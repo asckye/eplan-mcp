@@ -6,7 +6,10 @@
   <PropertyGroup>
     <Product>EplanMcp</Product>
     <Company>EplanMcp contributors</Company>
-    <Copyright>Copyright (c) EplanMcp contributors</Copyright>
+    <Copyright>Copyright (c) 2026 asckye</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/asckye/eplan-mcp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/asckye/eplan-mcp</PackageProjectUrl>
 
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

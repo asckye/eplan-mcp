@@ -36,5 +36,8 @@ EPLAN 2026（你正在使用的界面）
 | 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
 | 模板 | [设计文档](docs/templates/design-doc.md) · [工具规格](docs/templates/tool-spec.md) · [ADR](docs/adr/template.md) |
 
+## 许可证
+[MIT](LICENSE)
+
 ## 声明
 EPLAN 是 EPLAN GmbH & Co. KG 的商标。本项目是独立的社区项目，与 EPLAN 公司没有隶属关系。
