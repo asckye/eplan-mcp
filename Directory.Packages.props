@@ -9,6 +9,8 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Versions are added together with the first project that needs them (milestone M1). -->
+    <!-- Official MCP C# SDK (Apache-2.0); 2.x implements the 2026-07-28 revision and keeps 2025-11-25 clients working. -->
+    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
   </ItemGroup>
 </Project>
