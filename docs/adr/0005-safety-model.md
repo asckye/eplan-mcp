@@ -54,6 +54,9 @@
 
 另：默认的 scratch 根目录已由 [ADR-0008](0008-data-locations-and-instance-discovery.md) 改为 `%USERPROFILE%\EplanMcp\scratch\`（2026-10-13）。
 
+## 修订（2026-10-13，Workbench 审批渠道）
+项目负责人决定借鉴 TIA 项目的 Workbench 图形界面（M5）。审批渠道相应增加一种，优先级为：MCP elicitation → **Workbench 审批队列**（Workbench 正在运行时）→ EPLAN 内的审批对话框 → 拒绝。第 3 节的其他规则不变：审批针对具体的变更清单，`requestState` 签名并设有效期，执行前比对项目状态指纹。
+
 ## 后果
 - **好的**：模型出错或被诱导时，伤害被限制在 scratch 中，或者被审批拦下；所有修改都可以追溯、撤销。
 - **代价**：真实项目上的每次写入都要人工点一次确认，自动化程度受限。这是有意的取舍；之后如果要增加"会话内对同类操作免审批"等便利措施，必须另写 ADR。

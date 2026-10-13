@@ -145,7 +145,7 @@ flowchart TB
 | **Host**（`eplanmcp.exe`） | .NET 10 控制台程序，自包含单文件发布；官方 MCP C# SDK 2.x（支持 2026-07-28 规范，并兼容旧版客户端） | MCP 协议；工具注册和 Profile；参数校验；策略与审批；审计；结果整形；发现和管理 Bridge 连接；CLI 子命令 | 不引用任何 EPLAN 程序集 |
 | **Bridge**（EPLAN 插件） | net481 类库，由 EPLAN 加载；**除 EPLAN 自带的程序集外不带任何第三方依赖** | 在主线程上执行操作；事务和撤销；把 EPLAN 对象映射为契约 DTO；收集操作期间产生的 EPLAN 系统消息 | 不做策略判断，不访问 MCP，不写审计 |
 | **Contracts** | netstandard2.0 类库，纯 POCO | Host 与 Bridge 共享的请求/响应 DTO、操作名、错误码、协议版本 | 不包含逻辑，也不依赖任何序列化器 |
-| **Workbench**（M5） | .NET 10 WPF | 审批队列、审计浏览、状态面板、配置 | 第一版不需要 |
+| **Workbench**（M5） | .NET 10 WPF，中英双语 | 客户端配置向导（选择客户端、一键写入 MCP 配置）、审批队列（一种审批渠道）、审计浏览、连接与授权状态面板 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目 |
 
 **职责划分原则：Host 决定"能不能做"，Bridge 只负责"怎么做"。** 安全逻辑全部在 Host 中，不依赖 EPLAN，可以用 Small 测试穷尽验证。
 
@@ -157,7 +157,7 @@ flowchart TB
 | `ToolCatalog` | 用 `[McpServerTool]` 等特性声明工具，并显式设置 `ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld`；按 Profile 过滤；导出契约快照供 CI 比对 |
 | `ToolHandlers` | 每个工具一个处理器：校验参数 → 询问策略 → 调用 Bridge → 整形结果 |
 | `PolicyEngine` | 纯函数：输入（工具级别、目标项目、是否在 scratch 中、配置），输出（允许 / 需要审批 / 拒绝 + 原因）。见 [ADR-0005](../adr/0005-safety-model.md) |
-| `ApprovalService` | 多种实现按优先级选择：**MCP elicitation**（通过多轮请求，客户端支持时使用）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝 |
+| `ApprovalService` | 多种实现按优先级选择：**MCP elicitation**（通过多轮请求，客户端支持时使用）→ **Workbench 审批队列**（Workbench 正在运行时）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝 |
 | `PendingPlanStore` | 保存等待审批的变更计划，以高熵随机 ID 引用，带过期时间。交给客户端的 `requestState` 使用 HMAC 签名，防止被篡改或重放 |
 | `AuditLog` | 每次调用写一条 JSONL 记录，每条记录带上一条的哈希，形成哈希链 |
 | `ResultShaper` | 统一处理分页、截断、`response_format`（concise / detailed）、不可信内容标记，以及 token 预算（默认不超过 5k，硬上限 20k，低于 Claude Code 的 25k 限制） |
@@ -375,6 +375,10 @@ sequenceDiagram
 - `config.json` 带 JSON Schema。优先级从低到高：内置默认值 → 用户配置 → 环境变量 → 命令行参数。启动时校验，有错误就拒绝启动，并指出具体是哪一项。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
+### 8.11 界面语言
+- 面向人的内容提供**中文和英文**：Workbench、审批对话框与审批表单、`doctor` 的输出、安装和入门文档。默认跟随系统语言，可以切换。
+- 面向模型的内容（工具名称、描述、schema、错误的 `reason`）统一使用英文，保证不同客户端和模型下行为一致；错误的 `message` 中引用的项目数据保持原文。
+
 ### 8.10 协议版本
 Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版本号，Host 支持当前版本 N 和上一个版本 N-1。不兼容时给出明确提示，例如"请运行 eplanmcp install-addin 更新插件"。
 
@@ -425,8 +429,9 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | **M1 技术验证 + 打通骨架** | spike S0 授权（未签名插件能否加载，5 页限制是否生效）；S1 主线程调度；S2 回滚与撤销；S3 程序集共存；S4 客户端的 elicitation 支持。最小端到端链路：Host（stdio）↔ 管道 ↔ Bridge ↔ EPLAN，提供 `eplan_session_status`、`eplan_project_list`；`doctor`；CI 运行构建和 Small 测试 | 在 Claude Code 中调用 `eplan_project_list` 拿到真实结果；S0–S4 全部有结论，记入 api-notes；写出 ADR-0007 |
 | **M2 只读核心** | 项目、页面、设备、连接、部件、属性、系统消息、检查结果的只读工具；分页与结构化输出；契约快照；Agent 评测 v0（只读任务） | 只读任务的 Agent 评测成功率 ≥ 90% |
 | **M3 安全写入** | 策略引擎、审批（elicitation 和 EPLAN 对话框）、事务与撤销、审计哈希链、scratch 工作流；第一批写工具：建页、放置设备或宏、设备标识、属性、连接 | Q1、Q2、Q3、Q6、Q7、Q9 通过；写入类 Agent 评测通过 |
-| **M4 工程工作流** | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持 | 典型工作流的端到端 Agent 评测通过 |
-| **M5 可运维** | 按用户安装的安装包、Workbench、离线宿主与 CI 实机测试、发布流水线（SBOM、来源证明，视情况加 EADN 签名） | 在一台干净的机器上按文档安装成功 |
+| **M4 工程工作流** | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |
+| **M4b Pro Panel 3D** | 先做 spike（E3D 对象的读写、坐标系、回滚与撤销），再实现 Pro Panel 工具家族：查询 3D 布局、布置导轨和线槽、把设备放进 3D 布局、钻孔、母排与铜排、生产输出。详见 [API 覆盖矩阵第 3 节](../eplan/api-coverage.md#3-pro-panel-3dm4b) | 3D 布局类 Agent 评测任务通过；写操作同样满足 Q1–Q3 |
+| **M5 可运维** | 按用户安装的安装包；**Workbench**（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名） | 在一台干净的机器上，非开发人员按中文入门指南安装成功 |
 | **M6 多版本** | EPLAN 2027 验证 | Q10 通过 |
 
 ---
