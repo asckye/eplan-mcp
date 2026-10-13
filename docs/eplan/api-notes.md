@@ -48,6 +48,16 @@
 - 在 action 中，`TransactionManager.IsEplanTransactionRunning` 为 false；创建 `Transaction` 后变为 true。`SafetyPoint.GetAutoLockingState()` 在 SafetyPoint 存在期间为 true。— spike S2。
 - 对空的 `PropertyValue` 调用 `ToString()` 会抛出 `EmptyPropertyException`（例如新页面的页描述 `PAGE_NOMINATIOMN`），读取前要先检查 `IsEmpty`。多语言属性的原始字符串格式为 `<语言>@<文本>;`，语言无关的文本为 `??_??@…;`。— spike S2。
 
+### A9. 从后台线程调度到 EPLAN 主线程（spike S1，2026-10-13）
+- **EPLAN 已经预先设置了主线程调度器**：在主线程上，`EplanMainThreadDispatcher.GetMainThreadDispatcher()` 不为 null，并且与 `Dispatcher.CurrentDispatcher` 是同一个对象。主线程为 STA，托管线程 ID 为 1。`GetMainThreadDispatcher`、`SetMainThreadDispatcher`、`CanAccessMainThread` 都是**静态方法**；`ExecuteInMainThreadSync/Async` 是实例方法。— [spike S1](../../spikes/S1-dispatcher/README.md)。
+- 从后台线程调用 `EplanMainThreadDispatcher.ExecuteInMainThreadSync` 或 WPF 的 `Dispatcher.Invoke`，委托都在主线程上执行；中位延迟约 0.3–0.4 ms（各 20 次）。`CanAccessMainThread()` 在主线程上为 true，在后台线程上为 false。— spike S1。
+- **在 action 之外，即使只是读取（例如 `project.Pages`），也必须先创建 `LockingStep`**，否则抛出 `NoLockingStepException`。— spike S1。
+- `Dispatcher.Invoke(DispatcherPriority, TimeSpan timeout, Delegate)`：主线程忙时，在超时（1 s）后返回 null，**委托之后也不会再被执行**（等了 2 s 确认）。`ExecuteInMainThreadSync` **没有超时**，会一直等到主线程空闲。— spike S1。
+  - 对本项目的影响：Bridge 使用 EPLAN 预设的 WPF `Dispatcher` 加超时，来实现 `EPLAN_BUSY`。
+- `Send`、`Normal`、`Background`、`ContextIdle`、`ApplicationIdle`、`SystemIdle` 各优先级在 EPLAN 空闲时都会立即执行。— spike S1。
+- 🔴 **委托中未捕获的异常会直接终止 EPLAN 进程。** 用 `Dispatcher.Invoke(priority, timeout, delegate)` 调度的委托在主线程上抛出 `InvalidOperationException`，没有传回调用方，而是成为 `Dispatcher.ProcessQueue` 中的未处理异常，EPLAN 随即崩溃（Windows 事件日志：.NET Runtime 1026、Application Error 1000，2026-10-13 03:18:02）。— spike S1 第一次运行。
+  - 对本项目的影响：**每一个调度到主线程的委托都必须在内部捕获全部异常**，把失败作为返回值交回调用方。这一点只能通过统一的调度封装来保证，不能依赖每个调用者自觉。
+
 ### A8. 插件程序集的生命周期
 - **插件程序集一旦被 EPLAN 加载，在 EPLAN 进程退出之前无法卸载。** 注销之后再注册同名的新版本，执行的仍然是内存中的旧代码，不会报错。— spike S2（第一次重新构建后，新探针没有执行）。
   - 对开发流程的影响：重新编译 Bridge 后，必须重启 EPLAN；spike 中可以改用新的程序集名（`-p:AssemblyName=…r2`）。
