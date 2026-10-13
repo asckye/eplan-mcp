@@ -39,6 +39,20 @@
 - 插件 action 中未处理的异常**不会导致 EPLAN 崩溃**：EPLAN 记录完整的堆栈，并报告"操作 … 失败"；Remote Client 的调用仍然返回成功。— spike S0 第一次运行。
 - 以下 EPLAN 类型实现了 `IDisposable`（分析器 CA2000 提示）：`DMObjectsFinder`、`UndoManager`、`PagePropertyList`、`Page`。— 编译 spike S0。
 
+### A7. 回滚与撤销（spike S2，2026-10-13，均在插件 action 中执行）
+- `SafetyPoint` 和 `Transaction` 的各种放弃方式（不提交释放、`Rollback()`、`Abort()`、`Start()` 后释放、异常）都能撤回新建的页面，也能恢复被修改的页面属性。— [spike S2](../../spikes/S2-transactions/README.md)。
+- **`UndoStep` 在 `SafetyPoint` 外面创建时，`SafetyPoint` 无法回滚**，包括显式调用 `Rollback()`。`UndoStep` 在 `SafetyPoint` 里面创建，或者 `UndoStep` 包住 `Transaction` 时，回滚正常。— spike S2。
+- `UndoStep.DoUndo()` 只在 `CloseUndo()` **之前**调用才有效；在 `CloseUndo()` 或 `CloseOpenUndo()` 之后调用，以及 `DoUndo(true)`，都没有效果。— spike S2。
+- action 结束后执行 `XEsUndoAction`（GUI 的撤销，即 Ctrl+Z），会撤销带有已关闭 `UndoStep` 的 AI 修改。每次 action 中的修改各占一个撤销步骤；**此前的撤销历史保持完整**。— spike S2。
+- 在 action 中，**没有 UndoStep 的修改同样可以用 Ctrl+Z 撤销，撤销历史也没有被清空**，与 XML 文档（B7）的说法不符。在 action 之外的行为待 S1 验证。— spike S2。
+- 在 action 中，`TransactionManager.IsEplanTransactionRunning` 为 false；创建 `Transaction` 后变为 true。`SafetyPoint.GetAutoLockingState()` 在 SafetyPoint 存在期间为 true。— spike S2。
+- 对空的 `PropertyValue` 调用 `ToString()` 会抛出 `EmptyPropertyException`（例如新页面的页描述 `PAGE_NOMINATIOMN`），读取前要先检查 `IsEmpty`。多语言属性的原始字符串格式为 `<语言>@<文本>;`，语言无关的文本为 `??_??@…;`。— spike S2。
+
+### A8. 插件程序集的生命周期
+- **插件程序集一旦被 EPLAN 加载，在 EPLAN 进程退出之前无法卸载。** 注销之后再注册同名的新版本，执行的仍然是内存中的旧代码，不会报错。— spike S2（第一次重新构建后，新探针没有执行）。
+  - 对开发流程的影响：重新编译 Bridge 后，必须重启 EPLAN；spike 中可以改用新的程序集名（`-p:AssemblyName=…r2`）。
+  - 对安装的影响：`install-addin` 更新插件之后，必须提示用户重启 EPLAN；握手时比对 Bridge 的版本号，可以发现"已更新但尚未重启"的情况。
+
 ### A6. 由 MSIX 打包应用启动的进程（Claude 桌面版）
 - Claude 桌面应用以 MSIX 包安装（包族名 `Claude_pzs8sxrjxfjjc`）。由它启动的子进程写入 `%LOCALAPPDATA%` 时，**被重定向到 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Local\`**，包外的进程（EPLAN）看不到这些文件。写到 `D:\…` 以及 `%TEMP%`（即 `%LOCALAPPDATA%\Temp`）下的文件，EPLAN 可以正常读取。— spike S0 第一次运行失败的原因；检查包的 LocalCache 目录确认。
   - 对本项目的影响：由 Claude 桌面版启动的 Host，不能把 EPLAN 需要读取的文件（scratch 项目、实例发现文件）写到 `%LOCALAPPDATA%`；审计日志写在那里，用户也会找不到。见 ADR-0008。
@@ -100,7 +114,7 @@
 
 ### B7. 事务、锁定、撤销、静默模式（`Eplan.EplApi.DataModel`，除非另行注明）
 - `SafetyPoint`：静态 `Create()`，以及 `Start()`、`Commit()`、`Rollback()`、`Dispose()`。存在期间自动锁定对象；**不调用 `Commit` 就会回滚**；提交时释放锁。— 反射 + `2026/Locking.html`。
-  - ⚠️ **与实测不符**：在插件 action 中执行 `SafetyPoint.Create()` → `Page.Create(...)` → 不提交直接 `Dispose()`，**页面仍然存在，没有回滚**。— spike S0。正确的回滚方式（显式 `Rollback()`、先 `Start()`、`Transaction.Abort()`），以及在 action 之外的行为，由 spike S2 确定。在此之前，**不能依赖"不提交即回滚"**。
+  - 实测（spike S2，在 action 中）：不提交即回滚**成立**，`Rollback()`、`Start()` 后释放、中途抛异常也都能回滚，修改已有属性同样会恢复。**例外：如果 `UndoStep` 在 SafetyPoint 外面创建，回滚会静默失效**（即使显式调用 `Rollback()`）。S0 中观察到的"不回滚"正是这个原因。详见 A7。
 - `LockingStep`：释放其生存期内获得的锁，可以嵌套。在非模态对话框、离线程序和校验中**必须显式创建**；action 内部会隐式创建一个。— XML。
   - 对本项目的影响：Bridge 通过调度器执行的代码**不在 action 内**，所以必须自己创建 `LockingStep`。
 - 缺少 `LockingStep` 时抛出 `NoLockingStepException`（派生自 `DataModelException`）。`Project.LockAllObjects()`、`StorableObject.LockObject()` / `SmartLock()`；锁定失败时抛出 `Eplan.EplApi.Base.LockingException`，其 `GetAllFailed2LockAsString()` 列出锁定失败的对象。— 反射 + XML。

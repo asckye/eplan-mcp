@@ -172,7 +172,7 @@ flowchart TB
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
 | `MainThreadDispatcher` | 封装 `EplanMainThreadDispatcher`。如果 EPLAN 尚未设置调度器，就在 `OnInitGui` 中把当前主线程的 WPF `Dispatcher` 设置进去〔待验证〕。**等待进入主线程有超时**：超时说明 EPLAN 正忙，或者打开了模态对话框，此时返回 `EPLAN_BUSY` |
 | `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
-| `TransactionScope` | 每个写操作的固定包装，顺序为：`LockingStep`（调度器中的代码不在 action 内，必须显式创建）→ `UndoStep`（**必需**，否则工程师的撤销历史会被清空；描述写明"AI: <工具名>"）→ `SafetyPoint`（不提交即回滚）→ `QuietModeStep(ShowNoDialogs)` |
+| `TransactionScope` | 每个写操作的固定包装，顺序为：`LockingStep`（调度器中的代码不在 action 内，必须显式创建）→ `SafetyPoint`（不提交即回滚）→ `UndoStep`（**在 SafetyPoint 内创建**，描述写明"AI: <工具名>"，让 Ctrl+Z 一次撤销整个操作）→ `QuietModeStep(ShowNoDialogs)`。成功时先 `Commit()` 再 `CloseUndo()`。**UndoStep 放在 SafetyPoint 外面会让回滚静默失效**（spike S2） |
 | `Adapters` | **唯一引用 `Eplan.EplApi.*` 的地方**。负责 EPLAN 对象与 DTO 之间的转换、多语言文本、单位 |
 | `MessageCapture` | 记录操作前后 EPLAN 系统消息的差异，一并返回。这是实机测试得到的教训：EPLAN 的很多失败只出现在系统消息里 |
 | JSON | 使用 EPLAN 自带的 `Newtonsoft.Json 13`：编译时引用，运行时不随插件分发。与 Host 端的 `System.Text.Json` 之间的兼容性由契约测试保证 |
@@ -281,7 +281,7 @@ sequenceDiagram
     alt 批准
         H->>B: execute（带计划 ID 和项目状态指纹）
         B->>B: 指纹变了 → 拒绝执行（返回 PLAN_STALE，需要重新规划）
-        B->>B: LockingStep → UndoStep → SafetyPoint → QuietModeStep
+        B->>B: LockingStep → SafetyPoint → UndoStep → QuietModeStep
         B->>B: 执行并读回校验
         alt 成功
             B->>B: Commit；关闭撤销步骤
@@ -317,7 +317,7 @@ sequenceDiagram
 | 安装范围 | 按用户安装到 `%LOCALAPPDATA%\Programs\EplanMcp\`，不需要管理员权限 | 工程师的电脑常常没有管理员权限 |
 | Host | 自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
-| 插件注册 | `eplanmcp install-addin` 调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`（命令行方式，或者通过 Remote Client 对正在运行的实例执行）；`uninstall-addin` 可以完全撤销 | 使用官方机制，不手工修改 EPLAN 设置 |
+| 插件注册 | `eplanmcp install-addin` 调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`（命令行方式，或者通过 Remote Client 对正在运行的实例执行）；`uninstall-addin` 可以完全撤销。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
 | 签名 | 视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 授权要求 |
 | 客户端配置 | `eplanmcp client-config claude-code` 等命令生成客户端的 MCP 配置，写入前展示 diff | 用户可以掌控被改动的内容 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
@@ -344,8 +344,8 @@ sequenceDiagram
 
 ### 8.4 事务与可回退性
 每个写操作逐层提供保护：
-1. **SafetyPoint**：中途出错时回滚 DataModel 的修改（不提交就回滚）〔待验证在插件主线程中的行为〕。
-2. **UndoStep**：整个操作在 EPLAN 中合并为一个撤销步骤，工程师可以用 Ctrl+Z 一次撤销；同时避免清空工程师自己的撤销历史。
+1. **SafetyPoint**：中途出错时回滚 DataModel 的修改（不提交就回滚；新建对象和修改已有属性都已在 action 中验证，spike S2）〔待在主线程调度器中复核，S1〕。
+2. **UndoStep**（在 SafetyPoint **内**创建）：整个操作在 EPLAN 中合并为一个撤销步骤，工程师可以用 Ctrl+Z 一次撤销，而且此前的撤销历史保持完整（S2 已验证）。放在 SafetyPoint 外面会让第 1 层的回滚失效。
 3. **项目备份**：Destructive 级别的操作执行前，按策略自动备份项目。
 4. **执行后读回校验**：读回实际状态，与计划比较，并把差异返回给模型。
 5. **计划指纹**：审批针对的是某一时刻的项目状态。执行时如果状态已经改变（例如工程师在此期间手工修改了项目），拒绝执行。
@@ -405,7 +405,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 |---|---|---|---|---|
 | **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（提议中）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
 | R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | spike S1；不可靠时改用"自定义 Action + Remote Client"的后备方案 | M1 |
-| **R2** | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义。**S0 发现：在 action 中，未提交的 SafetyPoint 没有回滚，与官方文档不符** | 回滚承诺可能无法兑现 | spike S2（**优先级提高**）：验证显式 `Rollback()`、`Start()`、`Transaction.Abort()`，以及在调度器中执行时的行为；如果都不能回滚，改为"执行前备份 + 失败时提示工程师撤销"，并修订 ADR-0005 | M1 |
+| R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
 | R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | SDK 自带旧版兼容；审批渠道退回 EPLAN 内对话框；spike S4 验证 Claude Code 的实际行为 | M1–M3 |
 | R5 | 通过项目数据进行提示注入 | 模型被诱导执行有害操作 | 第 8.5 节的措施，加上写操作必须审批；Agent 评测中加入对抗任务 | 持续 |

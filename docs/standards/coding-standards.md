@@ -98,8 +98,8 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 6. 在主线程上执行的代码中不能 `await`，也不能阻塞等待其他线程，否则会导致死锁。主线程上的工作必须是同步的、有界的。
 
 ### 9.3 写操作（B7）
-7. 写操作**只能**在 `TransactionScope` 中执行，顺序固定为 `LockingStep` → `UndoStep` → `SafetyPoint` → `QuietModeStep(ShowNoDialogs)`。**不得在别处临时创建这些对象**。
-8. 每个写操作都要创建 `UndoStep`，并用 `SetUndoDescription("AI: <工具名>")` 标注，否则 EPLAN 会清空工程师的撤销历史。
+7. 写操作**只能**在 `TransactionScope` 中执行，顺序固定为 `LockingStep` → `SafetyPoint` → `UndoStep` → `QuietModeStep(ShowNoDialogs)`。**不得在别处临时创建这些对象**。**禁止把 `UndoStep` 放在 `SafetyPoint` 外面**：这样做时，`SafetyPoint` 的回滚（包括显式 `Rollback()`）会静默失效（S2）。
+8. 每个写操作都要在 `SafetyPoint` 内创建 `UndoStep`，并用 `SetUndoDescription("AI: <工具名>")` 标注，这样工程师可以用 Ctrl+Z 一次撤销 AI 的整个操作（S2）。成功时先 `SafetyPoint.Commit()`，再 `UndoStep.CloseUndo()`。
 9. 只有执行后的读回校验通过，才调用 `SafetyPoint.Commit()`；其他任何路径（异常、校验失败、取消）都要让它回滚。
 10. 所有实现了 `IDisposable` 的 EPLAN 对象一律用 `using` 包装。
 
@@ -108,7 +108,7 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 12. 只用 `License.HasOption` 检查授权，**不调用 `LockOption`**（它会占用一个授权直到 EPLAN 退出）。
 
 ### 9.5 数据
-13. 读取属性时显式处理多语言文本（`MultiLangString`）和"未设置"状态，返回时注明语言代码，不把未设置当成空字符串。
+13. 读取属性时显式处理多语言文本（`MultiLangString`）和"未设置"状态，返回时注明语言代码，不把未设置当成空字符串。**读取前先检查 `PropertyValue.IsEmpty`**：对空属性调用 `ToString()` 会抛出 `EmptyPropertyException`（S2）。
 14. 对象以业务名称标识。`ToStringIdentifier()` 只在当前 EPLAN 会话内有效（A3），只能作为附带会话 ID 的句柄使用。
 15. 每个操作都要收集执行前后的 EPLAN 系统消息差异，随结果一起返回（A1：很多失败只出现在系统消息中）。
 

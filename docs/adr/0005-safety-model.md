@@ -49,6 +49,9 @@
 ### 6. scratch 沙箱
 默认的 scratch 根目录是 `%LOCALAPPDATA%\EplanMcp\scratch\`。`eplan_scratch_create` 把项目复制或备份还原到这里，供 AI 自由试验；试验满意后，由工程师自己决定是否在真实项目上重做（或者走审批）。
 
+## 修订（2026-10-13，依据 spike S2）
+决策本身不变，只更正第 4 节中的嵌套顺序：实测表明，`UndoStep` 放在 `SafetyPoint` 外面时，`SafetyPoint` 的回滚会静默失效。正确的顺序是 `LockingStep` → `SafetyPoint` → `UndoStep`（在 SafetyPoint 内创建）→ `QuietModeStep`，成功时先 `Commit()` 再 `CloseUndo()`。按这个顺序，失败时可以回滚，Ctrl+Z 可以一次撤销 AI 的操作，而且工程师原有的撤销历史保持完整。详见 [spike S2](../../spikes/S2-transactions/README.md)。上述结论是在插件 action 中测得的，在主线程调度器中的行为由 spike S1 复核。
+
 ## 后果
 - **好的**：模型出错或被诱导时，伤害被限制在 scratch 中，或者被审批拦下；所有修改都可以追溯、撤销。
 - **代价**：真实项目上的每次写入都要人工点一次确认，自动化程度受限。这是有意的取舍；之后如果要增加"会话内对同类操作免审批"等便利措施，必须另写 ADR。
