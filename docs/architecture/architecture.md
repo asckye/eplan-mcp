@@ -403,9 +403,9 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 
 | # | 风险 | 影响 | 应对 | 何时消除 |
 |---|---|---|---|---|
-| **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **M1 spike S0** 实测；结果写成 ADR-0007，在"仅自用 / 开发者授权"和"申请 EADN 签名"之间做出选择 | M1，最优先 |
+| **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（提议中）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
 | R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | spike S1；不可靠时改用"自定义 Action + Remote Client"的后备方案 | M1 |
-| R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚和撤销的承诺能否兑现 | spike S2：用故障注入验证回滚，用实际 Ctrl+Z 验证撤销 | M1 |
+| **R2** | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义。**S0 发现：在 action 中，未提交的 SafetyPoint 没有回滚，与官方文档不符** | 回滚承诺可能无法兑现 | spike S2（**优先级提高**）：验证显式 `Rollback()`、`Start()`、`Transaction.Abort()`，以及在调度器中执行时的行为；如果都不能回滚，改为"执行前备份 + 失败时提示工程师撤销"，并修订 ADR-0005 | M1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
 | R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | SDK 自带旧版兼容；审批渠道退回 EPLAN 内对话框；spike S4 验证 Claude Code 的实际行为 | M1–M3 |
 | R5 | 通过项目数据进行提示注入 | 模型被诱导执行有害操作 | 第 8.5 节的措施，加上写操作必须审批；Agent 评测中加入对抗任务 | 持续 |
@@ -413,6 +413,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R7 | EPLAN 2027 上的兼容性 | 需要额外的 Bridge 构建 | 4.8.1 API 在 2027 中保留，预计影响很小；拿到 2027 后尽早验证 | M6 |
 | R8 | 名称中使用 "EPLAN" 的商标问题 | 公开发布受限 | 公开发布前确认命名，必要时改名 | 公开发布前 |
 | R9 | 只有一台实机测试环境 | Large 测试和日常开发争用同一个 EPLAN | 使用 scratch 项目隔离；M5 之后用离线宿主在 CI 中运行 | M5 |
+| R10 | **MSIX 打包的客户端**（Claude 桌面版）启动 Host 时，写入 `%LOCALAPPDATA%` 的文件被重定向，EPLAN 和用户都看不到（S0 发现） | scratch 项目打不开；审计日志找不到 | [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)（提议中）：数据目录改为 `%USERPROFILE%\EplanMcp\`，实例发现改为枚举命名管道 | M1 |
 
 ---
 

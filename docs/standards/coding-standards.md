@@ -114,7 +114,9 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 
 ### 9.6 异常（B7）
 16. 在操作处理器的边界把 EPLAN 异常映射为错误码：`LockingException` → `LOCK_FAILED`（附带 `GetAllFailed2LockAsString()` 的结果）；"API License missing" → `LICENCE_MISSING`；`NoLockingStepException` 说明我们自己的代码有缺陷 → `INTERNAL`，并记录完整日志。
-17. Bridge 的每个入口（管道请求、插件生命周期方法、调度回调）都必须捕获全部异常。**Bridge 中未处理的异常会导致 EPLAN 本身崩溃**。
+17. Bridge 的每个入口（管道请求、插件生命周期方法、调度回调）都必须捕获全部异常。原因有两个：
+    - **后台线程**（管道线程等）上未处理的异常，会按 .NET 的默认行为终止整个 EPLAN 进程；
+    - **action 中**未处理的异常虽然会被 EPLAN 捕获并记录到系统日志（api-notes A5），但调用方只能拿到一个"成功"，错误信息丢失了。
 
 ### 9.7 依赖（B1）
 18. Bridge 不带第三方运行时依赖。JSON 使用 EPLAN 自带的 Newtonsoft.Json 13：
