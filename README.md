@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：写入前审批，事后可审计，出错可回滚，在 EPLAN 中可以用 Ctrl+Z 撤销。
 
-> **状态：M1 进行中**（2026-10-13）。M0 已完成；M1 的技术验证 S0–S3 已完成，结论见 [spikes/README.md](spikes/README.md) 和 [api-notes](docs/eplan/api-notes.md)。**下一步**：S4（客户端对 MCP elicitation 的支持），然后打通端到端骨架（Host ↔ 管道 ↔ Bridge ↔ EPLAN）。还没有产品代码。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：M1 进行中**（2026-10-13）。技术验证 S0–S3 已完成，S4 的协议层已完成（Claude Code 使用 MCP 2026-07-28 并支持表单 elicitation），结论见 [spikes/README.md](spikes/README.md) 和 [api-notes](docs/eplan/api-notes.md)。端到端骨架的代码已就绪（[设计](docs/design/2026-10-13-m1-skeleton.md)）：`eplanmcp` 提供 `eplan_session_status` 和 `eplan_project_list`，EPLAN 插件经命名管道为它服务，不需要 EPLAN 的 Small / Medium 测试和 CI 已建好。**下一步**：在 EPLAN 中实机验证插件，然后在 Claude Code 中调用 `eplan_project_list`（M1 的完成标准）。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 
