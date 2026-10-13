@@ -157,5 +157,6 @@
 - **SDK 2.x 中，工具抛出 `InputRequiredException` 即可发起 elicitation**，两种协议都适用：2026-07-28 下返回 `resultType: "input_required"`（`inputRequests` + `requestState`），客户端用新的 id 重发 `tools/call` 并带回 `inputResponses` 和原样的 `requestState`；2025-11-25（stdio）下 SDK 改为向客户端发送 `elicitation/create` 请求，拿到回答后**重新调用同一个工具处理器**，`RequestContext.Params.InputResponses` 和 `RequestState` 同样有值。— S4 selftest（10 个场景）+ 报文核对。
 - `McpServer.IsMrtrSupported` 在 2026-07-28 下、以及 stdio 上的 2025-11-25 会话中都为 true；客户端没有声明 elicitation 时 `McpServer.ClientCapabilities.Elicitation` 为 null。规范禁止向未声明的客户端发送 `elicitation/create`，因此两者都要检查。— S4 + [MRTR 规范](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr)。
 - `McpServer.ElicitAsync` 在无状态模式下抛出 `InvalidOperationException`，只适用于旧协议的有状态会话；Host 不使用它。— SDK 文档 `docs/concepts/elicitation`。
+- SDK **不按 `inputSchema` 校验 `tools/call` 的参数**：即使 schema 中有 `additionalProperties: false`，拼错的参数（如 `limt`）也被静默忽略，工具按默认值执行。Host 用 `tools/call` 请求过滤器统一拒绝未知参数。— M1 骨架的 stdio 端到端测试（2026-10-13）。
 - SDK 由 `[McpServerTool]` 生成的 `inputSchema` **不含 `additionalProperties: false`**；在特性中显式设置的 `Title`、`ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld` 都出现在 `tools/list` 的 `annotations` 中（`title` 同时出现在工具顶层）。— S4 报文。
 - Claude 桌面版自带的 Claude Code 可执行文件在无界面模式（`claude -p`）下单独运行时没有登录态（"Not logged in"），但在报错前已经完成 MCP 服务器的连接和 `tools/list`。— S4。
