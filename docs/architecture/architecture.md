@@ -425,7 +425,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | **S1 已完成**：可行。EPLAN 预设了调度器，超时可以干净地放弃。另外发现两个必须防范的问题：委托中漏出的异常会让 EPLAN 崩溃；模态对话框打开时会被重入执行。两者都已写成硬规则（编码规范 5a–5c） | 已消除（启动时加载的情况在打通骨架时确认） |
 | R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
-| R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | SDK 自带旧版兼容；审批渠道退回 EPLAN 内对话框；spike S4 验证 Claude Code 的实际行为 | M1–M3 |
+| R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | **S4 协议层已完成**：Claude Code 2.1.295 使用 2026-07-28，并声明 `elicitation: {form, url}`；SDK 2.x 的 `InputRequiredException` 一条代码路径覆盖 2026-07-28 和 2025-11-25，`requestState` 都能带回（api-notes C）。客户端不声明 elicitation 时退回 EPLAN 内对话框。**剩余**：交互界面中的表单显示与三种回答的往返，人工确认一次；Tasks 未测 | 协议层已消除；界面在 M3 前确认 |
 | R5 | 通过项目数据进行提示注入 | 模型被诱导执行有害操作 | 第 8.5 节的措施，加上写操作必须审批；Agent 评测中加入对抗任务 | 持续 |
 | R6 | 借用授权到期，或网络授权被占用 | 调用失败 | 授权丢失作为单独的错误码；doctor 中检查 | M2 |
 | R7 | EPLAN 2027 上的兼容性 | 需要额外的 Bridge 构建 | 4.8.1 API 在 2027 中保留，预计影响很小；拿到 2027 后尽早验证 | M6 |
