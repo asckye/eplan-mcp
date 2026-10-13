@@ -68,7 +68,7 @@ internal sealed class ProjectTools
             return ToolResults.Error(ex.Error);
         }
 
-        List<OpenProject> all = [.. data.Projects.OrderBy(p => p.Name, StringComparer.Ordinal).ThenBy(p => p.Path, StringComparer.Ordinal)];
+        List<OpenProject> all = [.. data.Projects.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase).ThenBy(p => p.Name, StringComparer.Ordinal).ThenBy(p => p.Path, StringComparer.Ordinal)];
         if (offset > all.Count)
         {
             return ToolResults.InvalidArguments(["'cursor' is out of date (fewer projects are open now); omit it to start from the first page."]);

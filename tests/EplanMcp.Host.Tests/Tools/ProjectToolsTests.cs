@@ -37,6 +37,16 @@ public sealed class ProjectToolsTests
     }
 
     [Fact]
+    public async Task ProjectList_SortsNamesIgnoringCase()
+    {
+        _bridge.Projects.AddRange([Project("Zeta"), Project("alpha"), Project("Beta")]);
+
+        JsonElement projects = Structured(await List()).GetProperty("projects");
+
+        Assert.Equal(["alpha", "Beta", "Zeta"], projects.EnumerateArray().Select(p => p.GetProperty("name").GetString()));
+    }
+
+    [Fact]
     public async Task ProjectList_Pages_CoverEveryProjectExactlyOnce()
     {
         _bridge.Projects.AddRange(Enumerable.Range(1, 5).Select(i => Project($"P{i}")));
