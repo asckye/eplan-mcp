@@ -16,5 +16,9 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Host.Tests" />
+    <!-- Windows x64 only (architecture section 2); lets the platform analyzer accept registry and Win32 calls. -->
+    <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <_Parameter1>windows</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 </Project>
