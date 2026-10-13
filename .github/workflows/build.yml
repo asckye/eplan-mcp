@@ -1,0 +1,50 @@
+name: build
+
+# CI gates of docs/process/development-workflow.md section 7 that need no EPLAN: build with warnings as errors,
+# format check, and Small + Medium tests. The add-in (EplanMcp.Bridge.Eplan) compiles against the EPLAN API and
+# is built only on machines with EPLAN, so CI uses the EplanMcp.Ci.slnf filter.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # CI=true (set by GitHub) turns on locked-mode restore (Directory.Build.props).
+      - name: Restore
+        run: dotnet restore EplanMcp.Ci.slnf
+
+      - name: Build
+        run: dotnet build EplanMcp.Ci.slnf -c Release --no-restore
+
+      - name: Format
+        run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
+
+      - name: Small and Medium tests
+        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large"
+
+      # Fails on high or critical advisories, direct or transitive (development-workflow section 7).
+      - name: Vulnerable packages
+        shell: pwsh
+        run: |
+          $data = dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive --format json | Out-String | ConvertFrom-Json
+          $found = @($data.projects | ForEach-Object { $_.frameworks } |
+            ForEach-Object { @($_.topLevelPackages) + @($_.transitivePackages) } | Where-Object { $_ } |
+            ForEach-Object { $package = $_; $_.vulnerabilities | Where-Object { $_.severity -in 'High', 'Critical' } |
+              ForEach-Object { "$($package.id) $($package.resolvedVersion): $($_.severity) $($_.advisoryurl)" } })
+          $found | ForEach-Object { Write-Output "::error::$_" }
+          if ($found.Count -gt 0) { exit 1 }

@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "EplanMcp.slnx",
+    "projects": [
+      "src\\EplanMcp.Contracts\\EplanMcp.Contracts.csproj",
+      "src\\EplanMcp.Bridge.Core\\EplanMcp.Bridge.Core.csproj",
+      "src\\EplanMcp.Host\\EplanMcp.Host.csproj",
+      "tests\\EplanMcp.Contracts.Tests\\EplanMcp.Contracts.Tests.csproj",
+      "tests\\EplanMcp.Bridge.Core.Tests\\EplanMcp.Bridge.Core.Tests.csproj",
+      "tests\\EplanMcp.Host.Tests\\EplanMcp.Host.Tests.csproj"
+    ]
+  }
+}
