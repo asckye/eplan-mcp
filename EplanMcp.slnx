@@ -3,6 +3,9 @@
     <Project Path="src/EplanMcp.Bridge.Core/EplanMcp.Bridge.Core.csproj">
       <Platform Project="x64" />
     </Project>
+    <Project Path="src/EplanMcp.Bridge.Eplan/EplanMcp.Bridge.Eplan.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="src/EplanMcp.Contracts/EplanMcp.Contracts.csproj" />
     <Project Path="src/EplanMcp.Host/EplanMcp.Host.csproj">
       <Platform Project="x64" />
