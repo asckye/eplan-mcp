@@ -28,6 +28,7 @@ public sealed class SpikeS1Action : IEplAction
     private const int BusyMilliseconds = 3000;
 
     private static int _mainThreadId;
+    private static IntPtr _mainWindow;
     private static Dispatcher? _dispatcher;
 
     public bool OnRegister(ref string Name, ref int Ordinal)
@@ -103,6 +104,7 @@ public sealed class SpikeS1Action : IEplAction
         snapshot["canAccessMainThreadOnMain"] = EplanMainThreadDispatcher.CanAccessMainThread();
 
         _mainThreadId = Environment.CurrentManagedThreadId;
+        _mainWindow = Process.GetCurrentProcess().MainWindowHandle;
         _dispatcher = EplanMainThreadDispatcher.GetMainThreadDispatcher() ?? current;
         return snapshot;
     }
@@ -141,6 +143,7 @@ public sealed class SpikeS1Action : IEplAction
         "undoCommit" => DispatchWrite(() => Op(p, withUndo: true)),
         "noUndo" => DispatchWrite(() => Op(p, withUndo: false)),
         "modal" => Modal(),
+        "modalGuard" => ModalGuard(),
         _ => new JObject { ["error"] = "unknown scenario " + p.Scenario },
     };
 
@@ -289,6 +292,40 @@ public sealed class SpikeS1Action : IEplAction
         };
     }
 
+    private static JObject ModalGuard()
+    {
+        var clock = Stopwatch.StartNew();
+        _dispatcher!.BeginInvoke(DispatcherPriority.Normal, new System.Action(() => MessageBoxW(_mainWindow, "Spike S1: closes automatically.", ModalTitle, 0)));
+        Thread.Sleep(800);
+        bool boxVisible = FindWindowW(null, ModalTitle) != IntPtr.Zero;
+        JObject whileOpen = Attempt(() => GuardedDispatch(() => new JObject { ["executedAtMs"] = clock.ElapsedMilliseconds }));
+
+        IntPtr box = FindWindowW(null, ModalTitle);
+        if (box != IntPtr.Zero)
+        {
+            PostMessageW(box, 0x0010 /* WM_CLOSE */, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        Thread.Sleep(500);
+        JObject afterClose = Attempt(() => GuardedDispatch(() => new JObject { ["executedAtMs"] = clock.ElapsedMilliseconds }));
+        return new JObject
+        {
+            ["boxVisible"] = boxVisible,
+            ["whileModalOpen"] = whileOpen,
+            ["afterModalClosed"] = afterClose,
+        };
+    }
+
+    /// <summary>
+    /// The production rule under test: on the main thread, before doing anything, refuse when EPLAN's main
+    /// window is disabled (a modal dialog is open), because the dispatcher would otherwise run us re-entrantly
+    /// inside that dialog's message loop.
+    /// </summary>
+    private static JToken GuardedDispatch(Func<JToken> work) => Dispatch(() =>
+        IsWindowEnabled(_mainWindow)
+            ? work()
+            : new JObject { ["refused"] = "EPLAN_BUSY: a modal dialog is open (main window disabled)" });
+
     // ---------------------------------------------------------------- EPLAN operations (main thread)
 
     private static Project CurrentProject() =>
@@ -315,11 +352,13 @@ public sealed class SpikeS1Action : IEplAction
 
     private static JObject CreateAbandoned(int counter, bool locking, string undo)
     {
-        Project project = CurrentProject();
-        RequireScratch(project, _scratchRoot);
+        // r1 created the LockingStep after CurrentProject()/ProjectFullName and every variant failed with
+        // NoLockingStepException: outside an action even those reads need it, so it must come first.
         LockingStep? lockingStep = locking ? new LockingStep() : null;
         try
         {
+            Project project = CurrentProject();
+            RequireScratch(project, _scratchRoot);
             string name;
             using var undoManager = new UndoManager();
             UndoStep? outer = undo == "outside" ? undoManager.CreateUndoStep() : null;
@@ -343,9 +382,9 @@ public sealed class SpikeS1Action : IEplAction
     /// <summary>The production write pattern: LockingStep → SafetyPoint → UndoStep (inside) → commit → close.</summary>
     private static JObject Op(Params p, bool withUndo)
     {
+        using var locking = new LockingStep();
         Project project = CurrentProject();
         RequireScratch(project, p.ScratchRoot);
-        using var locking = new LockingStep();
         using var undoManager = new UndoManager();
         string name;
         using (SafetyPoint safetyPoint = SafetyPoint.Create())

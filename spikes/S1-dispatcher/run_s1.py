@@ -33,7 +33,9 @@ OUT_DIR = os.path.join(REPO, ".local", "spikes", "s1")
 VARIANT_LOG = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else "Electric P8"
 EPL_LOG = os.path.join(r"C:\Users\Public\EPLAN", VARIANT_LOG, "EplLog.eldb")
 
-BACKGROUND_SCENARIOS = ["probe", "idle", "busy", "exception", "rollback", "modal"]
+BACKGROUND_SCENARIOS = (sys.argv[sys.argv.index("--scenarios") + 1].split(",") if "--scenarios" in sys.argv
+                        else ["probe", "idle", "busy", "exception", "rollback", "modal", "modalGuard"])
+RUN_UNDO_SEQUENCE = "--scenarios" not in sys.argv or "--undo" in sys.argv
 steps, results = [], {}
 
 
@@ -130,7 +132,7 @@ def main():
             timeline.append({"after": label, "spikePages": state.get("spikePages")})
             print(f"    after {label}: {state.get('spikePages')}")
 
-        for baseline, ai, scenario in ((61, 62, "undoCommit"), (64, 65, "noUndo")):
+        for baseline, ai, scenario in ((61, 62, "undoCommit"), (64, 65, "noUndo")) if RUN_UNDO_SEQUENCE else ():
             wait_for(run_action(m, "op", f"op{baseline}", f"/Counter:{baseline}"))
             snapshot(f"baseline {baseline} (action, with UndoStep)")
             results[f"{scenario}{ai}"] = wait_for(run_action(m, "bg", f"{scenario}{ai}", f"/Scenario:{scenario} /Counter:{ai}"))
