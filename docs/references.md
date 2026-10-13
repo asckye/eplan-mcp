@@ -62,6 +62,12 @@
 | [SLSA v1.2](https://slsa.dev/spec/v1.2/build-track-basics) · [GitHub artifact attestations](https://docs.github.com/en/actions/concepts/security/artifact-attestations) · [Sigstore](https://docs.sigstore.dev/about/overview/) | 构建来源证明，达到 SLSA Build L2 | 开发流程第 8 节；安全标准 SEC-16 |
 | [CycloneDX](https://cyclonedx.org/specification/overview/) | SBOM 格式 | 发布清单 |
 
+## 行业产品（需求信号）
+
+| 来源 | 采纳的要点 | 落地位置 |
+|---|---|---|
+| [电气CAD吧 EPLAN 插件商店](https://www.cad-bbs.cn/pluginstore/) | 国内工程师付费购买的高频功能：批量建页、批量改页描述、属性查找替换（先预览再执行）、线号管理、图例编号、批量生成部件、EDZ 浏览；以及用户常遇到的安装问题。插件闭源且声明"不得商用"，**只参考需求，不参考实现** | [API 覆盖矩阵第 4 节](eplan/api-coverage.md#4-国内工程师的高频任务需求信号)；[架构 7.1 安装验收清单](architecture/architecture.md#71-安装验收清单m5-发布前逐项通过)；[测试策略第 5 节](standards/testing.md#5-agent-评测) |
+
 ## EPLAN 官方
 
 | 来源 | 内容 |
