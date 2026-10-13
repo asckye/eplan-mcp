@@ -147,6 +147,7 @@ eplan_device_place
 | `EPLAN_BUSY` | 是 | 主线程在超时时间内不可用（有模态对话框或正在运行的操作）；提示请工程师关闭对话框 |
 | `BRIDGE_INCOMPATIBLE` | 否 | 插件和 Host 的协议版本不兼容；提示运行 `eplanmcp install-addin` |
 | `LICENCE_MISSING` | 否 | 缺少 API 授权，或授权已到期 |
+| `LICENCE_RESTRICTED` | 否 | 授权存在但受限，例如开发者授权的页数限制，或只允许加载已签名的插件；提示运行 `eplanmcp doctor` 进行授权自检（ADR-0007） |
 | `LOCK_FAILED` | 是 | 对象被其他用户锁定（多用户模式）；`metadata` 列出被锁定的对象 |
 | `POLICY_DENIED` | 否 | 策略禁止，例如 Code 级工具未启用；说明是哪条策略，**不提示如何绕过** |
 | `APPROVAL_DENIED` | 否 | 工程师拒绝或取消了审批；项目未改变 |

@@ -168,7 +168,7 @@ flowchart TB
 
 | 组件 | 职责 |
 |---|---|
-| `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器、写入实例发现文件；在 `OnExit` 中清理 |
+| `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器（管道名带固定前缀，供 Host 枚举发现，见 ADR-0008）；在 `OnExit` 中清理 |
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
 | `MainThreadDispatcher` | 封装 `EplanMainThreadDispatcher`。如果 EPLAN 尚未设置调度器，就在 `OnInitGui` 中把当前主线程的 WPF `Dispatcher` 设置进去〔待验证〕。**等待进入主线程有超时**：超时说明 EPLAN 正忙，或者打开了模态对话框，此时返回 `EPLAN_BUSY` |
 | `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
@@ -222,19 +222,17 @@ docs/  eng/  .github/
 sequenceDiagram
     participant E as EPLAN（GUI）
     participant B as Bridge 插件
-    participant F as 实例发现目录
     participant H as Host
     participant C as MCP 客户端
     E->>B: 启动时加载插件，OnInit → OnInitGui（主线程）
     B->>B: 取得主线程调度器；检查 APIExtension 授权
-    B->>B: 启动管道服务器<br/>管道名 = EplanMcp.<pid>.<随机值>，ACL 只允许当前用户
-    B->>F: 写入 instances/<pid>.json<br/>(管道名、EPLAN 版本、变体、协议版本、一次性密钥)
+    B->>B: 启动管道服务器<br/>管道名 = EplanMcp.Bridge.<pid>.<随机值>，ACL 只允许当前用户
     C->>H: 启动 eplanmcp serve（stdio）
     C->>H: server/discover
     H-->>C: 能力和工具列表（按 Profile，顺序固定）
     Note over H: 收到第一个工具调用时才连接 Bridge
-    H->>F: 扫描实例，剔除进程已退出的记录
-    H->>B: 连接并握手（协议版本、密钥）
+    H->>H: 枚举 \\.\pipe\ 下以 EplanMcp.Bridge. 开头的管道（ADR-0008）
+    H->>B: 连接（CurrentUserOnly）并握手（协议版本、Bridge 版本）
     B-->>H: EPLAN 版本、变体、授权摘要、已打开的项目
 ```
 
@@ -314,14 +312,14 @@ sequenceDiagram
 
 | 项 | 做法 | 理由 |
 |---|---|---|
-| 安装范围 | 按用户安装到 `%LOCALAPPDATA%\Programs\EplanMcp\`，不需要管理员权限 | 工程师的电脑常常没有管理员权限 |
+| 安装范围 | 按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限。不放在 `%LOCALAPPDATA%` 下，原因同 ADR-0008：安装命令如果从 MSIX 打包的应用中运行，写入会被重定向，EPLAN 就找不到插件 | 工程师的电脑常常没有管理员权限 |
 | Host | 自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
 | 插件注册 | `eplanmcp install-addin` 调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`（命令行方式，或者通过 Remote Client 对正在运行的实例执行）；`uninstall-addin` 可以完全撤销。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
 | 签名 | 视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 授权要求 |
 | 客户端配置 | `eplanmcp client-config claude-code` 等命令生成客户端的 MCP 配置，写入前展示 diff | 用户可以掌控被改动的内容 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
-| 数据目录 | `%LOCALAPPDATA%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`instances\`、`scratch\` | 每个用户一份，只对本人开放 |
+| 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
 | 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写 | 把这次环境排查中踩过的坑全部变成自动检查 |
 
 ---
@@ -368,7 +366,7 @@ sequenceDiagram
 - OpenTelemetry 作为可选项（M5），遵循 MCP 语义约定（目前处于 Development 状态）：span 名为 `{mcp.method.name} {target}`，属性包括 `gen_ai.tool.name`、`mcp.protocol.version` 等。**工具参数和结果默认不记录到遥测中**。
 
 ### 8.8 审计
-- 文件：`%LOCALAPPDATA%\EplanMcp\audit\yyyy-MM-dd.jsonl`，只追加写入。
+- 文件：`%USERPROFILE%\EplanMcp\audit\yyyy-MM-dd.jsonl`，只追加写入。
 - 每条记录包含：时间、关联 ID、客户端信息、工具、级别、项目、参数（写操作记完整参数，读操作只记摘要）、策略决定、审批渠道与结果、变更清单、执行结果、耗时、EPLAN 版本/变体/进程号、**上一条记录的哈希和本条的哈希**。
 - `eplanmcp audit verify` 校验哈希链，能发现记录被删除或篡改。
 - 审计写入失败时，**写操作一律拒绝执行**（不在没有记录的情况下修改项目）；读操作照常执行，同时记录告警。
@@ -403,7 +401,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 
 | # | 风险 | 影响 | 应对 | 何时消除 |
 |---|---|---|---|---|
-| **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（提议中）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
+| **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（已接受）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
 | R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | spike S1；不可靠时改用"自定义 Action + Remote Client"的后备方案 | M1 |
 | R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
@@ -413,7 +411,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R7 | EPLAN 2027 上的兼容性 | 需要额外的 Bridge 构建 | 4.8.1 API 在 2027 中保留，预计影响很小；拿到 2027 后尽早验证 | M6 |
 | R8 | 名称中使用 "EPLAN" 的商标问题 | 公开发布受限 | 公开发布前确认命名，必要时改名 | 公开发布前 |
 | R9 | 只有一台实机测试环境 | Large 测试和日常开发争用同一个 EPLAN | 使用 scratch 项目隔离；M5 之后用离线宿主在 CI 中运行 | M5 |
-| R10 | **MSIX 打包的客户端**（Claude 桌面版）启动 Host 时，写入 `%LOCALAPPDATA%` 的文件被重定向，EPLAN 和用户都看不到（S0 发现） | scratch 项目打不开；审计日志找不到 | [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)（提议中）：数据目录改为 `%USERPROFILE%\EplanMcp\`，实例发现改为枚举命名管道 | M1 |
+| R10 | **MSIX 打包的客户端**（Claude 桌面版）启动 Host 时，写入 `%LOCALAPPDATA%` 的文件被重定向，EPLAN 和用户都看不到（S0 发现） | scratch 项目打不开；审计日志找不到 | [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)（已接受）：数据目录改为 `%USERPROFILE%\EplanMcp\`，实例发现改为枚举命名管道 | M1 |
 
 ---
 

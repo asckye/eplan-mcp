@@ -52,7 +52,7 @@
 
 ### 环境
 - 自托管 runner，安装 EPLAN（版本与支持矩阵一致），具备 API 扩展授权，runner 标签为 `eplan-<版本>`。
-- 测试只操作 **scratch 根目录**（默认 `%LOCALAPPDATA%\EplanMcp\scratch\`）下的项目，测试结束后删除。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
+- 测试只操作 **scratch 根目录**（默认 `%USERPROFILE%\EplanMcp\scratch\`，见 ADR-0008）下的项目，测试结束后删除。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
 
 ### 测试夹具项目
 - **不把 EPLAN 自带的示例项目提交进仓库**，因为它的再分发许可不明确。
