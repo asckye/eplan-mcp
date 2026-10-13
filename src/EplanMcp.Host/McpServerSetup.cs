@@ -22,6 +22,7 @@ internal static class McpServerSetup
                 options.ServerInfo = new Implementation { Name = "eplanmcp", Title = "EplanMcp", Version = HostInfo.Version };
                 options.ServerInstructions = ServerInstructions.Text;
             })
-            .WithTools<SessionTools>(HostJson.Options);
+            .WithTools<SessionTools>(HostJson.Options)
+            .WithTools<ProjectTools>(HostJson.Options);
     }
 }
