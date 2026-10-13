@@ -1,0 +1,5 @@
+# Test-only overrides of the repository rules.
+
+[*.cs]
+# Test names follow Method_Condition_Expected (docs/standards/testing.md); an "Async" suffix adds nothing there.
+dotnet_naming_rule.async_methods_suffix.severity = none
