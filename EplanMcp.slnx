@@ -4,12 +4,18 @@
       <Platform Project="x64" />
     </Project>
     <Project Path="src/EplanMcp.Contracts/EplanMcp.Contracts.csproj" />
+    <Project Path="src/EplanMcp.Host/EplanMcp.Host.csproj">
+      <Platform Project="x64" />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EplanMcp.Bridge.Core.Tests/EplanMcp.Bridge.Core.Tests.csproj">
       <Platform Project="x64" />
     </Project>
     <Project Path="tests/EplanMcp.Contracts.Tests/EplanMcp.Contracts.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="tests/EplanMcp.Host.Tests/EplanMcp.Host.Tests.csproj">
       <Platform Project="x64" />
     </Project>
   </Folder>
