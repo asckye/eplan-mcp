@@ -18,6 +18,7 @@ internal sealed class EplanProjectCatalog : IProjectCatalog
 {
     public IReadOnlyList<OpenProject> ListOpenProjects()
     {
+        MainThread.Assert();
         string? currentPath = new SelectionSet().GetCurrentProject(false)?.ProjectFullName;
 
         using var manager = new ProjectManager();

@@ -1,7 +1,5 @@
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Server;
@@ -53,25 +51,5 @@ internal static class BridgeHost
     {
         _server?.Dispose();
         _server = null;
-    }
-
-    /// <summary>
-    /// Last-resort report when <see cref="Start"/> or <see cref="Stop"/> failed, possibly because Bridge.Core could not
-    /// be loaded: BCL only, never throws.
-    /// </summary>
-    public static void ReportStartFailure(Exception exception)
-    {
-        try
-        {
-            Directory.CreateDirectory(DataLocations.Logs);
-            File.AppendAllText(
-                Path.Combine(DataLocations.Logs, "bridge-startup-error.log"),
-                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + " " + exception + Environment.NewLine,
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
-        {
-            // Nowhere left to report to; EPLAN keeps running without the Bridge.
-        }
     }
 }

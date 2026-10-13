@@ -14,6 +14,7 @@ internal static class EplanEnvironment
 
     public static EplanInstanceInfo Capture(IBridgeLog log)
     {
+        MainThread.Assert();
         using var process = Process.GetCurrentProcess();
         return new EplanInstanceInfo
         {
