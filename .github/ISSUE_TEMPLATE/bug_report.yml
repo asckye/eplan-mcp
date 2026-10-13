@@ -1,0 +1,56 @@
+name: Bug 报告
+description: 工具行为与预期不符、报错或写坏了数据
+labels: ["type/bug", "needs-triage"]
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重级别
+      description: S1 = 写坏了项目数据，或未经批准执行了写操作；S2 = 返回错误结果但未写入；S3 = 体验或性能问题
+      options: ["S1", "S2", "S3"]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 期望的结果和实际的结果
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      description: 调用了哪个工具、传了什么参数（去掉客户信息）；最好能在 EPLAN 示例项目上复现
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 本项目版本
+      placeholder: v0.3.1
+    validations:
+      required: true
+  - type: input
+    id: eplan
+    attributes:
+      label: EPLAN 版本与变体
+      placeholder: 2026.0.3 / Pro Panel
+    validations:
+      required: true
+  - type: input
+    id: licence
+    attributes:
+      label: 授权类型
+      placeholder: 本地 / 网络 / 借用 / 云授权；是否有 API 扩展
+  - type: input
+    id: client
+    attributes:
+      label: MCP 客户端
+      placeholder: Claude Code 2.x / Claude Desktop / Cursor ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志与审计记录
+      description: 相关的审计记录（JSONL）和 Host 日志片段。请先去除项目名、客户名等敏感信息。
+      render: text

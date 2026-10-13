@@ -1,0 +1,31 @@
+# Normalise line endings in the repository; check out with the platform default.
+* text=auto
+
+# Windows-only tooling keeps CRLF.
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.sln  text eol=crlf
+*.slnx text eol=crlf
+
+# Shell scripts and git hooks must stay LF or bash fails with "$'\r': command not found".
+*.sh           text eol=lf
+eng/hooks/*    text eol=lf
+
+# Source and docs use LF so diffs are identical everywhere.
+*.cs     text eol=lf diff=csharp
+*.csproj text eol=lf
+*.props  text eol=lf
+*.targets text eol=lf
+*.json   text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.md     text eol=lf diff=markdown
+
+# Binary artefacts.
+*.png  binary
+*.jpg  binary
+*.pdf  binary
+*.zw1  binary
+*.dll  binary
+*.exe  binary

@@ -1,0 +1,44 @@
+# ---- Build output ----
+[Bb]in/
+[Oo]bj/
+artifacts/
+publish/
+*.binlog
+
+# ---- IDE / tooling ----
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# ---- Test results / coverage ----
+TestResults/
+coverage/
+*.coverage
+*.trx
+
+# ---- Runtime data produced by local runs (audit logs, scratch projects, exports) ----
+.local/
+logs/
+*.log
+
+# ---- NuGet ----
+*.nupkg
+*.snupkg
+packages/
+
+# ---- Repository-specific ----
+# Reference checkouts of other projects; never part of this product.
+third_party/
+# Machine-specific backups (e.g. exported registry keys). May contain personal data.
+backup/
+
+# ---- EPLAN artefacts that must never be committed ----
+# Real customer projects and their databases. Test fixtures live under tests/fixtures/ and are allow-listed there.
+*.elk
+*.edb/
+*.zw1
+!tests/fixtures/**/*.zw1

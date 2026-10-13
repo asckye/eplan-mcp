@@ -1,0 +1,33 @@
+<Project>
+  <!--
+    Repository-wide build rules. These are the coding standard made executable:
+    docs/standards/coding-standards.md explains each choice; change both together.
+  -->
+  <PropertyGroup>
+    <Product>EplanMcp</Product>
+    <Company>EplanMcp contributors</Company>
+    <Copyright>Copyright (c) EplanMcp contributors</Copyright>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- EPLAN is a 64-bit process; every assembly that may load next to it must be x64 too. -->
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
+
+    <!-- Quality gates: warnings fail the build, analyzers and code style run in every build (also in CI). -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Public XML docs are reviewed per project (see coding standards), not forced on every member. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <!-- Lock files make restores reproducible; CI restores in locked mode. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+</Project>
