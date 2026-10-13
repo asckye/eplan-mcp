@@ -1,3 +1,5 @@
+using System.Globalization;
+using EplanMcp.Host.Doctor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,7 +8,8 @@ using Microsoft.Extensions.Logging.Console;
 namespace EplanMcp.Host;
 
 /// <summary>
-/// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp --version</c> prints the version.
+/// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp doctor</c> checks the machine;
+/// <c>eplanmcp --version</c> prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5).
 /// </summary>
 internal static class Program
@@ -18,11 +21,13 @@ internal static class Program
             case [] or ["serve"]:
                 await ServeAsync().ConfigureAwait(false);
                 return 0;
+            case ["doctor"]:
+                return await DoctorCommand.RunAsync(Console.Out, CultureInfo.CurrentUICulture, CancellationToken.None).ConfigureAwait(false);
             case ["--version"]:
                 Console.WriteLine(HostInfo.Version);
                 return 0;
             default:
-                Console.Error.WriteLine("usage: eplanmcp [serve] | --version");
+                Console.Error.WriteLine("usage: eplanmcp [serve] | doctor | --version");
                 return 2;
         }
     }
