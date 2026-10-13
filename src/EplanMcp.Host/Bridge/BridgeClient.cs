@@ -44,7 +44,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
     {
-        IReadOnlyList<BridgeEndpoint> instances = _discovery.Discover();
+        IReadOnlyList<BridgeEndpoint> instances = Discover();
         try
         {
             HandshakeResult handshake = await RunExclusiveAsync(token => EnsureConnectedAsync(instances, token), cancellationToken).ConfigureAwait(false);
@@ -62,7 +62,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         return RunExclusiveAsync(
             async token =>
             {
-                await EnsureConnectedAsync(_discovery.Discover(), token).ConfigureAwait(false);
+                await EnsureConnectedAsync(Discover(), token).ConfigureAwait(false);
                 var parameters = new JsonObject
                 {
                     ["operation"] = operation,
@@ -229,6 +229,20 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         return new BridgeCallException(BridgeErrors.Internal(correlationId));
     }
 
+    /// <summary>Discovery failures (pipe listing, process lookup) mean "no usable EPLAN", never an escaped exception.</summary>
+    private IReadOnlyList<BridgeEndpoint> Discover()
+    {
+        try
+        {
+            return _discovery.Discover();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            LogDiscoveryFailed(ex);
+            return [];
+        }
+    }
+
     private async Task DropAsync()
     {
         IBridgeChannel? channel = _channel;
@@ -244,6 +258,9 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Could not connect to Bridge pipe {PipeName}")]
     private partial void LogConnectFailed(Exception exception, string pipeName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Bridge discovery failed")]
+    private partial void LogDiscoveryFailed(Exception exception);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Connection to the Bridge was lost")]
     private partial void LogConnectionLost(Exception exception);

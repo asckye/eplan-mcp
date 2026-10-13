@@ -9,7 +9,9 @@ internal sealed class FakeDiscovery : IBridgeDiscovery
 {
     public List<BridgeEndpoint> Endpoints { get; } = [];
 
-    public IReadOnlyList<BridgeEndpoint> Discover() => [.. Endpoints];
+    public Exception? Failure { get; set; }
+
+    public IReadOnlyList<BridgeEndpoint> Discover() => Failure is null ? [.. Endpoints] : throw Failure;
 }
 
 /// <summary>A channel whose answers come from a delegate; answers handshake compatibly unless told otherwise.</summary>
