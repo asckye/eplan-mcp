@@ -12,6 +12,8 @@ namespace EplanMcp.Spikes.S4;
 /// <item><c>serve [--log-dir DIR]</c>: stdio MCP server for a real client (Claude Code). Every raw JSON-RPC line in
 /// both directions is appended to <c>wire-*.jsonl</c> so the negotiated revision and the exact elicitation
 /// messages can be read afterwards.</item>
+/// <item><c>selftest [--log-dir DIR]</c>: runs this executable as a server under the SDK's own client, once per
+/// protocol era, to prove the server side before a real client is involved.</item>
 /// </list>
 /// Logs go to stderr or files only: in serve mode stdout belongs to the protocol.
 /// </summary>
@@ -25,6 +27,7 @@ internal static class Program
         return mode switch
         {
             "serve" => await ServeAsync(logDir).ConfigureAwait(false),
+            "selftest" => await SelfTest.RunAsync(logDir).ConfigureAwait(false),
             _ => Usage(),
         };
     }
@@ -74,7 +77,7 @@ internal static class Program
 
     private static int Usage()
     {
-        Console.Error.WriteLine("usage: EplanMcp.Spikes.S4 serve [--log-dir DIR]");
+        Console.Error.WriteLine("usage: EplanMcp.Spikes.S4 serve|selftest [--log-dir DIR]");
         return 2;
     }
 }
