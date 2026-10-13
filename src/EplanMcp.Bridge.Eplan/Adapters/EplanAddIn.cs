@@ -1,4 +1,5 @@
 using Eplan.EplApi.ApplicationFramework;
+using EplanMcp.Bridge.Eplan.Hosting;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
@@ -28,7 +29,7 @@ public sealed class EplanAddIn : IEplAddIn
         }
         catch (Exception ex)
         {
-            BridgeHost.ReportStartFailure(ex);
+            StartupFailureLog.Write(ex);
         }
 
         return true;
@@ -42,7 +43,7 @@ public sealed class EplanAddIn : IEplAddIn
         }
         catch (Exception ex)
         {
-            BridgeHost.ReportStartFailure(ex);
+            StartupFailureLog.Write(ex);
         }
 
         return true;

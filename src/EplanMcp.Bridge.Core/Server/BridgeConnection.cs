@@ -40,6 +40,10 @@ internal sealed class BridgeConnection
                 _log.Write(BridgeLogLevel.Warning, "Closing a connection that broke the framing: " + ex.Message);
                 return;
             }
+            catch (IOException)
+            {
+                return; // the Host went away (pipe broken): a normal end of the connection
+            }
 
             if (frame is null)
             {
@@ -49,7 +53,14 @@ internal sealed class BridgeConnection
             JObject? response = Handle(frame);
             if (response is not null)
             {
-                await Framing.WriteFrameAsync(stream, BridgeJson.ToUtf8(response), cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await Framing.WriteFrameAsync(stream, BridgeJson.ToUtf8(response), cancellationToken).ConfigureAwait(false);
+                }
+                catch (IOException)
+                {
+                    return; // the Host gave up waiting (timeout) or exited; nobody is left to answer
+                }
             }
         }
     }
@@ -109,6 +120,7 @@ internal sealed class BridgeConnection
 
     private JToken Handshake(JToken? parameters)
     {
+        _handshaken = false; // a new handshake replaces the old one, even if it fails
         HandshakeRequest request;
         try
         {
@@ -151,7 +163,12 @@ internal sealed class BridgeConnection
             throw new RpcException(RpcException.InvalidParams, "invoke needs {operation, correlationId, args}.");
         }
 
-        string correlationId = (string?)envelope["correlationId"] ?? Guid.NewGuid().ToString("N");
+        string correlationId = envelope["correlationId"] switch
+        {
+            null or { Type: JTokenType.Null } => Guid.NewGuid().ToString("N"),
+            { Type: JTokenType.String } id => (string)id!,
+            _ => throw new RpcException(RpcException.InvalidParams, "invoke correlationId must be a string."),
+        };
         JToken data = _router.Invoke((string)envelope["operation"]!, envelope["args"], correlationId);
         return new JObject { ["data"] = data };
     }
