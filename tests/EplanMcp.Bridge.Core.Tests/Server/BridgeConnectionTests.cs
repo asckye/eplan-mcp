@@ -40,6 +40,29 @@ public sealed class BridgeConnectionTests
     }
 
     [Fact]
+    public void FailedSecondHandshake_LocksInvokeAgain()
+    {
+        BridgeConnection connection = Connection();
+        Send(connection, Handshake);
+
+        Send(connection, """{"jsonrpc":"2.0","id":3,"method":"handshake","params":{"protocolVersion":3,"minProtocolVersion":2}}""");
+
+        AssertRpcError(Send(connection, Invoke(OperationNames.ProjectList)), BridgeProtocol.NotHandshakenErrorCode);
+    }
+
+    [Fact]
+    public void Invoke_CorrelationIdNotAString_IsInvalidParams()
+    {
+        BridgeConnection connection = Connection();
+        Send(connection, Handshake);
+
+        JObject? response = Send(connection, """{"jsonrpc":"2.0","id":2,"method":"invoke","params":{"operation":"project.list","correlationId":{"x":1},"args":{}}}""");
+
+        AssertRpcError(response, -32602);
+        Assert.DoesNotContain(_log.Entries, e => e.Level == Diagnostics.BridgeLogLevel.Error);
+    }
+
+    [Fact]
     public void Invoke_BeforeHandshake_IsRejectedWithoutRunningAnything()
     {
         AssertRpcError(Send(Connection(), Invoke(OperationNames.ProjectList)), BridgeProtocol.NotHandshakenErrorCode);
