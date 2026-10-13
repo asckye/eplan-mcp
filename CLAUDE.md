@@ -32,4 +32,15 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 - 不要修改用户的 PATH 或其他全局环境变量；安装过程也一样。
 
 ## 常用命令
-<!-- 里程碑 M1 建好解决方案后补充：构建、测试（按 Size 过滤）、运行 Host、注册 Bridge 插件、doctor 自检 -->
+```powershell
+dotnet build EplanMcp.slnx                      # 全部，含 EPLAN 插件（需要本机装有 EPLAN）
+dotnet build EplanMcp.Ci.slnf                   # 不含插件，与 CI 相同
+dotnet test --solution EplanMcp.Ci.slnf -- --filter-not-trait "Size=Large"   # Small + Medium
+dotnet test --project tests\EplanMcp.Host.Tests -- --filter-trait "Size=Small"
+dotnet format EplanMcp.Ci.slnf --verify-no-changes
+src\EplanMcp.Host\bin\Debug\net10.0\eplanmcp.exe doctor   # 自检；serve（默认）是 stdio MCP 服务器
+eng\scripts\eplan-addin.ps1 -Action register    # 开发用：注册插件，之后重启 EPLAN；更新插件后同样要重启
+```
+- 测试运行在 Microsoft.Testing.Platform 上（`global.json` 中选定），`--` 之后是 xUnit 的参数。
+- Host 发现插件时只认 `EplanMcp.Bridge.` 前缀的管道；测试用环境变量 `EPLANMCP_PIPE_PREFIX` 换成自己的前缀，避免和正在运行的 EPLAN 冲突。
+- 插件日志：`%USERPROFILE%\EplanMcp\logs\bridge-*.log`；插件启动失败时看 `bridge-startup-error.log`。
