@@ -13,6 +13,8 @@ internal sealed class PipeBridgeDiscovery : IBridgeDiscovery
 {
     public const string PrefixVariable = "EPLANMCP_PIPE_PREFIX";
 
+    private static readonly int _session = CurrentSession();
+
     private readonly string _prefix;
 
     public PipeBridgeDiscovery(string? prefix = null)
@@ -23,11 +25,10 @@ internal sealed class PipeBridgeDiscovery : IBridgeDiscovery
 
     public IReadOnlyList<BridgeEndpoint> Discover()
     {
-        int session = Process.GetCurrentProcess().SessionId;
         var found = new List<BridgeEndpoint>();
         foreach (string path in Directory.EnumerateFiles(@"\\.\pipe\"))
         {
-            if (Parse(Path.GetFileName(path), _prefix) is { } endpoint && IsAliveInSession(endpoint.ProcessId, session))
+            if (Parse(Path.GetFileName(path), _prefix) is { } endpoint && IsInOurSession(endpoint.ProcessId))
             {
                 found.Add(endpoint);
             }
@@ -52,12 +53,16 @@ internal sealed class PipeBridgeDiscovery : IBridgeDiscovery
             : null;
     }
 
-    private static bool IsAliveInSession(int processId, int session)
+    /// <summary>
+    /// GetProcessById succeeds only for a running process, and SessionId comes from the process snapshot, so no
+    /// process handle is needed: an elevated EPLAN or another user's EPLAN would deny one (HasExited would throw).
+    /// </summary>
+    private static bool IsInOurSession(int processId)
     {
         try
         {
             using var process = Process.GetProcessById(processId);
-            return !process.HasExited && process.SessionId == session;
+            return process.SessionId == _session;
         }
         catch (ArgumentException)
         {
@@ -67,5 +72,11 @@ internal sealed class PipeBridgeDiscovery : IBridgeDiscovery
         {
             return false;
         }
+    }
+
+    private static int CurrentSession()
+    {
+        using var process = Process.GetCurrentProcess();
+        return process.SessionId;
     }
 }

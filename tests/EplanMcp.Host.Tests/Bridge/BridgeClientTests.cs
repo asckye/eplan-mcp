@@ -29,6 +29,23 @@ public sealed class BridgeClientTests
         Assert.Empty(_connector.Opened);
     }
 
+    [Theory]
+    [MemberData(nameof(DiscoveryFailures))]
+    public async Task DiscoveryFails_IsNotConnectedInsteadOfAnEscapedException(Exception failure)
+    {
+        _discovery.Failure = failure;
+        await using BridgeClient client = Client();
+
+        BridgeStatus status = await client.GetStatusAsync(Token);
+        BridgeCallException ex = await Assert.ThrowsAsync<BridgeCallException>(Invoke(client));
+
+        Assert.Equal(ErrorReason.EplanNotConnected, status.Problem!.Reason);
+        Assert.Equal(ErrorReason.EplanNotConnected, ex.Error.Reason);
+    }
+
+    // Win32Exception: an elevated EPLAN or another user's EPLAN denies process access.
+    public static TheoryData<Exception> DiscoveryFailures() => [new System.ComponentModel.Win32Exception(5), new IOException(), new UnauthorizedAccessException()];
+
     [Fact]
     public async Task TwoEplans_AreSessionNotSelectedWithBothProcessIds()
     {
