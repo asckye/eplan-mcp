@@ -1,0 +1,27 @@
+using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Tools;
+using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol.Protocol;
+
+namespace EplanMcp.Host;
+
+/// <summary>Service registration shared by <c>serve</c> and the tests: Bridge access, MCP server, tools.</summary>
+internal static class McpServerSetup
+{
+    /// <summary>Registers everything except the transport, which the caller chooses.</summary>
+    public static IMcpServerBuilder AddEplanMcp(this IServiceCollection services)
+    {
+        services.AddSingleton<IBridgeDiscovery>(_ => new PipeBridgeDiscovery());
+        services.AddSingleton<IBridgeConnector, PipeBridgeConnector>();
+        services.AddSingleton<IBridgeClient, BridgeClient>();
+
+        // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
+        return services
+            .AddMcpServer(options =>
+            {
+                options.ServerInfo = new Implementation { Name = "eplanmcp", Title = "EplanMcp", Version = HostInfo.Version };
+                options.ServerInstructions = ServerInstructions.Text;
+            })
+            .WithTools<SessionTools>(HostJson.Options);
+    }
+}
