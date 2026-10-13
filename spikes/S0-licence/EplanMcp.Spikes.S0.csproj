@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Deliberately UNSIGNED (no EplanSignedAssembly attribute): spike S0 measures what this licence allows. -->
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>EplanMcp.Spikes.S0</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S0</RootNamespace>
+    <AssemblyTitle>EplanMcp.Spikes.S0</AssemblyTitle>
+  </PropertyGroup>
+
+  <!-- EPLAN assemblies are referenced from the local installation and never copied (Private=false). -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Also a first data point for spike S3: bind to the Newtonsoft.Json that EPLAN ships. -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

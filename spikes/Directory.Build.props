@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Spikes are throwaway experiments that answer one question each (see spikes/README.md).
+    They inherit the repository rules; only "warnings as errors" is relaxed so an experiment
+    is not blocked by, e.g., a missing Dispose on an EPLAN object we are probing.
+    Rules configured as errors in .editorconfig still fail the build.
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
+  </PropertyGroup>
+</Project>

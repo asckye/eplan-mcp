@@ -86,7 +86,7 @@ Issue ──► 分级(Triage) ──► 就绪(DoR) ──► [设计] ──�
 Refs: #42
 ```
 - **type**：`feat` `fix` `docs` `refactor` `perf` `test` `build` `ci` `chore` `revert`
-- **scope**（与架构组件对应）：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `docs` `ci`
+- **scope**（与架构组件对应）：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `docs` `ci` `spikes`
 - 破坏工具契约的变更必须在 type 后加 `!`，并写 `BREAKING CHANGE:` 脚注。发布工具会根据它决定是否升主版本。
 - **不允许出现 AI 署名**：提交信息里不能有 `Co-Authored-By: <AI 名称>` 之类的尾注；PR 描述、发布说明、CHANGELOG 和文档里不能写 "Generated with ..." 等 AI 生成标记，也不能把 AI 列为作者。CI 会检查（见第 7 节）。
 
