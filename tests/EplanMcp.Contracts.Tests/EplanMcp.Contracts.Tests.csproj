@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EplanMcp.Contracts\EplanMcp.Contracts.csproj" />
+    <!-- Both serializers that meet on the pipe: System.Text.Json (Host) and Newtonsoft.Json (Bridge). -->
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+</Project>

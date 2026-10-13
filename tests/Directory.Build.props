@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    Test projects inherit the repository rules (warnings as errors included) and add the xUnit v3 setup.
+    Each test class carries [Trait("Size", "Small|Medium|Large")] so CI can filter (docs/standards/testing.md).
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Test code reads better without ConfigureAwait noise; xUnit has no synchronization context to escape. -->
+    <NoWarn>$(NoWarn);CA2007;CA1707</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- xUnit v3 runs on Microsoft.Testing.Platform (selected in global.json); no VSTest adapter needed. -->
+    <PackageReference Include="xunit.v3" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>
