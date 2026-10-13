@@ -24,7 +24,7 @@
 - 命名空间与文件夹一一对应，一个文件只放一个公共类型，文件名即类型名。
 - 根命名空间 `EplanMcp`。项目命名为 `EplanMcp.<组件>`，例如 `EplanMcp.Host`、`EplanMcp.Bridge`、`EplanMcp.Contracts`。
 - 测试项目命名为 `<被测项目>.Tests`，与被测项目的目录结构保持镜像。
-- 私有字段 `_camelCase`；常量和静态只读字段 `PascalCase`；接口以 `I` 开头；异步方法以 `Async` 结尾。由 `.editorconfig` 强制。
+- 私有字段 `_camelCase`（私有的静态只读字段也一样）；常量和公开的静态只读字段 `PascalCase`；接口以 `I` 开头；异步方法以 `Async` 结尾（测试方法除外，见 `tests/.editorconfig`）。由 `.editorconfig` 强制。
 
 ---
 
