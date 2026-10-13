@@ -56,7 +56,10 @@
   - 对本项目的影响：Bridge 使用 EPLAN 预设的 WPF `Dispatcher` 加超时，来实现 `EPLAN_BUSY`。
 - `Send`、`Normal`、`Background`、`ContextIdle`、`ApplicationIdle`、`SystemIdle` 各优先级在 EPLAN 空闲时都会立即执行。— spike S1。
 - 🔴 **委托中未捕获的异常会直接终止 EPLAN 进程。** 用 `Dispatcher.Invoke(priority, timeout, delegate)` 调度的委托在主线程上抛出 `InvalidOperationException`，没有传回调用方，而是成为 `Dispatcher.ProcessQueue` 中的未处理异常，EPLAN 随即崩溃（Windows 事件日志：.NET Runtime 1026、Application Error 1000，2026-10-13 03:18:02）。— spike S1 第一次运行。
-  - 对本项目的影响：**每一个调度到主线程的委托都必须在内部捕获全部异常**，把失败作为返回值交回调用方。这一点只能通过统一的调度封装来保证，不能依赖每个调用者自觉。
+  - 对本项目的影响：**每一个调度到主线程的委托都必须在内部捕获全部异常**，把失败作为返回值交回调用方。这一点只能通过统一的调度封装来保证，不能依赖每个调用者自觉。在委托内部捕获后，失败能正确传回，之后的调度照常工作（S1r2）。
+- 在 action 之外，**`SelectionSet.GetCurrentProject()` 和 `Project.ProjectFullName` 也需要 `LockingStep`**，所以 LockingStep 必须是主线程上执行的第一件事。— S1 第一次运行时，因为顺序错误，所有写入都失败了。
+- 在调度器中（action 之外），回滚和撤销的规律与 action 中一致：`LockingStep → SafetyPoint`、`LockingStep → SafetyPoint → UndoStep（在内）` 不提交时都会回滚；`UndoStep` 在 SafetyPoint 外面时**不回滚**。经调度器写入、带有 UndoStep 的修改可以用 Ctrl+Z 撤销，此前的撤销历史保持完整；**没有 UndoStep 的写入同样可以撤销，历史没有被清空**。— S1r2。
+- ⚠️ **模态对话框打开时，调度的委托仍会被执行**：它在该对话框的消息循环中被重入执行，执行时 EPLAN 主窗口处于禁用状态。在执行前检查 `IsWindowEnabled(EPLAN 主窗口)`，可以可靠地识别并拒绝这种情况（对话框打开时拒绝，关闭后正常执行）。— S1、S1r2（用所有者为 EPLAN 主窗口的 `MessageBoxW` 模拟）。
 
 ### A8. 插件程序集的生命周期
 - **插件程序集一旦被 EPLAN 加载，在 EPLAN 进程退出之前无法卸载。** 注销之后再注册同名的新版本，执行的仍然是内存中的旧代码，不会报错。— spike S2（第一次重新构建后，新探针没有执行）。

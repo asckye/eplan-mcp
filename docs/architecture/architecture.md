@@ -170,7 +170,7 @@ flowchart TB
 |---|---|
 | `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器（管道名带固定前缀，供 Host 枚举发现，见 ADR-0008）；在 `OnExit` 中清理 |
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
-| `MainThreadDispatcher` | 封装 `EplanMainThreadDispatcher`。如果 EPLAN 尚未设置调度器，就在 `OnInitGui` 中把当前主线程的 WPF `Dispatcher` 设置进去〔待验证〕。**等待进入主线程有超时**：超时说明 EPLAN 正忙，或者打开了模态对话框，此时返回 `EPLAN_BUSY` |
+| `MainThreadDispatcher` | 使用 EPLAN 预设的主线程 WPF `Dispatcher`（`EplanMainThreadDispatcher.GetMainThreadDispatcher()`，S1 已确认 EPLAN 会预先设置），通过带超时的 `Invoke` 调度，延迟约 0.3 ms。四条硬规则（S1）：① 委托在内部捕获全部异常，否则 EPLAN 进程终止；② 第一步创建 `LockingStep`；③ 执行前检查 EPLAN 主窗口是否被禁用，被禁用（有模态对话框）则返回 `EPLAN_BUSY`，否则会在对话框中被重入执行；④ 等待进入主线程超时（默认 10 s）返回 `EPLAN_BUSY`，超时的调度事后不会再执行 |
 | `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
 | `TransactionScope` | 每个写操作的固定包装，顺序为：`LockingStep`（调度器中的代码不在 action 内，必须显式创建）→ `SafetyPoint`（不提交即回滚）→ `UndoStep`（**在 SafetyPoint 内创建**，描述写明"AI: <工具名>"，让 Ctrl+Z 一次撤销整个操作）→ `QuietModeStep(ShowNoDialogs)`。成功时先 `Commit()` 再 `CloseUndo()`。**UndoStep 放在 SafetyPoint 外面会让回滚静默失效**（spike S2） |
 | `Adapters` | **唯一引用 `Eplan.EplApi.*` 的地方**。负责 EPLAN 对象与 DTO 之间的转换、多语言文本、单位 |
@@ -298,7 +298,7 @@ sequenceDiagram
 客户端不支持 elicitation 时，Host 让 Bridge 在 EPLAN 中弹出审批对话框（以 EPLAN 主窗口为父窗口），流程其余部分不变。两种渠道都不可用时，需要审批的操作一律拒绝。
 
 ### 6.4 EPLAN 正忙或有模态对话框
-工程师可能正在 EPLAN 里操作，或者 EPLAN 正显示一个对话框，这时主线程无法接收新任务。如果在 10 秒（可配置）内没能进入主线程，Bridge 放弃这次调度并返回 `EPLAN_BUSY`，提示"请关闭 EPLAN 中打开的对话框后重试"。**操作不会在后台排队、等到之后突然执行**，因为工程师那时可能已经改变了项目状态。
+工程师可能正在 EPLAN 里操作，或者 EPLAN 正显示一个对话框。两种情况分开处理（spike S1）：主线程正忙时，调度在超时（默认 10 秒，可配置）后放弃，返回 `EPLAN_BUSY`，而且被放弃的调度**事后不会再执行**；主线程空闲但打开着模态对话框时，WPF 调度器会在对话框的消息循环中执行我们的代码，所以 Bridge 在执行前检查 EPLAN 主窗口是否被禁用，被禁用就立即返回 `EPLAN_BUSY`，提示"请关闭 EPLAN 中打开的对话框后重试"。**操作不会在后台排队、等到之后突然执行**，因为工程师那时可能已经改变了项目状态。
 
 ### 6.5 耗时操作
 报表更新、整个项目的检查、PDF 导出等可能需要几十秒到几分钟：
@@ -402,7 +402,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | # | 风险 | 影响 | 应对 | 何时消除 |
 |---|---|---|---|---|
 | **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（已接受）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
-| R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | spike S1；不可靠时改用"自定义 Action + Remote Client"的后备方案 | M1 |
+| R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | **S1 已完成**：可行。EPLAN 预设了调度器，超时可以干净地放弃。另外发现两个必须防范的问题：委托中漏出的异常会让 EPLAN 崩溃；模态对话框打开时会被重入执行。两者都已写成硬规则（编码规范 5a–5c） | 已消除（启动时加载的情况在打通骨架时确认） |
 | R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
 | R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | SDK 自带旧版兼容；审批渠道退回 EPLAN 内对话框；spike S4 验证 Claude Code 的实际行为 | M1–M3 |

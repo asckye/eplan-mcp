@@ -96,7 +96,8 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 4. 所有 EPLAN API 调用都通过 `MainThreadDispatcher` 在主线程上执行。管道线程和线程池线程**绝不**直接调用 API。适配层的入口在 Debug 构建中断言当前在主线程上。
 5. 调度必须带等待超时，超时返回 `EPLAN_BUSY`。禁止无限期等待主线程：EPLAN 自带的 `ExecuteInMainThreadSync` 没有超时，所以不使用它，改用 EPLAN 预设的 WPF `Dispatcher` 的 `Invoke(priority, timeout, …)`（S1）。
 5a. 🔴 **调度到主线程的委托必须在内部捕获全部异常**，把失败作为结果交回调用方。异常一旦漏到主线程，**EPLAN 进程会直接终止**（S1 实测）。所有调度只能通过 `MainThreadDispatcher` 的统一封装进行，禁止在别处直接调用 `Dispatcher.Invoke`，代码评审时一律拒绝。
-5b. 在 action 之外，**读取操作也要在 `LockingStep` 中进行**，否则会抛出 `NoLockingStepException`（S1）。
+5b. 在 action 之外，**读取操作也要在 `LockingStep` 中进行**，否则会抛出 `NoLockingStepException`。LockingStep 必须是主线程上执行的**第一件事**，在它之前不能访问任何 EPLAN 对象，包括 `GetCurrentProject()` 和 `ProjectFullName`（S1）。
+5c. 在主线程上执行任何操作之前，先检查 EPLAN 主窗口是否被禁用；被禁用表示有模态对话框打开，此时拒绝执行并返回 `EPLAN_BUSY`。否则我们的代码会在该对话框的消息循环中被**重入执行**（S1）。同样，用"正在执行"标志防止我们自己的操作被重入。
 6. 在主线程上执行的代码中不能 `await`，也不能阻塞等待其他线程，否则会导致死锁。主线程上的工作必须是同步的、有界的。
 
 ### 9.3 写操作（B7）
