@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Unsigned spike add-in (see S0); spike S2 measures rollback and undo semantics. -->
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>EplanMcp.Spikes.S2</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S2</RootNamespace>
+    <AssemblyTitle>EplanMcp.Spikes.S2</AssemblyTitle>
+  </PropertyGroup>
+
+  <!-- EPLAN assemblies are referenced from the local installation and never copied (Private=false). -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
