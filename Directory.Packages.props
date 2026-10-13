@@ -12,5 +12,14 @@
     <!-- Official MCP C# SDK (Apache-2.0); 2.x implements the 2026-07-28 revision and keeps 2025-11-25 clients working. -->
     <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <!--
+      Bridge JSON (MIT). Compile-time only in the Bridge: EPLAN 2026 ships 13.0.3 and the add-in uses that copy
+      (coding standards 9.7). Never raise above the version in the EPLAN Bin directory.
+    -->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <ItemGroup Label="Tests">
+    <!-- Apache-2.0. Runs on Microsoft.Testing.Platform, which global.json selects for `dotnet test`. -->
+    <PackageVersion Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
 </Project>
