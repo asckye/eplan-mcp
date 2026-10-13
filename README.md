@@ -22,6 +22,16 @@ EPLAN 2026（你正在使用的界面）
 - EPLAN Electric P8 或 Pro Panel 2026
 - 包含 **API 扩展**的 EPLAN 授权。具体是哪一种授权（开发者授权或运行时授权）以及签名方式，正在 M1 中验证，见 [ADR 索引](docs/adr/README.md) 中的 ADR-0007。
 
+## 开发工具（新的开发电脑上安装）
+
+下面这些工具只用于**开发阶段**，不是产品的依赖，不会随 EplanMcp 发布。它们都是 MIT 许可证或官方工具。
+
+| 工具 | 用途 | 安装 |
+|---|---|---|
+| [covagashi/eplan-development-skill](https://github.com/covagashi/eplan-development-skill) | Claude Code 技能：教 AI 写 EPLAN 的 C# 脚本、API 和 Remote Client 代码，让 Bridge 代码写得更准 | 按该仓库 README 安装到 Claude Code |
+| [covagashi/eplan-rag-mcp](https://github.com/covagashi/eplan-rag-mcp) 中的文档服务 | EPLAN 2026/2027 官方文档的语义检索 MCP 服务器，开发时让 AI 随时查 API 文档，不凭记忆猜 | 按该仓库 README 中"远程文档服务器"一节，把服务器地址加到 Claude Code 的 MCP 配置中 |
+| [MCP Inspector](https://github.com/modelcontextprotocol/inspector) | MCP 官方的可视化调试工具，打通骨架时用来手动调用和检查我们的工具 | 需要 Node.js；使用时运行 `npx @modelcontextprotocol/inspector <启动 Host 的命令>` |
+
 ## 文档
 
 | 想了解 | 读这里 |
