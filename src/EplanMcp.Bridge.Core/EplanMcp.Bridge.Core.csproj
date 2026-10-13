@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The EPLAN-independent half of the Bridge: framing, JSON-RPC server, operation routing and the main-thread
+    dispatch abstraction. Runs inside EPLAN (net481) and in .NET 10 tests; never references Eplan.EplApi.*.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>EplanMcp.Bridge.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EplanMcp.Contracts\EplanMcp.Contracts.csproj" />
+    <!-- Compile against Newtonsoft.Json 13; at run time EPLAN's own copy is used (coding standards 9.7, spike S3). -->
+    <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EplanMcp.Bridge.Core.Tests" />
+  </ItemGroup>
+</Project>
