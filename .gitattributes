@@ -1,5 +1,7 @@
-# Normalise line endings in the repository; check out with the platform default.
-* text=auto
+# Text files are stored and checked out with LF, matching end_of_line in .editorconfig
+# (otherwise `dotnet format --verify-no-changes` fails on Windows checkouts).
+# Windows-only tooling below overrides this with CRLF.
+* text=auto eol=lf
 
 # Windows-only tooling keeps CRLF.
 *.ps1  text eol=crlf
