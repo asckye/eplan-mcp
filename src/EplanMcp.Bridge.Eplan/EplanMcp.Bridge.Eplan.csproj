@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The EPLAN add-in: entry point, main-thread dispatcher and adapter layer (net481, ADR-0004). Builds only where
+    EPLAN is installed, because it compiles against the EPLAN API assemblies; CI builds EplanMcp.Ci.slnf without it.
+    Only the Adapters namespace may use Eplan.EplApi.* (coding standards 9.1).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <RootNamespace>EplanMcp.Bridge.Eplan</RootNamespace>
+    <Version>0.1.0</Version>
+    <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
+    <!-- Compile-time only; EPLAN's own Newtonsoft.Json 13 is used at run time (coding standards 9.7). -->
+    <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- EPLAN assemblies come from the local installation and are never copied or shipped (Private=false). -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- WPF Dispatcher: EPLAN's main-thread dispatcher, the only one with an Invoke timeout (spike S1). -->
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>
