@@ -8,9 +8,9 @@
 | 编号 | 标题 | 状态 | 门的类型 |
 |---|---|---|---|
 | [0001](0001-record-architecture-decisions.md) | 用 ADR 记录架构决策 | Accepted | 双向门 |
-| [0002](0002-host-bridge-process-model.md) | 采用"进程外 Host + EPLAN 进程内 Bridge"的进程模型 | Proposed | 单向门 |
-| [0003](0003-ipc-named-pipe-json-rpc.md) | Host 与 Bridge 之间使用命名管道上的 JSON-RPC 2.0 | Proposed | 双向门（协议有版本号） |
-| [0004](0004-runtimes-and-target-frameworks.md) | 运行时：Host 用 .NET 10，Bridge 用 net481，契约用 netstandard2.0 | Proposed | 单向门 |
-| [0005](0005-safety-model.md) | 安全模型：分级、策略引擎、审批、事务、审计 | Proposed | 单向门 |
-| [0006](0006-tool-surface-design.md) | 工具面：面向任务、资源命名、显式注解、结构化输出、Profile | Proposed | 单向门（工具契约发布后难以更改） |
+| [0002](0002-host-bridge-process-model.md) | 采用"进程外 Host + EPLAN 进程内 Bridge"的进程模型 | Accepted | 单向门 |
+| [0003](0003-ipc-named-pipe-json-rpc.md) | Host 与 Bridge 之间使用命名管道上的 JSON-RPC 2.0 | Accepted | 双向门（协议有版本号） |
+| [0004](0004-runtimes-and-target-frameworks.md) | 运行时：Host 用 .NET 10，Bridge 用 net481，契约用 netstandard2.0 | Accepted | 单向门 |
+| [0005](0005-safety-model.md) | 安全模型：分级、策略引擎、审批、事务、审计 | Accepted | 单向门 |
+| [0006](0006-tool-surface-design.md) | 工具面：面向任务、资源命名、显式注解、结构化输出、Profile | Accepted | 单向门（工具契约发布后难以更改） |
 | 0007 | 授权与分发路线（开发者授权，还是 EADN 签名 + 运行时授权） | 待 M1 spike S0 后编写 | 单向门 |
