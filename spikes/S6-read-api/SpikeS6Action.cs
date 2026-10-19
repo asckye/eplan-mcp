@@ -16,14 +16,18 @@ namespace EplanMcp.Spikes.S6;
 /// multi-language values look like, whether reading messages or objects has side effects, and how to
 /// list the connections of a page.
 /// <para>
-/// Usage: <c>EplanMcpSpikeS6 /Mode:read|checkrun /Report:"…\x.json" /ScratchRoot:"…\scratch"</c>.
-/// Runs only when the current project lies under ScratchRoot. "read" only reads; "checkrun" runs a check,
-/// which writes check messages, and is meant for the scratch copy only.
+/// Usage: <c>EplanMcpSpikeS6 /Mode:read|sysmsg|sysmsgall|sysmsgafterexception|sysmsgreuse|noop|checkrun|close /Report:"…\x.json" /ScratchRoot:"…\scratch"</c>.
+/// Works only on an open project under ScratchRoot, found by path. "read" only reads; "checkrun" runs a
+/// check, which writes check messages, on that scratch copy; "close" closes that copy and nothing else.
 /// </para>
 /// </summary>
 public sealed class SpikeS6Action : IEplAction
 {
     private const int SampleSize = 12;
+
+    // An access violation inside EPLAN ends the action before the report is written (first r2 run), so
+    // every probe saves the report before it starts; the last "inProgress" names the probe that died.
+    private static string _reportPath = string.Empty;
 
     // Property ids from the 2026 Properties enums (reflection dump); read by number so names that live in
     // FunctionBase rather than Function need no cast.
@@ -80,6 +84,7 @@ public sealed class SpikeS6Action : IEplAction
     public bool Execute(ActionCallingContext oActionCallingContext)
     {
         string reportPath = GetParameter(oActionCallingContext, "Report");
+        _reportPath = reportPath;
         string scratchRoot = GetParameter(oActionCallingContext, "ScratchRoot");
         string mode = GetParameter(oActionCallingContext, "Mode");
         var report = new JObject
@@ -112,17 +117,87 @@ public sealed class SpikeS6Action : IEplAction
 
     private static void Run(JObject report, string scratchRoot, string mode)
     {
-        Project? project = new SelectionSet().GetCurrentProject(false);
+        // The first run took the current (selected) project: after ProjectOpen it was still the engineer's
+        // project that EPLAN reopened at start-up, so the guard refused and the driver's close closed the
+        // wrong project. Pick the scratch project from the open projects by path instead, never by selection.
+        report["currentProjectIsScratch"] = Try(() => IsUnder(new SelectionSet().GetCurrentProject(false)?.ProjectFullName, scratchRoot));
+        Project? project = OpenProjects().FirstOrDefault(p => IsUnder(p.ProjectFullName, scratchRoot));
         if (project is null)
         {
-            report["refused"] = "no project open";
+            report["refused"] = "no open project under the scratch root";
             return;
         }
 
-        string root = Path.GetFullPath(scratchRoot).TrimEnd('\\') + "\\";
-        if (!Path.GetFullPath(project.ProjectFullName).StartsWith(root, StringComparison.OrdinalIgnoreCase))
+        report["project"] = project.ProjectName;
+        if (mode == "close")
         {
-            report["refused"] = "project is outside the scratch root";
+            Probe(report, "close", () =>
+            {
+                project.Close();
+                return "closed";
+            });
+            return;
+        }
+
+        if (mode == "sysmsg")
+        {
+            SystemMessages(report);
+            return;
+        }
+
+        if (mode == "noop")
+        {
+            // Finds the project and nothing else: tells whether the action itself, rather than the reads,
+            // rewrites the project's User.eod (r4: reads changed it, an idle wait did not).
+            return;
+        }
+
+        if (mode == "sysmsgreuse")
+        {
+            // Hypothesis 2: r2/r3 re-enumerated collection A after creating collections B and C; the later
+            // runs never did. Enumerate A, create B, then enumerate A again, saving before each step.
+            var first = new SysMessagesCollection();
+            Probe(report, "reuse_enumerate_first", () => first.Cast<object>().Count());
+            Probe(report, "reuse_create_second", () => new SysMessagesCollection(0, MessageLevel.Warning).Count);
+            Probe(report, "reuse_enumerate_first_again", () => first.Cast<object>().Count());
+            Probe(report, "reuse_read_first_texts_again", () => new JArray(first.Cast<object>().OfType<BaseException>().Reverse().Take(3).Select(e => e.GetMessageText())));
+            return;
+        }
+
+        if (mode == "sysmsgafterexception")
+        {
+            // Hypothesis from r2-r5: EPLAN exceptions thrown and caught earlier in the same call become
+            // system messages whose objects are no longer valid, and reading them is the access violation.
+            using var exceptionFinder = new DMObjectsFinder(project);
+            Probe(report, "cause_indexed_property_exception", () => Try(() => exceptionFinder.GetFunctions(null).First(f => f.IsMainFunction).Properties[20100].ToString()));
+            Probe(report, "cause_connection3d_exception", () => Try(() => exceptionFinder.GetConnections(null).First().StartPin?.Name));
+            mode = "sysmsgall";
+        }
+
+        if (mode == "sysmsgall")
+        {
+            // r2/r3 died reading the texts of the LAST system messages (Reverse()); read every message,
+            // saving before each, so "inProgress" names the message whose text access fails.
+            var all = new SysMessagesCollection();
+            var read = new JArray();
+            report["messages"] = read;
+            int i = 0;
+            foreach (object item in all)
+            {
+                report["inProgress"] = "message " + i.ToString(CultureInfo.InvariantCulture);
+                Save(report);
+                if (item is BaseException e)
+                {
+                    int level = (int)e.MessageLevel;
+                    report["inProgress"] = "message " + i.ToString(CultureInfo.InvariantCulture) + " level " + level.ToString(CultureInfo.InvariantCulture);
+                    Save(report);
+                    read.Add(new JObject { ["i"] = i, ["level"] = level, ["index"] = e.GetMessageIndex(), ["text"] = e.GetMessageText(), ["occurrences"] = e.NumberOfOccurrences });
+                }
+
+                i++;
+            }
+
+            report.Remove("inProgress");
             return;
         }
 
@@ -158,9 +233,27 @@ public sealed class SpikeS6Action : IEplAction
         Probe(report, "connections", () => Connections(finder, samples, pages));
         Probe(report, "article_references", () => ArticleReferences(finder, functions, project));
         Probe(report, "project_messages", () => Messages(project));
-        Probe(report, "system_messages", SystemMessages);
         Probe(report, "locks", () => new JObject { ["before"] = locksBefore, ["after"] = Locks(samples), ["projectIsLocked"] = project.IsLocked });
     }
+
+    private static Project[] OpenProjects()
+    {
+        // OpenProjects locks every project it returns unless LockProjectByDefault is off (as in the Bridge).
+        using var manager = new ProjectManager();
+        bool lockByDefault = manager.LockProjectByDefault;
+        manager.LockProjectByDefault = false;
+        try
+        {
+            return manager.OpenProjects;
+        }
+        finally
+        {
+            manager.LockProjectByDefault = lockByDefault;
+        }
+    }
+
+    private static bool IsUnder(string? path, string root) =>
+        path is not null && Path.GetFullPath(path).StartsWith(Path.GetFullPath(root).TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase);
 
     private static JObject DescribeProject(Project project)
     {
@@ -237,12 +330,8 @@ public sealed class SpikeS6Action : IEplAction
     {
         // One main and one auxiliary function per category, so names of contactors, terminals, PLC
         // boxes, cables and the like all show up.
-        return functions
-            .GroupBy(f => (f.IsMainFunction, f.FunctionCategory))
-            .Select(g => g.First())
-            .OrderBy(f => f.IsMainFunction ? 0 : 1)
-            .Take(SampleSize * 2)
-            .ToArray();
+        Function[] perCategory = [.. functions.GroupBy(f => (f.IsMainFunction, f.FunctionCategory)).Select(g => g.First())];
+        return [.. perCategory.Where(f => f.IsMainFunction).Take(SampleSize), .. perCategory.Where(f => !f.IsMainFunction).Take(SampleSize)];
     }
 
     private static JObject DescribeFunction(Function f)
@@ -425,31 +514,41 @@ public sealed class SpikeS6Action : IEplAction
         };
     }
 
-    private static JToken SystemMessages()
+    /// <summary>
+    /// Mode "sysmsg": the r2 and r3 runs died in the system message probe with an access violation inside
+    /// EPLAN, which managed code cannot catch. Steps run from least to most suspicious, each saved first,
+    /// so the report's "inProgress" names the call that fails.
+    /// </summary>
+    private static void SystemMessages(JObject report)
     {
-        var o = new JObject();
-        var watch = Stopwatch.StartNew();
-        var all = new SysMessagesCollection();
-        var levels = new Dictionary<string, int>();
-        foreach (object item in all)
+        SysMessagesCollection? all = null;
+        Probe(report, "sys_ctor_count", () =>
         {
-            if (item is BaseException e)
+            all = new SysMessagesCollection();
+            return all.Count;
+        });
+        Probe(report, "sys_enumerate_once", () =>
+        {
+            var levels = new Dictionary<string, int>();
+            foreach (object item in all!)
             {
-                Increment(levels, e.MessageLevel.ToString());
+                if (item is BaseException e)
+                {
+                    Increment(levels, e.MessageLevel.ToString());
+                }
             }
-        }
 
-        o["all"] = new JObject { ["count"] = all.Count, ["ms"] = watch.ElapsedMilliseconds, ["levels"] = JObject.FromObject(levels) };
-        o["fromBookmark0Warning"] = Try(() => new SysMessagesCollection(0, MessageLevel.Warning).Count);
-        o["fromBookmark0Error"] = Try(() => new SysMessagesCollection(0, MessageLevel.Error).Count);
-        o["last"] = new JArray(all.Cast<object>().OfType<BaseException>().Reverse().Take(3).Select(e => new JObject
+            return JObject.FromObject(levels);
+        });
+        Probe(report, "sys_read_texts", () => new JArray(all!.Cast<object>().OfType<BaseException>().Take(3).Select(e => new JObject
         {
             ["level"] = e.MessageLevel.ToString(),
             ["index"] = e.GetMessageIndex(),
             ["text"] = e.GetMessageText(),
             ["occurrences"] = e.NumberOfOccurrences,
-        }));
-        return o;
+        })));
+        Probe(report, "sys_bookmark0_warning", () => new SysMessagesCollection(0, MessageLevel.Warning).Count);
+        Probe(report, "sys_bookmark0_error", () => new SysMessagesCollection(0, MessageLevel.Error).Count);
     }
 
     private static JArray Locks(Function[] samples) =>
@@ -529,6 +628,8 @@ public sealed class SpikeS6Action : IEplAction
 
     private static void Probe(JObject report, string name, Func<JToken> probe)
     {
+        report["inProgress"] = name;
+        Save(report);
         var watch = Stopwatch.StartNew();
         JObject entry;
         try
@@ -542,6 +643,16 @@ public sealed class SpikeS6Action : IEplAction
 
         entry["ms"] = watch.ElapsedMilliseconds;
         report[name] = entry;
+        report.Remove("inProgress");
+        Save(report);
+    }
+
+    private static void Save(JObject report)
+    {
+        if (_reportPath.Length > 0)
+        {
+            File.WriteAllText(_reportPath, report.ToString(Formatting.Indented));
+        }
     }
 
     private static JObject DescribeException(Exception ex)
