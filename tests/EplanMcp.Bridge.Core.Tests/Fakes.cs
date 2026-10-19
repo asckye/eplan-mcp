@@ -70,10 +70,34 @@ internal sealed class FakePageReader : IPageReader
 
     public List<(string Path, string? NamePrefix, string? PageType, string? Language)> ListCalls { get; } = [];
 
+    /// <summary>The functions placed on each page, by page name, for <see cref="ReadPage"/>.</summary>
+    public Dictionary<string, List<FunctionRecord>> Functions { get; } = new(StringComparer.Ordinal);
+
+    public List<PropertyEntry>? Properties { get; set; }
+
+    public List<(string Path, string PageName, bool IncludeProperties, string? Language)> ReadCalls { get; } = [];
+
     public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language)
     {
         ListCalls.Add((projectPath, namePrefix, pageType, language));
         return [.. Pages.Where(p => (namePrefix is null || p.Name.StartsWith(namePrefix, StringComparison.Ordinal)) && (pageType is null || p.Type == pageType))];
+    }
+
+    public IReadOnlyList<string> PageNames(string projectPath) => [.. Pages.Select(p => p.Name)];
+
+    /// <summary>Exact and case-sensitive, like EPLAN's exact name filter.</summary>
+    public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language)
+    {
+        ReadCalls.Add((projectPath, pageName, includeProperties, language));
+        PageSummary? page = Pages.FirstOrDefault(p => p.Name == pageName);
+        return page is null
+            ? null
+            : new PageContent
+            {
+                Page = new PageDetail { Name = page.Name, Type = page.Type, TypeName = page.Type + " (UI)", Description = page.Description },
+                Functions = Functions.TryGetValue(page.Name, out List<FunctionRecord>? functions) ? functions : [],
+                Properties = includeProperties ? Properties : null,
+            };
     }
 }
 

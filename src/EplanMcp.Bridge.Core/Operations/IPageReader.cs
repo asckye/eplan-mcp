@@ -17,4 +17,13 @@ public interface IPageReader
     /// Descriptions in <paramref name="language"/>. Throws INVALID_ARGUMENT for a language EPLAN does not know.
     /// </summary>
     public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language);
+
+    /// <summary>The full name of every page, in EPLAN's page order.</summary>
+    public IReadOnlyList<string> PageNames(string projectPath);
+
+    /// <summary>
+    /// The first page whose full name is exactly <paramref name="pageName"/> (EPLAN's exact name filter), with the
+    /// functions placed on it, or null when there is none. Throws INVALID_ARGUMENT for a language EPLAN does not know.
+    /// </summary>
+    public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language);
 }

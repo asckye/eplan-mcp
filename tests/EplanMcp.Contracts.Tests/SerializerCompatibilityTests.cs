@@ -78,6 +78,20 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 140,
         },
+        new PageGetArgs { Project = "Line1", Page = "=GAA+A1&EFS1/1", Language = "en_US", IncludeProperties = true },
+        new PageGetArgs(),
+        new PageGetData
+        {
+            Project = "项目 二",
+            Page = new PageDetail { Name = "&AAA1/1", Type = "TitlePage", TypeName = "标题页/封页", Description = "封页" },
+            Devices =
+            [
+                new PageDevice { Tag = "=GAA+A1-FC1", VisibleTag = "-FC1", Category = "CircuitBreaker" },
+                new PageDevice { Tag = "=GAA+A1-TA1", Category = "Transformer" },
+            ],
+            Properties = [new PropertyEntry { Id = 11011, Name = "页描述", Value = "封页" }],
+        },
+        new PageGetData(),
     ];
 
     [Theory]

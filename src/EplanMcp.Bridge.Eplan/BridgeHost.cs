@@ -40,11 +40,13 @@ internal static class BridgeHost
 
         var options = new BridgeServerOptions { BridgeVersion = version, Eplan = eplan };
         var catalog = new EplanProjectCatalog();
+        var pages = new EplanPageReader();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new EplanProjectReader()),
-            new PageListOperation(catalog, new EplanPageReader()),
+            new PageListOperation(catalog, pages),
+            new PageGetOperation(catalog, pages),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

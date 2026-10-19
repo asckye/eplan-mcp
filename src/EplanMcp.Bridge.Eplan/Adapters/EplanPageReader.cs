@@ -43,6 +43,53 @@ internal sealed class EplanPageReader : IPageReader
         return [.. pages.Select(page => new PageSummary { Name = page.Name, Type = page.PageType.ToString(), Description = Description(page, textLanguage) })];
     }
 
+    public IReadOnlyList<string> PageNames(string projectPath)
+    {
+        MainThread.Assert();
+        using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
+        return [.. finder.GetPages(null).Select(page => page.Name)];
+    }
+
+    public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language)
+    {
+        MainThread.Assert();
+        ISOCode.Language textLanguage = EplanText.Language(language);
+        using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
+        using var pageFilter = new PagesFilter { Name = pageName, ExactNameMatching = true }; // S6: one page for its exact name
+        // The ordinal check keeps the match exact even if EPLAN's exact matching ignores case, which S6 did not test;
+        // the operation retries ignoring case on its own terms.
+        Page? page = finder.GetPages(pageFilter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        if (page is null)
+        {
+            return null;
+        }
+
+        // FunctionsFilter.Page instead of Page.Functions: the latter depends on the shared Page.Filter (banned). S6 found
+        // this filter correct and fast (0 ms on a circuit page).
+        using var functionFilter = new FunctionsFilter { Page = page };
+        return new PageContent
+        {
+            Page = new PageDetail
+            {
+                Name = page.Name,
+                Type = page.PageType.ToString(),
+                TypeName = page.PageTypeName is { Length: > 0 } typeName ? typeName : null,
+                Description = Description(page, textLanguage),
+            },
+            Functions =
+            [
+                .. finder.GetFunctions(functionFilter).Select(function => new FunctionRecord
+                {
+                    Name = function.Name ?? string.Empty,
+                    VisibleName = function.VisibleName ?? string.Empty,
+                    IsMain = function.IsMainFunction,
+                    Category = function.FunctionCategory.ToString(),
+                }),
+            ],
+            Properties = includeProperties ? EplanProperties.Read(page.Properties, textLanguage) : null,
+        };
+    }
+
     /// <summary>The page description, <c>PAGE_NOMINATIOMN</c> (EPLAN's spelling), a multi-language property (S6).</summary>
     internal static string? Description(Page page, ISOCode.Language language) => EplanText.Read(page.Properties.PAGE_NOMINATIOMN, language);
 }
