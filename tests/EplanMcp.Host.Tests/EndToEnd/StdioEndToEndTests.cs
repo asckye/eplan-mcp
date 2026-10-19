@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -141,6 +141,22 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_DeviceGetAsksForAFullTagAndThenReturnsTheDevice()
+    {
+        StartBridge();
+
+        CallToolResult ambiguous = await Call("eplan_device_get", new() { ["tag"] = "-FC1" });
+        CallToolResult device = await Call("eplan_device_get", new() { ["tag"] = "=GAB1+A1-FC1", ["response_format"] = "detailed" });
+
+        Assert.True(ambiguous.IsError);
+        Assert.Contains(ErrorReason.AmbiguousName, Text(ambiguous), StringComparison.Ordinal);
+        JsonElement data = device.StructuredContent!.Value;
+        Assert.Equal("MotorOverloadSwitch", data.GetProperty("device").GetProperty("category").GetString());
+        Assert.Equal(1, data.GetProperty("properties").GetArrayLength());
+        Assert.Equal("Device found: MotorOverloadSwitch, 0 auxiliary functions, 1 part, 1 property.", Text(device));
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -193,6 +209,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),
+            new DeviceGetOperation(catalog, devices),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(

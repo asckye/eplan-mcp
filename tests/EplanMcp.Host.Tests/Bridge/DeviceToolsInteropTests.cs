@@ -28,7 +28,7 @@ public sealed class DeviceToolsInteropTests : IAsyncDisposable
     {
         var catalog = new Catalog();
         var router = new OperationRouter(
-            [new ProjectListOperation(catalog), new DeviceListOperation(catalog, _devices)],
+            [new ProjectListOperation(catalog), new DeviceListOperation(catalog, _devices), new DeviceGetOperation(catalog, _devices)],
             new InlineDispatcher(),
             null,
             new NullLog(),
@@ -114,6 +114,54 @@ public sealed class DeviceToolsInteropTests : IAsyncDisposable
         Assert.Equal(ErrorReason.PageNotFound, Reason(page));
         Assert.Equal(ErrorReason.InvalidArgument, Reason(category));
     }
+
+    [Fact]
+    public async Task DeviceGet_FullTag_ReturnsTheDeviceWithItsAuxiliaryFunctionsAndParts()
+    {
+        CallToolResult result = await Get("=GAA+A1-FC1");
+
+        JsonElement data = Structured(result);
+        JsonElement device = data.GetProperty("device");
+        Assert.Equal(("-FC1", "=GAA+A1&EFS1/1", "功能文本"), (device.GetProperty("visibleTag").GetString(), device.GetProperty("page").GetString(), device.GetProperty("text").GetString()));
+        Assert.Equal(["1", "2"], device.GetProperty("pins").EnumerateArray().Select(p => p.GetString()));
+        JsonElement contact = Assert.Single(data.GetProperty("functions").EnumerateArray());
+        Assert.Equal(("NoContact", "=GAA+A1&EFS1/2"), (contact.GetProperty("category").GetString(), contact.GetProperty("page").GetString()));
+        Assert.Equal(2, data.GetProperty("parts").GetArrayLength());
+        Assert.Equal("Device found: CircuitBreaker, 1 auxiliary function, 2 parts.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
+    [Fact]
+    public async Task DeviceGet_ShortTagInTwoStructures_IsAmbiguousWithBothFullTags()
+    {
+        CallToolResult result = await Get("-FC1");
+
+        Assert.Equal(ErrorReason.AmbiguousName, Reason(result));
+        JsonElement metadata = JsonDocument.Parse(((TextContentBlock)result.Content[0]).Text).RootElement.GetProperty("error").GetProperty("metadata");
+        Assert.Equal("=GAA+A1-FC1\n=GAB1+A1-FC1", metadata.GetProperty("candidates").GetString());
+    }
+
+    [Fact]
+    public async Task DeviceGet_UniqueShownTag_FindsTheDevice()
+    {
+        Assert.Equal("=GAA+A1-MA2", Structured(await Get("-ma2")).GetProperty("device").GetProperty("tag").GetString());
+    }
+
+    [Fact]
+    public async Task DeviceGet_DetailedInALanguage_ReturnsTheProperties()
+    {
+        JsonElement property = Structured(await Get("=GAA+A1-MA1", ToolArguments.Detailed, "en_US")).GetProperty("properties")[0];
+
+        Assert.Equal((20011, "en_US"), (property.GetProperty("id").GetInt32(), property.GetProperty("value").GetString()));
+    }
+
+    [Fact]
+    public async Task DeviceGet_UnknownTag_IsDeviceNotFound()
+    {
+        Assert.Equal(ErrorReason.DeviceNotFound, Reason(await Get("-K99")));
+    }
+
+    private Task<CallToolResult> Get(string tag, string responseFormat = ToolArguments.Concise, string language = "") =>
+        DeviceTools.DeviceGetAsync(_client, tag, string.Empty, responseFormat, language, TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> List(
         string tagContains = "",
