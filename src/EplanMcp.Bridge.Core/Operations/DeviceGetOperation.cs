@@ -20,11 +20,7 @@ public sealed class DeviceGetOperation(IProjectCatalog catalog, IDeviceReader de
         if (tag.Length == 0)
         {
             const string Violation = "'tag' is required: a device tag such as -K1 or =GAA+A1-FC1.";
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + Violation,
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = Violation });
+            throw InvalidArgument(Violation);
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);

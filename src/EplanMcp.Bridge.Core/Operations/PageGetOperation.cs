@@ -15,11 +15,7 @@ public sealed class PageGetOperation(IProjectCatalog catalog, IPageReader reader
         if (string.IsNullOrEmpty(args.Page))
         {
             const string violation = "'page' is required: a full page name such as =GAA+A1&EFS1/1, as eplan_page_list returns it.";
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + violation,
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = violation });
+            throw InvalidArgument(violation);
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);

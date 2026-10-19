@@ -20,11 +20,7 @@ public sealed class MessageListOperation(ISystemMessageReader reader) : Operatio
         if (minLevel is not (SystemMessage.Message or SystemMessage.Warning or SystemMessage.Error))
         {
             const string violation = "'min_level' must be message, warning or error.";
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + violation,
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = violation });
+            throw InvalidArgument(violation);
         }
 
         int minimum = Rank(minLevel);

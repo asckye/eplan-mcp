@@ -28,11 +28,7 @@ public sealed class DeviceListOperation(IProjectCatalog catalog, IDeviceReader d
         if (category is not null && !devices.IsCategory(category))
         {
             string violation = $"'category' is not an EPLAN function category. Common ones: {string.Join(", ", CommonCategories)}.";
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + violation,
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = violation });
+            throw InvalidArgument(violation);
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);

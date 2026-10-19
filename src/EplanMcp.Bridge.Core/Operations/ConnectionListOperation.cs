@@ -20,11 +20,7 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
         if (device is null && page is null)
         {
             const string Violation = "'device' or 'page' is required: a device tag such as -K1, a full page name such as =GAA+A1&EFS1/1, or both.";
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + Violation,
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = Violation });
+            throw InvalidArgument(Violation);
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
