@@ -1,0 +1,7 @@
+id: holdout-plc-pages
+set: holdout
+prompt: 项目里有几页 PLC 图表？
+answer: { type: object, required: [pages], properties: { pages: { type: integer } } }
+oracle: { pages: { tool: eplan_page_list, args: { page_type: PLCDiagram, limit: 1 }, pick: $.total } }
+checks: [{ answer: $.pages, equals: oracle.pages }]
+budget: { max_tool_calls: 8 }

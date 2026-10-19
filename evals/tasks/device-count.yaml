@@ -1,0 +1,7 @@
+id: device-count
+set: dev
+prompt: 项目里一共有多少个设备？
+answer: { type: object, required: [devices], properties: { devices: { type: integer } } }
+oracle: { devices: { tool: eplan_project_get, pick: $.counts.devices } }
+checks: [{ answer: $.devices, equals: oracle.devices }]
+budget: { max_tool_calls: 6 }

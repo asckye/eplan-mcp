@@ -1,0 +1,11 @@
+id: page-devices
+set: dev
+prompt: =GAA+A1&EFS1/2 这一页上有哪些设备？列出完整设备标识。
+answer:
+  type: object
+  required: [devices]
+  properties:
+    devices: { type: array, items: { type: string } }
+oracle: { devices: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/2" }, pick: "$.devices[*].tag" } }
+checks: [{ answer: $.devices, set_equals: oracle.devices }]
+budget: { max_tool_calls: 6 }

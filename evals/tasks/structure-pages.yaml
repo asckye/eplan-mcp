@@ -1,0 +1,11 @@
+id: structure-pages
+set: dev
+prompt: =GAA+A1 这个结构下有哪些页？列出完整页名。
+answer:
+  type: object
+  required: [pages]
+  properties:
+    pages: { type: array, items: { type: string } }
+oracle: { pages: { tool: eplan_page_list, args: { name_prefix: "=GAA+A1" }, pick: "$.pages[*].name" } }
+checks: [{ answer: $.pages, set_equals: oracle.pages }]
+budget: { max_tool_calls: 8 }

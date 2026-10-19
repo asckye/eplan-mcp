@@ -2,20 +2,20 @@
 
 评测运行器（`EplanMcp.Evals`）用真实任务检验模型会不会用 eplanmcp 的工具：用 `claude -p` 让模型作答，再按程序规则判分。设计见 [Agent 评测 v0](../docs/design/2026-10-19-agent-evals-v0.md)，规则见[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)。
 
-运行器已经完成（设计第 8 节实施顺序的第 2 至 4 步）；任务集在第 5 步加入。
+运行器和任务集 v0 已经完成（设计第 8 节实施顺序的第 2 至 5 步）；第一次真实运行（第 6 步）需要先登录 Claude Code。
 
 ## 校验任务文件
 ```powershell
 dotnet run --project evals\EplanMcp.Evals -- check                  # 校验 evals\tasks\*.yaml
 dotnet run --project evals\EplanMcp.Evals -- check --tasks <目录>
 ```
-不需要 EPLAN 和模型。每个文件的问题一次全部列出，带行号；有问题时退出码为 1。扩展名写成 `.yml` 的文件不会被读取，也按问题报告。任务集加入之前（第 5 步）`evals/tasks` 还不存在，`check` 会报告找不到任务目录。
+不需要 EPLAN 和模型。每个文件的问题一次全部列出，带行号；有问题时退出码为 1。扩展名写成 `.yml` 的文件不会被读取，也按问题报告。CI 中的 `TaskSetTests` 也检查仓库里的任务文件，并核对标准调用用到的工具都是 eplanmcp 提供的。
 
 ## 运行评测
 **准备**（每台机器一次，夹具每次换项目时重做）：
 1. 在命令行登录 Claude Code：`claude auth login`（或 `claude setup-token`），用你的 Claude 套餐账号授权一次即可。桌面版自带的 `claude.exe` 不在 PATH 上，在自己打开的终端里要用完整路径：`& (Get-ChildItem "$env:LOCALAPPDATA\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code" -Recurse -Filter claude.exe | Select-Object -Last 1).FullName auth login`。
 2. 构建 Release 版的插件和 eplanmcp，并在要用的 EPLAN 变体中注册插件（`CLAUDE.md` 常用命令；每个变体各注册一次，见 [api-notes A12](../docs/eplan/api-notes.md)）。
-3. 把 EPLAN 自带的 `EPLAN_Sample_Project`（`.elk` 文件和 `.edb` 目录）复制到 `%USERPROFILE%\EplanMcp\scratch\fixtures\`，在 EPLAN 中打开这个副本，并让它成为当前项目。评测只在 scratch 根目录下的项目上运行，预检会拒绝其他项目。
+3. 准备夹具：`eng\scripts\eval-fixture.ps1 -Open` 把 EPLAN 自带的 `EPLAN_Sample_Project`（`.elk` 文件和 `.edb` 目录）复制到 `%USERPROFILE%\EplanMcp\scratch\fixtures\`，并用这个副本作为当前项目启动 EPLAN（默认 Electric P8，`-Variant` 可改）。已有副本时不覆盖，`-Force` 才覆盖（先关闭 EPLAN）。评测只在 scratch 根目录下的项目上运行，预检会拒绝其他项目。
 
 ```powershell
 dotnet run --project evals\EplanMcp.Evals -- run                       # 开发集，每题一次
@@ -32,6 +32,19 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 - `<任务>/transcript.jsonl` 和 `stderr.txt`：每次作答的原始轨迹。**失败的轨迹是改进工具描述的第一手材料。**
 
 成功率只计"成功"和"失败"。"无效"不计入：环境出错（未登录、API 错误、会话没有隔离），或者任务本身有问题（标准调用失败、标准调用取到的值不适合比较方式）。
+
+## 任务集 v0
+`evals/tasks/` 中 21 题：开发集 15 题，保留集 6 题（文件名以 `holdout-` 开头）。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
+- 项目概况：页数、设备数、连接数；
+- 页面：某个结构下的页、某种类型的页数、页上的设备；
+- 设备：所在页、用了哪些部件、没有部件的电机；
+- 连接：断路器的输出端接到哪些设备；
+- 部件：某个制造商的部件有多少种；
+- 检查结果、英文页描述（`language` 参数）；
+- 有歧义的短标识（`-FC1` 出现在多个结构下，答案要列出它们，而不是只挑一个）；
+- 超出能力的请求（改名、删页）：只有只读工具，答案中的 `done` 必须是 `false`。
+
+改进工具描述时只看开发集的结果；保留集只在验收时运行，不据此调整描述（[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)）。每道题的标准调用都在夹具上核对过一次：值与另行查到的数据一致。新增题目时也要先这样核对。少数题目用字面量作期望值，例如连接的对端设备，路径子集无法表达"另一端"；字面量来自同一次核对。
 
 ## 任务文件
 每个任务一个文件 `evals/tasks/<id>.yaml`：

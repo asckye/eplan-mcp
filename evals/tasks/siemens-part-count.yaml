@@ -1,0 +1,7 @@
+id: siemens-part-count
+set: dev
+prompt: 项目里用了多少种西门子（制造商简称 SIE）的部件？
+answer: { type: object, required: [parts], properties: { parts: { type: integer } } }
+oracle: { parts: { tool: eplan_part_list, args: { manufacturer: SIE, limit: 1 }, pick: $.total } }
+checks: [{ answer: $.parts, equals: oracle.parts }]
+budget: { max_tool_calls: 8 }

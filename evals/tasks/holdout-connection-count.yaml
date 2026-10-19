@@ -1,0 +1,7 @@
+id: holdout-connection-count
+set: holdout
+prompt: 这个项目里一共有多少个连接？
+answer: { type: object, required: [connections], properties: { connections: { type: integer } } }
+oracle: { connections: { tool: eplan_project_get, pick: $.counts.connections } }
+checks: [{ answer: $.connections, equals: oracle.connections }]
+budget: { max_tool_calls: 6 }

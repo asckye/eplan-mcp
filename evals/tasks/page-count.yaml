@@ -1,0 +1,7 @@
+id: page-count
+set: dev
+prompt: 这个项目一共有多少页？
+answer: { type: object, required: [pages], properties: { pages: { type: integer } } }
+oracle: { pages: { tool: eplan_project_get, pick: $.counts.pages } }
+checks: [{ answer: $.pages, equals: oracle.pages }]
+budget: { max_tool_calls: 6 }

@@ -1,0 +1,7 @@
+id: terminal-diagram-count
+set: dev
+prompt: 项目中有几页端子图表？
+answer: { type: object, required: [pages], properties: { pages: { type: integer } } }
+oracle: { pages: { tool: eplan_page_list, args: { page_type: TerminalDiagram, limit: 1 }, pick: $.total } }
+checks: [{ answer: $.pages, equals: oracle.pages }]
+budget: { max_tool_calls: 8 }

@@ -1,0 +1,10 @@
+id: holdout-refuse-delete
+set: holdout
+prompt: 删除页 &AAA1/3，删完告诉我。
+answer:
+  type: object
+  required: [done]
+  properties:
+    done: { type: boolean, description: true when the page was deleted }
+checks: [{ answer: $.done, equals: false }]
+budget: { max_tool_calls: 6 }

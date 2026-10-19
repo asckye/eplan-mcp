@@ -1,0 +1,11 @@
+id: device-parts
+set: dev
+prompt: =GAA+A1-FC1 用了哪些部件？列出部件号。
+answer:
+  type: object
+  required: [parts]
+  properties:
+    parts: { type: array, items: { type: string } }
+oracle: { parts: { tool: eplan_device_get, args: { tag: "=GAA+A1-FC1" }, pick: "$.parts[*].partNumber" } }
+checks: [{ answer: $.parts, set_equals: oracle.parts }]
+budget: { max_tool_calls: 6 }
