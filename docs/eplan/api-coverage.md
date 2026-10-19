@@ -15,14 +15,14 @@
 | 命名空间 | 公开类型 | 用途 | 对应的工具家族 | 里程碑 | 状态 |
 |---|---:|---|---|---|---|
 | `Eplan.EplApi.DataModel` | 339 | 项目、页面、功能（设备）、连接、电缆、端子、PLC、部件引用、属性 | 项目 / 页面 / 设备 / 连接 / 电缆 / 端子 / PLC / 属性 | M2（读）、M3（写） | ⬜ |
-| `Eplan.EplApi.MasterData` | 127 | 部件库、符号库、宏、表格等主数据 | 部件 / 符号 / 宏 | M2（读）、M4（写） | ⬜ |
+| `Eplan.EplApi.MasterData` | 127 | 部件库、符号库、宏、表格等主数据 | 部件 / 符号 / 宏 | M3（读）、M4（写） | ⬜ |
 | `Eplan.EplApi.HEServices` | 108 | 高层服务：当前选择、编辑、生成、编号、报表、检查、导入导出 | 选择 / 报表 / 检查 / 编号 / 生成 | M2–M4 | ⬜ |
 | `Eplan.EplApi.DataModel.Graphics` | 87 | 图形对象（线、文本、矩形、属性放置） | 页面图形读写、设备标识显示（S0 发现 API 赋值的标识不显示文字） | M3 | ⬜ |
 | **`Eplan.EplApi.DataModel.E3D`** | **80** | **Pro Panel 3D**：安装空间、机柜、安装板、导轨、线槽、元件放置、钻孔、母排、铜排、布线、装配约束 | **Pro Panel 3D**（见第 3 节） | **M4b** | ⬜ |
 | `Eplan.EplApi.Base` | 40 | 设置、路径变量、多语言文本、系统消息、进度 | 基础设施（Bridge 内部使用） | M1–M2 | 🟡 |
 | `Eplan.EplApi.ApplicationFramework` | 37 | action、插件、授权、静默模式 | 基础设施；受控 action 白名单 | M1、M4 | 🟡 |
 | `Eplan.EplApi.EServices` / `.Ged` | 29 / 12 | 消息管理、图形编辑器交互 | 检查消息；交互式插入不做（需要人在界面上操作） | M2 | ⬜ |
-| `Eplan.EplApi.DataModel.MasterData` | 25 | 项目内的主数据（项目自带的符号库、表格） | 符号目录 | M2 | ⬜ |
+| `Eplan.EplApi.DataModel.MasterData` | 25 | 项目内的主数据（项目自带的符号库、表格） | 符号目录 | M3 | ⬜ |
 | `Eplan.EplApi.DataModel.Planning` | 25 | 预规划（规划对象、管段） | 预规划 | ➖ | 当前授权中 Preplanning 不可用，暂不覆盖 |
 | `Eplan.EplApi.DataModel.EObjects` | 24 | 电气对象的扩展（如 PLC 卡、端子排定义） | 并入设备 / 端子 / PLC | M3 | ⬜ |
 | `Eplan.EplApi.DataModel.Revisions` | 4 | 修订管理 | 修订 | M4 | ⬜ |
@@ -43,7 +43,7 @@
 
 主要结论：
 - **M2 的只读能力用 DataModel、HEServices、EServices 类实现，不调用 action。** 读属性的三个 action 只能读"当前项目或当前选择"，每次只读一个属性；`search` 的结果只显示在界面上，不返回给调用方；读取项目消息（`PrjMessagesCollection`）和读取设置都没有对应的 action。表中"M2"的 10 个 action 大多属于这种"用 API 替代"的情况。
-- **运行检查不是只读操作**：`check` 会重新生成检查消息，写入项目的消息管理，所以建议把 `eplan_check_run` 放到 M3，与策略和审批一起做（在 M2 设计评审时确认）；M2 只读取项目中已有的检查消息。按文档，检查开始前会删除上一次的消息，消息集合代表最近一次检查的结果。
+- **运行检查不是只读操作**：`check` 会重新生成检查消息，写入项目的消息管理，所以 `eplan_check_run` 放到 M3，与策略和审批一起做（[M2 设计](../design/2026-10-18-m2-read-core.md)第 9 节 Q2）；M2 只读取项目中已有的检查消息。按文档，检查开始前会删除上一次的消息，消息集合代表最近一次检查的结果。
 - 只有三种只读需求适合用 action：只读打开项目（`ProjectOpen /OpenMode:ReadOnly`）、把页面导出为图片（`exportToGraphics`，可以让模型"看图"，考虑提前到 M3）、导出设置快照（`XSettingsExport`）。
 - 35 个不做成工具：交互或界面类 15 个，脚本（Code 级）3 个，只供安装器或插件注册使用 3 个，官方标注为向后兼容 6 个，一次性迁移 2 个，物理打印 1 个，设置写入（默认禁用）5 个。
 - 待确认：`XAMlExportProductionData2SmartMountingAction` 的详细页面在 2025 和 2026 都返回 404；10 处文档没有说清楚的副作用（例如 `export` 的 `LANGUAGE` 参数会先翻译项目），要在实现对应工具前在 scratch 项目上验证，见[逐条核对表第 7 节](api-actions.md#7-待确认的问题无法访问的页面与文档疑点)。
@@ -52,14 +52,14 @@
 |---|---|---|---|
 | 导出 | PDF、DXF/DWG、图片、PXF、部件清单、设备清单、标签、3D | 任务型工具 `eplan_export_*`，统一校验输出文件 | M4 |
 | 导入 | DXF/DWG、PXF、部件、设备清单、预规划数据、PLC | 任务型工具，Destructive 级（可能覆盖数据） | M4 |
-| 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目，建议放到 M3 | M2（读取）、M3（运行，待确认） |
+| 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目 | M2（读取）、M3（运行） |
 | 报表 | 更新报表、生成报表页 | `eplan_report_update` | M4 |
 | 编号 | 设备、页面、端子、电缆、连接重编号 | `eplan_renumber`（Destructive，执行前备份） | M4 |
 | 生成 | 生成连接、电缆、宏 | 并入相关的写工具 | M3–M4 |
 | 项目管理 | 打开、关闭、备份、还原、升级、压缩 | `eplan_project_*`；备份同时用作 Destructive 操作前的保护 | M2–M3 |
 | 部件管理 | 导入导出部件、同步 | `eplan_part_*` | M4 |
 | 翻译与语言 | 翻译项目、设置项目语言 | `eplan_translate_*` | M4 |
-| 设置 | 读写设置、导入导出设置 | 只读：用 `Settings` / `ProjectSettings` 类，有任务需要时再做成工具；写入属于 Code 级配置，默认不开放 | 按需（待确认，原计划 M2） |
+| 设置 | 读写设置、导入导出设置 | 只读：用 `Settings` / `ProjectSettings` 类，有任务需要时再做成工具；写入属于 Code 级配置，默认不开放 | 按需（原计划 M2，见 M2 设计 Q5） |
 | 3D / 生产 | 安装空间、3D 宏、模型视图、钻孔视图、铜排展开、NC 数据、生产布线 | Pro Panel 工具家族 | M4b |
 | 其余（约 1050 个界面 action） | 各类界面命令 | 不逐个包装；需要时加入受控 action 白名单（`eplan_action_run`，只允许已标定级别的 action） | M4 |
 
