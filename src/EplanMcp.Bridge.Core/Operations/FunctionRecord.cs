@@ -17,4 +17,10 @@ public sealed class FunctionRecord
 
     /// <summary>EPLAN's <c>FunctionCategory</c> name, e.g. <c>CircuitBreaker</c>.</summary>
     public string Category { get; set; } = string.Empty;
+
+    /// <summary>Full name of the page the function is placed on; null when it is not placed.</summary>
+    public string? Page { get; set; }
+
+    /// <summary>The number of part references (<c>Function.ArticleReferences</c>).</summary>
+    public int Parts { get; set; }
 }

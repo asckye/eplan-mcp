@@ -101,6 +101,32 @@ internal sealed class FakePageReader : IPageReader
     }
 }
 
+/// <summary>
+/// A project's functions as an EPLAN adapter would read them: page and category narrow the list like FunctionsFilter,
+/// everything else is left to the operation. Records every read.
+/// </summary>
+internal sealed class FakeDeviceReader : IDeviceReader
+{
+    private static readonly string[] _categories = ["Coil", "NoContact", "NcContact", "Motor", "CircuitBreaker", "Terminal", "PLCBox", "Cable"];
+
+    public List<FunctionRecord> Functions { get; } = [];
+
+    public List<(string Path, string? Page, string? Category)> Reads { get; } = [];
+
+    public bool IsCategory(string category) => _categories.Contains(category, StringComparer.OrdinalIgnoreCase);
+
+    public IReadOnlyList<FunctionRecord>? ReadFunctions(string projectPath, string? page, string? category)
+    {
+        Reads.Add((projectPath, page, category));
+        if (page is not null && !Functions.Any(f => f.Page == page))
+        {
+            return null;
+        }
+
+        return [.. Functions.Where(f => (page is null || f.Page == page) && (category is null || string.Equals(f.Category, category, StringComparison.OrdinalIgnoreCase)))];
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {
