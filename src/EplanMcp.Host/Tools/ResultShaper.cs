@@ -126,13 +126,58 @@ internal static class ResultShaper
     }
 
     /// <summary>
+    /// The counterpart of <see cref="FitPage"/> for results that are one object with lists rather than a page (the
+    /// <c>*_get</c> tools): leaves <paramref name="result"/> as it is when it fits <paramref name="tokenBudget"/>,
+    /// otherwise drops entries from the end of <paramref name="items"/>, one of its lists, until it fits or the list is
+    /// empty. Returns how many entries were dropped. A caller with several lists calls this list by list, least
+    /// important first; it either sets <c>truncated</c> and <c>hint</c> before calling, so they are measured too, or
+    /// keeps room for them in the budget.
+    /// </summary>
+    public static int FitItems<TItem>(object result, List<TItem>? items, int tokenBudget = DefaultTokenBudget)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(tokenBudget, MaxTokenBudget);
+        if (items is null || items.Count == 0 || Fits(result, tokenBudget))
+        {
+            return 0;
+        }
+
+        // As in FitPage: the size grows with the count, and the whole list does not fit.
+        TItem[] all = [.. items];
+        int low = 0;
+        int high = all.Length - 1;
+        while (low < high)
+        {
+            int mid = (low + high + 1) / 2;
+            Keep(mid);
+            if (Fits(result, tokenBudget))
+            {
+                low = mid;
+            }
+            else
+            {
+                high = mid - 1;
+            }
+        }
+
+        Keep(low);
+        return all.Length - low;
+
+        void Keep(int count)
+        {
+            items.Clear();
+            items.AddRange(all.AsSpan(0, count));
+        }
+    }
+
+    /// <summary>Whether the serialized result is within <paramref name="tokenBudget"/>, counted as <see cref="ResultTokens"/>.</summary>
+    public static bool Fits(object result, int tokenBudget) =>
+        ResultTokens(JsonSerializer.Serialize(result, result.GetType(), HostJson.Options)) <= tokenBudget;
+
+    /// <summary>
     /// A tool result carries its JSON twice, as structured content and as a text block for older clients
     /// (<see cref="ToolResults.Success"/>), and the budget, like Claude Code's limit, is for the whole result.
     /// </summary>
     internal static int ResultTokens(string json) => 2 * EstimateTokens(json);
-
-    private static bool Fits(object result, int tokenBudget) =>
-        ResultTokens(JsonSerializer.Serialize(result, result.GetType(), HostJson.Options)) <= tokenBudget;
 
     private static string RemoveControls(string text)
     {
