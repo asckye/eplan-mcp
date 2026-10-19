@@ -129,7 +129,7 @@ Refs: #42
 | 构建 | `dotnet build -c Release`，警告即错误 | GitHub 托管 Windows runner | 每个 PR / push |
 | 格式 | `dotnet format --verify-no-changes` | 同上 | 每个 PR |
 | 提交信息 | PR 标题和每个提交都必须符合 Conventional Commits；凡是包含 AI 署名的一律拒绝，例如 `Co-Authored-By:` 尾注里出现 AI 名称或 noreply 地址，或者 `Generated with` 等字样。同样的规则也检查 PR 描述 | 同上 | 每个 PR |
-| Small + Medium 测试 | 单元测试、契约测试、使用 Fake Bridge 的端到端测试 | 同上 | 每个 PR |
+| Small + Medium 测试 | 单元测试、契约测试、使用 Fake Bridge 的端到端测试；每个测试程序集的通过数不得低于 `tests/test-suites.json` 中的下限（[测试策略第 7 节](../standards/testing.md#7-测试数量下限)） | 同上 | 每个 PR |
 | 工具契约快照 | 所有工具的名称、描述、JSON Schema、注解导出为快照，与仓库中的快照比对；有差异时 PR 必须同时更新快照 | 同上 | 每个 PR |
 | 依赖安全 | `dotnet list package --vulnerable --include-transitive`，有高危漏洞就失败 | 同上 | 每个 PR + 每周 |
 | 文档 | Markdown 链接检查 | 同上 | 每个 PR |

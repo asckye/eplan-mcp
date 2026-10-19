@@ -1,0 +1,7 @@
+{
+  "suites": [
+    { "assembly": "EplanMcp.Contracts.Tests", "minPassed": 75 },
+    { "assembly": "EplanMcp.Bridge.Core.Tests", "minPassed": 130 },
+    { "assembly": "EplanMcp.Host.Tests", "minPassed": 185 }
+  ]
+}
