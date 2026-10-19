@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -157,6 +157,20 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_PartListSumsUpThePartsOfOneManufacturer()
+    {
+        StartBridge();
+
+        CallToolResult result = await Call("eplan_part_list", new() { ["manufacturer"] = "SIE", ["language"] = "zh_CN" });
+
+        JsonElement parts = result.StructuredContent!.Value.GetProperty("parts");
+        Assert.Equal(["SIE.3RT2016-1BB41", "SIE.3RV2011-1JA10"], parts.EnumerateArray().Select(p => p.GetProperty("partNumber").GetString()));
+        Assert.Equal("接触器，AC-3，4 kW/400 V", parts[0].GetProperty("description").GetString());
+        Assert.Equal(3, parts[0].GetProperty("quantity").GetInt32());
+        Assert.Equal("Listed 2 parts.", Text(result));
+    }
+
+    [Fact]
     public async Task WithBridge_ConnectionListFollowsADeviceAcrossPagesAndAsksForAFullTag()
     {
         StartBridge();
@@ -230,6 +244,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new ConnectionListOperation(catalog, devices, new SampleConnections()),
+            new PartListOperation(catalog, new SampleParts()),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
