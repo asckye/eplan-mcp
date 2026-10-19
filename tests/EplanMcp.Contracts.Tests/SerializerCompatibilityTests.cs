@@ -147,6 +147,18 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 293,
         },
+        new MessageListArgs { MinLevel = SystemMessage.Error, Offset = 20, Limit = 20 },
+        new MessageListArgs(),
+        new MessageListData
+        {
+            Items =
+            [
+                new SystemMessage { Level = SystemMessage.Error, Number = "S085016", Text = "文件 D:\\项目\\a.elk 未找到\n第二行", Occurrences = 2 },
+                new SystemMessage { Level = SystemMessage.Fatal, Text = "x" },
+            ],
+            Total = 45,
+        },
+        new MessageListData(),
     ];
 
     [Theory]

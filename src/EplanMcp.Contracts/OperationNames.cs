@@ -38,4 +38,10 @@ public static class OperationNames
     /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.
     /// </summary>
     public const string PartList = "part.list";
+
+    /// <summary>
+    /// EPLAN's system messages of this session, newest first, filtered and sliced in the Bridge. Arguments:
+    /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
+    /// </summary>
+    public const string MessageList = "message.list";
 }
