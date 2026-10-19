@@ -105,6 +105,16 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.Contains("'limt'", Text(result), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task MissingRequiredArgument_IsInvalidArgumentRatherThanTheSdksGenericError()
+    {
+        CallToolResult result = await Call("eplan_tool_usage");
+
+        Assert.True(result.IsError);
+        Assert.Contains(ErrorReason.InvalidArgument, Text(result), StringComparison.Ordinal);
+        Assert.Contains("Missing required argument 'tool'", Text(result), StringComparison.Ordinal);
+    }
+
     private void StartBridge()
     {
         var router = new OperationRouter([new ProjectListOperation(new Catalog())], new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));

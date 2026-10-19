@@ -37,7 +37,7 @@
 | `INVALID_ARGUMENT` | `tool` 不是已注册的工具，`topic` 不是四个值之一，或传入了未知参数 | `metadata.violations` 一次列出全部问题和可选值，例如 "'tool' must be one of: eplan_project_list, eplan_session_status, eplan_tool_usage." |
 
 - 不访问 EPLAN，没有 `EPLAN_*` 等连接类错误；EPLAN 没有运行时也能正常返回。
-- 缺少 `tool` 时，SDK 不调用工具，直接返回 `isError` 和通用文字 "An error occurred invoking 'eplan_tool_usage'."，没有 reason（2026-10-19 实测，记入 api-notes C）；说明文件的 Errors 一节如实写明。以后的工具也会有必填参数，建议另行在请求过滤器中统一检查缺少的必填参数，与未知参数一起报告为 `INVALID_ARGUMENT`。
+- 缺少 `tool` 时返回 `INVALID_ARGUMENT`（"Missing required argument 'tool'."）。SDK 本身只会返回一句没有 reason 的通用错误（api-notes C），所以由 Host 的参数过滤器在调用前检查必填参数，与未知参数一起报告。
 
 ## 5. 实现要点
 - 内容放在 `src/EplanMcp.Host/Tools/Usage/<工具名>.md`，作为嵌入资源编译进 `eplanmcp.exe`，运行时不读磁盘；第一次调用时加载并解析全部文件，之后只读。不调用 Bridge，耗时可以忽略。

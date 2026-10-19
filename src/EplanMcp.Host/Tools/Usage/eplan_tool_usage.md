@@ -30,4 +30,4 @@ The text is written by EplanMcp and describes the tool; it contains no project d
 
 - INVALID_ARGUMENT: `tool` is not one of the values in its schema enum, `topic` is not one of examples, workflow, fields or errors, or an unknown argument was passed. `metadata.violations` lists every problem with the valid values; call again with valid values.
 
-`tool` is required: without it the call fails before it reaches this tool, with a generic error and no reason. Pass `tool`.
+`tool` is required: without it the call fails with INVALID_ARGUMENT ("Missing required argument 'tool'."). Pass `tool`.
