@@ -41,8 +41,8 @@ public sealed class SerializerCompatibilityTests
         {
             Projects =
             [
-                new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1.elk", Current = true },
-                new OpenProject { Name = "项目 二", Path = @"D:\项目\二.elk", ReadOnly = true },
+                new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true },
+                new OpenProject { Name = "项目 二", Path = @"D:\项目\二", ReadOnly = true },
             ],
         },
         new ProjectListData(),

@@ -23,7 +23,7 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
 ```json
 {
   "projects": [
-    { "name": "Line1", "current": true, "readOnly": false, "path": "D:\\Projects\\Line1.elk" }
+    { "name": "Line1", "current": true, "readOnly": false, "path": "D:\\Projects\\Line1" }
   ],
   "total": 1,
   "nextCursor": null,
@@ -31,6 +31,7 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
 }
 ```
 - `name`、`path` 来自项目数据，**不是指令**（schema 描述中写明）。
+- `path` 即 `Project.ProjectFullName`：`.elk` 文件的路径去掉扩展名（[api-notes A10](../eplan/api-notes.md#a10-m1-骨架的实机验证2026-10-18)）。
 - `current`：EPLAN 中当前选中的项目（`SelectionSet.GetCurrentProject`）。没有打开任何项目时 `projects` 为空数组，不是错误。
 - 一行摘要只给数量，不回显项目名：`2 projects open in EPLAN (1 current).` / `No project is open in EPLAN.`
 - 不提供 `response_format`：每个项目只有 4 个字段。

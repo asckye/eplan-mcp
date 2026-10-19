@@ -110,7 +110,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
 
     private sealed class Catalog : IProjectCatalog
     {
-        public IReadOnlyList<OpenProject> ListOpenProjects() => [new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1.elk", Current = true }];
+        public IReadOnlyList<OpenProject> ListOpenProjects() => [new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true }];
     }
 
     private sealed class InlineDispatcher : IMainThreadDispatcher
