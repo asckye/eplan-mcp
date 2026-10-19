@@ -18,7 +18,7 @@ public static class ErrorReason
     /// </summary>
     public const string AmbiguousName = "AMBIGUOUS_NAME";
 
-    /// <summary>No page has the given name; <c>metadata.page</c> repeats it.</summary>
+    /// <summary>No page has the given name; <c>metadata.page</c> repeats it, and eplan_page_list shows the page names.</summary>
     public const string PageNotFound = "PAGE_NOT_FOUND";
 
     /// <summary>Several EPLAN instances are running and none is selected.</summary>

@@ -14,4 +14,9 @@ public static class DeviceTags
     /// <summary>The shown tag without its '&gt;' markers, or null when nothing is left.</summary>
     public static string? Shown(string? visibleName) =>
         visibleName?.Replace(">", string.Empty) is { Length: > 0 } shown ? shown : null;
+
+    /// <summary>Whether the full tag or the shown tag contains <paramref name="text"/>, ignoring case.</summary>
+    public static bool Contains(string name, string? visibleName, string text) =>
+        name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0
+        || (Shown(visibleName)?.IndexOf(text, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
 }

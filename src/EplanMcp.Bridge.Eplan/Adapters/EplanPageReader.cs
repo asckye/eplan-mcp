@@ -84,6 +84,8 @@ internal sealed class EplanPageReader : IPageReader
                     VisibleName = function.VisibleName ?? string.Empty,
                     IsMain = function.IsMainFunction,
                     Category = function.FunctionCategory.ToString(),
+                    Page = page.Name,
+                    Parts = function.ArticleReferences.Length,
                 }),
             ],
             Properties = includeProperties ? EplanProperties.Read(page.Properties, textLanguage) : null,

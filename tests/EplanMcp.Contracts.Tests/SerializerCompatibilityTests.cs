@@ -92,6 +92,18 @@ public sealed class SerializerCompatibilityTests
             Properties = [new PropertyEntry { Id = 11011, Name = "页描述", Value = "封页" }],
         },
         new PageGetData(),
+        new DeviceListArgs { Project = "Line1", TagContains = "-K1", Page = "=A1&EFS1/1", Category = "Coil", HasPart = false, IncludeAuxiliary = true, Offset = 50, Limit = 50 },
+        new DeviceListArgs(),
+        new ListData<DeviceListItem>
+        {
+            Project = "项目 二",
+            Items =
+            [
+                new DeviceListItem { Tag = "=GAA+A1-FC1", VisibleTag = "-FC1", Main = true, Category = "CircuitBreaker", Page = "=GAA+A1&EFS1/1", Parts = 2 },
+                new DeviceListItem { Tag = "+A1-FC2:1", Category = "Terminal" },
+            ],
+            Total = 2876,
+        },
     ];
 
     [Theory]
