@@ -140,6 +140,61 @@ public sealed class ResultShaperTests
         Assert.Throws<ArgumentOutOfRangeException>(() => ResultShaper.FitPage(Page(1, 1), 0, _listing, ResultShaper.MaxTokenBudget + 1));
     }
 
+    [Fact]
+    public void FitItems_ResultWithinTheBudget_IsLeftAsItIs()
+    {
+        TestPage page = Page(count: 10, length: 10);
+
+        Assert.True(ResultShaper.Fits(page, ResultShaper.DefaultTokenBudget));
+        Assert.Equal(0, ResultShaper.FitItems(page, page.Entries));
+        Assert.Equal(10, page.Entries.Count);
+    }
+
+    [Fact]
+    public void FitItems_ResultOverTheBudget_KeepsTheMostEntriesFromTheStartThatFit()
+    {
+        TestPage page = Page(count: 40, length: 1000);
+        string[] all = [.. page.Entries];
+        Assert.False(ResultShaper.Fits(page, ResultShaper.DefaultTokenBudget));
+
+        int dropped = ResultShaper.FitItems(page, page.Entries);
+
+        Assert.InRange(page.Entries.Count, 1, 39);
+        Assert.Equal(40 - page.Entries.Count, dropped);
+        Assert.Equal(all.Take(page.Entries.Count), page.Entries);
+        Assert.InRange(Estimate(page), 1, ResultShaper.DefaultTokenBudget);
+        page.Entries.Add(all[page.Entries.Count]);
+        Assert.False(ResultShaper.Fits(page, ResultShaper.DefaultTokenBudget), "one more entry would not have fitted");
+    }
+
+    [Fact]
+    public void FitItems_OtherPartsAloneOverTheBudget_EmptiesTheList()
+    {
+        TestPage page = Page(count: 3, length: 10);
+        page.Hint = new string('h', 4 * ResultShaper.DefaultTokenBudget);
+
+        Assert.Equal(3, ResultShaper.FitItems(page, page.Entries));
+        Assert.Empty(page.Entries);
+    }
+
+    [Fact]
+    public void FitItems_NullOrEmptyList_DropsNothing()
+    {
+        TestPage page = Page(count: 3, length: 4 * ResultShaper.DefaultTokenBudget);
+
+        Assert.Equal(0, ResultShaper.FitItems<string>(page, null));
+        Assert.Equal(0, ResultShaper.FitItems(page, new List<string>()));
+        Assert.Equal(3, page.Entries.Count);
+    }
+
+    [Fact]
+    public void FitItems_BudgetAboveTheHardCap_IsRejected()
+    {
+        TestPage page = Page(count: 1, length: 1);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => ResultShaper.FitItems(page, page.Entries, ResultShaper.MaxTokenBudget + 1));
+    }
+
     private static TestPage Page(int count, int length) =>
         new() { Entries = [.. Enumerable.Range(0, count).Select(i => i.ToString("D3", CultureInfo.InvariantCulture).PadRight(length, 'x'))] };
 
