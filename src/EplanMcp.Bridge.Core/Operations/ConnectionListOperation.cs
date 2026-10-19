@@ -78,7 +78,4 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
         string? point = string.IsNullOrEmpty(pin) ? null : pin;
         return function is null && point is null ? null : new ConnectionEnd { Device = function, Pin = point };
     }
-
-    /// <summary>A blank filter is no filter; models sometimes pass "" for an argument they mean to omit.</summary>
-    private static string? Given(string? value) => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 }

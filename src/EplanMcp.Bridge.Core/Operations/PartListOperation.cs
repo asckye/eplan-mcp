@@ -57,7 +57,4 @@ public sealed class PartListOperation(IProjectCatalog catalog, IPartReader parts
     }
 
     private static bool Contains(string? value, string text) => value is not null && value.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0;
-
-    /// <summary>A blank filter is no filter; models sometimes pass "" for an argument they mean to omit.</summary>
-    private static string? Given(string? value) => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 }

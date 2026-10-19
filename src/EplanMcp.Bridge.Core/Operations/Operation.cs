@@ -42,4 +42,7 @@ public abstract class Operation<TArgs, TData> : IOperation
     public object? Execute(object args) => Execute((TArgs)args);
 
     protected abstract TData Execute(TArgs args);
+
+    /// <summary>A blank argument is no argument; models sometimes pass "" for one they mean to omit.</summary>
+    protected static string? Given(string? value) => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 }
