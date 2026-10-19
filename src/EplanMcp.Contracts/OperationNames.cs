@@ -26,4 +26,10 @@ public static class OperationNames
 
     /// <summary>One device by tag. Arguments: <see cref="DeviceGetArgs"/>; data: <see cref="DeviceGetData"/>.</summary>
     public const string DeviceGet = "device.get";
+
+    /// <summary>
+    /// Lists the connections of a device, of a page, or of both, sliced in the Bridge. Arguments:
+    /// <see cref="ConnectionListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="ConnectionListItem"/>.
+    /// </summary>
+    public const string ConnectionList = "connection.list";
 }

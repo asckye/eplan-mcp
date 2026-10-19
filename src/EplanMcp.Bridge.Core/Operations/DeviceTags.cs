@@ -23,9 +23,10 @@ public static class DeviceTags
     /// <summary>
     /// The full tag of the one main function whose shown tag is <paramref name="tag"/>, both without '&gt;' markers and
     /// ignoring case; null when none matches. Several devices sharing the shown tag in different structures are
-    /// AMBIGUOUS_NAME with their full tags as candidates, so the model can pick one (M2 design 4.2).
+    /// AMBIGUOUS_NAME with their full tags as candidates, so the model can pick one (M2 design 4.2) and pass it again as
+    /// <paramref name="argument"/>, the tool argument that held the tag.
     /// </summary>
-    public static string? FindByShownTag(IEnumerable<FunctionName> mainFunctions, string tag)
+    public static string? FindByShownTag(IEnumerable<FunctionName> mainFunctions, string tag, string argument = "tag")
     {
         string? wanted = Shown(tag);
         string[] matches =
@@ -43,7 +44,7 @@ public static class DeviceTags
                 "device",
                 tag,
                 matches,
-                "Several devices in different structures show this tag; pass the full tag of one of the candidates as 'tag'."),
+                $"Several devices in different structures show this tag; pass the full tag of one of the candidates as '{argument}'."),
         };
     }
 }
