@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\evals\EplanMcp.Evals\EplanMcp.Evals.csproj" />
+    <!-- Medium tests start the real eplanmcp.exe, which this reference copies next to the tests. -->
+    <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
   </ItemGroup>
 </Project>

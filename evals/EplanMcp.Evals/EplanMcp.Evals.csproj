@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="YamlDotNet" />
+    <!-- The MCP client for the preflight and the oracle calls, which talk to eplanmcp directly (design 4.2). -->
+    <PackageReference Include="ModelContextProtocol" />
   </ItemGroup>
 
   <ItemGroup>
