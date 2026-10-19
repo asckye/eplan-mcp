@@ -52,7 +52,8 @@
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- `DMObjectsFinder(project).GetPages(filter)`：`name_prefix` 直接用 `PagesFilter.Name`（前缀匹配，区分大小写，S6），`page_type` 用 `PagesFilter.DocumentType`；`text` 在内存中按页描述过滤。
+- `DMObjectsFinder(project).GetPages(filter)`：`name_prefix` 直接用 `PagesFilter.Name`（前缀匹配，区分大小写，S6），`page_type` 用 `PagesFilter.DocumentType`；`text` 在内存中按页描述过滤（Bridge.Core，`OrdinalIgnoreCase`）。两个条件都没有时传 `null`（S6 验证过 `null` 返回全部页）。
+- `page_type` 在 Bridge.Core 中对照适配层给出的枚举名校验，不区分大小写，传给 EPLAN 的是枚举的原始写法。不接受 `Undefined`：没有页是这个类型，而且它很可能是过滤器"不限类型"的默认值。`PagesFilter.DocumentType` 的过滤效果 S6 没有单独验证，由 Large 测试与 `eplan_project_get` 的 `pagesByType` 对照确认。
 - 分页：`Paging.Slice`（Bridge），游标指纹包含项目、`name_prefix`、`page_type`、`text`、`language`。
 - 耗时：321 页全部取出 7 ms（S6），读页描述在 Large 测试中测量。
 

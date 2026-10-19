@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Tools;
 using ModelContextProtocol.Protocol;
@@ -44,7 +45,7 @@ public sealed class UsageToolsTests
         JsonElement error = JsonDocument.Parse(Text(result, 0)).RootElement.GetProperty("error");
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
         string violations = error.GetProperty("metadata").GetProperty("violations").GetString()!;
-        Assert.Contains("'tool' must be one of: eplan_project_get, eplan_project_list, eplan_session_status, eplan_tool_usage.", violations, StringComparison.Ordinal);
+        Assert.Contains("'tool' must be one of: eplan_page_list, eplan_project_get, eplan_project_list, eplan_session_status, eplan_tool_usage.", violations, StringComparison.Ordinal);
         Assert.Contains("'topic' must be one of: examples, workflow, fields, errors;", violations, StringComparison.Ordinal);
     }
 
@@ -54,6 +55,16 @@ public sealed class UsageToolsTests
     public void ToolUsage_TopicNotExactlyAnEnumValue_IsInvalidArgument(string topic)
     {
         Assert.True(UsageTools.ToolUsage(ProjectTools.ListTool, topic).IsError);
+    }
+
+    [Fact]
+    public void PageListUsage_ListsEveryPageTypeTheBridgeSuggests()
+    {
+        // The Bridge's INVALID_ARGUMENT for page_type names these and points to this section for the rest.
+        string fields = ToolUsageCatalog.Usage[PageTools.ListTool][ToolUsageCatalog.Fields];
+        string[] listed = [.. fields.Split(["`page_type` values"], StringSplitOptions.None)[1].Split([',', ':', '.', ' ', '\n'], StringSplitOptions.RemoveEmptyEntries)];
+
+        Assert.All(PageListOperation.CommonPageTypes, type => Assert.Contains(type, listed));
     }
 
     [Fact]

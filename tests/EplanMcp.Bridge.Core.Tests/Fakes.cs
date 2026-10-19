@@ -58,6 +58,25 @@ internal sealed class FakeProjectReader : IProjectReader
     }
 }
 
+/// <summary>
+/// Pages of one project, filtered the way S6 found EPLAN filters (name prefix case-sensitive, page type exact), so
+/// the operation's own filtering and paging run against realistic input. Records what it was asked.
+/// </summary>
+internal sealed class FakePageReader : IPageReader
+{
+    public List<PageSummary> Pages { get; } = [];
+
+    public IReadOnlyCollection<string> PageTypes { get; set; } = ["Circuit", "TerminalDiagram", "TitlePage", "Overview"];
+
+    public List<(string Path, string? NamePrefix, string? PageType, string? Language)> ListCalls { get; } = [];
+
+    public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language)
+    {
+        ListCalls.Add((projectPath, namePrefix, pageType, language));
+        return [.. Pages.Where(p => (namePrefix is null || p.Name.StartsWith(namePrefix, StringComparison.Ordinal)) && (pageType is null || p.Type == pageType))];
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {
