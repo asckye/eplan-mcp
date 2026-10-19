@@ -12,6 +12,12 @@ public static class ErrorReason
     /// <summary>The named project is not open in EPLAN.</summary>
     public const string ProjectNotOpen = "PROJECT_NOT_OPEN";
 
+    /// <summary>
+    /// A name matches several objects (a short device tag in several structures, two projects with one name);
+    /// <c>metadata.candidates</c> lists their full names, one per line, at most 20.
+    /// </summary>
+    public const string AmbiguousName = "AMBIGUOUS_NAME";
+
     /// <summary>Several EPLAN instances are running and none is selected.</summary>
     public const string SessionNotSelected = "SESSION_NOT_SELECTED";
 
