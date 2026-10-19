@@ -5,9 +5,10 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// Enforces <c>additionalProperties: false</c>. The SDK advertises the schema but does not validate arguments
-/// against it, so a misspelled argument (<c>limt</c>) would be silently ignored and the model would believe it
-/// had been applied. Every unknown argument is reported at once as INVALID_ARGUMENT, before the tool runs.
+/// Checks the arguments against the tool's input schema before the tool runs, because the SDK advertises the schema
+/// but does not enforce it: a misspelled argument (<c>limt</c>) would be silently ignored, and a missing required one
+/// makes the SDK answer "An error occurred invoking …" without a reason (api-notes C). Unknown and missing arguments
+/// are reported together as INVALID_ARGUMENT, so the model can fix them in one go.
 /// </summary>
 internal static class UnknownArgumentFilter
 {
@@ -16,27 +17,33 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
-            if (tool is not null && context.Params?.Arguments is { Count: > 0 } arguments)
+            if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments) is { Count: > 0 } violations)
             {
-                HashSet<string> allowed = AllowedNames(tool.ProtocolTool.InputSchema);
-                List<string> violations =
-                [
-                    .. arguments.Keys
-                        .Where(name => !allowed.Contains(name))
-                        .Order(StringComparer.Ordinal)
-                        .Select(name => $"Unknown argument '{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}."),
-                ];
-                if (violations.Count > 0)
-                {
-                    return ValueTask.FromResult(ToolResults.InvalidArguments(violations));
-                }
+                return ValueTask.FromResult(ToolResults.InvalidArguments(violations));
             }
 
             return next(context, cancellationToken);
         };
 
-    private static HashSet<string> AllowedNames(JsonElement schema) =>
-        schema.TryGetProperty("properties", out JsonElement properties) && properties.ValueKind == JsonValueKind.Object
-            ? [.. properties.EnumerateObject().Select(p => p.Name)]
-            : [];
+    /// <summary>Every argument not in the schema's properties, then every required one that is absent or null.</summary>
+    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments)
+    {
+        HashSet<string> allowed = Names(schema, "properties");
+        IEnumerable<string> unknown = (arguments?.Keys ?? [])
+            .Where(name => !allowed.Contains(name))
+            .Order(StringComparer.Ordinal)
+            .Select(name => $"Unknown argument '{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}.");
+        IEnumerable<string> missing = Names(schema, "required")
+            .Where(name => arguments is null || !arguments.TryGetValue(name, out JsonElement value) || value.ValueKind == JsonValueKind.Null)
+            .Order(StringComparer.Ordinal)
+            .Select(name => $"Missing required argument '{name}'.");
+        return [.. unknown, .. missing];
+    }
+
+    /// <summary>The property names of an object member, or the strings of an array member, of the schema.</summary>
+    private static HashSet<string> Names(JsonElement schema, string member) =>
+        !schema.TryGetProperty(member, out JsonElement value) ? []
+        : value.ValueKind == JsonValueKind.Object ? [.. value.EnumerateObject().Select(p => p.Name)]
+        : value.ValueKind == JsonValueKind.Array ? [.. value.EnumerateArray().Where(e => e.ValueKind == JsonValueKind.String).Select(e => e.GetString()!)]
+        : [];
 }
