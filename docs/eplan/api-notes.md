@@ -115,6 +115,22 @@
 ### A4. 路径变量
 - 在 2026 中，`PathMap.SubstitutePath` 无法替换 `$(MD_SCHEMES)`、`$(MD_IMAGES)`、`$(TEMPPATH)`、`$(USERSETTINGSPATH)`，原样返回；`$(MD_MACROS)`、`$(MD_PARTS)`、`$(MD_SYMBOLS)`、`$(MD_FORMS)` 正常。— 实机调用。待查：2026 中方案（schemes）的存储位置。
 
+### A12. M2 只读工具的实机验证（2026-10-19，EPLAN 2026.0.3.25421，Electric P8）
+夹具：`EPLAN_Sample_Project` 的 scratch 副本，位于 `%USERPROFILE%\EplanMcp\scratch\fixtures\`。工具通过 Release 构建的 `eplanmcp` 调用（`feat/message-check-session-tools`，13 个工具），插件为同一提交的 Release 构建。
+- **夹具的做法**：直接复制 `.elk` 文件和 `.edb` 目录即可，EPLAN 正常打开（M2 设计 4.6 第 6 项）。`EPLAN.exe /Variant:"Electric P8" ProjectOpen /Project:"<.elk 的路径>"` 在启动时打开它，EPLAN 随后保持运行，与 `EplApiModuleAction` 的命令行形式相同。— 实测。
+- **插件按变体注册**：Electric P8 下原先没有注册插件，EPLAN 能启动，但既没有管道，系统日志里也没有任何插件记录。用 `eng\scripts\eplan-addin.ps1 -Action register -Variant 'Electric P8'` 注册后，每次启动都会加载。— 实测。
+  - 对本项目的影响：连不上时先看是否在当前变体注册过插件。`eplan_session_status` 的提示，以及 M5 的 `install-addin`，都要说明"每个变体各注册一次"。
+- **13 个工具全部成功**，单次调用最慢的是 `eplan_project_get`（`detailed`，493 ms），其余都在 250 ms 以内：321 页、504 个设备、2060 个连接、2900 个部件引用、314 种部件。
+  - `-FC1` 出现在 15 个设备上，`eplan_device_get` 返回 `AMBIGUOUS_NAME` 并列出候选的完整标识；
+  - 连接的 `colour`（取自 `CONNECTION_WIRENUMBER`）在示例项目中是颜色代码（`OG`、`BK`），与 S6 一致；在其他项目中的含义仍待确认（[`eplan_connection_list` 规格](../tools/eplan_connection_list.md)第 3 节）；
+  - 示例项目没有检查消息，`eplan_check_list` 返回空列表和提示；
+  - `eplan_session_select` 选中当前进程。
+  - — 实测（`dotnet run` 的 MCP 客户端脚本，不在仓库中）。
+- **读取没有副作用**：调用全部 13 个工具前后，夹具 `.edb` 中所有文件的修改时间和大小都没有变化；EPLAN 系统日志只新增了数据库打开、关闭的信息。— 实测。
+- **部件描述只有德文和部分英文**：示例项目中 `ARTICLE_DESCR1` 没有中文。界面语言为中文时，`GetStringToDisplay` 返回空串，**不会回退到其他语言**，所以 `eplan_part_list` 和 `eplan_device_get` 的部件 `description` 都是 null；传入 `language: "de_DE"` 时全部都有，传入 `en_US` 时部分有。页描述有中文，可以正常显示。— 实测。
+  - 待决定：当前语言没有文本时，是否回退到另一种语言并注明是哪种语言（影响全部多语言字段，属于 M2 设计 Q3 的补充）。
+- 部件数据中有一个部件号是一个空格（`" "`），被 10 个引用使用，这些引用既不在设备上，也不在导线上。— 实测。
+
 ---
 
 ## B. 官方文档与反射核实的事实（2026-10-12）
