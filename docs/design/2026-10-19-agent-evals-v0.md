@@ -12,7 +12,8 @@
 M2 的完成标准是"只读任务的 Agent 评测成功率 ≥ 90%"。13 个只读工具都已实现，但还没有评测框架。单元测试证明工具"能工作"，评测要回答的是模型"会不会用"：选对工具、一次传对参数、读懂结果、出错后能自行纠正（[测试规范第 5 节](../standards/testing.md#5-agent-评测)）。
 
 M2 设计 Q1 已经决定：用 Claude Code 的无界面模式 `claude -p` 驱动模型，沿用现有登录。对本机 Claude Code 2.1.299 的核查（2026-10-19）：
-- 可用的开关：`--json-schema`（结构化输出）、`--mcp-config` 与 `--strict-mcp-config`、`--allowedTools`、`--output-format stream-json`、`--no-session-persistence`、`--bare`、`--setting-sources`、`--model`、`--max-budget-usd`。**没有 `--max-turns`**。
+- 可用的开关：`--json-schema`（结构化输出）、`--mcp-config` 与 `--strict-mcp-config`、`--allowedTools`、`--output-format stream-json`、`--no-session-persistence`、`--restricted`、`--tools`、`--disable-slash-commands`、`--model`、`--max-budget-usd`、`--max-turns`（`--help` 中没有列出，[CLI 参考](https://code.claude.com/docs/en/cli-reference)中有）。
+- `--bare` **不读取登录态**，只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`（[无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)），与 Q1"沿用现有登录"冲突，因此不用；改用为评测设计的 `--restricted`（2026-10-19 实测见 [api-notes C 节](../eplan/api-notes.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)）。
 - 桌面版自带的 `claude.exe` 单独运行时没有登录态（`claude auth status` 返回 `loggedIn: false`），需要工程师先在命令行登录一次（`claude auth login`，或用 `claude setup-token` 生成长期令牌）。
 
 ## 2. 目标与非目标
@@ -80,21 +81,24 @@ budget: { max_tool_calls: 12, max_minutes: 4 }
    - 运行器作为 MCP 客户端启动 `eplanmcp`，`eplan_session_status` 为已连接；
    - `eplan_project_list` 的当前项目是夹具：路径在 scratch 根目录（`%USERPROFILE%\EplanMcp\scratch\`，[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)）下，否则拒绝运行。工具虽然都是只读的，评测也只在 scratch 副本上进行（`CLAUDE.md` 硬性规则 1 的精神）。
 2. **标准答案**：依次执行任务的 `oracle` 调用。标准调用失败时任务记为"无效"（不计入成功率），报告中写明原因。
-3. **作答**：在 `.local/evals/<运行>/<任务>/` 这个空目录中启动
+3. **作答**：在仓库之外新建的空目录（系统临时目录下）中启动
 
    ```
-   claude -p <提示> --bare --output-format stream-json --verbose --no-session-persistence
-     --json-schema <answer> --mcp-config <只含 eplanmcp 的配置> --strict-mcp-config
-     --allowedTools mcp__eplan__* --model <模型> --max-budget-usd <上限>
+   claude -p --output-format stream-json --verbose --no-session-persistence
+     --restricted --tools "" --disable-slash-commands --strict-mcp-config --mcp-config <只含 eplanmcp 的配置>
+     --allowedTools mcp__eplan --permission-mode dontAsk --permission-prompts none
+     --json-schema <answer> --model <模型> --max-budget-usd <上限> --max-turns <调用上限 + 1>
    ```
 
-   - `--bare`、空目录和 `--strict-mcp-config` 让结果不受本机的 `CLAUDE.md`、技能、钩子和其他 MCP 服务器影响；
-   - 只允许 eplanmcp 的工具，模型不能读文件或执行命令；
-   - 提示原样使用任务中的中文，不追加"请调用某某工具"之类的引导，避免高估工具的易用性。
-4. **预算**：运行器逐行读取 stream-json，统计工具调用；超过 `max_tool_calls` 或超过 `max_minutes` 就终止进程，任务记为失败（"超出预算"）。`--max-budget-usd` 是费用上的兜底。
+   - `--restricted` 不读本机的用户和项目设置（钩子、权限规则等），关闭项目记忆（`CLAUDE.md`）；`--tools ""` 去掉全部内置工具，`--disable-slash-commands` 去掉技能，`--strict-mcp-config` 只连接 eplanmcp。工作目录放在仓库之外，祖先目录中的 `CLAUDE.md` 也不会被发现；
+   - 只允许 eplanmcp 的工具，模型不能读文件或执行命令。运行器检查 `system/init` 事件：工具列表中出现 eplanmcp 和 `StructuredOutput`（`--json-schema` 用它提交答案，不计入调用次数）以外的工具，或 eplanmcp 没有连接，就立即终止，这次运行记为"无效"；
+   - 提示原样使用任务中的中文，不追加"请调用某某工具"之类的引导，避免高估工具的易用性。提示从标准输入传入，而不是作为参数：以 `-` 开头的提示（例如"-FC1 在哪几页？"）会被当成开关；
+   - 轨迹（`transcript.jsonl`）和标准错误写在 `.local/evals/<运行>/<任务>/`。
+4. **预算**：运行器逐行读取 stream-json，统计主对话中的工具调用；超过 `max_tool_calls` 或超过 `max_minutes` 就终止进程（连同它启动的 eplanmcp），任务记为失败（"超出预算"）。`--max-budget-usd` 是费用上的兜底，`--max-turns` 是调用计数之外的兜底。
+   - 认证失败、API 错误、没有 `result` 事件就退出等**环境问题**记为"无效"，不计入成功率；没有给出结构化答案、`--max-budget-usd` 或 `--max-turns` 用尽记为失败。
 5. **判分**：从最后的 `result` 事件中取结构化答案，逐条执行 `checks`。全部通过才算成功。
 
-**stream-json 的具体格式**（事件类型、工具调用和工具错误的字段、`result` 事件中结构化答案和 usage 的位置）以本机 Claude Code 的实际输出为准：第一次真实运行时录下一份轨迹，确认解析规则，把它（去掉项目数据后）作为解析器 Small 测试的样本，结论写入 api-notes C 节。在那之前，解析器按 Claude Code 文档中的格式实现。
+**stream-json 的具体格式**以本机 Claude Code 的实际输出为准。`system/init` 和 `result` 事件已在未登录状态下实测（api-notes C 节）；工具调用（`assistant` 消息中的 `tool_use` 块）和工具结果（`user` 消息中的 `tool_result` 块及其 `is_error`）按 [Agent SDK 文档](https://code.claude.com/docs/en/agent-sdk/typescript)和 Messages API 的格式实现。第一次真实运行时录下一份轨迹，确认这两部分，把它（去掉项目数据后）补作解析器 Small 测试的样本。
 
 ### 4.3 指标与报告
 每个任务记录：成败与失败原因、工具调用次数（按工具分）、出错的调用（`isError`）及其后是否成功纠正、输入/输出 token、费用、耗时。
