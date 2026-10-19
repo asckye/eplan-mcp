@@ -204,3 +204,9 @@
 - 缺少必填参数（方法参数没有默认值，schema 中列在 `required`）时，工具方法不会被调用，SDK 返回 `isError: true` 和通用文字 "An error occurred invoking '<工具名>'."，**没有 reason，也不说缺了哪个参数**。可选参数显式传 `null` 时，方法收到 `null`。— 2026-10-19 stdio 端到端实测（`eplan_tool_usage`）。
   - 对本项目的影响：Host 的参数过滤器（`UnknownArgumentFilter`）在调用工具之前检查 schema 中的 `required`，缺少或为 `null` 时与未知参数一起报告为 `INVALID_ARGUMENT`，请求不会到达 SDK 的这段逻辑。
 - Claude 桌面版自带的 Claude Code 可执行文件在无界面模式（`claude -p`）下单独运行时没有登录态（"Not logged in"），但在报错前已经完成 MCP 服务器的连接和 `tools/list`。— S4。
+
+### Claude Code 无界面模式（Agent 评测的驱动方式，2026-10-19，Claude Code 2.1.299，未登录）
+- **`--bare` 不读取登录态**（OAuth 和系统钥匙串），只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`。— [无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)。
+- `--max-turns` 可用，但 `claude --help` 不列出它（"`--help` does not list every flag"）。— [CLI 参考](https://code.claude.com/docs/en/cli-reference)。
+- `claude -p --restricted --tools "" --disable-slash-commands --strict-mcp-config --mcp-config <只含 eplanmcp>` 的 `system/init` 事件中：`tools` 只有 `mcp__eplan__*`，`slash_commands` 和 `skills` 为空，`mcp_servers` 为 `[{"name": "eplan", "status": "connected", "source": "dynamic"}]`；调试日志（`--debug-file`）记录 "project memory is off"，且不读取工作目录的 `.claude/settings.local.json`（不加 `--restricted` 时会读）。`plugins` 中仍有 3 个内置插件（`cc-plugin-agents-md` 等），不带技能。加上 `--json-schema` 后 `tools` 多出内置的 `StructuredOutput`：模型通过它提交结构化答案，统计工具调用时不能算它。上面这组开关加 `--allowedTools mcp__eplan`、`--permission-mode dontAsk`、`--permission-prompts none`、`--max-turns` 都被接受，以 `-` 开头的提示从标准输入传入也不会被当成开关。— 实测，工作目录分别在仓库内外。
+- 未登录时，stream-json 依次输出 `system/init`、一条 `assistant` 消息（`error: "authentication_failed"`、`is_api_error_message: true`、文字 "Not logged in · Please run /login"）和 `result` 事件，退出码 1。**`result` 的 `subtype` 仍是 `"success"`**，失败要看 `is_error: true` 和 `terminal_reason: "api_error"`；`total_cost_usd` 为 0，`usage` 含 `input_tokens`、`output_tokens`、`cache_read_input_tokens`、`cache_creation_input_tokens`。— 实测。
