@@ -44,4 +44,10 @@ public static class OperationNames
     /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
     /// </summary>
     public const string MessageList = "message.list";
+
+    /// <summary>
+    /// The check messages stored in a project (the last check's results), filtered and sliced in the Bridge; never
+    /// runs a check. Arguments: <see cref="CheckListArgs"/>; data: <see cref="CheckListData"/>.
+    /// </summary>
+    public const string CheckList = "check.list";
 }
