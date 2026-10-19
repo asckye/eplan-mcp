@@ -23,12 +23,23 @@ internal static class BridgeErrors
     public static BridgeError SessionNotSelected(IReadOnlyList<BridgeEndpoint> instances) => new()
     {
         Reason = ErrorReason.SessionNotSelected,
-        Message = $"{instances.Count.ToString(CultureInfo.InvariantCulture)} EPLAN instances with the EplanMcp add-in are running. Ask the engineer to close all but one, then retry.",
-        Metadata = new Dictionary<string, string>
-        {
-            ["processIds"] = string.Join(",", instances.Select(i => i.ProcessId.ToString(CultureInfo.InvariantCulture))),
-        },
+        Message = $"{instances.Count.ToString(CultureInfo.InvariantCulture)} EPLAN instances with the EplanMcp add-in are running. " +
+            "Call eplan_session_status to see them, then eplan_session_select with the processId of the one to work with.",
+        Metadata = new Dictionary<string, string> { ["processIds"] = ProcessIds(instances) },
     };
+
+    /// <summary>eplan_session_select was given a process in which no Bridge runs (tool spec eplan_session_select 4).</summary>
+    public static BridgeError UnknownInstance(int processId, IReadOnlyList<BridgeEndpoint> instances)
+    {
+        string violation = $"'process_id' {processId.ToString(CultureInfo.InvariantCulture)} is not an EPLAN with the EplanMcp add-in; " +
+            "use one of metadata.processIds, as eplan_session_status lists them.";
+        return new BridgeError
+        {
+            Reason = ErrorReason.InvalidArgument,
+            Message = "Invalid arguments: " + violation,
+            Metadata = new Dictionary<string, string> { ["violations"] = violation, ["processIds"] = ProcessIds(instances) },
+        };
+    }
 
     public static BridgeError Incompatible(int bridgeVersion) => new()
     {
@@ -67,4 +78,7 @@ internal static class BridgeErrors
         Message = $"An internal error occurred in EplanMcp (correlation ID {correlationId}). Please report it.",
         Metadata = new Dictionary<string, string> { ["correlationId"] = correlationId },
     };
+
+    private static string ProcessIds(IReadOnlyList<BridgeEndpoint> instances) =>
+        string.Join(",", instances.Select(i => i.ProcessId.ToString(CultureInfo.InvariantCulture)));
 }

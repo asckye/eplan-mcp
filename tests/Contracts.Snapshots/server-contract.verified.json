@@ -1402,6 +1402,56 @@
       }
     },
     {
+      "name": "eplan_session_select",
+      "title": "Choose the EPLAN to work with",
+      "description": "Chooses which running EPLAN this server works with when several have the add-in loaded and other tools return SESSION_NOT_SELECTED. Take process_id from the instances of eplan_session_status; the result names that EPLAN's version and variant, so select another if it is not the one meant. Lasts until that EPLAN exits; changes nothing in EPLAN. Example: {\"process_id\": 24688}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "process_id": {
+            "description": "EPLAN process ID from eplan_session_status",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "process_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "selected": {
+            "description": "The EPLAN every later call works with, until it exits.",
+            "type": "object",
+            "properties": {
+              "processId": {
+                "type": "integer"
+              },
+              "version": {
+                "description": "EPLAN file version, e.g. 2026.0.3.25421.",
+                "type": "string"
+              },
+              "variant": {
+                "description": "Product variant such as 'Electric P8' or 'Pro Panel'; null if unknown.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "annotations": {
+        "title": "Choose the EPLAN to work with",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
       "name": "eplan_session_status",
       "title": "EPLAN session status",
       "description": "Reports whether EPLAN is running with the EplanMcp add-in, and which EPLAN version and variant this server is connected to. Use it first, or when another tool returns EPLAN_NOT_CONNECTED or BRIDGE_INCOMPATIBLE: it succeeds even when EPLAN is not available and says in 'hint' what the engineer should do. Does not touch any project and does not wait for EPLAN's main thread. Related: eplan_project_list.",
@@ -1414,7 +1464,7 @@
         "type": "object",
         "properties": {
           "connected": {
-            "description": "True when exactly one EPLAN with a compatible EplanMcp add-in is running and answered.",
+            "description": "True when the EPLAN in use (the only one running, or the one chosen with eplan_session_select) answered with a compatible add-in.",
             "type": "boolean"
           },
           "host": {
@@ -1472,7 +1522,12 @@
               "type": "object",
               "properties": {
                 "processId": {
+                  "description": "Pass it as 'process_id' to eplan_session_select to work with this EPLAN.",
                   "type": "integer"
+                },
+                "selected": {
+                  "description": "True for the EPLAN chosen with eplan_session_select.",
+                  "type": "boolean"
                 }
               }
             }
@@ -1506,6 +1561,7 @@
             "type": "string",
             "enum": [
               "eplan_session_status",
+              "eplan_session_select",
               "eplan_project_list",
               "eplan_project_get",
               "eplan_page_list",

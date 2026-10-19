@@ -20,12 +20,12 @@
   "connected": true,
   "host": { "version": "0.1.0", "protocolVersion": 1 },
   "eplan": { "processId": 12345, "version": "2026.0.3.25421", "variant": "Pro Panel", "bridgeVersion": "0.1.0", "protocolVersion": 1 },
-  "instances": [ { "processId": 12345 } ],
+  "instances": [ { "processId": 12345, "selected": false } ],
   "hint": null
 }
 ```
 - `connected = false` 时 `eplan` 为 null，`hint` 用英文说明原因和下一步，例如 "No running EPLAN with the EplanMcp add-in was found. Start EPLAN and make sure the add-in is loaded, or run 'eplanmcp doctor'."
-- `instances` 列出发现的全部 Bridge（M1 只含进程号）；多于一个时 `connected = false`，`hint` 说明需要只保留一个 EPLAN 实例（`eplan_session_select` 在 M2 提供）。
+- `instances` 列出发现的全部 Bridge：进程号，以及是否是用 `eplan_session_select` 选中的实例（`selected`）。多于一个且没有选择时 `connected = false`，`hint` 提示先看 `instances`，再用 `eplan_session_select` 选定一个；选定后 `connected` 和 `eplan` 描述所选的实例。
 - 一行摘要：`EPLAN 2026.0.3.25421 (Pro Panel) connected, process 12345.` 或 `EPLAN not connected: <原因>.`
 - 结果很小，不分页。
 
