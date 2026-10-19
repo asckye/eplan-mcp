@@ -113,8 +113,10 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 
 ### 9.5 数据
 13. 读取属性时显式处理多语言文本（`MultiLangString`）和"未设置"状态，返回时注明语言代码，不把未设置当成空字符串。**读取前先检查 `PropertyValue.IsEmpty`**：对空属性调用 `ToString()` 会抛出 `EmptyPropertyException`（S2）。
+13a. 多语言文本一律通过 `ToMultiLangString().GetStringToDisplay(语言)` 读取。对多语言属性调用 `ToString()` 会返回 `de_DE@…;en_US@…;` 这样的原始串（A11）。数值按 EPLAN 给出的文本返回，不在 Bridge 中按区域解析（例如截面是 `1,5`）。
 14. 对象以业务名称标识。`ToStringIdentifier()` 只在当前 EPLAN 会话内有效（A3），只能作为附带会话 ID 的句柄使用。
-15. 每个操作都要收集执行前后的 EPLAN 系统消息差异，随结果一起返回（A1：很多失败只出现在系统消息中）。
+14a. **不依赖"当前项目"**：`ProjectOpen` 之后，`GetCurrentProject` 返回的仍可能是另一个项目（A11）。按名称或路径在已打开的项目中查找；关闭、写入等操作必须明确指定目标项目。
+15. 每个操作都要收集执行前后的 EPLAN 系统消息差异，随结果一起返回（A1：很多失败只出现在系统消息中）。🔴 **同一时间只能使用一个 `SysMessagesCollection`**：新建另一个集合之后，再读取旧集合中消息的文本，会触发 EPLAN 内部的访问冲突，托管代码捕获不到（A11）。收集差异时，执行前只记下书签（或已有消息的数量），执行后只新建一个集合，读出后立即复制到 DTO，不保留 `BaseException` 对象。
 
 ### 9.6 异常（B7）
 16. 在操作处理器的边界把 EPLAN 异常映射为错误码：`LockingException` → `LOCK_FAILED`（附带 `GetAllFailed2LockAsString()` 的结果）；"API License missing" → `LICENCE_MISSING`；`NoLockingStepException` 说明我们自己的代码有缺陷 → `INTERNAL`，并记录完整日志。
