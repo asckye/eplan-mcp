@@ -98,7 +98,7 @@ budget: { max_tool_calls: 12, max_minutes: 4 }
    - 认证失败、API 错误、没有 `result` 事件就退出等**环境问题**记为"无效"，不计入成功率；没有给出结构化答案、`--max-budget-usd` 或 `--max-turns` 用尽记为失败。
 5. **判分**：从最后的 `result` 事件中取结构化答案，逐条执行 `checks`。全部通过才算成功。
 
-**stream-json 的具体格式**以本机 Claude Code 的实际输出为准。`system/init` 和 `result` 事件已在未登录状态下实测（api-notes C 节）；工具调用（`assistant` 消息中的 `tool_use` 块）和工具结果（`user` 消息中的 `tool_result` 块及其 `is_error`）按 [Agent SDK 文档](https://code.claude.com/docs/en/agent-sdk/typescript)和 Messages API 的格式实现。第一次真实运行时录下一份轨迹，确认这两部分，把它（去掉项目数据后）补作解析器 Small 测试的样本。
+**stream-json 的具体格式**以本机 Claude Code 的实际输出为准，全部已实测（api-notes C 节）：`system/init` 和 `result` 事件先在未登录状态下确认；工具调用（`assistant` 消息中的 `tool_use` 块）、工具结果（`user` 消息中的 `tool_result` 块）和结构化答案的提交方式在第一次真实运行（2026-10-19）中确认，与解析器的实现一致。
 
 ### 4.3 指标与报告
 每个任务记录：成败与失败原因、工具调用次数（按工具分）、出错的调用（`isError`）及其后是否成功纠正、输入/输出 token、费用、耗时。
