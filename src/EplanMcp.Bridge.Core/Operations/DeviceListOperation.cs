@@ -5,7 +5,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// <see cref="OperationNames.DeviceList"/> (docs/tools/eplan_device_list.md). EPLAN narrows the functions by page and
 /// category; the rest happens here on plain records, keeping EPLAN's order: functions without a name are skipped,
-/// auxiliary functions only when asked for, then the part and tag filters, then the slice.
+/// auxiliary functions only when asked for, one function per tag (<see cref="DeviceTags.OnePerTag"/>), then the part
+/// and tag filters, then the slice.
 /// </summary>
 public sealed class DeviceListOperation(IProjectCatalog catalog, IDeviceReader devices) : Operation<DeviceListArgs, ListData<DeviceListItem>>
 {
@@ -43,10 +44,9 @@ public sealed class DeviceListOperation(IProjectCatalog catalog, IDeviceReader d
         string? text = Given(args.TagContains);
         List<FunctionRecord> matching =
         [
-            .. functions.Where(f => f.Name.Length > 0
-                && (f.IsMain || args.IncludeAuxiliary)
-                && (args.HasPart is not { } hasPart || (f.Parts > 0) == hasPart)
-                && (text is null || DeviceTags.Contains(f.Name, f.VisibleName, text))),
+            .. DeviceTags.OnePerTag(functions.Where(f => f.Name.Length > 0 && (f.IsMain || args.IncludeAuxiliary)))
+                .Where(f => (args.HasPart is not { } hasPart || (f.Parts > 0) == hasPart)
+                    && (text is null || DeviceTags.Contains(f.Name, f.VisibleName, text))),
         ];
 
         return new ListData<DeviceListItem>

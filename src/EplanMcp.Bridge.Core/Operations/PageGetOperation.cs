@@ -26,8 +26,7 @@ public sealed class PageGetOperation(IProjectCatalog catalog, IPageReader reader
             Page = content.Page,
             Devices =
             [
-                .. content.Functions
-                    .Where(function => DeviceTags.IsDevice(function.IsMain, function.Name))
+                .. DeviceTags.OnePerTag(content.Functions.Where(function => DeviceTags.IsDevice(function.IsMain, function.Name)))
                     .Select(function => new PageDevice { Tag = function.Name, VisibleTag = DeviceTags.Shown(function.VisibleName), Category = function.Category }),
             ],
             Properties = args.IncludeProperties ? content.Properties ?? [] : null,

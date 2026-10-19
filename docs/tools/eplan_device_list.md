@@ -41,6 +41,7 @@
 ```
 - `tag`：`Function.Name`，完整标识，**是其他工具引用这个设备时应该使用的值**。`visibleTag`：页面上显示的标识，去掉 `>` 标记；页面上没有显示标识时为 `null`（api-notes A11）。
 - `main`：是否主功能。`include_auxiliary` 为 true 时，同一个设备的主功能和辅助功能可能有相同的 `tag`，用它区分。
+- **每个 `tag` 只有一行主功能**：带 `page` 或 `category` 过滤时，EPLAN 还会在设备的标识下返回没有显示标识的主功能（黑盒里的功能、第二种表达），不过滤时不返回。列表中保留有显示标识的那一个，与不过滤时和 `eplan_device_get` 一致，没有时保留第一个；`has_part`、`tag_contains` 按保留的这一个判断（api-notes A12）。
 - `page`：主功能所在的页；没有放置在页上（如定义文本类对象）时为 `null`。`parts`：部件引用的数量。
 - 没有名称的功能（`Name` 为空）不列出。
 - 顺序：EPLAN 的返回顺序。超出 token 预算时由 ResultShaper 截断。

@@ -27,4 +27,20 @@ public sealed class DeviceTagsTests
     {
         Assert.Equal(expected, DeviceTags.Shown(visibleName));
     }
+
+    [Fact]
+    public void OnePerTag_KeepsTheShownMainFunctionAtItsTagsFirstPlace()
+    {
+        FunctionRecord hidden = Function("=EC1+A3-EC1-BT2", string.Empty, main: true);
+        FunctionRecord coil = Function("=F+A2-KF1", "-KF1", main: true);
+        FunctionRecord contact = Function("=F+A2-KF1", "-KF1", main: false);
+        FunctionRecord box = Function("=EC1+A3-EC1-BT2", "-BT2", main: true);
+        FunctionRecord onlyHidden = Function("=EC1+A3-EC1-MA9", ">", main: true);
+        FunctionRecord onlyHiddenToo = Function("=EC1+A3-EC1-MA9", string.Empty, main: true);
+
+        Assert.Equal([box, coil, contact, onlyHidden], DeviceTags.OnePerTag([hidden, coil, contact, box, onlyHidden, onlyHiddenToo]));
+    }
+
+    private static FunctionRecord Function(string name, string visibleName, bool main) =>
+        new() { Name = name, VisibleName = visibleName, IsMain = main, Category = "Blackbox" };
 }
