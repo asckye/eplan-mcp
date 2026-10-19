@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "只读调用的时序",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/read-call-sequence/read-call-sequence.html"
+  },
+  "participants": [
+    { "id": "client", "type": "frontend", "label": "MCP 客户端", "sublabel": "Claude Code 等" },
+    { "id": "host", "type": "backend", "label": "Host", "sublabel": "eplanmcp.exe" },
+    { "id": "bridge", "type": "backend", "label": "Bridge", "sublabel": "管道线程" },
+    { "id": "main", "type": "external", "label": "EPLAN 主线程", "sublabel": "DataModel API" },
+    { "id": "audit", "type": "database", "label": "审计日志", "sublabel": "JSONL" }
+  ],
+  "segments": [
+    { "from": 150, "to": 258, "label": "Host：校验与策略" },
+    { "from": 262, "to": 365, "label": "Bridge：主线程执行" },
+    { "from": 370, "to": 495, "label": "返回与审计" }
+  ],
+  "messages": [
+    { "id": "call", "from": "client", "to": "host", "y": 160, "label": "tools/call eplan_page_list", "variant": "emphasis", "note": "校验参数；策略判定 Read → 允许" },
+    { "id": "invoke", "from": "host", "to": "bridge", "y": 215, "label": "invoke page.list", "variant": "emphasis", "note": "带关联 ID 和 traceparent" },
+    { "id": "dispatch", "from": "bridge", "to": "main", "y": 270, "label": "调度（超时 10 s）", "variant": "emphasis", "note": "先确认主窗口未被禁用" },
+    { "id": "pages", "from": "main", "to": "bridge", "y": 325, "label": "页面 DTO", "variant": "return", "note": "在 LockingStep 内读取" },
+    { "id": "result", "from": "bridge", "to": "host", "y": 380, "label": "结果 + EPLAN 系统消息", "variant": "return" },
+    { "id": "audit-write", "from": "host", "to": "audit", "y": 410, "label": "写审计（摘要）", "variant": "dashed" },
+    { "id": "reply", "from": "host", "to": "client", "y": 440, "label": "structuredContent + 摘要", "variant": "return", "note": "分页 · 截断 · 不可信内容标记" }
+  ],
+  "activations": [
+    { "participant": "host", "from": 160, "to": 446, "type": "backend" },
+    { "participant": "bridge", "from": 215, "to": 386, "type": "backend" },
+    { "participant": "main", "from": 270, "to": 331, "type": "external" },
+    { "participant": "audit", "from": 405, "to": 416, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "EPLAN 不可用时",
+      "items": [
+        "主线程 10 s 内没有空出来：返回 EPLAN_BUSY，事后不会再执行",
+        "打开着模态对话框：立即返回 EPLAN_BUSY",
+        "找不到插件管道：返回 EPLAN_NOT_CONNECTED，并提示运行 doctor"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "结果整形",
+      "items": [
+        "默认约 5k token，硬上限 20k",
+        "项目里的自由文本只放在数据字段中"
+      ]
+    }
+  ]
+}

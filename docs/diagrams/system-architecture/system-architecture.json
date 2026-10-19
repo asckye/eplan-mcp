@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "EplanMcp 系统架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/system-architecture/system-architecture.html",
+    "legend": {
+      "entries": {
+        "external": { "label": "人与外部软件" },
+        "frontend": { "label": "MCP 客户端" },
+        "backend": { "label": "本项目组件" },
+        "security": { "label": "安全关卡" },
+        "database": { "label": "持久化数据" }
+      }
+    }
+  },
+  "components": [
+    { "id": "engineer", "type": "external", "label": "电气工程师", "sublabel": "对话 · 审批 · Ctrl+Z", "pos": [40, 90], "size": [130, 64] },
+    { "id": "client", "type": "frontend", "label": "MCP 客户端", "sublabel": "Claude Code 等", "pos": [270, 90], "size": [140, 64] },
+    { "id": "host", "type": "backend", "label": "Host（eplanmcp.exe）", "sublabel": ".NET 10 · 工具 · 串行队列 · 结果整形", "pos": [515, 90], "size": [290, 64] },
+    { "id": "policy", "type": "security", "label": "策略与审批", "sublabel": "分级 · 审批 · 计划签名", "pos": [520, 250], "size": [140, 64] },
+    { "id": "audit", "type": "database", "label": "审计日志", "sublabel": "JSONL · 哈希链", "pos": [670, 250], "size": [140, 64] },
+    { "id": "bridge", "type": "backend", "label": "Bridge 插件", "sublabel": "管道服务 · 主线程调度", "pos": [945, 90], "size": [150, 64] },
+    { "id": "eplan", "type": "external", "label": "EPLAN 2026", "sublabel": "主线程 · DataModel API", "pos": [1200, 90], "size": [150, 64] },
+    { "id": "project", "type": "database", "label": "EPLAN 项目", "sublabel": ".elk / .edb · 主数据", "pos": [1205, 250], "size": [140, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "EPLAN.exe 进程（.NET Framework 4.8.1）", "wraps": ["bridge", "eplan"] }
+  ],
+  "connections": [
+    { "id": "engineer-client", "from": "engineer", "to": "client", "label": "对话 · 审批", "variant": "emphasis" },
+    { "id": "client-host", "from": "client", "to": "host", "label": "MCP（stdio）", "variant": "emphasis" },
+    { "id": "host-bridge", "from": "host", "to": "bridge", "label": "命名管道 JSON-RPC", "variant": "emphasis" },
+    { "id": "bridge-eplan", "from": "bridge", "to": "eplan", "label": "API · 主线程", "variant": "emphasis" },
+    { "id": "eplan-project", "from": "eplan", "to": "project", "label": "读写", "variant": "default", "fromSide": "bottom", "toSide": "top" },
+    { "id": "host-policy", "from": "host", "to": "policy", "label": "写操作先判定", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "host-audit", "from": "host", "to": "audit", "label": "每次调用", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "policy-client", "from": "policy", "to": "client", "label": "审批表单（MRTR）", "variant": "security", "fromSide": "left", "toSide": "bottom" },
+    { "id": "engineer-eplan", "from": "engineer", "to": "eplan", "label": "查看图纸 · Ctrl+Z 撤销", "variant": "default", "fromSide": "top", "toSide": "top" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "写操作的安全链",
+      "items": [
+        "先 dry-run 生成变更清单，再请求审批",
+        "审批渠道：MCP 表单 → Workbench → EPLAN 内对话框",
+        "LockingStep → SafetyPoint → UndoStep：失败回滚，Ctrl+Z 一次撤销",
+        "审计不可写时拒绝写操作"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "主线程规则（spike S1）",
+      "items": [
+        "只在 EPLAN 主线程调用 API，调度带超时",
+        "调度的代码在内部捕获全部异常，否则 EPLAN 退出",
+        "模态对话框打开时拒绝执行，返回 EPLAN_BUSY"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "本机边界",
+      "items": [
+        "管道只允许当前 Windows 用户连接",
+        "数据目录 %USERPROFILE%\\EplanMcp，不受 MSIX 重定向影响"
+      ]
+    }
+  ]
+}

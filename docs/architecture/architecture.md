@@ -56,6 +56,8 @@
 
 ## 3. 系统上下文
 
+> 交互式图：[系统架构](../diagrams/system-architecture/system-architecture.html)（克隆仓库后用浏览器打开，见 [docs/diagrams](../diagrams/README.md)）。
+
 ```mermaid
 flowchart LR
     engineer([电气工程师])
@@ -241,6 +243,8 @@ sequenceDiagram
 
 ### 6.2 只读调用
 
+> 交互式图：[只读调用的时序](../diagrams/read-call-sequence/read-call-sequence.html)。
+
 ```mermaid
 sequenceDiagram
     participant C as MCP 客户端
@@ -259,6 +263,8 @@ sequenceDiagram
 ```
 
 ### 6.3 写调用：审批与事务
+
+> 交互式图：[写调用：审批与事务的时序](../diagrams/write-call-sequence/write-call-sequence.html)。
 
 按照 MCP 2026-07-28 的规定，服务器不能主动向客户端发起请求，审批通过**多轮请求（MRTR）**完成：
 

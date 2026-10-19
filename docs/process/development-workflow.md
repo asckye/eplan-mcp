@@ -20,6 +20,8 @@
 
 ## 2. 工作项生命周期
 
+> 交互式图：[开发工作流程](../diagrams/development-workflow/development-workflow.html)（克隆仓库后用浏览器打开，见 [docs/diagrams](../diagrams/README.md)）。
+
 ```
 Issue ──► 分级(Triage) ──► 就绪(DoR) ──► [设计] ──► 实现 ──► PR ──► CI 关卡 ──► 合并 ──► 实机验证 ──► 发布说明
                                        ▲                                           │
