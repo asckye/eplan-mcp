@@ -36,7 +36,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [PageTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, SessionTools.StatusTool, UsageTools.UsageTool],
+            [PageTools.GetTool, PageTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, SessionTools.StatusTool, UsageTools.UsageTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
@@ -65,6 +65,15 @@ public sealed class ToolContractTests : IDisposable
             Assert.Equal(ToolArguments.Concise, format.GetProperty("default").GetString());
         });
         Assert.Contains(Tools, t => t.Name == ProjectTools.GetTool && t.InputSchema.GetProperty("properties").TryGetProperty("response_format", out _));
+        Assert.Contains(Tools, t => t.Name == PageTools.GetTool && t.InputSchema.GetProperty("properties").TryGetProperty("response_format", out _));
+    }
+
+    [Fact]
+    public void PageGet_RequiresOnlyThePage()
+    {
+        JsonElement schema = Tools.Single(t => t.Name == PageTools.GetTool).InputSchema;
+
+        Assert.Equal(["page"], schema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
     }
 
     [Fact]
