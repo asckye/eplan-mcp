@@ -148,6 +148,7 @@ internal sealed class BridgeConnection
             ProtocolVersion = BridgeProtocol.CurrentVersion,
             BridgeVersion = _options.BridgeVersion,
             Eplan = _options.Eplan,
+            Operations = [.. _router.SupportedOperations],
         });
     }
 

@@ -118,6 +118,37 @@ public sealed class BridgeClientTests
         Assert.True(_connector.Opened[0].Disposed);
     }
 
+    [Fact]
+    public async Task M1AddIn_ServesProjectListButNotNewerOperations()
+    {
+        _discovery.Endpoints.Add(_eplanA);
+        await using BridgeClient client = Client();
+
+        await Invoke(client)();
+        BridgeCallException ex = await Assert.ThrowsAsync<BridgeCallException>(Invoke(client, "page.list"));
+
+        Assert.Equal(ErrorReason.BridgeIncompatible, ex.Error.Reason);
+        Assert.Equal("page.list", ex.Error.Metadata!["operation"]);
+        Assert.Contains("install-addin", ex.Error.Message, StringComparison.Ordinal);
+        FakeChannel channel = Assert.Single(_connector.Opened);
+        Assert.Equal([BridgeProtocol.HandshakeMethod, BridgeProtocol.InvokeMethod], channel.Methods);
+        Assert.False(channel.Disposed);
+    }
+
+    [Fact]
+    public async Task AddInAnnouncingItsOperations_IsAskedOnlyForThose()
+    {
+        _discovery.Endpoints.Add(_eplanA);
+        _connector = new FakeConnector(e => new FakeChannel(e) { Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(100, operations: ["page.list"])) });
+        await using BridgeClient client = Client();
+
+        BridgeCallException ex = await Assert.ThrowsAsync<BridgeCallException>(Invoke(client));
+        await Invoke(client, "page.list")();
+
+        Assert.Equal(ErrorReason.BridgeIncompatible, ex.Error.Reason);
+        Assert.Equal([BridgeProtocol.HandshakeMethod, BridgeProtocol.InvokeMethod], _connector.Opened[0].Methods);
+    }
+
     [Theory]
     [MemberData(nameof(ConnectFailures))]
     public async Task ConnectFails_IsNotConnected(Exception failure)
@@ -238,6 +269,6 @@ public sealed class BridgeClientTests
     private BridgeClient Client(TimeSpan? queueTimeout = null, TimeSpan? callTimeout = null) =>
         new(_discovery, _connector, NullLogger<BridgeClient>.Instance, queueTimeout ?? TimeSpan.FromSeconds(5), callTimeout ?? TimeSpan.FromSeconds(5));
 
-    private static Func<Task> Invoke(BridgeClient client) =>
-        () => client.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new ProjectListArgs(), Token);
+    private static Func<Task> Invoke(BridgeClient client, string operation = OperationNames.ProjectList) =>
+        () => client.InvokeAsync<ProjectListArgs, ProjectListData>(operation, new ProjectListArgs(), Token);
 }

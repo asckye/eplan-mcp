@@ -62,7 +62,12 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         return RunExclusiveAsync(
             async token =>
             {
-                await EnsureConnectedAsync(Discover(), token).ConfigureAwait(false);
+                HandshakeResult handshake = await EnsureConnectedAsync(Discover(), token).ConfigureAwait(false);
+                if (!Supports(handshake, operation))
+                {
+                    throw new BridgeCallException(BridgeErrors.OperationMissing(operation, handshake.BridgeVersion));
+                }
+
                 var parameters = new JsonObject
                 {
                     ["operation"] = operation,
@@ -119,6 +124,12 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             _queue.Release();
         }
     }
+
+    /// <summary>M1 add-ins announce no operations and support project.list only (<see cref="HandshakeResult.Operations"/>).</summary>
+    internal static bool Supports(HandshakeResult handshake, string operation) =>
+        handshake.Operations is { } operations
+            ? operations.Contains(operation, StringComparer.Ordinal)
+            : operation == OperationNames.ProjectList;
 
     private async Task<HandshakeResult> EnsureConnectedAsync(IReadOnlyList<BridgeEndpoint> instances, CancellationToken cancellationToken)
     {

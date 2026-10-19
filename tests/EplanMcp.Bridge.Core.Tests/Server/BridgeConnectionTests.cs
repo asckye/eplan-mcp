@@ -26,6 +26,14 @@ public sealed class BridgeConnectionTests
         Assert.Equal(4242, (int)response["result"]!["eplan"]!["processId"]!);
     }
 
+    [Fact]
+    public void Handshake_AnnouncesTheRegisteredOperationsSorted()
+    {
+        JObject response = Send(Connection(new DelegateOperation("device.list", () => null), new DelegateOperation("a.first", () => null)), Handshake)!;
+
+        Assert.Equal(["a.first", "device.list", OperationNames.ProjectList], response["result"]!["operations"]!.Values<string>());
+    }
+
     [Theory]
     [InlineData(2, 3)]
     [InlineData(0, 0)]

@@ -29,6 +29,9 @@ public sealed class OperationRouter
         _startTimeout = startTimeout;
     }
 
+    /// <summary>The names of the registered operations, sorted; announced in the handshake.</summary>
+    public IReadOnlyList<string> SupportedOperations => [.. _operations.Keys.OrderBy(name => name, StringComparer.Ordinal)];
+
     public JToken Invoke(string operationName, JToken? args, string correlationId)
     {
         if (!_operations.TryGetValue(operationName, out IOperation? operation))

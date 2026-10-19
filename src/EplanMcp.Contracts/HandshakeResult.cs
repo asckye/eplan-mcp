@@ -11,4 +11,11 @@ public sealed class HandshakeResult
 
     /// <summary>The EPLAN instance hosting the Bridge.</summary>
     public EplanInstanceInfo Eplan { get; set; } = new();
+
+    /// <summary>
+    /// The operations this Bridge supports (<see cref="OperationNames"/>), so the Host can tell an outdated add-in
+    /// from a defect. Added in M2 without a protocol version change; null from M1 add-ins, which support
+    /// <see cref="OperationNames.ProjectList"/> only.
+    /// </summary>
+    public List<string>? Operations { get; set; }
 }
