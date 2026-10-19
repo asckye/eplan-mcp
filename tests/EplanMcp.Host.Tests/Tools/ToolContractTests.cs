@@ -13,6 +13,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// them. The full contract is snapshotted in <see cref="ToolContractSnapshotTests"/>.
 /// </summary>
 [Trait("Size", "Small")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ToolContractTests : IDisposable
 {
     private readonly ServiceProvider _services;
