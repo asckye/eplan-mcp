@@ -31,13 +31,16 @@ public sealed class DoctorTests
     }
 
     [Fact]
-    public async Task Bridge_NoInstance_IsAFailureThatMentionsRestartingEplan()
+    public async Task Bridge_NoInstance_IsAFailureThatPointsAtThePerVariantRegistration()
     {
         IReadOnlyList<DoctorCheck> checks = await DoctorChecks.BridgeAsync(new FakeBridgeClient(), TestContext.Current.CancellationToken);
 
         DoctorCheck check = Assert.Single(checks);
         Assert.Equal(DoctorStatus.Failure, check.Status);
-        Assert.Contains("restart EPLAN", check.English, StringComparison.Ordinal);
+        Assert.Contains("variant", check.English, StringComparison.Ordinal);
+        Assert.Contains("变体", check.Chinese, StringComparison.Ordinal);
+        // Registering loads the add-in at once (api-notes A10); only a rebuilt add-in needs a restart (A8).
+        Assert.DoesNotContain("restart", check.English, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
