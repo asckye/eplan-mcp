@@ -17,6 +17,7 @@
 | 锁文件 | `RestorePackagesWithLockFile` | 还原结果可重现；CI 以锁定模式还原 |
 | x64 | `PlatformTarget=x64` | EPLAN 是 64 位进程 |
 | 输出路径不含平台名 | `AppendPlatformToOutputPath=false` | 解决方案构建（x64）和单项目构建（AnyCPU）的产物相同，共用 `bin\<配置>\` 才不会有两份互不更新的输出 |
+| 禁用的 EPLAN 成员 | `BannedApiAnalyzers` + `src/EplanMcp.Bridge.Eplan/BannedSymbols.txt`（RS0030） | 看起来是读、实际会写的成员（如 `Article.LoadFromMasterdata`、运行检查），以及没有超时的调度和占用授权的调用。用到就编译失败；M3 的写适配层确实需要时，就地抑制并写明原因（M2 设计第 5 节） |
 
 ---
 

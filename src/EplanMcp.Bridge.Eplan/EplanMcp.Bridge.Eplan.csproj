@@ -15,6 +15,9 @@
     <ProjectReference Include="..\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <!-- Compile-time only; EPLAN's own Newtonsoft.Json 13 is used at run time (coding standards 9.7). -->
     <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
+    <!-- Rejects EPLAN members that write while looking like reads (BannedSymbols.txt, RS0030 is an error). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="BannedSymbols.txt" />
   </ItemGroup>
 
   <!-- EPLAN assemblies come from the local installation and are never copied or shipped (Private=false). -->
@@ -29,6 +32,11 @@
     </Reference>
     <Reference Include="Eplan.EplApi.DataModelu">
       <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Project messages (check results) for the M2 read tools; their writing members are banned. -->
+    <Reference Include="Eplan.EplApi.EServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.EServicesu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.HEServicesu">
