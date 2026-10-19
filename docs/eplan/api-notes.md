@@ -78,6 +78,30 @@
 - 不带 MSIX 包身份的进程中运行的 Host（`doctor` 报告"当前进程没有 MSIX 包身份"），可以通过 `PipeOptions.CurrentUserOnly` 连上 EPLAN 中插件的管道。— `eplanmcp doctor` 8 项检查全部通过。
   - 待验证：由 MSIX 包内进程（Claude 桌面版）启动的 Host 能否连上（S5）。
 
+### A11. 只读 API 的实机验证（spike S6，2026-10-19，Electric P8，在 action 中）
+示例项目的 scratch 副本：321 页、2876 个功能、2060 个连接、2900 个部件引用。详细数据见 [spike S6](../../spikes/S6-read-api/README.md)。
+- **性能**：查找和读取都在 100 ms 以内。`GetFunctions(null)` 第一次 64 ms、第二次 14 ms；读取全部功能的名称 18 ms；`GetConnections(null)` 30 ms；`GetArticleReferences(null)` 36 ms；单个功能的全部 1000 个属性 4 ms。— S6。
+  - 对本项目的影响：Bridge 可以一次取出全部对象，再在内存中过滤和分页。
+- **名称**：
+  - `Page.Name` = `IdentifyingName` = `PAGE_FULLNAME`，形如 `=GAA+A1&EFS1/1`；`PAGE_NAME` 只是页号。
+  - `Function.Name` = `FUNC_IDENTNAME` = `FUNC_IDENTDEVICETAG`，是带结构的完整标识，如 `=GAA+A1-FC1`；辅助功能带连接点后缀，如 `+A1-FC2:1`。
+  - `VisibleName` 是页面上显示的标识（`-FC1`）：可能为空，可能带 `>` 标记，也可能等于完整标识。
+  - 同一个短标识可以出现在多个结构下。
+  - `FunctionsFilter.Name` 和 `PagesFilter.Name` 对完整标识做前缀匹配，**区分大小写**，不匹配 `VisibleName`。
+  - — S6。
+- **多语言**：多语言属性的原始格式是 `de_DE@…;zh_CN@…;`，**`ToString()` 返回整个原始串**。语言无关的值是 `??_??@值;`，`GetString(语言)` 返回空串。两种情况都应该用 `GetStringToDisplay(语言)`。数值按区域格式返回（`1,5`）。带索引的属性不带索引读取时抛出 `IndexedPropertyException`。— S6。
+- **连接**：
+  - `Connection3D` 的 `StartPin` / `EndPin` 抛出 `NotSupportedException`，`Page` 为 null。
+  - 已过时的 `ConnectionsFilter.Page` 漏掉了连接（35 个，实际 40 个），按页列出应在内存中按 `Connection.Page` 过滤。
+  - — S6。
+- **读取的副作用**：只读探针前后，项目的设计数据文件没有变化。但**任何一次 action（哪怕只获取项目、不读任何对象）都会改写项目的 `User.eod` / `User.eox`**；打开项目后空闲时不会改写。调度器（action 之外）中是否也会改写，尚未验证。— S6，对比项目文件的大小和修改时间。
+- **运行检查是写操作**：`Check.VerifyProject` 在示例项目上用时 3.9 秒，检查消息从 0 条变为 20 条，并改写了项目的 `Message`、`Project`、`Blob` 数据文件。读取已有的检查消息用 `PrjMessagesCollection`，元素类型是 `ProjectMessage`。— S6。
+- 🔴 **系统消息集合不能交叉使用**：创建 `SysMessagesCollection` A 之后又创建集合 B，再读取 A 中消息的文本（`GetMessageText`），EPLAN 报"硬件错误：存储器访问受阻"（原生访问冲突，托管代码捕获不到），整个 action 失败；在 action 中 EPLAN 没有崩溃。只用一个集合时，读取全部 490 条消息都正常；先捕获 EPLAN 异常再读取也正常。— S6 r2、r3 中触发，r7 稳定复现。
+  - 对本项目的影响：同一时间只使用一个集合，读出后立即复制到 DTO（编码规范 9.5 第 15 条）。
+- `SysMessagesCollection()` 包含整个 EPLAN 会话的消息，其中有 Trace 级别的消息，以及一条级别为 7 的"有新版本"提示（7 不在 `MessageLevel` 枚举中）。— S6。
+- **`ProjectOpen` 不一定改变当前项目**：已有一个项目打开时，用 `ProjectOpen` 再打开一个，`SelectionSet.GetCurrentProject` 返回的仍是原来的项目；`XPrjActionProjectClose` 关闭的也是原来的项目。— S6 第一次运行（驱动脚本因此关闭了工程师自己的项目，没有读取或修改它）。
+  - 对本项目的影响：不依赖"当前项目"，按名称或路径找项目（编码规范 9.5 第 14a 条）。
+
 ### A8. 插件程序集的生命周期
 - **插件程序集一旦被 EPLAN 加载，在 EPLAN 进程退出之前无法卸载。** 注销之后再注册同名的新版本，执行的仍然是内存中的旧代码，不会报错。— spike S2（第一次重新构建后，新探针没有执行）。
   - 对开发流程的影响：重新编译 Bridge 后，必须重启 EPLAN；spike 中可以改用新的程序集名（`-p:AssemblyName=…r2`）。
