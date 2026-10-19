@@ -14,12 +14,11 @@ public sealed class CheckListOperation(IProjectCatalog catalog, IProjectMessageR
     protected override CheckListData Execute(CheckListArgs args)
     {
         string? severity = null;
-        if (!string.IsNullOrWhiteSpace(args.Severity))
+        if (Given(args.Severity) is { } wanted)
         {
-            string wanted = args.Severity!.Trim();
             severity = new[] { CheckMessage.Error, CheckMessage.Warning, CheckMessage.Hint }
                 .FirstOrDefault(s => string.Equals(s, wanted, StringComparison.OrdinalIgnoreCase))
-                ?? throw Invalid("'severity' must be error, warning or hint; omit it for every severity.");
+                ?? throw InvalidArgument("'severity' must be error, warning or hint; omit it for every severity.");
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
@@ -57,10 +56,4 @@ public sealed class CheckListOperation(IProjectCatalog catalog, IProjectMessageR
         Done = record.Done,
         Target = record.ObjectKind is null ? null : new CheckObject { Kind = record.ObjectKind, Name = record.ObjectName },
     };
-
-    private static BridgeErrorException Invalid(string violation) => new(
-        ErrorReason.InvalidArgument,
-        "Invalid arguments: " + violation,
-        retryable: false,
-        new Dictionary<string, string> { ["violations"] = violation });
 }

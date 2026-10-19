@@ -47,11 +47,7 @@ public sealed class PageListOperation(IProjectCatalog catalog, IPageReader reade
 
         string violation = $"'page_type' must be an EPLAN page type such as {string.Join(", ", CommonPageTypes)}; " +
             "eplan_tool_usage for eplan_page_list (topic 'fields') lists all of them.";
-        throw new BridgeErrorException(
-            ErrorReason.InvalidArgument,
-            "Invalid arguments: " + violation,
-            retryable: false,
-            new Dictionary<string, string> { ["violations"] = violation });
+        throw InvalidArgument(violation);
     }
 
     private static string? Optional(string? value) => string.IsNullOrEmpty(value) ? null : value;

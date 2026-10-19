@@ -45,4 +45,14 @@ public abstract class Operation<TArgs, TData> : IOperation
 
     /// <summary>A blank argument is no argument; models sometimes pass "" for one they mean to omit.</summary>
     protected static string? Given(string? value) => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
+
+    /// <summary>
+    /// INVALID_ARGUMENT for one argument problem, in the shape the Host's ToolResults.InvalidArguments gives: the
+    /// message and <c>metadata.violations</c> carry the same text.
+    /// </summary>
+    protected static BridgeErrorException InvalidArgument(string violation) => new(
+        ErrorReason.InvalidArgument,
+        "Invalid arguments: " + violation,
+        retryable: false,
+        new Dictionary<string, string> { ["violations"] = violation });
 }
