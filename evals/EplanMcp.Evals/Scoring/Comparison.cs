@@ -74,6 +74,19 @@ internal static class Comparison
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
     };
 
+    /// <summary>
+    /// Why <paramref name="kind"/> cannot compare with <paramref name="expected"/>, or null when it can: checked for the
+    /// literals of a task file when it is loaded, and for oracle values when they are known.
+    /// </summary>
+    public static string? ExpectedProblem(ComparisonKind kind, JsonNode? expected) => kind switch
+    {
+        ComparisonKind.AtLeast or ComparisonKind.AtMost when Number(expected) is null => "compares with a number",
+        ComparisonKind.EqualIgnoringCase when Text(expected) is null => "compares with a string",
+        ComparisonKind.SetEqual when expected is not JsonArray => "compares with a list",
+        ComparisonKind.Contains when expected is JsonArray { Count: 0 } => "needs something to look for, not an empty list",
+        _ => null,
+    };
+
     /// <summary>The value of a JSON number; null for anything else and for numbers out of the decimal range.</summary>
     public static decimal? Number(JsonNode? node) =>
         node is JsonValue value && value.GetValueKind() == JsonValueKind.Number
