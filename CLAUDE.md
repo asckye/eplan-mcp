@@ -39,12 +39,11 @@ dotnet build EplanMcp.Ci.slnf                   # 不含插件，与 CI 相同
 dotnet test --solution EplanMcp.Ci.slnf -- --filter-not-trait "Size=Large"   # Small + Medium
 dotnet test --project tests\EplanMcp.Host.Tests -- --filter-trait "Size=Small"
 dotnet format EplanMcp.Ci.slnf --verify-no-changes
-dotnet run --project src\EplanMcp.Host -- doctor   # 自检：先构建再运行，不会用到旧的 exe
-dotnet build src\EplanMcp.Bridge.Eplan -c Release  # 注册脚本只认这份插件输出（bin\Release\net481）
+dotnet run --project src\EplanMcp.Host -- doctor   # 自检；serve（默认）是 stdio MCP 服务器
+dotnet build src\EplanMcp.Bridge.Eplan -c Release  # 注册脚本默认用 Release 版插件（可用 -Configuration 改）
 eng\scripts\eplan-addin.ps1 -Action register    # 开发用：注册插件，立即加载；每个用到的变体各注册一次（-Variant 'Electric P8'）；改了插件要重新跑上一行，再重启 EPLAN
 ```
-- 输出目录：解决方案构建（`.slnx` / `.slnf`）映射了 x64 平台，输出在 `bin\x64\<配置>\`；单独构建一个项目（包括 `dotnet run --project`、`dotnet test --project`）输出在 `bin\<配置>\`。两处互不更新，所以不要直接运行 `bin\` 下的 exe。`dotnet test --project` 要配 `--no-build` 复用解决方案构建的结果时，加 `-p:Platform=x64`，否则找不到测试程序。
-- serve（默认）是 stdio MCP 服务器。给 MCP 客户端配置时，先 `dotnet build EplanMcp.slnx`，再指向 `src\EplanMcp.Host\bin\x64\Debug\net10.0\eplanmcp.exe`。
+- 输出目录：解决方案构建和单项目构建（包括 `dotnet run --project`、`dotnet test --project`）共用 `bin\<配置>\<目标框架>\`，所以 `dotnet test --project ... --no-build` 可以直接用解决方案构建的结果。给 MCP 客户端配置时指向 `src\EplanMcp.Host\bin\<配置>\net10.0\eplanmcp.exe`。
 - 测试运行在 Microsoft.Testing.Platform 上（`global.json` 中选定），`--` 之后是 xUnit 的参数。
 - Host 发现插件时只认 `EplanMcp.Bridge.` 前缀的管道；测试用环境变量 `EPLANMCP_PIPE_PREFIX` 换成自己的前缀，避免和正在运行的 EPLAN 冲突。
 - 插件日志：`%USERPROFILE%\EplanMcp\logs\bridge-*.log`；插件启动失败时看 `bridge-startup-error.log`。
