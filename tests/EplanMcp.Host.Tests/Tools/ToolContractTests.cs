@@ -35,13 +35,36 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void ToolNames_AreTheImplementedSet()
     {
-        Assert.Equal([ProjectTools.ListTool, SessionTools.StatusTool, UsageTools.UsageTool], Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(
+            [ProjectTools.GetTool, ProjectTools.ListTool, SessionTools.StatusTool, UsageTools.UsageTool],
+            Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
     [Fact]
     public void EveryTool_FollowsTheNamingRule()
     {
         Assert.All(Tools, t => Assert.Matches("^eplan_[a-z]+_[a-z]+$", t.Name));
+    }
+
+    [Fact]
+    public void EveryArgumentName_IsSnakeCase()
+    {
+        // mcp-tool-design 5: response_format, name_prefix; the C# parameter names become the schema names as they are.
+        Assert.All(Tools, t => Assert.All(
+            t.InputSchema.GetProperty("properties").EnumerateObject(),
+            p => Assert.Matches("^[a-z]+(_[a-z]+)*$", p.Name)));
+    }
+
+    [Fact]
+    public void ResponseFormat_IsAnEnumDefaultingToConcise()
+    {
+        Assert.All(Tools.Where(t => t.InputSchema.GetProperty("properties").TryGetProperty("response_format", out _)), t =>
+        {
+            JsonElement format = t.InputSchema.GetProperty("properties").GetProperty("response_format");
+            Assert.Equal([ToolArguments.Concise, ToolArguments.Detailed], Enum(format));
+            Assert.Equal(ToolArguments.Concise, format.GetProperty("default").GetString());
+        });
+        Assert.Contains(Tools, t => t.Name == ProjectTools.GetTool && t.InputSchema.GetProperty("properties").TryGetProperty("response_format", out _));
     }
 
     [Fact]

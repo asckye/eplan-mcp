@@ -49,7 +49,9 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     {
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(["eplan_project_list", "eplan_session_status", "eplan_tool_usage"], tools.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(
+            ["eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
 
@@ -94,6 +96,21 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_ProjectGetReturnsTheOverview()
+    {
+        StartBridge();
+
+        CallToolResult result = await Call("eplan_project_get", new() { ["response_format"] = "detailed", ["language"] = "zh_CN" });
+
+        JsonElement data = result.StructuredContent!.Value;
+        Assert.Equal("Line1", data.GetProperty("project").GetProperty("name").GetString());
+        Assert.Equal(2, data.GetProperty("counts").GetProperty("pages").GetInt32());
+        Assert.Equal("Circuit", data.GetProperty("pagesByType")[0].GetProperty("type").GetString());
+        Assert.Equal("项目 一", data.GetProperty("properties")[0].GetProperty("value").GetString());
+        Assert.Equal("Project has 2 pages, 1 device, 0 connections.", Text(result));
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -117,7 +134,13 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
 
     private void StartBridge()
     {
-        var router = new OperationRouter([new ProjectListOperation(new Catalog())], new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
+        var catalog = new Catalog();
+        IOperation[] operations =
+        [
+            new ProjectListOperation(catalog),
+            new ProjectGetOperation(catalog, new ProjectReader()),
+        ];
+        var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
             _prefix + Environment.ProcessId + ".00000000000000e2",
             name => new NamedPipeServerStream(name, PipeDirection.InOut, 4, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly),
@@ -135,6 +158,16 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     private sealed class Catalog : IProjectCatalog
     {
         public IReadOnlyList<OpenProject> ListOpenProjects() => [new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true }];
+    }
+
+    private sealed class ProjectReader : IProjectReader
+    {
+        public ProjectContent Read(string projectPath, bool includeProperties, string? language) => new()
+        {
+            PageTypes = ["Circuit", "TitlePage"],
+            Devices = 1,
+            Properties = includeProperties && language == "zh_CN" ? [new PropertyEntry { Id = 10000, Value = "项目 一" }] : null,
+        };
     }
 
     private sealed class InlineDispatcher : IMainThreadDispatcher

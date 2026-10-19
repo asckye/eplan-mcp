@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -35,6 +36,10 @@ internal static class ToolResults
             Content = [new TextContentBlock { Text = body.ToJsonString(HostJson.Options) }],
         };
     }
+
+    /// <summary>"1 page", "2 pages": for summary lines, which carry counts only (architecture 8.5).</summary>
+    public static string Count(int count, string noun) =>
+        count.ToString(CultureInfo.InvariantCulture) + " " + noun + (count == 1 ? string.Empty : "s");
 
     /// <summary>Argument problems, all at once (mcp-tool-design 6.2), as INVALID_ARGUMENT.</summary>
     public static CallToolResult InvalidArguments(IReadOnlyList<string> violations) => Error(new BridgeError

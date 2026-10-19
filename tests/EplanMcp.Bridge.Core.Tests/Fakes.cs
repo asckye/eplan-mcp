@@ -44,6 +44,20 @@ internal sealed class FakeCatalog(params OpenProject[] projects) : IProjectCatal
     public IReadOnlyList<OpenProject> ListOpenProjects() => projects;
 }
 
+/// <summary>Returns <see cref="Content"/> and records what the operation asked for.</summary>
+internal sealed class FakeProjectReader : IProjectReader
+{
+    public ProjectContent Content { get; set; } = new();
+
+    public List<(string Path, bool IncludeProperties, string? Language)> Calls { get; } = [];
+
+    public ProjectContent Read(string projectPath, bool includeProperties, string? language)
+    {
+        Calls.Add((projectPath, includeProperties, language));
+        return Content;
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {

@@ -8,4 +8,7 @@ public static class OperationNames
 {
     /// <summary>Lists the projects open in EPLAN. Arguments: <see cref="ProjectListArgs"/>; data: <see cref="ProjectListData"/>.</summary>
     public const string ProjectList = "project.list";
+
+    /// <summary>Overview of one project: counts, pages per type, optionally its properties. Arguments: <see cref="ProjectGetArgs"/>; data: <see cref="ProjectGetData"/>.</summary>
+    public const string ProjectGet = "project.get";
 }

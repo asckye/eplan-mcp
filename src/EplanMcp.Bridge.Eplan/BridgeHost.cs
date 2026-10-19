@@ -39,7 +39,13 @@ internal static class BridgeHost
         log.Write(BridgeLogLevel.Information, $"EPLAN {eplan.Version}, variant {eplan.Variant ?? "unknown"}, API extension licence {eplan.ApiExtensionLicence?.ToString() ?? "unknown"}");
 
         var options = new BridgeServerOptions { BridgeVersion = version, Eplan = eplan };
-        var router = new OperationRouter([new ProjectListOperation(new EplanProjectCatalog())], dispatcher, new EplanExceptionMapper(), log, _startTimeout);
+        var catalog = new EplanProjectCatalog();
+        IOperation[] operations =
+        [
+            new ProjectListOperation(catalog),
+            new ProjectGetOperation(catalog, new EplanProjectReader()),
+        ];
+        var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
         _server = new BridgeServer(BridgeServer.CreatePipeName(eplan.ProcessId), pipes.Create, options, router, log);
         _server.Start();
