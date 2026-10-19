@@ -55,7 +55,7 @@
 - 实现（`EplanProjectMessageReader` → `CheckListOperation`）：适配层按路径找到项目，`new PrjMessagesCollection(project)` 后一次 `foreach`，只处理 `ProjectMessage` 元素（S6 中元素全是这种类型；`BaseProjectMessage` 按文档不存储在项目中），复制 `GetId`、`GetCategory`、`GetGroup`、`GetText`、`GetDone` 和 `GetObject1()` 的类型名与名称。集合不是 `IDisposable`，枚举器由 `foreach` 释放；消息和关联对象属于 EPLAN，不释放。已处理消息的排除、`counts`、`severity` 过滤（不区分大小写）和切片在 Bridge.Core 中完成，保持 EPLAN 的顺序。
 - 游标指纹包含 `project`、`severity` 和 `include_done`。
 - M2 设计 4.1 的工具表中列有 `page` 参数，本规格没有，也没有实现：消息不一定关联到页，按页筛选需要先取关联对象所在的页（文档说明要先取对象再查），留到有任务需要时再做。
-- **未验证、需在 Large 测试中确认**：在 Bridge 调度器中（不在 action 中）构造和枚举 `PrjMessagesCollection` 不写入项目（对比项目文件的修改时间）；`GetObject1()` 实际返回哪些类型，关联对象已被删除时是返回 `null` 还是抛出异常（目前不捕获，抛出时整个调用失败）；GUI 中运行的检查结果在重新打开项目后仍能读到。
+- **未验证、需在 Large 测试中确认**：在 Bridge 调度器中（不在 action 中）构造和枚举 `PrjMessagesCollection` 不写入项目（对比项目文件的修改时间）；`GetObject1()` 实际返回哪些类型，关联对象已被删除时是返回 `null` 还是抛出异常（适配层捕获 DataModel 的异常家族，这条消息的 `object` 为 `null`，其余消息照常列出）；GUI 中运行的检查结果在重新打开项目后仍能读到。
 
 ## 6. 写操作专项
 不适用。
