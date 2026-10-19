@@ -16,7 +16,7 @@ Every property of the main function, texts in English, in another open project:
 
 1. Get the full tag first: from eplan_device_list (`tag_contains`, `page`, `category`), or from the engineer. A full tag is unique; a shown tag such as -K1 can exist in several structures.
 2. Call this tool with that tag. For "which part does -KF1 use and on which pages are its contacts", read `parts` and the `page` of each entry in `functions`.
-3. On AMBIGUOUS_NAME, pick the full tag that matches the structure the engineer means from `metadata.candidates`, or ask the engineer, then call again.
+3. On AMBIGUOUS_NAME, pick the full tag that matches the structure the engineer means from `metadata.candidates`, or ask the engineer, then call again. When the question is about all of them (where they are, how many), call eplan_device_list with `tag_contains` once instead of eplan_device_get per candidate.
 4. Use `response_format: "detailed"` only for a property the concise result lacks; it can be large.
 
 ## Fields

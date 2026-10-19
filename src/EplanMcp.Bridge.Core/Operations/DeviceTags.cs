@@ -69,7 +69,10 @@ public static class DeviceTags
                 "device",
                 tag,
                 matches,
-                $"Several devices in different structures show this tag; pass the full tag of one of the candidates as '{argument}'."),
+                // The first eval run (dev set) saw the model call device_get once per candidate, 14 calls where one
+                // eplan_device_list call gives every tag with its page.
+                $"Several devices in different structures show this tag; pass the full tag of one of the candidates as '{argument}'. "
+                + "To see all of them with their pages in one call, use eplan_device_list with tag_contains."),
         };
     }
 }
