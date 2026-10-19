@@ -16,4 +16,14 @@ public interface IDeviceReader
     /// <paramref name="category"/>. Null when the project has no page of that name.
     /// </summary>
     public IReadOnlyList<FunctionRecord>? ReadFunctions(string projectPath, string? page, string? category);
+
+    /// <summary>The names of every main function of the project, in EPLAN's order; cheaper than <see cref="ReadFunctions"/>.</summary>
+    public IReadOnlyList<FunctionName> ReadMainFunctionNames(string projectPath);
+
+    /// <summary>
+    /// The device whose main function's full tag is exactly <paramref name="tag"/> (ordinal), the first one in EPLAN's
+    /// order if a project repeats a tag; null when there is none. Texts are read in <paramref name="language"/> (null:
+    /// EPLAN's user interface language), which is checked first: an unknown one throws INVALID_ARGUMENT.
+    /// </summary>
+    public DeviceRecord? ReadDevice(string projectPath, string tag, string? language, bool withProperties);
 }

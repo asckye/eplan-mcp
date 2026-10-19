@@ -1,6 +1,8 @@
+using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
@@ -50,6 +52,85 @@ internal sealed class EplanDeviceReader : IDeviceReader
                 Category = f.FunctionCategory.ToString(),
                 Page = f.Page?.Name,
                 Parts = f.ArticleReferences.Length,
+            }),
+        ];
+    }
+
+    public IReadOnlyList<FunctionName> ReadMainFunctionNames(string projectPath)
+    {
+        MainThread.Assert();
+        Project project = EplanProjects.ByPath(projectPath);
+        using var finder = new DMObjectsFinder(project);
+        return
+        [
+            .. finder.GetFunctions(null)
+                .Where(f => f.IsMainFunction)
+                .Select(f => new FunctionName { Name = f.Name ?? string.Empty, VisibleName = f.VisibleName ?? string.Empty }),
+        ];
+    }
+
+    public DeviceRecord? ReadDevice(string projectPath, string tag, string? language, bool withProperties)
+    {
+        MainThread.Assert();
+        ISOCode.Language textLanguage = EplanText.Language(language);
+        Project project = EplanProjects.ByPath(projectPath);
+        using var finder = new DMObjectsFinder(project);
+        using var filter = new FunctionsFilter();
+        filter.Name = tag;
+        filter.ExactNameMatching = true;
+
+        // The name filter finds a function by its full tag (S6); the ordinal check keeps the match case-sensitive like
+        // EPLAN's prefix matching (api-notes A11). Auxiliary functions share the tag, so only the main one counts.
+        Function? main = finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal));
+        if (main is null)
+        {
+            return null;
+        }
+
+        ArticleReference[] references = main.ArticleReferences;
+        return new DeviceRecord
+        {
+            Main = Detail(main, textLanguage, withText: true),
+            Auxiliary = [.. main.SubFunctions.Select(f => Detail(f, textLanguage, withText: false))],
+            Parts = references.Length == 0 ? [] : Parts(project, references, textLanguage),
+            Properties = withProperties ? EplanProperties.Read(main.Properties, textLanguage) : null,
+        };
+    }
+
+    private static FunctionDetail Detail(Function function, ISOCode.Language language, bool withText) => new()
+    {
+        Name = function.Name ?? string.Empty,
+        VisibleName = function.VisibleName ?? string.Empty,
+        Category = function.FunctionCategory.ToString(),
+        Page = function.Page?.Name,
+        Text = withText ? EplanText.Read(function.Properties.FUNC_TEXT, language) : null,
+        Pins = [.. function.Pins.Select(pin => pin.Name ?? string.Empty)],
+    };
+
+    /// <summary>
+    /// Part data from the references only: indexed properties such as FUNC_ARTICLE_PARTNR throw when read without an
+    /// index (S6). Descriptions come from the project's own parts (Project.Articles, 293 read in 10 ms in S6), never
+    /// from the parts database: Article.LoadFromMasterdata would write into the project (BannedSymbols.txt).
+    /// </summary>
+    private static List<DevicePart> Parts(Project project, ArticleReference[] references, ISOCode.Language language)
+    {
+        ILookup<string, Article> articles = project.Articles.ToLookup(a => a.PartNr ?? string.Empty, StringComparer.Ordinal);
+        return
+        [
+            .. references.Select(reference =>
+            {
+                string partNumber = reference.PartNr ?? string.Empty;
+                string variant = reference.VariantNr ?? string.Empty;
+                Article? article = articles[partNumber].FirstOrDefault(a => string.Equals(a.VariantNr, variant, StringComparison.Ordinal))
+                    ?? articles[partNumber].FirstOrDefault();
+                return new DevicePart
+                {
+                    PartNumber = partNumber,
+                    Variant = variant.Length == 0 ? null : variant,
+                    Count = reference.Count,
+                    Description = article is null ? null : EplanText.Read(article.Properties.ARTICLE_DESCR1, language),
+                    Manufacturer = article is null ? null : EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, language),
+                };
             }),
         ];
     }

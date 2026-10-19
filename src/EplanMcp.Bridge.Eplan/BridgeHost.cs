@@ -49,6 +49,7 @@ internal static class BridgeHost
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),
+            new DeviceGetOperation(catalog, devices),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

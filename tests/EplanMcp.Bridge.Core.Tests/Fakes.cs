@@ -111,7 +111,28 @@ internal sealed class FakeDeviceReader : IDeviceReader
 
     public List<FunctionRecord> Functions { get; } = [];
 
+    /// <summary>What <see cref="ReadDevice"/> returns, by the main function's full tag (ordinal).</summary>
+    public Dictionary<string, DeviceRecord> Devices { get; } = new(StringComparer.Ordinal);
+
     public List<(string Path, string? Page, string? Category)> Reads { get; } = [];
+
+    public List<(string Path, string Tag, string? Language, bool WithProperties)> DeviceReads { get; } = [];
+
+    public int NameReads { get; private set; }
+
+    public IReadOnlyList<FunctionName> ReadMainFunctionNames(string projectPath)
+    {
+        NameReads++;
+        return [.. Functions.Where(f => f.IsMain).Select(f => new FunctionName { Name = f.Name, VisibleName = f.VisibleName })];
+    }
+
+    public DeviceRecord? ReadDevice(string projectPath, string tag, string? language, bool withProperties)
+    {
+        DeviceReads.Add((projectPath, tag, language, withProperties));
+        return language == "xx_XX"
+            ? throw new BridgeErrorException(ErrorReason.InvalidArgument, "'language' is not a language EPLAN knows.")
+            : Devices.GetValueOrDefault(tag);
+    }
 
     public bool IsCategory(string category) => _categories.Contains(category, StringComparer.OrdinalIgnoreCase);
 

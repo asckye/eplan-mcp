@@ -19,4 +19,31 @@ public static class DeviceTags
     public static bool Contains(string name, string? visibleName, string text) =>
         name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0
         || (Shown(visibleName)?.IndexOf(text, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
+
+    /// <summary>
+    /// The full tag of the one main function whose shown tag is <paramref name="tag"/>, both without '&gt;' markers and
+    /// ignoring case; null when none matches. Several devices sharing the shown tag in different structures are
+    /// AMBIGUOUS_NAME with their full tags as candidates, so the model can pick one (M2 design 4.2).
+    /// </summary>
+    public static string? FindByShownTag(IEnumerable<FunctionName> mainFunctions, string tag)
+    {
+        string? wanted = Shown(tag);
+        string[] matches =
+        [
+            .. mainFunctions
+                .Where(f => f.Name.Length > 0 && wanted is not null && string.Equals(Shown(f.VisibleName), wanted, StringComparison.OrdinalIgnoreCase))
+                .Select(f => f.Name)
+                .Distinct(StringComparer.Ordinal),
+        ];
+        return matches.Length switch
+        {
+            0 => null,
+            1 => matches[0],
+            _ => throw ProjectResolver.Ambiguous(
+                "device",
+                tag,
+                matches,
+                "Several devices in different structures show this tag; pass the full tag of one of the candidates as 'tag'."),
+        };
+    }
 }

@@ -104,6 +104,18 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 2876,
         },
+        new DeviceGetArgs { Project = @"D:\Projects\Line1", Tag = "-KF1", Language = "zh_CN", Detailed = true },
+        new DeviceGetArgs(),
+        new DeviceGetData
+        {
+            Project = "Line1",
+            Device = new DeviceFunction { Tag = "=F+A2-KF1", VisibleTag = "-KF1", Category = "Coil", Page = "=F+A2&EFS1/1", Text = "功能文本", Pins = ["A1", "A2"] },
+            Functions = [new DeviceFunction { Tag = "=F+A2-KF1", Category = "NoContact", Pins = ["13", "14"] }],
+            FunctionCount = 3,
+            Parts = [new DevicePart { PartNumber = "SIE.3RT2016-1BB41", Variant = "1", Count = 2, Description = "接触器", Manufacturer = "SIE" }, new DevicePart()],
+            Properties = [new PropertyEntry { Id = 20011, Name = "Function text", Value = "1,5" }, new PropertyEntry { Name = "UserProp", Value = "x" }],
+        },
+        new DeviceGetData(),
     ];
 
     [Theory]
