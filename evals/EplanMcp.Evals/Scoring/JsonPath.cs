@@ -25,7 +25,8 @@ internal sealed partial class JsonPath
     /// <summary>The field the path starts with, or null for <c>$</c> and paths that start with an index.</summary>
     public string? FirstField => _segments is [{ Field: { } name }, ..] ? name : null;
 
-    private bool HasWildcard => _segments.Any(s => s is { Field: null, Index: null });
+    /// <summary>True when the path selects an array of every match rather than one value.</summary>
+    public bool HasWildcard => _segments.Any(s => s is { Field: null, Index: null });
 
     public static bool TryParse(string text, [NotNullWhen(true)] out JsonPath? path)
     {
