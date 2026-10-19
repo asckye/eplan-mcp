@@ -18,6 +18,13 @@
     -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+  <ItemGroup Label="Analyzers">
+    <!--
+      MIT. Build time only, never shipped: rejects EPLAN members that look like reads but write
+      (src/EplanMcp.Bridge.Eplan/BannedSymbols.txt, M2 design section 5).
+    -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
+  </ItemGroup>
   <ItemGroup Label="Tests">
     <!-- Apache-2.0. Runs on Microsoft.Testing.Platform, which global.json selects for `dotnet test`. -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />

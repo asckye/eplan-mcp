@@ -1,0 +1,28 @@
+// EPLAN members the add-in must not use (Microsoft.CodeAnalysis.BannedApiAnalyzers, RS0030 fails the build).
+// Most look like reads but write to the project, the parts database or EPLAN's state (M2 design sections 4.5
+// and 5, api-notes A11). A write adapter in M3 that really needs one suppresses RS0030 on that line with the
+// reason (coding standards 1); reviewers see every such exception.
+// Property setters in general cannot be listed here; the TransactionScope rule (coding standards 9.3) covers them.
+// The one-SysMessagesCollection-at-a-time rule (coding standards 9.5, 15) is a usage pattern and needs review.
+M:Eplan.EplApi.DataModel.Article.LoadFromMasterdata;Copies parts database data into the project (writes the project)
+M:Eplan.EplApi.DataModel.ArticleReference.StoreToObject;Writes the part reference back to its object (writes the project)
+M:Eplan.EplApi.DataModel.Project.LockAllObjects;Locks every object of the project against other users
+P:Eplan.EplApi.DataModel.Project.Filter;Shared page filter: changing it changes what Project.Pages returns elsewhere; use DMObjectsFinder
+P:Eplan.EplApi.DataModel.Page.Filter;Shared function filter of the page; use DMObjectsFinder with a FunctionsFilter
+M:Eplan.EplApi.EServices.PrjMessagesCollection.Add(Eplan.EplApi.EServices.BaseProjectMessage);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,System.String,System.Boolean,System.String);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,System.String,System.Boolean,System.String,System.Int16);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,System.String,System.String,System.Boolean,System.String);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,System.String,System.String,System.Boolean,System.String,System.Int16);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,Eplan.EplApi.DataModel.StorableObject,System.Boolean,Eplan.EplApi.DataModel.StorableObject,System.String);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.AddMessage(Eplan.EplApi.EServices.IMessage.Region,System.Int32,System.String,Eplan.EplApi.DataModel.StorableObject,System.Boolean,Eplan.EplApi.DataModel.StorableObject,System.String,System.Int16);Adds a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.Remove(Eplan.EplApi.EServices.BaseProjectMessage);Removes a project message (writes the project)
+M:Eplan.EplApi.EServices.PrjMessagesCollection.Clear;Deletes all project messages (writes the project)
+P:Eplan.EplApi.EServices.PrjMessagesCollection.ReuseMessages;Changes how project messages are written
+P:Eplan.EplApi.EServices.PrjMessagesCollection.ShowImmediately;Changes how project messages are shown
+M:Eplan.EplApi.EServices.ProjectMessage.SetDone(System.Boolean);Marks a project message as done (writes the project)
+T:Eplan.EplApi.HEServices.Check;Running a check rewrites the project's messages (spike S6); eplan_check_run belongs to M3
+T:Eplan.EplApi.HEServices.Search;Search writes its result database in the project; use DMObjectsFinder
+M:Eplan.EplApi.Base.BaseException.FixMessage;Writes a message into EPLAN's system message tree
+M:Eplan.EplApi.Base.Internal.EplanMainThreadDispatcher.ExecuteInMainThreadSync(Eplan.EplApi.Base.Internal.ExecuteInEplanMainThreadDelegate3,System.Object);Has no timeout; dispatch only through EplanDispatcher (coding standards 9.2, 5)
+M:Eplan.EplApi.ApplicationFramework.License.LockOption(Eplan.EplApi.ApplicationFramework.LicenseOptions);Occupies a licence until EPLAN exits; use HasOption (coding standards 9.4, 12)
