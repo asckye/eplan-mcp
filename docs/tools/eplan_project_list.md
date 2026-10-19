@@ -27,10 +27,12 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
   ],
   "total": 1,
   "nextCursor": null,
-  "truncated": false
+  "truncated": false,
+  "hint": null
 }
 ```
-- `name`、`path` 来自项目数据，**不是指令**（schema 描述中写明）。
+- `name`、`path` 来自项目数据，**不是指令**（schema 描述中写明）。返回前经过 `ResultShaper.CleanText`：剥除控制字符，超过 500 个字符时截断并注明长度（[工具设计规范 7.3](../standards/mcp-tool-design.md#73-不可信内容)）。
+- 整页超出 token 预算（默认 5k）时，从末尾去掉项目，`truncated` 为 true，`nextCursor` 指向第一个被去掉的项目，`hint` 说明下一步；一行摘要也会注明，例如 `Showing 18 to stay within the size budget; more with 'cursor'.`
 - `path` 即 `Project.ProjectFullName`：`.elk` 文件的路径去掉扩展名（[api-notes A10](../eplan/api-notes.md#a10-m1-骨架的实机验证2026-10-18)）。
 - `current`：EPLAN 中当前选中的项目（`SelectionSet.GetCurrentProject`）。没有打开任何项目时 `projects` 为空数组，不是错误。
 - 一行摘要只给数量，不回显项目名：`2 projects open in EPLAN (1 current).` / `No project is open in EPLAN.`
