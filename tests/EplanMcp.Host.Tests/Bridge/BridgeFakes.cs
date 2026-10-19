@@ -42,9 +42,16 @@ internal sealed class FakeChannel(BridgeEndpoint endpoint, Func<string, JsonNode
         return ValueTask.CompletedTask;
     }
 
-    public static JsonNode? CompatibleHandshake(int processId, int protocolVersion = BridgeProtocol.CurrentVersion) =>
+    /// <summary>Without <paramref name="operations"/> the answer is an M1 add-in's, which announces none.</summary>
+    public static JsonNode? CompatibleHandshake(int processId, int protocolVersion = BridgeProtocol.CurrentVersion, List<string>? operations = null) =>
         JsonSerializer.SerializeToNode(
-            new HandshakeResult { ProtocolVersion = protocolVersion, BridgeVersion = "b", Eplan = new EplanInstanceInfo { ProcessId = processId, Version = "2026.0.3" } },
+            new HandshakeResult
+            {
+                ProtocolVersion = protocolVersion,
+                BridgeVersion = "b",
+                Eplan = new EplanInstanceInfo { ProcessId = processId, Version = "2026.0.3" },
+                Operations = operations,
+            },
             HostJson.Options);
 
     public static BridgeRpcException BusinessError(string reason, string message = "m", bool retryable = false) =>

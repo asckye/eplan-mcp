@@ -38,6 +38,15 @@ internal static class BridgeErrors
             "Ask the engineer to run 'eplanmcp install-addin' and restart EPLAN.",
     };
 
+    /// <summary>The add-in is older than this Host: it handshakes fine but lacks the operation a tool needs.</summary>
+    public static BridgeError OperationMissing(string operation, string bridgeVersion) => new()
+    {
+        Reason = ErrorReason.BridgeIncompatible,
+        Message = $"The EplanMcp add-in in EPLAN (version {bridgeVersion}) is older than this server and cannot do '{operation}'. " +
+            "Ask the engineer to run 'eplanmcp install-addin' and restart EPLAN.",
+        Metadata = new Dictionary<string, string> { ["operation"] = operation, ["bridgeVersion"] = bridgeVersion },
+    };
+
     public static BridgeError QueueBusy() => new()
     {
         Reason = ErrorReason.EplanBusy,

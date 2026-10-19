@@ -28,6 +28,7 @@ public sealed class SerializerCompatibilityTests
             Eplan = new EplanInstanceInfo { ProcessId = 4242, Version = "2026.0.3.25421", Variant = "Pro Panel", ApiExtensionLicence = true },
         },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.1.0", Eplan = new EplanInstanceInfo { ProcessId = 1, Version = "x" } },
+        new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.2.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, Operations = ["page.list", "project.list"] },
         new BridgeError
         {
             Reason = ErrorReason.EplanBusy,
