@@ -18,6 +18,10 @@
     -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+  <ItemGroup Label="Development tools">
+    <!-- MIT, no dependencies. Reads the agent eval task files (evals/, agent evals design 4.1); never shipped. -->
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
+  </ItemGroup>
   <ItemGroup Label="Analyzers">
     <!--
       MIT. Build time only, never shipped: rejects EPLAN members that look like reads but write
