@@ -448,7 +448,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | 里程碑 | 内容 | 完成标准 |
 |---|---|---|
 | **M0 启动**（已完成 2026-10-13） | 架构、ADR、规范、流程、仓库配置 | 本文档和 ADR-0001 到 0006 评审通过（Accepted） |
-| **M1 技术验证 + 打通骨架** | spike S0 授权（未签名插件能否加载，5 页限制是否生效）；S1 主线程调度；S2 回滚与撤销；S3 程序集共存；S4 客户端的 elicitation 支持。最小端到端链路：Host（stdio）↔ 管道 ↔ Bridge ↔ EPLAN，提供 `eplan_session_status`、`eplan_project_list`；`doctor`；CI 运行构建和 Small 测试 | 在 Claude Code 中调用 `eplan_project_list` 拿到真实结果；S0–S4 全部有结论，记入 api-notes；写出 ADR-0007 |
+| **M1 技术验证 + 打通骨架**（完成标准已达到 2026-10-18） | spike S0 授权（未签名插件能否加载，5 页限制是否生效）；S1 主线程调度；S2 回滚与撤销；S3 程序集共存；S4 客户端的 elicitation 支持。最小端到端链路：Host（stdio）↔ 管道 ↔ Bridge ↔ EPLAN，提供 `eplan_session_status`、`eplan_project_list`；`doctor`；CI 运行构建和 Small 测试 | 在 Claude Code 中调用 `eplan_project_list` 拿到真实结果；S0–S4 全部有结论，记入 api-notes；写出 ADR-0007 |
 | **M2 只读核心** | 项目、页面、设备、连接、部件、属性、系统消息、检查结果的只读工具；分页与结构化输出；契约快照；Agent 评测 v0（只读任务） | 只读任务的 Agent 评测成功率 ≥ 90% |
 | **M3 安全写入** | 策略引擎、审批（elicitation 和 EPLAN 对话框）、事务与撤销、审计哈希链、scratch 工作流；第一批写工具：建页、放置设备或宏、设备标识、属性、连接 | Q1、Q2、Q3、Q6、Q7、Q9 通过；写入类 Agent 评测通过 |
 | **M4 工程工作流** | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |

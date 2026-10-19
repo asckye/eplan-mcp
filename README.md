@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：写入前审批，事后可审计，出错可回滚，在 EPLAN 中可以用 Ctrl+Z 撤销。
 
-> **状态：M1 进行中**（2026-10-13）。技术验证 S0–S3 已完成，S4 的协议层已完成（Claude Code 使用 MCP 2026-07-28 并支持表单 elicitation），结论见 [spikes/README.md](spikes/README.md) 和 [api-notes](docs/eplan/api-notes.md)。端到端骨架的代码已就绪（[设计](docs/design/2026-10-13-m1-skeleton.md)）：`eplanmcp` 提供 `eplan_session_status` 和 `eplan_project_list`，EPLAN 插件经命名管道为它服务，不需要 EPLAN 的 Small / Medium 测试和 CI 已建好。**下一步**：在 EPLAN 中实机验证插件，然后在 Claude Code 中调用 `eplan_project_list`（M1 的完成标准）。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：M1 已达到完成标准**（2026-10-18）。端到端骨架（[设计](docs/design/2026-10-13-m1-skeleton.md)）在 EPLAN 2026 的 Pro Panel 和 Electric P8 中实机验证通过：插件随 EPLAN 启动，Claude Code 调用 `eplan_project_list` 拿到了真实结果，EPLAN 打开对话框时返回 `EPLAN_BUSY`，退出后返回 `EPLAN_NOT_CONNECTED`（[api-notes A10](docs/eplan/api-notes.md#a10-m1-骨架的实机验证2026-10-18)）。技术验证 S0–S4 的结论见 [spikes/README.md](spikes/README.md)。遗留两项：S4 审批表单界面的人工确认，以及 S5（由 MSIX 打包的 Claude 桌面版启动 Host）。**下一步**：M2 只读核心。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 
