@@ -16,6 +16,7 @@
 | 中央包管理 | `Directory.Packages.props` | 每个依赖版本只声明一次；可传递依赖也要固定版本 |
 | 锁文件 | `RestorePackagesWithLockFile` | 还原结果可重现；CI 以锁定模式还原 |
 | x64 | `PlatformTarget=x64` | EPLAN 是 64 位进程 |
+| 输出路径不含平台名 | `AppendPlatformToOutputPath=false` | 解决方案构建（x64）和单项目构建（AnyCPU）的产物相同，共用 `bin\<配置>\` 才不会有两份互不更新的输出 |
 
 ---
 
