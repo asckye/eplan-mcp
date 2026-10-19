@@ -148,6 +148,34 @@ internal sealed class FakeDeviceReader : IDeviceReader
     }
 }
 
+/// <summary>
+/// A project's connections narrowed the way the EPLAN adapter narrows them: by device, those starting or ending at the
+/// device's main function or one of its auxiliary functions (here: the same tag, or the tag with a ':' suffix, S6); by
+/// page, those placed on it. Records every read.
+/// </summary>
+internal sealed class FakeConnectionReader : IConnectionReader
+{
+    public List<string> Pages { get; } = [];
+
+    public List<ConnectionRecord> Connections { get; } = [];
+
+    public List<(string Path, string? Device, string? Page)> Reads { get; } = [];
+
+    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page)
+    {
+        Reads.Add((projectPath, device, page));
+        if (page is not null && !Pages.Contains(page, StringComparer.Ordinal))
+        {
+            return null;
+        }
+
+        return [.. Connections.Where(c => (device is null || At(c.StartDevice, device) || At(c.EndDevice, device)) && (page is null || c.Page == page))];
+    }
+
+    private static bool At(string? function, string device) =>
+        function is not null && (function == device || function.StartsWith(device + ":", StringComparison.Ordinal));
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {

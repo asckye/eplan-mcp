@@ -116,6 +116,25 @@ public sealed class SerializerCompatibilityTests
             Properties = [new PropertyEntry { Id = 20011, Name = "Function text", Value = "1,5" }, new PropertyEntry { Name = "UserProp", Value = "x" }],
         },
         new DeviceGetData(),
+        new ConnectionListArgs { Project = "Line1", Device = "-FC1", Page = "=GAA+A1&EFS1/1", Offset = 50, Limit = 50 },
+        new ConnectionListArgs(),
+        new ListData<ConnectionListItem>
+        {
+            Project = "项目 二",
+            Items =
+            [
+                new ConnectionListItem
+                {
+                    From = new ConnectionEnd { Device = "=GAA+A1-FC1", Pin = "2" },
+                    To = new ConnectionEnd { Device = "=GAA+A1-XD1" },
+                    Page = "=GAA+A1&EFS1/1",
+                    CrossSection = "1,5",
+                    Colour = "GY",
+                },
+                new ConnectionListItem { Kind = ConnectionListItem.Kind3D, Colour = "绿色/黄色" },
+            ],
+            Total = 40,
+        },
     ];
 
     [Theory]

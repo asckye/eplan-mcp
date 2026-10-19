@@ -75,13 +75,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         ISOCode.Language textLanguage = EplanText.Language(language);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
-        using var filter = new FunctionsFilter();
-        filter.Name = tag;
-        filter.ExactNameMatching = true;
-
-        // The name filter finds a function by its full tag (S6); the ordinal check keeps the match case-sensitive like
-        // EPLAN's prefix matching (api-notes A11). Auxiliary functions share the tag, so only the main one counts.
-        Function? main = finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal));
+        Function? main = FindMain(finder, tag);
         if (main is null)
         {
             return null;
@@ -150,10 +144,23 @@ internal sealed class EplanDeviceReader : IDeviceReader
     }
 
     /// <summary>
+    /// The first main function whose full tag is exactly <paramref name="tag"/>. The name filter finds a function by its
+    /// full tag (S6); the ordinal check keeps the match case-sensitive like EPLAN's prefix matching (api-notes A11).
+    /// Auxiliary functions share the tag, so only the main one counts.
+    /// </summary>
+    internal static Function? FindMain(DMObjectsFinder finder, string tag)
+    {
+        using var filter = new FunctionsFilter();
+        filter.Name = tag;
+        filter.ExactNameMatching = true;
+        return finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// The page with exactly this full name. PagesFilter.Name with ExactNameMatching finds a page by its full name
     /// (S6); the ordinal check keeps the match case-sensitive like EPLAN's prefix matching (api-notes A11).
     /// </summary>
-    private static Page? FindPage(DMObjectsFinder finder, string name)
+    internal static Page? FindPage(DMObjectsFinder finder, string name)
     {
         using var filter = new PagesFilter();
         filter.Name = name;
