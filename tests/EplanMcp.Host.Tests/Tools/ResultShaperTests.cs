@@ -16,6 +16,15 @@ public sealed class ResultShaperTests
         Assert.Equal("电气 -K1 Schütz", ResultShaper.CleanText("电气 -K1 Schütz"));
     }
 
+    [Fact]
+    public void CleanText_RemovesBidirectionalControlsButKeepsOtherFormatCharacters()
+    {
+        // "Trojan Source": an override makes "-K1 delete all" display as something else to the engineer.
+        Assert.Equal("-K1 lla eteled", ResultShaper.CleanText("-K1 ‮lla eteled‬"));
+        Assert.Equal("ab", ResultShaper.CleanText("⁦a⁩‪b‬"));
+        Assert.Equal("👨‍🔧", ResultShaper.CleanText("👨‍🔧"));
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -82,7 +91,7 @@ public sealed class ResultShaperTests
     public void FitPage_PageOverTheBudget_DropsEntriesFromTheEndAndPointsTheCursorAtTheFirstDropped()
     {
         // About 100 tokens per entry: 10,000 against the 5,000 default.
-        TestPage page = Page(count: 100, length: 400);
+        TestPage page = Page(count: 100, length: 180); // about 9k tokens with the JSON counted twice: over 5k, under 20k
         List<string> original = [.. page.Entries];
 
         ResultShaper.FitPage(page, offset: 40, _listing);
@@ -103,7 +112,7 @@ public sealed class ResultShaperTests
     [Fact]
     public void FitPage_DetailedBudget_FitsWhatTheDefaultCuts()
     {
-        TestPage page = Page(count: 100, length: 400);
+        TestPage page = Page(count: 100, length: 180); // about 9k tokens with the JSON counted twice: over 5k, under 20k
 
         ResultShaper.FitPage(page, 0, _listing, ResultShaper.MaxTokenBudget);
 
@@ -134,7 +143,7 @@ public sealed class ResultShaperTests
     private static TestPage Page(int count, int length) =>
         new() { Entries = [.. Enumerable.Range(0, count).Select(i => i.ToString("D3", CultureInfo.InvariantCulture).PadRight(length, 'x'))] };
 
-    private static int Estimate(TestPage page) => ResultShaper.EstimateTokens(JsonSerializer.Serialize(page, HostJson.Options));
+    private static int Estimate(TestPage page) => ResultShaper.ResultTokens(JsonSerializer.Serialize(page, HostJson.Options));
 
     private sealed class TestPage : IPagedResult<string>
     {

@@ -22,13 +22,18 @@ internal static class ResultShaper
     /// <summary>Hard cap, for <c>response_format: "detailed"</c>: below Claude Code's 25k limit, with room for the rest.</summary>
     public const int MaxTokenBudget = 20_000;
 
-    // C0, DEL and C1, except the two characters that lay out multi-line project texts.
+    // C0, DEL and C1, except the two characters that lay out multi-line project texts, plus the bidirectional
+    // embedding, override and isolate controls, which make text read differently from what it contains when it is
+    // shown to an engineer (approval forms, audit). Other format characters such as ZWJ are needed by real text.
     private static readonly SearchValues<char> _controls = SearchValues.Create(
-        [.. Enumerable.Range(0, 0xA0).Select(c => (char)c).Where(c => char.IsControl(c) && c is not '\n' and not '\t')]);
+    [
+        .. Enumerable.Range(0, 0xA0).Select(c => (char)c).Where(c => char.IsControl(c) && c is not '\n' and not '\t'),
+        '‪', '‫', '‬', '‭', '‮', '⁦', '⁧', '⁨', '⁩',
+    ]);
 
     /// <summary>
     /// Returns one string from project data in the form a tool may return it: control characters other than
-    /// <c>\n</c> and <c>\t</c> removed (so <c>\r\n</c> becomes <c>\n</c>), and text longer than
+    /// <c>\n</c> and <c>\t</c>, and bidirectional controls, removed (so <c>\r\n</c> becomes <c>\n</c>), and text longer than
     /// <see cref="MaxTextLength"/> cut to that length followed by <c> … [truncated, N characters in total]</c>, N being
     /// the length after the removal. Null stays null, because an unset value is not an empty one. Never throws.
     /// </summary>
@@ -120,8 +125,14 @@ internal static class ResultShaper
         }
     }
 
+    /// <summary>
+    /// A tool result carries its JSON twice, as structured content and as a text block for older clients
+    /// (<see cref="ToolResults.Success"/>), and the budget, like Claude Code's limit, is for the whole result.
+    /// </summary>
+    internal static int ResultTokens(string json) => 2 * EstimateTokens(json);
+
     private static bool Fits(object result, int tokenBudget) =>
-        EstimateTokens(JsonSerializer.Serialize(result, result.GetType(), HostJson.Options)) <= tokenBudget;
+        ResultTokens(JsonSerializer.Serialize(result, result.GetType(), HostJson.Options)) <= tokenBudget;
 
     private static string RemoveControls(string text)
     {
