@@ -28,5 +28,13 @@
   <ItemGroup Label="Tests">
     <!-- Apache-2.0. Runs on Microsoft.Testing.Platform, which global.json selects for `dotnet test`. -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <!--
+      MIT. Tool contract snapshots (docs/standards/testing.md 3), test projects only. From 33.0 the Verify core package
+      ships under the Open Source Maintenance Fee EULA (a fee for revenue-generating users) instead of MIT, so Verify is
+      pinned to 32.x: moving to 33 is the project owner's decision, and this pin makes restore fail until it is taken.
+      32.0.1 is built against xunit.v3 3.2 and runs on 4.x.
+    -->
+    <PackageVersion Include="Verify.XunitV3" Version="32.0.1" />
+    <PackageVersion Include="Verify" Version="32.0.1" />
   </ItemGroup>
 </Project>

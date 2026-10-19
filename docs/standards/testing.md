@@ -40,11 +40,20 @@
 
 ## 3. 工具契约快照测试
 
-工具的名称、描述、输入输出 JSON Schema 和注解，是本项目对外承诺的 API（见 [mcp-tool-design.md](mcp-tool-design.md)）。
+工具的名称、标题、描述、输入输出 JSON Schema、四个注解，以及服务器说明（instructions），是本项目对外承诺的 API（见 [mcp-tool-design.md 第 11 节](mcp-tool-design.md#11-契约变更)）。
 
-- 用 [Verify](https://github.com/VerifyTests/Verify) 把 `tools/list` 的完整结果序列化成快照，提交到仓库（`tests/Contracts.Snapshots/*.verified.json`）。
-- 任何导致快照变化的 PR，都必须同时提交新的快照。评审时快照的 diff 就是契约变更的清单。
+- `ToolContractSnapshotTests`（Medium）用 [Verify](https://github.com/VerifyTests/Verify) 把服务器说明和 `tools/list` 中每个工具的完整定义（工具与 `serve` 注册的相同，按名称排序）序列化成 `tests/Contracts.Snapshots/server-contract.verified.json`，提交到仓库。
+- 任何导致快照变化的 PR，都必须同时提交新的快照，并在 PR 描述中说明契约为什么要变（[mcp-tool-design 第 11 节](mcp-tool-design.md#11-契约变更)）。评审时快照的 diff 就是契约变更的清单。
 - 描述文字的修改也会体现在快照中。描述会直接影响模型行为，所以同样要评审，必要时重跑 Agent 评测。
+- 快照从不自动接受：契约一变，测试就失败（本地和 CI 都一样），Verify 只在旁边写出 `*.received.json`（已被 `.gitignore` 忽略），不会弹出比较工具。
+- 依赖工具精确 schema 的测试类要加 `[Collection(typeof(ToolBuildIsolation))]`，让它在没有其他测试运行时构建工具：几个测试同时构建工具时，SDK 内部存在竞争，生成的 schema 会不稳定（详见该类的注释）。
+
+### 更新快照
+1. 运行快照测试：`dotnet test --project tests\EplanMcp.Host.Tests -- --filter-class "EplanMcp.Host.Tests.Tools.ToolContractSnapshotTests"`。契约有变化时测试失败，失败信息逐行列出变化（`-` 是已提交的快照，`+` 是当前结果，带行号）；还没有快照时列出全部内容。
+2. 审视差异：`git diff --no-index tests\Contracts.Snapshots\server-contract.verified.json tests\Contracts.Snapshots\server-contract.received.json`，确认每一处变化都是有意的。
+3. 接受：用 `.received.json` 覆盖 `.verified.json`（`Move-Item -Force` 两个文件），重新运行测试确认通过，把新快照和代码改动放在同一个 PR 里提交。
+
+快照文件由 Verify 写出，是带 BOM 的 UTF-8、LF 换行（`.editorconfig` 中有对应规则）。不要手工编辑快照，改代码后重新生成。
 
 ---
 
@@ -113,7 +122,7 @@ budget: { max_tool_calls: 25, max_minutes: 5 }
 |---|---|---|
 | 测试框架 | xUnit v3 | 支持 .NET Framework 4.8 和 .NET 10 |
 | 断言 | xUnit 自带断言或 Shouldly | **不使用 FluentAssertions 8.x 及以上**：其许可证已改为商业许可 |
-| 快照 | Verify | 工具契约、规范化后的读回结果 |
+| 快照 | Verify 32.x | 工具契约、规范化后的读回结果。**暂不升级到 33.x**：从 33.0 起 Verify 主包的二进制改用 Open Source Maintenance Fee EULA（年营收 1 万美元以上的使用者需付维护费），升级与否由项目负责人决定 |
 | 模拟 | 手写 Fake 优先，必要时用 NSubstitute | Fake 能表达"EPLAN 的行为"，比逐个方法打桩更可读 |
 | 覆盖率 | coverlet，只作参考 | 不设覆盖率门槛。策略引擎和写入保护这类安全关键代码，要求逐条覆盖决策表 |
 

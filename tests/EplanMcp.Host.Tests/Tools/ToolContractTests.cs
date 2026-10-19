@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
 /// The rules of mcp-tool-design 12 that can be checked mechanically, on the tools exactly as <c>serve</c> registers
-/// them. Snapshot tests of the full contract arrive with Verify in M2.
+/// them. The full contract is snapshotted in <see cref="ToolContractSnapshotTests"/>.
 /// </summary>
 [Trait("Size", "Small")]
 public sealed class ToolContractTests : IDisposable

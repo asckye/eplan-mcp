@@ -16,6 +16,10 @@ indent_size = 2
 [*.md]
 trim_trailing_whitespace = false
 
+# Verify snapshots (tests/Contracts.Snapshots) are written by Verify as UTF-8 with BOM; editors must keep the BOM.
+[*.{received,verified}.{json,txt,xml}]
+charset = utf-8-bom
+
 [*.{ps1,cmd,bat,sln,slnx}]
 end_of_line = crlf
 
