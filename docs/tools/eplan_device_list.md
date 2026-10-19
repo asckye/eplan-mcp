@@ -31,7 +31,7 @@
 {
   "project": "Line1",
   "devices": [
-    { "tag": "=GAA+A1-FC1", "visibleTag": "-FC1", "category": "CircuitBreaker", "page": "=GAA+A1&EFS1/1", "parts": 2 }
+    { "tag": "=GAA+A1-FC1", "visibleTag": "-FC1", "main": true, "category": "CircuitBreaker", "page": "=GAA+A1&EFS1/1", "parts": 2 }
   ],
   "total": 37,
   "nextCursor": null,
@@ -39,7 +39,8 @@
   "hint": null
 }
 ```
-- `tag`：`Function.Name`，完整标识，**是其他工具引用这个设备时应该使用的值**。`visibleTag`：页面上显示的标识，去掉 `>` 标记；可能为空（api-notes A11）。
+- `tag`：`Function.Name`，完整标识，**是其他工具引用这个设备时应该使用的值**。`visibleTag`：页面上显示的标识，去掉 `>` 标记；页面上没有显示标识时为 `null`（api-notes A11）。
+- `main`：是否主功能。`include_auxiliary` 为 true 时，同一个设备的主功能和辅助功能可能有相同的 `tag`，用它区分。
 - `page`：主功能所在的页；没有放置在页上（如定义文本类对象）时为 `null`。`parts`：部件引用的数量。
 - 没有名称的功能（`Name` 为空）不列出。
 - 顺序：EPLAN 的返回顺序。超出 token 预算时由 ResultShaper 截断。

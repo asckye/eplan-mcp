@@ -26,7 +26,7 @@ public sealed class PageGetToolTests
 
     public PageGetToolTests()
     {
-        _bridge.Answers[OperationNames.PageGet] = _ => _data;
+        _bridge.Handlers[OperationNames.PageGet] = _ => _data;
     }
 
     [Fact]
