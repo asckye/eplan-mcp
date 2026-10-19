@@ -48,3 +48,5 @@ backup/
 .claude/skills/archify/
 # archify scratch folders (candidates, receipts, browser evidence); finished diagrams live in docs/diagrams/.
 .archify/
+# archify delivery receipts next to each diagram (provenance of one local run, not reviewed content).
+docs/diagrams/**/*.delivery.json

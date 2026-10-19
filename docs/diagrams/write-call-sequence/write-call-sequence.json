@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "写调用：审批与事务的时序",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/write-call-sequence/write-call-sequence.html"
+  },
+  "participants": [
+    { "id": "engineer", "type": "external", "label": "工程师" },
+    { "id": "client", "type": "frontend", "label": "MCP 客户端", "sublabel": "Claude Code 等" },
+    { "id": "host", "type": "backend", "label": "Host", "sublabel": "策略 · 审批 · 审计" },
+    { "id": "bridge", "type": "backend", "label": "Bridge", "sublabel": "EPLAN 主线程" },
+    { "id": "audit", "type": "database", "label": "审计日志", "sublabel": "哈希链" }
+  ],
+  "segments": [
+    { "from": 150, "to": 268, "label": "规划（dry-run）" },
+    { "from": 272, "to": 452, "label": "审批（MCP 多轮请求）" },
+    { "from": 456, "to": 560, "label": "执行（事务）" },
+    { "from": 564, "to": 640, "label": "审计与返回" }
+  ],
+  "messages": [
+    { "id": "call", "from": "client", "to": "host", "y": 160, "label": "tools/call eplan_device_place", "variant": "emphasis", "note": "写操作必须显式指定项目" },
+    { "id": "plan", "from": "host", "to": "bridge", "y": 215, "label": "plan（dry-run）", "variant": "emphasis" },
+    { "id": "plan-result", "from": "bridge", "to": "host", "y": 245, "label": "变更清单 + 项目指纹", "variant": "return" },
+    { "id": "ask", "from": "host", "to": "client", "y": 285, "label": "input_required：审批表单", "variant": "security", "note": "requestState 经 HMAC 签名、带有效期" },
+    { "id": "show", "from": "client", "to": "engineer", "y": 340, "label": "显示变更清单", "variant": "default" },
+    { "id": "approve", "from": "engineer", "to": "client", "y": 370, "label": "批准", "variant": "security" },
+    { "id": "retry", "from": "client", "to": "host", "y": 400, "label": "再次 tools/call + 审批结果", "variant": "emphasis", "note": "校验签名、有效期，以及计划是否仍匹配" },
+    { "id": "execute", "from": "host", "to": "bridge", "y": 466, "label": "execute（计划 ID + 指纹）", "variant": "emphasis", "note": "LockingStep → SafetyPoint → UndoStep；指纹不符则 PLAN_STALE" },
+    { "id": "changes", "from": "bridge", "to": "host", "y": 540, "label": "结果 + 实际变更", "variant": "return", "note": "失败时回滚" },
+    { "id": "audit-write", "from": "host", "to": "audit", "y": 590, "label": "参数 · 清单 · 决定 · 结果", "variant": "dashed" },
+    { "id": "reply", "from": "host", "to": "client", "y": 620, "label": "结果", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "host", "from": 160, "to": 626, "type": "backend" },
+    { "participant": "bridge", "from": 215, "to": 251, "type": "backend" },
+    { "participant": "engineer", "from": 340, "to": 376, "type": "external" },
+    { "participant": "bridge", "from": 466, "to": 546, "type": "backend" },
+    { "participant": "audit", "from": 585, "to": 596, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "不执行的情况",
+      "items": [
+        "拒绝、取消或审批过期：APPROVAL_DENIED，项目不变",
+        "审批后项目被改动：PLAN_STALE，需要重新发起",
+        "审计不可写：AUDIT_UNAVAILABLE，拒绝写操作"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "其他审批渠道",
+      "items": [
+        "scratch 项目：策略自动允许，跳过审批",
+        "客户端不支持表单：改用 Workbench 或 EPLAN 内对话框",
+        "成功后工程师可在 EPLAN 中 Ctrl+Z 一次撤销"
+      ]
+    }
+  ]
+}
