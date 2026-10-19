@@ -4,6 +4,7 @@
     <!-- Medium tests run the real Bridge.Core server (with fake EPLAN adapters) on a real pipe. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">

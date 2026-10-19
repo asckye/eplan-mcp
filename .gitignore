@@ -19,6 +19,8 @@ TestResults/
 coverage/
 *.coverage
 *.trx
+# Verify writes these next to a snapshot that does not match; accepting one is a reviewed, manual step.
+*.received.*
 
 # ---- Runtime data produced by local runs (audit logs, scratch projects, exports) ----
 .local/
