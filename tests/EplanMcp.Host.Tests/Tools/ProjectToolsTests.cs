@@ -85,9 +85,21 @@ public sealed class ProjectToolsTests
     {
         _bridge.Projects.Add(Project("Only"));
 
-        CallToolResult result = await List(cursor: PageCursor.Encode(5));
+        CallToolResult result = await List(cursor: PageCursor.Encode(5, PageCursor.Fingerprint(ProjectTools.ListTool)));
 
         Assert.Equal(ErrorReason.InvalidArgument, Error(result).GetProperty("reason").GetString());
+    }
+
+    [Fact]
+    public async Task ProjectList_CursorOfAnotherListing_IsInvalidArgument()
+    {
+        _bridge.Projects.Add(Project("A"));
+        _bridge.Projects.Add(Project("B"));
+
+        CallToolResult result = await List(cursor: PageCursor.Encode(1, PageCursor.Fingerprint("eplan_page_list", "Line1")));
+
+        Assert.Equal(ErrorReason.InvalidArgument, Error(result).GetProperty("reason").GetString());
+        Assert.Equal(0, _bridge.Invocations);
     }
 
     [Fact]

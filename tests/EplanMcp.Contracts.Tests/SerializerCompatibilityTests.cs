@@ -47,6 +47,8 @@ public sealed class SerializerCompatibilityTests
             ],
         },
         new ProjectListData(),
+        new ListData<OpenProject> { Project = "项目 二", Items = [new OpenProject { Name = "Line1", Path = "p" }], Total = 7 },
+        new ListData<OpenProject>(),
     ];
 
     [Theory]

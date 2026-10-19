@@ -40,10 +40,12 @@ internal sealed class ProjectTools
             violations.Add($"'limit' must be between 1 and {MaxLimit.ToString(CultureInfo.InvariantCulture)}.");
         }
 
+        // No project or filter arguments: the listing is identified by the tool alone.
+        string fingerprint = PageCursor.Fingerprint(ListTool);
         int offset = 0;
         if (cursor is not null)
         {
-            if (PageCursor.Decode(cursor) is { } decoded)
+            if (PageCursor.Decode(cursor, fingerprint) is { } decoded)
             {
                 offset = decoded;
             }
@@ -80,7 +82,7 @@ internal sealed class ProjectTools
         {
             Projects = [.. page.Select(p => new ProjectListResult.ProjectEntry { Name = p.Name, Current = p.Current, ReadOnly = p.ReadOnly, Path = p.Path })],
             Total = all.Count,
-            NextCursor = next < all.Count ? PageCursor.Encode(next) : null,
+            NextCursor = next < all.Count ? PageCursor.Encode(next, fingerprint) : null,
         };
         return ToolResults.Success(Summary(result, all), result);
     }
