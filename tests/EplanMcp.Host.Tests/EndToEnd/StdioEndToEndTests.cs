@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_message_list", "eplan_page_get", "eplan_page_list", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -190,6 +190,21 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_MessageListGivesTheNewestErrorsFirst()
+    {
+        StartBridge();
+
+        CallToolResult errors = await Call("eplan_message_list", new() { ["min_level"] = "error" });
+        CallToolResult badLevel = await Call("eplan_message_list", new() { ["min_level"] = "fatal" });
+
+        JsonElement messages = errors.StructuredContent!.Value.GetProperty("messages");
+        Assert.Equal(["脚本编译失败", "Datei nicht gefunden"], messages.EnumerateArray().Select(m => m.GetProperty("text").GetString()));
+        Assert.Equal("2 messages at error level or above.", Text(errors));
+        Assert.True(badLevel.IsError);
+        Assert.Contains("'min_level'", Text(badLevel), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -245,6 +260,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new DeviceGetOperation(catalog, devices),
             new ConnectionListOperation(catalog, devices, new SampleConnections()),
             new PartListOperation(catalog, new SampleParts()),
+            new MessageListOperation(new SystemMessageReader()),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
@@ -304,6 +320,18 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
                     ],
                 }
                 : null;
+    }
+
+    /// <summary>EPLAN's enumeration order: oldest first.</summary>
+    private sealed class SystemMessageReader : ISystemMessageReader
+    {
+        public IReadOnlyList<SystemMessageRecord> ReadAll() =>
+        [
+            new() { Level = 4, Index = "S085016", Text = "Datei nicht gefunden", Occurrences = 1 },
+            new() { Level = 2, Index = "S000000", Text = "warning", Occurrences = 1 },
+            new() { Level = 0, Index = "S000000", Text = "trace", Occurrences = 1 },
+            new() { Level = 4, Index = "S000000", Text = "脚本编译失败", Occurrences = 2 },
+        ];
     }
 
     private sealed class InlineDispatcher : IMainThreadDispatcher
