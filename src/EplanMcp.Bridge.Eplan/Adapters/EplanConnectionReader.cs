@@ -36,7 +36,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
         {
             // In memory by Connection.Page, as S6 found right (40 on =GAA+A1&EFS1/1): the obsolete ConnectionsFilter.Page
             // missed 5 of them. StorableObject overrides Equals, and S6 compared pages this way.
-            found = found.Where(connection => target.Equals(connection.Page));
+            found = found.Where(connection => target.Equals(PageOf(connection)));
         }
 
         return [.. found.Select(connection => Record(connection, language))];
@@ -74,6 +74,28 @@ internal sealed class EplanConnectionReader : IConnectionReader
     }
 
     /// <summary>
+    /// The page the connection is placed on; null when it is not placed, for a Connection3D (no page, S6), or when EPLAN
+    /// cannot give it: the Page getter throws BaseException on failure (EPLAN XML docs), and one such connection must not
+    /// fail the whole listing.
+    /// </summary>
+    private static Page? PageOf(Connection connection)
+    {
+        if (connection is Connection3D)
+        {
+            return null;
+        }
+
+        try
+        {
+            return connection.Page;
+        }
+        catch (BaseException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// A Connection3D throws NotSupportedException on StartPin and EndPin and has no page (S6), so only its properties are
     /// read. StartPin and EndPin are null on a side that is not connected (EPLAN XML docs).
     /// </summary>
@@ -96,7 +118,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
         record.StartPin = start?.Name;
         record.EndDevice = end?.ParentFunction?.Name;
         record.EndPin = end?.Name;
-        record.Page = connection.Page?.Name;
+        record.Page = PageOf(connection)?.Name;
         return record;
     }
 }
