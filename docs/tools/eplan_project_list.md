@@ -43,7 +43,7 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
 |---|---|---|
 | `INVALID_ARGUMENT` | `limit` 越界，或 `cursor` 无效 | `metadata.violations` 列出问题 |
 | `EPLAN_NOT_CONNECTED` | 没有运行中、已加载插件的 EPLAN | "Start EPLAN and make sure the EplanMcp add-in is loaded, then retry. eplan_session_status shows details." |
-| `SESSION_NOT_SELECTED` | 发现多个 EPLAN 实例 | "Several EPLAN instances are running; close all but one and retry." |
+| `SESSION_NOT_SELECTED` | 发现多个 EPLAN 实例，且没有用 `eplan_session_select` 选定 | "Call eplan_session_status to see them, then eplan_session_select with the processId of the one to work with."；`metadata.processIds` 列出各实例的进程号 |
 | `BRIDGE_INCOMPATIBLE` | 协议版本不兼容 | "Run 'eplanmcp install-addin' and restart EPLAN." |
 | `EPLAN_BUSY` | 主线程 10 秒内不可用，或有模态对话框 | "EPLAN is busy or showing a dialog. Ask the engineer to close open dialogs in EPLAN, then retry." |
 | `LICENCE_MISSING` | 缺少 API 扩展授权 | 说明需要的授权模块 |

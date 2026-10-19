@@ -27,7 +27,7 @@
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
-| `INVALID_ARGUMENT` | 没有这个进程号的、已加载插件的 EPLAN | `metadata.processIds` 列出可选的进程号 |
+| `INVALID_ARGUMENT` | `process_id` 不是正整数（不询问 Bridge），或没有这个进程号的、已加载插件的 EPLAN | `metadata.violations` 说明问题；后一种情况 `metadata.processIds` 还列出可选的进程号 |
 | `EPLAN_NOT_CONNECTED` | 一个 EPLAN 都没有 | 同 `eplan_project_list` |
 | `BRIDGE_INCOMPATIBLE` | 所选实例的插件版本不兼容 | 同 `eplan_project_list` |
 
@@ -35,6 +35,8 @@
 - 只改变 Host 的连接目标，不改变 EPLAN 或项目，所以注解为只读、幂等。
 - `BridgeClient`：发现多个实例时，若已有选择且该进程仍在，就连接它；否则返回 `SESSION_NOT_SELECTED`。选择后立即握手，确认可以连接。
 - 只有一个实例时，选择不是必需的，但调用也成功。
+- 实现（Host，`BridgeClient.SelectAsync`）：在串行队列内重新发现实例并与所选实例握手，**握手成功后才记住选择**；失败（进程号不对、插件不兼容）时保留原来的选择。之后每次调用都先发现实例：所选进程已不在时清除选择，并释放指向它的通道；此时只剩一个实例就直接用它，仍有多个就再次返回 `SESSION_NOT_SELECTED`。
+- `process_id` 必须是正整数；不是任何 Bridge 所在的进程时，返回 `INVALID_ARGUMENT`，`metadata.processIds` 列出可选值。
 
 ## 6. 写操作专项
 不适用。

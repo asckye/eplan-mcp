@@ -45,7 +45,7 @@ public sealed class UsageToolsTests
         JsonElement error = JsonDocument.Parse(Text(result, 0)).RootElement.GetProperty("error");
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
         string violations = error.GetProperty("metadata").GetProperty("violations").GetString()!;
-        Assert.Contains("'tool' must be one of: eplan_check_list, eplan_connection_list, eplan_device_get, eplan_device_list, eplan_message_list, eplan_page_get, eplan_page_list, eplan_part_list, eplan_project_get, eplan_project_list, eplan_session_status, eplan_tool_usage.", violations, StringComparison.Ordinal);
+        Assert.Contains("'tool' must be one of: eplan_check_list, eplan_connection_list, eplan_device_get, eplan_device_list, eplan_message_list, eplan_page_get, eplan_page_list, eplan_part_list, eplan_project_get, eplan_project_list, eplan_session_select, eplan_session_status, eplan_tool_usage.", violations, StringComparison.Ordinal);
         Assert.Contains("'topic' must be one of: examples, workflow, fields, errors;", violations, StringComparison.Ordinal);
     }
 

@@ -43,7 +43,7 @@ Texts longer than 500 characters are cut and end with `… [truncated, N charact
 - PROJECT_NOT_OPEN: no project is open, or none has this name or path. Call eplan_project_list; if the project is not listed, ask the engineer to open it in EPLAN.
 - AMBIGUOUS_NAME: two open projects have this name, or `project` was omitted while several projects are open and none is selected. `metadata.candidates` lists their paths, one per line; pass one as `project`.
 - EPLAN_NOT_CONNECTED (retryable): no EPLAN with the EplanMcp add-in is running. Call eplan_session_status and relay its `hint`.
-- SESSION_NOT_SELECTED: several EPLAN instances with the add-in are running. Ask the engineer to close all but one.
+- SESSION_NOT_SELECTED: several EPLAN instances with the add-in are running and none is chosen. Call eplan_session_status, then eplan_session_select with the `processId` of the one meant.
 - BRIDGE_INCOMPATIBLE: the add-in in EPLAN is older than this server and lacks this tool. Ask the engineer to run `eplanmcp install-addin` and restart EPLAN.
 - EPLAN_BUSY (retryable): EPLAN shows a dialog or is busy. Relay the message to the engineer, then retry once.
 - LICENCE_MISSING: the API extension licence is missing or expired. Ask the engineer to check the licence or run `eplanmcp doctor`.

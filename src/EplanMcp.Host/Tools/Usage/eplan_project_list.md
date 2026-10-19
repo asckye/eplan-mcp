@@ -36,7 +36,7 @@ No open project is not an error: `projects` is empty and `total` is 0. The summa
 
 - INVALID_ARGUMENT: `limit` is outside 1-200, `cursor` was not returned by this tool or is out of date because fewer projects are open now, or an unknown argument was passed. `metadata.violations` lists every problem. Fix the arguments; for a cursor problem, call again without `cursor`.
 - EPLAN_NOT_CONNECTED (retryable): no EPLAN with the EplanMcp add-in is running, or the connection was lost. Call eplan_session_status and relay its `hint`; retry after the engineer has acted.
-- SESSION_NOT_SELECTED: several EPLAN instances with the add-in are running. Ask the engineer to close all but one, then retry.
+- SESSION_NOT_SELECTED: several EPLAN instances with the add-in are running and none is chosen. Call eplan_session_status to see their `processId`s, then eplan_session_select with the one meant (its result names the variant); ask the engineer which one when unsure. Then retry.
 - BRIDGE_INCOMPATIBLE: the add-in in EPLAN is a different or older version than this server. Ask the engineer to run `eplanmcp install-addin` and restart EPLAN.
 - EPLAN_BUSY (retryable): EPLAN shows a dialog, is busy with a long task, or another EplanMcp call is still running. Relay the message to the engineer, then retry once.
 - LICENCE_MISSING: EPLAN reports that the API extension licence is missing or has expired. Ask the engineer to check the EPLAN licence or run `eplanmcp doctor`; retrying does not help.

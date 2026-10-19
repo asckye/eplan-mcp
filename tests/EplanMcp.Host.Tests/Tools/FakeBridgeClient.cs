@@ -25,7 +25,18 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>The arguments of the last call, as the tool built them.</summary>
     public object? LastArgs => Calls.Count == 0 ? null : Calls[^1].Args;
 
+    /// <summary>The process IDs passed to <see cref="SelectAsync"/>, which answers with <see cref="Status"/>'s handshake.</summary>
+    public List<int> Selections { get; } = [];
+
     public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => Task.FromResult(Status);
+
+    public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken)
+    {
+        Selections.Add(processId);
+        return Failure is not null
+            ? throw new BridgeCallException(Failure)
+            : Task.FromResult(Status.Handshake ?? throw new InvalidOperationException("no handshake to answer select with"));
+    }
 
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken)
     {

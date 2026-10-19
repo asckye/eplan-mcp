@@ -6,12 +6,16 @@ using Microsoft.Extensions.Logging;
 namespace EplanMcp.Host.Bridge;
 
 /// <summary>
-/// Connects lazily, on the first call that needs EPLAN, and keeps one channel to the single discovered Bridge.
-/// Discovery runs before every call, so a restarted EPLAN (new pipe name) is picked up without a failed call.
+/// Connects lazily, on the first call that needs EPLAN, and keeps one channel to the discovered Bridge: the only one,
+/// or the one chosen with <see cref="SelectAsync"/> (eplan_session_select) when several run. Discovery runs before
+/// every call, so a restarted EPLAN (new pipe name) is picked up without a failed call, and a choice whose EPLAN has
+/// exited is forgotten.
 /// <para>
 /// Ownership: <see cref="_queue"/> guards <see cref="_channel"/> and <see cref="_handshake"/>; every call holds it
 /// for its whole duration, which also makes the queue per EPLAN instance serial (architecture 8.3). A cancelled or
 /// timed-out call drops the channel, because a late response would otherwise be read by the next call.
+/// <see cref="_selectedProcessId"/> is written only while holding <see cref="_queue"/>; it is volatile because the
+/// status also reports it after a failed call.
 /// </para>
 /// </summary>
 internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
@@ -27,6 +31,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
     private readonly SemaphoreSlim _queue = new(1, 1);
     private IBridgeChannel? _channel;
     private HandshakeResult? _handshake;
+    private volatile int _selectedProcessId; // 0: none chosen; no EPLAN runs as process 0
 
     public BridgeClient(IBridgeDiscovery discovery, IBridgeConnector connector, ILogger<BridgeClient> logger)
         : this(discovery, connector, logger, DefaultQueueTimeout, DefaultCallTimeout)
@@ -47,14 +52,26 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         IReadOnlyList<BridgeEndpoint> instances = Discover();
         try
         {
-            HandshakeResult handshake = await RunExclusiveAsync(token => EnsureConnectedAsync(instances, token), cancellationToken).ConfigureAwait(false);
-            return new BridgeStatus(instances, handshake, null);
+            HandshakeResult handshake = await RunExclusiveAsync(token => EnsureConnectedAsync(instances, null, token), cancellationToken).ConfigureAwait(false);
+            return new BridgeStatus(instances, handshake, null, Selected);
         }
         catch (BridgeCallException ex)
         {
-            return new BridgeStatus(instances, null, ex.Error);
+            return new BridgeStatus(instances, null, ex.Error, Selected);
         }
     }
+
+    public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken) =>
+        RunExclusiveAsync(
+            async token =>
+            {
+                // Remembered only after the handshake: a failed choice leaves the previous one in place.
+                HandshakeResult handshake = await EnsureConnectedAsync(Discover(), processId, token).ConfigureAwait(false);
+                _selectedProcessId = processId;
+                LogSelected(processId);
+                return handshake;
+            },
+            cancellationToken);
 
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken)
     {
@@ -62,7 +79,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         return RunExclusiveAsync(
             async token =>
             {
-                HandshakeResult handshake = await EnsureConnectedAsync(Discover(), token).ConfigureAwait(false);
+                HandshakeResult handshake = await EnsureConnectedAsync(Discover(), null, token).ConfigureAwait(false);
                 if (!Supports(handshake, operation))
                 {
                     throw new BridgeCallException(BridgeErrors.OperationMissing(operation, handshake.BridgeVersion));
@@ -131,20 +148,34 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             ? operations.Contains(operation, StringComparer.Ordinal)
             : operation == OperationNames.ProjectList;
 
-    private async Task<HandshakeResult> EnsureConnectedAsync(IReadOnlyList<BridgeEndpoint> instances, CancellationToken cancellationToken)
+    private int? Selected => _selectedProcessId is var selected and not 0 ? selected : null;
+
+    /// <summary>
+    /// Connects to <paramref name="choice"/> when given (<see cref="SelectAsync"/>), else to the selected instance, else
+    /// to the only one. A selection whose process discovery no longer finds is forgotten (tool spec eplan_session_select 3).
+    /// </summary>
+    private async Task<HandshakeResult> EnsureConnectedAsync(IReadOnlyList<BridgeEndpoint> instances, int? choice, CancellationToken cancellationToken)
     {
+        if (Selected is { } selected && !instances.Any(i => i.ProcessId == selected))
+        {
+            LogSelectionGone(selected);
+            _selectedProcessId = 0;
+            if (_channel?.Endpoint.ProcessId == selected)
+            {
+                // Its EPLAN has exited; nothing will answer on this channel again.
+                await DropAsync().ConfigureAwait(false);
+            }
+        }
+
         if (instances.Count == 0)
         {
             await DropAsync().ConfigureAwait(false);
             throw new BridgeCallException(BridgeErrors.NotConnected());
         }
 
-        if (instances.Count > 1)
-        {
-            throw new BridgeCallException(BridgeErrors.SessionNotSelected(instances));
-        }
-
-        BridgeEndpoint target = instances[0];
+        BridgeEndpoint target = (choice ?? Selected) is { } wanted
+            ? instances.FirstOrDefault(i => i.ProcessId == wanted) ?? throw new BridgeCallException(BridgeErrors.UnknownInstance(wanted, instances))
+            : instances.Count == 1 ? instances[0] : throw new BridgeCallException(BridgeErrors.SessionNotSelected(instances));
         if (_channel is not null && _handshake is not null && _channel.Endpoint == target)
         {
             return _handshake;
@@ -266,6 +297,12 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Connected to EPLAN process {ProcessId} (EPLAN {EplanVersion}, add-in {BridgeVersion})")]
     private partial void LogConnected(int processId, string eplanVersion, string bridgeVersion);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "EPLAN process {ProcessId} selected")]
+    private partial void LogSelected(int processId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Selected EPLAN process {ProcessId} is gone; selection cleared")]
+    private partial void LogSelectionGone(int processId);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Could not connect to Bridge pipe {PipeName}")]
     private partial void LogConnectFailed(Exception exception, string pipeName);

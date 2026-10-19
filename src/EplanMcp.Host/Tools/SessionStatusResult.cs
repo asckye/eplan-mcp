@@ -5,7 +5,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Output of <c>eplan_session_status</c> (docs/tools/eplan_session_status.md).</summary>
 internal sealed class SessionStatusResult
 {
-    [Description("True when exactly one EPLAN with a compatible EplanMcp add-in is running and answered.")]
+    [Description("True when the EPLAN in use (the only one running, or the one chosen with eplan_session_select) answered with a compatible add-in.")]
     public bool Connected { get; set; }
 
     [Description("This EplanMcp server.")]
@@ -47,6 +47,10 @@ internal sealed class SessionStatusResult
 
     internal sealed class InstanceSummary
     {
+        [Description("Pass it as 'process_id' to eplan_session_select to work with this EPLAN.")]
         public int ProcessId { get; set; }
+
+        [Description("True for the EPLAN chosen with eplan_session_select.")]
+        public bool Selected { get; set; }
     }
 }
