@@ -21,6 +21,9 @@ public static class ErrorReason
     /// <summary>No page has the given name; <c>metadata.page</c> repeats it, and eplan_page_list shows the page names.</summary>
     public const string PageNotFound = "PAGE_NOT_FOUND";
 
+    /// <summary>No device has the given tag; eplan_device_list finds the full tag.</summary>
+    public const string DeviceNotFound = "DEVICE_NOT_FOUND";
+
     /// <summary>Several EPLAN instances are running and none is selected.</summary>
     public const string SessionNotSelected = "SESSION_NOT_SELECTED";
 

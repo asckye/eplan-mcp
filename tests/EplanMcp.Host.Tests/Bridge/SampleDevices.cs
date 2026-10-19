@@ -1,4 +1,5 @@
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tests.Bridge;
 
@@ -29,4 +30,27 @@ internal sealed class SampleDevices : IDeviceReader
         page is not null && !Functions.Any(f => f.Page == page)
             ? null
             : [.. Functions.Where(f => (page is null || f.Page == page) && (category is null || string.Equals(f.Category, category, StringComparison.OrdinalIgnoreCase)))];
+
+    public IReadOnlyList<FunctionName> ReadMainFunctionNames(string projectPath) =>
+        [.. Functions.Where(f => f.IsMain).Select(f => new FunctionName { Name = f.Name, VisibleName = f.VisibleName })];
+
+    /// <summary>The main function with this full tag; its auxiliary functions are the others whose tag starts with it.</summary>
+    public DeviceRecord? ReadDevice(string projectPath, string tag, string? language, bool withProperties)
+    {
+        FunctionRecord? main = Functions.FirstOrDefault(f => f.IsMain && f.Name == tag);
+        return main is null
+            ? null
+            : new DeviceRecord
+            {
+                Main = new FunctionDetail { Name = main.Name, VisibleName = main.VisibleName, Category = main.Category, Page = main.Page, Text = "功能文本", Pins = ["1", string.Empty, "2"] },
+                Auxiliary =
+                [
+                    .. Functions
+                        .Where(f => !f.IsMain && f.Name.StartsWith(main.Name, StringComparison.Ordinal))
+                        .Select(f => new FunctionDetail { Name = f.Name, VisibleName = f.VisibleName, Category = f.Category, Page = f.Page }),
+                ],
+                Parts = [.. Enumerable.Range(1, main.Parts).Select(i => new DevicePart { PartNumber = $"PXC.{i}", Variant = "1", Count = 1 })],
+                Properties = withProperties ? [new PropertyEntry { Id = 20011, Name = "Function text", Value = language ?? "default" }] : null,
+            };
+    }
 }

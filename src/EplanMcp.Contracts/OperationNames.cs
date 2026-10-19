@@ -23,4 +23,7 @@ public static class OperationNames
     /// data: <see cref="ListData{TItem}"/> of <see cref="DeviceListItem"/>.
     /// </summary>
     public const string DeviceList = "device.list";
+
+    /// <summary>One device by tag. Arguments: <see cref="DeviceGetArgs"/>; data: <see cref="DeviceGetData"/>.</summary>
+    public const string DeviceGet = "device.get";
 }
