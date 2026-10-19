@@ -42,3 +42,9 @@ backup/
 *.edb/
 *.zw1
 !tests/fixtures/**/*.zw1
+
+# ---- Agent skills ----
+# Installed skill files are restored from skills-lock.json (see README, development tools); only the lock is tracked.
+.claude/skills/archify/
+# archify scratch folders (candidates, receipts, browser evidence); finished diagrams live in docs/diagrams/.
+.archify/
