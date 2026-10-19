@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>Output of <c>eplan_project_list</c> (docs/tools/eplan_project_list.md).</summary>
-internal sealed class ProjectListResult
+internal sealed class ProjectListResult : IPagedResult<ProjectListResult.ProjectEntry>
 {
     [Description("Open projects on this page, sorted by name.")]
     public List<ProjectEntry> Projects { get; set; } = [];
@@ -16,6 +16,11 @@ internal sealed class ProjectListResult
 
     [Description("True when entries were cut to stay within the size budget.")]
     public bool Truncated { get; set; }
+
+    [Description("What to do next when entries were cut; null otherwise.")]
+    public string? Hint { get; set; }
+
+    List<ProjectEntry> IPagedResult<ProjectEntry>.Items => Projects;
 
     internal sealed class ProjectEntry
     {

@@ -126,6 +126,51 @@ public sealed class ProjectToolsTests
         Assert.DoesNotContain("Ignore", Text(result, 0), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task ProjectList_NameAndPath_AreCleanedAsProjectText()
+    {
+        _bridge.Projects.Add(new OpenProject { Name = "Line\u001B[31m1\r\n" + new string('n', 600), Path = @"D:\Projects\" + new string('p', 600) });
+
+        JsonElement project = Structured(await List()).GetProperty("projects")[0];
+
+        string name = project.GetProperty("name").GetString()!;
+        Assert.StartsWith("Line[31m1\nnnn", name, StringComparison.Ordinal);
+        Assert.EndsWith("n … [truncated, 610 characters in total]", name, StringComparison.Ordinal);
+        Assert.EndsWith("p … [truncated, 612 characters in total]", project.GetProperty("path").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ProjectList_PageOverTheSizeBudget_IsCutAndTheCursorContinuesIt()
+    {
+        // About 270 tokens per project: a full page of 50 is far over the 5,000 default budget.
+        string[] names = [.. Enumerable.Range(1, 50).Select(i => $"P{i:D2}".PadRight(500, 'x'))];
+        _bridge.Projects.AddRange(names.Select(n => Project(n)));
+
+        CallToolResult first = await List();
+
+        JsonElement page = Structured(first);
+        Assert.True(page.GetProperty("truncated").GetBoolean());
+        Assert.InRange(page.GetProperty("projects").GetArrayLength(), 1, 49);
+        Assert.Contains("'cursor'", page.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.False(page.TryGetProperty("items", out _));
+        Assert.InRange(ResultShaper.EstimateTokens(page.GetRawText()), 1, ResultShaper.DefaultTokenBudget);
+        Assert.EndsWith("to stay within the size budget; more with 'cursor'.", Text(first, 0), StringComparison.Ordinal);
+
+        var seen = new List<string>();
+        string? cursor = null;
+        int pages = 0;
+        do
+        {
+            JsonElement next = Structured(await List(cursor: cursor));
+            seen.AddRange(next.GetProperty("projects").EnumerateArray().Select(p => p.GetProperty("name").GetString()!));
+            cursor = next.GetProperty("nextCursor").GetString();
+            Assert.InRange(++pages, 1, 10);
+        }
+        while (cursor is not null);
+
+        Assert.Equal(names, seen);
+    }
+
     private Task<CallToolResult> List(int limit = ProjectTools.DefaultLimit, string? cursor = null) =>
         ProjectTools.ProjectListAsync(_bridge, limit, cursor, TestContext.Current.CancellationToken);
 

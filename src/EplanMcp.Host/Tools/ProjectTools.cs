@@ -80,10 +80,20 @@ internal sealed class ProjectTools
         int next = offset + page.Count;
         var result = new ProjectListResult
         {
-            Projects = [.. page.Select(p => new ProjectListResult.ProjectEntry { Name = p.Name, Current = p.Current, ReadOnly = p.ReadOnly, Path = p.Path })],
+            Projects =
+            [
+                .. page.Select(p => new ProjectListResult.ProjectEntry
+                {
+                    Name = ResultShaper.CleanText(p.Name),
+                    Current = p.Current,
+                    ReadOnly = p.ReadOnly,
+                    Path = ResultShaper.CleanText(p.Path),
+                }),
+            ],
             Total = all.Count,
             NextCursor = next < all.Count ? PageCursor.Encode(next, fingerprint) : null,
         };
+        ResultShaper.FitPage(result, offset, fingerprint);
         return ToolResults.Success(Summary(result, all), result);
     }
 
@@ -99,7 +109,7 @@ internal sealed class ProjectTools
         string current = all.Any(p => p.Current) ? " (1 current)" : " (none selected as current)";
         string paging = result.NextCursor is null
             ? string.Empty
-            : $" Showing {result.Projects.Count.ToString(CultureInfo.InvariantCulture)}; more with 'cursor'.";
+            : $" Showing {result.Projects.Count.ToString(CultureInfo.InvariantCulture)}{(result.Truncated ? " to stay within the size budget" : string.Empty)}; more with 'cursor'.";
         return $"{total} project{(result.Total == 1 ? string.Empty : "s")} open in EPLAN{current}.{paging}";
     }
 }
