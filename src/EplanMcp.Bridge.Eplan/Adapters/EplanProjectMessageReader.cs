@@ -1,3 +1,4 @@
+using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.EServices;
 using EplanMcp.Bridge.Core.Operations;
@@ -25,7 +26,7 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
             // S6 found only ProjectMessage elements; a BaseProjectMessage is not stored in the project (EPLAN XML docs).
             if (item is ProjectMessage message)
             {
-                StorableObject? target = message.GetObject1();
+                (string? kind, string? name) = Target(message);
                 records.Add(new ProjectMessageRecord
                 {
                     Id = message.GetId(),
@@ -33,17 +34,37 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
                     Region = message.GetGroup().ToString(),
                     Text = message.GetText() ?? string.Empty,
                     Done = message.GetDone(),
-                    ObjectKind = target?.GetType().Name,
-                    ObjectName = target switch
-                    {
-                        FunctionBase function => function.Name,
-                        Page page => page.Name,
-                        _ => null,
-                    },
+                    ObjectKind = kind,
+                    ObjectName = name,
                 });
             }
         }
 
         return records;
+    }
+
+    /// <summary>
+    /// The EPLAN type name and the name of the object a message points at; both null when there is none, or when EPLAN
+    /// cannot give it back (for example an object deleted since the check: unverified whether GetObject1 then returns
+    /// null or throws). One such message must not fail the whole listing. The exception families are the DataModel
+    /// ones of M2 design 4.5: BaseException, and ArgumentException or InvalidOperationException subclasses.
+    /// </summary>
+    private static (string? Kind, string? Name) Target(ProjectMessage message)
+    {
+        try
+        {
+            StorableObject? target = message.GetObject1();
+            string? name = target switch
+            {
+                FunctionBase function => function.Name,
+                Page page => page.Name,
+                _ => null,
+            };
+            return (target?.GetType().Name, name);
+        }
+        catch (Exception ex) when (ex is BaseException or ArgumentException or InvalidOperationException)
+        {
+            return (null, null);
+        }
     }
 }
