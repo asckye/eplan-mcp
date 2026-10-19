@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_message_list", "eplan_page_get", "eplan_page_list", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_check_list", "eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_message_list", "eplan_page_get", "eplan_page_list", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -205,6 +205,19 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_CheckListGivesTheStoredMessagesAndCounts()
+    {
+        StartBridge();
+
+        CallToolResult result = await Call("eplan_check_list", new() { ["severity"] = "warning", ["include_done"] = true });
+
+        JsonElement data = result.StructuredContent!.Value;
+        Assert.Equal(["端子 -X1:1 没有连接", "已处理"], data.GetProperty("messages").EnumerateArray().Select(m => m.GetProperty("text").GetString()));
+        Assert.Equal("=GAA+A1-X1:1", data.GetProperty("messages")[0].GetProperty("object").GetProperty("name").GetString());
+        Assert.Equal("2 warnings, 1 hint from the last check.", Text(result));
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -261,6 +274,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new ConnectionListOperation(catalog, devices, new SampleConnections()),
             new PartListOperation(catalog, new SampleParts()),
             new MessageListOperation(new SystemMessageReader()),
+            new CheckListOperation(catalog, new ProjectMessageReader()),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
@@ -331,6 +345,16 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new() { Level = 2, Index = "S000000", Text = "warning", Occurrences = 1 },
             new() { Level = 0, Index = "S000000", Text = "trace", Occurrences = 1 },
             new() { Level = 4, Index = "S000000", Text = "脚本编译失败", Occurrences = 2 },
+        ];
+    }
+
+    private sealed class ProjectMessageReader : IProjectMessageReader
+    {
+        public IReadOnlyList<ProjectMessageRecord> ReadMessages(string projectPath) =>
+        [
+            new() { Id = 4025, Category = "Warning", Region = "Connections", Text = "端子 -X1:1 没有连接", ObjectKind = "Terminal", ObjectName = "=GAA+A1-X1:1" },
+            new() { Id = 13001, Category = "Hint", Region = "PartsData", Text = "h" },
+            new() { Id = 4026, Category = "Warning", Region = "Connections", Text = "已处理", Done = true },
         ];
     }
 
