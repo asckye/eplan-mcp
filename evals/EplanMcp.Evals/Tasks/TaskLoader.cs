@@ -23,6 +23,10 @@ internal static partial class TaskLoader
     private static readonly string[] _checkKeys = ["answer", .. Comparison.Names.Keys];
     private static readonly string[] _budgetKeys = ["max_tool_calls", "max_minutes", "max_usd"];
 
+    public static IReadOnlyList<TaskFile> LoadDirectory(string directory) =>
+        [.. Directory.EnumerateFiles(directory, "*.yaml").Order(StringComparer.Ordinal)
+            .Select(file => Load(Path.GetFileNameWithoutExtension(file), File.ReadAllText(file)))];
+
     /// <summary>Reads one file; <paramref name="name"/> is its name without <c>.yaml</c>, which the task id must repeat.</summary>
     public static TaskFile Load(string name, string yaml)
     {
