@@ -52,10 +52,11 @@
 | `export` | 导出 | PDF、DXF、图片…… |
 | `scratch` | 沙箱项目 | 本项目的概念 |
 | `message` | EPLAN 系统消息 | 系统消息树 |
+| `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
 
 ### 3.3 动作
 - 标准动作：`list`（分页列出）、`get`（按名称取单个）、`search`（按条件查找）、`create`、`update`、`delete`。
-- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`。
+- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
 
 ---

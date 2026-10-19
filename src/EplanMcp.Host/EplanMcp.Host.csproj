@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Detailed usage per tool, served by eplan_tool_usage (mcp-tool-design 10); the file name is the tool name. -->
+    <EmbeddedResource Include="Tools\Usage\*.md" LogicalName="EplanMcp.Host.Tools.Usage.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Host.Tests" />
     <!-- Windows x64 only (architecture section 2); lets the platform analyzer accept registry and Win32 calls. -->
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">

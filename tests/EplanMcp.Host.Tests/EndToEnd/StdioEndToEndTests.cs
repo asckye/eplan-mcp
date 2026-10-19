@@ -45,12 +45,26 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ToolsList_HasBothM1Tools()
+    public async Task ToolsList_HasEveryToolAndTheInstructions()
     {
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(["eplan_project_list", "eplan_session_status"], tools.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(["eplan_project_list", "eplan_session_status", "eplan_tool_usage"], tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task WithoutEplan_ToolUsageAnswersAndRejectsUnknownTools()
+    {
+        CallToolResult usage = await Call("eplan_tool_usage", new() { ["tool"] = "eplan_project_list", ["topic"] = "examples" });
+        CallToolResult unknown = await Call("eplan_tool_usage", new() { ["tool"] = "eplan_page_lst" });
+
+        JsonElement data = usage.StructuredContent!.Value;
+        Assert.Equal("examples", data.GetProperty("topic").GetString());
+        Assert.StartsWith("## Examples\n", data.GetProperty("text").GetString(), StringComparison.Ordinal);
+        Assert.Equal("Usage of eplan_project_list: examples.", Text(usage));
+        Assert.True(unknown.IsError);
+        Assert.Contains(ErrorReason.InvalidArgument, Text(unknown), StringComparison.Ordinal);
     }
 
     [Fact]
