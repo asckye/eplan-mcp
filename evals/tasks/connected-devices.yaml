@@ -1,13 +1,22 @@
 id: connected-devices
 set: dev
-prompt: 断路器 =GAA+A1-FC1 的输出端分别接到了哪些设备？列出对端设备的完整标识。
+prompt: 断路器 =GAA+A1-FC1 的 2、4、6 号端子分别接到哪个设备？
 answer:
   type: object
-  required: [devices]
+  required: [pins]
   properties:
-    devices: { type: array, items: { type: string } }
-# Checked on the fixture (api-notes A12 run): FC1 pins 1-6 lead to these six devices; terminals of +A1-XD1 lead into it.
+    pins:
+      type: array
+      items:
+        type: object
+        required: [pin, device]
+        properties:
+          pin: { type: string }
+          device: { type: string, description: "the full tag of the device at the other end, such as =GAA+A1-FC9" }
+# Checked on the fixture (api-notes A12 run): pins 2, 4 and 6 lead to FC2, FC3 and FC4. The first version asked for
+# "the outputs" and expected pins 1-6; the model rightly answered the load side only, so the question now names the
+# pins. A plain list of tags invited "2 号端子 → =GAA+A1-FC2" entries, so each pin and device has its own field.
 checks:
-  - answer: $.devices
-    contains: ["=EA+A1-FB1", "=EA+A1-FB2", "=GAA+A1-FC2", "=GAA+A1-FC3", "=GAA+A1-FC4", "=GAA+A1-FC5"]
+  - answer: "$.pins[*].device"
+    set_equals: ["=GAA+A1-FC2", "=GAA+A1-FC3", "=GAA+A1-FC4"]
 budget: { max_tool_calls: 8 }
