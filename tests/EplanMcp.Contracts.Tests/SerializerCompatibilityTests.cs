@@ -66,6 +66,18 @@ public sealed class SerializerCompatibilityTests
             ],
         },
         new ProjectGetData(),
+        new PageListArgs { Project = "Line1", NamePrefix = "=GAA+A1&EFS1/", PageType = "Circuit", Text = "电源", Language = "zh_CN", Offset = 50, Limit = 50 },
+        new PageListArgs(),
+        new ListData<PageSummary>
+        {
+            Project = "Line1",
+            Items =
+            [
+                new PageSummary { Name = "=GAA+A1&EFS1/1", Type = "Circuit", Description = "电源\n24 V" },
+                new PageSummary { Name = "&AAA1/1", Type = "TitlePage" },
+            ],
+            Total = 140,
+        },
     ];
 
     [Theory]

@@ -50,7 +50,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -111,6 +111,23 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_PageListFiltersAndPagesThroughTheBridge()
+    {
+        StartBridge();
+
+        CallToolResult first = await Call("eplan_page_list", new() { ["page_type"] = "circuit", ["limit"] = 1 });
+        CallToolResult second = await Call("eplan_page_list", new() { ["page_type"] = "circuit", ["limit"] = 1, ["cursor"] = first.StructuredContent!.Value.GetProperty("nextCursor").GetString() });
+        CallToolResult badType = await Call("eplan_page_list", new() { ["page_type"] = "Schematic" });
+
+        Assert.Equal("=GAA+A1&EFS1/1", first.StructuredContent!.Value.GetProperty("pages")[0].GetProperty("name").GetString());
+        Assert.Equal("Listed 1 of 2 pages (more: cursor).", Text(first));
+        Assert.Equal("电机", second.StructuredContent!.Value.GetProperty("pages")[0].GetProperty("description").GetString());
+        Assert.Equal(JsonValueKind.Null, second.StructuredContent!.Value.GetProperty("nextCursor").ValueKind);
+        Assert.True(badType.IsError);
+        Assert.Contains("'page_type'", Text(badType), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -139,6 +156,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new ProjectReader()),
+            new PageListOperation(catalog, new PageReader()),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
@@ -168,6 +186,21 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             Devices = 1,
             Properties = includeProperties && language == "zh_CN" ? [new PropertyEntry { Id = 10000, Value = "项目 一" }] : null,
         };
+    }
+
+    private sealed class PageReader : IPageReader
+    {
+        private readonly PageSummary[] _pages =
+        [
+            new() { Name = "&AAA1/1", Type = "TitlePage", Description = "封页" },
+            new() { Name = "=GAA+A1&EFS1/1", Type = "Circuit", Description = "电源" },
+            new() { Name = "=GAA+A1&EFS1/2", Type = "Circuit", Description = "电机" },
+        ];
+
+        public IReadOnlyCollection<string> PageTypes { get; } = ["Circuit", "TitlePage"];
+
+        public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language) =>
+            [.. _pages.Where(p => (namePrefix is null || p.Name.StartsWith(namePrefix, StringComparison.Ordinal)) && (pageType is null || p.Type == pageType))];
     }
 
     private sealed class InlineDispatcher : IMainThreadDispatcher
