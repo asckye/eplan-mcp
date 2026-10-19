@@ -176,6 +176,22 @@ internal sealed class FakeConnectionReader : IConnectionReader
         function is not null && (function == device || function.StartsWith(device + ":", StringComparison.Ordinal));
 }
 
+/// <summary>A project's part references and part data as the EPLAN adapter reads them; "xx_XX" is a language EPLAN does not know.</summary>
+internal sealed class FakePartReader : IPartReader
+{
+    public ProjectParts Parts { get; } = new();
+
+    public List<(string Path, string? Language)> Reads { get; } = [];
+
+    public ProjectParts ReadParts(string projectPath, string? language)
+    {
+        Reads.Add((projectPath, language));
+        return language == "xx_XX"
+            ? throw new BridgeErrorException(ErrorReason.InvalidArgument, "'language' is not a language EPLAN knows.")
+            : Parts;
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {

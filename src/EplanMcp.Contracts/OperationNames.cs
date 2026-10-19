@@ -32,4 +32,10 @@ public static class OperationNames
     /// <see cref="ConnectionListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="ConnectionListItem"/>.
     /// </summary>
     public const string ConnectionList = "connection.list";
+
+    /// <summary>
+    /// Lists the parts a project uses, summed up per part number and variant, filtered and sliced in the Bridge.
+    /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.
+    /// </summary>
+    public const string PartList = "part.list";
 }

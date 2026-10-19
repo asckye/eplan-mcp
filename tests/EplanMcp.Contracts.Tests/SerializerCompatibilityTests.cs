@@ -135,6 +135,18 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 40,
         },
+        new PartListArgs { Project = "Line1", Manufacturer = "SIE", Text = "接触器", Language = "zh_CN", Offset = 50, Limit = 50 },
+        new PartListArgs(),
+        new ListData<PartListItem>
+        {
+            Project = "项目 二",
+            Items =
+            [
+                new PartListItem { PartNumber = "SIE.3RT2016-1BB41", Variant = "1", Quantity = 4, Devices = 3, Description = "接触器", Manufacturer = "SIE" },
+                new PartListItem { PartNumber = "14AWG-BLK", Quantity = 120, Connections = 120 },
+            ],
+            Total = 293,
+        },
     ];
 
     [Theory]
