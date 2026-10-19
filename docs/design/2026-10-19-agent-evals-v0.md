@@ -117,7 +117,7 @@ dotnet run --project evals/EplanMcp.Evals -- run [--set dev|holdout|all] [--task
 dotnet run --project evals/EplanMcp.Evals -- check     # 只校验任务文件，不需要 EPLAN 和模型
 ```
 - `--repeat`：同一任务运行多次，成功率取平均，用来观察模型的波动。
-- 默认的 `claude` 路径：先找 PATH，再找 Claude 桌面版自带的最新版本（`%APPDATA%\Claude\claude-code\<版本>\…\claude.exe`）。
+- 默认的 `claude` 路径：先找 PATH，再找 Claude 桌面版自带的最新版本（`%APPDATA%\Claude\claude-code\<版本>\…\claude.exe`；在包外运行时是包的重定向目录 `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code\…`，api-notes C 节）。
 
 ### 4.5 任务集 v0
 约 20 个任务，覆盖全部 13 个工具和几类常见难点：

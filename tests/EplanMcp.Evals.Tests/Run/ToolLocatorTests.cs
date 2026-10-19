@@ -15,7 +15,7 @@ public sealed class ToolLocatorTests : IDisposable
         string onPath = Touch("bin", "claude.exe");
         Touch("appdata", "Claude", "claude-code", "2.1.299", "f058", "claude.exe");
 
-        Assert.Equal(onPath, ToolLocator.Claude($"{Path.Combine(_directory.FullName, "empty")};{Path.GetDirectoryName(onPath)}", Path.Combine(_directory.FullName, "appdata")));
+        Assert.Equal(onPath, ToolLocator.Claude($"{Path.Combine(_directory.FullName, "empty")};{Path.GetDirectoryName(onPath)}", Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
     }
 
     [Fact]
@@ -26,13 +26,24 @@ public sealed class ToolLocatorTests : IDisposable
         Touch("appdata", "Claude", "claude-code", "latest", "x", "claude.exe");
         Touch("appdata", "Claude", "claude-code", "2.1.1000", "empty.txt");
 
-        Assert.Equal(newest, ToolLocator.Claude(null, Path.Combine(_directory.FullName, "appdata")));
+        Assert.Equal(newest, ToolLocator.Claude(null, Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
+    }
+
+    [Fact]
+    public void Claude_OutsideThePackage_IsFoundInItsRedirectedCopy()
+    {
+        // A terminal outside the MSIX package sees no Claude folder in %APPDATA% (api-notes A6).
+        Touch("local", "Packages", "Claude_pzs8sxrjxfjjc", "LocalCache", "Roaming", "Claude", "claude-code", "2.1.295", "d2e2", "claude.exe");
+        string newest = Touch("local", "Packages", "Claude_pzs8sxrjxfjjc", "LocalCache", "Roaming", "Claude", "claude-code", "2.1.299", "f058", "claude.exe");
+        Touch("local", "Packages", "Other_abc", "LocalCache", "Roaming", "Claude", "claude-code", "9.9.9", "x", "claude.exe");
+
+        Assert.Equal(newest, ToolLocator.Claude(null, Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
     }
 
     [Fact]
     public void Claude_Nowhere_IsNull()
     {
-        Assert.Null(ToolLocator.Claude(string.Empty, Path.Combine(_directory.FullName, "appdata")));
+        Assert.Null(ToolLocator.Claude(string.Empty, Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
     }
 
     [Fact]

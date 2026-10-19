@@ -37,7 +37,10 @@ internal static class RunCommand
             return Stop(output, $"No valid task in {directory} matches --set {options.SetToRun}{(options.Task is null ? string.Empty : " --task " + options.Task)}; run check for the problems.");
         }
 
-        string? claude = options.Claude ?? ToolLocator.Claude(Environment.GetEnvironmentVariable("PATH"), Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+        string? claude = options.Claude ?? ToolLocator.Claude(
+            Environment.GetEnvironmentVariable("PATH"),
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
         string? eplanmcp = options.Eplanmcp ?? ToolLocator.Eplanmcp(root);
         if (claude is null || eplanmcp is null)
         {
