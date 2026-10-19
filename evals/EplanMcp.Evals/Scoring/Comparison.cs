@@ -106,7 +106,8 @@ internal static class Comparison
         _ => false,
     };
 
-    private static string? Text(JsonNode? node) =>
+    /// <summary>The value of a JSON string; null for anything else.</summary>
+    public static string? Text(JsonNode? node) =>
         node is JsonValue value && value.GetValueKind() == JsonValueKind.String ? value.GetValue<string>() : null;
 
     /// <summary>The elements of <paramref name="wanted"/> that <paramref name="present"/> lacks, each once.</summary>
