@@ -16,20 +16,23 @@ public static class Paging
     /// Returns items <c>[Offset, Offset + Limit)</c>. An offset past the end means the listing changed since the
     /// cursor was made; the caller hears that, rather than getting an empty page that looks like the end.
     /// </summary>
-    public static List<T> Slice<T>(IReadOnlyList<T> all, ListArgs args)
+    public static List<T> Slice<T>(IReadOnlyList<T> all, ListArgs args) => Slice(all, args.Offset, args.Limit);
+
+    /// <summary>The same for a listing without a project, such as EPLAN's system messages.</summary>
+    public static List<T> Slice<T>(IReadOnlyList<T> all, int offset, int limit)
     {
         var violations = new List<string>();
-        if (args.Offset < 0)
+        if (offset < 0)
         {
             violations.Add("'offset' must not be negative.");
         }
 
-        if (args.Limit is < 1 or > MaxLimit)
+        if (limit is < 1 or > MaxLimit)
         {
             violations.Add($"'limit' must be between 1 and {MaxLimit.ToString(CultureInfo.InvariantCulture)}.");
         }
 
-        if (violations.Count == 0 && args.Offset > all.Count)
+        if (violations.Count == 0 && offset > all.Count)
         {
             violations.Add("'cursor' is out of date: fewer items match now. Omit it to start from the first page.");
         }
@@ -43,6 +46,6 @@ public static class Paging
                 new Dictionary<string, string> { ["violations"] = string.Join(" ", violations) });
         }
 
-        return [.. all.Skip(args.Offset).Take(args.Limit)];
+        return [.. all.Skip(offset).Take(limit)];
     }
 }
