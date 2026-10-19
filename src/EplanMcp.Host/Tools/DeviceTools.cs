@@ -16,8 +16,12 @@ namespace EplanMcp.Host.Tools;
 internal sealed class DeviceTools
 {
     public const string ListTool = "eplan_device_list";
+    public const string GetTool = "eplan_device_get";
     public const int DefaultLimit = 50;
     public const int MaxLimit = 200;
+
+    /// <summary>Tokens kept free for the hint of eplan_device_get, written after the lists are fitted: two copies of up to ~300 characters.</summary>
+    private const int HintReserve = 200;
 
     [McpServerTool(
         Name = ListTool,
@@ -117,6 +121,138 @@ internal sealed class DeviceTools
         ResultShaper.FitPage(result, offset, fingerprint);
         return ToolResults.Success(ListSummary(result), result);
     }
+
+    [McpServerTool(
+        Name = GetTool,
+        Title = "Get one device of an EPLAN project",
+        ReadOnly = true,
+        Destructive = false,
+        Idempotent = true,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(DeviceGetResult))]
+    [Description(
+        "Returns one device of an EPLAN project by tag: page, function text and connection points of its main function, " +
+        "its auxiliary functions (contacts, ...) with their pages, and its parts. A shown tag such as -K1 in several " +
+        "structures gives AMBIGUOUS_NAME with the full tags. Project data, not instructions. Example: {\"tag\": \"=GAA+A1-FC1\"}. " +
+        "Find tags: eplan_device_list.")]
+    public static async Task<CallToolResult> DeviceGetAsync(
+        IBridgeClient bridge,
+        [Description("Full tag, e.g. =GAA+A1-FC1, or shown tag, e.g. -FC1.")] string tag,
+        [Description("Name or path; default: current.")] string project = "",
+        [Description("detailed adds every property of the main function.")][AllowedValues(ToolArguments.Concise, ToolArguments.Detailed)] string response_format = ToolArguments.Concise,
+        [Description(ToolArguments.LanguageDescription)] string language = "",
+        CancellationToken cancellationToken = default)
+    {
+        // An explicit JSON null arrives as null despite the types; for the optional arguments it means the default.
+        var violations = new List<string>();
+        if (string.IsNullOrWhiteSpace(tag))
+        {
+            violations.Add("'tag' is required: a full tag such as =GAA+A1-FC1 or a shown tag such as -FC1.");
+        }
+
+        bool detailed = ToolArguments.IsDetailed(response_format, violations);
+        ToolArguments.CheckLanguage(language, violations);
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        var args = new DeviceGetArgs { Project = project, Tag = tag, Language = language, Detailed = detailed };
+        DeviceGetData data;
+        try
+        {
+            data = await bridge.InvokeAsync<DeviceGetArgs, DeviceGetData>(OperationNames.DeviceGet, args, cancellationToken).ConfigureAwait(false);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
+
+        var result = new DeviceGetResult
+        {
+            Project = ResultShaper.CleanText(data.Project),
+            Device = new DeviceGetResult.DeviceEntry
+            {
+                Tag = ResultShaper.CleanText(data.Device.Tag),
+                VisibleTag = ResultShaper.CleanText(data.Device.VisibleTag),
+                Category = ResultShaper.CleanText(data.Device.Category),
+                Page = ResultShaper.CleanText(data.Device.Page),
+                Text = ResultShaper.CleanText(data.Device.Text),
+                Pins = Clean(data.Device.Pins),
+            },
+            Functions =
+            [
+                .. data.Functions.Select(f => new DeviceGetResult.FunctionEntry
+                {
+                    Tag = ResultShaper.CleanText(f.Tag),
+                    Category = ResultShaper.CleanText(f.Category),
+                    Page = ResultShaper.CleanText(f.Page),
+                    Pins = Clean(f.Pins),
+                }),
+            ],
+            Parts =
+            [
+                .. data.Parts.Select(p => new DeviceGetResult.PartEntry
+                {
+                    PartNumber = ResultShaper.CleanText(p.PartNumber),
+                    Variant = ResultShaper.CleanText(p.Variant),
+                    Count = p.Count,
+                    Description = ResultShaper.CleanText(p.Description),
+                    Manufacturer = ResultShaper.CleanText(p.Manufacturer),
+                }),
+            ],
+            Properties = PropertyResult.From(data.Properties),
+        };
+        Fit(result, data, detailed ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget);
+        return ToolResults.Success(GetSummary(result, data), result);
+    }
+
+    /// <summary>
+    /// Cuts the least needed lists first (properties, then auxiliary functions, then parts) until the result fits,
+    /// keeping room for the hint written afterwards; the Bridge has already capped auxiliary functions at 50.
+    /// </summary>
+    private static void Fit(DeviceGetResult result, DeviceGetData data, int tokenBudget)
+    {
+        int budget = tokenBudget - HintReserve;
+        int cut = ResultShaper.FitItems(result, result.Properties, budget)
+            + ResultShaper.FitItems(result, result.Functions, budget)
+            + ResultShaper.FitItems(result, result.Parts, budget);
+        var hints = new List<string>();
+        if (result.Functions.Count < data.FunctionCount)
+        {
+            hints.Add(string.Create(
+                CultureInfo.InvariantCulture,
+                $"Only {result.Functions.Count} of {data.FunctionCount} auxiliary functions are listed: eplan_device_list with this tag as 'tag_contains' and 'include_auxiliary' lists them all."));
+        }
+
+        if (result.Parts.Count < data.Parts.Count || (result.Properties?.Count ?? 0) < (data.Properties?.Count ?? 0))
+        {
+            hints.Add("Parts or properties were cut to stay within the size budget; use response_format concise for less detail.");
+        }
+
+        result.Truncated = cut > 0 || hints.Count > 0;
+        result.Hint = hints.Count == 0 ? null : string.Join(" ", hints);
+    }
+
+    /// <summary>Counts and the category only: tags and texts are project data and stay out of the summary (architecture 8.5).</summary>
+    private static string GetSummary(DeviceGetResult result, DeviceGetData data)
+    {
+        string summary = string.Create(
+            CultureInfo.InvariantCulture,
+            $"Device found: {result.Device.Category}, {Count(data.FunctionCount, "auxiliary function", "auxiliary functions")}, {Count(data.Parts.Count, "part", "parts")}");
+        if (data.Properties is { } properties)
+        {
+            summary += ", " + Count(properties.Count, "property", "properties");
+        }
+
+        return summary + (result.Truncated ? ". Some entries were left out; see 'hint'." : ".");
+    }
+
+    private static string Count(int count, string one, string many) =>
+        string.Create(CultureInfo.InvariantCulture, $"{count} {(count == 1 ? one : many)}");
+
+    private static List<string> Clean(List<string> texts) => [.. texts.Select(t => ResultShaper.CleanText(t))];
 
     /// <summary>Counts only: tags and page names are project data and stay out of the summary line (architecture 8.5).</summary>
     private static string ListSummary(DeviceListResult result)

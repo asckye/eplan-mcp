@@ -30,12 +30,16 @@
   "functions": [ { "tag": "=F+A2-KF1", "category": "NoContact", "page": "=F+A2&EFS1/2", "pins": ["13", "14"] } ],
   "parts": [ { "partNumber": "…", "variant": "1", "count": 1, "description": "…", "manufacturer": "…" } ],
   "properties": null,
-  "truncated": false
+  "truncated": false,
+  "hint": null
 }
 ```
 - `device`：主功能。`text` 是功能文本 `FUNC_TEXT` 在 `language` 下的显示文本，没有时为 `null`。
 - `functions`：辅助功能（`SubFunctions`），各自所在的页和连接点名称，最多 50 个。
+- `pins`：连接点名称；没有名称的连接点（S6 中端子等的连接点名称为空串）不列出。
 - `parts`：主功能的部件引用（`PartNr`、`VariantNr`、`Count`），描述和制造商取自项目中的部件数据（`Project.Articles`），**不访问部件库**。
+- `properties`（仅 `detailed`）：`[{ "id": 20011, "index": null, "name": "…", "value": "…" }]`，结构与 `eplan_project_get` 相同：只含非空、非内部的属性；带索引的属性每个已用索引一条；用户自定义属性的 `id` 为 `null`。
+- `truncated` / `hint`：辅助功能超过 50 个，或者超出 token 预算（`concise` 约 5k、`detailed` 20k；依次裁掉属性、辅助功能、部件）时为 true，`hint` 说明少了什么、怎样取全（辅助功能用 `eplan_device_list` 的 `tag_contains` + `include_auxiliary`）。
 - 所有项目文本经过 ResultShaper；一行摘要：`Device found: Coil, 3 auxiliary functions, 1 part.`，不回显标识和文本。
 
 ## 4. 错误
@@ -48,9 +52,9 @@
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- 查找顺序：先用 `FunctionsFilter { Name = tag, ExactNameMatching = true }` 按完整标识精确匹配主功能；找不到时在主功能中按去掉 `>` 的 `VisibleName` 比较（不区分大小写），一个时采用，多个时返回 `AMBIGUOUS_NAME`（`ProjectResolver.Ambiguous`，最多 20 个候选）。
+- 查找顺序：先用 `FunctionsFilter { Name = tag, ExactNameMatching = true }` 按完整标识精确匹配主功能（再按 `Ordinal` 复核，区分大小写；项目中同一完整标识有多个主功能时取 EPLAN 顺序中的第一个）；找不到时在主功能中按去掉 `>` 的 `VisibleName` 比较（不区分大小写，`tag` 也去掉 `>`），一个时采用，多个时返回 `AMBIGUOUS_NAME`（`ProjectResolver.Ambiguous`，候选为去重后的完整标识，最多 20 个）。
 - 部件描述：`Article` 的 `ARTICLE_DESCR1`、`ARTICLE_MANUFACTURER`，用 `GetStringToDisplay`；**不调用 `Article.LoadFromMasterdata()`**（会写入项目，已列入 BannedSymbols）。
-- 带索引的属性（如 `FUNC_ARTICLE_PARTNR`）不直接读取，部件信息只从 `ArticleReferences` 取（S6：不带索引读取会抛异常）。
+- `parts` 只从 `ArticleReferences` 取，不读带索引的部件属性（如 `FUNC_ARTICLE_PARTNR`）。`detailed` 的属性用共用的 `EplanProperties` 读取，带索引的属性按 `Indexes` 逐个索引读取（S6：不带索引读取会抛异常），因此部件编号也会作为带索引的属性出现在 `properties` 中。
 
 ## 6. 写操作专项
 不适用。
