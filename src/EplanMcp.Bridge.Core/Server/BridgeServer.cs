@@ -51,8 +51,13 @@ public sealed class BridgeServer : IDisposable
             BitConverter.ToString(random).Replace("-", string.Empty).ToLowerInvariant();
     }
 
+    /// <summary>
+    /// Creates the first pipe instance before returning, so a Host can discover the pipe as soon as this returns,
+    /// and a failure to create it (access denied, for example) reaches the caller instead of only the log.
+    /// </summary>
     public void Start()
     {
+        NamedPipeServerStream first;
         lock (_gate)
         {
             if (_started)
@@ -60,12 +65,15 @@ public sealed class BridgeServer : IDisposable
                 return;
             }
 
+            first = _createPipe(PipeName);
+            _pipes.Add(first);
             _started = true;
         }
 
-        for (int i = 0; i < Math.Max(1, _options.MaxConnections); i++)
+        _ = Task.Run(() => ListenAsync(first));
+        for (int i = 1; i < Math.Max(1, _options.MaxConnections); i++)
         {
-            _ = Task.Run(ListenAsync);
+            _ = Task.Run(() => ListenAsync(null));
         }
 
         _log.Write(BridgeLogLevel.Information, $"Listening on pipe {PipeName}");
@@ -92,7 +100,7 @@ public sealed class BridgeServer : IDisposable
         _log.Write(BridgeLogLevel.Information, "Pipe server stopped");
     }
 
-    private async Task ListenAsync()
+    private async Task ListenAsync(NamedPipeServerStream? first)
     {
         CancellationToken stop = _stop.Token;
         while (!stop.IsCancellationRequested)
@@ -100,7 +108,8 @@ public sealed class BridgeServer : IDisposable
             NamedPipeServerStream? pipe = null;
             try
             {
-                pipe = _createPipe(PipeName);
+                pipe = first ?? _createPipe(PipeName);
+                first = null;
                 lock (_gate)
                 {
                     if (stop.IsCancellationRequested)
