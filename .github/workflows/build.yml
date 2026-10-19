@@ -35,7 +35,30 @@ jobs:
         run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
 
       - name: Small and Medium tests
-        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large"
+        id: tests
+        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory "${{ runner.temp }}/test-results"
+
+      # Job logs need a GitHub sign-in, annotations do not: repeat each failed test as an annotation.
+      - name: Report failed tests
+        if: failure() && steps.tests.outcome == 'failure'
+        shell: pwsh
+        run: |
+          function Escape([string]$text, [switch]$property) {
+            $text = $text -replace '%', '%25' -replace "`r", '%0D' -replace "`n", '%0A'
+            if ($property) { $text = $text -replace ':', '%3A' -replace ',', '%2C' }
+            $text
+          }
+          $failed = 0
+          foreach ($file in Get-ChildItem "$env:RUNNER_TEMP/test-results" -Filter *.trx -ErrorAction SilentlyContinue) {
+            [xml]$trx = Get-Content $file.FullName -Raw
+            foreach ($result in @($trx.TestRun.Results.UnitTestResult) | Where-Object { $_ -and $_.outcome -notin 'Passed', 'NotExecuted' }) {
+              $failed++
+              $text = "$($result.outcome): $($result.Output.ErrorInfo.Message)`n$($result.Output.ErrorInfo.StackTrace)".Trim()
+              if ($text.Length -gt 4000) { $text = $text.Substring(0, 4000) + ' ...' }
+              Write-Output "::error title=$(Escape $result.testName -property)::$(Escape $text)"
+            }
+          }
+          if ($failed -eq 0) { Write-Output '::error::No failed test in the TRX files; a test host may have crashed or not started.' }
 
       # Fails on high or critical advisories, direct or transitive (development-workflow section 7).
       - name: Vulnerable packages
