@@ -92,8 +92,8 @@ internal static class DoctorChecks
         if (status.Instances.Count == 0)
         {
             checks.Add(new(DoctorStatus.Failure,
-                "没有发现 EplanMcp 插件：请确认 EPLAN 已启动，并且插件已注册为启动时加载（注册后需要重启 EPLAN）",
-                "No EplanMcp add-in found: make sure EPLAN is running and the add-in is registered to load at start-up (restart EPLAN after registering)"));
+                "没有发现 EplanMcp 插件：请确认 EPLAN 正在以所用的变体运行，并且插件已为该变体注册（每个变体要分别注册）",
+                "No EplanMcp add-in found: make sure EPLAN is running in the variant you use and the add-in is registered for that variant (each variant is registered separately)"));
             return checks;
         }
 
