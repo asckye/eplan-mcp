@@ -93,6 +93,7 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 1. **只有 `EplanMcp.Bridge.Eplan` 的 `Adapters` 命名空间可以引用 `Eplan.EplApi.*`。** 用架构测试（反射检查程序集引用和类型依赖）强制执行。
 2. EPLAN 的类型不能出现在 Contracts 中，也不能越过 Bridge 的操作处理器层。在主线程上就把它们映射为 DTO，**不跨请求持有任何 EPLAN 对象**。
 3. 引用 EPLAN 程序集时，路径来自构建属性 `EplanBinPath`，并设置 `Private=false`。**绝不复制或分发 EPLAN 的 DLL**。
+   插件声明自己针对哪个 EPLAN 版本构建（属性 `EplanVersion`，年份，默认 `2026`）。构建时目标 `ValidateEplanApiReferences` 检查 Bin 目录和每个引用的 `Eplan.EplApi.*` DLL 都存在，并且 DLL 文件版本的主版本号等于 `EplanVersion`，否则构建失败。比较文件版本，是因为程序集版本恒为 1.0.0.0（B1）；只读版本资源，不把 DLL 加载进构建进程。**不得静默回退到本机安装的其他版本**：用别的安装构建时，用 `-p:EplanBinPath=` 指向它的 Bin，版本不是 2026 时同时传 `-p:EplanVersion=`。
 
 ### 9.2 线程（B6）
 4. 所有 EPLAN API 调用都通过 `MainThreadDispatcher` 在主线程上执行。管道线程和线程池线程**绝不**直接调用 API。适配层的入口在 Debug 构建中断言当前在主线程上。

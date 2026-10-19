@@ -199,7 +199,7 @@ src/
   EplanMcp.Contracts/          netstandard2.0   共享 DTO、操作名、错误码、协议版本
   EplanMcp.Host/               net10.0          eplanmcp.exe（MCP 服务器 + CLI）
   EplanMcp.Bridge.Core/        netstandard2.0   管道服务器、协议、调度抽象、操作路由（不引用 EPLAN）
-  EplanMcp.Bridge.Eplan/       net481           适配层 + 插件入口；-p:EplanVersion=2026 选择引用的 EPLAN Bin
+  EplanMcp.Bridge.Eplan/       net481           适配层 + 插件入口；-p:EplanBinPath 指定引用的 EPLAN Bin，构建时校验它属于 EplanVersion（默认 2026）
   EplanMcp.Bridge.Offline/     net481 (M5)      离线宿主
   EplanMcp.Workbench/          net10.0-windows (M5)
 tests/

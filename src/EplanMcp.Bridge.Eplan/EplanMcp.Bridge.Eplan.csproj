@@ -8,6 +8,12 @@
     <TargetFramework>net481</TargetFramework>
     <RootNamespace>EplanMcp.Bridge.Eplan</RootNamespace>
     <Version>0.1.0</Version>
+    <!--
+      The EPLAN version (year) this add-in is built for, and the Bin folder of an installation of that version.
+      ValidateEplanApiReferences below fails the build when the two disagree; there is no fallback to another
+      installation. Another installation: -p:EplanBinPath=<its Bin folder>, plus -p:EplanVersion=<year> if not 2026.
+    -->
+    <EplanVersion Condition="'$(EplanVersion)' == ''">2026</EplanVersion>
     <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
   </PropertyGroup>
 
@@ -46,4 +52,45 @@
     <!-- WPF Dispatcher: EPLAN's main-thread dispatcher, the only one with an Invoke timeout (spike S1). -->
     <Reference Include="WindowsBase" />
   </ItemGroup>
+
+  <!--
+    Reads the file versions of the given files from their version resources. The EPLAN assemblies are never loaded
+    into the build process; MSBuild property functions cannot read file versions, hence the inline task.
+  -->
+  <UsingTask TaskName="GetEplanApiFileVersions" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <Result ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        Result = Files.Select(file =>
+        {
+            var info = System.Diagnostics.FileVersionInfo.GetVersionInfo(file.GetMetadata("FullPath"));
+            var item = new TaskItem(file);
+            item.SetMetadata("FileMajorPart", info.FileMajorPart.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            item.SetMetadata("FileVersion", string.Join(".", info.FileMajorPart, info.FileMinorPart, info.FileBuildPart, info.FilePrivatePart));
+            return (ITaskItem)item;
+        }).ToArray();
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!--
+    Build-time identity check (coding standards 9.1): every Eplan.EplApi.* reference must come from EPLAN
+    $(EplanVersion). Their assembly version is always 1.0.0.0 (api-notes B1), so the major part of the file version
+    (2026 in 2026.0.3.25421) is compared instead.
+  -->
+  <Target Name="ValidateEplanApiReferences" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_EplanApiReference Include="@(Reference->'%(HintPath)')" Condition="$([System.String]::Copy('%(Identity)').StartsWith('Eplan.EplApi.'))" />
+    </ItemGroup>
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(EplanVersion)', '^\d{4}$'))" Text="EplanVersion must be the EPLAN version year, for example 2026, but is '$(EplanVersion)'." />
+    <Error Condition="!Exists('$(EplanBinPath)')" Text="EPLAN Bin folder not found: '$(EplanBinPath)'. Install EPLAN $(EplanVersion), or pass -p:EplanBinPath=&lt;Bin folder of an EPLAN $(EplanVersion) installation&gt;." />
+    <Error Condition="!Exists('%(_EplanApiReference.FullPath)')" Text="EPLAN API assembly not found: '%(_EplanApiReference.FullPath)'. EplanBinPath must be the Bin folder of an EPLAN $(EplanVersion) installation; it is '$(EplanBinPath)'." />
+    <GetEplanApiFileVersions Files="@(_EplanApiReference)" Condition="'@(_EplanApiReference)' != ''">
+      <Output TaskParameter="Result" ItemName="_EplanApiFileVersion" />
+    </GetEplanApiFileVersions>
+    <Error Condition="'%(_EplanApiFileVersion.FileMajorPart)' != '$(EplanVersion)'" Text="'%(_EplanApiFileVersion.FullPath)' has file version %(_EplanApiFileVersion.FileVersion), so it is from EPLAN %(_EplanApiFileVersion.FileMajorPart), but this add-in is built for EPLAN $(EplanVersion) (EplanVersion). Pass -p:EplanBinPath=&lt;Bin folder of an EPLAN $(EplanVersion) installation&gt;, or -p:EplanVersion=%(_EplanApiFileVersion.FileMajorPart) if EPLAN %(_EplanApiFileVersion.FileMajorPart) is the intended target." />
+  </Target>
 </Project>
