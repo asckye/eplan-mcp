@@ -11,6 +11,12 @@
     <IsTestProject>true</IsTestProject>
     <!-- Test code reads better without ConfigureAwait noise; xUnit has no synchronization context to escape. -->
     <NoWarn>$(NoWarn);CA2007;CA1707</NoWarn>
+    <!--
+      CI asks every test assembly for a TRX report (development-workflow section 7). The default name is a timestamp, so
+      two assemblies that finish in the same microsecond overwrite each other's report and the test count floor finds no
+      results; a name per assembly cannot collide.
+    -->
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true'">$(TestingPlatformCommandLineArguments) --report-xunit-trx-filename $(MSBuildProjectName).trx</TestingPlatformCommandLineArguments>
   </PropertyGroup>
   <ItemGroup>
     <!-- xUnit v3 runs on Microsoft.Testing.Platform (selected in global.json); no VSTest adapter needed. -->
