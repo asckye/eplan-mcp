@@ -53,6 +53,7 @@ internal static class BridgeHost
             new ConnectionListOperation(catalog, devices, new EplanConnectionReader()),
             new PartListOperation(catalog, new EplanPartReader()),
             new MessageListOperation(new EplanSystemMessageReader()),
+            new CheckListOperation(catalog, new EplanProjectMessageReader()),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

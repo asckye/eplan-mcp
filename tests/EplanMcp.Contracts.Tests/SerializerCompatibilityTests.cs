@@ -159,6 +159,32 @@ public sealed class SerializerCompatibilityTests
             Total = 45,
         },
         new MessageListData(),
+        new CheckListArgs { Project = "Line1", Severity = CheckMessage.Warning, IncludeDone = true, Offset = 50, Limit = 50 },
+        new CheckListArgs(),
+        new CheckListData
+        {
+            Project = "项目 二",
+            Items =
+            [
+                new CheckMessage
+                {
+                    Number = 4025,
+                    Severity = CheckMessage.Warning,
+                    Region = "Connections",
+                    Text = "端子 =GAA+A1-X1:1 没有连接",
+                    Done = true,
+                    Target = new CheckObject { Kind = "Terminal", Name = "=GAA+A1-X1:1" },
+                },
+                new CheckMessage { Number = 13001, Severity = CheckMessage.Hint, Region = "PartsData", Text = "h", Target = new CheckObject { Kind = "Connection" } },
+                new CheckMessage { Number = 1, Text = "u" },
+            ],
+            Total = 20,
+            Errors = 1,
+            Warnings = 6,
+            Hints = 14,
+            Done = 3,
+        },
+        new CheckListData(),
     ];
 
     [Theory]
