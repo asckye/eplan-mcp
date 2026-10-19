@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Evals.Tests" />
   </ItemGroup>
 </Project>
