@@ -32,9 +32,9 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
-    public void ToolNames_AreTheM1Set()
+    public void ToolNames_AreTheImplementedSet()
     {
-        Assert.Equal([ProjectTools.ListTool, SessionTools.StatusTool], Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal([ProjectTools.ListTool, SessionTools.StatusTool, UsageTools.UsageTool], Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -91,8 +91,27 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
+    public void EveryTool_HasUsageWithAllFourTopics()
+    {
+        // A tool without usage text, or a usage file without a tool, fails here (mcp-tool-design 10).
+        Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), ToolUsageCatalog.Usage.Keys.Order(StringComparer.Ordinal));
+        Assert.All(ToolUsageCatalog.Usage.Values, sections => Assert.Equal(ToolUsageCatalog.Topics.Order(StringComparer.Ordinal), sections.Keys.Order(StringComparer.Ordinal)));
+    }
+
+    [Fact]
+    public void ToolUsageSchema_EnumeratesEveryToolAndTopic()
+    {
+        JsonElement properties = Tools.Single(t => t.Name == UsageTools.UsageTool).InputSchema.GetProperty("properties");
+
+        Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), Enum(properties.GetProperty("tool")).Order(StringComparer.Ordinal));
+        Assert.Equal(ToolUsageCatalog.Topics, Enum(properties.GetProperty("topic")));
+    }
+
+    [Fact]
     public void ServerInstructions_StayWithinTheBudget()
     {
         Assert.InRange(_options.ServerInstructions!.Length, 1, 1200);
     }
+
+    private static IEnumerable<string?> Enum(JsonElement property) => property.GetProperty("enum").EnumerateArray().Select(v => v.GetString());
 }
