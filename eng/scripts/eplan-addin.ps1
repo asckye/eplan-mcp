@@ -6,9 +6,9 @@
     Uses the documented command-line form of EplApiModuleAction (api-notes B2):
         EPLAN.exe /Variant:"<variant>" EplApiModuleAction /register:"<dll>"
         EPLAN.exe /Variant:"<variant>" EplApiModuleAction /unregister:"EplanMcp.Bridge.Eplan"
-    This starts EPLAN. The add-in loads at start-up (bLoadOnStart = true), so after registering, restart EPLAN
-    once; after rebuilding the add-in, restart EPLAN as well, because a loaded assembly cannot be unloaded
-    (api-notes A8). Product installs will use 'eplanmcp install-addin' (M5) instead of this script.
+    This starts EPLAN, which loads the add-in right away (bLoadOnStart = true, api-notes A10) and again at every
+    start. Registration is per variant: run it once for each variant in use (-Variant 'Electric P8').
+    After rebuilding the add-in, restart EPLAN, because a loaded assembly cannot be unloaded (api-notes A8). Product installs will use 'eplanmcp install-addin' (M5) instead of this script.
 
 .EXAMPLE
     eng\scripts\eplan-addin.ps1 -Action register
