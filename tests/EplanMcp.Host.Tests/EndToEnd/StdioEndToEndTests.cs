@@ -201,6 +201,21 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
 
         public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language) =>
             [.. _pages.Where(p => (namePrefix is null || p.Name.StartsWith(namePrefix, StringComparison.Ordinal)) && (pageType is null || p.Type == pageType))];
+
+        public IReadOnlyList<string> PageNames(string projectPath) => [.. _pages.Select(p => p.Name)];
+
+        public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language) =>
+            _pages.FirstOrDefault(p => p.Name == pageName) is { } page
+                ? new PageContent
+                {
+                    Page = new PageDetail { Name = page.Name, Type = page.Type, TypeName = "多线原理图", Description = page.Description },
+                    Functions =
+                    [
+                        new FunctionRecord { Name = "=GAA+A1-FC1", VisibleName = "-FC1", IsMain = true, Category = "CircuitBreaker" },
+                        new FunctionRecord { Name = "=GAA+A1-FC1:1", VisibleName = "1", IsMain = false, Category = "NoContact" },
+                    ],
+                }
+                : null;
     }
 
     private sealed class InlineDispatcher : IMainThreadDispatcher
