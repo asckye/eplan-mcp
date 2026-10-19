@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -157,6 +157,25 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_ConnectionListFollowsADeviceAcrossPagesAndAsksForAFullTag()
+    {
+        StartBridge();
+
+        CallToolResult byDevice = await Call("eplan_connection_list", new() { ["device"] = "=GAA+A1-FC1" });
+        CallToolResult ambiguous = await Call("eplan_connection_list", new() { ["device"] = "-FC1" });
+        CallToolResult neither = await Call("eplan_connection_list");
+
+        JsonElement connections = byDevice.StructuredContent!.Value.GetProperty("connections");
+        Assert.Equal(["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"], connections.EnumerateArray().Select(c => c.GetProperty("page").GetString()));
+        Assert.Equal("=GAA+A1-MA1", connections[0].GetProperty("to").GetProperty("device").GetString());
+        Assert.Equal("Listed 3 connections.", Text(byDevice));
+        Assert.True(ambiguous.IsError);
+        Assert.Contains(ErrorReason.AmbiguousName, Text(ambiguous), StringComparison.Ordinal);
+        Assert.True(neither.IsError);
+        Assert.Contains("'device' or 'page'", Text(neither), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -210,6 +229,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
+            new ConnectionListOperation(catalog, devices, new SampleConnections()),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(

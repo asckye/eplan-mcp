@@ -22,6 +22,9 @@
 
 `device` 和 `page` 至少给一个；两个都给时取交集。不提供"列出整个项目的连接"：示例项目有 2060 个连接，这类需求属于 M4 的导出工具。
 
+- 字符串参数的默认值是空串而不是 `null`（与 `eplan_device_list` 相同，节省描述预算）；空白等同于没给。
+- `page` 按完整页名精确匹配（区分大小写，与 `eplan_device_list` 的 `page` 相同），不做 `eplan_page_get` 那样的大小写回退。
+
 ## 3. 输出
 ```json
 {
@@ -32,26 +35,37 @@
   ],
   "total": 40,
   "nextCursor": null,
-  "truncated": false
+  "truncated": false,
+  "hint": null
 }
 ```
+- `from`、`to`：两端的 `device`（连接点所属功能的 `Name`，辅助功能可能带连接点后缀）和 `pin`（连接点名称）。名称为空时该字段为 `null`；一端未连接（`StartPin` / `EndPin` 为 `null`）或两个名称都为空时，整个端点为 `null`。
+- `page`：连接所在页的完整页名；未放置时为 `null`。
 - `crossSection`、`colour`：EPLAN 给出的文本，**不按区域解析**（S6：截面是 `1,5` 这样的区域格式）。`colour` 来自 `CONNECTION_WIRENUMBER`：示例项目中它存的是颜色代码（S6）；在其他项目中的含义在 Large 测试中确认，不确定时字段改名为 `wireNumber`。
-- `kind`：`2d` 或 `3d`。3D 连接（`Connection3D`）没有可读的端点和页（S6），返回 `kind = "3d"`，`from`、`to`、`page` 为 `null`。
-- 一行摘要：`Listed 40 connections.`，不回显标识。
+- `kind`：`2d` 或 `3d`。3D 连接（`Connection3D`）没有可读的端点和页（S6），返回 `kind = "3d"`，`from`、`to`、`page` 为 `null`；`crossSection`、`colour` 照常读取（S6 的样本中 3D 连接的这两个属性可读）。
+- 顺序：按页列出时是 `GetConnections(null)` 的顺序；按设备列出时先是主功能的连接，再按 `SubFunctions` 的顺序是各辅助功能的连接，同一个连接只出现一次。超出 token 预算时由 ResultShaper 截断。
+- 一行摘要：`Listed 40 connections.` / `Listed 50 of 120 connections (more: cursor).`，不回显标识。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
 | `INVALID_ARGUMENT` | `device` 和 `page` 都没给，或其他参数不合法 | `metadata.violations` 列出全部问题 |
-| `DEVICE_NOT_FOUND` / `AMBIGUOUS_NAME` | 设备查找失败 | 同 `eplan_device_get` |
-| `PAGE_NOT_FOUND` | 页不存在 | 提示用 `eplan_page_list` |
+| `DEVICE_NOT_FOUND` / `AMBIGUOUS_NAME` | 设备查找失败 | 同 `eplan_device_get`；`DEVICE_NOT_FOUND` 的 `metadata.device` 为传入的值，`AMBIGUOUS_NAME` 提示把候选中的完整标识作为 `device` 传入 |
+| `PAGE_NOT_FOUND` | 页不存在 | 提示用 `eplan_page_list`；`metadata.page` 为传入的值，`metadata.project` 为项目名 |
 | `PROJECT_NOT_OPEN` | 项目解析失败 | 同 `eplan_project_get` |
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- 按设备：`ConnectionsFilter { Function = 主功能 }`，再加上各辅助功能的连接（触点、端子的连接分布在辅助功能上；Large 测试确认 `ConnectionsFilter.Function` 是否已包含它们）。
-- 按页：取全部连接后在内存中按 `Connection.Page` 过滤（S6：已过时的 `ConnectionsFilter.Page` 会漏掉连接，35 个对 40 个）。
-- 端点：`StartPin` / `EndPin` 的 `ParentFunction.Name` 和 `Name`；对 `Connection3D` 不读取端点（会抛 `NotSupportedException`）。
+- 查设备（Bridge.Core，`ConnectionListOperation`）：规则同 `eplan_device_get`。先在全部主功能的名称中按完整标识精确比较（序数），找不到时用 `DeviceTags.FindByShownTag` 按去掉 `>` 的 `VisibleName` 不区分大小写比较；适配层只拿到确定存在的完整标识。
+- 按设备（适配层）：主功能和每个辅助功能各用一次 `ConnectionsFilter { Function = 该功能 }`，合并后去重。XML 文档说明 `ConnectionsFilter.Function` 匹配"起点或终点是这个功能"的连接，触点、端子的连接分布在辅助功能上，所以逐个功能查询；即使主功能的查询已包含辅助功能的连接，去重后结果也一样。去重依赖 `StorableObject` 重写的 `Equals` / `GetHashCode`（反射确认；S6 用 `Distinct()` 汇总一页功能的连接得到 40 个，与按页过滤一致）。
+- 按页：取全部连接（设备和页都给时，取该设备的连接）后在内存中按 `Connection.Page` 过滤，与目标页用 `Equals` 比较，做法与 S6 相同（S6：已过时的 `ConnectionsFilter.Page` 会漏掉连接，35 个对 40 个）。目标页用 `PagesFilter { Name, ExactNameMatching = true }` 加序数比较查找，与 `eplan_device_list` 共用 `EplanDeviceReader.FindPage`。
+- 端点：`StartPin` / `EndPin` 的 `ParentFunction.Name` 和 `Name`；对 `Connection3D` 不读取端点和页（会抛 `NotSupportedException`，S6）。
+- `crossSection`、`colour` 用 `GetStringToDisplay`（EPLAN 界面语言）读取：S6 中它们是与语言无关的值（`??_??@1,5;`）。
+- 待 Large 测试确认（S6 没有直接验证）：
+  - 按设备查询的结果：`ConnectionsFilter.Function` 是否也返回 `Connection3D`；主功能的查询是否已包含辅助功能的连接；辅助功能很多的设备（如 PLC 卡）逐个查询的耗时。
+  - 示例项目中所有 2D 连接读取 `Connection.Page` 都不抛异常（XML 文档写明失败时抛 `BaseException`；S6 的按页过滤包了异常处理，没有记录是否发生）。
+  - 连接点所属功能的 `Name` 的实际形式（主功能、辅助功能、端子）。
+  - `CONNECTION_WIRENUMBER` 在其他项目中的含义（见第 3 节）。
 
 ## 6. 写操作专项
 不适用。
