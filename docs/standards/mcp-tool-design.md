@@ -234,4 +234,5 @@ eplan_device_place
 - [ ] 大小在预算内；列表有分页和过滤
 - [ ] 错误使用错误码表中的 reason，message 能指导下一步
 - [ ] 项目自由文本只在数据字段中
+- [ ] 描述、schema、用法和错误消息都是英文；示例符合输入 schema；只提到已注册的工具（`ModelTextTests`、`ToolUsageExampleTests` 自动检查）
 - [ ] 至少有一个 Agent 评测任务；契约快照已更新
