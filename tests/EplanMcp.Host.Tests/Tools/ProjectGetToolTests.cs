@@ -13,7 +13,7 @@ public sealed class ProjectGetToolTests
 
     public ProjectGetToolTests()
     {
-        _bridge.Answers[OperationNames.ProjectGet] = _ => _data;
+        _bridge.Handlers[OperationNames.ProjectGet] = _ => _data;
     }
 
     [Fact]

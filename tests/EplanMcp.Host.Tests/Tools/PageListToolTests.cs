@@ -15,7 +15,7 @@ public sealed class PageListToolTests
     public PageListToolTests()
     {
         // Slices like the Bridge does, so the tool's offsets and cursors are exercised for real.
-        _bridge.Answers[OperationNames.PageList] = args =>
+        _bridge.Handlers[OperationNames.PageList] = args =>
         {
             var list = (PageListArgs)args!;
             return new ListData<PageSummary> { Project = "Line1", Items = [.. _pages.Skip(list.Offset).Take(list.Limit)], Total = _pages.Count };

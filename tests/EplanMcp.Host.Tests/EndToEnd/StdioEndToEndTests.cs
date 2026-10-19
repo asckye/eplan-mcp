@@ -6,6 +6,7 @@ using EplanMcp.Bridge.Core.Server;
 using EplanMcp.Bridge.Core.Threading;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Tests.Bridge;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
@@ -50,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_device_list", "eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -128,6 +129,18 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_DeviceListFindsAShortTagInEveryStructure()
+    {
+        StartBridge();
+
+        CallToolResult list = await Call("eplan_device_list", new() { ["tag_contains"] = "-FC1", ["has_part"] = true });
+
+        JsonElement devices = list.StructuredContent!.Value.GetProperty("devices");
+        Assert.Equal(["=GAA+A1-FC1", "=GAB1+A1-FC1"], devices.EnumerateArray().Select(d => d.GetProperty("tag").GetString()));
+        Assert.Equal("Listed 2 devices.", Text(list));
+    }
+
+    [Fact]
     public async Task UnknownArgument_IsRejected()
     {
         StartBridge();
@@ -172,12 +185,14 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     {
         var catalog = new Catalog();
         var pages = new PageReader();
+        var devices = new SampleDevices();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new ProjectReader()),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
+            new DeviceListOperation(catalog, devices),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
