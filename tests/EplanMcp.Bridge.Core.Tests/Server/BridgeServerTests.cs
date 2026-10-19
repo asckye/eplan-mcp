@@ -17,18 +17,7 @@ public sealed class BridgeServerTests : IDisposable
 
     public BridgeServerTests()
     {
-        var router = new OperationRouter(
-            [new ProjectListOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p" }))],
-            new InlineDispatcher(),
-            null,
-            _log,
-            TimeSpan.FromSeconds(10));
-        _server = new BridgeServer(
-            "EplanMcp.Test." + Guid.NewGuid().ToString("N"),
-            CreatePipe,
-            new BridgeServerOptions { BridgeVersion = "t", Eplan = new EplanInstanceInfo { ProcessId = 1 }, MaxConnections = 2 },
-            router,
-            _log);
+        _server = NewServer(CreatePipe);
         _server.Start();
     }
 
@@ -41,6 +30,28 @@ public sealed class BridgeServerTests : IDisposable
 
         Assert.Matches(@"^EplanMcp\.Bridge\.1234\.[0-9a-f]{16}$", name);
         Assert.NotEqual(name, BridgeServer.CreatePipeName(1234));
+    }
+
+    [Fact]
+    public void Start_CreatesThePipeBeforeReturning()
+    {
+        // The Host discovers Bridges by listing \\.\pipe\ (ADR-0008) and does not wait for a pipe to appear.
+        int caller = Environment.CurrentManagedThreadId;
+        bool createdByStart = false;
+        using BridgeServer server = NewServer(name =>
+        {
+            if (Environment.CurrentManagedThreadId == caller)
+            {
+                createdByStart = true;
+            }
+
+            return CreatePipe(name);
+        });
+
+        server.Start();
+
+        Assert.True(createdByStart);
+        Assert.Contains(server.PipeName, Directory.EnumerateFiles(@"\\.\pipe\").Select(Path.GetFileName));
     }
 
     [Fact]
@@ -97,6 +108,18 @@ public sealed class BridgeServerTests : IDisposable
             await client.ConnectAsync(500, TestContext.Current.CancellationToken);
         });
     }
+
+    private BridgeServer NewServer(Func<string, NamedPipeServerStream> createPipe) => new(
+        "EplanMcp.Test." + Guid.NewGuid().ToString("N"),
+        createPipe,
+        new BridgeServerOptions { BridgeVersion = "t", Eplan = new EplanInstanceInfo { ProcessId = 1 }, MaxConnections = 2 },
+        new OperationRouter(
+            [new ProjectListOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p" }))],
+            new InlineDispatcher(),
+            null,
+            _log,
+            TimeSpan.FromSeconds(10)),
+        _log);
 
     private NamedPipeServerStream CreatePipe(string name) =>
         new(name, PipeDirection.InOut, 2, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
