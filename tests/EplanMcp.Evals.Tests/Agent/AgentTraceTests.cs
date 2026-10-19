@@ -27,6 +27,37 @@ public sealed class AgentTraceTests
         """{"duration_api_ms":0,"stop_reason":"stop_sequence","session_id":"d97e","total_cost_usd":0,"usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0},"modelUsage":{},"permission_denials":[],"terminal_reason":"api_error","is_error":true,"num_turns":1,"subtype":"success","api_error_status":null,"result":"Not logged in · Please run /login","type":"result","duration_ms":40}""",
     ];
 
+    // Recorded in the first real run (2026-10-19, page-count) and shortened: ids, usage and the event kinds as they
+    // came, the project data and paths left out (api-notes C).
+    private static readonly string[] _recorded =
+    [
+        """{"type":"system","subtype":"init","session_id":"b4ce","tools":["StructuredOutput","mcp__eplan__eplan_project_get"],"mcp_servers":[{"name":"eplan","status":"connected","source":"dynamic"}],"model":"claude-sonnet-5-5","permissionMode":"dontAsk"}""",
+        """{"type":"assistant","message":{"model":"claude-sonnet-5-5","id":"msg_011CgC2TUEL7","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01KVSi8k","name":"mcp__eplan__eplan_project_get","input":{},"caller":{"type":"direct"}}],"stop_reason":null,"usage":{"input_tokens":2,"cache_creation_input_tokens":7527,"cache_read_input_tokens":0,"output_tokens":32}},"parent_tool_use_id":null,"session_id":"b4ce"}""",
+        """{"type":"rate_limit_event","rate_limit_info":{"status":"allowed","rateLimitType":"five_hour","isUsingOverage":false},"session_id":"b4ce"}""",
+        """{"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01KVSi8k","type":"tool_result","content":"{\"counts\":{\"pages\":321}}"}]},"parent_tool_use_id":null,"session_id":"b4ce","tool_use_result":{"structuredContent":{"counts":{"pages":321}}}}""",
+        """{"type":"assistant","message":{"model":"claude-sonnet-5-5","id":"msg_011CgC2TdQyx","type":"message","role":"assistant","content":[{"type":"text","text":"项目一共有 **321 页**。"}],"usage":{"input_tokens":2,"cache_creation_input_tokens":488,"cache_read_input_tokens":7527,"output_tokens":86}},"parent_tool_use_id":null,"session_id":"b4ce"}""",
+        """{"type":"system","subtype":"post_turn_summary","status_category":"completed","session_id":"b4ce"}""",
+        """{"type":"user","message":{"role":"user","content":[{"type":"text","text":"[structured-output-enforce] You MUST call the StructuredOutput tool to complete this request. Call this tool now."}]},"parent_tool_use_id":null,"session_id":"b4ce","isSynthetic":true}""",
+        """{"type":"assistant","message":{"model":"claude-sonnet-5-5","id":"msg_011CgC2Tyb","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01UrP5Pc","name":"StructuredOutput","input":{"pages":321},"caller":{"type":"direct"}}]},"parent_tool_use_id":null,"session_id":"b4ce"}""",
+        """{"type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UrP5Pc","type":"tool_result","content":"Structured output provided successfully"}]},"parent_tool_use_id":null,"session_id":"b4ce","tool_use_result":"Structured output provided successfully"}""",
+        """{"duration_api_ms":7122,"stop_reason":"tool_use","session_id":"b4ce","total_cost_usd":0.0358942,"usage":{"input_tokens":8,"cache_creation_input_tokens":8141,"cache_read_input_tokens":15542,"output_tokens":176},"is_error":false,"num_turns":4,"subtype":"success","result":"","structured_output":{"pages":321},"type":"result","duration_ms":13500,"terminal_reason":"completed"}""",
+    ];
+
+    [Fact]
+    public void Read_TheRecordedRun_GivesOneCallAndTheAnswer()
+    {
+        AgentTrace trace = Read(_recorded);
+
+        ToolCall call = Assert.Single(trace.Calls);
+        Assert.Equal(("eplan_project_get", false), (call.Tool, call.IsError));
+        Assert.Null(trace.IsolationProblem());
+        Assert.Null(trace.ApiError);
+        Assert.Equal(0, trace.Unreadable);
+        Assert.Equal(("success", false, 4), (trace.Result!.Subtype, trace.Result.IsError, trace.Result.Turns));
+        Assert.Equal("""{"pages":321}""", Comparison.Show(trace.Result.Answer));
+        Assert.Equal(new TokenUsage(8, 176, 15542, 8141), trace.Result.Usage);
+    }
+
     [Fact]
     public void Read_AnAnsweredRun_CountsTheCallsButNotTheAnswer()
     {
