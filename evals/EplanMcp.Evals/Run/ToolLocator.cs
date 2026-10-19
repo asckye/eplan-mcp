@@ -21,9 +21,11 @@ internal static class ToolLocator
 
     /// <summary>
     /// <c>claude.exe</c> on <paramref name="searchPath"/> (the PATH), otherwise the newest copy the Claude desktop app
-    /// keeps under <c>%APPDATA%\Claude\claude-code\&lt;version&gt;\&lt;build&gt;\</c>.
+    /// keeps under <c>Claude\claude-code\&lt;version&gt;\&lt;build&gt;\</c> in its roaming data. The app is an MSIX package:
+    /// its own processes see that folder in <paramref name="appData"/>, every other process only in the package's
+    /// redirected copy under <paramref name="localAppData"/> (api-notes A6), so both are searched.
     /// </summary>
-    public static string? Claude(string? searchPath, string appData)
+    public static string? Claude(string? searchPath, string appData, string localAppData)
     {
         foreach (string directory in (searchPath ?? string.Empty).Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
@@ -34,16 +36,23 @@ internal static class ToolLocator
             }
         }
 
-        var versions = new DirectoryInfo(Path.Combine(appData, "Claude", "claude-code"));
-        return !versions.Exists
-            ? null
-            : versions.EnumerateDirectories()
-                .Select(d => (Directory: d, Version: Version.TryParse(d.Name, out Version? v) ? v : null))
-                .Where(d => d.Version is not null)
-                .OrderByDescending(d => d.Version)
-                .SelectMany(d => d.Directory.EnumerateFiles("claude.exe", SearchOption.AllDirectories))
-                .Select(f => f.FullName)
-                .FirstOrDefault();
+        var packages = new DirectoryInfo(Path.Combine(localAppData, "Packages"));
+        IEnumerable<DirectoryInfo> roots =
+        [
+            new(Path.Combine(appData, "Claude", "claude-code")),
+            .. packages.Exists
+                ? packages.EnumerateDirectories("Claude_*").Select(p => new DirectoryInfo(Path.Combine(p.FullName, "LocalCache", "Roaming", "Claude", "claude-code")))
+                : [],
+        ];
+        return roots
+            .Where(root => root.Exists)
+            .SelectMany(root => root.EnumerateDirectories())
+            .Select(d => (Directory: d, Version: Version.TryParse(d.Name, out Version? v) ? v : null))
+            .Where(d => d.Version is not null)
+            .OrderByDescending(d => d.Version)
+            .SelectMany(d => d.Directory.EnumerateFiles("claude.exe", SearchOption.AllDirectories))
+            .Select(f => f.FullName)
+            .FirstOrDefault();
     }
 
     /// <summary>The Release build of eplanmcp in the repository, otherwise the Debug build (CLAUDE.md, common commands).</summary>

@@ -13,7 +13,7 @@ dotnet run --project evals\EplanMcp.Evals -- check --tasks <目录>
 
 ## 运行评测
 **准备**（每台机器一次，夹具每次换项目时重做）：
-1. 在命令行登录 Claude Code：`claude auth login`（或 `claude setup-token`）。桌面版自带的 `claude.exe` 单独运行时没有登录态。
+1. 在命令行登录 Claude Code：`claude auth login`（或 `claude setup-token`），用你的 Claude 套餐账号授权一次即可。桌面版自带的 `claude.exe` 不在 PATH 上，在自己打开的终端里要用完整路径：`& (Get-ChildItem "$env:LOCALAPPDATA\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code" -Recurse -Filter claude.exe | Select-Object -Last 1).FullName auth login`。
 2. 构建 Release 版的插件和 eplanmcp，并在要用的 EPLAN 变体中注册插件（`CLAUDE.md` 常用命令；每个变体各注册一次，见 [api-notes A12](../docs/eplan/api-notes.md)）。
 3. 把 EPLAN 自带的 `EPLAN_Sample_Project`（`.elk` 文件和 `.edb` 目录）复制到 `%USERPROFILE%\EplanMcp\scratch\fixtures\`，在 EPLAN 中打开这个副本，并让它成为当前项目。评测只在 scratch 根目录下的项目上运行，预检会拒绝其他项目。
 

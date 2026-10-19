@@ -222,6 +222,7 @@
 - 缺少必填参数（方法参数没有默认值，schema 中列在 `required`）时，工具方法不会被调用，SDK 返回 `isError: true` 和通用文字 "An error occurred invoking '<工具名>'."，**没有 reason，也不说缺了哪个参数**。可选参数显式传 `null` 时，方法收到 `null`。— 2026-10-19 stdio 端到端实测（`eplan_tool_usage`）。
   - 对本项目的影响：Host 的参数过滤器（`UnknownArgumentFilter`）在调用工具之前检查 schema 中的 `required`，缺少或为 `null` 时与未知参数一起报告为 `INVALID_ARGUMENT`，请求不会到达 SDK 的这段逻辑。
 - Claude 桌面版自带的 Claude Code 可执行文件在无界面模式（`claude -p`）下单独运行时没有登录态（"Not logged in"），但在报错前已经完成 MCP 服务器的连接和 `tools/list`。— S4。
+- 这个 `claude.exe` 在桌面版的进程中看到的位置是 `%APPDATA%\Claude\claude-code\<版本>\<构建>\claude.exe`，**包外的进程（例如用户自己打开的终端）在那里找不到它**：实际位置是包的重定向目录 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude-code\…`（A6）。登录（`claude auth login`）只需做一次，两边共享登录态。— 2026-10-19 实测（Claude Code 2.1.299，登录后 `auth status` 为 `loggedIn: true`、`authMethod: claude.ai`）。
 
 ### Claude Code 无界面模式（Agent 评测的驱动方式，2026-10-19，Claude Code 2.1.299，未登录）
 - **`--bare` 不读取登录态**（OAuth 和系统钥匙串），只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`。— [无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)。
