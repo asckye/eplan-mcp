@@ -47,7 +47,7 @@
 |---|---|---|
 | `INVALID_ARGUMENT` | 缺少 `tag`，或其他参数不合法 | `metadata.violations` 列出全部问题 |
 | `DEVICE_NOT_FOUND` | 没有这个标识 | 提示用 `eplan_device_list` 的 `tag_contains` 查 |
-| `AMBIGUOUS_NAME` | 短标识对应多个设备 | `metadata.candidates` 列出完整标识，提示选一个再调用 |
+| `AMBIGUOUS_NAME` | 短标识对应多个设备 | `metadata.candidates` 列出完整标识，提示选一个再调用；问题涉及全部候选时（在哪些页、有几个），提示改用一次 `eplan_device_list`（`tag_contains`），而不是对每个候选调用一次 `eplan_device_get`（第一次 Agent 评测中模型调用了 14 次） |
 | `PROJECT_NOT_OPEN` | 项目解析失败 | 同 `eplan_project_get` |
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 

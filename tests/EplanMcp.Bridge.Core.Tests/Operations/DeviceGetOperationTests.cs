@@ -57,6 +57,7 @@ public sealed class DeviceGetOperationTests
         BridgeError error = Fails(new DeviceGetArgs { Tag = "-fc1" });
 
         Assert.Equal(ErrorReason.AmbiguousName, error.Reason);
+        Assert.EndsWith("To see all of them with their pages in one call, use eplan_device_list with tag_contains.", error.Message, StringComparison.Ordinal);
         Assert.Equal(["=GAA+A1-FC1", "=GAB1+A1-FC1"], error.Metadata!["candidates"].Split('\n'));
         Assert.Equal(("device", "-fc1", "2"), (error.Metadata["kind"], error.Metadata["name"], error.Metadata["candidateCount"]));
         Assert.Contains("full tag", error.Message, StringComparison.Ordinal);
