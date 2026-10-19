@@ -34,6 +34,26 @@ public sealed class DeviceListOperationTests
     }
 
     [Fact]
+    public void Execute_FilteredFunctionsUnderOneTag_ListTheDeviceOnceAsShown()
+    {
+        // A page or category filter also returns the function inside a black box under the box's tag (api-notes A12).
+        _devices.Functions.AddRange(
+        [
+            Primary("=EC1+A3-EC1-BT2", string.Empty, category: "AnalogSensor", parts: 1),
+            Primary("=EC1+A3-EC1-MA2", "-MA2", category: "Motor"),
+            Primary("=EC1+A3-EC1-BT2", "-BT2", category: "Blackbox"),
+            Primary("=EC1+A3-EC1-MA2", string.Empty, category: "Motor"),
+        ]);
+
+        ListData<DeviceListItem> data = Run(new DeviceListArgs { Limit = 50 });
+        ListData<DeviceListItem> withParts = Run(new DeviceListArgs { HasPart = true, Limit = 50 });
+
+        Assert.Equal(2, data.Total);
+        Assert.Equal([("=EC1+A3-EC1-BT2", "-BT2", "Blackbox"), ("=EC1+A3-EC1-MA2", "-MA2", "Motor")], data.Items.Select(d => (d.Tag, d.VisibleTag, d.Category)));
+        Assert.Equal(0, withParts.Total);
+    }
+
+    [Fact]
     public void Execute_IncludeAuxiliary_ListsAuxiliaryFunctionsMarkedAsSuch()
     {
         _devices.Functions.AddRange([Primary("=F+A2-KF1", "-KF1", category: "Coil"), Auxiliary("=F+A2-KF1", "-KF1", category: "NoContact"), Auxiliary(string.Empty, "-X")]);

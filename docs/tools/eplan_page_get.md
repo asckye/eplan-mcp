@@ -31,7 +31,7 @@
   "hint": null
 }
 ```
-- `devices`：页上的设备，即带标识的主功能（`IsMainFunction` 且 `Name` 非空，与 `eplan_project_get` 的设备计数同一规则），按 EPLAN 的顺序；`tag` 是 `Function.Name`（完整标识），`visibleTag` 是页面上显示的标识（去掉 `>` 标记，去掉后为空时为 `null`），`category` 是 `FunctionCategory` 的枚举名（api-notes A11）。最多 100 个，超出时 `truncated = true`，`hint` 提示用 `eplan_device_list` 的 `page` 过滤。`deviceCount` 是页上设备的总数。
+- `devices`：页上的设备，即带标识的主功能（`IsMainFunction` 且 `Name` 非空，与 `eplan_project_get` 的设备计数同一规则），按 EPLAN 的顺序；`tag` 是 `Function.Name`（完整标识），`visibleTag` 是页面上显示的标识（去掉 `>` 标记，去掉后为空时为 `null`），`category` 是 `FunctionCategory` 的枚举名（api-notes A11）。同一个完整标识只列一次：按页过滤时 EPLAN 还会返回黑盒里同名的功能，保留有显示标识的那一个（与 `eplan_device_list` 相同，api-notes A12）。最多 100 个，超出时 `truncated = true`，`hint` 提示用 `eplan_device_list` 的 `page` 过滤。`deviceCount` 是页上设备的总数。
 - `typeName`：EPLAN 界面语言的页类型名称（S6：如"标题页/封页"）。
 - `properties`（仅 `detailed`）：同 `eplan_project_get`（含 `index`）。
 - 大小：`concise` 默认 5k token，`detailed` 上限 20k token；超出时先从末尾去掉属性，仍然超出（页上设备的标识异常长）再去掉设备，`truncated` 为 true，`hint` 说明。

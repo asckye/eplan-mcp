@@ -11,6 +11,31 @@ public static class DeviceTags
     /// <summary>Auxiliary functions belong to a main function's device; unnamed main functions cannot be looked up by tag.</summary>
     public static bool IsDevice(bool isMainFunction, string? name) => isMainFunction && !string.IsNullOrEmpty(name);
 
+    /// <summary>
+    /// One main function per full tag, in the order of each tag's first one; auxiliary functions pass unchanged. With a
+    /// page or category filter EPLAN also returns further main functions under a device's tag, with nothing shown (the
+    /// function inside a black box, a second representation; api-notes A12): the one with a shown tag stands for the
+    /// device, as in the unfiltered list and in device.get, otherwise the first.
+    /// </summary>
+    public static IEnumerable<FunctionRecord> OnePerTag(IEnumerable<FunctionRecord> functions)
+    {
+        List<FunctionRecord> all = [.. functions];
+        Dictionary<string, FunctionRecord> devices = all.Where(f => f.IsMain).GroupBy(f => f.Name, StringComparer.Ordinal)
+            .ToDictionary(tag => tag.Key, tag => tag.FirstOrDefault(f => Shown(f.VisibleName) is not null) ?? tag.First(), StringComparer.Ordinal);
+        var listed = new HashSet<string>(StringComparer.Ordinal);
+        foreach (FunctionRecord function in all)
+        {
+            if (!function.IsMain)
+            {
+                yield return function;
+            }
+            else if (listed.Add(function.Name))
+            {
+                yield return devices[function.Name];
+            }
+        }
+    }
+
     /// <summary>The shown tag without its '&gt;' markers, or null when nothing is left.</summary>
     public static string? Shown(string? visibleName) =>
         visibleName?.Replace(">", string.Empty) is { Length: > 0 } shown ? shown : null;
