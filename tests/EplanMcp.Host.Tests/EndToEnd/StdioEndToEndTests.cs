@@ -50,7 +50,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_page_get", "eplan_page_list", "eplan_project_get", "eplan_project_list", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -140,6 +140,25 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WithBridge_PageGetFindsThePageInAnyCaseAndReportsMissingOnes()
+    {
+        StartBridge();
+
+        CallToolResult found = await Call("eplan_page_get", new() { ["page"] = "=gaa+a1&efs1/1" });
+        CallToolResult missing = await Call("eplan_page_get", new() { ["page"] = "=GAA+A1&EFS1/9" });
+        CallToolResult noPage = await Call("eplan_page_get", new() { ["response_format"] = "detailed" });
+
+        JsonElement data = found.StructuredContent!.Value;
+        Assert.Equal("=GAA+A1&EFS1/1", data.GetProperty("page").GetProperty("name").GetString());
+        Assert.Equal("=GAA+A1-FC1", data.GetProperty("devices")[0].GetProperty("tag").GetString());
+        Assert.Equal("Page found: Circuit, 1 device.", Text(found));
+        Assert.True(missing.IsError);
+        Assert.Contains(ErrorReason.PageNotFound, Text(missing), StringComparison.Ordinal);
+        Assert.True(noPage.IsError);
+        Assert.Contains("Missing required argument 'page'.", Text(noPage), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task MissingRequiredArgument_IsInvalidArgumentRatherThanTheSdksGenericError()
     {
         CallToolResult result = await Call("eplan_tool_usage");
@@ -152,11 +171,13 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     private void StartBridge()
     {
         var catalog = new Catalog();
+        var pages = new PageReader();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new ProjectReader()),
-            new PageListOperation(catalog, new PageReader()),
+            new PageListOperation(catalog, pages),
+            new PageGetOperation(catalog, pages),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _bridge = new BridgeServer(
