@@ -21,7 +21,7 @@ Older messages: repeat the same arguments and add the `nextCursor` of the previo
 1. Call it when the engineer asks what EPLAN just reported, or when an EPLAN operation seems to have had no effect: many EPLAN failures only show up as system messages.
 2. Messages belong to the running EPLAN session, not to a project, so there is no `project` argument; they start when EPLAN starts.
 3. The newest message comes first. EPLAN keeps no time stamps here, so the order is the only clue to when a message appeared.
-4. The results of EPLAN's project check are not system messages; they are stored in the project.
+4. The results of EPLAN's project check are not system messages; they are stored in the project and eplan_check_list lists them.
 5. New messages arriving between two calls push the older ones down, so a `cursor` can repeat or skip entries; start again without it when in doubt.
 
 ## Fields

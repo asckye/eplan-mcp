@@ -31,6 +31,7 @@ internal static class McpServerSetup
             .WithTools<ConnectionTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
+            .WithTools<CheckTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }

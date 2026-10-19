@@ -29,7 +29,7 @@ internal sealed class UsageTools
         "open. Works without EPLAN. Example: {\"tool\": \"eplan_project_list\", \"topic\": \"errors\"}.")]
     public static CallToolResult ToolUsage(
         // The enum lists every registered tool; ToolContractTests fails when it, the usage files and the tools differ.
-        [Description("The tool to explain.")][AllowedValues(SessionTools.StatusTool, ProjectTools.ListTool, ProjectTools.GetTool, PageTools.ListTool, PageTools.GetTool, DeviceTools.ListTool, DeviceTools.GetTool, ConnectionTools.ListTool, PartTools.ListTool, MessageTools.ListTool, UsageTool)] string tool,
+        [Description("The tool to explain.")][AllowedValues(SessionTools.StatusTool, ProjectTools.ListTool, ProjectTools.GetTool, PageTools.ListTool, PageTools.GetTool, DeviceTools.ListTool, DeviceTools.GetTool, ConnectionTools.ListTool, PartTools.ListTool, MessageTools.ListTool, CheckTools.ListTool, UsageTool)] string tool,
         [Description("Return only this section; omit for all four.")]
         [AllowedValues(ToolUsageCatalog.Examples, ToolUsageCatalog.Workflow, ToolUsageCatalog.Fields, ToolUsageCatalog.Errors)]
         string? topic = null)
