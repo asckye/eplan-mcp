@@ -24,12 +24,15 @@
   "project": { "name": "Line1", "path": "D:\\Projects\\Line1", "readOnly": false },
   "counts": { "pages": 321, "devices": 420, "connections": 2060, "partReferences": 2900 },
   "pagesByType": [ { "type": "Circuit", "count": 140 }, { "type": "TerminalDiagram", "count": 25 } ],
-  "properties": null
+  "properties": null,
+  "truncated": false,
+  "hint": null
 }
 ```
 - `devices`：带标识的主功能数量（`IsMainFunction` 且 `Name` 非空），与 `eplan_device_list` 默认列出的范围一致。
-- `pagesByType`：按数量降序，最多 15 种。`type` 用 EPLAN 页类型的枚举名（英文，稳定），与 `eplan_page_list` 的 `page_type` 参数一致。
-- `properties`（仅 `detailed`）：`[{ "id": 10000, "name": "…", "value": "…" }]`，只含非空属性；文本经过 ResultShaper 的不可信文本处理，整体受 20k token 上限约束。
+- `pagesByType`：按数量降序（数量相同时按类型名），最多 15 种。`type` 用 EPLAN 页类型的枚举名（英文，稳定），与 `eplan_page_list` 的 `page_type` 参数一致。
+- `properties`（仅 `detailed`）：`[{ "id": 10000, "index": null, "name": "…", "value": "…" }]`，只含非空属性，不含 EPLAN 标为内部（`IsInternal`）的属性；带索引的属性（如附加字段）每个已用索引一条，`index` 是 EPLAN 的索引号，不带索引的属性 `index` 为 `null`；用户自定义属性没有编号，`id` 为 `null`，`name` 是它的标识名。单个属性按列出的方式读不出来时（抛出 `IndexedPropertyException` 等）只跳过这一个。文本经过 ResultShaper 的不可信文本处理，整体受 20k token 上限约束。
+- `truncated` / `hint`：`detailed` 的结果超过 20k token 时，从末尾去掉属性，`truncated` 为 true，`hint` 说明去掉了什么（[工具设计规范 7.2](../standards/mcp-tool-design.md#72-大小控制)）。
 - 一行摘要只给数字，不回显项目名和属性等项目数据（架构 8.5）：`Project has 321 pages, 420 devices, 2060 connections.`
 
 ## 4. 错误
@@ -44,7 +47,8 @@
 - 项目解析：`ProjectResolver.Resolve(ListOpenProjects(), project)`，再在适配层按路径取 `Project`（不依赖当前项目，api-notes A11）。
 - 计数：一次 `DMObjectsFinder` 调用分别取页、功能、连接、部件引用（S6：合计约 200 ms 冷启动）；页类型按 `Page.PageType` 分组。
 - 多语言：`ToMultiLangString().GetStringToDisplay(语言)`（编码规范 9.5 第 13a 条）。
-- 属性名：`PropertyDefinition` 的名称是否可读、是否按界面语言返回，S6 没有测，在 Large 测试中确认；取不到名称时只返回 `id`。
+- 属性名：`PropertyDefinition` 的名称是否可读、是否按界面语言返回，S6 没有测，在 Large 测试中确认；名称为空时 `name` 用 `AnyPropertyId.AsString`（内置属性是编号，用户自定义属性是标识名）。
+- 属性：`ExistingIds` / `ExistingValues` 逐个读取；带索引的属性先按 `PropertyDefinition.IsIndexed` 判断，再按 `PropertyValue.Indexes` 逐个读取（S6：不带索引读取会抛 `IndexedPropertyException`，连 `IsEmpty` 也会）。`IsInternal`、`IsIndexed`、`Indexes` 以及非文本类型（Bool、Point、Time 等）经 `ToMultiLangString` 的显示结果都没有实机验证，在 Large 测试中确认。
 - 只读，`LockingStep` 由调度器创建；不使用 BannedSymbols 中的任何成员。
 
 ## 6. 写操作专项

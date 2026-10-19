@@ -49,6 +49,23 @@ public sealed class SerializerCompatibilityTests
         new ProjectListData(),
         new ListData<OpenProject> { Project = "项目 二", Items = [new OpenProject { Name = "Line1", Path = "p" }], Total = 7 },
         new ListData<OpenProject>(),
+        new ProjectGetArgs { Project = @"D:\项目\二", Language = "zh_CN", IncludeProperties = true },
+        new ProjectGetArgs(),
+        new ProjectGetData
+        {
+            Project = new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true, ReadOnly = true },
+            Pages = 321,
+            Devices = 420,
+            Connections = 2060,
+            PartReferences = 2900,
+            PagesByType = [new PageTypeCount { Type = "Circuit", Count = 140 }, new PageTypeCount { Type = "TitlePage", Count = 3 }],
+            Properties =
+            [
+                new PropertyEntry { Id = 10000, Name = "项目名称", Value = "Line1" },
+                new PropertyEntry { Id = 10901, Index = 2, Value = "多行\n文本" },
+            ],
+        },
+        new ProjectGetData(),
     ];
 
     [Theory]
