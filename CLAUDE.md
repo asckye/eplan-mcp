@@ -23,7 +23,7 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 ## 约定
 - **与项目负责人交流一律使用中文**：回复、提问、进度说明、总结和表格都用中文，长时间运行任务之后也一样；代码标识符、API 名称、文件路径和命令保持原文。
 - 文档用中文；代码标识符、代码注释、日志消息、提交信息用英文。
-- 提交信息遵循 Conventional Commits，scope 取自：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `docs` `ci` `spikes`。
+- 提交信息遵循 Conventional Commits，scope 取自：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `evals` `docs` `ci` `spikes`。
 - 一个 PR 只做一件事，改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、快照、夹具不计入。
 
 ## 本机环境注意事项
