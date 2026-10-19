@@ -15,4 +15,4 @@
 | [0006](0006-tool-surface-design.md) | 工具面：面向任务、资源命名、显式注解、结构化输出、Profile | Accepted | 单向门（工具契约发布后难以更改） |
 | [0007](0007-licensing-and-distribution.md) | 授权与分发：0.x 阶段发布未签名插件，构建预留 EADN 签名开关 | Accepted | 双向门 |
 | [0008](0008-data-locations-and-instance-discovery.md) | 数据目录移出 %LOCALAPPDATA%，实例发现改用命名管道枚举 | Accepted | 双向门（1.0 前） |
-| [0009](0009-supported-eplan-versions.md) | 支持 EPLAN 2024–2027，用一份 net481 插件构建；2022、2023 暂不支持 | Proposed | 双向门 |
+| [0009](0009-supported-eplan-versions.md) | 支持 EPLAN 2024–2027，用一份 net481 插件构建；2022、2023 暂不支持 | Accepted | 双向门 |
