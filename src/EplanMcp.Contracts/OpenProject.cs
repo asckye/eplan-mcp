@@ -6,7 +6,7 @@ public sealed class OpenProject
     /// <summary>Project name as EPLAN shows it (<c>Project.ProjectName</c>).</summary>
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>Full path of the project file (<c>Project.ProjectFullName</c>).</summary>
+    /// <summary>Project path as EPLAN reports it (<c>Project.ProjectFullName</c>): the .elk file's path without the extension.</summary>
     public string Path { get; set; } = string.Empty;
 
     /// <summary>Whether this is the project currently selected in EPLAN.</summary>

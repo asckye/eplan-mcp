@@ -118,7 +118,7 @@ public sealed class ProjectToolsTests
         ProjectTools.ProjectListAsync(_bridge, limit, cursor, TestContext.Current.CancellationToken);
 
     private static OpenProject Project(string name, bool current = false, bool readOnly = false) =>
-        new() { Name = name, Path = $@"D:\Projects\{name}.elk", Current = current, ReadOnly = readOnly };
+        new() { Name = name, Path = $@"D:\Projects\{name}", Current = current, ReadOnly = readOnly };
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 

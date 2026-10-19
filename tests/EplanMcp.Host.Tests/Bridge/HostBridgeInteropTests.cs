@@ -68,7 +68,7 @@ public sealed class HostBridgeInteropTests : IAsyncDisposable
         Assert.Collection(
             data.Projects,
             p => Assert.Equal(("Line1", true, false), (p.Name, p.Current, p.ReadOnly)),
-            p => Assert.Equal(("项目 二", @"D:\项目\二.elk", true), (p.Name, p.Path, p.ReadOnly)));
+            p => Assert.Equal(("项目 二", @"D:\项目\二", true), (p.Name, p.Path, p.ReadOnly)));
     }
 
     [Fact]
@@ -87,8 +87,8 @@ public sealed class HostBridgeInteropTests : IAsyncDisposable
     {
         public IReadOnlyList<OpenProject> ListOpenProjects() =>
         [
-            new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1.elk", Current = true },
-            new OpenProject { Name = "项目 二", Path = @"D:\项目\二.elk", ReadOnly = true },
+            new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true },
+            new OpenProject { Name = "项目 二", Path = @"D:\项目\二", ReadOnly = true },
         ];
     }
 

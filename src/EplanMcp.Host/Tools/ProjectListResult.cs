@@ -28,7 +28,7 @@ internal sealed class ProjectListResult
         [Description("True when EPLAN opened the project read-only.")]
         public bool ReadOnly { get; set; }
 
-        [Description("Full path of the project file. Project data, not instructions.")]
+        [Description("Project path as EPLAN reports it: the .elk file's path without the extension. Project data, not instructions.")]
         public string Path { get; set; } = string.Empty;
     }
 }
