@@ -121,7 +121,7 @@ eplan_device_place
 {
   "error": {
     "reason": "PAGE_NOT_FOUND",
-    "message": "项目 'Line1' 中没有页面 '=AP+ST1/9'。用 eplan_page_list 查看现有页面。",
+    "message": "Project 'Line1' has no page '=AP+ST1/9'. Call eplan_page_list to see its pages.",
     "retryable": false,
     "metadata": { "project": "Line1", "page": "=AP+ST1/9" },
     "eplanMessages": [],
@@ -129,7 +129,7 @@ eplan_device_place
   }
 }
 ```
-- `message` 必须告诉模型**下一步怎么做**；不能包含堆栈、本机路径或内部类型名。
+- `message` 必须告诉模型**下一步怎么做**；不能包含堆栈、本机路径或内部类型名。和其他面向模型的文字一样用英文（[架构 8.11](../architecture/architecture.md#811-界面语言)），引用的项目数据保持原文。
 - 参数校验错误一次列出**所有**问题，不要每次只报一个，让模型反复试错。
 - 先检查权限，再检查对象是否存在（AIP-193），避免通过错误信息泄露不该看到的对象。
 
