@@ -28,7 +28,7 @@ public sealed class DeviceGetOperation(IProjectCatalog catalog, IDeviceReader de
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
-        string? language = string.IsNullOrWhiteSpace(args.Language) ? null : args.Language!.Trim();
+        string? language = Given(args.Language);
         DeviceRecord device = devices.ReadDevice(project.Path, tag, language, args.Detailed)
             ?? (DeviceTags.FindByShownTag(devices.ReadMainFunctionNames(project.Path), tag) is { } fullTag
                 ? devices.ReadDevice(project.Path, fullTag, language, args.Detailed)

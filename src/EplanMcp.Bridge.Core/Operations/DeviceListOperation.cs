@@ -71,7 +71,4 @@ public sealed class DeviceListOperation(IProjectCatalog catalog, IDeviceReader d
             Total = matching.Count,
         };
     }
-
-    /// <summary>A blank filter is no filter; models sometimes pass "" for an argument they mean to omit.</summary>
-    private static string? Given(string? value) => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 }
