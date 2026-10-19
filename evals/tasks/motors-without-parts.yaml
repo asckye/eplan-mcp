@@ -1,0 +1,11 @@
+id: motors-without-parts
+set: dev
+prompt: 哪些电机还没有选部件？列出完整设备标识。
+answer:
+  type: object
+  required: [devices]
+  properties:
+    devices: { type: array, items: { type: string } }
+oracle: { devices: { tool: eplan_device_list, args: { category: Motor, has_part: false }, pick: "$.devices[*].tag" } }
+checks: [{ answer: $.devices, set_equals: oracle.devices }]
+budget: { max_tool_calls: 8 }

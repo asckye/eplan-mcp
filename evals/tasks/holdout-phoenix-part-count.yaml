@@ -1,0 +1,7 @@
+id: holdout-phoenix-part-count
+set: holdout
+prompt: 菲尼克斯（制造商简称 PXC）的部件在项目里用了多少种？
+answer: { type: object, required: [parts], properties: { parts: { type: integer } } }
+oracle: { parts: { tool: eplan_part_list, args: { manufacturer: PXC, limit: 1 }, pick: $.total } }
+checks: [{ answer: $.parts, equals: oracle.parts }]
+budget: { max_tool_calls: 8 }

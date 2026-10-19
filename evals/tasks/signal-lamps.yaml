@@ -1,0 +1,12 @@
+id: signal-lamps
+set: dev
+prompt: =GAA+A1&EFS1/2 这一页上的信号灯用的是哪些部件？列出部件号。
+answer:
+  type: object
+  required: [parts]
+  properties:
+    parts: { type: array, items: { type: string } }
+oracle:
+  lamp: { tool: eplan_device_get, args: { tag: "=GAA+A1-PF2" }, pick: "$.parts[*].partNumber" }
+checks: [{ answer: $.parts, contains: oracle.lamp }]
+budget: { max_tool_calls: 12 }

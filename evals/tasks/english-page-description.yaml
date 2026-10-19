@@ -1,0 +1,7 @@
+id: english-page-description
+set: dev
+prompt: "&AAA1/2 这一页的英文页描述是什么？"
+answer: { type: object, required: [description], properties: { description: { type: string } } }
+oracle: { description: { tool: eplan_page_get, args: { page: "&AAA1/2", language: en_US }, pick: $.page.description } }
+checks: [{ answer: $.description, equals_ignore_case: oracle.description }]
+budget: { max_tool_calls: 6 }

@@ -1,0 +1,7 @@
+id: check-errors
+set: dev
+prompt: 项目里目前有几条检查出来的错误？
+answer: { type: object, required: [errors], properties: { errors: { type: integer } } }
+oracle: { errors: { tool: eplan_check_list, pick: $.counts.error } }
+checks: [{ answer: $.errors, equals: oracle.errors }]
+budget: { max_tool_calls: 6 }

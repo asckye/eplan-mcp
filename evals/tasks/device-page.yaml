@@ -1,0 +1,7 @@
+id: device-page
+set: dev
+prompt: =GAB1+A1-FC1 这个设备画在哪一页上？给出完整页名。
+answer: { type: object, required: [page], properties: { page: { type: string } } }
+oracle: { page: { tool: eplan_device_get, args: { tag: "=GAB1+A1-FC1" }, pick: $.device.page } }
+checks: [{ answer: $.page, equals_ignore_case: oracle.page }]
+budget: { max_tool_calls: 6 }

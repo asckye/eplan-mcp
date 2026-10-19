@@ -1,0 +1,18 @@
+id: ambiguous-short-tag
+set: dev
+prompt: "-FC1 在哪一页上？"
+answer:
+  type: object
+  required: [devices]
+  properties:
+    devices:
+      type: array
+      items:
+        type: object
+        required: [tag, page]
+        properties: { tag: { type: string }, page: { type: string } }
+# -FC1 is shown in several structures (S6, api-notes A12): the answer has to name them rather than pick one.
+checks:
+  - answer: "$.devices[*].tag"
+    contains: ["=GAA+A1-FC1", "=GAB1+A1-FC1", "=F+A2-FC1", "=K1+A2-FC1"]
+budget: { max_tool_calls: 10 }

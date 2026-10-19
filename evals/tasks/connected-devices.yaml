@@ -1,0 +1,13 @@
+id: connected-devices
+set: dev
+prompt: 断路器 =GAA+A1-FC1 的输出端分别接到了哪些设备？列出对端设备的完整标识。
+answer:
+  type: object
+  required: [devices]
+  properties:
+    devices: { type: array, items: { type: string } }
+# Checked on the fixture (api-notes A12 run): FC1 pins 1-6 lead to these six devices; terminals of +A1-XD1 lead into it.
+checks:
+  - answer: $.devices
+    contains: ["=EA+A1-FB1", "=EA+A1-FB2", "=GAA+A1-FC2", "=GAA+A1-FC3", "=GAA+A1-FC4", "=GAA+A1-FC5"]
+budget: { max_tool_calls: 8 }
