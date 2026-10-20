@@ -1,4 +1,3 @@
-using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Operations;
 
@@ -13,7 +12,7 @@ internal sealed class EplanProjectReader : IProjectReader
     public ProjectContent Read(string projectPath, bool includeProperties, string? language)
     {
         MainThread.Assert();
-        ISOCode.Language textLanguage = EplanText.Language(language);
+        TextLanguage textLanguage = EplanText.Language(language);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
 

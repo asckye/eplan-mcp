@@ -179,6 +179,35 @@ public sealed class DeviceGetToolTests
         Assert.Null(result.StructuredContent);
     }
 
+    [Fact]
+    public async Task DeviceGet_NamesFallbackLanguagesAndLeavesTheFieldsOutOtherwise()
+    {
+        _data.Device.TextLanguage = "en_US";
+        _data.Parts.Add(new DevicePart { PartNumber = "PXC.3044102", Count = 2, Description = "Durchgangsreihenklemme", DescriptionLanguage = "de_DE" });
+        _data.Properties =
+        [
+            new PropertyEntry { Id = 20026, Name = "Function text", Value = "Pump on", Language = "en_US" },
+            new PropertyEntry { Id = 20010, Name = "Tag", Value = "-KF1" },
+        ];
+
+        JsonElement data = Structured(await Get("-KF1", responseFormat: ToolArguments.Detailed));
+
+        Assert.Equal("en_US", data.GetProperty("device").GetProperty("textLanguage").GetString());
+        Assert.False(data.GetProperty("parts")[0].TryGetProperty("descriptionLanguage", out _));
+        Assert.Equal("de_DE", data.GetProperty("parts")[1].GetProperty("descriptionLanguage").GetString());
+        Assert.Equal("en_US", data.GetProperty("properties")[0].GetProperty("language").GetString());
+        Assert.False(data.GetProperty("properties")[1].TryGetProperty("language", out _));
+    }
+
+    [Fact]
+    public async Task DeviceGet_LeavesTheLanguageFieldsOutWithoutAFallback()
+    {
+        JsonElement data = Structured(await Get("-KF1"));
+
+        Assert.False(data.GetProperty("device").TryGetProperty("textLanguage", out _));
+        Assert.False(data.GetProperty("parts")[0].TryGetProperty("descriptionLanguage", out _));
+    }
+
     private Task<CallToolResult> Get(string tag, string project = "", string responseFormat = ToolArguments.Concise, string language = "") =>
         DeviceTools.DeviceGetAsync(_bridge, tag, project, responseFormat, language, TestContext.Current.CancellationToken);
 

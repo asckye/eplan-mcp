@@ -128,7 +128,8 @@
   - — 实测（`dotnet run` 的 MCP 客户端脚本，不在仓库中）。
 - **读取没有副作用**：调用全部 13 个工具前后，夹具 `.edb` 中所有文件的修改时间和大小都没有变化；EPLAN 系统日志只新增了数据库打开、关闭的信息。— 实测。
 - **部件描述只有德文和部分英文**：示例项目中 `ARTICLE_DESCR1` 没有中文。界面语言为中文时，`GetStringToDisplay` 返回空串，**不会回退到其他语言**，所以 `eplan_part_list` 和 `eplan_device_get` 的部件 `description` 都是 null；传入 `language: "de_DE"` 时全部都有，传入 `en_US` 时部分有。页描述有中文，可以正常显示。— 实测。
-  - 待决定：当前语言没有文本时，是否回退到另一种语言并注明是哪种语言（影响全部多语言字段，属于 M2 设计 Q3 的补充）。
+  - 已按[语言回退设计](../design/2026-10-19-text-language-fallback.md)实现，实测：省略 `language` 时，西门子的 33 种部件中，前 5 种有 4 种返回英文描述、1 种只有德文（`descriptionLanguage: "de_DE"`）；显式传入 `zh_CN` 时仍是 null，没有标记字段；中文页描述不触发回退。`=GAA+A1-FC1` 的 detailed 结果中 281 个属性有 7 个用了回退语言（部件名称、部件描述），项目的 308 个属性和页的 79 个属性没有回退；读原始串（`PropertyValue.ToString()`）找候选语言的做法在各种类型的属性上都没有报错。
+  - 回退后 `text` 过滤匹配的是回退语言的文本：`eplan_part_list` 用德文 `Leistungsschalter` 找不到英文描述的部件，要传 `language: "de_DE"`。
 - 部件数据中有一个部件号是一个空格（`" "`），被 10 个引用使用，这些引用既不在设备上，也不在导线上。— 实测。
 - **带过滤器的 `GetFunctions` 会多返回同名的主功能**：不带过滤器时，示例项目每个完整标识只有一个主功能（504 个）；带 `FunctionsFilter.Page` 或 `FunctionCategory` 时，还会返回没有 `VisibleName` 的同名主功能。黑盒里的功能（`=EC1+A3-EC1-BT2`：`Blackbox` 加一个 `AnalogSensor`）和第二种表达（`=EC1+A3-EC1-MA2` 的两个 `Motor`）都是这样。`=EC1+A3&EFS1/1` 页因此有 95 个主功能，但只有 85 个不同的标识。— 实测（`eplan_device_list` 的 `page` 和 `category` 过滤，与不过滤的列表对比）。
   - 对本项目的影响：设备列表和页上的设备按完整标识合并为一行，保留有显示标识的那一个（`DeviceTags.OnePerTag`）。

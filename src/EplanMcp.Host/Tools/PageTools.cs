@@ -100,6 +100,7 @@ internal sealed class PageTools
                     Name = ResultShaper.CleanText(p.Name),
                     Type = ResultShaper.CleanText(p.Type),
                     Description = ResultShaper.CleanText(p.Description),
+                    DescriptionLanguage = p.DescriptionLanguage,
                 }),
             ],
             Total = data.Total,
@@ -165,6 +166,7 @@ internal sealed class PageTools
                 Type = ResultShaper.CleanText(data.Page.Type),
                 TypeName = ResultShaper.CleanText(data.Page.TypeName),
                 Description = ResultShaper.CleanText(data.Page.Description),
+                DescriptionLanguage = data.Page.DescriptionLanguage,
             },
             Devices =
             [

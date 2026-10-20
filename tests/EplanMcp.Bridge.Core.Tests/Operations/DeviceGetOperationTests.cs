@@ -156,13 +156,14 @@ public sealed class DeviceGetOperationTests
     {
         DeviceRecord record = Add("=F+A2-KF1", ">-KF1", category: "Coil", page: "=F+A2&EFS1/1");
         record.Main.Text = "Pump on";
+        record.Main.TextLanguage = "en_US";
         record.Main.Pins.AddRange(["A1", string.Empty, "A2"]);
         record.Auxiliary.Add(new FunctionDetail { Name = "=F+A2-KF1", VisibleName = string.Empty, Category = "NoContact", Page = "=F+A2&EFS1/2", Pins = ["13", "14"] });
         record.Parts.Add(new DevicePart { PartNumber = "SIE.3RT2016-1BB41", Variant = "1", Count = 1, Description = "Contactor" });
 
         DeviceGetData data = Run(new DeviceGetArgs { Tag = "-KF1" });
 
-        Assert.Equal(("-KF1", "Coil", "=F+A2&EFS1/1", "Pump on"), (data.Device.VisibleTag, data.Device.Category, data.Device.Page, data.Device.Text));
+        Assert.Equal(("-KF1", "Coil", "=F+A2&EFS1/1", "Pump on", "en_US"), (data.Device.VisibleTag, data.Device.Category, data.Device.Page, data.Device.Text, data.Device.TextLanguage));
         Assert.Equal(["A1", "A2"], data.Device.Pins);
         DeviceFunction contact = Assert.Single(data.Functions);
         Assert.Equal(("=F+A2-KF1", null, "NoContact", "=F+A2&EFS1/2"), (contact.Tag, contact.VisibleTag, contact.Category, contact.Page));

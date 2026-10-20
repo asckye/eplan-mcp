@@ -53,6 +53,7 @@ public sealed class DeviceGetOperation(IProjectCatalog catalog, IDeviceReader de
         Category = function.Category,
         Page = function.Page,
         Text = function.Text,
+        TextLanguage = function.TextLanguage,
 
         // EPLAN reports connection points without a designation as empty names (S6): nothing a model can use.
         Pins = [.. function.Pins.Where(pin => pin.Length > 0)],

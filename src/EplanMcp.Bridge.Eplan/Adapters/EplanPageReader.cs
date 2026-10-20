@@ -1,4 +1,3 @@
-using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -25,7 +24,7 @@ internal sealed class EplanPageReader : IPageReader
     public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language)
     {
         MainThread.Assert();
-        ISOCode.Language textLanguage = EplanText.Language(language);
+        TextLanguage textLanguage = EplanText.Language(language);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter();
         if (namePrefix is not null)
@@ -40,7 +39,14 @@ internal sealed class EplanPageReader : IPageReader
 
         // Without conditions, null: S6 verified that a null filter returns every page, in EPLAN's page order.
         Page[] pages = finder.GetPages(namePrefix is null && pageType is null ? null : filter);
-        return [.. pages.Select(page => new PageSummary { Name = page.Name, Type = page.PageType.ToString(), Description = Description(page, textLanguage) })];
+        return
+        [
+            .. pages.Select(page =>
+            {
+                (string? description, string? descriptionLanguage) = Description(page, textLanguage);
+                return new PageSummary { Name = page.Name, Type = page.PageType.ToString(), Description = description, DescriptionLanguage = descriptionLanguage };
+            }),
+        ];
     }
 
     public IReadOnlyList<string> PageNames(string projectPath)
@@ -53,7 +59,7 @@ internal sealed class EplanPageReader : IPageReader
     public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language)
     {
         MainThread.Assert();
-        ISOCode.Language textLanguage = EplanText.Language(language);
+        TextLanguage textLanguage = EplanText.Language(language);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var pageFilter = new PagesFilter { Name = pageName, ExactNameMatching = true }; // S6: one page for its exact name
         // The ordinal check keeps the match exact even if EPLAN's exact matching ignores case, which S6 did not test;
@@ -67,6 +73,7 @@ internal sealed class EplanPageReader : IPageReader
         // FunctionsFilter.Page instead of Page.Functions: the latter depends on the shared Page.Filter (banned). S6 found
         // this filter correct and fast (0 ms on a circuit page).
         using var functionFilter = new FunctionsFilter { Page = page };
+        (string? description, string? descriptionLanguage) = Description(page, textLanguage);
         return new PageContent
         {
             Page = new PageDetail
@@ -74,7 +81,8 @@ internal sealed class EplanPageReader : IPageReader
                 Name = page.Name,
                 Type = page.PageType.ToString(),
                 TypeName = page.PageTypeName is { Length: > 0 } typeName ? typeName : null,
-                Description = Description(page, textLanguage),
+                Description = description,
+                DescriptionLanguage = descriptionLanguage,
             },
             Functions =
             [
@@ -92,6 +100,10 @@ internal sealed class EplanPageReader : IPageReader
         };
     }
 
-    /// <summary>The page description, <c>PAGE_NOMINATIOMN</c> (EPLAN's spelling), a multi-language property (S6).</summary>
-    internal static string? Description(Page page, ISOCode.Language language) => EplanText.Read(page.Properties.PAGE_NOMINATIOMN, language);
+    /// <summary>
+    /// The page description, <c>PAGE_NOMINATIOMN</c> (EPLAN's spelling), a multi-language property (S6), and the
+    /// language it was read in when that is a fallback.
+    /// </summary>
+    internal static (string? Text, string? Fallback) Description(Page page, TextLanguage language) =>
+        EplanText.ReadWithLanguage(page.Properties.PAGE_NOMINATIOMN, language);
 }

@@ -17,7 +17,7 @@
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `manufacturer` | string | 否 | — | 制造商名称中包含的文字，不区分大小写 |
 | `text` | string | 否 | — | 部件号或描述中包含的文字，不区分大小写 |
-| `language` | string | 否 | EPLAN 界面语言 | 部件描述的语言 |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 部件描述的语言 |
 | `limit` | integer，1–200 | 否 | 50 | 每页最多条数 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor` |
 
@@ -42,6 +42,7 @@
 - 没有部件号的引用不计入。设备按完整标识去重计数；没有名称的功能无法区分，各算一个。
 - 项目中没有该变型的部件数据时，用同一部件号其他变型的数据代替（与 `eplan_device_get` 相同）。
 - `variant`、`description`、`manufacturer` 为空时返回 `null`。
+- 省略 `language`、而部件描述在界面语言中没有时，返回其他语言的描述（先 `en_US`，再按存储顺序），`descriptionLanguage` 给出语言代码；没有回退时不出现这个字段（[语言回退设计](../design/2026-10-19-text-language-fallback.md)）。`text` 也匹配回退后的描述。
 - 顺序：按部件号排序（序数比较），再按变型号，保证分页稳定。超出 token 预算时由 ResultShaper 截断，`hint` 说明如何继续。
 - 一行摘要：`Listed 4 parts.` / `Listed 50 of 293 parts (more: cursor).`，不回显部件号和描述。
 

@@ -17,4 +17,7 @@ public sealed class PropertyEntry
 
     /// <summary>The value as EPLAN displays it in the requested language; numbers keep EPLAN's format (<c>1,5</c>).</summary>
     public string Value { get; set; } = string.Empty;
+
+    /// <summary>The language the value was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
+    public string? Language { get; set; }
 }

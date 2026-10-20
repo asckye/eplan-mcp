@@ -179,6 +179,7 @@ internal sealed class DeviceTools
                 Category = ResultShaper.CleanText(data.Device.Category),
                 Page = ResultShaper.CleanText(data.Device.Page),
                 Text = ResultShaper.CleanText(data.Device.Text),
+                TextLanguage = data.Device.TextLanguage,
                 Pins = Clean(data.Device.Pins),
             },
             Functions =
@@ -199,6 +200,7 @@ internal sealed class DeviceTools
                     Variant = ResultShaper.CleanText(p.Variant),
                     Count = p.Count,
                     Description = ResultShaper.CleanText(p.Description),
+                    DescriptionLanguage = p.DescriptionLanguage,
                     Manufacturer = ResultShaper.CleanText(p.Manufacturer),
                 }),
             ],

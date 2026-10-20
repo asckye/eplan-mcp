@@ -19,7 +19,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
 
         // Cross-section and wire number are language-independent values (S6: ??_??@1,5;), which GetStringToDisplay
         // shows the same in any language.
-        ISOCode.Language language = EplanText.Language(null);
+        TextLanguage language = EplanText.Language(null);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Page? target = null;
         if (page is not null)
@@ -99,7 +99,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
     /// A Connection3D throws NotSupportedException on StartPin and EndPin and has no page (S6), so only its properties are
     /// read. StartPin and EndPin are null on a side that is not connected (EPLAN XML docs).
     /// </summary>
-    private static ConnectionRecord Record(Connection connection, ISOCode.Language language)
+    private static ConnectionRecord Record(Connection connection, TextLanguage language)
     {
         var record = new ConnectionRecord
         {

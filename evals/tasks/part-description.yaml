@@ -1,0 +1,7 @@
+id: part-description
+set: dev
+prompt: 部件 SIE.3RV2011-1BA25 的描述是什么？
+answer: { type: object, required: [description], properties: { description: { type: string, description: "the description as the project gives it, untranslated" } } }
+oracle: { description: { tool: eplan_part_list, args: { text: SIE.3RV2011-1BA25 }, pick: "$.parts[0].description" } }
+checks: [{ answer: $.description, equals_ignore_case: oracle.description }]
+budget: { max_tool_calls: 4 }

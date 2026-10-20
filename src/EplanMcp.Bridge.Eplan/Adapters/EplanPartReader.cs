@@ -1,4 +1,3 @@
-using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Operations;
 
@@ -14,7 +13,7 @@ internal sealed class EplanPartReader : IPartReader
     public ProjectParts ReadParts(string projectPath, string? language)
     {
         MainThread.Assert();
-        ISOCode.Language textLanguage = EplanText.Language(language);
+        TextLanguage textLanguage = EplanText.Language(language);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
         return new ProjectParts
@@ -27,12 +26,17 @@ internal sealed class EplanPartReader : IPartReader
             // into the project (BannedSymbols.txt). Descriptions are multi-language, the manufacturer is not (S6).
             Articles =
             [
-                .. project.Articles.Select(article => new ArticleRecord
+                .. project.Articles.Select(article =>
                 {
-                    PartNumber = article.PartNr ?? string.Empty,
-                    Variant = article.VariantNr ?? string.Empty,
-                    Description = EplanText.Read(article.Properties.ARTICLE_DESCR1, textLanguage),
-                    Manufacturer = EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, textLanguage),
+                    (string? description, string? descriptionLanguage) = EplanText.ReadWithLanguage(article.Properties.ARTICLE_DESCR1, textLanguage);
+                    return new ArticleRecord
+                    {
+                        PartNumber = article.PartNr ?? string.Empty,
+                        Variant = article.VariantNr ?? string.Empty,
+                        Description = description,
+                        DescriptionLanguage = descriptionLanguage,
+                        Manufacturer = EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, textLanguage),
+                    };
                 }),
             ],
         };

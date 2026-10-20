@@ -1,5 +1,4 @@
 using System.Globalization;
-using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Contracts;
 
@@ -19,7 +18,7 @@ internal static class EplanProperties
     /// an index, even for <c>IsEmpty</c> (S6), so its used indexes are read one by one. Properties EPLAN marks internal
     /// are left out, as the XML docs ask.
     /// </summary>
-    public static List<PropertyEntry> Read(UniversalPropertyList properties, ISOCode.Language language)
+    public static List<PropertyEntry> Read(UniversalPropertyList properties, TextLanguage language)
     {
         AnyPropertyId[] ids = properties.ExistingIds;
         PropertyValue[] values = properties.ExistingValues;
@@ -40,7 +39,7 @@ internal static class EplanProperties
         return entries;
     }
 
-    private static void Add(List<PropertyEntry> entries, AnyPropertyId id, PropertyValue value, ISOCode.Language language)
+    private static void Add(List<PropertyEntry> entries, AnyPropertyId id, PropertyValue value, TextLanguage language)
     {
         PropertyDefinition definition = value.Definition;
         if (definition.IsInternal)
@@ -54,9 +53,9 @@ internal static class EplanProperties
         string name = string.IsNullOrEmpty(definition.Name) ? key : definition.Name;
         if (!definition.IsIndexed)
         {
-            if (EplanText.Read(value, language) is { } text)
+            if (EplanText.ReadWithLanguage(value, language) is ({ } text, var textLanguage))
             {
-                entries.Add(new PropertyEntry { Id = number, Name = name, Value = text });
+                entries.Add(new PropertyEntry { Id = number, Name = name, Value = text, Language = textLanguage });
             }
 
             return;
@@ -64,9 +63,9 @@ internal static class EplanProperties
 
         foreach (int index in value.Indexes)
         {
-            if (EplanText.Read(value[index], language) is { } text)
+            if (EplanText.ReadWithLanguage(value[index], language) is ({ } text, var textLanguage))
             {
-                entries.Add(new PropertyEntry { Id = number, Index = index, Name = name, Value = text });
+                entries.Add(new PropertyEntry { Id = number, Index = index, Name = name, Value = text, Language = textLanguage });
             }
         }
     }

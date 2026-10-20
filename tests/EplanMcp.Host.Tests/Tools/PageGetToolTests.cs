@@ -174,6 +174,16 @@ public sealed class PageGetToolTests
         Assert.Null(result.StructuredContent);
     }
 
+    [Fact]
+    public async Task PageGet_NamesAFallbackLanguageOnlyWhenThereIsOne()
+    {
+        Assert.False(Structured(await Get(Circuit)).GetProperty("page").TryGetProperty("descriptionLanguage", out _));
+
+        _data.Page.DescriptionLanguage = "en_US";
+
+        Assert.Equal("en_US", Structured(await Get(Circuit)).GetProperty("page").GetProperty("descriptionLanguage").GetString());
+    }
+
     private Task<CallToolResult> Get(string page, string? project = null, string? responseFormat = ToolArguments.Concise, string? language = null) =>
         PageTools.PageGetAsync(_bridge, page, project, responseFormat!, language, TestContext.Current.CancellationToken);
 

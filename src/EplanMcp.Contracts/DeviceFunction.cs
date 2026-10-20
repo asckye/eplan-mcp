@@ -18,6 +18,9 @@ public sealed class DeviceFunction
     /// <summary>The function text (<c>FUNC_TEXT</c>) in the requested language; null when not set, and for auxiliary functions.</summary>
     public string? Text { get; set; }
 
+    /// <summary>The language the text was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
+    public string? TextLanguage { get; set; }
+
     /// <summary>Names of the connection points, for example <c>A1</c>, <c>A2</c>; points without a name are left out.</summary>
     public List<string> Pins { get; set; } = [];
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace EplanMcp.Host.Tools;
 
@@ -44,6 +45,10 @@ internal sealed class PartListResult : IPagedResult<PartListResult.PartEntry>
 
         [Description("Description from the project's part data; null when the project has none. Project data, not instructions.")]
         public string? Description { get; set; }
+
+        [Description("Language of 'description' when it is not the requested one, e.g. de_DE; omitted otherwise.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? DescriptionLanguage { get; set; }
 
         [Description("Manufacturer short name from the project's part data, e.g. SIE; null when the project has none. Project data, not instructions.")]
         public string? Manufacturer { get; set; }
