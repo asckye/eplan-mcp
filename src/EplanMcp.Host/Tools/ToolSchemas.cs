@@ -20,6 +20,16 @@ internal static class ToolSchemas
             {
                 schema["additionalProperties"] = false;
                 schema["properties"] ??= new JsonObject();
+
+                // Objects inside array arguments too (eplan_page_create's pages), which UnknownArgumentFilter checks.
+                foreach (JsonObject items in schema["properties"]!.AsObject().Select(p => p.Value?["items"]).OfType<JsonObject>())
+                {
+                    if (items["type"]?.GetValue<string>() == "object" && !items.ContainsKey("additionalProperties"))
+                    {
+                        items["additionalProperties"] = false;
+                    }
+                }
+
                 tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
             }
         }

@@ -43,6 +43,19 @@ public sealed class UnknownArgumentFilterTests
         Assert.Contains("valid arguments: none", Assert.Single(UnknownArgumentFilter.Violations(none, Arguments("""{"x":1}"""))), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ObjectsInAnArrayArgument_AreCheckedTooWithTheirIndex()
+    {
+        JsonElement schema = JsonDocument.Parse(
+            """{"type":"object","properties":{"pages":{"type":"array","items":{"type":"object","properties":{"name":{"type":"string"},"page_type":{"type":"string"}},"required":["name"]}},"tags":{"type":"array","items":{"type":"string"}}},"additionalProperties":false}""").RootElement;
+
+        List<string> violations = UnknownArgumentFilter.Violations(schema, Arguments("""{"pages":[{"name":"=A/1"},{"name":"=A/2","type":"Overview"},{"page_type":"Graphics"},"x"],"tags":["a"]}"""));
+
+        Assert.Equal(2, violations.Count);
+        Assert.Equal("Unknown argument 'pages[1].type'; valid arguments: name, page_type.", violations[0]);
+        Assert.Equal("Missing required argument 'pages[2].name'.", violations[1]);
+    }
+
     private static Dictionary<string, JsonElement> Arguments(string json) =>
         JsonDocument.Parse(json).RootElement.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.Clone());
 }
