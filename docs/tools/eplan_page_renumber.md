@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 12 步；依赖第 10 步的 Destructive 流水线，见 `eplan_page_delete` 第 6 节） |
+| 状态 | Proposed（M4 第 12 步；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把 `/90` 到 `/92` 这几页改成从 200 开始、步长 10 的页号"。代理给出 1–50 页，让 EPLAN 按"重新编号页"的规则给它们新的页号，按结构（页名中 `/` 之前的部分）编号（XML）。新页名由 EPLAN 的规则决定（M4 设计 Q7），变更清单只列范围，执行后列出每一页的新旧页名。页名被交叉引用、报表等处使用，按 Destructive 处理：每次审批，执行前备份，按一次 Ctrl+Z 撤销。只改一页的页描述用 `eplan_page_update`。重编号页不常用，所以放在 `full` Profile。

@@ -104,6 +104,20 @@ public sealed class ApprovalTextsTests
         Assert.Equal([change, string.Empty, heading, "=GAA+A1-?QA1", "+A1-?XG1", total], texts.Changes);
     }
 
+    [Theory]
+    [InlineData("zh-CN", "重新编号页 =A/90", "编号：from 200, step 10, per structure, subpages: retain, keep text: no")]
+    [InlineData("en-US", "Renumber page =A/90", "Numbering: from 200, step 10, per structure, subpages: retain, keep text: no")]
+    public void APageRenumbering_ListsThePagesThenTheNumbering(string culture, string change, string numbering)
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "update", Kind = "page", Name = "=A/90", Property = "page number" }],
+            Details = new Dictionary<string, string> { ["numbering"] = "from 200, step 10, per structure, subpages: retain, keep text: no" },
+        };
+
+        Assert.Equal([change, string.Empty, numbering], ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo(culture)).Changes);
+    }
+
     [Fact]
     public void AMacroInsertsDevices_AreNotListedAsDevicesToNumber()
     {
