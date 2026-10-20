@@ -36,11 +36,14 @@ jobs:
       - name: Format
         run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
 
-      # --long-running names any test still running after 60 s in the log, so an intermittent hang shows which test it
-      # is; --timeout ends the whole test session after 20 minutes instead of holding the runner.
+      # --timeout ends the whole test session after 20 minutes instead of holding the runner. A test still running after
+      # two minutes is written to hung-tests-<assembly>.txt in the results (tests/Shared/HangWatch.cs), and the report
+      # step below names it; xUnit's --long-running report does not reach the dotnet test output.
       - name: Small and Medium tests
         id: tests
-        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --long-running 60 --timeout 20m --report-xunit-trx --results-directory "${{ runner.temp }}/test-results"
+        env:
+          EPLANMCP_HANG_REPORT_DIR: ${{ runner.temp }}/test-results
+        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --timeout 20m --report-xunit-trx --results-directory "${{ runner.temp }}/test-results"
 
       # A wrong filter or a broken discovery passes with few or no tests run: every test assembly must pass at least
       # its floor in tests/test-suites.json, and every assembly that ran must be listed there (testing.md section 7).
@@ -90,6 +93,12 @@ jobs:
               $text = "$($result.outcome): $($result.Output.ErrorInfo.Message)`n$($result.Output.ErrorInfo.StackTrace)".Trim()
               if ($text.Length -gt 4000) { $text = $text.Substring(0, 4000) + ' ...' }
               Write-Output "::error title=$(Escape $result.testName -property)::$(Escape $text)"
+            }
+          }
+          foreach ($file in Get-ChildItem "$env:RUNNER_TEMP/test-results" -Filter hung-tests-*.txt -ErrorAction SilentlyContinue) {
+            foreach ($line in Get-Content $file.FullName) {
+              $failed++
+              Write-Output "::error title=Hung test::$(Escape $line)"
             }
           }
           if ($failed -eq 0) { Write-Output '::error::No failed test in the TRX files; a test host may have crashed or not started.' }
