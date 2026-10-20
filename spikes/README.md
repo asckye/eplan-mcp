@@ -13,6 +13,7 @@
 | [S5](S5-msix-host/README.md) | MSIX 打包的客户端（Claude 桌面版）启动 Host 时的文件系统重定向 | **完成** 2026-10-19 | Host 正常工作：数据根目录和 `%TEMP%` 不重定向，命名管道正常。客户端启动的进程**没有包身份**，写入 `%LOCALAPPDATA%`、`%APPDATA%` 却仍被重定向，`doctor` 要改为直接探测 |
 | [S6](S6-read-api/README.md) | M2 只读 API 在真实项目上的耗时、名称取值、多语言格式和副作用 | **完成** 2026-10-19 | 全部读取在 100 ms 以内；设备标识用 `Function.Name`；多语言用 `GetStringToDisplay`；运行检查是写操作。🔴 新建第二个 `SysMessagesCollection` 后再读第一个集合的消息文本，会触发 EPLAN 内部的访问冲突。`ProjectOpen` 不一定改变当前项目 |
 | [S9](S9-write-api/README.md) | M3 的写入 API：用完整页名建页、改设备标识、按符号放置设备、插入宏、生成连接，以及各自能否回滚 | **完成** 2026-10-20 | 建页、改标识、插宏、生成连接都可行。🔴 `SafetyPoint` 和 `Transaction` 各管一半：插宏只有 `SafetyPoint` 能撤回，按符号新建设备在 `SafetyPoint` 中必定失败、只能用 `Transaction`。改标识要连同辅助功能一起改；页名和设备标识中项目结构不用的部分会被静默丢掉，EPLAN 不检查设备标识重名，都要读回比较 |
+| [S10](S10-dispatcher-writes/README.md) | M3b 的写入在 Bridge 调度器中（不在 action 中）：插宏的编号方式、Ctrl+Z、生成连接的回滚、读宏内容、页幅面、按符号放置的撤销与标识显示 | **完成** 2026-10-20 | 插宏用 `Number` 编号不产生重复设备（`None` 会）；插宏、生成连接各占一个撤销步骤，都能被 `SafetyPoint` 回滚；不插入就能读出宏的内容；空页读不到幅面。按符号放置的设备能撤销，但图上不显示标识，Q1 继续推迟 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。

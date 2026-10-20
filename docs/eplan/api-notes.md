@@ -159,6 +159,24 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A14. 在 Bridge 调度器中写入（spike S10，2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
+探针在 action 返回之后经 `Dispatcher.Invoke` 在主线程上执行，与 Bridge 相同；写入的包装是 `SafetyPoint` → 其中的 `UndoStep` → `QuietModeStep`。详细数据见 [spike S10](../../spikes/S10-dispatcher-writes/README.md)。
+- **插入宏的编号方式**（`Insert.WindowMacro(…, NumerationMode)`）：
+  - `None` 保留宏中的标识、结构跟随目标页。再次插入同一个宏时，项目中出现**两个同名的主功能**（`+A1-WG6`）；
+  - `Number` 分配不冲突的新标识（`WG7`、`XG9`），端子编号为 `:?1`、`:?2`；没有主功能的触点得到带 `?` 的标识（`=GAA+A1-?QA1`）；
+  - `NumberWithQuestionMark` 给所有标识加 `?`；
+  - PLC 端子保留宏自带的结构（`=K1+A1:1.4`），四种方式都不改。
+  - — S10。
+- **在调度器中，插入宏、生成连接、按符号新建设备（`UndoStep` 包住 `Transaction`）各占一个撤销步骤**。S10 的副本是当前项目时，`XEsUndoAction` 只撤销最后那一步。— S10 r3。
+  - ⚠️ 测试 Ctrl+Z 时，要先确认打开的项目全是 scratch 副本，并且要撤销的项目是当前项目：EPLAN 中开着其他项目时，撤销可能落到它上面。`Edit.SelectProjectInPagesNavigator(project)` 可以把副本选为当前项目。
+- `SafetyPoint` 能回滚 `Generate.Connections`（页上 0 → 9 → 0 个连接）。对连接已经齐全的页，"只更新"和"重建全部"都不增删连接。— S10。
+- **调度器中没有隐式锁定**：不加 `SafetyPoint` 时（例如按符号新建设备时只用 `Transaction`），写入前要自己锁定，否则抛出 `LockingException`（"写存取前没有加锁该对象"）。`SafetyPoint` 存在期间会自动锁定，插宏、生成连接、建页都不需要手动锁。— S10 r1、r2。
+- **按符号新建的设备在图上不显示标识和连接点编号**：导出的 PNG 中只有符号本身。新功能有 12 个属性放置；`PropertyPlacementsSchemas.All` 有"默认""用户定义"两种，选择"默认"后也没有变化。宏插入的设备则显示标识。— S10 r3，`Export.GraphicPage`。
+- **不插入就能读出宏的内容**：`WindowMacro.Open(path, project)` 后，`Objects` 返回全部对象（示例宏 28 个，其中 19 个功能，带宏自己的占位结构，如 `+-XG8:?`）；还能读出 `Size`、`GetBoundingBox()`、`GetVariants(type)`。打开前后项目的功能数和 `.edb` 文件都不变。— S10。
+- **页幅面**：`Page.Size` 对已有内容的页返回幅面（示例页 420 × 297.02 mm），对**新建的空页抛出 `InvalidOperationException`**（"S063136无法确定页尺寸"）。`Page.GetBoundingBox()` 是页上全部对象的外框。— S10。
+- 用 `MoveKind.Absolute` 插入宏时，插入点对应宏外框的左上角（只观察了一次）。— S10 r3，导出的 PNG。
+- **调度器中的读取不改写项目文件**：只找项目、或打开并读取宏，项目 `.edb` 中都没有文件变化，包括 `User.eod`。A11 中的改写来自在 action 中调用 DataModel API。— S10，对比文件的大小和修改时间。
+
 ---
 
 ## B. 官方文档与反射核实的事实（2026-10-12）
