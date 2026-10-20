@@ -8,7 +8,7 @@
 | 门的类型 | 双向门（1.0 发布前） |
 
 ## 背景与问题
-[M4 设计](../design/2026-10-20-m4-workflows.md)第一批有三个导出工具：`eplan_export_image`、`eplan_export_pdf`、`eplan_export_dxf`。它们不改项目（由 S11 验证），但会在磁盘上新建文件。
+[M4 设计](../design/2026-10-20-m4-workflows.md)第一批有三个导出工具：`eplan_export_image`、`eplan_export_pdf`、`eplan_export_dxf`。它们不改项目的设计数据（S11，api-notes A16），但会在磁盘上新建文件。
 
 [ADR-0005](0005-safety-model.md) 第 1 节规定级别与 MCP 注解一一对应（Read → `readOnlyHint: true`），CI 检查二者一致。导出放进哪一级都不合适：
 - 按 Read，`readOnlyHint: true` 不准确：MCP 规范中它的意思是"不改变环境"，客户端可能据此不经询问就允许调用；
@@ -40,7 +40,7 @@ M4 设计 Q2 已按建议决定：采用 Read 级加 `readOnlyHint: false`，并
    - 导出后递归核对每个文件都在这个目录之下、不是链接；
    - 失败或取消时删除这个目录；
    - 从不覆盖已有文件。
-3. **前提**：S11 必须证实导出不改动项目文件（方法同 A11、A14）。如果改动了，该工具按 Write 级处理，需要审批。
+3. **前提**：导出不改动项目的设计数据。S11 已证实（api-notes A16）：PDF、DXF 导出只改写项目的 `User.eod` / `User.eox`，这是 EPLAN 按用户保存的项目数据，任何 action 都会改写它（A11），不算修改设计数据；文件只出现在给定目录中，但 DXF 方案会在目录下建子目录。以后发现某种导出改动了设计数据，该工具按 Write 级处理，需要审批。
 4. **不变的部分**：Write、Destructive、Code 的定义和策略；审批只针对改变项目的操作。
 
 ## 后果
