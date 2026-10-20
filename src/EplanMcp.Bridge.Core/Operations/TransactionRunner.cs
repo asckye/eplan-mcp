@@ -110,7 +110,7 @@ public static class TransactionRunner
     {
         var error = new BridgeErrorException(
             ErrorReason.OutcomeUnknown,
-            $"EPLAN failed while {step} the change, so whether the project changed is unknown. Do not call this tool again; ask the engineer to check the project in EPLAN, where Ctrl+Z undoes '{UndoPrefix}{tool}' if the change is there.",
+            $"EPLAN failed while {step} the change of {tool}, so whether the project changed is unknown; it may hold all, part or none of it. Do not call this tool again; ask the engineer to check the project in EPLAN.",
             cause);
         error.Error.Execution = ExecutionState.Unknown;
         return error;
