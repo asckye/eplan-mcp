@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.HEServices;
@@ -16,6 +19,9 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 internal sealed class EplanConnectionGenerator : IConnectionGenerator
 {
     private const int MaxMessageLength = 500;
+
+    // Drive-letter and UNC paths, up to the next whitespace or quote.
+    private static readonly Regex _paths = new(@"(?:[A-Za-z]:\\|\\\\)[^\s""']+", RegexOptions.CultureInvariant);
 
     public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages)
     {
@@ -48,8 +54,8 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
 
     /// <summary>
     /// The SafetyPoint locks what the generation touches by itself (S10, A14). EPLAN reports a failed generation as a
-    /// BaseException with its message (EPLAN XML docs), which goes back with EPLAN_OPERATION_FAILED; a LockingException
-    /// stays for the exception mapper (LOCK_FAILED).
+    /// BaseException with its message (EPLAN XML docs), which goes back with EPLAN_OPERATION_FAILED; what the exception
+    /// mapper knows (locks, a missing licence) stays for it.
     /// </summary>
     public void Generate(string projectPath, IReadOnlyList<string> pages)
     {
@@ -61,16 +67,47 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
         {
             generate.Connections(targets, false);
         }
-        catch (BaseException ex) when (ex is not LockingException)
+        catch (BaseException ex) when (new EplanExceptionMapper().Map(ex) is null)
         {
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not generate the connections on these pages, so nothing was changed. metadata.eplanMessage has EPLAN's message; ask the engineer to check the pages in EPLAN.",
                 ex);
-            string message = ex.Message ?? string.Empty;
-            failed.Error.Metadata = new Dictionary<string, string> { ["eplanMessage"] = message.Length <= MaxMessageLength ? message : message.Substring(0, MaxMessageLength) + "…" };
+            failed.Error.Metadata = new Dictionary<string, string> { ["eplanMessage"] = ForModel(ex.Message) };
             throw failed;
         }
+    }
+
+    /// <summary>
+    /// EPLAN's message as the model may see it (SEC-12): paths replaced, control and format characters dropped, cut at
+    /// <see cref="MaxMessageLength"/> without splitting a surrogate pair. The Host cleans it again as project text.
+    /// </summary>
+    internal static string ForModel(string? message)
+    {
+        string text = _paths.Replace(message ?? string.Empty, "<path>");
+        var kept = new StringBuilder(Math.Min(text.Length, MaxMessageLength + 1));
+        foreach (char c in text)
+        {
+            if (char.IsControl(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
+            {
+                if (c is '\r' or '\n' or '\t')
+                {
+                    kept.Append(' ');
+                }
+
+                continue;
+            }
+
+            kept.Append(c);
+        }
+
+        if (kept.Length <= MaxMessageLength)
+        {
+            return kept.ToString();
+        }
+
+        int cut = char.IsHighSurrogate(kept[MaxMessageLength - 1]) ? MaxMessageLength - 1 : MaxMessageLength;
+        return kept.ToString(0, cut) + "…";
     }
 
     /// <summary>The pages by their exact names, which the operation resolved in the same main-thread call.</summary>
