@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `macro` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 4 步；实现依赖 M3a 第 10 步的 `TransactionScope`） |
+| 状态 | Proposed（M3b 第 4 步；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1&EFS1/60` 页左上方放一个接触器反馈控制回路"。代理先用 `eplan_macro_list` 和 `eplan_macro_get` 选好宏，再用它把宏放到页上的指定位置，得到带标识、在图上显示的设备。这是 M3b 放置设备的唯一方式（M3b 设计 Q1）：一次调用插一个宏，只审批一次，按一次 Ctrl+Z 撤销。
@@ -49,9 +49,10 @@
 - 插入后外框超出页面，或者页的幅面读不到（新建的空页，A14）时，`hint` 也会说明。
 - `undo`、`recovered`：同 `eplan_page_create`。
 - 标识按项目数据处理，经过 ResultShaper。
-- 一行摘要：
-  - `Inserted a macro with 8 devices on a page of 'Line1'; Ctrl+Z in EPLAN undoes this step.`
+- 一行摘要（只有计数，不回显项目名，架构 8.5）：
+  - `Inserted a macro with 8 devices; Ctrl+Z in EPLAN undoes this step.`
   - `Dry run: would insert a macro with 8 devices. Nothing was changed.`
+- `dry_run` 和取回结果（`recovered`）时，`devices`、`objectCount` 和幅面提示来自计划的 `details`（`devices`、`deviceCount`、`objectCount`、`pageSizeKnown`）；取回结果时 `devices` 是宏中的设备，`hint` 提示用 `eplan_page_get` 核对。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
@@ -70,11 +71,11 @@
   - 解析项目、页（规则同 `eplan_page_get`）和宏路径（`MacroFiles.Resolve`，SEC-19）；
   - 打开宏（不插入，A14），确认有 `MultiLine` 和要求的 `variant`，读出外框尺寸和其中的设备；
   - 读页的幅面（`Page.Size`）。读得到时，检查插入后的外框 `[x, x + 宽] × [y − 高, y]` 在页内；读不到时只检查 `x ≥ 0`、`y ≥ 0`，并在结果中提示；
-  - 一条 `create` 变更：`Kind = "macro"`，`Name` 为页名，`NewValue` 为宏文件名、插入点、编号方式和设备数。表单显示为 `insert macro Contactor_Feedback_Control.ema at (40, 200) on page =GAA+A1&EFS1/60, numbering number, 8 devices`；
+  - 一条 `create` 变更：`Kind = "macro"`，`Name` 为页名，`NewValue` 为宏文件名、插入点、编号方式和设备数（`Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices`，变体不为 0 时加 `, variant 2`）。EPLAN 中的审批对话框显示为 `Insert a macro on page =GAA+A1&EFS1/60: Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices`，中文界面为"在页 =GAA+A1&EFS1/60 上插入宏：…"；
   - 指纹包括三部分，排序后取 SHA-256：页上全部对象的会话内标识；`keep` 时，宏中各标识在项目中的功能；宏文件的大小和修改时间。
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中执行：
   1. 先记下项目中主功能的标识集合，然后调用 `Insert.WindowMacro(macro, MultiLine, variant, page, new PointD(x, y), MoveKind.Absolute, numbering == number ? NumerationMode.Number : NumerationMode.None)`；
-  2. 读回页上新增的功能。`keep` 时，若有标识在插入前已有主功能、插入后有两个以上主功能，就抛出（`ALREADY_EXISTS`），整体回滚；
+  2. 读回页上新增的功能。若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。`keep` 时这就是合并；`number` 时不应发生，同样检查；
   3. 通过后 `Commit()`，再 `CloseUndo()`。
 - **已验证**（S9、S10，api-notes A13、A14）：
   - 插入宏能被 `SafetyPoint` 回滚，`Transaction` 不行，所以只用 `SafetyPoint`；

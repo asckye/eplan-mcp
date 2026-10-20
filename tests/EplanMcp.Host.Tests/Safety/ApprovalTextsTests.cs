@@ -55,6 +55,16 @@ public sealed class ApprovalTextsTests
         Assert.Equal(("Approve", "Reject", "Rejected automatically in {0}"), (texts.ApproveLabel, texts.RejectLabel, texts.CountdownFormat));
     }
 
+    [Theory]
+    [InlineData(true, "在页 =GAA+A1&EFS1/60 上插入宏：Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
+    [InlineData(false, "Insert a macro on page =GAA+A1&EFS1/60: Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
+    public void AMacroInsert_ShowsWhatGoesWhere(bool zh, string line)
+    {
+        var change = new PlannedChange { Action = "create", Kind = "macro", Name = "=GAA+A1&EFS1/60", NewValue = "Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices" };
+
+        Assert.Equal(line, ApprovalTexts.Change(change, zh));
+    }
+
     [Fact]
     public void ProjectData_StaysOnOneLine_WithoutBidirectionalControls()
     {
