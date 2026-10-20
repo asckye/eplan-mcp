@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Exports;
 using EplanMcp.Host.Safety;
 using Microsoft.Win32;
 
@@ -63,6 +64,21 @@ internal static class DoctorChecks
         DoctorStatus.Failure,
         $"审计目录不可写，写操作会被拒绝：{locations.Audit}（{ex.Message}）",
         $"Audit directory not writable, so writes will be refused: {locations.Audit} ({ex.Message})");
+
+    /// <summary>What the exports occupy: successful ones are never deleted automatically (M4 design Q8, SEC-20).</summary>
+    public static DoctorCheck Exports(HostDataLocations locations)
+    {
+        if (!Directory.Exists(locations.Exports))
+        {
+            return new(DoctorStatus.Info, $"导出目录尚未创建：{locations.Exports}（第一次导出时创建）", $"Export directory not created yet: {locations.Exports} (created by the first export)");
+        }
+
+        (int folders, long bytes) = ExportFolders.Usage(locations.Exports);
+        string size = ByteSize.Format(bytes);
+        return new(DoctorStatus.Info,
+            $"导出目录 {locations.Exports}：{folders} 次导出，共 {size}；不会自动清理，不再需要的可以手工删除",
+            $"Export directory {locations.Exports}: {folders} exports, {size} in total; never cleaned up automatically, delete what is no longer needed");
+    }
 
     /// <summary>Suspended writes (ADR-0010 section 3): what the engineer has to check before AI writes resume.</summary>
     public static IEnumerable<DoctorCheck> Suspensions(HostDataLocations locations)
