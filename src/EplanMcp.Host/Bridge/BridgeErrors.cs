@@ -13,6 +13,31 @@ internal static class BridgeErrors
         Retryable = true,
     };
 
+    public static BridgeError WritesUnsupported(string bridgeVersion) => new()
+    {
+        Reason = ErrorReason.BridgeIncompatible,
+        Message = $"The EplanMcp add-in in EPLAN (version {bridgeVersion}) cannot report the outcome of writes, so no write is sent to it. Ask the engineer to update the add-in and restart EPLAN.",
+    };
+
+    public static BridgeError RolledBackAfterInterruption(string? reason) => new()
+    {
+        Reason = reason ?? ErrorReason.EplanOperationFailed,
+        Message = "The connection to EPLAN was interrupted. The add-in reports that the write failed and was rolled back, so the project is unchanged.",
+    };
+
+    public static BridgeError NotStartedAfterInterruption(string? reason) => new()
+    {
+        Reason = reason ?? ErrorReason.EplanBusy,
+        Message = "The connection to EPLAN was interrupted. The add-in reports that the write did not start, so nothing was changed. Call again when EPLAN is free.",
+        Retryable = true,
+    };
+
+    public static BridgeError OutcomeUnknown() => new()
+    {
+        Reason = ErrorReason.OutcomeUnknown,
+        Message = "The write was interrupted and its outcome could not be fetched from EPLAN: whether the project changed is unknown. Do not call again. Ask the engineer to check the project in EPLAN; read tools show its current state.",
+    };
+
     public static BridgeError ConnectionLost() => new()
     {
         Reason = ErrorReason.EplanNotConnected,

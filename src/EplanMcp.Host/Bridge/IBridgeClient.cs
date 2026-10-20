@@ -17,4 +17,12 @@ internal interface IBridgeClient
 
     /// <summary>Runs one Bridge operation; throws <see cref="BridgeCallException"/> carrying the tool error.</summary>
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Runs a write's execute operation under <paramref name="requestId"/>, never sending it twice (ADR-0010). After a
+    /// timeout, a lost connection or cancellation it fetches the outcome with outcome.get until
+    /// <paramref name="limit"/>. Throws <see cref="BridgeCallException"/> whose error carries <c>Execution</c>;
+    /// OUTCOME_UNKNOWN when the outcome cannot be learned.
+    /// </summary>
+    public Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken);
 }

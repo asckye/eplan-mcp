@@ -23,11 +23,15 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
     public static readonly TimeSpan DefaultQueueTimeout = TimeSpan.FromSeconds(15);
     public static readonly TimeSpan DefaultCallTimeout = TimeSpan.FromSeconds(30);
 
+    /// <summary>How often a write's outcome is asked for after an interruption (ADR-0010).</summary>
+    public static readonly TimeSpan DefaultPollInterval = TimeSpan.FromSeconds(1);
+
     private readonly IBridgeDiscovery _discovery;
     private readonly IBridgeConnector _connector;
     private readonly ILogger<BridgeClient> _logger;
     private readonly TimeSpan _queueTimeout;
     private readonly TimeSpan _callTimeout;
+    private readonly TimeSpan _pollInterval;
     private readonly SemaphoreSlim _queue = new(1, 1);
     private IBridgeChannel? _channel;
     private HandshakeResult? _handshake;
@@ -38,13 +42,14 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
     {
     }
 
-    internal BridgeClient(IBridgeDiscovery discovery, IBridgeConnector connector, ILogger<BridgeClient> logger, TimeSpan queueTimeout, TimeSpan callTimeout)
+    internal BridgeClient(IBridgeDiscovery discovery, IBridgeConnector connector, ILogger<BridgeClient> logger, TimeSpan queueTimeout, TimeSpan callTimeout, TimeSpan? pollInterval = null)
     {
         _discovery = discovery;
         _connector = connector;
         _logger = logger;
         _queueTimeout = queueTimeout;
         _callTimeout = callTimeout;
+        _pollInterval = pollInterval ?? DefaultPollInterval;
     }
 
     public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
