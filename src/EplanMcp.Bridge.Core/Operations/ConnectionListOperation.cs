@@ -68,7 +68,7 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
         };
 
     /// <summary>Empty names are no names; an end with neither a function nor a connection point name is not connected.</summary>
-    private static ConnectionEnd? End(string? device, string? pin)
+    internal static ConnectionEnd? End(string? device, string? pin)
     {
         string? function = string.IsNullOrEmpty(device) ? null : device;
         string? point = string.IsNullOrEmpty(pin) ? null : pin;

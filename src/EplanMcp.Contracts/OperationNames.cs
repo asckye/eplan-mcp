@@ -100,6 +100,18 @@ public static class OperationNames
     public const string DeviceUpdateExecute = "device.update.execute";
 
     /// <summary>
+    /// The plan of eplan_connection_generate: finds the pages and counts their connections, never writes. Arguments:
+    /// <see cref="ConnectionGenerateArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string ConnectionGeneratePlan = "connection.generate.plan";
+
+    /// <summary>
+    /// Generates connections on the planned pages in one transaction, updating only. Arguments:
+    /// <see cref="ConnectionGenerateArgs"/> with the fingerprint; data: <see cref="ConnectionGenerateData"/>.
+    /// </summary>
+    public const string ConnectionGenerateExecute = "connection.generate.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
