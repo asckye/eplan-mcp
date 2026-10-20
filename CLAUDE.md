@@ -38,6 +38,7 @@ dotnet build EplanMcp.slnx                      # 全部，含 EPLAN 插件（�
 dotnet build EplanMcp.Ci.slnf                   # 不含插件，与 CI 相同
 dotnet test --solution EplanMcp.Ci.slnf -- --filter-not-trait "Size=Large"   # Small + Medium
 dotnet test --project tests\EplanMcp.Host.Tests -- --filter-trait "Size=Small"
+dotnet test --project tests\EplanMcp.Large.Tests   # Large：需要 EPLAN 以夹具运行（eng\scripts\eval-fixture.ps1 -Open），见该目录的 README
 dotnet format EplanMcp.Ci.slnf --verify-no-changes
 dotnet run --project src\EplanMcp.Host -- doctor   # 自检；serve（默认）是 stdio MCP 服务器
 dotnet build src\EplanMcp.Bridge.Eplan -c Release  # 注册脚本默认用 Release 版插件（可用 -Configuration 改）

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!--
+      Every test here is Size=Large: it needs a running EPLAN with the fixture project (README.md). CI builds the project
+      but filters out Large tests, which leaves this assembly with zero tests; exit code 8 ("zero tests ran") is then
+      not a failure.
+    -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
+    <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <_Parameter1>windows</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
