@@ -15,9 +15,9 @@
 | 命名空间 | 公开类型 | 用途 | 对应的工具家族 | 里程碑 | 状态 |
 |---|---:|---|---|---|---|
 | `Eplan.EplApi.DataModel` | 339 | 项目、页面、功能（设备）、连接、电缆、端子、PLC、部件引用、属性 | 项目 / 页面 / 设备 / 连接 / 电缆 / 端子 / PLC / 属性 | M2（读）、M3（写） | ⬜ |
-| `Eplan.EplApi.MasterData` | 127 | 部件库、符号库、宏、表格等主数据 | 部件 / 符号 / 宏 | M3（读）、M4（写） | ⬜ |
+| `Eplan.EplApi.MasterData` | 127 | 部件库、符号库、宏、表格等主数据 | 部件 / 符号 / 宏 | M3（读）、M4（写） | 🟡 宏的读取已实现（`eplan_macro_list`、`eplan_macro_get`） |
 | `Eplan.EplApi.HEServices` | 108 | 高层服务：当前选择、编辑、生成、编号、报表、检查、导入导出 | 选择 / 报表 / 检查 / 编号 / 生成 | M2–M4 | ⬜ |
-| `Eplan.EplApi.DataModel.Graphics` | 87 | 图形对象（线、文本、矩形、属性放置） | 页面图形读写、设备标识显示（S0 发现 API 赋值的标识不显示文字） | M3 | ⬜ |
+| `Eplan.EplApi.DataModel.Graphics` | 87 | 图形对象（线、文本、矩形、属性放置） | 页面图形读写、设备标识显示：按符号新建的设备不显示标识，选择属性排列方案也不行（S10）；M3b 改用窗口宏放置，宏中的设备显示标识 | M3 | ⬜ |
 | **`Eplan.EplApi.DataModel.E3D`** | **80** | **Pro Panel 3D**：安装空间、机柜、安装板、导轨、线槽、元件放置、钻孔、母排、铜排、布线、装配约束 | **Pro Panel 3D**（见第 3 节） | **M4b** | ⬜ |
 | `Eplan.EplApi.Base` | 40 | 设置、路径变量、多语言文本、系统消息、进度 | 基础设施（Bridge 内部使用） | M1–M2 | 🟡 |
 | `Eplan.EplApi.ApplicationFramework` | 37 | action、插件、授权、静默模式 | 基础设施；受控 action 白名单 | M1、M4 | 🟡 |
@@ -55,7 +55,7 @@
 | 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目 | M2（读取）、M3（运行） |
 | 报表 | 更新报表、生成报表页 | `eplan_report_update` | M4 |
 | 编号 | 设备、页面、端子、电缆、连接重编号 | `eplan_renumber`（Destructive，执行前备份） | M4 |
-| 生成 | 生成连接、电缆、宏 | 并入相关的写工具 | M3–M4 |
+| 生成 | 生成连接、电缆、宏 | 插入窗口宏：`eplan_macro_insert`；生成连接：`eplan_connection_generate`（按页，只更新）。两者都已写规格，实现排在 M3a 第 10 步之后（[M3b 设计](../design/2026-10-20-m3b-placement.md)）；电缆生成在 M4 | M3b、M4 |
 | 项目管理 | 打开、关闭、备份、还原、升级、压缩 | `eplan_project_*`；备份同时用作 Destructive 操作前的保护 | M2–M3 |
 | 部件管理 | 导入导出部件、同步 | `eplan_part_*` | M4 |
 | 翻译与语言 | 翻译项目、设置项目语言 | `eplan_translate_*` | M4 |
