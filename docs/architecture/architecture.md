@@ -18,7 +18,7 @@
 让电气工程师可以把 EPLAN 中重复、机械的工作交给 AI 代理完成，例如查询项目、生成页面、放置设备、整理标识、更新报表、导出和检查。同时**工程师始终掌握控制权**：AI 的每一处修改都事先经过批准，事后可以审计，出错可以回退，还可以在 EPLAN 里用 Ctrl+Z 撤销。
 
 ### 1.2 范围
-- **范围内**：通过 MCP 向 AI 代理提供 EPLAN Electric P8 / Pro Panel 的读写能力；安全策略、审批、审计；安装与自检工具。首个支持的版本是 EPLAN 2026，同时在设计上覆盖 2027。
+- **范围内**：通过 MCP 向 AI 代理提供 EPLAN Electric P8 / Pro Panel 的读写能力；安全策略、审批、审计；安装与自检工具。首个验证的版本是 EPLAN 2026；按 [ADR-0009](../adr/0009-supported-eplan-versions.md)，同一份插件支持 2024–2027，每个版本实测（spike S7）后列入支持矩阵；2022、2023 暂不支持。
 - **非目标**（至少 1.0 之前不做）：
   - 没有 API 扩展授权的环境。那种环境只能走"Remote Client + 受限脚本"的路子，无法访问 DataModel。
   - 远程或多用户服务化部署：每台工程师电脑各自运行一套。
@@ -42,7 +42,7 @@
 | 类别 | 约束 | 出处 |
 |---|---|---|
 | 平台 | 仅支持 Windows x64。`EPLAN.exe` 是原生 x64（MFC）程序，CLR 在其中被宿主 | api-notes B1 |
-| 运行时 | EPLAN 2026 API 以 **.NET Framework 4.8.1** 为目标。2027 新增并行的 .NET 8 API，同时保留 4.8.1 API；两者不能混用 | B1 |
+| 运行时 | EPLAN 2024 起的 API 以 **.NET Framework 4.8.1** 为目标（2023 及以前是 4.7.2）。2027 新增并行的 .NET 8 API，同时保留 4.8.1 API；两者不能混用 | B1、[ADR-0009](../adr/0009-supported-eplan-versions.md) |
 | 线程 | **只能在 EPLAN 主线程调用 API**。官方从 2025 起提供 `EplanMainThreadDispatcher` 把调用切换到主线程；本项目直接使用主线程的 WPF `Dispatcher`，各版本都有（ADR-0009）。`LockingStep` 不支持多线程 | B6、B7 |
 | 撤销 | 通过 API 修改项目时**如果没有创建 `UndoStep`，EPLAN 会清空撤销历史** | B7 |
 | 授权 | 编译的 API 程序：**开发者授权只加载未签名程序，通常限制项目不超过 5 页**；**运行时授权只加载经 EADN 签名的程序**。开发机有 `APIExtension`，但具体属于哪一种授权、5 页限制是否生效，尚未验证 | B8 |
@@ -89,7 +89,7 @@ flowchart LR
 |---|---|---|
 | 如何访问 EPLAN | **进程外的 Host + EPLAN 进程内的 Bridge 插件**。Bridge 在主线程上直接调用 EPLAN API，Host 负责 MCP 协议、策略和审计 | [0002](../adr/0002-host-bridge-process-model.md) |
 | Host 与 Bridge 如何通信 | **命名管道 + JSON-RPC 2.0**，自己实现轻量的帧格式；只允许当前用户访问；握手时交换协议版本 | [0003](../adr/0003-ipc-named-pipe-json-rpc.md) |
-| 用什么语言和运行时 | 全部用 C#：Host 用 .NET 10；Bridge 用 net481（覆盖 2026，预计也覆盖 2027）；共享契约用 netstandard2.0 | [0004](../adr/0004-runtimes-and-target-frameworks.md) |
+| 用什么语言和运行时 | 全部用 C#：Host 用 .NET 10；Bridge 用 net481，一份构建支持 EPLAN 2024–2027；共享契约用 netstandard2.0 | [0004](../adr/0004-runtimes-and-target-frameworks.md)、[0009](../adr/0009-supported-eplan-versions.md) |
 | 如何保证安全 | **分级（Read / Write / Destructive / Code）+ 策略引擎 + 人工审批 + scratch 沙箱 + 事务回滚 + 撤销步骤 + 防篡改审计** | [0005](../adr/0005-safety-model.md) |
 | 工具怎么设计 | **面向任务的少量工具**：`eplan_<资源>_<动作>` 命名，显式声明全部 MCP 注解，结构化输出，分页，按 Profile 暴露 | [0006](../adr/0006-tool-surface-design.md) |
 | 授权与分发 | **待决策**：开发者授权（未签名，可能有 5 页限制）还是 EADN 签名 + 运行时授权。M1 spike S0 的结果出来后再定 | 0007（待写） |
@@ -419,7 +419,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | Q7 | 审计目录不可写时调用写工具 | 拒绝执行，返回 `AUDIT_UNAVAILABLE` | Small |
 | Q8 | 项目属性中含有提示注入文本 | 文本只出现在数据字段中；没有审批时不会发生任何写操作 | Agent 评测（对抗任务） |
 | Q9 | 审计文件中有一条记录被删除 | `audit verify` 报告哈希链在该处断开 | Small |
-| Q10 | 在 EPLAN 2027 上运行 | Host 和工具契约不变；net481 Bridge 直接可用，或者只需重新构建 | M6 验收 |
+| Q10 | 在 EPLAN 2024、2025、2027 上运行 | Host 和工具契约不变；同一份 net481 Bridge 直接可用，M2 的 Large 测试全部通过 | spike S7；M6 验收 |
 
 ---
 
@@ -434,7 +434,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | **S4 协议层已完成**：Claude Code 2.1.295 使用 2026-07-28，并声明 `elicitation: {form, url}`；SDK 2.x 的 `InputRequiredException` 一条代码路径覆盖 2026-07-28 和 2025-11-25，`requestState` 都能带回（api-notes C）。客户端不声明 elicitation 时退回 EPLAN 内对话框。**剩余**：交互界面中的表单显示与三种回答的往返，人工确认一次；Tasks 未测 | 协议层已消除；界面在 M3 前确认 |
 | R5 | 通过项目数据进行提示注入 | 模型被诱导执行有害操作 | 第 8.5 节的措施，加上写操作必须审批；Agent 评测中加入对抗任务 | 持续 |
 | R6 | 借用授权到期，或网络授权被占用 | 调用失败 | 授权丢失作为单独的错误码；doctor 中检查 | M2 |
-| R7 | EPLAN 2027 上的兼容性 | 需要额外的 Bridge 构建 | 4.8.1 API 在 2027 中保留，预计影响很小；拿到 2027 后尽早验证 | M6 |
+| R7 | EPLAN 2024、2025、2027 上的兼容性 | 需要额外的 Bridge 构建 | 2024 起都是 4.8.1 API，2027 保留它；唯一不兼容的 `EplanMainThreadDispatcher` 已去掉（ADR-0009）；spike S7 逐版本实测 | M6 |
 | R8 | 名称中使用 "EPLAN" 的商标问题 | 公开发布受限 | 公开发布前确认命名，必要时改名 | 公开发布前 |
 | R9 | 只有一台实机测试环境 | Large 测试和日常开发争用同一个 EPLAN | 使用 scratch 项目隔离；M5 之后用离线宿主在 CI 中运行 | M5 |
 | R10 | **MSIX 打包的客户端**（Claude 桌面版）启动 Host 时，写入 `%LOCALAPPDATA%` 的文件被重定向，EPLAN 和用户都看不到（S0 发现） | scratch 项目打不开；审计日志找不到 | [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)（已接受）：数据目录改为 `%USERPROFILE%\EplanMcp\`，实例发现改为枚举命名管道 | M1 |
@@ -454,7 +454,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | **M4 工程工作流** | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |
 | **M4b Pro Panel 3D** | 先做 spike（E3D 对象的读写、坐标系、回滚与撤销），再实现 Pro Panel 工具家族：查询 3D 布局、布置导轨和线槽、把设备放进 3D 布局、钻孔、母排与铜排、生产输出。详见 [API 覆盖矩阵第 3 节](../eplan/api-coverage.md#3-pro-panel-3dm4b) | 3D 布局类 Agent 评测任务通过；写操作同样满足 Q1–Q3 |
 | **M5 可运维** | 按用户安装的安装包；**Workbench**（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名） | 在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](#71-安装验收清单m5-发布前逐项通过)全部通过 |
-| **M6 多版本** | EPLAN 2027 验证 | Q10 通过 |
+| **M6 多版本** | EPLAN 2024、2025、2027 验证（spike S7，[ADR-0009](../adr/0009-supported-eplan-versions.md)） | Q10 通过 |
 
 ---
 
