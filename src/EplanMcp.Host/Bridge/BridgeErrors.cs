@@ -32,6 +32,16 @@ internal static class BridgeErrors
         Retryable = true,
     };
 
+    /// <summary>
+    /// The client cancelled a write before it committed (M4 design 4.3). A cancelled request gets no reply, so only the
+    /// audit records it; not retryable, as the client gave the call up.
+    /// </summary>
+    public static BridgeError Cancelled() => new()
+    {
+        Reason = ErrorReason.Cancelled,
+        Message = "The call was cancelled before the change was committed, so nothing was changed.",
+    };
+
     public static BridgeError OutcomeUnknown() => new()
     {
         Reason = ErrorReason.OutcomeUnknown,

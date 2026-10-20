@@ -135,7 +135,7 @@ internal sealed partial class WritePipeline(
         // From here on the write may run: no cancellation may skip its result record.
         try
         {
-            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan), requestId, request.Limit, cancellationToken).ConfigureAwait(false);
+            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan), requestId, request.Limit, null, cancellationToken).ConfigureAwait(false);
             await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered).ConfigureAwait(false);
             return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered);
         }

@@ -244,6 +244,58 @@ public sealed class BridgeClientTests
     }
 
     [Fact]
+    public async Task CallerCancels_AnAddInThatCanCancel_IsAskedToStopThatInvokeOverANewChannel()
+    {
+        _discovery.Endpoints.Add(_eplanA);
+        using var cancel = new CancellationTokenSource();
+        var invokes = new List<JsonNode>();
+        _connector = new FakeConnector(e => new FakeChannel(e, async (_, parameters, token) =>
+        {
+            invokes.Add(parameters!.DeepClone());
+            if (invokes.Count > 1)
+            {
+                return new JsonObject { ["data"] = new JsonObject { ["found"] = true } };
+            }
+
+            await cancel.CancelAsync();
+            await Task.Delay(Timeout.Infinite, token);
+            return null;
+        })
+        {
+            Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(e.ProcessId, operations: [OperationNames.ProjectList, OperationNames.OperationCancel])),
+        });
+        await using BridgeClient client = Client();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), cancel.Token));
+
+        Assert.Equal(2, invokes.Count);
+        Assert.Equal(OperationNames.OperationCancel, invokes[1]["operation"]!.GetValue<string>());
+        Assert.Equal(invokes[0]["correlationId"]!.GetValue<string>(), invokes[1]["args"]!["requestId"]!.GetValue<string>());
+        Assert.Equal(2, _connector.Opened.Count);
+        Assert.True(_connector.Opened[0].Disposed);
+    }
+
+    [Fact]
+    public async Task TheProgressOfTheInvoke_ReachesTheCallerAndNoOtherReportDoes()
+    {
+        _discovery.Endpoints.Add(_eplanA);
+        _connector = new FakeConnector(e => new FakeChannel(e, (_, parameters, _) =>
+        {
+            IProgress<ProgressNotification> progress = _connector.Opened[0].Progress!;
+            progress.Report(new ProgressNotification { RequestId = "another", Progress = 9 });
+            progress.Report(new ProgressNotification { RequestId = parameters!["correlationId"]!.GetValue<string>(), Progress = 1, Total = 2, Message = "Exporting page 2 of 2" });
+            return Task.FromResult<JsonNode?>(new JsonObject { ["data"] = new JsonObject { ["projects"] = new JsonArray() } });
+        }));
+        var reports = new RecordedReports<ProgressNotification>();
+        await using BridgeClient client = Client();
+
+        await client.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), TimeSpan.FromSeconds(5), reports, Token);
+
+        ProgressNotification report = Assert.Single(reports.Values);
+        Assert.Equal((1, 2, "Exporting page 2 of 2"), (report.Progress, report.Total, report.Message));
+    }
+
+    [Fact]
     public async Task SecondCallWhileTheFirstHoldsTheQueue_IsRetryableEplanBusy()
     {
         _discovery.Endpoints.Add(_eplanA);

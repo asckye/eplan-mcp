@@ -58,7 +58,7 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>The timeouts given to the long-waiting overload, in order.</summary>
     public List<TimeSpan> Timeouts { get; } = [];
 
-    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, CancellationToken cancellationToken)
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         Timeouts.Add(timeout);
         return InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
@@ -80,7 +80,7 @@ internal sealed class FakeBridgeClient : IBridgeClient
     public bool WriteRecovered { get; set; }
 
     /// <summary>Writes answer like reads (<see cref="Handlers"/>, <see cref="Failure"/>) unless told otherwise above.</summary>
-    public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken)
+    public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         Writes.Add((requestId, limit));
         if (WriteFailure is not null)
