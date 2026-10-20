@@ -12,8 +12,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// thread through the dispatcher and converts every outcome into data or a <see cref="BridgeErrorException"/>.
 /// Writes (<see cref="IWriteOperation"/>) also go through <see cref="OutcomeRecords"/>, and <c>outcome.get</c> is
 /// answered on the calling pipe thread from them (ADR-0010). Every invoke runs with an <see cref="OperationContext"/>,
-/// which <c>operation.cancel</c> flags from another pipe thread (M4 design 4.3). Thread-safe; one router serves every
-/// connection.
+/// through which the operation reports progress and which <c>operation.cancel</c> flags from another pipe thread (M4
+/// design 4.3). Thread-safe; one router serves every connection.
 /// </summary>
 public sealed class OperationRouter
 {
