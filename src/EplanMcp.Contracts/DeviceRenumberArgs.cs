@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.DeviceRenumberPlan"/> and of <c>device.renumber.execute</c>.</summary>
+/// <summary>Arguments of <see cref="OperationNames.DeviceRenumberPlan"/> and <see cref="OperationNames.DeviceRenumberExecute"/>.</summary>
 public sealed class DeviceRenumberArgs
 {
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>

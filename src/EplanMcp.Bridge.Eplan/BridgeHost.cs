@@ -60,6 +60,8 @@ internal static class BridgeHost
         var reports = new EplanReportUpdater();
         var exporter = new EplanExporter();
         var remover = new EplanPageRemover();
+        var renumberer = new EplanDeviceRenumberer();
+        var backup = new EplanProjectBackup();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -95,7 +97,9 @@ internal static class BridgeHost
                 new ExportRunOperation(kind, catalog, pages, exporter),
             }),
             new PageDeletePlanOperation(catalog, remover),
-            new PageDeleteExecuteOperation(catalog, pages, remover, new EplanProjectBackup(), transactions),
+            new PageDeleteExecuteOperation(catalog, pages, remover, backup, transactions),
+            new DeviceRenumberPlanOperation(catalog, renumberer),
+            new DeviceRenumberExecuteOperation(catalog, pages, renumberer, backup, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

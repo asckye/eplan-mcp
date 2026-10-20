@@ -98,6 +98,79 @@ public sealed class DeviceRenumberOperationTests : IDisposable
     }
 
     [Fact]
+    public void Execute_BacksUpFirst_ThenNumbersInOneTransaction_AndReportsByDevice()
+    {
+        var args = new DeviceRenumberArgs { Project = "Line1", Pages = [Page] };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _transactions.Snapshot = () =>
+        {
+            Assert.Single(_backup.Copies);
+            return () => { };
+        };
+
+        DeviceRenumberData data = Execute(args);
+
+        var call = Assert.Single(_renumberer.Renumbers);
+        Assert.Equal([Page], call.Pages!);
+        Assert.Equal((true, (string?)null, 1, 1), (call.OnlyUnnumbered, call.Scheme, call.Start, call.Step));
+        Assert.Equal(["Begin AI: eplan_device_renumber", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Equal([("+A1-?XG1", "+A1-XG2"), ("+A1-?XG2", "+A1-XG3"), ("+A1-?WG1", "+A1-WG1")], data.Changed.Select(c => (c.From, c.To)));
+        Assert.Equal((3, "=GAA+A1-?QA1", 1, null), (data.ChangedCount, Assert.Single(data.StillUnnumbered), data.StillUnnumberedCount, data.Warning));
+    }
+
+    [Fact]
+    public void Execute_AnUnknownScheme_RollsBackWithTheSchemesEplanNamed()
+    {
+        var args = new DeviceRenumberArgs { Project = "Line1", Pages = [Page], Scheme = "Default" };
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal(5, error.Metadata!["candidates"].Split('\n').Length);
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WhenTheScopeChanged_IsStaleAndNothingIsBackedUp()
+    {
+        var args = new DeviceRenumberArgs { Project = "Line1", Pages = [Page] };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Functions[0].Name = "=GAA+A1-QA1";
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Empty(_backup.Copies);
+    }
+
+    [Fact]
+    public void Execute_WhenTheBackupFails_NothingIsNumbered()
+    {
+        var args = new DeviceRenumberArgs { Project = "Line1", Pages = [Page] };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _backup.Failure = new IOException("disk full");
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Empty(_renumberer.Renumbers);
+    }
+
+    [Fact]
+    public void Execute_WhenEplanGivesNewIdentifiers_SaysSoInsteadOfGuessing()
+    {
+        var args = new DeviceRenumberArgs { Project = "Line1", Pages = [Page] };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.NewIds = true;
+
+        DeviceRenumberData data = Execute(args);
+
+        Assert.Empty(data.Changed);
+        Assert.StartsWith("EPLAN gave 7 functions new identifiers", data.Warning, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Changes_AreByDevice_AndCountFunctionsWithoutAMatch()
     {
         PlacedFunction[] before = [new() { Name = "-?K1", Id = "1" }, new() { Name = "-?K1", Id = "2" }, new() { Name = "-?X1:?1", Id = "3" }, new() { Name = "-?X1:?2", Id = "4" }, new() { Name = "-A1", Id = "5" }];
@@ -122,5 +195,10 @@ public sealed class DeviceRenumberOperationTests : IDisposable
 
     private WritePlan Plan(DeviceRenumberArgs args) => (WritePlan)new DeviceRenumberPlanOperation(new FakeCatalog(_project), _renumberer).Execute(args)!;
 
+    private DeviceRenumberData Execute(DeviceRenumberArgs args)
+    {
+        args.Backup = new BackupTarget { Path = Path.Combine(_folder, "Line1.elk"), MaxSeconds = 150 };
+        return (DeviceRenumberData)new DeviceRenumberExecuteOperation(new FakeCatalog(_project), _pages, _renumberer, _backup, _transactions).Execute(args)!;
+    }
 
 }

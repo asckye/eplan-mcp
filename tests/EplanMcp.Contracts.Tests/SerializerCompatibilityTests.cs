@@ -348,6 +348,16 @@ public sealed class SerializerCompatibilityTests
         new PageDeleteData(),
         new DeviceRenumberArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/90"], OnlyUnnumbered = false, Scheme = "Standard", Start = 10, Step = 5, Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
         new DeviceRenumberArgs(),
+        new DeviceRenumberData
+        {
+            Project = "项目 二",
+            Changed = [new RenamedObject { From = "+A1-?XG1", To = "+A1-XG2" }],
+            ChangedCount = 4,
+            StillUnnumbered = ["=GAA+A1-?QA1"],
+            StillUnnumberedCount = 1,
+            Warning = "w",
+        },
+        new DeviceRenumberData(),
     ];
 
     [Theory]
