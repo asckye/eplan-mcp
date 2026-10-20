@@ -77,6 +77,17 @@ public sealed class SerializerCompatibilityTests
         new PageCreateArgs(),
         new PageCreateData { Project = "Line1", Pages = [new PageSummary { Name = "=GAA+A1&EFS1/5", Type = "Circuit", Description = "电源" }], Warning = "w" },
         new PageCreateData(),
+        new PageUpdateArgs { Project = "Line1", Pages = [new PageUpdateItem { Name = "=GAA+A1&EFS1/3", Description = "主回路" }, new PageUpdateItem { Name = "=A/1" }], Language = "zh_CN", Fingerprint = "f" },
+        new PageUpdateArgs(),
+        new PageUpdateData
+        {
+            Project = "Line1",
+            Language = "zh_CN",
+            Pages = [new PageDescriptionChange { Name = "=GAA+A1&EFS1/3", Description = "主回路", Previous = "电源" }, new PageDescriptionChange { Name = "=A/1" }],
+            Unchanged = 2,
+            Warning = "w",
+        },
+        new PageUpdateData(),
         new ProjectListArgs(),
         new ProjectListData
         {

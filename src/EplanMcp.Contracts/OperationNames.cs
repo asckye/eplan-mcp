@@ -76,6 +76,18 @@ public static class OperationNames
     public const string PageCreateExecute = "page.create.execute";
 
     /// <summary>
+    /// The plan of eplan_page_update: finds the pages and lists the descriptions that change, never writes. Arguments:
+    /// <see cref="PageUpdateArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string PageUpdatePlan = "page.update.plan";
+
+    /// <summary>
+    /// Changes the planned descriptions in one language in one transaction, keeping the other languages. Arguments:
+    /// <see cref="PageUpdateArgs"/> with the fingerprint; data: <see cref="PageUpdateData"/>.
+    /// </summary>
+    public const string PageUpdateExecute = "page.update.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
