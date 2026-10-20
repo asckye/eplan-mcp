@@ -27,7 +27,8 @@ internal static class UnknownArgumentFilter
 
     /// <summary>
     /// Every argument not in the schema's properties, then every required one that is absent or null; then the same for
-    /// each object in an array argument whose items are objects, named like <c>pages[1].page_type</c>.
+    /// each element of an array argument whose items are objects, named like <c>pages[1].page_type</c>, and an element
+    /// that is not an object at all (the tool would get null for it).
     /// </summary>
     internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "")
     {
@@ -43,10 +44,11 @@ internal static class UnknownArgumentFilter
         IEnumerable<string> nested = (arguments ?? new Dictionary<string, JsonElement>())
             .Where(a => a.Value.ValueKind == JsonValueKind.Array && allowed.Contains(a.Key))
             .OrderBy(a => a.Key, StringComparer.Ordinal)
-            .SelectMany(a => schema.GetProperty("properties").GetProperty(a.Key).TryGetProperty("items", out JsonElement items) && Names(items, "properties").Count > 0
+            .SelectMany(a => schema.GetProperty("properties").GetProperty(a.Key) is { ValueKind: JsonValueKind.Object } property
+                && property.TryGetProperty("items", out JsonElement items) && items.ValueKind == JsonValueKind.Object && Names(items, "properties").Count > 0
                 ? a.Value.EnumerateArray().SelectMany((item, i) => item.ValueKind == JsonValueKind.Object
                     ? Violations(items, item.EnumerateObject().ToDictionary(p => p.Name, p => p.Value), $"{prefix}{a.Key}[{i}].")
-                    : [])
+                    : [$"Argument '{prefix}{a.Key}[{i}]' must be an object."])
                 : []);
         return [.. unknown, .. missing, .. nested];
     }

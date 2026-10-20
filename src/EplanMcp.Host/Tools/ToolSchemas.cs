@@ -22,9 +22,9 @@ internal static class ToolSchemas
                 schema["properties"] ??= new JsonObject();
 
                 // Objects inside array arguments too (eplan_page_create's pages), which UnknownArgumentFilter checks.
-                foreach (JsonObject items in schema["properties"]!.AsObject().Select(p => p.Value?["items"]).OfType<JsonObject>())
+                foreach (JsonObject items in schema["properties"]!.AsObject().Select(p => (p.Value as JsonObject)?["items"]).OfType<JsonObject>())
                 {
-                    if (items["type"]?.GetValue<string>() == "object" && !items.ContainsKey("additionalProperties"))
+                    if (items["type"] is JsonValue type && type.TryGetValue(out string? kind) && kind == "object" && !items.ContainsKey("additionalProperties"))
                     {
                         items["additionalProperties"] = false;
                     }

@@ -49,11 +49,16 @@ public sealed class UnknownArgumentFilterTests
         JsonElement schema = JsonDocument.Parse(
             """{"type":"object","properties":{"pages":{"type":"array","items":{"type":"object","properties":{"name":{"type":"string"},"page_type":{"type":"string"}},"required":["name"]}},"tags":{"type":"array","items":{"type":"string"}}},"additionalProperties":false}""").RootElement;
 
-        List<string> violations = UnknownArgumentFilter.Violations(schema, Arguments("""{"pages":[{"name":"=A/1"},{"name":"=A/2","type":"Overview"},{"page_type":"Graphics"},"x"],"tags":["a"]}"""));
+        List<string> violations = UnknownArgumentFilter.Violations(schema, Arguments("""{"pages":[{"name":"=A/1"},{"name":"=A/2","type":"Overview"},{"page_type":"Graphics"},"x",null],"tags":["a"]}"""));
 
-        Assert.Equal(2, violations.Count);
-        Assert.Equal("Unknown argument 'pages[1].type'; valid arguments: name, page_type.", violations[0]);
-        Assert.Equal("Missing required argument 'pages[2].name'.", violations[1]);
+        Assert.Equal(
+            [
+                "Unknown argument 'pages[1].type'; valid arguments: name, page_type.",
+                "Missing required argument 'pages[2].name'.",
+                "Argument 'pages[3]' must be an object.",
+                "Argument 'pages[4]' must be an object.",
+            ],
+            violations);
     }
 
     private static Dictionary<string, JsonElement> Arguments(string json) =>
