@@ -40,6 +40,21 @@ public sealed class SerializerCompatibilityTests
         new BridgeError { Reason = ErrorReason.Internal, Message = "m" },
         new BridgeError { Reason = ErrorReason.OutcomeUnknown, Message = "m", Execution = ExecutionState.Unknown },
         new OutcomeGetArgs { RequestId = "c0a8" },
+        new ApprovalAskArgs
+        {
+            RequestId = "c0a8",
+            Fingerprint = "9f86",
+            ArgumentsHash = "e3b0",
+            DeadlineUnixMs = 1_792_483_200_000,
+            Title = "批准 AI 修改 EPLAN 项目？",
+            Summary = "eplan_page_create · Line1",
+            Changes = ["create page =GAA+A1&EFS1/5", "update page =GAA+A1&EFS1/6: description '' -> '电源'"],
+            Note = "Ctrl+Z",
+            ApproveLabel = "批准",
+            RejectLabel = "拒绝",
+            CountdownFormat = "{0} 后自动拒绝",
+        },
+        new ApprovalAskData { RequestId = "c0a8", Fingerprint = "9f86", ArgumentsHash = "e3b0", Decision = ApprovalDecisions.Granted },
         new OutcomeGetData { Status = OutcomeStatus.Running, Operation = "page.create.execute" },
         new OutcomeGetData { Status = OutcomeStatus.RolledBack, Operation = "page.create.execute", Reason = ErrorReason.EplanOperationFailed },
         new WritePlan
