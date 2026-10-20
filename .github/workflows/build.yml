@@ -14,6 +14,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    # A hung test once held a run for an hour (2026-10-20); the test step below stops itself sooner.
+    timeout-minutes: 40
     env:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -34,9 +36,11 @@ jobs:
       - name: Format
         run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
 
+      # --long-running names any test still running after 60 s in the log, so an intermittent hang shows which test it
+      # is; --timeout ends the whole test session after 20 minutes instead of holding the runner.
       - name: Small and Medium tests
         id: tests
-        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory "${{ runner.temp }}/test-results"
+        run: dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --long-running 60 --timeout 20m --report-xunit-trx --results-directory "${{ runner.temp }}/test-results"
 
       # A wrong filter or a broken discovery passes with few or no tests run: every test assembly must pass at least
       # its floor in tests/test-suites.json, and every assembly that ran must be listed there (testing.md section 7).
