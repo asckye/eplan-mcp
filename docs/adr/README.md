@@ -3,7 +3,7 @@
 记录难以回退、或者会长期影响项目的决策。格式见 [template.md](template.md)（基于 MADR），规则见 [开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)。
 
 - 编号从不复用。决策被推翻时，新写一份 ADR，并把旧的标为 `Superseded by ADR-XXXX`。
-- 以 `Proposed` 状态通过 PR 提交，由项目负责人确认后改为 `Accepted`。L3 决策提交后至少隔一天再确认。
+- 以 `Proposed` 状态通过 PR 提交，由项目负责人确认后改为 `Accepted`（冷却期已于 2026-10-20 取消，见开发流程第 6 节）。
 
 | 编号 | 标题 | 状态 | 门的类型 |
 |---|---|---|---|
