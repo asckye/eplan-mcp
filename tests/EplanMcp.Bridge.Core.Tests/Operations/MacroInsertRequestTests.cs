@@ -84,6 +84,31 @@ public sealed class MacroInsertRequestTests
     }
 
     [Fact]
+    public void Merged_IsATagWithAMainFunctionBeforeAndMoreAfter()
+    {
+        // S10: numbering None inserted the macro's cable again, and the project had +A1-WG6 twice.
+        string[] before = ["+A1-WG6", "=GAA+A1-KF1", "=GAA+A1-KF2", "=GAA+A1-KF2", string.Empty];
+        string[] after = ["+A1-WG6", "+A1-WG6", "=GAA+A1-KF1", "=GAA+A1-KF2", "=GAA+A1-KF2", "+A1-WG7", "+A1-WG7", string.Empty, string.Empty];
+
+        Assert.Equal(["+A1-WG6"], MacroInsertRequest.Merged(before, after));
+    }
+
+    [Fact]
+    public void Merged_ADeviceThatHadTwoMainFunctionsAndGetsAThird_IsMerged_AndTagsAreSorted()
+    {
+        string[] before = ["=GAA+A1-KF2", "=GAA+A1-KF2", "+A1-XG5"];
+        string[] after = ["=GAA+A1-KF2", "=GAA+A1-KF2", "=GAA+A1-KF2", "+A1-XG5", "+A1-XG5"];
+
+        Assert.Equal(["+A1-XG5", "=GAA+A1-KF2"], MacroInsertRequest.Merged(before, after));
+    }
+
+    [Fact]
+    public void Merged_TagsDifferingInCase_AreNotTheSameTag()
+    {
+        Assert.Empty(MacroInsertRequest.Merged(["+A1-WG6"], ["+A1-WG6", "+a1-wg6"]));
+    }
+
+    [Fact]
     public void Describe_KeepsTwoDecimalsOfThePoint()
     {
         Assert.Equal("Top.ema at (40.13, 0.5), numbering number, 0 devices", MacroInsertRequest.Describe("Top.ema", 40.126, 0.5, 0, number: true, 0));
