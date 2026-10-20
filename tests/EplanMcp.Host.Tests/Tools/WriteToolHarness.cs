@@ -29,6 +29,7 @@ internal sealed class WriteToolHarness : IDisposable
             SuspensionStore.For(Locations),
             audit,
             new DanglingWrites(Bridge, SuspensionStore.For(Locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
+            new ApprovalService([], TimeProvider.System, NullLogger<ApprovalService>.Instance),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
     }
