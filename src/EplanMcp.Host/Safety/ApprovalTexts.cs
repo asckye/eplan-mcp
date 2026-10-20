@@ -87,6 +87,11 @@ internal static class ApprovalTexts
                 : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
             // The check replaces all the project's check messages; the scope is in the plan's details (check.run.plan).
             _ when change.Property == "check messages" => CheckRun(change, zh, details),
+            // Only EPLAN can tell which report pages it creates or removes (eplan_report_update, tool spec 5; M4 design Q7).
+            _ when change.Property == "reports" => zh
+                ? $"更新全部报表（现有报表页 {Value(change.OldValue ?? "?", zh)} 页）；可能新建、替换或删除报表页"
+                : $"Update all reports ({Value(change.OldValue ?? "?", zh)} report pages now); may create, replace or delete report pages",
+            _ when change.Property == "report" => zh ? $"更新报表页 {name}" : $"Update report page {name}",
             _ => zh
                 ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
                 : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
