@@ -277,6 +277,74 @@ internal sealed class FakePageDescriptions : IPageDescriptions
 }
 
 /// <summary>
+/// A project's functions for renames, renamed the way S9 found EPLAN renames them (api-notes A13): every function named
+/// the old tag gets the new name, without a check for duplicates. <see cref="Drop"/> stands for a structure part the
+/// category does not use; <see cref="LeaveBehind"/> for a function EPLAN did not rename.
+/// </summary>
+internal sealed class FakeDeviceRenamer : IDeviceRenamer
+{
+    /// <summary>Name, session identifier, main or not, page and, for main functions, the tag without structure.</summary>
+    public List<(string Name, string Id, bool IsMain, string? Page, string DeviceTag)> Functions { get; } = [];
+
+    /// <summary>The auxiliary function names of a main function, by its session identifier; default: its other same-named functions.</summary>
+    public Dictionary<string, List<string>> SubFunctions { get; } = new(StringComparer.Ordinal);
+
+    public string? Drop { get; set; }
+
+    public bool LeaveBehind { get; set; }
+
+    public List<(string Tag, string NewTag)> Renames { get; } = [];
+
+    public DeviceNames? ReadDevice(string projectPath, string tag)
+    {
+        var main = Functions.FirstOrDefault(f => f.IsMain && f.Name == tag);
+        if (main.Name is null)
+        {
+            return null;
+        }
+
+        var named = Functions.Where(f => f.Name == tag).ToList();
+        return new DeviceNames
+        {
+            Tag = tag,
+            DeviceTag = main.DeviceTag,
+            Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Id = f.Id, IsMain = f.IsMain, Page = f.Page })],
+            SubFunctions = SubFunctions.TryGetValue(main.Id, out List<string>? subs) ? subs : [.. named.Where(f => !f.IsMain).Select(f => f.Name)],
+        };
+    }
+
+    public IReadOnlyList<string> FunctionNames(string projectPath) => [.. Functions.Select(f => f.Name)];
+
+    public RenameReadBack Rename(string projectPath, string tag, string newTag)
+    {
+        Renames.Add((tag, newTag));
+        string actual = Drop is null ? newTag : newTag.Replace(Drop, string.Empty, StringComparison.Ordinal);
+        bool leftOne = false;
+        for (int i = 0; i < Functions.Count; i++)
+        {
+            if (Functions[i].Name == tag)
+            {
+                if (LeaveBehind && !Functions[i].IsMain && !leftOne)
+                {
+                    leftOne = true;
+                    continue;
+                }
+
+                Functions[i] = Functions[i] with { Name = actual };
+            }
+        }
+
+        return new RenameReadBack
+        {
+            MainName = Functions.First(f => f.IsMain && f.Name == actual).Name,
+            VisibleName = "-" + actual.Split('-')[^1],
+            Remaining = Functions.Count(f => f.Name == tag),
+            Renamed = Functions.Count(f => f.Name == actual),
+        };
+    }
+}
+
+/// <summary>
 /// Transactions that behave like EPLAN's SafetyPoint as far as a fake project can: <see cref="Snapshot"/> runs when one
 /// begins and returns how to restore that state, which a rollback does. Records every call in order and throws where
 /// <see cref="FailAt"/> says ("Begin", "Commit", "CloseUndo", "Rollback" or "Dispose").

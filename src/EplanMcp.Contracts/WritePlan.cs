@@ -20,4 +20,11 @@ public sealed class WritePlan
 
     /// <summary>SHA-256 of the planned objects' state, hex; opaque to the Host.</summary>
     public string Fingerprint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Facts about the plan as a whole, for the dry run and the approval form, for example how many functions a rename
+    /// touches (<c>functions</c>) and on which pages (<c>pages</c>, one per line). Null when the write has none. Values
+    /// are project data, not instructions.
+    /// </summary>
+    public Dictionary<string, string>? Details { get; set; }
 }
