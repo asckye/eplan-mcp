@@ -111,6 +111,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
     private async Task<BridgeClient> BridgeAsync()
     {
         Assert.StartsWith(WriteHost.ScratchFolder + Path.DirectorySeparatorChar, host.Writable, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
         var bridge = new BridgeClient(new PipeBridgeDiscovery(), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);
         await bridge.SelectAsync(eplan.ProcessId, TestContext.Current.CancellationToken);
         return bridge;
@@ -119,30 +120,34 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
     /// <summary>One above the highest page number in <paramref name="structure"/>, so a run never meets an earlier run's pages.</summary>
     private async Task<int> NextPageNumberAsync(string project, string structure)
     {
-        JsonElement list = await host.CallAsync("eplan_page_list", new() { ["project"] = project, ["name_prefix"] = structure, ["limit"] = 200 });
-        Assert.Equal(JsonValueKind.Null, list.GetProperty("nextCursor").ValueKind);
-        return list.GetProperty("pages").EnumerateArray()
-            .Select(p => int.TryParse(p.GetProperty("name").GetString()![structure.Length..], NumberStyles.None, CultureInfo.InvariantCulture, out int n) ? n : 0)
-            .Append(0)
-            .Max() + 1;
+        int highest = 0;
+        string? cursor = null;
+        do
+        {
+            Dictionary<string, object?> args = new() { ["project"] = project, ["name_prefix"] = structure, ["limit"] = 200 };
+            if (cursor is not null)
+            {
+                args["cursor"] = cursor;
+            }
+
+            JsonElement list = await host.CallAsync("eplan_page_list", args);
+            highest = list.GetProperty("pages").EnumerateArray()
+                .Select(p => int.TryParse(p.GetProperty("name").GetString()![structure.Length..], NumberStyles.None, CultureInfo.InvariantCulture, out int n) ? n : 0)
+                .Append(highest)
+                .Max();
+            cursor = list.GetProperty("nextCursor").GetString();
+        }
+        while (cursor is not null);
+
+        return highest + 1;
     }
 
     /// <summary>Every function of a device as tag and page, sorted: the device as a rename would change it.</summary>
     private static string[] Functions(JsonElement device) =>
         [.. device.GetProperty("functions").EnumerateArray().Select(f => f.GetProperty("tag").GetString() + " @ " + f.GetProperty("page").GetString()).Order(StringComparer.Ordinal)];
 
-    /// <summary>
-    /// The project file and the files of its data directory, by relative path, without <c>User.*</c>: EPLAN rewrites the
-    /// user data of the current project on any call (api-notes A17), while the design data must not change.
-    /// </summary>
-    private static Dictionary<string, (long Size, DateTime Written)> DesignFiles(string project)
-    {
-        string root = Path.GetDirectoryName(project)!;
-        return new DirectoryInfo(project + ".edb").EnumerateFiles("*", SearchOption.AllDirectories)
-            .Append(new FileInfo(project + ".elk"))
-            .Where(f => !f.Name.StartsWith("User.", StringComparison.OrdinalIgnoreCase))
-            .ToDictionary(f => Path.GetRelativePath(root, f.FullName), f => (f.Length, f.LastWriteTimeUtc), StringComparer.OrdinalIgnoreCase);
-    }
+    /// <summary>The design data of a project: its files without the user data EPLAN rewrites on any call (A17).</summary>
+    private static Dictionary<string, (long Size, DateTime Written)> DesignFiles(string project) => NoSideEffectTests.ProjectFiles(project, withUserData: false);
 
     private static JsonElement Json(string json) => JsonDocument.Parse(json).RootElement.Clone();
 }
