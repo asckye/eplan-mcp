@@ -55,6 +55,8 @@ internal static class BridgeHost
         var renamer = new EplanDeviceRenamer();
         var generator = new EplanConnectionGenerator();
         var inserter = new EplanMacroInserter();
+        var messages = new EplanProjectMessageReader();
+        var checker = new EplanCheckRunner();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -66,7 +68,7 @@ internal static class BridgeHost
             new ConnectionListOperation(catalog, devices, new EplanConnectionReader()),
             new PartListOperation(catalog, new EplanPartReader()),
             new MessageListOperation(new EplanSystemMessageReader()),
-            new CheckListOperation(catalog, new EplanProjectMessageReader()),
+            new CheckListOperation(catalog, messages),
             new MacroListOperation(macros),
             new MacroGetOperation(catalog, macros),
             new ApprovalAskOperation(new EplanApprovalDialog()),
@@ -80,6 +82,8 @@ internal static class BridgeHost
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
+            new CheckRunPlanOperation(catalog, pages, checker, messages),
+            new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

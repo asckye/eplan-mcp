@@ -21,7 +21,7 @@ M:Eplan.EplApi.EServices.PrjMessagesCollection.Clear;Deletes all project message
 P:Eplan.EplApi.EServices.PrjMessagesCollection.ReuseMessages;Changes how project messages are written
 P:Eplan.EplApi.EServices.PrjMessagesCollection.ShowImmediately;Changes how project messages are shown
 M:Eplan.EplApi.EServices.ProjectMessage.SetDone(System.Boolean);Marks a project message as done (writes the project)
-T:Eplan.EplApi.HEServices.Check;Running a check rewrites the project's messages (spike S6); eplan_check_run belongs to M3
+T:Eplan.EplApi.HEServices.Check;Running a check rewrites the project's messages (spike S6); only EplanCheckRunner runs one, inside a write's TransactionScope
 T:Eplan.EplApi.HEServices.Search;Search writes its result database in the project; use DMObjectsFinder
 M:Eplan.EplApi.Base.BaseException.FixMessage;Writes a message into EPLAN's system message tree
 T:Eplan.EplApi.Base.Internal.EplanMainThreadDispatcher;Missing before EPLAN 2025 (ADR-0009), and ExecuteInMainThreadSync has no timeout; dispatch only through EplanDispatcher (coding standards 9.2, 5)
