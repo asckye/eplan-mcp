@@ -24,5 +24,5 @@ M:Eplan.EplApi.EServices.ProjectMessage.SetDone(System.Boolean);Marks a project 
 T:Eplan.EplApi.HEServices.Check;Running a check rewrites the project's messages (spike S6); eplan_check_run belongs to M3
 T:Eplan.EplApi.HEServices.Search;Search writes its result database in the project; use DMObjectsFinder
 M:Eplan.EplApi.Base.BaseException.FixMessage;Writes a message into EPLAN's system message tree
-M:Eplan.EplApi.Base.Internal.EplanMainThreadDispatcher.ExecuteInMainThreadSync(Eplan.EplApi.Base.Internal.ExecuteInEplanMainThreadDelegate3,System.Object);Has no timeout; dispatch only through EplanDispatcher (coding standards 9.2, 5)
+T:Eplan.EplApi.Base.Internal.EplanMainThreadDispatcher;Missing before EPLAN 2025 (ADR-0009), and ExecuteInMainThreadSync has no timeout; dispatch only through EplanDispatcher (coding standards 9.2, 5)
 M:Eplan.EplApi.ApplicationFramework.License.LockOption(Eplan.EplApi.ApplicationFramework.LicenseOptions);Occupies a licence until EPLAN exits; use HasOption (coding standards 9.4, 12)

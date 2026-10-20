@@ -43,7 +43,7 @@
 |---|---|---|
 | 平台 | 仅支持 Windows x64。`EPLAN.exe` 是原生 x64（MFC）程序，CLR 在其中被宿主 | api-notes B1 |
 | 运行时 | EPLAN 2026 API 以 **.NET Framework 4.8.1** 为目标。2027 新增并行的 .NET 8 API，同时保留 4.8.1 API；两者不能混用 | B1 |
-| 线程 | **只能在 EPLAN 主线程调用 API**。官方提供 `EplanMainThreadDispatcher` 把调用切换到主线程。`LockingStep` 不支持多线程 | B6、B7 |
+| 线程 | **只能在 EPLAN 主线程调用 API**。官方从 2025 起提供 `EplanMainThreadDispatcher` 把调用切换到主线程；本项目直接使用主线程的 WPF `Dispatcher`，各版本都有（ADR-0009）。`LockingStep` 不支持多线程 | B6、B7 |
 | 撤销 | 通过 API 修改项目时**如果没有创建 `UndoStep`，EPLAN 会清空撤销历史** | B7 |
 | 授权 | 编译的 API 程序：**开发者授权只加载未签名程序，通常限制项目不超过 5 页**；**运行时授权只加载经 EADN 签名的程序**。开发机有 `APIExtension`，但具体属于哪一种授权、5 页限制是否生效，尚未验证 | B8 |
 | 进程内共存 | Bridge 和 EPLAN 自带的程序集加载在同一个进程中。2026 自带 `Newtonsoft.Json 13.0.3`、`Grpc.Core 2.46`、`Google.Protobuf 3.24`，**没有** `System.Text.Json`、`System.Memory` | B1 |
@@ -125,7 +125,7 @@ flowchart TB
     subgraph eplanproc["EPLAN.exe 进程（CLR：.NET Framework 4.8.1）"]
         addin["插件入口<br/>(IEplAddIn)"]
         server["管道服务器<br/>(Bridge.Core)"]
-        dispatcher["主线程调度器<br/>(EplanMainThreadDispatcher)"]
+        dispatcher["主线程调度器<br/>(WPF Dispatcher)"]
         ops["操作处理器<br/>Project / Page / Device / ..."]
         tx["事务作用域<br/>LockingStep · SafetyPoint · UndoStep · QuietModeStep"]
         adapters["EPLAN 适配层<br/>(唯一引用 Eplan.EplApi.* 的地方)"]
@@ -172,7 +172,7 @@ flowchart TB
 |---|---|
 | `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器（管道名带固定前缀，供 Host 枚举发现，见 ADR-0008）；在 `OnExit` 中清理 |
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
-| `MainThreadDispatcher` | 使用 EPLAN 预设的主线程 WPF `Dispatcher`（`EplanMainThreadDispatcher.GetMainThreadDispatcher()`，S1 已确认 EPLAN 会预先设置），通过带超时的 `Invoke` 调度，延迟约 0.3 ms。四条硬规则（S1）：① 委托在内部捕获全部异常，否则 EPLAN 进程终止；② 第一步创建 `LockingStep`；③ 执行前检查 EPLAN 主窗口是否被禁用，被禁用（有模态对话框）则返回 `EPLAN_BUSY`，否则会在对话框中被重入执行；④ 等待进入主线程超时（默认 10 s）返回 `EPLAN_BUSY`，超时的调度事后不会再执行 |
+| `MainThreadDispatcher` | 使用主线程的 WPF `Dispatcher`（在 `OnInitGui` 中取 `Dispatcher.CurrentDispatcher`；2026 上它就是 EPLAN 预设的那个，S1；不用 `EplanMainThreadDispatcher`，2024 及更早没有，ADR-0009），通过带超时的 `Invoke` 调度，延迟约 0.3 ms。四条硬规则（S1）：① 委托在内部捕获全部异常，否则 EPLAN 进程终止；② 第一步创建 `LockingStep`；③ 执行前检查 EPLAN 主窗口是否被禁用，被禁用（有模态对话框）则返回 `EPLAN_BUSY`，否则会在对话框中被重入执行；④ 等待进入主线程超时（默认 10 s）返回 `EPLAN_BUSY`，超时的调度事后不会再执行 |
 | `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
 | `TransactionScope` | 每个写操作的固定包装，顺序为：`LockingStep`（调度器中的代码不在 action 内，必须显式创建）→ `SafetyPoint`（不提交即回滚）→ `UndoStep`（**在 SafetyPoint 内创建**，描述写明"AI: <工具名>"，让 Ctrl+Z 一次撤销整个操作）→ `QuietModeStep(ShowNoDialogs)`。成功时先 `Commit()` 再 `CloseUndo()`。**UndoStep 放在 SafetyPoint 外面会让回滚静默失效**（spike S2） |
 | `Adapters` | **唯一引用 `Eplan.EplApi.*` 的地方**。负责 EPLAN 对象与 DTO 之间的转换、多语言文本、单位 |

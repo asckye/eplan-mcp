@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Windows.Threading;
-using Eplan.EplApi.Base.Internal;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Threading;
 using EplanMcp.Bridge.Eplan.Interop;
@@ -11,7 +10,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// The only place that calls <see cref="Dispatcher.Invoke(DispatcherPriority, TimeSpan, Delegate)"/> (coding standards
 /// 5a). Implements the four S1 rules (api-notes A9):
 /// <list type="number">
-/// <item>EPLAN's preset WPF dispatcher with a start timeout; an abandoned dispatch never runs later;</item>
+/// <item>the main thread's WPF dispatcher with a start timeout; an abandoned dispatch never runs later;</item>
 /// <item>everything is caught inside the delegate, because an exception escaping on the main thread terminates EPLAN;</item>
 /// <item>a <see cref="LockingStep"/> is the first EPLAN object created on the main thread;</item>
 /// <item>refuse while EPLAN's main window is disabled (a modal dialog would run us inside its message loop), and
@@ -32,12 +31,16 @@ internal sealed class EplanDispatcher : IMainThreadDispatcher
         _dispatcher = dispatcher;
     }
 
-    /// <summary>Must run on EPLAN's main thread (OnInitGui). Reports which source supplied the dispatcher.</summary>
-    public static EplanDispatcher CaptureOnMainThread(out string source)
+    /// <summary>
+    /// Must run on EPLAN's main thread (OnInitGui): keeps that thread's WPF dispatcher, and gives it to
+    /// <see cref="MainThread"/> to check against. Not <c>EplanMainThreadDispatcher</c>, which EPLAN 2024 and earlier
+    /// do not have (ADR-0009); on 2026 it presets this very object (api-notes A9).
+    /// </summary>
+    public static EplanDispatcher CaptureOnMainThread()
     {
-        Dispatcher? preset = EplanMainThreadDispatcher.GetMainThreadDispatcher();
-        source = preset is null ? "Dispatcher.CurrentDispatcher (EPLAN had none preset)" : "EplanMainThreadDispatcher (preset by EPLAN)";
-        return new EplanDispatcher(preset ?? Dispatcher.CurrentDispatcher);
+        Dispatcher main = Dispatcher.CurrentDispatcher;
+        MainThread.Use(main);
+        return new EplanDispatcher(main);
     }
 
     public DispatchResult Run(Func<object?> work, TimeSpan startTimeout)

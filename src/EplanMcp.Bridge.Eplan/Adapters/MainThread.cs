@@ -1,13 +1,21 @@
 using System.Diagnostics;
-using Eplan.EplApi.Base.Internal;
+using System.Windows.Threading;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>Debug-build guard for adapter entry points (coding standards 9.2, rule 4).</summary>
 internal static class MainThread
 {
-    /// <summary><c>CanAccessMainThread</c> is true only on EPLAN's main thread (api-notes A9).</summary>
+    private static Dispatcher? _main;
+
+    /// <summary>Set once in OnInitGui, on the main thread, before any adapter runs (<see cref="EplanDispatcher.CaptureOnMainThread"/>).</summary>
+    public static void Use(Dispatcher main) => _main = main;
+
+    /// <summary>
+    /// The main dispatcher's own <c>CheckAccess</c>, which every EPLAN version has; on 2026 it agrees with
+    /// <c>EplanMainThreadDispatcher.CanAccessMainThread</c> (api-notes A9, ADR-0009).
+    /// </summary>
     [Conditional("DEBUG")]
     public static void Assert() =>
-        Debug.Assert(EplanMainThreadDispatcher.CanAccessMainThread(), "EPLAN API called off the main thread; use the dispatcher.");
+        Debug.Assert(_main?.CheckAccess() == true, "EPLAN API called off the main thread; use the dispatcher.");
 }
