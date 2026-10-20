@@ -105,7 +105,7 @@ public sealed class SessionSelectInteropTests : IAsyncDisposable
 
     private static IEnumerable<string> Projects(CallToolResult result)
     {
-        Assert.NotEqual(true, result.IsError);
+        ToolResultAssert.Succeeded(result);
         return result.StructuredContent!.Value.GetProperty("projects").EnumerateArray().Select(p => p.GetProperty("name").GetString()!);
     }
 

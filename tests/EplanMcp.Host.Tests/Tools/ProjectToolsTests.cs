@@ -15,7 +15,7 @@ public sealed class ProjectToolsTests
     {
         CallToolResult result = await List();
 
-        Assert.NotEqual(true, result.IsError);
+        ToolResultAssert.Succeeded(result);
         Assert.Equal("No project is open in EPLAN.", Text(result, 0));
         Assert.Equal(0, Structured(result).GetProperty("total").GetInt32());
     }

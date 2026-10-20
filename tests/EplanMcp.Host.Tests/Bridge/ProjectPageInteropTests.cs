@@ -159,7 +159,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
 
     private static JsonElement Structured(CallToolResult result)
     {
-        Assert.NotEqual(true, result.IsError);
+        ToolResultAssert.Succeeded(result);
         return result.StructuredContent!.Value;
     }
 
