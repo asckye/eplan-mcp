@@ -24,6 +24,9 @@ public static class ErrorReason
     /// <summary>No device has the given tag; eplan_device_list finds the full tag.</summary>
     public const string DeviceNotFound = "DEVICE_NOT_FOUND";
 
+    /// <summary>No window macro has the given path below the macro directory; <c>metadata.macro</c> repeats it, and eplan_macro_list shows the paths.</summary>
+    public const string MacroNotFound = "MACRO_NOT_FOUND";
+
     /// <summary>Several EPLAN instances are running and none is selected.</summary>
     public const string SessionNotSelected = "SESSION_NOT_SELECTED";
 

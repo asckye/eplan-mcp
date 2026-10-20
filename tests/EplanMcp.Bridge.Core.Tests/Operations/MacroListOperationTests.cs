@@ -78,5 +78,7 @@ public sealed class MacroListOperationTests : IDisposable
     private sealed class FakeMacroReader(string? root) : IMacroReader
     {
         public string? MacroRoot() => root;
+
+        public MacroContent ReadMacro(string projectPath, string macroPath) => throw new NotSupportedException("macro.list never opens a macro");
     }
 }
