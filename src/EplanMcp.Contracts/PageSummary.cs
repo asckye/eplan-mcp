@@ -11,4 +11,7 @@ public sealed class PageSummary
 
     /// <summary>The page description in the requested language; null when the page has none.</summary>
     public string? Description { get; set; }
+
+    /// <summary>The language the description was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
+    public string? DescriptionLanguage { get; set; }
 }

@@ -192,6 +192,17 @@ public sealed class PageListToolTests
         Assert.Null(result.StructuredContent);
     }
 
+    [Fact]
+    public async Task PageList_NamesAFallbackLanguageAndLeavesTheFieldOutOtherwise()
+    {
+        _pages = [Page(1, "电源"), new PageSummary { Name = "=A1/2", Type = "Circuit", Description = "Power supply", DescriptionLanguage = "en_US" }];
+
+        JsonElement pages = Structured(await List()).GetProperty("pages");
+
+        Assert.False(pages[0].TryGetProperty("descriptionLanguage", out _));
+        Assert.Equal("en_US", pages[1].GetProperty("descriptionLanguage").GetString());
+    }
+
     private Task<CallToolResult> List(
         string? project = null,
         string? namePrefix = null,

@@ -17,7 +17,7 @@
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `page` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/1`（用 `eplan_page_list` 查） |
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | `detailed` 额外返回全部非空的页属性 |
-| `language` | string | 否 | EPLAN 界面语言 | 多语言文本的语言 |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言 |
 
 ## 3. 输出
 ```json
@@ -33,6 +33,7 @@
 ```
 - `devices`：页上的设备，即带标识的主功能（`IsMainFunction` 且 `Name` 非空，与 `eplan_project_get` 的设备计数同一规则），按 EPLAN 的顺序；`tag` 是 `Function.Name`（完整标识），`visibleTag` 是页面上显示的标识（去掉 `>` 标记，去掉后为空时为 `null`），`category` 是 `FunctionCategory` 的枚举名（api-notes A11）。同一个完整标识只列一次：按页过滤时 EPLAN 还会返回黑盒里同名的功能，保留有显示标识的那一个（与 `eplan_device_list` 相同，api-notes A12）。最多 100 个，超出时 `truncated = true`，`hint` 提示用 `eplan_device_list` 的 `page` 过滤。`deviceCount` 是页上设备的总数。
 - `typeName`：EPLAN 界面语言的页类型名称（S6：如"标题页/封页"）。
+- 省略 `language` 时按[语言回退设计](../design/2026-10-19-text-language-fallback.md)回退：页描述旁边有 `descriptionLanguage`，属性的值旁边有 `language`；没有回退时不出现这些字段。
 - `properties`（仅 `detailed`）：同 `eplan_project_get`（含 `index`）。
 - 大小：`concise` 默认 5k token，`detailed` 上限 20k token；超出时先从末尾去掉属性，仍然超出（页上设备的标识异常长）再去掉设备，`truncated` 为 true，`hint` 说明。
 - 一行摘要：`Page found: Circuit, 4 devices.`，不回显页名和页描述；有内容被去掉时追加 `Some entries were left out; see 'hint'.`

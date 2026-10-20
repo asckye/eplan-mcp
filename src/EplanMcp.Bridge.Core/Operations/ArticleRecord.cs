@@ -12,6 +12,9 @@ public sealed class ArticleRecord
     /// <summary>The display text of <c>ARTICLE_DESCR1</c> in the requested language; null when not set.</summary>
     public string? Description { get; set; }
 
+    /// <summary>The language the description was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
+    public string? DescriptionLanguage { get; set; }
+
     /// <summary>The display text of <c>ARTICLE_MANUFACTURER</c>, the manufacturer's short name; null when not set.</summary>
     public string? Manufacturer { get; set; }
 }

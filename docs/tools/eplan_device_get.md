@@ -17,7 +17,7 @@
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `tag` | string | 是 | — | 设备标识。完整标识（如 `=GAA+A1-FC1`）总是唯一；短标识（如 `-FC1`）在多个结构下出现时返回 `AMBIGUOUS_NAME` |
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | `detailed` 额外返回主功能全部非空的属性 |
-| `language` | string | 否 | EPLAN 界面语言 | 多语言文本的语言 |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言 |
 
 ## 3. 输出
 ```json
@@ -34,7 +34,7 @@
   "hint": null
 }
 ```
-- `device`：主功能。`text` 是功能文本 `FUNC_TEXT` 在 `language` 下的显示文本，没有时为 `null`。
+- `device`：主功能。`text` 是功能文本 `FUNC_TEXT` 在 `language` 下的显示文本，没有时为 `null`。省略 `language` 时按[语言回退设计](../design/2026-10-19-text-language-fallback.md)回退，回退时 `text` 旁边有 `textLanguage`，部件的描述旁边有 `descriptionLanguage`，属性的值旁边有 `language`；没有回退时不出现这些字段。
 - `functions`：辅助功能（`SubFunctions`），各自所在的页和连接点名称，最多 50 个。
 - `pins`：连接点名称；没有名称的连接点（S6 中端子等的连接点名称为空串）不列出。
 - `parts`：主功能的部件引用（`PartNr`、`VariantNr`、`Count`），描述和制造商取自项目中的部件数据（`Project.Articles`），**不访问部件库**。

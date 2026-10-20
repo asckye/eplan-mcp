@@ -18,7 +18,7 @@
 | `name_prefix` | string | 否 | — | 完整页名的前缀，**区分大小写**，如 `=GAA+A1`、`=GAA+A1&EFS1/` |
 | `page_type` | string | 否 | — | EPLAN 页类型名，如 `Circuit`、`TerminalDiagram`、`TitlePage`；完整列表见 `eplan_tool_usage`（`fields`） |
 | `text` | string | 否 | — | 页描述中包含的文字，不区分大小写，按 `language` 的语言匹配 |
-| `language` | string | 否 | EPLAN 界面语言 | 页描述的语言，如 `zh_CN`、`en_US` |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 页描述的语言，如 `zh_CN`、`en_US` |
 | `limit` | integer，1–200 | 否 | 50 | 每页最多条数 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor` |
 
@@ -39,7 +39,7 @@
 }
 ```
 - 顺序：EPLAN 自身的页顺序（`DMObjectsFinder.GetPages` 的返回顺序，S6 确认不是简单的字符串排序）。
-- `name`：`Page.Name`，即完整页名（api-notes A11）。`description`：页描述 `PAGE_NOMINATIOMN` 在 `language` 下的显示文本，经过不可信文本处理；没有页描述时为 `null`。
+- `name`：`Page.Name`，即完整页名（api-notes A11）。`description`：页描述 `PAGE_NOMINATIOMN` 在 `language` 下的显示文本，经过不可信文本处理；没有页描述时为 `null`。省略 `language` 时按[语言回退设计](../design/2026-10-19-text-language-fallback.md)回退，回退时有 `descriptionLanguage`，`text` 也匹配回退后的描述。
 - 超出 token 预算时由 ResultShaper 截断，`truncated` 和 `nextCursor` 指向第一条未返回的页。
 - 一行摘要：`Listed 50 of 140 pages (more: cursor).`，不回显页名和页描述。
 - 不提供 `response_format`：每页 3 个字段；需要更多信息用 `eplan_page_get`。

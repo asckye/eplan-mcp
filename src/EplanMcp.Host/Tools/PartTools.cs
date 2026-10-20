@@ -106,6 +106,7 @@ internal sealed class PartTools
                     Devices = p.Devices,
                     Connections = p.Connections,
                     Description = ResultShaper.CleanText(p.Description),
+                    DescriptionLanguage = p.DescriptionLanguage,
                     Manufacturer = ResultShaper.CleanText(p.Manufacturer),
                 }),
             ],

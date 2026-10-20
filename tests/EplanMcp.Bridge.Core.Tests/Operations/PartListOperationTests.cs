@@ -59,14 +59,14 @@ public sealed class PartListOperationTests
         _parts.Parts.Articles.AddRange(
         [
             new ArticleRecord { PartNumber = "PXC.3031212", Variant = "1", Description = "端子", Manufacturer = "PXC" },
-            new ArticleRecord { PartNumber = "PXC.3031212", Variant = "3", Description = "端子 3", Manufacturer = "PXC" },
+            new ArticleRecord { PartNumber = "PXC.3031212", Variant = "3", Description = "Klemme 3", DescriptionLanguage = "de_DE", Manufacturer = "PXC" },
         ]);
 
         ListData<PartListItem> data = Run(new PartListArgs { Limit = 50 });
 
         Assert.Equal(
-            [("EPL.1", (string?)null, (string?)null), ("PXC.3031212", "端子", "PXC"), ("PXC.3031212", "端子 3", "PXC")],
-            data.Items.Select(p => (p.PartNumber, p.Description, p.Manufacturer)));
+            [("EPL.1", (string?)null, (string?)null, (string?)null), ("PXC.3031212", "端子", null, "PXC"), ("PXC.3031212", "Klemme 3", "de_DE", "PXC")],
+            data.Items.Select(p => (p.PartNumber, p.Description, p.DescriptionLanguage, p.Manufacturer)));
     }
 
     [Fact]

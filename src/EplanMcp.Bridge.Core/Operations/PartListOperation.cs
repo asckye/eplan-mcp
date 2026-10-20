@@ -52,6 +52,7 @@ public sealed class PartListOperation(IProjectCatalog catalog, IPartReader parts
                 + onFunctions.Count(r => r.OwnerName.Length == 0),
             Connections = references.Count(r => r.Owner == PartOwner.Connection),
             Description = article?.Description,
+            DescriptionLanguage = article?.DescriptionLanguage,
             Manufacturer = article?.Manufacturer,
         };
     }

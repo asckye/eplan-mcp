@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | `detailed` 额外返回全部非空的项目属性 |
-| `language` | string | 否 | EPLAN 界面语言 | 多语言文本的语言，如 `zh_CN`、`en_US`（M2 设计 Q3） |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言，如 `zh_CN`、`en_US`（M2 设计 Q3）。回退时属性的值旁边有 `language`（[语言回退设计](../design/2026-10-19-text-language-fallback.md)） |
 
 ## 3. 输出
 ```json

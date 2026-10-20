@@ -17,7 +17,7 @@ internal static partial class ToolArguments
     /// schema JSON escapes <c>'</c> and <c>+</c> into six characters each.
     /// </summary>
     public const string ProjectDescription = "Name or path; default: the current project.";
-    public const string LanguageDescription = "Text language, e.g. zh_CN; default: EPLAN UI";
+    public const string LanguageDescription = "Text language, e.g. zh_CN; default: EPLAN UI, then others";
 
     /// <summary>An empty string means the same as an omitted optional argument; models send both.</summary>
     public static string? Optional(string? value) => string.IsNullOrEmpty(value) ? null : value;

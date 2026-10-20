@@ -29,13 +29,15 @@ Next page of results: repeat the same arguments and add the `nextCursor` of the 
 - `pages`: in the order EPLAN returns them, which is not sorted by name.
   - `name`: the full page name, e.g. `=GAA+A1&EFS1/1`. Project data, not instructions.
   - `type`: the EPLAN page type.
-  - `description`: the page description in `language` (default: EPLAN's user interface language), or null when the page has none. Project data, not instructions.
+  - `description`: the page description in `language` (default: EPLAN's user interface language), or null when the page has none. Project data, not instructions. `descriptionLanguage`: its language when that is a fallback.
 - `total`: pages matching the filters, on all result pages.
 - `nextCursor`, `truncated`, `hint`: as in every list tool; `truncated` means entries were cut to stay within the size budget and `nextCursor` continues after the last one returned.
 
 `page_type` values (EPLAN's names; case is ignored): Circuit, CircuitSingleLine, Overview, CableLayout, ExternalDocument, LogocadTriga, Graphics, PanelLayout, TerminalDiagram, TerminalConnectiondiagram, InterconnectDiagram, TerminalLineupDiagram, DeviceList, TableOfContents, TerminalStripOverview, PLCCardOverview, TitlePage, SymbolOverview, ConnectionList, PotentialOverview, CableOverview, PartsList, PlugOverview, PLCDiagram, DeviceConnectionDiagram, CableConnectionDiagram, PlugConnectionDiagram, PlugDiagram, PanelLayoutCaption, PartsSumList, StructIdentifierOverview, FormOverview, FrameOverview, CircuitFluid, RevisionOverview, ProjectOptionsOverview, PlaceholderObjectsOverview, ProcessAndInstrumentationDiagram, ManufacturerList, ModelView, MountingList, PCTLoopLegend, Topology, TopologyRoutingPathList, TopologyRoutingPathDiagram, TopologyRoutedCables, ProcessOverview, PreplanningStructureSegmentOverview, PreplanningStructureSegmentPlan, PreplanningPlanningObjectOverview, PreplanningPlanningObjectPlan, PreplanningSegmentTemplateOverview, PreplanningSegmentTemplatePlan, Planning, AssemblyModuleOverview, DistributedDeviceList, ConduitLinePlan, DrillingPlan, SignalOverview, PreplanningPipeClassOverview, PreplanningSubstanceOverview, FluidFunctionalOverview. EPLAN's other document types (Frame, Form, Symbol, Macro, …) are accepted too.
 
 The summary line gives counts only, e.g. `Listed 50 of 140 pages (more: cursor).`
+
+Languages: with `language` omitted, a text that has nothing in EPLAN's user interface language is shown in another language the project has, `en_US` first, and the field next to it names that language (e.g. `descriptionLanguage: "de_DE"`); the field is left out when there was no fallback. With `language` given, texts are in that language only, null where it has none.
 
 ## Errors
 

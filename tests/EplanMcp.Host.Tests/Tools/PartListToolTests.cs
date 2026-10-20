@@ -173,6 +173,18 @@ public sealed class PartListToolTests
         Assert.Equal(descriptions[kept], second.GetProperty("parts")[0].GetProperty("description").GetString());
     }
 
+    [Fact]
+    public async Task PartList_NamesAFallbackLanguageAndLeavesTheFieldOutOtherwise()
+    {
+        _parts.Add(new PartListItem { PartNumber = "PXC.3044102", Description = "Durchgangsreihenklemme", DescriptionLanguage = "de_DE" });
+        _parts.Add(new PartListItem { PartNumber = "SIE.3RT2016-1BB41", Description = "接触器" });
+
+        JsonElement parts = Structured(await List()).GetProperty("parts");
+
+        Assert.Equal("de_DE", parts[0].GetProperty("descriptionLanguage").GetString());
+        Assert.False(parts[1].TryGetProperty("descriptionLanguage", out _));
+    }
+
     private Task<CallToolResult> List(
         string project = "", string manufacturer = "", string text = "", string language = "", int limit = PartTools.DefaultLimit, string cursor = "") =>
         PartTools.PartListAsync(_bridge, project, manufacturer, text, language, limit, cursor, TestContext.Current.CancellationToken);

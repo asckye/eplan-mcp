@@ -1,4 +1,3 @@
-using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core.Operations;
@@ -72,7 +71,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
     public DeviceRecord? ReadDevice(string projectPath, string tag, string? language, bool withProperties)
     {
         MainThread.Assert();
-        ISOCode.Language textLanguage = EplanText.Language(language);
+        TextLanguage textLanguage = EplanText.Language(language);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
         Function? main = FindMain(finder, tag);
@@ -91,22 +90,27 @@ internal sealed class EplanDeviceReader : IDeviceReader
         };
     }
 
-    private static FunctionDetail Detail(Function function, ISOCode.Language language, bool withText) => new()
+    private static FunctionDetail Detail(Function function, TextLanguage language, bool withText)
     {
-        Name = function.Name ?? string.Empty,
-        VisibleName = function.VisibleName ?? string.Empty,
-        Category = function.FunctionCategory.ToString(),
-        Page = function.Page?.Name,
-        Text = withText ? EplanText.Read(function.Properties.FUNC_TEXT, language) : null,
-        Pins = [.. function.Pins.Select(pin => pin.Name ?? string.Empty)],
-    };
+        (string? text, string? textLanguage) = withText ? EplanText.ReadWithLanguage(function.Properties.FUNC_TEXT, language) : (null, null);
+        return new FunctionDetail
+        {
+            Name = function.Name ?? string.Empty,
+            VisibleName = function.VisibleName ?? string.Empty,
+            Category = function.FunctionCategory.ToString(),
+            Page = function.Page?.Name,
+            Text = text,
+            TextLanguage = textLanguage,
+            Pins = [.. function.Pins.Select(pin => pin.Name ?? string.Empty)],
+        };
+    }
 
     /// <summary>
     /// Part data from the references only: indexed properties such as FUNC_ARTICLE_PARTNR throw when read without an
     /// index (S6). Descriptions come from the project's own parts (Project.Articles, 293 read in 10 ms in S6), never
     /// from the parts database: Article.LoadFromMasterdata would write into the project (BannedSymbols.txt).
     /// </summary>
-    private static List<DevicePart> Parts(Project project, ArticleReference[] references, ISOCode.Language language)
+    private static List<DevicePart> Parts(Project project, ArticleReference[] references, TextLanguage language)
     {
         ILookup<string, Article> articles = project.Articles.ToLookup(a => a.PartNr ?? string.Empty, StringComparer.Ordinal);
         return
@@ -117,12 +121,16 @@ internal sealed class EplanDeviceReader : IDeviceReader
                 string variant = reference.VariantNr ?? string.Empty;
                 Article? article = articles[partNumber].FirstOrDefault(a => string.Equals(a.VariantNr, variant, StringComparison.Ordinal))
                     ?? articles[partNumber].FirstOrDefault();
+                (string? description, string? descriptionLanguage) = article is null
+                    ? (null, null)
+                    : EplanText.ReadWithLanguage(article.Properties.ARTICLE_DESCR1, language);
                 return new DevicePart
                 {
                     PartNumber = partNumber,
                     Variant = variant.Length == 0 ? null : variant,
                     Count = reference.Count,
-                    Description = article is null ? null : EplanText.Read(article.Properties.ARTICLE_DESCR1, language),
+                    Description = description,
+                    DescriptionLanguage = descriptionLanguage,
                     Manufacturer = article is null ? null : EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, language),
                 };
             }),

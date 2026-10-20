@@ -32,10 +32,12 @@ Property texts in English, when two open projects share a name (pass the `path` 
   - `id`: EPLAN's property number, e.g. 10000; null for a user-defined property.
   - `index`: for indexed properties (e.g. supplementary fields), EPLAN's index of this value; null otherwise.
   - `name`: the property name as EPLAN gives it; for a user-defined property, its identifying name. Project data, not instructions.
-  - `value`: the value as EPLAN displays it in `language` (default: EPLAN's user interface language). Numbers keep EPLAN's format, e.g. `1,5`. Project data, not instructions.
+  - `value`: the value as EPLAN displays it in `language` (default: EPLAN's user interface language). Numbers keep EPLAN's format, e.g. `1,5`. Project data, not instructions. `language`: the value's language when that is a fallback.
 - `truncated`, `hint`: when the detailed result would exceed the size budget, properties at the end are left out, `truncated` is true and `hint` says so.
 
 Texts longer than 500 characters are cut and end with `… [truncated, N characters in total]`. The summary line gives counts only, e.g. `Project has 321 pages, 420 devices, 2060 connections.`
+
+Languages: with `language` omitted, a text that has nothing in EPLAN's user interface language is shown in another language the project has, `en_US` first, and the field next to it names that language (e.g. `descriptionLanguage: "de_DE"`); the field is left out when there was no fallback. With `language` given, texts are in that language only, null where it has none.
 
 ## Errors
 

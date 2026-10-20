@@ -18,6 +18,9 @@ public sealed class FunctionDetail
     /// <summary>The display text of <c>FUNC_TEXT</c>; read for the main function only, null when not set.</summary>
     public string? Text { get; set; }
 
+    /// <summary>The language the text was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
+    public string? TextLanguage { get; set; }
+
     /// <summary><c>Pin.Name</c> of every connection point in EPLAN's order; empty for a point without a name (S6).</summary>
     public List<string> Pins { get; set; } = [];
 }
