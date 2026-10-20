@@ -96,6 +96,7 @@ budget: { max_tool_calls: 12, max_minutes: 4 }
    - 轨迹（`transcript.jsonl`）和标准错误写在 `.local/evals/<运行>/<任务>/`。
 4. **预算**：运行器逐行读取 stream-json，统计主对话中的工具调用；超过 `max_tool_calls` 或超过 `max_minutes` 就终止进程（连同它启动的 eplanmcp），任务记为失败（"超出预算"）。`--max-budget-usd` 是费用上的兜底，`--max-turns` 是调用计数之外的兜底。
    - 认证失败、API 错误、没有 `result` 事件就退出等**环境问题**记为"无效"，不计入成功率；没有给出结构化答案、`--max-budget-usd` 或 `--max-turns` 用尽记为失败。
+   - 因 API 错误无效、而且没有工具调用和花费的作答（认证失败除外），等一分钟后重试一次，两次都记入报告（补充于 2026-10-19 的重复运行之后：共享登录的刷新冲突让 6 次作答无效）。
 5. **判分**：从最后的 `result` 事件中取结构化答案，逐条执行 `checks`。全部通过才算成功。
 
 **stream-json 的具体格式**以本机 Claude Code 的实际输出为准，全部已实测（api-notes C 节）：`system/init` 和 `result` 事件先在未登录状态下确认；工具调用（`assistant` 消息中的 `tool_use` 块）、工具结果（`user` 消息中的 `tool_result` 块）和结构化答案的提交方式在第一次真实运行（2026-10-19）中确认，与解析器的实现一致。

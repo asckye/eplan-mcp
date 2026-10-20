@@ -82,14 +82,17 @@ internal static class ReportWriter
         }
 
         Section(text, "失败", report.Tasks.SelectMany(t => t.Attempts.Where(a => a.Outcome == Outcome.Failed).SelectMany(a =>
-            (IEnumerable<string>)[$"- `{t.Id}` 第 {a.Attempt} 次：{Inline(a.Reason)}", .. a.Failures.Select(f => $"  - {Inline(f)}")])));
+            (IEnumerable<string>)[$"- `{t.Id}` {Label(a)}：{Inline(a.Reason)}", .. a.Failures.Select(f => $"  - {Inline(f)}")])));
         Section(text, "无效（不计入成功率）", report.Tasks.SelectMany(t => t.Invalid is { } invalid
             ? [$"- `{t.Id}`：{Inline(invalid)}"]
-            : t.Attempts.Where(a => a.Outcome == Outcome.Invalid).Select(a => $"- `{t.Id}` 第 {a.Attempt} 次：{Inline(a.Reason)}")));
+            : t.Attempts.Where(a => a.Outcome == Outcome.Invalid).Select(a => $"- `{t.Id}` {Label(a)}：{Inline(a.Reason)}")));
         Section(text, "无效的任务文件", report.InvalidFiles.Select(f => $"- {Inline(f)}"));
         Section(text, "提示", report.Tasks.SelectMany(t => t.Notes.Select(n => $"- `{t.Id}`：{Inline(n)}")));
         return text.ToString();
     }
+
+    private static string Label(AttemptRecord attempt) =>
+        string.Create(CultureInfo.InvariantCulture, $"第 {attempt.Attempt} 次{(attempt.Retry ? "（重试）" : string.Empty)}");
 
     private static void Section(StringBuilder text, string title, IEnumerable<string> lines)
     {

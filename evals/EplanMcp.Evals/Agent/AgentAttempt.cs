@@ -27,6 +27,21 @@ internal sealed record AgentAttempt(AttemptStatus Status, string? Reason, JsonNo
     // The model's own doing, unlike the other assistant errors (login, rate limit, overload, server).
     private const string OutputLimitError = "max_output_tokens";
 
+    // No login: waiting does not fix it, unlike the other API errors.
+    private const string LoginError = "authentication_failed";
+
+    /// <summary>
+    /// Invalid because of an API error before the model did anything: no tool call, nothing spent. The runner retries
+    /// such an attempt once. On 2026-10-19 another Claude Code process refreshing the shared login made six attempts in
+    /// a row invalid ("Failed to refresh OAuth token ... retry in a minute"); a missing login is not retried.
+    /// </summary>
+    public bool IsRetryable =>
+        Status == AttemptStatus.Invalid
+        && (Trace.ApiError is not null || Trace.Result?.TerminalReason == "api_error")
+        && Trace.ApiError != LoginError
+        && Trace.Calls.Count == 0
+        && (Trace.Result?.CostUsd ?? 0) == 0;
+
     public static AgentAttempt From(AgentTrace trace, AgentStop? stop, int exitCode, string stderr, TimeSpan elapsed)
     {
         (AttemptStatus status, string? reason, JsonNode? answer) = Judge(trace, stop, exitCode, stderr);

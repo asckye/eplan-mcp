@@ -90,6 +90,20 @@ public sealed class ReportTests
     }
 
     [Fact]
+    public void Markdown_NamesARetryAndCountsOnlyIt()
+    {
+        AttemptRecord first = Record(Outcome.Invalid, calls: 0, cost: 0m, reason: "API error server_error: retry in a minute");
+        AttemptRecord retry = Record(Outcome.Failed, reason: "the answer failed checks") with { Retry = true };
+        RunReport report = Report(new TaskRecord("a", "dev", null, [], [first, retry]));
+
+        string markdown = ReportWriter.Markdown(report);
+
+        Assert.Contains("- `a` 第 1 次（重试）：the answer failed checks\n", markdown, StringComparison.Ordinal);
+        Assert.Contains("- `a` 第 1 次：API error server_error: retry in a minute\n", markdown, StringComparison.Ordinal);
+        Assert.Equal(1, Assert.Single(ReportWriter.Summarize(report)).Counted);
+    }
+
+    [Fact]
     public void Markdown_LeavesOutEmptySections()
     {
         string markdown = ReportWriter.Markdown(Report(Task("a", "dev", Record(Outcome.Solved))));

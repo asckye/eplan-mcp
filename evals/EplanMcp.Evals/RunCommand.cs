@@ -88,7 +88,7 @@ internal static class RunCommand
             int exit = 0;
             try
             {
-                await EvalRun.RunAsync(tasks, options.Repeat, client, tools, attempts, output, records, cancellationToken).ConfigureAwait(false);
+                await EvalRun.RunAsync(tasks, options.Repeat, client, tools, attempts, output, records, EvalRun.RetryDelay, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
