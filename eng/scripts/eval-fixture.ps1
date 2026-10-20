@@ -5,7 +5,7 @@
 .DESCRIPTION
     The fixture is a plain file copy of EPLAN_Sample_Project, its .elk file and .edb folder (api-notes A12), in
     <scratch root>\fixtures\. The scratch root is %USERPROFILE%\EplanMcp\scratch, or scratch under EPLANMCP_HOME
-    (ADR-0008); the evals refuse to run on a project outside it. The script writes nothing else.
+    (ADR-0008); the evals refuse to run on a project outside it. Besides the copies below, the script writes nothing.
     -Open then starts EPLAN with the copy as the current project; the EplanMcp add-in must be registered for the
     variant (eplan-addin.ps1 -Variant). Close EPLAN before replacing a copy it has open (-Force).
     -WriteCopies also makes the two copies the Large write tests need (tests/EplanMcp.Large.Tests/README.md):

@@ -30,12 +30,18 @@ public sealed class NoSideEffectTests(LiveEplan eplan)
         Assert.True(changed.Length == 0, "Changed by reading: " + string.Join(", ", changed));
     }
 
-    /// <summary>The project file and every file of its data directory (<c>.elk</c> and <c>.edb</c>), by relative path.</summary>
-    private Dictionary<string, (long Size, DateTime Written)> ProjectFiles()
+    private Dictionary<string, (long Size, DateTime Written)> ProjectFiles() => ProjectFiles(eplan.ProjectPath, withUserData: true);
+
+    /// <summary>
+    /// The project file and every file of its data directory (<c>.elk</c> and <c>.edb</c>), by relative path. Without
+    /// user data, the <c>User.*</c> files are left out: EPLAN rewrites them for the current project on any call (A17).
+    /// </summary>
+    internal static Dictionary<string, (long Size, DateTime Written)> ProjectFiles(string projectPath, bool withUserData)
     {
-        string root = Path.GetDirectoryName(eplan.ProjectPath)!;
-        IEnumerable<FileInfo> files = new DirectoryInfo(eplan.ProjectPath + ".edb").EnumerateFiles("*", SearchOption.AllDirectories)
-            .Append(new FileInfo(eplan.ProjectPath + ".elk"));
+        string root = Path.GetDirectoryName(projectPath)!;
+        IEnumerable<FileInfo> files = new DirectoryInfo(projectPath + ".edb").EnumerateFiles("*", SearchOption.AllDirectories)
+            .Append(new FileInfo(projectPath + ".elk"))
+            .Where(f => withUserData || !f.Name.StartsWith("User.", StringComparison.OrdinalIgnoreCase));
         return files.ToDictionary(f => Path.GetRelativePath(root, f.FullName), f => (f.Length, f.LastWriteTimeUtc), StringComparer.OrdinalIgnoreCase);
     }
 }

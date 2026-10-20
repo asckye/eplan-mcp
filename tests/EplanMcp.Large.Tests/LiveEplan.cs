@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EplanMcp.Host;
 using EplanMcp.Large.Tests;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -114,10 +115,9 @@ public sealed class LiveEplan : IAsyncLifetime
 
     private static string Text(CallToolResult result) => string.Join("\n", result.Content.OfType<TextContentBlock>().Select(b => b.Text));
 
-    /// <summary>The data root eplanmcp uses (ADR-0008): <c>EPLANMCP_HOME</c>, or <c>%USERPROFILE%\EplanMcp</c>.</summary>
-    internal static string DataRoot() =>
-        Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home ? home : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp");
+    /// <summary>The data root eplanmcp uses (ADR-0008), by the Host's own rule.</summary>
+    internal static string DataRoot() => HostDataLocations.FromEnvironment().Root;
 
     /// <summary>The scratch root eplanmcp uses by default: <c>scratch</c> under <see cref="DataRoot"/>.</summary>
-    internal static string ScratchRoot() => Path.Combine(DataRoot(), "scratch");
+    internal static string ScratchRoot() => HostDataLocations.FromEnvironment().DefaultScratch;
 }

@@ -22,7 +22,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 - 多语言文本都显式传入 `language`，结果不受 EPLAN 界面语言影响；只有回退的测试按界面语言分两种情况判断。
 
 ### Q1、Q2、Q6
-`WriteSafetyTests` 另起一个 `eplanmcp`，数据根目录在系统临时目录中（测试结束后删除），其中的 `config.json` 只把 `<scratch 根目录>\writes\` 当作 scratch 根目录，其他项目的写入一律拒绝，不看工程师自己的 `config.json`。所以对 `not-scratch\writes\` 下那份副本的写入只会被拒绝，也不会弹出审批对话框；开始前还核对可写的副本在 scratch 根目录中、另一份在它之外。
+`WriteSafetyTests` 另起一个 `eplanmcp`，数据根目录在系统临时目录中（测试结束后删除），其中的 `config.json` 只把 `<scratch 根目录>\writes\` 当作 scratch 根目录，其他项目的写入一律拒绝，不看工程师自己的 `config.json`。所以对 `not-scratch\writes\` 下那份副本的写入只会被拒绝，也不会弹出审批对话框。`writes\` 下开着几个项目时（`eplan_macro_insert` 的写测试也用这个目录），取 `LargeWrite`。
 
 两份副本可以反复使用：Q1、Q2 不改变它们，Q6 每次取新的页号和描述文字。副本出了问题时，在 EPLAN 中关闭它们，运行 `eval-fixture.ps1 -WriteCopies -Force`（它也会重新复制夹具，所以要先关闭 EPLAN），再按准备第 3 步打开。
 
