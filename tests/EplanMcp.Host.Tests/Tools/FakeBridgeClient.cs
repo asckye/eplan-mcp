@@ -58,6 +58,12 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>The request IDs and limits of writes, in order.</summary>
     public List<(string RequestId, TimeSpan Limit)> Writes { get; } = [];
 
+    /// <summary>What <see cref="FetchOutcomeAsync"/> answers, by request ID; missing means the Bridge cannot be asked.</summary>
+    public Dictionary<string, OutcomeGetData> Outcomes { get; } = new(StringComparer.Ordinal);
+
+    public Task<OutcomeGetData?> FetchOutcomeAsync(int processId, string requestId, CancellationToken cancellationToken) =>
+        Task.FromResult(Outcomes.GetValueOrDefault(requestId));
+
     /// <summary>When set, writes fail with it (reads still answer); its <c>Execution</c> is kept as given.</summary>
     public BridgeError? WriteFailure { get; set; }
 

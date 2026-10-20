@@ -81,6 +81,52 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
         return last is null ? null : JsonNode.Parse(last)?["hash"]?.GetValue<string>();
     }
 
+    /// <summary>
+    /// The "execution_started" records without an "execution_result" of the same request ID, oldest first: writes
+    /// whose outcome was not recorded (ADR-0010 section 2). Lines that are not records are skipped here; audit verify
+    /// reports them.
+    /// </summary>
+    public IReadOnlyList<JsonObject> Dangling()
+    {
+        if (!Directory.Exists(directory))
+        {
+            return [];
+        }
+
+        var started = new List<JsonObject>();
+        var finished = new HashSet<string>(StringComparer.Ordinal);
+        foreach (string line in Directory.EnumerateFiles(directory, FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadLines))
+        {
+            JsonObject? record;
+            try
+            {
+                record = line.Length == 0 ? null : JsonNode.Parse(line) as JsonObject;
+            }
+            catch (JsonException)
+            {
+                continue;
+            }
+
+            string? kind = record?["kind"]?.GetValue<string>();
+            string? requestId = record?["requestId"]?.GetValue<string>();
+            if (requestId is null)
+            {
+                continue;
+            }
+
+            if (kind == "execution_started")
+            {
+                started.Add(record!);
+            }
+            else if (kind == "execution_result")
+            {
+                finished.Add(requestId);
+            }
+        }
+
+        return [.. started.Where(r => !finished.Contains(r["requestId"]!.GetValue<string>()))];
+    }
+
     internal static string? LastLine(string file) =>
         File.ReadLines(file).LastOrDefault(l => l.Length > 0);
 

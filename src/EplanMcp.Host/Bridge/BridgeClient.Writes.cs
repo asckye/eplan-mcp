@@ -86,6 +86,25 @@ internal sealed partial class BridgeClient
         }
     }
 
+    public async Task<OutcomeGetData?> FetchOutcomeAsync(int processId, string requestId, CancellationToken cancellationToken)
+    {
+        if (!await _queue.WaitAsync(_queueTimeout, cancellationToken).ConfigureAwait(false))
+        {
+            return null;
+        }
+
+        try
+        {
+            return Discover().FirstOrDefault(e => e.ProcessId == processId) is { } target
+                ? (await FetchOutcomeAsync(target, requestId).ConfigureAwait(false)).Outcome
+                : null;
+        }
+        finally
+        {
+            _queue.Release();
+        }
+    }
+
     private async Task<WriteResult<TData>> RecoverAsync<TData>(BridgeEndpoint target, string requestId, BridgeError interruption, long deadline)
     {
         while (true)
