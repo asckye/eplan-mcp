@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Bridge;
 
@@ -11,5 +12,9 @@ internal interface IBridgeChannel : IAsyncDisposable
 {
     public BridgeEndpoint Endpoint { get; }
 
-    public Task<JsonNode?> CallAsync(string method, JsonNode? parameters, CancellationToken cancellationToken);
+    /// <summary>
+    /// Sends <paramref name="method"/> and returns its result. The <c>progress</c> notifications that arrive before the
+    /// response go to <paramref name="progress"/>, on the reading thread; other notifications are skipped.
+    /// </summary>
+    public Task<JsonNode?> CallAsync(string method, JsonNode? parameters, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken);
 }

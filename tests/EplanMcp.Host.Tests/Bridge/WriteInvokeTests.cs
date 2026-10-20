@@ -19,14 +19,17 @@ public sealed class WriteInvokeTests
     private readonly FakeDiscovery _discovery = new();
     private readonly BridgeEndpoint _bridge = new("EplanMcp.Bridge.42.a1", 42);
     private readonly Queue<OutcomeGetData> _outcomes = new();
+    private readonly Queue<bool> _found = new([true]);
     private Func<CancellationToken, Task<JsonNode?>> _execute = _ => Task.FromResult<JsonNode?>(new JsonObject { ["data"] = new JsonObject { ["pages"] = 2 } });
-    private List<string> _operations = [Execute, OperationNames.OutcomeGet];
+    private List<string> _operations = [Execute, OperationNames.OutcomeGet, OperationNames.OperationCancel];
 
     public WriteInvokeTests() => _discovery.Endpoints.Add(_bridge);
 
     private int Executes { get; set; }
 
     private int OutcomeQuestions { get; set; }
+
+    private int Cancels { get; set; }
 
     [Fact]
     public async Task AWrite_ThatAnswers_IsCommittedAndSentOnceUnderTheRequestId()
@@ -167,6 +170,89 @@ public sealed class WriteInvokeTests
         Assert.Equal((ErrorReason.Internal, ExecutionState.Committed), (error.Reason, error.Execution));
     }
 
+    [Fact]
+    public async Task AWrite_TheCallerCancels_IsStoppedInTheBridgeAndItsRollbackReported()
+    {
+        using var cancel = new CancellationTokenSource();
+        _execute = token => CancelThenWait(cancel, token);
+        _outcomes.Enqueue(Outcome(OutcomeStatus.RolledBack, ErrorReason.Cancelled));
+
+        BridgeError error = await Fails(token: cancel.Token);
+
+        Assert.Equal((ErrorReason.Cancelled, ExecutionState.RolledBack, false), (error.Reason, error.Execution, error.Retryable));
+        Assert.Equal((1, 1), (Executes, Cancels));
+    }
+
+    [Fact]
+    public async Task AWrite_CancelledBeforeTheBridgeReadIt_NeverRuns()
+    {
+        using var cancel = new CancellationTokenSource();
+        _execute = token => CancelThenWait(cancel, token);
+        _found.Clear();
+        _found.Enqueue(false);
+        _outcomes.Enqueue(new OutcomeGetData { Status = OutcomeStatus.NotStarted });
+
+        BridgeError error = await Fails(token: cancel.Token);
+
+        Assert.Equal((ErrorReason.Cancelled, ExecutionState.NotStarted, false), (error.Reason, error.Execution, error.Retryable));
+    }
+
+    [Fact]
+    public async Task AWrite_TheBridgeReadsOnlyAfterTheCancel_IsAskedAgainAndWhatItDidReported()
+    {
+        using var cancel = new CancellationTokenSource();
+        _execute = token => CancelThenWait(cancel, token);
+        _found.Clear();
+        _found.Enqueue(false);
+        _found.Enqueue(true);
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Committed)); // the cancel came after its last safe point
+
+        WriteResult<JsonObject> result = await Write(token: cancel.Token);
+
+        Assert.True(result.Recovered);
+        Assert.Equal((1, 2), (Executes, Cancels));
+    }
+
+    [Fact]
+    public async Task AWrite_CancelledOnAnAddInThatCannotCancel_IsWaitedFor()
+    {
+        using var cancel = new CancellationTokenSource();
+        _operations = [Execute, OperationNames.OutcomeGet];
+        _execute = token => CancelThenWait(cancel, token);
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Committed));
+
+        WriteResult<JsonObject> result = await Write(token: cancel.Token);
+
+        Assert.True(result.Recovered);
+        Assert.Equal(0, Cancels);
+    }
+
+    [Fact]
+    public async Task AWrite_CancelledWhileQueued_IsNeverSent()
+    {
+        var release = new TaskCompletionSource<JsonNode?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _operations = [Execute, OperationNames.OutcomeGet, "x.read"];
+        var connector = new FakeConnector(endpoint => new FakeChannel(endpoint, (method, parameters, token) =>
+            parameters!["operation"]!.GetValue<string>() == "x.read" ? release.Task : Answer(method, parameters, token))
+        {
+            Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(endpoint.ProcessId, operations: _operations)),
+        });
+        await using var client = new BridgeClient(_discovery, connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(10));
+        using var cancel = new CancellationTokenSource();
+
+        Task<JsonObject> read = client.InvokeAsync<object, JsonObject>("x.read", new { }, TestContext.Current.CancellationToken);
+        Task<WriteResult<JsonObject>> write = client.InvokeWriteAsync<object, JsonObject>(Execute, new { }, RequestId, TimeSpan.FromSeconds(5), null, cancel.Token);
+        await cancel.CancelAsync();
+        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => write)).Error;
+        release.SetResult(new JsonObject { ["data"] = new JsonObject() });
+        await read;
+
+        Assert.Equal((ErrorReason.Cancelled, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal((0, 0), (Executes, Cancels));
+    }
+
     [Theory]
     [InlineData(ErrorReason.EplanBusy, true, ExecutionState.NotStarted, true)]
     [InlineData(ErrorReason.LockFailed, true, ExecutionState.RolledBack, true)]
@@ -183,19 +269,19 @@ public sealed class WriteInvokeTests
         Assert.Equal(hold, ExecutionInvariants.Hold(new BridgeError { Reason = reason, Retryable = retryable, Execution = execution }));
     }
 
-    private async Task<WriteResult<JsonObject>> Write(TimeSpan? limit = null)
+    private async Task<WriteResult<JsonObject>> Write(TimeSpan? limit = null, CancellationToken? token = null)
     {
         var connector = new FakeConnector(endpoint => new FakeChannel(endpoint, Answer)
         {
             Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(endpoint.ProcessId, operations: _operations)),
         });
         await using var client = new BridgeClient(_discovery, connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(10));
-        return await client.InvokeWriteAsync<object, JsonObject>(Execute, new { }, RequestId, limit ?? TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        return await client.InvokeWriteAsync<object, JsonObject>(Execute, new { }, RequestId, limit ?? TimeSpan.FromSeconds(5), null, token ?? TestContext.Current.CancellationToken);
     }
 
-    private async Task<BridgeError> Fails(TimeSpan? limit = null)
+    private async Task<BridgeError> Fails(TimeSpan? limit = null, CancellationToken? token = null)
     {
-        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => Write(limit))).Error;
+        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => Write(limit, token))).Error;
         Assert.True(ExecutionInvariants.Hold(error), $"{error.Reason}/{error.Execution}/{error.Retryable}");
         Assert.True(Executes <= 1, "a write was sent twice");
         return error;
@@ -212,6 +298,14 @@ public sealed class WriteInvokeTests
             return Task.FromResult<JsonNode?>(new JsonObject { ["data"] = JsonSerializer.SerializeToNode(next, HostJson.Options) });
         }
 
+        if (operation == OperationNames.OperationCancel)
+        {
+            Cancels++;
+            Assert.Equal(RequestId, parameters["args"]!["requestId"]!.GetValue<string>());
+            bool found = _found.Count > 1 ? _found.Dequeue() : _found.Peek();
+            return Task.FromResult<JsonNode?>(new JsonObject { ["data"] = new JsonObject { ["found"] = found } });
+        }
+
         Executes++;
         Assert.Equal(RequestId, parameters["correlationId"]!.GetValue<string>());
         return _execute(cancellationToken);
@@ -226,4 +320,11 @@ public sealed class WriteInvokeTests
     }
 
     private static Task<JsonNode?> Lost(CancellationToken cancellationToken) => throw new IOException("pipe broken");
+
+    /// <summary>The client cancels the tool call while the write is on its way to EPLAN.</summary>
+    private static async Task<JsonNode?> CancelThenWait(CancellationTokenSource cancel, CancellationToken cancellationToken)
+    {
+        await cancel.CancelAsync();
+        return await Never(cancellationToken);
+    }
 }

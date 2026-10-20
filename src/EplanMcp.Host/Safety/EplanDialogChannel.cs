@@ -35,7 +35,7 @@ internal sealed class EplanDialogChannel(IBridgeClient bridge, TimeProvider cloc
         args.ArgumentsHash = question.ArgumentsHash;
         args.DeadlineUnixMs = question.Deadline.ToUnixTimeMilliseconds();
         TimeSpan wait = question.Deadline - clock.GetUtcNow() + Slack;
-        ApprovalAskData data = await bridge.InvokeAsync<ApprovalAskArgs, ApprovalAskData>(OperationNames.ApprovalAsk, args, wait, cancellationToken).ConfigureAwait(false);
+        ApprovalAskData data = await bridge.InvokeAsync<ApprovalAskArgs, ApprovalAskData>(OperationNames.ApprovalAsk, args, wait, null, cancellationToken).ConfigureAwait(false);
         ApprovalDecision decision = data.Decision switch
         {
             ApprovalDecisions.Granted => ApprovalDecision.Granted,

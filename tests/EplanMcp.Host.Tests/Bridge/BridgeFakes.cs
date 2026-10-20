@@ -25,9 +25,13 @@ internal sealed class FakeChannel(BridgeEndpoint endpoint, Func<string, JsonNode
 
     public List<string> Methods { get; } = [];
 
-    public Task<JsonNode?> CallAsync(string method, JsonNode? parameters, CancellationToken cancellationToken)
+    /// <summary>Where the call in progress sends the Bridge's progress reports; null outside a call or when none listens.</summary>
+    public IProgress<ProgressNotification>? Progress { get; private set; }
+
+    public Task<JsonNode?> CallAsync(string method, JsonNode? parameters, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         Methods.Add(method);
+        Progress = progress;
         if (method == BridgeProtocol.HandshakeMethod)
         {
             return Handshake?.Invoke(method, parameters, cancellationToken) ?? Task.FromResult(CompatibleHandshake(endpoint.ProcessId));
@@ -56,6 +60,32 @@ internal sealed class FakeChannel(BridgeEndpoint endpoint, Func<string, JsonNode
 
     public static BridgeRpcException BusinessError(string reason, string message = "m", bool retryable = false) =>
         new(BridgeProtocol.BusinessErrorCode, message, JsonSerializer.SerializeToNode(new BridgeError { Reason = reason, Message = message, Retryable = retryable }, HostJson.Options));
+}
+
+/// <summary>Keeps every report as it is made, on the reporting thread (unlike <see cref="Progress{T}"/>).</summary>
+internal sealed class RecordedReports<T> : IProgress<T>
+{
+    private readonly Lock _lock = new();
+    private readonly List<T> _values = [];
+
+    public List<T> Values
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return [.. _values];
+            }
+        }
+    }
+
+    public void Report(T value)
+    {
+        lock (_lock)
+        {
+            _values.Add(value);
+        }
+    }
 }
 
 internal sealed class FakeConnector(Func<BridgeEndpoint, FakeChannel> create) : IBridgeConnector

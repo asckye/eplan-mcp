@@ -13,7 +13,8 @@ namespace EplanMcp.Host.Bridge;
 /// <para>
 /// Ownership: <see cref="_queue"/> guards <see cref="_channel"/> and <see cref="_handshake"/>; every call holds it
 /// for its whole duration, which also makes the queue per EPLAN instance serial (architecture 8.3). A cancelled or
-/// timed-out call drops the channel, because a late response would otherwise be read by the next call.
+/// timed-out call drops the channel, because a late response would otherwise be read by the next call; one the caller
+/// cancelled after sending it is also cancelled in the Bridge, over a new channel (M4 design 4.3).
 /// <see cref="_selectedProcessId"/> is written only while holding <see cref="_queue"/>; it is volatile because the
 /// status also reports it after a failed call.
 /// </para>
@@ -79,9 +80,9 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             cancellationToken);
 
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken) =>
-        InvokeAsync<TArgs, TData>(operation, args, _callTimeout, cancellationToken);
+        InvokeAsync<TArgs, TData>(operation, args, _callTimeout, null, cancellationToken);
 
-    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, CancellationToken cancellationToken)
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         string correlationId = Guid.NewGuid().ToString("N");
         return RunExclusiveAsync(
@@ -93,14 +94,22 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
                     throw new BridgeCallException(BridgeErrors.OperationMissing(operation, handshake.BridgeVersion));
                 }
 
-                var parameters = new JsonObject
-                {
-                    ["operation"] = operation,
-                    ["correlationId"] = correlationId,
-                    ["args"] = JsonSerializer.SerializeToNode(args, HostJson.Options),
-                };
                 LogInvoke(operation, correlationId);
-                JsonNode? result = await CallAsync(BridgeProtocol.InvokeMethod, parameters, token).ConfigureAwait(false);
+                BridgeEndpoint target = _channel!.Endpoint;
+                JsonNode? result;
+                try
+                {
+                    result = await CallAsync(BridgeProtocol.InvokeMethod, Envelope(operation, correlationId, args), ForRequest(correlationId, progress), token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested && Supports(handshake, OperationNames.OperationCancel))
+                {
+                    // The caller gave up, so EPLAN should not stay busy for nobody: the operation stops at its next safe
+                    // point (M4 design 4.3). Its own connection reads nothing until it answers, so the cancel needs another.
+                    await DropAsync().ConfigureAwait(false);
+                    await CancelAsync(target, correlationId).ConfigureAwait(false);
+                    throw;
+                }
+
                 try
                 {
                     return result?["data"] is { } data && data.Deserialize<TData>(HostJson.Options) is { } typed
@@ -211,7 +220,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
                 MinProtocolVersion = BridgeProtocol.MinimumSupportedVersion,
                 HostVersion = HostInfo.Version,
             };
-            JsonNode? result = await pending.CallAsync(BridgeProtocol.HandshakeMethod, JsonSerializer.SerializeToNode(request, HostJson.Options), cancellationToken).ConfigureAwait(false);
+            JsonNode? result = await pending.CallAsync(BridgeProtocol.HandshakeMethod, JsonSerializer.SerializeToNode(request, HostJson.Options), null, cancellationToken).ConfigureAwait(false);
             HandshakeResult handshake = result.Deserialize<HandshakeResult>(HostJson.Options) ?? throw new JsonException("empty handshake result");
             if (handshake.ProtocolVersion is < BridgeProtocol.MinimumSupportedVersion or > BridgeProtocol.CurrentVersion)
             {
@@ -241,11 +250,23 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         }
     }
 
-    private async Task<JsonNode?> CallAsync(string method, JsonNode parameters, CancellationToken cancellationToken)
+    /// <summary>The parameters of an <c>invoke</c>.</summary>
+    private static JsonObject Envelope<TArgs>(string operation, string correlationId, TArgs args) => new()
+    {
+        ["operation"] = operation,
+        ["correlationId"] = correlationId,
+        ["args"] = JsonSerializer.SerializeToNode(args, HostJson.Options),
+    };
+
+    /// <summary>Only the reports about <paramref name="requestId"/> reach <paramref name="progress"/>.</summary>
+    private static RequestProgress? ForRequest(string requestId, IProgress<ProgressNotification>? progress) =>
+        progress is null ? null : new RequestProgress(requestId, progress);
+
+    private async Task<JsonNode?> CallAsync(string method, JsonNode parameters, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         try
         {
-            return await _channel!.CallAsync(method, parameters, cancellationToken).ConfigureAwait(false);
+            return await _channel!.CallAsync(method, parameters, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeRpcException ex)
         {
@@ -302,6 +323,18 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         if (channel is not null)
         {
             await channel.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>A connection carries the progress of its current invoke only; this keeps any other report out.</summary>
+    private sealed class RequestProgress(string requestId, IProgress<ProgressNotification> progress) : IProgress<ProgressNotification>
+    {
+        public void Report(ProgressNotification value)
+        {
+            if (string.Equals(value.RequestId, requestId, StringComparison.Ordinal))
+            {
+                progress.Report(value);
+            }
         }
     }
 

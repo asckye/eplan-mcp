@@ -10,14 +10,26 @@ namespace EplanMcp.Host.Bridge;
 /// Writes (ADR-0010 section 2, M3 design 4.3): the caller's request ID goes with the invoke, which is never sent
 /// twice. When the response does not come (call timeout, lost connection, the caller cancelling), the client asks the
 /// same Bridge, recognised by its pipe name, with outcome.get every <see cref="_pollInterval"/> until the write's
-/// execution limit, and reports what it recorded; when that cannot be learned, OUTCOME_UNKNOWN.
+/// execution limit, and reports what it recorded; when that cannot be learned, OUTCOME_UNKNOWN. When the caller
+/// cancelled, the Bridge is first asked to stop the write at its next safe point (M4 design 4.3); a timeout does not
+/// stop it.
 /// </summary>
 internal sealed partial class BridgeClient
 {
-    public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken)
+    public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         long deadline = Environment.TickCount64 + (long)limit.TotalMilliseconds;
-        if (!await _queue.WaitAsync(_queueTimeout, cancellationToken).ConfigureAwait(false))
+        bool entered;
+        try
+        {
+            entered = await _queue.WaitAsync(_queueTimeout, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw Stamped(BridgeErrors.Cancelled(), ExecutionState.NotStarted); // still in the queue: never sent
+        }
+
+        if (!entered)
         {
             throw Stamped(BridgeErrors.QueueBusy(), ExecutionState.NotStarted);
         }
@@ -25,6 +37,7 @@ internal sealed partial class BridgeClient
         try
         {
             BridgeEndpoint target;
+            bool cancellable;
             try
             {
                 HandshakeResult handshake = await EnsureConnectedAsync(Discover(), null, cancellationToken).ConfigureAwait(false);
@@ -38,25 +51,26 @@ internal sealed partial class BridgeClient
                 {
                     throw new BridgeCallException(BridgeErrors.WritesUnsupported(handshake.BridgeVersion));
                 }
+
+                // An older add-in cannot stop a write: a cancelled one is still waited for.
+                cancellable = Supports(handshake, OperationNames.OperationCancel);
             }
             catch (BridgeCallException ex)
             {
                 throw Stamped(ex.Error, ExecutionState.NotStarted);
             }
-
-            var parameters = new JsonObject
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                ["operation"] = operation,
-                ["correlationId"] = requestId,
-                ["args"] = JsonSerializer.SerializeToNode(args, HostJson.Options),
-            };
+                throw Stamped(BridgeErrors.Cancelled(), ExecutionState.NotStarted);
+            }
+
             LogInvoke(operation, requestId);
             using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             wait.CancelAfter(limit < _callTimeout ? limit : _callTimeout);
             BridgeError interruption;
             try
             {
-                JsonNode? result = await _channel!.CallAsync(BridgeProtocol.InvokeMethod, parameters, wait.Token).ConfigureAwait(false);
+                JsonNode? result = await _channel!.CallAsync(BridgeProtocol.InvokeMethod, Envelope(operation, requestId, args), ForRequest(requestId, progress), wait.Token).ConfigureAwait(false);
                 return new WriteResult<TData>(Committed<TData>(result, requestId), Recovered: false);
             }
             catch (BridgeRpcException ex)
@@ -67,7 +81,7 @@ internal sealed partial class BridgeClient
             }
             catch (OperationCanceledException)
             {
-                interruption = BridgeErrors.Timeout(_callTimeout);
+                interruption = cancellationToken.IsCancellationRequested ? BridgeErrors.Cancelled() : BridgeErrors.Timeout(_callTimeout);
             }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException)
             {
@@ -78,7 +92,7 @@ internal sealed partial class BridgeClient
             // A late response must not reach the next call, and this channel may be broken anyway.
             await DropAsync().ConfigureAwait(false);
             LogWriteInterrupted(operation, requestId, interruption.Reason);
-            return await RecoverAsync<TData>(target, requestId, interruption, deadline).ConfigureAwait(false);
+            return await RecoverAsync<TData>(target, requestId, interruption, deadline, cancellable && cancellationToken.IsCancellationRequested).ConfigureAwait(false);
         }
         finally
         {
@@ -96,7 +110,7 @@ internal sealed partial class BridgeClient
         try
         {
             return Discover().FirstOrDefault(e => e.ProcessId == processId) is { } target
-                ? (await FetchOutcomeAsync(target, requestId).ConfigureAwait(false)).Outcome
+                ? (await FetchOutcomeAsync(target, requestId).ConfigureAwait(false)).Data
                 : null;
         }
         finally
@@ -105,10 +119,19 @@ internal sealed partial class BridgeClient
         }
     }
 
-    private async Task<WriteResult<TData>> RecoverAsync<TData>(BridgeEndpoint target, string requestId, BridgeError interruption, long deadline)
+    /// <summary>Polls outcome.get; with <paramref name="cancel"/>, sends operation.cancel until the Bridge has found the write.</summary>
+    private async Task<WriteResult<TData>> RecoverAsync<TData>(BridgeEndpoint target, string requestId, BridgeError interruption, long deadline, bool cancel)
     {
+        bool stopping = false;
         while (true)
         {
+            if (cancel && !stopping)
+            {
+                // Not found yet may mean not read yet: the next outcome.get then says queued or running, or not_started,
+                // which keeps it from ever running.
+                stopping = await CancelAsync(target, requestId).ConfigureAwait(false);
+            }
+
             (OutcomeGetData? outcome, bool gone) = await FetchOutcomeAsync(target, requestId).ConfigureAwait(false);
             bool timeLeft = Environment.TickCount64 < deadline;
             switch (outcome?.Status)
@@ -118,12 +141,16 @@ internal sealed partial class BridgeClient
                     return new WriteResult<TData>(default, Recovered: true);
                 case OutcomeStatus.RolledBack:
                     LogOutcomeFetched(requestId, OutcomeStatus.RolledBack);
-                    throw Stamped(BridgeErrors.RolledBackAfterInterruption(outcome.Reason), ExecutionState.RolledBack);
+                    throw Stamped(outcome.Reason == ErrorReason.Cancelled ? BridgeErrors.Cancelled() : BridgeErrors.RolledBackAfterInterruption(outcome.Reason), ExecutionState.RolledBack);
                 case OutcomeStatus.NotStarted:
                     LogOutcomeFetched(requestId, OutcomeStatus.NotStarted);
 
                     // No operation recorded: the request never arrived, so the interruption itself is the error.
-                    throw Stamped(outcome.Operation is null ? interruption : BridgeErrors.NotStartedAfterInterruption(outcome.Reason), ExecutionState.NotStarted);
+                    throw Stamped(
+                        outcome.Operation is null ? interruption
+                            : outcome.Reason == ErrorReason.Cancelled ? BridgeErrors.Cancelled()
+                            : BridgeErrors.NotStartedAfterInterruption(outcome.Reason),
+                        ExecutionState.NotStarted);
                 case OutcomeStatus.Queued or OutcomeStatus.Running when timeLeft:
                 case null when !gone && timeLeft:
                     await Task.Delay(_pollInterval).ConfigureAwait(false);
@@ -135,11 +162,27 @@ internal sealed partial class BridgeClient
         }
     }
 
+    private Task<(OutcomeGetData? Data, bool Gone)> FetchOutcomeAsync(BridgeEndpoint target, string requestId) =>
+        AskAsync<OutcomeGetArgs, OutcomeGetData>(target, OperationNames.OutcomeGet, new OutcomeGetArgs { RequestId = requestId });
+
     /// <summary>
-    /// outcome.get on <paramref name="target"/> only. Gone: that Bridge no longer exists (EPLAN exited or restarted
-    /// under another pipe name); null data and not gone: it could not be asked this time.
+    /// operation.cancel for <paramref name="requestId"/> on <paramref name="target"/>; true when the Bridge found the
+    /// invoke queued or running and stops it at its next safe point, false when it had none or could not be asked.
     /// </summary>
-    private async Task<(OutcomeGetData? Outcome, bool Gone)> FetchOutcomeAsync(BridgeEndpoint target, string requestId)
+    private async Task<bool> CancelAsync(BridgeEndpoint target, string requestId)
+    {
+        bool found = (await AskAsync<OperationCancelArgs, OperationCancelData>(target, OperationNames.OperationCancel, new OperationCancelArgs { RequestId = requestId }).ConfigureAwait(false)).Data?.Found == true;
+        LogCancelSent(requestId, found);
+        return found;
+    }
+
+    /// <summary>
+    /// An operation the Bridge answers on its pipe thread while an invoke runs (outcome.get, operation.cancel), on
+    /// <paramref name="target"/> only. Gone: that Bridge no longer exists (EPLAN exited or restarted under another pipe
+    /// name); null data and not gone: it could not be asked this time.
+    /// </summary>
+    private async Task<(TData? Data, bool Gone)> AskAsync<TArgs, TData>(BridgeEndpoint target, string operation, TArgs args)
+        where TData : class
     {
         IReadOnlyList<BridgeEndpoint> instances = Discover();
         if (!instances.Contains(target))
@@ -156,14 +199,8 @@ internal sealed partial class BridgeClient
                 return (null, true);
             }
 
-            var parameters = new JsonObject
-            {
-                ["operation"] = OperationNames.OutcomeGet,
-                ["correlationId"] = Guid.NewGuid().ToString("N"),
-                ["args"] = JsonSerializer.SerializeToNode(new OutcomeGetArgs { RequestId = requestId }, HostJson.Options),
-            };
-            JsonNode? result = await CallAsync(BridgeProtocol.InvokeMethod, parameters, timeout.Token).ConfigureAwait(false);
-            return (result?["data"]?.Deserialize<OutcomeGetData>(HostJson.Options), false);
+            JsonNode? result = await CallAsync(BridgeProtocol.InvokeMethod, Envelope(operation, Guid.NewGuid().ToString("N"), args), null, timeout.Token).ConfigureAwait(false);
+            return (result?["data"]?.Deserialize<TData>(HostJson.Options), false);
         }
         catch (Exception ex) when (ex is BridgeCallException or OperationCanceledException or JsonException)
         {
@@ -203,4 +240,7 @@ internal sealed partial class BridgeClient
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Outcome of write {RequestId} unknown ({Why})")]
     private partial void LogOutcomeUnknown(string requestId, string why);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Asked the Bridge to cancel {RequestId}; found: {Found}")]
+    private partial void LogCancelSent(string requestId, bool found);
 }
