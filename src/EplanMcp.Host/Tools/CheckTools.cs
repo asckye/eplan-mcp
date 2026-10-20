@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The check messages stored in a project (docs/tools/eplan_check_list.md). Only reads them: running a check writes
-/// the project and belongs to eplan_check_run in M3 (M2 design Q2).
+/// the project and belongs to eplan_check_run (<see cref="CheckWriteTools"/>).
 /// </summary>
 [McpServerToolType]
 internal sealed class CheckTools
@@ -95,20 +95,7 @@ internal sealed class CheckTools
         var result = new CheckListResult
         {
             Project = ResultShaper.CleanText(data.Project),
-            Messages =
-            [
-                .. data.Items.Select(m => new CheckListResult.MessageEntry
-                {
-                    Number = m.Number,
-                    Severity = ResultShaper.CleanText(m.Severity),
-                    Region = ResultShaper.CleanText(m.Region),
-                    Text = ResultShaper.CleanText(m.Text),
-                    Done = m.Done,
-                    Object = m.Target is { } target
-                        ? new CheckListResult.ObjectEntry { Kind = ResultShaper.CleanText(target.Kind), Name = ResultShaper.CleanText(target.Name) }
-                        : null,
-                }),
-            ],
+            Messages = [.. data.Items.Select(Entry)],
             Counts = new CheckListResult.CountsEntry { Error = data.Errors, Warning = data.Warnings, Hint = data.Hints },
             Total = data.Total,
             NextCursor = next < data.Total ? PageCursor.Encode(next, fingerprint) : null,
@@ -117,6 +104,19 @@ internal sealed class CheckTools
         ResultShaper.FitPage(result, args.Offset, fingerprint);
         return ToolResults.Success(Summary(result), result);
     }
+
+    /// <summary>One message as the tools list it, its texts cleaned as project data; eplan_check_run lists the same.</summary>
+    internal static CheckListResult.MessageEntry Entry(CheckMessage message) => new()
+    {
+        Number = message.Number,
+        Severity = ResultShaper.CleanText(message.Severity),
+        Region = ResultShaper.CleanText(message.Region),
+        Text = ResultShaper.CleanText(message.Text),
+        Done = message.Done,
+        Object = message.Target is { } target
+            ? new CheckListResult.ObjectEntry { Kind = ResultShaper.CleanText(target.Kind), Name = ResultShaper.CleanText(target.Name) }
+            : null,
+    };
 
     /// <summary>Why nothing was found, when the counts alone do not say it (tool spec 3).</summary>
     private static string? EmptyHint(CheckListData data, bool includeDone)
@@ -128,8 +128,8 @@ internal sealed class CheckTools
 
         return !includeDone && data.Done > 0
             ? $"Every check message of the project is marked as done ({ToolResults.Count(data.Done, "message")}); pass include_done: true to list them."
-            : "The project has no check messages: no check has been run, or the last one found nothing. Ask the engineer to run the " +
-                "project check in EPLAN; this server cannot run it yet.";
+            : "The project has no check messages: no check has been run, or the last one found nothing. Run one with " +
+                "eplan_check_run, then call this tool again.";
     }
 
     /// <summary>Counts only: message texts and names are project data and stay out of the summary line (architecture 8.5).</summary>

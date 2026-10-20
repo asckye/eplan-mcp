@@ -20,7 +20,7 @@ Next page: repeat the same arguments and add the `nextCursor` of the previous re
 
 1. Call it when the engineer asks about the check results ("how many errors did the check find?"). Start without `severity`: `counts` gives the whole picture in one call.
 2. Then list one severity at a time, or group the messages by `region` to explain them.
-3. The messages are the results of the last project check run in EPLAN, stored in the project. This tool never runs a check; if there are none, ask the engineer to run the project check in EPLAN, then call it again.
+3. The messages are the results of the last project check, stored in the project. This tool never runs a check; if there are none, run one with eplan_check_run, then call this tool again.
 4. A message's `object` names the device (full tag) or page it is about; pass it to eplan_device_get or eplan_page_get for details.
 5. For what EPLAN reported while working (failed operations), use eplan_message_list instead.
 

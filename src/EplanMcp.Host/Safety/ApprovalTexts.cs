@@ -31,7 +31,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh))],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details))],
             Note = zh
                 ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {question.Tool}”这一步。"
                 : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {question.Tool}\".",
@@ -70,8 +70,8 @@ internal static class ApprovalTexts
         };
     }
 
-    /// <summary>One change as one line, in the dialog's language.</summary>
-    internal static string Change(PlannedChange change, bool zh)
+    /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
+    internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
         string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
@@ -85,10 +85,22 @@ internal static class ApprovalTexts
             _ when change.Property == "connections" => zh
                 ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
                 : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
+            // The check replaces all the project's check messages; the scope is in the plan's details (check.run.plan).
+            _ when change.Property == "check messages" => CheckRun(change, zh, details),
             _ => zh
                 ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
                 : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
         };
+    }
+
+    private static string CheckRun(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details)
+    {
+        string pages = Value(details?.GetValueOrDefault("pageCount") ?? "?", zh);
+        string existing = Value(change.OldValue ?? "?", zh);
+        string? scheme = details?.GetValueOrDefault("scheme") is { } given ? Value(given, zh) : null;
+        return zh
+            ? $"运行检查：{pages} 页（{(scheme is null ? "EPLAN 当前的方案" : "方案：" + scheme)}），替换现有的 {existing} 条检查消息"
+            : $"Run the check on {pages} pages ({(scheme is null ? "EPLAN's current scheme" : "scheme: " + scheme)}), replacing the {existing} existing check messages";
     }
 
     private static string Quoted(string? value, bool zh) => value is null ? (zh ? "（未设置）" : "(not set)") : "'" + Value(value, zh) + "'";

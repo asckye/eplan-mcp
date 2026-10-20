@@ -163,7 +163,7 @@ public sealed class CheckListToolTests
 
         JsonElement data = Structured(result);
         Assert.Equal(0, data.GetProperty("total").GetInt32());
-        Assert.Contains("run the project check in EPLAN", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Contains("Run one with eplan_check_run", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Equal("No check messages to list; see 'hint'.", Text(result, 0));
     }
 
