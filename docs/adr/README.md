@@ -18,4 +18,4 @@
 | [0009](0009-supported-eplan-versions.md) | 支持 EPLAN 2024–2027，用一份 net481 插件构建；2022、2023 暂不支持 | Accepted | 双向门 |
 | [0010](0010-write-outcomes.md) | 写操作结果使用封闭的执行状态，中断后向 Bridge 查询结果 | Accepted | 单向门（写工具发布后） |
 | [0011](0011-approval-out-of-band.md) | 审批只经工程师独立操作的窗口（EPLAN 对话框、Workbench），不用 MCP elicitation | Accepted | 双向门（1.0 发布前） |
-| [0012](0012-export-tier.md) | 导出工具按 Read 级处理，注解 `readOnlyHint: false`，文件只写进 Host 新建的导出目录 | Proposed | 双向门（1.0 发布前） |
+| [0012](0012-export-tier.md) | 导出工具按 Read 级处理，注解 `readOnlyHint: false`，文件只写进 Host 新建的导出目录 | Accepted | 双向门（1.0 发布前） |
