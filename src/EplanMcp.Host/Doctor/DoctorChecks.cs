@@ -103,13 +103,21 @@ internal static class DoctorChecks
 
         foreach (string exe in executables)
         {
-            string version = FileVersionInfo.GetVersionInfo(exe).FileVersion ?? "?";
-            bool supported = version.StartsWith("2026.", StringComparison.Ordinal);
-            yield return supported
-                ? new(DoctorStatus.Ok, $"EPLAN {version}：{exe}", $"EPLAN {version}: {exe}")
-                : new(DoctorStatus.Warning, $"EPLAN {version}：{exe}（尚未验证支持，目前只支持 2026）", $"EPLAN {version}: {exe} (not verified yet; only 2026 is supported)");
+            yield return Installation(FileVersionInfo.GetVersionInfo(exe).FileVersion ?? "?", exe);
         }
     }
+
+    /// <summary>An installed EPLAN and where its version stands in the support range (ADR-0009).</summary>
+    internal static DoctorCheck Installation(string version, string exe) => EplanVersions.Support(version) switch
+    {
+        EplanSupport.Verified => new(DoctorStatus.Ok, $"EPLAN {version}：{exe}", $"EPLAN {version}: {exe}"),
+        EplanSupport.Expected => new(DoctorStatus.Info,
+            $"EPLAN {version}：{exe}（在支持范围 {EplanVersions.Range} 内，但尚未实测，ADR-0009）",
+            $"EPLAN {version}: {exe} (in the supported range {EplanVersions.Range}, not tested yet; ADR-0009)"),
+        _ => new(DoctorStatus.Warning,
+            $"EPLAN {version}：{exe}（不在支持范围 {EplanVersions.Range} 内，ADR-0009）",
+            $"EPLAN {version}: {exe} (outside the supported range {EplanVersions.Range}; ADR-0009)"),
+    };
 
     public static IEnumerable<DoctorCheck> RunningEplan()
     {
@@ -160,8 +168,8 @@ internal static class DoctorChecks
             string licence = handshake.Eplan.ApiExtensionLicence switch { true => "可用", false => "不可用", null => "未知" };
             string licenceEn = handshake.Eplan.ApiExtensionLicence switch { true => "available", false => "missing", null => "unknown" };
             checks.Add(new(DoctorStatus.Ok,
-                $"握手成功：插件 {handshake.BridgeVersion}，协议 {handshake.ProtocolVersion}，EPLAN {handshake.Eplan.Version}（{handshake.Eplan.Variant ?? "变体未知"}）",
-                $"Handshake OK: add-in {handshake.BridgeVersion}, protocol {handshake.ProtocolVersion}, EPLAN {handshake.Eplan.Version} ({handshake.Eplan.Variant ?? "variant unknown"})"));
+                $"握手成功：插件 {handshake.BridgeVersion}（{handshake.BuildTarget ?? "构建目标未知"}），协议 {handshake.ProtocolVersion}，EPLAN {handshake.Eplan.Version}（{handshake.Eplan.Variant ?? "变体未知"}）",
+                $"Handshake OK: add-in {handshake.BridgeVersion} ({handshake.BuildTarget ?? "build target unknown"}), protocol {handshake.ProtocolVersion}, EPLAN {handshake.Eplan.Version} ({handshake.Eplan.Variant ?? "variant unknown"})"));
             checks.Add(new(handshake.Eplan.ApiExtensionLicence == false ? DoctorStatus.Failure : DoctorStatus.Ok,
                 $"API 扩展授权（APIExtension）：{licence}", $"API extension licence (APIExtension): {licenceEn}"));
         }

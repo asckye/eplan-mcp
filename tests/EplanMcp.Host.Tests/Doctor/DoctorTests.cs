@@ -43,6 +43,18 @@ public sealed class DoctorTests
         Assert.Contains(text, check.English, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("2026.0.3.25421", false, "EPLAN 2026.0.3.25421: E")]
+    [InlineData("2025.0.3.1", true, "in the supported range 2024-2027, not tested yet")]
+    [InlineData("2023.0.3.19351", true, "outside the supported range 2024-2027")]
+    public void Installation_SaysWhereTheVersionStandsInAdr0009(string version, bool flagged, string text)
+    {
+        DoctorCheck check = DoctorChecks.Installation(version, "E");
+
+        Assert.Equal(flagged, check.Status != DoctorStatus.Ok);
+        Assert.Contains(text, check.English, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Bridge_NoInstance_IsAFailureThatPointsAtThePerVariantRegistration()
     {

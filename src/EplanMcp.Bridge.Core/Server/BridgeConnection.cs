@@ -149,6 +149,7 @@ internal sealed class BridgeConnection
             BridgeVersion = _options.BridgeVersion,
             Eplan = _options.Eplan,
             Operations = [.. _router.SupportedOperations],
+            BuildTarget = _options.BuildTarget,
         });
     }
 

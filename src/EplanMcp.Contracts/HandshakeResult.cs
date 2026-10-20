@@ -18,4 +18,10 @@ public sealed class HandshakeResult
     /// <see cref="OperationNames.ProjectList"/> only.
     /// </summary>
     public List<string>? Operations { get; set; }
+
+    /// <summary>
+    /// The framework the add-in was built for, such as <c>.NETFramework,Version=v4.8.1</c>: one build serves EPLAN
+    /// 2024-2027 (ADR-0009). Added without a protocol version change; null from older add-ins.
+    /// </summary>
+    public string? BuildTarget { get; set; }
 }

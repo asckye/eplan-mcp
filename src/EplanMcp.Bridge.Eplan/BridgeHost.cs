@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Server;
@@ -38,7 +39,12 @@ internal static class BridgeHost
         EplanInstanceInfo eplan = EplanEnvironment.Capture(log);
         log.Write(BridgeLogLevel.Information, $"EPLAN {eplan.Version}, variant {eplan.Variant ?? "unknown"}, API extension licence {eplan.ApiExtensionLicence?.ToString() ?? "unknown"}");
 
-        var options = new BridgeServerOptions { BridgeVersion = version, Eplan = eplan };
+        var options = new BridgeServerOptions
+        {
+            BridgeVersion = version,
+            Eplan = eplan,
+            BuildTarget = typeof(BridgeHost).Assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName,
+        };
         var catalog = new EplanProjectCatalog();
         var pages = new EplanPageReader();
         var devices = new EplanDeviceReader();

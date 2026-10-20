@@ -115,6 +115,21 @@ public sealed class SessionToolsTests
         Assert.Equal("1,2", error.GetProperty("metadata").GetProperty("processIds").GetString());
     }
 
+    [Theory]
+    [InlineData("2025.0.3.1", "is in the supported range (2024-2027) but EplanMcp has not been tested with it yet")]
+    [InlineData("2023.0.3.19351", "is outside the versions EplanMcp supports (2024-2027)")]
+    public async Task SessionStatus_AnUntestedEplan_SaysSoInTheHint(string version, string text)
+    {
+        HandshakeResult handshake = Handshake(42, "Electric P8");
+        handshake.Eplan.Version = version;
+        _bridge.Status = new BridgeStatus([new BridgeEndpoint("p", 42)], handshake, null);
+
+        CallToolResult result = await Status();
+
+        Assert.Contains(text, result.StructuredContent!.Value.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Equal($"EPLAN {version} (Electric P8) connected, process 42. See 'hint'.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
     private static HandshakeResult Handshake(int processId, string variant) => new()
     {
         ProtocolVersion = 1,
