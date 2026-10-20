@@ -20,6 +20,9 @@
   - `eplan_check_list`：项目中已有的检查结果（不运行检查）；
   - `eplan_session_select`：同时运行多个 EPLAN 时选择要操作的实例；
   - `eplan_tool_usage`：按需返回每个工具的详细用法。
+- 宏的只读工具（M3b 的准备）：
+  - `eplan_macro_list`：按名称列出 EPLAN 宏目录中的窗口宏（`.ema`），分页；不跟随链接和联接点，扫描最多 2 秒；
+  - `eplan_macro_get`：不插入地读出一个窗口宏的表达类型、变体、尺寸和其中的设备，项目不变。
 - 列表工具统一分页（`nextCursor`），结果超出大小预算时截断并提示；来自项目的文本按不可信数据处理。
 - 支持 `language` 参数读取多语言文本。
 
