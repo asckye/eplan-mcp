@@ -44,9 +44,10 @@
 - 提交后是读回的值；`dry_run` 时是将要得到的值，`visibleTag` 为 `null`。
 - `undo`、`recovered`：同 `eplan_page_create`。
 - 标识按项目数据处理，经过 ResultShaper。
-- 一行摘要：
-  - `Renamed a device and its 2 auxiliary functions in 'Line1'; Ctrl+Z in EPLAN undoes this step.`
-  - `Dry run: would rename a device and its 2 auxiliary functions in 'Line1'. Nothing was changed.`
+- 一行摘要（只有计数，不回显项目名，架构 8.5）：
+  - `Renamed a device and its 2 auxiliary functions; Ctrl+Z in EPLAN undoes this step.`
+  - `Dry run: would rename a device and its 2 auxiliary functions. Nothing was changed.`
+- `dry_run` 和取回结果时的 `functions`、`pages` 来自计划的 `details`（`functions`、`pageCount`、`pages`），审批表单的"共 N 个功能，分布在 M 页"也取自这里。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
