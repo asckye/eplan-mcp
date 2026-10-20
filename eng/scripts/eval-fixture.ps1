@@ -9,8 +9,8 @@
     -Open then starts EPLAN with the copy as the current project; the EplanMcp add-in must be registered for the
     variant (eplan-addin.ps1 -Variant). Close EPLAN before replacing a copy it has open (-Force).
     -WriteCopies also makes the two copies the Large write tests need (tests/EplanMcp.Large.Tests/README.md):
-    LargeWrite in <scratch root>\large\, and LargeOutside in <data root>\not-scratch\large\, outside the scratch root,
-    which the tests only ever see refused. Open both in EPLAN by hand.
+    LargeWrite in <scratch root>\writes\, which they change, and LargeOutside in <data root>\not-scratch\writes\,
+    outside the scratch root, which they only ever see refused. Open both in EPLAN by hand.
 
 .EXAMPLE
     eng\scripts\eval-fixture.ps1 -Open -WriteCopies
@@ -62,8 +62,8 @@ $scratch = Join-Path $dataRoot 'scratch'
 $target = Join-Path (Join-Path $scratch 'fixtures') (Split-Path $sourceBase -Leaf)
 Copy-Project $target
 if ($WriteCopies) {
-    Copy-Project (Join-Path (Join-Path $scratch 'large') 'LargeWrite')
-    Copy-Project (Join-Path (Join-Path (Join-Path $dataRoot 'not-scratch') 'large') 'LargeOutside')
+    Copy-Project (Join-Path (Join-Path $scratch 'writes') 'LargeWrite')
+    Copy-Project (Join-Path (Join-Path (Join-Path $dataRoot 'not-scratch') 'writes') 'LargeOutside')
     Write-Output 'Open LargeWrite and LargeOutside in EPLAN, then select the fixture in the page navigator again so that it is the current project.'
 }
 
