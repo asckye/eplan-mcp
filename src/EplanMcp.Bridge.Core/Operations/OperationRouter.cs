@@ -12,7 +12,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// thread through the dispatcher and converts every outcome into data or a <see cref="BridgeErrorException"/>.
 /// Writes (<see cref="IWriteOperation"/>) also go through <see cref="OutcomeRecords"/>, and <c>outcome.get</c> is
 /// answered on the calling pipe thread from them (ADR-0010). Every invoke runs with an <see cref="OperationContext"/>,
-/// through which the operation reports progress (M4 design 4.3). Thread-safe; one router serves every connection.
+/// which <c>operation.cancel</c> flags from another pipe thread (M4 design 4.3). Thread-safe; one router serves every
+/// connection.
 /// </summary>
 public sealed class OperationRouter
 {
@@ -22,6 +23,7 @@ public sealed class OperationRouter
     private readonly IBridgeLog _log;
     private readonly TimeSpan _startTimeout;
     private readonly OutcomeRecords _outcomes = new();
+    private readonly RunningOperations _running = new();
 
     public OperationRouter(IEnumerable<IOperation> operations, IMainThreadDispatcher dispatcher, IExceptionMapper? exceptionMapper, IBridgeLog log, TimeSpan startTimeout)
     {
@@ -32,19 +34,30 @@ public sealed class OperationRouter
         _startTimeout = startTimeout;
     }
 
-    /// <summary>The names of the registered operations and <c>outcome.get</c>, sorted; announced in the handshake.</summary>
+    /// <summary>
+    /// The names of the registered operations, <c>outcome.get</c> and <c>operation.cancel</c>, sorted; announced in the
+    /// handshake.
+    /// </summary>
     public IReadOnlyList<string> SupportedOperations =>
-        [.. _operations.Keys.Append(OperationNames.OutcomeGet).OrderBy(name => name, StringComparer.Ordinal)];
+        [.. _operations.Keys.Append(OperationNames.OutcomeGet).Append(OperationNames.OperationCancel).OrderBy(name => name, StringComparer.Ordinal)];
 
     public JToken Invoke(string operationName, JToken? args, string correlationId) => Invoke(operationName, args, correlationId, null);
 
     /// <summary>Runs one invoke; the operation's progress goes to <paramref name="progress"/>, or nowhere when it is null.</summary>
     internal JToken Invoke(string operationName, JToken? args, string correlationId, ProgressSlot? progress)
     {
+        // These two on this pipe thread, never the main thread: they must answer while a write is running.
         if (operationName == OperationNames.OutcomeGet)
         {
-            // On this pipe thread, never the main thread: it must answer while a write is running.
-            return BridgeJson.FromObject(_outcomes.Get(RequestIdOf(args)));
+            return BridgeJson.FromObject(_outcomes.Get(RequestIdOf(args, operationName)));
+        }
+
+        if (operationName == OperationNames.OperationCancel)
+        {
+            string requestId = RequestIdOf(args, operationName);
+            bool found = _running.Cancel(requestId);
+            _log.Write(BridgeLogLevel.Information, $"[{requestId}] cancel requested: {(found ? "it stops at its next safe point" : "not queued or running")}");
+            return BridgeJson.FromObject(new OperationCancelData { Found = found });
         }
 
         if (!_operations.TryGetValue(operationName, out IOperation? operation))
@@ -53,15 +66,31 @@ public sealed class OperationRouter
         }
 
         object parsed = operation.ParseArgs(args);
-        var context = new OperationContext(correlationId, progress);
-        return operation is IWriteOperation ? InvokeWrite(operation, parsed, context) : InvokeRead(operation, parsed, context);
+        bool write = operation is IWriteOperation;
+        var context = new OperationContext(correlationId, write, progress);
+        _running.Add(context);
+        try
+        {
+            return write ? InvokeWrite(operation, parsed, context) : InvokeRead(operation, parsed, context);
+        }
+        finally
+        {
+            _running.Remove(context);
+        }
     }
 
     private JToken InvokeRead(IOperation operation, object parsed, OperationContext context)
     {
         string operationName = operation.Name;
         string correlationId = context.RequestId;
-        DispatchResult outcome = _dispatcher.Run(() => context.Run(() => operation.Execute(parsed)), _startTimeout);
+        DispatchResult outcome = _dispatcher.Run(
+            () => context.Run(() =>
+            {
+                // The first safe point: an invoke cancelled while it waited for the main thread does nothing.
+                context.ThrowIfCancellationRequested();
+                return operation.Execute(parsed);
+            }),
+            _startTimeout);
         switch (outcome.Status)
         {
             case DispatchStatus.Completed:
@@ -96,6 +125,7 @@ public sealed class OperationRouter
         DispatchResult outcome = _dispatcher.Run(
             () => context.Run(() =>
             {
+                context.ThrowIfCancellationRequested(); // not_started: the write never began
                 _outcomes.Update(requestId, OutcomeStatus.Running);
                 return operation.Execute(parsed);
             }),
@@ -124,10 +154,10 @@ public sealed class OperationRouter
         return error;
     }
 
-    private static string RequestIdOf(JToken? args) =>
+    private static string RequestIdOf(JToken? args, string operationName) =>
         args is JObject { } parameters && parameters["requestId"] is { Type: JTokenType.String } id && ((string)id!).Length > 0
             ? (string)id!
-            : throw new BridgeErrorException(ErrorReason.InvalidArgument, "outcome.get needs {requestId}: the correlationId of the write's invoke.");
+            : throw new BridgeErrorException(ErrorReason.InvalidArgument, operationName + " needs {requestId}: the correlationId of the invoke it is about.");
 
     private BridgeErrorException Busy(BusyReason reason)
     {
@@ -145,7 +175,11 @@ public sealed class OperationRouter
     {
         if (exception is BridgeErrorException known)
         {
-            if (known.InnerException is not null)
+            if (known.Error.Reason == ErrorReason.Cancelled)
+            {
+                _log.Write(BridgeLogLevel.Information, $"[{correlationId}] {operationName} cancelled ({known.Error.Execution ?? "a read"})");
+            }
+            else if (known.InnerException is not null)
             {
                 _log.Write(BridgeLogLevel.Warning, $"[{correlationId}] {operationName} failed: {known.Error.Reason}", known.InnerException);
             }

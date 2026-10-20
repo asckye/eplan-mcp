@@ -28,12 +28,15 @@ public sealed class BridgeConnectionTests
     }
 
     [Fact]
-    public void Handshake_AnnouncesTheRegisteredOperationsAndOutcomeGetSorted()
+    public void Handshake_AnnouncesTheRegisteredOperationsOutcomeGetAndCancelSorted()
     {
         JObject response = Send(Connection(new DelegateOperation("device.list", () => null), new DelegateOperation("a.first", () => null)), Handshake)!;
 
         // outcome.get comes with every Bridge that records writes; the Host sends writes only to those (ADR-0010).
-        Assert.Equal(["a.first", "device.list", OperationNames.OutcomeGet, OperationNames.ProjectList], response["result"]!["operations"]!.Values<string>());
+        // operation.cancel tells the Host it can stop a running invoke (M4 design 4.3).
+        Assert.Equal(
+            ["a.first", "device.list", OperationNames.OperationCancel, OperationNames.OutcomeGet, OperationNames.ProjectList],
+            response["result"]!["operations"]!.Values<string>());
     }
 
     [Theory]

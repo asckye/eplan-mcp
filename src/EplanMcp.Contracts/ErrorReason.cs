@@ -84,6 +84,12 @@ public static class ErrorReason
     /// <summary>Writes to the project, or to the EPLAN instance, are suspended after an unknown outcome (ADR-0010).</summary>
     public const string WritesSuspended = "WRITES_SUSPENDED";
 
+    /// <summary>
+    /// The client cancelled the call, and the Bridge stopped it at a safe point before it committed anything (M4 design
+    /// 4.3). The model never sees it, because a cancelled request gets no reply; outcome.get and the audit record it.
+    /// </summary>
+    public const string Cancelled = "CANCELLED";
+
     /// <summary>A defect in EplanMcp; the correlation ID identifies the log entries.</summary>
     public const string Internal = "INTERNAL";
 }

@@ -5,10 +5,10 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// Runs a write's change in one transaction and says what became of it (M3 design 4.2, ADR-0010 section 2). The change
 /// does its own read-back check and throws when it fails, so a commit only ever follows a passed check (coding
-/// standards 9.3, rule 9). Any exception from the change rolls everything back and is rethrown as "rolled back"; a
-/// commit or rollback that itself fails makes the outcome unknown (OUTCOME_UNKNOWN), never "rolled back" by guess;
-/// a problem after the commit is a warning on the committed result. The order of the calls follows what spikes S1,
-/// S2 and S10 verified (api-notes A7, A9, A14). Main thread only.
+/// standards 9.3, rule 9). Any exception from the change, or a cancel found before the commit, rolls everything back
+/// and is rethrown as "rolled back"; a commit or rollback that itself fails makes the outcome unknown
+/// (OUTCOME_UNKNOWN), never "rolled back" by guess; a problem after the commit is a warning on the committed result.
+/// The order of the calls follows what spikes S1, S2 and S10 verified (api-notes A7, A9, A14). Main thread only.
 /// </summary>
 public static class TransactionRunner
 {
@@ -22,6 +22,10 @@ public static class TransactionRunner
         try
         {
             result = change();
+
+            // The last safe point (M4 design 4.3): a cancel that came during the change rolls it back instead of
+            // committing it. After the commit a cancel changes nothing.
+            OperationContext.Current.ThrowIfCancellationRequested();
         }
         catch (Exception failure)
         {
