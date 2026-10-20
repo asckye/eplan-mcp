@@ -1,0 +1,24 @@
+id: holdout-page-descriptions
+set: holdout
+fixture: copy
+prompt: 项目 {project} 中，把 =GAA+A1&EFS1/2 和 =EA+A1&EFS1/1 两页的中文页描述分别改为"控制电源"和"主回路"，英文描述不要动。改完告诉我。
+answer:
+  type: object
+  required: [done]
+  properties:
+    done: { type: boolean, description: true when both descriptions read so now }
+oracle:
+  english2: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/2", language: en_US }, pick: $.page.description }
+  english1: { tool: eplan_page_get, args: { page: "=EA+A1&EFS1/1", language: en_US }, pick: $.page.description }
+after:
+  chinese2: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/2", language: zh_CN }, pick: $.page.description }
+  chinese1: { tool: eplan_page_get, args: { page: "=EA+A1&EFS1/1", language: zh_CN }, pick: $.page.description }
+  english2: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/2", language: en_US }, pick: $.page.description }
+  english1: { tool: eplan_page_get, args: { page: "=EA+A1&EFS1/1", language: en_US }, pick: $.page.description }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: chinese2, equals: 控制电源 }
+  - { after: chinese1, equals: 主回路 }
+  - { after: english2, equals: oracle.english2 }
+  - { after: english1, equals: oracle.english1 }
+budget: { max_tool_calls: 8 }

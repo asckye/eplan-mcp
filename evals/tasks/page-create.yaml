@@ -1,0 +1,22 @@
+id: page-create
+set: dev
+fixture: copy
+prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 60、61 页多线原理图，中文页描述分别为"电源"和"控制"。完成后告诉我结果。
+answer:
+  type: object
+  required: [done]
+  properties:
+    done: { type: boolean, description: true when both pages exist now }
+# The tool spec's eval (docs/tools/eplan_page_create.md, section 7); A17 created /60 and /61 on a fresh copy.
+after:
+  description60: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/60", language: zh_CN }, pick: $.page.description }
+  description61: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/61", language: zh_CN }, pick: $.page.description }
+  type60: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/60" }, pick: $.page.type }
+  type61: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/61" }, pick: $.page.type }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: description60, equals: 电源 }
+  - { after: description61, equals: 控制 }
+  - { after: type60, equals: Circuit }
+  - { after: type61, equals: Circuit }
+budget: { max_tool_calls: 10 }
