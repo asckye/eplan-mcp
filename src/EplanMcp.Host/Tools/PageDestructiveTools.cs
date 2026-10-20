@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
@@ -10,16 +11,118 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The Destructive page tools (docs/tools/eplan_page_delete.md). Every call goes through <see cref="WritePipeline"/> at
-/// <see cref="ToolTier.Destructive"/>: the engineer approves each one, in scratch too, and the project is backed up
-/// before anything changes (ADR-0005, ADR-0013). The Bridge resolves the pages; the Host shapes the result.
+/// The Destructive page tools (docs/tools/eplan_page_delete.md, eplan_page_renumber.md). Every call goes through
+/// <see cref="WritePipeline"/> at <see cref="ToolTier.Destructive"/>: the engineer approves each one, in scratch too, and
+/// the project is backed up before anything changes (ADR-0005, ADR-0013). The Bridge resolves the pages; the Host shapes
+/// the result.
 /// </summary>
 [McpServerToolType]
 internal sealed class PageDestructiveTools
 {
     public const string DeleteTool = "eplan_page_delete";
+    public const string RenumberTool = "eplan_page_renumber";
 
     private const string ReportHint = "Reports are not updated when pages are deleted; call eplan_report_update.";
+
+    [McpServerTool(
+        Name = RenumberTool,
+        Title = "Renumber pages in an EPLAN project",
+        ReadOnly = false,
+        Destructive = true,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(PageRenumberResult))]
+    [Description(
+        "Gives pages new page numbers per structure, from start in steps; EPLAN's rules decide the names. Always needs the " +
+        "engineer's approval, in scratch too; the project is backed up first, and one Ctrl+Z in EPLAN undoes it. Example: " +
+        "{\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/90\", \"=GAA+A1&EFS1/91\"], \"start\": 200, \"step\": 10}.")]
+    public static async Task<CallToolResult> PageRenumberAsync(
+        WritePipeline pipeline,
+        IProgress<ProgressNotificationValue> progress,
+        [Description("From eplan_project_list")] string project,
+        [Description("1-50 exact full names")] string[] pages,
+        [Description("First page number")] int start,
+        int step = 1,
+        [Description("Keep letters in numbers")] bool keep_text = false,
+        [AllowedValues("retain", "consecutive", "to_main")] string subpages = "retain",
+        [Description("Only return the plan")] bool dry_run = false,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        if (string.IsNullOrWhiteSpace(project))
+        {
+            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+        }
+
+        if (pages is null or { Length: < 1 or > PageWriteTools.MaxPages })
+        {
+            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names.");
+        }
+
+        if (start < 1 || step < 1)
+        {
+            violations.Add("'start' and 'step' must be at least 1.");
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        var args = new PageRenumberArgs { Project = project, Pages = [.. pages!.Select(p => p ?? string.Empty)], Start = start, Step = step, KeepText = keep_text, Subpages = subpages };
+        var request = new WriteRequest<PageRenumberArgs, PageRenumberArgs>(
+            RenumberTool,
+            ToolTier.Destructive,
+            OperationNames.PageRenumberPlan,
+            OperationNames.PageRenumberExecute,
+            args,
+            (plan, backup) => new PageRenumberArgs { Project = args.Project, Pages = args.Pages, Start = args.Start, Step = args.Step, KeepText = args.KeepText, Subpages = args.Subpages, Fingerprint = plan.Fingerprint, Backup = backup },
+            dry_run,
+            PageWriteTools.Limit(args.Pages.Count));
+        WriteOutcome<PageRenumberData> outcome;
+        try
+        {
+            outcome = await pipeline.RunAsync<PageRenumberArgs, PageRenumberArgs, PageRenumberData>(request, progress, cancellationToken).ConfigureAwait(false);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
+
+        bool committed = outcome.Execution == ExecutionState.Committed;
+        PageRenumberData? data = outcome.Data;
+        var hints = new List<string> { "Reports such as the table of contents may need eplan_report_update." };
+        if (outcome.Recovered)
+        {
+            hints.Add("The response was lost, but EPLAN reported the pages as renumbered; check the names with eplan_page_list.");
+        }
+
+        if (ResultShaper.CleanText(data?.Warning) is { } warning)
+        {
+            hints.Add(warning);
+        }
+
+        var result = new PageRenumberResult
+        {
+            Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
+            Execution = outcome.Execution,
+            DryRun = dry_run,
+            Scope = new PageRenumberResult.ScopeEntry { Start = start, Step = step, KeepText = keep_text, Subpages = subpages },
+            Changed = data is null ? null : [.. data.Changed.Select(c => new PageRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
+            Unchanged = data?.Unchanged,
+            Backup = committed ? outcome.Backup : null,
+            Undo = committed ? "AI: " + RenumberTool : null,
+            Recovered = outcome.Recovered,
+            Hint = string.Join(" ", hints),
+        };
+        string from = $"from {start.ToString(CultureInfo.InvariantCulture)} in steps of {step.ToString(CultureInfo.InvariantCulture)}";
+        return ToolResults.Success(
+            committed
+                ? $"Renumbered {ToolResults.Count(data?.Changed.Count ?? outcome.Plan.Changes.Count, "page")}. A backup was made first (see 'backup'); Ctrl+Z in EPLAN undoes this step."
+                : $"Dry run: would renumber {ToolResults.Count(outcome.Plan.Changes.Count, "page")} {from}; the new names are known only after running. Nothing was changed.",
+            result);
+    }
 
     [McpServerTool(
         Name = DeleteTool,
