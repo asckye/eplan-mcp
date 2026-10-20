@@ -70,6 +70,24 @@ public sealed class RunCommandTests : IDisposable
         Assert.Contains($"\nCould not start eplanmcp at {eplanmcp}: ", output, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task Run_ATaskOnACopyWithoutTheSampleProject_StopsBeforeThePreflight()
+    {
+        File.WriteAllText(Path.Combine(_directory.FullName, "rename.yaml"), """
+            id: rename
+            set: dev
+            fixture: copy
+            prompt: 在项目 {project} 中改名
+            answer: { type: object, properties: { done: { type: boolean } } }
+            checks: [{ answer: $.done, equals: true }]
+            """);
+        string template = Path.Combine(_directory.FullName, "missing.elk");
+
+        (int exit, string output) = await Run(RunOptions.Default with { Tasks = _directory.FullName, Template = template });
+
+        Assert.Equal((1, $"Tasks on a copy copy EPLAN_Sample_Project.elk, which is not under C:\\Users\\Public\\EPLAN\\Data or at {template}; pass --template.\n"), (exit, output));
+    }
+
     private static async Task<(int Exit, string Output)> Run(RunOptions options)
     {
         using var output = new StringWriter { NewLine = "\n" };

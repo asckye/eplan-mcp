@@ -28,10 +28,10 @@ public sealed class RunOptionsTests
     public void Parse_EveryOption_IsRead()
     {
         RunOptions? options = RunOptions.Parse(
-            ["--tasks", "t", "--set", "all", "--task", "page-count", "--repeat", "3", "--model", "claude-opus-5-5", "--claude", "c.exe", "--eplanmcp", "e.exe"],
+            ["--tasks", "t", "--set", "all", "--task", "page-count", "--repeat", "3", "--model", "claude-opus-5-5", "--claude", "c.exe", "--eplanmcp", "e.exe", "--template", "p.elk"],
             out _);
 
-        Assert.Equal(new RunOptions("t", "all", "page-count", 3, "claude-opus-5-5", "c.exe", "e.exe"), options);
+        Assert.Equal(new RunOptions("t", "all", "page-count", 3, "claude-opus-5-5", "c.exe", "e.exe", "p.elk"), options);
     }
 
     [Theory]

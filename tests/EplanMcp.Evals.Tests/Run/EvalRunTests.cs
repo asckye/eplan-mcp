@@ -20,6 +20,24 @@ public sealed class EvalRunTests
         checks: [{ answer: $.pages, equals: oracle.pages }]
         """).Task!;
 
+    private static readonly EvalTask _rename = TaskLoader.Load("rename", """
+        id: rename
+        set: dev
+        fixture: copy
+        prompt: 在项目 {project} 中把 =F+A2-KF1 改名为 =F+A2-KF19。
+        answer: { type: object, properties: { done: { type: boolean } } }
+        oracle: { parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF1" }, pick: "$.parts[*].partNumber" } }
+        after:
+          tags: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.functions[*].tag" }
+          parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.parts[*].partNumber" }
+        checks:
+          - { answer: $.done, equals: true }
+          - { after: tags, set_equals: ["=F+A2-KF19"] }
+          - { after: parts, set_equals: oracle.parts }
+        """).Task!;
+
+    private static readonly Dictionary<(string Task, int Attempt), AttemptCopy> _noCopies = [];
+
     [Fact]
     public async Task Run_GradesEveryAttemptAgainstTheOracle()
     {
@@ -27,7 +45,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         using var progress = new StringWriter { NewLine = "\n" };
 
-        await EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, progress, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, progress, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
 
         TaskRecord task = Assert.Single(records);
         Assert.Equal(("page-count", "dev", null), (task.Id, task.Set, task.Invalid));
@@ -45,7 +63,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         var client = new FakeToolClient().Fail("eplan_project_get", "EPLAN_BUSY: a dialog is open");
 
-        await EvalRun.RunAsync([_pageCount], 2, client, _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 2, client, _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
 
         TaskRecord task = Assert.Single(records);
         Assert.Equal("oracle 'pages': eplan_project_get failed: EPLAN_BUSY: a dialog is open", task.Invalid);
@@ -60,7 +78,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(Answer("""{"pages":321}""")) { OnSecond = cancel.Cancel };
         var records = new List<TaskRecord>();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, cancel.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, cancel.Token));
 
         Assert.Equal([Outcome.Solved], Assert.Single(records).Attempts.Select(a => a.Outcome));
     }
@@ -72,7 +90,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         using var progress = new StringWriter { NewLine = "\n" };
 
-        await EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, progress, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, progress, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
 
         // The retry of attempt 1 fails the same way and is not retried again; attempt 2 goes on as usual.
         Assert.Equal([(1, false), (1, true), (2, false)], runner.Runs);
@@ -88,7 +106,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(ApiError("authentication_failed"));
         var records = new List<TaskRecord>();
 
-        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
 
         Assert.Equal([(1, false)], runner.Runs);
     }
@@ -112,7 +130,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(Answer("""{"done":false}"""), Failed("more than 20 tool calls"), Answer("""{"done":false}"""));
         var records = new List<TaskRecord>();
 
-        await EvalRun.RunAsync([task], 3, client, new HashSet<string> { "eplan_device_get" }, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([task], 3, client, new HashSet<string> { "eplan_device_get" }, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
 
         // The failed attempt has no answer to grade, so no after call is made for it.
         IReadOnlyList<AttemptRecord> attempts = Assert.Single(records).Attempts;
@@ -136,10 +154,60 @@ public sealed class EvalRunTests
 
         // No answer is scripted: the fake throws as a client whose eplanmcp has gone would.
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            EvalRun.RunAsync([task], 2, new FakeToolClient(), new HashSet<string> { "eplan_device_get" }, new FakeRunner(Answer("""{"done":false}""")), TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken));
+            EvalRun.RunAsync([task], 2, new FakeToolClient(), new HashSet<string> { "eplan_device_get" }, new FakeRunner(Answer("""{"done":false}""")), TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken));
 
         AttemptRecord attempt = Assert.Single(Assert.Single(records).Attempts);
         Assert.Equal((Outcome.Invalid, "its after calls failed: No answer scripted for eplan_device_get."), (attempt.Outcome, attempt.Reason));
+    }
+
+    [Fact]
+    public async Task Run_ATaskOnACopy_AsksAndChecksEachAttemptOnItsOwnCopy()
+    {
+        var copies = new Dictionary<(string Task, int Attempt), AttemptCopy>
+        {
+            [("rename", 1)] = new("Eval_r1_01", @"C:\s\copies\01\Eval_r1_01"),
+            [("rename", 2)] = new("Eval_r1_02", @"C:\s\copies\02\Eval_r1_02", "it was not opened in EPLAN within 20 minutes"),
+        };
+        FakeToolClient client = new FakeToolClient()
+            .Answer("eplan_device_get", """{"parts":[{"partNumber":"SIE.3RH2122-1HB40"}]}""")
+            .Answer("eplan_device_get", """{"functions":[{"tag":"=F+A2-KF19"},{"tag":"=F+A2-KF19"}]}""")
+            .Answer("eplan_device_get", """{"parts":[{"partNumber":"SIE.3RH2122-1HB40"}]}""");
+        var runner = new FakeRunner(Answer("""{"done":true}"""));
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([_rename], 2, client, new HashSet<string> { "eplan_device_get" }, runner, TextWriter.Null, records, TimeSpan.Zero, copies, () => 0, TestContext.Current.CancellationToken);
+
+        Assert.Equal(["在项目 Eval_r1_01 中把 =F+A2-KF1 改名为 =F+A2-KF19。"], runner.Prompts);
+        Assert.Equal(3, client.Calls.Count);
+        Assert.All(client.Calls, c => Assert.Contains("\"project\":\"C:\\\\s\\\\copies\\\\01\\\\Eval_r1_01\"", c, StringComparison.Ordinal));
+        Assert.Equal(
+            [(Outcome.Solved, null), (Outcome.Invalid, "the copy: it was not opened in EPLAN within 20 minutes")],
+            Assert.Single(records).Attempts.Select(a => (a.Outcome, a.Reason)));
+    }
+
+    [Fact]
+    public async Task Run_AnAttemptOnACopyWhoseOracleFails_IsInvalidAndTheNextOneStillRuns()
+    {
+        var copies = new Dictionary<(string Task, int Attempt), AttemptCopy>
+        {
+            [("rename", 1)] = new("Eval_r1_01", @"C:\s\Eval_r1_01"),
+            [("rename", 2)] = new("Eval_r1_02", @"C:\s\Eval_r1_02"),
+        };
+        FakeToolClient client = new FakeToolClient()
+            .Fail("eplan_device_get", "PROJECT_NOT_OPEN")
+            .Answer("eplan_device_get", """{"parts":[]}""")
+            .Fail("eplan_device_get", """{"error":{"reason":"DEVICE_NOT_FOUND"}}""")
+            .Fail("eplan_device_get", """{"error":{"reason":"DEVICE_NOT_FOUND"}}""");
+        var runner = new FakeRunner(Answer("""{"done":true}"""));
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([_rename], 2, client, new HashSet<string> { "eplan_device_get" }, runner, TextWriter.Null, records, TimeSpan.Zero, copies, () => 0, TestContext.Current.CancellationToken);
+
+        IReadOnlyList<AttemptRecord> attempts = Assert.Single(records).Attempts;
+        Assert.Equal((Outcome.Invalid, "oracle 'parts': eplan_device_get failed: PROJECT_NOT_OPEN"), (attempts[0].Outcome, attempts[0].Reason));
+        Assert.Equal(Outcome.Failed, attempts[1].Outcome);
+        Assert.Equal(["after.tags set_equals: missing \"=F+A2-KF19\""], attempts[1].Failures);
+        Assert.Equal([2], runner.Attempts);
     }
 
     [Fact]
@@ -149,7 +217,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true)) { OnRun = () => audited++ };
         var records = new List<TaskRecord>();
 
-        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => audited, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => audited, TestContext.Current.CancellationToken);
 
         Assert.Equal(Outcome.Solved, Assert.Single(Assert.Single(records).Attempts).Outcome);
     }
@@ -161,7 +229,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
 
         InvalidOperationException stop = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 3, TestContext.Current.CancellationToken));
+            EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 3, TestContext.Current.CancellationToken));
 
         AttemptRecord attempt = Assert.Single(Assert.Single(records).Attempts);
         Assert.Equal((Outcome.Invalid, stop.Message), (attempt.Outcome, attempt.Reason));
@@ -175,7 +243,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true));
         var records = new List<TaskRecord>();
 
-        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => -1, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => -1, TestContext.Current.CancellationToken);
 
         Assert.Equal(Outcome.Solved, Assert.Single(Assert.Single(records).Attempts).Outcome);
     }
@@ -222,9 +290,12 @@ public sealed class EvalRunTests
         /// <summary>Runs during each attempt, as the model's writes would.</summary>
         public Action? OnRun { get; init; }
 
+        public List<string> Prompts { get; } = [];
+
         public Task<AgentAttempt> RunAsync(EvalTask task, int attempt, bool retry, CancellationToken cancellationToken)
         {
             Runs.Add((attempt, retry));
+            Prompts.Add(task.Prompt);
             OnRun?.Invoke();
             if (attempt == 2 && OnSecond is not null)
             {

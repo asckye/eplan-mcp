@@ -5,13 +5,14 @@ namespace EplanMcp.Evals.Run;
 
 /// <summary>
 /// The options of <c>run</c> (agent evals design 4.4). <see cref="Set"/> is <c>dev</c>, <c>holdout</c>, <c>all</c> or
-/// null when not given; the holdout set is meant for acceptance runs only (testing.md 5).
+/// null when not given; the holdout set is meant for acceptance runs only (testing.md 5). <see cref="Template"/> is the
+/// .elk file tasks on a copy copy, by default EPLAN's sample project (<see cref="ProjectCopies.FindTemplate"/>).
 /// </summary>
-internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int Repeat, string Model, string? Claude, string? Eplanmcp)
+internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int Repeat, string Model, string? Claude, string? Eplanmcp, string? Template = null)
 {
     public const int MaxRepeat = 10;
 
-    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--eplanmcp <path>]";
+    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--eplanmcp <path>] [--template <.elk>]";
 
     public static RunOptions Default { get; } = new(null, null, null, 1, ClaudeCommand.DefaultModel, null, null);
 
@@ -59,6 +60,9 @@ internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int 
                     break;
                 case "--eplanmcp":
                     options = options with { Eplanmcp = value };
+                    break;
+                case "--template":
+                    options = options with { Template = value };
                     break;
                 default:
                     error = $"unknown option {args[i]}";
