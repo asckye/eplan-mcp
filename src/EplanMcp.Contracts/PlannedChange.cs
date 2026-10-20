@@ -21,6 +21,9 @@ public sealed class PlannedChange
     /// <summary>The value before the change; null for <c>create</c> or when it was not set.</summary>
     public string? OldValue { get; set; }
 
-    /// <summary>The value after the change; null when it is cleared.</summary>
+    /// <summary>
+    /// The value after the change; null when it is cleared, or when only EPLAN can tell it, as for <c>connections</c>
+    /// (the count now in <see cref="OldValue"/>).
+    /// </summary>
     public string? NewValue { get; set; }
 }

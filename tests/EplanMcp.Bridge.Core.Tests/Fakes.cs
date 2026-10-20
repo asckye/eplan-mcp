@@ -387,3 +387,51 @@ internal sealed class FakeTransactions : ITransactionScopeFactory
         public void Dispose() => owner.Step("Dispose", "Dispose");
     }
 }
+
+/// <summary>
+/// Pages' connections and objects, generated the way S9 and S10 found EPLAN generates them (api-notes A13, A14): the
+/// connections <see cref="Drawn"/> on a page become connections once, the <see cref="Stale"/> ones are removed, and a
+/// page whose connections are complete keeps them. <see cref="Failure"/> is thrown by Generate after the change, like
+/// an EPLAN failure midway. Records every generation.
+/// </summary>
+internal sealed class FakeConnectionGenerator : IConnectionGenerator
+{
+    public Dictionary<string, List<ConnectionRecord>> Connections { get; } = new(StringComparer.Ordinal);
+
+    public Dictionary<string, List<string>> Objects { get; } = new(StringComparer.Ordinal);
+
+    public Dictionary<string, List<ConnectionRecord>> Drawn { get; } = new(StringComparer.Ordinal);
+
+    public Dictionary<string, List<ConnectionRecord>> Stale { get; } = new(StringComparer.Ordinal);
+
+    public Exception? Failure { get; set; }
+
+    public List<string[]> Generates { get; } = [];
+
+    public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) =>
+        [.. pages.Select(page => (IReadOnlyList<ConnectionRecord>)[.. Connections.GetValueOrDefault(page) ?? []])];
+
+    public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages) =>
+        [.. pages.Select(page => (IReadOnlyList<string>)[.. Objects.GetValueOrDefault(page) ?? []])];
+
+    public void Generate(string projectPath, IReadOnlyList<string> pages)
+    {
+        Generates.Add([.. pages]);
+        foreach (string page in pages)
+        {
+            if (!Connections.TryGetValue(page, out List<ConnectionRecord>? connections))
+            {
+                connections = Connections[page] = [];
+            }
+
+            connections.RemoveAll(c => Stale.GetValueOrDefault(page)?.Contains(c) == true);
+            connections.AddRange(Drawn.GetValueOrDefault(page) ?? []);
+            Drawn.Remove(page);
+        }
+
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+    }
+}

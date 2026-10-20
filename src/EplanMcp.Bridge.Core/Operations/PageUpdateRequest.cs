@@ -84,7 +84,7 @@ internal sealed class PageUpdateRequest
         Fingerprint.Of(pages.Select(p => p.Page.Name + "\t" + (p.Before.Raw ?? string.Empty)));
 
     /// <summary>The exact name, or the one name equal ignoring case; AMBIGUOUS_NAME when several are.</summary>
-    private static string? Find(IReadOnlyList<string> names, string wanted)
+    internal static string? Find(IReadOnlyList<string> names, string wanted)
     {
         if (names.Contains(wanted, StringComparer.Ordinal))
         {
