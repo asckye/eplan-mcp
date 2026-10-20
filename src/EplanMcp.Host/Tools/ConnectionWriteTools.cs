@@ -98,7 +98,8 @@ internal sealed class ConnectionWriteTools
                     Removed = [.. p.Removed.Select(Connection)],
                 }),
             ],
-            Undo = "AI: " + GenerateTool,
+            // EPLAN keeps no undo step for a generation that added and removed nothing (live check of #136).
+            Undo = added + removed == 0 ? null : "AI: " + GenerateTool,
             Truncated = listed < added + removed,
         };
         string?[] hints =
@@ -111,7 +112,9 @@ internal sealed class ConnectionWriteTools
         ];
         result.Hint = Join(hints);
         return ToolResults.Success(
-            string.Create(CultureInfo.InvariantCulture, $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: {added} added, {removed} removed; Ctrl+Z in EPLAN undoes this step."),
+            added + removed == 0
+                ? $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: nothing added or removed, so there is nothing to undo."
+                : string.Create(CultureInfo.InvariantCulture, $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: {added} added, {removed} removed; Ctrl+Z in EPLAN undoes this step."),
             result);
     }
 
