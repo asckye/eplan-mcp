@@ -79,7 +79,8 @@ internal sealed class PageDestructiveTools
             args,
             (plan, backup) => new PageRenumberArgs { Project = args.Project, Pages = args.Pages, Start = args.Start, Step = args.Step, KeepText = args.KeepText, Subpages = args.Subpages, Fingerprint = plan.Fingerprint, Backup = backup },
             dry_run,
-            PageWriteTools.Limit(args.Pages.Count));
+            PageWriteTools.Limit(args.Pages.Count),
+            "Renumbering pages");
         WriteOutcome<PageRenumberData> outcome;
         try
         {
