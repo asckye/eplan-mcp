@@ -137,6 +137,19 @@ public static class OperationNames
     public const string CheckRunExecute = "check.run.execute";
 
     /// <summary>
+    /// The plan of eplan_report_update: finds the report pages to update, or counts all of them, never updates.
+    /// Arguments: <see cref="ReportUpdateArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string ReportUpdatePlan = "report.update.plan";
+
+    /// <summary>
+    /// Updates all reports of the project, or the planned report pages one by one, in one transaction, and compares the
+    /// report pages before and after. Arguments: <see cref="ReportUpdateArgs"/> with the fingerprint; data:
+    /// <see cref="ReportUpdateData"/>.
+    /// </summary>
+    public const string ReportUpdateExecute = "report.update.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

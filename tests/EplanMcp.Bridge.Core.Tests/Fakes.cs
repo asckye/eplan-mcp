@@ -533,3 +533,52 @@ internal sealed class FakeCheckRunner : ICheckRunner, IProjectMessageReader
 
     public IReadOnlyList<ProjectMessageRecord> ReadMessages(string projectPath) => [.. Messages];
 }
+
+/// <summary>
+/// A project's report pages, updated the way S11 found EPLAN updates them (api-notes A16): updating all reports makes
+/// the report pages <see cref="AllAfter"/> (unchanged when null); updating one page removes the pages
+/// <see cref="Removes"/> names for it. <see cref="OnUpdate"/> runs during each update, standing for whatever happens
+/// meanwhile; <see cref="Failure"/> is thrown after the change, like an EPLAN failure midway. Records every update.
+/// </summary>
+internal sealed class FakeReportUpdater : IReportUpdater
+{
+    public List<ReportPageRecord> Reports { get; set; } = [];
+
+    public List<ReportPageRecord>? AllAfter { get; set; }
+
+    public Dictionary<string, string[]> Removes { get; } = new(StringComparer.Ordinal);
+
+    public Action<string?>? OnUpdate { get; set; }
+
+    public Exception? Failure { get; set; }
+
+    /// <summary>Each update in order: a page name, or null for all reports.</summary>
+    public List<string?> Updates { get; } = [];
+
+    public IReadOnlyList<ReportPageRecord> ReportPages(string projectPath) => [.. Reports];
+
+    public void UpdateAll(string projectPath)
+    {
+        Updates.Add(null);
+        Reports = AllAfter ?? Reports;
+        After(null);
+    }
+
+    public bool Update(string projectPath, string page)
+    {
+        Updates.Add(page);
+        bool found = Reports.Any(r => r.Name == page);
+        Reports = [.. Reports.Where(r => !(Removes.GetValueOrDefault(page) ?? []).Contains(r.Name))];
+        After(page);
+        return found;
+    }
+
+    private void After(string? page)
+    {
+        OnUpdate?.Invoke(page);
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+    }
+}

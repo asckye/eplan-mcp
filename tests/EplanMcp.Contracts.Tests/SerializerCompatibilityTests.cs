@@ -150,6 +150,21 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new CheckRunData(),
+        new ReportUpdateArgs { Project = "Line1", Pages = ["&AAB1/1"], Fingerprint = "f" },
+        new ReportUpdateArgs(),
+        new ReportUpdateData
+        {
+            Project = "Line1",
+            Scope = ReportUpdateData.PagesScope,
+            Before = 204,
+            After = 205,
+            AddedCount = 1,
+            RemovedCount = 1,
+            Added = ["+A2&EPA1/1.2"],
+            Removed = ["&部件/1"],
+            Warning = "w",
+        },
+        new ReportUpdateData(),
         new ProjectListArgs(),
         new ProjectListData
         {
