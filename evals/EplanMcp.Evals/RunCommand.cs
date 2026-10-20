@@ -100,9 +100,26 @@ internal static class RunCommand
             await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);
             var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig), run, workRoot, options.Repeat > 1);
-            Dictionary<(string Task, int Attempt), AttemptCopy> copies = template is null
-                ? []
-                : await OpenCopiesAsync(tasks, options.Repeat, template, copiesRoot, client, output, cancellationToken).ConfigureAwait(false);
+            Dictionary<(string Task, int Attempt), AttemptCopy> copies = [];
+            string copiesLeft = $"The copies stay open in EPLAN: close them there, then delete {copiesRoot}.";
+            if (template is not null)
+            {
+                string? problem;
+                try
+                {
+                    (copies, problem) = await OpenCopiesAsync(tasks, options.Repeat, template, copiesRoot, client, output, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    await output.WriteLineAsync(copiesLeft).ConfigureAwait(false);
+                    throw;
+                }
+
+                if (problem is not null)
+                {
+                    return Stop(output, copies.Count > 0 ? problem + " " + copiesLeft : problem);
+                }
+            }
 
             var records = new List<TaskRecord>();
             int exit = 0;
@@ -140,7 +157,7 @@ internal static class RunCommand
             await output.WriteLineAsync("Report: " + Path.Combine(run, ReportWriter.MarkdownFile)).ConfigureAwait(false);
             if (copies.Count > 0)
             {
-                await output.WriteLineAsync($"The copies stay open in EPLAN: close them there, then delete {copiesRoot}.").ConfigureAwait(false);
+                await output.WriteLineAsync(copiesLeft).ConfigureAwait(false);
             }
 
             return exit;
@@ -149,19 +166,27 @@ internal static class RunCommand
 
     /// <summary>
     /// Makes a fresh copy for every attempt of the tasks on a copy and waits until the engineer has opened them all in
-    /// EPLAN: nothing the evals may use opens a project in EPLAN (evals/README.md).
+    /// EPLAN and made the fixture, the project current at the preflight, current again: nothing the evals may use opens
+    /// a project in EPLAN (evals/README.md). The problem says why the run must not go on.
     /// </summary>
-    private static async Task<Dictionary<(string Task, int Attempt), AttemptCopy>> OpenCopiesAsync(
+    private static async Task<(Dictionary<(string Task, int Attempt), AttemptCopy> Copies, string? Problem)> OpenCopiesAsync(
         IReadOnlyList<EvalTask> tasks, int repeat, string template, string copiesRoot, IToolClient client, TextWriter output, CancellationToken cancellationToken)
     {
+        string? fixture = await ProjectCopies.CurrentProjectAsync(client, cancellationToken).ConfigureAwait(false);
+        if (fixture is null)
+        {
+            return ([], "EPLAN names no current project any more: open the fixture and start the run again.");
+        }
+
         Dictionary<(string Task, int Attempt), AttemptCopy> copies = ProjectCopies.Create(tasks, repeat, template, copiesRoot);
-        await output.WriteLineAsync(string.Create(CultureInfo.InvariantCulture, $"Open these {copies.Count} copies of {Path.GetFileName(template)} in EPLAN (File > Open), then select the fixture in the page navigator again; waiting up to {OpenLimit.TotalMinutes} minutes, Ctrl+C stops:")).ConfigureAwait(false);
+        await output.WriteLineAsync(string.Create(CultureInfo.InvariantCulture, $"Open these {copies.Count} copies of {Path.GetFileName(template)} in EPLAN (File > Open), then select the fixture {Path.GetFileName(fixture)} in the page navigator again; waiting up to {OpenLimit.TotalMinutes} minutes, Ctrl+C stops:")).ConfigureAwait(false);
         foreach (AttemptCopy copy in copies.Values)
         {
             await output.WriteLineAsync($"  {copy.Path}.elk{(copy.Problem is null ? string.Empty : " (" + copy.Problem + ")")}").ConfigureAwait(false);
         }
 
-        return await ProjectCopies.WaitUntilOpenAsync(client, copies, output, OpenLimit, TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+        bool fixtureCurrent = await ProjectCopies.WaitUntilOpenAsync(client, copies, fixture, output, OpenLimit, TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+        return (copies, fixtureCurrent ? null : $"The fixture {fixture} is not EPLAN's current project, so the tasks on it would read another one: select it in the page navigator and start the run again.");
     }
 
     private static async Task<EplanMcpClient?> TryStartAsync(string eplanmcp, TextWriter output, CancellationToken cancellationToken)

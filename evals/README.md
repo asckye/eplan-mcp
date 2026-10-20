@@ -34,7 +34,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 ### 写入题：每次作答一份新副本
 `fixture: copy` 的题目要修改项目（M3 设计第 7 节和 Q4）。运行器为这类题的**每次作答**复制一份 EPLAN 自带的 `EPLAN_Sample_Project`（在 `C:\Users\Public\EPLAN\Data` 下找，或用 `--template <.elk>` 指定），放在 `<scratch 根目录>\evals\<运行>\copies\<nn>\Eval_<运行>_<nn>`，每份的项目名都不同。题目中的 `{project}` 换成这个名字，标准调用和事后检查也都对这份副本进行（传入 `project`）。`fixture: copy_outside_scratch` 的副本放在 `outside\` 下，不在模型的 scratch 根目录中，用来考察写入被策略拒绝后模型怎么回答。
 
-**副本由工程师在 EPLAN 中打开**：运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待（最多 20 分钟，Ctrl+C 停止），每 2 秒用 `eplan_project_list` 查看一次。在 EPLAN 中逐个打开（文件 > 打开），全部打开后在页导航器中点回夹具 `EPLAN_Sample_Project`，让它重新成为当前项目：读取题读的是当前项目，所以副本是当前项目时运行器会继续等待。到时仍未打开的副本，对应的作答记为无效。运行器不自己打开副本：从外部打开项目只有 Remote Client 的 `ProjectOpen`（spike S9–S11 的驱动程序用过），它走未加密的局域网端口，架构上不采用（ADR-0002）；插件中也还没有打开项目的操作。
+**副本由工程师在 EPLAN 中打开**：运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待（最多 20 分钟，Ctrl+C 停止），每 2 秒用 `eplan_project_list` 查看一次。在 EPLAN 中逐个打开（文件 > 打开），全部打开后在页导航器中点回夹具 `EPLAN_Sample_Project`，让它重新成为当前项目：读取题读的是当前项目，所以运行器要等到预检时的当前项目（夹具）重新是当前项目。到时夹具仍不是当前项目，运行停止，不产生费用；到时仍未打开的副本，对应的作答记为无效。运行器不自己打开副本：从外部打开项目只有 Remote Client 的 `ProjectOpen`（spike S9–S11 的驱动程序用过），它走未加密的局域网端口，架构上不采用（ADR-0002）；插件中也还没有打开项目的操作。
 
 运行结束后副本仍开在 EPLAN 中：在 EPLAN 中关闭它们，再删除 `<scratch 根目录>\evals\<运行>\`（每份约 200 MB）。
 

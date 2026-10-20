@@ -63,13 +63,20 @@ internal static class ProjectCopies
         return copies;
     }
 
+    /// <summary>The path of EPLAN's current project as eplan_project_list gives it; null when none is current or EPLAN cannot say.</summary>
+    public static async Task<string?> CurrentProjectAsync(IToolClient client, CancellationToken cancellationToken) =>
+        Comparison.Text(Projects(await ListAsync(client, cancellationToken).ConfigureAwait(false)).FirstOrDefault(IsCurrent)?["path"]);
+
     /// <summary>
-    /// Waits until EPLAN lists every copy among its open projects and none of them is the current one, so the tasks on
-    /// the shared fixture keep reading the fixture. A copy not open within <paramref name="limit"/> gets a problem.
+    /// Waits until EPLAN lists every copy among its open projects and <paramref name="fixture"/> is the current project,
+    /// so the tasks on the shared fixture keep reading it: opening a copy may make the copy current. A copy not open
+    /// within <paramref name="limit"/> gets a problem in <paramref name="copies"/>. False when the fixture is not the
+    /// current project at the end.
     /// </summary>
-    public static async Task<Dictionary<(string Task, int Attempt), AttemptCopy>> WaitUntilOpenAsync(
+    public static async Task<bool> WaitUntilOpenAsync(
         IToolClient client,
         Dictionary<(string Task, int Attempt), AttemptCopy> copies,
+        string fixture,
         TextWriter progress,
         TimeSpan limit,
         TimeSpan poll,
@@ -78,35 +85,40 @@ internal static class ProjectCopies
         var waiting = copies.Where(c => c.Value.Problem is null).ToDictionary(c => c.Key, c => c.Value);
         var clock = Stopwatch.StartNew();
         string? shown = null;
-        while (waiting.Count > 0)
+        while (true)
         {
-            PagedOutcome projects = await ToolPages.AllAsync(client, "eplan_project_list", new JsonObject { ["limit"] = 200 }, cancellationToken).ConfigureAwait(false);
-            JsonObject[] open = [.. projects.Pages.SelectMany(p => p["projects"] as JsonArray ?? []).OfType<JsonObject>()];
+            PagedOutcome projects = await ListAsync(client, cancellationToken).ConfigureAwait(false);
+            JsonObject[] open = Projects(projects);
             int opened = waiting.Values.Count(c => open.Any(p => Same(p["path"], c.Path)));
-            bool copyIsCurrent = waiting.Values.Any(c => open.Any(p => Same(p["path"], c.Path) && p["current"]?.GetValueKind() == JsonValueKind.True));
+            bool fixtureCurrent = open.Any(p => Same(p["path"], fixture) && IsCurrent(p));
             string state = string.Create(CultureInfo.InvariantCulture, $"{opened} of {waiting.Count} copies are open in EPLAN")
-                + (copyIsCurrent ? "; a copy is the current project: select the fixture in the page navigator again" : string.Empty);
+                + (fixtureCurrent ? string.Empty : $"; the fixture is not the current project: select {Path.GetFileName(fixture)} in the page navigator again");
             if (state != shown)
             {
                 await progress.WriteLineAsync(projects.Problem is { } problem ? $"{state} ({problem})" : state).ConfigureAwait(false);
                 shown = state;
             }
 
-            if ((opened == waiting.Count && !copyIsCurrent) || clock.Elapsed >= limit)
+            if ((opened == waiting.Count && fixtureCurrent) || clock.Elapsed >= limit)
             {
                 foreach ((var key, AttemptCopy copy) in waiting.Where(c => !open.Any(p => Same(p["path"], c.Value.Path))))
                 {
                     copies[key] = copy with { Problem = string.Create(CultureInfo.InvariantCulture, $"it was not opened in EPLAN within {limit.TotalMinutes} minutes") };
                 }
 
-                return copies;
+                return fixtureCurrent;
             }
 
             await Task.Delay(poll, cancellationToken).ConfigureAwait(false);
         }
-
-        return copies;
     }
+
+    private static Task<PagedOutcome> ListAsync(IToolClient client, CancellationToken cancellationToken) =>
+        ToolPages.AllAsync(client, "eplan_project_list", new JsonObject { ["limit"] = 200 }, cancellationToken);
+
+    private static JsonObject[] Projects(PagedOutcome list) => [.. list.Pages.SelectMany(p => p["projects"] as JsonArray ?? []).OfType<JsonObject>()];
+
+    private static bool IsCurrent(JsonObject project) => project["current"]?.GetValueKind() == JsonValueKind.True;
 
     private static void CopyProject(string source, string target)
     {
