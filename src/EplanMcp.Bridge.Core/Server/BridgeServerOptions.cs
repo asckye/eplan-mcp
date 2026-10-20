@@ -14,4 +14,7 @@ public sealed class BridgeServerOptions
 
     /// <summary>How many Hosts may be connected at the same time (design 4.2).</summary>
     public int MaxConnections { get; set; } = 4;
+
+    /// <summary>The shortest gap between two progress notifications of one invoke; MCP asks senders to limit the rate.</summary>
+    public TimeSpan ProgressInterval { get; set; } = TimeSpan.FromSeconds(1);
 }
