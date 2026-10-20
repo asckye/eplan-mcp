@@ -32,8 +32,8 @@ internal static class BridgeHost
         string version = typeof(BridgeHost).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
         log.Write(BridgeLogLevel.Information, $"EplanMcp add-in {version} starting");
 
-        EplanDispatcher dispatcher = EplanDispatcher.CaptureOnMainThread(out string dispatcherSource);
-        log.Write(BridgeLogLevel.Information, "Main-thread dispatcher: " + dispatcherSource);
+        EplanDispatcher dispatcher = EplanDispatcher.CaptureOnMainThread();
+        log.Write(BridgeLogLevel.Information, $"Main-thread dispatcher: the WPF dispatcher of thread {Environment.CurrentManagedThreadId}");
 
         EplanInstanceInfo eplan = EplanEnvironment.Capture(log);
         log.Write(BridgeLogLevel.Information, $"EPLAN {eplan.Version}, variant {eplan.Variant ?? "unknown"}, API extension licence {eplan.ApiExtensionLicence?.ToString() ?? "unknown"}");
