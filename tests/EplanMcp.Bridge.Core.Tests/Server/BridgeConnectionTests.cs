@@ -28,11 +28,12 @@ public sealed class BridgeConnectionTests
     }
 
     [Fact]
-    public void Handshake_AnnouncesTheRegisteredOperationsSorted()
+    public void Handshake_AnnouncesTheRegisteredOperationsAndOutcomeGetSorted()
     {
         JObject response = Send(Connection(new DelegateOperation("device.list", () => null), new DelegateOperation("a.first", () => null)), Handshake)!;
 
-        Assert.Equal(["a.first", "device.list", OperationNames.ProjectList], response["result"]!["operations"]!.Values<string>());
+        // outcome.get comes with every Bridge that records writes; the Host sends writes only to those (ADR-0010).
+        Assert.Equal(["a.first", "device.list", OperationNames.OutcomeGet, OperationNames.ProjectList], response["result"]!["operations"]!.Values<string>());
     }
 
     [Theory]
