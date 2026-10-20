@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `device` / `core` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 12 步；依赖第 10 步的 Destructive 流水线，见 `eplan_page_delete` 第 6 节） |
+| 状态 | Proposed（M4 第 12 步；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把这一页上带 ? 的设备标识编号"。设备标识中的 `?` 表示还没有编号，例如插入宏后没有线圈的触点 `-?QA1`（A14）、`+A1-?XG1`（S12）。代理用它让 EPLAN 按编号方案给指定页或整个项目的设备编号：默认只给带 `?` 的标识编号（`PostNumerate`），也可以给范围内的全部设备重新编号。结果由 EPLAN 的规则决定，事先算不出（M4 设计 Q7），所以变更清单只列范围，执行后列出每个改变的标识。大范围改名难以逐项撤销，按 Destructive 处理：每次审批，执行前备份，按一次 Ctrl+Z 撤销。
@@ -68,7 +68,7 @@
 - **规划**（只读）：
   - 精确解析各页，读出范围内的功能和其中的设备；
   - 一条 `update` 变更：`Kind = "devices"`，`Property = "device tags"`，`NewValue` 为 `null`。表单显示为 `renumber device tags containing '?' on 1 page (5 devices), scheme: EPLAN default, start 1, step 1`（`only_unnumbered` 为 false 时为 `renumber all device tags on …`）；
-  - 要编号的设备标识放在 `details["devices"]` 中，每行一个，最多 50 行，另加总数，审批对话框在变更清单之后列出；
+  - 要编号的设备标识放在 `details["devices"]` 中，每行一个，最多 50 行，总数在 `details["deviceCount"]`，范围和参数在 `pageCount`、`onlyUnnumbered`、`scheme`、`start`、`step` 中；审批对话框在变更清单之后列出这些设备；
   - 指纹：范围内每个功能的 `Name` 和会话内标识，排序后取 SHA-256。
 - **执行**：Destructive 流水线先重算指纹、做好备份，然后在 `TransactionScope` 中：
   1. 记下范围内每个功能的会话内标识和 `Name`；

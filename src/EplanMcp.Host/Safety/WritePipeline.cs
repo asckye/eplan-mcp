@@ -252,6 +252,7 @@ internal sealed partial class WritePipeline(
         _ when c.Property == "check messages" => CheckRunLine(plan, c),
         _ when c.Property == "reports" => $"update all reports ({c.OldValue} report pages now); may create, replace or delete report pages",
         _ when c.Property == "report" => $"update report page {c.Name}",
+        _ when c.Property == "device tags" => $"renumber {c.OldValue}",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
 
