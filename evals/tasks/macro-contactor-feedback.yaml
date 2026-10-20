@@ -1,0 +1,11 @@
+id: macro-contactor-feedback
+set: dev
+prompt: EPLAN 的宏目录里，文件名中带 Contactor_Feedback 的窗口宏有哪些？列出它们在宏目录中的路径。
+answer:
+  type: object
+  required: [paths]
+  properties:
+    paths: { type: array, items: { type: string } }
+oracle: { paths: { tool: eplan_macro_list, args: { name_contains: Contactor_Feedback }, pick: "$.macros[*].path" } }
+checks: [{ answer: $.paths, set_equals: oracle.paths }]
+budget: { max_tool_calls: 4 }
