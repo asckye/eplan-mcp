@@ -25,4 +25,10 @@ internal interface IBridgeClient
     /// OUTCOME_UNKNOWN when the outcome cannot be learned.
     /// </summary>
     public Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// What the Bridge in EPLAN process <paramref name="processId"/> recorded for <paramref name="requestId"/>, for a
+    /// write another Host process started (ADR-0010 section 2); null when that Bridge cannot be asked.
+    /// </summary>
+    public Task<OutcomeGetData?> FetchOutcomeAsync(int processId, string requestId, CancellationToken cancellationToken);
 }

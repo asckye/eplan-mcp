@@ -34,6 +34,7 @@ internal sealed partial class WritePipeline(
     HostConfig config,
     SuspensionStore suspensions,
     AuditLog audit,
+    DanglingWrites dangling,
     TimeProvider clock,
     ILogger<WritePipeline> logger)
 {
@@ -57,6 +58,17 @@ internal sealed partial class WritePipeline(
         HandshakeResult eplan = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake
             ?? throw NotStarted(BridgeErrors.NotConnected());
         DateTimeOffset started = SuspensionStore.StartOf(eplan.Eplan.ProcessId) ?? throw NotStarted(BridgeErrors.ConnectionLost());
+        try
+        {
+            // A write a crashed Host left without an outcome may suspend this project first (ADR-0010 section 2).
+            await dangling.SettleOnceAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (AuditUnavailableException ex)
+        {
+            LogAuditUnavailable(ex);
+            throw NotStarted(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = AuditUnavailableMessage });
+        }
+
         if (suspensions.Blocking(plan.ProjectPath, eplan.Eplan.ProcessId, started).Count > 0)
         {
             // Releasing needs the engineer's confirmation through an approval channel (ADR-0010 section 3), M3 step 8.
@@ -77,6 +89,8 @@ internal sealed partial class WritePipeline(
 
         string requestId = Guid.NewGuid().ToString("N");
         JsonObject record = Record("execution_started", request.Tool, requestId, plan, eplan);
+        record["eplan"]!["start"] = started.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+        record["host"] = DanglingWrites.ThisHost();
         record["tier"] = request.Tier.ToString();
         record["policy"] = decision.Verdict.ToString();
         record["arguments"] = JsonSerializer.SerializeToNode(request.Args, HostJson.Options);

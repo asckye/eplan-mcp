@@ -28,6 +28,7 @@ internal static class McpServerSetup
         // serve registers the configuration it loaded; tests get the defaults, never a developer's own file.
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>()));
+        services.TryAddSingleton<DanglingWrites>();
         services.TryAddSingleton<WritePipeline>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
 

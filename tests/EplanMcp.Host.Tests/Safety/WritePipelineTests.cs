@@ -52,6 +52,39 @@ public sealed class WritePipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task AWriteACrashedHostLeftUnknown_SuspendsTheProjectBeforeThisOne()
+    {
+        string eplanStart = SuspensionStore.StartOf(Environment.ProcessId)!.Value.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+        await new AuditLog(_locations.Audit, TimeProvider.System).AppendAsync(
+            new JsonObject
+            {
+                ["kind"] = "execution_started",
+                ["requestId"] = "old",
+                ["tool"] = Tool,
+                ["project"] = _scratchProject,
+                ["eplan"] = new JsonObject { ["processId"] = Environment.ProcessId, ["start"] = eplanStart },
+                ["host"] = new JsonObject { ["processId"] = Environment.ProcessId, ["start"] = "2000-01-01T00:00:00.0000000+00:00" },
+            },
+            TestContext.Current.CancellationToken);
+
+        BridgeError error = await Fails();
+
+        Assert.Equal(ErrorReason.WritesSuspended, error.Reason);
+        Assert.Empty(_bridge.Writes);
+    }
+
+    [Fact]
+    public async Task TheStartedRecord_NamesTheHostAndTheEplanInstance()
+    {
+        await Run();
+
+        JsonObject started = AuditRecords()[0];
+        Assert.Equal(Environment.ProcessId, started["host"]!["processId"]!.GetValue<int>());
+        Assert.NotNull(started["eplan"]!["start"]);
+        Assert.Empty(new AuditLog(_locations.Audit, TimeProvider.System).Dangling());
+    }
+
+    [Fact]
     public async Task ADryRunOrAnEmptyPlan_ReturnsThePlanAndChangesNothing()
     {
         WriteOutcome<JsonObject> dry = await Run(dryRun: true);
@@ -157,11 +190,13 @@ public sealed class WritePipelineTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(bool dryRun = false, HostConfig? config = null)
     {
+        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
         var pipeline = new WritePipeline(
             _bridge,
             config ?? HostConfig.Defaults(_locations),
             SuspensionStore.For(_locations),
-            new AuditLog(_locations.Audit, TimeProvider.System),
+            audit,
+            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
