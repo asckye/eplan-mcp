@@ -75,7 +75,7 @@
   - 指纹包括三部分，排序后取 SHA-256：页上全部对象的会话内标识；`keep` 时，宏中各标识在项目中的功能；宏文件的大小和修改时间。
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中执行：
   1. 先记下项目中主功能的标识集合，然后调用 `Insert.WindowMacro(macro, MultiLine, variant, page, new PointD(x, y), MoveKind.Absolute, numbering == number ? NumerationMode.Number : NumerationMode.None)`；
-  2. 读回页上新增的功能。若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。`keep` 时这就是合并；`number` 时不应发生，同样检查；
+  2. 读回页上新增的功能。`keep` 时，若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。按"变多"而不是"两个以上"判断，是因为一个设备本来就可能有两个同名主功能（A12：黑盒、第二种表达）。`number` 时不检查：PLC 端子在各种编号方式下都保留宏自带的结构（`=K1+A1:1.4`，A14），再次插入同一个宏时名称会重复；
   3. 通过后 `Commit()`，再 `CloseUndo()`。
 - **已验证**（S9、S10，api-notes A13、A14）：
   - 插入宏能被 `SafetyPoint` 回滚，`Transaction` 不行，所以只用 `SafetyPoint`；
