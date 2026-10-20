@@ -132,33 +132,45 @@ eplan_device_place
 - `message` 必须告诉模型**下一步怎么做**；不能包含堆栈、本机路径或内部类型名。和其他面向模型的文字一样用英文（[架构 8.11](../architecture/architecture.md#811-界面语言)），引用的项目数据保持原文。
 - 参数校验错误一次列出**所有**问题，不要每次只报一个，让模型反复试错。
 - 先检查权限，再检查对象是否存在（AIP-193），避免通过错误信息泄露不该看到的对象。
+- Write、Destructive（以及启用后的 Code）级工具的结果和错误都带 `execution`，说明项目有没有被修改（[ADR-0010](../adr/0010-write-outcomes.md)）。Read 级工具不带。
+
+  | 值 | 含义 |
+  |---|---|
+  | `not_started` | 没有开始修改：执行前被拒绝，或者是 `dry_run`、变更清单为空 |
+  | `rolled_back` | 开始修改，失败后已回滚，项目与调用前相同 |
+  | `committed` | 修改已提交 |
+  | `unknown` | 无法确定项目是否被修改 |
+
+  两条不变式由 Small 测试保证：`retryable: true` 时只能是 `not_started` 或 `rolled_back`；`execution` 为 `unknown` 当且仅当 `reason` 为 `OUTCOME_UNKNOWN`。
 
 ### 6.3 错误码表
-新增错误码要更新本表，并在 Contracts 中定义。
+新增错误码要更新本表，并在 Contracts 中定义。`execution` 一列是写工具返回该错误时的执行状态（6.2）。
 
-| reason | retryable | 含义与给模型的提示 |
-|---|---|---|
-| `INVALID_ARGUMENT` | 否 | 参数不合法；`metadata.violations` 列出每个字段的问题 |
-| `PROJECT_NOT_OPEN` | 否 | 指定的项目没有在 EPLAN 中打开；提示用 `eplan_project_list` 查看已打开的项目 |
-| `AMBIGUOUS_NAME` | 否 | 名称对应多个对象：同一个短标识（如 `-K1`）出现在不同结构下、两个打开的项目同名，或者没有选中项目而打开了好几个；`metadata.candidates` 列出完整名称（每行一个，最多 20 个），提示选一个再调用 |
-| `PAGE_NOT_FOUND` / `DEVICE_NOT_FOUND` / `SYMBOL_NOT_FOUND` / `PART_NOT_FOUND` / `MACRO_NOT_FOUND` | 否 | 对象不存在；提示对应的查询工具 |
-| `ALREADY_EXISTS` | 否 | 例如设备标识已存在；说明合并的后果，以及如何显式允许合并 |
-| `HANDLE_EXPIRED` | 否 | 句柄过期，或者所属的 EPLAN 会话已经结束；提示按名称重新查询 |
-| `SESSION_NOT_SELECTED` | 否 | 有多个 EPLAN 实例；提示调用 `eplan_session_select` |
-| `EPLAN_NOT_CONNECTED` | 是 | 找不到运行中的 EPLAN，或插件没有加载；提示启动 EPLAN，或运行 `eplanmcp doctor` |
-| `EPLAN_BUSY` | 是 | 主线程在超时时间内不可用（有模态对话框或正在运行的操作）；提示请工程师关闭对话框 |
-| `BRIDGE_INCOMPATIBLE` | 否 | 插件和 Host 的协议版本不兼容；提示运行 `eplanmcp install-addin` |
-| `LICENCE_MISSING` | 否 | 缺少 API 授权，或授权已到期 |
-| `LICENCE_RESTRICTED` | 否 | 授权存在但受限，例如开发者授权的页数限制，或只允许加载已签名的插件；提示运行 `eplanmcp doctor` 进行授权自检（ADR-0007） |
-| `LOCK_FAILED` | 是 | 对象被其他用户锁定（多用户模式）；`metadata` 列出被锁定的对象 |
-| `POLICY_DENIED` | 否 | 策略禁止，例如 Code 级工具未启用；说明是哪条策略，**不提示如何绕过** |
-| `APPROVAL_DENIED` | 否 | 工程师拒绝或取消了审批；项目未改变 |
-| `APPROVAL_EXPIRED` | 否 | 审批请求过期；需要重新发起调用 |
-| `PLAN_STALE` | 否 | 审批之后项目已经改变；需要重新发起调用以生成新的计划 |
-| `EPLAN_OPERATION_FAILED` | 视情况 | EPLAN 报告失败；`eplanMessages` 中附带 EPLAN 的系统消息；已回滚 |
-| `TIMEOUT` | 是 | 执行超过时限；说明修改是否已经提交 |
-| `AUDIT_UNAVAILABLE` | 否 | 审计无法写入，所以写操作被拒绝 |
-| `INTERNAL` | 否 | 本项目的缺陷；附上关联 ID，请工程师提交 Issue |
+| reason | retryable | `execution` | 含义与给模型的提示 |
+|---|---|---|---|
+| `INVALID_ARGUMENT` | 否 | `not_started` | 参数不合法；`metadata.violations` 列出每个字段的问题 |
+| `PROJECT_NOT_OPEN` | 否 | `not_started` | 指定的项目没有在 EPLAN 中打开；提示用 `eplan_project_list` 查看已打开的项目 |
+| `AMBIGUOUS_NAME` | 否 | `not_started` | 名称对应多个对象：同一个短标识（如 `-K1`）出现在不同结构下、两个打开的项目同名，或者没有选中项目而打开了好几个；`metadata.candidates` 列出完整名称（每行一个，最多 20 个），提示选一个再调用 |
+| `PAGE_NOT_FOUND` / `DEVICE_NOT_FOUND` / `SYMBOL_NOT_FOUND` / `PART_NOT_FOUND` / `MACRO_NOT_FOUND` | 否 | `not_started` | 对象不存在；提示对应的查询工具 |
+| `ALREADY_EXISTS` | 否 | `not_started` | 例如设备标识已存在；说明合并的后果，以及如何显式允许合并 |
+| `HANDLE_EXPIRED` | 否 | `not_started` | 句柄过期，或者所属的 EPLAN 会话已经结束；提示按名称重新查询 |
+| `SESSION_NOT_SELECTED` | 否 | `not_started` | 有多个 EPLAN 实例；提示调用 `eplan_session_select` |
+| `EPLAN_NOT_CONNECTED` | 是 | `not_started` | 找不到运行中的 EPLAN，或插件没有加载；提示启动 EPLAN，或运行 `eplanmcp doctor` |
+| `EPLAN_BUSY` | 是 | `not_started` | 主线程在超时时间内不可用（有模态对话框或正在运行的操作）；提示请工程师关闭对话框 |
+| `BRIDGE_INCOMPATIBLE` | 否 | `not_started` | 插件和 Host 的协议版本不兼容；提示运行 `eplanmcp install-addin` |
+| `LICENCE_MISSING` | 否 | 执行前 `not_started`，事务中 `rolled_back` | 缺少 API 授权，或授权已到期 |
+| `LICENCE_RESTRICTED` | 否 | 执行前 `not_started`，事务中 `rolled_back` | 授权存在但受限，例如开发者授权的页数限制，或只允许加载已签名的插件；提示运行 `eplanmcp doctor` 进行授权自检（ADR-0007） |
+| `LOCK_FAILED` | 是 | `rolled_back` | 对象被其他用户锁定（多用户模式）；`metadata` 列出被锁定的对象 |
+| `POLICY_DENIED` | 否 | `not_started` | 策略禁止，例如 Code 级工具未启用；说明是哪条策略，**不提示如何绕过** |
+| `APPROVAL_DENIED` | 否 | `not_started` | 工程师拒绝或取消了审批；项目未改变 |
+| `APPROVAL_EXPIRED` | 否 | `not_started` | 审批请求过期；需要重新发起调用 |
+| `PLAN_STALE` | 否 | `not_started` | 审批之后项目已经改变；需要重新发起调用以生成新的计划 |
+| `EPLAN_OPERATION_FAILED` | 视情况 | `rolled_back` | EPLAN 报告失败；`eplanMessages` 中附带 EPLAN 的系统消息；已回滚 |
+| `TIMEOUT` | 是 | `not_started` | 读工具执行超过时限；写工具只在规划阶段超时，或已确认执行请求没有送达时返回。写工具发出执行请求后不再直接返回它，而是先向 Bridge 取回结果（[ADR-0010](../adr/0010-write-outcomes.md)） |
+| `AUDIT_UNAVAILABLE` | 否 | `not_started` | 审计无法写入，所以写操作被拒绝 |
+| `INTERNAL` | 否 | 按发生的阶段：执行前 `not_started`，事务中 `rolled_back`，Bridge 已提交之后 `committed` | 本项目的缺陷；附上关联 ID，请工程师提交 Issue |
+| `OUTCOME_UNKNOWN` | 否 | `unknown` | 写操作被中断，取不回结果，无法确定项目是否被修改。提示**不要重复调用**，先请工程师在 EPLAN 中检查，可以用读工具查看现状；该项目的写入随之暂停 |
+| `WRITES_SUSPENDED` | 否 | `not_started` | 该项目（或当时那个 EPLAN 实例）的写入因此前结果未知而暂停；提示请工程师在 EPLAN 中核实，下一次写调用会请求确认，确认后解除 |
 
 ---
 
@@ -168,6 +180,7 @@ eplan_device_place
 - 声明 `outputSchema`，返回 `structuredContent`（规范要求二者一致）；同时附上同内容的 JSON 文本块（兼容旧客户端）和**一行摘要**，例如 `"Listed 25 of 321 pages in 'Line1' (more: cursor)."`。
 - 对象使用人能读懂的标识：`{"kind":"device","name":"-K1","page":"=AP+ST1/3"}`。不要只返回内部 ID。
 - 结果中始终包含实际作用的 `project`，避免模型以为操作的是另一个项目。
+- 写工具的结果带 `execution`（6.2），模型读这一个字段就知道项目有没有被修改；提交之后才出现的问题作为警告放在成功结果中。
 - EPLAN 在操作期间产生的系统消息，放在 `eplanMessages` 中（只保留与本次操作相关的）。
 
 ### 7.2 大小控制
@@ -197,6 +210,7 @@ eplan_device_place
 
 - 每个工具**必须显式设置全部四个注解**和 `title`；`openWorldHint` 一律为 false。CI 检查注解与级别是否一致。
 - 审批请求（elicitation 表单）中展示：工具、项目、**变更清单**（例如"新建页面 =AP+ST1/12；放置 -K1（接触器）于 (100,160)"）、能否撤销。表单只包含确认选项，**不在表单中收集任何敏感信息**。
+- 写操作超时或中断后，Host 先向 Bridge 取回结果，**从不自动重发**；结果未知时暂停该项目的写入，没有工具可以解除，只能由工程师经审批渠道确认（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
 
 ---

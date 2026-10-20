@@ -33,6 +33,9 @@ spike S0 发现（[api-notes](../eplan/api-notes.md) A6）：Claude 桌面应用
 - **握手**：去掉"发现文件中的一次性密钥"，安全性依靠管道 ACL（只允许当前用户）和 Host 端的 `PipeOptions.CurrentUserOnly`。这个密钥原本只用来防范同一用户下的其他进程，而这类威胁本来就不在防护范围内（[安全标准](../standards/security.md)第 2 节），所以去掉它不降低实际的安全性。
 - `doctor` 报告当前进程是否带有 MSIX 包身份，以及实际使用的数据目录。
 
+## 修订（2026-10-20，ADR-0010）
+数据根目录增加 `state\`：Host 在这里记录写入暂停（[ADR-0010](0010-write-outcomes.md) 第 3 节），格式由 M3 设计文档确定。
+
 ## 后果
 - **好的**：Host 不管从 Claude Code 还是 Claude 桌面版启动，行为都一致；scratch 项目对 EPLAN 可见；审计记录工程师找得到；少了一个跨进程共享文件的约定。
 - **代价**：在用户目录根下多一个文件夹；管道枚举需要过滤名称前缀，并忽略已失效的管道。
