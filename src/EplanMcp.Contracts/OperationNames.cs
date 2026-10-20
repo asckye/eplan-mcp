@@ -58,6 +58,12 @@ public static class OperationNames
     public const string MacroList = "macro.list";
 
     /// <summary>
+    /// One window macro below the macro directory, opened in a project without inserting it: representations, variants,
+    /// size and functions. Arguments: <see cref="MacroGetArgs"/>; data: <see cref="MacroGetData"/>.
+    /// </summary>
+    public const string MacroGet = "macro.get";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

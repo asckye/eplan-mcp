@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
@@ -67,12 +68,67 @@ public static class MacroFiles
         return new MacroScan { Paths = found, Complete = complete };
     }
 
+    /// <summary>
+    /// The full path of the window macro that <paramref name="macro"/>, a path below <paramref name="root"/> as
+    /// <see cref="Scan"/> gives it, names. Checked by the same rules as the scan (SEC-19): a relative path with no
+    /// drive, no <c>.</c> or <c>..</c>, ending in <c>.ema</c>, every step of which exists and is no symbolic link or
+    /// junction. Throws INVALID_ARGUMENT or MACRO_NOT_FOUND; neither names the macro directory (SEC-12).
+    /// </summary>
+    public static string Resolve(string root, string? macro)
+    {
+        string given = macro?.Trim() ?? string.Empty;
+        string[] steps = given.Replace('\\', '/').Split('/');
+        if (given.Length == 0
+            || given.IndexOf(':') >= 0
+            || steps.Any(s => s.Length == 0 || s == "." || s == ".." || s.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
+        {
+            throw Invalid("'macro' must be a path that eplan_macro_list returned: below the macro directory, with no drive, no leading '/' and no '..'.");
+        }
+
+        if (!given.EndsWith(Extension, StringComparison.OrdinalIgnoreCase))
+        {
+            throw Invalid("'macro' must name a window macro (.ema).");
+        }
+
+        string current = root;
+        for (int i = 0; i < steps.Length; i++)
+        {
+            current = Path.Combine(current, steps[i]);
+            FileSystemInfo step = i < steps.Length - 1 ? new DirectoryInfo(current) : new FileInfo(current);
+            if (!step.Exists)
+            {
+                throw new BridgeErrorException(
+                    ErrorReason.MacroNotFound,
+                    "EPLAN's macro directory has no macro '" + given + "'. Use eplan_macro_list with name_contains to find its path.",
+                    retryable: false,
+                    new Dictionary<string, string> { ["macro"] = given });
+            }
+
+            if ((step.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                throw Invalid("'macro' leads through a symbolic link or junction, which the macro tools never follow; use a path that eplan_macro_list returned.");
+            }
+        }
+
+        return current;
+    }
+
     /// <summary>The file name in a macro path, without the extension.</summary>
     public static string NameOf(string path)
     {
         string file = path.Substring(path.LastIndexOf('/') + 1);
         return file.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) ? file.Substring(0, file.Length - Extension.Length) : file;
     }
+
+    /// <summary>The path as <see cref="Scan"/> gives it: the macro's own spelling, with <c>/</c> between folders.</summary>
+    public static string Normalized(string? macro) => (macro ?? string.Empty).Trim().Replace('\\', '/');
+
+    // The shape Operation.InvalidArgument gives, which the Host's argument errors share.
+    private static BridgeErrorException Invalid(string violation) => new(
+        ErrorReason.InvalidArgument,
+        "Invalid arguments: " + violation,
+        retryable: false,
+        new Dictionary<string, string> { ["violations"] = violation });
 }
 
 /// <summary>What <see cref="MacroFiles.Scan"/> found.</summary>
