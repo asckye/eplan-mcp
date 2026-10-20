@@ -72,17 +72,17 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     }
 
     [Fact]
-    public async Task PagesAlreadyUpToDate_AreCommittedWithAHintAndNothingToUndo()
+    public async Task PagesAlreadyUpToDate_AreNotStartedWithAHintAndNothingToUndo()
     {
         _harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _ => Data(new ConnectionGeneratePage { Page = FullPage, Before = 40, After = 40 });
 
         CallToolResult result = await Generate([FullPage]);
 
         JsonElement data = WriteToolHarness.Structured(result);
-        Assert.Equal("committed", data.GetProperty("execution").GetString());
-        Assert.Contains("up to date", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Equal("not_started", data.GetProperty("execution").GetString());
+        Assert.Contains("added and removed no connections", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Equal(JsonValueKind.Null, data.GetProperty("undo").ValueKind);
-        Assert.Equal("Generated connections on 1 page: nothing added or removed, so there is nothing to undo.", WriteToolHarness.Text(result, 0));
+        Assert.Equal("Generated connections on 1 page: nothing added or removed, so nothing was changed.", WriteToolHarness.Text(result, 0));
     }
 
     [Fact]

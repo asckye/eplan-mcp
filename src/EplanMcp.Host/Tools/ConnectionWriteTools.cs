@@ -86,7 +86,8 @@ internal sealed class ConnectionWriteTools
         var result = new ConnectionGenerateResult
         {
             Project = ResultShaper.CleanText(data.Project),
-            Execution = ExecutionState.Committed,
+            // Nothing added or removed is no change (ADR-0010 section 1); EPLAN then keeps no undo step (live check, A19).
+            Execution = added + removed == 0 ? ExecutionState.NotStarted : ExecutionState.Committed,
             Pages =
             [
                 .. data.Pages.Select(p => new ConnectionGenerateResult.PageEntry
@@ -98,14 +99,13 @@ internal sealed class ConnectionWriteTools
                     Removed = [.. p.Removed.Select(Connection)],
                 }),
             ],
-            // EPLAN keeps no undo step for a generation that added and removed nothing (live check of #136).
             Undo = added + removed == 0 ? null : "AI: " + GenerateTool,
             Truncated = listed < added + removed,
         };
         string?[] hints =
         [
             ResultShaper.CleanText(data.Warning),
-            added + removed == 0 ? "The connections on these pages were up to date: nothing was added or removed." : null,
+            added + removed == 0 ? "EPLAN added and removed no connections on these pages. If lines drawn there still do not show as connections, ask the engineer to check EPLAN's messages for these pages." : null,
             result.Truncated
                 ? string.Create(CultureInfo.InvariantCulture, $"Listed {listed} of {added + removed} added and removed connections, the removed ones first; eplan_connection_list with 'page' shows all connections of a page.")
                 : null,
@@ -113,7 +113,7 @@ internal sealed class ConnectionWriteTools
         result.Hint = Join(hints);
         return ToolResults.Success(
             added + removed == 0
-                ? $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: nothing added or removed, so there is nothing to undo."
+                ? $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: nothing added or removed, so nothing was changed."
                 : string.Create(CultureInfo.InvariantCulture, $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: {added} added, {removed} removed; Ctrl+Z in EPLAN undoes this step."),
             result);
     }
