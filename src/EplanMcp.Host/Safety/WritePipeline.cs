@@ -4,6 +4,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
 
 namespace EplanMcp.Host.Safety;
 
@@ -39,7 +40,15 @@ internal sealed partial class WritePipeline(
     TimeProvider clock,
     ILogger<WritePipeline> logger)
 {
-    public async Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, CancellationToken cancellationToken)
+    /// <summary>Runs <paramref name="request"/> without reporting progress.</summary>
+    public Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, CancellationToken cancellationToken) =>
+        RunAsync<TArgs, TExecuteArgs, TData>(request, progress: null, cancellationToken);
+
+    /// <summary>
+    /// Runs <paramref name="request"/>. <paramref name="progress"/> is the tool's <c>IProgress</c> parameter, which the
+    /// SDK binds to the client's progress token: while the engineer is asked, the wait is reported there (ADR-0011).
+    /// </summary>
+    public async Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         WritePlan plan;
         try
@@ -83,7 +92,7 @@ internal sealed partial class WritePipeline(
         string argumentsHash = PendingPlanStore.HashArguments(request.Args);
         if (suspensions.Blocking(plan.ProjectPath, eplan.Eplan.ProcessId, started) is { Count: > 0 } blocking)
         {
-            await ReleaseAsync(request.Tool, requestId, argumentsHash, plan, eplan, started, blocking, cancellationToken).ConfigureAwait(false);
+            await ReleaseAsync(request.Tool, requestId, argumentsHash, plan, eplan, started, blocking, progress, cancellationToken).ConfigureAwait(false);
         }
 
         if (decision.Verdict == PolicyVerdict.NeedsApproval)
@@ -91,7 +100,7 @@ internal sealed partial class WritePipeline(
             ApprovalResult approval;
             try
             {
-                approval = await approvals.AskAsync(requestId, request.Tool, argumentsHash, plan, cancellationToken).ConfigureAwait(false);
+                approval = await approvals.AskAsync(requestId, request.Tool, argumentsHash, plan, progress, cancellationToken).ConfigureAwait(false);
             }
             catch (BridgeCallException ex)
             {
@@ -184,14 +193,14 @@ internal sealed partial class WritePipeline(
     /// the project was checked: a question of its own, before any approval (ADR-0010 section 3). Each answer is recorded;
     /// when all are granted the suspensions are lifted, otherwise WRITES_SUSPENDED.
     /// </summary>
-    private async Task ReleaseAsync(string tool, string requestId, string argumentsHash, WritePlan plan, HandshakeResult eplan, DateTimeOffset started, IReadOnlyList<Suspension> blocking, CancellationToken cancellationToken)
+    private async Task ReleaseAsync(string tool, string requestId, string argumentsHash, WritePlan plan, HandshakeResult eplan, DateTimeOffset started, IReadOnlyList<Suspension> blocking, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         foreach (Suspension suspension in blocking.DistinctBy(s => s.RequestId))
         {
             ApprovalResult confirmation;
             try
             {
-                confirmation = await approvals.ConfirmReleaseAsync(requestId, tool, argumentsHash, plan, suspension, cancellationToken).ConfigureAwait(false);
+                confirmation = await approvals.ConfirmReleaseAsync(requestId, tool, argumentsHash, plan, suspension, progress, cancellationToken).ConfigureAwait(false);
             }
             catch (BridgeCallException ex)
             {

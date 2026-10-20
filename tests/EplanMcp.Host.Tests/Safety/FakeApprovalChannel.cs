@@ -23,6 +23,8 @@ internal sealed class FakeApprovalChannel(string name, ApprovalDecision? decisio
 
     public string Name => name;
 
+    public string Where { get; init; } = "in EPLAN";
+
     public Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
         Questions.Add(question);

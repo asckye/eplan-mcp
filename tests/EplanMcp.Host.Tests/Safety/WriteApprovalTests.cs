@@ -22,9 +22,10 @@ public sealed class WriteApprovalTests : IDisposable
 
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-approval-").FullName);
     private readonly FakeBridgeClient _bridge = new();
-    private readonly ManualClock _clock = new(DateTimeOffset.UtcNow);
+    private readonly ManualTime _clock = new(DateTimeOffset.UtcNow);
     private readonly string _realProject;
     private TimeSpan _timeout = HostConfig.DefaultApprovalTimeout;
+    private RecordedProgress? _progress;
 
     public WriteApprovalTests()
     {
@@ -116,7 +117,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AGrantAfterTheDeadline_HasExpired()
     {
-        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += HostConfig.DefaultApprovalTimeout + TimeSpan.FromSeconds(1) };
+        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Advance(HostConfig.DefaultApprovalTimeout + TimeSpan.FromSeconds(1)) };
 
         BridgeError error = await Fails(late);
 
@@ -129,8 +130,8 @@ public sealed class WriteApprovalTests : IDisposable
     public async Task TheConfiguredDeadline_IsTheQuestionsAndTheExpiryNamesIt()
     {
         _timeout = TimeSpan.FromSeconds(60);
-        var onTime = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += TimeSpan.FromSeconds(60) };
-        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += TimeSpan.FromSeconds(61) };
+        var onTime = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Advance(TimeSpan.FromSeconds(60)) };
+        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Advance(TimeSpan.FromSeconds(61)) };
 
         DateTimeOffset asked = _clock.Now;
         await Run(onTime);
@@ -185,6 +186,21 @@ public sealed class WriteApprovalTests : IDisposable
         Assert.Equal(["suspension_release", "approval", "execution_started", "execution_result"], records.Select(r => Text(r, "kind")));
         Assert.Equal(("granted", "earlier", "eplan_dialog"), (Text(records[0], "decision"), Text(records[0], "suspendedRequestId"), Text(records[0], "channel")));
         Assert.All(records, r => Assert.Equal(dialog.Questions[1].RequestId, Text(r, "requestId")));
+    }
+
+    [Fact]
+    public async Task TheToolsProgress_HearsTheWaitForTheConfirmationAndForTheApproval()
+    {
+        Suspend(_realProject, "earlier");
+        _progress = new RecordedProgress();
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Advance(TimeSpan.FromSeconds(20)) };
+
+        await Run(dialog);
+
+        Assert.Equal(
+            ["Waiting for the engineer to confirm in EPLAN that the project was checked (15 s of 120 s)", "Waiting for the engineer's approval in EPLAN (15 s of 120 s)"],
+            _progress.Values.Select(r => r.Message));
+        Assert.Single(_bridge.Writes);
     }
 
     [Theory]
@@ -312,7 +328,7 @@ public sealed class WriteApprovalTests : IDisposable
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
-        return pipeline.RunAsync<object, object, JsonObject>(request, TestContext.Current.CancellationToken);
+        return pipeline.RunAsync<object, object, JsonObject>(request, _progress, TestContext.Current.CancellationToken);
     }
 
     private Task<BridgeError> Fails(params IApprovalChannel[] channels) => Fails(channels, OutsideScratchWrites.Approve);
@@ -326,11 +342,4 @@ public sealed class WriteApprovalTests : IDisposable
 
     private List<JsonObject> AuditRecords() =>
         [.. Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())];
-
-    private sealed class ManualClock(DateTimeOffset now) : TimeProvider
-    {
-        public DateTimeOffset Now { get; set; } = now;
-
-        public override DateTimeOffset GetUtcNow() => Now;
-    }
 }

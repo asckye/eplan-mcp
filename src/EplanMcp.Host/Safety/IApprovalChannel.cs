@@ -39,6 +39,9 @@ internal interface IApprovalChannel
     /// <summary>The channel's name in the audit.</summary>
     public string Name { get; }
 
+    /// <summary>Where the engineer answers, for the progress the client sees while it waits: "in EPLAN".</summary>
+    public string Where { get; }
+
     /// <summary>
     /// Asks <paramref name="question"/> and waits for the answer, at the latest until its deadline; null when this
     /// channel cannot ask now, so the next one is tried. Throws <see cref="Bridge.BridgeCallException"/> when asking
