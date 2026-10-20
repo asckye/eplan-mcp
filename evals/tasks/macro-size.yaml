@@ -1,0 +1,16 @@
+id: macro-size
+set: dev
+prompt: 宏 Contactor_Feedback_Control 放到图纸上要占多大地方？给出它的宽和高，单位毫米。
+answer:
+  type: object
+  required: [width, height]
+  properties:
+    width: { type: number }
+    height: { type: number }
+oracle:
+  width: { tool: eplan_macro_get, args: { macro: EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema }, pick: $.macro.size.width }
+  height: { tool: eplan_macro_get, args: { macro: EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema }, pick: $.macro.size.height }
+checks:
+  - { answer: $.width, equals: oracle.width }
+  - { answer: $.height, equals: oracle.height }
+budget: { max_tool_calls: 6 }
