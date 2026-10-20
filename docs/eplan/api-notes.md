@@ -159,6 +159,14 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A16. 检查、报表、导出（spike S11，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S11](../../spikes/S11-workflow-apis/README.md)。
+- **`Check.VerifyProject(project, "", false)` 能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销**：检查消息 0 → 20 条 → 回到 0 条。用时 2.7–4.7 秒，改写 `Message`、`Project`、`Blob`、`User` 数据文件（同 A11）。`VerifyPages`（2 页）0.2 秒。— S11。
+- **`Reports.GenerateProject(project)` 能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销**：示例项目新增 1 张报表页，用时 7.7–9.3 秒。`Reports.Update(page)` 更新一张目录页 0.3 秒。— S11。
+- **导出不改动设计数据，但改写 `User.eod` / `User.eox`**：`Export.PdfPages` 3 页 0.7 秒，全部 321 页 12.5 秒（6.1 MB）；`Export.DxfDwgPagesToDisk` 2 页 0.6 秒。文件只出现在给定目录中，但 DXF 方案会在目录下按"项目名\结构"建子目录，文件名含 `=`、`+`、`&`。方案名传空串时，`SchemeSetting.GetLastUsed()` 前后不变。— S11。
+  - 对本项目的影响：ADR-0012 的前提"导出不改动项目"指设计数据；导出后要递归核对目录中的每个文件（M4 设计 4.4）。
+- 以上调用在 `QuietModeStep(ShowNoDialogs)` 下都没有弹出对话框。— S11。
+
 ### A15. 写操作中断（spike S8，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S8](../../spikes/S8-write-interruption/README.md)。
 - 🔴 **`SafetyPoint` 不防进程死亡**：EPLAN 每做一步修改就写入项目数据库，回滚只在进程活着时发生。20 页的写入做到第 5 页、尚未提交时用 `taskkill /F` 结束 EPLAN，重启后这 5 页都在；已提交的修改当然也都在。— S8 r3。
