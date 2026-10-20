@@ -40,6 +40,12 @@ public sealed class SerializerCompatibilityTests
         new BridgeError { Reason = ErrorReason.Internal, Message = "m" },
         new BridgeError { Reason = ErrorReason.OutcomeUnknown, Message = "m", Execution = ExecutionState.Unknown },
         new OutcomeGetArgs { RequestId = "c0a8" },
+        new OperationCancelArgs { RequestId = "c0a8" },
+        new OperationCancelArgs(),
+        new OperationCancelData { Found = true },
+        new OperationCancelData(),
+        new ProgressNotification { RequestId = "c0a8", Progress = 3, Total = 20, Message = "Exporting page 3 of 20" },
+        new ProgressNotification { RequestId = "c0a8", Progress = 40 },
         new ApprovalAskArgs
         {
             RequestId = "c0a8",
@@ -315,6 +321,15 @@ public sealed class SerializerCompatibilityTests
 
         Assert.Contains("\"protocolVersion\":", json, StringComparison.Ordinal);
         Assert.Contains("\"eplan\":{\"processId\":7", json, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProgressNotification_HasTheNamesOfM1sReservedShape()
+    {
+        // M1 design 4.2 reserved {id, progress, total?, message?}; M4 design 4.3 keys it by the request ID instead.
+        string json = JsonConvert.SerializeObject(new ProgressNotification { RequestId = "r", Progress = 1, Total = 2, Message = "m" }, _newtonsoft);
+
+        Assert.Equal("""{"requestId":"r","progress":1,"total":2,"message":"m"}""", json);
     }
 
     /// <summary>A serializer-independent rendering used for equality: STJ with fixed options.</summary>

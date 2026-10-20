@@ -131,6 +131,15 @@ public static class OperationNames
     public const string OutcomeGet = "outcome.get";
 
     /// <summary>
+    /// Asks the Bridge to stop a queued or running invoke, by its request ID (M4 design 4.3). Sent on another connection,
+    /// because the invoke's own connection reads nothing until it answers, and answered on the pipe thread like
+    /// <see cref="OutcomeGet"/>. The invoke stops at its next safe point and never in the middle of an EPLAN call; a
+    /// write that has committed stays committed, and outcome.get tells what became of it. Arguments:
+    /// <see cref="OperationCancelArgs"/>; data: <see cref="OperationCancelData"/>.
+    /// </summary>
+    public const string OperationCancel = "operation.cancel";
+
+    /// <summary>
     /// Asks the engineer to approve a write in a dialog in EPLAN, modal on the main thread until answered or the
     /// deadline (M3 design 4.3, 4.7); other calls get EPLAN_BUSY meanwhile. Arguments: <see cref="ApprovalAskArgs"/>;
     /// data: <see cref="ApprovalAskData"/>.

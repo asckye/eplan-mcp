@@ -27,6 +27,13 @@ public static class BridgeProtocol
     /// <summary>JSON-RPC method: runs one operation, see <see cref="OperationNames"/>.</summary>
     public const string InvokeMethod = "invoke";
 
+    /// <summary>
+    /// JSON-RPC notification from the Bridge while an <c>invoke</c> runs, on that invoke's connection and before its
+    /// response: how far it is (M4 design 4.3). <c>params</c> is a <see cref="ProgressNotification"/>. Operations that
+    /// do not report progress send none, and a Host that does not use it skips it.
+    /// </summary>
+    public const string ProgressMethod = "progress";
+
     /// <summary>JSON-RPC error code carrying a business error; <c>error.data</c> is a <see cref="BridgeError"/>.</summary>
     public const int BusinessErrorCode = -32000;
 
