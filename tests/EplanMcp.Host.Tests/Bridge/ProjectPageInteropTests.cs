@@ -59,7 +59,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
         BridgeStatus status = await _client.GetStatusAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            [OperationNames.PageGet, OperationNames.PageList, OperationNames.ProjectGet, OperationNames.ProjectList],
+            [OperationNames.OutcomeGet, OperationNames.PageGet, OperationNames.PageList, OperationNames.ProjectGet, OperationNames.ProjectList],
             status.Handshake!.Operations);
     }
 

@@ -58,7 +58,7 @@ public sealed class HostBridgeInteropTests : IAsyncDisposable
         Assert.Equal("Pro Panel", status.Handshake!.Eplan.Variant);
         Assert.Equal("0.1.0-test", status.Handshake.BridgeVersion);
         Assert.True(status.Handshake.Eplan.ApiExtensionLicence);
-        Assert.Equal([OperationNames.ProjectList], status.Handshake.Operations);
+        Assert.Equal([OperationNames.OutcomeGet, OperationNames.ProjectList], status.Handshake.Operations);
     }
 
     [Fact]
