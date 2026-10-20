@@ -39,7 +39,8 @@ EPLAN 未运行、插件未加载、有多个实例都**不是错误**，体现�
 
 已连接时 `hint` 通常为 null；EPLAN 版本未经实测时，`hint` 说明这一点，摘要行末尾加 "See 'hint'."（ADR-0009）：
 - 在支持范围 2024–2027 内、但尚未实测（目前已实测 2026）："EPLAN <版本> is in the supported range (2024-2027) but EplanMcp has not been tested with it yet; …"；
-- 不在支持范围内："EPLAN <版本> is outside the versions EplanMcp supports (2024-2027); tools may fail. …"。
+- 不在支持范围内："EPLAN <版本> is outside the versions EplanMcp supports (2024-2027); tools may fail. …"；
+- 有暂停的写入时（ADR-0010 第 3 节）：列出被暂停的项目，或当前实例的全部写入，并说明下一次写操作会请求确认，读操作不受影响。
 
 ## 5. 实现要点
 - 只需要发现和握手，不调用 `invoke`，因此**不进入 EPLAN 主线程**，EPLAN 忙或有模态对话框时也能立即返回。

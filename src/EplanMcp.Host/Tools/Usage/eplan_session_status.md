@@ -24,7 +24,7 @@ It does not wait for EPLAN's main thread, so an open dialog in EPLAN does not bl
   - `bridgeVersion`, `protocolVersion`: the EplanMcp add-in loaded in EPLAN.
   - `apiExtensionLicence`: whether EPLAN had the API extension licence when the add-in started; null if it could not be checked. When false, tools that read projects may fail with LICENCE_MISSING.
 - `instances`: every EPLAN process found with the add-in loaded. `processId` is what eplan_session_select takes; `selected` is true for the one chosen with it. With more than one and none selected, `connected` is false.
-- `hint`: when not connected, what the engineer should do next, in English. Relay it. When connected, it is null, unless EplanMcp has not been tested with this EPLAN version (supported: 2024-2027, tested so far: 2026); then it says so, and the summary line ends with "See 'hint'." Mention it to the engineer before relying on the tools.
+- `hint`: when not connected, what the engineer should do next, in English. Relay it. When connected, it is null, unless EplanMcp has not been tested with this EPLAN version (supported: 2024-2027, tested so far: 2026); then it says so, and the summary line ends with "See 'hint'." Mention it to the engineer before relying on the tools. It also lists writes that are suspended because the outcome of an earlier write is unknown: tell the engineer to check those projects in EPLAN; the next write asks them to confirm, and reads work as usual.
 
 The summary line repeats the essentials: `EPLAN 2026.0.3.25421 (Pro Panel) connected, process 12345.` or `EPLAN not connected: EPLAN_NOT_CONNECTED. See 'hint'.`
 

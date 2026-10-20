@@ -97,7 +97,7 @@ public sealed class SessionSelectInteropTests : IAsyncDisposable
 
     private Task<CallToolResult> Select(int processId) => SessionTools.SessionSelectAsync(_client, processId, TestContext.Current.CancellationToken);
 
-    private Task<CallToolResult> Status() => SessionTools.SessionStatusAsync(_client, TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Status() => SessionTools.SessionStatusAsync(_client, new EplanMcp.Host.Safety.SuspensionStore(Path.Combine(Path.GetTempPath(), "eplanmcp-no-state-" + Guid.NewGuid().ToString("N"))), TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> ProjectList() => ProjectTools.ProjectListAsync(_client, cancellationToken: TestContext.Current.CancellationToken);
 
