@@ -110,7 +110,9 @@
 ### A6. 由 MSIX 打包应用启动的进程（Claude 桌面版）
 - Claude 桌面应用以 MSIX 包安装（包族名 `Claude_pzs8sxrjxfjjc`）。由它启动的子进程写入 `%LOCALAPPDATA%` 时，**被重定向到 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Local\`**，包外的进程（EPLAN）看不到这些文件。写到 `D:\…` 以及 `%TEMP%`（即 `%LOCALAPPDATA%\Temp`）下的文件，EPLAN 可以正常读取。— spike S0 第一次运行失败的原因；检查包的 LocalCache 目录确认。
   - 对本项目的影响：由 Claude 桌面版启动的 Host，不能把 EPLAN 需要读取的文件（scratch 项目、实例发现文件）写到 `%LOCALAPPDATA%`；审计日志写在那里，用户也会找不到。见 ADR-0008。
-  - 待验证：包内进程能否**读取**包外进程写到 `%LOCALAPPDATA%` 的文件（Bridge 写、Host 读）。
+  - **由客户端启动的进程没有包身份，但仍被重定向**：Claude 桌面版中 Claude Code 会话的 shell、它启动的 `eplanmcp`，`GetCurrentPackageFullName` 都返回 `APPMODEL_ERROR_NO_PACKAGE`。可是它们写入 `%LOCALAPPDATA%`、`%APPDATA%` 的文件，仍然落在包的 `LocalCache\Local`、`LocalCache\Roaming` 下。所以不能用包身份判断是否被重定向。— spike S5。
+  - 不重定向：`%TEMP%`，以及数据根目录 `%USERPROFILE%\EplanMcp`（包内复制的夹具，包外的 EPLAN 正常打开）。命名管道不受影响：包内启动的 `eplanmcp` 能连上包外 EPLAN 的插件。— spike S5。
+  - 包内进程能读到真实位置的 `%LOCALAPPDATA%`（能看到其他程序的目录），所以"Bridge 写、Host 读"可以读到；会话期间由包外进程新写入的文件，没有单独验证。— spike S5。
 
 ### A4. 路径变量
 - 在 2026 中，`PathMap.SubstitutePath` 无法替换 `$(MD_SCHEMES)`、`$(MD_IMAGES)`、`$(TEMPPATH)`、`$(USERSETTINGSPATH)`，原样返回；`$(MD_MACROS)`、`$(MD_PARTS)`、`$(MD_SYMBOLS)`、`$(MD_FORMS)` 正常。— 实机调用。待查：2026 中方案（schemes）的存储位置。
