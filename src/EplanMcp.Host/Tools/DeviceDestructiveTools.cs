@@ -76,7 +76,8 @@ internal sealed class DeviceDestructiveTools
             args,
             (plan, backup) => new DeviceRenumberArgs { Project = args.Project, Pages = args.Pages, OnlyUnnumbered = args.OnlyUnnumbered, Scheme = args.Scheme, Start = args.Start, Step = args.Step, Fingerprint = plan.Fingerprint, Backup = backup },
             dry_run,
-            Limit);
+            Limit,
+            "Renumbering devices");
         WriteOutcome<DeviceRenumberData> outcome;
         try
         {
