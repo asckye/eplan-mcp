@@ -215,7 +215,7 @@ flowchart TD
   11. `eplan_page_update`、`eplan_device_update`；
   12. EPLAN 对话框审批渠道；
   13. 写入评测任务与 Large 测试 Q1、Q2、Q6，M3a 收尾；
-  14. M3b：按 S9 的结论设计放置设备、插入宏、建连接。
+  14. M3b：按 S9 的结论设计放置设备、插入宏、建连接，见 [M3b 设计](2026-10-20-m3b-placement.md)。
 
 ## 9. 待定问题与决定
 
