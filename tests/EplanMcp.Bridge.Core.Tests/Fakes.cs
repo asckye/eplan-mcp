@@ -582,3 +582,78 @@ internal sealed class FakeReportUpdater : IReportUpdater
         }
     }
 }
+
+/// <summary>
+/// Copies the way S12 found CopyProject(Snapshot) does (api-notes A18): the copy appears at the given path, with
+/// <see cref="Pages"/> pages (default: as many as <c>pages</c> has); <see cref="Failure"/> and <see cref="Delay"/> stand
+/// for a failed or slow copy. Records every copy and count.
+/// </summary>
+internal sealed class FakeProjectBackup(FakePageReader? pages = null) : IProjectBackup
+{
+    public List<(string Project, string Copy)> Copies { get; } = [];
+
+    public List<string> Counted { get; } = [];
+
+    public int? Pages { get; set; }
+
+    public Exception? Failure { get; set; }
+
+    public TimeSpan Delay { get; set; }
+
+    public void Copy(string projectPath, string copyPath)
+    {
+        Copies.Add((projectPath, copyPath));
+        Thread.Sleep(Delay);
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+
+        File.WriteAllText(copyPath, "copy");
+    }
+
+    public int CountPages(string copyPath)
+    {
+        Counted.Add(copyPath);
+        return Pages ?? pages?.Pages.Count ?? 0;
+    }
+}
+
+/// <summary>
+/// Pages of a <see cref="FakePageReader"/> and the project's functions, removed the way S12 found EPLAN removes a page
+/// (api-notes A18): the page and the functions on it go, functions of the same tag on other pages stay. A page's object
+/// identifiers are its own and its functions'. <see cref="Keep"/> stands for a page EPLAN did not remove,
+/// <see cref="Failure"/> for EPLAN refusing. Records every removal.
+/// </summary>
+internal sealed class FakePageRemover(FakePageReader pages) : IPageRemover
+{
+    public List<PlacedFunction> Placed { get; } = [];
+
+    public List<string> Removed { get; } = [];
+
+    public string? Keep { get; set; }
+
+    public Exception? Failure { get; set; }
+
+    public RemovablePage? ReadPage(string projectPath, string pageName) =>
+        pages.Pages.FirstOrDefault(p => p.Name == pageName) is { } page
+            ? new RemovablePage { Name = page.Name, Type = page.Type, ObjectIds = ["page " + page.Name, .. Placed.Where(f => f.Page == page.Name).Select(f => f.Id)] }
+            : null;
+
+    public IReadOnlyList<PlacedFunction> Functions(string projectPath) => [.. Placed];
+
+    public void Remove(string projectPath, string pageName)
+    {
+        Removed.Add(pageName);
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+
+        if (pageName != Keep)
+        {
+            pages.Pages.RemoveAll(p => p.Name == pageName);
+            Placed.RemoveAll(f => f.Page == pageName);
+        }
+    }
+}

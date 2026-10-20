@@ -117,39 +117,4 @@ public sealed class ProjectBackupsTests : IDisposable
         Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted, false, ProjectBackups.FailedMessage), (error.Reason, error.Execution, error.Retryable, error.Message));
         return error;
     }
-
-    /// <summary>
-    /// Copies the way S12 found CopyProject(Snapshot) does (api-notes A18): the copy appears at the given path, with
-    /// <see cref="Pages"/> pages; <see cref="Failure"/> and <see cref="Delay"/> stand for a failed or slow copy.
-    /// </summary>
-    private sealed class FakeProjectBackup : IProjectBackup
-    {
-        public List<(string Project, string Copy)> Copies { get; } = [];
-
-        public List<string> Counted { get; } = [];
-
-        public int Pages { get; set; }
-
-        public Exception? Failure { get; set; }
-
-        public TimeSpan Delay { get; set; }
-
-        public void Copy(string projectPath, string copyPath)
-        {
-            Copies.Add((projectPath, copyPath));
-            Thread.Sleep(Delay);
-            if (Failure is not null)
-            {
-                throw Failure;
-            }
-
-            File.WriteAllText(copyPath, "copy");
-        }
-
-        public int CountPages(string copyPath)
-        {
-            Counted.Add(copyPath);
-            return Pages;
-        }
-    }
 }
