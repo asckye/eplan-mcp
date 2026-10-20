@@ -58,6 +58,7 @@
 - 标准动作：`list`（分页列出）、`get`（按名称取单个）、`search`（按条件查找）、`create`、`update`、`delete`。
 - 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
+- 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
 
 ---
 
@@ -214,6 +215,7 @@ eplan_device_place
 - 等待审批时工具调用一直挂起，期限默认 120 秒；客户端提供了 `progressToken` 时每 15 秒发一次进度通知。写工具的方法因此带一个 `IProgress<ProgressNotificationValue>` 参数（SDK 绑定，不进入 schema），传给 `WritePipeline.RunAsync`。
 - 写操作超时或中断后，Host 先向 Bridge 取回结果，**从不自动重发**；结果未知时暂停该项目的写入，没有工具可以解除，只能由工程师经审批渠道确认（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
+- 例外（[ADR-0012](../adr/0012-export-tier.md)）：Read 级工具如果会在项目之外新建文件（目前只有导出工具），`readOnlyHint`、`idempotentHint` 为 false，`destructiveHint` 仍为 false，不需要审批；文件只写进 Host 每次新建的导出目录（[security.md](security.md) SEC-20）。
 
 ---
 
