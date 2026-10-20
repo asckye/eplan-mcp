@@ -73,6 +73,8 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 
 **YAML 的值**：加引号的一律是字符串；不加引号的 `null`、`~`、空值是 null（但检查的期望值不能留空，要比较 null 时写 `null`），`true`、`false` 是布尔值，符合 JSON 数字写法的是数字（`007`、`1.` 仍是字符串）。不支持 `!!str` 之类的标签，需要字符串时加引号即可。期望值要写以 `oracle.` 开头的字面字符串时，加引号。
 
+**`{ }` 中的逗号**：在 `{ }` 写法中，未加引号的字符串里的 `, ` 会开始一个新的键。例如 `{ description: the tag, such as -K1 }` 实际有两个键，第二个是没有值的 `such as -K1`。claude 会拒绝这样的答案 schema，每次作答都成为无效。所以 `check` 把答案 schema 中没有值的键报告为问题；含 `, ` 的字符串要加引号。明确写出的 `null`、`~` 不算。
+
 示例：
 
 ```yaml
