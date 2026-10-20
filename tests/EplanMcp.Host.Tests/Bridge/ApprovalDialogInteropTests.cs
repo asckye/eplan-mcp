@@ -58,7 +58,12 @@ public sealed class ApprovalDialogInteropTests : IAsyncDisposable
         var plan = new WritePlan { Project = "项目 一", ProjectPath = @"D:\项目\一", Changes = [new PlannedChange { Action = "create", Kind = "page", Name = "=A1&EFS1/5" }], Fingerprint = "f1" };
         var question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, [], DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1));
         Task<ApprovalAnswer?> asking = new EplanDialogChannel(_client, TimeProvider.System).AskAsync(question, TestContext.Current.CancellationToken);
-        _dialog.Shown.Wait(TestContext.Current.CancellationToken);
+        if (!_dialog.Shown.Wait(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken))
+        {
+            // Never hang on a question that did not reach the dialog (this held CI runs for up to an hour): fail with why.
+            await asking;
+            Assert.Fail("The question did not reach the dialog within 30 s.");
+        }
 
         BridgeCallException busy = await Assert.ThrowsAsync<BridgeCallException>(() =>
             _client.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new ProjectListArgs(), TestContext.Current.CancellationToken));

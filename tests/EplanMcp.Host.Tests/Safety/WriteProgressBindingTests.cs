@@ -54,7 +54,17 @@ public sealed class WriteProgressBindingTests : IDisposable
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var toServer = new Pipe();
         var toClient = new Pipe();
-        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _time.Advance(TimeSpan.FromSeconds(31)) };
+        var progress = new RecordedProgress();
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted)
+        {
+            // The engineer answers only once both reports reached the client: the SDK sends each on its own, so one
+            // still on its way when the result goes out would be dropped with the finished request.
+            Wait = () =>
+            {
+                _time.Advance(TimeSpan.FromSeconds(31));
+                SpinWait.SpinUntil(() => progress.Values.Count >= 2, TimeSpan.FromSeconds(10));
+            },
+        };
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton(_locations).AddSingleton<TimeProvider>(_time);
@@ -72,7 +82,6 @@ public sealed class WriteProgressBindingTests : IDisposable
         {
             await using McpClient client = await McpClient.CreateAsync(new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: cancellationToken);
             McpClientTool tool = (await client.ListToolsAsync(cancellationToken: cancellationToken)).Single(t => t.Name == Tool);
-            var progress = new RecordedProgress();
             CallToolResult result = await client.CallToolAsync(Tool, new Dictionary<string, object?>(), progress, cancellationToken: cancellationToken);
 
             Assert.Equal("{}", JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!["properties"]!.ToJsonString());
