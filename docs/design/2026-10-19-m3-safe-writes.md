@@ -142,9 +142,9 @@ flowchart TD
 ### 4.4 第一批工具（M3a）
 | 工具 | 级别 | 参数要点 | Bridge 操作 | API 状态 |
 |---|---|---|---|---|
-| `eplan_page_create` | Write | `project`（必填）；`pages`：1–50 项，每项是完整页名（如 `=GAA+A1&EFS1/5`）、`page_type`（默认 `Circuit`）、`description` 和 `language`；`dry_run` | `page.create.plan/execute` | 已验证，用页名设置结构标识的方式待 S9 确认 |
+| `eplan_page_create` | Write | `project`（必填）；`pages`：1–50 项，每项是完整页名（如 `=GAA+A1&EFS1/5`）、`page_type`（默认 `Circuit`）、`description` 和 `language`；`dry_run` | `page.create.plan/execute` | 已验证；S9：页名拆成 `=`、`+`、`&`、`/` 四部分建页，项目结构不用的部分会被丢掉，建好后读回比较 |
 | `eplan_page_update` | Write | `project`；`pages`：页名 + 新的 `description`（指定 `language`）；`dry_run` | `page.update.plan/execute` | 已验证 |
-| `eplan_device_update` | Write | `project`；`tag`（现有的完整或可见标识）、`new_tag`（第一版只改标识，设备属性在 M3b 加入）；`dry_run` | `device.update.plan/execute` | 已验证；对辅助功能和交叉引用的影响待 S9 确认 |
+| `eplan_device_update` | Write | `project`；`tag`（现有的完整或可见标识）、`new_tag`（第一版只改标识，设备属性在 M3b 加入）；`dry_run` | `device.update.plan/execute` | 已验证；S9：主功能和全部辅助功能一起改名（只改主功能会让辅助功能脱离），EPLAN 不检查重名，执行后读回比较 |
 
 - 一次调用 = 一次审批 = 一个撤销步骤；批量建页同样只有一个撤销步骤（api-coverage 第 4 节）。
 - 名称已存在时，规划阶段就返回 `ALREADY_EXISTS`，不进入审批。
