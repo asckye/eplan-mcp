@@ -4,6 +4,7 @@ using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -41,6 +42,7 @@ internal sealed class MacroWriteTools
         [Description("From eplan_macro_get")] int variant = 0,
         [Description("keep: the macro's tags")][AllowedValues("number", "keep")] string numbering = "number",
         [Description("Only return the plan")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         // The page, the macro, the point and the numbering are checked by the Bridge, all at once (macro.insert.plan).
@@ -58,11 +60,12 @@ internal sealed class MacroWriteTools
             args,
             plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Fingerprint = plan.Fingerprint },
             dry_run,
-            PageWriteTools.DefaultLimit);
+            PageWriteTools.DefaultLimit,
+            "Inserting the macro");
         WriteOutcome<MacroInsertData> outcome;
         try
         {
-            outcome = await pipeline.RunAsync<MacroInsertArgs, MacroInsertArgs, MacroInsertData>(request, cancellationToken).ConfigureAwait(false);
+            outcome = await pipeline.RunAsync<MacroInsertArgs, MacroInsertArgs, MacroInsertData>(request, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {

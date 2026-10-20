@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -43,6 +44,7 @@ internal sealed class PageWriteTools
         [Description("1-50, created in order")] NewPage[] pages,
         [Description("e.g. zh_CN; default: EPLAN UI")] string? language = null,
         [Description("Only return the plan")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (Violations(project, pages?.Length, language) is { Count: > 0 } violations)
@@ -64,11 +66,12 @@ internal sealed class PageWriteTools
             args,
             plan => new PageCreateArgs { Project = args.Project, Pages = args.Pages, Language = args.Language, Fingerprint = plan.Fingerprint },
             dry_run,
-            Limit(args.Pages.Count));
+            Limit(args.Pages.Count),
+            "Creating pages");
         WriteOutcome<PageCreateData> outcome;
         try
         {
-            outcome = await pipeline.RunAsync<PageCreateArgs, PageCreateArgs, PageCreateData>(request, cancellationToken).ConfigureAwait(false);
+            outcome = await pipeline.RunAsync<PageCreateArgs, PageCreateArgs, PageCreateData>(request, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {
@@ -115,6 +118,7 @@ internal sealed class PageWriteTools
         [Description("1-50 pages")] PageText[] pages,
         [Description("The one language to change; default: EPLAN UI")] string? language = null,
         [Description("Only return the plan")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (Violations(project, pages?.Length, language) is { Count: > 0 } violations)
@@ -136,11 +140,12 @@ internal sealed class PageWriteTools
             args,
             plan => new PageUpdateArgs { Project = args.Project, Pages = args.Pages, Language = args.Language, Fingerprint = plan.Fingerprint },
             dry_run,
-            DefaultLimit);
+            DefaultLimit,
+            "Changing page descriptions");
         WriteOutcome<PageUpdateData> outcome;
         try
         {
-            outcome = await pipeline.RunAsync<PageUpdateArgs, PageUpdateArgs, PageUpdateData>(request, cancellationToken).ConfigureAwait(false);
+            outcome = await pipeline.RunAsync<PageUpdateArgs, PageUpdateArgs, PageUpdateData>(request, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {

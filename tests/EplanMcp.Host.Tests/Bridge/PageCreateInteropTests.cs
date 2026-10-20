@@ -121,7 +121,7 @@ public sealed class PageCreateInteropTests : IAsyncDisposable
         [.. names.Select(n => new PageWriteTools.NewPage { Name = n })],
         null,
         false,
-        TestContext.Current.CancellationToken);
+        cancellationToken: TestContext.Current.CancellationToken);
 
     private static JsonElement Structured(CallToolResult result)
     {

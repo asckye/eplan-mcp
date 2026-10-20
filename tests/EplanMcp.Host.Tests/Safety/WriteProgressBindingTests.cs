@@ -17,8 +17,9 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Safety;
 
 /// <summary>
-/// What write tools rely on (ADR-0011 section 2): a tool method's <see cref="IProgress{T}"/> parameter is bound by the
-/// SDK, stays out of the input schema, and carries the wait for the engineer to a client that sent a progress token.
+/// What write tools rely on (ADR-0011 section 2, M4 design 4.3): a tool method's <see cref="IProgress{T}"/> parameter is
+/// bound by the SDK, stays out of the input schema, and carries the wait for the engineer and for EPLAN to a client that
+/// sent a progress token.
 /// The Host's own services in process, over in-memory streams, with a fake Bridge and approval channel.
 /// </summary>
 [Trait("Size", "Medium")]
@@ -51,9 +52,6 @@ public sealed class WriteProgressBindingTests : IDisposable
     [Fact]
     public async Task AToolsProgressParameter_IsNotAnArgument_AndCarriesTheWaitToTheClient()
     {
-        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var toServer = new Pipe();
-        var toClient = new Pipe();
         var progress = new RecordedProgress();
         var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted)
         {
@@ -65,6 +63,42 @@ public sealed class WriteProgressBindingTests : IDisposable
                 SpinWait.SpinUntil(() => progress.Values.Count >= 2, TimeSpan.FromSeconds(10));
             },
         };
+
+        (McpClientTool tool, CallToolResult result) = await CallAsync(dialog, progress);
+
+        Assert.Equal("{}", JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!["properties"]!.ToJsonString());
+        Assert.NotEqual(true, result.IsError);
+        Assert.Equal(ExecutionState.Committed, Assert.IsType<TextContentBlock>(Assert.Single(result.Content)).Text);
+        Assert.Equal(
+            ["Waiting for the engineer's approval in EPLAN (15 s of 120 s)", "Waiting for the engineer's approval in EPLAN (30 s of 120 s)"],
+            await MessagesAsync(progress, 2, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task TheWaitForEplan_ReachesTheClientAsTheBridgesStepsAndHeartbeats()
+    {
+        var progress = new RecordedProgress();
+        _bridge.DuringWrite = bridge =>
+        {
+            bridge!.Report(new ProgressNotification { RequestId = "r", Progress = 0, Total = 2, Message = "Exporting page 1 of 2" });
+            _time.Advance(TimeSpan.FromSeconds(6));
+            SpinWait.SpinUntil(() => progress.Values.Count >= 2, TimeSpan.FromSeconds(10)); // as above: before the result
+        };
+
+        (_, CallToolResult result) = await CallAsync(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted), progress);
+
+        Assert.NotEqual(true, result.IsError);
+        Assert.Equal(
+            ["Exporting page 1 of 2", "Exporting page 1 of 2 (5 s)"],
+            await MessagesAsync(progress, 2, TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>Calls the test tool through an MCP client, which sends a progress token, while the engineer is asked in <paramref name="dialog"/>.</summary>
+    private async Task<(McpClientTool Tool, CallToolResult Result)> CallAsync(FakeApprovalChannel dialog, RecordedProgress progress)
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var toServer = new Pipe();
+        var toClient = new Pipe();
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton(_locations).AddSingleton<TimeProvider>(_time);
@@ -82,14 +116,7 @@ public sealed class WriteProgressBindingTests : IDisposable
         {
             await using McpClient client = await McpClient.CreateAsync(new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: cancellationToken);
             McpClientTool tool = (await client.ListToolsAsync(cancellationToken: cancellationToken)).Single(t => t.Name == Tool);
-            CallToolResult result = await client.CallToolAsync(Tool, new Dictionary<string, object?>(), progress, cancellationToken: cancellationToken);
-
-            Assert.Equal("{}", JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!["properties"]!.ToJsonString());
-            Assert.NotEqual(true, result.IsError);
-            Assert.Equal(ExecutionState.Committed, Assert.IsType<TextContentBlock>(Assert.Single(result.Content)).Text);
-            Assert.Equal(
-                ["Waiting for the engineer's approval in EPLAN (15 s of 120 s)", "Waiting for the engineer's approval in EPLAN (30 s of 120 s)"],
-                await MessagesAsync(progress, 2, cancellationToken));
+            return (tool, await client.CallToolAsync(Tool, new Dictionary<string, object?>(), progress, cancellationToken: cancellationToken));
         }
         finally
         {
