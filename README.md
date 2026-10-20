@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：写入前审批，事后可审计，出错可回滚，在 EPLAN 中可以用 Ctrl+Z 撤销。
 
-> **状态：M2 只读核心已达到完成标准**（2026-10-19）。13 个只读工具（项目、页面、设备、连接、部件、系统消息、检查结果、多实例选择，[M2 设计](docs/design/2026-10-18-m2-read-core.md)）在 EPLAN 2026 Electric P8 上对示例项目的 scratch 副本实机验证通过，读取不改动项目（[api-notes A12](docs/eplan/api-notes.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)）。[Agent 评测 v0](evals/README.md) 用 Claude Sonnet 5.5 完成全部 21 题：开发集 15/15，保留集 6/6（单次运行）。遗留：评测的多次重复运行、Large 测试，以及 M1 的 S4 审批表单人工确认、S5。**下一步**：M3 安全写入，先由项目负责人决定 ADR-0009（支持的 EPLAN 版本）和 ADR-0010（写入结果与恢复）。M1 端到端骨架于 2026-10-18 达到完成标准（[api-notes A10](docs/eplan/api-notes.md#a10-m1-骨架的实机验证2026-10-18)）。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：M2 只读核心已达到完成标准**（2026-10-19）。13 个只读工具（项目、页面、设备、连接、部件、系统消息、检查结果、多实例选择，[M2 设计](docs/design/2026-10-18-m2-read-core.md)）在 EPLAN 2026 Electric P8 上对示例项目的 scratch 副本实机验证通过，读取不改动项目（[api-notes A12](docs/eplan/api-notes.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)）。[Agent 评测 v0](evals/README.md) 用 Claude Sonnet 5.5 完成全部 21 题：开发集 15/15，保留集 6/6（单次运行）。之后每题重复 3 次也全部答对；只读工具的 [Large 测试](tests/EplanMcp.Large.Tests/README.md) 在开发机上手动运行。遗留：M1 的 S4 审批表单人工确认、S5。**下一步**：M3 安全写入，先由项目负责人决定 ADR-0009（支持的 EPLAN 版本）和 ADR-0010（写入结果与恢复）。M1 端到端骨架于 2026-10-18 达到完成标准（[api-notes A10](docs/eplan/api-notes.md#a10-m1-骨架的实机验证2026-10-18)）。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 
