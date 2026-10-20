@@ -41,7 +41,7 @@ public sealed class SessionToolsTests
         CallToolResult result = await Status();
 
         JsonElement data = result.StructuredContent!.Value;
-        Assert.NotEqual(true, result.IsError);
+        ToolResultAssert.Succeeded(result);
         Assert.False(data.GetProperty("connected").GetBoolean());
         Assert.Equal(JsonValueKind.Null, data.GetProperty("eplan").ValueKind);
         Assert.Contains("start EPLAN", data.GetProperty("hint").GetString(), StringComparison.Ordinal);

@@ -58,7 +58,7 @@ internal sealed class WriteToolHarness : IDisposable
 
     public static JsonElement Structured(CallToolResult result)
     {
-        Assert.NotEqual(true, result.IsError);
+        ToolResultAssert.Succeeded(result);
         return result.StructuredContent!.Value;
     }
 }
