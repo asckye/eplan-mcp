@@ -37,6 +37,7 @@ public sealed partial class ModelTextTests
     [
         ("EplanMcp.Host.Doctor.DoctorChecks", "doctor prints each check in Chinese and English for the engineer; the model never sees it."),
         ("EplanMcp.Host.Audit.AuditCommand", "audit verify prints its result in Chinese or English for the engineer; the model never sees it."),
+        ("EplanMcp.Host.Safety.ApprovalTexts", "the approval dialog in EPLAN shows its texts in Chinese or English for the engineer; the model never sees them."),
     ];
 
     private static readonly JsonSerializerOptions _readableJson = new(McpJsonUtilities.DefaultOptions)

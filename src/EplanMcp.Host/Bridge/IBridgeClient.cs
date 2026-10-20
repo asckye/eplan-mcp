@@ -19,6 +19,12 @@ internal interface IBridgeClient
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken);
 
     /// <summary>
+    /// <see cref="InvokeAsync{TArgs, TData}(string, TArgs, CancellationToken)"/> waiting up to <paramref name="timeout"/>
+    /// instead of the usual call timeout, for an operation that waits for the engineer (approval.ask).
+    /// </summary>
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Runs a write's execute operation under <paramref name="requestId"/>, never sending it twice (ADR-0010). After a
     /// timeout, a lost connection or cancellation it fetches the outcome with outcome.get until
     /// <paramref name="limit"/>. Throws <see cref="BridgeCallException"/> whose error carries <c>Execution</c>;

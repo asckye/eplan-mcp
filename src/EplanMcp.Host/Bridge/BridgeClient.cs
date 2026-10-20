@@ -78,7 +78,10 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             },
             cancellationToken);
 
-    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken)
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken) =>
+        InvokeAsync<TArgs, TData>(operation, args, _callTimeout, cancellationToken);
+
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, CancellationToken cancellationToken)
     {
         string correlationId = Guid.NewGuid().ToString("N");
         return RunExclusiveAsync(
@@ -110,7 +113,8 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
                     throw new BridgeCallException(BridgeErrors.Internal(correlationId));
                 }
             },
-            cancellationToken);
+            cancellationToken,
+            timeout);
     }
 
     public async ValueTask DisposeAsync()
@@ -119,7 +123,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         _queue.Dispose();
     }
 
-    private async Task<T> RunExclusiveAsync<T>(Func<CancellationToken, Task<T>> body, CancellationToken cancellationToken)
+    private async Task<T> RunExclusiveAsync<T>(Func<CancellationToken, Task<T>> body, CancellationToken cancellationToken, TimeSpan? callTimeout = null)
     {
         if (!await _queue.WaitAsync(_queueTimeout, cancellationToken).ConfigureAwait(false))
         {
@@ -128,8 +132,9 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
         try
         {
+            TimeSpan limit = callTimeout ?? _callTimeout;
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(_callTimeout);
+            timeout.CancelAfter(limit);
             try
             {
                 return await body(timeout.Token).ConfigureAwait(false);
@@ -138,7 +143,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             {
                 await DropAsync().ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
-                throw new BridgeCallException(BridgeErrors.Timeout(_callTimeout));
+                throw new BridgeCallException(BridgeErrors.Timeout(limit));
             }
         }
         finally
