@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.PageDeletePlan"/> and of <c>page.delete.execute</c>.</summary>
+/// <summary>Arguments of <see cref="OperationNames.PageDeletePlan"/> and <see cref="OperationNames.PageDeleteExecute"/>.</summary>
 public sealed class PageDeleteArgs
 {
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>

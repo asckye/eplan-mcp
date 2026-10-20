@@ -337,6 +337,15 @@ public sealed class SerializerCompatibilityTests
             Backup = new BackupTarget { Path = @"C:\Users\u\EplanMcp\backups\Line1\20261021T083000123Z\Line1.elk", MaxSeconds = 31 },
         },
         new PageDeleteArgs(),
+        new PageDeleteData
+        {
+            Project = "项目 二",
+            Pages = [new DeletedPage { Name = "=GAA+A1&EFS1/1", Type = "Circuit", Functions = 59 }],
+            Orphaned = [new OrphanedDevice { Tag = "+A1-WE1", FunctionsLeft = 6, Pages = ["=GAA+A1&EFS1/2"] }],
+            OrphanedCount = 4,
+            Warning = "w",
+        },
+        new PageDeleteData(),
     ];
 
     [Theory]
