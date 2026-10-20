@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `core` |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 8 步；依赖第 5 步的导出目录，进度和取消依赖第 3、4 步） |
+| 状态 | Proposed（M4 第 8 步；已实现，待实机验证；取消时通知 Bridge 依赖第 4 步） |
 
 ## 1. 这个工具解决什么任务
 "把这三页导出成 PDF 给我看""整个项目出一份 PDF"。代理把页或整个项目导出为一个 PDF 文件，得到文件所在的目录，交给工程师查看或转发。导出不改动项目的设计数据（S11，A16），只在服务器新建的目录中写文件，所以是 Read 级，不需要审批；它会写文件，注解如实标为 `readOnlyHint: false`（ADR-0012）。本规格第 5 节的"导出目录"也适用于 `eplan_export_dxf`、`eplan_export_image`。
@@ -50,7 +50,7 @@
 |---|---|---|
 | `INVALID_ARGUMENT` | `pages` 为空数组、超过 50 项或有重复；`file_name` 不合法；`scheme` 不存在 | `metadata.violations` 列出全部问题；方案不存在时 `metadata.candidates` 列出可用的方案（最多 20 个），提示省略 `scheme` 用当前的方案 |
 | `PAGE_NOT_FOUND` / `AMBIGUOUS_NAME` | 有页名找不到，或只差大小写的页有多个 | 同 `eplan_connection_generate` |
-| `EPLAN_OPERATION_FAILED` | EPLAN 导出时报错；或者导出后目录中有链接、联接点（第 5 节） | 附带 EPLAN 的系统消息；说明没有留下文件，目录已删除 |
+| `EPLAN_OPERATION_FAILED` | EPLAN 导出时报错；或者导出后目录中有链接、联接点（第 5 节），或者没有文件 | 附带 EPLAN 的系统消息；说明没有留下文件，目录已删除 |
 | `TIMEOUT` | 超过 300 秒 | 提示减少页数，分几次导出 |
 | `PROJECT_NOT_OPEN` / `AMBIGUOUS_NAME` | 项目解析失败 | 同 `eplan_project_get` |
 | 连接与授权类错误、`INTERNAL` | 同 `eplan_project_list` | 同错误码表 |

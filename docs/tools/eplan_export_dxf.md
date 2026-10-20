@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full` |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 8 步；依赖第 5 步的导出目录，进度和取消依赖第 3、4 步） |
+| 状态 | Proposed（M4 第 8 步；已实现，待实机验证；取消时通知 Bridge 依赖第 4 步） |
 
 ## 1. 这个工具解决什么任务
 "把电路图导出成 DXF 给机械那边"。代理把页或整个项目导出为 DXF 或 DWG 文件（每页一个），得到文件所在的目录。DXF 还是 DWG 由 EPLAN 的导出方案决定。与 `eplan_export_pdf` 一样是 Read 级，只在服务器新建的目录中写文件。DXF 主要交给其他 CAD 软件，不是代理日常会用的，所以放在 `full` Profile。
