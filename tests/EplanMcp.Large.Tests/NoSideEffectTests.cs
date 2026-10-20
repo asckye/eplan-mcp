@@ -22,6 +22,8 @@ public sealed class NoSideEffectTests(LiveEplan eplan)
         await eplan.CallAsync("eplan_part_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_message_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_check_list", new() { ["limit"] = 200 });
+        await eplan.CallAsync("eplan_macro_list", new() { ["limit"] = 200 });
+        await eplan.CallAsync("eplan_macro_get", new() { ["macro"] = MacroTests.FeedbackControl });
 
         Dictionary<string, (long Size, DateTime Written)> after = ProjectFiles();
         string[] changed = [.. after.Where(f => !before.TryGetValue(f.Key, out var old) || old != f.Value).Select(f => f.Key).Concat(before.Keys.Except(after.Keys))];

@@ -33,15 +33,18 @@
       { "tag": "=+A1-QA1", "visibleTag": "-QA1", "category": "NoContact", "main": false },
       { "tag": "+-WG6", "visibleTag": "-WG6", "category": "Cable", "main": true }
     ],
+    "deviceCount": 8,
     "objectCount": 28
   },
   "truncated": false,
-  "hint": "Tags take the target page's structure when inserted; with numbering 'number' EPLAN assigns free tags."
+  "hint": null
 }
 ```
 - `representations`：宏有的表达类型，以及每种类型的变体编号（`GetVariants`）。电路图页用 `MultiLine`。
 - `size`：宏外框的宽和高，单位毫米。插入点对应外框的左上角（A14），代理据此选择插入位置。
 - `devices`：宏中的功能（`Objects` 中的 `Function`，去掉类别为 `Wire` 的连接线），按完整标识去重，最多 50 个。示例宏有 19 个功能，去掉连接线并去重后是 8 个。标识是宏自己的占位写法（如 `+-XG8:?`），插入后结构跟随目标页，编号取决于 `numbering`（A14）。
+- `deviceCount`：宏中不同标识的个数，含没有列出的。设备超过 50 个时 `truncated = true`，`hint` 说明列出了多少。
+- 插入后标识怎样变化（结构跟随目标页、编号），写在字段描述和 `eplan_tool_usage` 中，不放在每次的 `hint` 里。
 - 宏中的名称来自外部数据，经过 ResultShaper。
 - 一行摘要：`Macro found: MultiLine, 6 variants, 8 devices, 52 x 268 mm.`
 

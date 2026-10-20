@@ -36,7 +36,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [CheckTools.ListTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, MacroTools.ListTool, MessageTools.ListTool, PageTools.GetTool, PageTools.ListTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, UsageTools.UsageTool],
+            [CheckTools.ListTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, MacroTools.GetTool, MacroTools.ListTool, MessageTools.ListTool, PageTools.GetTool, PageTools.ListTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, UsageTools.UsageTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
