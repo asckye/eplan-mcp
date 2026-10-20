@@ -159,6 +159,17 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A17. M3a 写工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
+`eplan_page_create`、`eplan_page_update`、`eplan_device_update` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），另有一份 scratch 之外的副本只用来验证拒绝。步骤和结果记在 PR #109、#114、#121 中。
+- **Q1**：对 scratch 之外的副本建页返回 `POLICY_DENIED`、`not_started`，设计数据和审计都不变。— 实测。
+- **Q3：一次写入就是一个撤销步骤**：四次建页（其中一次建 4 页）后按四次 Ctrl+Z，依次撤销四次写入；改页描述、改设备标识同样一一对应。— 实测。
+- **Q2：事务中失败时整体回滚，并且不留空的撤销步骤**：把电缆 `+A1-WE1` 改名为 `=F+A1-WE19` 时，EPLAN 把名称改成了 `+A1-WE19`（电缆不用 `=`，A13），读回不一致，返回 `INVALID_ARGUMENT`、`rolled_back`；电缆和它的 6 个辅助功能都保持原名。随后的第一次 Ctrl+Z 撤销的是之前那次成功的改名，说明回滚掉的写入没有在撤销列表中留下步骤。— 实测。
+- `Page.Create` 支持 `Circuit`、`CircuitSingleLine`、`Overview`、`Graphics` 四种类型；页描述中的 `;`、`@` 原样写入并读回（`a;b@c`）。— 实测。
+- 只改一种语言的页描述时，其他语言保持不变；清除一页唯一的一种语言后，描述为空。— 实测。
+- 在调度器中给主功能和全部辅助功能的 `Function.Name` 赋值：另一页上的辅助功能（交叉引用）跟着改名，部件引用和 6 个连接都不变。— 实测（`=F+A2-KF1` → `=F+A2-KF19`）。
+- 写入只产生 `execution_started`、`execution_result` 两条审计记录；被拒绝的调用（策略、重名、找不到）不写审计。`eplanmcp audit verify` 通过。— 实测。
+- 待查：对 EPLAN 中的当前项目（`M3_OUT`）调用任何工具（包括只读的 `eplan_page_list`）后，它的 `User.eod` / `User.eox` 都被改写；同时打开的非当前项目（`M3_PC`）上，连续三次读取都没有改写。A12 中当前项目（评测夹具）也没有被改写，原因不明。只涉及 EPLAN 按用户保存的数据，设计数据不变。— 实测。
+
 ### A16. 检查、报表、导出（spike S11，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S11](../../spikes/S11-workflow-apis/README.md)。
 - **`Check.VerifyProject(project, "", false)` 能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销**：检查消息 0 → 20 条 → 回到 0 条。用时 2.7–4.7 秒，改写 `Message`、`Project`、`Blob`、`User` 数据文件（同 A11）。`VerifyPages`（2 页）0.2 秒。— S11。
