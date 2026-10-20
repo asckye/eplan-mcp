@@ -8,7 +8,7 @@ namespace EplanMcp.Host.Doctor;
 
 /// <summary>
 /// The checks behind <c>eplanmcp doctor</c> (design 4.5). Each turns a pitfall met during the spikes into an
-/// automatic check. Read-only: doctor changes nothing on the machine.
+/// automatic check. Doctor changes nothing on the machine: the one probe file it writes is removed again.
 /// </summary>
 internal static class DoctorChecks
 {
@@ -28,14 +28,66 @@ internal static class DoctorChecks
             : new(DoctorStatus.Info, $"数据目录尚未创建：{root}（首次需要时创建）", $"Data directory not created yet: {root} (created when first needed)");
     }
 
-    /// <summary>A Host started by an MSIX-packaged client inherits package identity and file redirection (api-notes A6).</summary>
-    public static DoctorCheck PackageIdentity()
+    /// <summary>
+    /// Whether this process runs in an MSIX package's environment: a Host started by a packaged client such as the
+    /// Claude desktop app has its writes to %LOCALAPPDATA% redirected into the package's LocalCache (api-notes A6),
+    /// even without package identity (spike S5). So doctor looks at where a probe file lands. EplanMcp itself only
+    /// uses the data directory, which is never redirected.
+    /// </summary>
+    public static DoctorCheck MsixEnvironment(string localAppData) =>
+        MsixEnvironment(CurrentPackageFullName(), RedirectingPackage(localAppData));
+
+    internal static DoctorCheck MsixEnvironment(string? identity, string? redirectingPackage)
     {
-        string? package = CurrentPackageFullName();
-        return package is null
-            ? new(DoctorStatus.Ok, "当前进程没有 MSIX 包身份", "This process has no MSIX package identity")
-            : new(DoctorStatus.Info, $"当前进程带有 MSIX 包身份 {package}：写入 %LOCALAPPDATA% 会被重定向，EplanMcp 不使用该目录", $"This process runs with MSIX package identity {package}: writes to %LOCALAPPDATA% are redirected; EplanMcp does not use it");
+        if (redirectingPackage is null && identity is null)
+        {
+            return new(DoctorStatus.Ok, "不在 MSIX 包环境中：写入 %LOCALAPPDATA% 没有被重定向", "Not in an MSIX package environment: writes to %LOCALAPPDATA% are not redirected");
+        }
+
+        string package = redirectingPackage ?? identity!;
+        string chinese = identity is null ? "当前进程没有包身份" : $"当前进程的包身份是 {identity}";
+        string english = identity is null ? "this process has no package identity" : $"this process has package identity {identity}";
+        return new(
+            DoctorStatus.Info,
+            $"在 MSIX 包 {package} 的环境中（例如由 Claude 桌面版启动），{chinese}：写入 %LOCALAPPDATA% 会被重定向到包的 LocalCache。EplanMcp 只用数据目录，不受影响",
+            $"In the environment of MSIX package {package} (started by the Claude desktop app, for example); {english}: writes to %LOCALAPPDATA% are redirected into the package's LocalCache. EplanMcp only uses the data directory and is not affected");
     }
+
+    /// <summary>
+    /// The package whose LocalCache a probe file written to <paramref name="localAppData"/> lands in, or null when it
+    /// is not redirected or cannot be written. The probe is removed again either way.
+    /// </summary>
+    internal static string? RedirectingPackage(string localAppData)
+    {
+        string name = $"eplanmcp-doctor-{Guid.NewGuid():N}.tmp";
+        string probe = Path.Combine(localAppData, name);
+        try
+        {
+            File.WriteAllBytes(probe, []);
+            return FindRedirected(Path.Combine(localAppData, "Packages"), name);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(probe);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // a zero-byte file named for doctor; nothing depends on it
+            }
+        }
+    }
+
+    /// <summary>The package under <paramref name="packages"/> whose <c>LocalCache\Local</c> holds <paramref name="name"/>.</summary>
+    internal static string? FindRedirected(string packages, string name) =>
+        Directory.Exists(packages)
+            ? Directory.EnumerateDirectories(packages).FirstOrDefault(p => File.Exists(Path.Combine(p, "LocalCache", "Local", name))) is { } package ? Path.GetFileName(package) : null
+            : null;
 
     public static IEnumerable<DoctorCheck> EplanInstallations(string programFiles)
     {

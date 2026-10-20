@@ -27,4 +27,5 @@
 - 省略 `language` 时，EPLAN 界面语言中没有的多语言文本（如只有德文、英文的部件描述）改为返回其他语言的文本（先英文），并在旁边的 `descriptionLanguage`、`textLanguage` 或 `language` 字段注明语言；显式传入 `language` 时行为不变。
 
 ### Fixed
+- `eplanmcp doctor` 由 Claude 桌面版启动时，不再误报"没有 MSIX 包身份"：这类进程没有包身份，写入 `%LOCALAPPDATA%` 却仍被重定向，现在直接探测重定向。
 - 按页或类别列设备、列页上的设备时，同一设备不再出现两次（EPLAN 在过滤时会多返回黑盒里的同名功能）。
