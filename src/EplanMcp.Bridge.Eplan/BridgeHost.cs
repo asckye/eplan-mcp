@@ -58,6 +58,7 @@ internal static class BridgeHost
         var messages = new EplanProjectMessageReader();
         var checker = new EplanCheckRunner();
         var reports = new EplanReportUpdater();
+        var exporter = new EplanExporter();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -87,6 +88,11 @@ internal static class BridgeHost
             new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
             new ReportUpdatePlanOperation(catalog, pages, reports),
             new ReportUpdateExecuteOperation(catalog, pages, reports, transactions),
+            .. new[] { ExportKind.Pdf, ExportKind.Dxf, ExportKind.Image }.SelectMany(kind => new IOperation[]
+            {
+                new ExportPlanOperation(kind, catalog, pages, exporter),
+                new ExportRunOperation(kind, catalog, pages, exporter),
+            }),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
