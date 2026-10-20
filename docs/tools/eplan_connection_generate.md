@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `connection` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 5 步；实现依赖 M3a 第 10 步的 `TransactionScope`） |
+| 状态 | Proposed（M3b 第 5 步；已实现，等待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把新放的回路连起来""这一页的连线生成连接"。在 EPLAN 中，两个连接点在同一条线上相对时，图上会画出自动连线，但还没有 `Connection` 对象（A3），导线清单、端子图等报表也就看不到它们。代理插入宏、放好设备之后，用它在指定的页上执行"生成连接"，让画出的连线成为真正的连接（M3b 设计 4.3，Q4）。
@@ -43,12 +43,12 @@
 }
 ```
 - `before`、`after`：执行前后页上的连接数（2D 连接，在内存中按页过滤，A11）。
-- `added`、`removed`：执行前后比较得出的连接，端点的写法同 `eplan_connection_list`。所有页合计最多列出 100 条，超出时 `truncated = true`，`hint` 给出总数，提示用 `eplan_connection_list` 的 `page` 查看。
+- `added`、`removed`：执行前后比较得出的连接，端点的写法同 `eplan_connection_list`。所有页合计最多列出 100 条，删除的优先（"只更新会不会删除连接"没有验证，见第 5 节），超出时 `truncated = true`，`hint` 给出总数，提示用 `eplan_connection_list` 的 `page` 查看。
 - 没有任何变化时（连接已经齐全，S10），仍然返回 `committed`，`added`、`removed` 为空，`hint` 说明已是最新。
 - **`dry_run`**：无法预先算出 EPLAN 会生成哪些连接，所以只返回 `before`。`added`、`removed`、`after` 为 `null`，`hint` 说明这一点。
 - 标识按项目数据处理，经过 ResultShaper。
-- 一行摘要：
-  - `Generated connections on 1 page of 'Line1': 9 added, 0 removed; Ctrl+Z in EPLAN undoes this step.`
+- 一行摘要（只有计数，不回显项目名，架构 8.5）：
+  - `Generated connections on 1 page: 9 added, 0 removed; Ctrl+Z in EPLAN undoes this step.`
   - `Dry run: 1 page has 0 connections now; the new ones are known only after running. Nothing was changed.`
 
 ## 4. 错误
@@ -58,7 +58,7 @@
 | `PAGE_NOT_FOUND` | 有页名找不到 | `not_started` | `metadata.missing` 列出全部找不到的页名 |
 | `AMBIGUOUS_NAME` | 精确匹配找不到，而不区分大小写时有多个页匹配 | `not_started` | 同 `eplan_page_get` |
 | `PLAN_STALE` | 规划之后，这些页上的对象或连接发生了变化 | `not_started` | 提示重新调用 |
-| `EPLAN_OPERATION_FAILED` | EPLAN 生成连接时报错（`BaseException`） | `rolled_back` | 附带 EPLAN 的系统消息 |
+| `EPLAN_OPERATION_FAILED` | EPLAN 生成连接时报错（`BaseException`） | `rolled_back` | `metadata.eplanMessage` 附带 EPLAN 的消息（最多 500 字符） |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
 ## 5. 实现要点
@@ -70,7 +70,7 @@
 - **执行**：在 `TransactionScope` 中执行：
   1. 记下各页的连接；
   2. `new Generate().Connections(pages, false)`；
-  3. 再读各页的连接，比较出新增和删除的连接；
+  3. 再读各页的连接，比较出新增和删除的连接。一条连接按两端的（功能，连接点）比较，不分起止方向，重复的按次数计：S10 只验证了已齐全的页连接数不变，没有验证连接对象和方向是否保持；
   4. `Commit()`，再 `CloseUndo()`。
 - **已验证**（S9、S10，api-notes A13、A14）：
   - 生成连接把画出的自动连线变成 `Connection`；

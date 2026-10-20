@@ -51,7 +51,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_check_list", "eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_device_update", "eplan_macro_get", "eplan_macro_list", "eplan_message_list", "eplan_page_create", "eplan_page_get", "eplan_page_list", "eplan_page_update", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_select", "eplan_session_status", "eplan_tool_usage"],
+            ["eplan_check_list", "eplan_connection_generate", "eplan_connection_list", "eplan_device_get", "eplan_device_list", "eplan_device_update", "eplan_macro_get", "eplan_macro_list", "eplan_message_list", "eplan_page_create", "eplan_page_get", "eplan_page_list", "eplan_page_update", "eplan_part_list", "eplan_project_get", "eplan_project_list", "eplan_session_select", "eplan_session_status", "eplan_tool_usage"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
