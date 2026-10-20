@@ -16,6 +16,7 @@
   - 对本项目的影响：不能把 Remote Client 的返回值当作操作成功的依据。
 - **EPLAN 系统日志**在 `C:\Users\Public\EPLAN\<变体>\EplLog.eldb`。它是 SQLite 数据库，文本为 UTF-8，消息在表 `TSysMsg_v100`（字段包括 `Time`、`ErrorLevel`、`Module`、`Description`），会话在表 `TSysSession_v100`。— 只读打开数据库验证。
 - **Remote Client 连接**：`EplanRemoteClient.GetActiveEplanServersOnLocalMachine` 返回空列表，但直接连接 `localhost:49152` 成功。正在运行的实例登记在 `HKCU\Software\EPLAN\RemoteServer\<端口>`（`ProcessID`、`EplanFullPath`、`EplanProductVariant`）。— 实机验证。
+  - 2026-10-20（Electric P8）：EPLAN 的 49152 端口**只监听各网卡地址，没有监听 127.0.0.1**，连接 `localhost` 被拒绝，改用本机网卡地址后成功。端口因此对局域网开放，而 Remote Client 没有 TLS（B4）。— `netstat`，spike S9。
 
 ### A2. 授权（`Eplan.EplApi.ApplicationFramework.License`）
 - `new License()` 之后，`GetLicenseModules(ref Dictionary<LicenseOptions,bool>)` 返回全部授权选项及其可用状态；`HasOption(LicenseOptions)` 只做检查，不占用授权。不要调用 `LockOption`，它会占用一个授权直到 EPLAN 退出。— 实机调用，见 [API 文档](https://eplan.help/en-us/Infoportal/Content/api/2025/Eplan.EplApi.AFu~Eplan.EplApi.ApplicationFramework.License~GetLicenseModules.html)。
@@ -41,6 +42,7 @@
 
 ### A7. 回滚与撤销（spike S2，2026-10-13，均在插件 action 中执行）
 - `SafetyPoint` 和 `Transaction` 的各种放弃方式（不提交释放、`Rollback()`、`Abort()`、`Start()` 后释放、异常）都能撤回新建的页面，也能恢复被修改的页面属性。— [spike S2](../../spikes/S2-transactions/README.md)。
+  - ⚠️ 不能推广到所有写操作：插入宏只有 `SafetyPoint` 能撤回，按符号新建功能只能在 `Transaction` 中进行，见 A13。
 - **`UndoStep` 在 `SafetyPoint` 外面创建时，`SafetyPoint` 无法回滚**，包括显式调用 `Rollback()`。`UndoStep` 在 `SafetyPoint` 里面创建，或者 `UndoStep` 包住 `Transaction` 时，回滚正常。— spike S2。
 - `UndoStep.DoUndo()` 只在 `CloseUndo()` **之前**调用才有效；在 `CloseUndo()` 或 `CloseOpenUndo()` 之后调用，以及 `DoUndo(true)`，都没有效果。— spike S2。
 - action 结束后执行 `XEsUndoAction`（GUI 的撤销，即 Ctrl+Z），会撤销带有已关闭 `UndoStep` 的 AI 修改。每次 action 中的修改各占一个撤销步骤；**此前的撤销历史保持完整**。— spike S2。
@@ -142,6 +144,21 @@
 - **带过滤器的 `GetFunctions` 会多返回同名的主功能**：不带过滤器时，示例项目每个完整标识只有一个主功能（504 个）；带 `FunctionsFilter.Page` 或 `FunctionCategory` 时，还会返回没有 `VisibleName` 的同名主功能。黑盒里的功能（`=EC1+A3-EC1-BT2`：`Blackbox` 加一个 `AnalogSensor`）和第二种表达（`=EC1+A3-EC1-MA2` 的两个 `Motor`）都是这样。`=EC1+A3&EFS1/1` 页因此有 95 个主功能，但只有 85 个不同的标识。— 实测（`eplan_device_list` 的 `page` 和 `category` 过滤，与不过滤的列表对比）。
   - 对本项目的影响：设备列表和页上的设备按完整标识合并为一行，保留有显示标识的那一个（`DeviceTags.OnePerTag`）。
 
+### A13. 写入 API 的实机验证（spike S9，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在 action 中）
+示例项目的 scratch 副本。详细数据见 [spike S9](../../spikes/S9-write-api/README.md)。
+- 🔴 **按库符号新建功能不能在 `SafetyPoint` 中进行**：`new Function().Create(page, symbolVariant)` 及带区域的重载，在 `SafetyPoint` 中总是抛出 `LockingExceptionFailedLockAttempt`（"S063176"），锁不住的是新建的功能本身（`InvalidHandleException`）。预先锁定页、`Project.LockAllObjects()`、`UndoStep` 在内、在 `SafetyPoint` 中嵌套 `Transaction` 都没有用。不加包装或在 `Transaction` 中则成功；`Transaction` 不提交（`Abort()` 或直接释放）后，项目中没有这个功能。EPLAN 系统日志中没有记录。— S9 r2–r12。
+- 🔴 **插入窗口宏只能用 `SafetyPoint` 回滚**：`Insert.WindowMacro` 在 `SafetyPoint` 中插入后 `Rollback()`，插入的 28 个对象全部失效；在 `Transaction` 中插入后 `Abort()`，对象全部**留在页上**。— S9 r10、r11。
+  - 对本项目的影响：A7 中 S2 的结论（两种包装都能回滚）只对建页、改属性成立。S2 定下的 `LockingStep → SafetyPoint → UndoStep` 适用于 M3a 的工具和插入宏，**不适用于按符号放置设备**。M3b 要在"用宏放置"和"按符号放置时改用 `UndoStep → Transaction`、且同一次写入不插宏"之间选择。
+- 在 `Transaction` 中新建的功能，提交之前 `DMObjectsFinder.GetFunctions` 找不到（带不带过滤器都一样）。— S9 r10、r11。
+- `SafetyPoint` 的公开成员只有 `Create`、`Start`、`Commit`、`Rollback`、`GetAutoLockingState`、`Dispose`，**不能关闭自动锁定**。`Insert` 提供 `WindowMacro`、`SymbolMacro`、`PageMacro`、`PrePlanningMacro`。— 反射。
+- **建页**：`Page.Create(project, DocumentType.Circuit, PagePropertyList)` 中，页名前缀对应 `=` → `DESIGNATION_PLANT`、`+` → `DESIGNATION_LOCATION`、`&` → `DESIGNATION_DOCTYPE`、`/` → `PAGE_COUNTER`。**项目页结构中没有的部分（如 `DESIGNATION_FUNCTIONALASSIGNMENT`）被静默丢掉**；与已有页重名时抛出 `NameConflictException`（"S063054"）。`Page.Name` 可以赋值完整页名，会被拆成各部分。— S9。
+  - 对本项目的影响：建页后读回页名并与请求比较，不一致就回滚并报参数错误。
+- **改设备标识**：只给主功能的 `Name` 赋值时，辅助功能（包括其他页上的交叉引用）保留旧标识并**脱离设备**；先读出 `SubFunctions`，再把主功能和全部辅助功能改成同一个标识，设备保持完整。**`Function.Name` 不检查重名**（同一页上可以有两个 `=GAA+A1-KF94` 主功能），并且会**丢掉该类别不使用的结构部分**（给电缆赋值 `=F+A2-KF19` 得到 `+A2-KF19`）。`SafetyPoint.Rollback()` 能恢复主功能和全部辅助功能的标识。— S9。
+  - 对本项目的影响：改名必须连同辅助功能一起改；规划阶段自己检查新标识是否已占用；执行后读回比较。
+- 按符号新建的功能 `VisibleName` 为空，页面上不显示标识（与 A3 一致）；宏插入的设备有显示标识（`-QA1`）。宏中的设备取目标页的结构（`=GAA+A1-QA1`），端子没有编号（`+A1-XG5:?`）。— S9。
+- 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
+- **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
+
 ---
 
 ## B. 官方文档与反射核实的事实（2026-10-12）
@@ -179,6 +196,8 @@
 - 传输层是旧版 C-core gRPC（`Grpc.Core`），使用 `ChannelCredentials.Insecure`（没有 TLS），附带一个双工回调流。客户端进程还需要 `System.Memory` 和 `System.Runtime.CompilerServices.Unsafe`，这两个 Bin 里都没有。— 反射 + IL。
 - 服务器端：需要开启"允许通过 Remote Client 进行远程访问"（`STATION.Remoting.AllowLocalAccess`）；EPLAN 不能以 `/NoRemoting` 启动；默认端口 49152，可以用 `/EplanServerPort` 指定（49152–65535）。— `2026/EPLANRemoting.html`。
 - 远程调用 `ExecuteScript` 时，即使脚本编译失败也会返回成功（见 A1）。
+- 客户端（net481 x64）引用 EPLAN Bin 中的 `RemoteClientu`、`Remotingu`、`Grpc.Core.Api`、`Newtonsoft.Json`，另加 NuGet 包 `System.Memory` 4.5.5（带来 `Unsafe` 等）即可运行。**gRPC 会使用 `HTTP_PROXY` 等代理环境变量**，设置了代理时要在客户端进程内清除，否则连不上本机的 EPLAN。— spike S9 驱动。
+- 通过 `ExecuteAction` 传给 action 的参数中，**含中文的路径没有完整传到**（action 报文件不存在）；ASCII 路径正常。— spike S9。
 
 ### B5. 离线程序（无界面）
 - `Eplan.EplApi.System.EplApplication`（Systemu）：`Init(appModifier[, allowLicenseDlg[, allowLoginDlg]])`、`Exit()`，以及属性 `EplanBinFolder`、`LicenseFile`、`QuietMode`、`StartEplanRemoteServer`（必须在 `Init` 之前设置）。— 反射。
@@ -201,7 +220,7 @@
 - 缺少 `LockingStep` 时抛出 `NoLockingStepException`（派生自 `DataModelException`）。`Project.LockAllObjects()`、`StorableObject.LockObject()` / `SmartLock()`；锁定失败时抛出 `Eplan.EplApi.Base.LockingException`，其 `GetAllFailed2LockAsString()` 列出锁定失败的对象。— 反射 + XML。
 - **撤销**：`UndoManager.CreateUndoStep()` 返回 `UndoStep`（`SetUndoDescription(string)`、`CloseUndo()`、`DoUndo(...)`）。**如果通过 API 修改项目时没有创建 `UndoStep`，EPLAN 会清空撤销历史。** — 反射 + XML。
   - 对本项目的影响：每个写操作都必须创建并关闭 `UndoStep`，否则工程师会失去手工操作的撤销历史。
-- `TransactionManager.CreateTransaction()` 返回 `Transaction`（`Commit`、`Abort`、`Store`）。— 反射。与 `SafetyPoint` 的分工尚未验证。
+- `TransactionManager.CreateTransaction()` 返回 `Transaction`（`Commit`、`Abort`、`Store`）。— 反射。与 `SafetyPoint` 的分工见 A7、A13（S9：插入宏只有 `SafetyPoint` 能撤回，按符号新建功能只能用 `Transaction`）。
 - `QuietModeStep(QuietModes)`（AFu）配合 `using` 使用。`QuietModes`：`ShowAllDialogs=0`、`ShowNoDialogs=1`、`ShowSomeDialogs=2`。— 反射。
 
 ### B8. 授权

@@ -21,6 +21,11 @@
   <ItemGroup Label="Development tools">
     <!-- MIT, no dependencies. Reads the agent eval task files (evals/, agent evals design 4.1); never shipped. -->
     <PackageVersion Include="YamlDotNet" Version="18.1.0" />
+    <!--
+      MIT. Spike S9's driver only: EPLAN's Remote Client references System.Memory 4.0.1.2 (this package), which the
+      EPLAN Bin directory lacks (api-notes B4). Never shipped.
+    -->
+    <PackageVersion Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
   <ItemGroup Label="Analyzers">
     <!--
