@@ -67,7 +67,8 @@ internal sealed class PageDestructiveTools
             args,
             (plan, backup) => new PageDeleteArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint, Backup = backup },
             dry_run,
-            PageWriteTools.Limit(args.Pages.Count));
+            PageWriteTools.Limit(args.Pages.Count),
+            "Deleting pages");
         WriteOutcome<PageDeleteData> outcome;
         try
         {
