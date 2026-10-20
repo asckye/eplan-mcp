@@ -68,7 +68,8 @@ internal sealed class ReportWriteTools
             args,
             plan => new ReportUpdateArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint },
             dry_run,
-            Limit);
+            Limit,
+            "Updating reports");
         WriteOutcome<ReportUpdateData> outcome;
         try
         {
