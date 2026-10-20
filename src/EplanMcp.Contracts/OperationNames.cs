@@ -186,6 +186,12 @@ public static class OperationNames
     public const string PageDeletePlan = "page.delete.plan";
 
     /// <summary>
+    /// Backs the project up, then removes the planned pages in one transaction and reads back (ADR-0013). Arguments:
+    /// <see cref="PageDeleteArgs"/> with the fingerprint and the backup target; data: <see cref="PageDeleteData"/>.
+    /// </summary>
+    public const string PageDeleteExecute = "page.delete.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

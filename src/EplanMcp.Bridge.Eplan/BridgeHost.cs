@@ -59,6 +59,7 @@ internal static class BridgeHost
         var checker = new EplanCheckRunner();
         var reports = new EplanReportUpdater();
         var exporter = new EplanExporter();
+        var remover = new EplanPageRemover();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -93,6 +94,8 @@ internal static class BridgeHost
                 new ExportPlanOperation(kind, catalog, pages, exporter),
                 new ExportRunOperation(kind, catalog, pages, exporter),
             }),
+            new PageDeletePlanOperation(catalog, remover),
+            new PageDeleteExecuteOperation(catalog, pages, remover, new EplanProjectBackup(), transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

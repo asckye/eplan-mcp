@@ -2,7 +2,8 @@ namespace EplanMcp.Contracts;
 
 /// <summary>
 /// A device whose main function is on a page being deleted while functions of its tag stay on other pages, without a
-/// main function afterwards (spike S12: a cable's cores). Names are project data.
+/// main function afterwards (spike S12: a cable's cores), as in <see cref="PageDeleteData.Orphaned"/>. Names are
+/// project data.
 /// </summary>
 public sealed class OrphanedDevice
 {
