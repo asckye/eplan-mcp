@@ -22,6 +22,30 @@ EPLAN 2026（你正在使用的界面）
 - EPLAN Electric P8 或 Pro Panel 2026；2024、2025、2027 预计可用，实测后列入支持范围（[ADR-0009](docs/adr/0009-supported-eplan-versions.md)）。2022、2023 暂不支持
 - 包含 **API 扩展**的 EPLAN 授权。具体是哪一种授权（开发者授权或运行时授权）以及签名方式，正在 M1 中验证，见 [ADR 索引](docs/adr/README.md) 中的 ADR-0007。
 
+## 现在怎么用（开发版，只读）
+还没有安装包（M5）；现在要从源码构建。只能读取项目，写入在 M3 中实现。
+
+1. 构建 eplanmcp 和 EPLAN 插件：
+   ```powershell
+   dotnet build src\EplanMcp.Host -c Release
+   dotnet build src\EplanMcp.Bridge.Eplan -c Release
+   ```
+2. 在每个要用的 EPLAN 变体中注册一次插件（会启动 EPLAN）：
+   ```powershell
+   eng\scripts\eplan-addin.ps1 -Action register -Variant 'Electric P8'
+   ```
+3. 在 EPLAN 中打开项目，然后自检，每一项都应是 OK 或 INFO：
+   ```powershell
+   src\EplanMcp.Host\bin\Release\net10.0\eplanmcp.exe doctor
+   ```
+4. 加到 Claude Code（`<仓库目录>` 换成本仓库的完整路径）：
+   ```powershell
+   claude mcp add -s user eplan -- "<仓库目录>\src\EplanMcp.Host\bin\Release\net10.0\eplanmcp.exe" serve
+   ```
+5. 在 Claude Code 中直接用中文提问，例如"这个项目有多少页""-K1 在哪几页上""哪些电机没有部件""=GAA+A1-FC1 的负载侧接到哪些设备"。
+
+可以查询项目概况、页、设备、连接、部件、系统消息和已有的检查结果，共 13 个只读工具，不会修改项目。
+
 ## 开发工具（新的开发电脑上安装）
 
 下面这些工具只用于**开发阶段**，不是产品的依赖，不会随 EplanMcp 发布。除 Maple Mono 字体（SIL OFL 1.1）外，都是 MIT 许可证或官方工具。
