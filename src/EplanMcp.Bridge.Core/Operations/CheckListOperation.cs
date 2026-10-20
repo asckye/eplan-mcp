@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// <see cref="OperationNames.CheckList"/> (docs/tools/eplan_check_list.md): the check messages already stored in the
 /// project, read in one main-thread call. The done filter, the counts, the severity filter and the slice happen
-/// here on plain records, in EPLAN's order. Running a check is a write and belongs to M3 (M2 design Q2).
+/// here on plain records, in EPLAN's order. Running a check is a write: <see cref="CheckRunExecuteOperation"/>.
 /// </summary>
 public sealed class CheckListOperation(IProjectCatalog catalog, IProjectMessageReader reader) : Operation<CheckListArgs, CheckListData>
 {
@@ -47,7 +47,8 @@ public sealed class CheckListOperation(IProjectCatalog catalog, IProjectMessageR
         _ => CheckMessage.Unknown,
     };
 
-    private static CheckMessage ToMessage(ProjectMessageRecord record) => new()
+    /// <summary>One message as the tools list it; eplan_check_run lists its messages the same way.</summary>
+    internal static CheckMessage ToMessage(ProjectMessageRecord record) => new()
     {
         Number = record.Id,
         Severity = Severity(record.Category),

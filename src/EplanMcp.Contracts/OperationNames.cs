@@ -124,6 +124,19 @@ public static class OperationNames
     public const string MacroInsertExecute = "macro.insert.execute";
 
     /// <summary>
+    /// The plan of eplan_check_run: finds the pages and counts the project's check messages, never checks. Arguments:
+    /// <see cref="CheckRunArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string CheckRunPlan = "check.run.plan";
+
+    /// <summary>
+    /// Runs EPLAN's check on the planned pages or the whole project in one transaction, which replaces the project's
+    /// check messages, and reads them back. Arguments: <see cref="CheckRunArgs"/> with the fingerprint; data:
+    /// <see cref="CheckRunData"/>.
+    /// </summary>
+    public const string CheckRunExecute = "check.run.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

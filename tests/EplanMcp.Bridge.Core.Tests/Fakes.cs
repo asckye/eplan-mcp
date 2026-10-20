@@ -495,3 +495,41 @@ internal sealed class FakeConnectionGenerator : IConnectionGenerator
         }
     }
 }
+
+/// <summary>
+/// A project's pages and check messages, checked the way S6 and S11 found EPLAN checks (api-notes A11, A16): a check
+/// replaces the project's messages with <see cref="Found"/>. <see cref="OnRun"/> runs during the check, standing for
+/// whatever happens meanwhile; <see cref="Failure"/> is thrown after the change, like an EPLAN failure midway. Records
+/// every check.
+/// </summary>
+internal sealed class FakeCheckRunner : ICheckRunner, IProjectMessageReader
+{
+    /// <summary>Each page's session identifier, by its exact name, in EPLAN's page order.</summary>
+    public Dictionary<string, string> Pages { get; } = new(StringComparer.Ordinal);
+
+    public List<ProjectMessageRecord> Messages { get; set; } = [];
+
+    public List<ProjectMessageRecord> Found { get; } = [];
+
+    public Action? OnRun { get; set; }
+
+    public Exception? Failure { get; set; }
+
+    public List<(string[]? Pages, string Scheme)> Runs { get; } = [];
+
+    public IReadOnlyList<string> PageIds(string projectPath, IReadOnlyList<string>? pages) =>
+        pages is null ? [.. Pages.Values] : [.. pages.Select(page => Pages[page])];
+
+    public void Run(string projectPath, IReadOnlyList<string>? pages, string scheme)
+    {
+        Runs.Add((pages?.ToArray(), scheme));
+        Messages = [.. Found];
+        OnRun?.Invoke();
+        if (Failure is not null)
+        {
+            throw Failure;
+        }
+    }
+
+    public IReadOnlyList<ProjectMessageRecord> ReadMessages(string projectPath) => [.. Messages];
+}

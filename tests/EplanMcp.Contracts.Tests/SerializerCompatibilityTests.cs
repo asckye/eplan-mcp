@@ -134,6 +134,22 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new MacroInsertData(),
+        new CheckRunArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/1"], Scheme = "检查方案", Fingerprint = "f" },
+        new CheckRunArgs(),
+        new CheckRunData
+        {
+            Project = "Line1",
+            PageCount = 321,
+            Scheme = "检查方案",
+            Before = 2,
+            Messages = [new CheckMessage { Number = 4025, Severity = CheckMessage.Warning, Region = "Connections", Text = "端子 -X1 没有连接", Target = new CheckObject { Kind = "Terminal", Name = "=GAA+A1-X1:1" } }],
+            Total = 20,
+            Errors = 0,
+            Warnings = 6,
+            Hints = 14,
+            Warning = "w",
+        },
+        new CheckRunData(),
         new ProjectListArgs(),
         new ProjectListData
         {
