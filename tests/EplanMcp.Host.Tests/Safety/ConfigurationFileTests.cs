@@ -19,6 +19,30 @@ public sealed class ConfigurationFileTests : IDisposable
         Assert.Equal(DoctorStatus.Ok, check.Status);
         Assert.Contains("(defaults)", check.English, StringComparison.Ordinal);
         Assert.Contains("writes outside scratch: denied", check.English, StringComparison.Ordinal);
+        Assert.Contains("approval deadline 120 s", check.English, StringComparison.Ordinal);
+        Assert.Contains("审批期限 120 秒", check.Chinese, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Doctor_ShowsTheConfiguredApprovalDeadline()
+    {
+        File.WriteAllText(_locations.ConfigFile, """{"approvalTimeoutSeconds":180}""");
+
+        DoctorCheck check = DoctorChecks.Configuration(_locations);
+
+        Assert.Equal(DoctorStatus.Ok, check.Status);
+        Assert.Contains("approval deadline 180 s", check.English, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Doctor_AnApprovalDeadlineOutOfRange_IsAFailure()
+    {
+        File.WriteAllText(_locations.ConfigFile, """{"approvalTimeoutSeconds":30}""");
+
+        DoctorCheck check = DoctorChecks.Configuration(_locations);
+
+        Assert.Equal(DoctorStatus.Failure, check.Status);
+        Assert.Contains("'approvalTimeoutSeconds' must be a whole number of seconds from 60 to 300", check.English, StringComparison.Ordinal);
     }
 
     [Fact]

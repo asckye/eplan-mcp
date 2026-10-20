@@ -25,7 +25,7 @@ public sealed class EplanDialogChannelTests
             Changes = [new PlannedChange { Action = "create", Kind = "page", Name = "=A1&EFS1/5" }],
             Fingerprint = "f1",
         };
-        _question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, ["create page =A1&EFS1/5"], _now + ApprovalService.Timeout);
+        _question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, ["create page =A1&EFS1/5"], _now + HostConfig.DefaultApprovalTimeout);
         Connect([OperationNames.ProjectList, OperationNames.ApprovalAsk]);
         _bridge.Handlers[OperationNames.ApprovalAsk] = args =>
         {
@@ -44,8 +44,8 @@ public sealed class EplanDialogChannelTests
         Assert.Equal((texts.Title, texts.Summary, texts.Note, texts.ApproveLabel, texts.RejectLabel), (sent.Title, sent.Summary, sent.Note, sent.ApproveLabel, sent.RejectLabel));
         Assert.Equal(texts.Changes, sent.Changes);
         Assert.Equal(("r1", "f1", "h1"), (sent.RequestId, sent.Fingerprint, sent.ArgumentsHash));
-        Assert.Equal((_now + ApprovalService.Timeout).ToUnixTimeMilliseconds(), sent.DeadlineUnixMs);
-        Assert.Equal(ApprovalService.Timeout + EplanDialogChannel.Slack, Assert.Single(_bridge.Timeouts));
+        Assert.Equal((_now + HostConfig.DefaultApprovalTimeout).ToUnixTimeMilliseconds(), sent.DeadlineUnixMs);
+        Assert.Equal(HostConfig.DefaultApprovalTimeout + EplanDialogChannel.Slack, Assert.Single(_bridge.Timeouts));
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", ApprovalDecision.Granted), answer);
     }
 

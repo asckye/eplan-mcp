@@ -103,9 +103,10 @@ internal static class DoctorChecks
         string sourceEn = File.Exists(locations.ConfigFile) ? locations.ConfigFile : "defaults";
         string roots = string.Join("; ", config.ScratchRoots);
         (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
+        string timeout = HostConfig.Seconds(config.ApprovalTimeout);
         return new(DoctorStatus.Ok,
-            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}",
-            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}");
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；审批期限 {timeout} 秒",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; approval deadline {timeout} s");
     }
 
     /// <summary>

@@ -17,15 +17,27 @@ public sealed class HostConfigTests
         Assert.Null(problem);
         Assert.Equal(["C:\\Data\\EplanMcp\\scratch"], config!.ScratchRoots);
         Assert.Equal(OutsideScratchWrites.Deny, config.WritesOutsideScratch);
+        Assert.Equal(TimeSpan.FromSeconds(120), config.ApprovalTimeout);
     }
 
     [Fact]
-    public void Parse_ReadsBothSettings()
+    public void Parse_ReadsEverySetting()
     {
-        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"approve"}""", _locations);
+        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"approve","approvalTimeoutSeconds":90}""", _locations);
 
         Assert.Equal(["D:\\Scratch", "E:\\Copies"], config!.ScratchRoots);
         Assert.Equal(OutsideScratchWrites.Approve, config.WritesOutsideScratch);
+        Assert.Equal(TimeSpan.FromSeconds(90), config.ApprovalTimeout);
+    }
+
+    [Theory]
+    [InlineData(60)]
+    [InlineData(300)]
+    public void Parse_TheApprovalDeadlineMayBeAnyWholeSecondFrom60To300(int seconds)
+    {
+        (HostConfig? config, _) = HostConfig.Parse($$"""{"approvalTimeoutSeconds":{{seconds}}}""", _locations);
+
+        Assert.Equal(TimeSpan.FromSeconds(seconds), config!.ApprovalTimeout);
     }
 
     [Theory]
@@ -36,6 +48,11 @@ public sealed class HostConfigTests
     [InlineData("""{"scratchRoots":[]}""", "full path")]
     [InlineData("""{"scratchRoots":[" "]}""", "full path")]
     [InlineData("""{"scratchRoots":""", "is not valid")]
+    [InlineData("""{"approvalTimeoutSeconds":59}""", "from 60 to 300")]
+    [InlineData("""{"approvalTimeoutSeconds":301}""", "from 60 to 300")]
+    [InlineData("""{"approvalTimeoutSeconds":-1}""", "from 60 to 300")]
+    [InlineData("""{"approvalTimeoutSeconds":120.5}""", "is not valid")]
+    [InlineData("""{"approvalTimeoutSeconds":"120"}""", "is not valid")]
     public void Parse_AnInvalidFile_IsRefusedWithTheReason(string json, string reason)
     {
         (HostConfig? config, string? problem) = HostConfig.Parse(json, _locations);

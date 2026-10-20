@@ -1,4 +1,3 @@
-using System.Globalization;
 using EplanMcp.Contracts;
 using Microsoft.Extensions.Logging;
 
@@ -8,16 +7,16 @@ namespace EplanMcp.Host.Safety;
 internal sealed record ApprovalResult(string? Channel, ApprovalDecision Decision);
 
 /// <summary>
-/// The approval step of the write pipeline (ADR-0005 section 3, M3 design 4.3): asks the engineer about one concrete,
-/// already planned change list through the first channel that can, in registration order, and refuses when none can.
-/// An answer counts only for the question it was asked for: one that names another request ID, fingerprint or
-/// argument hash is denied, and a grant after the deadline has expired. The wait happens here in the Host (4.7).
+/// The approval step of the write pipeline (ADR-0005 section 3, ADR-0011, M3 design 4.3): asks the engineer about one
+/// concrete, already planned change list through the first channel that can, in registration order, and refuses when
+/// none can. An answer counts only for the question it was asked for: one that names another request ID, fingerprint
+/// or argument hash is denied, and a grant after the deadline has expired. The wait happens here in the Host (4.7).
 /// Stateless and thread-safe.
 /// </summary>
-internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> channels, TimeProvider clock, ILogger<ApprovalService> logger)
+internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> channels, HostConfig config, TimeProvider clock, ILogger<ApprovalService> logger)
 {
-    /// <summary>How long the engineer has to answer: as long as a plan is kept (M3 design 4.3).</summary>
-    public static readonly TimeSpan Timeout = PendingPlanStore.Lifetime;
+    /// <summary>How long the engineer has to answer: <see cref="HostConfig.ApprovalTimeout"/> (ADR-0011).</summary>
+    public TimeSpan Timeout => config.ApprovalTimeout;
 
     internal const string NoChannel =
         "This change needs the engineer's approval, but no approval channel can ask the engineer now, so it was not run and nothing was changed.";
@@ -58,14 +57,14 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     }
 
     /// <summary>The error for a decision other than <see cref="ApprovalDecision.Granted"/>: nothing was run.</summary>
-    public static BridgeError Refusal(ApprovalDecision decision) => decision switch
+    public BridgeError Refusal(ApprovalDecision decision) => decision switch
     {
         ApprovalDecision.Denied => new() { Reason = ErrorReason.ApprovalDenied, Message = "The engineer rejected this change, so it was not run and nothing was changed. Do not call again unless the engineer asks for it." },
         ApprovalDecision.Cancelled => new() { Reason = ErrorReason.ApprovalDenied, Message = "The engineer closed the approval without deciding, so the change was not run and nothing was changed. Ask the engineer before calling again." },
         ApprovalDecision.Expired => new()
         {
             Reason = ErrorReason.ApprovalExpired,
-            Message = $"The engineer did not approve within {Timeout.TotalMinutes.ToString("0", CultureInfo.InvariantCulture)} minutes, so the change was not run and nothing was changed. Call again to ask again.",
+            Message = $"The engineer did not approve within {HostConfig.Seconds(Timeout)} seconds, so the change was not run and nothing was changed. Call again to ask again.",
         },
         _ => new() { Reason = ErrorReason.ApprovalDenied, Message = NoChannel },
     };

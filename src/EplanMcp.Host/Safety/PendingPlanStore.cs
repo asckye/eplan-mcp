@@ -32,7 +32,8 @@ internal enum PlanRejection
 /// </summary>
 internal sealed class PendingPlanStore(TimeProvider clock)
 {
-    public static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(5);
+    /// <summary>As long as the longest approval deadline, so no plan expires while the engineer may still answer.</summary>
+    public static readonly TimeSpan Lifetime = HostConfig.MaxApprovalTimeout;
 
     public const int Capacity = 100;
 

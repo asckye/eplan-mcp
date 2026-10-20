@@ -14,7 +14,7 @@ public sealed class ApprovalAskOperation(IApprovalDialog dialog, Func<DateTimeOf
 
     public const int MaxLineLength = 1000;
 
-    /// <summary>The longest a dialog may stay open; the Host's deadline is five minutes (M3 design 4.3).</summary>
+    /// <summary>The longest a dialog may stay open; the Host's deadline is at most five minutes (ADR-0011).</summary>
     public static readonly TimeSpan MaxTimeout = TimeSpan.FromMinutes(15);
 
     public ApprovalAskOperation(IApprovalDialog dialog)
