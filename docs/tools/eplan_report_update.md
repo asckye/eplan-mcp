@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `report` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 7 步；进度和取消依赖第 3、4 步） |
+| 状态 | Proposed（M4 第 7 步；已实现，待实机验证；进度和取消依赖第 3、4 步） |
 
 ## 1. 这个工具解决什么任务
 "改完图，把报表更新一下"。代理放置设备、生成连接或删页之后（删页不会自动更新报表，A18），用它在 EPLAN 中更新报表：整个项目（"生成项目报表"），或者只更新指定的报表页。结果列出新增和删除的报表页。报表页由项目数据生成，随时可以重建，能被 `SafetyPoint` 回滚、一步撤销（S11），所以是 Write 级（M4 设计 Q3）。

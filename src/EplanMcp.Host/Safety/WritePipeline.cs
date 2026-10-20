@@ -172,6 +172,8 @@ internal sealed partial class WritePipeline(
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",
         _ when c.Property == "check messages" => CheckRunLine(plan, c),
+        _ when c.Property == "reports" => $"update all reports ({c.OldValue} report pages now); may create, replace or delete report pages",
+        _ when c.Property == "report" => $"update report page {c.Name}",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
 
