@@ -16,6 +16,7 @@
 | [S9](S9-write-api/README.md) | M3 的写入 API：用完整页名建页、改设备标识、按符号放置设备、插入宏、生成连接，以及各自能否回滚 | **完成** 2026-10-20 | 建页、改标识、插宏、生成连接都可行。🔴 `SafetyPoint` 和 `Transaction` 各管一半：插宏只有 `SafetyPoint` 能撤回，按符号新建设备在 `SafetyPoint` 中必定失败、只能用 `Transaction`。改标识要连同辅助功能一起改；页名和设备标识中项目结构不用的部分会被静默丢掉，EPLAN 不检查设备标识重名，都要读回比较 |
 | [S10](S10-dispatcher-writes/README.md) | M3b 的写入在 Bridge 调度器中（不在 action 中）：插宏的编号方式、Ctrl+Z、生成连接的回滚、读宏内容、页幅面、按符号放置的撤销与标识显示 | **完成** 2026-10-20 | 插宏用 `Number` 编号不产生重复设备（`None` 会）；插宏、生成连接各占一个撤销步骤，都能被 `SafetyPoint` 回滚；不插入就能读出宏的内容；空页读不到幅面。按符号放置的设备能撤销，但图上不显示标识，Q1 继续推迟 |
 | [S11](S11-workflow-apis/README.md) | M4 的检查、报表、导出 API 在调度器中的行为：耗时、改动、回滚、撤销、导出文件的位置 | **完成** 2026-10-20 | 检查和更新报表都能被 `SafetyPoint` 回滚、一步撤销（M4 Q3 成立）；导出只在给定目录中产生文件，不改设计数据，但改写 `User.eod`；整个示例项目导出 PDF 12.5 秒，更新报表约 9 秒 |
+| [S12](S12-destructive-backup/README.md) | Destructive 操作前的备份（`CopyProject`、`Backup.Project`），删页和重编号能否回滚、撤销 | **完成** 2026-10-20 | `CopyProject(Snapshot)` 在打开的项目上 1 秒内得到完整、可打开的副本，不加锁（ADR-0013 方案 1 成立）；`MakeBackup` 慢且改写源项目文件；删页、重编号都能回滚、一步撤销；删页留下没有主功能的辅助功能；`PostNumerate` 不保证编完所有 `?` |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
