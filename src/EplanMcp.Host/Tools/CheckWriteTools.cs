@@ -69,7 +69,8 @@ internal sealed class CheckWriteTools
             args,
             plan => new CheckRunArgs { Project = args.Project, Pages = args.Pages, Scheme = args.Scheme, Fingerprint = plan.Fingerprint },
             dry_run,
-            Limit);
+            Limit,
+            "Running the EPLAN check");
         WriteOutcome<CheckRunData> outcome;
         try
         {
