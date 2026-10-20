@@ -49,18 +49,20 @@
 
 ## 5. 实现要点
 - **宏目录**：在主线程上用 `PathMap.SubstitutePath("$(MD_MACROS)")` 求出（A4 已验证可以替换），再按 SEC-05 规范化。
-- **枚举**：`Directory.EnumerateFiles(root, "*.ema", AllDirectories)`，只扫描文件系统，不打开宏。
-  - 跳过规范化之后不在宏目录之下的文件，例如经联接点指向别处的文件夹（SEC-19）；
+- **枚举**：逐个文件夹读取目录项，只扫描文件系统，不打开宏（`MacroFiles`，Bridge.Core）。
+  - **不跟随链接**：是重解析点（`FileAttributes.ReparsePoint`，即符号链接、联接点）的文件夹和文件一律跳过。所以列出的宏物理上都在宏目录之下（SEC-19），也不会经链接访问网络或陷入循环。宏目录本身可以是链接或网络路径；
   - 跳过无法访问的文件夹，不让整个调用失败。
+- **时间上限**：扫描与其他操作一样在 EPLAN 主线程上进行。宏目录在网络共享上时可能很慢，所以最多扫描 2 秒。超出时返回已找到的部分，`truncated = true`，`hint` 说明宏目录太大、结果不完整。
 - **过滤与分页**：在 Bridge.Core 中进行，`Paging.Slice` 的游标指纹包含 `name_contains`。
-- **耗时**：695 个文件只读目录项，预计在 100 ms 以内，由 Large 测试测量。
-- **适配层**：只提供"宏目录"和"列出宏文件"两件事；路径判断和过滤在 Bridge.Core 中（`MacroPaths`，与 `eplan_macro_get`、`eplan_macro_insert` 共用）。
+- **耗时**：本机上的 695 个文件只读目录项，预计在 100 ms 以内，由 Large 测试测量。
+- **适配层**：只提供宏目录（`PathMap`）；扫描、路径判断和过滤都在 Bridge.Core 中（`MacroFiles`，与 `eplan_macro_get`、`eplan_macro_insert` 共用）。
 
 ## 6. 写操作专项
 不适用。
 
 ## 7. 测试
-- **Small**：`MacroPaths` 的相对路径转换（`\` 和 `/`）；排除跳出根目录的文件；过滤；游标；摘要。
+- **Small**：过滤；游标；摘要；扫描超过时间上限时的 `truncated`。
+- **Medium**（临时目录）：`MacroFiles` 列出子文件夹中的 `.ema`，跳过联接点指向的文件夹和其他扩展名。
 - **Medium**：在假 Bridge 上测试分页与过滤。
 - **Large**（示例数据）：
   - `name_contains = "Contactor_Feedback"` 能找到 `EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema`；

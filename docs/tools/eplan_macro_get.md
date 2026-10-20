@@ -55,9 +55,9 @@
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- **路径**：`MacroPaths.Resolve(root, macro)`（Bridge.Core，与 `eplan_macro_list` 共用）：
-  - 统一分隔符，拒绝绝对路径、UNC、驱动器号和 `..`；
-  - 与根目录拼接后按 SEC-05 规范化，必须仍在根目录之下；
+- **路径**：`MacroFiles.Resolve(root, macro)`（Bridge.Core，与 `eplan_macro_list` 共用）：
+  - 统一分隔符，拒绝绝对路径、UNC、驱动器号、`.` 和 `..`；
+  - 从根目录逐级往下检查：每一级（文件夹和文件）都必须存在，并且不是重解析点（链接、联接点），与 `eplan_macro_list` 的规则相同（SEC-19）；
   - 扩展名必须是 `.ema`。
 - **读取**：`new WindowMacro().Open(path, project)`，然后读 `RepresentationTypes`、`GetVariants(type)`、`Size`、`Objects`。S10 证实打开宏不改动项目，项目文件和功能数都不变（A14）。
 - 读完立即释放 `WindowMacro`，结果复制到 DTO（编码规范 9.5）。
@@ -68,10 +68,10 @@
 不适用。
 
 ## 7. 测试
-- **Small**：`MacroPaths.Resolve` 的用例表：相对路径、`/` 与 `\`、绝对路径、UNC、`..`、驱动器号、扩展名、大小写；设备列表的去重与截断；摘要。
+- **Small**：`MacroFiles.Resolve` 的格式检查：相对路径、`/` 与 `\`、绝对路径、UNC、`..`、驱动器号、扩展名、大小写；设备列表的去重与截断；摘要。
+- **Medium**（临时目录）：经联接点访问宏时返回 `INVALID_ARGUMENT`。
 - **Medium**：在假 Bridge 上测试 `MACRO_NOT_FOUND`、`INVALID_ARGUMENT`。
 - **Large**（示例数据）：
   - `Contactor_Feedback_Control.ema` 返回 `MultiLine`、变体 0–5、尺寸 52 × 268 mm，设备中有 `-QA1`、`-WG6`（S10）；
-  - 调用前后项目 `.edb` 中的文件不变；
-  - 在宏目录中建一个指向其他目录的联接点，经它访问宏时返回 `INVALID_ARGUMENT`（SEC-19）。
+  - 调用前后项目 `.edb` 中的文件不变。
 - **Agent 评测**："`Contactor_Feedback_Control` 这个宏里有哪些设备？"
