@@ -93,6 +93,27 @@ public sealed class SerializerCompatibilityTests
         new DeviceUpdateArgs(),
         new DeviceUpdateData { Project = "Line1", Tag = "=F+A2-KF19", PreviousTag = "=F+A2-KF1", VisibleTag = "-KF19", Functions = 3, Pages = ["=F+A2&EFS1/1"], Warning = "w" },
         new DeviceUpdateData(),
+        new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
+        new ConnectionGenerateArgs(),
+        new ConnectionGenerateData
+        {
+            Project = "Line1",
+            Pages =
+            [
+                new ConnectionGeneratePage
+                {
+                    Page = "=GAA+A1&EFS1/60",
+                    After = 9,
+                    AddedCount = 9,
+                    RemovedCount = 1,
+                    Added = [new ChangedConnection { From = new ConnectionEnd { Device = "+A1-XG9:?1" }, To = new ConnectionEnd { Device = "=GAA+A1-?QA1", Pin = "14" } }],
+                    Removed = [new ChangedConnection { From = new ConnectionEnd { Device = "-A", Pin = "1" } }],
+                },
+                new ConnectionGeneratePage { Page = "=GAA+A1&EFS1/1", Before = 40, After = 40 },
+            ],
+            Warning = "w",
+        },
+        new ConnectionGenerateData(),
         new ProjectListArgs(),
         new ProjectListData
         {
