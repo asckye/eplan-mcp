@@ -17,6 +17,8 @@ public sealed class BridgeServerTests : IDisposable
 
     private readonly ListLog _log = new();
     private readonly ManualResetEventSlim _progressSeen = new();
+    private readonly ManualResetEventSlim _writeStarted = new();
+    private readonly FakeTransactions _transactions = new();
     private readonly BridgeServer _server;
 
     public BridgeServerTests()
@@ -29,6 +31,7 @@ public sealed class BridgeServerTests : IDisposable
     {
         _server.Dispose();
         _progressSeen.Dispose();
+        _writeStarted.Dispose();
     }
 
     [Fact]
@@ -127,6 +130,28 @@ public sealed class BridgeServerTests : IDisposable
     }
 
     [Fact]
+    public async Task Cancel_OnAnotherConnection_RollsTheRunningWriteBack()
+    {
+        // The write's own connection reads nothing until it answers, so the cancel comes on another (M4 design 4.3).
+        await using NamedPipeClientStream writer = await ConnectAsync();
+        await using NamedPipeClientStream canceller = await ConnectAsync();
+        await CallAsync(writer, Handshake);
+        await CallAsync(canceller, Handshake);
+        await SendAsync(writer, Invoke(2, "x.slow", "w1", null));
+        Assert.True(_writeStarted.Wait(_patience, TestContext.Current.CancellationToken));
+
+        JObject cancel = await CallAsync(canceller, Invoke(2, OperationNames.OperationCancel, "c1", new JObject { ["requestId"] = "w1" }));
+        JObject response = await ReadAsync(writer);
+        JObject outcome = await CallAsync(canceller, Invoke(3, OperationNames.OutcomeGet, "c2", new JObject { ["requestId"] = "w1" }));
+
+        Assert.True((bool)cancel["result"]!["data"]!["found"]!);
+        JToken error = response["error"]!["data"]!;
+        Assert.Equal((ErrorReason.Cancelled, ExecutionState.RolledBack), ((string?)error["reason"], (string?)error["execution"]));
+        Assert.Equal((OutcomeStatus.RolledBack, ErrorReason.Cancelled), ((string?)outcome["result"]!["data"]!["status"], (string?)outcome["result"]!["data"]!["reason"]));
+        Assert.Equal(["Begin AI: eplan_page_create", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
     public async Task Dispose_StopsListening()
     {
         _server.Dispose();
@@ -146,6 +171,7 @@ public sealed class BridgeServerTests : IDisposable
             [
                 new ProjectListOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p" })),
                 new DelegateOperation("x.progress", ReportTwoSteps),
+                new SlowWrite(_transactions, _writeStarted),
             ],
             new InlineDispatcher(),
             null,
@@ -194,4 +220,18 @@ public sealed class BridgeServerTests : IDisposable
         ["method"] = "invoke",
         ["params"] = new JObject { ["operation"] = operation, ["correlationId"] = correlationId, ["args"] = args ?? new JObject() },
     }.ToString(Newtonsoft.Json.Formatting.None);
+
+    /// <summary>A write whose change runs until it is cancelled, or for five seconds.</summary>
+    private sealed class SlowWrite(FakeTransactions transactions, ManualResetEventSlim started) : IWriteOperation
+    {
+        public string Name => "x.slow";
+
+        public object ParseArgs(JToken? args) => new();
+
+        public object? Execute(object args) => TransactionRunner.Run(transactions, "eplan_page_create", () =>
+        {
+            started.Set();
+            return SpinWait.SpinUntil(() => OperationContext.Current.IsCancellationRequested, _patience);
+        }).Result;
+    }
 }
