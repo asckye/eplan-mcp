@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `core` |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 8 步；依赖第 5 步的导出目录，进度和取消依赖第 3、4 步；`inline` 依赖 S13） |
+| 状态 | Proposed（M4 第 8 步；已实现，待实机验证；Bridge 分步进度的转发和取消时通知 Bridge 依赖第 4 步；`inline` 待 S13 确认） |
 
 ## 1. 这个工具解决什么任务
 "看看刚插的宏在页上是什么样子""这一页画得对不对"。代理把 1–20 页导出为 PNG 或 JPG 图片（每页一张），可以让工程师查看，也可以用 `inline` 把最多 4 页的图片直接放进工具结果，让模型自己"看"页面，例如核对 `eplan_macro_insert` 的位置（M4 设计 4.1）。与 `eplan_export_pdf` 一样是 Read 级，只在服务器新建的目录中写文件。
