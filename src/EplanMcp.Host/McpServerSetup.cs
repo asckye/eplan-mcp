@@ -46,6 +46,7 @@ internal static class McpServerSetup
             .WithTools<SessionTools>(HostJson.Options)
             .WithTools<ProjectTools>(HostJson.Options)
             .WithTools<PageTools>(HostJson.Options)
+            .WithTools<PageWriteTools>(HostJson.Options)
             .WithTools<DeviceTools>(HostJson.Options)
             .WithTools<ConnectionTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)

@@ -51,9 +51,10 @@
 - `undo`：EPLAN 撤销列表中这一步的名称。`dry_run` 时为 `null`。
 - `recovered`：响应丢失，但向 Bridge 取回的结果是已提交（ADR-0010 第 2 节）。这时没有读回的数据，`pages` 按计划列出，`hint` 提示用 `eplan_page_list` 查看实际结果。
 - 页描述按项目数据处理，经过 ResultShaper。
-- 一行摘要：
-  - `Created 4 pages in 'Line1'; Ctrl+Z in EPLAN undoes this step.`
-  - `Dry run: would create 4 pages in 'Line1'. Nothing was changed.`
+- 一行摘要（只有计数，不回显项目名，架构 8.5）：
+  - `Created 4 pages; Ctrl+Z in EPLAN undoes this step.`
+  - `Dry run: would create 4 pages. Nothing was changed.`
+- 提交之后出现的问题（例如撤销步骤没有正常关闭）放在 `hint` 中，`execution` 仍是 `committed`（ADR-0010 第 1 节）。
 - 大小：最多 50 页，每页约 40 token，在默认预算之内。
 
 ## 4. 错误

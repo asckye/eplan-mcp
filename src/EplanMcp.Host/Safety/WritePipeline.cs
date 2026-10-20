@@ -149,7 +149,7 @@ internal sealed partial class WritePipeline(
     /// <summary>The change list as one line per change, for the audit, the suspension and the approval form.</summary>
     internal static IEnumerable<string> ChangeLines(WritePlan plan) => plan.Changes.Select(c => c.Action switch
     {
-        "create" => $"create {c.Kind} {c.Name}",
+        "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
 

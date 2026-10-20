@@ -25,19 +25,30 @@ internal static class UnknownArgumentFilter
             return next(context, cancellationToken);
         };
 
-    /// <summary>Every argument not in the schema's properties, then every required one that is absent or null.</summary>
-    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments)
+    /// <summary>
+    /// Every argument not in the schema's properties, then every required one that is absent or null; then the same for
+    /// each object in an array argument whose items are objects, named like <c>pages[1].page_type</c>.
+    /// </summary>
+    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "")
     {
         HashSet<string> allowed = Names(schema, "properties");
         IEnumerable<string> unknown = (arguments?.Keys ?? [])
             .Where(name => !allowed.Contains(name))
             .Order(StringComparer.Ordinal)
-            .Select(name => $"Unknown argument '{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}.");
+            .Select(name => $"Unknown argument '{prefix}{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}.");
         IEnumerable<string> missing = Names(schema, "required")
             .Where(name => arguments is null || !arguments.TryGetValue(name, out JsonElement value) || value.ValueKind == JsonValueKind.Null)
             .Order(StringComparer.Ordinal)
-            .Select(name => $"Missing required argument '{name}'.");
-        return [.. unknown, .. missing];
+            .Select(name => $"Missing required argument '{prefix}{name}'.");
+        IEnumerable<string> nested = (arguments ?? new Dictionary<string, JsonElement>())
+            .Where(a => a.Value.ValueKind == JsonValueKind.Array && allowed.Contains(a.Key))
+            .OrderBy(a => a.Key, StringComparer.Ordinal)
+            .SelectMany(a => schema.GetProperty("properties").GetProperty(a.Key).TryGetProperty("items", out JsonElement items) && Names(items, "properties").Count > 0
+                ? a.Value.EnumerateArray().SelectMany((item, i) => item.ValueKind == JsonValueKind.Object
+                    ? Violations(items, item.EnumerateObject().ToDictionary(p => p.Name, p => p.Value), $"{prefix}{a.Key}[{i}].")
+                    : [])
+                : []);
+        return [.. unknown, .. missing, .. nested];
     }
 
     /// <summary>The property names of an object member, or the strings of an array member, of the schema.</summary>
