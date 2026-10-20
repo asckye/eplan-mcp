@@ -112,6 +112,18 @@ public static class OperationNames
     public const string ConnectionGenerateExecute = "connection.generate.execute";
 
     /// <summary>
+    /// The plan of eplan_macro_insert: checks the page, the macro's path and content and where its outline goes, never
+    /// writes. Arguments: <see cref="MacroInsertArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string MacroInsertPlan = "macro.insert.plan";
+
+    /// <summary>
+    /// Inserts the window macro on the page in one transaction and reads the inserted devices back. Arguments:
+    /// <see cref="MacroInsertArgs"/> with the fingerprint; data: <see cref="MacroInsertData"/>.
+    /// </summary>
+    public const string MacroInsertExecute = "macro.insert.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
