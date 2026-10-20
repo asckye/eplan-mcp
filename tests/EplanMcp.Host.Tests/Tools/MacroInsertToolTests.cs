@@ -152,5 +152,5 @@ public sealed class MacroInsertToolTests : IDisposable
     }
 
     private Task<CallToolResult> Insert(bool dryRun = false) =>
-        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, "Line1", Page, Macro, 40, 280, 2, "keep", dryRun, TestContext.Current.CancellationToken);
+        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, "Line1", Page, Macro, 40, 280, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

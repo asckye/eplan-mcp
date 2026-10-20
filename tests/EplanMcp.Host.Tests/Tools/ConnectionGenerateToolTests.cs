@@ -159,7 +159,7 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     {
         string[] pages = [.. Enumerable.Range(1, count).Select(n => "=A/" + n)];
 
-        JsonElement error = WriteToolHarness.Error(await ConnectionWriteTools.ConnectionGenerateAsync(_harness.Pipeline, project, pages, false, TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await ConnectionWriteTools.ConnectionGenerateAsync(_harness.Pipeline, project, pages, false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains(violation, error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
@@ -181,5 +181,5 @@ public sealed class ConnectionGenerateToolTests : IDisposable
         new() { From = new ConnectionEnd { Device = from, Pin = fromPin }, To = new ConnectionEnd { Device = to, Pin = toPin } };
 
     private Task<CallToolResult> Generate(string[] pages, bool dryRun = false) =>
-        ConnectionWriteTools.ConnectionGenerateAsync(_harness.Pipeline, "Line1", pages, dryRun, TestContext.Current.CancellationToken);
+        ConnectionWriteTools.ConnectionGenerateAsync(_harness.Pipeline, "Line1", pages, dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

@@ -80,7 +80,7 @@ public sealed class PageUpdateToolTests : IDisposable
     [Fact]
     public async Task HostChecks_FailBeforeTheBridgeIsAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await PageWriteTools.PageUpdateAsync(_harness.Pipeline, string.Empty, [], "zh-CN", false, TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await PageWriteTools.PageUpdateAsync(_harness.Pipeline, string.Empty, [], "zh-CN", false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(3, error.GetProperty("metadata").GetProperty("violations").GetString()!.Split('\n').Length);
         Assert.Equal(0, _harness.Bridge.Invocations);
@@ -95,5 +95,5 @@ public sealed class PageUpdateToolTests : IDisposable
         [new PageWriteTools.PageText { Name = "=GAA+A1&EFS1/3", Description = "主回路" }, new PageWriteTools.PageText { Name = "=GAA+A1&EFS1/4", Description = string.Empty }],
         language,
         dryRun,
-        TestContext.Current.CancellationToken);
+        cancellationToken: TestContext.Current.CancellationToken);
 }

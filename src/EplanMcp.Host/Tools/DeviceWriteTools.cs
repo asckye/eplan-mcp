@@ -3,6 +3,7 @@ using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -36,6 +37,7 @@ internal sealed class DeviceWriteTools
         [Description("Current tag, full or as shown, e.g. -KF1")] string tag,
         [Description("Full new tag, or from '-' to keep the structure")] string new_tag,
         [Description("Only return the plan")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         // The tags are checked by the Bridge, all at once (device.update.plan).
@@ -53,11 +55,12 @@ internal sealed class DeviceWriteTools
             args,
             plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Fingerprint = plan.Fingerprint },
             dry_run,
-            PageWriteTools.DefaultLimit);
+            PageWriteTools.DefaultLimit,
+            "Renaming the device");
         WriteOutcome<DeviceUpdateData> outcome;
         try
         {
-            outcome = await pipeline.RunAsync<DeviceUpdateArgs, DeviceUpdateArgs, DeviceUpdateData>(request, cancellationToken).ConfigureAwait(false);
+            outcome = await pipeline.RunAsync<DeviceUpdateArgs, DeviceUpdateArgs, DeviceUpdateData>(request, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {

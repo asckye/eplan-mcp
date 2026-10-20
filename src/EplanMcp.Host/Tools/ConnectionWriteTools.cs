@@ -3,6 +3,7 @@ using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -35,6 +36,7 @@ internal sealed class ConnectionWriteTools
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 full page names")] string[] pages,
         [Description("Only count the connections now")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         // The page names are checked by the Bridge, all at once (connection.generate.plan).
@@ -63,11 +65,12 @@ internal sealed class ConnectionWriteTools
             args,
             plan => new ConnectionGenerateArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint },
             dry_run,
-            PageWriteTools.Limit(args.Pages.Count));
+            PageWriteTools.Limit(args.Pages.Count),
+            "Generating connections");
         WriteOutcome<ConnectionGenerateData> outcome;
         try
         {
-            outcome = await pipeline.RunAsync<ConnectionGenerateArgs, ConnectionGenerateArgs, ConnectionGenerateData>(request, cancellationToken).ConfigureAwait(false);
+            outcome = await pipeline.RunAsync<ConnectionGenerateArgs, ConnectionGenerateArgs, ConnectionGenerateData>(request, progress, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {

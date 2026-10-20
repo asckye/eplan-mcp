@@ -221,6 +221,8 @@ eplan_device_place
 
 ## 9. 耗时操作
 - 预计超过 2 秒的工具，在客户端提供 `progressToken` 时发送进度通知（单调递增，频率有限制）。
+  - 等待 EPLAN 时（[M4 设计](../design/2026-10-20-m4-workflows.md) 4.3）：`progress` 是已用秒数，不给 `total`；每 5 秒一次心跳，`message` 是"在做什么 + 秒数"，如 `Creating pages (10 s)`，写工具在 `WriteRequest.Activity` 中给出这个短语。Bridge 的分步进度（如 `Exporting page 3 of 20`）一到就转发，文字放在 `message` 中，数值仍是秒数，所以分步与心跳交替时也只增不减。
+  - 一次调用依次等待几次（确认、审批、EPLAN），每段从零计数；Host 把后一段的数值（连同 `total`）接在客户端已收到的最大值之后（`CallProgress`）。
 - 支持取消：在安全点检查取消请求。已经提交的修改不撤回，在结果和审计中如实说明。
 - 预计超过 30 秒的工具（整个项目的报表更新、检查、导出），在客户端支持 Tasks 扩展时以任务方式运行。
 

@@ -83,12 +83,12 @@ public sealed class DeviceUpdateToolTests : IDisposable
     [Fact]
     public async Task WithoutAProject_TheBridgeIsNotAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, " ", "-KF1", "-KF19", false, TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, " ", "-KF1", "-KF19", false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("'project' is required", error.GetProperty("message").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
     private Task<CallToolResult> Update(bool dryRun = false) =>
-        DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", dryRun, TestContext.Current.CancellationToken);
+        DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

@@ -133,7 +133,7 @@ public sealed class PageCreateToolTests : IDisposable
     {
         PageWriteTools.NewPage[] pages = [.. Enumerable.Range(1, count).Select(n => Page("=A/" + n))];
 
-        JsonElement error = Error(await PageWriteTools.PageCreateAsync(_pipeline, project, pages, language, false, TestContext.Current.CancellationToken));
+        JsonElement error = Error(await PageWriteTools.PageCreateAsync(_pipeline, project, pages, language, false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("INVALID_ARGUMENT", error.GetProperty("reason").GetString());
         Assert.Contains(violation, error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
@@ -157,7 +157,7 @@ public sealed class PageCreateToolTests : IDisposable
     private static PageWriteTools.NewPage Page(string name, string? type = null, string? description = null) => new() { Name = name, PageType = type, Description = description };
 
     private Task<CallToolResult> Create(PageWriteTools.NewPage[] pages, bool dryRun = false, string? language = null) =>
-        PageWriteTools.PageCreateAsync(_pipeline, "Line1", pages, language, dryRun, TestContext.Current.CancellationToken);
+        PageWriteTools.PageCreateAsync(_pipeline, "Line1", pages, language, dryRun, cancellationToken: TestContext.Current.CancellationToken);
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 
