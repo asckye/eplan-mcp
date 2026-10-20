@@ -114,6 +114,20 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new ConnectionGenerateData(),
+        new MacroInsertArgs { Project = "Line1", Page = "=GAA+A1&EFS1/60", Macro = "EPLAN_Macro/宏.ema", X = 40.5, Y = 280, Variant = 2, Numbering = "keep", Fingerprint = "f" },
+        new MacroInsertArgs(),
+        new MacroInsertData
+        {
+            Project = "Line1",
+            Page = "=GAA+A1&EFS1/60",
+            Macro = "EPLAN_Macro/宏.ema",
+            Devices = [new PageDevice { Tag = "=GAA+A1-?QA1", VisibleTag = "-?QA1", Category = "NoContact" }, new PageDevice { Tag = "+A1-WG7", Category = "Cable" }],
+            DeviceCount = 8,
+            ObjectCount = 28,
+            PageSizeKnown = true,
+            Warning = "w",
+        },
+        new MacroInsertData(),
         new ProjectListArgs(),
         new ProjectListData
         {
