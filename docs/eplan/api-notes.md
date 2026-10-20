@@ -307,6 +307,14 @@
 - Remote Client：没有找到官方的授权说明；客户端 DLL 不引用 Baseu，不做客户端授权检查。— 未验证。
 - **已验证（spike S0）**：在开发机的授权下，未签名的插件可以加载，并能读写 321 页的项目（A5）。其他授权类型仍然未知。
 
+### B9. 导出与导出方案（`HEServices.Export`、`Base.SchemeSetting`，2026-10-20）
+导出工具依赖的文档说明；实测结果见 A14、A16。
+- `Export.PdfPages(ArrayList, 方案, 文件名, DegreeOfColor, 3D 模型, 语言, 打印边距)`：方案为空串时用界面上次使用的方案（`USER.PDFExportGUI.SCHEMAS`）；文件名带路径时覆盖方案中的目录，目录不存在时新建；没有扩展名时补上。`DegreeOfColor` 为 `Color`、`GreyLevel`、`BlackAndWhite`。— XML，枚举名经编译确认。
+- `Export.DxfDwgPagesToDisk(Page[], 方案, 目录, 语言)`：方案在 `USER.DXF.SCHEMES`，空串用上次使用的，名称不存在时抛 `BaseException`；方案可以按页树或页属性建子目录；语言非空时先把项目翻译成该语言。— XML。
+- `Export.GraphicPage(Page, 目录, Format, 色深, 宽度, Compression, 黑白)`：目录不存在时新建；PNG、JPG 可用色深 24；压缩只影响 TIF；高度按页的比例计算；不能导出外部文档页。— XML。
+- `SchemeSetting`：`Init(节点)`；`CheckIfSchemeExists(名称)`；`GetCount()`、`SetScheme(序号)`（不改"上次使用"）、`GetName()`（与语言无关的内部名称）；`GetLastUsed()`；`SetLastUsed(名称)`，空串抛 `ArgumentException`，名称无效抛 `BaseException`。— XML。
+- `Export`、`SchemeSetting` 都实现 `IDisposable`。— 编译（CA2000）、XML。
+
 ---
 
 ## C. MCP 客户端与 C# SDK（spike S4，2026-10-13）
