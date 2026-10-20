@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `check` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 6 步；进度和取消依赖第 3、4 步） |
+| 状态 | Proposed（M4 第 6 步；已实现，待实机验证；进度和取消依赖第 3、4 步） |
 
 ## 1. 这个工具解决什么任务
 "改完了，检查一下有没有错误"。代理改完图之后，用它在 EPLAN 中运行检查（消息管理中的"检查项目"），得到各级别的消息数和前 20 条消息，再决定下一步。运行检查会替换项目中的检查消息，改写项目的数据文件（A11、A16），所以是 Write 级（M4 设计 Q3）：scratch 中直接执行，真实项目需要审批，按一次 Ctrl+Z 撤销。只读取上一次检查的结果用 `eplan_check_list`。

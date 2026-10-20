@@ -171,8 +171,16 @@ internal sealed partial class WritePipeline(
     {
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",
+        _ when c.Property == "check messages" => CheckRunLine(plan, c),
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
+
+    /// <summary>A check replaces all the project's check messages; check.run.plan puts its scope in the details.</summary>
+    private static string CheckRunLine(WritePlan plan, PlannedChange change)
+    {
+        string scheme = plan.Details?.GetValueOrDefault("scheme") is { } given ? "scheme: " + given : "EPLAN's current scheme";
+        return $"run check on {plan.Details?.GetValueOrDefault("pageCount") ?? "?"} pages ({scheme}), replacing the {change.OldValue} existing check messages";
+    }
 
     private static BridgeError Suspended(WritePlan plan) => new()
     {

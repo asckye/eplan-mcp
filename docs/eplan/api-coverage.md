@@ -52,7 +52,7 @@
 |---|---|---|---|
 | 导出 | PDF、DXF/DWG、图片、PXF、部件清单、设备清单、标签、3D | 任务型工具 `eplan_export_*`，统一校验输出文件 | M4 |
 | 导入 | DXF/DWG、PXF、部件、设备清单、预规划数据、PLC | 任务型工具，Destructive 级（可能覆盖数据） | M4 |
-| 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目 | M2（读取）、M3（运行） |
+| 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目 | M2（读取）、M4（运行） |
 | 报表 | 更新报表、生成报表页 | `eplan_report_update` | M4 |
 | 编号 | 设备、页面、端子、电缆、连接重编号 | `eplan_renumber`（Destructive，执行前备份） | M4 |
 | 生成 | 生成连接、电缆、宏 | 插入窗口宏：`eplan_macro_insert`；生成连接：`eplan_connection_generate`（按页，只更新）。两者都已写规格，实现排在 M3a 第 10 步之后（[M3b 设计](../design/2026-10-20-m3b-placement.md)）；电缆生成在 M4 | M3b、M4 |
