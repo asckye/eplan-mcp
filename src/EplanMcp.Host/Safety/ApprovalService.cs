@@ -1,5 +1,6 @@
 using EplanMcp.Contracts;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
 
 namespace EplanMcp.Host.Safety;
 
@@ -24,26 +25,29 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     private readonly IApprovalChannel[] _channels = [.. channels];
 
     /// <summary>
-    /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> and returns the decision. Throws
+    /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> and returns the decision, reporting the
+    /// wait to <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). Throws
     /// <see cref="Bridge.BridgeCallException"/> when a channel failed to ask; nothing has run then.
     /// </summary>
-    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout), cancellationToken);
+    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout), progress, cancellationToken);
 
     /// <summary>
     /// Asks, before write <paramref name="requestId"/> goes on, whether the engineer has checked the project after the
     /// suspended write <paramref name="suspension"/> (ADR-0010 section 3), through the same channels as an approval and
     /// as a question of its own. Only <see cref="ApprovalDecision.Granted"/> lets the suspension be lifted.
     /// </summary>
-    public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, string argumentsHash, WritePlan plan, Suspension suspension, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension), cancellationToken);
+    public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, string argumentsHash, WritePlan plan, Suspension suspension, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension), progress, cancellationToken);
 
-    private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
+    private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         string requestId = question.RequestId;
         string tool = question.Release is null ? question.Tool : "release of " + question.Tool;
+        using ApprovalProgress? waiting = ApprovalProgress.Start(progress, question, Timeout, clock);
         foreach (IApprovalChannel channel in _channels)
         {
+            waiting?.AskingIn(channel.Where);
             if (await channel.AskAsync(question, cancellationToken).ConfigureAwait(false) is { } answer)
             {
                 ApprovalDecision decision = Checked(question, answer, channel.Name);

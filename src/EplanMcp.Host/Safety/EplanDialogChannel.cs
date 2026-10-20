@@ -19,6 +19,8 @@ internal sealed class EplanDialogChannel(IBridgeClient bridge, TimeProvider cloc
 
     public string Name => ChannelName;
 
+    public string Where => "in EPLAN";
+
     public async Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
