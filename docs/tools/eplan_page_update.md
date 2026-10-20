@@ -45,10 +45,12 @@
 - 全部页都没有变化时，计划为空，`execution = not_started`，不请求审批。
 - `undo`、`recovered`：同 `eplan_page_create`。
 - 页描述按项目数据处理，经过 ResultShaper。
-- 一行摘要：
-  - `Updated the descriptions of 3 pages in 'Line1'; Ctrl+Z in EPLAN undoes this step.`
-  - `Dry run: would update 3 pages in 'Line1'. Nothing was changed.`
+- `language`：省略参数时是 EPLAN 界面语言的代码；规划没有任何变化、又没有给出 `language` 时为 `null`。
+- 一行摘要（只有计数，不回显项目名，架构 8.5）：
+  - `Updated the descriptions of 3 pages; Ctrl+Z in EPLAN undoes this step.`
+  - `Dry run: would update 3 pages. Nothing was changed.`
   - `Nothing to change: the 3 pages already have these descriptions.`
+- 变更清单中的属性写作 `description (zh_CN)`，审批表单因此显示是哪种语言：`update page =GAA+A1&EFS1/3: description (zh_CN) '电源' -> '主回路'`。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
