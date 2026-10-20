@@ -150,6 +150,36 @@ public static class OperationNames
     public const string ReportUpdateExecute = "report.update.execute";
 
     /// <summary>
+    /// The plan of eplan_export_pdf: finds the project and the pages (all when none are given) and checks the scheme,
+    /// never exports. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/>.
+    /// </summary>
+    public const string ExportPdfPlan = "export.pdf.plan";
+
+    /// <summary>
+    /// Exports the pages as one PDF file into the Host's new, empty folder, then sets EPLAN's last used scheme back if
+    /// the export changed it. Arguments: <see cref="ExportArgs"/> with the folder and file name; data: <see cref="ExportRunData"/>.
+    /// </summary>
+    public const string ExportPdfRun = "export.pdf.run";
+
+    /// <summary>The plan of eplan_export_dxf, as <see cref="ExportPdfPlan"/>. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/>.</summary>
+    public const string ExportDxfPlan = "export.dxf.plan";
+
+    /// <summary>
+    /// Exports the pages as DXF or DWG files, one per page, into the Host's new folder; the scheme may add subfolders.
+    /// Arguments: <see cref="ExportArgs"/> with the folder; data: <see cref="ExportRunData"/>.
+    /// </summary>
+    public const string ExportDxfRun = "export.dxf.run";
+
+    /// <summary>The plan of eplan_export_image: finds the project and 1 to 20 pages. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/>.</summary>
+    public const string ExportImagePlan = "export.image.plan";
+
+    /// <summary>
+    /// Exports each page as one image into the Host's new folder, reporting progress and stopping at a cancel before each
+    /// page. Arguments: <see cref="ExportArgs"/> with the folder; data: <see cref="ExportRunData"/> with the page of each file.
+    /// </summary>
+    public const string ExportImageRun = "export.image.run";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
