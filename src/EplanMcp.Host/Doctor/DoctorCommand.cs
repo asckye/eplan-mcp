@@ -19,6 +19,7 @@ internal static class DoctorCommand
             DoctorChecks.AuditDirectory(locations),
             DoctorChecks.MsixEnvironment(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)),
         };
+        checks.AddRange(DoctorChecks.Suspensions(locations));
         checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
         checks.AddRange(DoctorChecks.RunningEplan());
         var bridge = new BridgeClient(new PipeBridgeDiscovery(), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);

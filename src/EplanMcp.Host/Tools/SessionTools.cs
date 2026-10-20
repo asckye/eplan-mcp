@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Safety;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -27,7 +28,7 @@ internal sealed class SessionTools
         "Use it first, or when another tool returns EPLAN_NOT_CONNECTED or BRIDGE_INCOMPATIBLE: it succeeds even when EPLAN is not available " +
         "and says in 'hint' what the engineer should do. Does not touch any project and does not wait for EPLAN's main thread. " +
         "Related: eplan_project_list.")]
-    public static async Task<CallToolResult> SessionStatusAsync(IBridgeClient bridge, CancellationToken cancellationToken)
+    public static async Task<CallToolResult> SessionStatusAsync(IBridgeClient bridge, SuspensionStore suspensions, CancellationToken cancellationToken)
     {
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
         HandshakeResult? handshake = status.Handshake;
@@ -48,7 +49,7 @@ internal sealed class SessionTools
             [
                 .. status.Instances.Select(i => new SessionStatusResult.InstanceSummary { ProcessId = i.ProcessId, Selected = i.ProcessId == status.SelectedProcessId }),
             ],
-            Hint = status.Problem?.Message ?? (handshake is null ? null : VersionHint(handshake.Eplan.Version)),
+            Hint = status.Problem?.Message ?? (handshake is null ? null : ConnectedHint(handshake, suspensions)),
         };
         return ToolResults.Success(Summary(result, status.Problem), result);
     }
@@ -98,6 +99,30 @@ internal sealed class SessionTools
         };
         string variant = result.Selected.Variant is { Length: > 0 } v ? $" ({v})" : string.Empty;
         return ToolResults.Success($"Selected EPLAN {result.Selected.Version}{variant}, process {result.Selected.ProcessId.ToString(CultureInfo.InvariantCulture)}.", result);
+    }
+
+    /// <summary>What to know about a connected EPLAN: its version (ADR-0009) and suspended writes (ADR-0010); null when nothing.</summary>
+    private static string? ConnectedHint(HandshakeResult handshake, SuspensionStore suspensions)
+    {
+        DateTimeOffset? start = SuspensionStore.StartOf(handshake.Eplan.ProcessId);
+        Suspension[] relevant = [.. suspensions.All().Where(s => s.Project is not null || (s.ProcessId == handshake.Eplan.ProcessId && s.ProcessStart == start))];
+        string[] parts = [.. new[] { VersionHint(handshake.Eplan.Version), SuspensionHint(relevant) }.OfType<string>()];
+        return parts.Length == 0 ? null : string.Join(" ", parts);
+    }
+
+    /// <summary>The model tells the engineer; the next write asks them to confirm (ADR-0010 section 3).</summary>
+    internal static string? SuspensionHint(IReadOnlyCollection<Suspension> suspensions)
+    {
+        if (suspensions.Count == 0)
+        {
+            return null;
+        }
+
+        IEnumerable<string> what = suspensions.Select(s => s.Project is { } project
+            ? $"to project '{project}' since {s.Time.ToString("u", CultureInfo.InvariantCulture)} ({s.Tool})"
+            : $"to every project of this EPLAN since {s.Time.ToString("u", CultureInfo.InvariantCulture)} ({s.Tool})");
+        return $"Writes are suspended because the outcome of an earlier write is unknown: {string.Join("; ", what)}. " +
+            "Ask the engineer to check those projects in EPLAN; the next write asks them to confirm. Reads work as usual.";
     }
 
     /// <summary>Null for a tested EPLAN; otherwise what to know before relying on the tools (ADR-0009).</summary>

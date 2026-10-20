@@ -64,6 +64,30 @@ internal static class DoctorChecks
         $"审计目录不可写，写操作会被拒绝：{locations.Audit}（{ex.Message}）",
         $"Audit directory not writable, so writes will be refused: {locations.Audit} ({ex.Message})");
 
+    /// <summary>Suspended writes (ADR-0010 section 3): what the engineer has to check before AI writes resume.</summary>
+    public static IEnumerable<DoctorCheck> Suspensions(HostDataLocations locations)
+    {
+        IReadOnlyList<Suspension> all = SuspensionStore.For(locations).All();
+        if (all.Count == 0)
+        {
+            yield return new(DoctorStatus.Ok, "没有暂停的写入", "No writes are suspended");
+            yield break;
+        }
+
+        foreach (Suspension s in all)
+        {
+            string time = s.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            string pid = s.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?";
+            yield return s.Project is { } project
+                ? new(DoctorStatus.Warning,
+                    $"项目 {project} 的写入已暂停（{time}，{s.Tool} 的结果未知）：请先在 EPLAN 中核实，下一次写操作会请求确认",
+                    $"Writes to {project} are suspended ({time}, outcome of {s.Tool} unknown): check the project in EPLAN; the next write asks to confirm")
+                : new(DoctorStatus.Warning,
+                    $"EPLAN 进程 {pid} 的写入已暂停（{time}，{s.Tool} 的结果未知），直到它退出或经确认解除",
+                    $"Writes in EPLAN process {pid} are suspended ({time}, outcome of {s.Tool} unknown) until it exits or the engineer confirms");
+        }
+    }
+
     /// <summary>The safety settings serve will use, or why it refuses to start (architecture 8.9).</summary>
     public static DoctorCheck Configuration(HostDataLocations locations)
     {

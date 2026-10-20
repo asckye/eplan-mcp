@@ -137,7 +137,7 @@ public sealed class SessionToolsTests
         Eplan = new EplanInstanceInfo { ProcessId = processId, Version = "2026.0.3.25421", Variant = variant },
     };
 
-    private Task<CallToolResult> Status() => SessionTools.SessionStatusAsync(_bridge, TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Status() => SessionTools.SessionStatusAsync(_bridge, new EplanMcp.Host.Safety.SuspensionStore(Path.Combine(Path.GetTempPath(), "eplanmcp-no-state-" + Guid.NewGuid().ToString("N"))), TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> Select(int processId) => SessionTools.SessionSelectAsync(_bridge, processId, TestContext.Current.CancellationToken);
 }
