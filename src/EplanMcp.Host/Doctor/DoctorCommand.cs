@@ -17,6 +17,7 @@ internal static class DoctorCommand
             DoctorChecks.DataDirectory(locations),
             DoctorChecks.Configuration(locations),
             DoctorChecks.AuditDirectory(locations),
+            DoctorChecks.Exports(locations),
             DoctorChecks.MsixEnvironment(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)),
         };
         checks.AddRange(DoctorChecks.Suspensions(locations));

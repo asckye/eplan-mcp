@@ -331,8 +331,8 @@ sequenceDiagram
 | 签名 | 视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 授权要求 |
 | 客户端配置 | `eplanmcp client-config claude-code` 等命令生成客户端的 MCP 配置，写入前展示 diff | 用户可以掌控被改动的内容 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
-| 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
-| 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写 | 把这次环境排查中踩过的坑全部变成自动检查 |
+| 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
+| 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写、导出占用的空间 | 把这次环境排查中踩过的坑全部变成自动检查 |
 
 ### 7.1 安装验收清单（M5 发布前逐项通过）
 清单来源：本项目实机验证中踩过的坑，以及国内 EPLAN 插件用户反映的常见安装问题（[电气CAD吧插件商店](https://www.cad-bbs.cn/pluginstore/)的安装说明与用户评论）。

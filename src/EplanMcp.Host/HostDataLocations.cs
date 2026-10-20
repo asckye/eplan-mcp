@@ -19,6 +19,9 @@ internal sealed class HostDataLocations(string root)
     /// <summary>Write suspensions (ADR-0010, M3 design 4.3).</summary>
     public string State => Path.Combine(Root, "state");
 
+    /// <summary>The export root: one new folder per export below it, never configurable (SEC-20, M4 design Q8).</summary>
+    public string Exports => Path.Combine(Root, "exports");
+
     public static HostDataLocations FromEnvironment() => new(
         Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
             ? home
