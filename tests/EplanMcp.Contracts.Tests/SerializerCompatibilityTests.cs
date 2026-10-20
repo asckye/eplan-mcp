@@ -165,6 +165,22 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new ReportUpdateData(),
+        new ExportArgs
+        {
+            Project = "Line1",
+            Pages = ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"],
+            Scheme = "EPLAN_default_value",
+            Color = "black_white",
+            Format = "jpg",
+            WidthPx = 2000,
+            Directory = @"C:\Users\u\EplanMcp\exports\Line1\20261021T083000Z-k3f9q2\",
+            FileName = "电气图.pdf",
+        },
+        new ExportArgs(),
+        new ExportPlanData { Project = "Line1", PageCount = 321, Scheme = "Standard Settings" },
+        new ExportPlanData(),
+        new ExportRunData { Project = "Line1", PageCount = 2, Files = [new ExportedPage { Page = "=GAA+A1&EFS1/60", Path = "=GAA+A1&EFS1_60.png" }], Warning = "w" },
+        new ExportRunData(),
         new ProjectListArgs(),
         new ProjectListData
         {
