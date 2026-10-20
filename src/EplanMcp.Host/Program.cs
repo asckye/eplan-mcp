@@ -1,4 +1,5 @@
 using System.Globalization;
+using EplanMcp.Host.Audit;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Safety;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ namespace EplanMcp.Host;
 
 /// <summary>
 /// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp doctor</c> checks the machine;
+/// <c>eplanmcp audit verify</c> checks the audit hash chain;
 /// <c>eplanmcp --version</c> prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5). Exit codes: 2 for a
 /// wrong command line, 3 when serve refuses an invalid config.json.
@@ -24,11 +26,13 @@ internal static class Program
                 return await ServeAsync().ConfigureAwait(false);
             case ["doctor"]:
                 return await DoctorCommand.RunAsync(Console.Out, CultureInfo.CurrentUICulture, CancellationToken.None).ConfigureAwait(false);
+            case ["audit", "verify"]:
+                return AuditCommand.Verify(Console.Out, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment());
             case ["--version"]:
                 Console.WriteLine(HostInfo.Version);
                 return 0;
             default:
-                Console.Error.WriteLine("usage: eplanmcp [serve] | doctor | --version");
+                Console.Error.WriteLine("usage: eplanmcp [serve] | doctor | audit verify | --version");
                 return 2;
         }
     }
