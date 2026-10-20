@@ -70,8 +70,8 @@ flowchart LR
     files[("项目、主数据<br/>（磁盘）")]
     lic[["EPLAN 授权<br/>（本地 / 网络 / 借用 / 云）"]]
 
-    engineer -- "对话、审批" --> client
-    engineer -- "查看和编辑图纸" --> eplan
+    engineer -- "对话" --> client
+    engineer -- "查看和编辑图纸、审批" --> eplan
     client -- "MCP（stdio）" --> host
     host -- "命名管道 JSON-RPC" --> bridge
     bridge -- "EPLAN .NET API（进程内、主线程）" --> eplan
@@ -79,7 +79,7 @@ flowchart LR
     eplan --> lic
 ```
 
-工程师同时面对两个界面：在 MCP 客户端里和 AI 对话、审批操作；在 EPLAN 里实时看到 AI 的修改。这是本架构选择**驱动正在运行的 EPLAN 界面**，而不是在后台另起一个看不见的 EPLAN 实例的主要原因（[ADR-0002](../adr/0002-host-bridge-process-model.md)）。
+工程师同时面对两个界面：在 MCP 客户端里和 AI 对话；在 EPLAN 里实时看到 AI 的修改，并在 EPLAN 的对话框中审批（M5 起也可以在 Workbench 中审批）。审批不经 MCP 客户端，AI 客户端不能代答（[ADR-0011](../adr/0011-approval-out-of-band.md)）。这是本架构选择**驱动正在运行的 EPLAN 界面**，而不是在后台另起一个看不见的 EPLAN 实例的主要原因（[ADR-0002](../adr/0002-host-bridge-process-model.md)）。
 
 ---
 
@@ -159,7 +159,7 @@ flowchart TB
 | `ToolCatalog` | 用 `[McpServerTool]` 等特性声明工具，并显式设置 `ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld`；按 Profile 过滤；导出契约快照供 CI 比对 |
 | `ToolHandlers` | 每个工具一个处理器：校验参数 → 询问策略 → 调用 Bridge → 整形结果 |
 | `PolicyEngine` | 纯函数：输入（工具级别、目标项目、是否在 scratch 中、配置），输出（允许 / 需要审批 / 拒绝 + 原因）。见 [ADR-0005](../adr/0005-safety-model.md) |
-| `ApprovalService` | 多种实现按优先级选择：**MCP elicitation**（通过多轮请求，客户端支持时使用）→ **Workbench 审批队列**（Workbench 正在运行时）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝 |
+| `ApprovalService` | 只经工程师独立操作的窗口，按优先级选择：**Workbench 审批队列**（M5，Workbench 正在运行时）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝。不用 MCP elicitation。在 Host 中等待决定，期限默认 120 秒（60–300 秒可配置），客户端提供了进度令牌时每 15 秒发一次进度通知（[ADR-0011](../adr/0011-approval-out-of-band.md)） |
 | `PendingPlanStore` | 保存等待审批的变更计划，以高熵随机 ID 引用，带过期时间。交给客户端的 `requestState` 使用 HMAC 签名，防止被篡改或重放 |
 | `AuditLog` | 每次调用写一条 JSONL 记录，每条记录带上一条的哈希，形成哈希链 |
 | `ResultShaper` | 统一处理分页、截断、`response_format`（concise / detailed）、不可信内容标记，以及 token 预算（默认不超过 5k，硬上限 20k，低于 Claude Code 的 25k 限制） |
@@ -266,25 +266,30 @@ sequenceDiagram
 
 > 交互式图：[写调用：审批与事务的时序](../diagrams/write-call-sequence/write-call-sequence.html)。
 
-按照 MCP 2026-07-28 的规定，服务器不能主动向客户端发起请求，审批通过**多轮请求（MRTR）**完成：
+审批只经工程师独立操作的窗口，不经 MCP 客户端：elicitation 的表单由 AI 客户端自己显示、自己回答，客户端可以无界面运行或被设置为自动回答，所以表单上的"批准"不能证明有人确认过（[ADR-0011](../adr/0011-approval-out-of-band.md)）。工具调用在 Host 中等待工程师的决定：
 
 ```mermaid
 sequenceDiagram
-    participant C as MCP 客户端 / 工程师
+    participant C as MCP 客户端
     participant H as Host
     participant B as Bridge
+    participant E as 工程师（EPLAN 中）
     C->>H: tools/call eplan_device_place {project, page, ...}
     H->>H: 校验参数；写操作必须显式指定 project
     H->>B: plan（dry-run）：计算将要发生的变化，不修改项目
     B-->>H: 变更清单 + 项目状态指纹
     H->>H: 策略判定：scratch → 自动允许；真实项目 → 需要审批
-    H-->>C: resultType = input_required<br/>表单："批准以下 N 处修改？" + 签名的 requestState
-    C->>C: 向工程师展示变更清单
-    C->>H: 再次 tools/call，带 inputResponses（accept / decline / cancel）+ requestState
-    H->>H: 校验签名、有效期，以及计划是否仍对应当前请求
+    H->>B: approval.ask：变更清单 + 请求 ID、指纹、参数摘要 + 期限（默认 120 秒）
+    B->>E: EPLAN 内的模态审批对话框，显示倒计时
+    loop 等待期间，客户端提供了进度令牌时
+        H-->>C: 每 15 秒一次进度通知："正在等待 EPLAN 中的审批"
+    end
+    E-->>B: 批准 / 拒绝 / 关闭；或到期
+    B-->>H: 决定 + 它所针对的请求 ID、指纹、参数摘要
+    H->>H: 绑定不符视为拒绝，期限之后的批准视为过期；决定单独写一条审计
     alt 批准
         H->>H: 审计："开始执行"
-        H->>B: execute（带计划 ID 和项目状态指纹）
+        H->>B: execute（带同一个请求 ID 和项目状态指纹）
         B->>B: 指纹变了 → 拒绝执行（返回 PLAN_STALE，需要重新规划）
         B->>B: LockingStep → SafetyPoint → UndoStep → QuietModeStep
         B->>B: 执行并读回校验
@@ -297,13 +302,13 @@ sequenceDiagram
         end
         Note over H,B: 等待超时或管道断开时，Host 重连并用 outcome.get 取回结果，从不重发；<br/>取不回则返回 OUTCOME_UNKNOWN 并暂停写入（ADR-0010）
     else 拒绝 / 取消 / 过期
-        H-->>C: APPROVAL_DENIED（execution = not_started）
+        H-->>C: APPROVAL_DENIED 或 APPROVAL_EXPIRED（execution = not_started）
     end
-    H->>H: 写审计：参数、变更清单、决定、审批渠道、结果
+    H->>H: 写审计：参数、变更清单、执行结果
     H-->>C: 结果
 ```
 
-客户端不支持 elicitation 时，Host 让 Bridge 在 EPLAN 中弹出审批对话框（以 EPLAN 主窗口为父窗口），流程其余部分不变。两种渠道都不可用时，需要审批的操作一律拒绝。
+审批对话框以 EPLAN 主窗口为所有者，打开期间其他调用返回 `EPLAN_BUSY`。M5 起 Workbench 正在运行时，由它的审批队列代替 EPLAN 对话框，流程其余部分不变。没有可用的渠道时，需要审批的操作一律拒绝；没有人回答时对话框到期自动拒绝。所以无人值守的代理不能写入真实项目，scratch 中的写入不受影响。
 
 ### 6.4 EPLAN 正忙或有模态对话框
 工程师可能正在 EPLAN 里操作，或者 EPLAN 正显示一个对话框。两种情况分开处理（spike S1）：主线程正忙时，调度在超时（默认 10 秒，可配置）后放弃，返回 `EPLAN_BUSY`，而且被放弃的调度**事后不会再执行**；主线程空闲但打开着模态对话框时，WPF 调度器会在对话框的消息循环中执行我们的代码，所以 Bridge 在执行前检查 EPLAN 主窗口是否被禁用，被禁用就立即返回 `EPLAN_BUSY`，提示"请关闭 EPLAN 中打开的对话框后重试"。**操作不会在后台排队、等到之后突然执行**，因为工程师那时可能已经改变了项目状态。
@@ -404,7 +409,7 @@ sequenceDiagram
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
 ### 8.11 界面语言
-- 面向人的内容提供**中文和英文**：Workbench、审批对话框与审批表单、`doctor` 的输出、安装和入门文档。默认跟随系统语言，可以切换。
+- 面向人的内容提供**中文和英文**：Workbench、审批对话框、`doctor` 的输出、安装和入门文档。默认跟随系统语言，可以切换。
 - 面向模型的内容（工具名称、描述、schema、错误的 `reason`）统一使用英文，保证不同客户端和模型下行为一致；错误的 `message` 中引用的项目数据保持原文。
 
 ### 8.10 协议版本
@@ -439,7 +444,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | **S1 已完成**：可行。EPLAN 预设了调度器，超时可以干净地放弃。另外发现两个必须防范的问题：委托中漏出的异常会让 EPLAN 崩溃；模态对话框打开时会被重入执行。两者都已写成硬规则（编码规范 5a–5c） | 已消除（启动时加载的情况在打通骨架时确认） |
 | R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
-| R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批 | **S4 协议层已完成**：Claude Code 2.1.295 使用 2026-07-28，并声明 `elicitation: {form, url}`；SDK 2.x 的 `InputRequiredException` 一条代码路径覆盖 2026-07-28 和 2025-11-25，`requestState` 都能带回（api-notes C）。客户端不声明 elicitation 时退回 EPLAN 内对话框。**剩余**：交互界面中的表单显示与三种回答的往返，人工确认一次；Tasks 未测 | 协议层已消除；界面在 M3 前确认 |
+| R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批；耗时操作无法以任务方式运行 | **S4 协议层已完成**：Claude Code 2.1.295 使用 2026-07-28，并声明 `elicitation: {form, url}`；SDK 2.x 的 `InputRequiredException` 一条代码路径覆盖 2026-07-28 和 2025-11-25，`requestState` 都能带回（api-notes C）。**ADR-0011 之后审批不经客户端**，表单界面的人工确认不再需要。**剩余**：Tasks 未测 | 审批部分已消除（ADR-0011）；Tasks 待定 |
 | R5 | 通过项目数据进行提示注入 | 模型被诱导执行有害操作 | 第 8.5 节的措施，加上写操作必须审批；Agent 评测中加入对抗任务 | 持续 |
 | R6 | 借用授权到期，或网络授权被占用 | 调用失败 | 授权丢失作为单独的错误码；doctor 中检查 | M2 |
 | R7 | EPLAN 2024、2025、2027 上的兼容性 | 需要额外的 Bridge 构建 | 2024 起都是 4.8.1 API，2027 保留它；唯一不兼容的 `EplanMainThreadDispatcher` 已去掉（ADR-0009）；spike S7 逐版本实测 | M6 |
@@ -458,7 +463,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | **M0 启动**（已完成 2026-10-13） | 架构、ADR、规范、流程、仓库配置 | 本文档和 ADR-0001 到 0006 评审通过（Accepted） |
 | **M1 技术验证 + 打通骨架**（完成标准已达到 2026-10-18） | spike S0 授权（未签名插件能否加载，5 页限制是否生效）；S1 主线程调度；S2 回滚与撤销；S3 程序集共存；S4 客户端的 elicitation 支持。最小端到端链路：Host（stdio）↔ 管道 ↔ Bridge ↔ EPLAN，提供 `eplan_session_status`、`eplan_project_list`；`doctor`；CI 运行构建和 Small 测试 | 在 Claude Code 中调用 `eplan_project_list` 拿到真实结果；S0–S4 全部有结论，记入 api-notes；写出 ADR-0007 |
 | **M2 只读核心** | 项目、页面、设备、连接、部件、属性、系统消息、检查结果的只读工具；分页与结构化输出；契约快照；Agent 评测 v0（只读任务） | 只读任务的 Agent 评测成功率 ≥ 90% |
-| **M3 安全写入** | 策略引擎、审批（elicitation 和 EPLAN 对话框）、事务与撤销、审计哈希链、scratch 工作流；第一批写工具：建页、放置设备或宏、设备标识、属性、连接。分两段：M3a 是基础设施和 API 已验证的页、设备标识工具，M3b 是放置设备、宏和连接（[M3 设计](../design/2026-10-19-m3-safe-writes.md)） | Q1、Q2、Q3、Q6、Q7、Q9 通过；写入类 Agent 评测通过 |
+| **M3 安全写入** | 策略引擎、审批（EPLAN 对话框，[ADR-0011](../adr/0011-approval-out-of-band.md)）、事务与撤销、审计哈希链、scratch 工作流；第一批写工具：建页、放置设备或宏、设备标识、属性、连接。分两段：M3a 是基础设施和 API 已验证的页、设备标识工具，M3b 是放置设备、宏和连接（[M3 设计](../design/2026-10-19-m3-safe-writes.md)） | Q1、Q2、Q3、Q6、Q7、Q9 通过；写入类 Agent 评测通过 |
 | **M4 工程工作流** | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |
 | **M4b Pro Panel 3D** | 先做 spike（E3D 对象的读写、坐标系、回滚与撤销），再实现 Pro Panel 工具家族：查询 3D 布局、布置导轨和线槽、把设备放进 3D 布局、钻孔、母排与铜排、生产输出。详见 [API 覆盖矩阵第 3 节](../eplan/api-coverage.md#3-pro-panel-3dm4b) | 3D 布局类 Agent 评测任务通过；写操作同样满足 Q1–Q3 |
 | **M5 可运维** | 按用户安装的安装包；**Workbench**（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名） | 在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](#71-安装验收清单m5-发布前逐项通过)全部通过 |
