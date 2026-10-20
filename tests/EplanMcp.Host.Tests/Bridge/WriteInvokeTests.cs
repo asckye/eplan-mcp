@@ -108,7 +108,8 @@ public sealed class WriteInvokeTests
         _execute = Never;
         _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
 
-        BridgeError error = await Fails(limit: TimeSpan.FromMilliseconds(300));
+        // The response wait alone takes 100 ms; 300 ms left room for one poll only on a busy CI runner (2026-10-20).
+        BridgeError error = await Fails(limit: TimeSpan.FromSeconds(2));
 
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false), (error.Reason, error.Execution, error.Retryable));
         Assert.True(OutcomeQuestions > 1);
