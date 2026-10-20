@@ -5,7 +5,7 @@
 | 问题 | 目标客户端（Claude Code）实际使用哪个 MCP 协议版本？是否声明 elicitation？Host 用 C# SDK 2.x 发起的审批表单，能否在客户端走完"批准 / 拒绝 / 取消"的往返，`requestState` 能否原样带回？ |
 | 日期 | 2026-10-13 |
 | 环境 | Windows 11；.NET SDK 10.0.401；ModelContextProtocol 2.2.0；Claude Code 2.1.295（Claude 桌面版自带） |
-| 结论 | **协议层可行**。Claude Code 2.1.295 原生使用 2026-07-28，每个请求都声明 `elicitation: {form, url}`。SDK 2.x 的 `InputRequiredException` 一条代码路径同时覆盖 2026-07-28（MRTR）和 2025-11-25（服务器发起 `elicitation/create`），两种协议下 `requestState` 都能带回。**待人工确认**：Claude Code 交互界面中表单的显示效果和三种回答的实际往返（见"待办"） |
+| 结论 | **协议层可行**。Claude Code 2.1.295 原生使用 2026-07-28，每个请求都声明 `elicitation: {form, url}`。SDK 2.x 的 `InputRequiredException` 一条代码路径同时覆盖 2026-07-28（MRTR）和 2025-11-25（服务器发起 `elicitation/create`），两种协议下 `requestState` 都能带回。原定的人工确认（交互界面中表单的显示效果和三种回答的实际往返）**不再需要**：ADR-0011 决定审批不用 elicitation（见"待办"） |
 
 ## 方法
 - [EplanMcp.Spikes.S4](EplanMcp.Spikes.S4.csproj) 是一个 stdio MCP 服务器（.NET 10 + 官方 SDK 2.2.0），提供两个工具：
@@ -66,8 +66,9 @@ spikes/S4-elicitation/bin/Release/net10.0/EplanMcp.Spikes.S4.exe selftest
 5. 2026-07-28 下每一轮都是独立的请求，工程师思考多久都不会占住一个挂起的 `tools/call`；旧协议下则会一直挂起到工程师回答为止（受客户端的工具超时限制）。
 
 ## 待办（需要人工）
-- [ ] 在**已登录的交互式** Claude Code 会话（CLI 或桌面版）中加载本服务器，调用 `s4_approve`（`form` 取 `boolean` 和 `enum` 各一次，再试一次 `rounds: 2`），分别选择批准、拒绝、按 Esc 取消，然后把 `wire-*.jsonl` 和界面截图的观察补进本节：表单是否显示完整的多行变更清单、中文是否正常、`title` / `description` 显示在哪里、默认值是否预填、超时多久。
-- [ ] 无界面模式（`claude -p`、Agent SDK）遇到 `input_required` 时如何处理（自动拒绝、取消还是报错），决定 Host 在 CI 和代理场景下的行为。
+**不再需要**（2026-10-21）：[ADR-0011](../../docs/adr/0011-approval-out-of-band.md) 决定审批和解除写入暂停都不用 elicitation，只经工程师独立操作的窗口（EPLAN 内的对话框，M5 起还有 Workbench）。原因正是第二项要查的问题：表单由 AI 客户端自己显示、自己回答，客户端可以无界面运行或自动回答。上面"结果"和"结论"中的协议层发现仍然有效，以后要在客户端里向工程师请求输入（不是审批）时可以直接使用。原来的两项保留如下：
+- 在**已登录的交互式** Claude Code 会话（CLI 或桌面版）中加载本服务器，调用 `s4_approve`（`form` 取 `boolean` 和 `enum` 各一次，再试一次 `rounds: 2`），分别选择批准、拒绝、按 Esc 取消，然后把 `wire-*.jsonl` 和界面截图的观察补进本节：表单是否显示完整的多行变更清单、中文是否正常、`title` / `description` 显示在哪里、默认值是否预填、超时多久。
+- 无界面模式（`claude -p`、Agent SDK）遇到 `input_required` 时如何处理（自动拒绝、取消还是报错），决定 Host 在 CI 和代理场景下的行为。
 
 ## 局限
 - 只测了 Claude Code 2.1.295。Claude 桌面版的聊天界面（非 Code）和其他客户端未测。

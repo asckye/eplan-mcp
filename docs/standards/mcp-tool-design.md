@@ -209,7 +209,8 @@ eplan_device_place
 | Code | false | true | false | 默认禁用；启用后每次都需要审批 | 不适用 |
 
 - 每个工具**必须显式设置全部四个注解**和 `title`；`openWorldHint` 一律为 false。CI 检查注解与级别是否一致。
-- 审批请求（elicitation 表单）中展示：工具、项目、**变更清单**（例如"新建页面 =AP+ST1/12；放置 -K1（接触器）于 (100,160)"）、能否撤销。表单只包含确认选项，**不在表单中收集任何敏感信息**。
+- 审批只在工程师独立操作的窗口中进行（EPLAN 内的对话框，M5 起还有 Workbench），**不用 MCP elicitation**：表单由 AI 客户端自己显示、自己回答，不能证明有人确认过（[ADR-0011](../adr/0011-approval-out-of-band.md)）。审批对话框中展示：工具、项目、**变更清单**（例如"新建页面 =AP+ST1/12；放置 -K1（接触器）于 (100,160)"）、能否撤销。对话框只有"批准""拒绝"，**不收集任何信息**。
+- 等待审批时工具调用一直挂起，期限默认 120 秒；客户端提供了 `progressToken` 时每 15 秒发一次进度通知。写工具的方法因此带一个 `IProgress<ProgressNotificationValue>` 参数（SDK 绑定，不进入 schema），传给 `WritePipeline.RunAsync`。
 - 写操作超时或中断后，Host 先向 Bridge 取回结果，**从不自动重发**；结果未知时暂停该项目的写入，没有工具可以解除，只能由工程师经审批渠道确认（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
 
