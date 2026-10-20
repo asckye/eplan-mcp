@@ -29,6 +29,9 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>()));
         services.TryAddSingleton<DanglingWrites>();
+
+        // Approval channels are registered in the order they are tried (ADR-0005 section 3); with none, approvals are refused.
+        services.TryAddSingleton<ApprovalService>();
         services.TryAddSingleton<WritePipeline>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
 

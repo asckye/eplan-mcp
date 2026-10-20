@@ -35,6 +35,7 @@ internal sealed partial class WritePipeline(
     SuspensionStore suspensions,
     AuditLog audit,
     DanglingWrites dangling,
+    ApprovalService approvals,
     TimeProvider clock,
     ILogger<WritePipeline> logger)
 {
@@ -50,6 +51,7 @@ internal sealed partial class WritePipeline(
             throw NotStarted(ex.Error);
         }
 
+        // Only a valid, non-empty plan is ever put to the engineer.
         if (request.DryRun || plan.Changes.Count == 0)
         {
             return new WriteOutcome<TData>(plan, ExecutionState.NotStarted, default, Recovered: false);
@@ -81,13 +83,27 @@ internal sealed partial class WritePipeline(
             throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = decision.Message! });
         }
 
+        // The Host names the write, never a client: the approval and the execution are bound to this ID.
+        string requestId = Guid.NewGuid().ToString("N");
         if (decision.Verdict == PolicyVerdict.NeedsApproval)
         {
-            // No approval channel yet (M3 step 8): with none available, whatever needs approval is refused (ADR-0005).
-            throw NotStarted(new BridgeError { Reason = ErrorReason.ApprovalDenied, Message = NoApprovalChannel });
+            ApprovalResult approval;
+            try
+            {
+                approval = await approvals.AskAsync(requestId, request.Tool, PendingPlanStore.HashArguments(request.Args), plan, cancellationToken).ConfigureAwait(false);
+            }
+            catch (BridgeCallException ex)
+            {
+                throw NotStarted(ex.Error);
+            }
+
+            await RecordApprovalAsync(request.Tool, requestId, plan, eplan, approval).ConfigureAwait(false);
+            if (approval.Decision != ApprovalDecision.Granted)
+            {
+                throw NotStarted(ApprovalService.Refusal(approval.Decision));
+            }
         }
 
-        string requestId = Guid.NewGuid().ToString("N");
         JsonObject record = Record("execution_started", request.Tool, requestId, plan, eplan);
         record["eplan"]!["start"] = started.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
         record["host"] = DanglingWrites.ThisHost();
@@ -126,9 +142,6 @@ internal sealed partial class WritePipeline(
         }
     }
 
-    internal const string NoApprovalChannel =
-        "This write needs the engineer's approval, and no approval channel is available in this version, so it was not run. Nothing was changed.";
-
     internal const string AuditUnavailableMessage =
         "The audit log cannot be written, so writes are refused and nothing was changed. Ask the engineer to run 'eplanmcp doctor'.";
 
@@ -164,6 +177,35 @@ internal sealed partial class WritePipeline(
             ["processId"] = eplan.Eplan.ProcessId,
         },
     };
+
+    /// <summary>
+    /// The decision as its own record, linked to the execution by the request ID, with the channel and the change list
+    /// it was about (architecture 8.8). A grant that cannot be recorded is not acted on (AUDIT_UNAVAILABLE); a refusal is
+    /// returned even when its record fails.
+    /// </summary>
+    private async Task RecordApprovalAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, ApprovalResult approval)
+    {
+        JsonObject record = Record("approval", tool, requestId, plan, eplan);
+        record["channel"] = approval.Channel;
+        record["decision"] = JsonNamingPolicy.SnakeCaseLower.ConvertName(approval.Decision.ToString());
+        record["fingerprint"] = plan.Fingerprint;
+        record["changes"] = new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+        if (approval.Decision != ApprovalDecision.Granted)
+        {
+            await AppendQuietlyAsync(record).ConfigureAwait(false);
+            return;
+        }
+
+        try
+        {
+            await audit.AppendAsync(record, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (AuditUnavailableException ex)
+        {
+            LogAuditUnavailable(ex);
+            throw NotStarted(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = AuditUnavailableMessage });
+        }
+    }
 
     private Task RecordResultAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, string execution, string? reason, bool recovered)
     {
