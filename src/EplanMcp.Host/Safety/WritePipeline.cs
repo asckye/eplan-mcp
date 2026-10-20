@@ -101,7 +101,7 @@ internal sealed partial class WritePipeline(
             await RecordApprovalAsync(request.Tool, requestId, plan, eplan, approval).ConfigureAwait(false);
             if (approval.Decision != ApprovalDecision.Granted)
             {
-                throw NotStarted(ApprovalService.Refusal(approval.Decision));
+                throw NotStarted(approvals.Refusal(approval.Decision));
             }
         }
 

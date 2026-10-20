@@ -24,6 +24,7 @@ public sealed class WriteApprovalTests : IDisposable
     private readonly FakeBridgeClient _bridge = new();
     private readonly ManualClock _clock = new(DateTimeOffset.UtcNow);
     private readonly string _realProject;
+    private TimeSpan _timeout = HostConfig.DefaultApprovalTimeout;
 
     public WriteApprovalTests()
     {
@@ -51,7 +52,7 @@ public sealed class WriteApprovalTests : IDisposable
         Assert.Equal((Tool, "f1"), (question.Tool, question.Plan.Fingerprint));
         Assert.Equal(["create page =A1&EFS1/5"], question.Changes);
         Assert.Equal(_bridge.Writes[0].RequestId, question.RequestId);
-        Assert.Equal(_clock.Now + ApprovalService.Timeout, question.Deadline);
+        Assert.Equal(_clock.Now + TimeSpan.FromSeconds(120), question.Deadline);
         List<JsonObject> records = AuditRecords();
         Assert.Equal(["approval", "execution_started", "execution_result"], records.Select(r => Text(r, "kind")));
         Assert.Equal(("eplan_dialog", "granted", "f1"), (Text(records[0], "channel"), Text(records[0], "decision"), Text(records[0], "fingerprint")));
@@ -115,12 +116,30 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AGrantAfterTheDeadline_HasExpired()
     {
-        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += ApprovalService.Timeout + TimeSpan.FromSeconds(1) };
+        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += HostConfig.DefaultApprovalTimeout + TimeSpan.FromSeconds(1) };
 
         BridgeError error = await Fails(late);
 
         Assert.Equal(ErrorReason.ApprovalExpired, error.Reason);
+        Assert.Contains("within 120 seconds", error.Message, StringComparison.Ordinal);
         Assert.Empty(_bridge.Writes);
+    }
+
+    [Fact]
+    public async Task TheConfiguredDeadline_IsTheQuestionsAndTheExpiryNamesIt()
+    {
+        _timeout = TimeSpan.FromSeconds(60);
+        var onTime = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += TimeSpan.FromSeconds(60) };
+        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += TimeSpan.FromSeconds(61) };
+
+        DateTimeOffset asked = _clock.Now;
+        await Run(onTime);
+        BridgeError error = await Fails(late);
+
+        Assert.Equal(asked + TimeSpan.FromSeconds(60), onTime.Questions.Single().Deadline);
+        Assert.Equal(ErrorReason.ApprovalExpired, error.Reason);
+        Assert.Contains("within 60 seconds", error.Message, StringComparison.Ordinal);
+        Assert.Single(_bridge.Writes);
     }
 
     [Fact]
@@ -282,13 +301,14 @@ public sealed class WriteApprovalTests : IDisposable
     private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun, OutsideScratchWrites outside = OutsideScratchWrites.Approve)
     {
         var audit = new AuditLog(_locations.Audit, TimeProvider.System);
+        var config = new HostConfig([_locations.DefaultScratch], outside) { ApprovalTimeout = _timeout };
         var pipeline = new WritePipeline(
             _bridge,
-            new HostConfig([_locations.DefaultScratch], outside),
+            config,
             SuspensionStore.For(_locations),
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService(channels, _clock, NullLogger<ApprovalService>.Instance),
+            new ApprovalService(channels, config, _clock, NullLogger<ApprovalService>.Instance),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));

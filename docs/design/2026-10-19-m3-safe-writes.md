@@ -104,6 +104,7 @@ flowchart TD
 - **配置与数据目录**：
   - 新增 `HostDataLocations`，与插件的 `DataLocations` 规则相同：`EPLANMCP_HOME`，或 `%USERPROFILE%\EplanMcp`。
   - `config.json` 第一版只有两项：`scratchRoots`，默认 `<数据根目录>\scratch`；`writesOutsideScratch`，M3a 期间默认 `deny`（Q5），M3a 收尾时默认改为 `approve`。
+  - [ADR-0011](../adr/0011-approval-out-of-band.md) 加了第三项 `approvalTimeoutSeconds`：工程师回答审批和解除暂停的确认的期限，默认 120 秒，只能是 60–300 之间的整数。
   - 启动时校验；无效时拒绝启动，`doctor` 指出原因（架构 8.9）。
   - 没有任何工具可以修改它（SEC-02）。
 - **scratch 判断**（SEC-05）：

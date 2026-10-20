@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -18,11 +19,24 @@ internal enum OutsideScratchWrites
 /// </summary>
 internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScratchWrites WritesOutsideScratch)
 {
+    /// <summary>How long the engineer has to answer an approval or a confirmation by default (ADR-0011).</summary>
+    public static readonly TimeSpan DefaultApprovalTimeout = TimeSpan.FromSeconds(120);
+
+    /// <summary>The shortest <c>approvalTimeoutSeconds</c> may set (ADR-0011).</summary>
+    public static readonly TimeSpan MinApprovalTimeout = TimeSpan.FromSeconds(60);
+
+    /// <summary>The longest <c>approvalTimeoutSeconds</c> may set (ADR-0011).</summary>
+    public static readonly TimeSpan MaxApprovalTimeout = TimeSpan.FromSeconds(300);
+
     private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+        NumberHandling = JsonNumberHandling.Strict,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
     };
+
+    /// <summary>How long the engineer has to answer an approval or a confirmation: <c>approvalTimeoutSeconds</c>.</summary>
+    public TimeSpan ApprovalTimeout { get; init; } = DefaultApprovalTimeout;
 
     public static HostConfig Defaults(HostDataLocations locations) => new([locations.DefaultScratch], OutsideScratchWrites.Deny);
 
@@ -68,13 +82,24 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             return (null, "is not valid: 'scratchRoots' must list at least one full path, such as C:\\EplanScratch");
         }
 
-        return (new HostConfig(roots, file?.WritesOutsideScratch ?? defaults.WritesOutsideScratch), null);
+        TimeSpan timeout = file?.ApprovalTimeoutSeconds is { } seconds ? TimeSpan.FromSeconds(seconds) : defaults.ApprovalTimeout;
+        if (timeout < MinApprovalTimeout || timeout > MaxApprovalTimeout)
+        {
+            return (null, $"is not valid: 'approvalTimeoutSeconds' must be a whole number of seconds from {Seconds(MinApprovalTimeout)} to {Seconds(MaxApprovalTimeout)}");
+        }
+
+        return (new HostConfig(roots, file?.WritesOutsideScratch ?? defaults.WritesOutsideScratch) { ApprovalTimeout = timeout }, null);
     }
+
+    /// <summary>A whole number of seconds, as config.json, doctor and the error messages write it.</summary>
+    public static string Seconds(TimeSpan span) => ((long)span.TotalSeconds).ToString(CultureInfo.InvariantCulture);
 
     private sealed class ConfigFile
     {
         public List<string>? ScratchRoots { get; set; }
 
         public OutsideScratchWrites? WritesOutsideScratch { get; set; }
+
+        public int? ApprovalTimeoutSeconds { get; set; }
     }
 }

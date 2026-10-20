@@ -23,7 +23,7 @@
 - 宏的只读工具（M3b 的准备）：
   - `eplan_macro_list`：按名称列出 EPLAN 宏目录中的窗口宏（`.ema`），分页；不跟随链接和联接点，扫描最多 2 秒；
   - `eplan_macro_get`：不插入地读出一个窗口宏的表达类型、变体、尺寸和其中的设备，项目不变。
-- 写入审批（`config.json` 中 `writesOutsideScratch` 为 `approve` 时）：scratch 之外的写入先在 EPLAN 中弹出审批对话框，按系统界面语言列出工具、项目和变更清单；5 分钟内未批准即自动拒绝，期间其他调用返回 `EPLAN_BUSY`；每个决定单独写入审计。
+- 写入审批（`config.json` 中 `writesOutsideScratch` 为 `approve` 时）：scratch 之外的写入先在 EPLAN 中弹出审批对话框，按系统界面语言列出工具、项目和变更清单；期限内未批准即自动拒绝，期限默认 120 秒，可用 `config.json` 中的 `approvalTimeoutSeconds` 设为 60–300 秒，`eplanmcp doctor` 显示当前值；对话框打开期间其他调用返回 `EPLAN_BUSY`；每个决定单独写入审计。
 - 第一个写工具 `eplan_page_create`（M3a）：按完整页名一次新建 1–50 页，可带页描述；在 EPLAN 中只占一个撤销步骤"AI: eplan_page_create"，任何一页失败或读回与请求不同时全部回滚；支持 `dry_run`；经写入流水线（策略、审批、审计、结果取回），scratch 之外的项目默认拒绝。
 - 写工具 `eplan_page_update`：改 1–50 页在一种语言下的页描述，其他语言保持不变，空串清除该语言；已经相同的页不改，全部相同时不写入；同样只占一个撤销步骤，读回不一致时全部回滚。
 - 写工具 `eplan_device_update`（这一版只改设备标识）：主功能和全部辅助功能（包括其他页上的触点）一起改名，`new_tag` 以 `-` 开头时保留原结构；新标识已被其他设备使用时拒绝（EPLAN 自己不检查重名）；EPLAN 丢掉新标识的一部分、或仍有功能带旧标识时回滚。

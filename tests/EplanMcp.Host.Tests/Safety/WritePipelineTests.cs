@@ -191,13 +191,14 @@ public sealed class WritePipelineTests : IDisposable
     private Task<WriteOutcome<JsonObject>> Run(bool dryRun = false, HostConfig? config = null)
     {
         var audit = new AuditLog(_locations.Audit, TimeProvider.System);
+        config ??= HostConfig.Defaults(_locations);
         var pipeline = new WritePipeline(
             _bridge,
-            config ?? HostConfig.Defaults(_locations),
+            config,
             SuspensionStore.For(_locations),
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
