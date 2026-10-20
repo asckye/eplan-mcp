@@ -204,6 +204,19 @@ public static class OperationNames
     public const string DeviceRenumberExecute = "device.renumber.execute";
 
     /// <summary>
+    /// The plan of eplan_page_renumber: finds the pages by their exact names, never writes; the new names are known only
+    /// after running. Arguments: <see cref="PageRenumberArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string PageRenumberPlan = "page.renumber.plan";
+
+    /// <summary>
+    /// Backs the project up, then lets EPLAN renumber the pages per structure in one transaction and reads back
+    /// (ADR-0013). Arguments: <see cref="PageRenumberArgs"/> with the fingerprint and the backup target; data:
+    /// <see cref="PageRenumberData"/>.
+    /// </summary>
+    public const string PageRenumberExecute = "page.renumber.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

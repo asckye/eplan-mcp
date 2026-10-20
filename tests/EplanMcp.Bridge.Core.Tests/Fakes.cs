@@ -710,3 +710,41 @@ internal sealed class FakeDeviceRenumberer : IDeviceRenumberer
 
     private static PlacedFunction Copy(PlacedFunction f) => new() { Name = f.Name, IsMain = f.IsMain, Page = f.Page, Id = f.Id };
 }
+
+/// <summary>
+/// Pages of a <see cref="FakePageReader"/> renumbered the way S12 found <c>Renumber.Pages</c> per structure renumbers
+/// them (api-notes A18): in the order given, from the start in steps, each in its own structure, keeping its session
+/// identifier; EPLAN's check for a taken name is <see cref="Refuse"/>, otherwise a taken number gives two pages one name.
+/// Records every call.
+/// </summary>
+internal sealed class FakePageRenumberer(FakePageReader pages) : IPageRenumberer
+{
+    private readonly Dictionary<PageSummary, string> _ids = [];
+
+    public bool Refuse { get; set; }
+
+    public List<(string[] Pages, int Start, int Step, bool KeepText, string Subpages)> Renumbers { get; } = [];
+
+    public string? PageId(string projectPath, string pageName) =>
+        pages.Pages.FirstOrDefault(p => p.Name == pageName) is { } page ? Id(page) : null;
+
+    public IReadOnlyList<string> Renumber(string projectPath, IReadOnlyList<string> names, int start, int increment, bool keepText, string subpages)
+    {
+        Renumbers.Add(([.. names], start, increment, keepText, subpages));
+        if (Refuse)
+        {
+            throw new BridgeErrorException(ErrorReason.AlreadyExists, "EPLAN: the page exists");
+        }
+
+        PageSummary[] targets = [.. names.Select(name => pages.Pages.First(p => p.Name == name))];
+        for (int i = 0; i < targets.Length; i++)
+        {
+            Id(targets[i]);
+            targets[i].Name = PageNames.StructureOf(targets[i].Name) + "/" + (start + (i * increment)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return [.. targets.Select(p => p.Name)];
+    }
+
+    private string Id(PageSummary page) => _ids.TryGetValue(page, out string? id) ? id : _ids[page] = "id " + page.Name;
+}
