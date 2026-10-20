@@ -85,6 +85,30 @@ public sealed class LiveEplan : IAsyncLifetime
         return JsonDocument.Parse(Text(result)).RootElement.GetProperty("error");
     }
 
+    /// <summary>The structured result, or the <c>error</c> object, of a call that may succeed or fail.</summary>
+    public async Task<(bool Succeeded, JsonElement Result)> CallOrErrorAsync(string tool, Dictionary<string, object?> args)
+    {
+        CallToolResult result = await CallRawAsync(tool, args);
+        return result.IsError == true
+            ? (false, JsonDocument.Parse(Text(result)).RootElement.GetProperty("error"))
+            : (true, result.StructuredContent!.Value);
+    }
+
+    /// <summary>
+    /// The path of the project write tests change: a copy of the sample project below the scratch root's <c>writes</c>
+    /// folder, open next to the fixture (README.md), so the fixture the read tests count stays as it is. The path, not
+    /// the name, because both copies are called <see cref="ProjectName"/>.
+    /// </summary>
+    public async Task<string> WriteProjectAsync()
+    {
+        string writes = Path.Combine(ScratchRoot(), "writes") + Path.DirectorySeparatorChar;
+        JsonElement open = (await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray()
+            .FirstOrDefault(p => p.GetProperty("path").GetString()!.StartsWith(writes, StringComparison.OrdinalIgnoreCase));
+        return open.ValueKind == JsonValueKind.Object
+            ? open.GetProperty("path").GetString()!
+            : throw new InvalidOperationException($"No project below {writes} is open in EPLAN: copy the sample project there and open it next to the fixture (README.md).");
+    }
+
     private Task<CallToolResult> CallRawAsync(string tool, Dictionary<string, object?>? args) =>
         _client!.CallToolAsync(tool, args ?? [], cancellationToken: TestContext.Current.CancellationToken).AsTask();
 
