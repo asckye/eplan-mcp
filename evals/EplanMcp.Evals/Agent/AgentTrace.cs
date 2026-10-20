@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using EplanMcp.Evals.Scoring;
 
 namespace EplanMcp.Evals.Agent;
@@ -13,6 +14,9 @@ internal sealed class ToolCall(string id, string tool)
     public string Tool { get; } = tool;
 
     public bool? IsError { get; set; }
+
+    /// <summary>The result reports <c>"execution": "committed"</c>: a write tool changed the project.</summary>
+    public bool Committed { get; set; }
 }
 
 internal sealed record TokenUsage(long Input, long Output, long CacheRead, long CacheCreation);
@@ -34,7 +38,7 @@ internal sealed record AgentResult(
 /// the main conversation counts: messages of subagents carry a <c>parent_tool_use_id</c> and are skipped, and the
 /// <c>StructuredOutput</c> call that delivers the answer is not a tool call.
 /// </summary>
-internal sealed class AgentTrace
+internal sealed partial class AgentTrace
 {
     public const string ServerName = "eplan";
     public const string AnswerTool = "StructuredOutput";
@@ -126,6 +130,7 @@ internal sealed class AgentTrace
                     if (_calls.FirstOrDefault(c => c.Id == Text(result["tool_use_id"])) is { } call)
                     {
                         call.IsError = result["is_error"] is JsonValue flag && flag.GetValueKind() == JsonValueKind.True;
+                        call.Committed = call.IsError == false && CommittedResult().IsMatch(ResultText(result["content"]));
                     }
                 }
 
@@ -158,6 +163,13 @@ internal sealed class AgentTrace
 
     private static IEnumerable<JsonObject> Blocks(JsonObject message, string type) =>
         (message["message"]?["content"] as JsonArray)?.OfType<JsonObject>().Where(b => Text(b["type"]) == type) ?? [];
+
+    /// <summary>A tool result's content: a string, or text blocks (api-notes C).</summary>
+    private static string ResultText(JsonNode? content) =>
+        Text(content) ?? string.Join("\n", (content as JsonArray)?.OfType<JsonObject>().Select(b => Text(b["text"])).OfType<string>() ?? []);
+
+    [GeneratedRegex("\"execution\"\\s*:\\s*\"committed\"", RegexOptions.CultureInvariant)]
+    private static partial Regex CommittedResult();
 
     private static string? Text(JsonNode? node) => Comparison.Text(node);
 

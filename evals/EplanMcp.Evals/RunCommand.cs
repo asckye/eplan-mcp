@@ -9,8 +9,9 @@ namespace EplanMcp.Evals;
 
 /// <summary>
 /// <c>run</c>: the preflight, then every selected task against EPLAN and the model, then the report in
-/// <c>.local/evals/&lt;yyyyMMdd-HHmmss&gt;/</c> (agent evals design 4.2 to 4.4). A cancelled run (Ctrl+C) still writes
-/// the report of what it finished.
+/// <c>.local/evals/&lt;yyyyMMdd-HHmmss&gt;/</c> (agent evals design 4.2 to 4.4). The model's eplanmcp gets the data
+/// root <c>eplanmcp\</c> there (<see cref="EvalsHome"/>). A cancelled run (Ctrl+C) still writes the report of what it
+/// finished.
 /// </summary>
 internal static class RunCommand
 {
@@ -79,8 +80,10 @@ internal static class RunCommand
             }
 
             string run = Directory.CreateDirectory(Path.Combine(evals, name)).FullName;
+            string home = Path.Combine(run, "eplanmcp");
+            EvalsHome.Write(home, Path.Combine(Preflight.ScratchRoot(), "evals", name, "copies"));
             string mcpConfig = Path.Combine(run, "mcp.json");
-            await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp), cancellationToken).ConfigureAwait(false);
+            await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);
             var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig), run, workRoot, options.Repeat > 1);
 
@@ -88,7 +91,7 @@ internal static class RunCommand
             int exit = 0;
             try
             {
-                await EvalRun.RunAsync(tasks, options.Repeat, client, tools, attempts, output, records, EvalRun.RetryDelay, cancellationToken).ConfigureAwait(false);
+                await EvalRun.RunAsync(tasks, options.Repeat, client, tools, attempts, output, records, EvalRun.RetryDelay, () => EvalsHome.AuditedWrites(home), cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {

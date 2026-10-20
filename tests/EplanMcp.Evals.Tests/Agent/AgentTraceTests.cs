@@ -150,6 +150,21 @@ public sealed class AgentTraceTests
         Assert.Equal(2, trace.Corrected);
     }
 
+    [Fact]
+    public void Read_AResultReportingACommit_MarksTheCallCommitted()
+    {
+        AgentTrace trace = Read(
+        [
+            Use("a", "eplan_page_create"), Use("b", "eplan_page_create"), Use("c", "eplan_device_update"), Use("d", "eplan_page_update"),
+            """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"a","content":"{\"project\":\"P\",\"execution\":\"not_started\",\"dryRun\":true}"}]},"parent_tool_use_id":null}""",
+            """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"b","content":"{\"project\":\"P\",\"execution\":\"committed\"}"}]},"parent_tool_use_id":null}""",
+            """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"c","content":[{"type":"text","text":"Renamed a device."},{"type":"text","text":"{\"execution\": \"committed\"}"}]}]},"parent_tool_use_id":null}""",
+            """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"d","content":"{\"error\":{\"execution\":\"committed\"}}","is_error":true}]},"parent_tool_use_id":null}""",
+        ]);
+
+        Assert.Equal([false, true, true, false], trace.Calls.Select(c => c.Committed));
+    }
+
     [Theory]
     [InlineData("""["StructuredOutput","mcp__eplan__eplan_page_list"]""", "connected", null)]
     [InlineData("""["mcp__eplan__eplan_page_list","Bash"]""", "connected", "the model could use Bash, not only eplanmcp")]

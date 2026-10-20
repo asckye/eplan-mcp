@@ -10,6 +10,9 @@ internal static class ClaudeCommand
     /// <summary>Q1 of the design fixes the model; the report records it.</summary>
     public const string DefaultModel = "claude-sonnet-5-5";
 
+    /// <summary>eplanmcp's data root (ADR-0008).</summary>
+    public const string HomeVariable = "EPLANMCP_HOME";
+
     // A run within budget takes a turn per tool call at most, one for StructuredOutput and one for the closing text;
     // the rest leaves room for an answer the schema rejects once or twice.
     private const int MaxTurnsHeadroom = 5;
@@ -39,8 +42,11 @@ internal static class ClaudeCommand
         "--max-turns", (task.Budget.MaxToolCalls + MaxTurnsHeadroom).ToString(CultureInfo.InvariantCulture),
     ];
 
-    /// <summary>An MCP configuration with eplanmcp as the only server, started over stdio.</summary>
-    public static string McpConfig(string eplanmcp) => new JsonObject
+    /// <summary>
+    /// An MCP configuration with eplanmcp as the only server, started over stdio with <paramref name="home"/> as its data
+    /// root (<c>EPLANMCP_HOME</c>), so that it reads the evals' own config.json and audits into it.
+    /// </summary>
+    public static string McpConfig(string eplanmcp, string home) => new JsonObject
     {
         ["mcpServers"] = new JsonObject
         {
@@ -49,6 +55,7 @@ internal static class ClaudeCommand
                 ["type"] = "stdio",
                 ["command"] = eplanmcp,
                 ["args"] = new JsonArray("serve"),
+                ["env"] = new JsonObject { [HomeVariable] = home },
             },
         },
     }.ToJsonString();
