@@ -104,6 +104,24 @@ internal static class DoctorChecks
         }
     }
 
+    /// <summary>
+    /// How much the copies made before Destructive writes take (ADR-0013): EplanMcp never deletes them, so the engineer
+    /// has to; a backup that fails for want of space refuses the write (BACKUP_FAILED).
+    /// </summary>
+    public static DoctorCheck Backups(HostDataLocations locations)
+    {
+        if (!Directory.Exists(locations.Backups))
+        {
+            return new(DoctorStatus.Info, $"还没有备份：{locations.Backups}（第一次 Destructive 写操作时创建）", $"No backups yet: {locations.Backups} (created by the first Destructive write)");
+        }
+
+        (int count, long bytes) = BackupFolders.Usage(locations.Backups);
+        string size = (bytes / (1024.0 * 1024.0)).ToString("0.0", CultureInfo.InvariantCulture);
+        return new(DoctorStatus.Info,
+            $"备份：{locations.Backups} 中有 {count} 份，共 {size} MB；EplanMcp 不会删除备份，不再需要时请自行清理",
+            $"Backups: {count} in {locations.Backups}, {size} MB in all; EplanMcp never deletes them, so remove those no longer needed");
+    }
+
     /// <summary>The safety settings serve will use, or why it refuses to start (architecture 8.9).</summary>
     public static DoctorCheck Configuration(HostDataLocations locations)
     {

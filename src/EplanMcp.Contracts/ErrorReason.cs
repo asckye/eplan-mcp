@@ -90,6 +90,12 @@ public static class ErrorReason
     /// </summary>
     public const string Cancelled = "CANCELLED";
 
+    /// <summary>
+    /// A Destructive write was not run because the project could not be backed up first: the copy failed, took too long,
+    /// or has another page count than the project (ADR-0013). Nothing was changed; never retried automatically.
+    /// </summary>
+    public const string BackupFailed = "BACKUP_FAILED";
+
     /// <summary>A defect in EplanMcp; the correlation ID identifies the log entries.</summary>
     public const string Internal = "INTERNAL";
 }

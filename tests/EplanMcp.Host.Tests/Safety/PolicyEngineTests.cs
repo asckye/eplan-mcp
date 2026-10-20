@@ -34,6 +34,15 @@ public sealed class PolicyEngineTests
     }
 
     [Fact]
+    public void TheOnlyApprovalChannelInTheHost_IsTheEplanDialog()
+    {
+        // ADR-0005, ADR-0011: nothing in eplanmcp can approve a write by itself; a test channel lives only in tests.
+        Type[] channels = [.. typeof(PolicyEngine).Assembly.GetTypes().Where(t => typeof(IApprovalChannel).IsAssignableFrom(t) && !t.IsInterface)];
+
+        Assert.Equal([typeof(EplanDialogChannel)], channels);
+    }
+
+    [Fact]
     public void Decide_DenialMessages_NameThePolicyButNoWayAround()
     {
         var config = new HostConfig(["C:\\Scratch"], OutsideScratchWrites.Deny);

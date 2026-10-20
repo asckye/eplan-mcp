@@ -48,6 +48,7 @@ public sealed class PageCreateToolTests : IDisposable
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
             new ApprovalService([], HostConfig.Defaults(_locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new BackupFolders(_locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
     }

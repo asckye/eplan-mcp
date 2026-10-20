@@ -9,12 +9,13 @@ using ModelContextProtocol.Protocol;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// A write tool's surroundings for Medium tests: the real write pipeline with its audit and suspensions in a temporary
-/// data directory, a fake Bridge connected to "EPLAN" in this test process, and a project path inside scratch.
+/// A write tool's surroundings for Medium tests: the real write pipeline with its audit, suspensions and backup folders
+/// in a temporary data directory, a fake Bridge connected to "EPLAN" in this test process, and a project path inside
+/// scratch. Approvals go to <c>channels</c>; with none, every approval is refused.
 /// </summary>
 internal sealed class WriteToolHarness : IDisposable
 {
-    public WriteToolHarness()
+    public WriteToolHarness(params IApprovalChannel[] channels)
     {
         Locations = new HostDataLocations(Directory.CreateTempSubdirectory("eplanmcp-write-tool-").FullName);
         ProjectPath = Path.Combine(Locations.DefaultScratch, "Line1");
@@ -29,7 +30,8 @@ internal sealed class WriteToolHarness : IDisposable
             SuspensionStore.For(Locations),
             audit,
             new DanglingWrites(Bridge, SuspensionStore.For(Locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], HostConfig.Defaults(Locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new ApprovalService(channels, HostConfig.Defaults(Locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new BackupFolders(Locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
     }

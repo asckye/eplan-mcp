@@ -56,6 +56,16 @@ public sealed class ApprovalTextsTests
     }
 
     [Theory]
+    [InlineData("zh-CN", "执行前会先把整个项目备份到 C:\\Data\\backups\\Line1\\ 下的新文件夹。批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: eplan_page_delete”这一步。")]
+    [InlineData("en-US", "Before the change, the whole project is backed up to a new folder in C:\\Data\\backups\\Line1\\. After approval, Ctrl+Z in EPLAN undoes the step \"AI: eplan_page_delete\".")]
+    public void ADestructiveWrite_NamesWhereTheProjectIsBackedUpFirst(string culture, string note)
+    {
+        ApprovalQuestion question = _question with { Tool = "eplan_page_delete", BackupFolder = @"C:\Data\backups\Line1" };
+
+        Assert.Equal(note, ApprovalTexts.For(question, CultureInfo.GetCultureInfo(culture)).Note);
+    }
+
+    [Theory]
     [InlineData(true, "在页 =GAA+A1&EFS1/60 上插入宏：Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
     [InlineData(false, "Insert a macro on page =GAA+A1&EFS1/60: Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
     public void AMacroInsert_ShowsWhatGoesWhere(bool zh, string line)

@@ -12,7 +12,8 @@ namespace EplanMcp.Host.Safety;
 /// <summary>
 /// One write call as a tool states it: its tier, the Bridge operations that plan and execute it, the arguments of both,
 /// whether it is a dry run, how long it may run (M3 design 4.3, 4.4), and what the client is told while it runs: a short
-/// English phrase such as "Creating pages" (M4 design 4.3).
+/// English phrase such as "Creating pages" (M4 design 4.3). A Destructive write's execute arguments carry the
+/// <see cref="BackupTarget"/> the pipeline made for it (ADR-0013); other writes get null.
 /// </summary>
 internal sealed record WriteRequest<TArgs, TExecuteArgs>(
     string Tool,
@@ -20,18 +21,30 @@ internal sealed record WriteRequest<TArgs, TExecuteArgs>(
     string PlanOperation,
     string ExecuteOperation,
     TArgs Args,
-    Func<WritePlan, TExecuteArgs> ExecuteArgs,
+    Func<WritePlan, BackupTarget?, TExecuteArgs> ExecuteArgs,
     bool DryRun,
     TimeSpan Limit,
-    string Activity = "Waiting for EPLAN");
+    string Activity = "Waiting for EPLAN")
+{
+    /// <summary>A write whose execute arguments need no backup target; named like the record's own parameters.</summary>
+    public WriteRequest(string Tool, ToolTier Tier, string PlanOperation, string ExecuteOperation, TArgs Args, Func<WritePlan, TExecuteArgs> ExecuteArgs, bool DryRun, TimeSpan Limit, string Activity = "Waiting for EPLAN")
+        : this(Tool, Tier, PlanOperation, ExecuteOperation, Args, (plan, _) => ExecuteArgs(plan), DryRun, Limit, Activity)
+    {
+    }
+}
 
-/// <summary>What a write call did: its plan, the execution state, and the data of a commit that answered in time.</summary>
-internal sealed record WriteOutcome<TData>(WritePlan Plan, string Execution, TData? Data, bool Recovered);
+/// <summary>
+/// What a write call did: its plan, the execution state, the data of a commit that answered in time, and for a committed
+/// Destructive write the path of its backup copy.
+/// </summary>
+internal sealed record WriteOutcome<TData>(WritePlan Plan, string Execution, TData? Data, bool Recovered, string? Backup = null);
 
 /// <summary>
 /// The steps every write tool goes through (M3 design 3, ADR-0005, ADR-0010): plan, dry run, policy, the confirmation
 /// that lifts a suspension, approval, the "started" audit record, one execute that is never sent twice, the result
-/// record, and a suspension when the outcome is unknown. Every error it throws carries the execution state.
+/// record, and a suspension when the outcome is unknown. A Destructive write, always approved first, also gets a new
+/// backup folder before it starts; the Bridge copies the project there before it changes anything (ADR-0013). Every
+/// error it throws carries the execution state.
 /// </summary>
 internal sealed partial class WritePipeline(
     IBridgeClient bridge,
@@ -40,6 +53,7 @@ internal sealed partial class WritePipeline(
     AuditLog audit,
     DanglingWrites dangling,
     ApprovalService approvals,
+    BackupFolders backups,
     TimeProvider clock,
     ILogger<WritePipeline> logger)
 {
@@ -100,12 +114,14 @@ internal sealed partial class WritePipeline(
             await ReleaseAsync(request.Tool, requestId, argumentsHash, plan, eplan, started, blocking, call, cancellationToken).ConfigureAwait(false);
         }
 
+        bool destructive = request.Tier == ToolTier.Destructive;
         if (decision.Verdict == PolicyVerdict.NeedsApproval)
         {
             ApprovalResult approval;
             try
             {
-                approval = await approvals.AskAsync(requestId, request.Tool, argumentsHash, plan, call?.Lane(), cancellationToken).ConfigureAwait(false);
+                string? backupFolder = destructive ? backups.ProjectFolder(plan) : null;
+                approval = await approvals.AskAsync(requestId, request.Tool, argumentsHash, plan, backupFolder, call?.Lane(), cancellationToken).ConfigureAwait(false);
             }
             catch (BridgeCallException ex)
             {
@@ -119,6 +135,8 @@ internal sealed partial class WritePipeline(
             }
         }
 
+        // Destructive writes were approved above in any case (PolicyEngine); the backup folder is made only after that.
+        BackupTarget? backup = destructive ? NewBackup(plan, request.Limit) : null;
         JsonObject record = Record("execution_started", request.Tool, requestId, plan, eplan);
         record["eplan"]!["start"] = started.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
         record["host"] = DanglingWrites.ThisHost();
@@ -126,6 +144,11 @@ internal sealed partial class WritePipeline(
         record["policy"] = decision.Verdict.ToString();
         record["arguments"] = JsonSerializer.SerializeToNode(request.Args, HostJson.Options);
         record["changes"] = new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+        if (backup is not null)
+        {
+            record["backup"] = backup.Path;
+        }
+
         try
         {
             await audit.AppendAsync(record, cancellationToken).ConfigureAwait(false);
@@ -133,6 +156,7 @@ internal sealed partial class WritePipeline(
         catch (AuditUnavailableException ex)
         {
             LogAuditUnavailable(ex);
+            Settle(backup, ExecutionState.NotStarted, null);
             throw NotStarted(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = AuditUnavailableMessage });
         }
 
@@ -141,21 +165,74 @@ internal sealed partial class WritePipeline(
         using BridgeProgress? waiting = BridgeProgress.Start(call, request.Activity, clock, cancellationToken);
         try
         {
-            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
-            await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered).ConfigureAwait(false);
-            return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered);
+            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
+            await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered, backup).ConfigureAwait(false);
+            return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered, backup?.Path);
         }
         catch (BridgeCallException ex)
         {
             string execution = ex.Error.Execution ?? ExecutionState.Unknown;
-            await RecordResultAsync(request.Tool, requestId, plan, eplan, execution, ex.Error.Reason, recovered: false).ConfigureAwait(false);
+            await RecordResultAsync(request.Tool, requestId, plan, eplan, execution, ex.Error.Reason, recovered: false, backup).ConfigureAwait(false);
             if (execution == ExecutionState.Unknown)
             {
                 suspensions.Suspend(plan.ProjectPath, eplan.Eplan.ProcessId, started, request.Tool, requestId, clock.GetUtcNow(), SuspensionReason.OutcomeUnknown, ChangeLines(plan));
                 await AppendQuietlyAsync(Record("writes_suspended", request.Tool, requestId, plan, eplan)).ConfigureAwait(false);
             }
 
+            Settle(backup, execution, ex.Error);
             throw;
+        }
+    }
+
+    /// <summary>
+    /// The backup target of a Destructive write: a new folder (<see cref="BackupFolders"/>) and half the execution limit,
+    /// so that the change itself still ends within the limit (tool spec eplan_page_delete, section 6). BACKUP_FAILED
+    /// when the folder cannot be made; nothing has run then.
+    /// </summary>
+    private BackupTarget NewBackup(WritePlan plan, TimeSpan limit)
+    {
+        try
+        {
+            return new BackupTarget { Path = backups.Create(plan), MaxSeconds = (int)(limit.TotalSeconds / 2) };
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            LogBackupFolderFailed(ex, plan.ProjectPath);
+            throw new BridgeCallException(BackupFolders.Failure());
+        }
+    }
+
+    /// <summary>
+    /// What becomes of a Destructive write's backup folder: after a write that did not run it is renamed "-failed", or
+    /// removed while still empty (<see cref="BackupFolders.Settle"/>); after one that rolled back or whose outcome is
+    /// unknown the backup stays, and the error names it, so the engineer can restore from it.
+    /// </summary>
+    private void Settle(BackupTarget? backup, string execution, BridgeError? error)
+    {
+        if (backup is null)
+        {
+            return;
+        }
+
+        if (execution != ExecutionState.NotStarted)
+        {
+            if (error is not null)
+            {
+                error.Metadata ??= [];
+                error.Metadata["backup"] = backup.Path;
+            }
+
+            return;
+        }
+
+        try
+        {
+            string? kept = BackupFolders.Settle(backup.Path, failed: error?.Reason == ErrorReason.BackupFailed);
+            LogBackupFolderSettled(backup.Path, kept ?? "removed, empty");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            LogBackupFolderFailed(ex, backup.Path);
         }
     }
 
@@ -277,12 +354,19 @@ internal sealed partial class WritePipeline(
         }
     }
 
-    private Task RecordResultAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, string execution, string? reason, bool recovered)
+    /// <summary>The result record; for a Destructive write also whether its backup copy was made (ADR-0013).</summary>
+    private Task RecordResultAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, string execution, string? reason, bool recovered, BackupTarget? backup)
     {
         JsonObject record = Record("execution_result", tool, requestId, plan, eplan);
         record["execution"] = execution;
         record["reason"] = reason;
         record["recovered"] = recovered;
+        if (backup is not null)
+        {
+            // The Bridge changes nothing before the copy exists, so a write that ran had its backup.
+            record["backupCompleted"] = reason != ErrorReason.BackupFailed && File.Exists(backup.Path);
+        }
+
         return AppendQuietlyAsync(record);
     }
 
@@ -307,4 +391,10 @@ internal sealed partial class WritePipeline(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Write suspension of {Project} lifted after the engineer's confirmation ({RequestId})")]
     private partial void LogReleased(string project, string requestId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Backup folder for {Path} failed")]
+    private partial void LogBackupFolderFailed(Exception exception, string path);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Backup folder of {Copy} after a write that did not run: {Now}")]
+    private partial void LogBackupFolderSettled(string copy, string now);
 }

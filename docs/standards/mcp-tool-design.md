@@ -172,6 +172,7 @@ eplan_device_place
 | `INTERNAL` | 否 | 按发生的阶段：执行前 `not_started`，事务中 `rolled_back`，Bridge 已提交之后 `committed` | 本项目的缺陷；附上关联 ID，请工程师提交 Issue |
 | `OUTCOME_UNKNOWN` | 否 | `unknown` | 写操作被中断，取不回结果，无法确定项目是否被修改。提示**不要重复调用**，先请工程师在 EPLAN 中检查，可以用读工具查看现状；该项目的写入随之暂停 |
 | `WRITES_SUSPENDED` | 否 | `not_started` | 该项目（或当时那个 EPLAN 实例）的写入因此前结果未知而暂停；提示请工程师在 EPLAN 中核实，下一次写调用会请求确认，确认后解除 |
+| `BACKUP_FAILED` | 否 | `not_started` | Destructive 写操作执行前没能备份项目：复制失败、超过执行时限的一半，或副本的页数与项目不符（[ADR-0013](../adr/0013-destructive-backup.md)）。项目未改变；提示请工程师检查磁盘空间，或运行 `eplanmcp doctor` |
 | `CANCELLED` | 否 | 开始执行前 `not_started`，事务中 `rolled_back` | 客户端取消了调用，Bridge 在下一个安全点停下，提交之前发现取消就回滚（[M4 设计](../design/2026-10-20-m4-workflows.md) 4.3）。MCP 规定不回复被取消的请求，所以模型看不到它，只出现在 `outcome.get` 的结果和审计中 |
 
 ---
