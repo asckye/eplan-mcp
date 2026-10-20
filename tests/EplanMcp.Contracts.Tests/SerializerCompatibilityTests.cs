@@ -29,6 +29,7 @@ public sealed class SerializerCompatibilityTests
         },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.1.0", Eplan = new EplanInstanceInfo { ProcessId = 1, Version = "x" } },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.2.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, Operations = ["page.list", "project.list"] },
+        new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.3.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, BuildTarget = ".NETFramework,Version=v4.8.1" },
         new BridgeError
         {
             Reason = ErrorReason.EplanBusy,

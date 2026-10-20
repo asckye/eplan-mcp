@@ -17,7 +17,7 @@ internal sealed class SessionStatusResult
     [Description("Every EPLAN process found with the EplanMcp add-in loaded.")]
     public List<InstanceSummary> Instances { get; set; } = [];
 
-    [Description("What to do next when not connected; null when connected.")]
+    [Description("What to do next when not connected, or what to know about a connected EPLAN that EplanMcp has not been tested with; null otherwise.")]
     public string? Hint { get; set; }
 
     internal sealed class HostSummary

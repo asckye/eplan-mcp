@@ -23,6 +23,7 @@ public sealed class BridgeConnectionTests
         Assert.Equal(1, (int)response["id"]!);
         Assert.Equal(BridgeProtocol.CurrentVersion, (int)response["result"]!["protocolVersion"]!);
         Assert.Equal("9.9.9", (string?)response["result"]!["bridgeVersion"]);
+        Assert.Equal(".NETFramework,Version=v4.8.1", (string?)response["result"]!["buildTarget"]);
         Assert.Equal(4242, (int)response["result"]!["eplan"]!["processId"]!);
     }
 
@@ -125,7 +126,12 @@ public sealed class BridgeConnectionTests
     {
         IOperation[] operations = [new ProjectListOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p", Current = true })), .. extra];
         var router = new OperationRouter(operations, _dispatcher, null, _log, TimeSpan.FromSeconds(10));
-        var options = new BridgeServerOptions { BridgeVersion = "9.9.9", Eplan = new EplanInstanceInfo { ProcessId = 4242, Version = "2026" } };
+        var options = new BridgeServerOptions
+        {
+            BridgeVersion = "9.9.9",
+            Eplan = new EplanInstanceInfo { ProcessId = 4242, Version = "2026" },
+            BuildTarget = ".NETFramework,Version=v4.8.1",
+        };
         return new BridgeConnection(options, router, _log);
     }
 

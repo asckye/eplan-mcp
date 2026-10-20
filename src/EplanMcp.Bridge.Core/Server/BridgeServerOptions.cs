@@ -9,6 +9,9 @@ public sealed class BridgeServerOptions
 
     public EplanInstanceInfo Eplan { get; set; } = new();
 
+    /// <summary>The add-in's target framework (<c>TargetFrameworkAttribute</c>); null when unknown.</summary>
+    public string? BuildTarget { get; set; }
+
     /// <summary>How many Hosts may be connected at the same time (design 4.2).</summary>
     public int MaxConnections { get; set; } = 4;
 }

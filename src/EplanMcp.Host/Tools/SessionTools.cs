@@ -48,7 +48,7 @@ internal sealed class SessionTools
             [
                 .. status.Instances.Select(i => new SessionStatusResult.InstanceSummary { ProcessId = i.ProcessId, Selected = i.ProcessId == status.SelectedProcessId }),
             ],
-            Hint = status.Problem?.Message,
+            Hint = status.Problem?.Message ?? (handshake is null ? null : VersionHint(handshake.Eplan.Version)),
         };
         return ToolResults.Success(Summary(result, status.Problem), result);
     }
@@ -100,12 +100,22 @@ internal sealed class SessionTools
         return ToolResults.Success($"Selected EPLAN {result.Selected.Version}{variant}, process {result.Selected.ProcessId.ToString(CultureInfo.InvariantCulture)}.", result);
     }
 
+    /// <summary>Null for a tested EPLAN; otherwise what to know before relying on the tools (ADR-0009).</summary>
+    internal static string? VersionHint(string version) => EplanVersions.Support(version) switch
+    {
+        EplanSupport.Verified => null,
+        EplanSupport.Expected =>
+            $"EPLAN {version} is in the supported range ({EplanVersions.Range}) but EplanMcp has not been tested with it yet; if a tool fails unexpectedly, tell the engineer.",
+        _ => $"EPLAN {version} is outside the versions EplanMcp supports ({EplanVersions.Range}); tools may fail. Ask the engineer to use a supported EPLAN.",
+    };
+
     private static string Summary(SessionStatusResult result, BridgeError? problem)
     {
         if (result.Eplan is { } eplan)
         {
             string variant = eplan.Variant is { Length: > 0 } v ? $" ({v})" : string.Empty;
-            return $"EPLAN {eplan.Version}{variant} connected, process {eplan.ProcessId.ToString(CultureInfo.InvariantCulture)}.";
+            string hint = result.Hint is null ? string.Empty : " See 'hint'.";
+            return $"EPLAN {eplan.Version}{variant} connected, process {eplan.ProcessId.ToString(CultureInfo.InvariantCulture)}.{hint}";
         }
 
         return $"EPLAN not connected: {problem?.Reason ?? ErrorReason.EplanNotConnected}. See 'hint'.";

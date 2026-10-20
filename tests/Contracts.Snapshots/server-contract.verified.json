@@ -1589,7 +1589,7 @@
             }
           },
           "hint": {
-            "description": "What to do next when not connected; null when connected.",
+            "description": "What to do next when not connected, or what to know about a connected EPLAN that EplanMcp has not been tested with; null otherwise.",
             "type": [
               "string",
               "null"
