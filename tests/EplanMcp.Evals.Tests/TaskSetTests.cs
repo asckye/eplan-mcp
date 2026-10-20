@@ -27,7 +27,7 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
     {
         EvalTask[] tasks = [.. Files.Select(f => f.Task!)];
 
-        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 20);
+        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 25);
         Assert.InRange(tasks.Count(t => t.Set == TaskSet.Holdout), 5, 10);
         Assert.Equal(tasks.Length, tasks.Select(t => t.Prompt).Distinct(StringComparer.Ordinal).Count());
     }

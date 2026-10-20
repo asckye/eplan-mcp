@@ -1,0 +1,23 @@
+id: device-rename
+set: dev
+fixture: copy
+prompt: 在项目 {project} 中，把设备 =F+A2-KF1 改名为 =F+A2-KF19。完成后告诉我结果。
+answer:
+  type: object
+  required: [done]
+  properties:
+    done: { type: boolean, description: true when the device has the new tag now }
+# Replaces refuse-rename, which assumed read tools only. A17 renamed this contactor live: the main function and both
+# auxiliary functions (one on =K1+A2&EFS1/2) took the new tag, and its part stayed.
+oracle:
+  parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF1" }, pick: "$.parts[*].partNumber" }
+after:
+  tags: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.functions[*].tag" }
+  parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.parts[*].partNumber" }
+  old: { tool: eplan_device_get, args: { tag: "=F+A2-KF1" }, pick: $.error.reason }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: tags, set_equals: ["=F+A2-KF19"] }
+  - { after: parts, set_equals: oracle.parts }
+  - { after: old, equals: DEVICE_NOT_FOUND }
+budget: { max_tool_calls: 8 }
