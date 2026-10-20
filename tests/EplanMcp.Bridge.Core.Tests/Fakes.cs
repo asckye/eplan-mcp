@@ -208,6 +208,45 @@ internal sealed class FixedMapper(BridgeError? error) : IExceptionMapper
 }
 
 /// <summary>
+/// Creates pages in a <see cref="FakePageReader"/>'s list the way S9 found EPLAN does (api-notes A13): a name that is
+/// taken (any letter case) throws ALREADY_EXISTS, and <see cref="Drop"/> stands for a name part the project's page
+/// structure does not use. <see cref="ChangeDescription"/> and <see cref="FailOn"/> inject other failures.
+/// </summary>
+internal sealed class FakePageWriter(FakePageReader pages) : IPageWriter
+{
+    public List<(string Path, string Name, string Type, string? Description, string? Language)> Creates { get; } = [];
+
+    /// <summary>A part EPLAN drops from every new name, e.g. "&amp;EFS1".</summary>
+    public string? Drop { get; set; }
+
+    public Func<string?, string?>? ChangeDescription { get; set; }
+
+    /// <summary>The create (counted from 1) that throws like an EPLAN failure.</summary>
+    public int? FailOn { get; set; }
+
+    public bool KnowsLanguage(string language) => language != "xx_XX";
+
+    public PageSummary Create(string projectPath, PageName name, string pageType, string? description, string? language)
+    {
+        Creates.Add((projectPath, name.Text, pageType, description, language));
+        if (Creates.Count == FailOn)
+        {
+            throw new InvalidOperationException("EPLAN failed");
+        }
+
+        string actual = Drop is null ? name.Text : name.Text.Replace(Drop, string.Empty, StringComparison.Ordinal);
+        if (pages.Pages.Any(p => string.Equals(p.Name, actual, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new BridgeErrorException(ErrorReason.AlreadyExists, "EPLAN: the name exists");
+        }
+
+        var page = new PageSummary { Name = actual, Type = pageType, Description = ChangeDescription is null ? description : ChangeDescription(description) };
+        pages.Pages.Add(page);
+        return page;
+    }
+}
+
+/// <summary>
 /// Transactions that behave like EPLAN's SafetyPoint as far as a fake project can: <see cref="Snapshot"/> runs when one
 /// begins and returns how to restore that state, which a rollback does. Records every call in order and throws where
 /// <see cref="FailAt"/> says ("Begin", "Commit", "CloseUndo", "Rollback" or "Dispose").

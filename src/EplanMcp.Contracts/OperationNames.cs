@@ -64,6 +64,18 @@ public static class OperationNames
     public const string MacroGet = "macro.get";
 
     /// <summary>
+    /// The plan of eplan_page_create: checks the names and that they are free, never writes. Arguments:
+    /// <see cref="PageCreateArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string PageCreatePlan = "page.create.plan";
+
+    /// <summary>
+    /// Creates the planned pages in one transaction, after checking the plan's fingerprint. Arguments:
+    /// <see cref="PageCreateArgs"/> with the fingerprint; data: <see cref="PageCreateData"/>.
+    /// </summary>
+    public const string PageCreateExecute = "page.create.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

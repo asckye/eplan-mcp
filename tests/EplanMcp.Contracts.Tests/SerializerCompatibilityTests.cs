@@ -67,6 +67,16 @@ public sealed class SerializerCompatibilityTests
             Fingerprint = "9f86d081884c7d65",
         },
         new WritePlan(),
+        new PageCreateArgs
+        {
+            Project = "Line1",
+            Pages = [new PageCreateItem { Name = "=GAA+A1&EFS1/5", PageType = "Overview", Description = "电源" }, new PageCreateItem { Name = "/6" }],
+            Language = "zh_CN",
+            Fingerprint = "9f86d081884c7d65",
+        },
+        new PageCreateArgs(),
+        new PageCreateData { Project = "Line1", Pages = [new PageSummary { Name = "=GAA+A1&EFS1/5", Type = "Circuit", Description = "电源" }], Warning = "w" },
+        new PageCreateData(),
         new ProjectListArgs(),
         new ProjectListData
         {
