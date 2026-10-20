@@ -197,6 +197,7 @@ public sealed class WritePipelineTests : IDisposable
             SuspensionStore.For(_locations),
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
+            new ApprovalService([], TimeProvider.System, NullLogger<ApprovalService>.Instance),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
