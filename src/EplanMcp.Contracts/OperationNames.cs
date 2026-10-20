@@ -180,6 +180,12 @@ public static class OperationNames
     public const string ExportImageRun = "export.image.run";
 
     /// <summary>
+    /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
+    /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string PageDeletePlan = "page.delete.plan";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

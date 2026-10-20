@@ -329,6 +329,14 @@ public sealed class SerializerCompatibilityTests
             Done = 3,
         },
         new CheckListData(),
+        new PageDeleteArgs
+        {
+            Project = "Line1",
+            Pages = ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"],
+            Fingerprint = "f",
+            Backup = new BackupTarget { Path = @"C:\Users\u\EplanMcp\backups\Line1\20261021T083000123Z\Line1.elk", MaxSeconds = 31 },
+        },
+        new PageDeleteArgs(),
     ];
 
     [Theory]
