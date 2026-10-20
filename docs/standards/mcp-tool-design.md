@@ -148,7 +148,7 @@ eplan_device_place
 
 | reason | retryable | `execution` | 含义与给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | 否 | `not_started` | 参数不合法；`metadata.violations` 列出每个字段的问题 |
+| `INVALID_ARGUMENT` | 否 | `not_started`；执行中读回才发现时为 `rolled_back` | 参数不合法；`metadata.violations` 列出每个字段的问题。有些问题只有 EPLAN 执行后才能看出，例如项目结构不用名称中的某一部分，EPLAN 把它丢掉了（api-notes A13）；这时已回滚，`metadata` 给出请求的值和 EPLAN 实际得到的值 |
 | `PROJECT_NOT_OPEN` | 否 | `not_started` | 指定的项目没有在 EPLAN 中打开；提示用 `eplan_project_list` 查看已打开的项目 |
 | `AMBIGUOUS_NAME` | 否 | `not_started` | 名称对应多个对象：同一个短标识（如 `-K1`）出现在不同结构下、两个打开的项目同名，或者没有选中项目而打开了好几个；`metadata.candidates` 列出完整名称（每行一个，最多 20 个），提示选一个再调用 |
 | `PAGE_NOT_FOUND` / `DEVICE_NOT_FOUND` / `SYMBOL_NOT_FOUND` / `PART_NOT_FOUND` / `MACRO_NOT_FOUND` | 否 | `not_started` | 对象不存在；提示对应的查询工具 |
