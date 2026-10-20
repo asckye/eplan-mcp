@@ -55,7 +55,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
             ExportRunData data;
             using (ExportHeartbeat.Start(progress, job.Label, clock))
             {
-                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, cancellationToken).ConfigureAwait(false);
+                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, null, cancellationToken).ConfigureAwait(false);
             }
 
             IReadOnlyList<ExportFile> files = Files(folder);
