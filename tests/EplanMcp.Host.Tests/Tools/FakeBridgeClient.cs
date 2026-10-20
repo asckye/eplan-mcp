@@ -58,10 +58,28 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>The request IDs and limits of writes, in order.</summary>
     public List<(string RequestId, TimeSpan Limit)> Writes { get; } = [];
 
-    /// <summary>Writes answer like reads (<see cref="Handlers"/>, <see cref="Failure"/>), and never as recovered.</summary>
+    /// <summary>When set, writes fail with it (reads still answer); its <c>Execution</c> is kept as given.</summary>
+    public BridgeError? WriteFailure { get; set; }
+
+    /// <summary>When true, writes come back as committed but recovered after an interruption, without data.</summary>
+    public bool WriteRecovered { get; set; }
+
+    /// <summary>Writes answer like reads (<see cref="Handlers"/>, <see cref="Failure"/>) unless told otherwise above.</summary>
     public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken)
     {
         Writes.Add((requestId, limit));
+        if (WriteFailure is not null)
+        {
+            Calls.Add((operation, args));
+            throw new BridgeCallException(WriteFailure);
+        }
+
+        if (WriteRecovered)
+        {
+            Calls.Add((operation, args));
+            return new WriteResult<TData>(default, Recovered: true);
+        }
+
         return new WriteResult<TData>(await InvokeAsync<TArgs, TData>(operation, args, cancellationToken), Recovered: false);
     }
 }
