@@ -54,4 +54,14 @@ internal sealed class FakeBridgeClient : IBridgeClient
                 : throw new InvalidOperationException("unexpected operation " + operation);
         return Task.FromResult((TData)data);
     }
+
+    /// <summary>The request IDs and limits of writes, in order.</summary>
+    public List<(string RequestId, TimeSpan Limit)> Writes { get; } = [];
+
+    /// <summary>Writes answer like reads (<see cref="Handlers"/>, <see cref="Failure"/>), and never as recovered.</summary>
+    public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, CancellationToken cancellationToken)
+    {
+        Writes.Add((requestId, limit));
+        return new WriteResult<TData>(await InvokeAsync<TArgs, TData>(operation, args, cancellationToken), Recovered: false);
+    }
 }
