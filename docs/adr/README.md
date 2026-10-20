@@ -17,3 +17,4 @@
 | [0008](0008-data-locations-and-instance-discovery.md) | 数据目录移出 %LOCALAPPDATA%，实例发现改用命名管道枚举 | Accepted | 双向门（1.0 前） |
 | [0009](0009-supported-eplan-versions.md) | 支持 EPLAN 2024–2027，用一份 net481 插件构建；2022、2023 暂不支持 | Accepted | 双向门 |
 | [0010](0010-write-outcomes.md) | 写操作结果使用封闭的执行状态，中断后向 Bridge 查询结果 | Accepted | 单向门（写工具发布后） |
+| [0011](0011-approval-out-of-band.md) | 审批只经工程师独立操作的窗口（EPLAN 对话框、Workbench），不用 MCP elicitation | Proposed | 双向门（1.0 发布前） |
