@@ -393,10 +393,10 @@ sequenceDiagram
 - OpenTelemetry 作为可选项（M5），遵循 MCP 语义约定（目前处于 Development 状态）：span 名为 `{mcp.method.name} {target}`，属性包括 `gen_ai.tool.name`、`mcp.protocol.version` 等。**工具参数和结果默认不记录到遥测中**。
 
 ### 8.8 审计
-- 文件：`%USERPROFILE%\EplanMcp\audit\yyyy-MM-dd.jsonl`，只追加写入。
+- 文件：`%USERPROFILE%\EplanMcp\audit\yyyy-MM-dd.jsonl`（UTC 日期），只追加写入；多个 Host 进程通过排他打开 `audit\.lock` 轮流写入，每条写入后刷盘。
 - 每条记录包含：时间、关联 ID、客户端信息、工具、级别、项目、参数（写操作记完整参数，读操作只记摘要）、策略决定、审批渠道与结果、变更清单、执行结果、耗时、EPLAN 版本/变体/进程号、**上一条记录的哈希和本条的哈希**。
 - 写操作发出执行请求之前先写一条"开始执行"记录，结果确定后补记；Host 重启时，只有"开始执行"、没有结果的记录要先查询并补记。写入暂停与解除也写入审计。
-- `eplanmcp audit verify` 校验哈希链，能发现记录被删除或篡改。
+- `eplanmcp audit verify` 校验哈希链，能发现记录被删除或篡改，报告第一个断开的位置。末尾几条被整段删除时，后面没有记录可以发现，哈希链本身查不出来。
 - 审计写入失败时，**写操作一律拒绝执行**（不在没有记录的情况下修改项目）；读操作照常执行，同时记录告警。
 
 ### 8.9 配置

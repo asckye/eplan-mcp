@@ -27,6 +27,43 @@ internal static class DoctorChecks
             : new(DoctorStatus.Info, $"数据目录尚未创建：{root}（首次需要时创建）", $"Data directory not created yet: {root} (created when first needed)");
     }
 
+    /// <summary>
+    /// Whether the audit log can be written: without it writes are refused (architecture 8.8). Opens the log's lock
+    /// file the way <c>AuditLog</c> does; another Host holding it at that moment counts as writable.
+    /// </summary>
+    public static DoctorCheck AuditDirectory(HostDataLocations locations)
+    {
+        if (!Directory.Exists(locations.Audit))
+        {
+            return new(DoctorStatus.Info, $"审计目录尚未创建：{locations.Audit}（第一次写操作时创建）", $"Audit directory not created yet: {locations.Audit} (created by the first write)");
+        }
+
+        const int SharingViolation = unchecked((int)0x80070020);
+        try
+        {
+            using var probe = new FileStream(Path.Combine(locations.Audit, ".lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException ex) when (ex.HResult != SharingViolation)
+        {
+            return AuditUnwritable(locations, ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return AuditUnwritable(locations, ex);
+        }
+        catch (IOException)
+        {
+            // Another Host is appending right now.
+        }
+
+        return new(DoctorStatus.Ok, $"审计目录可写：{locations.Audit}", $"Audit directory writable: {locations.Audit}");
+    }
+
+    private static DoctorCheck AuditUnwritable(HostDataLocations locations, Exception ex) => new(
+        DoctorStatus.Failure,
+        $"审计目录不可写，写操作会被拒绝：{locations.Audit}（{ex.Message}）",
+        $"Audit directory not writable, so writes will be refused: {locations.Audit} ({ex.Message})");
+
     /// <summary>The safety settings serve will use, or why it refuses to start (architecture 8.9).</summary>
     public static DoctorCheck Configuration(HostDataLocations locations)
     {

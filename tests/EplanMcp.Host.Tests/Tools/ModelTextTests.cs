@@ -36,6 +36,7 @@ public sealed partial class ModelTextTests
     private static readonly (string Type, string Reason)[] _allowedInLiterals =
     [
         ("EplanMcp.Host.Doctor.DoctorChecks", "doctor prints each check in Chinese and English for the engineer; the model never sees it."),
+        ("EplanMcp.Host.Audit.AuditCommand", "audit verify prints its result in Chinese or English for the engineer; the model never sees it."),
     ];
 
     private static readonly JsonSerializerOptions _readableJson = new(McpJsonUtilities.DefaultOptions)
