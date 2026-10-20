@@ -21,6 +21,8 @@ internal static class McpServerSetup
         // serve registers the locations it loaded the configuration from; tests get the environment's.
         services.TryAddSingleton(_ => HostDataLocations.FromEnvironment());
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<PendingPlanStore>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
