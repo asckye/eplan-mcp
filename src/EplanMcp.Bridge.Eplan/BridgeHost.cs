@@ -49,6 +49,8 @@ internal static class BridgeHost
         var pages = new EplanPageReader();
         var devices = new EplanDeviceReader();
         var macros = new EplanMacroReader();
+        var pageWriter = new EplanPageWriter();
+        var transactions = new EplanTransactions();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -64,6 +66,8 @@ internal static class BridgeHost
             new MacroListOperation(macros),
             new MacroGetOperation(catalog, macros),
             new ApprovalAskOperation(new EplanApprovalDialog()),
+            new PageCreatePlanOperation(catalog, pages, pageWriter),
+            new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
