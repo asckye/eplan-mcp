@@ -96,6 +96,38 @@ public sealed class AgentAttemptTests
     }
 
     [Fact]
+    public void IsRetryable_AnApiErrorBeforeTheModelDidAnything()
+    {
+        AgentAttempt attempt = From([Init, OAuthRefreshError, OAuthRefreshResult]);
+
+        Assert.Equal((AttemptStatus.Invalid, "API error server_error: " + OAuthRefreshText), (attempt.Status, attempt.Reason));
+        Assert.True(attempt.IsRetryable);
+    }
+
+    [Fact]
+    public void IsRetryable_NotWithoutALoginNorOnceTheModelStarted()
+    {
+        AgentAttempt login = From(
+        [
+            Init,
+            """{"type":"assistant","message":{"content":[{"type":"text","text":"Not logged in"}]},"parent_tool_use_id":null,"error":"authentication_failed"}""",
+            """{"type":"result","subtype":"success","is_error":true,"terminal_reason":"api_error","total_cost_usd":0,"result":"Not logged in · Please run /login"}""",
+        ]);
+        AgentAttempt spent = From([Init, OAuthRefreshError, OAuthRefreshResult.Replace("\"total_cost_usd\":0", "\"total_cost_usd\":0.02", StringComparison.Ordinal)]);
+        AgentAttempt called = From(
+        [
+            Init,
+            """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"t1","name":"mcp__eplan__eplan_page_list","input":{}}]},"parent_tool_use_id":null}""",
+            OAuthRefreshError,
+            OAuthRefreshResult,
+        ]);
+        AgentAttempt stopped = From([Init], new AgentStop(AttemptStatus.Invalid, "not isolated"));
+
+        Assert.All([login, spent, called, stopped], a => Assert.Equal(AttemptStatus.Invalid, a.Status));
+        Assert.All([login, spent, called, stopped], a => Assert.False(a.IsRetryable));
+    }
+
+    [Fact]
     public void From_NoResult_IsInvalidAndQuotesTheEndOfStderr()
     {
         AgentAttempt attempt = From([Init], stderr: new string('x', 400) + "MCP server crashed\n");
@@ -115,6 +147,13 @@ public sealed class AgentAttemptTests
 
         Assert.Equal((AttemptStatus.Failed, "more than 2 tool calls", null), (attempt.Status, attempt.Reason, attempt.Answer));
     }
+
+    // The transient error of 2026-10-19, trimmed from the recorded run: another claude was refreshing the shared login.
+    private const string OAuthRefreshText = "Failed to refresh OAuth token: another Claude Code process is refreshing it or exited mid-refresh. This is usually transient; retry in a minute";
+
+    private const string OAuthRefreshError = """{"type":"assistant","message":{"model":"<synthetic>","role":"assistant","content":[{"type":"text","text":"Failed to refresh OAuth token: another Claude Code process is refreshing it or exited mid-refresh. This is usually transient; retry in a minute"}]},"parent_tool_use_id":null,"error":"server_error","is_api_error_message":true}""";
+
+    private const string OAuthRefreshResult = """{"type":"result","subtype":"success","is_error":true,"terminal_reason":"api_error","total_cost_usd":0,"num_turns":1,"result":"Failed to refresh OAuth token: another Claude Code process is refreshing it or exited mid-refresh. This is usually transient; retry in a minute"}""";
 
     private static AgentAttempt From(string[] lines, AgentStop? stop = null, string stderr = "")
     {

@@ -7,13 +7,13 @@ namespace EplanMcp.Evals.Run;
 /// <summary>
 /// Runs each attempt in a new empty directory under <paramref name="workRoot"/>, outside the repository (design 4.2,
 /// step 3), and keeps its transcript in <c>&lt;run&gt;/&lt;task&gt;/</c>, or <c>&lt;task&gt;-&lt;n&gt;/</c> when
-/// tasks repeat.
+/// tasks repeat; a retry adds <c>-retry</c>.
 /// </summary>
 internal sealed class ClaudeAttempts(ClaudeSetup setup, string runDirectory, string workRoot, bool numbered) : IAttemptRunner
 {
-    public async Task<AgentAttempt> RunAsync(EvalTask task, int attempt, CancellationToken cancellationToken)
+    public async Task<AgentAttempt> RunAsync(EvalTask task, int attempt, bool retry, CancellationToken cancellationToken)
     {
-        string name = numbered ? string.Create(CultureInfo.InvariantCulture, $"{task.Id}-{attempt}") : task.Id;
+        string name = (numbered ? string.Create(CultureInfo.InvariantCulture, $"{task.Id}-{attempt}") : task.Id) + (retry ? "-retry" : string.Empty);
         string output = Directory.CreateDirectory(Path.Combine(runDirectory, name)).FullName;
         string work = Directory.CreateDirectory(Path.Combine(workRoot, name)).FullName;
         try

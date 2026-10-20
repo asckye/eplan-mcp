@@ -15,6 +15,7 @@ internal static class Outcome
 /// One attempt as the report keeps it (agent evals design 4.3). <see cref="Failures"/> are the failed checks of a graded
 /// answer; <see cref="ToolCalls"/> counts the calls by tool; <see cref="ErrorCalls"/> returned an error, and after
 /// <see cref="Corrected"/> of them the model called the same tool again and succeeded. Input tokens include the cache.
+/// <see cref="Retry"/> marks the second run of an attempt that was invalid before the model did anything.
 /// </summary>
 internal sealed record AttemptRecord(
     int Attempt,
@@ -28,10 +29,11 @@ internal sealed record AttemptRecord(
     long OutputTokens,
     decimal CostUsd,
     int Turns,
-    double Seconds)
+    double Seconds,
+    bool Retry = false)
 {
     /// <summary>Joins what claude did with how its answer graded; <paramref name="verdict"/> is null when nothing was graded.</summary>
-    public static AttemptRecord From(int attempt, AgentAttempt run, Verdict? verdict)
+    public static AttemptRecord From(int attempt, AgentAttempt run, Verdict? verdict, bool retry = false)
     {
         (string outcome, string? reason, IReadOnlyList<string> failures) = (run.Status, verdict) switch
         {
@@ -55,7 +57,8 @@ internal sealed record AttemptRecord(
             usage?.Output ?? 0,
             trace.Result?.CostUsd ?? 0,
             trace.Result?.Turns ?? 0,
-            Math.Round(run.Elapsed.TotalSeconds, 1));
+            Math.Round(run.Elapsed.TotalSeconds, 1),
+            retry);
     }
 }
 
