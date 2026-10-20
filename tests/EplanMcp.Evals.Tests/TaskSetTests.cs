@@ -5,7 +5,7 @@ using EplanMcp.Evals.Tests.Server;
 namespace EplanMcp.Evals.Tests;
 
 /// <summary>
-/// Keeps the repository's task set (evals/tasks) runnable: every file valid, every oracle tool one that eplanmcp
+/// Keeps the repository's task set (evals/tasks) runnable: every file valid, every oracle and after tool one that eplanmcp
 /// lists. What the oracle calls return is checked on the fixture before a task is added (agent evals design 4.5).
 /// </summary>
 [Trait("Size", "Medium")]
@@ -37,6 +37,8 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
     {
         IReadOnlyList<string> tools = await server.Client.ListToolsAsync(TestContext.Current.CancellationToken);
 
-        Assert.All(Files.SelectMany(f => f.Task!.Oracle.Select(o => (f.Name, o.Value.Tool))), o => Assert.True(tools.Contains(o.Tool), $"{o.Name}.yaml calls {o.Tool}"));
+        Assert.All(
+            Files.SelectMany(f => f.Task!.Oracle.Concat(f.Task.After).Select(o => (f.Name, o.Value.Tool))),
+            o => Assert.True(tools.Contains(o.Tool), $"{o.Name}.yaml calls {o.Tool}"));
     }
 }

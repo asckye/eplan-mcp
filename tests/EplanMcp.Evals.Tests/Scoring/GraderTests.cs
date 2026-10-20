@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using EplanMcp.Evals.Scoring;
+using EplanMcp.Evals.Server;
 using EplanMcp.Evals.Tasks;
 
 namespace EplanMcp.Evals.Tests.Scoring;
@@ -62,6 +63,45 @@ public sealed class GraderTests
         var other = new Dictionary<string, JsonNode?> { ["pages"] = JsonNode.Parse("""["/9"]""") };
 
         Assert.True(Grader.Grade(_task, JsonNode.Parse("""{"pages": ["/9"], "count": 1, "done": true}"""), other).Solved);
+    }
+
+    [Fact]
+    public void Grade_AfterChecks_LookAtWhatTheAfterCallsFound()
+    {
+        EvalTask task = TaskLoader.Load("rename", """
+            id: rename
+            set: dev
+            fixture: copy
+            prompt: 在 {project} 中把 =F+A2-KF1 改名为 =F+A2-KF19
+            answer: { type: object, properties: { done: { type: boolean } } }
+            oracle: { parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF1" }, pick: "$.parts[*].partNumber" } }
+            after:
+              tags: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.functions[*].tag" }
+              parts: { tool: eplan_device_get, args: { tag: "=F+A2-KF19" }, pick: "$.parts[*].partNumber" }
+              old: { tool: eplan_device_get, args: { tag: "=F+A2-KF1" }, pick: $.error.reason }
+            checks:
+              - { answer: $.done, equals: true }
+              - { after: tags, set_equals: ["=F+A2-KF19"] }
+              - { after: parts, set_equals: oracle.parts }
+              - { after: old, equals: DEVICE_NOT_FOUND }
+            """).Task!;
+        var oracle = new Dictionary<string, JsonNode?> { ["parts"] = JsonNode.Parse("""["SIE.3RH2122-1HB40"]""") };
+        var after = new Dictionary<string, AfterValue>
+        {
+            ["tags"] = new(JsonNode.Parse("""["=F+A2-KF19", "=F+A2-KF1"]"""), null),
+            ["parts"] = new(JsonNode.Parse("""["SIE.3RH2122-1HB40"]"""), null),
+            ["old"] = new(null, "$.error.reason matches nothing in the result of eplan_device_get: {\"project\":\"P\"}"),
+        };
+
+        Verdict verdict = Grader.Grade(task, JsonNode.Parse("""{"done": true}"""), oracle, after);
+
+        Assert.Equal(
+            [
+                "after.tags set_equals: unexpected \"=F+A2-KF1\"",
+                "after.old equals: $.error.reason matches nothing in the result of eplan_device_get: {\"project\":\"P\"}",
+            ],
+            verdict.Failures);
+        Assert.Equal(["after.tags set_equals: the after call was not made", "after.parts set_equals: the after call was not made", "after.old equals: the after call was not made"], Grader.Grade(task, JsonNode.Parse("""{"done": true}"""), oracle).Failures);
     }
 
     [Fact]

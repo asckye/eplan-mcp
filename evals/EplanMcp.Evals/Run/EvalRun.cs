@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Nodes;
 using EplanMcp.Evals.Agent;
 using EplanMcp.Evals.Reporting;
 using EplanMcp.Evals.Scoring;
@@ -27,7 +28,8 @@ internal static class EvalRun
 
     /// <summary>
     /// Appends one record per task to <paramref name="records"/> as soon as the task starts, so that a cancelled run
-    /// still reports what it finished. A task whose oracle calls fail gets no attempt. An attempt that is
+    /// still reports what it finished. A task whose oracle calls fail gets no attempt; the after calls of an answered
+    /// attempt go to the grading with its answer. An attempt that is
     /// <see cref="AgentAttempt.IsRetryable"/> runs once more after <paramref name="retryDelay"/>; both are reported, and
     /// the invalid one does not count, as always. <paramref name="auditedWrites"/> counts the writes in the audit log of
     /// the model's eplanmcp (<see cref="EvalsHome.AuditedWrites"/>, -1 when it cannot tell): an attempt with a committed
@@ -49,7 +51,9 @@ internal static class EvalRun
         foreach (EvalTask task in tasks)
         {
             string set = task.Set == TaskSet.Dev ? "dev" : "holdout";
-            OracleValues oracle = await OracleRunner.RunAsync(task, client, tools, cancellationToken).ConfigureAwait(false);
+            OracleValues oracle = task.Fixture == TaskFixture.Shared
+                ? await OracleRunner.RunAsync(task, client, tools, null, cancellationToken).ConfigureAwait(false)
+                : new OracleValues(new Dictionary<string, JsonNode?>(), ["this runner cannot make copies yet"], []);
             if (oracle.Problems.Count > 0)
             {
                 string problems = string.Join("; ", oracle.Problems);
@@ -81,7 +85,22 @@ internal static class EvalRun
                     run = run with { Status = AttemptStatus.Invalid, Reason = NotIsolated };
                 }
 
-                Verdict? verdict = run.Status == AttemptStatus.Answered ? Grader.Grade(task, run.Answer, oracle.Values) : null;
+                Verdict? verdict = null;
+                if (run.Status == AttemptStatus.Answered)
+                {
+                    try
+                    {
+                        IReadOnlyDictionary<string, AfterValue> after = await AfterRunner.RunAsync(task, client, null, cancellationToken).ConfigureAwait(false);
+                        verdict = Grader.Grade(task, run.Answer, oracle.Values, after);
+                    }
+                    catch (Exception ex)
+                    {
+                        // The attempt is paid for, so it is reported before the run stops (Ctrl+C, eplanmcp gone).
+                        await RecordAsync(attempt, run with { Status = AttemptStatus.Invalid, Reason = "its after calls failed: " + ex.Message }, null, retry).ConfigureAwait(false);
+                        throw;
+                    }
+                }
+
                 await RecordAsync(attempt, run, verdict, retry).ConfigureAwait(false);
 
                 // Every later attempt would write unprotected too, and the fixture may have changed: the run stops.
