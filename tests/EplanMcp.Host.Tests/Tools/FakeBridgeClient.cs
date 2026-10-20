@@ -55,6 +55,15 @@ internal sealed class FakeBridgeClient : IBridgeClient
         return Task.FromResult((TData)data);
     }
 
+    /// <summary>The timeouts given to the long-waiting overload, in order.</summary>
+    public List<TimeSpan> Timeouts { get; } = [];
+
+    public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        Timeouts.Add(timeout);
+        return InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
+    }
+
     /// <summary>The request IDs and limits of writes, in order.</summary>
     public List<(string RequestId, TimeSpan Limit)> Writes { get; } = [];
 
