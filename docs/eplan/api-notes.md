@@ -159,6 +159,21 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A19. M3b 写工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
+`eplan_connection_generate` 和 `eplan_macro_insert` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。步骤和结果记在 PR #136、#138 中。
+- **生成连接**：
+  - 已齐全的页 `=GAA+A1&EFS1/1`（40 条）先规划后执行，40 → 40，没有 `PLAN_STALE`：`Page.AllPlacements` 的 `ToStringIdentifier()` 在两次调度之间稳定。34 张原理图页（1057 条连接）一次生成 0.8 秒，没有增删。— 实测。
+  - 宏页上 0 → 9 条（同 S10），事务中、提交前新生成的连接能按 `Connection.Page` 读到，与随后 `eplan_connection_list` 的 9 条一致。一次 Ctrl+Z 撤销这一步，宏的设备仍在；再生成又是 9 条，再执行一次没有增删。— 实测。
+  - **没有增删的生成不留撤销步骤**：对齐全的页执行两次后按一次 Ctrl+Z，撤销的是之前那次真正的生成。也就是说这样的生成没有改动数据（包括没有删掉再重建连接），工具按 ADR-0010 返回 `not_started`。— 实测。
+- **插入窗口宏**（`Contactor_Feedback_Control.ema`，52 × 268 mm，变体 0–5）：
+  - 新建的空页上 (40, 280) 用 `NumerationMode.Number` 插入 28 个对象、12 个标识：端子 `+A1-XG2`–`XG4`、电缆 `+A1-WG1`，没有线圈的触点为 `=GAA+A1-?QA1`，PLC 端子保留宏的 `=K1+A1:1.4`–`1.6`（同 S10）。一次 Ctrl+Z 撤销整个插入。— 实测。
+  - 同一点再插入：EPLAN 拒绝叠放，在调度器中同样抛出异常，回滚后页上没有残留。— 实测。
+  - 插入后页上有内容时，`Page.Size` 可读（420 × 297.02，X 为宽）；外框按 `[x, x+宽] × [y−高, y]` 计算，(40, 200) 超出页面而被拒绝。外框与图纸上实际位置是否一致，没有导出图片核对。— 实测。
+  - 在已有内容的页上另一位置插入，按"插入后的功能减去插入前的"读回，只得到新插入的 12 个标识（`XG5`、`XG6`、`WG2`、`?QA2`，`XG3` 增加端子 `:?3`、`:?4`）。— 实测。
+  - `keep`：项目中没有同名设备时插入成功（`+A1-WG6`、`=GAA+A1-QA1`）；在同一页另一位置再用 `keep` 插入时，第二根 `+A1-WG6` 使主功能变多，返回 `ALREADY_EXISTS` 并回滚，页上不变。— 实测。
+  - 变体 2：插入成功，PLC 端子为 `=K1+A1:3.4`–`3.6`。— 实测。
+- 两个工具在插件日志和 `EplLog.eldb` 中都没有留下错误（叠放被拒绝时插件日志有一条预期的警告）。— 实测。
+
 ### A18. 复制、备份、删页、重编号（spike S12，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S12](../../spikes/S12-destructive-backup/README.md)。
 - **`ProjectManager.CopyProject(源 .elk, 目标 .elk, CopyMode.Snapshot)` 可以复制打开着的项目**：项目保持打开，不加锁，示例项目（313 个文件、213 MB）0.6–0.7 秒；源项目只改写 `User.eod` / `User.eox`（同 A11）。副本可以直接打开，页数、功能数与源项目相同；在一次已提交的写入之后立即复制，副本包含这次写入。— S12。
