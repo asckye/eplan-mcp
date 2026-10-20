@@ -30,8 +30,9 @@ internal static class EvalRun
     /// still reports what it finished. A task whose oracle calls fail gets no attempt. An attempt that is
     /// <see cref="AgentAttempt.IsRetryable"/> runs once more after <paramref name="retryDelay"/>; both are reported, and
     /// the invalid one does not count, as always. <paramref name="auditedWrites"/> counts the writes in the audit log of
-    /// the model's eplanmcp (<see cref="EvalsHome.AuditedWrites"/>): an attempt with a committed write that the count
-    /// does not show is invalid, because that eplanmcp did not use the evals' data root and its write protection.
+    /// the model's eplanmcp (<see cref="EvalsHome.AuditedWrites"/>, -1 when it cannot tell): an attempt with a committed
+    /// write that the count does not show is invalid, because that eplanmcp did not use the evals' data root and its
+    /// write protection, and the run stops after reporting it.
     /// </summary>
     public static async Task RunAsync(
         IReadOnlyList<EvalTask> tasks,
@@ -74,16 +75,24 @@ internal static class EvalRun
             {
                 int audited = auditedWrites();
                 AgentAttempt run = await runner.RunAsync(task, attempt, retry, cancellationToken).ConfigureAwait(false);
-                if (run.Trace.Calls.Any(c => c.Committed) && auditedWrites() == audited)
+                bool isolated = !run.Trace.Calls.Any(c => c.Committed) || audited < 0 || auditedWrites() != audited;
+                if (!isolated)
                 {
                     run = run with { Status = AttemptStatus.Invalid, Reason = NotIsolated };
                 }
 
                 Verdict? verdict = run.Status == AttemptStatus.Answered ? Grader.Grade(task, run.Answer, oracle.Values) : null;
+                await RecordAsync(attempt, run, verdict, retry).ConfigureAwait(false);
+
+                // Every later attempt would write unprotected too, and the fixture may have changed: the run stops.
+                return isolated ? run : throw new InvalidOperationException(NotIsolated);
+            }
+
+            async Task RecordAsync(int attempt, AgentAttempt run, Verdict? verdict, bool retry)
+            {
                 AttemptRecord record = AttemptRecord.From(attempt, run, verdict, retry);
                 attempts.Add(record);
                 await progress.WriteLineAsync(Describe(task.Id, record)).ConfigureAwait(false);
-                return run;
             }
         }
     }

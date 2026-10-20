@@ -34,4 +34,19 @@ public sealed class EvalsHomeTests : IDisposable
 
         Assert.Equal(2, EvalsHome.AuditedWrites(home));
     }
+
+    [Fact]
+    public void AuditedWrites_ReadsALogThatEplanmcpIsStillAppendingTo()
+    {
+        string audit = Directory.CreateDirectory(Path.Combine(_directory.FullName, "audit")).FullName;
+
+        // As AuditLog.AppendAsync opens the day's file.
+        using (var writer = new FileStream(Path.Combine(audit, "2026-10-20.jsonl"), FileMode.Append, FileAccess.Write, FileShare.Read))
+        {
+            writer.Write("""{"kind":"execution_result"}"""u8.ToArray().Append((byte)'\n').ToArray());
+            writer.Flush();
+
+            Assert.Equal(1, EvalsHome.AuditedWrites(_directory.FullName));
+        }
+    }
 }

@@ -18,13 +18,38 @@ internal static class EvalsHome
         File.WriteAllText(Path.Combine(home, "config.json"), config.ToJsonString());
     }
 
-    /// <summary>The <c>execution_result</c> records in the audit log under <paramref name="home"/>: one per write that ran.</summary>
+    /// <summary>
+    /// The <c>execution_result</c> records in the audit log under <paramref name="home"/>, one per write that ran; -1
+    /// when the log cannot be read, so the caller cannot tell.
+    /// </summary>
     public static int AuditedWrites(string home)
     {
         string audit = Path.Combine(home, "audit");
-        return Directory.Exists(audit)
-            ? Directory.EnumerateFiles(audit, "*.jsonl").SelectMany(File.ReadLines).Count(line => Kind(line) == "execution_result")
-            : 0;
+        if (!Directory.Exists(audit))
+        {
+            return 0;
+        }
+
+        try
+        {
+            int count = 0;
+            foreach (string file in Directory.EnumerateFiles(audit, "*.jsonl"))
+            {
+                // An eplanmcp still appending holds the file with FileShare.Read: share writing, or the read fails.
+                using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                using var reader = new StreamReader(stream);
+                while (reader.ReadLine() is { } line)
+                {
+                    count += Kind(line) == "execution_result" ? 1 : 0;
+                }
+            }
+
+            return count;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return -1;
+        }
     }
 
     private static string? Kind(string line)

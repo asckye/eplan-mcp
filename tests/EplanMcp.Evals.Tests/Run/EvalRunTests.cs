@@ -93,20 +93,42 @@ public sealed class EvalRunTests
         Assert.Equal([(1, false)], runner.Runs);
     }
 
-    [Theory]
-    [InlineData(0, Outcome.Invalid)]
-    [InlineData(1, Outcome.Solved)]
-    public async Task Run_ACommittedWrite_MustShowInTheEvalsAudit(int recorded, string outcome)
+    [Fact]
+    public async Task Run_ACommittedWriteTheEvalsAuditShows_IsGradedAsUsual()
     {
         int audited = 0;
-        var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true)) { OnRun = () => audited += recorded };
+        var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true)) { OnRun = () => audited++ };
         var records = new List<TaskRecord>();
 
         await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => audited, TestContext.Current.CancellationToken);
 
+        Assert.Equal(Outcome.Solved, Assert.Single(Assert.Single(records).Attempts).Outcome);
+    }
+
+    [Fact]
+    public async Task Run_ACommittedWriteTheEvalsAuditDoesNotShow_IsInvalidAndStopsTheRun()
+    {
+        var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true), Answer("""{"pages":321}"""));
+        var records = new List<TaskRecord>();
+
+        InvalidOperationException stop = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 3, TestContext.Current.CancellationToken));
+
         AttemptRecord attempt = Assert.Single(Assert.Single(records).Attempts);
-        Assert.Equal(outcome, attempt.Outcome);
-        Assert.Equal(recorded == 0, attempt.Reason?.StartsWith("not isolated: eplanmcp committed a write", StringComparison.Ordinal) ?? false);
+        Assert.Equal((Outcome.Invalid, stop.Message), (attempt.Outcome, attempt.Reason));
+        Assert.StartsWith("not isolated: eplanmcp committed a write", stop.Message, StringComparison.Ordinal);
+        Assert.Equal([1], runner.Attempts);
+    }
+
+    [Fact]
+    public async Task Run_AnAuditLogThatCannotBeRead_DoesNotMakeAnAttemptInvalid()
+    {
+        var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true));
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => -1, TestContext.Current.CancellationToken);
+
+        Assert.Equal(Outcome.Solved, Assert.Single(Assert.Single(records).Attempts).Outcome);
     }
 
     private static FakeToolClient Project(int pages) =>
