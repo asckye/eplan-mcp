@@ -139,28 +139,4 @@ public sealed class MacroGetOperationTests : IDisposable
         Assert.Equal(0, mklink.ExitCode);
         _junctions.Add(link);
     }
-
-    /// <summary>Returns <see cref="Content"/> for any macro and records what was opened, and in which project.</summary>
-    private sealed class FakeMacroReader(string root) : IMacroReader
-    {
-        public MacroContent Content { get; } = new()
-        {
-            Representations = [new("MultiLine", [0, 1, 2, 3, 4, 5])],
-            Width = 52,
-            Height = 268,
-            ObjectCount = 28,
-        };
-
-        public string? Opened { get; private set; }
-
-        public string? OpenedIn { get; private set; }
-
-        public string? MacroRoot() => root;
-
-        public MacroContent ReadMacro(string projectPath, string macroPath)
-        {
-            (OpenedIn, Opened) = (projectPath, macroPath);
-            return Content;
-        }
-    }
 }

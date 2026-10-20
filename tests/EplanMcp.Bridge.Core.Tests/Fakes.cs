@@ -345,6 +345,66 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
 }
 
 /// <summary>
+/// Returns <see cref="Content"/> for any macro below a real directory and records what was opened, and in which project.
+/// The content is S10's <c>Contactor_Feedback_Control.ema</c>: MultiLine with variants 0–5, 52 x 268 mm, 28 objects.
+/// </summary>
+internal sealed class FakeMacroReader(string root) : IMacroReader
+{
+    public MacroContent Content { get; set; } = new()
+    {
+        Representations = [new("MultiLine", [0, 1, 2, 3, 4, 5])],
+        Width = 52,
+        Height = 268,
+        ObjectCount = 28,
+    };
+
+    public string? Opened { get; private set; }
+
+    public string? OpenedIn { get; private set; }
+
+    public string? MacroRoot() => root;
+
+    public MacroContent ReadMacro(string projectPath, string macroPath)
+    {
+        (OpenedIn, Opened) = (projectPath, macroPath);
+        return Content;
+    }
+}
+
+/// <summary>
+/// Target pages, and window macros inserted the way S9 and S10 found EPLAN inserts them (api-notes A13, A14):
+/// <see cref="Placed"/> stands for EPLAN's numbering and gives the inserted functions by mode (true: number); their
+/// main functions join the project's in <paramref name="project"/> and their objects the page. <see cref="Stacked"/>
+/// stands for EPLAN refusing to place the same symbols on top of each other ("S029181").
+/// </summary>
+internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInserter
+{
+    public Dictionary<string, MacroTargetPage> Pages { get; } = new(StringComparer.Ordinal);
+
+    public Func<bool, List<MacroFunctionRecord>> Placed { get; set; } = _ => [];
+
+    public bool Stacked { get; set; }
+
+    public List<(string Page, string Macro, int Variant, double X, double Y, bool Number)> Inserts { get; } = [];
+
+    public MacroTargetPage? ReadPage(string projectPath, string pageName) => Pages.GetValueOrDefault(pageName);
+
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number)
+    {
+        Inserts.Add((pageName, macroPath, variant, x, y, number));
+        if (Stacked)
+        {
+            throw new BridgeErrorException(ErrorReason.InvalidArgument, "EPLAN: the same symbols on top of each other");
+        }
+
+        List<MacroFunctionRecord> functions = Placed(number);
+        project.Functions.AddRange(functions.Where(f => f.Main).Select(f => new FunctionRecord { Name = f.Name, VisibleName = f.VisibleName, IsMain = true, Category = f.Category, Page = pageName }));
+        Pages[pageName].Objects.AddRange(functions.Select((f, i) => "9/9/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/0"));
+        return new PlacedMacro { Functions = functions, ObjectCount = functions.Count + 9 };
+    }
+}
+
+/// <summary>
 /// Transactions that behave like EPLAN's SafetyPoint as far as a fake project can: <see cref="Snapshot"/> runs when one
 /// begins and returns how to restore that state, which a rollback does. Records every call in order and throws where
 /// <see cref="FailAt"/> says ("Begin", "Commit", "CloseUndo", "Rollback" or "Dispose").
