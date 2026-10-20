@@ -82,7 +82,9 @@ public sealed class TransactionRunnerTests
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run<int>(_transactions, Tool, () => throw new InvalidOperationException("x")));
 
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false), (error.Error.Reason, error.Error.Execution, error.Error.Retryable));
-        Assert.Contains("'AI: eplan_page_create'", error.Error.Message, StringComparison.Ordinal);
+        // After A15 (spike S8) the message does not promise that Ctrl+Z reverts a half-done change.
+        Assert.Contains("part or none", error.Error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("Ctrl+Z", error.Error.Message, StringComparison.Ordinal);
         Assert.IsType<InvalidOperationException>(error.InnerException);
     }
 
