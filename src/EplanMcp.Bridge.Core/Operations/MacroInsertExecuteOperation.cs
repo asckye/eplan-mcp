@@ -3,10 +3,10 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
-/// <see cref="OperationNames.MacroInsertExecute"/>: checks the arguments and the plan's fingerprint again, then, in one
-/// transaction, notes the project's main functions, inserts the macro and reads back; devices merged with existing ones
-/// roll the insert back (docs/tools/eplan_macro_insert.md, section 5). The transaction's SafetyPoint is what takes an
-/// insert back, and the insert is one undo step (api-notes A13, A14).
+/// <see cref="OperationNames.MacroInsertExecute"/>: checks the arguments and the plan's fingerprint again, then inserts
+/// the macro in one transaction and reads back; with numbering keep, devices merged with existing ones roll the insert
+/// back (docs/tools/eplan_macro_insert.md, section 5). The transaction's SafetyPoint is what takes an insert back, and
+/// the insert is one undo step (api-notes A13, A14).
 /// </summary>
 public sealed class MacroInsertExecuteOperation(
     IProjectCatalog catalog,
@@ -62,19 +62,21 @@ public sealed class MacroInsertExecuteOperation(
         };
     }
 
-    /// <summary>The tool spec's steps in the transaction: note the main functions, insert, then refuse merged devices (S10).</summary>
+    /// <summary>
+    /// The tool spec's steps in the transaction: note the main functions, insert, then refuse merged devices (S10). The
+    /// spec checks keep only: number gives the devices free tags, but PLC terminals keep the macro's own structure in
+    /// every mode (<c>=K1+A1:1.4</c>, A14), so a second insert with number repeats their names.
+    /// </summary>
     private PlacedMacro Insert(MacroInsertRequest request)
     {
-        string[] before = MainFunctions(request);
+        string[] before = request.Number ? [] : MainFunctions(request);
         PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number);
-        List<string> merged = MacroInsertRequest.Merged(before, MainFunctions(request));
+        List<string> merged = request.Number ? [] : MacroInsertRequest.Merged(before, MainFunctions(request));
         return merged.Count == 0
             ? placed
             : throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                request.Number
-                    ? "EPLAN gave inserted devices the tags of existing devices, which merges them, so nothing was inserted. Ask the engineer to check the macro in EPLAN."
-                    : "With numbering 'keep' the macro's devices took the tags of existing devices, which merges them in EPLAN, so nothing was inserted. Use numbering 'number', or first give the existing devices other tags with eplan_device_update.",
+                "With numbering 'keep' the macro's devices took the tags of existing devices, which merges them in EPLAN, so nothing was inserted. Use numbering 'number', or first give the existing devices other tags with eplan_device_update.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = request.Project.Name, ["tags"] = string.Join("\n", merged.Take(ProjectResolver.MaxCandidates)) });
     }
