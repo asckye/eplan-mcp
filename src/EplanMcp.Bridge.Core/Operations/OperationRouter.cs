@@ -11,7 +11,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// Finds the operation for an <c>invoke</c>, parses its arguments on the calling thread, runs it on EPLAN's main
 /// thread through the dispatcher and converts every outcome into data or a <see cref="BridgeErrorException"/>.
 /// Writes (<see cref="IWriteOperation"/>) also go through <see cref="OutcomeRecords"/>, and <c>outcome.get</c> is
-/// answered on the calling pipe thread from them (ADR-0010). Thread-safe; one router serves every connection.
+/// answered on the calling pipe thread from them (ADR-0010). Every invoke runs with an <see cref="OperationContext"/>,
+/// through which the operation reports progress (M4 design 4.3). Thread-safe; one router serves every connection.
 /// </summary>
 public sealed class OperationRouter
 {
@@ -35,7 +36,10 @@ public sealed class OperationRouter
     public IReadOnlyList<string> SupportedOperations =>
         [.. _operations.Keys.Append(OperationNames.OutcomeGet).OrderBy(name => name, StringComparer.Ordinal)];
 
-    public JToken Invoke(string operationName, JToken? args, string correlationId)
+    public JToken Invoke(string operationName, JToken? args, string correlationId) => Invoke(operationName, args, correlationId, null);
+
+    /// <summary>Runs one invoke; the operation's progress goes to <paramref name="progress"/>, or nowhere when it is null.</summary>
+    internal JToken Invoke(string operationName, JToken? args, string correlationId, ProgressSlot? progress)
     {
         if (operationName == OperationNames.OutcomeGet)
         {
@@ -49,13 +53,15 @@ public sealed class OperationRouter
         }
 
         object parsed = operation.ParseArgs(args);
-        return operation is IWriteOperation ? InvokeWrite(operation, parsed, correlationId) : InvokeRead(operation, parsed, correlationId);
+        var context = new OperationContext(correlationId, progress);
+        return operation is IWriteOperation ? InvokeWrite(operation, parsed, context) : InvokeRead(operation, parsed, context);
     }
 
-    private JToken InvokeRead(IOperation operation, object parsed, string correlationId)
+    private JToken InvokeRead(IOperation operation, object parsed, OperationContext context)
     {
         string operationName = operation.Name;
-        DispatchResult outcome = _dispatcher.Run(() => operation.Execute(parsed), _startTimeout);
+        string correlationId = context.RequestId;
+        DispatchResult outcome = _dispatcher.Run(() => context.Run(() => operation.Execute(parsed)), _startTimeout);
         switch (outcome.Status)
         {
             case DispatchStatus.Completed:
@@ -72,8 +78,9 @@ public sealed class OperationRouter
     /// A write: recorded as queued, then running once on the main thread, then with its final state before the
     /// response leaves (ADR-0010: record first, then respond). Every error says whether the project changed.
     /// </summary>
-    private JToken InvokeWrite(IOperation operation, object parsed, string requestId)
+    private JToken InvokeWrite(IOperation operation, object parsed, OperationContext context)
     {
+        string requestId = context.RequestId;
         if (!_outcomes.TryBegin(requestId, operation.Name, out OutcomeGetData? previous))
         {
             _log.Write(BridgeLogLevel.Warning, $"[{requestId}] {operation.Name} refused: the request ID was used before ({previous!.Status})");
@@ -87,11 +94,11 @@ public sealed class OperationRouter
         }
 
         DispatchResult outcome = _dispatcher.Run(
-            () =>
+            () => context.Run(() =>
             {
                 _outcomes.Update(requestId, OutcomeStatus.Running);
                 return operation.Execute(parsed);
-            },
+            }),
             _startTimeout);
         switch (outcome.Status)
         {
