@@ -160,6 +160,35 @@ public sealed class TaskLoaderTests
     }
 
     [Fact]
+    public void Load_AStringSplitByACommaInsideBraces_IsReportedAsAKeyWithoutValue()
+    {
+        // The first real run: the description became two keys, and claude rejected the schema.
+        TaskFile file = TaskLoader.Load("t", """
+            id: t
+            set: dev
+            prompt: p
+            answer: { type: object, properties: { device: { type: string, description: the full tag, such as =GAA+A1-FC9 } } }
+            checks: [{ answer: $.device, equals: "=GAA+A1-FC2" }]
+            """);
+
+        Assert.Equal(["line 4: 'such as =GAA+A1-FC9' in 'answer' has no value; quote a string that contains ', ' inside { }"], file.Problems);
+    }
+
+    [Fact]
+    public void Load_AnExplicitNullInTheAnswerSchema_Passes()
+    {
+        EvalTask task = Valid("t", """
+            id: t
+            set: dev
+            prompt: p
+            answer: { type: object, properties: { device: { type: [string, "null"], default: null } } }
+            checks: [{ answer: $.device, equals: null }]
+            """);
+
+        Assert.Equal("t", task.Id);
+    }
+
+    [Fact]
     public void Load_ACheckPathOutsideTheAnswerSchema_IsReported()
     {
         TaskFile file = TaskLoader.Load("t", """

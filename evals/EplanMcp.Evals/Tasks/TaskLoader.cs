@@ -97,10 +97,49 @@ internal static partial class TaskLoader
                 : null;
         }
 
-        private JsonObject? AnswerSchema(YamlNode node) =>
-            Json(node) is JsonObject schema && IsString(schema["type"]) && (string?)schema["type"] == "object"
-                ? schema
-                : Reported<JsonObject>(node, "'answer' must be a JSON Schema of type object");
+        private JsonObject? AnswerSchema(YamlNode node)
+        {
+            if (Json(node) is not JsonObject schema || !IsString(schema["type"]) || (string?)schema["type"] != "object")
+            {
+                return Reported<JsonObject>(node, "'answer' must be a JSON Schema of type object");
+            }
+
+            EmptyKeys(node, new HashSet<YamlNode>(ReferenceEqualityComparer.Instance));
+            return schema;
+        }
+
+        /// <summary>
+        /// A key without a value in the answer schema is a slip: in a { } mapping, ", " inside an unquoted string starts
+        /// a new key, so <c>{ description: the tag, such as -K1 }</c> also has the key <c>such as -K1</c>. claude rejects
+        /// such a schema and every attempt comes out invalid (first real run). An explicit <c>null</c> or <c>~</c> is meant
+        /// and passes; <paramref name="seen"/> stops at aliases met before.
+        /// </summary>
+        private void EmptyKeys(YamlNode node, HashSet<YamlNode> seen)
+        {
+            if (!seen.Add(node))
+            {
+                return;
+            }
+
+            IEnumerable<YamlNode> children = node switch
+            {
+                YamlMappingNode map => map.Children.Values,
+                YamlSequenceNode sequence => sequence.Children,
+                _ => [],
+            };
+            if (node is YamlMappingNode mapping)
+            {
+                foreach ((YamlNode key, _) in mapping.Children.Where(c => c.Value is YamlScalarNode { Style: ScalarStyle.Plain, Value: null or "" }))
+                {
+                    Problem(key, $"'{(key as YamlScalarNode)?.Value}' in 'answer' has no value; quote a string that contains ', ' inside {{ }}");
+                }
+            }
+
+            foreach (YamlNode child in children)
+            {
+                EmptyKeys(child, seen);
+            }
+        }
 
         private void ReadOracle(YamlMappingNode oracle)
         {
