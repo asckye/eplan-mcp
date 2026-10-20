@@ -206,3 +206,47 @@ internal sealed class FixedMapper(BridgeError? error) : IExceptionMapper
 {
     public BridgeError? Map(Exception exception) => error;
 }
+
+/// <summary>
+/// Transactions that behave like EPLAN's SafetyPoint as far as a fake project can: <see cref="Snapshot"/> runs when one
+/// begins and returns how to restore that state, which a rollback does. Records every call in order and throws where
+/// <see cref="FailAt"/> says ("Begin", "Commit", "CloseUndo", "Rollback" or "Dispose").
+/// </summary>
+internal sealed class FakeTransactions : ITransactionScopeFactory
+{
+    public List<string> Calls { get; } = [];
+
+    public string? FailAt { get; set; }
+
+    public Func<Action>? Snapshot { get; set; }
+
+    public ITransactionScope Begin(string undoDescription)
+    {
+        Step("Begin " + undoDescription, "Begin");
+        return new Scope(this, Snapshot?.Invoke());
+    }
+
+    private void Step(string call, string step)
+    {
+        Calls.Add(call);
+        if (FailAt == step)
+        {
+            throw new InvalidOperationException(step + " failed");
+        }
+    }
+
+    private sealed class Scope(FakeTransactions owner, Action? restore) : ITransactionScope
+    {
+        public void Commit() => owner.Step("Commit", "Commit");
+
+        public void CloseUndo() => owner.Step("CloseUndo", "CloseUndo");
+
+        public void Rollback()
+        {
+            owner.Step("Rollback", "Rollback");
+            restore?.Invoke();
+        }
+
+        public void Dispose() => owner.Step("Dispose", "Dispose");
+    }
+}

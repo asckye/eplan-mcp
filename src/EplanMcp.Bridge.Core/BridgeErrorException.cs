@@ -30,5 +30,12 @@ public sealed class BridgeErrorException : Exception
         Error = new BridgeError { Reason = reason, Message = message, Retryable = retryable, Metadata = metadata };
     }
 
+    /// <summary>A business error caused by an EPLAN exception, which the router logs (never sends).</summary>
+    public BridgeErrorException(string reason, string message, Exception innerException)
+        : base(message, innerException)
+    {
+        Error = new BridgeError { Reason = reason, Message = message };
+    }
+
     public BridgeError Error { get; }
 }

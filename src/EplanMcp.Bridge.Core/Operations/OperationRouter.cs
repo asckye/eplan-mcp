@@ -138,6 +138,11 @@ public sealed class OperationRouter
     {
         if (exception is BridgeErrorException known)
         {
+            if (known.InnerException is not null)
+            {
+                _log.Write(BridgeLogLevel.Warning, $"[{correlationId}] {operationName} failed: {known.Error.Reason}", known.InnerException);
+            }
+
             return known;
         }
 
