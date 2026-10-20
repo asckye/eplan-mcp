@@ -25,6 +25,7 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
     {
         MainThread.Assert();
         var countdown = new ApprovalCountdown(timeout);
+        var open = Stopwatch.StartNew();
         var shown = new Stopwatch();
         string? decision = null;
         bool closing = false;
@@ -70,7 +71,8 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
         };
         new WindowInteropHelper(window).Owner = owner;
 
-        // A timer on this (main) thread's dispatcher; nothing is invoked from another thread.
+        // A timer on this (main) thread's dispatcher; nothing is invoked from another thread. It runs from before the
+        // dialog appears, so the deadline closes it even if it never does: EPLAN must never stay blocked.
         var timer = new DispatcherTimer(DispatcherPriority.Input) { Interval = TimeSpan.FromMilliseconds(100) };
         timer.Tick += (_, _) =>
         {
@@ -79,9 +81,9 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
                 return;
             }
 
-            approve.IsEnabled = reject.IsEnabled = countdown.AcceptsClicks(shown.Elapsed);
-            left.Text = question.CountdownFormat.Replace("{0}", countdown.Remaining(shown.Elapsed));
-            if (countdown.HasExpired(shown.Elapsed))
+            approve.IsEnabled = reject.IsEnabled = countdown.AcceptsClicks(open.Elapsed, Shown());
+            left.Text = question.CountdownFormat.Replace("{0}", countdown.Remaining(open.Elapsed));
+            if (countdown.HasExpired(open.Elapsed))
             {
                 window.Close();
             }
@@ -89,7 +91,6 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
         window.ContentRendered += (_, _) =>
         {
             shown.Start();
-            timer.Start();
             changes.Focus();
         };
         window.PreviewKeyDown += (_, e) =>
@@ -104,13 +105,14 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
         {
             closing = true;
             timer.Stop();
-            decision ??= countdown.Decide(ApprovalChoice.Close, shown.Elapsed);
+            decision ??= countdown.Decide(ApprovalChoice.Close, open.Elapsed, Shown());
         };
         approve.Click += (_, _) => Choose(ApprovalChoice.Approve);
         reject.Click += (_, _) => Choose(ApprovalChoice.Reject);
 
         try
         {
+            timer.Start();
             window.ShowDialog();
         }
         finally
@@ -120,9 +122,11 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
 
         return decision ?? ApprovalDecisions.Cancelled;
 
+        TimeSpan? Shown() => shown.IsRunning ? shown.Elapsed : null;
+
         void Choose(ApprovalChoice choice)
         {
-            if (!closing && countdown.Decide(choice, shown.Elapsed) is { } chosen)
+            if (!closing && countdown.Decide(choice, open.Elapsed, Shown()) is { } chosen)
             {
                 decision = chosen;
                 window.Close();

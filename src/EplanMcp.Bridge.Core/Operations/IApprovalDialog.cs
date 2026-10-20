@@ -10,8 +10,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 public interface IApprovalDialog
 {
     /// <summary>
-    /// Shows <paramref name="question"/> until the engineer decides or <paramref name="timeout"/> has passed since it
-    /// appeared, and returns one of <see cref="ApprovalDecisions"/>.
+    /// Shows <paramref name="question"/> until the engineer decides or <paramref name="timeout"/> has passed since the
+    /// call, whether or not the dialog appeared, and returns one of <see cref="ApprovalDecisions"/>.
     /// </summary>
     public string Ask(ApprovalAskArgs question, TimeSpan timeout);
 }
