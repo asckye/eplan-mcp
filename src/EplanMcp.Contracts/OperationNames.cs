@@ -192,6 +192,12 @@ public static class OperationNames
     public const string PageDeleteExecute = "page.delete.execute";
 
     /// <summary>
+    /// The plan of eplan_device_renumber: finds the pages and the devices in scope, never writes; which tags EPLAN gives is
+    /// known only after running. Arguments: <see cref="DeviceRenumberArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string DeviceRenumberPlan = "device.renumber.plan";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

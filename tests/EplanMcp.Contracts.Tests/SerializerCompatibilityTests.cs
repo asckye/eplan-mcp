@@ -346,6 +346,8 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new PageDeleteData(),
+        new DeviceRenumberArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/90"], OnlyUnnumbered = false, Scheme = "Standard", Start = 10, Step = 5, Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new DeviceRenumberArgs(),
     ];
 
     [Theory]

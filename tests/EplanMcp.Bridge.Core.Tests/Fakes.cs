@@ -657,3 +657,56 @@ internal sealed class FakePageRemover(FakePageReader pages) : IPageRemover
         }
     }
 }
+
+/// <summary>
+/// The functions of a project's pages, numbered the way S12 found <c>Renumber.DeviceTags</c> with PostNumerate numbers
+/// them (api-notes A18): <see cref="Numbers"/> gives the new tag of each device EPLAN numbers, connection points keep
+/// their '?', and a device not in it (S12: <c>=GAA+A1-?QA1</c>) stays as it was. A scheme other than "", "Standard" or
+/// null throws like EPLAN's InvalidScheme, with S12's message. <see cref="NewIds"/> stands for EPLAN giving functions new
+/// session identifiers. Records every call.
+/// </summary>
+internal sealed class FakeDeviceRenumberer : IDeviceRenumberer
+{
+    /// <summary>S12's message for the scheme "Default", in Chinese as EPLAN's user interface was.</summary>
+    public const string InvalidSchemeMessage = "S029131配置无效。参数名称:'strSchemePerIdentifier'。参数值:'Default'。请使用下列配置中的其中一个:'Kennbuchstabe + Zähler Fluidtechnik, Kennbuchstabe + Zähler/Zubehör Fluidtechnik, Kennbuchstabe Zähler, Media_code, Standard'。";
+
+    public List<string> Pages { get; } = [];
+
+    public List<PlacedFunction> Functions { get; } = [];
+
+    public Dictionary<string, string> Numbers { get; } = new(StringComparer.Ordinal);
+
+    public bool NewIds { get; set; }
+
+    public List<(IReadOnlyList<string>? Pages, bool OnlyUnnumbered, string? Scheme, int Start, int Step)> Renumbers { get; } = [];
+
+    public IReadOnlyList<PlacedFunction>? ReadFunctions(string projectPath, string? page) =>
+        page is null ? [.. Functions.Select(Copy)]
+        : Pages.Contains(page) ? [.. Functions.Where(f => f.Page == page).Select(Copy)]
+        : null;
+
+    public void Renumber(string projectPath, IReadOnlyList<string>? pages, bool onlyUnnumbered, string? scheme, int start, int increment)
+    {
+        Renumbers.Add((pages, onlyUnnumbered, scheme, start, increment));
+        if (scheme is not (null or "" or "Standard"))
+        {
+            throw NumberingSchemes.Unknown(scheme, InvalidSchemeMessage, new InvalidOperationException(InvalidSchemeMessage));
+        }
+
+        foreach (PlacedFunction function in Functions.Where(f => pages is null || pages.Contains(f.Page!)))
+        {
+            string device = DeviceRenumberRequest.DeviceOf(function.Name);
+            if (Numbers.TryGetValue(device, out string? tag))
+            {
+                function.Name = string.Concat(tag, function.Name.AsSpan(device.Length));
+            }
+
+            if (NewIds)
+            {
+                function.Id += "'";
+            }
+        }
+    }
+
+    private static PlacedFunction Copy(PlacedFunction f) => new() { Name = f.Name, IsMain = f.IsMain, Page = f.Page, Id = f.Id };
+}
