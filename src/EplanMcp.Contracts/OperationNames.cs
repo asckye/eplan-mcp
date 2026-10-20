@@ -69,4 +69,11 @@ public static class OperationNames
     /// <see cref="OutcomeGetData"/>.
     /// </summary>
     public const string OutcomeGet = "outcome.get";
+
+    /// <summary>
+    /// Asks the engineer to approve a write in a dialog in EPLAN, modal on the main thread until answered or the
+    /// deadline (M3 design 4.3, 4.7); other calls get EPLAN_BUSY meanwhile. Arguments: <see cref="ApprovalAskArgs"/>;
+    /// data: <see cref="ApprovalAskData"/>.
+    /// </summary>
+    public const string ApprovalAsk = "approval.ask";
 }

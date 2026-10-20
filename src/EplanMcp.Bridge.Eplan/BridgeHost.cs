@@ -63,6 +63,7 @@ internal static class BridgeHost
             new CheckListOperation(catalog, new EplanProjectMessageReader()),
             new MacroListOperation(macros),
             new MacroGetOperation(catalog, macros),
+            new ApprovalAskOperation(new EplanApprovalDialog()),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
