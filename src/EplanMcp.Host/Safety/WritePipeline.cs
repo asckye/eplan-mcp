@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -89,7 +90,7 @@ internal sealed partial class WritePipeline(
 
         // The Host names the write, never a client: the approval and the execution are bound to this ID.
         string requestId = Guid.NewGuid().ToString("N");
-        string argumentsHash = PendingPlanStore.HashArguments(request.Args);
+        string argumentsHash = HashArguments(request.Args);
         if (suspensions.Blocking(plan.ProjectPath, eplan.Eplan.ProcessId, started) is { Count: > 0 } blocking)
         {
             await ReleaseAsync(request.Tool, requestId, argumentsHash, plan, eplan, started, blocking, progress, cancellationToken).ConfigureAwait(false);
@@ -154,6 +155,10 @@ internal sealed partial class WritePipeline(
 
     internal const string AuditUnavailableMessage =
         "The audit log cannot be written, so writes are refused and nothing was changed. Ask the engineer to run 'eplanmcp doctor'.";
+
+    /// <summary>The SHA-256 of the arguments as the tool serializes them, so the approval binds to exactly these.</summary>
+    internal static string HashArguments<TArgs>(TArgs args) =>
+        Convert.ToHexStringLower(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(args, HostJson.Options)));
 
     /// <summary>The change list as one line per change, for the audit, the suspension and the approval form.</summary>
     internal static IEnumerable<string> ChangeLines(WritePlan plan) => plan.Changes.Select(c => c.Action switch

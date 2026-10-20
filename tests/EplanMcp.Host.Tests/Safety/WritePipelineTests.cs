@@ -41,6 +41,14 @@ public sealed class WritePipelineTests : IDisposable
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);
 
     [Fact]
+    public void HashArguments_DependsOnEveryValue()
+    {
+        Assert.Equal(WritePipeline.HashArguments(new { a = 1, b = "x" }), WritePipeline.HashArguments(new { a = 1, b = "x" }));
+        Assert.NotEqual(WritePipeline.HashArguments(new { a = 1, b = "x" }), WritePipeline.HashArguments(new { a = 1, b = "y" }));
+        Assert.Matches("^[0-9a-f]{64}$", WritePipeline.HashArguments(new { a = 1 }));
+    }
+
+    [Fact]
     public async Task AScratchWrite_RunsOnceAndIsAuditedBeforeAndAfter()
     {
         WriteOutcome<JsonObject> outcome = await Run();

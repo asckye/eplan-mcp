@@ -115,10 +115,8 @@ flowchart TD
   - Write + 真实项目 → `writesOutsideScratch` 为 `deny` 时拒绝（`POLICY_DENIED`），为 `approve` 时需要审批；
   - Destructive → 始终审批（M4）；
   - Code → 拒绝。
-- **计划存储** `PendingPlanStore`：
-  - 计划保存在 Host 内存中：工具、参数、项目、变更清单、指纹。ID 是 128 位随机数，5 分钟后过期。
-  - `requestState` = 计划 ID + 参数摘要 + 过期时间，用 HMAC-SHA256 签名。密钥在 Host 启动时随机生成，只存在内存中（S4）。
-  - 校验签名、过期时间，以及计划与本次请求是否对应（SEC-06）。
+- **计划**：只在一次工具调用中保存在 Host 内存里，规划、审批和执行都在这次调用中完成，不交给客户端（SEC-06）。审批绑定计划指纹和参数摘要（按工具的序列化方式取参数的 SHA-256）。
+  - 第 7 步原来做了 `PendingPlanStore`：等待审批的计划和签名的 `requestState`，供 elicitation 的多轮请求使用。ADR-0011 之后没有多轮请求，它已删除，只保留参数摘要。
 - **审批** `ApprovalService`（[ADR-0011](../adr/0011-approval-out-of-band.md) 取代了原来的 elicitation 渠道）：
   - 只经工程师独立操作的窗口：Workbench 审批队列（M5，Workbench 正在运行时）→ EPLAN 内的审批对话框（以 EPLAN 主窗口为所有者，第 12 步）→ 都不可用时拒绝。不用 MCP elicitation：表单由 AI 客户端自己显示、自己回答，"批准"不能证明有人确认过。
   - 工具调用在 Host 中等待决定，期限见上面的 `approvalTimeoutSeconds`，到期按 `APPROVAL_EXPIRED` 拒绝。客户端提供了进度令牌时，每 15 秒发一次进度通知，说明正在等待 EPLAN 中的审批。
@@ -188,7 +186,7 @@ flowchart TD
 ## 7. 测试与验证
 - **Small**：
   - 策略决策表全覆盖；scratch 路径判断（`..`、符号链接、短文件名、大小写）；
-  - `requestState` 的签名、篡改、过期、重放；
+  - 参数摘要随每个参数变化；
   - 审计哈希链与 `audit verify`（Q9）；审计不可写时拒绝（Q7）；
   - `execution` 的两条不变式和错误码映射；暂停记录的读写与过期实例。
 - **Medium**：用假 Bridge 测试：
@@ -211,7 +209,7 @@ flowchart TD
   4. Bridge 结果记录、`outcome.get`、去重；
   5. Host 写入调用：请求 ID、取回结果；
   6. 写入暂停：记录、检查，在 `doctor` 和 `eplan_session_status` 中显示；
-  7. 计划存储与 `requestState`；
+  7. 计划存储与 `requestState`（ADR-0011 之后删除，只保留参数摘要）；
   8. 审批服务与对话框文字。ADR-0011 之后不做 elicitation 渠道，与第 12 步一起完成；
   9. spike S8（项目负责人在场）、spike S9；
   10. Bridge `TransactionScope` 与 `eplan_page_create`（含工具规格、Large 测试）；
