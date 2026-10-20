@@ -18,6 +18,11 @@ internal static class ApprovalTexts
     public static ApprovalAskArgs For(ApprovalQuestion question, CultureInfo culture)
     {
         bool zh = culture.TwoLetterISOLanguageName == "zh";
+        if (question.Release is { } suspension)
+        {
+            return Release(suspension, zh);
+        }
+
         WritePlan plan = question.Plan;
         string count = plan.Changes.Count.ToString(CultureInfo.InvariantCulture);
         return new ApprovalAskArgs
@@ -33,6 +38,35 @@ internal static class ApprovalTexts
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
             CountdownFormat = zh ? "{0} 后自动拒绝" : "Rejected automatically in {0}",
+        };
+    }
+
+    /// <summary>
+    /// The confirmation that lifts a suspension (ADR-0010 section 3). Not "use Ctrl+Z": after EPLAN was ended during a
+    /// write, its changes so far stay in the project and the undo history is gone (spike S8).
+    /// </summary>
+    private static ApprovalAskArgs Release(Suspension suspension, bool zh)
+    {
+        string time = suspension.Time == DateTimeOffset.MinValue ? "?" : suspension.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        string pid = suspension.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?";
+        string scope = suspension.Project is { } project
+            ? (zh ? "项目：" : "Project: ") + Value(project, zh)
+            : zh ? $"范围：这个 EPLAN 实例（进程 {pid}）中的所有项目" : $"Scope: every project in this EPLAN instance (process {pid})";
+        return new ApprovalAskArgs
+        {
+            Title = zh ? "上次 AI 修改的结果未知" : "The outcome of the last AI change is unknown",
+            Summary = zh
+                ? $"时间：{time}\n工具：{suspension.Tool}\n{scope}\n这次修改被中断，无法确定是否已经执行，项目中可能只有其中一部分。AI 的写入因此暂停。计划中的修改（最多 {SuspensionStore.MaxChanges} 处）："
+                : $"Time: {time}\nTool: {suspension.Tool}\n{scope}\nThis change was interrupted and whether it was made is unknown; the project may contain part of it. AI writes are suspended. Planned changes (up to {SuspensionStore.MaxChanges}):",
+            Changes = suspension.Changes.Count == 0
+                ? [zh ? "（暂停记录中没有变更清单）" : "(the suspension record lists no changes)"]
+                : [.. suspension.Changes.Select(c => Value(c, zh))],
+            Note = zh
+                ? "请先在 EPLAN 中核实项目：手动删除不完整的修改，或者恢复项目的副本；EPLAN 打开项目时如果提示检查数据，请执行检查。核实之后再继续，否则请保持暂停。"
+                : "Check the project in EPLAN first: remove any partial change by hand, or restore a copy of the project, and run EPLAN's data check if it offers one when opening the project. Continue only after that; otherwise keep writes suspended.",
+            ApproveLabel = zh ? "已核实，继续" : "Checked, continue",
+            RejectLabel = zh ? "保持暂停" : "Keep suspended",
+            CountdownFormat = zh ? "{0} 后自动保持暂停" : "Stays suspended automatically in {0}",
         };
     }
 

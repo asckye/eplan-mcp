@@ -132,7 +132,7 @@ public sealed class WritePipelineTests : IDisposable
         Assert.Equal((ErrorReason.WritesSuspended, ExecutionState.NotStarted), (next.Reason, next.Execution));
         Assert.Single(_bridge.Writes); // the second never reached the Bridge
         Assert.Equal(2, SuspensionStore.For(_locations).All().Count);
-        Assert.Equal(["execution_started", "execution_result", "writes_suspended"], AuditKinds());
+        Assert.Equal(["execution_started", "execution_result", "writes_suspended", "suspension_release"], AuditKinds()); // no channel: kept
     }
 
     [Fact]

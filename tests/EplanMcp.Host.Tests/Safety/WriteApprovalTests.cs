@@ -10,8 +10,8 @@ namespace EplanMcp.Host.Tests.Safety;
 
 /// <summary>
 /// The approval step of the write pipeline with fake channels (ADR-0005 section 3, M3 design 4.3): every decision, the
-/// order of the channels, answers that do not belong to the question or come too late, and the audit of each decision
-/// as its own record linked by the Host's request ID. Real files for the audit and the suspensions.
+/// order of the channels, answers that do not belong to the question or come too late, the confirmation that lifts a
+/// suspension (ADR-0010 section 3), and the audit of each decision as its own record linked by the Host's request ID. Real files for the audit and the suspensions.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class WriteApprovalTests : IDisposable
@@ -41,7 +41,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task Granted_TheWriteRunsOnceAndTheGrantIsRecordedFirst()
     {
-        var dialog = new FakeChannel("eplan_dialog", ApprovalDecision.Granted);
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
 
         WriteOutcome<JsonObject> outcome = await Run(dialog);
 
@@ -66,7 +66,7 @@ public sealed class WriteApprovalTests : IDisposable
     [InlineData(nameof(ApprovalDecision.Expired), ErrorReason.ApprovalExpired, "expired")]
     public async Task NotGranted_NothingRunsAndTheDecisionIsRecorded(string decision, string reason, string recorded)
     {
-        BridgeError error = await Fails(new FakeChannel("eplan_dialog", Enum.Parse<ApprovalDecision>(decision)));
+        BridgeError error = await Fails(new FakeApprovalChannel("eplan_dialog", Enum.Parse<ApprovalDecision>(decision)));
 
         Assert.Equal((reason, ExecutionState.NotStarted, false), (error.Reason, error.Execution, error.Retryable));
         Assert.Empty(_bridge.Writes);
@@ -77,7 +77,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task WithoutAChannelThatCanAsk_TheWriteIsRefusedAsUnavailable()
     {
-        var unable = new FakeChannel("eplan_dialog", null);
+        var unable = new FakeApprovalChannel("eplan_dialog", null);
 
         BridgeError none = await Fails();
         BridgeError cannot = await Fails(unable);
@@ -91,8 +91,8 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AChannelThatCannotAsk_PassesTheQuestionToTheNext()
     {
-        var first = new FakeChannel("workbench", null);
-        var second = new FakeChannel("eplan_dialog", ApprovalDecision.Granted);
+        var first = new FakeApprovalChannel("workbench", null);
+        var second = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
 
         await Run(first, second);
 
@@ -103,9 +103,9 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AnAnswerForAnotherRequestPlanOrArguments_IsDenied()
     {
-        BridgeError otherRequest = await Fails(new FakeChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { RequestId = "other" } });
-        BridgeError otherPlan = await Fails(new FakeChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { Fingerprint = "f0" } });
-        BridgeError otherArguments = await Fails(new FakeChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { ArgumentsHash = "h" } });
+        BridgeError otherRequest = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { RequestId = "other" } });
+        BridgeError otherPlan = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { Fingerprint = "f0" } });
+        BridgeError otherArguments = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Bind = a => a with { ArgumentsHash = "h" } });
 
         Assert.All([otherRequest, otherPlan, otherArguments], e => Assert.Equal(ErrorReason.ApprovalDenied, e.Reason));
         Assert.Empty(_bridge.Writes);
@@ -115,7 +115,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AGrantAfterTheDeadline_HasExpired()
     {
-        var late = new FakeChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += ApprovalService.Timeout + TimeSpan.FromSeconds(1) };
+        var late = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _clock.Now += ApprovalService.Timeout + TimeSpan.FromSeconds(1) };
 
         BridgeError error = await Fails(late);
 
@@ -126,7 +126,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AChannelThatFails_ReturnsItsErrorAsNotStarted()
     {
-        var busy = new FakeChannel("eplan_dialog", null) { Failure = new BridgeError { Reason = ErrorReason.EplanBusy, Message = "m", Retryable = true } };
+        var busy = new FakeApprovalChannel("eplan_dialog", null) { Failure = new BridgeError { Reason = ErrorReason.EplanBusy, Message = "m", Retryable = true } };
 
         BridgeError error = await Fails(busy);
 
@@ -137,7 +137,7 @@ public sealed class WriteApprovalTests : IDisposable
     [Fact]
     public async Task AScratchWriteOrADryRun_AsksNobody()
     {
-        var dialog = new FakeChannel("eplan_dialog", ApprovalDecision.Denied);
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Denied);
 
         WriteOutcome<JsonObject> dry = await Run([dialog], dryRun: true);
         _bridge.Handlers[Plan] = _ => PlanFor(Path.Combine(_locations.DefaultScratch, "Line1"));
@@ -149,15 +149,105 @@ public sealed class WriteApprovalTests : IDisposable
     }
 
     [Fact]
-    public async Task ASuspendedProject_IsRefusedBeforeAnyoneIsAsked()
+    public async Task ASuspendedProject_IsReleasedByItsOwnConfirmation_ThenTheWriteIsApprovedSeparately()
     {
-        SuspensionStore.For(_locations).Suspend(_realProject, Environment.ProcessId, SuspensionStore.StartOf(Environment.ProcessId)!.Value, Tool, "r", _clock.Now, SuspensionReason.OutcomeUnknown, []);
-        var dialog = new FakeChannel("eplan_dialog", ApprovalDecision.Granted);
+        Suspend(_realProject, "earlier");
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+
+        WriteOutcome<JsonObject> outcome = await Run(dialog);
+
+        Assert.Equal(ExecutionState.Committed, outcome.Execution);
+        Assert.Equal(2, dialog.Questions.Count);
+        Assert.Equal("earlier", dialog.Questions[0].Release!.RequestId);
+        Assert.Equal(["create page =A1&EFS1/5"], dialog.Questions[0].Changes);
+        Assert.Null(dialog.Questions[1].Release);
+        Assert.Empty(SuspensionStore.For(_locations).All());
+        List<JsonObject> records = AuditRecords();
+        Assert.Equal(["suspension_release", "approval", "execution_started", "execution_result"], records.Select(r => Text(r, "kind")));
+        Assert.Equal(("granted", "earlier", "eplan_dialog"), (Text(records[0], "decision"), Text(records[0], "suspendedRequestId"), Text(records[0], "channel")));
+        Assert.All(records, r => Assert.Equal(dialog.Questions[1].RequestId, Text(r, "requestId")));
+    }
+
+    [Theory]
+    [InlineData(nameof(ApprovalDecision.Denied), "denied")]
+    [InlineData(nameof(ApprovalDecision.Cancelled), "cancelled")]
+    [InlineData(nameof(ApprovalDecision.Expired), "expired")]
+    public async Task ASuspensionNotConfirmed_StaysAndNothingElseIsAsked(string decision, string recorded)
+    {
+        Suspend(_realProject, "earlier");
+        var dialog = new FakeApprovalChannel("eplan_dialog", Enum.Parse<ApprovalDecision>(decision));
+
+        BridgeError error = await Fails(dialog);
+
+        Assert.Equal((ErrorReason.WritesSuspended, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Single(dialog.Questions);
+        Assert.Equal(2, SuspensionStore.For(_locations).All().Count);
+        Assert.Empty(_bridge.Writes);
+        Assert.Equal(("suspension_release", recorded), (Text(AuditRecords()[0], "kind"), Text(AuditRecords()[0], "decision")));
+    }
+
+    [Fact]
+    public async Task ASuspensionWithoutAChannel_StaysSuspended()
+    {
+        Suspend(_realProject, "earlier");
+
+        BridgeError error = await Fails();
+
+        Assert.Equal(ErrorReason.WritesSuspended, error.Reason);
+        Assert.Equal(2, SuspensionStore.For(_locations).All().Count);
+    }
+
+    [Fact]
+    public async Task ASuspendedScratchProject_NeedsTheConfirmationButNoApproval()
+    {
+        string scratch = Path.Combine(_locations.DefaultScratch, "Line1");
+        _bridge.Handlers[Plan] = _ => PlanFor(scratch);
+        Suspend(scratch, "earlier");
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+
+        await Run(dialog);
+
+        Assert.NotNull(Assert.Single(dialog.Questions).Release);
+        Assert.Single(_bridge.Writes);
+    }
+
+    [Fact]
+    public async Task AWriteThePolicyForbids_AsksNobodyAboutTheSuspension()
+    {
+        Suspend(_realProject, "earlier");
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+
+        BridgeError error = await Fails([dialog], OutsideScratchWrites.Deny);
+
+        Assert.Equal(ErrorReason.PolicyDenied, error.Reason);
+        Assert.Empty(dialog.Questions);
+    }
+
+    [Fact]
+    public async Task ProjectAndInstanceSuspendedByDifferentWrites_EachIsConfirmed()
+    {
+        DateTimeOffset start = SuspensionStore.StartOf(Environment.ProcessId)!.Value;
+        SuspensionStore store = SuspensionStore.For(_locations);
+        store.Suspend(Path.Combine(_locations.Root, "Projects", "Other"), Environment.ProcessId, start, Tool, "instance-write", _clock.Now, SuspensionReason.OutcomeUnknown, []);
+        store.Suspend(_realProject, 1, start, Tool, "project-write", _clock.Now, SuspensionReason.OutcomeUnknown, []);
+        var dialog = new FakeApprovalChannel("eplan_dialog", null) { Answers = q => q.Release?.RequestId == "instance-write" ? ApprovalDecision.Denied : ApprovalDecision.Granted };
 
         BridgeError error = await Fails(dialog);
 
         Assert.Equal(ErrorReason.WritesSuspended, error.Reason);
-        Assert.Empty(dialog.Questions);
+        Assert.Equal(["instance-write", "project-write"], dialog.Questions.Select(q => q.Release!.RequestId).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task AConfirmationThatCannotBeAudited_LiftsNothing()
+    {
+        Suspend(_realProject, "earlier");
+        File.WriteAllText(_locations.Audit, "a file where the audit directory should be");
+
+        BridgeError error = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted));
+
+        Assert.Equal(ErrorReason.AuditUnavailable, error.Reason);
+        Assert.Equal(2, SuspensionStore.For(_locations).All().Count);
     }
 
     [Fact]
@@ -166,14 +256,18 @@ public sealed class WriteApprovalTests : IDisposable
         Directory.CreateDirectory(_locations.Root);
         File.WriteAllText(_locations.Audit, "a file where the audit directory should be");
 
-        BridgeError granted = await Fails(new FakeChannel("eplan_dialog", ApprovalDecision.Granted));
-        BridgeError denied = await Fails(new FakeChannel("eplan_dialog", ApprovalDecision.Denied));
+        BridgeError granted = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted));
+        BridgeError denied = await Fails(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Denied));
 
         Assert.Equal((ErrorReason.AuditUnavailable, ErrorReason.ApprovalDenied), (granted.Reason, denied.Reason));
         Assert.Empty(_bridge.Writes);
     }
 
     private static string Text(JsonObject record, string name) => record[name]!.GetValue<string>();
+
+    /// <summary>Suspends the project and this EPLAN instance (the test process) after write <paramref name="requestId"/>.</summary>
+    private void Suspend(string project, string requestId) => SuspensionStore.For(_locations).Suspend(
+        project, Environment.ProcessId, SuspensionStore.StartOf(Environment.ProcessId)!.Value, Tool, requestId, _clock.Now, SuspensionReason.OutcomeUnknown, ["create page =A1&EFS1/5"]);
 
     private static WritePlan PlanFor(string projectPath) => new()
     {
@@ -185,12 +279,12 @@ public sealed class WriteApprovalTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(params IApprovalChannel[] channels) => Run(channels, dryRun: false);
 
-    private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun)
+    private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun, OutsideScratchWrites outside = OutsideScratchWrites.Approve)
     {
         var audit = new AuditLog(_locations.Audit, TimeProvider.System);
         var pipeline = new WritePipeline(
             _bridge,
-            new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Approve),
+            new HostConfig([_locations.DefaultScratch], outside),
             SuspensionStore.For(_locations),
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
@@ -201,44 +295,17 @@ public sealed class WriteApprovalTests : IDisposable
         return pipeline.RunAsync<object, object, JsonObject>(request, TestContext.Current.CancellationToken);
     }
 
-    private async Task<BridgeError> Fails(params IApprovalChannel[] channels)
+    private Task<BridgeError> Fails(params IApprovalChannel[] channels) => Fails(channels, OutsideScratchWrites.Approve);
+
+    private async Task<BridgeError> Fails(IApprovalChannel[] channels, OutsideScratchWrites outside)
     {
-        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => Run(channels))).Error;
+        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => Run(channels, dryRun: false, outside))).Error;
         Assert.True(ExecutionInvariants.Hold(error), $"{error.Reason}/{error.Execution}/{error.Retryable}");
         return error;
     }
 
     private List<JsonObject> AuditRecords() =>
         [.. Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())];
-
-    /// <summary>
-    /// Answers <paramref name="decision"/> for exactly the question asked (null: cannot ask), unless <see cref="Bind"/>
-    /// changes the binding; <see cref="Wait"/> runs while "the engineer thinks"; or fails with <see cref="Failure"/>.
-    /// </summary>
-    private sealed class FakeChannel(string name, ApprovalDecision? decision) : IApprovalChannel
-    {
-        public List<ApprovalQuestion> Questions { get; } = [];
-
-        public BridgeError? Failure { get; init; }
-
-        public Func<ApprovalAnswer, ApprovalAnswer> Bind { get; init; } = a => a;
-
-        public Action Wait { get; init; } = () => { };
-
-        public string Name => name;
-
-        public Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
-        {
-            Questions.Add(question);
-            if (Failure is not null)
-            {
-                throw new BridgeCallException(Failure);
-            }
-
-            Wait();
-            return Task.FromResult(decision is { } d ? Bind(new ApprovalAnswer(question.RequestId, question.Plan.Fingerprint, question.ArgumentsHash, d)) : null);
-        }
-    }
 
     private sealed class ManualClock(DateTimeOffset now) : TimeProvider
     {

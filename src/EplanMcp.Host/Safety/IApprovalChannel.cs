@@ -24,9 +24,11 @@ internal enum ApprovalDecision
 /// One question to the engineer: may <see cref="Tool"/> make the changes of <see cref="Plan"/> in <see cref="Plan"/>'s
 /// project? <see cref="RequestId"/> is the Host's ID of this write, never one a client gave; with the plan's
 /// fingerprint and <see cref="ArgumentsHash"/> it binds the answer to this call. <see cref="Changes"/>: the plan as one
-/// line per change. Unanswered at <see cref="Deadline"/>, the question has expired.
+/// line per change. Unanswered at <see cref="Deadline"/>, the question has expired. With <see cref="Release"/>, the
+/// question is instead whether the engineer has checked the project after that write of unknown outcome, so that its
+/// suspension may be lifted before this call goes on (ADR-0010 section 3); it is never merged with the approval.
 /// </summary>
-internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline);
+internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null);
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>
 internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, string ArgumentsHash, ApprovalDecision Decision);
