@@ -14,7 +14,7 @@ internal static class DoctorCommand
         {
             DoctorChecks.HostVersion(),
             DoctorChecks.DataDirectory(),
-            DoctorChecks.PackageIdentity(),
+            DoctorChecks.MsixEnvironment(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)),
         };
         checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
         checks.AddRange(DoctorChecks.RunningEplan());

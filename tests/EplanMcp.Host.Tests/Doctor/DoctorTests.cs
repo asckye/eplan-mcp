@@ -30,6 +30,19 @@ public sealed class DoctorTests
         Assert.Contains(length.ToString(CultureInfo.InvariantCulture), check.English, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(null, null, false, "not redirected")]
+    [InlineData(null, "Claude_pzs8sxrjxfjjc", true, "no package identity")]
+    [InlineData("Claude_1.0_x64__pzs8sxrjxfjjc", null, true, "identity Claude_1.0_x64__pzs8sxrjxfjjc")]
+    public void MsixEnvironment_ReportsRedirectionWithOrWithoutPackageIdentity(string? identity, string? package, bool redirected, string text)
+    {
+        // Spike S5: a Host the Claude desktop app starts has no package identity, yet its writes are redirected.
+        DoctorCheck check = DoctorChecks.MsixEnvironment(identity, package);
+
+        Assert.Equal(redirected ? DoctorStatus.Info : DoctorStatus.Ok, check.Status);
+        Assert.Contains(text, check.English, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Bridge_NoInstance_IsAFailureThatPointsAtThePerVariantRegistration()
     {
