@@ -24,13 +24,13 @@ internal sealed class UsageTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(ToolUsageResult))]
     [Description(
-        "Returns the detailed usage of one EplanMcp tool: complete argument examples, the typical call order with other tools, " +
-        "how to read the result fields, and what to do about each error reason. Use it when a tool's description leaves a question " +
-        "open. Works without EPLAN. Example: {\"tool\": \"eplan_project_list\", \"topic\": \"errors\"}.")]
+        "Returns the detailed usage of one EplanMcp tool: argument examples, the call order with other tools, the result fields " +
+        "and what to do about each error. Use it when a description leaves a question open. Works without EPLAN. Example: " +
+        "{\"tool\": \"eplan_project_list\", \"topic\": \"errors\"}.")]
     public static CallToolResult ToolUsage(
         // The enum lists every registered tool; ToolContractTests fails when it, the usage files and the tools differ.
-        [Description("The tool to explain.")][AllowedValues(SessionTools.StatusTool, SessionTools.SelectTool, ProjectTools.ListTool, ProjectTools.GetTool, PageTools.ListTool, PageTools.GetTool, PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceTools.ListTool, DeviceTools.GetTool, DeviceWriteTools.UpdateTool, ConnectionTools.ListTool, PartTools.ListTool, MessageTools.ListTool, CheckTools.ListTool, MacroTools.ListTool, MacroTools.GetTool, UsageTool)] string tool,
-        [Description("Return only this section; omit for all four.")]
+        [Description("The tool to explain.")][AllowedValues(SessionTools.StatusTool, SessionTools.SelectTool, ProjectTools.ListTool, ProjectTools.GetTool, PageTools.ListTool, PageTools.GetTool, PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceTools.ListTool, DeviceTools.GetTool, DeviceWriteTools.UpdateTool, ConnectionTools.ListTool, ConnectionWriteTools.GenerateTool, PartTools.ListTool, MessageTools.ListTool, CheckTools.ListTool, MacroTools.ListTool, MacroTools.GetTool, UsageTool)] string tool,
+        [Description("Only this section; omit for all.")]
         [AllowedValues(ToolUsageCatalog.Examples, ToolUsageCatalog.Workflow, ToolUsageCatalog.Fields, ToolUsageCatalog.Errors)]
         string? topic = null)
     {

@@ -79,6 +79,10 @@ internal static class ApprovalTexts
         return change.Action switch
         {
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
+            // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
+            _ when change.Property == "connections" => zh
+                ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
+                : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
             _ => zh
                 ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
                 : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
