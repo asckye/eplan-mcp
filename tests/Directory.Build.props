@@ -22,5 +22,8 @@
     <!-- xUnit v3 runs on Microsoft.Testing.Platform (selected in global.json); no VSTest adapter needed. -->
     <PackageReference Include="xunit.v3" />
     <Using Include="Xunit" />
+    <!-- Names a hung test in CI (EPLANMCP_HANG_REPORT_DIR); see the file. -->
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/HangWatch.cs" Link="Shared/HangWatch.cs" />
+    <TestingPlatformBuilderHook Include="5D0F3A9E-6C1B-4E57-9B2A-0F4C8E7D1A63" DisplayName="Hang watch" TypeFullName="EplanMcp.Tests.HangWatch" />
   </ItemGroup>
 </Project>
