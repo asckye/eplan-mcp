@@ -78,6 +78,8 @@ internal static class ApprovalTexts
         string name = Value(change.Name, zh);
         return change.Action switch
         {
+            // A macro's change names the page; what goes there is its value (macro.insert.plan).
+            "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
             // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
             _ when change.Property == "connections" => zh
