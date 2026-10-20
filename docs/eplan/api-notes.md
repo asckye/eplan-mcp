@@ -159,6 +159,17 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A15. 写操作中断（spike S8，2026-10-20，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S8](../../spikes/S8-write-interruption/README.md)。
+- 🔴 **`SafetyPoint` 不防进程死亡**：EPLAN 每做一步修改就写入项目数据库，回滚只在进程活着时发生。20 页的写入做到第 5 页、尚未提交时用 `taskkill /F` 结束 EPLAN，重启后这 5 页都在；已提交的修改当然也都在。— S8 r3。
+  - 对本项目的影响：写操作被中断后，项目可能处于"做了一半"的状态。ADR-0010 中的 B3（把崩溃变成确定的结果）不可行；`OUTCOME_UNKNOWN`、暂停写入、人工核实是唯一正确的处理。撤销历史随进程消失，解除暂停的提示不能建议 Ctrl+Z（M3 设计 4.6 已修改）。
+- 🔴 **调度的委托中发生原生访问冲突，EPLAN 进程直接结束**：`AccessViolationException`（损坏状态异常）不会被委托中的 `try/catch` 捕获，WPF 调度器也不处理。事务中已做的修改同样留在项目里。同样的错误在 action 中不会结束 EPLAN（A11）。— S8 r3。
+  - 对本项目的影响：编码规范 9.5 第 15 条没有兜底，必须遵守。
+- **重开被结束时开着的项目，EPLAN 弹出"检查相容性"**："未按照规定关闭项目 '…'"，选项"是"（打开并检查数据）、"否"（不打开，随后通知"无法打开项目"）、"以后"（打开，下次再检查）。用 Remote Client 执行 `ProjectOpen /Quiet` 时也会弹出，并挡住之后所有的远程调用。— S8 r1–r3，UI Automation 读出。
+- **EPLAN 启动时自动重开上次开着的项目**，所以被结束时开着的项目在下次启动时就会弹出上面的对话框。— S8 r1。
+- **被结束的会话在 `EplLog.eldb` 的 `TSysSession_v100` 中没有结束时间**，正常退出的会话有；`TSysMsg_v100` 中没有关于中断的记录。— S8。
+- 用 UI Automation 访问 EPLAN 的窗口时，如果 EPLAN 的界面线程正忙（例如主线程上正在执行写入），调用会一直等到它空闲。— S8 r2。
+
 ### A14. 在 Bridge 调度器中写入（spike S10，2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 探针在 action 返回之后经 `Dispatcher.Invoke` 在主线程上执行，与 Bridge 相同；写入的包装是 `SafetyPoint` → 其中的 `UndoStep` → `QuietModeStep`。详细数据见 [spike S10](../../spikes/S10-dispatcher-writes/README.md)。
 - **插入宏的编号方式**（`Insert.WindowMacro(…, NumerationMode)`）：
