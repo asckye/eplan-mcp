@@ -160,7 +160,6 @@ flowchart TB
 | `ToolHandlers` | 每个工具一个处理器：校验参数 → 询问策略 → 调用 Bridge → 整形结果 |
 | `PolicyEngine` | 纯函数：输入（工具级别、目标项目、是否在 scratch 中、配置），输出（允许 / 需要审批 / 拒绝 + 原因）。见 [ADR-0005](../adr/0005-safety-model.md) |
 | `ApprovalService` | 只经工程师独立操作的窗口，按优先级选择：**Workbench 审批队列**（M5，Workbench 正在运行时）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝。不用 MCP elicitation。在 Host 中等待决定，期限默认 120 秒（60–300 秒可配置），客户端提供了进度令牌时每 15 秒发一次进度通知（[ADR-0011](../adr/0011-approval-out-of-band.md)） |
-| `PendingPlanStore` | 保存等待审批的变更计划，以高熵随机 ID 引用，带过期时间。交给客户端的 `requestState` 使用 HMAC 签名，防止被篡改或重放 |
 | `AuditLog` | 每次调用写一条 JSONL 记录，每条记录带上一条的哈希，形成哈希链 |
 | `ResultShaper` | 统一处理分页、截断、`response_format`（concise / detailed）、不可信内容标记，以及 token 预算（默认不超过 5k，硬上限 20k，低于 Claude Code 的 25k 限制） |
 | `BridgeClient` | 发现 EPLAN 实例；建立管道连接并握手；**每个 EPLAN 实例一个串行队列**；超时与取消 |
