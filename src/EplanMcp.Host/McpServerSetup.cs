@@ -1,3 +1,4 @@
+using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
@@ -23,6 +24,11 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<PendingPlanStore>();
+
+        // serve registers the configuration it loaded; tests get the defaults, never a developer's own file.
+        services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
+        services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>()));
+        services.TryAddSingleton<WritePipeline>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).

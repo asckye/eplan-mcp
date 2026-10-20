@@ -6,6 +6,15 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class WritePlan
 {
+    /// <summary>The name of the project the plan is for.</summary>
+    public string Project { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The project's full path as EPLAN has it open, without extension: the Host decides on it whether the project is
+    /// in scratch and whether its writes are suspended.
+    /// </summary>
+    public string ProjectPath { get; set; } = string.Empty;
+
     /// <summary>Every change, in the order it would be made. Empty when there is nothing to do.</summary>
     public List<PlannedChange> Changes { get; set; } = [];
 

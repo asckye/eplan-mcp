@@ -52,12 +52,12 @@ M2 交付了 13 个只读工具，评测和 Large 测试都已通过。M3 的范
 ```mermaid
 flowchart TD
     A[tools/call] --> B[校验参数<br/>project 必须显式给出]
-    B --> C{项目或实例的写入<br/>已暂停?}
-    C -- 是 --> C1[确认解除 / WRITES_SUSPENDED]
-    C -- 否 --> D[Bridge: *.plan<br/>变更清单 + 状态指纹]
-    D --> E{dry_run?}
+    B --> D[Bridge: *.plan<br/>变更清单 + 状态指纹 + 项目路径]
+    D --> E{dry_run 或<br/>没有变更?}
     E -- 是 --> E1[返回变更清单<br/>execution = not_started]
-    E -- 否 --> F{策略}
+    E -- 否 --> C{项目或实例的写入<br/>已暂停?}
+    C -- 是 --> C1[确认解除 / WRITES_SUSPENDED]
+    C -- 否 --> F{策略}
     F -- scratch --> H
     F -- 真实项目 --> G[审批：elicitation<br/>→ EPLAN 对话框 → 拒绝]
     G -- 批准 --> H[审计：开始执行]
