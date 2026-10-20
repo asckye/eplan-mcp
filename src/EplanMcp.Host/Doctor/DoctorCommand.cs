@@ -10,10 +10,12 @@ internal static class DoctorCommand
 {
     public static async Task<int> RunAsync(TextWriter output, CultureInfo culture, CancellationToken cancellationToken)
     {
+        HostDataLocations locations = HostDataLocations.FromEnvironment();
         var checks = new List<DoctorCheck>
         {
             DoctorChecks.HostVersion(),
-            DoctorChecks.DataDirectory(),
+            DoctorChecks.DataDirectory(locations),
+            DoctorChecks.Configuration(locations),
             DoctorChecks.MsixEnvironment(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)),
         };
         checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
