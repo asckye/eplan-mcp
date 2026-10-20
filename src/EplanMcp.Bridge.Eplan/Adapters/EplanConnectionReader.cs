@@ -78,7 +78,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
     /// cannot give it: the Page getter throws BaseException on failure (EPLAN XML docs), and one such connection must not
     /// fail the whole listing.
     /// </summary>
-    private static Page? PageOf(Connection connection)
+    internal static Page? PageOf(Connection connection)
     {
         if (connection is Connection3D)
         {
@@ -99,7 +99,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
     /// A Connection3D throws NotSupportedException on StartPin and EndPin and has no page (S6), so only its properties are
     /// read. StartPin and EndPin are null on a side that is not connected (EPLAN XML docs).
     /// </summary>
-    private static ConnectionRecord Record(Connection connection, TextLanguage language)
+    internal static ConnectionRecord Record(Connection connection, TextLanguage language)
     {
         var record = new ConnectionRecord
         {

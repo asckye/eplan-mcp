@@ -53,6 +53,7 @@ internal static class BridgeHost
         var transactions = new EplanTransactions();
         var descriptions = new EplanPageDescriptions();
         var renamer = new EplanDeviceRenamer();
+        var generator = new EplanConnectionGenerator();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -74,6 +75,8 @@ internal static class BridgeHost
             new PageUpdateExecuteOperation(catalog, pages, descriptions, transactions),
             new DeviceUpdatePlanOperation(catalog, devices, renamer),
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions),
+            new ConnectionGeneratePlanOperation(catalog, pages, generator),
+            new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
