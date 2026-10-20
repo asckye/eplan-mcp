@@ -57,6 +57,7 @@ internal static class BridgeHost
         var inserter = new EplanMacroInserter();
         var messages = new EplanProjectMessageReader();
         var checker = new EplanCheckRunner();
+        var reports = new EplanReportUpdater();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -84,6 +85,8 @@ internal static class BridgeHost
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
             new CheckRunPlanOperation(catalog, pages, checker, messages),
             new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
+            new ReportUpdatePlanOperation(catalog, pages, reports),
+            new ReportUpdateExecuteOperation(catalog, pages, reports, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
