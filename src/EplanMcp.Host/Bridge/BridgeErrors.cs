@@ -25,12 +25,14 @@ internal static class BridgeErrors
         Message = "The connection to EPLAN was interrupted. The add-in reports that the write failed and was rolled back, so the project is unchanged.",
     };
 
-    public static BridgeError NotStartedAfterInterruption(string? reason) => new()
-    {
-        Reason = reason ?? ErrorReason.EplanBusy,
-        Message = "The connection to EPLAN was interrupted. The add-in reports that the write did not start, so nothing was changed. Call again when EPLAN is free.",
-        Retryable = true,
-    };
+    public static BridgeError NotStartedAfterInterruption(string? reason) => reason == ErrorReason.BackupFailed
+        ? new() { Reason = reason, Message = "The connection to EPLAN was interrupted. The add-in reports that the write did not start because the project could not be backed up first, so nothing was changed. Ask the engineer to check the free disk space, or to run 'eplanmcp doctor'." }
+        : new()
+        {
+            Reason = reason ?? ErrorReason.EplanBusy,
+            Message = "The connection to EPLAN was interrupted. The add-in reports that the write did not start, so nothing was changed. Call again when EPLAN is free.",
+            Retryable = true,
+        };
 
     /// <summary>
     /// The client cancelled a write before it committed (M4 design 4.3). A cancelled request gets no reply, so only the

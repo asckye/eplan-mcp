@@ -57,6 +57,7 @@ public sealed class PageCreateInteropTests : IAsyncDisposable
             audit,
             new DanglingWrites(_client, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
             new ApprovalService([], HostConfig.Defaults(_locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new BackupFolders(_locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
     }

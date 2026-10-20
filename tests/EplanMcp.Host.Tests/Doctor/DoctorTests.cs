@@ -97,6 +97,17 @@ public sealed class DoctorTests
     }
 
     [Fact]
+    public void Backups_NoneYet_IsOnlyInformation()
+    {
+        var locations = new HostDataLocations(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+
+        DoctorCheck check = DoctorChecks.Backups(locations);
+
+        Assert.Equal(DoctorStatus.Info, check.Status);
+        Assert.Contains("No backups yet", check.English, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EplanInstallations_NothingInstalled_IsAFailure()
     {
         DoctorCheck check = Assert.Single(DoctorChecks.EplanInstallations(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))));

@@ -26,11 +26,12 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
 
     /// <summary>
     /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> and returns the decision, reporting the
-    /// wait to <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). Throws
+    /// wait to <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). <paramref name="backupFolder"/>: where a
+    /// Destructive write backs the project up first, which the dialog names; null for other writes. Throws
     /// <see cref="Bridge.BridgeCallException"/> when a channel failed to ask; nothing has run then.
     /// </summary>
-    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout), progress, cancellationToken);
+    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, string? backupFolder, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout, BackupFolder: backupFolder), progress, cancellationToken);
 
     /// <summary>
     /// Asks, before write <paramref name="requestId"/> goes on, whether the engineer has checked the project after the

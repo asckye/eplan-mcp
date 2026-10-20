@@ -32,9 +32,9 @@ internal static class ApprovalTexts
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
             Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details))],
-            Note = zh
+            Note = Backup(question.BackupFolder, zh) + (zh
                 ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {question.Tool}”这一步。"
-                : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {question.Tool}\".",
+                : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {question.Tool}\"."),
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
             CountdownFormat = zh ? "{0} 后自动拒绝" : "Rejected automatically in {0}",
@@ -107,6 +107,13 @@ internal static class ApprovalTexts
             ? $"运行检查：{pages} 页（{(scheme is null ? "EPLAN 当前的方案" : "方案：" + scheme)}），替换现有的 {existing} 条检查消息"
             : $"Run the check on {pages} pages ({(scheme is null ? "EPLAN's current scheme" : "scheme: " + scheme)}), replacing the {existing} existing check messages";
     }
+
+    /// <summary>For a Destructive write: where the whole project is copied before the change (ADR-0013); else nothing.</summary>
+    private static string Backup(string? folder, bool zh) => folder is null
+        ? string.Empty
+        : zh
+            ? $"执行前会先把整个项目备份到 {Value(folder, zh)}\\ 下的新文件夹。"
+            : $"Before the change, the whole project is backed up to a new folder in {Value(folder, zh)}\\. ";
 
     private static string Quoted(string? value, bool zh) => value is null ? (zh ? "（未设置）" : "(not set)") : "'" + Value(value, zh) + "'";
 

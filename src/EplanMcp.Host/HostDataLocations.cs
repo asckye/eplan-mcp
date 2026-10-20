@@ -22,6 +22,9 @@ internal sealed class HostDataLocations(string root)
     /// <summary>The export root: one new folder per export below it, never configurable (SEC-20, M4 design Q8).</summary>
     public string Exports => Path.Combine(Root, "exports");
 
+    /// <summary>The copies made before Destructive writes (ADR-0013); never deleted by EplanMcp.</summary>
+    public string Backups => Path.Combine(Root, "backups");
+
     public static HostDataLocations FromEnvironment() => new(
         Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
             ? home

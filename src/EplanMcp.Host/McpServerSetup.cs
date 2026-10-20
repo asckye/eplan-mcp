@@ -33,6 +33,7 @@ internal static class McpServerSetup
         // Approval channels are registered in the order they are tried (ADR-0005 section 3); with none, approvals are refused.
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IApprovalChannel, EplanDialogChannel>());
         services.TryAddSingleton<ApprovalService>();
+        services.TryAddSingleton<BackupFolders>();
         services.TryAddSingleton<WritePipeline>();
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();

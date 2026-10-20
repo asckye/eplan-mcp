@@ -27,8 +27,9 @@ internal enum ApprovalDecision
 /// line per change. Unanswered at <see cref="Deadline"/>, the question has expired. With <see cref="Release"/>, the
 /// question is instead whether the engineer has checked the project after that write of unknown outcome, so that its
 /// suspension may be lifted before this call goes on (ADR-0010 section 3); it is never merged with the approval.
+/// <see cref="BackupFolder"/>: for a Destructive write, the folder its backup goes into first (ADR-0013).
 /// </summary>
-internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null);
+internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null, string? BackupFolder = null);
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>
 internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, string ArgumentsHash, ApprovalDecision Decision);
