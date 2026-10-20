@@ -72,7 +72,7 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     }
 
     [Fact]
-    public async Task PagesAlreadyUpToDate_AreCommittedWithAHint()
+    public async Task PagesAlreadyUpToDate_AreCommittedWithAHintAndNothingToUndo()
     {
         _harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _ => Data(new ConnectionGeneratePage { Page = FullPage, Before = 40, After = 40 });
 
@@ -81,7 +81,8 @@ public sealed class ConnectionGenerateToolTests : IDisposable
         JsonElement data = WriteToolHarness.Structured(result);
         Assert.Equal("committed", data.GetProperty("execution").GetString());
         Assert.Contains("up to date", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
-        Assert.Equal("Generated connections on 1 page: 0 added, 0 removed; Ctrl+Z in EPLAN undoes this step.", WriteToolHarness.Text(result, 0));
+        Assert.Equal(JsonValueKind.Null, data.GetProperty("undo").ValueKind);
+        Assert.Equal("Generated connections on 1 page: nothing added or removed, so there is nothing to undo.", WriteToolHarness.Text(result, 0));
     }
 
     [Fact]
