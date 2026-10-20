@@ -358,6 +358,10 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new DeviceRenumberData(),
+        new PageRenumberArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/90"], Start = 200, Step = 10, KeepText = true, Subpages = "to_main", Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 31 } },
+        new PageRenumberArgs(),
+        new PageRenumberData { Project = "项目 二", Changed = [new RenamedObject { From = "=GAA+A1&EFS1/90", To = "=GAA+A1&EFS1/200" }], Unchanged = 1, Warning = "w" },
+        new PageRenumberData(),
     ];
 
     [Theory]
