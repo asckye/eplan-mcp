@@ -9,7 +9,8 @@ namespace EplanMcp.Bridge.Core.Server;
 
 /// <summary>
 /// Serves one Host connection: reads frames, answers <c>handshake</c> and <c>invoke</c>, writes responses.
-/// Requests on one connection are handled one at a time, in order. Owned by a single listener task.
+/// Requests on one connection are handled one at a time, in order; while one runs, the listener sends its progress
+/// notifications and reads nothing. Owned by a single listener task.
 /// </summary>
 internal sealed class BridgeConnection
 {
@@ -50,7 +51,16 @@ internal sealed class BridgeConnection
                 return;
             }
 
-            JObject? response = Handle(frame);
+            JObject? response;
+            try
+            {
+                response = await HandleAsync(frame, stream, cancellationToken).ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                return; // the Host went away during the invoke, which still finishes and records its outcome
+            }
+
             if (response is not null)
             {
                 try
@@ -65,8 +75,38 @@ internal sealed class BridgeConnection
         }
     }
 
+    /// <summary>
+    /// Handles one frame off the listener task, sending the invoke's progress meanwhile, at most one notification per
+    /// <see cref="BridgeServerOptions.ProgressInterval"/>: the pipe side sends, and the main thread never waits for the
+    /// pipe (M4 design 4.3). A report still pending when the response is ready is dropped, as nothing about an invoke
+    /// follows its response.
+    /// </summary>
+    private async Task<JObject?> HandleAsync(byte[] frame, Stream stream, CancellationToken cancellationToken)
+    {
+        var progress = new ProgressSlot();
+        Task<JObject?> handling = Task.Run(() => Handle(frame, progress), CancellationToken.None);
+        while (await Task.WhenAny(handling, progress.Changed).ConfigureAwait(false) != handling)
+        {
+            if (progress.Take() is { } report)
+            {
+                var notification = new JObject
+                {
+                    ["jsonrpc"] = "2.0",
+                    ["method"] = BridgeProtocol.ProgressMethod,
+                    ["params"] = BridgeJson.FromObject(report),
+                };
+                await Framing.WriteFrameAsync(stream, BridgeJson.ToUtf8(notification), cancellationToken).ConfigureAwait(false);
+                await Task.WhenAny(handling, Task.Delay(_options.ProgressInterval, cancellationToken)).ConfigureAwait(false);
+            }
+        }
+
+        return await handling.ConfigureAwait(false);
+    }
+
     /// <summary>Handles one frame; returns the response, or null for a notification. Never throws.</summary>
-    internal JObject? Handle(byte[] frame)
+    internal JObject? Handle(byte[] frame) => Handle(frame, null);
+
+    private JObject? Handle(byte[] frame, ProgressSlot? progress)
     {
         JObject request;
         try
@@ -90,7 +130,7 @@ internal sealed class BridgeConnection
             JToken? parameters = request["params"];
             if (id is null)
             {
-                // Notifications (cancel, reserved for M4) have no response.
+                // The Host sends none (it cancels with operation.cancel, M4 design 4.3); notifications get no response.
                 _log.Write(BridgeLogLevel.Debug, "Ignoring notification " + method);
                 return null;
             }
@@ -98,7 +138,7 @@ internal sealed class BridgeConnection
             JToken result = method switch
             {
                 BridgeProtocol.HandshakeMethod => Handshake(parameters),
-                BridgeProtocol.InvokeMethod => Invoke(parameters),
+                BridgeProtocol.InvokeMethod => Invoke(parameters, progress),
                 _ => throw new RpcException(RpcException.MethodNotFound, $"Method '{method}' not found."),
             };
             return new JObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = result };
@@ -153,7 +193,7 @@ internal sealed class BridgeConnection
         });
     }
 
-    private JObject Invoke(JToken? parameters)
+    private JObject Invoke(JToken? parameters, ProgressSlot? progress)
     {
         if (!_handshaken)
         {
@@ -171,7 +211,7 @@ internal sealed class BridgeConnection
             { Type: JTokenType.String } id => (string)id!,
             _ => throw new RpcException(RpcException.InvalidParams, "invoke correlationId must be a string."),
         };
-        JToken data = _router.Invoke((string)envelope["operation"]!, envelope["args"], correlationId);
+        JToken data = _router.Invoke((string)envelope["operation"]!, envelope["args"], correlationId, progress);
         return new JObject { ["data"] = data };
     }
 
