@@ -50,4 +50,11 @@ public static class OperationNames
     /// runs a check. Arguments: <see cref="CheckListArgs"/>; data: <see cref="CheckListData"/>.
     /// </summary>
     public const string CheckList = "check.list";
+
+    /// <summary>
+    /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
+    /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
+    /// <see cref="OutcomeGetData"/>.
+    /// </summary>
+    public const string OutcomeGet = "outcome.get";
 }
