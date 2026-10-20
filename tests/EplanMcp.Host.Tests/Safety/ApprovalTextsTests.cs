@@ -88,6 +88,34 @@ public sealed class ApprovalTextsTests
         Assert.Equal((6, total), (texts.Changes.Count, texts.Changes[^1]));
     }
 
+    [Theory]
+    [InlineData("zh-CN", "重新编号：device tags containing '?' on 1 page (51 devices), scheme: EPLAN default, start 1, step 1", "要编号的设备：", "……共 51 个设备")]
+    [InlineData("en-US", "Renumber device tags containing '?' on 1 page (51 devices), scheme: EPLAN default, start 1, step 1", "Devices to number:", "… 51 devices in all")]
+    public void ADeviceRenumbering_ListsTheDevicesToNumberAfterTheScope(string culture, string change, string heading, string total)
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "update", Kind = "devices", Name = "Line1", Property = "device tags", OldValue = "device tags containing '?' on 1 page (51 devices), scheme: EPLAN default, start 1, step 1" }],
+            Details = new Dictionary<string, string> { ["devices"] = "=GAA+A1-?QA1\n+A1-?XG1", ["deviceCount"] = "51" },
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo(culture));
+
+        Assert.Equal([change, string.Empty, heading, "=GAA+A1-?QA1", "+A1-?XG1", total], texts.Changes);
+    }
+
+    [Fact]
+    public void AMacroInsertsDevices_AreNotListedAsDevicesToNumber()
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "create", Kind = "macro", Name = "=A/1", NewValue = "m.ema" }],
+            Details = new Dictionary<string, string> { ["devices"] = "+-WG6\t-WG6\tCable", ["deviceCount"] = "1" },
+        };
+
+        Assert.Single(ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo("en-US")).Changes);
+    }
+
     [Fact]
     public void APlanWithoutDevicesLeftBehind_HasNoSuchSection()
     {

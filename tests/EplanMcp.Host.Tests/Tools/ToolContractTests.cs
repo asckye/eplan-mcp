@@ -36,7 +36,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ExportTools.PdfTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageWriteTools.UpdateTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, ReportWriteTools.UpdateTool, SessionTools.SelectTool, SessionTools.StatusTool, UsageTools.UsageTool],
+            [CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ExportTools.PdfTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageWriteTools.UpdateTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, ReportWriteTools.UpdateTool, SessionTools.SelectTool, SessionTools.StatusTool, UsageTools.UsageTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 

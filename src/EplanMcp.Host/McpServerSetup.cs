@@ -53,6 +53,7 @@ internal static class McpServerSetup
             .WithTools<PageDestructiveTools>(HostJson.Options)
             .WithTools<DeviceTools>(HostJson.Options)
             .WithTools<DeviceWriteTools>(HostJson.Options)
+            .WithTools<DeviceDestructiveTools>(HostJson.Options)
             .WithTools<ConnectionTools>(HostJson.Options)
             .WithTools<ConnectionWriteTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)

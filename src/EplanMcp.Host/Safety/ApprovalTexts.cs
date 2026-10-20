@@ -31,7 +31,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + (zh
                 ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {question.Tool}”这一步。"
                 : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {question.Tool}\"."),
@@ -83,6 +83,8 @@ internal static class ApprovalTexts
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
             "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
             // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
+            // Only EPLAN's numbering rules give the new tags (eplan_device_renumber, tool spec 5): the scope, worded by the Bridge.
+            _ when change.Property == "device tags" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
             _ when change.Property == "connections" => zh
                 ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
                 : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
@@ -133,6 +135,31 @@ internal static class ApprovalTexts
         }
 
         if (plan.Details.GetValueOrDefault("orphanedCount") is { } total && total != devices.Length.ToString(CultureInfo.InvariantCulture))
+        {
+            yield return zh ? $"……共 {total} 个设备" : $"… {total} devices in all";
+        }
+    }
+
+    /// <summary>
+    /// After the change list of a device renumbering, the devices EPLAN is to number (device.renumber.plan's
+    /// <c>devices</c> details, at most 50, and <c>deviceCount</c>); nothing for other plans.
+    /// </summary>
+    private static IEnumerable<string> ToNumber(WritePlan plan, bool zh)
+    {
+        if (!plan.Changes.Any(c => c.Property == "device tags") || plan.Details?.GetValueOrDefault("devices") is not { Length: > 0 } lines)
+        {
+            yield break;
+        }
+
+        yield return string.Empty;
+        yield return zh ? "要编号的设备：" : "Devices to number:";
+        string[] devices = lines.Split('\n');
+        foreach (string device in devices)
+        {
+            yield return Value(device, zh);
+        }
+
+        if (plan.Details.GetValueOrDefault("deviceCount") is { } total && total != devices.Length.ToString(CultureInfo.InvariantCulture))
         {
             yield return zh ? $"……共 {total} 个设备" : $"… {total} devices in all";
         }
