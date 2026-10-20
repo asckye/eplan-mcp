@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 11 步；依赖第 10 步的 Destructive 流水线，见第 6 节） |
+| 状态 | Proposed（M4 第 11 步；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把 `=GAA+A1&EFS1/60` 和 `/61` 删掉"。代理给出完整页名，一次调用删除 1–50 页：每次都要工程师审批（scratch 中也一样），执行前自动备份整个项目，删除后在 EPLAN 中按一次 Ctrl+Z 就能全部恢复。删页会让其他页上的辅助功能失去主功能（S12，A18），变更清单和结果都列出这些设备；报表不随之更新，要再调用 `eplan_report_update`。删页不常用，又是 Destructive，所以放在 `full` Profile。
@@ -65,7 +65,7 @@
 - **规划**（只读）：
   - 精确解析每一页，读出页类型、页上的功能数，算出受影响的设备；
   - 每页一条 `delete` 变更：`Kind = "page"`，`OldValue` 为页类型和功能数。表单显示为 `delete page =GAA+A1&EFS1/1 (Circuit, 59 functions)`，`ChangeLines` 要补上 `delete` 分支；
-  - 受影响的设备放在计划的 `details["orphaned"]` 中，每行一个，如 `+A1-WE1: 6 functions on =GAA+A1&EFS1/2`（最多 50 行，另加总数），审批对话框在变更清单之后单独列出，标题"删除后这些设备在其他页上的功能将失去主功能"；
+  - 受影响的设备放在计划的 `details["orphaned"]` 中，每行一个，字段以制表符分隔：标识、留下的功能数、所在页（最多 50 行；总数在 `details["orphanedCount"]`）；`details["pages"]` 同样列出各页的页名、类型和功能数。审批对话框在变更清单之后单独列出这些设备，标题"删除后这些设备在其他页上的功能将失去主功能"，每行如 `+A1-WE1: 6 functions on =GAA+A1&EFS1/2`；
   - 指纹包括两部分，排序后取 SHA-256：被删各页及其上全部对象的会话内标识；受影响设备在其他页上的功能的会话内标识。
 - **执行**：Destructive 流水线（第 6 节）先重算指纹、做好备份，然后在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中：
   1. 逐页 `Page.Remove()`；

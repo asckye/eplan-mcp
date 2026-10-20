@@ -31,7 +31,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details))],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + (zh
                 ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {question.Tool}”这一步。"
                 : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {question.Tool}\"."),
@@ -81,6 +81,7 @@ internal static class ApprovalTexts
             // A macro's change names the page; what goes there is its value (macro.insert.plan).
             "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
+            "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
             // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
             _ when change.Property == "connections" => zh
                 ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
@@ -106,6 +107,35 @@ internal static class ApprovalTexts
         return zh
             ? $"运行检查：{pages} 页（{(scheme is null ? "EPLAN 当前的方案" : "方案：" + scheme)}），替换现有的 {existing} 条检查消息"
             : $"Run the check on {pages} pages ({(scheme is null ? "EPLAN's current scheme" : "scheme: " + scheme)}), replacing the {existing} existing check messages";
+    }
+
+    /// <summary>
+    /// After the change list, the devices a page deletion leaves without their main function (page.delete.plan's
+    /// <c>orphaned</c> details: tag, functions left, pages, tab-separated), under their own heading (tool spec
+    /// eplan_page_delete, section 5); nothing for other plans.
+    /// </summary>
+    private static IEnumerable<string> Orphaned(WritePlan plan, bool zh)
+    {
+        if (plan.Details?.GetValueOrDefault("orphaned") is not { Length: > 0 } lines)
+        {
+            yield break;
+        }
+
+        yield return string.Empty;
+        yield return zh ? "删除后这些设备在其他页上的功能将失去主功能：" : "After the deletion, these devices keep functions on other pages without their main function:";
+        string[] devices = lines.Split('\n');
+        foreach (string[] fields in devices.Select(line => line.Split('\t')))
+        {
+            string tag = Value(fields[0], zh);
+            string left = fields.Length > 1 ? fields[1] : "?";
+            string pages = Value(string.Join(zh ? "、" : ", ", fields.Skip(2)), zh);
+            yield return zh ? $"{tag}：{pages} 上的 {left} 个功能" : $"{tag}: {left} functions on {pages}";
+        }
+
+        if (plan.Details.GetValueOrDefault("orphanedCount") is { } total && total != devices.Length.ToString(CultureInfo.InvariantCulture))
+        {
+            yield return zh ? $"……共 {total} 个设备" : $"… {total} devices in all";
+        }
     }
 
     /// <summary>For a Destructive write: where the whole project is copied before the change (ADR-0013); else nothing.</summary>

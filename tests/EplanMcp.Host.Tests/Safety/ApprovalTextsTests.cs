@@ -66,6 +66,37 @@ public sealed class ApprovalTextsTests
     }
 
     [Theory]
+    [InlineData("zh-CN", "删除页 =GAA+A1&EFS1/1（Circuit, 59 functions）", "删除后这些设备在其他页上的功能将失去主功能：", "+A1-WE1：=GAA+A1&EFS1/2、=GAA+A1&EFS1/3 上的 6 个功能", "……共 51 个设备")]
+    [InlineData("en-US", "Delete page =GAA+A1&EFS1/1 (Circuit, 59 functions)", "After the deletion, these devices keep functions on other pages without their main function:", "+A1-WE1: 6 functions on =GAA+A1&EFS1/2, =GAA+A1&EFS1/3", "… 51 devices in all")]
+    public void APageDeletion_ListsTheDevicesLeftWithoutTheirMainFunctionAfterTheChanges(string culture, string change, string heading, string device, string total)
+    {
+        WritePlan plan = new()
+        {
+            Project = "Line1",
+            ProjectPath = @"D:\Projects\Line1",
+            Changes = [new PlannedChange { Action = "delete", Kind = "page", Name = "=GAA+A1&EFS1/1", OldValue = "Circuit, 59 functions" }],
+            Details = new Dictionary<string, string>
+            {
+                ["orphaned"] = "+A1-WE1\t6\t=GAA+A1&EFS1/2\t=GAA+A1&EFS1/3\n+A2-WE1\t1\t=GAA+A1&EFS1/2",
+                ["orphanedCount"] = "51",
+            },
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo(culture));
+
+        Assert.Equal([change, string.Empty, heading, device], texts.Changes.Take(4));
+        Assert.Equal((6, total), (texts.Changes.Count, texts.Changes[^1]));
+    }
+
+    [Fact]
+    public void APlanWithoutDevicesLeftBehind_HasNoSuchSection()
+    {
+        WritePlan plan = new() { Changes = [new PlannedChange { Action = "delete", Kind = "page", Name = "=A/1" }], Details = new Dictionary<string, string> { ["orphaned"] = string.Empty, ["orphanedCount"] = "0" } };
+
+        Assert.Equal(["Delete page =A/1"], ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo("en-US")).Changes);
+    }
+
+    [Theory]
     [InlineData(true, "在页 =GAA+A1&EFS1/60 上插入宏：Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
     [InlineData(false, "Insert a macro on page =GAA+A1&EFS1/60: Contactor_Feedback_Control.ema at (40, 280), numbering number, 8 devices")]
     public void AMacroInsert_ShowsWhatGoesWhere(bool zh, string line)
