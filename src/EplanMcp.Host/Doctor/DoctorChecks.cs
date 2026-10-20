@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Safety;
 using Microsoft.Win32;
 
 namespace EplanMcp.Host.Doctor;
@@ -18,14 +19,32 @@ internal static class DoctorChecks
     public static DoctorCheck HostVersion() =>
         new(DoctorStatus.Info, $"eplanmcp {HostInfo.Version}", $"eplanmcp {HostInfo.Version}");
 
-    public static DoctorCheck DataDirectory()
+    public static DoctorCheck DataDirectory(HostDataLocations locations)
     {
-        string root = Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
-            ? home
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp");
+        string root = locations.Root;
         return Directory.Exists(root)
             ? new(DoctorStatus.Ok, $"数据目录：{root}", $"Data directory: {root}")
             : new(DoctorStatus.Info, $"数据目录尚未创建：{root}（首次需要时创建）", $"Data directory not created yet: {root} (created when first needed)");
+    }
+
+    /// <summary>The safety settings serve will use, or why it refuses to start (architecture 8.9).</summary>
+    public static DoctorCheck Configuration(HostDataLocations locations)
+    {
+        (HostConfig? config, string? problem) = HostConfig.Load(locations);
+        if (config is null)
+        {
+            return new(DoctorStatus.Failure,
+                $"配置文件 {locations.ConfigFile} 无效，serve 不会启动：{problem}",
+                $"Configuration {locations.ConfigFile} {problem}; serve will not start");
+        }
+
+        string source = File.Exists(locations.ConfigFile) ? locations.ConfigFile : "默认值";
+        string sourceEn = File.Exists(locations.ConfigFile) ? locations.ConfigFile : "defaults";
+        string roots = string.Join("; ", config.ScratchRoots);
+        (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
+        return new(DoctorStatus.Ok,
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}");
     }
 
     /// <summary>
