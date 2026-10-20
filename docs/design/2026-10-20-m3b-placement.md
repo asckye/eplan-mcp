@@ -56,7 +56,7 @@ flowchart LR
 - 列出宏目录下的 `.ema` 文件。宏目录是 `$(MD_MACROS)`，由 `PathMap.SubstitutePath` 得到，已验证（A4）。
 - 参数：`name_contains`（文件名或相对路径，不区分大小写）、`limit`/`cursor`。
 - 每项返回：`path`（相对于宏目录）、`name`。
-- `detailed` 只对单个宏可用，打开宏，返回它的表达类型、变体数和描述。打开宏是否改动项目由 S10 确认。
+- `detailed` 只对单个宏可用，打开宏，返回它的表达类型、变体、尺寸和其中的设备（`WindowMacro.Objects`）。S10 证实打开宏不改动项目（A14）。
 - 只扫描文件系统，不打开每个宏：示例数据有 695 个宏，逐个打开太慢。
 
 ### 4.2 `eplan_macro_insert`（Write）
@@ -71,14 +71,14 @@ flowchart LR
 - **规划**：
   - 解析宏路径。必须在宏目录之下：规范化规则同 SEC-05，拒绝 UNC 路径和联接点跳出，扩展名必须是 `.ema`；
   - 打开宏，确认它有要求的表达类型；
-  - 确认插入点在页的幅面之内（读取幅面的 API 由 S10 查证）；
-  - 变更清单：`insert macro <文件名> at (x, y) on page <页名>`，能读出宏内的设备时一并列出（S10）；
+  - 确认插入后的外框（插入点加上宏的外框，A14）在页的幅面之内。`Page.Size` 在新建的空页上读不到（A14），这时只检查插入点，并在结果中提示；
+  - 变更清单：`insert macro <文件名> at (x, y) on page <页名>`，并列出宏内的设备（`WindowMacro.Objects`，A14）；
   - 指纹：页上全部功能的会话内标识，以及宏文件的大小和修改时间。
 - **执行**：
   - 在 `TransactionScope` 中调用 `Insert.WindowMacro(path, representation, variant, page, PointD, MoveKind.Absolute, numbering)`；
   - 读回插入的功能，与插入前的设备标识集合比较：
     - `keep` 时，宏中的设备标识若与已有设备相同，EPLAN 会把它们合并为一个设备。这种情况回滚，返回 `ALREADY_EXISTS`，列出冲突的标识，提示改用 `number`，或先用 `eplan_device_update` 改名；
-    - `number` 时，确认插入后没有发生合并。
+    - `number` 时，确认插入后没有发生合并。S10 中 `Number` 给出不冲突的新标识；没有主功能的触点得到带 `?` 的标识（`-?QA1`），端子编号为 `:?1`。这些原样列出，并提示工程师在 EPLAN 中确认（A14）。
   - 位置被同样的符号占用时，EPLAN 抛出 "S029181"（A13），回滚并返回 `INVALID_ARGUMENT`，提示换一个位置。
 - **输出**：插入的设备（`tag`、`visibleTag`、`category`）、对象数、`execution`、`undo`。
 - **时限**：默认 60 秒。
@@ -95,7 +95,7 @@ flowchart LR
 - 读回校验通过才 `Commit()`。
 
 ### 4.5 spike S10（在 Bridge 调度器中进行，不在 action 中）
-S9 全部在 action 中运行。M3b 的工具在调度器中执行，所以以下各项都在调度器中验证：
+S9 全部在 action 中运行。M3b 的工具在调度器中执行，所以以下各项都在调度器中验证。**已完成（2026-10-20），结果见 [S10](../../spikes/S10-dispatcher-writes/README.md) 和 api-notes A14**：第 1–6 项与本文的设计一致；第 7 项中撤销可行，但设备标识不显示，Q1 继续推迟。
 1. 宏中的设备与已有设备同名时，`NumerationMode` 各取值的结果：会不会合并，`Number` 能否避免合并；
 2. 插入宏、生成连接之后，Ctrl+Z 能否一步撤销；
 3. `SafetyPoint` 能否回滚 `Generate.Connections`，以及"只更新"会不会删除连接；
