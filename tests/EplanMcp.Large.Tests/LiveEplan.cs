@@ -114,8 +114,10 @@ public sealed class LiveEplan : IAsyncLifetime
 
     private static string Text(CallToolResult result) => string.Join("\n", result.Content.OfType<TextContentBlock>().Select(b => b.Text));
 
-    /// <summary>The scratch root eplanmcp uses (ADR-0008): <c>EPLANMCP_HOME</c>, or <c>%USERPROFILE%\EplanMcp</c>, then <c>scratch</c>.</summary>
-    private static string ScratchRoot() => Path.Combine(
-        Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home ? home : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp"),
-        "scratch");
+    /// <summary>The data root eplanmcp uses (ADR-0008): <c>EPLANMCP_HOME</c>, or <c>%USERPROFILE%\EplanMcp</c>.</summary>
+    internal static string DataRoot() =>
+        Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home ? home : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp");
+
+    /// <summary>The scratch root eplanmcp uses by default: <c>scratch</c> under <see cref="DataRoot"/>.</summary>
+    internal static string ScratchRoot() => Path.Combine(DataRoot(), "scratch");
 }

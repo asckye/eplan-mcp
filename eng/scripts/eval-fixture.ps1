@@ -8,9 +8,12 @@
     (ADR-0008); the evals refuse to run on a project outside it. The script writes nothing else.
     -Open then starts EPLAN with the copy as the current project; the EplanMcp add-in must be registered for the
     variant (eplan-addin.ps1 -Variant). Close EPLAN before replacing a copy it has open (-Force).
+    -WriteCopies also makes the two copies the Large write tests need (tests/EplanMcp.Large.Tests/README.md):
+    LargeWrite in <scratch root>\large\, and LargeOutside in <data root>\not-scratch\large\, outside the scratch root,
+    which the tests only ever see refused. Open both in EPLAN by hand.
 
 .EXAMPLE
-    eng\scripts\eval-fixture.ps1 -Open
+    eng\scripts\eval-fixture.ps1 -Open -WriteCopies
 #>
 [CmdletBinding()]
 param(
@@ -24,7 +27,9 @@ param(
 
     [switch] $Force,
 
-    [switch] $Open
+    [switch] $Open,
+
+    [switch] $WriteCopies
 )
 
 $ErrorActionPreference = 'Stop'
@@ -37,20 +42,29 @@ if (-not $Source) {
 $sourceBase = [IO.Path]::ChangeExtension((Resolve-Path $Source).Path, $null).TrimEnd('.')
 if (-not (Test-Path "$sourceBase.edb" -PathType Container)) { throw "$sourceBase.edb not found next to the .elk file." }
 
-$dataRoot = if ($env:EPLANMCP_HOME) { $env:EPLANMCP_HOME } else { Join-Path $env:USERPROFILE 'EplanMcp' }
-$fixtures = Join-Path (Join-Path $dataRoot 'scratch') 'fixtures'
-$name = Split-Path $sourceBase -Leaf
-$target = Join-Path $fixtures $name
-if ((Test-Path "$target.elk") -and -not $Force) {
-    Write-Output "The fixture exists already: $target.elk (pass -Force to replace it)."
-}
-else {
-    New-Item -ItemType Directory -Force $fixtures | Out-Null
-    Copy-Item "$sourceBase.elk" "$target.elk" -Force
+# Copies the source project to $Target (a path without extension) unless it is there already and -Force is not given.
+function Copy-Project([string] $Target) {
+    if ((Test-Path "$Target.elk") -and -not $Force) {
+        Write-Output "The copy exists already: $Target.elk (pass -Force to replace it)."
+        return
+    }
+
+    New-Item -ItemType Directory -Force (Split-Path $Target) | Out-Null
+    Copy-Item "$sourceBase.elk" "$Target.elk" -Force
     # /MIR makes the copy exactly the source; robocopy exits with 8 or more on failure.
-    robocopy "$sourceBase.edb" "$target.edb" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+    robocopy "$sourceBase.edb" "$Target.edb" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Copying $sourceBase.edb failed (robocopy $LASTEXITCODE); is EPLAN holding the old copy open?" }
-    Write-Output "Copied $name to $fixtures."
+    Write-Output "Copied $(Split-Path $sourceBase -Leaf) to $Target."
+}
+
+$dataRoot = if ($env:EPLANMCP_HOME) { $env:EPLANMCP_HOME } else { Join-Path $env:USERPROFILE 'EplanMcp' }
+$scratch = Join-Path $dataRoot 'scratch'
+$target = Join-Path (Join-Path $scratch 'fixtures') (Split-Path $sourceBase -Leaf)
+Copy-Project $target
+if ($WriteCopies) {
+    Copy-Project (Join-Path (Join-Path $scratch 'large') 'LargeWrite')
+    Copy-Project (Join-Path (Join-Path (Join-Path $dataRoot 'not-scratch') 'large') 'LargeOutside')
+    Write-Output 'Open LargeWrite and LargeOutside in EPLAN, then select the fixture in the page navigator again so that it is the current project.'
 }
 
 if ($Open) {
