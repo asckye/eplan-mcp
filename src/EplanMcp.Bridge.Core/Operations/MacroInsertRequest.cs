@@ -154,6 +154,16 @@ internal sealed class MacroInsertRequest
                 pageWidth - width);
     }
 
+    /// <summary>
+    /// The tags of devices an insert merged, sorted: tags that had a main function before the insert and have more
+    /// after it (S10: numbering None gave the project a second main function <c>+A1-WG6</c>, A14).
+    /// </summary>
+    internal static List<string> Merged(IEnumerable<string> before, IEnumerable<string> after)
+    {
+        Dictionary<string, int> had = Count(before);
+        return [.. Count(after).Where(tag => had.TryGetValue(tag.Key, out int count) && tag.Value > count).Select(tag => tag.Key).OrderBy(tag => tag, StringComparer.Ordinal)];
+    }
+
     /// <summary>A tag's device part: after its last '-', before a ':' (<c>+-XG8:?</c> gives <c>XG8</c>); null without one.</summary>
     internal static string? DevicePart(string tag)
     {
@@ -184,6 +194,9 @@ internal sealed class MacroInsertRequest
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = project.Name, ["page"] = wanted });
     }
+
+    private static Dictionary<string, int> Count(IEnumerable<string> tags) =>
+        tags.Where(tag => tag.Length > 0).GroupBy(tag => tag, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
 
     private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
 

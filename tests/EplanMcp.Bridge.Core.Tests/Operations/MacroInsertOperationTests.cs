@@ -1,11 +1,15 @@
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
+using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>
-/// macro.insert.plan against fake pages and S10's macro in a temporary macro directory (docs/tools/eplan_macro_insert.md,
-/// sections 2, 4, 5 and 7). Page /60 is new and empty, so EPLAN cannot tell its size (A14); page /1 has S10's sample size.
+/// macro.insert.plan and macro.insert.execute against fake pages and S10's macro in a temporary macro directory
+/// (docs/tools/eplan_macro_insert.md, sections 2, 4, 5 and 7): the checks, the fingerprint (Q6) and the rollback of a
+/// merge or a refused insert (Q2). Page /60 is new and empty, so EPLAN cannot tell its size (A14); page /1 has S10's
+/// sample size. The project has the cable +A1-WG6 that the macro's cable becomes with numbering keep.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class MacroInsertOperationTests : IDisposable
@@ -21,6 +25,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     private readonly FakeDeviceReader _devices = new();
     private readonly FakeMacroReader _macros;
     private readonly FakeMacroInserter _inserter;
+    private readonly FakeTransactions _transactions = new();
 
     public MacroInsertOperationTests()
     {
@@ -42,6 +47,21 @@ public sealed class MacroInsertOperationTests : IDisposable
         _inserter.Pages["=GAA+A1&EFS2/1"] = new MacroTargetPage { Name = "=GAA+A1&EFS2/1", Type = "Overview" };
         _pages.Pages.AddRange(_inserter.Pages.Keys.Select(name => new PageSummary { Name = name }));
         _devices.Functions.Add(new FunctionRecord { Name = "+A1-WG6", IsMain = true, Category = "Cable" });
+        _inserter.Placed = Numbered;
+        _transactions.Snapshot = () =>
+        {
+            FunctionRecord[] functions = [.. _devices.Functions];
+            Dictionary<string, string[]> objects = _inserter.Pages.ToDictionary(p => p.Key, p => p.Value.Objects.ToArray());
+            return () =>
+            {
+                _devices.Functions.Clear();
+                _devices.Functions.AddRange(functions);
+                foreach ((string page, string[] ids) in objects)
+                {
+                    _inserter.Pages[page].Objects = [.. ids];
+                }
+            };
+        };
     }
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
@@ -199,8 +219,134 @@ public sealed class MacroInsertOperationTests : IDisposable
         Assert.Contains("numbering keep", Plan(args).Changes[0].NewValue, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Execute_InsertsInOneCommittedTransaction_AndListsTheDevicesAsReadBack()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Variant = 2;
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal(("Line1", NewPage, Macro, false, null), (data.Project, data.Page, data.Macro, data.PageSizeKnown, data.Warning));
+        Assert.Equal(
+            [("+A1-WG7", "-WG7", "Cable"), ("+A1-XG9:?1", "-XG9", "Terminal"), ("=GAA+A1-?QA1", "-?QA1", "NoContact")],
+            data.Devices.Select(d => (d.Tag, d.VisibleTag, d.Category)));
+        Assert.Equal((3, 13), (data.DeviceCount, data.ObjectCount));
+        Assert.Equal((NewPage, Path.Combine([_root, .. Macro.Split('/')]), 2, 40.0, 200.0, true), Assert.Single(_inserter.Inserts));
+        Assert.Equal(["Begin AI: eplan_macro_insert", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_ManyDevices_ListsTheFirstFiftyAndCountsAll()
+    {
+        _inserter.Placed = _ => [.. Enumerable.Range(1, 60).Select(i => new MacroFunctionRecord { Name = "+A1-XG" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), Category = "Terminal" })];
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal((50, 60), (data.Devices.Count, data.DeviceCount));
+    }
+
+    [Fact]
+    public void Execute_WithKeep_ADeviceMergedWithAnExistingOne_IsAlreadyExistsAndRolledBack()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Numbering = "keep";
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.RolledBack, "+A1-WG6"), (error.Reason, error.Execution, error.Metadata!["tags"]));
+        Assert.Contains("numbering 'number'", error.Message, StringComparison.Ordinal);
+        Assert.False(Assert.Single(_inserter.Inserts).Number);
+        Assert.Equal(["+A1-WG6"], _devices.Functions.Select(f => f.Name));
+        Assert.Empty(_inserter.Pages[NewPage].Objects);
+        Assert.Equal(["Begin AI: eplan_macro_insert", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WithNumber_AMergeEplanDidAnyway_IsAlsoRolledBack()
+    {
+        _inserter.Placed = _ => [new() { Name = "+A1-WG6", VisibleName = "-WG6", Category = "Cable", Main = true }];
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Single(_devices.Functions);
+    }
+
+    [Fact]
+    public void Execute_TheSameSymbolsOnTopOfEachOther_IsInvalidArgumentAndRolledBack()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.Stacked = true;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_AfterAnObjectWasAddedToThePage_IsPlanStaleAndInsertsNothing()
+    {
+        MacroInsertArgs args = Args(SamplePage, 40, 280);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.Pages[SamplePage].Objects.Add("1/1/7/0"); // the engineer, while the approval waited
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted, false), (error.Reason, error.Execution, error.Retryable));
+        Assert.Empty(_inserter.Inserts);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WithoutAFingerprintOrWithBadArguments_IsNotStarted()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        BridgeError missing = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        args.Fingerprint = "f";
+        args.Page = "=GAA+A1&EFS2/1";
+        BridgeError invalid = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (missing.Reason, missing.Execution));
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (invalid.Reason, invalid.Execution));
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_ThroughTheRouter_RecordsTheOutcome()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 200);
+        args.Fingerprint = Plan(args).Fingerprint;
+        var router = new OperationRouter([new MacroInsertExecuteOperation(_catalog, _pages, _devices, _macros, _inserter, _transactions)], new InlineDispatcher(), null, new ListLog(), TimeSpan.FromSeconds(10));
+
+        router.Invoke(OperationNames.MacroInsertExecute, JObject.FromObject(args, BridgeJson.Serializer), "r1");
+
+        Assert.Equal(OutcomeStatus.Committed, router.Invoke(OperationNames.OutcomeGet, new JObject { ["requestId"] = "r1" }, "c")["status"]!.ToString());
+        Assert.Contains(OperationNames.MacroInsertExecute, router.SupportedOperations);
+    }
+
     private static MacroInsertArgs Args(string page, double x, double y) => new() { Project = "Line1", Page = page, Macro = Macro, X = x, Y = y };
+
+    /// <summary>What S10 read back after inserting the macro again with Number (A14); with None the cable keeps +A1-WG6.</summary>
+    private static List<MacroFunctionRecord> Numbered(bool number) =>
+    [
+        new() { Name = number ? "+A1-WG7" : "+A1-WG6", VisibleName = number ? "-WG7" : "-WG6", Category = "Cable", Main = true },
+        new() { Name = number ? "+A1-WG7" : "+A1-WG6", Category = "Wire" },
+        new() { Name = number ? "+A1-XG9:?1" : "+A1-XG8:?", VisibleName = number ? "-XG9" : "-XG8", Category = "Terminal" },
+        new() { Name = number ? "=GAA+A1-?QA1" : "=GAA+A1-QA1", VisibleName = number ? "-?QA1" : "-QA1", Category = "NoContact" },
+    ];
 
     private WritePlan Plan(MacroInsertArgs args) =>
         (WritePlan)new MacroInsertPlanOperation(_catalog, _pages, _devices, _macros, _inserter).Execute(args)!;
+
+    private MacroInsertData Execute(MacroInsertArgs args) =>
+        (MacroInsertData)new MacroInsertExecuteOperation(_catalog, _pages, _devices, _macros, _inserter, _transactions).Execute(args)!;
 }
