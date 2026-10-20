@@ -38,6 +38,20 @@ public sealed class SerializerCompatibilityTests
             Metadata = new Dictionary<string, string> { ["waitedSeconds"] = "10" },
         },
         new BridgeError { Reason = ErrorReason.Internal, Message = "m" },
+        new BridgeError { Reason = ErrorReason.OutcomeUnknown, Message = "m", Execution = ExecutionState.Unknown },
+        new OutcomeGetArgs { RequestId = "c0a8" },
+        new OutcomeGetData { Status = OutcomeStatus.Running, Operation = "page.create.execute" },
+        new OutcomeGetData { Status = OutcomeStatus.RolledBack, Operation = "page.create.execute", Reason = ErrorReason.EplanOperationFailed },
+        new WritePlan
+        {
+            Changes =
+            [
+                new PlannedChange { Action = "create", Kind = "page", Name = "=GAA+A1&EFS1/5", Property = null, NewValue = "电源" },
+                new PlannedChange { Action = "update", Kind = "device", Name = "=GAA+A1-FC1", Property = "tag", OldValue = "=GAA+A1-FC1", NewValue = "=GAA+A1-QA1" },
+            ],
+            Fingerprint = "9f86d081884c7d65",
+        },
+        new WritePlan(),
         new ProjectListArgs(),
         new ProjectListData
         {

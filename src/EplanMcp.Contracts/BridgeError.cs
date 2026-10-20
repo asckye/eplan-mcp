@@ -17,4 +17,10 @@ public sealed class BridgeError
 
     /// <summary>Optional details, for example the object that was not found.</summary>
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// For errors of write operations, one of <see cref="ExecutionState"/>: whether the project was changed
+    /// (ADR-0010). Null for reads.
+    /// </summary>
+    public string? Execution { get; set; }
 }

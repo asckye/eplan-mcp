@@ -48,8 +48,38 @@ public static class ErrorReason
     /// <summary>EPLAN reported a failure; any change was rolled back.</summary>
     public const string EplanOperationFailed = "EPLAN_OPERATION_FAILED";
 
-    /// <summary>The call did not finish in time. Retryable.</summary>
+    /// <summary>
+    /// The call did not finish in time. Retryable. A write returns it only before its execution request reached the
+    /// Bridge; after that the Host fetches the outcome instead (ADR-0010).
+    /// </summary>
     public const string Timeout = "TIMEOUT";
+
+    /// <summary>An object with the new name exists already, for example a page or a device tag.</summary>
+    public const string AlreadyExists = "ALREADY_EXISTS";
+
+    /// <summary>The safety policy forbids the call; the message names the policy and never how to get around it.</summary>
+    public const string PolicyDenied = "POLICY_DENIED";
+
+    /// <summary>The engineer declined or cancelled the approval; nothing was changed.</summary>
+    public const string ApprovalDenied = "APPROVAL_DENIED";
+
+    /// <summary>The approval request expired; call again for a new one.</summary>
+    public const string ApprovalExpired = "APPROVAL_EXPIRED";
+
+    /// <summary>The planned objects changed after the plan was made; call again for a new plan.</summary>
+    public const string PlanStale = "PLAN_STALE";
+
+    /// <summary>The audit log cannot be written, so writes are refused.</summary>
+    public const string AuditUnavailable = "AUDIT_UNAVAILABLE";
+
+    /// <summary>
+    /// A write was interrupted and its outcome cannot be fetched: whether the project changed is unknown. Never retry;
+    /// writes to the project are suspended until the engineer has checked it (ADR-0010).
+    /// </summary>
+    public const string OutcomeUnknown = "OUTCOME_UNKNOWN";
+
+    /// <summary>Writes to the project, or to the EPLAN instance, are suspended after an unknown outcome (ADR-0010).</summary>
+    public const string WritesSuspended = "WRITES_SUSPENDED";
 
     /// <summary>A defect in EplanMcp; the correlation ID identifies the log entries.</summary>
     public const string Internal = "INTERNAL";
