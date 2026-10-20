@@ -32,11 +32,7 @@ internal sealed class PageCreateRequest
     public static PageCreateRequest Check(PageCreateArgs args, IProjectCatalog catalog, IPageWriter writer)
     {
         var violations = new List<string>();
-        if (string.IsNullOrWhiteSpace(args.Project))
-        {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
-        }
-
+        WriteArguments.RequireProject(args.Project, violations);
         List<PageCreateItem> items = args.Pages ?? [];
         if (items.Count is < 1 or > MaxPages)
         {
@@ -60,19 +56,9 @@ internal sealed class PageCreateRequest
 
         string? language = string.IsNullOrWhiteSpace(args.Language) ? null : args.Language!.Trim();
         AddIf(violations, language is not null && !writer.KnowsLanguage(language), "'language' is not a language EPLAN knows; use a code like zh_CN or en_US, or omit it for EPLAN's user interface language.");
-        if (violations.Count > 0)
-        {
-            throw new BridgeErrorException(
-                ErrorReason.InvalidArgument,
-                "Invalid arguments: " + string.Join(" ", violations),
-                retryable: false,
-                new Dictionary<string, string> { ["violations"] = string.Join("\n", violations) });
-        }
-
-        OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
-        return project.ReadOnly
-            ? throw new BridgeErrorException(ErrorReason.InvalidArgument, "EPLAN has this project open read-only, so it cannot be changed. Ask the engineer to open it for writing.")
-            : new PageCreateRequest(project, pages, language);
+        return violations.Count > 0
+            ? throw WriteArguments.Invalid(violations)
+            : new PageCreateRequest(WriteArguments.Writable(catalog, args.Project), pages, language);
     }
 
     /// <summary>

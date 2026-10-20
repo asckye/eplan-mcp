@@ -247,6 +247,36 @@ internal sealed class FakePageWriter(FakePageReader pages) : IPageWriter
 }
 
 /// <summary>
+/// Page descriptions by page name, stored as EPLAN stores them (raw <c>code@text;</c> per language, api-notes A11).
+/// <see cref="Tamper"/> changes what a write stores, standing for EPLAN not keeping something.
+/// </summary>
+internal sealed class FakePageDescriptions : IPageDescriptions
+{
+    public Dictionary<string, List<TextEntry>> Pages { get; } = new(StringComparer.Ordinal);
+
+    public string GuiLanguage { get; set; } = "zh_CN";
+
+    public List<(string Page, string[] Entries)> Writes { get; } = [];
+
+    public Func<List<TextEntry>, List<TextEntry>>? Tamper { get; set; }
+
+    public string? LanguageCode(string? language) => language is null ? GuiLanguage : language == "xx_XX" ? null : language;
+
+    public PageDescription Read(string projectPath, string pageName)
+    {
+        List<TextEntry> entries = Pages.GetValueOrDefault(pageName) ?? [];
+        return new PageDescription(entries.Count == 0 ? null : string.Concat(entries.Select(e => $"{e.Language}@{e.Text};")), [.. entries]);
+    }
+
+    public PageDescription Write(string projectPath, string pageName, IReadOnlyList<TextEntry> entries)
+    {
+        Writes.Add((pageName, [.. entries.Select(e => $"{e.Language}@{e.Text}")]));
+        Pages[pageName] = Tamper is null ? [.. entries] : Tamper([.. entries]);
+        return Read(projectPath, pageName);
+    }
+}
+
+/// <summary>
 /// Transactions that behave like EPLAN's SafetyPoint as far as a fake project can: <see cref="Snapshot"/> runs when one
 /// begins and returns how to restore that state, which a rollback does. Records every call in order and throws where
 /// <see cref="FailAt"/> says ("Begin", "Commit", "CloseUndo", "Rollback" or "Dispose").
