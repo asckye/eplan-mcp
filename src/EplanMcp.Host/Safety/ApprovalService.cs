@@ -28,9 +28,21 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> and returns the decision. Throws
     /// <see cref="Bridge.BridgeCallException"/> when a channel failed to ask; nothing has run then.
     /// </summary>
-    public async Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, CancellationToken cancellationToken)
+    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout), cancellationToken);
+
+    /// <summary>
+    /// Asks, before write <paramref name="requestId"/> goes on, whether the engineer has checked the project after the
+    /// suspended write <paramref name="suspension"/> (ADR-0010 section 3), through the same channels as an approval and
+    /// as a question of its own. Only <see cref="ApprovalDecision.Granted"/> lets the suspension be lifted.
+    /// </summary>
+    public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, string argumentsHash, WritePlan plan, Suspension suspension, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension), cancellationToken);
+
+    private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
-        var question = new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout);
+        string requestId = question.RequestId;
+        string tool = question.Release is null ? question.Tool : "release of " + question.Tool;
         foreach (IApprovalChannel channel in _channels)
         {
             if (await channel.AskAsync(question, cancellationToken).ConfigureAwait(false) is { } answer)

@@ -76,6 +76,36 @@ public sealed class ApprovalTextsTests
     }
 
     [Fact]
+    public void TheReleaseConfirmation_InChinese_AsksForACheckNotForCtrlZ()
+    {
+        var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "r0", new DateTimeOffset(2026, 10, 20, 8, 30, 0, TimeSpan.Zero), SuspensionReason.OutcomeUnknown, ["create page =A1&EFS1/5"]);
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Release = suspension }, CultureInfo.GetCultureInfo("zh-CN"));
+
+        string time = suspension.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        Assert.Equal("上次 AI 修改的结果未知", texts.Title);
+        Assert.Equal($"时间：{time}\n工具：eplan_page_create\n项目：D:\\Projects\\Line1\n这次修改被中断，无法确定是否已经执行，项目中可能只有其中一部分。AI 的写入因此暂停。计划中的修改（最多 20 处）：", texts.Summary);
+        Assert.Equal(["create page =A1&EFS1/5"], texts.Changes);
+        Assert.Equal("请先在 EPLAN 中核实项目：手动删除不完整的修改，或者恢复项目的副本；EPLAN 打开项目时如果提示检查数据，请执行检查。核实之后再继续，否则请保持暂停。", texts.Note);
+        Assert.Equal(("已核实，继续", "保持暂停", "{0} 后自动保持暂停"), (texts.ApproveLabel, texts.RejectLabel, texts.CountdownFormat));
+        Assert.DoesNotContain("Ctrl+Z", texts.Summary + texts.Note, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheReleaseConfirmation_ForAnInstance_InEnglish_WithAnUnreadableRecord()
+    {
+        var suspension = new Suspension(null, 4242, DateTimeOffset.UnixEpoch, "?", "?", DateTimeOffset.MinValue, SuspensionReason.OutcomeUnknown, []);
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Release = suspension }, CultureInfo.GetCultureInfo("en-US"));
+
+        Assert.Equal("The outcome of the last AI change is unknown", texts.Title);
+        Assert.Equal("Time: ?\nTool: ?\nScope: every project in this EPLAN instance (process 4242)\nThis change was interrupted and whether it was made is unknown; the project may contain part of it. AI writes are suspended. Planned changes (up to 20):", texts.Summary);
+        Assert.Equal(["(the suspension record lists no changes)"], texts.Changes);
+        Assert.StartsWith("Check the project in EPLAN first: remove any partial change by hand, or restore a copy", texts.Note, StringComparison.Ordinal);
+        Assert.Equal(("Checked, continue", "Keep suspended", "Stays suspended automatically in {0}"), (texts.ApproveLabel, texts.RejectLabel, texts.CountdownFormat));
+    }
+
+    [Fact]
     public void UnknownKindsAndProperties_AreShownAsTheyAre()
     {
         var change = new PlannedChange { Action = "update", Kind = "cable", Name = "-W1", Property = "length", OldValue = "1", NewValue = "2" };
