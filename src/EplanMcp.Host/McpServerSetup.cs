@@ -60,6 +60,7 @@ internal static class McpServerSetup
             .WithTools<ReportWriteTools>(HostJson.Options)
             .WithTools<MacroTools>(HostJson.Options)
             .WithTools<MacroWriteTools>(HostJson.Options)
+            .WithTools<ExportTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
