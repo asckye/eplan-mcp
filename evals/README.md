@@ -26,6 +26,11 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 
 运行时先显示任务数和费用上限（各任务 `max_usd` 之和乘以次数），然后预检：claude 已登录、EPLAN 通过 eplanmcp 连接、当前项目在 scratch 根目录下。任何一项不满足就停止，不产生费用。每题先执行标准调用，再让模型作答、判分，并逐行显示结果。按 Ctrl+C 会停止当前作答，已完成的部分照样写进报告。
 
+**模型用的 eplanmcp 有自己的数据根目录** `.local/evals/<运行>/eplanmcp/`（`EPLANMCP_HOME`，经 `mcp.json` 中的 `env` 传入）。运行器在其中写一份 `config.json`：唯一的 scratch 根目录是 `<scratch 根目录>\evals\<运行>\copies\`（留给写入题的副本），其他项目的写入一律拒绝（`POLICY_DENIED`），不看工程师自己的 `config.json`。所以：
+- 共享夹具 `scratch\fixtures\` 对模型只读，模型在读取题中尝试写入（例如照题目要求改名）也改不了它；
+- 不会弹出没有人点的审批对话框（M3 设计 4.3）；
+- 模型的每次写入都记在这里的审计日志中。作答中有写入提交（工具结果为 `committed`）而审计日志没有新增记录，说明 eplanmcp 没有用这个数据根目录，写入保护没有生效：这次作答记为无效（"not isolated"），这时要检查夹具有没有被改动。
+
 结果在 `.local/evals/<yyyyMMdd-HHmmss>/`（不进仓库）：
 - `report.md`：中文摘要，按开发集和保留集给出成功率，以及调用次数、token、耗时的中位数，列出失败、无效的任务和提示；
 - `report.json`：全部数据；

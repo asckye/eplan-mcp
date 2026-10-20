@@ -27,7 +27,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         using var progress = new StringWriter { NewLine = "\n" };
 
-        await EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, progress, records, TimeSpan.Zero, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, progress, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
 
         TaskRecord task = Assert.Single(records);
         Assert.Equal(("page-count", "dev", null), (task.Id, task.Set, task.Invalid));
@@ -45,7 +45,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         var client = new FakeToolClient().Fail("eplan_project_get", "EPLAN_BUSY: a dialog is open");
 
-        await EvalRun.RunAsync([_pageCount], 2, client, _tools, runner, TextWriter.Null, records, TimeSpan.Zero, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 2, client, _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
 
         TaskRecord task = Assert.Single(records);
         Assert.Equal("oracle 'pages': eplan_project_get failed: EPLAN_BUSY: a dialog is open", task.Invalid);
@@ -60,7 +60,7 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(Answer("""{"pages":321}""")) { OnSecond = cancel.Cancel };
         var records = new List<TaskRecord>();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, cancel.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => EvalRun.RunAsync([_pageCount], 3, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, cancel.Token));
 
         Assert.Equal([Outcome.Solved], Assert.Single(records).Attempts.Select(a => a.Outcome));
     }
@@ -72,7 +72,7 @@ public sealed class EvalRunTests
         var records = new List<TaskRecord>();
         using var progress = new StringWriter { NewLine = "\n" };
 
-        await EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, progress, records, TimeSpan.Zero, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 2, Project(321), _tools, runner, progress, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
 
         // The retry of attempt 1 fails the same way and is not retried again; attempt 2 goes on as usual.
         Assert.Equal([(1, false), (1, true), (2, false)], runner.Runs);
@@ -88,18 +88,40 @@ public sealed class EvalRunTests
         var runner = new FakeRunner(ApiError("authentication_failed"));
         var records = new List<TaskRecord>();
 
-        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, TestContext.Current.CancellationToken);
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
 
         Assert.Equal([(1, false)], runner.Runs);
+    }
+
+    [Theory]
+    [InlineData(0, Outcome.Invalid)]
+    [InlineData(1, Outcome.Solved)]
+    public async Task Run_ACommittedWrite_MustShowInTheEvalsAudit(int recorded, string outcome)
+    {
+        int audited = 0;
+        var runner = new FakeRunner(Answer("""{"pages":321}""", committed: true)) { OnRun = () => audited += recorded };
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([_pageCount], 1, Project(321), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, () => audited, TestContext.Current.CancellationToken);
+
+        AttemptRecord attempt = Assert.Single(Assert.Single(records).Attempts);
+        Assert.Equal(outcome, attempt.Outcome);
+        Assert.Equal(recorded == 0, attempt.Reason?.StartsWith("not isolated: eplanmcp committed a write", StringComparison.Ordinal) ?? false);
     }
 
     private static FakeToolClient Project(int pages) =>
         new FakeToolClient().Answer("eplan_project_get", """{"counts":{"pages":N}}""".Replace("N", pages.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal));
 
-    private static AgentAttempt Answer(string json)
+    private static AgentAttempt Answer(string json, bool committed = false)
     {
         var trace = new AgentTrace();
         trace.Read("""{"type":"system","subtype":"init","tools":["StructuredOutput","mcp__eplan__eplan_project_get"],"mcp_servers":[{"name":"eplan","status":"connected"}]}""");
+        if (committed)
+        {
+            trace.Read("""{"type":"assistant","message":{"content":[{"type":"tool_use","id":"w","name":"mcp__eplan__eplan_page_create","input":{}}]},"parent_tool_use_id":null}""");
+            trace.Read("""{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"w","content":"{\"execution\":\"committed\"}"}]},"parent_tool_use_id":null}""");
+        }
+
         trace.Read($$"""{"type":"result","subtype":"success","is_error":false,"structured_output":{{json}}}""");
         return AgentAttempt.From(trace, null, 0, string.Empty, TimeSpan.FromSeconds(2));
     }
@@ -126,9 +148,13 @@ public sealed class EvalRunTests
 
         public Action? OnSecond { get; init; }
 
+        /// <summary>Runs during each attempt, as the model's writes would.</summary>
+        public Action? OnRun { get; init; }
+
         public Task<AgentAttempt> RunAsync(EvalTask task, int attempt, bool retry, CancellationToken cancellationToken)
         {
             Runs.Add((attempt, retry));
+            OnRun?.Invoke();
             if (attempt == 2 && OnSecond is not null)
             {
                 OnSecond();

@@ -22,11 +22,16 @@ internal static class EvalRun
     /// <summary>How long to wait before retrying an attempt; the OAuth refresh error says "retry in a minute".</summary>
     public static readonly TimeSpan RetryDelay = TimeSpan.FromMinutes(1);
 
+    private const string NotIsolated =
+        "not isolated: eplanmcp committed a write that the evals' audit log does not show, so it did not use the evals' data root and its write protection; check the fixture";
+
     /// <summary>
     /// Appends one record per task to <paramref name="records"/> as soon as the task starts, so that a cancelled run
     /// still reports what it finished. A task whose oracle calls fail gets no attempt. An attempt that is
     /// <see cref="AgentAttempt.IsRetryable"/> runs once more after <paramref name="retryDelay"/>; both are reported, and
-    /// the invalid one does not count, as always.
+    /// the invalid one does not count, as always. <paramref name="auditedWrites"/> counts the writes in the audit log of
+    /// the model's eplanmcp (<see cref="EvalsHome.AuditedWrites"/>): an attempt with a committed write that the count
+    /// does not show is invalid, because that eplanmcp did not use the evals' data root and its write protection.
     /// </summary>
     public static async Task RunAsync(
         IReadOnlyList<EvalTask> tasks,
@@ -37,6 +42,7 @@ internal static class EvalRun
         TextWriter progress,
         List<TaskRecord> records,
         TimeSpan retryDelay,
+        Func<int> auditedWrites,
         CancellationToken cancellationToken)
     {
         foreach (EvalTask task in tasks)
@@ -66,7 +72,13 @@ internal static class EvalRun
 
             async Task<AgentAttempt> AttemptAsync(EvalTask task, int attempt, bool retry)
             {
+                int audited = auditedWrites();
                 AgentAttempt run = await runner.RunAsync(task, attempt, retry, cancellationToken).ConfigureAwait(false);
+                if (run.Trace.Calls.Any(c => c.Committed) && auditedWrites() == audited)
+                {
+                    run = run with { Status = AttemptStatus.Invalid, Reason = NotIsolated };
+                }
+
                 Verdict? verdict = run.Status == AttemptStatus.Answered ? Grader.Grade(task, run.Answer, oracle.Values) : null;
                 AttemptRecord record = AttemptRecord.From(attempt, run, verdict, retry);
                 attempts.Add(record);

@@ -1,0 +1,41 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+namespace EplanMcp.Evals.Run;
+
+/// <summary>
+/// The data root of the eplanmcp the model talks to (<c>EPLANMCP_HOME</c>, ADR-0008), in the run's folder. Its
+/// config.json makes the folder of the writable copies the only scratch folder and refuses writes everywhere else,
+/// whatever the engineer's own config.json says: the shared fixture is never written, and no approval dialog can come
+/// up that nobody would answer (M3 design 4.3). Its audit log holds every write the model made.
+/// </summary>
+internal static class EvalsHome
+{
+    public static void Write(string home, string scratchFolder)
+    {
+        Directory.CreateDirectory(home);
+        var config = new JsonObject { ["scratchRoots"] = new JsonArray(scratchFolder), ["writesOutsideScratch"] = "deny" };
+        File.WriteAllText(Path.Combine(home, "config.json"), config.ToJsonString());
+    }
+
+    /// <summary>The <c>execution_result</c> records in the audit log under <paramref name="home"/>: one per write that ran.</summary>
+    public static int AuditedWrites(string home)
+    {
+        string audit = Path.Combine(home, "audit");
+        return Directory.Exists(audit)
+            ? Directory.EnumerateFiles(audit, "*.jsonl").SelectMany(File.ReadLines).Count(line => Kind(line) == "execution_result")
+            : 0;
+    }
+
+    private static string? Kind(string line)
+    {
+        try
+        {
+            return (JsonNode.Parse(line) as JsonObject)?["kind"]?.GetValue<string>();
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException or FormatException)
+        {
+            return null;
+        }
+    }
+}

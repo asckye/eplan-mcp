@@ -40,12 +40,12 @@ public sealed class ClaudeCommandTests
     }
 
     [Fact]
-    public void McpConfig_StartsOnlyEplanmcpOverStdio()
+    public void McpConfig_StartsOnlyEplanmcpOverStdioWithTheEvalsDataRoot()
     {
-        JsonNode config = JsonNode.Parse(ClaudeCommand.McpConfig(@"C:\Tools\EplanMcp\eplanmcp.exe"))!;
+        JsonNode config = JsonNode.Parse(ClaudeCommand.McpConfig(@"C:\Tools\EplanMcp\eplanmcp.exe", @"C:\repo\.local\evals\r1\eplanmcp"))!;
 
         Assert.Equal(
-            """{"mcpServers":{"eplan":{"type":"stdio","command":"C:\\Tools\\EplanMcp\\eplanmcp.exe","args":["serve"]}}}""",
+            """{"mcpServers":{"eplan":{"type":"stdio","command":"C:\\Tools\\EplanMcp\\eplanmcp.exe","args":["serve"],"env":{"EPLANMCP_HOME":"C:\\repo\\.local\\evals\\r1\\eplanmcp"}}}}""",
             config.ToJsonString());
     }
 }
