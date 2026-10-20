@@ -293,7 +293,7 @@
             }
           },
           "undo": {
-            "description": "The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run.",
+            "description": "The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and when nothing was added or removed.",
             "type": [
               "string",
               "null"

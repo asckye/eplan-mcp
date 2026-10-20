@@ -44,11 +44,12 @@
 ```
 - `before`、`after`：执行前后页上的连接数（2D 连接，在内存中按页过滤，A11）。
 - `added`、`removed`：执行前后比较得出的连接，端点的写法同 `eplan_connection_list`。所有页合计最多列出 100 条，删除的优先（"只更新会不会删除连接"没有验证，见第 5 节），超出时 `truncated = true`，`hint` 给出总数，提示用 `eplan_connection_list` 的 `page` 查看。
-- 没有任何变化时（连接已经齐全，S10），仍然返回 `committed`，`added`、`removed` 为空，`hint` 说明已是最新。
+- 没有任何变化时（连接已经齐全，S10），仍然返回 `committed`，`added`、`removed` 为空，`hint` 说明已是最新；`undo` 为 `null`，因为 EPLAN 不为没有改动的生成留下撤销步骤（实机验证，见 api-notes A19）。
 - **`dry_run`**：无法预先算出 EPLAN 会生成哪些连接，所以只返回 `before`。`added`、`removed`、`after` 为 `null`，`hint` 说明这一点。
 - 标识按项目数据处理，经过 ResultShaper。
 - 一行摘要（只有计数，不回显项目名，架构 8.5）：
   - `Generated connections on 1 page: 9 added, 0 removed; Ctrl+Z in EPLAN undoes this step.`
+  - `Generated connections on 1 page: nothing added or removed, so there is nothing to undo.`
   - `Dry run: 1 page has 0 connections now; the new ones are known only after running. Nothing was changed.`
 
 ## 4. 错误

@@ -17,7 +17,7 @@ internal sealed class ConnectionGenerateResult
     [Description("The pages in the order given.")]
     public List<PageEntry> Pages { get; set; } = [];
 
-    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run.")]
+    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and when nothing was added or removed.")]
     public string? Undo { get; set; }
 
     [Description("True when the response was lost and EPLAN reported the commit afterwards; 'after', 'added' and 'removed' are then null.")]
