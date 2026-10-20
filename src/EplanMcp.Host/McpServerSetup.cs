@@ -1,5 +1,6 @@
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Exports;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,8 @@ internal static class McpServerSetup
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IApprovalChannel, EplanDialogChannel>());
         services.TryAddSingleton<ApprovalService>();
         services.TryAddSingleton<WritePipeline>();
+        services.TryAddSingleton<ExportFolders>();
+        services.TryAddSingleton<ExportRunner>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
