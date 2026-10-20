@@ -267,16 +267,19 @@ public sealed class MacroInsertOperationTests : IDisposable
     }
 
     [Fact]
-    public void Execute_WithNumber_AMergeEplanDidAnyway_IsAlsoRolledBack()
+    public void Execute_WithNumber_ARepeatedPlcTerminal_IsNoMerge()
     {
-        _inserter.Placed = _ => [new() { Name = "+A1-WG6", VisibleName = "-WG6", Category = "Cable", Main = true }];
+        // S10: PLC terminals keep the macro's structure in every mode, so a second insert repeats =K1+A1:1.4.
+        _devices.Functions.Add(new FunctionRecord { Name = "=K1+A1:1.4", IsMain = true, Category = "PLCTerminal" });
+        _inserter.Placed = _ => [new() { Name = "=K1+A1:1.4", Category = "PLCTerminal", Main = true }];
         MacroInsertArgs args = Args(NewPage, 40, 200);
         args.Fingerprint = Plan(args).Fingerprint;
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        MacroInsertData data = Execute(args);
 
-        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.RolledBack), (error.Reason, error.Execution));
-        Assert.Single(_devices.Functions);
+        Assert.Equal("=K1+A1:1.4", Assert.Single(data.Devices).Tag);
+        Assert.Equal(2, _devices.Functions.Count(f => f.Name == "=K1+A1:1.4"));
+        Assert.Contains("Commit", _transactions.Calls);
     }
 
     [Fact]
