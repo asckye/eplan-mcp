@@ -88,6 +88,11 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new PageUpdateData(),
+        new WritePlan { Project = "Line1", Fingerprint = "f", Details = new Dictionary<string, string> { ["functions"] = "3", ["pages"] = "=F+A2&EFS1/1\n=K1+A2&EFS1/2" } },
+        new DeviceUpdateArgs { Project = "Line1", Tag = "-KF1", NewTag = "-KF19", Fingerprint = "f" },
+        new DeviceUpdateArgs(),
+        new DeviceUpdateData { Project = "Line1", Tag = "=F+A2-KF19", PreviousTag = "=F+A2-KF1", VisibleTag = "-KF19", Functions = 3, Pages = ["=F+A2&EFS1/1"], Warning = "w" },
+        new DeviceUpdateData(),
         new ProjectListArgs(),
         new ProjectListData
         {
