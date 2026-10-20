@@ -27,7 +27,7 @@ public sealed class OracleRunnerTests
     {
         FakeToolClient client = TwoPages(new FakeToolClient());
 
-        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, TestContext.Current.CancellationToken);
+        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, null, TestContext.Current.CancellationToken);
 
         Assert.Empty(values.Problems);
         Assert.Equal("""["/1","/2","/3"]""", Comparison.Show(values.Values["pages"]));
@@ -41,9 +41,21 @@ public sealed class OracleRunnerTests
     }
 
     [Fact]
+    public async Task Run_OnACopy_PassesItAsTheProjectOfEveryCall()
+    {
+        FakeToolClient client = TwoPages(new FakeToolClient());
+
+        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, @"C:\s\Eval_r1_01", TestContext.Current.CancellationToken);
+
+        Assert.Empty(values.Problems);
+        Assert.All(client.Calls, c => Assert.Contains("\"project\":\"C:\\\\s\\\\Eval_r1_01\"", c, StringComparison.Ordinal));
+        Assert.Equal(2, client.Calls.Count);
+    }
+
+    [Fact]
     public async Task Run_AToolTheServerLacks_MakesTheTaskInvalid()
     {
-        OracleValues values = await OracleRunner.RunAsync(_task, TwoPages(new FakeToolClient()), new HashSet<string> { "eplan_device_get" }, TestContext.Current.CancellationToken);
+        OracleValues values = await OracleRunner.RunAsync(_task, TwoPages(new FakeToolClient()), new HashSet<string> { "eplan_device_get" }, null, TestContext.Current.CancellationToken);
 
         Assert.Equal(
             ["oracle 'pages': eplan_page_list is not a tool of this eplanmcp", "oracle 'total': eplan_page_list is not a tool of this eplanmcp"],
@@ -51,11 +63,28 @@ public sealed class OracleRunnerTests
     }
 
     [Fact]
+    public async Task Run_AnAfterToolTheServerLacks_MakesTheTaskInvalid()
+    {
+        EvalTask task = TaskLoader.Load("t", """
+            id: t
+            set: dev
+            prompt: p
+            answer: { type: object }
+            after: { tag: { tool: eplan_device_find, args: { tag: "-FC1" }, pick: $.device.tag } }
+            checks: [{ after: tag, equals: "=GAA+A1-FC1" }]
+            """).Task!;
+
+        OracleValues values = await OracleRunner.RunAsync(task, new FakeToolClient(), _tools, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal(["after 'tag': eplan_device_find is not a tool of this eplanmcp"], values.Problems);
+    }
+
+    [Fact]
     public async Task Run_AFailedCall_MakesTheTaskInvalidWithTheToolsText()
     {
         FakeToolClient client = new FakeToolClient().Fail("eplan_page_list", "EPLAN_NOT_CONNECTED: start EPLAN");
 
-        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, TestContext.Current.CancellationToken);
+        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, null, TestContext.Current.CancellationToken);
 
         // Both oracle entries share the one call.
         Assert.Equal(
@@ -76,7 +105,7 @@ public sealed class OracleRunnerTests
             checks: [{ answer: $.tag, equals: oracle.tag }]
             """).Task!;
 
-        OracleValues values = await OracleRunner.RunAsync(task, new FakeToolClient().Answer("eplan_device_get", """{"tag":"=GAA+A1-FC1"}"""), _tools, TestContext.Current.CancellationToken);
+        OracleValues values = await OracleRunner.RunAsync(task, new FakeToolClient().Answer("eplan_device_get", """{"tag":"=GAA+A1-FC1"}"""), _tools, null, TestContext.Current.CancellationToken);
 
         Assert.Equal(["oracle 'tag': $.device.tag matches nothing in the result of eplan_device_get"], values.Problems);
     }
@@ -86,7 +115,7 @@ public sealed class OracleRunnerTests
     {
         FakeToolClient client = new FakeToolClient().Answer("eplan_page_list", """{"pages":[],"total":0}""");
 
-        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, TestContext.Current.CancellationToken);
+        OracleValues values = await OracleRunner.RunAsync(_task, client, _tools, null, TestContext.Current.CancellationToken);
 
         Assert.Empty(values.Problems);
         Assert.Equal("[]", Comparison.Show(values.Values["pages"]));

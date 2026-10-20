@@ -15,12 +15,19 @@ internal static class OracleRunner
     /// <summary>
     /// <paramref name="tools"/> are the tools the server lists: a task naming any other is invalid. A pick with
     /// <c>[*]</c> collects its matches from every page; any other pick reads the first page, where totals are.
+    /// <paramref name="project"/> is the copy a task on a copy works on (<see cref="WithProject"/>).
     /// </summary>
-    public static async Task<OracleValues> RunAsync(EvalTask task, IToolClient client, IReadOnlySet<string> tools, CancellationToken cancellationToken)
+    public static async Task<OracleValues> RunAsync(EvalTask task, IToolClient client, IReadOnlySet<string> tools, string? project, CancellationToken cancellationToken)
     {
         var values = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
         var problems = new List<string>();
         var notes = new List<string>();
+
+        // The after calls run later, but a tool the server lacks is a mistake of the task, not of the model.
+        foreach ((string name, OracleCall call) in task.After.Where(a => !tools.Contains(a.Value.Tool)))
+        {
+            problems.Add($"after '{name}': {call.Tool} is not a tool of this eplanmcp");
+        }
 
         // A list and its total often come from the same call; it is made, with all its pages, once.
         var calls = new Dictionary<string, PagedOutcome>(StringComparer.Ordinal);
@@ -32,10 +39,11 @@ internal static class OracleRunner
                 continue;
             }
 
-            string key = call.Tool + " " + call.Args.ToJsonString();
+            JsonObject args = WithProject(call.Args, project);
+            string key = call.Tool + " " + args.ToJsonString();
             if (!calls.TryGetValue(key, out PagedOutcome? outcome))
             {
-                calls[key] = outcome = await ToolPages.AllAsync(client, call.Tool, call.Args, cancellationToken).ConfigureAwait(false);
+                calls[key] = outcome = await ToolPages.AllAsync(client, call.Tool, args, cancellationToken).ConfigureAwait(false);
             }
 
             if (outcome.Problem is { } problem)
@@ -64,5 +72,21 @@ internal static class OracleRunner
         }
 
         return new OracleValues(values, problems, notes);
+    }
+
+    /// <summary>
+    /// The arguments of a call on <paramref name="project"/>, the path of a task's copy: <c>project</c> is added unless
+    /// the task gives one. Without a copy (null) the call reads EPLAN's current project, the shared fixture.
+    /// </summary>
+    public static JsonObject WithProject(JsonObject args, string? project)
+    {
+        if (project is null || args.ContainsKey("project"))
+        {
+            return args;
+        }
+
+        var withProject = (JsonObject)args.DeepClone();
+        withProject["project"] = project;
+        return withProject;
     }
 }

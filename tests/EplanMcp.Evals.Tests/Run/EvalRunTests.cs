@@ -94,6 +94,55 @@ public sealed class EvalRunTests
     }
 
     [Fact]
+    public async Task Run_TheAfterCallsOfAnAnsweredAttempt_AreGradedWithIt()
+    {
+        EvalTask task = TaskLoader.Load("refuse", """
+            id: refuse
+            set: dev
+            prompt: 把 =GAA+A1-FC1 改名为 =GAA+A1-FC9
+            answer: { type: object, properties: { done: { type: boolean } } }
+            after: { tag: { tool: eplan_device_get, args: { tag: "=GAA+A1-FC1" }, pick: $.device.tag } }
+            checks:
+              - { answer: $.done, equals: false }
+              - { after: tag, equals: "=GAA+A1-FC1" }
+            """).Task!;
+        FakeToolClient client = new FakeToolClient()
+            .Answer("eplan_device_get", """{"device":{"tag":"=GAA+A1-FC1"}}""")
+            .Fail("eplan_device_get", """{"error":{"reason":"DEVICE_NOT_FOUND"}}""");
+        var runner = new FakeRunner(Answer("""{"done":false}"""), Failed("more than 20 tool calls"), Answer("""{"done":false}"""));
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([task], 3, client, new HashSet<string> { "eplan_device_get" }, runner, TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken);
+
+        // The failed attempt has no answer to grade, so no after call is made for it.
+        IReadOnlyList<AttemptRecord> attempts = Assert.Single(records).Attempts;
+        Assert.Equal([Outcome.Solved, Outcome.Failed, Outcome.Failed], attempts.Select(a => a.Outcome));
+        Assert.StartsWith("after.tag equals: $.device.tag matches nothing in the result of eplan_device_get: {\"error\"", Assert.Single(attempts[2].Failures), StringComparison.Ordinal);
+        Assert.Equal(2, client.Calls.Count);
+    }
+
+    [Fact]
+    public async Task Run_AfterCallsThatFail_StopTheRunButTheAttemptIsReported()
+    {
+        EvalTask task = TaskLoader.Load("refuse", """
+            id: refuse
+            set: dev
+            prompt: 把 =GAA+A1-FC1 改名为 =GAA+A1-FC9
+            answer: { type: object, properties: { done: { type: boolean } } }
+            after: { tag: { tool: eplan_device_get, args: { tag: "=GAA+A1-FC1" }, pick: $.device.tag } }
+            checks: [{ after: tag, equals: "=GAA+A1-FC1" }]
+            """).Task!;
+        var records = new List<TaskRecord>();
+
+        // No answer is scripted: the fake throws as a client whose eplanmcp has gone would.
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            EvalRun.RunAsync([task], 2, new FakeToolClient(), new HashSet<string> { "eplan_device_get" }, new FakeRunner(Answer("""{"done":false}""")), TextWriter.Null, records, TimeSpan.Zero, () => 0, TestContext.Current.CancellationToken));
+
+        AttemptRecord attempt = Assert.Single(Assert.Single(records).Attempts);
+        Assert.Equal((Outcome.Invalid, "its after calls failed: No answer scripted for eplan_device_get."), (attempt.Outcome, attempt.Reason));
+    }
+
+    [Fact]
     public async Task Run_ACommittedWriteTheEvalsAuditShows_IsGradedAsUsual()
     {
         int audited = 0;

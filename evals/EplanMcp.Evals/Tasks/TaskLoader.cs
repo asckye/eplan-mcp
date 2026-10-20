@@ -18,9 +18,16 @@ internal static partial class TaskLoader
 {
     private const string OraclePrefix = "oracle.";
 
-    private static readonly string[] _taskKeys = ["id", "set", "prompt", "answer", "oracle", "checks", "budget"];
+    private static readonly string[] _taskKeys = ["id", "set", "fixture", "prompt", "answer", "oracle", "after", "checks", "budget"];
     private static readonly string[] _oracleKeys = ["tool", "args", "pick"];
-    private static readonly string[] _checkKeys = ["answer", .. Comparison.Names.Keys];
+    private static readonly string[] _checkKeys = ["answer", "after", .. Comparison.Names.Keys];
+
+    private static readonly Dictionary<string, TaskFixture> _fixtures = new(StringComparer.Ordinal)
+    {
+        ["shared"] = TaskFixture.Shared,
+        ["copy"] = TaskFixture.Copy,
+        ["copy_outside_scratch"] = TaskFixture.CopyOutsideScratch,
+    };
     private static readonly string[] _budgetKeys = ["max_tool_calls", "max_minutes", "max_usd"];
 
     public static IReadOnlyList<TaskFile> LoadDirectory(string directory) =>
@@ -59,7 +66,9 @@ internal static partial class TaskLoader
     private sealed class Reader : YamlReader
     {
         private readonly Dictionary<string, (YamlNode Key, OracleCall? Call)> _oracle = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, (YamlNode Key, OracleCall? Call)> _after = new(StringComparer.Ordinal);
         private readonly HashSet<string> _used = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _usedAfter = new(StringComparer.Ordinal);
 
         public EvalTask? Task(string name, YamlMappingNode root)
         {
@@ -78,11 +87,25 @@ internal static partial class TaskLoader
                 Problem(setNode!, $"set '{setName}' is neither dev nor holdout");
             }
 
-            string? prompt = Text(Required(root, "prompt"), "'prompt'")?.TrimEnd();
+            TaskFixture fixture = FixtureOf(Child(root, "fixture"));
+            YamlNode? promptNode = Required(root, "prompt");
+            string? prompt = Text(promptNode, "'prompt'")?.TrimEnd();
+            if (prompt is not null && prompt.Contains(EvalTask.ProjectToken, StringComparison.Ordinal) != (fixture != TaskFixture.Shared))
+            {
+                Problem(promptNode!, fixture == TaskFixture.Shared
+                    ? $"only a task on a copy (fixture: copy) names its project as {EvalTask.ProjectToken}"
+                    : $"the prompt must name the copy as {EvalTask.ProjectToken}");
+            }
+
             JsonObject? answer = Required(root, "answer") is { } answerNode ? AnswerSchema(answerNode) : null;
             if (Child(root, "oracle") is { } oracleNode && Mapping(oracleNode, "'oracle'") is { } oracle)
             {
-                ReadOracle(oracle);
+                ReadCalls(oracle, _oracle, "oracle");
+            }
+
+            if (Child(root, "after") is { } afterNode && Mapping(afterNode, "'after'") is { } after)
+            {
+                ReadCalls(after, _after, "after");
             }
 
             List<Check> checks = Required(root, "checks") is { } checksNode ? Checks(checksNode, answer) : [];
@@ -92,9 +115,38 @@ internal static partial class TaskLoader
                 Problem(key, $"oracle '{unused}' is not used by any check");
             }
 
+            foreach ((string unused, (YamlNode key, _)) in _after.Where(o => !_usedAfter.Contains(o.Key)))
+            {
+                Problem(key, $"after '{unused}' is not checked by any check");
+            }
+
             return Problems.Count == 0
-                ? new EvalTask(name, set!.Value, prompt!, answer!, _oracle.ToDictionary(o => o.Key, o => o.Value.Call!, StringComparer.Ordinal), checks, budget)
+                ? new EvalTask(name, set!.Value, prompt!, answer!, Calls(_oracle), checks, budget) { Fixture = fixture, After = Calls(_after) }
                 : null;
+        }
+
+        private static Dictionary<string, OracleCall> Calls(Dictionary<string, (YamlNode Key, OracleCall? Call)> calls) =>
+            calls.ToDictionary(o => o.Key, o => o.Value.Call!, StringComparer.Ordinal);
+
+        private TaskFixture FixtureOf(YamlNode? node)
+        {
+            if (node is null)
+            {
+                return TaskFixture.Shared;
+            }
+
+            string? text = Text(node, "'fixture'");
+            if (text is not null && _fixtures.TryGetValue(text, out TaskFixture fixture))
+            {
+                return fixture;
+            }
+
+            if (text is not null)
+            {
+                Problem(node, $"fixture '{text}' is not one of {string.Join(", ", _fixtures.Keys)}");
+            }
+
+            return TaskFixture.Shared;
         }
 
         private JsonObject? AnswerSchema(YamlNode node)
@@ -141,17 +193,18 @@ internal static partial class TaskLoader
             }
         }
 
-        private void ReadOracle(YamlMappingNode oracle)
+        /// <summary>The oracle calls, or the after calls: <paramref name="kind"/> names them in problems.</summary>
+        private void ReadCalls(YamlMappingNode calls, Dictionary<string, (YamlNode Key, OracleCall? Call)> target, string kind)
         {
-            foreach ((YamlNode key, YamlNode value) in oracle.Children)
+            foreach ((YamlNode key, YamlNode value) in calls.Children)
             {
-                if (Text(key, "an oracle name") is not { } name)
+                if (Text(key, $"an {kind} name") is not { } name)
                 {
                     continue;
                 }
 
                 OracleCall? call = null;
-                if (Mapping(value, $"oracle '{name}'") is { } entry)
+                if (Mapping(value, $"{kind} '{name}'") is { } entry)
                 {
                     Unknown(entry, _oracleKeys);
                     YamlNode? toolNode = Required(entry, "tool");
@@ -171,7 +224,7 @@ internal static partial class TaskLoader
                     call = tool is not null && args is not null && pick is not null ? new OracleCall(tool, args, pick) : null;
                 }
 
-                _oracle[name] = (key, call);
+                target[name] = (key, call);
             }
         }
 
@@ -187,13 +240,7 @@ internal static partial class TaskLoader
             foreach (YamlMappingNode check in sequence.Children.Select(item => Mapping(item, "a check")).OfType<YamlMappingNode>())
             {
                 Unknown(check, _checkKeys);
-                YamlNode? pathNode = Required(check, "answer");
-                JsonPath? path = PathOf(pathNode, "'answer'");
-                if (path?.FirstField is { } field && answer?["properties"] is JsonObject properties && !properties.ContainsKey(field))
-                {
-                    Problem(pathNode!, $"the answer schema has no property '{field}'");
-                }
-
+                (bool subject, JsonPath? path, string? after) = Subject(check, answer);
                 KeyValuePair<YamlNode, YamlNode>[] comparisons = [.. check.Children.Where(c => c.Key is YamlScalarNode { Value: { } k } && Comparison.Names.ContainsKey(k))];
                 if (comparisons is not [(YamlScalarNode { Value: { } kindName }, YamlNode expected)])
                 {
@@ -203,13 +250,45 @@ internal static partial class TaskLoader
 
                 ComparisonKind kind = Comparison.Names[kindName];
                 (string? oracleName, JsonNode? literal) = Expected(kindName, kind, expected);
-                if (path is not null)
+                if (subject)
                 {
-                    checks.Add(new Check(path, kind, oracleName, literal));
+                    checks.Add(new Check(path, kind, oracleName, literal, after));
                 }
             }
 
             return checks;
+        }
+
+        /// <summary>What a check looks at: a path into the answer, or the value of an after call; exactly one of them.</summary>
+        private (bool Valid, JsonPath? Path, string? After) Subject(YamlMappingNode check, JsonObject? answer)
+        {
+            YamlNode? pathNode = Child(check, "answer");
+            YamlNode? afterNode = Child(check, "after");
+            if ((pathNode is null) == (afterNode is null))
+            {
+                Problem(check, "a check needs exactly one of 'answer' (a path into the answer) or 'after' (the name of an after call)");
+                return (false, null, null);
+            }
+
+            if (afterNode is not null)
+            {
+                string? after = Text(afterNode, "'after'");
+                if (after is not null && !_after.ContainsKey(after))
+                {
+                    Problem(afterNode, $"after '{after}' is not defined");
+                }
+
+                _usedAfter.Add(after ?? string.Empty);
+                return (after is not null, null, after);
+            }
+
+            JsonPath? path = PathOf(pathNode, "'answer'");
+            if (path?.FirstField is { } field && answer?["properties"] is JsonObject properties && !properties.ContainsKey(field))
+            {
+                Problem(pathNode!, $"the answer schema has no property '{field}'");
+            }
+
+            return (path is not null, path, null);
         }
 
         /// <summary>A plain <c>oracle.&lt;name&gt;</c> refers to an oracle call; anything else, quoted text included, is a literal.</summary>
