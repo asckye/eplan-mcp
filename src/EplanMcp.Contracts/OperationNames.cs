@@ -52,6 +52,12 @@ public static class OperationNames
     public const string CheckList = "check.list";
 
     /// <summary>
+    /// The window macros below EPLAN's macro directory, filtered by path and sliced in the Bridge; never opens a macro.
+    /// Arguments: <see cref="MacroListArgs"/>; data: <see cref="MacroListData"/>.
+    /// </summary>
+    public const string MacroList = "macro.list";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
