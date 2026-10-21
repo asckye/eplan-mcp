@@ -168,11 +168,20 @@
 - 为本用户注册的插件会被影子复制进离线进程，但不调用 `OnInitGui`，所以 EplanMcp 的 Bridge 不启动。`Init` 把线程的区域性改为界面的区域性。— S15。
 - 未验证：另一个 Windows 用户、服务上下文、网络授权或运行时授权下的行为。
 
+### A23. 插件注册（spike S14，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，非提升权限）
+详细数据见 [spike S14](../../spikes/S14-addin-registration/README.md)。
+- 注册保存在工作站设置 `C:\Users\Public\Eplan\Settings\<变体>\<版本>\x64\Cfg\STATION.<…>.xdb\Setting.eod`（键 `EplanEplApiModule.Module.<程序集名，点换成 @>.*`），**按机器而不是按用户**；目录对 `INTERACTIVE`、`SERVICE`、`BATCH` 可写。不在 MSIX 会重定向的目录中。— S14。
+- 命令行 `EplApiModuleAction /register` 总是启动一个新的 EPLAN 实例（已有实例在运行时也是），注册在新实例中生效并立即加载，新实例不会自己退出；它没有项目，关闭窗口即正常退出。— S14。
+- `/unregister` 之后插件不再可用（S085021），但工作站设置中它的键和 `AssemblyPath` 仍然保留。— S14。
+- 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
+- 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
+
 ### A21. Claude Code 客户端的进度与图片（spike S13，2026-10-20，Claude Code 2.1.299）
 详细数据见 [spike S13](../../spikes/S13-client-progress/README.md)。
 - Claude Code 每次 `tools/call` 都在 `_meta` 中带 `progressToken`，服务器的进度通知送达；`initialize` 的协议版本为 `2025-11-25`。— S13。
 - 工具结果中的 PNG（`eplan_export_image` 的 `inline`）交给了模型，模型读出了图上的设备标识和文字。— S13。
-- 中断时是否发送 `notifications/cancelled`、超过 2 分钟的调用怎样处理，无头模式测不了，没有结论。— S13。
+- 中断（SDK 的 `interrupt` 控制请求，与界面中按 Esc 同一个中止路径）约 0.2 秒后发出 `notifications/cancelled`，`reason` 为 "AbortError: remote-cancel"。— S13，2026-10-21。
+- 无头模式下 150 秒的调用一直等到结果，期间每 5 秒的进度都送达，没有超时。交互界面中超过 2 分钟转到后台的显示没有测。— S13，2026-10-21。
 
 ### A20. M4 工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 各工具链的 Release 构建，经 `eplanmcp` 调用，每次用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。Destructive 工具的审批由项目负责人在 EPLAN 对话框中点击。
