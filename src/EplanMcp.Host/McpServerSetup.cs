@@ -61,6 +61,7 @@ internal static class McpServerSetup
             .WithTools<ConnectionTools>(HostJson.Options)
             .WithTools<ConnectionWriteTools>(HostJson.Options)
             .WithTools<CableTools>(HostJson.Options)
+            .WithTools<CableDestructiveTools>(HostJson.Options)
             .WithTools<TerminalTools>(HostJson.Options)
             .WithTools<TerminalDestructiveTools>(HostJson.Options)
             .WithTools<PlcTools>(HostJson.Options)
