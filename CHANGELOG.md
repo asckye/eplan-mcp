@@ -43,6 +43,10 @@
 - 第一个 Destructive 工具 `eplan_page_delete`（M4）：按完整页名精确删除 1–50 页；每次都要工程师在 EPLAN 中审批（scratch 中也一样），审批对话框列出删除后在其他页上失去主功能的设备（如电缆的芯线）；执行前先备份整个项目，结果的 `backup` 给出副本路径；只占一个撤销步骤"AI: eplan_page_delete"，读回不符时全部回滚；提示用 `eplan_report_update` 更新报表。
 - Destructive 工具 `eplan_device_renumber`（M4）：让 EPLAN 按编号方案给指定页（1–50 页）或整个项目的设备标识编号，默认只给带 `?` 的标识编号（如插入宏后的 `-?QA1`），也可以全部重新编号；每次审批、执行前备份、一步撤销；结果按设备列出改变的标识，以及仍带 `?` 的标识（EPLAN 不一定都能编号）；方案名不存在时返回可用的方案。
 - Destructive 工具 `eplan_page_renumber`（M4）：让 EPLAN 按结构给 1–50 页新的页号（起始值、步长，可保留页号中的字母，子页保留、连续编号或转成主页）；每次审批、执行前备份、一步撤销；新页号与已有页冲突时回滚并列出重名的页；结果列出每页的新旧页名，提示用 `eplan_report_update` 更新目录等报表。
+- EplanMcp Workbench（M5，ADR-0014、ADR-0017）：桌面程序，中英文界面，浅色、深色、跟随系统和高对比主题，每个用户和数据根目录一个，关闭窗口时缩到托盘。这一版有：
+  - 审批队列：Host 经只允许当前用户访问的命名管道发来的审批问题，按到期时间排列，显示工具、级别、项目、EPLAN 实例、未经验证的客户端名称、变更清单（纯文本，去掉双向控制字符）和倒计时；"批准""拒绝"两个按钮样式相同、不是默认按钮、没有快捷键，问题显示 500 毫秒后才响应；新问题只让托盘和任务栏提醒，不抢焦点；已回答的问题和执行结果在"已回答"中；
+  - 等待中的问题达到 50 个时不再接收，Host 改用 EPLAN 中的对话框；退出时如果还有等待中的问题先确认，退出后它们按"已取消"返回；
+  - 审计、状态、MCP 与客户端三个页面暂为占位。
 - `eplanmcp doctor --format json`、`eplanmcp audit verify --format json`（M5）：输出带 `schemaVersion` 的 JSON，供 Workbench 使用；doctor 的每一项带稳定的 `id`，便于分组。结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
 - `eplanmcp client-config <客户端>… [--dry-run|--remove] [--format json]`（M5）：为 Claude Code、Claude 桌面版、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot 写入名为 `eplan` 的 MCP 服务器，运行本机的 `eplanmcp.exe serve`；可以一次写多个客户端，分别报告结果，任何一个失败时退出码为 1。
   - 只改 `eplan` 这一项，文件中的其他服务器和设置都保留；已有的 `eplan` 是本地服务器（有 `command`）时只更新命令和参数，其他字段保留，否则整项替换；JSONC 文件中的注释在改写后丢失（原文件在备份中），Codex 的 TOML 中无法安全地逐行修改的写法拒绝写入；

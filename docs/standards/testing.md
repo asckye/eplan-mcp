@@ -29,7 +29,7 @@
 | **Contracts**（共享的请求/响应类型） | 序列化往返、schema 生成 | — | — |
 | **Host**（MCP 服务器、工具注册、策略、审计） | 参数校验、策略引擎决策表、错误码映射、分页、截断 | 通过 stdio 启动真实 Host + **Fake Bridge**，用 MCP 客户端走完整协议 | 连接真实 Bridge |
 | **Bridge**（EPLAN 内的插件） | 不依赖 EPLAN 类型的逻辑（对象映射、过滤、坐标与栅格计算） | 命名管道服务端 + 假调度器 | 在 EPLAN 中加载，执行真实 API |
-| **Workbench**（桌面界面） | 视图模型逻辑 | — | 手工冒烟清单（发布前） |
+| **Workbench**（桌面界面） | 视图模型逻辑：排序、防误触、倒计时、文字清洗、设置文件 | 真实窗口中的页面、焦点、UIA 树和三套调色板的对比度（[workbench-ui](workbench-ui.md) 15.1）；真实管道上 Host 的 `WorkbenchChannel` 对 Workbench 的服务端 | 手工冒烟清单（发布前） |
 
 ### 可测试性设计要求
 - EPLAN API 的调用集中在 Bridge 的**适配层**，适配层之外的代码不引用 `Eplan.EplApi.*`。

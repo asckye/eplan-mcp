@@ -88,7 +88,22 @@ public sealed partial class StringsTests
 
         Assert.Contains("Access.ScrollPosition", used);
         Assert.Contains("Page.Approvals", used);
+        Assert.Contains("Result.Approved", used);
+        Assert.Contains("Outcome.Unknown", used);
         Assert.All(used, k => Assert.True(Catalogue.English.ContainsKey(k), k));
+    }
+
+    /// <summary>
+    /// The views hold no text of their own (LOC-01): what a view shows comes from the catalogue, a binding or code. The
+    /// breadcrumb's separator is the one exception.
+    /// </summary>
+    [Fact]
+    public void NoView_ShowsALiteralText()
+    {
+        string[] literals = [.. SourceScan.Own.Where(f => f.Path.EndsWith(".xaml", StringComparison.Ordinal))
+            .SelectMany(f => LiteralText().Matches(f.Text).Select(m => $"{f.Path}: {m.Value.Trim()}"))];
+
+        Assert.Equal(["Shell/MainWindow.xaml: Text=\"/\""], literals);
     }
 
     private static int[] Indexes(string text) => [.. Placeholder().Matches(text).Select(m => int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)).Distinct().Order()];
@@ -105,10 +120,13 @@ public sealed partial class StringsTests
     [GeneratedRegex(@"[\u3400-\u9fff][,;:?!]")]
     private static partial Regex AsciiPunctuationAfterCjk();
 
+    [GeneratedRegex(@"\s(?:Text|Content|Title|Caption|Header|ToolTip|AutomationProperties\.Name|AutomationProperties\.HelpText)=""[^{""][^""]*""")]
+    private static partial Regex LiteralText();
+
     [GeneratedRegex(@"\{l:Tr (?<key>[A-Za-z0-9.]+)")]
     private static partial Regex TrKey();
 
     /// <summary>A catalogue key as a string literal in code: two or more dotted parts, starting with a known area.</summary>
-    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question)\\.[A-Za-z0-9.]+)\"")]
+    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome)\\.[A-Za-z0-9.]+)\"")]
     private static partial Regex CodeKey();
 }

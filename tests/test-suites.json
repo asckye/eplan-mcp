@@ -5,6 +5,6 @@
     { "assembly": "EplanMcp.Host.Tests", "minPassed": 295 },
     { "assembly": "EplanMcp.Evals.Tests", "minPassed": 225 },
     { "assembly": "EplanMcp.Workbench.Protocol.Tests", "minPassed": 60 },
-    { "assembly": "EplanMcp.Workbench.Tests", "minPassed": 20 }
+    { "assembly": "EplanMcp.Workbench.Tests", "minPassed": 560 }
   ]
 }

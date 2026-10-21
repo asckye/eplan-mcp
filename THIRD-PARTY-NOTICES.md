@@ -24,6 +24,8 @@
 - `Themes/ThemeManager.cs`：`using` 按 `dotnet format` 排序；`Convert.ToString` 加上 `CultureInfo.InvariantCulture`（本仓库的 CA1305 是错误级别，不放宽）；
 - `Controls/ContrastSelection.cs`：`dotnet format` 调整了一行缩进。
 
+测试中有 3 个文件移植自 TIA 的 `tests/Studio/TiaOpenness.Gui.Tests/`（同一提交）：`WpfContext.cs`、`Localization/StringsTests.cs`（部分）和 `Themes/ThemeContrastTests.cs`（来自 `ThemeSurfaceTests.cs`），开头同样注明来源和版权行，并说明改了什么。
+
 其余文件除开头的注释外与 TIA 完全相同。代码风格按 TIA 的写法保留，[`Tia/.editorconfig`](src/EplanMcp.Workbench/Tia/.editorconfig) 只对这个文件夹关掉风格、格式、表述清晰和性能类的规则，正确性规则和编译器警告照常生效。合并 TIA 的新改动时：去掉开头的注释，与 TIA 新提交中的同名文件比较，再把注释中的提交号改为新读的提交；[`VendoredThemeTests`](tests/EplanMcp.Workbench.Tests/Themes/VendoredThemeTests.cs) 检查每个文件的注释。
 
 ```
