@@ -4,8 +4,9 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
-/// The checked arguments of the plan or run of a database export (docs/tools/eplan_part_export.md, section 2): every
-/// problem at once. Part numbers are taken as the database writes them, trimmed, each once.
+/// The checked arguments of the plan or run of a database export (docs/tools/eplan_part_export.md,
+/// eplan_translation_export.md, section 2): every problem at once. Part numbers are taken as the database writes them,
+/// trimmed, each once.
 /// </summary>
 internal sealed class MasterDataExportRequest
 {
@@ -20,10 +21,10 @@ internal sealed class MasterDataExportRequest
 
     public MasterDataFormat Format { get; }
 
-    /// <summary>The extension the Host gives the file: <c>.xml</c> or <c>.edz</c>.</summary>
+    /// <summary>The extension the Host gives the file: <c>.xml</c>, <c>.edz</c>, or <c>.txt</c> for tab-separated text.</summary>
     public string Extension { get; }
 
-    /// <summary>Parts: the part numbers to export; null for every part.</summary>
+    /// <summary>Parts: the part numbers to export; null for every part, and always for translations.</summary>
     public IReadOnlyList<string>? Parts { get; }
 
     public static MasterDataExportRequest Check(MasterDataExportKind kind, ExportArgs args)
@@ -34,11 +35,13 @@ internal sealed class MasterDataExportRequest
         {
             (MasterDataExportKind.Parts, "" or "xml") => (MasterDataFormat.Xml, ".xml"),
             (MasterDataExportKind.Parts, "edz") => (MasterDataFormat.Edz, ".edz"),
+            (MasterDataExportKind.Translations, "" or "tab") => (MasterDataFormat.Tab, ".txt"),
+            (MasterDataExportKind.Translations, "xml") => (MasterDataFormat.Xml, ".xml"),
             _ => null,
         };
         if (file is null)
         {
-            violations.Add("'format' must be xml or edz.");
+            violations.Add(kind == MasterDataExportKind.Parts ? "'format' must be xml or edz." : "'format' must be tab or xml.");
         }
 
         List<string>? parts = kind == MasterDataExportKind.Parts ? CheckParts(args.Parts, violations) : null;

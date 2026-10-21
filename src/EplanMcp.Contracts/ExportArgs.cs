@@ -24,7 +24,7 @@ public sealed class ExportArgs
 
     /// <summary>
     /// Images: <c>png</c> or <c>jpg</c>; null means <c>png</c>. Parts database: <c>xml</c> or <c>edz</c>; null means
-    /// <c>xml</c>.
+    /// <c>xml</c>. Translation database: <c>tab</c> or <c>xml</c>; null means <c>tab</c>.
     /// </summary>
     public string? Format { get; set; }
 

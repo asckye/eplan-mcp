@@ -144,8 +144,11 @@ internal static class BridgeHost
                 new ProjectExportPlanOperation(kind, catalog, projectExporter),
                 new ProjectExportRunOperation(kind, catalog, projectExporter),
             }),
-            new MasterDataExportPlanOperation(MasterDataExportKind.Parts, masterData),
-            new MasterDataExportRunOperation(MasterDataExportKind.Parts, masterData),
+            .. new[] { MasterDataExportKind.Parts, MasterDataExportKind.Translations }.SelectMany(kind => new IOperation[]
+            {
+                new MasterDataExportPlanOperation(kind, masterData),
+                new MasterDataExportRunOperation(kind, masterData),
+            }),
             new PageDeletePlanOperation(catalog, remover),
             new PageDeleteExecuteOperation(catalog, pages, remover, backup, transactions),
             new DeviceRenumberPlanOperation(catalog, renumberer),

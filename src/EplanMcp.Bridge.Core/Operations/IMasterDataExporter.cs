@@ -1,10 +1,13 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>Which system database an export reads (docs/tools/eplan_part_export.md).</summary>
+/// <summary>Which system database an export reads (docs/tools/eplan_part_export.md, eplan_translation_export.md).</summary>
 public enum MasterDataExportKind
 {
     /// <summary>The parts database EPLAN is configured with, as XML or EDZ.</summary>
     Parts,
+
+    /// <summary>The translation database EPLAN is configured with, as tab-separated text or XML.</summary>
+    Translations,
 }
 
 /// <summary>The file a database export writes, as the tools' <c>format</c> names it.</summary>
@@ -12,6 +15,7 @@ public enum MasterDataFormat
 {
     Xml,
     Edz,
+    Tab,
 }
 
 /// <summary>What <see cref="IMasterDataExporter.ExportParts"/> found in the parts database.</summary>
@@ -43,4 +47,13 @@ public interface IMasterDataExporter
     /// <paramref name="format"/>. Closes the database before returning, after an error too. Without a file it only checks.
     /// </summary>
     public PartsExport ExportParts(IReadOnlyList<string>? partNumbers, MasterDataFormat format, string? file);
+
+    /// <summary>The configured translation database as EPLAN's setting has it; for one on SQL Server, a name without the connection.</summary>
+    public string TranslationDatabase();
+
+    /// <summary>
+    /// Exports the whole configured translation database to <paramref name="file"/> in <paramref name="format"/>
+    /// (<see cref="MasterDataFormat.Tab"/> or <see cref="MasterDataFormat.Xml"/>); false when EPLAN reports an error.
+    /// </summary>
+    public bool ExportTranslations(string file, MasterDataFormat format);
 }

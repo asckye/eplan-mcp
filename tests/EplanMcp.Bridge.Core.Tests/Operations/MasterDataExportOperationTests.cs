@@ -7,7 +7,8 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>
 /// The plans and runs of the database exports against a fake exporter that writes into a real temporary folder
-/// (docs/tools/eplan_part_export.md, sections 2 to 5; SEC-20), through the router where cancels matter.
+/// (docs/tools/eplan_part_export.md, eplan_translation_export.md, sections 2 to 5; SEC-20), through the router where
+/// cancels matter.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class MasterDataExportOperationTests : IDisposable
@@ -166,6 +167,66 @@ public sealed class MasterDataExportOperationTests : IDisposable
 
         Assert.Equal(ErrorReason.Cancelled, error.Reason);
         Assert.Equal(["a.xml"], Files()); // the call ran to its end; the Host deletes the folder
+    }
+
+    [Theory]
+    [InlineData(null, ".txt")]
+    [InlineData(" XML ", ".xml")]
+    public void TranslationsPlan_NamesTheDatabaseAndTheExtension_AndExportsNothing(string? format, string extension)
+    {
+        var data = (ExportPlanData)new MasterDataExportPlanOperation(MasterDataExportKind.Translations, _exporter).Execute(new ExportArgs { Format = format })!;
+
+        Assert.Equal((string.Empty, @"$(md_translate)\Translate.db", extension), (data.Project, data.Database, data.Extension));
+        Assert.Equal(
+            (OperationNames.TranslationExportPlan, OperationNames.TranslationExportRun),
+            (new MasterDataExportPlanOperation(MasterDataExportKind.Translations, _exporter).Name, new MasterDataExportRunOperation(MasterDataExportKind.Translations, _exporter).Name));
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Theory]
+    [InlineData(null, "Tab", "翻译.txt")]
+    [InlineData("xml", "Xml", "翻译.xml")]
+    public void Translations_AreOneFileInTheHostsFolder_InTheFormatAsked_WhateverPartsSays(string? format, string converter, string fileName)
+    {
+        ExportRunData data = Run(new ExportArgs { Format = format, Parts = [], Directory = _folder, FileName = fileName }, MasterDataExportKind.Translations);
+
+        Assert.Equal([fileName], Files());
+        Assert.Equal([$"translations {converter} {fileName}"], _exporter.Exports);
+        Assert.Equal((@"$(md_translate)\Translate.db", (int?)null), (data.Database, data.PartCount));
+    }
+
+    [Theory]
+    [InlineData("edz", "a.txt", "'format' must be tab or xml.")]
+    [InlineData(null, "a.xml", "ending in .txt")]
+    public void Translations_AnUnknownFormatOrAFileNameOfAnotherOne_IsInvalid(string? format, string fileName, string message)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Format = format, Directory = _folder, FileName = fileName }, MasterDataExportKind.Translations)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains(message, error.Message, StringComparison.Ordinal);
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Fact]
+    public void Translations_EplanReportingAnError_IsEplanOperationFailed()
+    {
+        _exporter.TranslationsExported = false;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Directory = _folder, FileName = "t.txt" }, MasterDataExportKind.Translations)).Error;
+
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Contains("no files were kept", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Translations_CancelledWhileEplanExports_IsReportedWhenTheCallReturns()
+    {
+        var router = new OperationRouter([new MasterDataExportRunOperation(MasterDataExportKind.Translations, _exporter)], new InlineDispatcher(), null, _log, TimeSpan.FromSeconds(10));
+        _exporter.During = () => Assert.True((bool)router.Invoke(OperationNames.OperationCancel, new JObject { ["requestId"] = "c1" }, "cancel")["found"]!);
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => router.Invoke(OperationNames.TranslationExportRun, BridgeJson.FromObject(new ExportArgs { Directory = _folder, FileName = "t.txt" }), "c1")).Error;
+
+        Assert.Equal(ErrorReason.Cancelled, error.Reason);
     }
 
     private ExportRunData Run(ExportArgs args, MasterDataExportKind kind = MasterDataExportKind.Parts) => (ExportRunData)new MasterDataExportRunOperation(kind, _exporter).Execute(args)!;

@@ -1,5 +1,6 @@
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
+using Eplan.EplApi.HEServices;
 using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -8,8 +9,8 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
-/// Exports the configured parts database the way spike S24 r11 did (api-notes A27, A30), in
-/// QuietModeStep(ShowNoDialogs), always to a file in the Host's folder. The database is opened with
+/// Exports the configured parts and translation databases the way spike S24 r11 did (api-notes A27, A30), in
+/// QuietModeStep(ShowNoDialogs), always to a file in the Host's folder. The parts database is opened with
 /// <c>OpenDatabase()</c> and closed again, as for part.search (<see cref="EplanPartsDatabase"/>); nothing else is
 /// called that would create, upgrade or select a database or set a setting, and BannedSymbols.txt keeps it so. S24
 /// saw no export change its database; the Large tests compare the data files before and after.
@@ -17,6 +18,15 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanMasterDataExporter : IMasterDataExporter
 {
+    private const string TabConverter = "XTrLanguageDbXml2TabConverterImpl";
+    private const string XmlConverter = "XTrLanguageDbXmlConverterImpl";
+
+    /// <summary>
+    /// What a translation database on SQL Server is called: its connection string's format, which may hold a login, is
+    /// not verified (EPLAN XML docs of <c>Translate.TranslateDatabase</c>), so none of it leaves the Bridge (SEC-12).
+    /// </summary>
+    private const string SqlServer = "SQL Server";
+
     /// <summary>
     /// <c>ExportParts(file, format)</c> for every part, as S24 r11 ran it: XML 2 s and 5 MB, EDZ 44 s and 128 MB for the
     /// 464 parts of the sample database. Given part numbers are looked up with <c>GetPartVariants</c>, every variant of
@@ -44,6 +54,42 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
                 file is null ? "EPLAN could not open or read its parts database" : "EPLAN could not export its parts database, so no files were kept",
                 "the configured database in EPLAN's parts management",
                 ex);
+        }
+    }
+
+    /// <summary><c>Translate.TranslateDatabase</c> and <c>ActiveTranslateDatabase</c>, as S24 read them (A27: type EPLAN, <c>$(md_translate)\Translate.db</c>).</summary>
+    public string TranslationDatabase()
+    {
+        MainThread.Assert();
+        try
+        {
+            using var translate = new Translate();
+            return translate.ActiveTranslateDatabase == Translate.DatabaseType.SQL ? SqlServer : translate.TranslateDatabase ?? string.Empty;
+        }
+        catch (Exception ex) when (IsEplanFailure(ex))
+        {
+            throw Failed("EPLAN could not tell which translation database it uses", "the translation database in EPLAN's settings", ex);
+        }
+    }
+
+    /// <summary>
+    /// <c>Translate.ExportDatabaseTexts(file, converter)</c>, as S24 r11 ran it on the configured database: XML 0.68 s
+    /// and 2.8 MB, tab-separated 0.76 s and 2.1 MB, the database unchanged. True means no error (EPLAN XML docs).
+    /// </summary>
+    public bool ExportTranslations(string file, MasterDataFormat format)
+    {
+        MainThread.Assert();
+        try
+        {
+            using var translate = new Translate();
+            using (new QuietModeStep(QuietModes.ShowNoDialogs))
+            {
+                return translate.ExportDatabaseTexts(file, format == MasterDataFormat.Xml ? XmlConverter : TabConverter);
+            }
+        }
+        catch (Exception ex) when (IsEplanFailure(ex))
+        {
+            throw Failed("EPLAN could not export its translation database, so no files were kept", "the translation database in EPLAN's settings", ex);
         }
     }
 

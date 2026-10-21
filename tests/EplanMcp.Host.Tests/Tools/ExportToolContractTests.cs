@@ -25,7 +25,7 @@ public sealed class ExportToolContractTests
         using ServiceProvider provider = services.BuildServiceProvider();
         Tool[] exports = [.. provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Select(t => t.ProtocolTool).Where(t => t.Name.StartsWith("eplan_export_", StringComparison.Ordinal) || t.Name.EndsWith("_export", StringComparison.Ordinal))];
 
-        Assert.Equal([ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, MasterDataExportTools.PartTool], exports.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal([ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, MasterDataExportTools.PartTool, MasterDataExportTools.TranslationTool], exports.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.All(exports, t =>
         {
             Assert.Equal((false, false, false, false), (t.Annotations!.ReadOnlyHint, t.Annotations.DestructiveHint, t.Annotations.IdempotentHint, t.Annotations.OpenWorldHint));

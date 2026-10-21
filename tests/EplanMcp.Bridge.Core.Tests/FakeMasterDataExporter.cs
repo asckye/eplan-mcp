@@ -3,13 +3,19 @@ using EplanMcp.Bridge.Core.Operations;
 namespace EplanMcp.Bridge.Core.Tests;
 
 /// <summary>
-/// The configured parts database as S24 found it on the development machine (api-notes A27), with <see cref="Parts"/>,
-/// each part number with its variants. Exports write the file named and record themselves in <see cref="Exports"/>;
-/// <see cref="During"/> runs inside each export, as a cancel arriving meanwhile would.
+/// The configured databases as S24 found them on the development machine (api-notes A27): a parts database with
+/// <see cref="Parts"/>, each part number with its variants, and the translation database. Exports write the file named
+/// and record themselves in <see cref="Exports"/>; <see cref="During"/> runs inside each export, as a cancel arriving
+/// meanwhile would.
 /// </summary>
 internal sealed class FakeMasterDataExporter : IMasterDataExporter
 {
     public string PartsDatabase { get; set; } = @"$(MD_PARTS)\EPLAN_parts.alk";
+
+    public string Translations { get; set; } = @"$(md_translate)\Translate.db";
+
+    /// <summary>What <see cref="ExportTranslations"/> returns, after it wrote the file.</summary>
+    public bool TranslationsExported { get; set; } = true;
 
     /// <summary>The variants of each part number; the sample database has 464 parts.</summary>
     public Dictionary<string, int> Parts { get; } = new(StringComparer.Ordinal)
@@ -45,6 +51,17 @@ internal sealed class FakeMasterDataExporter : IMasterDataExporter
         }
 
         return found;
+    }
+
+    public string TranslationDatabase() => Translations;
+
+    public bool ExportTranslations(string file, MasterDataFormat format)
+    {
+        Exports.Add($"translations {format} {Path.GetFileName(file)}");
+        During?.Invoke();
+        File.WriteAllText(file, "de_DE\ten_US\n");
+        ThrowIfFailing();
+        return TranslationsExported;
     }
 
     private void ThrowIfFailing()
