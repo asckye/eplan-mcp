@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.DevicePlacePlan"/> and of its execute operation, which places the device.</summary>
+/// <summary>Arguments of <see cref="OperationNames.DevicePlacePlan"/> and <see cref="OperationNames.DevicePlaceExecute"/>.</summary>
 public sealed class DevicePlaceArgs
 {
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>

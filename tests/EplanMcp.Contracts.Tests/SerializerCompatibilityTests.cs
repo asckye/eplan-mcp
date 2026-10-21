@@ -103,6 +103,8 @@ public sealed class SerializerCompatibilityTests
         new DeviceUpdateData(),
         new DevicePlaceArgs { Project = "Line1", Page = "=GAA+A1&EFS1/60", Part = "SIE.3RH2122-1HB40", Variant = "1", X = 80, Y = 160.5, Tag = "-KF20", Fingerprint = "f" },
         new DevicePlaceArgs(),
+        new DevicePlaceData { Project = "Line1", Page = "=GAA+A1&EFS1/60", Part = "SIE.3RH2122-1HB40", Variant = "1", Tag = "=GAA+A1-KF20", VisibleTag = "-KF20", Category = "Coil", Functions = 5, Unplaced = 4, PageSizeKnown = true, Warning = "w" },
+        new DevicePlaceData(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData

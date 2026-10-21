@@ -90,6 +90,8 @@ internal static class BridgeHost
         var backup = new EplanProjectBackup();
         var languages = new EplanProjectLanguages();
         var languageRemover = new EplanLanguageRemover();
+        var partsDatabase = new EplanPartsDatabase();
+        var placer = new EplanDevicePlacer();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -116,6 +118,8 @@ internal static class BridgeHost
             new PageUpdateExecuteOperation(catalog, pages, descriptions, transactions),
             new DeviceUpdatePlanOperation(catalog, devices, renamer),
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions),
+            new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer),
+            new DevicePlaceExecuteOperation(catalog, pages, renamer, partsDatabase, placer, transactions),
             new ConnectionGeneratePlanOperation(catalog, pages, generator),
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
