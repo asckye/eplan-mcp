@@ -89,9 +89,9 @@ flowchart LR
 | 3 | `eplan_import_list` | Destructive | `kind`：`parts`（部件清单）、`devices`（设备清单） |
 | 3 | `eplan_import_plc` | Destructive | PLC 总线数据；禁止会弹出比较对话框的匹配方式（`IMPORTMATCH:1`） |
 | 3 | `eplan_import_pxf` | Write | 把 EPJ（PXF）导入为新项目；新项目只建在 scratch 根目录中（Q5）。S22：`PXFProject` 的第二个参数是新项目的路径（不带扩展名）；约 1 分钟；失败时删除本次新建的 `.elk`、`.edb` |
-| 4 | `eplan_part_import`、`eplan_part_sync` | 系统主数据（ADR-0019） | 文件导入部件库；把项目中的部件加入部件库 |
+| 4 | `eplan_part_import`、`eplan_part_sync` | 系统主数据（ADR-0019） | 文件导入部件库（[规格](../tools/eplan_part_import.md)）；把项目中的部件加入部件库，S24 r15：同步也写项目（[规格](../tools/eplan_part_sync.md)） |
 | 4 | `eplan_part_export` | 导出 | 从部件库导出到文件：XML 或 EDZ，全部或指定部件（[规格](../tools/eplan_part_export.md)） |
-| 4 | `eplan_translation_import` | 系统主数据（ADR-0019） | 文件导入翻译库 |
+| 4 | `eplan_translation_import` | 系统主数据（ADR-0019） | 文件导入翻译库；实现前先验证 `ImportDatabaseTexts`（[规格](../tools/eplan_translation_import.md)） |
 | 4 | `eplan_translation_export` | 导出 | 从翻译库导出到文件：制表符文本或 XML（[规格](../tools/eplan_translation_export.md)） |
 
 ### 4.2 Profile
