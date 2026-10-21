@@ -154,7 +154,7 @@ flowchart TB
 | **Host**（`eplanmcp.exe`） | .NET 10 控制台程序，自包含单文件发布；官方 MCP C# SDK 2.x（支持 2026-07-28 规范，并兼容旧版客户端） | MCP 协议；工具注册和 Profile；参数校验；策略与审批；审计；结果整形；发现和管理 Bridge 连接；CLI 子命令 | 不引用任何 EPLAN 程序集 |
 | **Bridge**（EPLAN 插件） | net481 类库，由 EPLAN 加载；**除 EPLAN 自带的程序集外不带任何第三方依赖** | 在主线程上执行操作；事务和撤销；把 EPLAN 对象映射为契约 DTO；收集操作期间产生的 EPLAN 系统消息 | 不做策略判断，不访问 MCP，不写审计 |
 | **Contracts** | netstandard2.0 类库，纯 POCO | Host 与 Bridge 共享的请求/响应 DTO、操作名、错误码、协议版本 | 不包含逻辑，也不依赖任何序列化器 |
-| **Workbench**（M5） | 单独的桌面程序 `app\workbench\EplanMcp.Workbench.exe`，WinUI 3（Windows App SDK，未打包、自包含，[ADR-0015](../adr/0015-workbench-ui-stack.md)），Fluent 2 控件，苹果式的简洁观感；中英双语；字体 Maple Mono CN（SIL OFL 1.1，随程序附带，许可证文本随安装包附带） | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
+| **Workbench**（M5） | 单独的桌面程序 `app\workbench\EplanMcp.Workbench.exe`，WPF（.NET 10，自包含，[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)），视觉与 TIA 的 Workbench 一致（Ant Design v5，复用其主题）；中英双语；字体 Maple Mono CN（SIL OFL 1.1，随程序附带，许可证文本随安装包附带） | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
 
 **职责划分原则：Host 决定"能不能做"，Bridge 只负责"怎么做"。** 安全逻辑全部在 Host 中，不依赖 EPLAN，可以用 Small 测试穷尽验证。
 

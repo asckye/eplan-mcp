@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Accepted；[ADR-0017](0017-workbench-wpf-tia-theme.md)（Proposed）提议取代它：改用 WPF 和 TIA 的 Ant Design 主题 |
+| 状态 | Superseded by [ADR-0017](0017-workbench-wpf-tia-theme.md)（2026-10-20：改用 WPF 和 TIA Workbench 的 Ant Design 主题） |
 | 日期 | 2026-10-20（提出，建议方案 2）· 2026-10-20（修改：项目负责人问 Fluent UI 与苹果的设计哪个可以之后，建议改为方案 1）· 2026-10-20（接受：项目负责人明确答复"可以用winUI3，但是字体的话用我之前推荐的"，字体按第 5 条） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（第一版 Workbench 发布前）：只影响 Workbench 一个项目；发布后再换界面技术等于重写界面 |

@@ -20,7 +20,7 @@
 | `EplanMcp.Bridge.Eplan` | **net481** | 与 EPLAN 2026 的 API 一致。2027 保留了 4.8.1 API，因此同一份构建预计在 2027 上也能使用〔M6 验证〕 |
 | `EplanMcp.Bridge.Core` | netstandard2.0 | 协议和调度抽象与 EPLAN 无关，可以在 .NET 10 的测试中直接运行 |
 | `EplanMcp.Contracts` | netstandard2.0 | Host 和 Bridge 共用 |
-| `EplanMcp.Workbench`（M5） | **net10.0-windows**（带 Windows SDK 版本号），WinUI 3，Windows App SDK 未打包、自包含发布 | 与 Host 同一个 .NET 运行时；界面技术见 [ADR-0015](0015-workbench-ui-stack.md)（补充本表） |
+| `EplanMcp.Workbench`（M5） | **net10.0-windows**，WPF，自包含发布 | 与 Host 同一个 .NET 运行时；界面技术见 [ADR-0017](0017-workbench-wpf-tia-theme.md)（补充本表，取代 ADR-0015） |
 | 测试 | 与被测项目一致；Bridge 的适配层测试在 net481 下运行 | |
 
 - 语言：全部使用 C#，`LangVersion=latest`。net481 项目中需要较新语言特性的支持类型（如 `init`、`required`）时，引入只在编译期使用的 polyfill 源码包，不增加运行时依赖。
