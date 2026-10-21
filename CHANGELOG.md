@@ -44,6 +44,12 @@
 - Destructive 工具 `eplan_device_renumber`（M4）：让 EPLAN 按编号方案给指定页（1–50 页）或整个项目的设备标识编号，默认只给带 `?` 的标识编号（如插入宏后的 `-?QA1`），也可以全部重新编号；每次审批、执行前备份、一步撤销；结果按设备列出改变的标识，以及仍带 `?` 的标识（EPLAN 不一定都能编号）；方案名不存在时返回可用的方案。
 - Destructive 工具 `eplan_page_renumber`（M4）：让 EPLAN 按结构给 1–50 页新的页号（起始值、步长，可保留页号中的字母，子页保留、连续编号或转成主页）；每次审批、执行前备份、一步撤销；新页号与已有页冲突时回滚并列出重名的页；结果列出每页的新旧页名，提示用 `eplan_report_update` 更新目录等报表。
 - `eplanmcp doctor --format json`、`eplanmcp audit verify --format json`（M5）：输出带 `schemaVersion` 的 JSON，供 Workbench 使用；doctor 的每一项带稳定的 `id`，便于分组。结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
+- `eplanmcp client-config <客户端>… [--dry-run|--remove] [--format json]`（M5）：为 Claude Code、Claude 桌面版、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot 写入名为 `eplan` 的 MCP 服务器，运行本机的 `eplanmcp.exe serve`；可以一次写多个客户端，分别报告结果，任何一个失败时退出码为 1。
+  - 只改 `eplan` 这一项，文件中的其他服务器和设置都保留；已有的 `eplan` 是本地服务器（有 `command`）时只更新命令和参数，其他字段保留，否则整项替换；JSONC 文件中的注释在改写后丢失（原文件在备份中），Codex 的 TOML 中无法安全地逐行修改的写法拒绝写入；
+  - 写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`；读取之后文件被其他程序改动时拒绝写入；
+  - `--dry-run` 只显示 `eplan` 这一项改动前后的写法，不显示文件的其他部分；
+  - 写入和移除都记在 `<数据根目录>\state\clients.json`；`--remove` 不带客户端时移除记录中的全部条目，供卸载使用；
+  - JSON 结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
 - 列表工具统一分页（`nextCursor`），结果超出大小预算时截断并提示；来自项目的文本按不可信数据处理。
 - 支持 `language` 参数读取多语言文本。
 

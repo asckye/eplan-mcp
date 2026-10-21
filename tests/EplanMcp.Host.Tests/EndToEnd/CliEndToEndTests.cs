@@ -24,6 +24,10 @@ public sealed class CliEndToEndTests : IDisposable
     [InlineData("doctor --format xml")]
     [InlineData("audit verify --format")]
     [InlineData("audit verify --format text")]
+    [InlineData("client-config")]
+    [InlineData("client-config windsurf")]
+    [InlineData("client-config codex --dry-run --remove")]
+    [InlineData("client-config codex --format text")]
     public async Task WrongFormat_ExitsWith2AndPrintsTheUsageOnStderr(string arguments)
     {
         (int exit, string stdout, string stderr) = await Run(arguments);

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using EplanMcp.Host.Audit;
+using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Safety;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,8 +13,9 @@ namespace EplanMcp.Host;
 
 /// <summary>
 /// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp doctor</c> checks the machine;
-/// <c>eplanmcp audit verify</c> checks the audit hash chain; with <c>--format json</c> both print JSON for the Workbench;
-/// <c>eplanmcp --version</c> prints the version.
+/// <c>eplanmcp audit verify</c> checks the audit hash chain; <c>eplanmcp client-config</c> writes or removes the server in
+/// AI clients' configuration; with <c>--format json</c> these print JSON for the Workbench; <c>eplanmcp --version</c>
+/// prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5). Exit codes: 2 for a
 /// wrong command line, 3 when serve refuses an invalid config.json.
 /// </summary>
@@ -38,9 +40,12 @@ internal static class Program
         }
     }
 
-    private static async Task<int> RunAsync(CliArguments cli, TextWriter output) => cli.Command == CliCommand.Doctor
-        ? await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false)
-        : AuditCommand.Verify(output, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment(), cli.Json);
+    private static async Task<int> RunAsync(CliArguments cli, TextWriter output) => cli switch
+    {
+        { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
+        { ClientConfig: { } request } => ClientConfigCommand.ForMachine().Run(request, output, CultureInfo.CurrentUICulture, cli.Json),
+        _ => AuditCommand.Verify(output, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment(), cli.Json),
+    };
 
     /// <summary>The Workbench reads the JSON as UTF-8, so it bypasses Console.Out and the console's code page.</summary>
     private static async Task<int> RunJsonAsync(CliArguments cli)
