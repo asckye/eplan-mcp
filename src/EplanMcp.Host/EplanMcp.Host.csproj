@@ -24,6 +24,8 @@
     <InternalsVisibleTo Include="EplanMcp.Host.Tests" />
     <!-- Large test Q6 calls the Bridge's plan and execute operations itself, with the Host's BridgeClient. -->
     <InternalsVisibleTo Include="EplanMcp.Large.Tests" />
+    <!-- The Workbench's Medium tests run this WorkbenchChannel against the real Workbench pipe server (M5 design 7). -->
+    <InternalsVisibleTo Include="EplanMcp.Workbench.Tests" />
     <!-- Windows x64 only (architecture section 2); lets the platform analyzer accept registry and Win32 calls. -->
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
       <_Parameter1>windows</_Parameter1>

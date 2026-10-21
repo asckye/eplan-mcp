@@ -13,6 +13,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\EplanMcp.Workbench\EplanMcp.Workbench.csproj" />
+    <!-- The real Host channel talks to the real Workbench pipe server in the Medium tests. -->
+    <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!--
