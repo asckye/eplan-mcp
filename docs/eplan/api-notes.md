@@ -186,7 +186,8 @@
 详细数据见 [spike S23](../../spikes/S23-translation-revisions/README.md)。示例项目的 scratch 副本。
 - 项目语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（示例 20 种）、`DISPLAYED_LANGUAGES`（`##_##;`）、`SOURCE_LANGUAGE`（`##_##`）中。多语言文本存储为 `de_DE@…;en_US@…;`。— S23。
 - `Translate.TranslateObjects([project])` 2.6–2.9 秒；示例项目已全部翻译，没有文本改变，但改写 `Project`、`Page`、`Blob` 等文件。— S23。
-- `SetDisplayedLanguages(project, "en_US;zh_CN")` 抛 `ArgumentException`（S029035，`strLanguage` 无效）。— S23。
+- `SetDisplayedLanguages` 接受 `"en_US"` 和逗号分隔的 `"en_US,zh_CN"`（存为 `en_US;zh_CN;`）；用分号分隔或带结尾分号都抛 `ArgumentException`（S029035）。设置不被 `SafetyPoint` 回滚。— S23 r0、r1。
+- 只有德语的功能文本（`de_DE@Motor;`）经 `TranslateObjects` 后不变（项目源语言为 `##_##`）；翻译的前提没有查清。— S23 r1。
 - 🔴 `RemoveProjectLanguage(project, "sv_SE")` 删除该语言的全部译文、把它移出翻译语言，还把显示语言改为 `zh_CN;`。`SafetyPoint` 回滚撤回了译文，但**没有撤回语言列表和显示语言**。— S23。
 - 🔴 `Revision.CreateRevision(project, 名称, 说明, ref 路径)` 0.04 秒，返回的路径为空，项目链接文件从 `.elk` 变为 `.ell`（修订跟踪中的项目）；Ctrl+Z 不撤回。`Project.Comparisons` 和 `Revision.GetUncompletedPages` 前后都是 0。— S23。
 
