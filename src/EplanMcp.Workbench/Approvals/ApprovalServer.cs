@@ -31,6 +31,12 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     private const int InvalidRequest = -32600;
     private const int InvalidParams = -32602;
 
+    /// <summary>
+    /// The latest time a suspended write may name, in Unix milliseconds: a day short of the last one
+    /// <see cref="DateTimeOffset"/> holds, so that it shows in any time zone.
+    /// </summary>
+    private const long LatestTime = 253_402_214_399_999;
+
     private static readonly string _version = typeof(ApprovalServer).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0";
 
     private readonly ApprovalQueue _queue;
@@ -104,13 +110,13 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         }
 
         await _stop.CancelAsync().ConfigureAwait(false);
-        Task[] instances;
-        lock (_instances)
+
+        // A stopping instance may have started the next one: wait until none runs, after which none uses _stop.
+        while (Running() is { Length: > 0 } instances)
         {
-            instances = [.. _instances];
+            await Task.WhenAll(instances).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         }
 
-        await Task.WhenAll(instances).ConfigureAwait(false);
         _stop.Dispose();
     }
 
@@ -120,6 +126,11 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     /// </summary>
     private async Task InstanceAsync(bool firstInstance)
     {
+        if (_stop.IsCancellationRequested)
+        {
+            return; // quitting: no new instance
+        }
+
         using NamedPipeServerStream? pipe = Make(firstInstance);
         if (pipe is null)
         {
@@ -164,6 +175,15 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         {
             _instances.RemoveAll(t => t.IsCompleted);
             _instances.Add(instance);
+        }
+    }
+
+    private Task[] Running()
+    {
+        lock (_instances)
+        {
+            _instances.RemoveAll(t => t.IsCompleted);
+            return [.. _instances];
         }
     }
 
@@ -304,10 +324,15 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         }
     }
 
-    /// <summary>What strict reading cannot check: the binding is there and the deadline is one a Host gives.</summary>
+    /// <summary>
+    /// What strict reading cannot check: the binding is there, the deadline is one a Host gives, a release and only a
+    /// release names its suspended write, and that write's time, if given, is one the page can show.
+    /// </summary>
     private bool Valid(ApprovalAskParams ask) =>
         ask.RequestId.Length > 0 && ask.Tool.Length > 0 && ask.Fingerprint.Length > 0 && ask.ArgumentsHash.Length > 0 && ask.DeadlineUnixMs >= 0
-        && ask.DeadlineUnixMs <= (_clock.GetUtcNow() + MaxDeadline).ToUnixTimeMilliseconds();
+        && ask.DeadlineUnixMs <= (_clock.GetUtcNow() + MaxDeadline).ToUnixTimeMilliseconds()
+        && (ask.Kind == QuestionKind.SuspensionRelease) == (ask.Suspension is not null)
+        && ask.Suspension?.TimeUnixMs is null or (>= 0 and <= LatestTime);
 
     /// <summary>Whether the message the Host sent while its question waited is the cancel of that question.</summary>
     private static bool IsCancel(Task<RpcMessage?> next, Question question)
@@ -333,7 +358,7 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         Task first = await Task.WhenAny(question.Decision.Task, next, deadline).ConfigureAwait(false);
         if (first == next)
         {
-            _queue.End(question, IsCancel(next, question) ? QuestionEnd.Cancelled : QuestionEnd.Disconnected);
+            _queue.End(question, _quitting ? QuestionEnd.Closed : IsCancel(next, question) ? QuestionEnd.Cancelled : QuestionEnd.Disconnected);
             _queue.NoOutcome(question); // answered at that very moment, but the Host is gone
             LogEnded(question.RequestId, question.End);
             return;
