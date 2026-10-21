@@ -1,0 +1,15 @@
+id: connection-number
+set: dev
+fixture: copy
+prompt: 按 Standard 方案给项目 {project} 编线号，不要覆盖手工输入的线号。完成后告诉我有多少条连接的线号变了。
+answer:
+  type: object
+  required: [changed]
+  properties:
+    changed: { type: integer, description: how many connections got a new wire number }
+# The tool spec's eval (docs/tools/eplan_connection_number.md, section 7). S21 overwrote all wire numbers and changed
+# 605 (api-notes A24); except_manual keeps the manual ones, which is not verified yet, so the check only requires that
+# some wire numbers changed. The model is expected to pass overwrite except_manual, the default.
+checks:
+  - { answer: $.changed, at_least: 1 }
+budget: { max_tool_calls: 8, max_minutes: 8 }

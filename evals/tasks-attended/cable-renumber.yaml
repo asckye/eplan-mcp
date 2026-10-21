@@ -1,0 +1,20 @@
+id: cable-renumber
+set: dev
+fixture: copy
+prompt: 按 Standard 方案给项目 {project} 的电缆重新编号，告诉我哪些电缆的标识变了（编号之前的完整标识）。
+answer:
+  type: object
+  required: [changed]
+  properties:
+    changed: { type: array, items: { type: string }, description: the full tags before the numbering of the cables whose tag changed }
+# The tool spec's eval (docs/tools/eplan_cable_renumber.md, section 7). Standard is the sample project's only cable
+# numbering scheme, so S21's empty scheme ran it: +A2-WD4 and +A2-WD5, +B2.Y1-WD1 and +B2.Y1-WD2 swapped their tags
+# (api-notes A24), and the cables keep their tags as a set.
+after:
+  wd4: { tool: eplan_cable_get, args: { cable: "+A2-WD4" }, pick: $.cable.tag }
+  wd1: { tool: eplan_cable_get, args: { cable: "+B2.Y1-WD1" }, pick: $.cable.tag }
+checks:
+  - { answer: $.changed, set_equals: ["+A2-WD4", "+A2-WD5", "+B2.Y1-WD1", "+B2.Y1-WD2"] }
+  - { after: wd4, equals: "+A2-WD4" }
+  - { after: wd1, equals: "+B2.Y1-WD1" }
+budget: { max_tool_calls: 10, max_minutes: 8 }

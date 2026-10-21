@@ -1,0 +1,16 @@
+id: terminal-renumber
+set: dev
+fixture: copy
+prompt: 在项目 {project} 中，按 Numerisch 方案把端子排 +A1-XD1 的端子按顺序重新编号。完成后告诉我有几个端子改了名称。
+answer:
+  type: object
+  required: [changed]
+  properties:
+    changed: { type: integer, description: how many terminals of the strip got a new name }
+# The tool spec's eval (docs/tools/eplan_terminal_renumber.md, section 7). S21 renamed 4 terminals of +A1-XD1 with the
+# scheme the user interface had last used (api-notes A24); whether Numerisch gives the same is not verified yet, so the
+# check only requires at least one change. The task loader does not take eplan_terminal_strip_get as an after call (its
+# tool name pattern has one word for the resource), so the strip is not read back here; the Large test does that.
+checks:
+  - { answer: $.changed, at_least: 1 }
+budget: { max_tool_calls: 10, max_minutes: 8 }
