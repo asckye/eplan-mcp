@@ -6,6 +6,7 @@ namespace EplanMcp.Large.Tests;
 /// (eplan_check_list, eplan_message_list).
 /// </summary>
 [Trait("Size", "Large")]
+[Trait("Host", "Offline")]
 public sealed class NoSideEffectTests(LiveEplan eplan)
 {
     [Fact]

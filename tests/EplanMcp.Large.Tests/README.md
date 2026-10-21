@@ -1,6 +1,6 @@
 # Large 测试：工具的实机测试
 
-这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[测试规范第 4 节](../../docs/standards/testing.md#4-large-测试实机)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
+这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**（只读测试也可以改用离线宿主，见下文"离线宿主"）：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[测试规范第 4 节](../../docs/standards/testing.md#4-large-测试实机)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
 
 ## 准备
 1. 构建 Release 版插件，并在要用的 EPLAN 变体中注册（`CLAUDE.md` 常用命令）。
@@ -52,6 +52,35 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 - 准备与写测试相同（上文第 2、3 步）：用的是 `writes\LargeWrite`；`PageDeleteTests` 中只有一个测试用 `not-scratch\writes\` 下的副本，核对 `POLICY_DENIED`。
 
 这三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
+
+## 离线宿主
+标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`MacroTests`、`NoSideEffectTests`，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。
+
+准备：
+1. 用同一个配置构建离线宿主和测试（离线宿主同插件一样需要本机的 EPLAN，不注册、不启动 EPLAN）：
+   ```powershell
+   dotnet build src\EplanMcp.Bridge.Offline -c Release
+   dotnet build tests\EplanMcp.Large.Tests -c Release
+   ```
+2. 复制夹具，不加 `-Open`：`eng\scripts\eval-fixture.ps1`。离线宿主不用插件，也不需要注册。
+
+运行：
+```powershell
+$env:EPLANMCP_OFFLINE_VARIANT_BIN = 'C:\Program Files\EPLAN\Electric P8\2026.0.3\Bin'
+dotnet test --project tests\EplanMcp.Large.Tests -c Release --no-build -- --filter-trait "Host=Offline"
+Remove-Item Env:EPLANMCP_OFFLINE_VARIANT_BIN
+```
+- `EPLANMCP_OFFLINE_VARIANT_BIN` 是**变体的** Bin（其中有 `W3u.exe`），不是 Platform 的 Bin（api-notes A22）。设置了它，`LiveEplan` 先把夹具复制到 `<scratch 根目录>\offline\<时间>-<进程号>\EPLAN_Sample_Project`，在这份副本上启动离线宿主（`--idle-exit 10`，管道前缀每次不同），再把测试进程的 `EPLANMCP_PIPE_PREFIX` 设为这个前缀：这次运行中的每个 `eplanmcp` 都只连离线宿主，不碰界面中的 EPLAN，后者可以同时运行（A22）。
+- 离线宿主默认用 `src\EplanMcp.Bridge.Offline\bin\<测试的配置>\net481\EplanMcp.Bridge.Offline.exe`，`EPLANMCP_OFFLINE_EXE` 可以指定另一个。
+- 夹具开在界面中的 EPLAN 里时，复制可能因为文件被占用而失败，或者带上未保存的状态，所以最好先在 EPLAN 中关闭夹具。
+- 运行结束时 `eplanmcp` 退出，离线宿主没有 Host 连接 10 秒后自己退出；`LiveEplan` 等它退出，并核对退出码为 0、没有写 stdout。不满足时报告失败，给出日志的位置（`<数据根目录>\logs\bridge-offline-*.log`），并保留副本；正常退出时删除副本。
+- 没有标 `Host=Offline` 的测试不要这样运行：离线宿主只打开了一份副本，写测试要的 `writes\` 副本不在其中；离线宿主没有界面、不提供审批（`approval.ask`），scratch 之外的写入和 Destructive 工具只会被拒绝。
+
+不经测试、手工启动离线宿主（例如查问题时），先复制一份项目到 scratch，再：
+```powershell
+src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --variant-bin 'C:\Program Files\EPLAN\Electric P8\2026.0.3\Bin' --project "<scratch 中的副本>.elk" --pipe-prefix EplanMcpManual. --idle-exit 300
+```
+`eplanmcp` 在 `EPLANMCP_PIPE_PREFIX=EplanMcpManual.` 下只找到它。按 Ctrl+C 或空闲 300 秒后，它停止管道、关闭项目、退出 EPLAN。退出码：0 正常，1 EPLAN 或 Bridge 失败（见日志），2 命令行错误。
 
 ## 写测试
 写工具的测试**不写夹具**：读测试核对的页数、设备数会被改掉。它们写另一份 scratch 副本：

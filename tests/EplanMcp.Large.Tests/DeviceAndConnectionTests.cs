@@ -5,6 +5,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>eplan_device_*, eplan_connection_list against the fixture's known data (api-notes A12).</summary>
 [Trait("Size", "Large")]
+[Trait("Host", "Offline")]
 public sealed class DeviceAndConnectionTests(LiveEplan eplan)
 {
     private const string Breaker = "=GAA+A1-FC1";

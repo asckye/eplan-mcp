@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EplanMcp.Host;
+using EplanMcp.Host.Bridge;
 using EplanMcp.Large.Tests;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -16,6 +17,8 @@ namespace EplanMcp.Large.Tests;
 /// <summary>
 /// eplanmcp connected to the running EPLAN, with the fixture project current (README.md). Starting fails with what to
 /// do when EPLAN, the add-in or the fixture is missing, so every test reports it instead of a confusing assertion.
+/// With <see cref="OfflineHost.VariantBinVariable"/> set, it starts the offline host on a copy of the fixture instead,
+/// and every Host of the run talks to that one only (README.md, "离线宿主").
 /// </summary>
 public sealed class LiveEplan : IAsyncLifetime
 {
@@ -23,6 +26,7 @@ public sealed class LiveEplan : IAsyncLifetime
     public const string ProjectName = "EPLAN_Sample_Project";
 
     private McpClient? _client;
+    private OfflineHost? _offline;
 
     /// <summary>The fixture's project path as EPLAN reports it, without an extension.</summary>
     public string ProjectPath { get; private set; } = string.Empty;
@@ -32,6 +36,14 @@ public sealed class LiveEplan : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
+        if (Environment.GetEnvironmentVariable(OfflineHost.VariantBinVariable) is { Length: > 0 } variantBin)
+        {
+            _offline = await OfflineHost.StartAsync(variantBin, ScratchRoot(), TestContext.Current.CancellationToken);
+            // Inherited by every eplanmcp this run starts, and read by the Hosts the other fixtures build in-process: none
+            // of them finds the engineer's EPLAN (M5 design 4.9).
+            Environment.SetEnvironmentVariable(PipeBridgeDiscovery.PrefixVariable, _offline.PipePrefix);
+        }
+
         var transport = new StdioClientTransport(new StdioClientTransportOptions
         {
             Name = "eplanmcp",
@@ -49,10 +61,16 @@ public sealed class LiveEplan : IAsyncLifetime
         }
 
         ProcessId = status.GetProperty("eplan").GetProperty("processId").GetInt32();
+        if (_offline is not null && ProcessId != _offline.ProcessId)
+        {
+            throw new InvalidOperationException($"eplanmcp reached EPLAN process {ProcessId}, not the offline host {_offline.ProcessId}.");
+        }
+
+        // The offline host has only its copy open, which need not be EPLAN's current project.
         JsonElement current = (await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray()
-            .FirstOrDefault(p => p.GetProperty("current").GetBoolean());
+            .FirstOrDefault(p => _offline is null ? p.GetProperty("current").GetBoolean() : string.Equals(p.GetProperty("path").GetString(), _offline.ProjectPath, StringComparison.OrdinalIgnoreCase));
         string path = current.ValueKind == JsonValueKind.Object ? current.GetProperty("path").GetString()! : string.Empty;
-        string fixtures = Path.Combine(ScratchRoot(), "fixtures") + Path.DirectorySeparatorChar;
+        string fixtures = (_offline is null ? Path.Combine(ScratchRoot(), "fixtures") : Path.GetDirectoryName(_offline.ProjectPath)!) + Path.DirectorySeparatorChar;
         if (!path.StartsWith(fixtures, StringComparison.OrdinalIgnoreCase) || !string.Equals(Path.GetFileName(path), ProjectName, StringComparison.Ordinal))
         {
             throw new InvalidOperationException(
@@ -67,6 +85,12 @@ public sealed class LiveEplan : IAsyncLifetime
         if (_client is not null)
         {
             await _client.DisposeAsync();
+        }
+
+        if (_offline is not null)
+        {
+            // eplanmcp has exited, so the offline host is idle now and exits by itself; this checks that it does, cleanly.
+            await _offline.StopAsync();
         }
     }
 

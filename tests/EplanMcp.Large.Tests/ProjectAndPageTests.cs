@@ -9,6 +9,7 @@ namespace EplanMcp.Large.Tests;
 /// language, so the results do not depend on EPLAN's user interface language.
 /// </summary>
 [Trait("Size", "Large")]
+[Trait("Host", "Offline")]
 public sealed class ProjectAndPageTests(LiveEplan eplan)
 {
     private const string PowerSupplyPage = "=GAA+A1&EFS1/1";
