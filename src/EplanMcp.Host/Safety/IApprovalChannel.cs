@@ -31,11 +31,11 @@ internal enum ApprovalDecision
 /// </summary>
 internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null, string? BackupFolder = null)
 {
-    /// <summary>The tool's tier, which the Workbench shows (ADR-0014).</summary>
-    public ToolTier Tier { get; init; } = ToolTier.Write;
+    /// <summary>The tool's tier, which the Workbench shows, a Destructive one prominently (ADR-0014).</summary>
+    public required ToolTier Tier { get; init; }
 
-    /// <summary>The EPLAN instance the write goes to, which the Workbench shows; null when the asker did not say.</summary>
-    public EplanInstanceInfo? Eplan { get; init; }
+    /// <summary>The EPLAN instance the write goes to, which the Workbench shows; null when nobody can tell.</summary>
+    public required EplanInstanceInfo? Eplan { get; init; }
 }
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>

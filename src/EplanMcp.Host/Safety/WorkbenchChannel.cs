@@ -1,8 +1,7 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Workbench.Protocol;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +15,10 @@ namespace EplanMcp.Host.Safety;
 /// Asks the engineer in the EplanMcp Workbench (ADR-0014, M5 design 4.6), tried before the EPLAN dialog. For each
 /// question it connects once to the Workbench's pipe of this user and data root, checks that the server runs the
 /// Workbench beside this Host (a guard against a mismatched build or a squatted name, not authentication), agrees on a
-/// protocol version and sends approval.ask. Until then it can step aside (null) and the EPLAN dialog asks. Once the
-/// question is sent, only the Workbench answers it: a broken connection or message closes the question, unanswered,
-/// and it is never asked in EPLAN as well. The wait lasts until the deadline and <see cref="Slack"/>, and holds nothing
-/// of the Host's queue to EPLAN; <see cref="ApprovalService"/> judges whether an answer counts.
+/// protocol version and sends approval.ask. Until the question is sent whole it can step aside (null) and the EPLAN
+/// dialog asks. Once it is, only the Workbench answers it: a broken connection or message closes the question,
+/// unanswered, and it is never asked in EPLAN as well. The wait lasts until the deadline and <see cref="Slack"/>, and
+/// holds nothing of the Host's queue to EPLAN; <see cref="ApprovalService"/> judges whether an answer counts.
 /// </summary>
 internal sealed partial class WorkbenchChannel : IApprovalChannel
 {
@@ -36,6 +35,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
 
     private const long HandshakeId = 1;
     private const long AskId = 2;
+    private const uint QueryLimitedInformation = 0x1000;
 
     private readonly string _pipeName;
     private readonly string _workbench;
@@ -58,7 +58,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     internal WorkbenchChannel(string pipeName, string workbench, Func<string?> clientName, TimeProvider clock, ILogger logger)
     {
         _pipeName = pipeName;
-        _workbench = Path.GetFullPath(workbench);
+        _workbench = workbench;
         _clientName = clientName;
         _clock = clock;
         _logger = logger;
@@ -70,42 +70,110 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
 
     public async Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
-        if (Ask(question) is not { Length: <= WorkbenchProtocol.MaxFrameBytes } ask)
+        QuestionTier? tier = question.Tier switch { ToolTier.Write => QuestionTier.Write, ToolTier.Destructive => QuestionTier.Destructive, _ => null };
+        if (tier is null || question.Eplan is not { } eplan)
         {
-            return null;
+            return null; // version 1 cannot show it
         }
 
         using NamedPipeClientStream? pipe = await ConnectAsync(cancellationToken).ConfigureAwait(false);
-        return pipe is not null && await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false)
+        return pipe is not null && await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false) && Ask(question, tier.Value, eplan) is { } ask
             ? await DeliverAsync(pipe, question, ask, cancellationToken).ConfigureAwait(false)
             : null;
     }
 
-    /// <summary>The question as an approval.ask request; null for a tier version 1 cannot name or without the instance.</summary>
-    private byte[]? Ask(ApprovalQuestion question)
+    /// <summary>
+    /// Sends the question and waits for its answer; null when it could not be sent whole, so the Workbench never showed
+    /// it. From then on, only the Workbench answers it.
+    /// </summary>
+    internal async Task<ApprovalAnswer?> DeliverAsync(Stream pipe, ApprovalQuestion question, byte[] ask, CancellationToken cancellationToken)
     {
-        QuestionTier? tier = question.Tier switch { ToolTier.Write => QuestionTier.Write, ToolTier.Destructive => QuestionTier.Destructive, _ => null };
-        if (tier is null || question.Eplan is not { } eplan)
+        TimeSpan wait = question.Deadline + Slack - _clock.GetUtcNow();
+        using var deadline = new CancellationTokenSource(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, _clock);
+        using var waiting = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
+        bool sent = false;
+        try
         {
+            await WorkbenchFraming.WriteAsync(pipe, ask, waiting.Token).ConfigureAwait(false);
+            sent = true;
+            RpcMessage response = await ResponseAsync(pipe, AskId, waiting.Token).ConfigureAwait(false);
+            if (response.Error is { } error)
+            {
+                LogClosed(question.RequestId, error.Message);
+                return Unanswered(question, ApprovalDecision.Cancelled);
+            }
+
+            ApprovalAskResult result = WorkbenchJson.As<ApprovalAskResult>(response.Result);
+            return new ApprovalAnswer(result.RequestId, result.Fingerprint, result.ArgumentsHash, result.Decision switch
+            {
+                WorkbenchDecision.Approved => ApprovalDecision.Granted,
+                WorkbenchDecision.Rejected => ApprovalDecision.Denied,
+                WorkbenchDecision.Expired => ApprovalDecision.Expired,
+                _ => ApprovalDecision.Cancelled,
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            await CancelAsync(pipe, question.RequestId).ConfigureAwait(false);
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            return Unanswered(question, ApprovalDecision.Expired);
+        }
+        catch (IOException ex) when (!sent)
+        {
+            LogUnreachable(ex.Message);
+            return null;
+        }
+        catch (IOException ex)
+        {
+            LogClosed(question.RequestId, ex.Message);
+            return Unanswered(question, ApprovalDecision.Cancelled);
+        }
+    }
+
+    /// <summary>The question as an approval.ask request; null, logged, when this protocol version cannot carry it.</summary>
+    private byte[]? Ask(ApprovalQuestion question, QuestionTier tier, EplanInstanceInfo eplan)
+    {
+        WritePlan plan = question.Plan;
+        Suspension? suspension = question.Release;
+        byte[] ask;
+        try
+        {
+            ask = WorkbenchJson.Request(AskId, WorkbenchProtocol.ApprovalAskMethod, new ApprovalAskParams(
+                question.RequestId,
+                suspension is null ? QuestionKind.Approval : QuestionKind.SuspensionRelease,
+                question.Tool,
+                tier,
+                new ProjectInfo(plan.Project, plan.ProjectPath),
+                new EplanInstance(eplan.Version, eplan.Variant, eplan.ProcessId),
+                _clientName(),
+                ApprovalTexts.For(question, CultureInfo.CurrentUICulture).Changes,
+                question.BackupFolder,
+                suspension is null ? null : new SuspensionRecord(
+                    suspension.RequestId,
+                    suspension.Tool,
+                    suspension.Time == DateTimeOffset.MinValue ? null : suspension.Time.ToUnixTimeMilliseconds(),
+                    suspension.Project,
+                    suspension.ProcessId),
+                plan.Fingerprint,
+                question.ArgumentsHash,
+                question.Deadline.ToUnixTimeMilliseconds()));
+        }
+        catch (JsonException ex)
+        {
+            LogNotAsked(ex.Message); // a null where version 1 allows none
             return null;
         }
 
-        WritePlan plan = question.Plan;
-        Suspension? suspension = question.Release;
-        return WorkbenchJson.Request(AskId, WorkbenchProtocol.ApprovalAskMethod, new ApprovalAskParams(
-            question.RequestId,
-            suspension is null ? QuestionKind.Approval : QuestionKind.SuspensionRelease,
-            question.Tool,
-            tier.Value,
-            new ProjectInfo(plan.Project, plan.ProjectPath),
-            new EplanInstance(eplan.Version, eplan.Variant, eplan.ProcessId),
-            _clientName(),
-            ApprovalTexts.For(question, CultureInfo.CurrentUICulture).Changes,
-            question.BackupFolder,
-            suspension is null ? null : new SuspensionRecord(suspension.RequestId, suspension.Tool, suspension.Time.ToUnixTimeMilliseconds(), suspension.Project, suspension.ProcessId),
-            plan.Fingerprint,
-            question.ArgumentsHash,
-            question.Deadline.ToUnixTimeMilliseconds()));
+        if (ask.Length > WorkbenchProtocol.MaxFrameBytes)
+        {
+            LogNotAsked($"{ask.Length.ToString(CultureInfo.InvariantCulture)} bytes, over the frame limit");
+            return null;
+        }
+
+        return ask;
     }
 
     /// <summary>
@@ -119,7 +187,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
         {
             await pipe.ConnectAsync(ConnectTimeout, cancellationToken).ConfigureAwait(false);
             string? image = ServerImage(pipe);
-            if (image is null || !string.Equals(Path.GetFullPath(image), _workbench, StringComparison.OrdinalIgnoreCase))
+            if (image is null || !string.Equals(Canonical(image), Canonical(_workbench), StringComparison.OrdinalIgnoreCase))
             {
                 LogNotTheWorkbench(image ?? "unknown");
                 return null;
@@ -182,49 +250,8 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
         }
     }
 
-    /// <summary>Sends the question and waits for its answer; from the first byte sent, only the Workbench answers it.</summary>
-    private async Task<ApprovalAnswer> DeliverAsync(NamedPipeClientStream pipe, ApprovalQuestion question, byte[] ask, CancellationToken cancellationToken)
-    {
-        TimeSpan wait = question.Deadline + Slack - _clock.GetUtcNow();
-        using var deadline = new CancellationTokenSource(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, _clock);
-        using var waiting = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
-        try
-        {
-            await WorkbenchFraming.WriteAsync(pipe, ask, waiting.Token).ConfigureAwait(false);
-            RpcMessage response = await ResponseAsync(pipe, AskId, waiting.Token).ConfigureAwait(false);
-            if (response.Error is { } error)
-            {
-                LogClosed(question.RequestId, error.Message);
-                return Unanswered(question, ApprovalDecision.Cancelled);
-            }
-
-            ApprovalAskResult result = WorkbenchJson.As<ApprovalAskResult>(response.Result);
-            return new ApprovalAnswer(result.RequestId, result.Fingerprint, result.ArgumentsHash, result.Decision switch
-            {
-                WorkbenchDecision.Approved => ApprovalDecision.Granted,
-                WorkbenchDecision.Rejected => ApprovalDecision.Denied,
-                WorkbenchDecision.Expired => ApprovalDecision.Expired,
-                _ => ApprovalDecision.Cancelled,
-            });
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await CancelAsync(pipe, question.RequestId).ConfigureAwait(false);
-            throw;
-        }
-        catch (OperationCanceledException)
-        {
-            return Unanswered(question, ApprovalDecision.Expired);
-        }
-        catch (IOException ex)
-        {
-            LogClosed(question.RequestId, ex.Message);
-            return Unanswered(question, ApprovalDecision.Cancelled);
-        }
-    }
-
     /// <summary>Tells the Workbench to drop the question the client no longer waits for; the connection closes anyway.</summary>
-    private async Task CancelAsync(NamedPipeClientStream pipe, string requestId)
+    private async Task CancelAsync(Stream pipe, string requestId)
     {
         try
         {
@@ -238,7 +265,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     }
 
     /// <summary>The answer to request <paramref name="id"/>; anything else on the pipe breaks the protocol.</summary>
-    private static async Task<RpcMessage> ResponseAsync(NamedPipeClientStream pipe, long id, CancellationToken cancellationToken)
+    private static async Task<RpcMessage> ResponseAsync(Stream pipe, long id, CancellationToken cancellationToken)
     {
         byte[] frame = await WorkbenchFraming.ReadAsync(pipe, cancellationToken).ConfigureAwait(false)
             ?? throw new EndOfStreamException("The Workbench closed the connection.");
@@ -250,7 +277,10 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     private static ApprovalAnswer Unanswered(ApprovalQuestion question, ApprovalDecision decision) =>
         new(question.RequestId, question.Plan.Fingerprint, question.ArgumentsHash, decision);
 
-    /// <summary>The image of the process serving the pipe; null when it cannot be read.</summary>
+    /// <summary>
+    /// The image of the process serving the pipe; null when it cannot be read. Limited query access suffices, so an
+    /// elevated Workbench is read too.
+    /// </summary>
     private static string? ServerImage(NamedPipeClientStream pipe)
     {
         if (!GetNamedPipeServerProcessId(pipe.SafePipeHandle, out uint processId))
@@ -258,20 +288,35 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
             return null;
         }
 
+        using SafeProcessHandle process = OpenProcess(QueryLimitedInformation, inheritHandle: false, processId);
+        char[] image = new char[32_768];
+        int length = image.Length;
+        return !process.IsInvalid && QueryFullProcessImageName(process, 0, image, ref length) ? new string(image, 0, length) : null;
+    }
+
+    /// <summary>Both sides of the image comparison as the file system resolves them: short names and links followed.</summary>
+    private static string Canonical(string path)
+    {
         try
         {
-            using var process = Process.GetProcessById((int)processId);
-            return process.MainModule?.FileName;
+            return ScratchPaths.Canonical(path);
         }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or Win32Exception or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            return null; // gone already, or not ours to inspect
+            return Path.GetFullPath(path);
         }
     }
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint serverProcessId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern SafeProcessHandle OpenProcess(uint desiredAccess, [MarshalAs(UnmanagedType.Bool)] bool inheritHandle, uint processId);
+
+    [DllImport("kernel32.dll", EntryPoint = "QueryFullProcessImageNameW", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool QueryFullProcessImageName(SafeProcessHandle process, uint flags, [Out] char[] image, ref int length);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Workbench not running; the next approval channel asks")]
     private partial void LogNotRunning();
@@ -287,6 +332,9 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Workbench takes no new question now; the next approval channel asks")]
     private partial void LogNotAccepting();
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Workbench cannot be sent this question ({Problem}); the next approval channel asks")]
+    private partial void LogNotAsked(string problem);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Workbench question {RequestId} closed unanswered: {Problem}")]
     private partial void LogClosed(string requestId, string problem);

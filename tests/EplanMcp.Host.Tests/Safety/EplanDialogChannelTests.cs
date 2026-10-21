@@ -25,7 +25,7 @@ public sealed class EplanDialogChannelTests
             Changes = [new PlannedChange { Action = "create", Kind = "page", Name = "=A1&EFS1/5" }],
             Fingerprint = "f1",
         };
-        _question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, ["create page =A1&EFS1/5"], _now + HostConfig.DefaultApprovalTimeout);
+        _question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, ["create page =A1&EFS1/5"], _now + HostConfig.DefaultApprovalTimeout) { Tier = ToolTier.Write, Eplan = null };
         Connect([OperationNames.ProjectList, OperationNames.ApprovalAsk]);
         _bridge.Handlers[OperationNames.ApprovalAsk] = args =>
         {
