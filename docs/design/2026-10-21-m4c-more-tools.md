@@ -72,7 +72,7 @@ flowchart LR
 | 1 | `eplan_terminal_strip_list`、`eplan_terminal_strip_get` | Read | 端子排、端子顺序、跨接、两侧的连接 |
 | 1 | `eplan_plc_get` | Read | 一个 PLC 盒的通道与地址。列出 PLC 盒用 `eplan_device_list`（`category: "PLCBox"`） |
 | 1 | `eplan_part_search` | Read | 查询系统部件库（M2 设计 Q4 的遗留）；只读打开部件库 |
-| 1 | `eplan_revision_list` | Read | 项目的修订和修订标记（S23 之后定字段） |
+| 1 | `eplan_revision_list` | Read | 项目的修订状态（按链接文件扩展名 .elk/.ell/.elr）、修订记录（`PROJ_REVISION_LOG_*`）、未完成的页（S23 r3，[规格](../tools/eplan_revision_list.md)） |
 | 1 | `eplan_export_pxf` | 导出 | 项目导出为 EPJ（PXF），默认不带主数据（S25：840 MB 对 598 MB）（[规格](../tools/eplan_export_pxf.md)） |
 | 1 | `eplan_export_parts`、`eplan_export_untranslated` | 导出 | 部件清单（只有 XML，A25）、缺失词表（[规格](../tools/eplan_export_parts.md)、[规格](../tools/eplan_export_untranslated.md)）。S25 之后不再合成一个 `eplan_export_list`：两者参数不同；设备清单导出的是预规划清单，由标签覆盖；PLC 地址总览不给配置项目时为空，以后单独设计 |
 | 1 | `eplan_export_labels` | 导出 | 按标签方案生成清单文件，方案必填；S25 验证了文本和 xlsx，不输出需要 Excel 的 xls（[规格](../tools/eplan_export_labels.md)） |
