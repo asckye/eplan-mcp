@@ -208,14 +208,41 @@ public sealed class AddinCommandTests : IDisposable
     [Fact]
     public async Task Install_OverAnOlderAddinThatDoesNotSayItsPath_RegistersAgainAndTrustsTheFreshStart()
     {
+        // Second live check: the add-in registered from the main checkout was built before addinPath existed.
         _eplan.Registered["Electric P8"] = OldDll;
         _eplan.ReportsPath = false;
 
         AddinReport report = await Command.InstallAsync(["Electric P8"]);
 
-        Assert.Equal(3, _eplan.Instances.Count);
-        Assert.Equal((AddinOutcome.Registered, (AddinIssue?)null), (report.Results.Single().Outcome, report.Results.Single().Problem));
-        Assert.Single(Record.All());
+        Assert.Equal(
+            [
+                $"start {Eplan2026} /Variant:\"Electric P8\" EplApiModuleAction /register:\"{Dll}\"",
+                "close 4000",
+                $"start {Eplan2026} /Variant:\"Electric P8\" EplApiModuleAction /unregister:\"EplanMcp.Bridge.Eplan\"",
+                "close 4001",
+                $"start {Eplan2026} /Variant:\"Electric P8\" EplApiModuleAction /register:\"{Dll}\"",
+                "close 4002",
+            ],
+            _eplan.Log);
+        Assert.All(_eplan.Instances, i => Assert.Equal(["refresh", "close"], i.Calls));
+        AddinResult result = report.Results.Single();
+        Assert.Equal((AddinOutcome.Registered, (AddinIssue?)null, (int?)4002, 0), (result.Outcome, result.Problem, result.ProcessId, result.Notes.Count));
+        Assert.Equal(Dll, _eplan.Registered["Electric P8"]);
+        Assert.Equal([Dll], Record.All().Select(r => r.Dll));
+    }
+
+    [Fact]
+    public async Task Install_WhenTheEplanWithAnOlderAddinDoesNotClose_SaysThePathIsUnknown()
+    {
+        _eplan.Registered["Electric P8"] = OldDll;
+        _eplan.ReportsPath = false;
+        _eplan.HasWindow = false;
+
+        AddinReport report = await Command.InstallAsync(["Electric P8"]);
+
+        AddinResult result = report.Results.Single();
+        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.PathMismatch, string.Empty), AddinNote.CloseEplan), (result.Outcome, result.Problem, result.Notes.Single()));
+        Assert.Single(_eplan.Instances);
     }
 
     [Fact]
@@ -309,7 +336,7 @@ public sealed class AddinCommandTests : IDisposable
     [Fact]
     public async Task Install_AsksEplanToCloseAgainUntilItDoes()
     {
-        // Live check: right after the add-in loaded, EPLAN still finishes starting and ignores a close request.
+        // Each request goes out after a refresh (second live check: Process kept the splash screen's handle).
         _eplan.IgnoresCloses = 2;
 
         AddinReport report = await Command.InstallAsync(["Electric P8"]);
