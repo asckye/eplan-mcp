@@ -6,18 +6,26 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 /// <summary>
 /// cable.renumber.plan and cable.renumber.execute against a fake that numbers the way spike S21 found EPLAN numbers the
 /// sample project's cables (api-notes A24: +A2-WD4 and +A2-WD5, +B2.Y1-WD1 and +B2.Y1-WD2 swap): the scheme check, how
-/// given cables are found, the scope and the change list.
+/// given cables are found, the scope, the change list, the backup before the transaction, and the read-back by cable.
+/// Medium: the backup goes into a real temporary folder.
 /// </summary>
-[Trait("Size", "Small")]
-public sealed class CableRenumberOperationTests
+[Trait("Size", "Medium")]
+public sealed class CableRenumberOperationTests : IDisposable
 {
     private static readonly OpenProject _project = new() { Name = "Line1", Path = @"D:\Scratch\Line1" };
 
+    private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-cables-").FullName;
+    private readonly FakePageReader _pages = new();
     private readonly FakeDeviceReader _devices = new();
     private readonly FakeCableRenumberer _renumberer = new();
+    private readonly FakeProjectBackup _backup;
+    private readonly FakeTransactions _transactions = new();
 
     public CableRenumberOperationTests()
     {
+        _pages.Pages.Add(new PageSummary { Name = "=GAA+A1&EFS1/1" });
+        _backup = new FakeProjectBackup(_pages);
+
         // Two functions of +A2-WD4, as a category filter can give a device's tag more than once (A12).
         Cable("+A2-WD4", "-WD4", "c4");
         _renumberer.Cables.Add(new PlacedFunction { Name = "+A2-WD4", Id = "c4b" });
@@ -34,6 +42,8 @@ public sealed class CableRenumberOperationTests
         _renumberer.Numbers["+B2.Y1-WD2"] = "+B2.Y1-WD1";
         _renumberer.Numbers["+A1-?WE9"] = "+A1-WE10";
     }
+
+    public void Dispose() => Directory.Delete(_folder, recursive: true);
 
     [Fact]
     public void Plan_EveryCableOfTheProject()
@@ -101,6 +111,83 @@ public sealed class CableRenumberOperationTests
         Assert.Equal("'cables' must hold 1 to 200 cable tags; omit it for every cable of the project.", empty.Metadata!["violations"]);
     }
 
+    [Fact]
+    public void Execute_EveryCable_BacksUpFirst_ThenNumbersInOneTransaction_AndReportsEachRenamedCableOnce()
+    {
+        var args = new CableRenumberArgs { Project = "Line1", Scheme = "Standard" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _transactions.Snapshot = () =>
+        {
+            Assert.Single(_backup.Copies);
+            return () => { };
+        };
+
+        CableRenumberData data = Execute(args);
+
+        var call = Assert.Single(_renumberer.Renumbers);
+        Assert.Equal(((IReadOnlyList<string>?)null, "Standard", false, 1, 1), (call.Cables, call.Scheme, call.KeepExisting, call.Start, call.Step));
+        Assert.Equal(["Begin AI: eplan_cable_renumber", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Equal(
+            [("+A2-WD4", "+A2-WD5"), ("+A2-WD5", "+A2-WD4"), ("+B2.Y1-WD1", "+B2.Y1-WD2"), ("+B2.Y1-WD2", "+B2.Y1-WD1"), ("+A1-?WE9", "+A1-WE10")],
+            data.Changed.Select(c => (c.From, c.To)));
+        Assert.Equal((5, null), (data.ChangedCount, data.Warning));
+    }
+
+    [Fact]
+    public void Execute_GivenCables_GoToEplanByTheirFullTags_AndKeepExistingKeepsThem()
+    {
+        var args = new CableRenumberArgs { Project = "Line1", Cables = ["-WD4", "+A1-?WE9"], Scheme = "Standard", KeepExisting = true };
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        CableRenumberData data = Execute(args);
+
+        Assert.Equal(["+A2-WD4", "+A1-?WE9"], Assert.Single(_renumberer.Renumbers).Cables!);
+        Assert.Equal(("+A1-?WE9", "+A1-WE10"), (Assert.Single(data.Changed).From, data.Changed[0].To));
+    }
+
+    [Fact]
+    public void Execute_ASchemeEplanRefuses_RollsBackWithTheSchemesEplanNamed()
+    {
+        var args = new CableRenumberArgs { Project = "Line1", Scheme = "Standard" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Refuse = true;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WhenTheScopeChangedOrTheBackupFails_NothingIsNumbered()
+    {
+        var args = new CableRenumberArgs { Project = "Line1", Scheme = "Standard" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Cables[0].Name = "+A2-WD9";
+        BridgeError stale = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        _renumberer.Cables[0].Name = "+A2-WD4";
+        _backup.Failure = new IOException("disk full");
+
+        BridgeError failed = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (stale.Reason, stale.Execution));
+        Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted), (failed.Reason, failed.Execution));
+        Assert.Empty(_renumberer.Renumbers);
+    }
+
+    [Fact]
+    public void Execute_WhenEplanGivesNewIdentifiers_SaysSoInsteadOfGuessing()
+    {
+        var args = new CableRenumberArgs { Project = "Line1", Cables = ["+A2-WD4"], Scheme = "Standard" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.NewIds = true;
+
+        CableRenumberData data = Execute(args);
+
+        Assert.Empty(data.Changed);
+        Assert.StartsWith("EPLAN gave 2 cable functions new identifiers", data.Warning, StringComparison.Ordinal);
+    }
+
     private void Cable(string tag, string shown, string id)
     {
         _renumberer.Cables.Add(new PlacedFunction { Name = tag, IsMain = true, Id = id });
@@ -108,4 +195,10 @@ public sealed class CableRenumberOperationTests
     }
 
     private WritePlan Plan(CableRenumberArgs args) => (WritePlan)new CableRenumberPlanOperation(new FakeCatalog(_project), _devices, _renumberer).Execute(args)!;
+
+    private CableRenumberData Execute(CableRenumberArgs args)
+    {
+        args.Backup = new BackupTarget { Path = Path.Combine(_folder, "Line1.elk"), MaxSeconds = 150 };
+        return (CableRenumberData)new CableRenumberExecuteOperation(new FakeCatalog(_project), _pages, _devices, _renumberer, _backup, _transactions).Execute(args)!;
+    }
 }
