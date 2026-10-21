@@ -36,6 +36,12 @@
     <PackageVersion Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
     <PackageVersion Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
     <PackageVersion Include="Microsoft.WindowsAppSDK.DWrite" Version="2.1.0" />
+    <!--
+      Apache-2.0, same release as ModelContextProtocol (it must stay equal). Spike S19's HTTP prototype only
+      (spikes/S19-vm-http, ADR-0018): Streamable HTTP on Kestrel. No project in EplanMcp.Ci.slnf references it yet; the
+      Host takes it with ADR-0018's implementation PR, which moves this line to the first group.
+    -->
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup Label="Analyzers">
     <!--

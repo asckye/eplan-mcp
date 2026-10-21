@@ -394,3 +394,12 @@
 - 两个插件服务器的命令行相同时，只启动一个（文档：插件按端点判断重复，本地、项目、用户范围的定义优先）。`mcp get` 隐藏插件服务器的命令、参数和环境变量。— S17。
 - `marketplace add` 能展开 `~/…`，不能展开 `%USERPROFILE%\…`（报 "Invalid marketplace source format"）。— S17。
 - 桌面版（MSIX，`Claude_pzs8sxrjxfjjc`）的 `claude_desktop_config.json` 只在 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\` 中。包外的进程看不到 `%APPDATA%\Claude\`；包内的进程看到的 `%APPDATA%\Claude\claude_desktop_config.json` 与包目录中的是同一个文件（文件 ID 相同）。桌面版运行时每隔几十秒就会改写它。— S17、A6。
+
+### Streamable HTTP 与 Claude Code 远程客户端（spike S19，2026-10-21，ModelContextProtocol.AspNetCore 2.2.0，Claude Code 2.1.299，只在 127.0.0.1 上）
+详细数据见 [spike S19](../../spikes/S19-vm-http/README.md)。
+- **`HttpServerTransportOptions.SessionMode` 默认是 `Stateless`**：没有 `Mcp-Session-Id`，每个请求一个新的服务器对象，`initialize` 中的客户端名称在后续请求中取不到，按会话保存的状态无处可放。`Stateful` 对 2026-07-28 的请求回 -32022；`StatefulForInitializeClients` 只给用 `initialize` 的客户端会话。— SDK 的 XML 文档 + S19 探测。
+- HTTP 方式下**根服务容器中没有 `McpServer`**（三种模式都是），单例中 `GetService<McpServer>()` 为 null；stdio 方式下有，2025-11-25 和 2026-07-28 两种客户端的名称都能取到。— S19。
+- `ConfigureSessionOptions` 在 Stateful 模式下每个会话调用一次，这时来源地址和响应头中新生成的 `Mcp-Session-Id` 都可用；SDK 不把会话绑定到来源地址；`IdleTimeout` 默认 2 小时，`MaxIdleSessionCount` 默认 10,000；`RunSessionHandler` 是实验性 API；`EnableLegacySse` 默认关闭（`/sse`、`/message` 回 404）。— S19。
+- 带上 `ModelContextProtocol.AspNetCore` 后，自包含单文件多 26.5 MB；`Microsoft.Extensions.*` 改用 ASP.NET Core 运行时包中的 ReadyToRun 版本；发布目录多一个 Kestrel 用不到的 `aspnetcorev2_inprocess.dll`。— S19。
+- **Claude Code 2.1.299 连接远程 HTTP 服务器时先发 2026-07-28 的 `server/discover`**；服务器回 -32022 时退回 `initialize`（2025-11-25）并带 `Mcp-Session-Id`，再开 `GET /mcp` 的 SSE 流；不发 `Origin`；`User-Agent` 为 `claude-code/2.1.299 (sdk-cli)`；`mcp list`/`mcp get` 每次都新建会话，结束时不发 `DELETE`。— S19 的请求日志。
+- `claude mcp add --transport http --scope user <名称> <URL> --header "Authorization: Bearer …"` 在 `.claude.json` 顶层 `mcpServers` 中写 `{"type":"http","url":…,"headers":{…}}`；`mcp get` 原样打印请求头的值。401 时报 "Server rejected the configured Authorization header (HTTP 401)"，配置了 `Authorization` 就不再尝试 OAuth。请求头中的 `${VAR}` 原样保存、连接时展开，变量不存在时在诊断中警告。— S19。
