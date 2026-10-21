@@ -1,0 +1,14 @@
+{
+  "name": "eplanmcp-local",
+  "description": "EplanMcp plugin shipped with the EplanMcp installer (local marketplace, works offline)",
+  "owner": {
+    "name": "EplanMcp"
+  },
+  "plugins": [
+    {
+      "name": "eplan-mcp",
+      "source": "./eplan-mcp",
+      "description": "Connects Claude Code to EPLAN Electric P8 / Pro Panel through the locally installed eplanmcp.exe"
+    }
+  ]
+}
