@@ -101,6 +101,22 @@ public sealed class DeviceRenumberToolTests : IDisposable
     }
 
     [Fact]
+    public async Task EplanNumberingNoTag_IsNotStartedWithTheBackupAndNothingToUndo()
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceRenumberExecute] = args =>
+        {
+            File.WriteAllText(((DeviceRenumberArgs)args!).Backup!.Path, "copy");
+            return new DeviceRenumberData { Project = "Line1", ChangedCount = 0, StillUnnumbered = ["=GAA+A1-?QA1"], StillUnnumberedCount = 1 };
+        };
+
+        CallToolResult result = await Renumber();
+
+        JsonElement data = WriteToolHarness.Structured(result);
+        Assert.Equal(("not_started", JsonValueKind.Null, JsonValueKind.String), (data.GetProperty("execution").GetString(), data.GetProperty("undo").ValueKind, data.GetProperty("backup").ValueKind));
+        Assert.Equal("EPLAN numbered no device tag, so nothing was changed; the tags in 'stillUnnumbered' still contain '?'. A backup was made first (see 'backup').", WriteToolHarness.Text(result, 0));
+    }
+
+    [Fact]
     public async Task AnUnknownScheme_IsRolledBackWithItsCandidatesAndTheBackup()
     {
         _harness.Bridge.WriteFailure = new BridgeError
