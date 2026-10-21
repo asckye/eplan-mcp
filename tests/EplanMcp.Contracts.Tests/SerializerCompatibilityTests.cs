@@ -30,6 +30,7 @@ public sealed class SerializerCompatibilityTests
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.1.0", Eplan = new EplanInstanceInfo { ProcessId = 1, Version = "x" } },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.2.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, Operations = ["page.list", "project.list"] },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.3.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, BuildTarget = ".NETFramework,Version=v4.8.1" },
+        new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.4.0", Eplan = new EplanInstanceInfo { ProcessId = 1, Variant = "Electric P8", Offline = true } },
         new BridgeError
         {
             Reason = ErrorReason.EplanBusy,
@@ -401,6 +402,15 @@ public sealed class SerializerCompatibilityTests
 
         Assert.Contains("\"protocolVersion\":", json, StringComparison.Ordinal);
         Assert.Contains("\"eplan\":{\"processId\":7", json, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HandshakeResult_FromAnAddInWithoutTheOfflineField_ReadsAsNotOffline()
+    {
+        HandshakeResult? result = System.Text.Json.JsonSerializer.Deserialize<HandshakeResult>("""{"protocolVersion":1,"eplan":{"processId":7}}""", _stj);
+
+        Assert.False(result!.Eplan.Offline);
+        Assert.Contains("\"offline\":true", JsonConvert.SerializeObject(new EplanInstanceInfo { Offline = true }, _newtonsoft), StringComparison.Ordinal);
     }
 
     [Fact]

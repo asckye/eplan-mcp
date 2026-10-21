@@ -52,6 +52,14 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     {
         string requestId = question.RequestId;
         string tool = question.Release is null ? question.Tool : "release of " + question.Tool;
+        if (question.Eplan is { Offline: true })
+        {
+            // The offline host has no user interface, and writes through it go to scratch only (M5 design 4.9): no
+            // channel asks about it, not even a Workbench that is running.
+            LogDecided(requestId, tool, "none (offline host)", ApprovalDecision.Unavailable);
+            return new ApprovalResult(null, ApprovalDecision.Unavailable);
+        }
+
         using ApprovalProgress? waiting = ApprovalProgress.Start(progress, question, Timeout, clock);
         foreach (IApprovalChannel channel in _channels)
         {

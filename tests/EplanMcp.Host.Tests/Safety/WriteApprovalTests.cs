@@ -91,6 +91,24 @@ public sealed class WriteApprovalTests : IDisposable
     }
 
     [Fact]
+    public async Task ThroughTheOfflineHost_NobodyIsAsked_SoOnlyScratchCanBeWritten()
+    {
+        // No user interface, and its writes go to scratch only (M5 design 4.9): not even a running Workbench is asked.
+        _bridge.Status.Handshake!.Eplan.Offline = true;
+        var workbench = new FakeApprovalChannel("workbench", ApprovalDecision.Granted);
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+
+        BridgeError outside = await Fails(workbench, dialog);
+        _bridge.Handlers[Plan] = _ => PlanFor(Path.Combine(_locations.DefaultScratch, "Line1"));
+        WriteOutcome<JsonObject> scratch = await Run(workbench, dialog);
+
+        Assert.Equal((ErrorReason.ApprovalDenied, ApprovalService.NoChannel), (outside.Reason, outside.Message));
+        Assert.Equal(ExecutionState.Committed, scratch.Execution);
+        Assert.Empty(workbench.Questions.Concat(dialog.Questions));
+        Assert.Single(_bridge.Writes);
+    }
+
+    [Fact]
     public async Task AChannelThatCannotAsk_PassesTheQuestionToTheNext()
     {
         var first = new FakeApprovalChannel("workbench", null);

@@ -26,6 +26,8 @@ public sealed class BridgeServer : IDisposable
     private readonly object _gate = new();
     private readonly HashSet<NamedPipeServerStream> _pipes = [];
     private bool _started;
+    private int _connected;
+    private long _idleSinceTicks = DateTime.UtcNow.Ticks;
 
     public BridgeServer(string pipeName, Func<string, NamedPipeServerStream> createPipe, BridgeServerOptions options, OperationRouter router, IBridgeLog log)
     {
@@ -39,7 +41,13 @@ public sealed class BridgeServer : IDisposable
     public string PipeName { get; }
 
     /// <summary><c>EplanMcp.Bridge.&lt;pid&gt;.&lt;16 hex digits&gt;</c>; the random part prevents name squatting (SEC-03).</summary>
-    public static string CreatePipeName(int processId)
+    public static string CreatePipeName(int processId) => CreatePipeName(BridgeProtocol.PipePrefix, processId);
+
+    /// <summary>
+    /// <c>&lt;prefix&gt;&lt;pid&gt;.&lt;16 hex digits&gt;</c>. Another prefix than <see cref="BridgeProtocol.PipePrefix"/>
+    /// is for the offline host in tests, which a Host finds through <c>EPLANMCP_PIPE_PREFIX</c> (M5 design 4.9).
+    /// </summary>
+    public static string CreatePipeName(string prefix, int processId)
     {
         byte[] random = new byte[8];
         using (var rng = RandomNumberGenerator.Create())
@@ -47,9 +55,17 @@ public sealed class BridgeServer : IDisposable
             rng.GetBytes(random);
         }
 
-        return BridgeProtocol.PipePrefix + processId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "." +
+        return prefix + processId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "." +
             BitConverter.ToString(random).Replace("-", string.Empty).ToLowerInvariant();
     }
+
+    /// <summary>
+    /// Since when no Host has been connected: the creation of this server or the end of the last connection; null
+    /// while one is. The offline host exits after a while of it (M5 design 4.9). Thread-safe; a Host that connects at
+    /// the very moment it is read is seen on the next read.
+    /// </summary>
+    public DateTime? IdleSinceUtc =>
+        Volatile.Read(ref _connected) > 0 ? null : new DateTime(Interlocked.Read(ref _idleSinceTicks), DateTimeKind.Utc);
 
     /// <summary>
     /// Creates the first pipe instance before returning, so a Host can discover the pipe as soon as this returns,
@@ -122,7 +138,17 @@ public sealed class BridgeServer : IDisposable
                 }
 
                 await pipe.WaitForConnectionAsync(stop).ConfigureAwait(false);
-                await new BridgeConnection(_options, _router, _log).RunAsync(pipe, stop).ConfigureAwait(false);
+                Interlocked.Increment(ref _connected);
+                try
+                {
+                    await new BridgeConnection(_options, _router, _log).RunAsync(pipe, stop).ConfigureAwait(false);
+                }
+                finally
+                {
+                    // Idle from now on, unless another Host is still connected.
+                    Interlocked.Exchange(ref _idleSinceTicks, DateTime.UtcNow.Ticks);
+                    Interlocked.Decrement(ref _connected);
+                }
             }
             catch (Exception) when (stop.IsCancellationRequested)
             {
