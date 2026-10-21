@@ -15,7 +15,7 @@
 ```powershell
 dotnet test --project tests\EplanMcp.Large.Tests
 dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.WriteSafetyTests"   # 只跑 Q1、Q2、Q6
-dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.PageDeleteTests" --filter-class "EplanMcp.Large.Tests.DeviceRenumberTests" --filter-class "EplanMcp.Large.Tests.PageRenumberTests"   # 只跑 Destructive 工具
+dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.PageDeleteTests" --filter-class "EplanMcp.Large.Tests.DeviceRenumberTests" --filter-class "EplanMcp.Large.Tests.PageRenumberTests" --filter-class "EplanMcp.Large.Tests.TerminalRenumberTests"   # 只跑 Destructive 工具
 ```
 - 测试一个接一个运行。只读测试共用同一个 `eplanmcp`，它就是本项目构建出的那个（随项目引用复制到测试旁边）。
 - 开始前检查 EPLAN 已连接、当前项目是 scratch 根目录下的夹具；不满足时，每个测试都报告该怎么做，而不会给出看不懂的断言失败。
@@ -47,12 +47,13 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `PageDeleteTests` | Destructive：dry run `=GAA+A1&EFS1/1` 列出页上的功能数，以及其他页上失去主功能的三根电缆 `+A1-WE1`、`+A1-WE2`、`+A2-WE1`（S12 的第四根 `+A2-WE2` 留下的功能不在页上，不列出），不审批；新的宏页：拒绝时 `APPROVAL_DENIED`、不建备份目录、页还在，审计只有拒绝；批准后新的备份目录中有副本（`.elk` 与 `.edb`），页没了，审计依次为批准、带 `backup` 的开始、`backupCompleted` 的结果；再删一次 `PAGE_NOT_FOUND`、不审批。一次删除 3 页。scratch 之外的副本 `POLICY_DENIED`，不审批、不备份，设计数据不变 |
 | `DeviceRenumberTests` | Destructive：在新页上用 `number` 插入宏后，`only_unnumbered` 编号：EPLAN 不崩溃（只交带 `?` 的设备标识，A20），`=GAA+A1-?QA…` 出现在 `stillUnnumbered` 中，没有改动所以 `not_started`、`undo` 为 null，备份照样有；方案 `Default`：`INVALID_ARGUMENT`、`rolled_back`，候选与 S12 的 5 个方案相同，备份保留，`?` 标识不变 |
 | `PageRenumberTests` | Destructive：三张新页从 200、步长 10 重编号为 `/200`、`/210`、`/220`（S12），dry run 不列新页名；`start` 为 1 时与 `/1`、`/2` 冲突：`ALREADY_EXISTS`、`rolled_back`，页名不变，备份保留 |
+| `TerminalRenumberTests` | Destructive，**改变副本**：`+A1-XD1` 全部端子按 `Numerisch` 重新编号：只改这一排（`+A1-XD4` 不变），名称只是互换（S21：`:2`→`:3`、`:3`→`:5`、`:4`→`:2`、`:5`→`:4`，写入测试输出），第一次 `committed`，之后的运行没有改名、`not_started`、`undo` 为 null；新宏页上 `only_unnumbered` 给整个项目编号：EPLAN 不崩溃，只改名称中 `:` 之后带 `?` 的端子；`numerisch`（大小写不符）：`INVALID_ARGUMENT`、`not_started`，候选中有 `Numerisch`、没有 `InternalRefDefScheme`，不审批、不备份 |
 | `WriteSafetyTests` | **Q1**：对 scratch 之外的副本建页、改页描述、设备改名都返回 `POLICY_DENIED`、`not_started`，设计数据文件（`User.*` 除外，A17）和审计都不变。**Q2**：把电缆 `+A1-WE1` 改名为 `=F+A1-WE19`，EPLAN 丢掉 `=F`，读回不一致而回滚（A17 的自然故障）：`INVALID_ARGUMENT`、`rolled_back`，电缆的全部功能保持原名，审计为 `rolled_back`，不暂停写入。**Q6**：直接经 Host 的 `BridgeClient` 调用 `page.create.plan`，在同一结构中另建一页，再用旧指纹调用 `page.create.execute`，返回 `PLAN_STALE`、`not_started`，计划的页不存在；改页描述同理，后来的修改保留 |
 
 Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映射为 `not_started`、不打开事务）已由 Medium 测试 `PageCreateInteropTests` 在假项目上覆盖；这里只验证 Medium 测试做不到的部分：真实适配层的指纹能看到在 EPLAN 中发生的变化（[`eplan_page_create` 规格第 7 节](../../docs/tools/eplan_page_create.md)）。
 
 ### Destructive 工具
-`eplan_page_delete`、`eplan_device_renumber`、`eplan_page_renumber` 每次都要工程师审批，scratch 中也一样，而 `eplanmcp` 不能自己批准（ADR-0005、ADR-0011）。所以这三组测试不启动 `eplanmcp.exe`，而是由 `DestructiveHost` 在测试进程中按 `serve` 的方式组装 Host（`AddEplanMcp`，内存中的流代替 stdio），连接真实的 Bridge，只把审批渠道换成 `ScriptedApprovalChannel`（[`eplan_page_delete` 规格第 7 节](../../docs/tools/eplan_page_delete.md)）：
+`eplan_page_delete`、`eplan_device_renumber`、`eplan_page_renumber` 和 M4c 的编号工具每次都要工程师审批，scratch 中也一样，而 `eplanmcp` 不能自己批准（ADR-0005、ADR-0011）。所以这些测试不启动 `eplanmcp.exe`，而是由 `DestructiveHost` 在测试进程中按 `serve` 的方式组装 Host（`AddEplanMcp`，内存中的流代替 stdio），连接真实的 Bridge，只把审批渠道换成 `ScriptedApprovalChannel`（[`eplan_page_delete` 规格第 7 节](../../docs/tools/eplan_page_delete.md)）：
 - 它只批准测试在调用前登记的工具、项目和变更清单（与 EPLAN 对话框中显示的逐行相同），每次登记只用一次，其余一律拒绝，包括解除写入暂停的确认。EPLAN 中不弹出审批对话框。
 - 这个类型只在本测试程序集中。`eplanmcp.exe` 没有任何开关、配置项或环境变量能启用它；Small 测试 `PolicyEngineTests` 核对 Host 程序集中 `IApprovalChannel` 的实现只有工程师操作的两个窗口 `WorkbenchChannel` 和 `EplanDialogChannel`，`AddEplanMcp` 注册的也只有这两个，Workbench 在前（ADR-0014）。
 - 数据根目录、配置与 `WriteHost` 相同：系统临时目录中新建，只把 `<scratch 根目录>\writes\` 当作 scratch，其他项目的写入一律拒绝。审计、备份都在这个目录中，测试类结束时删除。**每次执行的 Destructive 写入都先把整个副本复制到 `backups\` 下（示例项目约 210 MB），一个测试类最多留下 4 份**，运行时临时目录所在的盘要有 1 GB 左右的空闲空间。
@@ -61,6 +62,8 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 `eplan_language_remove` 的 `LanguageRemoveTests` 也在 `DestructiveHost` 上运行。规格第 7 节中两项要在 EPLAN 中手工核对：用测试输出中的备份路径打开备份，项目设置的翻译语言中仍有 `sv_SE`；删除 `sv_SE` 之后对写副本按一次 Ctrl+Z，记录译文和语言设置是否恢复（只开着写副本、让它成为当前项目时再按，见下文"写测试"第 3 步），结果补进 api-notes A28。
 
 页的三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
+
+M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整个项目，测试无法只在新页上验证，也不能按 Ctrl+Z（开着两个项目时撤销可能落在夹具上，A14），所以**它们会永久改变 `writes\LargeWrite`**：端子名、电缆名、线号按方案重排。其他写测试不依赖这些名称（`WriteSafetyTests` 和 `PageDeleteTests` 用到的 `+A1-WE1` 等电缆不在 S21 改名的电缆中）。这些测试第一次在新副本上运行时核对 S21 的改动，之后的运行核对"没有可改的"；要重新验证第一次的结果，按上文重新复制副本。
 
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。
