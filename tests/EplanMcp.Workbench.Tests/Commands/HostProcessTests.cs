@@ -7,6 +7,7 @@ namespace EplanMcp.Workbench.Tests.Commands;
 /// The real runner with the real eplanmcp.exe built beside this repository's Workbench (STS-04): started without a
 /// shell, its data root from the environment, its output read whole; and a program that takes too long is stopped.
 /// </summary>
+[Collection(typeof(ProcessIsolation))]
 [Trait("Size", "Medium")]
 public sealed class HostProcessTests : IDisposable
 {
@@ -85,3 +86,10 @@ public sealed class HostProcessTests : IDisposable
             ?? throw new InvalidOperationException("eplanmcp.exe is not built; build the solution first.");
     }
 }
+
+/// <summary>
+/// Tests that start processes run while no other test runs: a .NET process starting takes the CPU for a moment, and the
+/// pipe tests beside them count on the Host's 250 ms connect timeout (ADR-0014), which a busy CI runner then missed.
+/// </summary>
+[CollectionDefinition(DisableParallelization = true)]
+public sealed class ProcessIsolation;
