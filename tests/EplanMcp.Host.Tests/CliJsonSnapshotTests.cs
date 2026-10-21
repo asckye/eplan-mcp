@@ -1,12 +1,13 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Host.Audit;
+using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
 
 namespace EplanMcp.Host.Tests;
 
 /// <summary>
-/// The JSON of <c>doctor --format json</c> and <c>audit verify --format json</c> (architecture 5.2) as reviewed
+/// The JSON of <c>doctor</c>, <c>audit verify</c> and <c>client-config</c> with <c>--format json</c> (architecture 5.2) as reviewed
 /// snapshots: the Workbench parses it, so a change of shape fails here until the new snapshot in
 /// tests/Contracts.Snapshots is reviewed and committed with a new schemaVersion (testing.md 3). The checks and results
 /// are fixed, so only the shape is pinned, not doctor's texts. Medium: the snapshots are files.
@@ -46,6 +47,41 @@ public sealed class CliJsonSnapshotTests
         };
 
         return Snapshot(results.ToJsonString(), "audit-verify-json");
+    }
+
+    [Fact]
+    public Task ClientConfigJson_MatchesTheReviewedSnapshot()
+    {
+        const string Profile = @"C:\Users\engineer";
+        var server = new LocalServer(Profile + @"\EplanMcp\app\eplanmcp.exe");
+        const string Entry = "\"eplan\": {\n  \"command\": \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\",\n  \"args\": [\n    \"serve\"\n  ]\n}";
+        ClientResult[] written =
+        [
+            new("codex", Profile + @"\.codex\config.toml", ClientAction.Write, ClientOutcome.Written)
+            {
+                After = "[mcp_servers.eplan]\ncommand = \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\"",
+                Backup = Profile + @"\.codex\config.toml.bak_20261021T0815301234567Z",
+            },
+            new("gemini-cli", Profile + @"\.gemini\settings.json", ClientAction.Write, ClientOutcome.Unchanged) { Before = Entry, After = Entry },
+            new("claude-desktop", null, ClientAction.Write, ClientOutcome.Failed) { Problem = new(ClientProblem.AmbiguousPackage, "Claude_0123456789abc, Claude_abcdefghijklm") },
+        ];
+        var results = new JsonObject
+        {
+            ["write"] = Parse(new(server, ClientConfigMode.Write, null, written)),
+            ["dryRun"] = Parse(new(server, ClientConfigMode.DryRun, null,
+            [
+                new("vscode-copilot", Profile + @"\AppData\Roaming\Code\User\mcp.json", ClientAction.Write, ClientOutcome.WouldWrite) { After = Entry, CommentsDropped = true },
+            ])),
+            ["remove"] = Parse(new(server, ClientConfigMode.Remove, null,
+            [
+                new("cursor", Profile + @"\.cursor\mcp.json", ClientAction.Remove, ClientOutcome.Removed) { Before = Entry, Backup = Profile + @"\.cursor\mcp.json.bak_20261021T0815301234567Z" },
+            ])),
+            ["refused"] = Parse(new(new LocalServer(@"C:\Program Files\dotnet\dotnet.exe"), ClientConfigMode.Write, new(ClientProblem.NotEplanmcp, @"C:\Program Files\dotnet\dotnet.exe"), [])),
+        };
+
+        return Snapshot(results.ToJsonString(), "client-config-json");
+
+        static JsonNode Parse(ClientConfigReport report) => JsonNode.Parse(ClientConfigOutput.Json(report))!;
     }
 
     private static SettingsTask Snapshot(string json, string name) =>

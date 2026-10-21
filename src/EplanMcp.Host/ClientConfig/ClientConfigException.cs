@@ -17,6 +17,18 @@ internal enum ClientProblem
 
     /// <summary>The record of written entries (<c>state\clients.json</c>) cannot be read.</summary>
     InvalidRecord,
+
+    /// <summary>The file was written, but the record could not be updated.</summary>
+    RecordFailed,
+
+    /// <summary>The record names a client this version does not know.</summary>
+    UnknownClient,
+
+    /// <summary>The file cannot be read or written.</summary>
+    IoError,
+
+    /// <summary>client-config does not run as eplanmcp.exe, whose path the entry needs.</summary>
+    NotEplanmcp,
 }
 
 /// <summary>A client whose configuration is not changed; <see cref="Detail"/> names what was found, in English.</summary>
