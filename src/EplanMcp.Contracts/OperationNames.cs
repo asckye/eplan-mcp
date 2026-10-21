@@ -166,6 +166,13 @@ public static class OperationNames
     public const string ImportDxfExecute = "import.dxf.execute";
 
     /// <summary>
+    /// The plan of eplan_import_pxf: checks the EPJ file the Host resolved below its import root and that the scratch
+    /// folder has no project of the name, never writes; no open project is involved. Arguments: <see cref="ImportPxfArgs"/>;
+    /// data: <see cref="WritePlan"/> whose project path is the new project's.
+    /// </summary>
+    public const string ImportPxfPlan = "import.pxf.plan";
+
+    /// <summary>
     /// The plan of eplan_check_run: finds the pages and counts the project's check messages, never checks. Arguments:
     /// <see cref="CheckRunArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>
