@@ -30,14 +30,15 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         Assert.Contains(dryRun.GetProperty("devices").EnumerateArray(), d => d.GetProperty("tag").GetString() == "+-WG6");
 
         // S10 (A14): the devices take the page's structure and show their tags; the cable and the terminal strips get
-        // tags no device has. The page is new and empty, so EPLAN cannot tell its size and only the point was checked.
+        // tags no device has. A page from eplan_page_create already has its size (api-notes A20), so the outline was
+        // checked against it; no hint about an unknown size.
         Assert.Equal(("committed", "AI: eplan_macro_insert", 28), (inserted.GetProperty("execution").GetString(), inserted.GetProperty("undo").GetString(), inserted.GetProperty("objectCount").GetInt32()));
         JsonElement[] devices = [.. inserted.GetProperty("devices").EnumerateArray()];
         JsonElement cable = Assert.Single(devices, d => d.GetProperty("category").GetString() == "Cable");
         Assert.StartsWith("+A1-WG", cable.GetProperty("tag").GetString(), StringComparison.Ordinal);
         Assert.StartsWith("-WG", cable.GetProperty("visibleTag").GetString(), StringComparison.Ordinal);
         Assert.Contains(devices, d => d.GetProperty("tag").GetString()!.StartsWith("+A1-XG", StringComparison.Ordinal));
-        Assert.Contains("only x >= 0 and y >= 0 were checked", inserted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.DoesNotContain("only x >= 0 and y >= 0 were checked", inserted.GetProperty("hint").GetString() ?? string.Empty, StringComparison.Ordinal);
         Assert.InRange(onPage, 1, 50);
 
         // The same macro at the same point: EPLAN refuses to stack the same symbols ("S029181", A13), nothing stays.

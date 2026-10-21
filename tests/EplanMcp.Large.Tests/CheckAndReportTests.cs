@@ -18,7 +18,7 @@ public sealed class CheckAndReportTests(LiveEplan eplan)
     private const string NewPartsList = "+A2&EPA1/1.2";
 
     [Fact]
-    public async Task CheckRun_OfTheProject_ReplacesTheMessages_AndCheckListReadsTheSame()
+    public async Task CheckRun_OfTheProject_ReadsAsCheckList_AndAddsTheSummaryHintsAgain()
     {
         string project = await eplan.WriteProjectAsync();
         int pages = (await eplan.CallAsync("eplan_project_get", new() { ["project"] = project })).GetProperty("counts").GetProperty("pages").GetInt32();
@@ -37,8 +37,11 @@ public sealed class CheckAndReportTests(LiveEplan eplan)
         Assert.Equal(first.GetProperty("total").GetInt32(), listed.GetProperty("total").GetInt32());
         Assert.Equal(Messages(first), Messages(listed).Take(first.GetProperty("messages").GetArrayLength()));
 
-        // Checking again replaces the messages instead of adding to them (tool spec 5: idempotentHint).
-        Assert.Equal((Counts(first), first.GetProperty("total").GetInt32()), (Counts(second), second.GetProperty("total").GetInt32()));
+        // Checking again replaces the errors and warnings but adds EPLAN's 14 summary hints again, one per check region
+        // (api-notes A20), which is why the tool is not idempotent.
+        (int Error, int Warning, int Hint) before = Counts(first), after = Counts(second);
+        Assert.Equal((before.Error, before.Warning, before.Hint + 14), after);
+        Assert.Equal(first.GetProperty("total").GetInt32() + 14, second.GetProperty("total").GetInt32());
         TestContext.Current.TestOutputHelper?.WriteLine(
             $"check: dry run before {dryRun.GetProperty("before").GetInt32()}; first {first.GetProperty("total").GetInt32()} messages; second run before {second.GetProperty("before").GetInt32()} (done ones included)");
     }
