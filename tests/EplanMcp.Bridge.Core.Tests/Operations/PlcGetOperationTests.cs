@@ -107,6 +107,41 @@ public sealed class PlcGetOperationTests
     }
 
     [Fact]
+    public void Execute_ChannelsOfOneName_AreAllKeptInEplansOrderWithTheirPageAndMain()
+    {
+        // The fixture's =K1+A2-KE1: 34 channel objects with 17 names, e.g. :1.1 as the output %QX2.0 and the input %IX2.0.
+        Plc("=K1+A2-KE1", "-KE1", [.. Pair("1.1", "%QX2.0", "%IX2.0"), .. Pair("1.2", "%IX2.1", null)]);
+
+        PlcGetData data = Run(new PlcGetArgs { Plc = "=K1+A2-KE1", Limit = 100 });
+
+        Assert.Equal(["=K1+A2-KE1:1.1", "=K1+A2-KE1:1.1", "=K1+A2-KE1:1.2", "=K1+A2-KE1:1.2"], data.Channels.Select(c => c.Name));
+        Assert.Equal(["%QX2.0", "%IX2.0", "%IX2.1", null], data.Channels.Select(c => c.Address));
+        Assert.Equal([("=K1+A2&EFS1/3", true), ("=K1+A2&EFS1/1", false)], data.Channels.Take(2).Select(c => (c.Page, c.Main)));
+        Assert.Equal((4, 0), (data.Total, data.Connected));
+    }
+
+    [Fact]
+    public void Execute_ConnectionEnds_GoToTheirChannelObjectElseToTheChannelsOfThatNameOnTheConnectionsPage()
+    {
+        Plc("=K1+A2-KE1", "-KE1", [.. Pair("1.1", "%QX2.0", "%IX2.0"), .. Pair("1.2", "%IX2.1", null)]).Connections.AddRange(
+        [
+            Wire("=K1+A2-KE1:1.2", "=K1+A2&EFS1/3", "=K1+A2-FC2:2", "2"),
+            Wire("=K1+A2-KE1:1.1", "=K1+A2&EFS1/9", "+A2-XD4:3", "1"),
+            Wire("=K1+A2-KE1:1.1", "=K1+A2&EFS1/1", "-X9", "1", channel: 0),
+            Wire("=K1+A2-KE1", "=K1+A2&EFS1/3", "=K1+A2-GB1", "1"),
+            Wire("=K1+A2-KE1:1.2", "=K1+A2&EFS1/1", string.Empty, string.Empty),
+        ]);
+
+        List<PlcChannel> channels = Run(new PlcGetArgs { Plc = "=K1+A2-KE1", Limit = 100 }).Channels;
+
+        // Object first; by name, the one on the connection's page, or every one of the name when none is on it.
+        Assert.Equal(["+A2-XD4:3", "-X9"], channels[0].Connected.Select(e => e.Device));
+        Assert.Equal(["+A2-XD4:3"], channels[1].Connected.Select(e => e.Device));
+        Assert.Equal([("=K1+A2-FC2:2", "2")], channels[2].Connected.Select(e => (e.Device, e.Pin)));
+        Assert.Empty(channels[3].Connected);
+    }
+
+    [Fact]
     public void Execute_Language_ReachesTheReader()
     {
         Plc("=K1+A2-KE1", "-KE1");
@@ -143,17 +178,37 @@ public sealed class PlcGetOperationTests
         Connected = [.. ends.Select(e => new ConnectionEnd { Device = e.Device, Pin = e.Pin })],
     };
 
-    /// <summary>A PLC box the fake both lists by name and returns by its full tag.</summary>
-    private void Plc(string name, string visibleName, params PlcChannel[] channels)
+    /// <summary>
+    /// A PLC box the fake both lists by name and returns by its full tag. Each channel's ends become connections the
+    /// reader matched to that channel object, as the adapter gives them; the channels themselves carry none.
+    /// </summary>
+    private PlcRecord Plc(string name, string visibleName, params PlcChannel[] channels)
     {
         _devices.Functions.Add(new FunctionRecord { Name = name, VisibleName = visibleName, IsMain = true, Category = "PLCBox" });
-        _plcs.Records[name] = new PlcRecord
+        var record = new PlcRecord
         {
             Category = "PLCBox",
             Plc = new PlcInfo { Tag = name, VisibleTag = visibleName, Parts = ["PXC.2703994"], Station = "S1" },
             Channels = [.. channels],
+            Connections =
+            [
+                .. channels.SelectMany((channel, i) => channel.Connected.Select(end => new PlcConnectionRecord { Channel = i, Function = channel.Name, Other = end })),
+            ],
         };
+        channels.ToList().ForEach(channel => channel.Connected = []);
+        _plcs.Records[name] = record;
+        return record;
     }
+
+    /// <summary>Two channel objects of one name: the main one on page 3, an auxiliary one on page 1.</summary>
+    private static PlcChannel[] Pair(string point, string? mainAddress, string? auxiliaryAddress) =>
+    [
+        new() { Name = "=K1+A2-KE1:" + point, Address = mainAddress, Page = "=K1+A2&EFS1/3", Main = true },
+        new() { Name = "=K1+A2-KE1:" + point, Address = auxiliaryAddress, Page = "=K1+A2&EFS1/1" },
+    ];
+
+    private static PlcConnectionRecord Wire(string function, string? page, string device, string pin, int? channel = null) =>
+        new() { Channel = channel, Function = function, Page = page, Other = new ConnectionEnd { Device = device, Pin = pin } };
 
     private PlcGetData Run(PlcGetArgs args) => (PlcGetData)new PlcGetOperation(new FakeCatalog(_line1), _devices, _plcs).Execute(args)!;
 

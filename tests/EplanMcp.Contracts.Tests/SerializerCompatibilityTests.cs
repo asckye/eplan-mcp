@@ -345,6 +345,8 @@ public sealed class SerializerCompatibilityTests
                 new PlcChannel
                 {
                     Name = "=K1+A2-KE1:2.3",
+                    Page = "=K1+A2&EFS1/3",
+                    Main = true,
                     Address = "I0.3",
                     SymbolicAddress = "启动",
                     DataType = "BOOL",

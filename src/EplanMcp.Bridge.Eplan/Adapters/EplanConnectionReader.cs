@@ -48,16 +48,15 @@ internal sealed class EplanConnectionReader : IConnectionReader
     /// auxiliary functions with connections of their own. A connection between two of them is kept once; StorableObject
     /// overrides Equals and GetHashCode (reflection), and S6 deduplicated a page's connections this way (40 of 40).
     /// </summary>
-    private static List<Connection> DeviceConnections(DMObjectsFinder finder, string tag)
+    private static List<Connection> DeviceConnections(DMObjectsFinder finder, string tag) =>
+        EplanDeviceReader.FindMain(finder, tag) is { } main ? FunctionConnections(finder, main.SubFunctions.Prepend(main)) : [];
+
+    /// <summary>The connections that start or end at any of <paramref name="functions"/>, each once, in the order found.</summary>
+    internal static List<Connection> FunctionConnections(DMObjectsFinder finder, IEnumerable<Function> functions)
     {
         var connections = new List<Connection>();
-        if (EplanDeviceReader.FindMain(finder, tag) is not { } main)
-        {
-            return connections;
-        }
-
         var seen = new HashSet<Connection>();
-        foreach (Function function in main.SubFunctions.Prepend(main))
+        foreach (Function function in functions)
         {
             using var filter = new ConnectionsFilter();
             filter.Function = function;
