@@ -130,6 +130,6 @@ public sealed partial class StringsTests
     /// A catalogue key as a string literal in code: two or more dotted parts, starting with a known area. A literal that
     /// ends with a dot is the start of keys made in code, which their own tests check.
     /// </summary>
-    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome|Host|Audit)(?:\\.[A-Za-z0-9]+)+)\"")]
+    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome|Host|Audit|Status)(?:\\.[A-Za-z0-9]+)+)\"")]
     private static partial Regex CodeKey();
 }
