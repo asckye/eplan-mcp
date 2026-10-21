@@ -4,8 +4,14 @@ using ModelContextProtocol;
 
 namespace EplanMcp.Host.Safety;
 
-/// <summary>An approval's outcome: the channel that asked (null when none could) and the decision.</summary>
-internal sealed record ApprovalResult(string? Channel, ApprovalDecision Decision);
+/// <summary>
+/// An approval's outcome: the channel that asked (null when none could) and the decision; for a grant of a write, where
+/// the write's outcome goes, which the caller disposes.
+/// </summary>
+internal sealed record ApprovalResult(string? Channel, ApprovalDecision Decision)
+{
+    public IApprovalOutcome? Outcome { get; init; }
+}
 
 /// <summary>
 /// The approval step of the write pipeline (ADR-0005 section 3, ADR-0011, M3 design 4.3): asks the engineer about one
@@ -54,7 +60,15 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
             {
                 ApprovalDecision decision = Checked(question, answer, channel.Name);
                 LogDecided(requestId, tool, channel.Name, decision);
-                return new ApprovalResult(channel.Name, decision);
+
+                // Only a write that may now run has an outcome to show; a confirmation is followed by its own approval.
+                bool shows = decision == ApprovalDecision.Granted && question.Release is null;
+                if (!shows)
+                {
+                    answer.Outcome?.Dispose();
+                }
+
+                return new ApprovalResult(channel.Name, decision) { Outcome = shows ? answer.Outcome : null };
             }
         }
 

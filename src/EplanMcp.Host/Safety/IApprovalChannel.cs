@@ -39,7 +39,24 @@ internal sealed record ApprovalQuestion(string RequestId, string Tool, string Ar
 }
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>
-internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, string ArgumentsHash, ApprovalDecision Decision);
+internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, string ArgumentsHash, ApprovalDecision Decision)
+{
+    /// <summary>
+    /// For a grant, the window that gave it, waiting to show the write's outcome; null when the channel shows none.
+    /// <see cref="ApprovalService"/> passes it on when the grant counts, and disposes it otherwise.
+    /// </summary>
+    public IApprovalOutcome? Outcome { get; init; }
+}
+
+/// <summary>
+/// The engineer's window that approved a write, waiting to show what became of it (ADR-0014: approval.outcome). It
+/// approves nothing; disposing it lets the window go, reported or not.
+/// </summary>
+internal interface IApprovalOutcome : IDisposable
+{
+    /// <summary>Shows the write's execution state and error code; never throws, so it never fails the write.</summary>
+    public Task ReportAsync(string execution, string? reason);
+}
 
 /// <summary>A way to ask the engineer (ADR-0005 section 3). <see cref="ApprovalService"/> tries them in order.</summary>
 internal interface IApprovalChannel

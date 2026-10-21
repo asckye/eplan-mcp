@@ -122,7 +122,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         ApprovalQuestion question = Question();
 
-        await Channel().AskAsync(question, Token);
+        Released(await Channel().AskAsync(question, Token));
 
         WorkbenchHandshake hello = Assert.Single(_workbench.Handshakes);
         Assert.Equal((1, 1, HostInfo.Version, Environment.ProcessId), (hello.ProtocolVersion, hello.MinProtocolVersion, hello.HostVersion, hello.HostProcessId));
@@ -141,8 +141,8 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         var suspension = new Suspension(null, 4242, null, "eplan_page_delete", "earlier", _clock.Now - TimeSpan.FromHours(1), SuspensionReason.OutcomeUnknown, ["delete page =A1&EFS1/5"]);
 
-        await Channel().AskAsync(Question() with { BackupFolder = @"D:\EplanMcp\backups\Line1", Tier = ToolTier.Destructive }, Token);
-        await Channel().AskAsync(Question() with { Release = suspension }, Token);
+        Released(await Channel().AskAsync(Question() with { BackupFolder = @"D:\EplanMcp\backups\Line1", Tier = ToolTier.Destructive }, Token));
+        Released(await Channel().AskAsync(Question() with { Release = suspension }, Token));
 
         ApprovalAskParams[] asks = [.. _workbench.Asks];
         Assert.Equal((QuestionTier.Destructive, @"D:\EplanMcp\backups\Line1"), (asks[0].Tier, asks[0].BackupFolder));
@@ -179,7 +179,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "earlier", DateTimeOffset.MinValue, SuspensionReason.OutcomeUnknown, []);
 
-        await Channel().AskAsync(Question() with { Release = suspension }, Token);
+        Released(await Channel().AskAsync(Question() with { Release = suspension }, Token));
 
         Assert.Null(Assert.Single(_workbench.Asks).Suspension!.TimeUnixMs);
     }
@@ -195,7 +195,8 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 
         ApprovalAnswer? answer = await Channel().AskAsync(Question(), Token);
 
-        Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", Enum.Parse<ApprovalDecision>(decision)), answer);
+        Assert.Equal(answered == WorkbenchDecision.Approved, answer!.Outcome is not null);
+        Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", Enum.Parse<ApprovalDecision>(decision)), Released(answer));
         await _workbench.HungUp.Task.WaitAsync(_patience, Token);
     }
 
@@ -348,7 +349,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
             return await FakeWorkbench.Decide(WorkbenchDecision.Approved)(ask, id, stop);
         };
 
-        ApprovalAnswer? answer = await Channel().AskAsync(Question(), Token);
+        ApprovalAnswer? answer = Released(await Channel().AskAsync(Question(), Token));
 
         Assert.Equal(ApprovalDecision.Granted, answer!.Decision);
         Assert.NotNull(meanwhile);
@@ -364,15 +365,10 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
             _workbench.Answer = (_, _, _) => Task.FromResult<IReadOnlyList<byte[]>?>(null);
         }
 
-        EplanInstanceInfo eplan = Eplan();
-        eplan.ProcessId = Environment.ProcessId; // the pipeline asks this process's start time, as of a live EPLAN
-        var bridge = new FakeBridgeClient { Status = new BridgeStatus([new BridgeEndpoint("p", eplan.ProcessId)], new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "b", Eplan = eplan }, null) };
-        bridge.Handlers["page.create.plan"] = _ => _plan;
-        bridge.Handlers["page.create.execute"] = _ => new JsonObject { ["created"] = 1 };
+        FakeBridgeClient bridge = Bridge();
         var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
-        var request = new WriteRequest<object, object>("eplan_page_create", ToolTier.Write, "page.create.plan", "page.create.execute", new { pages = 1 }, plan => new { plan.Fingerprint }, false, TimeSpan.FromSeconds(60));
 
-        Task<WriteOutcome<JsonObject>> run = Pipeline(bridge, Channel(), dialog).RunAsync<object, object, JsonObject>(request, Token);
+        Task<WriteOutcome<JsonObject>> run = Write(bridge, Channel(), dialog);
 
         if (approved)
         {
@@ -384,17 +380,119 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
             Assert.Equal((ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.Reason, error.Execution));
         }
 
-        JsonObject record = Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject()).First();
+        JsonObject record = AuditRecords().First();
         Assert.Equal(("approval", WorkbenchChannel.ChannelName, approved ? "granted" : "cancelled"), (Text(record, "kind"), Text(record, "channel"), Text(record, "decision")));
         Assert.Equal(Assert.Single(_workbench.Asks).RequestId, Text(record, "requestId"));
         Assert.Equal(approved ? 1 : 0, bridge.Writes.Count);
         Assert.Empty(dialog.Questions);
     }
 
+    [Fact]
+    public async Task AnApprovedWrite_ShowsItsOutcomeInTheWorkbench_ThenTheConnectionCloses()
+    {
+        await Write(Bridge(), Channel());
+
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, WriteExecution.Committed, null), Shown());
+    }
+
+    [Theory]
+    [InlineData(ExecutionState.NotStarted, ErrorReason.PlanStale, WriteExecution.NotStarted)]
+    [InlineData(ExecutionState.RolledBack, ErrorReason.EplanOperationFailed, WriteExecution.RolledBack)]
+    [InlineData(ExecutionState.Unknown, ErrorReason.OutcomeUnknown, WriteExecution.Unknown)]
+    public async Task AnApprovedWriteThatFails_ShowsItsStateAndReason(string execution, string reason, WriteExecution shown)
+    {
+        FakeBridgeClient bridge = Bridge();
+        bridge.WriteFailure = new BridgeError { Reason = reason, Message = "m", Execution = execution };
+
+        await Assert.ThrowsAsync<BridgeCallException>(() => Write(bridge, Channel()));
+
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, shown, reason), Shown());
+    }
+
+    [Fact]
+    public async Task AnApprovedWriteThatCannotStart_ShowsThatItDidNot()
+    {
+        Directory.CreateDirectory(_locations.Root);
+        File.WriteAllText(_locations.Audit, "a file where the audit directory should be");
+        FakeBridgeClient bridge = Bridge();
+
+        BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => Write(bridge, Channel()))).Error;
+
+        Assert.Equal(ErrorReason.AuditUnavailable, error.Reason);
+        Assert.Empty(bridge.Writes);
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, WriteExecution.NotStarted, ErrorReason.AuditUnavailable), Shown());
+    }
+
+    [Fact]
+    public async Task AnApprovalThatDoesNotCount_OrAConfirmation_ShowsNoOutcomeAndTheConnectionCloses()
+    {
+        _workbench.Answer = (_, id, _) => Task.FromResult<IReadOnlyList<byte[]>?>([WorkbenchJson.Result(id, new ApprovalAskResult("earlier", "f1", "h1", WorkbenchDecision.Approved))]);
+        ApprovalResult other = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        _workbench.Answer = FakeWorkbench.Decide(WorkbenchDecision.Approved);
+        var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "earlier", _clock.Now, SuspensionReason.OutcomeUnknown, []);
+
+        ApprovalResult confirmed = await Service(Channel()).ConfirmReleaseAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), suspension, null, Token);
+
+        Assert.Equal((ApprovalDecision.Denied, null), (other.Decision, other.Outcome));
+        Assert.Equal((ApprovalDecision.Granted, null), (confirmed.Decision, confirmed.Outcome));
+        await _workbench.ConnectedAsync(2, Token);
+        Assert.Empty(_workbench.Notifications);
+    }
+
+    [Fact]
+    public async Task AWorkbenchGoneAfterApproving_DoesNotFailTheWrite()
+    {
+        _workbench.HangUpAfterAnswer = true;
+        FakeBridgeClient bridge = Bridge();
+
+        WriteOutcome<JsonObject> outcome = await Write(bridge, Channel());
+
+        Assert.Equal(ExecutionState.Committed, outcome.Execution);
+        Assert.Single(bridge.Writes);
+    }
+
     /// <summary>Takes the question and sends nothing back, reading on.</summary>
     private static readonly Func<ApprovalAskParams, long, CancellationToken, Task<IReadOnlyList<byte[]>?>> _silent = (_, _, _) => Task.FromResult<IReadOnlyList<byte[]>?>([]);
 
     private static string Text(JsonObject record, string name) => record[name]!.GetValue<string>();
+
+    /// <summary>Lets the Workbench go without an outcome, as the pipeline does when nothing runs; the answer without it.</summary>
+    private static ApprovalAnswer? Released(ApprovalAnswer? answer)
+    {
+        answer?.Outcome?.Dispose();
+        return answer is null ? null : answer with { Outcome = null };
+    }
+
+    /// <summary>The outcome the Workbench was shown, the only notification it got.</summary>
+    private ApprovalOutcomeParams Shown()
+    {
+        (string method, JsonElement? parameters) = Assert.Single(_workbench.Notifications);
+        Assert.Equal(WorkbenchProtocol.ApprovalOutcomeMethod, method);
+        return WorkbenchJson.As<ApprovalOutcomeParams>(parameters);
+    }
+
+    private List<JsonObject> AuditRecords() =>
+        [.. Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())];
+
+    /// <summary>EPLAN as this process, whose start time the pipeline asks for as of a live EPLAN; plans and creates pages.</summary>
+    private FakeBridgeClient Bridge()
+    {
+        EplanInstanceInfo eplan = Eplan();
+        eplan.ProcessId = Environment.ProcessId;
+        var bridge = new FakeBridgeClient { Status = new BridgeStatus([new BridgeEndpoint("p", eplan.ProcessId)], new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "b", Eplan = eplan }, null) };
+        bridge.Handlers["page.create.plan"] = _ => _plan;
+        bridge.Handlers["page.create.execute"] = _ => new JsonObject { ["created"] = 1 };
+        return bridge;
+    }
+
+    private Task<WriteOutcome<JsonObject>> Write(FakeBridgeClient bridge, params IApprovalChannel[] channels) =>
+        Pipeline(bridge, channels).RunAsync<object, object, JsonObject>(
+            new WriteRequest<object, object>("eplan_page_create", ToolTier.Write, "page.create.plan", "page.create.execute", new { pages = 1 }, plan => new { plan.Fingerprint }, false, TimeSpan.FromSeconds(60)),
+            Token);
 
     private static EplanInstanceInfo Eplan() => new() { ProcessId = 4242, Version = "2026.0.3.25421", Variant = "Pro Panel" };
 

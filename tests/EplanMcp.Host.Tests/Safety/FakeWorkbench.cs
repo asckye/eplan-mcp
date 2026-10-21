@@ -34,6 +34,9 @@ internal sealed class FakeWorkbench : IAsyncDisposable
 
     public Func<long, byte[]?>? HandshakeReply { get; set; }
 
+    /// <summary>Whether to hang up right after answering a question, as a Workbench that quits.</summary>
+    public bool HangUpAfterAnswer { get; set; }
+
     /// <summary>The frames to answer a question with, given the question, its JSON-RPC ID and the server's stop; null hangs up.</summary>
     public Func<ApprovalAskParams, long, CancellationToken, Task<IReadOnlyList<byte[]>?>> Answer { get; set; } = Decide(WorkbenchDecision.Approved);
 
@@ -170,6 +173,11 @@ internal sealed class FakeWorkbench : IAsyncDisposable
                     foreach (byte[] answer in frames)
                     {
                         await WorkbenchFraming.WriteAsync(pipe, answer, stop);
+                    }
+
+                    if (HangUpAfterAnswer)
+                    {
+                        return;
                     }
 
                     break;
