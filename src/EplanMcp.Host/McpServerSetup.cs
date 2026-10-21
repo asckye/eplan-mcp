@@ -81,6 +81,7 @@ internal static class McpServerSetup
             .WithTools<ImageExportTools>(HostJson.Options)
             .WithTools<ProjectExportTools>(HostJson.Options)
             .WithTools<ImportTools>(HostJson.Options)
+            .WithTools<MasterDataExportTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }

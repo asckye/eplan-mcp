@@ -19,6 +19,9 @@ internal sealed record ExportJob(string PlanOperation, string RunOperation, Expo
     /// <summary>The extension of the one file the export must leave, at the top of its folder; null when any files do (PXF, tool spec 5).</summary>
     public string? SingleFile { get; init; }
 
+    /// <summary>The folder below the export root for an export of no project (the databases'); null means the project the plan found.</summary>
+    public string? Folder { get; init; }
+
     /// <summary>What the model can do after a timeout.</summary>
     public string TimeoutHint { get; init; } = "Export fewer pages per call with 'pages'; EPLAN may still be busy for a while.";
 }
@@ -52,7 +55,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         ExportFolder folder;
         try
         {
-            folder = folders.Create(plan.Project);
+            folder = folders.Create(job.Folder ?? plan.Project);
         }
         catch (ExportFolderException ex)
         {
@@ -110,6 +113,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         IncludeMasterData = job.Args.IncludeMasterData,
         Language = job.Args.Language,
         Languages = job.Args.Languages,
+        Parts = job.Args.Parts,
         Directory = directory,
         FileName = job.FileName?.Invoke(plan),
     };
