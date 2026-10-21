@@ -24,7 +24,7 @@ public sealed class ApprovalTextsTests
         Fingerprint = "f",
     };
 
-    private static readonly ApprovalQuestion _question = new("r", "eplan_page_create", "h", _plan, [], DateTimeOffset.UnixEpoch);
+    private static readonly ApprovalQuestion _question = new("r", "eplan_page_create", "h", _plan, [], DateTimeOffset.UnixEpoch) { Tier = ToolTier.Write, Eplan = null };
 
     [Theory]
     [InlineData("zh-CN")]

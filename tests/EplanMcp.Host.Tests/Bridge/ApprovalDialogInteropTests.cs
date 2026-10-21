@@ -56,7 +56,7 @@ public sealed class ApprovalDialogInteropTests : IAsyncDisposable
     public async Task AnAnswerAfterTheUsualCallTimeout_StillArrives_AndOtherCallsMeanwhileAreBusy()
     {
         var plan = new WritePlan { Project = "项目 一", ProjectPath = @"D:\项目\一", Changes = [new PlannedChange { Action = "create", Kind = "page", Name = "=A1&EFS1/5" }], Fingerprint = "f1" };
-        var question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, [], DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1));
+        var question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, [], DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1)) { Tier = ToolTier.Write, Eplan = null };
 
         // The channel asks only a Bridge it has shaken hands with; on a busy machine the first status may come too early.
         for (int i = 0; i < 50 && (await _client.GetStatusAsync(TestContext.Current.CancellationToken)).Handshake is null; i++)

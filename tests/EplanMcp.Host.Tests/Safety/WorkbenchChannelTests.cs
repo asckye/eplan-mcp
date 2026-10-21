@@ -24,6 +24,9 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 {
     private static readonly TimeSpan _timeout = HostConfig.DefaultApprovalTimeout;
 
+    /// <summary>How long the fake Workbench may take to see something happen; a failing test fails rather than hangs.</summary>
+    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(5);
+
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-workbench-").FullName);
     private readonly ManualTime _clock = new(new DateTimeOffset(2026, 10, 21, 8, 0, 0, TimeSpan.Zero));
     private readonly FakeWorkbench _workbench;
@@ -105,7 +108,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.HandshakeReply = _ => null;
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), Token);
-        await _workbench.Greeted.Task.WaitAsync(Token);
+        await _workbench.Greeted.Task.WaitAsync(_patience, Token);
         _clock.Advance(WorkbenchChannel.ReplyTimeout);
 
         Assert.Null(await asking);
@@ -155,6 +158,30 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         Assert.Equal(0, _workbench.Connections);
     }
 
+    [Fact]
+    public async Task AQuestionVersion1CannotCarry_IsNotSentAndTheEplanDialogAsks()
+    {
+        var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
+        EplanInstanceInfo eplan = Eplan();
+        eplan.Version = null!; // as from an add-in that sent none
+
+        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, eplan, null, null, Token);
+
+        Assert.Equal(new ApprovalResult(EplanDialogChannel.ChannelName, ApprovalDecision.Granted), result);
+        Assert.Single(_workbench.Handshakes);
+        Assert.Empty(_workbench.Asks);
+    }
+
+    [Fact]
+    public async Task ASuspensionOfUnknownTime_IsSentWithoutOne()
+    {
+        var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "earlier", DateTimeOffset.MinValue, SuspensionReason.OutcomeUnknown, []);
+
+        await Channel().AskAsync(Question() with { Release = suspension }, Token);
+
+        Assert.Null(Assert.Single(_workbench.Asks).Suspension!.TimeUnixMs);
+    }
+
     [Theory]
     [InlineData(WorkbenchDecision.Approved, nameof(ApprovalDecision.Granted))]
     [InlineData(WorkbenchDecision.Rejected, nameof(ApprovalDecision.Denied))]
@@ -167,7 +194,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         ApprovalAnswer? answer = await Channel().AskAsync(Question(), Token);
 
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", Enum.Parse<ApprovalDecision>(decision)), answer);
-        await _workbench.HungUp.Task.WaitAsync(Token);
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
     }
 
     [Fact]
@@ -176,13 +203,13 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.Answer = _silent;
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), Token);
-        await _workbench.Asked.Task.WaitAsync(Token);
+        await _workbench.Asked.Task.WaitAsync(_patience, Token);
         _clock.Advance(_timeout + WorkbenchChannel.Slack - TimeSpan.FromSeconds(1));
         Assert.False(asking.IsCompleted);
         _clock.Advance(TimeSpan.FromSeconds(1));
 
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", ApprovalDecision.Expired), await asking);
-        await _workbench.HungUp.Task.WaitAsync(Token);
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
     }
 
     [Fact]
@@ -241,7 +268,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         };
 
         Task<ApprovalResult> asking = Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
-        await _workbench.Asked.Task.WaitAsync(Token);
+        await _workbench.Asked.Task.WaitAsync(_patience, Token);
         _clock.Advance(_timeout + TimeSpan.FromSeconds(1));
         late.SetResult();
 
@@ -285,11 +312,11 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         using var client = CancellationTokenSource.CreateLinkedTokenSource(Token);
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), client.Token);
-        await _workbench.Asked.Task.WaitAsync(Token);
+        await _workbench.Asked.Task.WaitAsync(_patience, Token);
         await client.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => asking);
-        await _workbench.HungUp.Task.WaitAsync(Token);
+        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
         (string method, JsonElement? parameters) = Assert.Single(_workbench.Notifications);
         Assert.Equal((WorkbenchProtocol.CancelMethod, new CancelParams("r1")), (method, WorkbenchJson.As<CancelParams>(parameters)));
     }
