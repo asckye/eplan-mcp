@@ -33,6 +33,9 @@ public static class OperationNames
     /// </summary>
     public const string ConnectionList = "connection.list";
 
+    /// <summary>One cable by tag: type, ends, parts, and its cores sliced in the Bridge. Arguments: <see cref="CableGetArgs"/>; data: <see cref="CableGetData"/>.</summary>
+    public const string CableGet = "cable.get";
+
     /// <summary>
     /// Lists the parts a project uses, summed up per part number and variant, filtered and sliced in the Bridge.
     /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.
