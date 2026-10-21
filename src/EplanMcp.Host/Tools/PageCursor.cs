@@ -29,6 +29,18 @@ internal static class PageCursor
         Base64Url.EncodeToString(Encoding.ASCII.GetBytes(
             Version + ":" + offset.ToString(CultureInfo.InvariantCulture) + ":" + fingerprint));
 
+    /// <summary>The offset <paramref name="cursor"/> continues at, 0 without one; a cursor of another listing adds a violation.</summary>
+    public static int Offset(string? cursor, string fingerprint, string tool, List<string> violations)
+    {
+        int? offset = string.IsNullOrEmpty(cursor) ? 0 : Decode(cursor, fingerprint);
+        if (offset is null)
+        {
+            violations.Add($"'cursor' was not returned by {tool} for these arguments; omit it to start from the first page.");
+        }
+
+        return offset ?? 0;
+    }
+
     /// <summary>
     /// Returns the offset, or null when the cursor was not produced by <see cref="Encode"/> for this
     /// <paramref name="fingerprint"/>: malformed, from an older Host, or from another tool or other filters.

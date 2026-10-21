@@ -89,24 +89,25 @@ internal sealed class ConnectionTools
         var result = new ConnectionListResult
         {
             Project = ResultShaper.CleanText(data.Project),
-            Connections =
-            [
-                .. data.Items.Select(c => new ConnectionListResult.ConnectionEntry
-                {
-                    From = End(c.From),
-                    To = End(c.To),
-                    Page = ResultShaper.CleanText(c.Page),
-                    CrossSection = ResultShaper.CleanText(c.CrossSection),
-                    Colour = ResultShaper.CleanText(c.Colour),
-                    Kind = ResultShaper.CleanText(c.Kind),
-                }),
-            ],
+            Connections = [.. data.Items.Select(Entry<ConnectionListResult.ConnectionEntry>)],
             Total = data.Total,
             NextCursor = next < data.Total ? PageCursor.Encode(next, fingerprint) : null,
         };
         ResultShaper.FitPage(result, offset, fingerprint);
         return ToolResults.Success(ListSummary(result), result);
     }
+
+    /// <summary>One connection with its names cleaned as project data; eplan_cable_get lists its cores the same way.</summary>
+    internal static T Entry<T>(ConnectionListItem c)
+        where T : ConnectionListResult.ConnectionEntry, new() => new()
+        {
+            From = End(c.From),
+            To = End(c.To),
+            Page = ResultShaper.CleanText(c.Page),
+            CrossSection = ResultShaper.CleanText(c.CrossSection),
+            Colour = ResultShaper.CleanText(c.Colour),
+            Kind = ResultShaper.CleanText(c.Kind),
+        };
 
     private static ConnectionListResult.EndEntry? End(ConnectionEnd? end) =>
         end is null ? null : new ConnectionListResult.EndEntry { Device = ResultShaper.CleanText(end.Device), Pin = ResultShaper.CleanText(end.Pin) };
