@@ -11,6 +11,34 @@ internal static class Catalogue
     [
         ("App.Name", "EplanMcp Workbench", "EplanMcp Workbench"),
 
+        // Shell: Sider, Header, window (workbench-ui 3.1, NAV-03).
+        ("Shell.WindowTitle", "{0} – EplanMcp Workbench", "{0} – EplanMcp Workbench"),
+        ("Shell.Breadcrumb", "Workbench", "Workbench"),
+        ("Shell.Shortcut", "{0} ({1})", "{0}（{1}）"),
+        ("Shell.Menu", "Pages", "页面"),
+        ("Shell.Header", "Header", "顶栏"),
+        ("Shell.Content", "Page content", "页面内容"),
+        ("Shell.Minimize", "Minimize", "最小化"),
+        ("Shell.Maximize", "Maximize", "最大化"),
+        ("Shell.Restore", "Restore", "还原"),
+        ("Shell.Close", "Close", "关闭"),
+
+        // Pages (workbench-ui section 7), their captions and the placeholders of the pages still to come (ERR-05).
+        ("Page.Approvals", "Approvals", "审批队列"),
+        ("Page.Audit", "Audit", "审计"),
+        ("Page.Status", "Status", "状态"),
+        ("Page.Clients", "MCP and clients", "MCP 与客户端"),
+        ("Page.Approvals.Caption", "Questions from the AI that wait for your answer", "等待你回答的 AI 问题"),
+        ("Page.Audit.Caption", "The audit records, read only", "只读查看审计记录"),
+        ("Page.Status.Caption", "EPLAN, the add-in and the approval channels", "EPLAN、插件和审批渠道"),
+        ("Page.Clients.Caption", "MCP client configuration and the virtual machine connection", "MCP 客户端配置和虚拟机连接"),
+        ("Page.Later", "This page comes in a later version", "这一页将在后续版本提供"),
+        ("Page.Audit.Later", "Until then, eplanmcp audit verify checks the audit records in the audit folder of the data root.", "在此之前，可以用 eplanmcp audit verify 校验数据根目录 audit 文件夹中的审计记录。"),
+        ("Page.Status.Later", "Until then, eplanmcp doctor shows EPLAN, the add-in and which channel asks the next approval.", "在此之前，可以用 eplanmcp doctor 查看 EPLAN、插件，以及下一次审批由哪个渠道询问。"),
+        ("Page.Clients.Later", "Until then, configure the MCP client as the README describes.", "在此之前，请按 README 中的步骤配置 MCP 客户端。"),
+        ("Approvals.Empty", "No questions waiting", "没有等待中的问题"),
+        ("Approvals.EmptyText", "When the AI wants to change a real project, its question shows here; while the Workbench is not running, the EPLAN dialog asks instead.", "AI 要修改真实项目时，问题会出现在这里；Workbench 不在运行时，改由 EPLAN 中的对话框询问。"),
+
         // Read by the vendored theme's scroll bars (ScrollCommandNameConverter, Primer.xaml).
         ("Access.Scroll", "Scroll", "滚动"),
         ("Access.ScrollUp", "Scroll up", "向上滚动"),
