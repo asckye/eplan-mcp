@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EplanMcp.Contracts\EplanMcp.Contracts.csproj" />
+    <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>

@@ -29,7 +29,14 @@ internal enum ApprovalDecision
 /// suspension may be lifted before this call goes on (ADR-0010 section 3); it is never merged with the approval.
 /// <see cref="BackupFolder"/>: for a Destructive write, the folder its backup goes into first (ADR-0013).
 /// </summary>
-internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null, string? BackupFolder = null);
+internal sealed record ApprovalQuestion(string RequestId, string Tool, string ArgumentsHash, WritePlan Plan, IReadOnlyList<string> Changes, DateTimeOffset Deadline, Suspension? Release = null, string? BackupFolder = null)
+{
+    /// <summary>The tool's tier, which the Workbench shows (ADR-0014).</summary>
+    public ToolTier Tier { get; init; } = ToolTier.Write;
+
+    /// <summary>The EPLAN instance the write goes to, which the Workbench shows; null when the asker did not say.</summary>
+    public EplanInstanceInfo? Eplan { get; init; }
+}
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>
 internal sealed record ApprovalAnswer(string RequestId, string Fingerprint, string ArgumentsHash, ApprovalDecision Decision);

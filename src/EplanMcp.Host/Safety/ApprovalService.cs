@@ -25,21 +25,22 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     private readonly IApprovalChannel[] _channels = [.. channels];
 
     /// <summary>
-    /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> and returns the decision, reporting the
-    /// wait to <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). <paramref name="backupFolder"/>: where a
+    /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> by <paramref name="tool"/> of
+    /// <paramref name="tier"/> to EPLAN <paramref name="eplan"/>, and returns the decision, reporting the wait to
+    /// <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). <paramref name="backupFolder"/>: where a
     /// Destructive write backs the project up first, which the dialog names; null for other writes. Throws
     /// <see cref="Bridge.BridgeCallException"/> when a channel failed to ask; nothing has run then.
     /// </summary>
-    public Task<ApprovalResult> AskAsync(string requestId, string tool, string argumentsHash, WritePlan plan, string? backupFolder, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout, BackupFolder: backupFolder), progress, cancellationToken);
+    public Task<ApprovalResult> AskAsync(string requestId, string tool, ToolTier tier, string argumentsHash, WritePlan plan, EplanInstanceInfo eplan, string? backupFolder, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout, BackupFolder: backupFolder) { Tier = tier, Eplan = eplan }, progress, cancellationToken);
 
     /// <summary>
     /// Asks, before write <paramref name="requestId"/> goes on, whether the engineer has checked the project after the
     /// suspended write <paramref name="suspension"/> (ADR-0010 section 3), through the same channels as an approval and
     /// as a question of its own. Only <see cref="ApprovalDecision.Granted"/> lets the suspension be lifted.
     /// </summary>
-    public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, string argumentsHash, WritePlan plan, Suspension suspension, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension), progress, cancellationToken);
+    public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, ToolTier tier, string argumentsHash, WritePlan plan, EplanInstanceInfo eplan, Suspension suspension, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension) { Tier = tier, Eplan = eplan }, progress, cancellationToken);
 
     private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {

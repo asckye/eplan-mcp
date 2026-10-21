@@ -410,6 +410,7 @@
         "type": "Project",
         "dependencies": {
           "EplanMcp.Contracts": "[1.0.0, )",
+          "EplanMcp.Workbench.Protocol": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.12, )",
           "ModelContextProtocol": "[2.2.0, )"
         }
@@ -423,6 +424,9 @@
           "ModelContextProtocol": "[2.2.0, )",
           "YamlDotNet": "[18.1.0, )"
         }
+      },
+      "eplanmcp.workbench.protocol": {
+        "type": "Project"
       },
       "Microsoft.Extensions.Hosting": {
         "type": "CentralTransitive",

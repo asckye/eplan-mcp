@@ -111,7 +111,7 @@ internal sealed partial class WritePipeline(
         string argumentsHash = HashArguments(request.Args);
         if (suspensions.Blocking(plan.ProjectPath, eplan.Eplan.ProcessId, started) is { Count: > 0 } blocking)
         {
-            await ReleaseAsync(request.Tool, requestId, argumentsHash, plan, eplan, started, blocking, call, cancellationToken).ConfigureAwait(false);
+            await ReleaseAsync(request.Tool, request.Tier, requestId, argumentsHash, plan, eplan, started, blocking, call, cancellationToken).ConfigureAwait(false);
         }
 
         bool destructive = request.Tier == ToolTier.Destructive;
@@ -121,7 +121,7 @@ internal sealed partial class WritePipeline(
             try
             {
                 string? backupFolder = destructive ? backups.ProjectFolder(plan) : null;
-                approval = await approvals.AskAsync(requestId, request.Tool, argumentsHash, plan, backupFolder, call?.Lane(), cancellationToken).ConfigureAwait(false);
+                approval = await approvals.AskAsync(requestId, request.Tool, request.Tier, argumentsHash, plan, eplan.Eplan, backupFolder, call?.Lane(), cancellationToken).ConfigureAwait(false);
             }
             catch (BridgeCallException ex)
             {
@@ -295,14 +295,14 @@ internal sealed partial class WritePipeline(
     /// the project was checked: a question of its own, before any approval (ADR-0010 section 3). Each answer is recorded;
     /// when all are granted the suspensions are lifted, otherwise WRITES_SUSPENDED.
     /// </summary>
-    private async Task ReleaseAsync(string tool, string requestId, string argumentsHash, WritePlan plan, HandshakeResult eplan, DateTimeOffset started, IReadOnlyList<Suspension> blocking, CallProgress? call, CancellationToken cancellationToken)
+    private async Task ReleaseAsync(string tool, ToolTier tier, string requestId, string argumentsHash, WritePlan plan, HandshakeResult eplan, DateTimeOffset started, IReadOnlyList<Suspension> blocking, CallProgress? call, CancellationToken cancellationToken)
     {
         foreach (Suspension suspension in blocking.DistinctBy(s => s.RequestId))
         {
             ApprovalResult confirmation;
             try
             {
-                confirmation = await approvals.ConfirmReleaseAsync(requestId, tool, argumentsHash, plan, suspension, call?.Lane(), cancellationToken).ConfigureAwait(false);
+                confirmation = await approvals.ConfirmReleaseAsync(requestId, tool, tier, argumentsHash, plan, eplan.Eplan, suspension, call?.Lane(), cancellationToken).ConfigureAwait(false);
             }
             catch (BridgeCallException ex)
             {
