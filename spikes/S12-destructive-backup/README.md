@@ -63,6 +63,19 @@ spikes\S12-destructive-backup\Driver\bin\Release\net481\EplanMcp.Spikes.S12.Driv
 5. **`PostNumerate` 只给设备标识编号**：端子的连接点名称 `?1` 不变，有的主功能（这里是 `=GAA+A1-?QA1`）也没有编号。`eplan_device_renumber` 执行后要读回，报告仍带 `?` 的标识，不能假定全部编号。
 6. **编号方案**：传空串等同于 `Standard`；名称不存在时抛 `InvalidScheme`，消息中列出可用方案，可以转成 `INVALID_ARGUMENT` 的提示。
 
+## r3、r4：`PostNumerate` 的崩溃（2026-10-20）
+M4 的实机验证中，`eplan_device_renumber` 让 EPLAN 发生访问冲突而退出（api-notes A20）。r3 加了 `backuprenumber` 模式（备份、只读打开副本数页数、关闭，再在同一次调度中重编号），r4 加了 `renumberfilter` 模式（只把 `/91` 上符合条件的功能交给 `PostNumerate`；`/Scheme:` 传条件，`zero-` 前缀表示不带标志）。每次都用新复制的项目，先用 `eplan_page_create` 建 `/90`–`/92`，再用 `eplan_macro_insert` 以 `number` 方式把宏插到 `/91`。
+
+| 交给 `Renumber.DeviceTags` 的功能 | 标志 | 结果 |
+|---|---|---|
+| `/91` 的全部 12 个功能 | `PostNumerate` | 访问冲突，EPLAN 退出（三次，其中一次不做备份） |
+| 只有 `=GAA+A1-?QA1`（设备标识带 `?`） | `PostNumerate` | 正常，没有编号 |
+| 只有连接点带 `?` 的端子 `+A1-XG2:?1` 等 7 个 | `PostNumerate` | 访问冲突 |
+| `=GAA+A1-?QA1`、电缆 `+A1-WG1`、3 个 PLC 端子 | `PostNumerate` | 访问冲突 |
+| 全部 12 个 | 无 | 正常，没有改动 |
+
+结论：交入设备标识（`:` 之前）不带 `?` 的功能时，`PostNumerate` 会崩溃；只交设备标识带 `?` 的功能是安全的（r1 中设备标识都带 `?` 时也正常）。`eplan_device_renumber` 已按此修复。
+
 ## 局限
 - 只在一个项目、Electric P8、EPLAN 2026 上验证；只复制到同一磁盘上的目录，没有测磁盘空间不足、目标已存在、网络路径。
 - 副本的完整性只比较了页数、功能数和 `?` 标识，没有逐个比较属性。
