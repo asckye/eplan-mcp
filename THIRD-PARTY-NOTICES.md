@@ -2,6 +2,15 @@
 
 本仓库自己的代码以 [MIT 许可证](LICENSE)发布。下面列出仓库中包含的、或构建时随程序复制的第三方内容。NuGet 依赖不在此列：它们的版本和许可证见 [Directory.Packages.props](Directory.Packages.props) 中的说明。
 
+## Maple Mono CN 字体
+
+| 项 | 内容 |
+|---|---|
+| 来源 | [subframe7536/maple-font](https://github.com/subframe7536/maple-font) 的官方发布 v7.9 中的 `MapleMono-CN.zip`（SHA-256 `cb1e79b2c23dff772ae351784ef2b84454a61b3920e9b20bd5db4bf207e4472d`） |
+| 位置 | **不在仓库中**。[`eng/scripts/get-fonts.ps1`](eng/scripts/get-fonts.ps1) 按需下载并核对哈希，只把 `MapleMono-CN-Regular.ttf`、`MapleMono-CN-SemiBold.ttf` 和 `LICENSE.txt` 解压到不提交的 `.local\fonts\`；构建时复制到 `EplanMcp.Workbench.exe` 旁的 `Fonts\`，许可证随字体一起（`Fonts\LICENSE.txt`） |
+| 许可证 | SIL Open Font License 1.1，`Copyright 2022 The Maple Mono Project Authors`；字体文件不修改、不裁剪 |
+| 为什么用 | [ADR-0017](docs/adr/0017-workbench-wpf-tia-theme.md) 第 4 条、[界面规范](docs/standards/workbench-ui.md) TYP-01 |
+
 ## TIA Portal Openness MCP 的 Workbench 主题
 
 | 项 | 内容 |

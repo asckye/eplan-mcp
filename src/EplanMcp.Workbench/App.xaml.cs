@@ -11,6 +11,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        WorkbenchFonts.Apply(Resources, AppContext.BaseDirectory);
         Loc.Current.Language = Loc.FromSystem();
         ThemeManager.Current.Initialize(AppTheme.Auto);
         var window = new MainWindow();

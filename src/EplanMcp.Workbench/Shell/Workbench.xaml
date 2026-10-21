@@ -1,0 +1,17 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    The Workbench's own styles on top of the vendored theme (Primer.xaml): only what the theme lacks, from its tokens.
+  -->
+
+  <!--
+    TYP-11: Maple Mono's ligatures off for the whole window (the Typography properties are inherited), so that project
+    data such as "->" or "!=" shows the characters it holds (SEC-23).
+  -->
+  <Style x:Key="Workbench.Window" TargetType="Window" BasedOn="{StaticResource Ui.Window}">
+    <Setter Property="Typography.StandardLigatures" Value="False" />
+    <Setter Property="Typography.ContextualLigatures" Value="False" />
+    <Setter Property="Typography.ContextualAlternates" Value="False" />
+  </Style>
+</ResourceDictionary>
