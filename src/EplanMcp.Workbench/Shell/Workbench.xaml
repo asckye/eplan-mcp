@@ -14,4 +14,22 @@
     <Setter Property="Typography.ContextualLigatures" Value="False" />
     <Setter Property="Typography.ContextualAlternates" Value="False" />
   </Style>
+
+  <!-- NAV-03: the selected menu item has the theme's bar and, beyond colour, SemiBold. -->
+  <Style x:Key="Workbench.NavItem" TargetType="RadioButton" BasedOn="{StaticResource Primer.NavItem}">
+    <Setter Property="GroupName" Value="Pages" />
+    <Style.Triggers>
+      <Trigger Property="IsChecked" Value="True">
+        <Setter Property="FontWeight" Value="SemiBold" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- The window buttons' glyphs, drawn in the button's text colour (ICO-05). -->
+  <Style x:Key="Workbench.CaptionGlyph" TargetType="Path">
+    <Setter Property="Width" Value="10" />
+    <Setter Property="Height" Value="10" />
+    <Setter Property="StrokeThickness" Value="1" />
+    <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+  </Style>
 </ResourceDictionary>

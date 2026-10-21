@@ -2,10 +2,105 @@
     x:Class="EplanMcp.Workbench.Shell.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
-    Title="{l:Tr App.Name}" Width="1200" Height="780" MinWidth="960" MinHeight="640"
-    WindowStartupLocation="CenterScreen" Style="{StaticResource Workbench.Window}">
-  <Border Margin="24" Style="{StaticResource Primer.PageHead}">
-    <TextBlock Text="{l:Tr App.Name}" Style="{StaticResource Primer.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
-  </Border>
+    xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls"
+    xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
+    Width="1200" Height="780" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen"
+    WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
+  <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
+  <chrome:WindowChrome.WindowChrome>
+    <chrome:WindowChrome CaptionHeight="56" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+  </chrome:WindowChrome.WindowChrome>
+  <Window.InputBindings>
+    <KeyBinding Key="D1" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Approvals}" />
+    <KeyBinding Key="D2" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Audit}" />
+    <KeyBinding Key="D3" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Status}" />
+    <KeyBinding Key="D4" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Clients}" />
+  </Window.InputBindings>
+
+  <Grid x:Name="Root" Background="{DynamicResource Primer.bg}">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <!-- Sider: brand and the page menu (one Tab stop, arrow keys inside, NAV-04). -->
+    <Border x:Name="Sider" Width="216" Style="{StaticResource Primer.Sider}" AutomationProperties.Name="{l:Tr Shell.Menu}">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" MinHeight="56" Margin="16,0,12,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Primer.BrandDot}" />
+          <TextBlock x:Name="Brand" Grid.Column="1" Text="{l:Tr App.Name}" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" Margin="8,0" />
+          <Border x:Name="VersionChip" Grid.Column="2" Style="{StaticResource Primer.Chip}">
+            <TextBlock x:Name="VersionText" Style="{StaticResource Primer.Mono.text}" />
+          </Border>
+        </Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+          <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="0,8,0,0">
+            <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Bell}" Content="{l:Tr Page.Approvals}"
+                         AutomationProperties.Name="{l:Tr Page.Approvals}" AutomationProperties.AcceleratorKey="Ctrl+1"
+                         AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
+            <RadioButton x:Name="AuditItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Audit}" Content="{l:Tr Page.Audit}"
+                         AutomationProperties.Name="{l:Tr Page.Audit}" AutomationProperties.AcceleratorKey="Ctrl+2"
+                         AutomationProperties.PositionInSet="2" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
+            <RadioButton x:Name="StatusItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Health}" Content="{l:Tr Page.Status}"
+                         AutomationProperties.Name="{l:Tr Page.Status}" AutomationProperties.AcceleratorKey="Ctrl+3"
+                         AutomationProperties.PositionInSet="3" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
+            <RadioButton x:Name="ClientsItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Api}" Content="{l:Tr Page.Clients}"
+                         AutomationProperties.Name="{l:Tr Page.Clients}" AutomationProperties.AcceleratorKey="Ctrl+4"
+                         AutomationProperties.PositionInSet="4" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Column="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <!-- Header: breadcrumb (secondary text, not a heading), the status area, the window buttons. -->
+      <Border x:Name="Header" Style="{StaticResource Primer.HeaderBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
+        <DockPanel MinHeight="56" Margin="24,0,8,0">
+          <StackPanel x:Name="WindowButtons" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+            <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">
+              <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
+            </Button>
+            <Button x:Name="MaximizeButton" Style="{StaticResource Primer.WindowButton}" Margin="4,0" Click="OnMaximize">
+              <Path x:Name="MaximizeGlyph" Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
+            </Button>
+            <Button x:Name="CloseButton" Style="{StaticResource Primer.WindowButton}" Click="OnClose">
+              <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 L9.5,9.5 M9.5,0.5 L0.5,9.5" />
+            </Button>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="{l:Tr Shell.Breadcrumb}" Style="{StaticResource Primer.Breadcrumb}" />
+            <TextBlock Text="/" Margin="8,0" Style="{StaticResource Primer.Breadcrumb}" />
+            <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <Grid x:Name="Body" Grid.Row="1" Margin="24" AutomationProperties.Name="{l:Tr Shell.Content}">
+        <shell:PageView x:Name="ApprovalsPage" Title="{l:Tr Page.Approvals}" Caption="{l:Tr Page.Approvals.Caption}">
+          <shell:EmptyState Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
+        </shell:PageView>
+        <shell:PageView x:Name="AuditPage" Title="{l:Tr Page.Audit}" Caption="{l:Tr Page.Audit.Caption}">
+          <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Audit.Later}" />
+        </shell:PageView>
+        <shell:PageView x:Name="StatusPage" Title="{l:Tr Page.Status}" Caption="{l:Tr Page.Status.Caption}">
+          <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Status.Later}" />
+        </shell:PageView>
+        <shell:PageView x:Name="ClientsPage" Title="{l:Tr Page.Clients}" Caption="{l:Tr Page.Clients.Caption}">
+          <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Clients.Later}" />
+        </shell:PageView>
+      </Grid>
+    </Grid>
+  </Grid>
 </Window>
