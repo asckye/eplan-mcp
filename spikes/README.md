@@ -24,6 +24,7 @@
 | [S18](S18-workbench-ui/README.md) | Workbench 审批卡片：WinUI 3（A）、WPF + TIA Workbench 主题（B）、WPF + .NET Fluent 主题（B1）能否只用 `dotnet` 构建发布，体积、冷启动、UIA、Maple Mono CN、主题切换、托盘 | **部分完成** 2026-10-20 | 三个原型都能只用 `dotnet` 构建和自包含发布，UIA 能读出按钮、可聚焦的标题和倒计时。B（项目负责人选定）可行：TIA 的 15 个文件只改两行字体，另需 7 个 TIA 类型的替身；Maple Mono CN 从程序目录加载，两个字重多 35.4 MB；窗口约 0.6 秒出现，比 A 慢约 0.3 秒。A 的 Windows App SDK 不是 MIT 许可，发布需 `EnableMsixTooling`，单文件不能启动。Windows 10、200% 缩放、系统高对比度、讲述人、离线未测 |
 | [S19](S19-vm-http/README.md) | 虚拟机连接（ADR-0018）：Kestrel 加 SDK 的 HTTP 传输在自包含单文件中的体积和启动，密钥、失败次数限制和 `Origin` 的中间件，SDK 的会话，Claude Code 和其他客户端的远程配置，Host 中哪些状态要按会话保存 | **部分完成** 2026-10-21 | 体积 +26.5 MB（74.3 → 100.7 MB），约 0.15 秒开始监听，stdio 不变慢；第 4、5 条的 23 项探测全部符合预期。🔴 SDK 2.2.0 的 HTTP 传输默认无状态（2026-07-28 版协议取消了会话），要设 `SessionMode = Stateful` 才能按会话保存选中的实例，Claude Code 2.1.299 这时退回 2025-11-25 并带 `Mcp-Session-Id`。Claude Code 不发 `Origin`，请求头中的 `${VAR}` 会展开；Claude 桌面版连不到私有网络中的服务器。真实虚拟机、经 UAC 的防火墙规则、明文抓包、其他客户端的实测没有做 |
 | [S21](S21-cables-terminals/README.md) | 电缆、端子、PLC 的读取；端子、电缆、线号的编号和生成电缆能否回滚；M4c 用到的授权 | **完成** 2026-10-21 | 都能读出，电缆要按类别取（空过滤方案随界面变化）；三种编号都能被 `SafetyPoint` 回滚，空方案等于界面上次的方案；授权中没有 `Preplanning`。Ctrl+Z 未测 |
+| [S25](S25-exports/README.md) | M4c 第一批的导出：PXF、部件清单、设备清单、标签、PLC 地址、缺失词表 | **进行中** 2026-10-21 | PXF 可行但很大（840 MB / 598 MB）；部件清单 60–90 秒；部件清单 CSV 导出之后 EPLAN 访问冲突并关闭全部项目，其余各项待重跑 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
