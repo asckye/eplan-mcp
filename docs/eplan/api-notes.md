@@ -176,6 +176,11 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A26. 不用窗口宏放置单个设备（spike S20，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S20](../../spikes/S20-symbol-placement/README.md)。示例项目的 scratch 副本。
+- 按库符号新建的功能已有 12 个属性放置，但显示的文字都是空的；`new PropertyPlacement().Create(function, Properties.Function.FUNC_DEVICETAG_FULLNAME)` 之后图上显示 `KF96`（没有 `-`，压在符号的插入点上），`UseLocalPropertyPlacements` 变为 true，`VisibleName` 仍为空。— S20。
+- `DeviceService.CreateDevice(部件号, "1", page, 位置)`：放置部件自带的宏（主功能，图上带标识、技术参数、连接点和触点镜像），其余功能未放置；标识为 `=+-Q1`，不取页的结构、不编号。能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销。— S20。
+
 ### A25. M4c 的导出（spike S25，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S25](../../spikes/S25-exports/README.md)。示例项目的 scratch 副本。
 - `Export.PXFProject(project, 路径, 主数据, 连接)`：带主数据 36.9 秒、840 MB，不带主数据 19.2 秒、598 MB；扩展名 `.epj` 由 EPLAN 补上，另外留下一个与文件同名的空目录。只改写 `User.eod`。— S25。

@@ -76,7 +76,7 @@ flowchart LR
 | 1 | `eplan_export_pxf` | 导出 | 项目导出为 EPJ（PXF），默认不带主数据（S25：840 MB 对 598 MB）（[规格](../tools/eplan_export_pxf.md)） |
 | 1 | `eplan_export_parts`、`eplan_export_untranslated` | 导出 | 部件清单（只有 XML，A25）、缺失词表（[规格](../tools/eplan_export_parts.md)、[规格](../tools/eplan_export_untranslated.md)）。S25 之后不再合成一个 `eplan_export_list`：两者参数不同；设备清单导出的是预规划清单，由标签覆盖；PLC 地址总览不给配置项目时为空，以后单独设计 |
 | 1 | `eplan_export_labels` | 导出 | 按标签方案生成清单文件，方案必填；S25 验证了文本和 xlsx，不输出需要 Excel 的 xls（[规格](../tools/eplan_export_labels.md)） |
-| 2 | `eplan_device_place` | Write | 按库符号在页上放置一个设备并给出标识。前提是 S20 找到显示标识的方法（Q3） |
+| 2 | `eplan_device_place` | Write | 按部件号在页上放置一个设备（`DeviceService.CreateDevice`，S20），再按目标结构改名；按库符号放置等显示标识的问题查清后再加（Q3） |
 | 2 | `eplan_cable_generate` | Destructive? | 按方案生成电缆，可能改名或替换已有的自动电缆 |
 | 2 | `eplan_terminal_renumber`、`eplan_cable_renumber` | Destructive | 与 `eplan_device_renumber` 相同的形态：范围、方案、起始值、步长、只编未编号的 |
 | 2 | `eplan_connection_number` | Destructive | 线号：按方案给连接编号（覆盖矩阵第 4 节的"线号管理器"） |
@@ -232,7 +232,7 @@ flowchart LR
 |---|---|---|
 | Q1 | M4c 作为单独的里程碑，与 M5 并行吗？ | **是**。M5 剩下的是 Workbench、安装包、发布流水线，与工具互不依赖；实机 spike 由同一个人在开发机上依次进行 |
 | Q2 | 按 4.1 的四批顺序做吗？ | **是**，从风险最低的只读和导出开始 |
-| Q3 | S20 找不到让按符号放置的设备显示标识的办法时怎么办？ | 先用符号宏（S20 第 1 项）；也不行时，放置后提示"标识不显示"，或者不做这个工具，到时再请项目负责人选择 |
+| Q3 | S20 找不到让按符号放置的设备显示标识的办法时怎么办？ | **S20 之后**：先做按部件号放置（`CreateDevice`，效果与手工相同，能回滚、能撤销）；按库符号放置时属性放置能让标识显示，但位置和属性还要查，查清后再加入 `eplan_device_place` |
 | Q4 | 导入文件放在哪里？ | 固定的 `<数据根目录>\imports\`，只接受其下的相对路径，不能配置 |
 | Q5 | PXF 导入新建的项目放在哪里？ | 只建在 scratch 根目录中 |
 | Q6 | 预规划数据的导入 | 授权中没有 Preplanning，暂不覆盖。项目负责人有这项授权时再做 |
