@@ -52,6 +52,9 @@ internal static class AddinTexts
             AddinProblem.NotLoaded => zh
                 ? $"EPLAN（进程 {d}）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录、授权对话框或系统消息窗口，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查{(install ? string.Empty : "；记录保留，可以再运行一次 uninstall-addin")}"
                 : $"EPLAN (process {d}) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog or a system messages window, deal with it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor{(install ? string.Empty : "; the record is kept, so uninstall-addin can be run again")}",
+            AddinProblem.PathMismatch when d.Length == 0 => zh
+                ? "EPLAN 加载的是不报告路径的旧版插件，它的位置未知，看不出这次的注册是否生效"
+                : "EPLAN loaded an older add-in that does not report its path, so where it was registered from is unknown and whether this registration took cannot be told",
             AddinProblem.PathMismatch => zh
                 ? $"EPLAN 从另一个位置加载了插件：{d}。那里的旧注册仍然有效，这次的注册没有生效"
                 : $"EPLAN loaded the add-in from another path: {d}. The earlier registration still holds; this one did not take",
