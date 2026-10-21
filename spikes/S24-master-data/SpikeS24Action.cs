@@ -113,6 +113,9 @@ public sealed class SpikeS24Action : IEplAction
             case "exporttranslation":
                 report["exportTranslation"] = ExportTranslation(p.Destination);
                 break;
+            case "removelanguage":
+                report["removeLanguage"] = RemoveLanguageRolledBack(p.Part, p.Contains);
+                break;
             case "labelformat":
                 report["labelFormat"] = LabelFormats();
                 break;
@@ -349,6 +352,60 @@ public sealed class SpikeS24Action : IEplAction
 
     // r12 (owner-approved, 2026-10-21): the probes below write the CONFIGURED parts and translation databases. They
     // run only after both databases were backed up and hashed; afterwards EPLAN is closed and both are restored.
+
+    /// <summary>
+    /// For eplan_language_remove (Large test 2026-10-21: RemoveProjectLanguage returned false): on an open project under
+    /// the scratch root that is not the current one, records the return value and the language settings before and
+    /// after, inside a SafetyPoint that is rolled back (S23: the settings are not rolled back; the copy is replaceable).
+    /// </summary>
+    private static JObject RemoveLanguageRolledBack(string path, string language)
+    {
+        var result = new JObject { ["path"] = path, ["language"] = language };
+        if (path.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            result["refused"] = "the project must be under the scratch root";
+            return result;
+        }
+
+        using var locking = new Eplan.EplApi.DataModel.LockingStep();
+        Eplan.EplApi.DataModel.Project? project = null;
+        using (var manager = new Eplan.EplApi.DataModel.ProjectManager())
+        {
+            project = manager.OpenProjects.FirstOrDefault(o => string.Equals(o.ProjectLinkFilePath, path, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (project is null)
+        {
+            result["refused"] = "the project is not open";
+            return result;
+        }
+
+        result["current"] = Try(() => new SelectionSet().GetCurrentProject(false)?.ProjectLinkFilePath);
+        result["before"] = ProjectLanguages(project);
+        using (Eplan.EplApi.DataModel.SafetyPoint safety = Eplan.EplApi.DataModel.SafetyPoint.Create())
+        {
+            result["returned"] = Try(() =>
+            {
+                using var translate = new Translate();
+                return translate.RemoveProjectLanguage(project, language);
+            });
+            result["during"] = ProjectLanguages(project);
+            safety.Rollback();
+        }
+
+        result["afterRollback"] = ProjectLanguages(project);
+        return result;
+    }
+
+    private static JToken ProjectLanguages(Eplan.EplApi.DataModel.Project project) => Try(() =>
+    {
+        using var settings = new Eplan.EplApi.DataModel.ProjectSettings(project);
+        return new JObject
+        {
+            ["translation"] = settings.GetStringSetting("TRANSLATEGUI.TRANSLATE_LANGUAGES", 0),
+            ["display"] = settings.GetStringSetting("TRANSLATEGUI.DISPLAYED_LANGUAGES", 0),
+        };
+    });
 
     /// <summary>
     /// Read only, for eplan_export_labels (Large test 2026-10-21: <c>Data.File.Format</c> could not be read): tries
