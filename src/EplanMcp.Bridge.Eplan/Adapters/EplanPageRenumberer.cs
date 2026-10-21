@@ -53,9 +53,10 @@ internal sealed class EplanPageRenumberer : IPageRenumberer
                 "EPLAN reports that a new page number is taken, so nothing was renumbered. Choose another 'start'; eplan_page_list with name_prefix shows the numbers in use.",
                 ex);
         }
-        catch (BaseException ex) when (ex.Message.StartsWith(AmbiguousPageName, StringComparison.Ordinal))
+        catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && ex.Message.StartsWith(AmbiguousPageName, StringComparison.Ordinal))
         {
-            // A new number that an existing page has: EPLAN refuses with "page name ambiguous" (live check, A20).
+            // A new number that an existing page has: EPLAN refuses with "page name ambiguous" (live check, A20); in the
+            // live Large run it did not come as a BaseException, so the message number decides.
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
                 "EPLAN reports that a new page number is taken, so nothing was renumbered. Choose another 'start'; eplan_page_list with name_prefix shows the numbers in use.",
