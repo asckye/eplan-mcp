@@ -61,12 +61,7 @@ public sealed partial class App : Application, IDisposable
         _log = new FileLog(_locations.Logs, TimeProvider.System);
         _queue = new ApprovalQueue(TimeProvider.System);
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
-        _queue.Changed += question => Dispatcher.BeginInvoke(() =>
-        {
-            _view.Update(question);
-            ShowQueue();
-        });
-        _queue.AcceptingChanged += () => Dispatcher.BeginInvoke(ShowQueue);
+        _view.Follow(Dispatcher, ShowQueue);
         _window.Attach(_view);
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
