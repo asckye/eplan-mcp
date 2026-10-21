@@ -27,10 +27,12 @@
 
   <!--
     APR-02: Reject and Approve are the same default button, never primary or danger; their text is plain, so a label
-    can never carry an access key; neither is IsDefault or IsCancel (set where they are used).
+    can never carry an access key; neither is IsDefault or IsCancel (set where they are used). They fill the equal cells
+    they are put in, so a label that wraps makes both taller.
   -->
   <Style x:Key="Workbench.Answer" TargetType="Button" BasedOn="{StaticResource Primer.Secondary}">
     <Setter Property="MinWidth" Value="120" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
     <Setter Property="ContentTemplate">
       <Setter.Value>
         <DataTemplate>

@@ -19,20 +19,23 @@ public sealed class HeaderStatusTests(WpfContext wpf)
 {
     [Theory]
     [InlineData(ApprovalChannelState.Accepting, "正在接收审批问题", false)]
-    [InlineData(ApprovalChannelState.Full, "不接收新问题：已有 50 个在等待", true)]
-    [InlineData(ApprovalChannelState.NameTaken, "不接收审批问题：管道名已被占用", true)]
+    [InlineData(ApprovalChannelState.Full, "不接收新问题：已有 50 个在等待，新的问题改由 EPLAN 中的对话框询问", true)]
+    [InlineData(ApprovalChannelState.NameTaken, "不接收审批问题：管道名已被占用，审批改由 EPLAN 中的对话框询问", true)]
     public void TheChannelState_IsShownInWords_WithWhereQuestionsGoWhenNotTaken(ApprovalChannelState state, string text, bool explained)
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
             window.ShowApprovals(state, 0);
 
+            // In the text itself, not only in the tooltip: the engineer must see where questions go (STS-11).
             var status = (TextBlock)window.FindName("PipeText");
             Assert.Equal(text, status.Text);
             Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(status));
-            Assert.Equal(explained, AutomationProperties.GetHelpText(status).Contains("EPLAN 中的对话框", StringComparison.Ordinal));
+            Assert.Equal(explained, AutomationProperties.GetHelpText(status).Length > 0);
+            Assert.Equal(TextWrapping.Wrap, status.TextWrapping);
             Loc.Current.Language = AppLanguage.English;
             Assert.StartsWith("Taking", status.Text, StringComparison.Ordinal);
+            Assert.Equal(explained, status.Text.EndsWith("asked in the EPLAN dialog", StringComparison.Ordinal));
         }));
     }
 

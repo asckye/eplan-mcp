@@ -95,11 +95,14 @@
             <TextBlock Text="/" Margin="8,0" Style="{StaticResource Primer.Breadcrumb}" />
             <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
           </StackPanel>
-          <!-- STS-11: whether approvals are taken, always, in words; STS-10: the waiting count, which opens the queue. -->
+          <!--
+            STS-11: whether approvals are taken, always, in words, and when not, why and that the EPLAN dialog asks instead;
+            STS-10: the waiting count, which opens the queue.
+          -->
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Click="OnPendingBadge" />
             <Path x:Name="PipeIcon" Width="14" Height="14" Margin="8,0" VerticalAlignment="Center" />
-            <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" MaxWidth="360" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" MaxWidth="360" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">

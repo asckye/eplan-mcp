@@ -53,6 +53,64 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         }));
     }
 
+    [Theory]
+    [InlineData(AppLanguage.English)]
+    [InlineData(AppLanguage.Chinese)]
+    public void TheTwoButtons_AreTheSameSize_InEitherLanguage_ForAnApprovalAndForARelease(AppLanguage language)
+    {
+        wpf.RunWithLanguage(language, () => WithPage((window, page) =>
+        {
+            Button reject = Button(page, "RejectButton");
+            Button approve = Button(page, "ApproveButton");
+            Add("r1");
+            Question release = Add("r2", 150, Asks.Release("r2"));
+            var sizes = new List<string>();
+            foreach (QuestionItem item in _view!.Pending.ToList())
+            {
+                _view.Select(item);
+                WpfContext.Drain();
+
+                // English "Checked, continue" is longer than "Keep suspended": both take the longer one's size.
+                Assert.Equal((reject.ActualWidth, reject.ActualHeight), (approve.ActualWidth, approve.ActualHeight));
+                Assert.All(new[] { reject, approve }, b => Assert.True(Descendants<TextBlock>(b).Single().ActualWidth <= b.ActualWidth - b.Padding.Left - b.Padding.Right + 0.5));
+                sizes.Add($"{item.RejectLabel}/{item.ApproveLabel}");
+            }
+
+            Assert.Equal(2, sizes.Distinct().Count()); // an approval and a release were both measured
+            Assert.Same(release, _view.Shown!.Question);
+        }));
+    }
+
+    [Fact]
+    public void AnUnknownOutcome_ShowsTheWarningIcon_AndTheWarningColour_ADoneOneNeither()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            Question unknown = Add("r1");
+            Question done = Add("r2", 150);
+            _queue!.Answer(unknown, approve: true);
+            _queue.Answer(done, approve: true);
+            _queue.Report(unknown, WriteExecution.Unknown, "OUTCOME_UNKNOWN");
+            _queue.Report(done, WriteExecution.Committed, null);
+            WpfContext.Drain();
+            var icon = (FrameworkElement)page.FindName("OutcomeWarning");
+            var text = (TextBlock)page.FindName("OutcomeText");
+
+            window.Open(Item(unknown));
+            WpfContext.Drain();
+            Assert.True(icon.IsVisible);
+            Assert.Equal(page.FindResource("Primer.warn"), text.Foreground);
+            Assert.StartsWith("结果未知：写入已暂停", text.Text, StringComparison.Ordinal);
+            var rows = (ListBox)page.FindName("Questions");
+            Assert.Single(Descendants<System.Windows.Shapes.Path>(rows), p => p.IsVisible && p.Style == page.FindResource("Primer.AlertIcon.Warning")); // the row of r1
+
+            window.Open(Item(done));
+            WpfContext.Drain();
+            Assert.False(icon.IsVisible);
+            Assert.Equal(page.FindResource("Primer.text"), text.Foreground);
+        }));
+    }
+
     [Fact]
     public void TheButtons_RespondOnly500msAfterTheQuestionRendered()
     {
