@@ -29,6 +29,7 @@
 - `restore`：同样在调度器中执行 `restore /TYPE:MASTERDATA`，目标只在 scratch 中。
 - `opencopy`：`new MDPartsManagement().OpenDatabase(副本路径)` 打开还原出来的副本（路径必须在 scratch 中），在事务中添加测试部件 `EPLANMCP.S24-TEST` 后回滚、再添加后提交，重复添加，删除后回滚；前后读 `SelectedPartsDatabaseAsString`。
 - r12–r16（项目负责人批准："批准 r12"）：先对两个库的全部文件计算 SHA-256，按文件复制一份、再用 `backup MASTERDATA` 备份一份到 scratch；`importpart` 把 r11 导出的单个测试部件导入**配置的**部件库（不在事务中）；`syncparts` 把当前项目（scratch 中的夹具）的部件同步进部件库；最后关闭 EPLAN，用文件副本恢复，核对全部文件与之前逐字节相同。
+- `removelanguage`（r18）：为 `eplan_language_remove` 查 `RemoveProjectLanguage` 的返回值：在 scratch 的写副本上、`SafetyPoint` 中调用后回滚。删除了语言也返回 false，结论见 api-notes A28。
 - `labelformat`（r17，只读）：为 `eplan_export_labels` 查标签方案输出格式的读法，结论见 api-notes B9。
 - `copyio`（r11）：在副本上 `ExportParts`（XML、EDZ、单个部件），删除测试部件后用 `ImportParts` 导入回来（先在事务中、再不在事务中）；用 `Translate.ExportDatabaseTexts` 把正在用的翻译库导出到 scratch（只读）。
 - 同一个 EPLAN 中再次注册要换程序集名：`-p:AssemblyName=EplanMcp.Spikes.S24rN`，驱动加 `--revision rN`。编译另一个版本会删掉上一个版本的 dll。
