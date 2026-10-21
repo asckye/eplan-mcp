@@ -1,0 +1,102 @@
+﻿{
+  "install": {
+    "schemaVersion": 1,
+    "action": "install",
+    "dll": "C:\\Users\\engineer\\EplanMcp\\app\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll",
+    "problem": null,
+    "results": [
+      {
+        "eplan": "C:\\Program Files\\EPLAN\\Platform\\2023.0.3\\Bin\\EPLAN.exe",
+        "version": "2023.0.3.19351",
+        "variant": null,
+        "result": "skipped",
+        "processId": null,
+        "notes": [
+          {
+            "code": "unsupported_version",
+            "zh": "不在支持范围 2024-2027 内，没有注册（ADR-0009）",
+            "en": "Outside the supported range 2024-2027, so nothing was registered (ADR-0009)"
+          }
+        ],
+        "problem": null
+      },
+      {
+        "eplan": "C:\\Program Files\\EPLAN\\Platform\\2026.0.3\\Bin\\EPLAN.exe",
+        "version": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "registered",
+        "processId": 4120,
+        "notes": [
+          {
+            "code": "close_eplan",
+            "zh": "这个 EPLAN 没有按要求关闭，请自己关闭它",
+            "en": "This EPLAN did not close when asked; close it yourself"
+          }
+        ],
+        "problem": null
+      },
+      {
+        "eplan": "C:\\Program Files\\EPLAN\\Platform\\2026.0.3\\Bin\\EPLAN.exe",
+        "version": "2026.0.3.25421",
+        "variant": "Pro Panel",
+        "result": "refused",
+        "processId": null,
+        "notes": [],
+        "problem": {
+          "code": "eplan_running",
+          "zh": "Pro Panel 的 EPLAN 正在运行，或有无法判断变体的 EPLAN 在运行（进程 3388）：这时执行命令会另起一个装着全部插件的 EPLAN。请先关闭它，然后重新运行",
+          "en": "EPLAN of Pro Panel, or one whose variant cannot be told, is running (process 3388): the command would start a second EPLAN with every add-in. Close it and run again"
+        }
+      }
+    ]
+  },
+  "notConfirmed": {
+    "schemaVersion": 1,
+    "action": "install",
+    "dll": "C:\\Users\\engineer\\EplanMcp\\app\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll",
+    "problem": null,
+    "results": [
+      {
+        "eplan": "C:\\Program Files\\EPLAN\\Platform\\2026.0.3\\Bin\\EPLAN.exe",
+        "version": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "not_confirmed",
+        "processId": 4120,
+        "notes": [],
+        "problem": {
+          "code": "not_loaded",
+          "zh": "EPLAN（进程 4120）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录或授权对话框，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查",
+          "en": "EPLAN (process 4120) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog, complete it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor"
+        }
+      }
+    ]
+  },
+  "refused": {
+    "schemaVersion": 1,
+    "action": "install",
+    "dll": "C:\\Users\\engineer\\EplanMcp\\app\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll",
+    "problem": {
+      "code": "variant_not_found",
+      "zh": "支持范围内的 EPLAN 中没有安装这些变体，没有注册任何变体：Fluid (installed: Electric P8, Pro Panel)",
+      "en": "No EPLAN in the supported range has these variants, so nothing was registered: Fluid (installed: Electric P8, Pro Panel)"
+    },
+    "results": []
+  },
+  "uninstall": {
+    "schemaVersion": 1,
+    "action": "uninstall",
+    "dll": null,
+    "problem": null,
+    "results": [
+      {
+        "eplan": "C:\\Program Files\\EPLAN\\Platform\\2026.0.3\\Bin\\EPLAN.exe",
+        "version": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "unregistered",
+        "processId": 5230,
+        "notes": [],
+        "problem": null
+      }
+    ]
+  }
+}
