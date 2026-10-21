@@ -44,20 +44,23 @@
 | `terminal` | 端子 | `Terminal` |
 | `terminal_strip` | 端子排（唯一由两个词组成的资源词，如 `eplan_terminal_strip_list`） | `TerminalStrip` |
 | `plc` | PLC 卡、地址 | `PLC` 相关功能 |
-| `part` | 部件（物料） | 部件库 `MDPart` |
+| `part` | 部件（物料）；也指系统部件库本身（`eplan_part_export`） | 部件库 `MDPart`、`MDPartsDatabase` |
 | `macro` | 宏 | 窗口宏、页面宏 |
 | `symbol` | 符号 | `SymbolLibrary`、`SymbolVariant` |
 | `property` | 属性 | `PropertyValue` |
 | `report` | 报表 | 报表页、报表模板 |
 | `check` | 检查 | 检查运行、消息管理 |
 | `export` | 导出 | PDF、DXF、图片…… |
+| `import` | 导入到项目，用法同 `export`：动作的位置放格式（`eplan_import_dxf`、`eplan_import_pxf`） | DXF、PXF…… |
+| `language` | 项目的语言：显示语言、翻译语言 | `Translate.SetDisplayedLanguages`、`AddProjectLanguage` |
+| `translation` | 系统翻译库（所有项目共用） | `Translate.TranslateDatabase` |
 | `scratch` | 沙箱项目 | 本项目的概念 |
 | `message` | EPLAN 系统消息 | 系统消息树 |
 | `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
 
 ### 3.3 动作
 - 标准动作：`list`（分页列出）、`get`（按名称取单个）、`search`（按条件查找）、`create`、`update`、`delete`。
-- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）。
+- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
 
