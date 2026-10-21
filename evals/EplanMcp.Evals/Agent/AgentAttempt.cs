@@ -30,6 +30,9 @@ internal sealed record AgentAttempt(AttemptStatus Status, string? Reason, JsonNo
     // No login: waiting does not fix it, unlike the other API errors.
     private const string LoginError = "authentication_failed";
 
+    /// <summary>The files the model exported during the attempt (<see cref="ExportedFiles"/>), for the after call exported_files.</summary>
+    public IReadOnlyList<ExportedFile> Exports { get; init; } = [];
+
     /// <summary>
     /// Invalid because of an API error before the model did anything: no tool call, nothing spent. The runner retries
     /// such an attempt once. On 2026-10-19 another Claude Code process refreshing the shared login made six attempts in

@@ -45,6 +45,12 @@ internal sealed record EvalTask(
     /// <summary>Where the prompt of a task on a copy names the copy; the runner puts the copy's project name there.</summary>
     public const string ProjectToken = "{project}";
 
+    /// <summary>
+    /// The after call the runner answers itself, with the files the model exported during the attempt (evals/README.md);
+    /// it is no tool of eplanmcp.
+    /// </summary>
+    public const string ExportedFiles = "exported_files";
+
     public TaskFixture Fixture { get; init; } = TaskFixture.Shared;
 
     public IReadOnlyDictionary<string, OracleCall> After { get; init; } = new Dictionary<string, OracleCall>();
@@ -55,9 +61,10 @@ internal sealed record OracleCall(string Tool, JsonObject Args, JsonPath Pick);
 
 /// <summary>
 /// Compares the answer value at <see cref="Answer"/>, or the value of the after call named <see cref="After"/>, with
-/// the oracle value named <see cref="Oracle"/>, or with <see cref="Literal"/> when no oracle is named.
+/// the oracle value named <see cref="Oracle"/>, the value of the after call named <see cref="ExpectedAfter"/>, or
+/// <see cref="Literal"/> when neither is named.
 /// </summary>
-internal sealed record Check(JsonPath? Answer, ComparisonKind Kind, string? Oracle, JsonNode? Literal, string? After = null)
+internal sealed record Check(JsonPath? Answer, ComparisonKind Kind, string? Oracle, JsonNode? Literal, string? After = null, string? ExpectedAfter = null)
 {
     /// <summary>What the check looks at, as reports name it: the answer path or <c>after.&lt;name&gt;</c>.</summary>
     public string Subject => After is null ? Answer?.ToString() ?? "$" : "after." + After;

@@ -11,6 +11,9 @@ namespace EplanMcp.Evals.Run;
 /// </summary>
 internal static class EvalsHome
 {
+    /// <summary>Where the model's eplanmcp writes its exports: <c>exports\</c> in its data root (M4 design 4.4).</summary>
+    public static string Exports(string home) => Path.Combine(home, "exports");
+
     public static void Write(string home, string scratchFolder)
     {
         Directory.CreateDirectory(home);

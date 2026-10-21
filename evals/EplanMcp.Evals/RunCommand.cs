@@ -99,7 +99,7 @@ internal static class RunCommand
             string mcpConfig = Path.Combine(run, "mcp.json");
             await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);
-            var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig), run, workRoot, options.Repeat > 1);
+            var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig), run, workRoot, options.Repeat > 1, EvalsHome.Exports(home));
             Dictionary<(string Task, int Attempt), AttemptCopy> copies = [];
             string copiesLeft = $"The copies stay open in EPLAN: close them there, then delete {copiesRoot}.";
             if (template is not null)

@@ -24,7 +24,7 @@ internal static class OracleRunner
         var notes = new List<string>();
 
         // The after calls run later, but a tool the server lacks is a mistake of the task, not of the model.
-        foreach ((string name, OracleCall call) in task.After.Where(a => !tools.Contains(a.Value.Tool)))
+        foreach ((string name, OracleCall call) in task.After.Where(a => a.Value.Tool != EvalTask.ExportedFiles && !tools.Contains(a.Value.Tool)))
         {
             problems.Add($"after '{name}': {call.Tool} is not a tool of this eplanmcp");
         }

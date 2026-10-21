@@ -35,7 +35,7 @@ internal static class EvalRun
     /// <summary>
     /// Appends one record per task to <paramref name="records"/> as soon as the task starts, so that a cancelled run
     /// still reports what it finished. A task whose oracle calls fail gets no attempt; the after calls of an answered
-    /// attempt go to the grading with its answer. A task on a copy makes its oracle and after calls on the copy of each
+    /// attempt, which also see the files it exported, go to the grading with its answer. A task on a copy makes its oracle and after calls on the copy of each
     /// attempt in <paramref name="copies"/>, and an attempt without a copy is invalid. An attempt that is
     /// <see cref="AgentAttempt.IsRetryable"/> runs once more after <paramref name="retryDelay"/>, on the same copy, which
     /// it has not touched (no tool call); both are reported, and the invalid one does not count, as always.
@@ -119,7 +119,7 @@ internal static class EvalRun
                 {
                     try
                     {
-                        IReadOnlyDictionary<string, AfterValue> after = await AfterRunner.RunAsync(task, client, copy?.Path, cancellationToken).ConfigureAwait(false);
+                        IReadOnlyDictionary<string, AfterValue> after = await AfterRunner.RunAsync(task, client, copy?.Path, run.Exports, cancellationToken).ConfigureAwait(false);
                         verdict = Grader.Grade(task, run.Answer, oracle.Values, after);
                     }
                     catch (Exception ex)

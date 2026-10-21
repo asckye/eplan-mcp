@@ -17,6 +17,7 @@ internal sealed record TaskFile(string Name, EvalTask? Task, IReadOnlyList<strin
 internal static partial class TaskLoader
 {
     private const string OraclePrefix = "oracle.";
+    private const string AfterPrefix = "after.";
 
     private static readonly string[] _taskKeys = ["id", "set", "fixture", "prompt", "answer", "oracle", "after", "checks", "budget"];
     private static readonly string[] _oracleKeys = ["tool", "args", "pick"];
@@ -209,7 +210,12 @@ internal static partial class TaskLoader
                     Unknown(entry, _oracleKeys);
                     YamlNode? toolNode = Required(entry, "tool");
                     string? tool = Text(toolNode, "'tool'");
-                    if (tool is not null && !ToolName().IsMatch(tool))
+                    bool exported = tool == EvalTask.ExportedFiles;
+                    if (exported && kind != "after")
+                    {
+                        tool = Reported<string>(toolNode!, $"{EvalTask.ExportedFiles} is an after call: the files are there once the attempt is over");
+                    }
+                    else if (tool is not null && !exported && !ToolName().IsMatch(tool))
                     {
                         tool = Reported<string>(toolNode!, $"'{tool}' is not a tool name (eplan_<family>_<verb>)");
                     }
@@ -218,6 +224,10 @@ internal static partial class TaskLoader
                     if (Child(entry, "args") is { } argsNode)
                     {
                         args = Mapping(argsNode, "'args'") is { } argsMap ? Json(argsMap) as JsonObject : null;
+                        if (exported && args is not null && args.Any(a => a.Key != "extension" || !IsString(a.Value)))
+                        {
+                            args = Reported<JsonObject>(argsNode, $"{EvalTask.ExportedFiles} takes one argument only, a string 'extension' such as pdf");
+                        }
                     }
 
                     JsonPath? pick = PathOf(Required(entry, "pick"), "'pick'");
@@ -249,10 +259,10 @@ internal static partial class TaskLoader
                 }
 
                 ComparisonKind kind = Comparison.Names[kindName];
-                (string? oracleName, JsonNode? literal) = Expected(kindName, kind, expected);
+                (string? oracleName, string? expectedAfter, JsonNode? literal) = Expected(kindName, kind, expected);
                 if (subject)
                 {
-                    checks.Add(new Check(path, kind, oracleName, literal, after));
+                    checks.Add(new Check(path, kind, oracleName, literal, after, expectedAfter));
                 }
             }
 
@@ -291,8 +301,11 @@ internal static partial class TaskLoader
             return (path is not null, path, null);
         }
 
-        /// <summary>A plain <c>oracle.&lt;name&gt;</c> refers to an oracle call; anything else, quoted text included, is a literal.</summary>
-        private (string? Oracle, JsonNode? Literal) Expected(string kindName, ComparisonKind kind, YamlNode expected)
+        /// <summary>
+        /// A plain <c>oracle.&lt;name&gt;</c> refers to an oracle call, a plain <c>after.&lt;name&gt;</c> to an after call;
+        /// anything else, quoted text included, is a literal.
+        /// </summary>
+        private (string? Oracle, string? After, JsonNode? Literal) Expected(string kindName, ComparisonKind kind, YamlNode expected)
         {
             if (expected is YamlScalarNode { Style: ScalarStyle.Plain, Value: { } reference } && reference.StartsWith(OraclePrefix, StringComparison.Ordinal))
             {
@@ -303,14 +316,26 @@ internal static partial class TaskLoader
                     Problem(expected, $"oracle '{name}' is not defined");
                 }
 
-                return (name, null);
+                return (name, null, null);
+            }
+
+            if (expected is YamlScalarNode { Style: ScalarStyle.Plain, Value: { } afterReference } && afterReference.StartsWith(AfterPrefix, StringComparison.Ordinal))
+            {
+                string name = afterReference[AfterPrefix.Length..];
+                _usedAfter.Add(name);
+                if (!_after.ContainsKey(name))
+                {
+                    Problem(expected, $"after '{name}' is not defined");
+                }
+
+                return (null, name, null);
             }
 
             if (expected is YamlScalarNode { Style: ScalarStyle.Plain, Value: null or "" })
             {
                 // An empty value is YAML's null, but here it is far more likely a value left out; null is written out.
                 Problem(expected, $"{kindName} has no expected value; write null to compare with null");
-                return (null, null);
+                return (null, null, null);
             }
 
             JsonNode? literal = Json(expected);
@@ -319,7 +344,7 @@ internal static partial class TaskLoader
                 Problem(expected, $"{kindName} {problem}");
             }
 
-            return (null, literal);
+            return (null, null, literal);
         }
 
         private Budget BudgetOf(YamlMappingNode budget)
