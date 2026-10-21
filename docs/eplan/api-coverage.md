@@ -46,7 +46,7 @@
 - **运行检查不是只读操作**：`check` 会重新生成检查消息，写入项目的消息管理，所以 `eplan_check_run` 放到 M3，与策略和审批一起做（[M2 设计](../design/2026-10-18-m2-read-core.md)第 9 节 Q2）；M2 只读取项目中已有的检查消息。按文档，检查开始前会删除上一次的消息，消息集合代表最近一次检查的结果。
 - 只有三种只读需求适合用 action：只读打开项目（`ProjectOpen /OpenMode:ReadOnly`）、把页面导出为图片（`exportToGraphics`，可以让模型"看图"，考虑提前到 M3）、导出设置快照（`XSettingsExport`）。
 - 35 个不做成工具：交互或界面类 15 个，脚本（Code 级）3 个，只供安装器或插件注册使用 3 个，官方标注为向后兼容 6 个，一次性迁移 2 个，物理打印 1 个，设置写入（默认禁用）5 个。
-- M4c 之后仍没有任务工具、也不在 M4b 中的 57 种用法，逐条列在 [ADR-0021](../adr/0021-action-run-whitelist.md) 第 8 节（Proposed），标出建议的级别、验证状态和是否进入白名单。
+- M4c 之后仍没有任务工具、也不在 M4b 中的 57 种用法，逐条列在 [ADR-0021](../adr/0021-action-run-whitelist.md) 第 8 节，标出建议的级别、验证状态和是否进入白名单。
 - 待确认：`XAMlExportProductionData2SmartMountingAction` 的详细页面在 2025 和 2026 都返回 404；10 处文档没有说清楚的副作用（例如 `export` 的 `LANGUAGE` 参数会先翻译项目），要在实现对应工具前在 scratch 项目上验证，见[逐条核对表第 7 节](api-actions.md#7-待确认的问题无法访问的页面与文档疑点)。
 
 | 功能类别 | 典型 action | 本项目的处理方式 | 里程碑 |
@@ -62,7 +62,7 @@
 | 翻译与语言 | 翻译项目、设置项目语言 | `eplan_translate_*` | M4 之后 |
 | 设置 | 读写设置、导入导出设置 | 只读：用 `Settings` / `ProjectSettings` 类，有任务需要时再做成工具；写入属于 Code 级配置，默认不开放 | 按需（原计划 M2，见 M2 设计 Q5） |
 | 3D / 生产 | 安装空间、3D 宏、模型视图、钻孔视图、铜排展开、NC 数据、生产布线 | Pro Panel 工具家族 | M4b |
-| 其余（约 1050 个界面 action） | 各类界面命令 | 不逐个包装；需要时加入受控 action 白名单（`eplan_action_run`，只允许已标定级别的 action；设计见 [ADR-0021](../adr/0021-action-run-whitelist.md)，Proposed） | M4 之后 |
+| 其余（约 1050 个界面 action） | 各类界面命令 | 不逐个包装；需要时加入受控 action 白名单（`eplan_action_run`，只允许已标定级别的 action；设计见 [ADR-0021](../adr/0021-action-run-whitelist.md)） | M4 之后 |
 
 ## 3. Pro Panel 3D（M4b）
 
