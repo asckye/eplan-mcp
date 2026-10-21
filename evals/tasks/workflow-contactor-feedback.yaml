@@ -1,12 +1,12 @@
 id: workflow-contactor-feedback
 set: dev
 fixture: copy
-prompt: 在项目 {project} 的新页 =GAA+A1&EFS1/60 上放一个接触器反馈控制回路并生成连接，运行检查，更新报表，导出这一页的 PDF，报告错误数和文件名。
+prompt: 在项目 {project} 的新页 =GAA+A1&EFS1/60 上放一个接触器反馈控制回路并生成连接，更新报表，然后检查整个项目，导出这一页的 PDF，报告检查发现的错误数和 PDF 的文件名。
 answer:
   type: object
   required: [errors, file]
   properties:
-    errors: { type: integer, description: the errors the check found }
+    errors: { type: integer, description: the errors the check of the whole project found }
     file: { type: string, description: the file name or full path of the PDF }
 # The end-to-end task of the first batch (M4 design 7). On a fresh copy: the page is not there (A17 made it); the
 # Contactor_Feedback macros of the macro catalog place devices, and a new page gets connections only by generating
