@@ -1,0 +1,7 @@
+# Files copied from the TIA Portal Openness MCP repository (MIT, see ../../README.md) stay as they are there, so the
+# rules of this repository that their style breaks are switched off for this folder only (spike S18).
+[*.cs]
+dotnet_diagnostic.IDE0011.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.CA1305.severity = none

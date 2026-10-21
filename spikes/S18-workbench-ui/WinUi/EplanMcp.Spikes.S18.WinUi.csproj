@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S18, prototype A (ADR-0015 option 1): the approval card in WinUI 3 on Windows App SDK 2.x, unpackaged and
+    self-contained, built and published with the dotnet CLI only. See ../README.md for the commands and results.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>EplanMcp.Spikes.S18.WinUi</RootNamespace>
+    <AssemblyName>S18.WinUi</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <!-- Unpackaged: no package identity, no MSIX (ADR-0015 item 1). -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Without it dotnet publish leaves out the app's .pri and .xbf files and MainWindow fails with XamlParseException. -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <!-- The Windows App SDK runtime is copied next to the exe; nothing is installed. -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <!-- Program.cs owns Main so that AppInstance can redirect a second instance before XAML starts. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <!-- TrayIcon.cs uses blittable structs with fixed buffers for Shell_NotifyIcon. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- UI code continues on the UI thread after await (CA2007 is for library code). -->
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+  <!--
+    S18Slim=true references only the WinUI component package (with its dependencies Foundation, InteractiveExperiences,
+    Base, WebView2) instead of the Microsoft.WindowsAppSDK metapackage, which also brings AI, ML (onnxruntime, DirectML),
+    Search and Widgets. It restores into its own lock file.
+  -->
+  <PropertyGroup Condition="'$(S18Slim)' == 'true'">
+    <NuGetLockFilePath>packages.slim.lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(S18Slim)' != 'true'">
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(S18Slim)' == 'true'">
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.DWrite" />
+  </ItemGroup>  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+  <!--
+    Workbench font (owner, 2026-10-20): Maple Mono CN, copied into Fonts\ next to the exe; never committed, never
+    installed. S18FontDir is the folder of the release's .ttf files (default: the repository's .local\fonts), and
+    S18FontFiles the weights the type ramp uses: Regular for Caption and Body, SemiBold for BodyStrong and Subtitle.
+    Without the folder nothing is copied and the text falls back to Segoe UI Variable and Microsoft YaHei UI.
+  -->
+  <PropertyGroup>
+    <S18FontDir Condition="'$(S18FontDir)' == ''">$(MSBuildThisFileDirectory)..\..\..\.local\fonts\maple-mono-cn-v7.9\fonts</S18FontDir>
+    <S18FontFiles Condition="'$(S18FontFiles)' == ''">MapleMono-CN-Regular.ttf;MapleMono-CN-SemiBold.ttf</S18FontFiles>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(S18FontDir)')">
+    <S18FontName Include="$(S18FontFiles)" />
+    <Content Include="@(S18FontName->'$(S18FontDir)\%(Identity)')" Link="Fonts\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

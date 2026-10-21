@@ -26,6 +26,16 @@
       EPLAN Bin directory lacks (api-notes B4). Never shipped.
     -->
     <PackageVersion Include="System.Memory" Version="4.5.5" />
+    <!--
+      Microsoft Software License Terms (not MIT; see the spike README). Spike S18's WinUI 3 prototype only
+      (spikes/S18-workbench-ui, ADR-0015 option 1): latest stable 2.x on 2026-10-20. No project in EplanMcp.Ci.slnf
+      references it; nothing ships with it until ADR-0015 is decided.
+    -->
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <!-- The same release split into its component packages: WinUI and windowing only, without AI, ML, Search, Widgets (S18Slim). -->
+    <PackageVersion Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK.DWrite" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup Label="Analyzers">
     <!--

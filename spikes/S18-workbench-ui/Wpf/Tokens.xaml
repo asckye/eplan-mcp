@@ -1,0 +1,32 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <!--
+    Tokens from the TIA Workbench UI spec (docs/development/design-spec/workbench-ui.md, appendix A), in one place.
+    Primer.xaml keeps its own Ant tokens (Ui.*) for the controls it styles; the card's layout uses these.
+  -->
+  <!-- A.1 spacing and sizes (LAY-04: multiples of 4) -->
+  <sys:Double x:Key="Space.4">4</sys:Double>
+  <sys:Double x:Key="Space.8">8</sys:Double>
+  <sys:Double x:Key="Space.12">12</sys:Double>
+  <sys:Double x:Key="Space.16">16</sys:Double>
+  <sys:Double x:Key="Space.24">24</sys:Double>
+  <sys:Double x:Key="Space.32">32</sys:Double>
+  <sys:Double x:Key="Control.Height">32</sys:Double>
+  <sys:Double x:Key="Control.Height.Compact">24</sys:Double>
+  <sys:Double x:Key="List.RowHeight">36</sys:Double>
+  <!-- Drawer.Width for the pending-approval drawer -->
+  <sys:Double x:Key="Drawer.Width.Approvals">480</sys:Double>
+  <!-- A.2 radii (LAY-08) -->
+  <CornerRadius x:Key="Radius.Control">4</CornerRadius>
+  <CornerRadius x:Key="Radius.Card">8</CornerRadius>
+  <CornerRadius x:Key="Radius.Overlay">8</CornerRadius>
+  <!-- A.3 type ramp (TYP-02); Code uses Ui.FontMono -->
+  <sys:Double x:Key="Type.Caption">12</sys:Double>
+  <sys:Double x:Key="Type.Body">14</sys:Double>
+  <sys:Double x:Key="Type.BodyLarge">18</sys:Double>
+  <sys:Double x:Key="Type.Subtitle">20</sys:Double>
+  <sys:Double x:Key="Type.Title">28</sys:Double>
+  <sys:Double x:Key="Type.Code">12</sys:Double>
+</ResourceDictionary>

@@ -1,0 +1,145 @@
+<Window
+    x:Class="EplanMcp.Spikes.S18.WinUi.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Layout on an 8 px grid: 32 px page margin, 24 px card padding, 16 px between groups, 8 px inside a group.
+    Groups are separated by whitespace, not divider lines. Type ramp: Caption 12, Body 14, BodyStrong 14, Subtitle 20.
+  -->
+  <Grid x:Name="Root" Padding="32" RowSpacing="24">
+    <Grid.Resources>
+      <!--
+        The WinUI type ramp with the Workbench font: all text in Maple Mono CN from the app's Fonts folder, or the
+        fallback (App.xaml.cs sets both families before this window is parsed). SemiBold styles use the SemiBold file.
+      -->
+      <Style x:Key="S18Caption" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource WorkbenchFontFamily}" />
+      </Style>
+      <Style x:Key="S18Body" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource WorkbenchFontFamily}" />
+      </Style>
+      <Style x:Key="S18BodyStrong" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource WorkbenchStrongFontFamily}" />
+      </Style>
+      <Style x:Key="S18Subtitle" TargetType="TextBlock" BasedOn="{StaticResource SubtitleTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource WorkbenchStrongFontFamily}" />
+      </Style>
+    </Grid.Resources>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Prototype controls, not part of the approval card. -->
+    <StackPanel Orientation="Horizontal" Spacing="32">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock x:Name="LanguageLabel" Style="{StaticResource S18Caption}" VerticalAlignment="Center"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <RadioButton x:Name="LangZh" Content="中文" GroupName="Language" AutomationProperties.AutomationId="LangZh" Checked="OnLanguageChecked" />
+        <RadioButton x:Name="LangEn" Content="English" GroupName="Language" AutomationProperties.AutomationId="LangEn" Checked="OnLanguageChecked" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock x:Name="ThemeLabel" Style="{StaticResource S18Caption}" VerticalAlignment="Center"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <RadioButton x:Name="ThemeSystem" GroupName="Theme" AutomationProperties.AutomationId="ThemeSystem" Checked="OnThemeChecked" />
+        <RadioButton x:Name="ThemeLight" GroupName="Theme" AutomationProperties.AutomationId="ThemeLight" Checked="OnThemeChecked" />
+        <RadioButton x:Name="ThemeDark" GroupName="Theme" AutomationProperties.AutomationId="ThemeDark" Checked="OnThemeChecked" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- The approval card: default card brushes, 8 px corners (OverlayCornerRadius), a light ThemeShadow. -->
+    <Border x:Name="Card" Grid.Row="1" Padding="24" CornerRadius="{StaticResource OverlayCornerRadius}" BorderThickness="1"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Translation="0,0,8">
+      <Border.Shadow>
+        <ThemeShadow />
+      </Border.Shadow>
+      <Grid RowSpacing="16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- TextBlock cannot take focus in WinUI, so the title sits in a focusable ContentControl. -->
+        <ContentControl x:Name="TitleHost" IsTabStop="True" UseSystemFocusVisuals="True"
+                        AutomationProperties.AutomationId="Title" AutomationProperties.HeadingLevel="Level1">
+          <TextBlock x:Name="TitleText" Style="{StaticResource S18Subtitle}" TextWrapping="Wrap" />
+        </ContentControl>
+
+        <Grid Grid.Row="1" ColumnSpacing="16" RowSpacing="8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <TextBlock x:Name="ToolLabel" Style="{StaticResource S18Caption}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <TextBlock x:Name="ToolValue" Style="{StaticResource S18Body}" Grid.Column="1" AutomationProperties.AutomationId="Tool" />
+          <TextBlock x:Name="TierLabel" Grid.Row="1" Style="{StaticResource S18Caption}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <TextBlock x:Name="TierValue" Style="{StaticResource S18Body}" Grid.Row="1" Grid.Column="1" AutomationProperties.AutomationId="Tier" />
+          <TextBlock x:Name="ProjectLabel" Grid.Row="2" Style="{StaticResource S18Caption}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <TextBlock x:Name="ProjectValue" Style="{StaticResource S18Body}" Grid.Row="2" Grid.Column="1" AutomationProperties.AutomationId="Project" />
+          <TextBlock x:Name="InstanceLabel" Grid.Row="3" Style="{StaticResource S18Caption}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <TextBlock x:Name="InstanceValue" Style="{StaticResource S18Body}" Grid.Row="3" Grid.Column="1" AutomationProperties.AutomationId="Instance" />
+          <TextBlock x:Name="ClientLabel" Grid.Row="4" Style="{StaticResource S18Caption}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <TextBlock x:Name="ClientValue" Style="{StaticResource S18Body}" Grid.Row="4" Grid.Column="1" AutomationProperties.AutomationId="Client" />
+        </Grid>
+
+        <Grid Grid.Row="2" RowSpacing="8">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <StackPanel Spacing="0">
+            <TextBlock x:Name="ChangesLabel" Style="{StaticResource S18BodyStrong}" />
+            <TextBlock x:Name="ChangesSource" Style="{StaticResource S18Caption}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          </StackPanel>
+          <Border Grid.Row="1" Padding="16,8" CornerRadius="{StaticResource ControlCornerRadius}" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto">
+              <TextBlock x:Name="ChangesText" Style="{StaticResource S18Caption}" LineHeight="20" TextWrapping="NoWrap" IsTextSelectionEnabled="True"
+                         AutomationProperties.AutomationId="Changes" />
+            </ScrollViewer>
+          </Border>
+        </Grid>
+
+        <TextBlock x:Name="UndoText" Grid.Row="3" Style="{StaticResource S18Caption}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+        <StackPanel Grid.Row="4" Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <!-- Last 20 s: the system caution colour on an icon and on the bar (ShowPaused), never a custom colour. -->
+            <FontIcon x:Name="CountdownWarning" Glyph="&#xE7BA;" FontSize="14" Visibility="Collapsed"
+                      Foreground="{ThemeResource SystemFillColorCautionBrush}" AutomationProperties.AccessibilityView="Raw" />
+            <TextBlock x:Name="CountdownText" Style="{StaticResource S18Body}" AutomationProperties.AutomationId="Countdown" />
+          </StackPanel>
+          <ProgressBar x:Name="CountdownBar" Maximum="100" AutomationProperties.AutomationId="CountdownBar" />
+        </StackPanel>
+
+        <!-- Same size, same default style (no AccentButtonStyle), no default button, no access key or accelerator. -->
+        <Grid Grid.Row="5" ColumnSpacing="8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Button x:Name="ApproveButton" HorizontalAlignment="Stretch" AutomationProperties.AutomationId="Approve" Click="OnAnswer" />
+          <Button x:Name="RejectButton" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.AutomationId="Reject" Click="OnAnswer" />
+        </Grid>
+      </Grid>
+    </Border>
+
+    <StackPanel Grid.Row="2" Spacing="8">
+      <TextBlock x:Name="ResultText" Style="{StaticResource S18Caption}" AutomationProperties.AutomationId="Result" />
+      <!-- Font check (only with the font-check switch): sample text in the default font next to candidates. -->
+      <StackPanel x:Name="FontCheckPanel" Visibility="Collapsed" Spacing="0" />
+    </StackPanel>
+  </Grid>
+</Window>

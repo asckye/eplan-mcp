@@ -1,0 +1,25 @@
+<Application
+    x:Class="EplanMcp.Spikes.S18.Wpf.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls"
+    ShutdownMode="OnMainWindowClose">
+  <!-- The same resource layout as TIA's App.xaml: ThemeManager swaps slot 0 (the palette) to change appearance. -->
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/Palette.Light.xaml" />
+        <ResourceDictionary Source="Themes/Icons.xaml" />
+        <ResourceDictionary Source="Themes/Primer.xaml" />
+        <!-- The TIA Workbench UI spec's appendix A tokens (spacing, sizes, radii, type ramp) used by the card. -->
+        <ResourceDictionary Source="Tokens.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+      <ux:InverseBooleanToVisibilityConverter x:Key="NotBoolToVisibility" />
+      <Style TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

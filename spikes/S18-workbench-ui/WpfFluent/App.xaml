@@ -1,0 +1,8 @@
+<Application
+    x:Class="EplanMcp.Spikes.S18.WpfFluent.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    ThemeMode="System"
+    ShutdownMode="OnMainWindowClose">
+  <!-- ThemeMode loads WPF's own Fluent dictionary (PresentationFramework.Fluent); nothing restyled. -->
+</Application>

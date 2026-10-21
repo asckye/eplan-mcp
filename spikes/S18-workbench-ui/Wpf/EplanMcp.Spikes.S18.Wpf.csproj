@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S18, prototype B (owner, 2026-10-20): the approval card in WPF on .NET 10 with the TIA Workbench's Ant Design v5
+    theme (Tia\, copied from the owner's TIA repository, MIT) and Maple Mono CN for all text. No NuGet package; the
+    tray icon is WinForms' NotifyIcon, as in TIA. See ../README.md for the commands and results.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>EplanMcp.Spikes.S18.Wpf</RootNamespace>
+    <AssemblyName>S18.Wpf</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <!-- Only for System.Windows.Forms.NotifyIcon (the tray icon), as in TIA. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- Per-monitor v2 DPI awareness; without a manifest a WPF app on .NET 10 runs system-aware (measured, see README). -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- WPF and WinForms both define Application, Button, FontFamily...; keep WinForms out of the implicit usings. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <!--
+      TIA's ThemeManager loads the palettes from pack://application:,,,/<assembly>;component/Themes/, so the copied
+      dictionaries keep that resource path although the files live under Tia\Themes.
+    -->
+    <Page Remove="Tia\Themes\*.xaml" />
+    <Page Include="Tia\Themes\*.xaml" Link="Themes\%(Filename)%(Extension)" />
+  </ItemGroup>
+  <!--
+    Maple Mono CN (owner, 2026-10-20) for Ui.Font and Ui.FontMono, copied into Fonts\ next to the exe; never committed,
+    never installed. Same properties as prototype A: S18FontDir (default: the repository's .local\fonts) and
+    S18FontFiles (Regular for text, SemiBold for the theme's SemiBold text).
+  -->
+  <PropertyGroup>
+    <S18FontDir Condition="'$(S18FontDir)' == ''">$(MSBuildThisFileDirectory)..\..\..\.local\fonts\maple-mono-cn-v7.9\fonts</S18FontDir>
+    <S18FontFiles Condition="'$(S18FontFiles)' == ''">MapleMono-CN-Regular.ttf;MapleMono-CN-SemiBold.ttf</S18FontFiles>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(S18FontDir)')">
+    <S18FontName Include="$(S18FontFiles)" />
+    <Content Include="@(S18FontName->'$(S18FontDir)\%(Identity)')" Link="Fonts\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
