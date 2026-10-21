@@ -18,10 +18,24 @@ internal static class Catalogue
         ("Shell.Menu", "Pages", "页面"),
         ("Shell.Header", "Header", "顶栏"),
         ("Shell.Content", "Page content", "页面内容"),
+        ("Shell.Collapse", "Collapse the menu", "收起菜单"),
+        ("Shell.Expand", "Expand the menu", "展开菜单"),
         ("Shell.Minimize", "Minimize", "最小化"),
         ("Shell.Maximize", "Maximize", "最大化"),
         ("Shell.Restore", "Restore", "还原"),
         ("Shell.Close", "Close", "关闭"),
+
+        // The settings drawer: language and theme (section 7, LOC-10, COL-09); each language named in its own.
+        ("Settings.Title", "Settings", "设置"),
+        ("Settings.Close", "Close the settings", "关闭设置"),
+        ("Settings.Language", "Language", "语言"),
+        ("Settings.Chinese", "中文", "中文"),
+        ("Settings.English", "English", "English"),
+        ("Settings.Theme", "Theme", "主题"),
+        ("Settings.ThemeSystem", "Follow Windows", "跟随系统"),
+        ("Settings.ThemeLight", "Light", "浅色"),
+        ("Settings.ThemeDark", "Dark", "深色"),
+        ("Settings.HighContrast", "While Windows uses a contrast theme, the Workbench uses its colours.", "Windows 使用对比主题时，Workbench 使用对比主题的颜色。"),
 
         // Pages (workbench-ui section 7), their captions and the placeholders of the pages still to come (ERR-05).
         ("Page.Approvals", "Approvals", "审批队列"),

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Automation;
@@ -5,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Shell;
@@ -17,7 +19,14 @@ public partial class MainWindow : Window
 {
     public static readonly RoutedUICommand NavigateCommand = new("Navigate", nameof(NavigateCommand), typeof(MainWindow));
 
+    public static readonly RoutedUICommand CycleCommand = new("Cycle", nameof(CycleCommand), typeof(MainWindow));
+
+    /// <summary>Below this window width the Sider shows icons only (3.1).</summary>
+    private const double CompactBelow = 992;
+
     private readonly (WorkbenchPage Page, string Key, string Shortcut, RadioButton Item, FrameworkElement View)[] _pages;
+    private bool? _compactChosen;
+    private IInputElement? _settingsOpener;
 
     public MainWindow()
     {
@@ -30,7 +39,10 @@ public partial class MainWindow : Window
             (WorkbenchPage.Clients, "Page.Clients", "Ctrl+4", ClientsItem, ClientsPage),
         ];
         VersionText.Text = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
-        CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut)));
+        // The shortcuts reach no page while the settings drawer covers the window (DLG-10).
+        CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut), CanNavigate));
+        CommandBindings.Add(new CommandBinding(CycleCommand, (_, e) => Cycle(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
+        SizeChanged += (_, _) => ApplySider();
         Loc.Current.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
         StateChanged += (_, _) => ApplyWindowState();
@@ -62,6 +74,55 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>Opens the settings drawer over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
+    public void OpenSettings()
+    {
+        _settingsOpener = Keyboard.FocusedElement;
+        SettingsLayer.Visibility = Visibility.Visible;
+        UpdateLayout();
+        SettingsPane.FocusHeading();
+    }
+
+    public void CloseSettings()
+    {
+        SettingsLayer.Visibility = Visibility.Collapsed;
+        (_settingsOpener ?? SettingsButton).Focus();
+        _settingsOpener = null;
+    }
+
+    private void CanNavigate(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = SettingsLayer.Visibility != Visibility.Visible;
+
+    private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);
+
+    private void OnSettings(object sender, RoutedEventArgs e) => OpenSettings();
+
+    private void OnSettingsClosed(object? sender, EventArgs e) => CloseSettings();
+
+    private void OnScrim(object sender, MouseButtonEventArgs e) => CloseSettings();
+
+    private void OnSiderToggle(object sender, RoutedEventArgs e)
+    {
+        _compactChosen = !Ux.GetCompact(Sider);
+        ApplySider();
+    }
+
+    /// <summary>A choice by hand holds until the window crosses the breakpoint; then the width decides again (3.1).</summary>
+    private void ApplySider()
+    {
+        bool narrow = ActualWidth > 0 && ActualWidth < CompactBelow;
+        if (_compactChosen == narrow)
+        {
+            _compactChosen = null;
+        }
+
+        bool compact = _compactChosen ?? narrow;
+        Ux.SetCompact(Sider, compact);
+        Sider.Width = compact ? 56 : 216;
+        Brand.Visibility = VersionChip.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        Ux.SetIcon(SiderToggle, (Geometry)FindResource(compact ? "Icon.MenuUnfold" : "Icon.MenuFold"));
+        ApplyTexts();
+    }
+
     private void OnLanguageChanged(object? sender, EventArgs e) => ApplyTexts();
 
     private void OnMenuClick(object sender, RoutedEventArgs e) =>
@@ -90,6 +151,9 @@ public partial class MainWindow : Window
             item.ToolTip = loc.T("Shell.Shortcut", loc[key], shortcut);
         }
 
+        string toggle = loc[Ux.GetCompact(Sider) ? "Shell.Expand" : "Shell.Collapse"];
+        SiderToggle.Content = toggle;
+        AutomationProperties.SetName(SiderToggle, toggle);
         Label(MinimizeButton, "Shell.Minimize");
         Label(MaximizeButton, WindowState == WindowState.Maximized ? "Shell.Restore" : "Shell.Maximize");
         Label(CloseButton, "Shell.Close");

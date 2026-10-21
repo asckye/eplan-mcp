@@ -3,7 +3,9 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using EplanMcp.Workbench.Shell;
+using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
+using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
 namespace EplanMcp.Workbench.Tests.Shell;
 
@@ -27,7 +29,7 @@ public sealed class ShellTests(WpfContext wpf)
     [MemberData(nameof(Pages))]
     public void CtrlAndANumber_ShowsThePage_NamesItInTheTitle_AndFocusesItsHeading(WorkbenchPage page, Key key, string english, string chinese)
     {
-        wpf.RunWithLanguage(AppLanguage.English, () => WithWindow(window =>
+        wpf.RunWithLanguage(AppLanguage.English, () => With(window =>
         {
             KeyBinding binding = window.InputBindings.OfType<KeyBinding>().Single(b => b.Key == key && b.Modifiers == ModifierKeys.Control);
             binding.Command.Execute(binding.CommandParameter);
@@ -47,13 +49,12 @@ public sealed class ShellTests(WpfContext wpf)
     [Fact]
     public void AMenuItem_ShowsItsPageAndKeepsTheFocus()
     {
-        wpf.Run(() => WithWindow(window =>
+        wpf.Run(() => With(window =>
         {
             RadioButton audit = Item(window, WorkbenchPage.Audit);
             audit.Focus();
 
-            audit.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
-            WpfContext.Drain();
+            Click(audit);
 
             Assert.Equal(WorkbenchPage.Audit, window.CurrentPage);
             Assert.Same(audit, Keyboard.FocusedElement);
@@ -61,9 +62,22 @@ public sealed class ShellTests(WpfContext wpf)
     }
 
     [Fact]
+    public void CtrlTab_CyclesThroughThePagesBothWays()
+    {
+        wpf.Run(() => With(window =>
+        {
+            MainWindow.CycleCommand.Execute("-1", window);
+            Assert.Equal(WorkbenchPage.Clients, window.CurrentPage);
+            MainWindow.CycleCommand.Execute("1", window);
+            MainWindow.CycleCommand.Execute("1", window);
+            Assert.Equal(WorkbenchPage.Audit, window.CurrentPage);
+        }));
+    }
+
+    [Fact]
     public void TheMenu_IsOneGroupOfFourItems_EachWithItsPositionAndShortcut()
     {
-        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithWindow(window =>
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
             RadioButton[] items = [.. Enum.GetValues<WorkbenchPage>().Select(p => Item(window, p))];
 
@@ -77,28 +91,34 @@ public sealed class ShellTests(WpfContext wpf)
     }
 
     [Fact]
+    public void TheSider_FollowsTheBreakpoint_UntilChosenByHand_AndAgainAfterCrossingIt()
+    {
+        wpf.Run(() => With(window =>
+        {
+            var sider = (FrameworkElement)window.FindName("Sider");
+            var toggle = (Button)window.FindName("SiderToggle");
+
+            Resize(window, 1200);
+            Assert.Equal((216d, false), (sider.Width, Ux.GetCompact(sider)));
+            Resize(window, 980);
+            Assert.Equal((56d, true), (sider.Width, Ux.GetCompact(sider)));
+            Click(toggle);
+            Resize(window, 970);
+            Assert.Equal(216d, sider.Width);
+            Resize(window, 1100);
+            Resize(window, 970);
+            Assert.Equal(56d, sider.Width);
+        }));
+    }
+
+    [Fact]
     public void TheWindow_FitsTheSmallestWorkAreas()
     {
-        wpf.Run(() => WithWindow(window =>
+        wpf.Run(() => With(window =>
         {
             Assert.True(window.MinWidth <= 960 && window.MinHeight <= 640, $"{window.MinWidth} x {window.MinHeight}");
             Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
         }));
-    }
-
-    private static void WithWindow(Action<MainWindow> test)
-    {
-        var window = new MainWindow { ShowActivated = false };
-        try
-        {
-            window.Show();
-            WpfContext.Drain();
-            test(window);
-        }
-        finally
-        {
-            window.Close();
-        }
     }
 
     private static RadioButton Item(MainWindow window, WorkbenchPage page) => (RadioButton)window.FindName(page + "Item");
