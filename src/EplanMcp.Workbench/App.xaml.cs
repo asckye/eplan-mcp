@@ -54,7 +54,8 @@ public sealed partial class App : Application, IDisposable
 
         _window = new MainWindow { HideOnClose = true };
         MainWindow = _window;
-        _tray = new TrayIcon(Restore, () => _ = ExitAsync());
+        _tray = new TrayIcon(() => _window.Open(null), () => _ = ExitAsync());
+        _window.NotificationWanted += item => _tray.Remind(_queue?.PendingCount ?? 1, item.Tool, () => _window.Open(item.RequestId));
         _instance.Listen(() => Dispatcher.BeginInvoke(Restore));
 
         _log = new FileLog(_locations.Logs, TimeProvider.System);

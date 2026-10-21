@@ -56,6 +56,32 @@ public sealed class TrayAndExitTests(WpfContext wpf)
         });
     }
 
+    [Theory]
+    [InlineData("eplan_page_delete", "3 questions wait for approval · new: eplan_page_delete", "3 个问题等待审批 · 新问题：eplan_page_delete")]
+    [InlineData("eplan_page_delete =K1 Line1", "3 questions wait for approval", "3 个问题等待审批")]
+    [InlineData("Eplan_Page_Delete", "3 questions wait for approval", "3 个问题等待审批")]
+    [InlineData("eplan_\u202Eexe", "3 questions wait for approval", "3 个问题等待审批")]
+    [InlineData("项目", "3 questions wait for approval", "3 个问题等待审批")]
+    [InlineData("", "3 questions wait for approval", "3 个问题等待审批")]
+    public void ANotification_SaysTheCountAndTheTool_AndLeavesOutAnythingThatIsNotAToolName(string tool, string english, string chinese)
+    {
+        wpf.RunWithLanguage(AppLanguage.English, () =>
+        {
+            Assert.Equal(english, TrayIcon.ReminderText(3, tool));
+            Loc.Current.Language = AppLanguage.Chinese;
+            Assert.Equal(chinese, TrayIcon.ReminderText(3, tool));
+        });
+    }
+
+    [Fact]
+    public void AToolName_IsAtMost64LowercaseLettersDigitsOrUnderscores()
+    {
+        Assert.True(TrayIcon.IsToolName(new string('a', 64)));
+        Assert.False(TrayIcon.IsToolName(new string('a', 65)));
+        Assert.True(TrayIcon.IsToolName("eplan_2d_export"));
+        Assert.False(TrayIcon.IsToolName("eplan-page"));
+    }
+
     [Fact]
     public void TheExitConfirmation_DefaultsToStaying_AndOnlyItsActionExits()
     {

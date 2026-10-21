@@ -21,6 +21,8 @@
     <KeyBinding Key="D4" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Clients}" />
     <KeyBinding Key="Tab" Modifiers="Control" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="1" />
     <KeyBinding Key="Tab" Modifiers="Control+Shift" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="-1" />
+    <KeyBinding Key="F6" Command="{x:Static shell:MainWindow.RegionCommand}" CommandParameter="1" />
+    <KeyBinding Key="F6" Modifiers="Shift" Command="{x:Static shell:MainWindow.RegionCommand}" CommandParameter="-1" />
   </Window.InputBindings>
 
   <Grid x:Name="Root" Background="{DynamicResource Primer.bg}">
