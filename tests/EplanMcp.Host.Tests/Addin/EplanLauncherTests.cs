@@ -49,7 +49,7 @@ public sealed class EplanLauncherTests
     }
 
     [Fact]
-    public async Task WhileEplanStillFinishesStarting_AsksAgainUntilItCloses()
+    public async Task AnEplanThatDoesNotReactAtOnce_IsAskedAgainUntilItCloses()
     {
         _eplan.IgnoresCloses = 3;
 
@@ -57,6 +57,30 @@ public sealed class EplanLauncherTests
 
         Assert.True(launch.Closed);
         Assert.Equal(4, _eplan.Log.Count(l => l == "close 4000"));
+    }
+
+    [Fact]
+    public async Task EveryCloseRequest_ComesRightAfterARefresh()
+    {
+        // Second live check: Process keeps the splash screen's handle, so a request without refreshing goes nowhere.
+        _eplan.IgnoresCloses = 2;
+
+        await Launcher.RunAsync(_result, Register, TimeSpan.Zero, _loaded.Add);
+
+        Assert.Equal(["refresh", "close", "refresh", "close", "refresh", "close"], _eplan.Instances.Single().Calls);
+    }
+
+    [Fact]
+    public void TheFake_LikeARealProcess_IgnoresARequestSentWithoutRefreshing()
+    {
+        IStartedEplan started = _eplan.Start(Eplan, Register);
+
+        started.CloseMainWindow();
+        Assert.False(started.HasExited);
+
+        started.Refresh();
+        started.CloseMainWindow();
+        Assert.True(started.HasExited);
     }
 
     [Theory]

@@ -12,8 +12,8 @@ internal sealed record Launch(AddinResult Result, AddinIssue? Problem, Handshake
 
 /// <summary>
 /// Starts EPLAN with an <c>EplApiModuleAction</c> command, waits for the Bridge pipe of the process it started, asks the
-/// Bridge which add-in EPLAN loaded, and closes that EPLAN as its close button would, asking again while EPLAN still
-/// finishes starting. It never forces EPLAN to close.
+/// Bridge which add-in EPLAN loaded, and closes that EPLAN as its close button would, asking again until it does or
+/// the wait ends. It never forces EPLAN to close.
 /// </summary>
 internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe bridge, TimeProvider time, AddinTimings timings)
 {
@@ -101,9 +101,10 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
     }
 
     /// <summary>
-    /// Asks EPLAN to close, again every <see cref="AddinTimings.Resend"/>: while EPLAN still finishes starting (cloud
-    /// sign-in, the new-version notice), it ignores the request (api-notes A23). False when it is still running after
-    /// <see cref="AddinTimings.Close"/>, for example behind a system messages window.
+    /// Asks EPLAN to close, refreshing the process first every time: .NET's <c>Process</c> keeps the main window handle
+    /// it first found, early in EPLAN's start the splash screen, and a request sent there does nothing (api-notes A23).
+    /// Asks again every <see cref="AddinTimings.Resend"/> in case a request did not take. False when EPLAN is still
+    /// running after <see cref="AddinTimings.Close"/>, for example behind a system messages window.
     /// </summary>
     private async Task<bool> CloseAsync(IStartedEplan started)
     {
@@ -119,6 +120,7 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
 
             if (asked is null || elapsed - asked >= timings.Resend)
             {
+                started.Refresh();
                 started.CloseMainWindow();
                 asked = elapsed;
             }
