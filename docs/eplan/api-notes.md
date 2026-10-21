@@ -182,6 +182,7 @@
 - 🔴 `GetCablesWithFilterScheme("")` 用电缆导航器当前的过滤方案（示例中只返回 4 根）；`null` 返回电缆加屏蔽（89），XML 说会抛 `ArgumentNullException`，实际没有。按类别取电缆不受界面影响。— S21。
 - `Renumber.Terminals`（全部端子，41–43 秒）、`CableService.RenumberCables`（0.3 秒）、`ConnectionService.DesignateConnections`（覆盖全部，约 1 秒，605 条连接得到线号）都能被 `SafetyPoint` 回滚，回滚后名称和线号与之前完全一致。Ctrl+Z 未测。— S21。
 - 这三种编号的方案传空串都能运行，用的是界面上次的方案，与 `Renumber.DeviceTags` 相同（A18）。— S21。
+- 方案的设置节点：端子编号 `USER.Terminal.Numbering.Scheme`、标签 `USER.Labelling.Config`（用户设置）；电缆编号 `CableLog.CableNumberingScheme`、生成电缆 `CableLog.CableCreateScheme`、线号 `WireNumberingLog.Schema`、PLC 编址 `OfflineNumerationPLC.PLCNumbering`（项目设置）。`XSettingsExport /prj:<项目名>` 在开发机上返回 FALSE，项目设置的节点是从 `Settings.xdb` 中只读查得的。— S21。
 - `Generate.Cables` 在示例项目中没有改动名称和线号，但改写了项目的 `User.eod` 和 `Settings.xdb`（上次使用的方案），`SafetyPoint` 回滚不撤回。— S21。
 - 授权：`Preplanning` 不可用；`RevisionManagement`、`RevisionMarkers`、`MultiLanguageTranslation`、`WireNumbering`、`EditingOfCables`、`EditingOfTerminals`、`EditingOfPLC`、`DXF_DWGImport`、`ImportAndExportDeviceLists`、`IntelligentPDF`、`InterfaceToLabelingDevices` 可用。— S21。
 
