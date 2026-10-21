@@ -441,6 +441,14 @@
 - 项目的翻译语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（索引 0，分号分隔，如 `en_US;de_DE`）。— CommandLineActions XML 中 `projectsettings` 动作的示例；S25 用 `ProjectSettings.GetStringSetting` 读出示例项目的 20 种（A25）。`Translate.ExportMissingTranslation` 要求每种语言都已是项目的翻译语言。— XML。
 - `Label.DoLabel(project, 方案, 语言, 目标文件, 1, 1)`：目标文件的扩展名要与方案的配置一致，应为 `.txt`、`.xls`、`.xlsx` 或 `.xml`，否则换成 `.txt`；`.xls` 需要 Excel；目标为空时用方案中的目标；带 `bShowOutput` 的重载会打开输出文件。— XML。
 
+### B10. 端子、电缆、线号的编号与项目方案（`HEServices`、`DataModel.ProjectSchemeSetting`，2026-10-21）
+M4c 编号工具依赖的文档说明；实测结果见 A24（S21 只用了空方案、`All` 和"不只编带 ? 的"），其余由 Large 测试确认。
+- `ProjectSchemeSetting.Init(节点, Project)`：用项目设置的节点初始化（XML 的例子为 `CableLog.CableAutoSelectionScheme`），节点不是该项目的方案时抛 `BaseException`。它继承 `SchemeSetting`，`GetCount`、`SetScheme(序号)`、`GetName` 可用，实现 `IDisposable`。— XML、编译。
+- `Renumber.Terminals(Function[], TerminalsSequence, Extent, …, 方案, 起始值, 步长, 前缀, 后缀, 允许改变排序, 填补空号, 只编带 ? 的, 连带 PLC 控制的)`：`Extent.AllSelectedTerminalStrips` 编号给出的端子所在端子排的全部端子，`Extent.Selected` 只编给出的端子；前缀、后缀只在方案为"按在线编号格式"时有用；方案名不存在时抛 `InvalidScheme`。— XML，枚举名经编译确认。
+- `CableService.RenumberCables(Function[], 方案, 保留旧名, 保留标识符, 起始值, 步长)`：参数可以是电缆和屏蔽；"保留旧名"为 true 时已有的标识不变，只给标识中带 `?` 的电缆编号；方案名不存在时 XML 一处写抛 `InvalidScheme`、一处写抛 `ArgumentException`。— XML。
+- `ConnectionService.DesignateConnections(Project, 方案, DesignateOverwrition, 标为手工, 先生成连接)`：`None` 从不覆盖、`ExceptManuals` 覆盖标为"手工设定"之外的、`All` 全部覆盖；与界面不同，只有"先生成连接"为 true 时才先更新连接；方案名不存在时抛 `InvalidScheme`（备注中写 `ArgumentException`）。— XML。
+- `Renumber`、`CableService`、`ConnectionService` 都实现 `IDisposable`。— XML、编译。
+
 ---
 
 ## C. MCP 客户端与 C# SDK（spike S4，2026-10-13）
