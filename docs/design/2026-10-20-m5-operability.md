@@ -30,7 +30,7 @@
   - G2 **Workbench**：审批队列（ADR-0011 的渠道之一，规则与 EPLAN 对话框相同）、审计浏览、客户端配置向导、连接与授权状态，中英双语，Fluent 2。
   - G3 **Claude Code 插件**：随安装包附带的本地插件市场，两条命令装好（不联网也能装），带入门技能。
   - G4 **中文入门指南**：非开发人员在干净机器上按它装成功，即 M5 的完成标准。
-  - G5 **离线宿主与 CI 实机测试**：自托管 runner 每晚和发布前在 scratch 副本上运行 Large 测试。（2026-10-21：不装 runner，Large 测试在开发机上手动运行，ADR-0020）
+  - G5 **离线宿主与实机测试**：离线宿主让 Large 测试不必用界面中的 EPLAN；实机测试在开发机上手动运行，不用自托管 runner（[ADR-0020](../adr/0020-no-self-hosted-runner.md)）。
   - G6 **发布流水线**：打标签后由 CI 构建全部产物，附 SHA-256、SBOM、来源证明；签名按 Q6。
 - **非目标**
   - 自动更新：检查新版本要联网（I5）。新版本由工程师下载安装包覆盖安装。
@@ -214,21 +214,21 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
   9. 升级与卸载：数据保留在哪里。
 - **验收**：一名非开发人员在干净的虚拟机上（标准用户账户，没有开发工具，只装 EPLAN 2026 和客户端，I8）只按指南操作，记录用时、每一处卡住或需要别人帮忙的地方，以及 SmartScreen 的提示和智能应用控制的状态（4.10）；I1–I10 逐项留证据。结果写进发布说明。人员和虚拟机见 Q11。
 
-### 4.9 离线宿主与 CI 实机测试
+### 4.9 离线宿主与实机测试
 - **离线宿主** `EplanMcp.Bridge.Offline`：net481 x64 的 STA 程序，用 `EplApplication.Init` 无界面运行 EPLAN（B5），与插件共用 `Bridge.Core`、操作和适配层（架构 5.4），创建同样格式的管道。参数：管道前缀（CI 中的 Host 用 `EPLANMCP_PIPE_PREFIX` 只找它，不碰工程师的 EPLAN）、启动时打开的 scratch 项目、空闲退出时间。它不声明 `approval.ask`，所以只能写 scratch，这正是 CI 需要的。启动时自己打开测试项目，不新增打开项目的操作或工具，与 M3 设计 Q4 的决定一致。
   - 实现（第 8 节步骤 12）：`EplanMcp.Bridge.Offline.exe --variant-bin <变体的 Bin> --project <scratch 副本的 .elk> [--pipe-prefix <前缀>] [--idle-exit <秒>]`，前缀默认与插件相同；退出码 0 为正常停止，1 为 EPLAN 或 Bridge 失败，2 为命令行错误。握手中 `eplan.offline` 为 true，Host 不经它询问审批。启动过程见架构 5.4。
 - **它测不了**：模态对话框（Q5）、EPLAN 中的审批对话框、Ctrl+Z（Q3）、插件的注册与加载。这些仍在发布前用界面中的 EPLAN 手工检查，列在发布清单中。
 - **spike S15（离线宿主）**：`EplApplication.Init` 在开发机上的授权和登录对话框（`allowLicenseDlg`、`allowLoginDlg`）、是否另占一个授权、与界面中的 EPLAN 能否同时运行、启动耗时；回滚、撤销、`LockingStep` 的规律是否与插件中相同（A7、A9）；未签名的离线程序在开发机授权下能否运行（B8、ADR-0007）；在没有登录桌面的上下文中（runner 作为服务）能否运行。
-- **CI**：自托管 runner 装在有 EPLAN 和授权的机器上，标签 `eplan-2026`，以单独的标准用户运行，有自己的数据根目录。新工作流 `live.yml` 只在每晚定时、手动触发和发布时运行，**从不因 pull request 运行**；仓库设置要求外部贡献者的工作流每次都经批准，改动了工作流的 fork PR 不批准；同时只运行一个（SEC-26）。GitHub 提醒公开仓库几乎不应使用自托管 runner（[安全使用](https://docs.github.com/en/actions/reference/security/secure-use)），这些条件缺一不可。步骤：构建插件和 Host → 复制示例项目到 runner 用户的 scratch → 启动离线宿主 → 运行能在离线宿主上跑的 Large 测试（新的 trait，例如 `Host=Offline`）→ 上传 TRX。日志和产物中不含项目内容（SEC-10）。机器与账户见 Q8。
+- **CI**：~~自托管 runner 与 `live.yml`~~ 取消（ADR-0020）。Large 测试和 Agent 评测由维护者在开发机上手动运行：合并写入类工具或 Bridge 的改动之前、每次发布之前；能在离线宿主上运行的测试类按 `[Trait("Host", "Offline")]` 运行。
 
 ### 4.10 发布流水线
 在 `main` 上打 `vX.Y.Z` 标签后运行 `release.yml`（[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)），三个作业：
 1. **构建**（GitHub 托管的 runner）：Host（自包含单文件，win-x64）、Workbench（自包含）；Small、Medium 测试；CI 中设 `ContinuousIntegrationBuild=true`，带 Source Link；用 CycloneDX 的 .NET 工具（`dotnet-CycloneDX`，Apache-2.0）生成 SBOM。
-2. **插件**（自托管 runner `eplan-2026`，4.9）：引用本机 EPLAN 的 Bin 构建 Release 版插件，`EplanSign=false`（ADR-0007）；在离线宿主上运行 Large 测试。只在本仓库的标签上运行。
+2. **插件**（ADR-0020）：维护者在开发机上运行 `eng/scripts/release-addin.ps1 -Tag vX.Y.Z`：从标签的干净检出构建 Release 版插件（`EplanSign=false`，ADR-0007），在离线宿主上运行 Large 测试，把插件和 SHA-256 上传到草稿发布。发布工作流下载插件并比对 SHA-256，不一致就失败。
 3. **打包**（托管 runner）：取前两步的产物生成安装包（Q5）、SHA-256 校验和文件、合并的 SBOM；为安装包和其中每个程序文件生成来源证明（`actions/attest-build-provenance`），为 SBOM 生成证明（`actions/attest-sbom`）；建立草稿发布，附支持矩阵、验收和评测结果。只有这个作业有 `id-token`、`attestations`、`contents` 的写权限。
 
-- 来源证明在公开仓库中免费，用 `gh attestation verify <文件> -R asckye/eplan-mcp` 校验（需要联网；离线机器上核对 SHA-256）。GitHub 的证明达到 SLSA v1.0 Build L2（[GitHub 文档](https://docs.github.com/en/actions/concepts/security/artifact-attestations)）。插件在自己维护的 runner 上构建，证明同样记录工作流和提交，但这台机器的可信程度取决于我们自己的维护（SEC-26）。
-- GitHub 托管的 Windows runner 以管理员身份运行，证明不了"不需要管理员"，所以 I1 只能在 4.8 的标准用户账户上验收。
+- 来源证明在公开仓库中免费，用 `gh attestation verify <文件> -R asckye/eplan-mcp` 校验（需要联网；离线机器上核对 SHA-256）。GitHub 的证明达到 SLSA v1.0 Build L2（[GitHub 文档](https://docs.github.com/en/actions/concepts/security/artifact-attestations)）。插件在自己维护的 runner 上构建，证明同样记录工作流和提交，但这台机器的可信程度取决于我们自己的维护（SEC-26）。 插件不由 CI 构建，它的证明只能证明发布工作流收到的就是维护者上传的文件（ADR-0020）。
+- GitHub 托管的 Windows runner 以管理员身份运行，证明不了"不需要管理员"，所以 I1 在第 16 步的干净机器验收中用标准用户账户验证（ADR-0020）。
 - **签名的现状**（Q6）：未签名的程序下载后，SmartScreen 显示"Windows 已保护你的电脑"，要点"仍要运行"，企业策略可以禁止；EV 证书也不再跳过这个提示（[SmartScreen](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)）。Windows 11 的智能应用控制处于强制模式时，会阻止未知的未签名程序（[智能应用控制](https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/overview)），这可能让干净机器上的验收直接失败。可选的签名方式：
   - SignPath Foundation：开源项目免费，但要求签名之前的每个作业都在 GitHub 托管的 runner 上运行（[SignPath](https://docs.signpath.io/trusted-build-systems/github)），插件只能在自托管 runner 上构建，所以最多签 Host 和 Workbench，签不了安装包；它的条款不允许"专有组件"，引用 EPLAN API 算不算没有核实；
   - Azure Artifact Signing：个人只限美国、加拿大，组织只限所列国家（[快速入门](https://learn.microsoft.com/en-us/azure/trusted-signing/quickstart)）；
@@ -335,7 +335,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 | Q5 | 安装包用什么技术 | **已决定**（同上）：**Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
 | Q6 | 安装包和程序是否签名（4.10） | **已决定**（同上）：**0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
 | Q7 | 配置向导在 M5 支持哪些客户端 | **已决定**（2026-10-20，项目负责人按建议），**同日改定**：项目负责人问能否用于 Claude Code 以外的 AI 后决定"与 TIA 相同，再加 Claude 桌面版"：Claude Code（推荐插件）、Claude 桌面版、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot，见 4.11 的表 |
-| Q8 | 自托管 runner 装在哪台机器、用哪个账户 | **已决定**（同上）：开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发。项目负责人已同意，先做 S15，结论满意再安装。**改为不装 runner**（2026-10-21，项目负责人："这个不用做runner"）：替代做法见 [ADR-0020](../adr/0020-no-self-hosted-runner.md)（Proposed） |
+| Q8 | 自托管 runner 装在哪台机器、用哪个账户 | **已决定**（同上）：开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发。项目负责人已同意，先做 S15，结论满意再安装。**改为不装 runner**（2026-10-21，项目负责人："这个不用做runner"）：替代做法见 [ADR-0020](../adr/0020-no-self-hosted-runner.md)（已接受：项目负责人："ADR-0020 同意"） |
 | Q9 | 同一用户的程序（包括代理经 shell 执行的命令）能操作审批窗口，是否接受为剩余风险（第 5 节） | **已决定**（同上）：**接受**，写进威胁模型和入门指南（保留客户端对 shell 命令的确认）；有了代码签名之后，再考虑由 Host 核对 Workbench 的签名 |
 | Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | **已决定**（同上）：M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场。S17 已证实 `${USERPROFILE}` 能展开 |
 | Q11 | 干净机器验收由谁、在哪台机器上做（4.8） | **已决定**（同上）：需要项目负责人安排一名非开发人员，和一台装有 EPLAN 2026 及授权的虚拟机（同时验证 I8） |

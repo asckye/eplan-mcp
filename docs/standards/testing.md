@@ -68,9 +68,9 @@
 ## 4. Large 测试（实机）
 
 ### 环境
-- 自托管 runner，安装 EPLAN（版本与支持矩阵一致），具备 API 扩展授权，runner 标签为 `eplan-<版本>`。
+- 装有 EPLAN（版本与支持矩阵一致）、具备 API 扩展授权的开发机；不使用自托管 runner（[ADR-0020](../adr/0020-no-self-hosted-runner.md)）。
 - 测试只操作 **scratch 根目录**（默认 `%USERPROFILE%\EplanMcp\scratch\`，见 ADR-0008）下的项目，测试结束后删除。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
-- 目前（M2）还没有自托管 runner：Large 测试在开发机上手动运行，见 [tests/EplanMcp.Large.Tests](../../tests/EplanMcp.Large.Tests/README.md)。只读测试共用夹具脚本复制的示例项目，不自建、也不删除它；M3 的写测试按下文的要求自建夹具。
+- Large 测试在开发机上手动运行，见 [tests/EplanMcp.Large.Tests](../../tests/EplanMcp.Large.Tests/README.md)：合并写入类工具或 Bridge 的改动之前、每次发布之前（ADR-0020）。只读测试共用夹具脚本复制的示例项目，不自建、也不删除它；M3 的写测试按下文的要求自建夹具。
 - 能在离线宿主上运行的 Large 测试类另标 `[Trait("Host", "Offline")]`（[M5 设计](../design/2026-10-20-m5-operability.md) 4.9），按 `--filter-trait "Host=Offline"` 运行，方法见上面的 README。
 
 ### 测试夹具项目
