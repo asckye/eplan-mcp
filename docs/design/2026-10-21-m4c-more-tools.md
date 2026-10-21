@@ -68,9 +68,9 @@ flowchart LR
 
 | 批 | 工具 | 级别 | 要点 |
 |---|---|---|---|
-| 1 | `eplan_cable_list`、`eplan_cable_get` | Read | 电缆、芯线、两端的设备与连接点、长度、部件 |
+| 1 | `eplan_cable_get` | Read | 一根电缆的型号、规格、两端、芯线及其连接。列出电缆用 `eplan_device_list`（`category: "Cable"`），不另做 `eplan_cable_list`（[规格](../tools/eplan_cable_get.md)） |
 | 1 | `eplan_terminal_strip_list`、`eplan_terminal_strip_get` | Read | 端子排、端子顺序、跨接、两侧的连接 |
-| 1 | `eplan_plc_list` | Read | PLC 盒、卡、通道与地址 |
+| 1 | `eplan_plc_get` | Read | 一个 PLC 盒的通道与地址。列出 PLC 盒用 `eplan_device_list`（`category: "PLCBox"`） |
 | 1 | `eplan_part_search` | Read | 查询系统部件库（M2 设计 Q4 的遗留）；只读打开部件库 |
 | 1 | `eplan_revision_list` | Read | 项目的修订和修订标记（S23 之后定字段） |
 | 1 | `eplan_export_pxf` | 导出 | 项目导出为 EPJ（PXF），可选带主数据 |
