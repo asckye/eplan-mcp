@@ -15,6 +15,9 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanPageRenumberer : IPageRenumberer
 {
+    // EPLAN's message number for "page name ambiguous" (live check with the Chinese user interface, A20).
+    private const string AmbiguousPageName = "S029167";
+
     public string? PageId(string projectPath, string pageName)
     {
         MainThread.Assert();
@@ -45,6 +48,14 @@ internal sealed class EplanPageRenumberer : IPageRenumberer
         }
         catch (NameConflictException ex)
         {
+            throw new BridgeErrorException(
+                ErrorReason.AlreadyExists,
+                "EPLAN reports that a new page number is taken, so nothing was renumbered. Choose another 'start'; eplan_page_list with name_prefix shows the numbers in use.",
+                ex);
+        }
+        catch (BaseException ex) when (ex.Message.StartsWith(AmbiguousPageName, StringComparison.Ordinal))
+        {
+            // A new number that an existing page has: EPLAN refuses with "page name ambiguous" (live check, A20).
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
                 "EPLAN reports that a new page number is taken, so nothing was renumbered. Choose another 'start'; eplan_page_list with name_prefix shows the numbers in use.",

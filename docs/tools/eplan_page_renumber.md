@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 12 步；已实现，待实机验证） |
+| 状态 | Proposed（M4 第 12 步；已实现，2026-10-20 实机验证，见 api-notes A20） |
 
 ## 1. 这个工具解决什么任务
 "把 `/90` 到 `/92` 这几页改成从 200 开始、步长 10 的页号"。代理给出 1–50 页，让 EPLAN 按"重新编号页"的规则给它们新的页号，按结构（页名中 `/` 之前的部分）编号（XML）。新页名由 EPLAN 的规则决定（M4 设计 Q7），变更清单只列范围，执行后列出每一页的新旧页名。页名被交叉引用、报表等处使用，按 Destructive 处理：每次审批，执行前备份，按一次 Ctrl+Z 撤销。只改一页的页描述用 `eplan_page_update`。重编号页不常用，所以放在 `full` Profile。
@@ -55,7 +55,7 @@
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `pages` 为空、超过 50 项或有重复；`start`、`step` 小于 1 | `not_started` | `metadata.violations` 列出全部问题 |
-| `ALREADY_EXISTS` | 执行后读回发现两页同名（不区分大小写），或者 EPLAN 报告重名（`NameConflictException`） | `rolled_back` | `metadata.existing` 列出冲突的页名，提示换一个 `start`，可以用 `eplan_page_list` 的 `name_prefix` 查看已用的页号 |
+| `ALREADY_EXISTS` | 执行后读回发现两页同名（不区分大小写），或者 EPLAN 报告重名（`NameConflictException`，或实测中带编号 S029167"页名不明确"的 `BaseException`，A20） | `rolled_back` | `metadata.existing` 列出冲突的页名，提示换一个 `start`，可以用 `eplan_page_list` 的 `name_prefix` 查看已用的页号 |
 | `PAGE_NOT_FOUND` | 有页名找不到 | `not_started` | 同 `eplan_page_delete` |
 | `PLAN_STALE` | 规划之后，这些页，或它们所在结构中的页名发生了变化 | `not_started` | 提示重新调用 |
 | `BACKUP_FAILED` | 同 `eplan_page_delete` | `not_started` | 同 `eplan_page_delete` |
