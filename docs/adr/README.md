@@ -25,3 +25,4 @@
 | [0016](0016-per-user-installer.md) | 用按用户安装的 Inno Setup 安装包分发，程序固定在 `%USERPROFILE%\EplanMcp\app\`，插件只经 `eplanmcp install-addin` 注册 | Accepted | 单向门（第一个安装包发布后） |
 | [0017](0017-workbench-wpf-tia-theme.md) | Workbench 改用 WPF（.NET 10），复用 TIA Workbench 的 Ant Design v5 主题，字体用 Maple Mono CN | Accepted | 双向门（第一版 Workbench 发布前） |
 | [0018](0018-vm-http-transport.md) | EPLAN 在虚拟机、AI 客户端在宿主机时，虚拟机中的 Host 以 HTTP 提供 MCP，用共享密钥认证，防火墙只放行宿主机 | Accepted | 双向门（1.0 发布前） |
+| [0019](0019-master-data-writes.md) | 部件库、翻译库的写入按 Destructive 处理：每次审批，先备份主数据，只支持文件型数据库 | Proposed | 单向门（写系统主数据的工具发布后） |
