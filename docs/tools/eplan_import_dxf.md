@@ -46,17 +46,17 @@
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `file` 不合规（SEC-19、SEC-31）、扩展名不对、超过 100 MB；页不存在时的其他参数问题 | `not_started` | `metadata.violations` 列出全部问题 |
-| `FILE_NOT_FOUND` | 导入目录中没有这个文件 | `not_started` | 说明导入目录的位置（不写本机路径，SEC-12：用"数据根目录下的 imports"） |
+| `FILE_NOT_FOUND` | 导入目录中没有这个文件，或者 Host 读过之后、规划或执行之前文件被移走 | `not_started` | 说明导入目录的位置（不写本机路径，SEC-12：用"数据根目录下的 imports"） |
 | `PAGE_NOT_FOUND` / `AMBIGUOUS_NAME` | 页找不到 | `not_started` | 同 `eplan_page_get` |
 | `EPLAN_OPERATION_FAILED` | EPLAN 导入时报错，或页上没有新增对象 | `rolled_back` | 附带 EPLAN 的系统消息 |
-| `PLAN_STALE` | 规划之后，文件（大小、修改时间、SHA-256）或页上的对象变了 | `not_started` | 提示重新调用 |
+| `PLAN_STALE` | Host 读过文件之后、规划时文件的 SHA-256 变了；或者规划之后，文件（大小、修改时间、SHA-256）或页上的对象变了 | `not_started` | 提示重新调用 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
 `FILE_NOT_FOUND` 如果错误码表中还没有，作为新错误码加入。
 
 ## 5. 实现要点
-- **Host**：解析并校验 `file`（与 SEC-19 共用 `MacroFiles` 的路径规则，根目录换成导入目录），算出 SHA-256；走 `WritePipeline`，规划操作 `import.dxf.plan`，执行操作 `import.dxf.execute`。
-- **规划**（只读）：解析项目和页；一条 `create` 变更：`Kind = "drawing"`，`Name` 为页名，`NewValue` 为 `4685200F.DXF (25 KB, sha256 1a2b…), scale fit, center`。审批对话框和审计都列出文件名、大小和 SHA-256（M4c 设计 4.5）。指纹：页上全部对象的会话内标识，加上文件的大小、修改时间和 SHA-256。
+- **Host**：用 `ImportFiles`（SEC-31）解析并校验 `file`，算出 SHA-256，把完整路径和 SHA-256 交给 Bridge。规则同 SEC-19，但在 Host 中实现，没有共用 `MacroFiles`（实现时改）：Host 不引用 Bridge.Core，导入根目录也只有 Host 知道（它在 Host 的数据根目录中，EPLAN 中的插件不一定用同一个）；走 `WritePipeline`，规划操作 `import.dxf.plan`，执行操作 `import.dxf.execute`。
+- **规划**（只读）：解析项目和页；一条 `create` 变更：`Kind = "drawing"`，`Name` 为页名，`NewValue` 为 `4685200F.DXF (25 KB, sha256 1a2b3c4d5e6f…), scale fit, center`（SHA-256 的前 12 位；完整的值在明细 `sha256` 和审计的参数中）。Bridge 再读一遍文件（不超过 100 MB，在主线程上读得起），SHA-256 与 Host 的不同时返回 `PLAN_STALE`，文件不在时返回 `FILE_NOT_FOUND`，都不写完整路径（SEC-12）。审批对话框和审计都列出文件名、大小和 SHA-256（M4c 设计 4.5）。指纹：页上全部对象的会话内标识，加上文件的大小、修改时间和 SHA-256。
 - **执行**：在 `TransactionScope` 中：`new Transformation(文件, 页, "", scale == fit ? ScalingMode.Automatic : ScalingMode.None, position == center ? PositionMode.Center : PositionMode.LowerLeft, false)`；`new Import().DXFPage(文件, 页, transformation, "")`；读回新增对象数，为 0 时抛出；`Commit()`，`CloseUndo()`。
 - **已验证**（S22，A29）：Rittal 示例 DXF 0.04–0.3 秒加上 227 个对象；能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销。
 - **待 Large 测试确认**：`ScalingMode.None`、`PositionMode.LowerLeft` 的效果；DWG 文件；导入方案传空串时用的是哪个方案、是否改写"上次使用"（导入方案节点在 `USER.DXF.SCHEMES`？待查）。

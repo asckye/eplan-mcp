@@ -105,6 +105,18 @@ public sealed class SerializerCompatibilityTests
         new DevicePlaceArgs(),
         new DevicePlaceData { Project = "Line1", Page = "=GAA+A1&EFS1/60", Part = "SIE.3RH2122-1HB40", Variant = "1", Tag = "=GAA+A1-KF20", VisibleTag = "-KF20", Category = "Coil", Functions = 5, Unplaced = 4, PageSizeKnown = true, Warning = "w" },
         new DevicePlaceData(),
+        new ImportDxfArgs
+        {
+            Project = "Line1",
+            Page = "=GAA+A1&EFS1/92",
+            File = "图纸/4685200F.DXF",
+            FilePath = @"C:\Users\u\EplanMcp\imports\图纸\4685200F.DXF",
+            Sha256 = new string('a', 64),
+            Scale = "none",
+            Position = "lower_left",
+            Fingerprint = "f",
+        },
+        new ImportDxfArgs(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData
