@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Safety;
@@ -11,7 +12,7 @@ namespace EplanMcp.Host;
 
 /// <summary>
 /// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp doctor</c> checks the machine;
-/// <c>eplanmcp audit verify</c> checks the audit hash chain;
+/// <c>eplanmcp audit verify</c> checks the audit hash chain; with <c>--format json</c> both print JSON for the Workbench;
 /// <c>eplanmcp --version</c> prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5). Exit codes: 2 for a
 /// wrong command line, 3 when serve refuses an invalid config.json.
@@ -20,21 +21,32 @@ internal static class Program
 {
     private static async Task<int> Main(string[] args)
     {
-        switch (args)
+        switch (CliArguments.Parse(args))
         {
-            case [] or ["serve"]:
+            case { Command: CliCommand.Serve }:
                 return await ServeAsync().ConfigureAwait(false);
-            case ["doctor"]:
-                return await DoctorCommand.RunAsync(Console.Out, CultureInfo.CurrentUICulture, CancellationToken.None).ConfigureAwait(false);
-            case ["audit", "verify"]:
-                return AuditCommand.Verify(Console.Out, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment());
-            case ["--version"]:
+            case { Command: CliCommand.Version }:
                 Console.WriteLine(HostInfo.Version);
                 return 0;
+            case { Json: true } json:
+                return await RunJsonAsync(json).ConfigureAwait(false);
+            case { } text:
+                return await RunAsync(text, Console.Out).ConfigureAwait(false);
             default:
-                Console.Error.WriteLine("usage: eplanmcp [serve] | doctor | audit verify | --version");
+                Console.Error.WriteLine(CliArguments.Usage);
                 return 2;
         }
+    }
+
+    private static async Task<int> RunAsync(CliArguments cli, TextWriter output) => cli.Command == CliCommand.Doctor
+        ? await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false)
+        : AuditCommand.Verify(output, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment(), cli.Json);
+
+    /// <summary>The Workbench reads the JSON as UTF-8, so it bypasses Console.Out and the console's code page.</summary>
+    private static async Task<int> RunJsonAsync(CliArguments cli)
+    {
+        using var utf8 = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        return await RunAsync(cli, utf8).ConfigureAwait(false);
     }
 
     private static async Task<int> ServeAsync()

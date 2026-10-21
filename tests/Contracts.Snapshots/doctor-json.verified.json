@@ -1,0 +1,32 @@
+﻿{
+  "schemaVersion": 1,
+  "hostVersion": "0.1.0",
+  "status": "failure",
+  "checks": [
+    {
+      "id": "host.version",
+      "status": "info",
+      "zh": "eplanmcp 0.1.0",
+      "en": "eplanmcp 0.1.0"
+    },
+    {
+      "id": "eplan.installation",
+      "subject": "2026.0.3.25421",
+      "status": "ok",
+      "zh": "EPLAN 2026.0.3.25421：E",
+      "en": "EPLAN 2026.0.3.25421: E"
+    },
+    {
+      "id": "eplan.running",
+      "status": "warning",
+      "zh": "EPLAN 没有在运行",
+      "en": "EPLAN is not running"
+    },
+    {
+      "id": "bridge.pipe",
+      "status": "failure",
+      "zh": "没有发现 EplanMcp 插件",
+      "en": "No EplanMcp add-in found"
+    }
+  ]
+}

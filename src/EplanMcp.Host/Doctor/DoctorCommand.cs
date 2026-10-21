@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Nodes;
 using EplanMcp.Host.Bridge;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -8,7 +10,10 @@ namespace EplanMcp.Host.Doctor;
 /// <summary><c>eplanmcp doctor</c>: prints every check and exits 1 when any failed. Never used in serve mode.</summary>
 internal static class DoctorCommand
 {
-    public static async Task<int> RunAsync(TextWriter output, CultureInfo culture, CancellationToken cancellationToken)
+    /// <summary>The version of the JSON shape (architecture 5.2); a change to the shape raises it.</summary>
+    public const int SchemaVersion = 1;
+
+    public static async Task<int> RunAsync(TextWriter output, CultureInfo culture, bool json, CancellationToken cancellationToken)
     {
         HostDataLocations locations = HostDataLocations.FromEnvironment();
         var checks = new List<DoctorCheck>
@@ -32,7 +37,7 @@ internal static class DoctorCommand
 
         checks.Add(DoctorChecks.UserPathLength(DoctorChecks.ReadUserPathLength()));
 
-        await output.WriteAsync(Format(checks, culture)).ConfigureAwait(false);
+        await output.WriteAsync(json ? FormatJson(HostInfo.Version, checks) + Environment.NewLine : Format(checks, culture)).ConfigureAwait(false);
         return checks.Any(c => c.Status == DoctorStatus.Failure) ? 1 : 0;
     }
 
@@ -54,4 +59,39 @@ internal static class DoctorCommand
 
         return text.ToString();
     }
+
+    /// <summary>
+    /// The JSON the Workbench reads (M5 design 4.4): the checks in output order and the worst status of all, where
+    /// info counts as ok, so a healthy machine is ok although the version line is always info.
+    /// </summary>
+    internal static string FormatJson(string hostVersion, IReadOnlyList<DoctorCheck> checks) => new JsonObject
+    {
+        ["schemaVersion"] = SchemaVersion,
+        ["hostVersion"] = hostVersion,
+        ["status"] = Name(checks.Select(c => c.Status).Where(s => s != DoctorStatus.Info).DefaultIfEmpty(DoctorStatus.Ok).Max()),
+        ["checks"] = new JsonArray([.. checks.Select(Json)]),
+    }.ToJsonString(HostJson.Options);
+
+    private static JsonObject Json(DoctorCheck check)
+    {
+        var json = new JsonObject { ["id"] = check.Id };
+        if (check.Subject is { } subject)
+        {
+            json["subject"] = subject;
+        }
+
+        json["status"] = Name(check.Status);
+        json["zh"] = check.Chinese;
+        json["en"] = check.English;
+        return json;
+    }
+
+    private static string Name(DoctorStatus status) => status switch
+    {
+        DoctorStatus.Ok => "ok",
+        DoctorStatus.Info => "info",
+        DoctorStatus.Warning => "warning",
+        DoctorStatus.Failure => "failure",
+        _ => throw new UnreachableException($"Doctor status {status} has no JSON name."),
+    };
 }

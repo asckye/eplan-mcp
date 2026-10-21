@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Host.Audit;
 
@@ -133,19 +134,34 @@ public sealed class AuditLogTests : IDisposable
     {
         var locations = new HostDataLocations(_root);
         using var empty = new StringWriter();
-        Assert.Equal(0, AuditCommand.Verify(empty, CultureInfo.GetCultureInfo("en-US"), locations));
+        Assert.Equal(0, AuditCommand.Verify(empty, CultureInfo.GetCultureInfo("en-US"), locations, json: false));
         Assert.StartsWith("No audit records", empty.ToString(), StringComparison.Ordinal);
 
         await AppendThree();
         using var intact = new StringWriter();
-        Assert.Equal(0, AuditCommand.Verify(intact, CultureInfo.GetCultureInfo("en-US"), locations));
+        Assert.Equal(0, AuditCommand.Verify(intact, CultureInfo.GetCultureInfo("en-US"), locations, json: false));
         Assert.Contains("intact: 3 records", intact.ToString(), StringComparison.Ordinal);
 
         Rewrite(lines => lines.RemoveAt(1));
         using var broken = new StringWriter();
-        Assert.Equal(1, AuditCommand.Verify(broken, CultureInfo.GetCultureInfo("zh-CN"), locations));
+        Assert.Equal(1, AuditCommand.Verify(broken, CultureInfo.GetCultureInfo("zh-CN"), locations, json: false));
         Assert.Contains("2026-10-20.jsonl:2", broken.ToString(), StringComparison.Ordinal);
         Assert.Contains("被删除", broken.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Command_Json_ReportsTheChainAndWhereItBreaksWithTheSameExitCodes()
+    {
+        var locations = new HostDataLocations(_root);
+        Assert.Equal((0, """{"schemaVersion":1,"directory":"DIR","exists":false,"intactRecords":0,"intact":true,"break":null}"""), VerifyJson(locations));
+
+        await AppendThree();
+        Assert.Equal((0, """{"schemaVersion":1,"directory":"DIR","exists":true,"intactRecords":3,"intact":true,"break":null}"""), VerifyJson(locations));
+
+        Rewrite(lines => lines.RemoveAt(1));
+        Assert.Equal(
+            (1, """{"schemaVersion":1,"directory":"DIR","exists":true,"intactRecords":1,"intact":false,"break":{"file":"2026-10-20.jsonl","line":2,"problem":"missing"}}"""),
+            VerifyJson(locations));
     }
 
     [Fact]
@@ -157,6 +173,16 @@ public sealed class AuditLogTests : IDisposable
         await AppendThree();
 
         Assert.Equal(EplanMcp.Host.Doctor.DoctorStatus.Ok, EplanMcp.Host.Doctor.DoctorChecks.AuditDirectory(locations).Status);
+    }
+
+    /// <summary>The exit code and the JSON line, with the audit directory as DIR.</summary>
+    private (int Exit, string Json) VerifyJson(HostDataLocations locations)
+    {
+        using var output = new StringWriter();
+        int exit = AuditCommand.Verify(output, CultureInfo.GetCultureInfo("zh-CN"), locations, json: true);
+        string directory = JsonSerializer.Serialize(AuditDirectory, HostJson.Options)[1..^1];
+        Assert.EndsWith(Environment.NewLine, output.ToString(), StringComparison.Ordinal);
+        return (exit, output.ToString().TrimEnd().Replace(directory, "DIR", StringComparison.Ordinal));
     }
 
     private AuditLog Log() => new(AuditDirectory, _clock);

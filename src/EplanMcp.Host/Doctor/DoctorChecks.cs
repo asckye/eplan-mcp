@@ -18,14 +18,14 @@ internal static class DoctorChecks
     public const int UserPathWarningLength = 2047;
 
     public static DoctorCheck HostVersion() =>
-        new(DoctorStatus.Info, $"eplanmcp {HostInfo.Version}", $"eplanmcp {HostInfo.Version}");
+        new(DoctorCheckIds.HostVersion, DoctorStatus.Info, $"eplanmcp {HostInfo.Version}", $"eplanmcp {HostInfo.Version}");
 
     public static DoctorCheck DataDirectory(HostDataLocations locations)
     {
         string root = locations.Root;
         return Directory.Exists(root)
-            ? new(DoctorStatus.Ok, $"数据目录：{root}", $"Data directory: {root}")
-            : new(DoctorStatus.Info, $"数据目录尚未创建：{root}（首次需要时创建）", $"Data directory not created yet: {root} (created when first needed)");
+            ? new(DoctorCheckIds.DataDirectory, DoctorStatus.Ok, $"数据目录：{root}", $"Data directory: {root}")
+            : new(DoctorCheckIds.DataDirectory, DoctorStatus.Info, $"数据目录尚未创建：{root}（首次需要时创建）", $"Data directory not created yet: {root} (created when first needed)");
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ internal static class DoctorChecks
     {
         if (!Directory.Exists(locations.Audit))
         {
-            return new(DoctorStatus.Info, $"审计目录尚未创建：{locations.Audit}（第一次写操作时创建）", $"Audit directory not created yet: {locations.Audit} (created by the first write)");
+            return new(DoctorCheckIds.AuditDirectory, DoctorStatus.Info, $"审计目录尚未创建：{locations.Audit}（第一次写操作时创建）", $"Audit directory not created yet: {locations.Audit} (created by the first write)");
         }
 
         const int SharingViolation = unchecked((int)0x80070020);
@@ -57,10 +57,11 @@ internal static class DoctorChecks
             // Another Host is appending right now.
         }
 
-        return new(DoctorStatus.Ok, $"审计目录可写：{locations.Audit}", $"Audit directory writable: {locations.Audit}");
+        return new(DoctorCheckIds.AuditDirectory, DoctorStatus.Ok, $"审计目录可写：{locations.Audit}", $"Audit directory writable: {locations.Audit}");
     }
 
     private static DoctorCheck AuditUnwritable(HostDataLocations locations, Exception ex) => new(
+        DoctorCheckIds.AuditDirectory,
         DoctorStatus.Failure,
         $"审计目录不可写，写操作会被拒绝：{locations.Audit}（{ex.Message}）",
         $"Audit directory not writable, so writes will be refused: {locations.Audit} ({ex.Message})");
@@ -70,12 +71,12 @@ internal static class DoctorChecks
     {
         if (!Directory.Exists(locations.Exports))
         {
-            return new(DoctorStatus.Info, $"导出目录尚未创建：{locations.Exports}（第一次导出时创建）", $"Export directory not created yet: {locations.Exports} (created by the first export)");
+            return new(DoctorCheckIds.Exports, DoctorStatus.Info, $"导出目录尚未创建：{locations.Exports}（第一次导出时创建）", $"Export directory not created yet: {locations.Exports} (created by the first export)");
         }
 
         (int folders, long bytes) = ExportFolders.Usage(locations.Exports);
         string size = ByteSize.Format(bytes);
-        return new(DoctorStatus.Info,
+        return new(DoctorCheckIds.Exports, DoctorStatus.Info,
             $"导出目录 {locations.Exports}：{folders} 次导出，共 {size}；不会自动清理，不再需要的可以手工删除",
             $"Export directory {locations.Exports}: {folders} exports, {size} in total; never cleaned up automatically, delete what is no longer needed");
     }
@@ -86,21 +87,23 @@ internal static class DoctorChecks
         IReadOnlyList<Suspension> all = SuspensionStore.For(locations).All();
         if (all.Count == 0)
         {
-            yield return new(DoctorStatus.Ok, "没有暂停的写入", "No writes are suspended");
+            yield return new(DoctorCheckIds.Suspension, DoctorStatus.Ok, "没有暂停的写入", "No writes are suspended");
             yield break;
         }
 
         foreach (Suspension s in all)
         {
             string time = s.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            string pid = s.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?";
+            string? processId = s.ProcessId?.ToString(CultureInfo.InvariantCulture);
+            string pid = processId ?? "?";
             yield return s.Project is { } project
-                ? new(DoctorStatus.Warning,
+                ? new(DoctorCheckIds.Suspension, DoctorStatus.Warning,
                     $"项目 {project} 的写入已暂停（{time}，{s.Tool} 的结果未知）：请先在 EPLAN 中核实，下一次写操作会请求确认",
                     $"Writes to {project} are suspended ({time}, outcome of {s.Tool} unknown): check the project in EPLAN; the next write asks to confirm")
-                : new(DoctorStatus.Warning,
+                : new(DoctorCheckIds.Suspension, DoctorStatus.Warning,
                     $"EPLAN 进程 {pid} 的写入已暂停（{time}，{s.Tool} 的结果未知），直到它退出或经确认解除",
-                    $"Writes in EPLAN process {pid} are suspended ({time}, outcome of {s.Tool} unknown) until it exits or the engineer confirms");
+                    $"Writes in EPLAN process {pid} are suspended ({time}, outcome of {s.Tool} unknown) until it exits or the engineer confirms",
+                    processId);
         }
     }
 
@@ -112,12 +115,12 @@ internal static class DoctorChecks
     {
         if (!Directory.Exists(locations.Backups))
         {
-            return new(DoctorStatus.Info, $"还没有备份：{locations.Backups}（第一次 Destructive 写操作时创建）", $"No backups yet: {locations.Backups} (created by the first Destructive write)");
+            return new(DoctorCheckIds.Backups, DoctorStatus.Info, $"还没有备份：{locations.Backups}（第一次 Destructive 写操作时创建）", $"No backups yet: {locations.Backups} (created by the first Destructive write)");
         }
 
         (int count, long bytes) = BackupFolders.Usage(locations.Backups);
         string size = (bytes / (1024.0 * 1024.0)).ToString("0.0", CultureInfo.InvariantCulture);
-        return new(DoctorStatus.Info,
+        return new(DoctorCheckIds.Backups, DoctorStatus.Info,
             $"备份：{locations.Backups} 中有 {count} 份，共 {size} MB；EplanMcp 不会删除备份，不再需要时请自行清理",
             $"Backups: {count} in {locations.Backups}, {size} MB in all; EplanMcp never deletes them, so remove those no longer needed");
     }
@@ -128,7 +131,7 @@ internal static class DoctorChecks
         (HostConfig? config, string? problem) = HostConfig.Load(locations);
         if (config is null)
         {
-            return new(DoctorStatus.Failure,
+            return new(DoctorCheckIds.Config, DoctorStatus.Failure,
                 $"配置文件 {locations.ConfigFile} 无效，serve 不会启动：{problem}",
                 $"Configuration {locations.ConfigFile} {problem}; serve will not start");
         }
@@ -138,7 +141,7 @@ internal static class DoctorChecks
         string roots = string.Join("; ", config.ScratchRoots);
         (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
         string timeout = HostConfig.Seconds(config.ApprovalTimeout);
-        return new(DoctorStatus.Ok,
+        return new(DoctorCheckIds.Config, DoctorStatus.Ok,
             $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；审批期限 {timeout} 秒",
             $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; approval deadline {timeout} s");
     }
@@ -156,13 +159,14 @@ internal static class DoctorChecks
     {
         if (redirectingPackage is null && identity is null)
         {
-            return new(DoctorStatus.Ok, "不在 MSIX 包环境中：写入 %LOCALAPPDATA% 没有被重定向", "Not in an MSIX package environment: writes to %LOCALAPPDATA% are not redirected");
+            return new(DoctorCheckIds.Msix, DoctorStatus.Ok, "不在 MSIX 包环境中：写入 %LOCALAPPDATA% 没有被重定向", "Not in an MSIX package environment: writes to %LOCALAPPDATA% are not redirected");
         }
 
         string package = redirectingPackage ?? identity!;
         string chinese = identity is null ? "当前进程没有包身份" : $"当前进程的包身份是 {identity}";
         string english = identity is null ? "this process has no package identity" : $"this process has package identity {identity}";
         return new(
+            DoctorCheckIds.Msix,
             DoctorStatus.Info,
             $"在 MSIX 包 {package} 的环境中（例如由 Claude 桌面版启动），{chinese}：写入 %LOCALAPPDATA% 会被重定向到包的 LocalCache。EplanMcp 只用数据目录，不受影响",
             $"In the environment of MSIX package {package} (started by the Claude desktop app, for example); {english}: writes to %LOCALAPPDATA% are redirected into the package's LocalCache. EplanMcp only uses the data directory and is not affected");
@@ -212,7 +216,7 @@ internal static class DoctorChecks
             : [];
         if (executables.Length == 0)
         {
-            yield return new(DoctorStatus.Failure, $"在 {platform} 下没有找到 EPLAN", $"No EPLAN found under {platform}");
+            yield return new(DoctorCheckIds.EplanInstallation, DoctorStatus.Failure, $"在 {platform} 下没有找到 EPLAN", $"No EPLAN found under {platform}");
             yield break;
         }
 
@@ -225,13 +229,15 @@ internal static class DoctorChecks
     /// <summary>An installed EPLAN and where its version stands in the support range (ADR-0009).</summary>
     internal static DoctorCheck Installation(string version, string exe) => EplanVersions.Support(version) switch
     {
-        EplanSupport.Verified => new(DoctorStatus.Ok, $"EPLAN {version}：{exe}", $"EPLAN {version}: {exe}"),
-        EplanSupport.Expected => new(DoctorStatus.Info,
+        EplanSupport.Verified => new(DoctorCheckIds.EplanInstallation, DoctorStatus.Ok, $"EPLAN {version}：{exe}", $"EPLAN {version}: {exe}", version),
+        EplanSupport.Expected => new(DoctorCheckIds.EplanInstallation, DoctorStatus.Info,
             $"EPLAN {version}：{exe}（在支持范围 {EplanVersions.Range} 内，但尚未实测，ADR-0009）",
-            $"EPLAN {version}: {exe} (in the supported range {EplanVersions.Range}, not tested yet; ADR-0009)"),
-        _ => new(DoctorStatus.Warning,
+            $"EPLAN {version}: {exe} (in the supported range {EplanVersions.Range}, not tested yet; ADR-0009)",
+            version),
+        _ => new(DoctorCheckIds.EplanInstallation, DoctorStatus.Warning,
             $"EPLAN {version}：{exe}（不在支持范围 {EplanVersions.Range} 内，ADR-0009）",
-            $"EPLAN {version}: {exe} (outside the supported range {EplanVersions.Range}; ADR-0009)"),
+            $"EPLAN {version}: {exe} (outside the supported range {EplanVersions.Range}; ADR-0009)",
+            version),
     };
 
     public static IEnumerable<DoctorCheck> RunningEplan()
@@ -239,17 +245,7 @@ internal static class DoctorChecks
         Process[] processes = Process.GetProcessesByName("EPLAN");
         try
         {
-            if (processes.Length == 0)
-            {
-                yield return new(DoctorStatus.Warning, "EPLAN 没有在运行", "EPLAN is not running");
-                yield break;
-            }
-
-            foreach (Process process in processes)
-            {
-                string pid = process.Id.ToString(CultureInfo.InvariantCulture);
-                yield return new(DoctorStatus.Ok, $"EPLAN 正在运行，进程 {pid}", $"EPLAN is running, process {pid}");
-            }
+            return RunningEplan([.. processes.Select(p => p.Id)]);
         }
         finally
         {
@@ -260,13 +256,28 @@ internal static class DoctorChecks
         }
     }
 
+    internal static IEnumerable<DoctorCheck> RunningEplan(IReadOnlyList<int> processIds)
+    {
+        if (processIds.Count == 0)
+        {
+            yield return new(DoctorCheckIds.EplanRunning, DoctorStatus.Warning, "EPLAN 没有在运行", "EPLAN is not running");
+            yield break;
+        }
+
+        foreach (int processId in processIds)
+        {
+            string pid = processId.ToString(CultureInfo.InvariantCulture);
+            yield return new(DoctorCheckIds.EplanRunning, DoctorStatus.Ok, $"EPLAN 正在运行，进程 {pid}", $"EPLAN is running, process {pid}", pid);
+        }
+    }
+
     public static async Task<IReadOnlyList<DoctorCheck>> BridgeAsync(IBridgeClient bridge, CancellationToken cancellationToken)
     {
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
         var checks = new List<DoctorCheck>();
         if (status.Instances.Count == 0)
         {
-            checks.Add(new(DoctorStatus.Failure,
+            checks.Add(new(DoctorCheckIds.BridgePipe, DoctorStatus.Failure,
                 "没有发现 EplanMcp 插件：请确认 EPLAN 正在以所用的变体运行，并且插件已为该变体注册（每个变体要分别注册）",
                 "No EplanMcp add-in found: make sure EPLAN is running in the variant you use and the add-in is registered for that variant (each variant is registered separately)"));
             return checks;
@@ -275,32 +286,34 @@ internal static class DoctorChecks
         foreach (BridgeEndpoint endpoint in status.Instances)
         {
             string pid = endpoint.ProcessId.ToString(CultureInfo.InvariantCulture);
-            checks.Add(new(DoctorStatus.Ok, $"发现插件管道：进程 {pid}", $"Add-in pipe found: process {pid}"));
+            checks.Add(new(DoctorCheckIds.BridgePipe, DoctorStatus.Ok, $"发现插件管道：进程 {pid}", $"Add-in pipe found: process {pid}", pid));
         }
 
         if (status.Handshake is { } handshake)
         {
             string licence = handshake.Eplan.ApiExtensionLicence switch { true => "可用", false => "不可用", null => "未知" };
             string licenceEn = handshake.Eplan.ApiExtensionLicence switch { true => "available", false => "missing", null => "unknown" };
-            checks.Add(new(DoctorStatus.Ok,
+            string process = handshake.Eplan.ProcessId.ToString(CultureInfo.InvariantCulture);
+            checks.Add(new(DoctorCheckIds.BridgeHandshake, DoctorStatus.Ok,
                 $"握手成功：插件 {handshake.BridgeVersion}（{handshake.BuildTarget ?? "构建目标未知"}），协议 {handshake.ProtocolVersion}，EPLAN {handshake.Eplan.Version}（{handshake.Eplan.Variant ?? "变体未知"}）",
-                $"Handshake OK: add-in {handshake.BridgeVersion} ({handshake.BuildTarget ?? "build target unknown"}), protocol {handshake.ProtocolVersion}, EPLAN {handshake.Eplan.Version} ({handshake.Eplan.Variant ?? "variant unknown"})"));
-            checks.Add(new(handshake.Eplan.ApiExtensionLicence == false ? DoctorStatus.Failure : DoctorStatus.Ok,
-                $"API 扩展授权（APIExtension）：{licence}", $"API extension licence (APIExtension): {licenceEn}"));
+                $"Handshake OK: add-in {handshake.BridgeVersion} ({handshake.BuildTarget ?? "build target unknown"}), protocol {handshake.ProtocolVersion}, EPLAN {handshake.Eplan.Version} ({handshake.Eplan.Variant ?? "variant unknown"})",
+                process));
+            checks.Add(new(DoctorCheckIds.BridgeLicence, handshake.Eplan.ApiExtensionLicence == false ? DoctorStatus.Failure : DoctorStatus.Ok,
+                $"API 扩展授权（APIExtension）：{licence}", $"API extension licence (APIExtension): {licenceEn}", process));
         }
         else if (status.Problem is { } problem)
         {
-            checks.Add(new(DoctorStatus.Failure, $"无法使用插件：{problem.Reason}", $"Cannot use the add-in: {problem.Reason} — {problem.Message}"));
+            checks.Add(new(DoctorCheckIds.BridgeHandshake, DoctorStatus.Failure, $"无法使用插件：{problem.Reason}", $"Cannot use the add-in: {problem.Reason} — {problem.Message}"));
         }
 
         return checks;
     }
 
     public static DoctorCheck UserPathLength(int length) => length > UserPathWarningLength
-        ? new(DoctorStatus.Warning,
+        ? new(DoctorCheckIds.PathLength, DoctorStatus.Warning,
             $"用户 PATH 有 {length} 个字符：过长时 Windows 登录不会加载用户环境变量，EPLAN 的 TEMP 会变成 C:\\WINDOWS\\TEMP，脚本编译失败。请手工缩短（EplanMcp 不会修改 PATH）",
             $"User PATH is {length} characters: when it is too long Windows skips the user environment at logon, EPLAN's TEMP becomes C:\\WINDOWS\\TEMP and script compilation fails. Shorten it by hand (EplanMcp never changes PATH)")
-        : new(DoctorStatus.Ok, $"用户 PATH 长度 {length}", $"User PATH length {length}");
+        : new(DoctorCheckIds.PathLength, DoctorStatus.Ok, $"用户 PATH 长度 {length}", $"User PATH length {length}");
 
     public static int ReadUserPathLength()
     {

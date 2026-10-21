@@ -12,7 +12,7 @@ public sealed class DoctorTests
     [Fact]
     public void Format_FollowsTheUiLanguage()
     {
-        DoctorCheck[] checks = [new(DoctorStatus.Failure, "中文", "English"), new(DoctorStatus.Ok, "好", "fine")];
+        DoctorCheck[] checks = [new("a", DoctorStatus.Failure, "中文", "English"), new("b", DoctorStatus.Ok, "好", "fine", "subject")];
 
         Assert.Equal("[FAIL] 中文" + Environment.NewLine + "[ OK ] 好" + Environment.NewLine, DoctorCommand.Format(checks, CultureInfo.GetCultureInfo("zh-CN")));
         Assert.Equal("[FAIL] English" + Environment.NewLine + "[ OK ] fine" + Environment.NewLine, DoctorCommand.Format(checks, CultureInfo.GetCultureInfo("de-DE")));
@@ -94,6 +94,59 @@ public sealed class DoctorTests
 
         Assert.Equal(DoctorStatus.Failure, checks[^1].Status);
         Assert.Contains(ErrorReason.BridgeIncompatible, checks[^1].English, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Installation_IsAboutItsVersion()
+    {
+        DoctorCheck check = DoctorChecks.Installation("2026.0.3.25421", "E");
+
+        Assert.Equal((DoctorCheckIds.EplanInstallation, "2026.0.3.25421"), (check.Id, check.Subject));
+    }
+
+    [Fact]
+    public void RunningEplan_IsAboutEachProcess()
+    {
+        DoctorCheck none = Assert.Single(DoctorChecks.RunningEplan([]));
+        DoctorCheck[] running = [.. DoctorChecks.RunningEplan([7, 9])];
+
+        Assert.Equal((DoctorCheckIds.EplanRunning, DoctorStatus.Warning, null), (none.Id, none.Status, none.Subject));
+        Assert.Equal([(DoctorCheckIds.EplanRunning, "7"), (DoctorCheckIds.EplanRunning, "9")], running.Select(c => (c.Id, c.Subject)));
+        Assert.All(running, c => Assert.Equal(DoctorStatus.Ok, c.Status));
+    }
+
+    [Fact]
+    public async Task Bridge_ChecksAreAboutTheProcessOfEachPipeAndOfTheHandshake()
+    {
+        var bridge = new FakeBridgeClient
+        {
+            Status = new BridgeStatus(
+                [new BridgeEndpoint("EplanMcp.Bridge.7.a1", 7), new BridgeEndpoint("EplanMcp.Bridge.9.b2", 9)],
+                new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.1.0", Eplan = new EplanInstanceInfo { ProcessId = 9, Version = "2026.0.3", ApiExtensionLicence = true } },
+                null),
+        };
+
+        IReadOnlyList<DoctorCheck> checks = await DoctorChecks.BridgeAsync(bridge, TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            [
+                (DoctorCheckIds.BridgePipe, "7"),
+                (DoctorCheckIds.BridgePipe, "9"),
+                (DoctorCheckIds.BridgeHandshake, "9"),
+                (DoctorCheckIds.BridgeLicence, "9"),
+            ],
+            checks.Select(c => (c.Id, c.Subject)));
+    }
+
+    [Fact]
+    public async Task Bridge_WithoutAnInstanceOrHandshake_IsAboutNoParticularOne()
+    {
+        DoctorCheck none = Assert.Single(await DoctorChecks.BridgeAsync(new FakeBridgeClient(), TestContext.Current.CancellationToken));
+        var bridge = new FakeBridgeClient { Status = new BridgeStatus([new BridgeEndpoint("p", 7)], null, BridgeErrors.Incompatible(9)) };
+        DoctorCheck problem = (await DoctorChecks.BridgeAsync(bridge, TestContext.Current.CancellationToken))[^1];
+
+        Assert.Equal((DoctorCheckIds.BridgePipe, null), (none.Id, none.Subject));
+        Assert.Equal((DoctorCheckIds.BridgeHandshake, null), (problem.Id, problem.Subject));
     }
 
     [Fact]
