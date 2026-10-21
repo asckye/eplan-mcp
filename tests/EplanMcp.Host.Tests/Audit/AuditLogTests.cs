@@ -176,12 +176,50 @@ public sealed class AuditLogTests : IDisposable
     [Fact]
     public async Task Append_SeveralHostsAtOnce_KeepOneChain()
     {
-        // Two logs on one directory stand for two Host processes; the lock file makes them take turns.
-        var other = new AuditLog(AuditDirectory, _clock);
+        // Two logs on one directory stand for two Host processes; the lock file makes them take turns. The forty appends
+        // queue up for it; on a loaded CI runner the turns ahead of the last one took longer than the 5 s a Host waits,
+        // so it gave up. The wait here covers them all: this is about the chain, not how quickly the turns go.
+        AuditLog one = Log(TimeSpan.FromMinutes(1)), other = Log(TimeSpan.FromMinutes(1));
         await Task.WhenAll(Enumerable.Range(0, 40).Select(i =>
-            Task.Run(() => (i % 2 == 0 ? Log() : other).AppendAsync(new JsonObject { ["n"] = i }, TestContext.Current.CancellationToken))));
+            Task.Run(() => (i % 2 == 0 ? one : other).AppendAsync(new JsonObject { ["n"] = i }, TestContext.Current.CancellationToken))));
 
         Assert.Equal((40, null), AuditVerifier.Verify(AuditDirectory));
+    }
+
+    [Fact]
+    public async Task Append_WaitsForAnotherHostToFinishItsTurn()
+    {
+        await AppendThree();
+
+        Task<string> waiting;
+        using (HoldingTheLock())
+        {
+            waiting = Log(TimeSpan.FromMinutes(1)).AppendAsync(new JsonObject { ["n"] = 4 }, TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(100), TestContext.Current.CancellationToken);
+            Assert.False(waiting.IsCompleted);
+        }
+
+        await waiting;
+        Assert.Equal((4, null), AuditVerifier.Verify(AuditDirectory));
+    }
+
+    [Fact]
+    public async Task Append_WhileAnotherHostKeepsTheLockPastTheWait_IsRefusedAndLeavesTheFile()
+    {
+        await AppendThree();
+        string file = Path.Combine(AuditDirectory, "2026-10-20.jsonl");
+        byte[] before = File.ReadAllBytes(file);
+
+        using (HoldingTheLock())
+        {
+            var refused = await Assert.ThrowsAsync<AuditUnavailableException>(() =>
+                Log(TimeSpan.FromMilliseconds(100)).AppendAsync(new JsonObject { ["n"] = 4 }, TestContext.Current.CancellationToken));
+            // ERROR_SHARING_VIOLATION on the lock file, as when the contended appends failed on CI.
+            Assert.Equal(unchecked((int)0x80070020), Assert.IsType<IOException>(refused.InnerException).HResult);
+            Assert.Contains(Path.Combine("audit", ".lock"), refused.Message, StringComparison.Ordinal);
+        }
+
+        Assert.Equal(before, File.ReadAllBytes(file));
     }
 
     [Fact]
@@ -249,6 +287,8 @@ public sealed class AuditLogTests : IDisposable
     }
 
     private AuditLog Log() => new(AuditDirectory, _clock);
+
+    private AuditLog Log(TimeSpan lockWait) => new(AuditDirectory, _clock) { LockWait = lockWait };
 
     private Task<string> Append(JsonObject entry) => Log().AppendAsync(entry, TestContext.Current.CancellationToken);
 

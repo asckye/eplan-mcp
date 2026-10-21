@@ -21,10 +21,13 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
 
     private const string LockFile = ".lock";
 
-    // How long a Host waits for another one to finish appending before reporting the log unavailable.
-    private static readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(5);
-
     internal static readonly JsonSerializerOptions Json = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    /// <summary>
+    /// How long a Host waits for the other Hosts' turns before reporting the log unavailable. Turns queue up, so the
+    /// wait covers every turn ahead of this one, each with its flush to disk.
+    /// </summary>
+    internal TimeSpan LockWait { get; init; } = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// Appends <paramref name="entry"/> with <c>time</c>, <c>prev</c> and <c>hash</c> added, flushed to disk before
@@ -193,7 +196,7 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
     private async Task<FileStream> TakeTurnAsync(CancellationToken cancellationToken)
     {
         // Real time, not the clock records are stamped with: the wait is about other processes.
-        long deadline = Environment.TickCount64 + (long)_lockTimeout.TotalMilliseconds;
+        long deadline = Environment.TickCount64 + (long)LockWait.TotalMilliseconds;
         while (true)
         {
             try
