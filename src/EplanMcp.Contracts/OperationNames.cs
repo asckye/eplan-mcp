@@ -154,6 +154,12 @@ public static class OperationNames
     public const string MacroInsertExecute = "macro.insert.execute";
 
     /// <summary>
+    /// The plan of eplan_import_dxf: finds the page and reads the file the Host resolved below its import root again,
+    /// never writes. Arguments: <see cref="ImportDxfArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string ImportDxfPlan = "import.dxf.plan";
+
+    /// <summary>
     /// The plan of eplan_check_run: finds the pages and counts the project's check messages, never checks. Arguments:
     /// <see cref="CheckRunArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>
