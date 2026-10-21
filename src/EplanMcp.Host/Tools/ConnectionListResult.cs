@@ -25,7 +25,8 @@ internal sealed class ConnectionListResult : IPagedResult<ConnectionListResult.C
 
     List<ConnectionEntry> IPagedResult<ConnectionEntry>.Items => Connections;
 
-    internal sealed class ConnectionEntry
+    /// <summary>Also the base of a cable core in eplan_cable_get, which adds its wire number.</summary>
+    internal class ConnectionEntry
     {
         [Description("Where the connection starts; null when it is not connected there, or for kind 3d.")]
         public EndEntry? From { get; set; }

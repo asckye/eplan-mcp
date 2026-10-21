@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "-WG2 是什么电缆、多长、从哪里接到哪里、每根芯线接在哪个端子上？"代理拿到一个电缆标识后，看电缆的全貌：型号和规格、两端、芯线及其连接。
@@ -59,7 +59,8 @@
 ## 5. 实现要点
 - 查找与 `eplan_device_get` 相同（完整标识精确匹配，再按显示标识），然后要求 `FunctionCategory` 为 `Cable` 并且对象是 `EObjects.Cable`。屏蔽（类别 Shielding）不当作电缆。
 - 只按类别取电缆，不用 `GetCablesWithFilterScheme("")`：空串用导航器当前的过滤方案，结果随界面状态变化（A24）。
-- 芯线的端点读法同 `eplan_connection_list`（`StartPin`、`EndPin` 的 `ParentFunction.Name` 和 `Name`）。
+- 芯线的端点读法同 `eplan_connection_list`（`StartPin`、`EndPin` 的 `ParentFunction.Name` 和 `Name`），所以芯线也带 `kind`（3D 连接没有端点和页）。
+- `sources`、`targets` 只列出其中的功能（S21 得到的都是功能），其他类型的对象不列出。
 - 待 Large 测试确认（S21 没有验证）：
   - 四个电缆属性在示例项目中是否有值、显示文本的形式；
   - `GetSourcesAndTargets` 对一根电缆的耗时；

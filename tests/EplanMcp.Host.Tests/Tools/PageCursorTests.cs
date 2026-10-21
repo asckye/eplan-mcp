@@ -25,6 +25,31 @@ public sealed class PageCursorTests
     }
 
     [Theory]
+    [InlineData(null, 0)]
+    [InlineData("", 0)]
+    [InlineData("own", 42)]
+    public void Offset_WithoutOrWithItsOwnCursor_IsTheOffsetWithoutAViolation(string? cursor, int expected)
+    {
+        var violations = new List<string>();
+
+        int offset = PageCursor.Offset(cursor == "own" ? PageCursor.Encode(42, _pages) : cursor, _pages, "eplan_page_list", violations);
+
+        Assert.Equal(expected, offset);
+        Assert.Empty(violations);
+    }
+
+    [Fact]
+    public void Offset_OfAnotherListing_IsZeroWithAViolationNamingTheTool()
+    {
+        var violations = new List<string>();
+
+        int offset = PageCursor.Offset(PageCursor.Encode(42, _pages), PageCursor.Fingerprint("eplan_page_list", "Line2", "=AP"), "eplan_page_list", violations);
+
+        Assert.Equal(0, offset);
+        Assert.Contains("'cursor' was not returned by eplan_page_list", Assert.Single(violations), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("not-a-cursor")]
     [InlineData("")]
     [InlineData("djE6NQ")] // "v1:5", what the M1 Host produced
