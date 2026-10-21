@@ -77,6 +77,7 @@ node eng/scripts/apply-archify-font.mjs
 | 工具怎么设计 | [MCP 工具设计规范](docs/standards/mcp-tool-design.md) |
 | 代码怎么写 | [编码规范](docs/standards/coding-standards.md) |
 | 怎么测试 | [测试策略](docs/standards/testing.md) |
+| Workbench 界面怎么做 | [Workbench 界面规范](docs/standards/workbench-ui.md) |
 | 安全 | [安全标准与威胁模型](docs/standards/security.md) · [SECURITY.md](SECURITY.md) |
 | 怎么协作、怎么发布 | [开发流程](docs/process/development-workflow.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
