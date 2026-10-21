@@ -159,6 +159,23 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A20. M4 工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
+各工具链的 Release 构建，经 `eplanmcp` 调用，每次用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。Destructive 工具的审批由项目负责人在 EPLAN 对话框中点击。
+- **检查**（`Check.VerifyProject` / `VerifyPages`）：
+  - 整个项目：6 条警告、14 条提示，与 `eplan_check_list` 一致；一次 Ctrl+Z 回到 0 条。— 实测。
+  - **再检查一次是追加，不是替换**：警告仍是 6 条，14 条汇总提示（编号 999，每个检查区域一条）每次都再加一遍（20 → 34）。所以 `eplan_check_run` 不是幂等的。— 实测。
+  - **按页检查会删掉其他对象的消息**：检查 `=GAA+A1&EFS1/1`、`/2` 后，原来挂在 3D 连接上的 6 条警告没有了。— 实测。
+  - 不存在的检查方案：`VerifyProject` 和 `VerifyPages` 都抛出带编号 S029123 的异常，消息列出全部检查方案；回滚后消息不变。— 实测。
+- **报表**：更新全部报表新增 `+A2&EPA1/1.2`（同 A16），一次 Ctrl+Z 撤销；再更新不增删；只更新 `&AAB1/1` 不增删。按 `Page.ReportBlock` 不为 null 数出 221 张报表页，A16 按页类型数的是 204 张，两种口径不同。— 实测。
+- **导出**：PDF 文件名就是给出的名称（没有 `.pdf.pdf`）；整个项目 322 页黑白 PDF 约 13 秒、6.1 MB；DXF 在给定目录下按"项目名\结构"建子目录；PNG、JPG 都可用。**图片导出也只改写 `User.eod` / `User.eox`**，设计数据不变。不存在的 PDF 方案时，候选只有 `EPLAN_default_value`。— 实测。
+- **删页与备份**：`CopyProject(Snapshot)` 得到 314 个文件、213 MB 的完整副本；以只读方式打开副本数页数再关闭后，当前项目不变，副本也不留在打开的项目中。一次 Ctrl+Z 恢复被删的页。工程师拒绝时不执行，也不建备份目录。— 实测。
+- **页重编号**：`/90`–`/92` 从 200、步长 10 得到 `/200`、`/210`、`/220`，一次 Ctrl+Z 撤销。新页号与已有的页重名时，`Renumber.Pages` 抛出带编号 S029167（"页名不明确"）的 `BaseException`，页名不变。— 实测。
+- 🔴 **`Renumber.DeviceTags(…, PostNumerate, …)` 在某些输入上发生原生访问冲突，EPLAN 进程直接结束**（同 A15，无法捕获）：
+  - 用 `NumerationMode.Number` 插入宏后，把这页的全部功能交给它：崩溃（三次）。只交端子 `+A1-XG2:?1` 这类连接点带 `?`、设备标识不带 `?` 的功能：崩溃。交 `=GAA+A1-?QA1`、电缆 `+A1-WG1`（主功能）和 PLC 端子：崩溃。只交 `=GAA+A1-?QA1`：正常。不带 `PostNumerate` 交全部功能：正常（没有改动）。S12 中设备标识都带 `?` 时也正常。
+  - 结论：崩溃的输入里都有设备标识不带 `?` 的功能。**只把设备标识（`:` 之前）带 `?` 的功能交给 `PostNumerate`**，修复后的 `eplan_device_renumber` 在同样的页上不再崩溃。
+  - `=GAA+A1-?QA1`（没有线圈的触点）`PostNumerate` 不编号（同 A18）；这样没有改动的编号不留撤销步骤，按一次 Ctrl+Z 撤销的是之前的插宏。— 实测。
+- 被强制结束过的项目，之后用 `ProjectOpen … /Quiet` 打开失败（返回 false）；EPLAN 重启后可能先弹出恢复类对话框，挡住所有调用。— 实测。
+
 ### A19. M3b 写工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 `eplan_connection_generate` 和 `eplan_macro_insert` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。步骤和结果记在 PR #136、#138 中。
 - **生成连接**：
