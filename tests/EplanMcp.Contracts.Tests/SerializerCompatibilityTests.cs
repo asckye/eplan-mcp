@@ -177,6 +177,7 @@ public sealed class SerializerCompatibilityTests
             Directory = @"C:\Users\u\EplanMcp\exports\Line1\20261021T083000Z-k3f9q2\",
             FileName = "电气图.pdf",
         },
+        new ExportArgs { Project = "Line1", Directory = @"C:\Users\u\EplanMcp\exports\Line1\20261021T083000Z-k3f9q2\", FileName = "项目 一", IncludeMasterData = true },
         new ExportArgs(),
         new ExportPlanData { Project = "Line1", PageCount = 321, Scheme = "Standard Settings" },
         new ExportPlanData(),
