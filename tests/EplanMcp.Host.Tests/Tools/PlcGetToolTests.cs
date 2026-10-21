@@ -46,13 +46,15 @@ public sealed class PlcGetToolTests
         _channels.Add(new PlcChannel
         {
             Name = "=K1+A2-KE1:2.3",
+            Page = "=K1+A2&EFS1/3",
+            Main = true,
             Address = "I0.3",
             SymbolicAddress = "Start",
             DataType = "BOOL",
             Text = "Start button",
             Connected = [new ConnectionEnd { Device = "=K1+A2-SF1", Pin = "13" }],
         });
-        _channels.Add(new PlcChannel { Name = "=K1+A2-KE1:2.4", Address = "I0.4" });
+        _channels.Add(new PlcChannel { Name = "=K1+A2-KE1:2.3", Address = "Q0.3" });
 
         CallToolResult result = await Get("=K1+A2-KE1");
 
@@ -63,6 +65,9 @@ public sealed class PlcGetToolTests
         Assert.Equal((JsonValueKind.Null, "0", "2", false), (plc.GetProperty("station").ValueKind, plc.GetProperty("rack").GetString(), plc.GetProperty("slot").GetString(), plc.GetProperty("cpu").GetBoolean()));
         Assert.Equal(["PXC.2703994"], plc.GetProperty("parts").EnumerateArray().Select(p => p.GetString()));
         JsonElement first = data.GetProperty("channels")[0];
+        JsonElement second = data.GetProperty("channels")[1];
+        Assert.Equal(("=K1+A2&EFS1/3", true), (first.GetProperty("page").GetString(), first.GetProperty("main").GetBoolean()));
+        Assert.Equal(("=K1+A2-KE1:2.3", "Q0.3", JsonValueKind.Null, false), (second.GetProperty("name").GetString(), second.GetProperty("address").GetString(), second.GetProperty("page").ValueKind, second.GetProperty("main").GetBoolean()));
         Assert.Equal(("I0.3", "Start", "BOOL", "Start button"), (first.GetProperty("address").GetString(), first.GetProperty("symbolicAddress").GetString(), first.GetProperty("dataType").GetString(), first.GetProperty("text").GetString()));
         Assert.Equal(("=K1+A2-SF1", "13"), (first.GetProperty("connected")[0].GetProperty("device").GetString(), first.GetProperty("connected")[0].GetProperty("pin").GetString()));
         Assert.Empty(data.GetProperty("channels")[1].GetProperty("connected").EnumerateArray());

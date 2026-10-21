@@ -5,9 +5,9 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Large.Tests;
 
 /// <summary>
-/// eplan_plc_get against the fixture's known data (api-notes A24, S21: 20 PLC boxes, =K1+A2-KE1 with 34 PLC terminals).
-/// S21 read names only, so the address properties' texts, which symbolic address the user interface shows and where the
-/// channels' connections are found go to the test output, for a check against the PLC navigator in EPLAN.
+/// eplan_plc_get against the fixture's known data (api-notes A24, S21: 20 PLC boxes, =K1+A2-KE1 with 34 PLC terminals;
+/// the first Large run: 17 names, 22 connections listed by eplan_connection_list, among them +A2-XD4:3 at :2.3). The
+/// channels with their pages, addresses and connections go to the test output, for a check against EPLAN.
 /// </summary>
 [Trait("Size", "Large")]
 [Trait("Host", "Offline")]
@@ -29,13 +29,18 @@ public sealed class PlcTests(LiveEplan eplan)
         Assert.Equal(34, data.GetProperty("total").GetInt32());
         Assert.Equal(34, channels.Length);
         Assert.All(channels, c => Assert.StartsWith(Plc + ":", c.GetProperty("name").GetString(), StringComparison.Ordinal));
+
+        // One name can be two channel objects (an input and an output, or two representations): at least one of :2.3 leads to +A2-XD4:3.
+        Assert.Contains(
+            channels.Where(c => c.GetProperty("name").GetString() == Plc + ":2.3").SelectMany(c => c.GetProperty("connected").EnumerateArray()),
+            e => e.GetProperty("device").GetString() == "+A2-XD4:3" || (e.GetProperty("device").GetString() == "+A2-XD4" && e.GetProperty("pin").GetString() == "3"));
         TestContext.Current.TestOutputHelper?.WriteLine(
             $"{clock.ElapsedMilliseconds} ms; station '{plc.GetProperty("station")}', rack '{plc.GetProperty("rack")}', slot '{plc.GetProperty("slot")}', parts {plc.GetProperty("parts")}; "
             + $"{channels.Count(c => c.GetProperty("connected").GetArrayLength() > 0)} channels connected.");
-        foreach (JsonElement c in channels.Take(12))
+        foreach (JsonElement c in channels)
         {
             TestContext.Current.TestOutputHelper?.WriteLine(
-                $"{c.GetProperty("name")}: address '{c.GetProperty("address")}', symbolic '{c.GetProperty("symbolicAddress")}', type '{c.GetProperty("dataType")}', text '{c.GetProperty("text")}', connected {c.GetProperty("connected")}");
+                $"{c.GetProperty("name")} ({c.GetProperty("page")}, main {c.GetProperty("main")}): address '{c.GetProperty("address")}', symbolic '{c.GetProperty("symbolicAddress")}', type '{c.GetProperty("dataType")}', text '{c.GetProperty("text")}', connected {c.GetProperty("connected")}");
         }
     }
 

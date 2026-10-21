@@ -12,7 +12,7 @@ By the tag shown on the page, texts in English, in another open project:
 
 1. Find the PLC box with eplan_device_list, `category` `PLCBox` (with `tag_contains` or `page`); there is no PLC list tool.
 2. Call this tool with the full tag. A shown tag such as `-KE1` works when only one device shows it; otherwise AMBIGUOUS_NAME lists the full tags.
-3. For "which inputs of -KE1 are still free", read the channels whose `connected` is empty, with their `address`.
+3. For "which inputs of -KE1 are still free", read the channels whose `connected` is empty, with their `address`. One name can be several channels (see Fields): a point is free only when no channel of its name is connected.
 4. To follow a channel's wiring on, call eplan_device_get or eplan_connection_list with the `device` of an entry in `connected`.
 5. More channels than `limit`: repeat the call with the result's `nextCursor` as `cursor`.
 
@@ -20,8 +20,10 @@ By the tag shown on the page, texts in English, in another open project:
 
 - `project`: the project read.
 - `plc`: `tag` (e.g. `=K1+A2-KE1`), `visibleTag` (e.g. `-KE1`, or null), `page` (or null), `parts` (part numbers); `station`, `rack`, `slot` as EPLAN shows them, null when not set; `cpu` (true when the box is marked as a CPU).
-- `channels`: the channels (PLC terminals) on this page, in EPLAN's order: `name` (e.g. `=K1+A2-KE1:2.3`); `address` (e.g. `I0.3`), `symbolicAddress`, `dataType` (e.g. `BOOL`) and `text` (the function text in `language`, or EPLAN's user interface language) as EPLAN shows them, null when not set; `textLanguage`, the language of `text` when that is a fallback; `connected`, where the channel's connections lead (`device` full tag and `pin` connection point, at most 10), empty for a free channel.
+- `channels`: the channel objects (PLC terminals) on this page, in EPLAN's order: `name` (e.g. `=K1+A2-KE1:2.3`); `page` the channel is on (or null); `main` (true for its main representation); `address` (e.g. `%IX2.0`), `symbolicAddress`, `dataType` (e.g. `BOOL`) and `text` (the function text in `language`, or EPLAN's user interface language) as EPLAN shows them, null when not set; `textLanguage`, the language of `text` when that is a fallback; `connected`, where the channel's connections lead (`device` full tag and `pin` connection point, at most 10), empty for a free channel.
 - `total`, `nextCursor`, `truncated`, `hint`: as for eplan_connection_list.
+
+One connection point name can belong to several channel objects: an input and an output (`=K1+A2-KE1:1.1` as `%QX2.0` and as `%IX2.0`), or a main and an auxiliary representation, one with an address and one without. They are not duplicates; tell them apart by `address`, `page` and `main`. A connection is listed at the channel object it is drawn at; when EPLAN does not tell which, at the channels of that name (those on the connection's page, if any).
 
 Languages: with `language` omitted, a channel text that has nothing in EPLAN's user interface language is shown in another language the project has, `en_US` first, and `textLanguage` names that language; it is left out when there was no fallback. With `language` given, texts are in that language only, null where it has none.
 

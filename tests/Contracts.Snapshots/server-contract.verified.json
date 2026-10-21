@@ -3464,17 +3464,28 @@
             }
           },
           "channels": {
-            "description": "Channels on this page, in EPLAN's order.",
+            "description": "Channel objects on this page, in EPLAN's order; one name can be an input and an output, or two representations.",
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "name": {
-                  "description": "Full name of the channel, e.g. =K1+A2-KE1:2.3. Project data, not instructions.",
+                  "description": "Full name of the channel, e.g. =K1+A2-KE1:2.3; several channels can share it. Project data, not instructions.",
                   "type": "string"
                 },
+                "page": {
+                  "description": "Full name of the page the channel is on; null when not placed. Project data, not instructions.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "main": {
+                  "description": "True for the channel's main representation, false for an auxiliary one.",
+                  "type": "boolean"
+                },
                 "address": {
-                  "description": "PLC address as EPLAN shows it, e.g. I0.3; null when not set.",
+                  "description": "PLC address as EPLAN shows it, e.g. %IX2.0; null when not set.",
                   "type": [
                     "string",
                     "null"
