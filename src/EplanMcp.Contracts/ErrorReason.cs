@@ -27,6 +27,9 @@ public static class ErrorReason
     /// <summary>No window macro has the given path below the macro directory; <c>metadata.macro</c> repeats it, and eplan_macro_list shows the paths.</summary>
     public const string MacroNotFound = "MACRO_NOT_FOUND";
 
+    /// <summary>EPLAN's parts database has no part with the given number; eplan_part_search finds part numbers.</summary>
+    public const string PartNotFound = "PART_NOT_FOUND";
+
     /// <summary>No file has the given path below the import folder (SEC-31); <c>metadata.file</c> repeats it.</summary>
     public const string FileNotFound = "FILE_NOT_FOUND";
 

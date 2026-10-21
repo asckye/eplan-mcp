@@ -101,6 +101,8 @@ public sealed class SerializerCompatibilityTests
         new DeviceUpdateArgs(),
         new DeviceUpdateData { Project = "Line1", Tag = "=F+A2-KF19", PreviousTag = "=F+A2-KF1", VisibleTag = "-KF19", Functions = 3, Pages = ["=F+A2&EFS1/1"], Warning = "w" },
         new DeviceUpdateData(),
+        new DevicePlaceArgs { Project = "Line1", Page = "=GAA+A1&EFS1/60", Part = "SIE.3RH2122-1HB40", Variant = "1", X = 80, Y = 160.5, Tag = "-KF20", Fingerprint = "f" },
+        new DevicePlaceArgs(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData
