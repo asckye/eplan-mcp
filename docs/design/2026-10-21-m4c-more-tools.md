@@ -81,7 +81,7 @@ flowchart LR
 | 2 | `eplan_terminal_renumber`、`eplan_cable_renumber` | Destructive | 与 `eplan_device_renumber` 相同的形态：范围、方案、起始值、步长、只编未编号的 |
 | 2 | `eplan_connection_number` | Destructive | 线号：按方案给连接编号（覆盖矩阵第 4 节的"线号管理器"） |
 | 2 | `eplan_language_set` | Write | 设置项目的显示语言、可变语言、源语言，不翻译。多种语言用逗号分隔（S23 r1：`"en_US,zh_CN"`，分号会被拒绝）；项目设置不被 `SafetyPoint` 回滚，工具自己记下原值、失败时写回 |
-| 2 | `eplan_project_translate` | Destructive | 用系统翻译库翻译整个项目或指定页（只读翻译库） |
+| 2 | `eplan_project_translate` | Destructive | 用系统翻译库翻译整个项目或指定页（只读翻译库）。前提是项目的源语言（S23 r2），`eplan_language_set` 为此加 `source` 参数（[规格](../tools/eplan_project_translate.md)） |
 | 2 | `eplan_language_remove` | Destructive | 从项目中删除一种语言（主语言不能删）。S23：回滚只撤回译文、不撤回语言设置，失败时还要写回设置；它会改显示语言，结果中列出 |
 | 2 | 修订的写工具 | ? | S23 之后单独设计（Q9） |
 | 3 | `eplan_import_dxf` | Write | DXF/DWG 插入页面。S22：只新增图形，能被 `SafetyPoint` 回滚、一步撤销 |
