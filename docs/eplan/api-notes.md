@@ -184,6 +184,8 @@
 - **进度与取消**（main 82332d5 的 Release 构建，`writes\LargeWrite`）：带 `progressToken` 调用 `eplan_report_update`，第 5 秒收到心跳 `Updating reports (5 s)`，第 7 秒返回结果。`eplan_check_run` 开始 1 秒后客户端发 `notifications/cancelled`：插件日志记下取消请求，2.3 秒后在下一个安全点停下并回滚，审计为 `rolled_back`、`CANCELLED`，被取消的请求没有回复（MCP 规定），检查消息没有增加。— 实测。
 - 用 `eplan_page_create` 建的新页在规划时就能读到幅面，`eplan_macro_insert` 因此按幅面检查外框；S10 中由 spike 建的空页读不到 `Page.Size`。— 实测。
 - 全部 35 个 Large 测试（只读、Q1/Q2/Q6、插宏、检查与报表）在夹具和 `writes\` 副本上通过。— 实测。
+- **更新报表会新增检查消息**：在新页上插宏、生成连接、只检查这一页（5 个错误）之后更新全部报表，`eplan_check_list` 读到 25 个错误。所以要报告检查结果时，先更新报表、再检查。— Agent 评测实测。
+- Agent 评测：有了 `eplan_page_renumber` 之后，"改页号"可以做到，模型会去调用它（Destructive，弹出审批对话框，无人值守时 120 秒后过期），所以退役了评测题 `refuse-page-rename`。— Agent 评测实测。
 
 ### A19. M3b 写工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 `eplan_connection_generate` 和 `eplan_macro_insert` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。步骤和结果记在 PR #136、#138 中。

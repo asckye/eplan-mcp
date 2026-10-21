@@ -67,7 +67,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 因 API 错误无效、而模型还没做任何事（没有工具调用、没有花费）的作答，运行器等一分钟后**重试一次**。例如，另一个 Claude Code 进程同时刷新共享的登录时，会出现 "Failed to refresh OAuth token"。未登录不重试。两次都写进报告，重试标为"（重试）"；第一次照样是无效，不计入成功率，所以费用上限不变。
 
 ## 任务集
-`evals/tasks/` 中 35 题：开发集 27 题，保留集 8 题（文件名以 `holdout-` 开头）。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
+`evals/tasks/` 中 34 题：开发集 26 题，保留集 8 题（文件名以 `holdout-` 开头）。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
 - 项目概况：页数、设备数、连接数；
 - 页面：某个结构下的页、某种类型的页数、页上的设备；
 - 设备：所在页、用了哪些部件、没有部件的电机；
