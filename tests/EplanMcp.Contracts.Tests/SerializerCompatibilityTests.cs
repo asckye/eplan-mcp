@@ -117,6 +117,8 @@ public sealed class SerializerCompatibilityTests
             Fingerprint = "f",
         },
         new ImportDxfArgs(),
+        new ImportDxfData { Project = "Line1", Page = "=GAA+A1&EFS1/92", File = "图纸/4685200F.DXF", Sha256 = new string('a', 64), ObjectsAdded = 227, Warning = "w" },
+        new ImportDxfData(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData

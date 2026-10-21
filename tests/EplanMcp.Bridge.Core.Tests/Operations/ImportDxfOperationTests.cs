@@ -5,9 +5,10 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 /// <summary>
-/// import.dxf.plan against fake pages and a drawing in a temporary folder, standing for the file the Host resolved below
-/// its import root (docs/tools/eplan_import_dxf.md, sections 2, 4, 5 and 7; SEC-31): the change names the file, its
-/// size and SHA-256; the file is read again, so one that changed since the Host read it is PLAN_STALE.
+/// import.dxf.plan and import.dxf.execute against fake pages and a drawing in a temporary folder, standing for the file
+/// the Host resolved below its import root (docs/tools/eplan_import_dxf.md, sections 2, 4, 5 and 7; SEC-31): the change
+/// names the file, its size and SHA-256; the file is read again, so one that changed since the Host read it is
+/// PLAN_STALE; an import that adds nothing is rolled back. The importer adds S22's 227 objects (api-notes A29).
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class ImportDxfOperationTests : IDisposable
@@ -19,6 +20,7 @@ public sealed class ImportDxfOperationTests : IDisposable
     private readonly FakeCatalog _catalog;
     private readonly FakePageReader _pages = new();
     private readonly Importer _importer = new();
+    private readonly FakeTransactions _transactions = new();
     private readonly string _file;
 
     public ImportDxfOperationTests()
@@ -29,6 +31,11 @@ public sealed class ImportDxfOperationTests : IDisposable
         _file = Path.Combine(_root, "drawings", "4685200F.DXF");
         Directory.CreateDirectory(Path.GetDirectoryName(_file)!);
         File.WriteAllBytes(_file, new byte[25 * 1024]);
+        _transactions.Snapshot = () =>
+        {
+            string[] objects = [.. _importer.Pages[Page].Objects];
+            return () => _importer.Pages[Page].Objects = [.. objects];
+        };
     }
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
@@ -131,6 +138,80 @@ public sealed class ImportDxfOperationTests : IDisposable
         Assert.NotEqual(first, Plan(Args()).Fingerprint);
     }
 
+    [Fact]
+    public void Execute_ImportsTheDrawingFromTheFullPath_AndCommits()
+    {
+        ImportDxfArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        ImportDxfData data = Execute(args);
+
+        Assert.Equal(("Line1", Page, "drawings/4685200F.DXF", Sha256(), 227), (data.Project, data.Page, data.File, data.Sha256, data.ObjectsAdded));
+        Assert.Equal((Page, _file, true, true), Assert.Single(_importer.Imports));
+        Assert.Equal(["Begin AI: eplan_import_dxf", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_ScaleNoneAndLowerLeft_ReachTheImporter()
+    {
+        ImportDxfArgs args = Args();
+        args.Scale = "none";
+        args.Position = "lower_left";
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        Execute(args);
+
+        Assert.Equal((false, false), (_importer.Imports[0].Fit, _importer.Imports[0].Center));
+    }
+
+    [Fact]
+    public void Execute_NothingAdded_IsRolledBack()
+    {
+        _importer.Added = 0;
+        ImportDxfArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Execute(args));
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Error.Reason, error.Error.Execution));
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WhatEPLANRefuses_IsRolledBack_AndThePageIsAsItWas()
+    {
+        _importer.Failure = new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not import the drawing.");
+        ImportDxfArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Execute(args));
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Error.Reason, error.Error.Execution));
+        Assert.Equal(["1/1/1/0"], _importer.Pages[Page].Objects);
+    }
+
+    [Fact]
+    public void Execute_AFileRewrittenAfterThePlan_IsPlanStale_AndImportsNothing()
+    {
+        ImportDxfArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+        File.SetLastWriteTimeUtc(_file, File.GetLastWriteTimeUtc(_file).AddMinutes(1));
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Execute(args));
+
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
+        Assert.Empty(_importer.Imports);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WithoutAFingerprint_IsInvalid_AndNotStarted()
+    {
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Execute(Args()));
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
+    }
+
     [Theory]
     [InlineData(900, "900 bytes")]
     [InlineData(25 * 1024, "25 KB")]
@@ -147,11 +228,30 @@ public sealed class ImportDxfOperationTests : IDisposable
 
     private WritePlan Plan(ImportDxfArgs args) => (WritePlan)new ImportDxfPlanOperation(_catalog, _pages, _importer).Execute(args)!;
 
-    /// <summary>The pages a drawing could go on.</summary>
+    private ImportDxfData Execute(ImportDxfArgs args) =>
+        (ImportDxfData)new ImportDxfExecuteOperation(_catalog, _pages, _importer, _transactions).Execute(args)!;
+
+    /// <summary>
+    /// <c>Import.DXFPage</c> as S22 saw it: <see cref="Added"/> new placements on the page, or <see cref="Failure"/> thrown
+    /// after half of them, as an import EPLAN gives up on may leave.
+    /// </summary>
     private sealed class Importer : IDrawingImporter
     {
         public Dictionary<string, MacroTargetPage> Pages { get; } = new(StringComparer.Ordinal);
 
+        public int Added { get; set; } = 227;
+
+        public BridgeErrorException? Failure { get; set; }
+
+        public List<(string Page, string File, bool Fit, bool Center)> Imports { get; } = [];
+
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => Pages.GetValueOrDefault(pageName);
+
+        public int ImportDxf(string projectPath, string pageName, string filePath, bool fit, bool center)
+        {
+            Imports.Add((pageName, filePath, fit, center));
+            Pages[pageName].Objects.AddRange(Enumerable.Range(0, Failure is null ? Added : Added / 2).Select(i => "5/5/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/0"));
+            return Failure is null ? Added : throw Failure;
+        }
     }
 }
