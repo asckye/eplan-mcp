@@ -96,6 +96,7 @@ flowchart LR
   - 已有的 EplanMcp 注册指向另一个用户的目录时，`install-addin` 拒绝并说明原因；
   - `doctor` 报告这种情况；
   - 入门指南写明"一台电脑由一个 Windows 用户使用 EplanMcp"。
+  - 判断方法（2026-10-21，实机核对之后）：工作站设置 `Setting.eod` 中的路径经 zlib 压缩后分页保存（A23），不读它。改为看握手：`install-addin` 第一次启动的 EPLAN 加载了另一个 Windows 用户目录中的插件（`%USERPROFILE%` 上级目录中的其他用户名，`Public` 除外）时，不撤销、不再注册，报 `other_user`。**只能部分做到**：那个用户的插件这个用户读不到时，EPLAN 加载失败（系统消息窗口），看不出是谁的注册，这次注册会覆盖它；旧版插件不报告路径时，也会先撤销再注册。`doctor` 的报告留到后续 PR。是否接受这个限制，或把 Q15 改回待定，请项目负责人决定。
 - **MSIX 环境**：注册不受重定向影响（S14），`install-addin` 不再因 MSIX 环境而拒绝；`client-config` 仍然拒绝（它写 `%APPDATA%` 等位置）。
 - **实现**（2026-10-21，第 8 节步骤 4；上文没有规定的地方按下面做）：
   - 命令行：`install-addin [--variant <变体>]… [--format json]`、`uninstall-addin [--format json]`。不带 `--variant` 时注册找到的全部变体；安装程序按工程师勾选的变体逐个传 `--variant`。变体是 `<Program Files>\EPLAN\<变体>\<版本目录>\Bin\W3u.exe` 存在的目录（A22），`--variant` 不区分大小写；有一个没有安装时什么都不做，并列出已安装的变体。

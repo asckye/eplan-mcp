@@ -9,7 +9,8 @@ namespace EplanMcp.Host.Addin;
 /// eplanmcp.exe with EPLAN's own command line, once for each chosen variant (all installed ones by default) of each
 /// EPLAN version in the supported range (ADR-0009). It refuses while any EPLAN runs; then per variant it starts the
 /// command, waits for the Bridge pipe of the EPLAN it started, checks in the handshake that EPLAN loaded this DLL,
-/// records the registration and closes that EPLAN as its close button would. Uninstall does the same with
+/// records the registration and closes that EPLAN as its close button would; it goes no further when the add-in that
+/// loaded lies in another user's profile (Q15). Uninstall does the same with
 /// <c>/unregister</c> for each recorded registration. It never forces EPLAN to close: an EPLAN that shows a sign-in or
 /// licence dialog or a system messages window, or does not close, is left for the engineer. Exit code 1 when anything
 /// failed. Never used in serve mode.
@@ -203,6 +204,12 @@ internal sealed class AddinCommand
         }
 
         string loaded = first.Handshake.AddinPath ?? string.Empty; // empty: an older add-in, which does not say
+        if (OtherUserRegistration.InAnotherProfile(loaded, _machine.UserProfile, _machine.Public))
+        {
+            // Undoing it would break EplanMcp for that user (Q15). /register did not take while an earlier registration had loaded (A23).
+            return first.Result with { Outcome = AddinOutcome.Failed, Problem = new(AddinProblem.OtherUser, loaded) };
+        }
+
         if (!first.Closed)
         {
             return first.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, loaded) };

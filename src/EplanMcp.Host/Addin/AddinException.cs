@@ -21,6 +21,9 @@ internal enum AddinProblem
     /// <summary>EPLAN runs in this session; which variant cannot be told (api-notes A1), so any EPLAN is in the way.</summary>
     EplanRunning,
 
+    /// <summary>The EPLAN started loaded the add-in from another Windows user's profile (M5 design Q15).</summary>
+    OtherUser,
+
     /// <summary>EPLAN.exe could not be started.</summary>
     StartFailed,
 
