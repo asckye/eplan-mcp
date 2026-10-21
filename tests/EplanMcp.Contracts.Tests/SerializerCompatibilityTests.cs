@@ -119,6 +119,16 @@ public sealed class SerializerCompatibilityTests
         new ImportDxfArgs(),
         new ImportDxfData { Project = "Line1", Page = "=GAA+A1&EFS1/92", File = "图纸/4685200F.DXF", Sha256 = new string('a', 64), ObjectsAdded = 227, Warning = "w" },
         new ImportDxfData(),
+        new ImportPxfArgs
+        {
+            File = "incoming/项目.epj",
+            FilePath = @"C:\Users\u\EplanMcp\imports\incoming\项目.epj",
+            Sha256 = new string('b', 64),
+            Name = "项目_imported",
+            Target = @"C:\Users\u\EplanMcp\scratch\imported\项目_imported",
+            Fingerprint = "f",
+        },
+        new ImportPxfArgs(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData
