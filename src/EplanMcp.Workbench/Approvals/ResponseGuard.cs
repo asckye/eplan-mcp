@@ -4,15 +4,15 @@ namespace EplanMcp.Workbench.Approvals;
 /// The 500 ms guard (workbench-ui APR-04, ADR-0014 decision 6, SEC-24): each time a different question is shown, the
 /// window becomes visible or the approval page is opened, neither answer button responds for 500 ms, counted from when
 /// the new content has rendered, not from when it was asked for. A click meant for the last question never lands on
-/// the next one (T21). Armed until the first rendering. Used on the UI thread; <see cref="Changed"/> may come from the
-/// clock's timer thread.
+/// the next one (T21). Armed until the first rendering. The 500 ms are steady time, which setting the wall clock does
+/// not move. Used on the UI thread; <see cref="Changed"/> may come from the clock's timer thread.
 /// </summary>
 internal sealed class ResponseGuard(TimeProvider clock) : IDisposable
 {
     public static readonly TimeSpan Delay = TimeSpan.FromMilliseconds(500);
 
     private readonly Lock _lock = new();
-    private DateTimeOffset? _rendered;
+    private long? _rendered;
     private ITimer? _timer;
 
     /// <summary>Whether the buttons may respond has changed.</summary>
@@ -24,7 +24,7 @@ internal sealed class ResponseGuard(TimeProvider clock) : IDisposable
         {
             lock (_lock)
             {
-                return _rendered is { } shown && clock.GetUtcNow() - shown >= Delay;
+                return _rendered is { } shown && clock.GetElapsedTime(shown) >= Delay;
             }
         }
     }
@@ -56,7 +56,7 @@ internal sealed class ResponseGuard(TimeProvider clock) : IDisposable
                 return;
             }
 
-            _rendered = clock.GetUtcNow();
+            _rendered = clock.GetTimestamp();
             _timer = clock.CreateTimer(_ => Changed?.Invoke(), null, Delay, Timeout.InfiniteTimeSpan);
         }
     }

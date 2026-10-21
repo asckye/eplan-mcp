@@ -78,10 +78,43 @@ public sealed class ResponseGuardTests : IDisposable
         Assert.True(_guard.IsOpen);
     }
 
+    [Fact]
+    public void SettingTheWallClock_NeitherOpensItEarly_NorClosesIt()
+    {
+        var time = new SteppedTime(_clock);
+        using var guard = new ResponseGuard(time);
+
+        guard.Rendered();
+        time.Step(TimeSpan.FromHours(1)); // set forward by hand or by time sync: no 500 ms have passed
+        Assert.False(guard.IsOpen);
+        _clock.Advance(ResponseGuard.Delay);
+        Assert.True(guard.IsOpen);
+        time.Step(TimeSpan.FromDays(-1));
+
+        Assert.True(guard.IsOpen);
+    }
+
     private void Open()
     {
         _guard.Rendered();
         _clock.Advance(ResponseGuard.Delay);
         Assert.True(_guard.IsOpen);
+    }
+
+    /// <summary>A clock whose wall time can be set, as the engineer or time sync does, while its steady time runs on.</summary>
+    private sealed class SteppedTime(ManualTime steady) : TimeProvider
+    {
+        private TimeSpan _step;
+
+        public override long TimestampFrequency => steady.TimestampFrequency;
+
+        public void Step(TimeSpan by) => _step += by;
+
+        public override DateTimeOffset GetUtcNow() => steady.GetUtcNow() + _step;
+
+        public override long GetTimestamp() => steady.GetTimestamp();
+
+        public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period) =>
+            steady.CreateTimer(callback, state, dueTime, period);
     }
 }

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Protocol;
@@ -244,6 +245,34 @@ public sealed class ApprovalQueueViewTests : IDisposable
 
             Assert.EndsWith("……还有 3 行", _view.Shown!.Changes, StringComparison.Ordinal);
         });
+    }
+
+    [Fact]
+    public void TheAnsweredGroup_LetsGoOfWhatTheQueueLetGo_WithTheQuestionsAndTheirTexts()
+    {
+        Add("waiting", 300); // shown throughout, so no ended question is
+        WeakReference oldest = Ended("r0");
+
+        for (int i = 1; i <= ApprovalQueue.MaxAnswered; i++)
+        {
+            _queue.End(Add($"r{i}", 90), QuestionEnd.Expired);
+        }
+
+        Assert.Equal(_queue.Answered.Reverse(), _view.Answered.Select(i => i.Question));
+        Assert.Equal("r1", _view.Answered[^1].RequestId);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        Assert.False(oldest.IsAlive, "the view still holds the oldest question");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private WeakReference Ended(string requestId)
+    {
+        Question question = Add(requestId, 90);
+        _queue.End(question, QuestionEnd.Expired);
+        Assert.Contains(_view.Answered, i => i.Question == question);
+        return new WeakReference(question);
     }
 
     private Question Add(string requestId, int seconds, ApprovalAskParams? ask = null)
