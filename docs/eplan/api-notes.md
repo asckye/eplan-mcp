@@ -359,6 +359,7 @@
 - 接口 `Eplan.EplApi.ApplicationFramework.IEplAddIn`（AFu）：`bool OnRegister(ref bool bLoadOnStart)`、`OnUnregister()`、`OnInit()`、`OnInitGui()`、`OnExit()`。**一个程序集中只能有一个类实现它。** — 反射 + XML。
 - 生命周期：`OnRegister` 在第一次选择该插件时调用一次；`OnInit` 在启动时加载时调用；`OnInitGui` 在界面初始化完成后调用，并且只在 `bLoadOnStart = true` 时才会调用；`OnExit` 在退出时调用。`bLoadOnStart = false` 时，插件在其 action 第一次被调用时才延迟加载，`OnInitGui` 不会被调用。— XML。
 - 插件会被影子复制到 `%APPDATA%\EPLAN\ShadowCopyAssemblies\`，所以 EPLAN 运行期间可以重新编译原始 DLL。可选接口 `IEplAddInShadowCopy.OnBeforeInit(string originalPath)` 会传入原始路径。— `2026/ShadowCopyingAPIAssemblies.html`。
+  - 2026 的 `Eplan.EplApi.AFu.xml`：`OnBeforeInit` 在 `OnInit` 之前调用，传入"注册插件程序集的位置"；它抛出的异常不影响初始化，只记入系统消息。返回类型是 `void`（按 2026 的程序集编译通过）。传入的是 DLL 的完整路径还是所在目录，以及 `/register` 在运行中的会话里加载插件时是否也调用它，都没有核实；Bridge 在握手的 `addinPath` 中原样报告。— 只读查看 XML 文档；编译。
 - 注册方式：
   - 界面：文件 > 附加 > 接口 > API > 管理；
   - 命令行：`EPLAN.exe /Variant:"Electric P8" EplApiModuleAction /register:"<dll 全路径>"`，以及 `/unregister:"<程序集标题>"`；

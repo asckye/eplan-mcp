@@ -24,4 +24,12 @@ public sealed class HandshakeResult
     /// 2024-2027 (ADR-0009). Added without a protocol version change; null from older add-ins.
     /// </summary>
     public string? BuildTarget { get; set; }
+
+    /// <summary>
+    /// Where EPLAN registered the add-in, as EPLAN passes it before shadow copying (<c>IEplAddInShadowCopy.OnBeforeInit</c>,
+    /// api-notes B2), so that <c>install-addin</c> can tell the add-in it registered from an earlier registration that
+    /// loaded at start-up. Added without a protocol version change; null from older add-ins, from the offline host, and
+    /// when EPLAN did not pass it.
+    /// </summary>
+    public string? AddinPath { get; set; }
 }

@@ -21,6 +21,9 @@ internal static class BridgeHost
 
     private static BridgeServer? _server;
 
+    /// <summary>Where EPLAN registered the add-in, set by <see cref="EplanAddIn.OnBeforeInit"/> before the Bridge starts; null in the offline host.</summary>
+    public static string? AddinPath { get; set; }
+
     /// <summary>The Bridge's version, as the handshake reports it.</summary>
     public static string Version =>
         typeof(BridgeHost).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
@@ -36,7 +39,8 @@ internal static class BridgeHost
 
         var log = new FileBridgeLog(DataLocations.Logs);
         log.Write(BridgeLogLevel.Information, $"EplanMcp add-in {Version} starting");
-        _server = Start(log, BridgeProtocol.PipePrefix, EplanEnvironment.Capture);
+        log.Write(BridgeLogLevel.Information, $"Registered from {AddinPath ?? "an unknown path"}");
+        _server = Start(log, BridgeProtocol.PipePrefix, EplanEnvironment.Capture, AddinPath);
     }
 
     /// <summary>
@@ -46,7 +50,7 @@ internal static class BridgeHost
     /// (<see cref="EplanInstanceInfo.Offline"/>) there is no approval dialog, so approval.ask is not offered.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static BridgeServer Start(IBridgeLog log, string pipePrefix, Func<IBridgeLog, EplanInstanceInfo> describe)
+    public static BridgeServer Start(IBridgeLog log, string pipePrefix, Func<IBridgeLog, EplanInstanceInfo> describe, string? addinPath = null)
     {
         EplanDispatcher dispatcher = EplanDispatcher.CaptureOnMainThread();
         log.Write(BridgeLogLevel.Information, $"Main-thread dispatcher: the WPF dispatcher of thread {Environment.CurrentManagedThreadId}");
@@ -59,6 +63,7 @@ internal static class BridgeHost
             BridgeVersion = Version,
             Eplan = eplan,
             BuildTarget = typeof(BridgeHost).Assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName,
+            AddinPath = addinPath,
         };
         var catalog = new EplanProjectCatalog();
         var pages = new EplanPageReader();

@@ -31,6 +31,7 @@ public sealed class SerializerCompatibilityTests
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.2.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, Operations = ["page.list", "project.list"] },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.3.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, BuildTarget = ".NETFramework,Version=v4.8.1" },
         new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.4.0", Eplan = new EplanInstanceInfo { ProcessId = 1, Variant = "Electric P8", Offline = true } },
+        new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "0.5.0", Eplan = new EplanInstanceInfo { ProcessId = 1 }, AddinPath = @"C:\Users\工程师\EplanMcp\app\bridge\net481\EplanMcp.Bridge.Eplan.dll" },
         new BridgeError
         {
             Reason = ErrorReason.EplanBusy,

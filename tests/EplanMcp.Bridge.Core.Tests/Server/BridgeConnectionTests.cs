@@ -24,6 +24,7 @@ public sealed class BridgeConnectionTests
         Assert.Equal(BridgeProtocol.CurrentVersion, (int)response["result"]!["protocolVersion"]!);
         Assert.Equal("9.9.9", (string?)response["result"]!["bridgeVersion"]);
         Assert.Equal(".NETFramework,Version=v4.8.1", (string?)response["result"]!["buildTarget"]);
+        Assert.Equal(@"C:\Users\工程师\EplanMcp\app\bridge\net481\EplanMcp.Bridge.Eplan.dll", (string?)response["result"]!["addinPath"]);
         Assert.Equal(4242, (int)response["result"]!["eplan"]!["processId"]!);
     }
 
@@ -135,6 +136,7 @@ public sealed class BridgeConnectionTests
             BridgeVersion = "9.9.9",
             Eplan = new EplanInstanceInfo { ProcessId = 4242, Version = "2026" },
             BuildTarget = ".NETFramework,Version=v4.8.1",
+            AddinPath = @"C:\Users\工程师\EplanMcp\app\bridge\net481\EplanMcp.Bridge.Eplan.dll",
         };
         return new BridgeConnection(options, router, _log);
     }
