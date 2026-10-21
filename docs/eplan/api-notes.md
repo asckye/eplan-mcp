@@ -176,6 +176,12 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A29. 导入（spike S22，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S22](../../spikes/S22-imports/README.md)。示例项目的 scratch 副本。
+- `new Import().DXFPage(文件, 页, new Transformation(文件, 页, "", ScalingMode.Automatic, PositionMode.Center, false), "")`：Rittal 示例 DXF 在 0.04–0.3 秒内给页加上 227 个图形对象，能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销。— S22。
+- 🔴 `Import.PXFProject(文件, 目标)` 的第二个参数是**新项目的路径（不带扩展名）**，不是 XML 所说的目标目录：`…\imported` 得到 `imported.elk` 和 `imported.edb`。示例项目的 598 MB EPJ 导入约 58 秒，得到 171 MB 的项目，导入后不自动打开；中途被结束时留下不完整的 `.edb`。— S22。
+- `PartsService.ImportPartsList(project, 文件, Format.XML)`：把刚导出的同一份清单导回，69 秒，项目部件数和部件引用数都不变。— S22。
+
 ### A28. 翻译、项目语言与修订（spike S23，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S23](../../spikes/S23-translation-revisions/README.md)。示例项目的 scratch 副本。
 - 项目语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（示例 20 种）、`DISPLAYED_LANGUAGES`（`##_##;`）、`SOURCE_LANGUAGE`（`##_##`）中。多语言文本存储为 `de_DE@…;en_US@…;`。— S23。
