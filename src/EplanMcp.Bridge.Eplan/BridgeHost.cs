@@ -135,7 +135,7 @@ internal static class BridgeHost
             new LanguageSetPlanOperation(catalog, languages),
             new LanguageSetExecuteOperation(catalog, languages, transactions),
             new LanguageRemovePlanOperation(catalog, languages, languageRemover),
-            new LanguageRemoveExecuteOperation(catalog, pages, languages, languageRemover, backup, transactions),
+            new LanguageRemoveExecuteOperation(catalog, pages, languages, languageRemover, backup, transactions, log),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
