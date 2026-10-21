@@ -16,6 +16,9 @@
         <StackPanel>
           <TextBlock x:Name="Heading" Style="{StaticResource Primer.ContainerTitle}" AutomationProperties.HeadingLevel="Level1" TextWrapping="Wrap" TextTrimming="None" />
           <TextBlock x:Name="Message" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
+          <!-- What the action would change, as plain text to read and select (DLG-12), when there is any. -->
+          <TextBox x:Name="Details" Style="{StaticResource Workbench.ProjectData}" MaxHeight="320" Margin="0,12,0,0" Visibility="Collapsed"
+                   AutomationProperties.LabeledBy="{Binding ElementName=Message}" />
         </StackPanel>
       </DockPanel>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">

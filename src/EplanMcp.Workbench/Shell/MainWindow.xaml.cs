@@ -11,6 +11,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Audit;
+using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Status;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
@@ -132,6 +133,9 @@ public partial class MainWindow : Window
 
     /// <summary>Gives the status page its state; the app does, once.</summary>
     internal void AttachStatus(StatusView view) => StatusPage.Attach(view);
+
+    /// <summary>Gives the client page its state; the app does, once.</summary>
+    internal void AttachClients(ClientsView view) => ClientsPage.Attach(view);
 
     /// <summary>Opens a record's details over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
     internal void OpenRecord(AuditRecord record)
@@ -293,6 +297,10 @@ public partial class MainWindow : Window
         else if (CurrentPage == WorkbenchPage.Status)
         {
             StatusPage.Refresh();
+        }
+        else if (CurrentPage == WorkbenchPage.Clients)
+        {
+            ClientsPage.Refresh();
         }
     }
 

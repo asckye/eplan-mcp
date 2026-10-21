@@ -11,7 +11,7 @@
     the shown question (APR-01, APR-02).
   -->
   <DockPanel>
-    <!-- The page head of 3.4, as PageView draws it: the title is level 1, focusable, not a Tab stop. -->
+    <!-- The page head of 3.4, as every page draws it: the title is level 1, focusable, not a Tab stop. -->
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">
       <StackPanel>
         <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Approvals}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"

@@ -41,6 +41,9 @@ internal sealed class ClientCard(string name) : IAccessibleItem
     /// <summary>The Claude Code plugin already gives the server: no entry is written for Claude Code (design 4.7).</summary>
     public bool PluginInstalled => Preview?.Problem?.Code == "plugin_installed";
 
+    /// <summary>The card can be chosen; with the plugin, Claude Code gets no entry (CMD-04: the problem says why).</summary>
+    public bool CanChoose => !PluginInstalled;
+
     public string Subtitle => Loc.Current[Detected ? "Clients.Detected" : "Clients.NotDetected"]
         + (Preview?.Before is not null ? Loc.Current["Clients.Configured"] : string.Empty);
 
@@ -102,7 +105,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
 
     public string? ErrorDetails => _error is { } error ? HostErrors.Details(error) : null;
 
-    public IReadOnlyList<ClientCard> Selected => [.. Cards.Where(c => c.IsSelected)];
+    public IReadOnlyList<ClientCard> Selected => [.. Cards.Where(c => c.IsSelected && c.CanChoose)];
 
     /// <summary>The Host's text in the current language, made plain.</summary>
     public static string Text(HostText text) => ProjectText.Line(Loc.Current.Language == AppLanguage.Chinese ? text.Zh : text.En);
