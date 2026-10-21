@@ -40,6 +40,9 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
     /// <summary>The started EPLAN exits by itself, as one whose sign-in was cancelled.</summary>
     public bool ExitsBeforePipe { get; set; }
 
+    /// <summary>From this start on (0 for the first), the started EPLAN exits by itself.</summary>
+    public int? ExitsFromStart { get; set; }
+
     /// <summary>False: no enabled main window (a modal dialog is open), so CloseMainWindow fails.</summary>
     public bool HasWindow { get; set; } = true;
 
@@ -86,7 +89,7 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
             Registered.Remove(variant);
         }
 
-        var instance = new Instance(this, _nextId++, loaded);
+        var instance = new Instance(this, _nextId++, loaded, _instances.Count);
         _instances.Add(instance);
         return instance;
     }
@@ -112,7 +115,7 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
     [GeneratedRegex("^/Variant:\"(?<variant>[^\"]*)\" EplApiModuleAction /(?:register:\"(?<register>[^\"]*)\"|unregister:\"[^\"]*\")$")]
     private static partial Regex Action();
 
-    internal sealed class Instance(FakeEplan eplan, int id, string? loadedFrom) : IStartedEplan
+    internal sealed class Instance(FakeEplan eplan, int id, string? loadedFrom, int start) : IStartedEplan
     {
         private int _closeRequests;
         private bool _refreshed;
@@ -131,7 +134,7 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
 
         public int Id => id;
 
-        public bool HasExited => Exited |= eplan.ExitsBeforePipe;
+        public bool HasExited => Exited |= eplan.ExitsBeforePipe || start >= (eplan.ExitsFromStart ?? int.MaxValue);
 
         public void Refresh()
         {
