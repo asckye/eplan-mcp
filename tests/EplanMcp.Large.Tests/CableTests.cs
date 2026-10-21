@@ -34,11 +34,15 @@ public sealed class CableTests(LiveEplan eplan)
     }
 
     [Fact]
-    public async Task CableGet_ShownTag_FindsTheSameCable()
+    public async Task CableGet_AShownTagSixCablesShow_IsAmbiguousWithAllOfThem()
     {
-        JsonElement data = await eplan.CallAsync("eplan_cable_get", new() { ["cable"] = "-WG2" });
+        // The fixture has six cables shown as -WG2 under different structures (live run, 2026-10-21).
+        JsonElement error = await eplan.ErrorAsync("eplan_cable_get", new() { ["cable"] = "-WG2" });
 
-        Assert.Equal(Cable, data.GetProperty("cable").GetProperty("tag").GetString());
+        JsonElement metadata = error.GetProperty("metadata");
+        Assert.Equal(ErrorReason.AmbiguousName, error.GetProperty("reason").GetString());
+        Assert.Contains(Cable, metadata.GetProperty("candidates").GetString()!.Split('\n'));
+        Assert.Equal("6", metadata.GetProperty("candidateCount").GetString());
     }
 
     [Fact]
