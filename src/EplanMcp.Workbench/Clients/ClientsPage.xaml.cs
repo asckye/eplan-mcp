@@ -111,10 +111,16 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
             return;
         }
 
+        if (view.ToWrite.Count == 0)
+        {
+            Say(Loc.Current["Clients.NoneToWrite"]); // only Claude Code with its plugin: removing its old entry is still possible
+            return;
+        }
+
         await view.PreviewAsync(CancellationToken.None).ConfigureAwait(true);
         Loc loc = Loc.Current;
-        string message = loc.T("Clients.WriteMessage", view.Selected.Count)
-            + (view.Selected.Any(c => c.Name == "claude-desktop") ? " " + loc["Clients.QuitDesktop"] : string.Empty);
+        string message = loc.T("Clients.WriteMessage", view.ToWrite.Count)
+            + (view.ToWrite.Any(c => c.Name == "claude-desktop") ? " " + loc["Clients.QuitDesktop"] : string.Empty);
         if (view.State == ClientsState.Ready && Confirm(loc["Clients.WriteTitle"], message, loc["Exit.Cancel"], loc["Clients.WriteConfirm"], view.Diff()))
         {
             await ApplyAsync(view, ClientConfigMode.Write).ConfigureAwait(true);
