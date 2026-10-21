@@ -19,7 +19,7 @@ namespace EplanMcp.Spikes.S24;
 /// <para>
 /// Usage: <c>EplanMcpSpikeS24 /Mode:partsdb|translationdb|opencopy /Report:"…\x.json" [/Part:number] [/Contains:text]</c>;
 /// for <c>opencopy</c> (write part) <c>/Part</c> is the path of the copy, which must be under the scratch root.
-/// <c>backupparts</c>, <c>backuptranslation</c> and <c>restore</c> (archive in <c>/Part</c>) write only to
+/// <c>backupparts</c>, <c>backuptranslation</c>, <c>restore</c> (archive in <c>/Part</c>) and <c>copyio</c> write only to
 /// <c>/Destination</c>, also under the scratch root.
 /// </para>
 /// </summary>
@@ -100,6 +100,9 @@ public sealed class SpikeS24Action : IEplAction
                 break;
             case "opencopy":
                 report["copy"] = OpenCopy(p.Part);
+                break;
+            case "copyio":
+                report["copyio"] = CopyImportExport(p.Part, p.Destination);
                 break;
             case "backupparts":
                 report["backup"] = RunAction(p.Destination, "backup", MasterDataBackup("ARTICLES", MDPartsManagement.SelectedPartsDatabaseAsString, p.Destination, "s24-parts"));
@@ -246,6 +249,106 @@ public sealed class SpikeS24Action : IEplAction
         result["selectedAfterClose"] = MDPartsManagement.SelectedPartsDatabaseAsString;
         return result;
     }
+
+    /// <summary>
+    /// r11 (batch 4 specs): exports from a parts database copy under the scratch root, imports a part file back into
+    /// it with and without a transaction, and exports the configured translation database (read only) to files under
+    /// the scratch root.
+    /// </summary>
+    private static JObject CopyImportExport(string path, string destination)
+    {
+        var result = new JObject { ["path"] = path, ["destination"] = destination };
+        if (path.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0
+            || destination.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            result["refused"] = "the copy and the destination must be under the scratch root";
+            return result;
+        }
+
+        Directory.CreateDirectory(destination);
+        string all = Path.Combine(destination, "all.xml");
+        string one = Path.Combine(destination, "one.xml");
+        const string TestPart = "EPLANMCP.S24-TEST";
+        MDPartsDatabase database = new MDPartsManagement().OpenDatabase(path);
+        try
+        {
+            result["allParts"] = Try(() => database.Parts.Length);
+            result["exportXml"] = Timed(() => database.ExportParts(all, MDPartsDatabase.DataFormat.XML), all);
+            string edz = Path.Combine(destination, "all.edz");
+            result["exportEdz"] = Timed(() => database.ExportParts(edz, MDPartsDatabase.DataFormat.EDZ), edz);
+            result["exportOne"] = Try(() =>
+            {
+                using (MDPartsDatabaseTransaction transaction = database.CreateTransaction())
+                {
+                    MDPart part = database.AddPart(TestPart, "1");
+                    part.Properties.ARTICLE_DESCR1 = "EplanMcp S24 test part";
+                    transaction.Commit();
+                }
+
+                database.ExportParts(one, MDPartsDatabase.DataFormat.XML, [database.GetPart(TestPart)]);
+                database.RemovePart(database.GetPart(TestPart));
+                return new JObject { ["bytes"] = new FileInfo(one).Length, ["existsAfterRemove"] = database.ExistsPart(TestPart) };
+            });
+            result["importRolledBack"] = Try(() =>
+            {
+                using MDPartsDatabaseTransaction transaction = database.CreateTransaction();
+                database.ImportParts(one, "XPamImportXml", MDPartsDatabase.ImportMode.AppendNewRecords, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                bool during = database.ExistsPart(TestPart);
+                transaction.Rollback();
+                return new JObject { ["during"] = during, ["after"] = database.ExistsPart(TestPart), ["allParts"] = database.Parts.Length };
+            });
+            result["imported"] = Try(() =>
+            {
+                var clock = Stopwatch.StartNew();
+                database.ImportParts(one, "XPamImportXml", MDPartsDatabase.ImportMode.AppendNewRecords, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                return new JObject { ["seconds"] = Seconds(clock), ["exists"] = database.ExistsPart(TestPart), ["allParts"] = database.Parts.Length, ["description"] = Text(database.GetPart(TestPart).Properties.ARTICLE_DESCR1) };
+            });
+            result["importedAgain"] = Try(() =>
+            {
+                database.ImportParts(one, "XPamImportXml", MDPartsDatabase.ImportMode.UpdateAndAppend, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                return new JObject { ["allParts"] = database.Parts.Length, ["variants"] = database.GetPartVariants(TestPart).Length };
+            });
+            result["importAll"] = Try(() =>
+            {
+                var clock = Stopwatch.StartNew();
+                database.ImportParts(all, "XPamImportXml", MDPartsDatabase.ImportMode.UpdateAndAppend, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                return new JObject { ["seconds"] = Seconds(clock), ["allParts"] = database.Parts.Length };
+            });
+        }
+        finally
+        {
+            database.Close();
+        }
+
+        using (var translate = new Translate())
+        {
+            string xml = Path.Combine(destination, "translate.xml");
+            result["translationExportXml"] = Timed(() => translate.ExportDatabaseTexts(xml, "XTrLanguageDbXmlConverterImpl"), xml);
+            string tab = Path.Combine(destination, "translate.txt");
+            result["translationExportTab"] = Timed(() => translate.ExportDatabaseTexts(tab, "XTrLanguageDbXml2TabConverterImpl"), tab);
+        }
+
+        result["selectedAfter"] = MDPartsManagement.SelectedPartsDatabaseAsString;
+        return result;
+    }
+
+    private static JToken Timed(Func<object?> run, string file) => Try(() =>
+    {
+        var clock = Stopwatch.StartNew();
+        object? returned = run();
+        return new JObject
+        {
+            ["returned"] = returned is null ? JValue.CreateNull() : JToken.FromObject(returned),
+            ["seconds"] = Seconds(clock),
+            ["bytes"] = File.Exists(file) ? new FileInfo(file).Length : -1,
+        };
+    });
+
+    private static JToken Timed(System.Action run, string file) => Timed(() =>
+    {
+        run();
+        return null;
+    }, file);
 
     /// <summary>The backup ADR-0019 makes before every master-data write, of the configured database.</summary>
     private static Dictionary<string, string> MasterDataBackup(string type, string configured, string destination, string archive) => new()
