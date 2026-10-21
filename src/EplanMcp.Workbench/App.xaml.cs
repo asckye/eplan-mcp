@@ -66,6 +66,7 @@ public sealed partial class App : Application, IDisposable
             _view.Update(question);
             ShowQueue();
         });
+        _queue.AcceptingChanged += () => Dispatcher.BeginInvoke(ShowQueue);
         _window.Attach(_view);
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
@@ -93,10 +94,11 @@ public sealed partial class App : Application, IDisposable
     private void ShowQueue()
     {
         Pending = _queue?.PendingCount ?? 0;
-        ApprovalChannelState channel = !_listening ? ApprovalChannelState.NameTaken
-            : Pending >= ApprovalQueue.DefaultCapacity ? ApprovalChannelState.Full : ApprovalChannelState.Accepting;
         _tray?.Pending = Pending;
-        _window?.ShowApprovals(channel, Pending);
+        if (_queue is not null)
+        {
+            _window?.ShowQueue(_queue, _listening);
+        }
     }
 
     /// <summary>

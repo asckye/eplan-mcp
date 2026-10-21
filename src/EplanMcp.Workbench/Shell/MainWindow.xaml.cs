@@ -139,6 +139,14 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Shows the queue in the Header (STS-10, STS-11): without the pipe name, or without a place that is neither waiting
+    /// nor reserved by a handshake, questions are not taken.
+    /// </summary>
+    internal void ShowQueue(ApprovalQueue queue, bool listening) => ShowApprovals(
+        !listening ? ApprovalChannelState.NameTaken : queue.IsAccepting ? ApprovalChannelState.Accepting : ApprovalChannelState.Full,
+        queue.PendingCount);
+
+    /// <summary>
     /// Shows whether approvals are taken and how many questions wait (STS-10, STS-11); a change of state is announced
     /// (STS-02).
     /// </summary>

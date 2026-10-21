@@ -262,7 +262,13 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     [MemberData(nameof(BrokenQuestions))]
     public async Task AQuestionThatIsNotStrictlyValid_GetsAnError_AndNeverReachesTheQueue(string ask)
     {
-        await using NamedPipeClientStream pipe = await ConnectAsync();
+        // One place only: had the handshake's reservation leaked, the queue would stay full.
+        var queue = new ApprovalQueue(_clock, capacity: 1);
+        string name = _pipe + ".one";
+        await using ApprovalServer server = Server(queue, name);
+        Assert.True(server.Start());
+        Task freed = Freed(queue);
+        await using NamedPipeClientStream pipe = await ConnectAsync(name);
         await HandshakeAsync(pipe);
 
         await SendAsync(pipe, Encoding.UTF8.GetBytes(ask));
@@ -270,8 +276,29 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         // An error when the message could be read, else the connection closes (a duplicate field breaks the frame).
         RpcMessage? reply = await ReceiveOrEndAsync(pipe);
         Assert.True(reply is null || reply.Error?.Code == -32602, reply?.ToString());
-        Assert.Empty(_queue.Pending);
-        Assert.True(_queue.TryReserve(), "the place the handshake promised is free again");
+        await freed.WaitAsync(_patience, Token); // the server's finally has run
+        Assert.Empty(queue.Pending);
+        Assert.True(queue.TryReserve(), "the place the handshake promised is free again");
+    }
+
+    [Fact]
+    public async Task AHostThatHangsUpBeforeItsHandshakeIsAnswered_LeavesNoPlaceTaken()
+    {
+        var queue = new ApprovalQueue(_clock, capacity: 1);
+        string name = _pipe + ".gone";
+        await using ApprovalServer server = Server(queue, name);
+        Assert.True(server.Start());
+        Task freed = Freed(queue);
+
+        // The reply then has no reader: sending it fails, after the handshake reserved the only place.
+        await using (NamedPipeClientStream pipe = await ConnectAsync(name))
+        {
+            await SendAsync(pipe, WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, new WorkbenchHandshake(1, 1, "test", Environment.ProcessId)));
+        }
+
+        await freed.WaitAsync(_patience, Token);
+        Assert.True(queue.IsAccepting);
+        Assert.True(queue.TryReserve(), "the place is free for the next Host");
     }
 
     [Theory]
@@ -470,9 +497,23 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         return condition(question) ? Task.CompletedTask : changed.Task;
     }
 
-    private async Task<NamedPipeClientStream> ConnectAsync()
+    /// <summary>Completes once <paramref name="queue"/> takes questions again after a place was reserved there.</summary>
+    private static Task Freed(ApprovalQueue queue)
     {
-        var pipe = new NamedPipeClientStream(".", _pipe, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        var freed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        queue.AcceptingChanged += () =>
+        {
+            if (queue.IsAccepting)
+            {
+                freed.TrySetResult();
+            }
+        };
+        return freed.Task;
+    }
+
+    private async Task<NamedPipeClientStream> ConnectAsync(string? name = null)
+    {
+        var pipe = new NamedPipeClientStream(".", name ?? _pipe, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
         await pipe.ConnectAsync(TimeSpan.FromSeconds(5), Token);
         return pipe;
     }

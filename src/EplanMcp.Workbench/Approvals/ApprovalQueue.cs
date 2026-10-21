@@ -25,6 +25,24 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     /// <summary>A question arrived or changed.</summary>
     public event Action<Question>? Changed;
 
+    /// <summary><see cref="IsAccepting"/> changed: a place was reserved or given back, or a question took or freed one.</summary>
+    public event Action? AcceptingChanged;
+
+    /// <summary>
+    /// Whether a new Host's question is taken now (STS-11): some place is neither waiting nor reserved by a handshake, so
+    /// the Header never says questions are taken while Hosts are turned away.
+    /// </summary>
+    public bool IsAccepting
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return Free;
+            }
+        }
+    }
+
     public int PendingCount
     {
         get
@@ -48,24 +66,40 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     /// </summary>
     public bool TryReserve()
     {
+        bool full;
         lock (_lock)
         {
-            if (_pending.Count + _reserved >= capacity)
+            if (!Free)
             {
                 return false;
             }
 
             _reserved++;
-            return true;
+            full = !Free;
         }
+
+        if (full)
+        {
+            AcceptingChanged?.Invoke();
+        }
+
+        return true;
     }
 
     /// <summary>Gives back a place no question took.</summary>
     public void Release()
     {
+        bool freed;
         lock (_lock)
         {
+            bool before = Free;
             _reserved = Math.Max(0, _reserved - 1);
+            freed = Free != before;
+        }
+
+        if (freed)
+        {
+            AcceptingChanged?.Invoke();
         }
     }
 
@@ -77,20 +111,31 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     /// </summary>
     public Question? Add(ApprovalAskParams ask)
     {
-        Question question;
+        Question? question = null;
+        bool changed;
         lock (_lock)
         {
+            bool before = Free;
             _reserved = Math.Max(0, _reserved - 1);
-            if (_pending.Any(q => q.RequestId == ask.RequestId && q.Ask.Kind == ask.Kind && Equals(q.Ask.Suspension, ask.Suspension)))
+            if (!_pending.Any(q => q.RequestId == ask.RequestId && q.Ask.Kind == ask.Kind && Equals(q.Ask.Suspension, ask.Suspension)))
             {
-                return null;
+                question = new Question(ask, ++_sequence, clock.GetUtcNow());
+                _pending.Add(question);
             }
 
-            question = new Question(ask, ++_sequence, clock.GetUtcNow());
-            _pending.Add(question);
+            changed = Free != before;
         }
 
-        Changed?.Invoke(question);
+        if (question is not null)
+        {
+            Changed?.Invoke(question);
+        }
+
+        if (changed)
+        {
+            AcceptingChanged?.Invoke();
+        }
+
         return question;
     }
 
@@ -115,12 +160,16 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
 
     private bool Finish(Question question, QuestionEnd end)
     {
+        bool freed;
         lock (_lock)
         {
+            bool before = Free;
             if (question.End is not null || !_pending.Remove(question))
             {
                 return false;
             }
+
+            freed = Free != before;
 
             question.End = end;
             bool write = end == QuestionEnd.Approved && question.Ask.Kind == QuestionKind.Approval;
@@ -140,6 +189,11 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
             _ => WorkbenchDecision.Closed,
         });
         Changed?.Invoke(question);
+        if (freed)
+        {
+            AcceptingChanged?.Invoke();
+        }
+
         return true;
     }
 
@@ -158,6 +212,9 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
 
         Changed?.Invoke(question);
     }
+
+    /// <summary>Some place is neither waiting nor reserved; under the lock.</summary>
+    private bool Free => _pending.Count + _reserved < capacity;
 
     private Question[] Snapshot(List<Question> questions)
     {

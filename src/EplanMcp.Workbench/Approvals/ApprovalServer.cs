@@ -232,7 +232,16 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         }
 
         bool accepting = !_quitting && _queue.TryReserve();
-        await SendAsync(pipe, WorkbenchJson.Result(helloId, new WorkbenchHandshakeResult(version, _version, accepting))).ConfigureAwait(false);
+        try
+        {
+            await SendAsync(pipe, WorkbenchJson.Result(helloId, new WorkbenchHandshakeResult(version, _version, accepting))).ConfigureAwait(false);
+        }
+        catch when (accepting)
+        {
+            _queue.Release(); // the Host never learnt of its place; from here on QuestionAsync gives it back
+            throw;
+        }
+
         if (accepting)
         {
             await QuestionAsync(pipe, client).ConfigureAwait(false);

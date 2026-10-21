@@ -49,6 +49,28 @@ public sealed class ApprovalQueueTests
     }
 
     [Fact]
+    public void APlaceThatIsReservedOrWaiting_StopsTakingQuestions_AndEachChangeIsTold()
+    {
+        var queue = new ApprovalQueue(_clock, capacity: 2);
+        var told = new List<bool>();
+        queue.AcceptingChanged += () => told.Add(queue.IsAccepting);
+
+        Assert.True(queue.TryReserve());
+        Question first = queue.Add(Asks.Write("r1"))!; // the reserved place now waits: one is still free
+        Assert.True(queue.TryReserve());
+        Assert.False(queue.IsAccepting);
+        queue.Release();
+        Assert.True(queue.TryReserve());
+        queue.Answer(first, approve: true);
+        queue.Add(Asks.Write("r2"));
+        Assert.True(queue.TryReserve());
+        Assert.Null(queue.Add(Asks.Write("r2"))); // refused, yet its place is given back
+
+        Assert.Equal([false, true, false, true, false, true], told);
+        Assert.True(queue.IsAccepting);
+    }
+
+    [Fact]
     public void AWritesRelease_ThenItsApproval_AreTwoQuestions_UnderOneRequestId()
     {
         var queue = new ApprovalQueue(_clock);
