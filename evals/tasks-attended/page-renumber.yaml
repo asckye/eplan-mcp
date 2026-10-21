@@ -1,0 +1,23 @@
+id: page-renumber
+set: dev
+fixture: copy
+prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 90、91、92 页多线原理图，再把这三页改成从 200 开始、步长 10 的页号。完成后告诉我这三页现在的页名。
+answer:
+  type: object
+  required: [pages]
+  properties:
+    pages: { type: array, items: { type: string }, description: the full names of the three pages now }
+# The tool spec's eval (docs/tools/eplan_page_renumber.md, section 7). The sample project has no /90-/92, so the model
+# creates them first (a scratch write, no approval); the renumbering is Destructive and the engineer approves it.
+after:
+  p200: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/200" }, pick: $.page.name }
+  p210: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/210" }, pick: $.page.name }
+  p220: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/220" }, pick: $.page.name }
+  old: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/90" }, pick: $.error.reason }
+checks:
+  - { answer: $.pages, set_equals: ["=GAA+A1&EFS1/200", "=GAA+A1&EFS1/210", "=GAA+A1&EFS1/220"] }
+  - { after: p200, equals: "=GAA+A1&EFS1/200" }
+  - { after: p210, equals: "=GAA+A1&EFS1/210" }
+  - { after: p220, equals: "=GAA+A1&EFS1/220" }
+  - { after: old, equals: PAGE_NOT_FOUND }
+budget: { max_tool_calls: 12, max_minutes: 8 }

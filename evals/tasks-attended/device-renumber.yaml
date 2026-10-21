@@ -1,0 +1,22 @@
+id: device-renumber
+set: dev
+fixture: copy
+prompt: 在项目 {project} 中，先把设备 =F+A2-KF1 改名为 =F+A2-?KF1，再给它的线圈所在那一页上带 ? 的设备标识编号。完成后告诉我它现在的设备标识。
+answer:
+  type: object
+  required: [tag]
+  properties:
+    tag: { type: string, description: the device's full tag after the numbering }
+# The tool spec's first Large case as an eval (docs/tools/eplan_device_renumber.md, section 7): the coil is on
+# =F+A2&EFS1/1, a contact on =K1+A2&EFS1/2. What tag EPLAN's numbering gives is not verified yet, so the checks only
+# require that the '?' tag is gone, the page keeps its devices and the answer keeps the structure and the letters.
+oracle:
+  devices: { tool: eplan_page_get, args: { page: "=F+A2&EFS1/1" }, pick: $.deviceCount }
+after:
+  old: { tool: eplan_device_get, args: { tag: "=F+A2-?KF1" }, pick: $.error.reason }
+  devices: { tool: eplan_page_get, args: { page: "=F+A2&EFS1/1" }, pick: $.deviceCount }
+checks:
+  - { after: old, equals: DEVICE_NOT_FOUND }
+  - { after: devices, equals: oracle.devices }
+  - { answer: $.tag, contains: "=F+A2-KF" }
+budget: { max_tool_calls: 12, max_minutes: 8 }
