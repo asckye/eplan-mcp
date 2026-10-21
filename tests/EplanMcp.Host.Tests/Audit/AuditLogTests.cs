@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Text.Json.Nodes;
 using EplanMcp.Host.Audit;
 
@@ -68,6 +69,30 @@ public sealed class AuditLogTests : IDisposable
         Rewrite(lines => lines.RemoveAt(2));
 
         Assert.Equal((2, null), AuditVerifier.Verify(AuditDirectory));
+    }
+
+    [Fact]
+    public async Task Verify_WhileAnotherHostAppends_ChecksTheRecordsWritten()
+    {
+        await AppendThree();
+
+        using (AppendingHalfARecord())
+        {
+            Assert.Equal((3, null), AuditVerifier.Verify(AuditDirectory));
+        }
+    }
+
+    [Fact]
+    public async Task Dangling_WhileAnotherHostAppends_ReadsTheRecordsWritten()
+    {
+        await Append(new JsonObject { ["kind"] = "execution_started", ["requestId"] = "a" });
+        await Append(new JsonObject { ["kind"] = "execution_started", ["requestId"] = "b" });
+        await Append(new JsonObject { ["kind"] = "execution_result", ["requestId"] = "b" });
+
+        using (AppendingHalfARecord())
+        {
+            Assert.Equal(["a"], Log().Dangling().Select(r => r["requestId"]!.GetValue<string>()));
+        }
     }
 
     [Fact]
@@ -144,6 +169,15 @@ public sealed class AuditLogTests : IDisposable
         {
             await Append(new JsonObject { ["n"] = n });
         }
+    }
+
+    // The day's file held the way AppendAsync holds it, halfway through writing the next record.
+    private FileStream AppendingHalfARecord()
+    {
+        var stream = new FileStream(Path.Combine(AuditDirectory, "2026-10-20.jsonl"), FileMode.Append, FileAccess.Write, FileShare.Read);
+        stream.Write(Encoding.UTF8.GetBytes("{\"time\":\"2026-10-20T08:00:00"));
+        stream.Flush();
+        return stream;
     }
 
     private void Rewrite(Action<List<string>> change)

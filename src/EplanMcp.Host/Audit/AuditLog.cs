@@ -95,7 +95,7 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
 
         var started = new List<JsonObject>();
         var finished = new HashSet<string>(StringComparer.Ordinal);
-        foreach (string line in Directory.EnumerateFiles(directory, FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadLines))
+        foreach (string line in Directory.EnumerateFiles(directory, FilePattern).Order(StringComparer.Ordinal).SelectMany(ReadLines))
         {
             JsonObject? record;
             try
@@ -127,6 +127,30 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
         return [.. started.Where(r => !finished.Contains(r["requestId"]!.GetValue<string>()))];
     }
 
+    /// <summary>
+    /// The lines of <paramref name="file"/> that another Host process may be appending to, in order. The appender holds
+    /// the file with <c>FileShare.Read</c>, so it is opened sharing write and delete: a reader that shares only reading
+    /// cannot open it then, and makes the append fail while it reads. Every record ends with "\n"; what follows the
+    /// last one is a record still being written and is left out.
+    /// </summary>
+    internal static IEnumerable<string> ReadLines(string file)
+    {
+        string text;
+        using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+        using (var reader = new StreamReader(stream))
+        {
+            text = reader.ReadToEnd();
+        }
+
+        using var lines = new StringReader(text[..(text.LastIndexOf('\n') + 1)]);
+        while (lines.ReadLine() is { } line)
+        {
+            yield return line;
+        }
+    }
+
+    // Read under the lock, so a last line without its "\n" is an append that failed halfway; it is not left out, or
+    // the next record would be joined onto it.
     internal static string? LastLine(string file) =>
         File.ReadLines(file).LastOrDefault(l => l.Length > 0);
 
