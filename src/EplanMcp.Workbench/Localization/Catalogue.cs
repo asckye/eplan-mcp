@@ -226,6 +226,7 @@ internal static class Catalogue
         ("Clients.Plugin", "For Claude Code the plugin is recommended. Run these two commands in a terminal; with the plugin, no entry is written for Claude Code.", "Claude Code 推荐使用插件：在终端中运行下面两条命令。装了插件后，不再为 Claude Code 写配置。"),
         ("Clients.Running", "Running eplanmcp client-config…", "正在运行 eplanmcp client-config……"),
         ("Clients.NoneChosen", "Choose at least one client first.", "请先选择至少一个客户端。"),
+        ("Clients.NoneToWrite", "Nothing to write: with its plugin, Claude Code gets no entry. Its old entry can still be removed.", "没有要写入的：Claude Code 装了插件，不为它写配置；它原来的配置仍然可以移除。"),
         ("Clients.Done", "Done. Each card says what came of it.", "已完成。每张卡片上写明了结果。"),
         ("Clients.NotDone", "Not done; the error above says why.", "未完成，原因见上方的错误。"),
         ("Clients.WriteTitle", "Write the client configuration?", "写入客户端配置？"),

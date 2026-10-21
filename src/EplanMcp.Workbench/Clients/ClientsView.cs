@@ -41,8 +41,11 @@ internal sealed class ClientCard(string name) : IAccessibleItem
     /// <summary>The Claude Code plugin already gives the server: no entry is written for Claude Code (design 4.7).</summary>
     public bool PluginInstalled => Preview?.Problem?.Code == "plugin_installed";
 
-    /// <summary>The card can be chosen; with the plugin, Claude Code gets no entry (CMD-04: the problem says why).</summary>
-    public bool CanChoose => !PluginInstalled;
+    /// <summary>
+    /// An entry can be written for it: with the plugin, Claude Code gets none (design 4.7), but an old entry can still be
+    /// removed, so the card can be chosen all the same.
+    /// </summary>
+    public bool CanWrite => !PluginInstalled;
 
     public string Subtitle => Loc.Current[Detected ? "Clients.Detected" : "Clients.NotDetected"]
         + (Preview?.Before is not null ? Loc.Current["Clients.Configured"] : string.Empty);
@@ -105,7 +108,10 @@ internal sealed class ClientsView : INotifyPropertyChanged
 
     public string? ErrorDetails => _error is { } error ? HostErrors.Details(error) : null;
 
-    public IReadOnlyList<ClientCard> Selected => [.. Cards.Where(c => c.IsSelected && c.CanChoose)];
+    public IReadOnlyList<ClientCard> Selected => [.. Cards.Where(c => c.IsSelected)];
+
+    /// <summary>The chosen clients an entry can be written for.</summary>
+    public IReadOnlyList<ClientCard> ToWrite => [.. Selected.Where(c => c.CanWrite)];
 
     /// <summary>The Host's text in the current language, made plain.</summary>
     public static string Text(HostText text) => ProjectText.Line(Loc.Current.Language == AppLanguage.Chinese ? text.Zh : text.En);
@@ -117,16 +123,17 @@ internal sealed class ClientsView : INotifyPropertyChanged
     public Task DetectAsync(CancellationToken cancellationToken) => RunAsync(Cards, ClientConfigMode.DryRun, cancellationToken);
 
     /// <summary>A dry run of the chosen clients, for the diff the engineer confirms (DLG-12).</summary>
-    public Task PreviewAsync(CancellationToken cancellationToken) => RunAsync(Selected, ClientConfigMode.DryRun, cancellationToken);
+    public Task PreviewAsync(CancellationToken cancellationToken) => RunAsync(ToWrite, ClientConfigMode.DryRun, cancellationToken);
 
     /// <summary>Writes or removes the chosen clients' entry, after the engineer confirmed (PRI-01).</summary>
-    public Task ApplyAsync(ClientConfigMode mode, CancellationToken cancellationToken) => RunAsync(Selected, mode, cancellationToken);
+    public Task ApplyAsync(ClientConfigMode mode, CancellationToken cancellationToken) =>
+        RunAsync(mode == ClientConfigMode.Remove ? Selected : ToWrite, mode, cancellationToken);
 
     /// <summary>The chosen clients' preview as plain text: the file, then the entry's lines, "−" before and "+" after.</summary>
     public string Diff()
     {
         var text = new StringBuilder();
-        foreach (ClientCard card in Selected.Where(c => c.Preview is not null))
+        foreach (ClientCard card in ToWrite.Where(c => c.Preview is not null))
         {
             ClientOutcome preview = card.Preview!;
             text.AppendLine(Loc.Current.T("Clients.DiffHead", card.Title, ProjectText.Line(preview.File ?? Loc.Current["Clients.NoFile"])));

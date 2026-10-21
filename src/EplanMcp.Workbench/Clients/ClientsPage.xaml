@@ -61,7 +61,7 @@
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <Border Width="300" Margin="0,0,12,12" Padding="16,12" Style="{StaticResource Primer.Container}">
-                <CheckBox Style="{StaticResource Primer.Checkbox}" IsChecked="{Binding IsSelected, Mode=TwoWay}" IsEnabled="{Binding CanChoose}"
+                <CheckBox Style="{StaticResource Primer.Checkbox}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
                           AutomationProperties.Name="{Binding AccessibleName}" AutomationProperties.HelpText="{Binding Problem}" VerticalAlignment="Top">
                   <StackPanel Margin="4,0,0,0">
                     <TextBlock Text="{Binding Title}" Style="{StaticResource Primer.Text}" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="None" />

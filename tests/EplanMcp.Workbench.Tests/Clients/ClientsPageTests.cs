@@ -41,7 +41,7 @@ public sealed class ClientsPageTests(WpfContext wpf) : IDisposable
             CheckBox[] boxes = [.. Descendants<CheckBox>(page)];
             Assert.Equal(11, boxes.Length);
             Assert.Equal("Codex，本机已检测到", AutomationProperties.GetName(boxes[2]));
-            Assert.False(boxes[0].IsEnabled); // Claude Code with its plugin: no entry, and the card says why
+            Assert.True(boxes[0].IsEnabled); // Claude Code with its plugin: no entry is written, but an old one can be removed
             Assert.Equal("已装插件", AutomationProperties.GetHelpText(boxes[0]));
             var command = (TextBox)page.FindName("MarketplaceCommand");
             Assert.Equal(("claude plugin marketplace add ~/EplanMcp/app/claude-plugin", true), (command.Text, command.IsReadOnly));
@@ -90,6 +90,25 @@ public sealed class ClientsPageTests(WpfContext wpf) : IDisposable
 
             Assert.Equal(("移除客户端配置？", "Cursor"), (_asked.Single().Title, _asked.Single().Details));
             Assert.Equal(["client-config", "cursor", "--remove", "--format", "json"], _host.Runs[^1].Arguments);
+        }));
+    }
+
+    [Fact]
+    public void ClaudeCodeWithItsPlugin_IsNotWritten_ButItsOldEntryCanBeRemoved()
+    {
+        _host.Answer = Answer(problem: "plugin_installed");
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Clients, NavigationOrigin.Menu);
+            WpfContext.Drain();
+            Descendants<CheckBox>(page)[0].IsChecked = true;
+
+            Click((Button)page.FindName("WriteButton"));
+            Assert.Single(_host.Runs); // the detection only
+            Assert.StartsWith("没有要写入的", ((TextBlock)page.FindName("StatusText")).Text, StringComparison.Ordinal);
+
+            Click((Button)page.FindName("RemoveButton"));
+            Assert.Equal(["client-config", "claude-code", "--remove", "--format", "json"], _host.Runs[^1].Arguments);
         }));
     }
 
