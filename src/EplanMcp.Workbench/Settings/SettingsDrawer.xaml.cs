@@ -44,6 +44,7 @@ public partial class SettingsDrawer : UserControl
         ConfigPath.Text = _config ?? string.Empty;
         ConfigText.Text = _config is null ? string.Empty : Config(_config);
         ConfigButton.IsEnabled = File.Exists(_config);
+        ConfigProblem.Visibility = Visibility.Collapsed;
     }
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
@@ -79,7 +80,17 @@ public partial class SettingsDrawer : UserControl
         }
     }
 
-    private void OnOpenConfig(object sender, RoutedEventArgs e) => _shell.Open(_config!);
+    /// <summary>config.json in its own program; when Windows cannot open it, the drawer says so beside the button (STS-05).</summary>
+    private void OnOpenConfig(object sender, RoutedEventArgs e)
+    {
+        bool opened = _shell.Open(_config!);
+        ConfigProblem.Text = opened ? string.Empty : Loc.Current.T("Settings.OpenFailed", _config!);
+        ConfigProblem.Visibility = opened ? Visibility.Collapsed : Visibility.Visible;
+        if (!opened)
+        {
+            AccessibleStatus.Announce(ConfigProblem);
+        }
+    }
 
     /// <summary>Sets the switch to what is so, without that counting as the engineer turning it.</summary>
     private void Show(bool on)

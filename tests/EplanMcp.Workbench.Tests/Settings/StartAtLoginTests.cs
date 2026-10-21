@@ -30,6 +30,7 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     private readonly string _test = Tests + @"\" + Guid.NewGuid().ToString("N");
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("eplanmcp-workbench-settings-");
     private readonly List<string> _opened = [];
+    private bool _shellWorks = true;
 
     private string RunKey => _test + @"\Run";
 
@@ -136,6 +137,22 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     }
 
     [Fact]
+    public void AConfigWindowsCannotOpen_IsSaidBesideTheButton()
+    {
+        _shellWorks = false;
+        string config = Path.Combine(_root.FullName, "config.json");
+        File.WriteAllText(config, "{}");
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, drawer) =>
+        {
+            Click((Button)drawer.FindName("ConfigButton"));
+
+            var problem = (TextBlock)drawer.FindName("ConfigProblem");
+            Assert.True(problem.IsVisible);
+            Assert.Equal($"Windows 无法打开 {config}。", problem.Text);
+        }));
+    }
+
+    [Fact]
     public void WithoutConfigJson_TheDefaultsApply_AndThereIsNothingToOpen()
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, drawer) =>
@@ -147,7 +164,7 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
 
     private void WithDrawer(Action<MainWindow, SettingsDrawer> test) => With(window =>
     {
-        window.AttachSettings(new StartAtLogin(RunKey, Executable), Path.Combine(_root.FullName, "config.json"), new FakeShell(_opened));
+        window.AttachSettings(new StartAtLogin(RunKey, Executable), Path.Combine(_root.FullName, "config.json"), new FakeShell(_opened, _shellWorks));
         window.OpenSettings();
         test(window, (SettingsDrawer)window.FindName("SettingsPane"));
         window.CloseSettings();
@@ -166,12 +183,12 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
         return run?.GetValue(name) as string;
     }
 
-    private sealed class FakeShell(List<string> opened) : IShellOpen
+    private sealed class FakeShell(List<string> opened, bool works = true) : IShellOpen
     {
         public bool Open(string path)
         {
             opened.Add(path);
-            return true;
+            return works;
         }
     }
 }
