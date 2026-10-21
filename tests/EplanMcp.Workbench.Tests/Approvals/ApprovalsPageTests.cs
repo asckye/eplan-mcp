@@ -379,10 +379,16 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
 
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
             window.Hide();
+            // IsActive is activation within the window's own thread, which the focus at startup gave it. Hiding the
+            // window from the foreground, as the engineer does, passes it on; a test run that is not in the foreground
+            // keeps it on the hidden window. So the arrival is checked for activating the window, not IsActive for false.
+            int activated = 0;
+            window.Activated += (_, _) => activated++;
             Add("r1", 150);
 
             Assert.Equal("r1", Assert.Single(notified).RequestId);
-            Assert.False(window.IsVisible || window.IsActive || window.Topmost);
+            Assert.False(window.IsVisible || window.Topmost);
+            Assert.Equal(0, activated);
             Assert.Equal(WorkbenchPage.Status, window.CurrentPage);
         }));
     }
