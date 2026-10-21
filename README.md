@@ -48,13 +48,13 @@ EPLAN 2026（你正在使用的界面）
 
 ## 开发工具（新的开发电脑上安装）
 
-下面这些工具只用于**开发阶段**，不是产品的依赖，不会随 EplanMcp 发布。除 Maple Mono 字体（SIL OFL 1.1）外，都是 MIT 许可证或官方工具。
+下面这些工具只用于**开发阶段**，不是产品的依赖，不会随 EplanMcp 发布（Maple Mono 字体例外，见表中说明）。除 Maple Mono 字体（SIL OFL 1.1）外，都是 MIT 许可证或官方工具。
 
 | 工具 | 用途 | 安装 |
 |---|---|---|
 | [Node.js](https://nodejs.org/) LTS | archify 和 MCP Inspector 的运行环境 | `winget install --id OpenJS.NodeJS.LTS -e` |
 | [archify](https://github.com/tt-a1i/archify) | Claude Code 技能：把架构、工作流程、时序画成可交互的 HTML 图，图存放在 [docs/diagrams/](docs/diagrams/) | 版本记录在 `skills-lock.json`，技能文件本身不进仓库。在仓库根目录依次运行下面两条命令：先按锁文件还原技能，再把图的字体切换为 Maple Mono（技能每次更新后都要再运行第二条） |
-| [Maple Mono](https://github.com/subframe7536/maple-font) 字体 | 项目统一字体：archify 图、Workbench 界面（M5）、开发时的编辑器和终端 | 从 [Releases](https://github.com/subframe7536/maple-font/releases) 下载 `MapleMono-NF-CN` 压缩包，解压后选中全部字体文件，右键"安装"；编辑器和终端里的字体名填 `Maple Mono NF CN` |
+| [Maple Mono](https://github.com/subframe7536/maple-font) 字体 | 项目统一字体：archify 图、开发时的编辑器和终端；Workbench 界面（M5）也用它，那里随程序附带 `MapleMono-CN` 的字体文件和许可证（ADR-0015），工程师不需要另装 | 从 [Releases](https://github.com/subframe7536/maple-font/releases) 下载 `MapleMono-NF-CN` 压缩包，解压后选中全部字体文件，右键"安装"；编辑器和终端里的字体名填 `Maple Mono NF CN` |
 | [covagashi/eplan-development-skill](https://github.com/covagashi/eplan-development-skill) | Claude Code 技能：教 AI 写 EPLAN 的 C# 脚本、API 和 Remote Client 代码，让 Bridge 代码写得更准 | 按该仓库 README 安装到 Claude Code |
 | [covagashi/eplan-rag-mcp](https://github.com/covagashi/eplan-rag-mcp) 中的文档服务 | EPLAN 2026/2027 官方文档的语义检索 MCP 服务器，开发时让 AI 随时查 API 文档，不凭记忆猜 | 按该仓库 README 中"远程文档服务器"一节，把服务器地址加到 Claude Code 的 MCP 配置中 |
 | [MCP Inspector](https://github.com/modelcontextprotocol/inspector) | MCP 官方的可视化调试工具，打通骨架时用来手动调用和检查我们的工具 | 需要 Node.js；使用时运行 `npx @modelcontextprotocol/inspector <启动 Host 的命令>` |

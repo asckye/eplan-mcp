@@ -2,10 +2,10 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Approved（2026-10-20，项目负责人确认第 9 节的 Q2–Q13 均按本文建议，ADR-0014、ADR-0016 同时接受；Q1 应项目负责人的提问改为建议 A，ADR-0015 保持 Proposed，等项目负责人确认） |
+| 状态 | Approved（2026-10-20，项目负责人确认第 9 节的 Q1–Q13：Q1 选 A（WinUI 3），Q2 改为界面也用 Maple Mono CN，其余按本文建议；ADR-0014、0015、0016 均已接受） |
 | 作者 | asckye |
 | 关联 Issue | — |
-| 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道，已接受）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术，Proposed）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发，已接受） |
+| 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道，已接受）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术，已接受）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发，已接受） |
 | 最后更新 | 2026-10-20 |
 
 ## 1. 背景
@@ -135,14 +135,14 @@ flowchart LR
 
 另外两种不考虑：.NET MAUI 在 Windows 上就是 WinUI 3 外加一层抽象；WPF-UI（lepoco，MIT）还原度好，但 NuGet 把 4.0–4.2 标为"有严重缺陷"而废弃，变动较大。
 
-**建议 A**（Q1）：项目负责人要求按 Fluent UI **及其组件库**设计，在 Windows 桌面上，Fluent 2 的组件库就是 WinUI 3：控件本身就是 Fluent 2 的样式和交互，不需要自己补样式，原生支持 UIA 和高对比度。A 的风险用下面的办法控制：SDK 的大版本至少每年跟进一次，每次按 S18 的清单复查；托盘用 Win32 `Shell_NotifyIcon` 的小封装，不引入第三方库；中英文用自己的文字表（ADR-0015 第 5 条），不用 `.resw` 的界面语言切换，从而避开未打包时的问题；体积和 .NET 10 的可用性由 S18 实测。S18 发现 A 无法满足时改用 B：B 与 Host 同一个运行时、依赖最少，代价是 Fluent 2 只还原到 WPF 主题的程度，`ThemeMode` 仍是实验性 API（WPF0001）。C、D 不建议：离线机器上的 WebView2，以及变更清单这种不可信文本进入网页渲染。
+**选 A**（Q1，项目负责人 2026-10-20 确认）：项目负责人要求按 Fluent UI **及其组件库**设计，在 Windows 桌面上，Fluent 2 的组件库就是 WinUI 3：控件本身就是 Fluent 2 的样式和交互，不需要自己补样式，原生支持 UIA 和高对比度。A 的风险用下面的办法控制：SDK 的大版本至少每年跟进一次，每次按 S18 的清单复查；托盘用 Win32 `Shell_NotifyIcon` 的小封装，不引入第三方库；中英文用自己的文字表（ADR-0015 第 5 条），不用 `.resw` 的界面语言切换，从而避开未打包时的问题；体积和 .NET 10 的可用性由 S18 实测。S18 发现 A 无法满足时改用 B：B 与 Host 同一个运行时、依赖最少，代价是 Fluent 2 只还原到 WPF 主题的程度，`ThemeMode` 仍是实验性 API（WPF0001）。C、D 不建议：离线机器上的 WebView2，以及变更清单这种不可信文本进入网页渲染。
 
 项目负责人 2026-10-20 还问过 Fluent UI 与苹果的设计风格（Apple Human Interface Guidelines）哪个更合适。建议 Fluent UI：苹果的规范和组件只面向苹果平台，Windows 上没有官方实现，每个控件都要自己画，讲述人、高对比度和键盘焦点也要自己保证；Workbench 放在 EPLAN 和 Windows 的对话框旁边使用，用 Windows 自己的设计语言，工程师不必面对两套交互习惯。
 
 **观感**（项目负责人 2026-10-20：喜欢苹果的观感）：控件仍用 WinUI 3 原生的，只通过主题资源调整观感（轻量样式），不重新绘制控件，这样无障碍和高对比度不受影响：
 1. **留白**：间距以 8 px 为单位，页面边距 24–32 px；分组之间靠留白区分，少用分隔线。
 2. **颜色克制**：界面以中性色为主，强调色只用于选中状态和链接；Destructive 和警告用系统的状态色；审批卡片的两个按钮仍然一样（ADR-0014）。
-3. **排版**：用 WinUI 的字号层级（说明 12、正文 14、小标题 20、标题 28），一页最多四级；字体用 Segoe UI Variable，中文用 Microsoft YaHei UI，不用苹果的 SF 字体（它的许可证只允许用于苹果平台的软件，正式实现前再核对原文）。
+3. **排版**：用 WinUI 的字号层级（说明 12、正文 14、小标题 20、标题 28），一页最多四级；字体用 Maple Mono CN（见下面的"字体"），不用苹果的 SF 字体（它的许可证只允许用于苹果平台的软件，正式实现前再核对原文）。
 4. **形状**：卡片式分组，圆角用 WinUI 的默认值（控件 4 px、卡片 8 px），阴影轻。
 5. **材质与导航**：Windows 11 上用 Mica 背景，Windows 10 上用纯色；页面导航用左侧的 `NavigationView` 侧边栏。
 6. **动效**：只用 WinUI 自带的过渡。
@@ -150,9 +150,9 @@ flowchart LR
 
 S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目负责人确认观感。
 
-**字体**（Q2）：Fluent 2 在 Windows 上用 Segoe UI Variable，它只覆盖西文、希腊文和俄文；微软的 Windows 排版指南建议简体中文用 Microsoft YaHei UI，最小 12px（Regular）。两者都是系统字体，不需要随程序分发。架构 5.1 和 README 定的 Maple Mono CN 建议只用在等宽的数据区（变更清单、审计记录），随安装包附带其 SIL OFL 1.1 许可证。
+**字体**（Q2，项目负责人 2026-10-20 决定）：界面文字（中英文）和等宽的数据区都用 Maple Mono CN（SIL OFL 1.1，官方发布包 `MapleMono-CN`）。字体文件随程序放在 `app\workbench\` 中，只由 Workbench 自己加载，不安装到系统；只带用到的字重，不修改、不裁剪字体文件；许可证文本随安装包附带。加载失败时回退到系统字体 Segoe UI Variable 和 Microsoft YaHei UI。不用苹果的 SF 字体。等宽字体比 Segoe UI 宽，页面布局按实际宽度留余量。微软的排版指南建议简体中文最小 12px（Regular），回退字体也照此。官方发布包 `MapleMono-CN.zip`（v7.9）含全部字重和斜体，共约 141 MB；每个字重的实际体积、未打包时从程序目录加载字体、中文显示由 S18 核对。
 
-**spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；另查托盘封装、单实例、.NET 10 下的构建和自包含发布能否在 CI（windows-2025 镜像）上用 `dotnet` 命令完成。S18 发现 A 无法满足时，改用 B，ADR-0015 随之修改。
+**spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；另查托盘封装、单实例、Maple Mono CN 的加载与体积、.NET 10 下的构建和自包含发布能否在 CI（windows-2025 镜像）上用 `dotnet` 命令完成。S18 发现 A 无法满足时，改用 B，ADR-0015 随之修改。
 
 ### 4.6 审批队列
 **Host 一侧**（`WorkbenchChannel`，注册在 `EplanDialogChannel` 之前，即 ADR-0011 的顺序）：
@@ -255,7 +255,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 - 不改变工具契约；Host 与 Bridge 的协议不变。新增的契约：Workbench 管道协议（第 1 版）、`doctor` 和 `audit verify` 的 JSON 输出（带 `schemaVersion`）、`state\addins.json`。
 - `CHANGELOG` 的 Added 记录安装包、Workbench、插件、新命令。
 - 实施顺序（每个 PR 目标 200 行，上限 400 行）：
-  1. 本设计文档；ADR-0014、0016（已接受），Proposed ADR-0015；威胁模型 T19–T23、SEC-22–26。
+  1. 本设计文档；ADR-0014、0015、0016（已接受）；威胁模型 T19–T23、SEC-22–26。
   2. spike S16、S17、S18（不需要 EPLAN）；S14、S15（实机，项目负责人的机器）。
   3. `doctor`、`audit verify` 的 `--format json`。
   4. `install-addin`、`uninstall-addin`、`state\addins.json`（S14 之后）。
@@ -274,8 +274,8 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 ## 9. 待定问题
 | # | 问题 | 结论 |
 |---|---|---|
-| Q1 | Fluent 2 用哪一种实现（4.5） | **待确认**：原建议 B；项目负责人 2026-10-20 问 Fluent UI 与苹果的设计哪个可以，答复是 Fluent UI，并改为**建议 A：WinUI 3（Windows App SDK，未打包、自包含）**，因为负责人要的是 Fluent 的组件库（4.5）。S18 用原型确认，A 无法满足时改用 B。不选依赖 WebView2 的 C、D。Proposed ADR-0015 随之修改，项目负责人确认后接受 |
-| Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | **已决定**（2026-10-20，项目负责人按建议）：界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI）；Maple Mono CN 只用于等宽的数据区，随安装包附带 OFL 许可证 |
+| Q1 | Fluent 2 用哪一种实现（4.5） | **已决定**（2026-10-20，项目负责人："可以用winUI3"）：**A：WinUI 3（Windows App SDK，未打包、自包含）**；原建议 B，负责人要 Fluent 的组件库后改为 A（4.5）。S18 用原型核对，A 无法满足时改用 B。不选依赖 WebView2 的 C、D，也不用苹果的设计规范和组件（4.5）。ADR-0015 已接受 |
+| Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | **已决定**（2026-10-20，项目负责人改定："字体的话用我之前推荐的"）：界面文字和数据区都用 **Maple Mono CN**，随程序附带、不安装到系统，附 OFL 许可证；加载失败时回退到 Segoe UI Variable、Microsoft YaHei UI（4.5） |
 | Q3 | Workbench 是否在登录时自启动 | **已决定**（同上）：安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
 | Q4 | 安装目录能否选择 | **已决定**（同上）：**不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
 | Q5 | 安装包用什么技术 | **已决定**（同上）：**Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
