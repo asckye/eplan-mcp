@@ -127,6 +127,8 @@ internal static class BridgeHost
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
             new ImportDxfPlanOperation(catalog, pages, drawings),
             new ImportDxfExecuteOperation(catalog, pages, drawings, transactions),
+            new ImportPxfPlanOperation(),
+            new ImportPxfExecuteOperation(new EplanProjectImporter()),
             new CheckRunPlanOperation(catalog, pages, checker, messages),
             new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
             new ReportUpdatePlanOperation(catalog, pages, reports),
