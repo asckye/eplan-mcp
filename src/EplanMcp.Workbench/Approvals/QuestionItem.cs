@@ -113,6 +113,9 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
     /// <summary>The unknown outcome is a warning: writes are suspended until the engineer confirms (ADR-0010).</summary>
     public bool OutcomeIsWarning => Question.Execution == QuestionExecution.Unknown;
 
+    /// <summary>The tone of the outcome's text: the warning colour, beside the warning icon, when it is unknown (APR-12).</summary>
+    public FeatureTone OutcomeTone => OutcomeIsWarning ? FeatureTone.Warning : FeatureTone.Normal;
+
     /// <summary>The row's name for screen readers (CTL-05): what it is, where, and how much time is left or how it ended.</summary>
     public string AccessibleName => IsPending
         ? Loc.Current.T("Question.ItemName", Tool, Tier, ProjectName, Countdown.Clock(Left))
