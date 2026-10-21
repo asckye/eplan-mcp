@@ -35,18 +35,19 @@
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `scheme` 不在 `USER.Terminal.Numbering.Scheme` 中 | `not_started` | `metadata.candidates` 列出可用的方案 |
 | `DEVICE_NOT_FOUND` | 有端子排找不到 | `not_started` | 提示用 `eplan_terminal_strip_list` |
+| `EPLAN_OPERATION_FAILED` | 读回时发现 EPLAN 还改了不该编号的端子：`only_unnumbered` 时不带 `?` 的，或者给定端子排之外的 | `rolled_back` | `metadata.unplanned` 列出多改的端子（`前 -> 后`，最多 50 行），`unplannedCount` 为总数；请工程师在 EPLAN 中编号，或只给要重排的端子排并设 `only_unnumbered: false` |
 
 ## 5. 实现要点
 - **Host**：走 `WritePipeline`，级别 Destructive，规划操作 `terminal.renumber.plan`，执行操作 `terminal.renumber.execute`。时限 300 秒，含备份；每 5 秒一次心跳。
 - **方案**：规划时用 `SchemeSetting` 在用户设置 `USER.Terminal.Numbering.Scheme` 中校验，候选不含内部的 `InternalRefDefScheme`（A24）。这比 `eplan_device_renumber` 好：名称在备份之前就能校验。
 - **范围**：`strips` 中各端子排的 `Terminals`，或 `GetTerminals(null)` 的全部端子；"带 `?`"指端子名中 `:` 之后的部分含 `?`。
 - **执行**：Destructive 流水线先备份，然后在 `TransactionScope` 中：
-  1. 记下范围内每个端子的会话内标识和名称；
-  2. `new Renumber().Terminals(terminals, TerminalsSequence.Level, Extent.AllSelectedTerminalStrips, TerminalsPotential.Numbering ×3, MultipleTerminals.NumberIndividually, TerminalsWithAlphabeticalCharacters.DontModify, scheme, start, step, "", "", false, false, only_unnumbered, false)`（S21 的参数，最后四个依次为允许改变排序、填补空号、只编带 `?` 的、连带编号 PLC 控制的端子）；
-  3. 读回、比较、提交，同 `eplan_device_renumber`。
-- **已验证**（S21，A24）：全部 1331 个端子 31–43 秒，4 个端子换了号；能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销。
+  1. 记下项目中每个端子的会话内标识和名称（只给整个项目时就是范围）；
+  2. `new Renumber().Terminals(terminals, TerminalsSequence.Level, Extent.AllSelectedTerminalStrips, TerminalsPotential.Numbering ×3, MultipleTerminals.NumberIndividually, TerminalsWithAlphabeticalCharacters.DontModify, scheme, start, step, "", "", false, false, only_unnumbered, false)`（S21 的参数，最后四个依次为允许改变排序、填补空号、只编带 `?` 的、连带编号 PLC 控制的端子）。🔴 `only_unnumbered` 为 true 时，`terminals` **只含范围内名称中 `:` 之后带 `?` 的端子**：那个参数挡不住已编号的端子，给整个项目的全部端子时，EPLAN 照样按方案重排了已编号的 `+A1-XD1`（Large 测试，2026-10-21，A24）。做法同 `eplan_device_renumber` 只把带 `?` 的设备标识交给 `PostNumerate`（A20）；没有这样的端子时规划没有变更，`not_started`；
+  3. 读回项目中的全部端子，按会话内标识比较：只允许规划时数到的端子改名（`only_unnumbered` 时是带 `?` 的，否则是范围内的全部）。其他端子改了名就是读回不一致，整体回滚，返回 `EPLAN_OPERATION_FAILED`（第 4 节）；一致时提交，同 `eplan_device_renumber`。
+- **已验证**（S21，A24）：全部 1331 个端子 31–43 秒，4 个端子换了号；能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销。插宏后对整个项目做 `only_unnumbered`，7 个 `:?n` 都编成了 `:n`，`stillUnnumbered` 为空，EPLAN 没有崩溃，约 35–43 秒（Large 测试，2026-10-21）。
 - **待 Large 测试确认**：
-  - `only_unnumbered = true` 的效果（示例项目中没有带 `?` 的端子；可先用 `eplan_macro_insert` 插入带未编号端子的宏，A13）；
+  - 只交带 `?` 的端子（仍用 `AllSelectedTerminalStrips`）之后，端子排中已编号的端子是否保持不变。不变的话，读回检查不会触发；变了的话，读回检查会回滚。`Extent.Selected`（只编给出的端子，XML）没有用：它会不会和端子排中已有的号重复，还没有验证；
   - 只给部分端子排时，`Extent.AllSelectedTerminalStrips` 是否只改这些端子排；
   - `start`、`step` 不为 1 时的效果；
   - EPLAN 没有改任何端子名时是否留下撤销步骤：工具按 `eplan_device_renumber` 的做法（A20）返回 `not_started`、`undo` 为 `null`。

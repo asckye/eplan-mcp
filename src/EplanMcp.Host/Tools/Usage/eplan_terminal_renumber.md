@@ -44,4 +44,5 @@ Every error carries `execution`: `not_started` and `rolled_back` mean the projec
 - BACKUP_FAILED (`not_started`): the project could not be backed up first, so nothing was numbered. Ask the engineer to check the free disk space, or to run 'eplanmcp doctor'. Do not retry by yourself.
 - PLAN_STALE (`not_started`): the terminals in scope changed while the call waited; call again.
 - EPLAN_OPERATION_FAILED (`rolled_back`): EPLAN could not number the terminals; `metadata.eplanMessage` has EPLAN's message.
+- EPLAN_OPERATION_FAILED (`rolled_back`): EPLAN also renamed terminals it was not to number (without '?' when `only_unnumbered`, or in other strips); `metadata.unplanned` lists them (`before -> after`). Ask the engineer to number the terminals in EPLAN, or give only the strips to renumber with `only_unnumbered: false`.
 - POLICY_DENIED, WRITES_SUSPENDED, AUDIT_UNAVAILABLE (`not_started`), OUTCOME_UNKNOWN (`unknown`), LOCK_FAILED, INTERNAL, and the connection errors: as for eplan_page_create.
