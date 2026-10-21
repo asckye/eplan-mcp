@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using EplanMcp.Workbench.Approvals;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
@@ -27,6 +28,8 @@ public partial class MainWindow : Window
 
     private readonly (WorkbenchPage Page, string Key, string Shortcut, RadioButton Item, FrameworkElement View)[] _pages;
     private bool? _compactChosen;
+    private ApprovalChannelState _channel;
+    private int _pending;
     private IInputElement? _settingsOpener;
 
     public MainWindow()
@@ -88,6 +91,21 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Shows whether approvals are taken and how many questions wait (STS-10, STS-11); a change of state is announced
+    /// (STS-02).
+    /// </summary>
+    public void ShowApprovals(ApprovalChannelState channel, int pending)
+    {
+        bool changed = channel != _channel;
+        (_channel, _pending) = (channel, pending);
+        ApplyStatus();
+        if (changed)
+        {
+            AccessibleStatus.Announce(PipeText);
+        }
+    }
+
     /// <summary>Shows the window from the tray or for a second start, in front: the engineer asked for it (NAV-09).</summary>
     public void Restore()
     {
@@ -121,6 +139,28 @@ public partial class MainWindow : Window
     private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);
 
     private void OnSettings(object sender, RoutedEventArgs e) => OpenSettings();
+
+    private void OnPendingBadge(object sender, RoutedEventArgs e) => Navigate(WorkbenchPage.Approvals, NavigationOrigin.Reminder);
+
+    private void ApplyStatus()
+    {
+        Loc loc = Loc.Current;
+        (string text, string help, string icon) = _channel switch
+        {
+            ApprovalChannelState.Accepting => ("Pipe.Accepting", string.Empty, "Primer.AlertIcon.Success"),
+            ApprovalChannelState.Full => ("Pipe.Full", "Pipe.FullHelp", "Primer.AlertIcon.Warning"),
+            _ => ("Pipe.Taken", "Pipe.TakenHelp", "Primer.AlertIcon.Error"),
+        };
+        PipeText.Text = loc.T(text, ApprovalQueue.DefaultCapacity);
+        PipeIcon.SetResourceReference(StyleProperty, icon);
+        PipeText.ToolTip = help.Length == 0 ? PipeText.Text : PipeText.Text + Environment.NewLine + loc[help];
+        AutomationProperties.SetHelpText(PipeText, help.Length == 0 ? string.Empty : loc[help]);
+        string pending = loc.T("Tray.Pending", _pending);
+        PendingBadge.Visibility = _pending > 0 ? Visibility.Visible : Visibility.Collapsed;
+        PendingBadge.Content = _pending.ToString(CultureInfo.CurrentCulture);
+        PendingBadge.ToolTip = pending;
+        AutomationProperties.SetName(PendingBadge, pending);
+    }
 
     private void OnSettingsClosed(object? sender, EventArgs e) => CloseSettings();
 
@@ -180,6 +220,7 @@ public partial class MainWindow : Window
         string toggle = loc[Ux.GetCompact(Sider) ? "Shell.Expand" : "Shell.Collapse"];
         SiderToggle.Content = toggle;
         AutomationProperties.SetName(SiderToggle, toggle);
+        ApplyStatus();
         Label(MinimizeButton, "Shell.Minimize");
         Label(MaximizeButton, WindowState == WindowState.Maximized ? "Shell.Restore" : "Shell.Maximize");
         Label(CloseButton, "Shell.Close");

@@ -1,5 +1,8 @@
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
+using EplanMcp.Workbench.Approvals;
+using EplanMcp.Workbench.Logging;
 using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Shell;
@@ -9,19 +12,24 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench;
 
 /// <summary>
-/// The Workbench process (M5 design 4.4): one per user and data root; settings, fonts, language, theme, the window and
-/// the tray. Closing the window only hides it to the tray; exiting goes through the tray menu (NAV-09, DLG-11).
+/// The Workbench process (M5 design 4.4): one per user and data root; settings, fonts, language, theme, the approval
+/// pipe and its queue, the window and the tray. Closing the window only hides it to the tray; exiting goes through the
+/// tray menu (NAV-09, DLG-11).
 /// </summary>
 public sealed partial class App : Application, IDisposable
 {
     private readonly WorkbenchDataLocations _locations = WorkbenchDataLocations.FromEnvironment();
     private WorkbenchSettings _settings = new();
     private SingleInstance? _instance;
+    private FileLog? _log;
+    private ApprovalQueue? _queue;
+    private ApprovalServer? _server;
+    private bool _listening;
     private TrayIcon? _tray;
     private MainWindow? _window;
 
     /// <summary>How many questions wait now; exiting with any asks first (DLG-11).</summary>
-    internal int Pending { get; set; }
+    internal int Pending { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -45,14 +53,22 @@ public sealed partial class App : Application, IDisposable
 
         _window = new MainWindow { HideOnClose = true };
         MainWindow = _window;
-        _tray = new TrayIcon(Restore, RequestExit);
+        _tray = new TrayIcon(Restore, () => _ = ExitAsync());
         _instance.Listen(() => Dispatcher.BeginInvoke(Restore));
+
+        _log = new FileLog(_locations.Logs, TimeProvider.System);
+        _queue = new ApprovalQueue(TimeProvider.System);
+        _queue.Changed += _ => Dispatcher.BeginInvoke(ShowQueue);
+        _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
+        _listening = _server.Start();
+        ShowQueue();
         _window.Show();
     }
 
     public void Dispose()
     {
         _tray?.Dispose();
+        _log?.Dispose();
         _instance?.Dispose();
     }
 
@@ -64,18 +80,43 @@ public sealed partial class App : Application, IDisposable
 
     private void Restore() => _window?.Restore();
 
-    /// <summary>Exit from the tray: with questions waiting, only after the engineer confirms (DLG-11).</summary>
-    private void RequestExit()
+    /// <summary>The waiting count in the tray and the Header, and whether questions are taken (STS-09 to STS-11).</summary>
+    private void ShowQueue()
     {
-        int pending = Pending;
-        if (pending > 0)
+        Pending = _queue?.PendingCount ?? 0;
+        ApprovalChannelState channel = !_listening ? ApprovalChannelState.NameTaken
+            : Pending >= ApprovalQueue.DefaultCapacity ? ApprovalChannelState.Full : ApprovalChannelState.Accepting;
+        _tray?.Pending = Pending;
+        _window?.ShowApprovals(channel, Pending);
+    }
+
+    /// <summary>
+    /// Exit from the tray: with questions waiting, only after the engineer confirms (DLG-11); they then return to their
+    /// Hosts as closed.
+    /// </summary>
+    private async Task ExitAsync()
+    {
+        try
         {
-            Restore();
-            Loc loc = Loc.Current;
-            if (!WorkbenchDialog.Confirm(_window!, loc["Exit.Title"], loc.T("Exit.Message", pending), loc["Exit.Cancel"], loc["Exit.Confirm"]))
+            int pending = Pending;
+            if (pending > 0)
             {
-                return;
+                Restore();
+                Loc loc = Loc.Current;
+                if (!WorkbenchDialog.Confirm(_window!, loc["Exit.Title"], loc.T("Exit.Message", pending), loc["Exit.Cancel"], loc["Exit.Confirm"]))
+                {
+                    return;
+                }
             }
+
+            if (_server is not null)
+            {
+                await _server.DisposeAsync().ConfigureAwait(true);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
+        {
+            // Quitting goes on: a Host whose connection breaks takes its question as closed all the same.
         }
 
         if (_window is not null)
