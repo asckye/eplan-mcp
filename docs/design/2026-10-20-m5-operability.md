@@ -139,6 +139,8 @@ flowchart LR
 
 项目负责人 2026-10-20 还问过 Fluent UI 与苹果的设计风格（Apple Human Interface Guidelines）哪个更合适。建议 Fluent UI：苹果的规范和组件只面向苹果平台，Windows 上没有官方实现，每个控件都要自己画，讲述人、高对比度和键盘焦点也要自己保证；Workbench 放在 EPLAN 和 Windows 的对话框旁边使用，用 Windows 自己的设计语言，工程师不必面对两套交互习惯。
 
+**2026-10-20 改定**：项目负责人决定视觉与 TIA 的 Workbench 一致（Ant Design v5），改用 WPF 并复用 TIA 的主题，字体仍用 Maple Mono CN（[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)，Proposed）。ADR-0017 接受后，下面的 A（WinUI 3）和观感规则由它和 `docs/standards/workbench-ui.md` 取代。
+
 **观感**（项目负责人 2026-10-20：喜欢苹果的观感）：控件仍用 WinUI 3 原生的，只通过主题资源调整观感（轻量样式），不重新绘制控件，这样无障碍和高对比度不受影响：
 1. **留白**：间距以 8 px 为单位，页面边距 24–32 px；分组之间靠留白区分，少用分隔线。
 2. **颜色克制**：界面以中性色为主，强调色只用于选中状态和链接；Destructive 和警告用系统的状态色；审批卡片的两个按钮仍然一样（ADR-0014）。
@@ -274,7 +276,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 ## 9. 待定问题
 | # | 问题 | 结论 |
 |---|---|---|
-| Q1 | Fluent 2 用哪一种实现（4.5） | **已决定**（2026-10-20，项目负责人："可以用winUI3"）：**A：WinUI 3（Windows App SDK，未打包、自包含）**；原建议 B，负责人要 Fluent 的组件库后改为 A（4.5）。S18 用原型核对，A 无法满足时改用 B。不选依赖 WebView2 的 C、D，也不用苹果的设计规范和组件（4.5）。ADR-0015 已接受 |
+| Q1 | Fluent 2 用哪一种实现（4.5） | **已决定**（2026-10-20，项目负责人："可以用winUI3"）：**A：WinUI 3（Windows App SDK，未打包、自包含）**；原建议 B，负责人要 Fluent 的组件库后改为 A（4.5）。S18 用原型核对，A 无法满足时改用 B。不选依赖 WebView2 的 C、D，也不用苹果的设计规范和组件（4.5）。ADR-0015 已接受。**2026-10-20 改定**：项目负责人学习 TIA 的 Workbench 后决定"学规范，视觉也和TIA一致"，并选择"改用 WPF，复用 TIA 主题"，字体仍用 Maple Mono CN；写成 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)（Proposed），接受后取代 ADR-0015 |
 | Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | **已决定**（2026-10-20，项目负责人改定："字体的话用我之前推荐的"）：界面文字和数据区都用 **Maple Mono CN**，随程序附带、不安装到系统，附 OFL 许可证；加载失败时回退到 Segoe UI Variable、Microsoft YaHei UI（4.5） |
 | Q3 | Workbench 是否在登录时自启动 | **已决定**（同上）：安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
 | Q4 | 安装目录能否选择 | **已决定**（同上）：**不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
