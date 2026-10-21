@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using EplanMcp.Host.Addin;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
 using EplanMcp.Host.Safety;
@@ -217,10 +218,8 @@ internal static class DoctorChecks
     public static IEnumerable<DoctorCheck> EplanInstallations(string programFiles)
     {
         string platform = Path.Combine(programFiles, "EPLAN", "Platform");
-        string[] executables = Directory.Exists(platform)
-            ? [.. Directory.EnumerateDirectories(platform).Select(d => Path.Combine(d, "Bin", "EPLAN.exe")).Where(File.Exists).Order(StringComparer.OrdinalIgnoreCase)]
-            : [];
-        if (executables.Length == 0)
+        IReadOnlyList<string> executables = EplanInstallation.Executables(programFiles);
+        if (executables.Count == 0)
         {
             yield return new(DoctorCheckIds.EplanInstallation, DoctorStatus.Failure, $"在 {platform} 下没有找到 EPLAN", $"No EPLAN found under {platform}");
             yield break;

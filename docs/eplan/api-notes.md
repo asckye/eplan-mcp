@@ -175,6 +175,7 @@
 - `/unregister` 之后插件不再可用（S085021），但工作站设置中它的键和 `AssemblyPath` 仍然保留。— S14。
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
+- 变体的程序目录是 `<Program Files>\EPLAN\<变体>\<版本>\Bin`（其中有 `W3u.exe`），版本目录名与 `Platform\<版本>` 相同，变体目录名就是 `/Variant:` 的值：开发机上有 `Electric P8\2026.0.3\Bin\W3u.exe` 和 `Pro Panel\2026.0.3\Bin\W3u.exe`；`Electric P8 Data` 等目录中没有这一层。`install-addin` 按它找出已安装的变体。— 2026-10-21 只读查看开发机的 `C:\Program Files\EPLAN`；A22。
 
 ### A30. 主数据的备份、还原与部件库写入（spike S24 写入部分，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。写入只在还原到 scratch 中的副本上进行，正在用的库前后 SHA-256 不变。
