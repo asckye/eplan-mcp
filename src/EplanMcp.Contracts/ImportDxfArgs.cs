@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.ImportDxfPlan"/> and of its execute operation, which imports the drawing.</summary>
+/// <summary>Arguments of <see cref="OperationNames.ImportDxfPlan"/> and <see cref="OperationNames.ImportDxfExecute"/>.</summary>
 public sealed class ImportDxfArgs
 {
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>

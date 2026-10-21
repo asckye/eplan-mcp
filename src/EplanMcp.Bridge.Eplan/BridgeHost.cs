@@ -92,6 +92,7 @@ internal static class BridgeHost
         var languageRemover = new EplanLanguageRemover();
         var partsDatabase = new EplanPartsDatabase();
         var placer = new EplanDevicePlacer();
+        var drawings = new EplanDrawingImporter();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -124,6 +125,8 @@ internal static class BridgeHost
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
+            new ImportDxfPlanOperation(catalog, pages, drawings),
+            new ImportDxfExecuteOperation(catalog, pages, drawings, transactions),
             new CheckRunPlanOperation(catalog, pages, checker, messages),
             new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
             new ReportUpdatePlanOperation(catalog, pages, reports),

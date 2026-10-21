@@ -160,6 +160,12 @@ public static class OperationNames
     public const string ImportDxfPlan = "import.dxf.plan";
 
     /// <summary>
+    /// Imports the drawing onto the page in one transaction and counts the objects it added. Arguments:
+    /// <see cref="ImportDxfArgs"/> with the fingerprint; data: <see cref="ImportDxfData"/>.
+    /// </summary>
+    public const string ImportDxfExecute = "import.dxf.execute";
+
+    /// <summary>
     /// The plan of eplan_check_run: finds the pages and counts the project's check messages, never checks. Arguments:
     /// <see cref="CheckRunArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>
