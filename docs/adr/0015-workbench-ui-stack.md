@@ -33,7 +33,7 @@ M5 要做 Workbench：审批队列、审计浏览、客户端配置向导、状�
 **建议方案 1**（项目负责人在 M5 设计 Q1 中决定）。最初建议的是方案 2；项目负责人要的是 Fluent 的组件库，在 Windows 桌面上它就是 WinUI 3，所以改为方案 1。S18 发现方案 1 无法满足时改用方案 2，并修改本 ADR。
 
 1. **运行时**：`EplanMcp.Workbench` 以 .NET 10 的 Windows 目标框架构建，WinUI 3，未打包（不需要包身份、不经 MSIX 安装）、Windows App SDK 自包含，整个程序发布到 `app\workbench\`（M5 设计 4.1），不需要另装 Windows App SDK 运行时。Windows App SDK 固定一个版本，只在本项目发布新版本时升级。
-2. **Fluent 2**：直接用 WinUI 3 自带的控件和主题资源，不另写控件样式；主题跟随系统，设置中可以切换浅色、深色；Windows 11 上用 Mica 背景，Windows 10 上用纯色。确实缺的部分按 Fluent 2 的颜色、字体、间距规范补，集中在一个资源字典中。
+2. **Fluent 2**：直接用 WinUI 3 自带的控件和主题资源，不另写控件样式；主题跟随系统，设置中可以切换浅色、深色；Windows 11 上用 Mica 背景，Windows 10 上用纯色。确实缺的部分按 Fluent 2 的颜色、字体、间距规范补，集中在一个资源字典中。观感按项目负责人的要求做成苹果式的简洁（留白多、颜色克制、排版层级少），只通过主题资源调整，规则见 M5 设计 4.5 的"观感"。
 3. **托盘和单实例**：托盘用 Win32 `Shell_NotifyIcon` 的小封装（P/Invoke，集中在一个类中），不引入第三方界面库；S18 核对它在 WinUI 3 窗口中的消息处理，不行再评估 H.NotifyIcon.WinUI（MIT）。单实例用 Windows App SDK 的 `AppInstance`，第二个实例把激活转给第一个后退出（M5 设计 4.4）。
 4. **例外**：审批卡片的两个按钮都用默认按钮样式，不用 Fluent 的强调色主按钮（`AccentButtonStyle`），样式相同（ADR-0011、ADR-0014）。
 5. **字体**：界面文字用系统字体：Segoe UI Variable，中文 Microsoft YaHei UI（[Windows 排版](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography)）；等宽的数据区用 Maple Mono CN，随安装包附带 SIL OFL 1.1 许可证（M5 设计 Q2）。
