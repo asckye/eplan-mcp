@@ -279,6 +279,19 @@ public static class OperationNames
     public const string PageRenumberExecute = "page.renumber.execute";
 
     /// <summary>
+    /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
+    /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string LanguageSetPlan = "language.set.plan";
+
+    /// <summary>
+    /// Adds translation languages and sets the displayed languages, then reads them back; on any failure writes the old
+    /// settings back, which a rollback does not (api-notes A28). Arguments: <see cref="LanguageSetArgs"/> with the
+    /// fingerprint; data: <see cref="LanguageSetData"/>.
+    /// </summary>
+    public const string LanguageSetExecute = "language.set.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

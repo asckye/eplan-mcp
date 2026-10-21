@@ -15,12 +15,13 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
-| `display` | array of string，1–10 项 | 否 | — | 图上显示的语言，按顺序，如 `["en_US", "zh_CN"]`；每种都必须是项目的翻译语言 |
+| `display` | array of string，1–10 项 | 否 | — | 图上显示的语言，按顺序，如 `["en_US", "zh_CN"]`；每种都必须是项目的翻译语言。只给 `["##_##"]` 时清除显示语言（恢复为未设置） |
 | `add` | array of string，1–10 项 | 否 | — | 加入翻译语言的语言，如 `["en_US"]`；已有的语言忽略 |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回前后的语言设置，不请求审批，也不修改项目 |
 
 - `display` 和 `add` 至少给一个；两个都给时先加语言，再设显示语言。
 - 语言代码的形式是 `xx_YY`（EPLAN 的 ISO 代码，如 `de_DE`、`zh_CN`）。
+- `["##_##"]` 是为了能用 `before` 的值恢复原样：示例项目的显示语言就是 `##_##`（A28），没有它，这个工具无法把显示语言改回未设置。
 
 ## 3. 输出
 ```json
@@ -43,7 +44,8 @@
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `display`、`add` 都没给；语言代码形式不对或重复；`display` 中有语言不是翻译语言（也不在 `add` 中） | `not_started` | `metadata.violations` 列出全部问题；`metadata.candidates` 列出项目的翻译语言 |
-| `EPLAN_OPERATION_FAILED` | EPLAN 拒绝（`ArgumentException`），或执行后读回的设置与请求不同 | `rolled_back` | 附带 EPLAN 的消息；说明已经写回原来的设置 |
+| `EPLAN_OPERATION_FAILED` | EPLAN 拒绝（`ArgumentException`），或执行后读回的设置与请求不同 | `rolled_back` | 附带 EPLAN 的消息；说明已经写回原来的设置；读回不同时 `metadata.problem` 说明 EPLAN 得到了什么 |
+| `OUTCOME_UNKNOWN` | 写回原值失败，或写回后读回与原值不同；提交或回滚本身失败 | `unknown` | 不要重复调用；`metadata.translation`、`metadata.display` 给出原值，请工程师在项目设置（翻译）中恢复；该项目的写入随之暂停 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
 ## 5. 实现要点
@@ -52,16 +54,17 @@
 - **执行**：
   1. 记下两项设置的原值；
   2. `add` 中的每种语言：`new Translate().AddProjectLanguage(project, 语言)`；
-  3. `display`：`new Translate().SetDisplayedLanguages(project, string.Join(",", display))`。**用逗号分隔**：分号或结尾分号都抛 `ArgumentException`（S23 r1，A28）；
-  4. 读回两项设置，与请求不同就写回原值并抛出；EPLAN 抛异常时同样写回原值。
+  3. `display`：`new Translate().SetDisplayedLanguages(project, string.Join(",", display))`。**用逗号分隔**：分号或结尾分号都抛 `ArgumentException`（S23 r1，A28）。`["##_##"]` 时 `SetDisplayedLanguages` 不接受（`"##_##;"` 抛异常，A28），改为按存储形式写 `DISPLAYED_LANGUAGES = "##_##;"`，与写回用同一个方法；
+  4. 读回两项设置，与请求不同就写回原值并抛出；EPLAN 抛异常时同样写回原值。比较：翻译语言是原有的加上新加的（不比顺序，EPLAN 怎样排序未验证）；显示语言只在给了 `display` 时比较，按顺序。没给 `display` 时 EPLAN 自己改了显示语言（删除语言时会这样，A28），不算失败，在 `after` 中如实列出。
+  - 写回在回滚之后进行，与 `eplan_language_remove` 相同（取消在提交前的最后一个安全点才被发现，那时已经不在变更之中）：`ProjectSettings.SetStringSetting("TRANSLATEGUI.TRANSLATE_LANGUAGES" / "TRANSLATEGUI.DISPLAYED_LANGUAGES", 原样的存储值, 0)`，在 `QuietModeStep` 中，不在 `SafetyPoint` 中（它不回滚设置，A28）；写回后读回核对，不同或写回抛异常时为 `OUTCOME_UNKNOWN`（`execution` 为 `unknown` 当且仅当 reason 为 `OUTCOME_UNKNOWN`，工具设计规范 6.2）。
   5. 包在 `TransactionScope` 中照常提交，但不依赖它回滚设置：项目设置不被 `SafetyPoint` 回滚（A28）。
 - **已验证**（S23 r1，A28）：`"en_US"` 和 `"en_US,zh_CN"` 被接受，存为 `en_US;` 和 `en_US;zh_CN;`。
-- **待 Large 测试确认**：`AddProjectLanguage` 的效果（S23 没有试）；显示语言改变后图上文本的变化；写回原值能把 `##_##` 恢复。
+- **待 Large 测试确认**：`AddProjectLanguage` 的效果（S23 没有试）；显示语言改变后图上文本的变化；`ProjectSettings.SetStringSetting` 写入语言设置的效果（写回和清除显示语言都用它），写回原值能把 `##_##` 恢复。
 
 ## 6. 写操作专项
 - **dry-run**：返回 `before` 和计算出的 `after`，`execution = not_started`。
 - **审批**：项目在 scratch 之外时请求审批，表单为一行变更，注明 Ctrl+Z 不能撤销语言设置。
-- **审计**：前后的设置。失败时 `execution` 为 `rolled_back` 表示原值已写回；写回也失败时为 `unknown`，`hint` 给出原值，请工程师在项目属性中恢复。
+- **审计**：前后的设置。失败时 `execution` 为 `rolled_back` 表示原值已写回；写回也失败时为 `unknown`（`OUTCOME_UNKNOWN`），`metadata` 给出原值，请工程师在项目设置中恢复。
 - 幂等：同样的调用再来一次，结果相同。
 
 ## 7. 测试
