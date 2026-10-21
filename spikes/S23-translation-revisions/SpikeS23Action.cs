@@ -149,6 +149,9 @@ public sealed class SpikeS23Action : IEplAction
             case "translatesource":
                 report["translateSource"] = TranslateWithSource(project);
                 break;
+            case "revisiontrack":
+                report["revisionTrack"] = RevisionTracking(project);
+                break;
             case "removerollback":
                 report["remove"] = SettingRolledBack(project, () => new Translate().RemoveProjectLanguage(project, RemovedLanguage));
                 break;
@@ -407,6 +410,97 @@ public sealed class SpikeS23Action : IEplAction
 
         result["textAfterRollback"] = Raw(() => function.Properties.FUNC_TEXT);
         return result;
+    }
+
+    /// <summary>
+    /// r3: where EPLAN keeps the revisions (S23 r0 found none of the comparison types useful). Walks one change-tracking
+    /// round on the scratch copy, committed (CreateRevision cannot be undone, S23 r0): create a revision, change one
+    /// page's description, complete the project; reads the revision properties of the project and its pages after
+    /// each step.
+    /// </summary>
+    private static JObject RevisionTracking(Project project)
+    {
+        var result = new JObject { ["before"] = RevisionProperties(project) };
+        string newPath = string.Empty;
+        result["create"] = Try(() =>
+        {
+            using var revision = new Revision();
+            revision.CreateRevision(project, "S23-3", "EplanMcp spike S23 r3", ref newPath);
+            return new JObject { ["newPath"] = newPath, ["linkFile"] = project.ProjectLinkFilePath };
+        });
+        result["afterCreate"] = RevisionProperties(project);
+        result["edit"] = Try(() =>
+        {
+            Page page = project.Pages.First();
+            page.LockObject();
+            var text = new MultiLangString();
+            text.AddString(ISOCode.Language.L_en_US, "EplanMcp S23 r3 edit");
+            page.Properties.PAGE_NOMINATIOMN = text;
+            return page.Name;
+        });
+        result["afterEdit"] = RevisionProperties(project);
+        result["complete"] = Try(() =>
+        {
+            using var revision = new Revision();
+            revision.CompleteProject(project, "S23-Rev-A", "EplanMcp spike S23 r3", "completed by the spike", false);
+            return "completed";
+        });
+        result["afterComplete"] = RevisionProperties(project);
+        return result;
+    }
+
+    private static JObject RevisionProperties(Project project)
+    {
+        var log = new JArray();
+        for (int i = 1; i <= 5; i++)
+        {
+            var entry = new JObject
+            {
+                ["revisions"] = Raw(() => project.Properties.PROJ_REVISIONS[i]),
+                ["name"] = Raw(() => project.Properties.PROJ_REVISION_LOG_NAME[i]),
+                ["description"] = Raw(() => project.Properties.PROJ_REVISION_LOG_DESCRIPTION[i]),
+                ["user"] = Raw(() => project.Properties.PROJ_REVISION_LOG_USER[i]),
+                ["date"] = Raw(() => project.Properties.PROJ_REVISION_LOG_DATE[i]),
+            };
+            if (entry.Properties().Any(x => x.Value.ToString().Length > 0))
+            {
+                log.Add(new JObject { ["index"] = i, ["values"] = entry });
+            }
+        }
+
+        var pages = new JArray();
+        foreach (Page page in project.Pages)
+        {
+            var entry = new JObject
+            {
+                ["draft"] = Raw(() => page.Properties.PAGE_REVISION_LOG_DRAFT),
+                ["name1"] = Raw(() => page.Properties.PAGE_REVISION_LOG_NAME[1]),
+                ["projRev1"] = Raw(() => page.Properties.PAGE_REVISION_LOG_PROJ_REV[1]),
+                ["projRevName1"] = Raw(() => page.Properties.PAGE_REVISION_LOG_PROJ_REVNAME[1]),
+                ["date1"] = Raw(() => page.Properties.PAGE_REVISION_LOG_DATE[1]),
+                ["marker"] = Raw(() => page.Properties.PAGE_INSTANCE_WITH_REVISIONMARKER),
+            };
+            if (entry.Properties().Any(x => x.Value.ToString().Length > 0 && x.Value.ToString() != "False" && x.Value.ToString() != "0"))
+            {
+                pages.Add(new JObject { ["page"] = page.Name, ["values"] = entry });
+            }
+        }
+
+        return new JObject
+        {
+            ["linkFile"] = project.ProjectLinkFilePath,
+            ["logStarted"] = Raw(() => project.Properties.PROJ_REVISION_LOG_START),
+            ["parent"] = Raw(() => project.Properties.PROJ_REVISIONSPARENT),
+            ["highestIndex"] = Raw(() => project.Properties.PROJECT_HIGHEST_REVISION_INDEX),
+            ["log"] = log,
+            ["pagesWithRevisionData"] = new JArray(pages.Take(10)),
+            ["pagesWithRevisionDataCount"] = pages.Count,
+            ["uncompletedPages"] = Try(() =>
+            {
+                using var revision = new Revision();
+                return new JArray(revision.GetUncompletedPages(project).Select(p => p.Name));
+            }),
+        };
     }
 
     private static JObject RevisionState(Project project) => new()

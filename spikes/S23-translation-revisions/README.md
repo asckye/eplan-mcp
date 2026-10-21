@@ -50,7 +50,11 @@ spikes\S23-translation-revisions\Driver\bin\Release\net481\EplanMcp.Spikes.S23.D
 5. 🔴 **新建修订会改变项目文件的路径**（`.elk` → `.ell`），Ctrl+Z 不撤回。Host 按路径识别项目、记录审计和暂停（ADR-0010），所以修订的写工具要单独设计：
    - 执行后按新路径重新识别项目，审计中记下新旧两个路径；
    - 不能撤销，定为 Destructive。
-6. **修订的只读状态还没有找到**：比较结果和未完成的页在新建修订前后都是 0；修订列表存在项目的什么地方要另查。`eplan_revision_list` 在查清之前不实现（M4c 设计 Q9）。
+6. **修订的状态在项目属性和链接文件的扩展名中**（r3，`--revision-tracking`，2026-10-21，scratch 副本上提交）：
+   - 新建修订（`CreateRevision`）：链接文件 `.elk` → `.ell`；`PROJ_REVISION_LOG_START` 为 1；修订记录 `PROJ_REVISION_LOG_NAME[1]` 为修订名，`_DESCRIPTION[1]`（多语言串，`??_??@…`）、`_USER[1]`（`ASCKYE`）、`_DATE[1]`（Unix 秒数的字符串）也有值；`PROJ_REVISIONS[i]` 为空；
+   - 在修订中用 API 改一页的描述：页面没有标为草稿（`PAGE_REVISION_LOG_DRAFT` 空），页面的修订记录（`PAGE_REVISION_LOG_*`）为空，`GetUncompletedPages` 仍为空（XML 文档：从未"完成项目"时总是空）；
+   - 完成项目（`CompleteProject(project, 名称, 说明, 附加说明, false)`）：链接文件 `.ell` → `.elr`（完成的修订项目，写保护），`PROJ_REVISIONSPARENT` 为原来的 `.ell` 路径；修订记录仍只有第 1 条，完成时给的名称没有出现在 1–5 条中。
+   - 所以 `eplan_revision_list` 按链接文件扩展名给出项目的修订状态，按 `PROJ_REVISION_LOG_*[i]` 列出修订记录（i 从 1 起，到名称为空为止，最多 1000）。页面级的记录和"完成"的名称从哪里读，没有查清。
 
 ## 局限
 - 只在示例项目、Electric P8、EPLAN 2026 上验证。

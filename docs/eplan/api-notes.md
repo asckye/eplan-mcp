@@ -214,6 +214,7 @@
 - 🔴 `RemoveProjectLanguage(project, "sv_SE")` 删除该语言的全部译文、把它移出翻译语言，还把显示语言改为 `zh_CN;`。`SafetyPoint` 回滚撤回了译文，但**没有撤回语言列表和显示语言**。— S23。
 - 🔴 `RemoveProjectLanguage` 删除了语言也返回 false：在不是当前项目的写副本上、`SafetyPoint` 中删除 `sv_SE`，返回 false，翻译语言中却已没有 `sv_SE`，显示语言从 `##_##;` 变为 `zh_CN;`，回滚后设置仍是删除后的样子（与 S23 一致）。结果要按读回的翻译语言判断，不能看返回值。— 2026-10-21，S24 r18。
 - 🔴 `Revision.CreateRevision(project, 名称, 说明, ref 路径)` 0.04 秒，返回的路径为空，项目链接文件从 `.elk` 变为 `.ell`（修订跟踪中的项目）；Ctrl+Z 不撤回。`Project.Comparisons` 和 `Revision.GetUncompletedPages` 前后都是 0。— S23。
+- 修订状态（S23 r3）：链接文件扩展名 `.elk` 普通项目、`.ell` 修订进行中（变更跟踪）、`.elr` 完成的修订（写保护，`CompleteProject` 把 `.ell` 改为 `.elr`，`PROJ_REVISIONSPARENT` 为原路径）。修订记录在项目的带索引属性 `PROJ_REVISION_LOG_NAME/DESCRIPTION/USER/DATE[i]`（i 从 1 起；`DATE` 读出为 Unix 秒数的字符串），新建修订时写第 1 条，`PROJ_REVISION_LOG_START` 为 1。用 API 改页不会产生页面的修订记录或草稿标记；从未完成项目时 `GetUncompletedPages` 为空。— S23 r3。
 
 ### A27. 部件库与翻译库的只读访问（spike S24，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。
