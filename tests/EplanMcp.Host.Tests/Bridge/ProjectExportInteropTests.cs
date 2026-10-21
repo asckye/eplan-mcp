@@ -34,7 +34,7 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         var catalog = new Catalog();
         IOperation[] operations =
         [
-            .. new[] { ProjectExportKind.Pxf }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog), new ProjectExportRunOperation(kind, catalog, _exporter) }),
+            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog), new ProjectExportRunOperation(kind, catalog, _exporter) }),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _server = new BridgeServer(
@@ -68,6 +68,17 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         Assert.True(Directory.Exists(Path.Combine(directory, "Line1 archive")));
     }
 
+    [Fact]
+    public async Task Parts_WritesOneXmlFileIntoTheToolsFolder_NamedAfterTheProject()
+    {
+        CallToolResult result = await ProjectExportTools.ExportPartsAsync(_runner, new RecordedProgress(), null, null, TestContext.Current.CancellationToken);
+
+        JsonElement data = Structured(result);
+        string directory = data.GetProperty("directory").GetString()!;
+        Assert.Equal(("Line 1", "Line 1.xml"), (data.GetProperty("project").GetString(), data.GetProperty("files")[0].GetProperty("path").GetString()));
+        Assert.Equal(["parts " + Path.Combine(directory, "Line 1.xml")], _exporter.Exports);
+    }
+
     private static JsonElement Structured(CallToolResult result)
     {
         ToolResultAssert.Succeeded(result);
@@ -84,6 +95,12 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
             Exports.Add($"{file} {includeMasterData}");
             File.WriteAllText(file + ".epj", "pxf");
             Directory.CreateDirectory(file);
+        }
+
+        public void ExportPartsList(string projectPath, string file)
+        {
+            Exports.Add($"parts {file}");
+            File.WriteAllText(file, "<parts/>");
         }
     }
 

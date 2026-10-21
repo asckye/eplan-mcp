@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "导出项目的部件清单给采购"。代理把项目的部件清单导出为 XML 文件。只想知道项目里用了哪些部件、各多少个时，用 `eplan_part_list` 直接读，不用导出；本工具给需要一份文件的场合。

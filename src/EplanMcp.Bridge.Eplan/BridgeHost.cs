@@ -119,7 +119,7 @@ internal static class BridgeHost
                 new ExportPlanOperation(kind, catalog, pages, exporter),
                 new ExportRunOperation(kind, catalog, pages, exporter),
             }),
-            .. new[] { ProjectExportKind.Pxf }.SelectMany(kind => new IOperation[]
+            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList }.SelectMany(kind => new IOperation[]
             {
                 new ProjectExportPlanOperation(kind, catalog),
                 new ProjectExportRunOperation(kind, catalog, projectExporter),

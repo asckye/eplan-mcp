@@ -1,9 +1,10 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md).</summary>
+/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md).</summary>
 public enum ProjectExportKind
 {
     Pxf,
+    PartsList,
 }
 
 /// <summary>
@@ -18,4 +19,7 @@ public interface IProjectExporter
     /// which EPLAN adds (S25). <paramref name="includeMasterData"/> adds the project's master data.
     /// </summary>
     public void ExportPxf(string projectPath, string file, bool includeMasterData);
+
+    /// <summary>Exports the project's parts list as XML to <paramref name="file"/>, which ends with <c>.xml</c> (S25).</summary>
+    public void ExportPartsList(string projectPath, string file);
 }

@@ -25,13 +25,24 @@ public sealed class ProjectExportTests(LiveEplan eplan)
         TestContext.Current.TestOutputHelper?.WriteLine($"PXF without master data: {milliseconds} ms, {data.GetProperty("totalBytes")} bytes (S25: 19.2 s, 598 MB).");
     }
 
+    [Fact]
+    public async Task Parts_IsOneXmlFileInItsFolderOnly_AndEplanStillAnswers()
+    {
+        // Which fields the XML gives each part decides how the tool describes the file (tool spec 5).
+        (JsonElement data, long milliseconds) = await ExportAsync("eplan_export_parts", new() { ["file_name"] = "LargeParts" }, directory => Head(Path.Combine(directory, "LargeParts.xml")));
+
+        Assert.Equal(("LargeParts.xml", 1), (data.GetProperty("files")[0].GetProperty("path").GetString(), data.GetProperty("fileCount").GetInt32()));
+        Assert.InRange(data.GetProperty("totalBytes").GetInt64(), 1024L, 200L * 1024 * 1024);
+        TestContext.Current.TestOutputHelper?.WriteLine($"Parts list: {milliseconds} ms, {data.GetProperty("totalBytes")} bytes (S25: 61.9 s, 14 MB).");
+    }
+
     /// <summary>
     /// Runs one export and checks what every export of a whole project must leave: its files in a new folder below the
     /// export root and nowhere else, no new export folder besides it, no new file next to the fixture, the fixture's
     /// design data unchanged, and EPLAN still answering (S25 saw EPLAN stop after a parts list export, A25). Deletes the
     /// folder before returning.
     /// </summary>
-    private async Task<(JsonElement Data, long Milliseconds)> ExportAsync(string tool, Dictionary<string, object?> args)
+    private async Task<(JsonElement Data, long Milliseconds)> ExportAsync(string tool, Dictionary<string, object?> args, Action<string>? inspect = null)
     {
         string exports = Path.TrimEndingDirectorySeparator(HostDataLocations.FromEnvironment().Exports);
         string fixtureFolder = Path.GetDirectoryName(eplan.ProjectPath)!;
@@ -56,6 +67,7 @@ public sealed class ProjectExportTests(LiveEplan eplan)
             string[] changed = [.. designAfter.Where(f => !designBefore.TryGetValue(f.Key, out var old) || old != f.Value).Select(f => f.Key).Concat(designBefore.Keys.Except(designAfter.Keys))];
             Assert.True(changed.Length == 0, $"Changed by {tool}: " + string.Join(", ", changed));
             Assert.True((await eplan.CallAsync("eplan_session_status")).GetProperty("connected").GetBoolean());
+            inspect?.Invoke(directory);
         }
         finally
         {
@@ -63,6 +75,15 @@ public sealed class ProjectExportTests(LiveEplan eplan)
         }
 
         return (data, clock.ElapsedMilliseconds);
+    }
+
+    /// <summary>Writes the first 3000 characters of an exported text file to the test output.</summary>
+    private static void Head(string file)
+    {
+        using var reader = new StreamReader(file, detectEncodingFromByteOrderMarks: true);
+        char[] buffer = new char[3000];
+        int read = reader.ReadBlock(buffer, 0, buffer.Length);
+        TestContext.Current.TestOutputHelper?.WriteLine($"{Path.GetFileName(file)} begins:{Environment.NewLine}{new string(buffer, 0, read)}");
     }
 
     /// <summary>Every export folder, <c>exports\&lt;project&gt;\&lt;time&gt;-&lt;suffix&gt;</c>.</summary>

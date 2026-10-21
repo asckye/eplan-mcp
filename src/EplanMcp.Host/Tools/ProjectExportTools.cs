@@ -9,7 +9,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The exports of a whole project into one file (docs/tools/eplan_export_pxf.md): Read tier, yet they write files, so
+/// The exports of a whole project into one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md): Read tier, yet they write files, so
 /// readOnlyHint is false (ADR-0012); only into a new folder the Host creates for each call (SEC-20), through
 /// <see cref="ExportRunner"/>, as eplan_export_pdf does.
 /// </summary>
@@ -17,6 +17,7 @@ namespace EplanMcp.Host.Tools;
 internal sealed class ProjectExportTools
 {
     public const string PxfTool = "eplan_export_pxf";
+    public const string PartsTool = "eplan_export_parts";
 
     /// <summary>The free space a PXF export needs first: S25 wrote 840 MB for the sample project with master data (tool spec 5).</summary>
     public const long PxfFreeBytes = 2L * 1024 * 1024 * 1024;
@@ -64,6 +65,47 @@ internal sealed class ProjectExportTools
             progress,
             outcome => new PxfExportResult { Project = ResultShaper.CleanText(outcome.Data.Project), MasterData = include_master_data },
             result => $"Exported the project to a {ByteSize.Format(result.TotalBytes)} EPJ file in a new folder; see 'directory'.",
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    [McpServerTool(
+        Name = PartsTool,
+        Title = "Export the parts list of an EPLAN project",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(PartsExportResult))]
+    [Description(
+        "Exports the parts list of an EPLAN project as one XML file into a new folder the server creates, for purchasing " +
+        "or another program. The sample project takes about a minute and gives some 14 MB; to count parts, call " +
+        "eplan_part_list instead. Writes files there only; the project is not changed and no approval is needed. " +
+        "Example: {\"file_name\": \"Line1 parts\"}.")]
+    public static async Task<CallToolResult> ExportPartsAsync(
+        ExportRunner exports,
+        IProgress<ProgressNotificationValue> progress,
+        [Description(ToolArguments.ProjectDescription)] string? project = null,
+        [Description("File name only; .xml is added")] string? file_name = null,
+        CancellationToken cancellationToken = default)
+    {
+        string? fileName = ToolArguments.Optional(file_name);
+        if (ExportFileName.Problem(fileName) is { } problem)
+        {
+            return ToolResults.InvalidArguments(["'file_name' " + problem]);
+        }
+
+        var job = new ExportJob(OperationNames.ExportPartsPlan, OperationNames.ExportPartsRun, new ExportArgs { Project = ToolArguments.Optional(project) }, "Exporting the parts list")
+        {
+            FileName = plan => ExportFileName.WithExtension(fileName, plan.Project, ExportFileName.XmlExtension),
+            TimeoutHint = ProjectTimeoutHint,
+        };
+        return await RunAsync(
+            exports,
+            job,
+            progress,
+            outcome => new PartsExportResult { Project = ResultShaper.CleanText(outcome.Data.Project) },
+            result => $"Exported the parts list to a {ByteSize.Format(result.TotalBytes)} XML file in a new folder; see 'directory'.",
             cancellationToken).ConfigureAwait(false);
     }
 

@@ -25,6 +25,16 @@ internal sealed class EplanProjectExporter : IProjectExporter
     });
 
     /// <summary>
+    /// <c>PartsService.ExportPartsList</c> as XML, as S25 ran it: 62 s and 14 MB for the sample project. CSV is not
+    /// offered: after a CSV export S25 saw EPLAN fail with an access violation (A25), not yet explained.
+    /// </summary>
+    public void ExportPartsList(string projectPath, string file) => Run("the parts list", () =>
+    {
+        using var parts = new PartsService();
+        parts.ExportPartsList(EplanProjects.ByPath(projectPath), file, PartsService.Format.XML);
+    });
+
+    /// <summary>
     /// Runs one export quietly. What EPLAN throws for a failed export (EPLAN XML docs) goes back as
     /// EPLAN_OPERATION_FAILED with EPLAN's message; what the exception mapper knows (a missing licence) stays for it.
     /// </summary>
