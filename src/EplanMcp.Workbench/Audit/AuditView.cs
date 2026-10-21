@@ -101,6 +101,12 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
         set => Filter(ref _execution, value);
     }
 
+    /// <summary>Whether there is a Host to verify with (NAV-05).</summary>
+    public bool CanVerify => host.IsAvailable;
+
+    /// <summary>The command line and exit code of a verification that gave no result (ERR-02).</summary>
+    public string? VerificationDetails => _verifyError is { } error ? HostErrors.Details(error) : null;
+
     /// <summary>Whether <c>audit verify</c> is running (STS-03).</summary>
     public bool IsVerifying { get; private set; }
 

@@ -15,6 +15,8 @@
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
           <Button x:Name="ReloadButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.Reload}" AutomationProperties.AcceleratorKey="F5" Click="OnReload" />
+          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.OpenFolder}" Margin="8,0,0,0" Click="OnFolder" />
+          <Button x:Name="VerifyButton" Style="{StaticResource Primer.Run}" Content="{l:Tr Audit.Verify}" Margin="8,0,0,0" Click="OnVerify" />
         </StackPanel>
         <StackPanel>
           <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Audit}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
@@ -23,6 +25,10 @@
         </StackPanel>
       </DockPanel>
     </Border>
+
+    <!-- STS-05: why a command did nothing, where it was given. -->
+    <TextBlock x:Name="Notice" DockPanel.Dock="Top" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="0,0,0,12"
+               Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
 
     <!-- STS-02, STS-03: what is running, and what came of it, told to screen readers too. -->
     <StackPanel x:Name="Working" DockPanel.Dock="Top" Margin="0,0,0,12" Visibility="Collapsed">
