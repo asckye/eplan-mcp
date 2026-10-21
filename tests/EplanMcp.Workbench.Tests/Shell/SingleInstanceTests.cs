@@ -25,8 +25,10 @@ public sealed class SingleInstanceTests
     [Fact]
     public void ASecondStart_WakesTheFirst_EachTime()
     {
-        using var first = new SingleInstance(_name);
+        // The semaphore comes first, so it is disposed after the listener has stopped: a wake that reached a disposed
+        // semaphore would end the test process (seen on CI).
         using var woken = new SemaphoreSlim(0);
+        using var first = new SingleInstance(_name);
         first.Listen(() => woken.Release());
 
         for (int i = 0; i < 2; i++)

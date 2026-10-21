@@ -38,9 +38,17 @@ internal sealed class SingleInstance : IDisposable
     public void Listen(Action activate) =>
         _listening = ThreadPool.RegisterWaitForSingleObject(_activate, (_, _) => activate(), null, Timeout.Infinite, executeOnlyOnce: false);
 
+    /// <summary>Stops listening, waiting for a wake that is running to finish, so that none runs after this returns.</summary>
     public void Dispose()
     {
-        _listening?.Unregister(null);
+        using (var stopped = new ManualResetEvent(false))
+        {
+            if (_listening?.Unregister(stopped) == true)
+            {
+                stopped.WaitOne(TimeSpan.FromSeconds(5));
+            }
+        }
+
         _activate.Dispose();
         _mutex.Dispose();
     }
