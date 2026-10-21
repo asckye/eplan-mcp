@@ -196,6 +196,16 @@ public sealed class ApprovalTextsTests
         Assert.Equal(line, ApprovalTexts.Change(change, zh));
     }
 
+    [Theory]
+    [InlineData(true, "在页 =GAA+A1&EFS1/60 上放置设备：SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)")]
+    [InlineData(false, "Place a device on page =GAA+A1&EFS1/60: SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)")]
+    public void ADevicePlacement_ShowsThePartTheTagAndThePoint(bool zh, string line)
+    {
+        var change = new PlannedChange { Action = "create", Kind = "device", Name = "=GAA+A1&EFS1/60", NewValue = "SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)" };
+
+        Assert.Equal(line, ApprovalTexts.Change(change, zh));
+    }
+
     [Fact]
     public void ProjectData_StaysOnOneLine_WithoutBidirectionalControls()
     {
