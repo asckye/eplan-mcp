@@ -18,6 +18,7 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 - 工具设计规范：[docs/standards/mcp-tool-design.md](docs/standards/mcp-tool-design.md)。新增或修改工具前先填 [工具规格模板](docs/templates/tool-spec.md)
 - 测试策略：[docs/standards/testing.md](docs/standards/testing.md)
 - 安全：[docs/standards/security.md](docs/standards/security.md)
+- Workbench 界面：[docs/standards/workbench-ui.md](docs/standards/workbench-ui.md)。改 `EplanMcp.Workbench` 的界面前先读
 - EPLAN API 已验证的事实：[docs/eplan/api-notes.md](docs/eplan/api-notes.md)。**不要凭记忆假设 EPLAN API 的行为**，没验证过的先查文档或在 scratch 项目上验证，再把结论补进 api-notes。
 
 ## 约定
