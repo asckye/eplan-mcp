@@ -6,15 +6,16 @@ namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
 /// The approval queue page without its window (workbench-ui section 11, M5 design 4.6): the waiting questions, earliest
-/// deadline first; the ended ones, latest first; the question shown, kept by request ID so an arrival never replaces it
-/// (APR-05); the 500 ms guard (APR-04); and the one way to answer, the shown question's two buttons (APR-01, APR-06).
+/// deadline first; the ended ones, latest first; the question shown, kept as that very question so an arrival never
+/// replaces it (APR-05), not by request ID, which a write's releases and approval share; the 500 ms guard (APR-04); and
+/// the one way to answer, the shown question's two buttons (APR-01, APR-06).
 /// Used on the UI thread: queue changes come in through <see cref="Update"/>.
 /// </summary>
 internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
 {
     private readonly ApprovalQueue _queue;
     private readonly TimeProvider _clock;
-    private readonly Dictionary<string, QuestionItem> _items = new(StringComparer.Ordinal);
+    private readonly Dictionary<Question, QuestionItem> _items = [];
     private readonly Dictionary<QuestionItem, QuestionExecution> _executions = [];
     private TimeSpan? _left;
 
@@ -61,10 +62,10 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
     /// <summary>Takes in a change of the queue, after its <see cref="ApprovalQueue.Changed"/>.</summary>
     public void Update(Question question)
     {
-        if (!_items.TryGetValue(question.RequestId, out QuestionItem? item))
+        if (!_items.TryGetValue(question, out QuestionItem? item))
         {
             item = new QuestionItem(question, _clock);
-            _items.Add(question.RequestId, item);
+            _items.Add(question, item);
         }
 
         if (question.End is null && !Pending.Contains(item))

@@ -347,7 +347,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
             window.Hide();
 
-            window.Open("r2");
+            window.Open(Item(second));
             WpfContext.Drain();
 
             Assert.True(window.IsVisible);
@@ -368,11 +368,11 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             _queue!.End(second, QuestionEnd.Expired);
             WpfContext.Drain();
 
-            window.Open("gone");
+            window.Open(new QuestionItem(new ApprovalQueue(_clock).Add(Asks.Write("gone"))!, _clock));
             WpfContext.Drain();
             Assert.Same(first, _view!.Shown!.Question);
 
-            window.Open("r2");
+            window.Open(Item(second));
             WpfContext.Drain();
             Assert.Same(second, _view.Shown!.Question);
             Assert.True(((RadioButton)page.FindName("AnsweredGroup")).IsChecked);
@@ -456,6 +456,8 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
     }
 
     private static Button Button(ApprovalsPage page, string name) => (Button)page.FindName(name);
+
+    private QuestionItem Item(Question question) => _view!.Pending.Concat(_view.Answered).Single(i => i.Question == question);
 
     /// <summary>What Windows does when the window comes to the front, without taking the foreground in a test run.</summary>
     private static void Activated(Window window)

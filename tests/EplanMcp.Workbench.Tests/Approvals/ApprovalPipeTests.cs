@@ -290,7 +290,46 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     [Fact]
-    public async Task ASecondQuestionWithARequestIdInTheQueue_IsRefused()
+    public async Task AReleaseThatIsGranted_ThenTheWritesApproval_UnderTheSameRequestId_IsShownAndAnswered()
+    {
+        Task<Question> arrival = Arrival();
+        Task<ApprovalAnswer?> releasing = Channel().AskAsync(HostQuestion("r1") with { Release = Suspended("earlier") }, Token);
+        Question release = await arrival.WaitAsync(_patience, Token);
+        Assert.Equal(QuestionKind.SuspensionRelease, release.Ask.Kind);
+        _queue.Answer(release, approve: true);
+        Assert.Equal(ApprovalDecision.Granted, (await releasing.WaitAsync(_patience, Token))!.Decision);
+
+        arrival = Arrival();
+        Task<ApprovalAnswer?> approving = Channel().AskAsync(HostQuestion("r1"), Token);
+        Question approval = await arrival.WaitAsync(_patience, Token);
+
+        Assert.Equal((QuestionKind.Approval, "r1"), (approval.Ask.Kind, approval.RequestId));
+        Assert.True(_queue.Answer(approval, approve: true));
+        ApprovalAnswer answer = (await approving.WaitAsync(_patience, Token))!;
+        Assert.Equal(ApprovalDecision.Granted, answer.Decision);
+        answer.Outcome!.Dispose();
+    }
+
+    [Fact]
+    public async Task TwoReleases_ThenTheApproval_OfOneWrite_AllReachTheEngineer()
+    {
+        var decisions = new List<ApprovalDecision>();
+        foreach (Suspension? release in new[] { Suspended("earlier"), Suspended("older"), null })
+        {
+            Task<Question> arrival = Arrival();
+            Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion("r1") with { Release = release }, Token);
+            _queue.Answer(await arrival.WaitAsync(_patience, Token), approve: true);
+            ApprovalAnswer answer = (await asking.WaitAsync(_patience, Token))!;
+            decisions.Add(answer.Decision);
+            answer.Outcome?.Dispose();
+        }
+
+        Assert.Equal([ApprovalDecision.Granted, ApprovalDecision.Granted, ApprovalDecision.Granted], decisions);
+        Assert.Equal(3, _queue.Answered.Count);
+    }
+
+    [Fact]
+    public async Task TheVerySameQuestion_WhileItWaits_IsRefused()
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> first = Channel().AskAsync(HostQuestion("r1"), Token);
@@ -400,6 +439,10 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
             Eplan = eplan,
         };
     }
+
+    /// <summary>A suspended write of unknown outcome, whose release a later write must ask first (ADR-0010 section 3).</summary>
+    private Suspension Suspended(string requestId) =>
+        new(@"D:\Projects\Line1", null, null, "eplan_page_delete", requestId, _clock.GetUtcNow().AddHours(-1), SuspensionReason.OutcomeUnknown, ["delete page =A1&EFS1/4"]);
 
     private Task<Question> Arrival(ApprovalQueue? queue = null)
     {

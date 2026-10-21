@@ -7,9 +7,9 @@ namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
 /// The approval queue page's logic (workbench-ui APR-03 to APR-12, T21): earliest deadline first, the shown question kept
-/// by request ID, the next one after an answer, no answer before the guard opens or after the question ended, and the
-/// ended questions with their results and outcomes. In the WPF group only because the catalogue's language is one
-/// per process.
+/// as that very question, the next one after an answer, no answer before the guard opens or after the question ended,
+/// and the ended questions with their results and outcomes. In the WPF group only because the catalogue's language is
+/// one per process.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Small")]
@@ -33,6 +33,23 @@ public sealed class ApprovalQueueViewTests : IDisposable
     }
 
     public void Dispose() => _view.Dispose();
+
+    [Fact]
+    public void AWritesReleaseAndApproval_UnderOneRequestId_AreTwoItems_AndTheApprovalCanBeAnswered()
+    {
+        Question release = Add("r1", 90, Asks.Release());
+        Open();
+        Assert.True(_view.Answer(approve: true));
+
+        Question approval = Add("r1", 90);
+        Open();
+
+        Assert.Same(approval, _view.Shown!.Question);
+        Assert.Same(release, Assert.Single(_view.Answered).Question);
+        Assert.NotSame(_view.Answered[0], _view.Shown);
+        Assert.True(_view.Answer(approve: true));
+        Assert.Equal(QuestionEnd.Approved, approval.End);
+    }
 
     [Fact]
     public void TheEarliestDeadline_IsOnTop_AndEqualDeadlinesKeepTheirOrderOfArrival()
