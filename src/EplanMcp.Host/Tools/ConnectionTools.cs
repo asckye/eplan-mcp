@@ -109,7 +109,7 @@ internal sealed class ConnectionTools
             Kind = ResultShaper.CleanText(c.Kind),
         };
 
-    private static ConnectionListResult.EndEntry? End(ConnectionEnd? end) =>
+    internal static ConnectionListResult.EndEntry? End(ConnectionEnd? end) =>
         end is null ? null : new ConnectionListResult.EndEntry { Device = ResultShaper.CleanText(end.Device), Pin = ResultShaper.CleanText(end.Pin) };
 
     /// <summary>Counts only: tags and page names are project data and stay out of the summary line (architecture 8.5).</summary>

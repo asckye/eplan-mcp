@@ -16,7 +16,7 @@ Next page: repeat the same arguments and add the `nextCursor` of the previous re
 
 1. List the strips, narrowed with `name_contains` (part of the name, any case, e.g. `+A1` or `-XD`).
 2. Terminal strip definitions have no page. To find the terminals drawn on one page, call eplan_device_list with `category` `Terminal` and `page`.
-3. For "which strip has bridges", read `bridges` of each entry.
+3. For "which strip has bridges", read `bridges` of each entry. For the terminals of one strip, their order, wiring and bridges, call eplan_terminal_strip_get with its `name`.
 
 ## Fields
 

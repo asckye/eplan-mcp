@@ -39,6 +39,9 @@ public static class OperationNames
     /// <summary>The terminal strips of a project with their counts, filtered, sorted and sliced in the Bridge. Arguments: <see cref="TerminalStripListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="TerminalStripListItem"/>.</summary>
     public const string TerminalStripList = "terminal.strip.list";
 
+    /// <summary>One terminal strip by name: its terminals in strip order, sliced in the Bridge, with their connections and bridges. Arguments: <see cref="TerminalStripGetArgs"/>; data: <see cref="TerminalStripGetData"/>.</summary>
+    public const string TerminalStripGet = "terminal.strip.get";
+
     /// <summary>
     /// Lists the parts a project uses, summed up per part number and variant, filtered and sliced in the Bridge.
     /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.

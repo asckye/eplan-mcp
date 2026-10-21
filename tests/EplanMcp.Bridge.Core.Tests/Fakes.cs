@@ -749,16 +749,30 @@ internal sealed class FakePageRenumberer(FakePageReader pages) : IPageRenumberer
     private string Id(PageSummary page) => _ids.TryGetValue(page, out string? id) ? id : _ids[page] = "id " + page.Name;
 }
 
-/// <summary>A project's terminal strips as the EPLAN adapter reads them, in EPLAN's (unsorted) order; records every read.</summary>
+/// <summary>
+/// A project's terminal strips as the EPLAN adapter reads them, in EPLAN's (unsorted) order, and their terminals by the
+/// strip's exact name (ordinal); records every read.
+/// </summary>
 internal sealed class FakeTerminalReader : ITerminalReader
 {
     public List<TerminalStripListItem> Strips { get; } = [];
 
+    public Dictionary<string, List<TerminalItem>> Terminals { get; } = new(StringComparer.Ordinal);
+
     public List<string> Reads { get; } = [];
+
+    public List<(string Path, string Name)> StripReads { get; } = [];
 
     public IReadOnlyList<TerminalStripListItem> ReadStrips(string projectPath)
     {
         Reads.Add(projectPath);
         return Strips;
+    }
+
+    public TerminalStripRecord? ReadStrip(string projectPath, string name)
+    {
+        StripReads.Add((projectPath, name));
+        TerminalStripListItem? strip = Strips.FirstOrDefault(s => s.Name == name);
+        return strip is null ? null : new TerminalStripRecord { Strip = strip, Terminals = Terminals.TryGetValue(name, out List<TerminalItem>? terminals) ? terminals : [] };
     }
 }

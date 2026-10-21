@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `terminal` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "-XD4 的端子按什么顺序排？每个端子内侧、外侧各接到哪里？哪些端子有跨接？"代理看一排端子的全貌，用来回答端子图类的问题，或者在编号前后核对。
@@ -38,7 +38,7 @@
 - 示例中的连接只是示意；`+A2-XD2` 的端子数、跨接数来自 S21。
 - `terminals`：`TerminalStrip.Terminals` 的顺序，即端子排中的排列顺序（待 Large 测试确认）。`designation` 是端子名中 `:` 之后的部分。
 - `inside`、`outside`：`InternalConnections`、`ExternalConnections` 另一端的设备和连接点，字段同 `eplan_connection_list` 的端点；各最多 10 个。
-- `bridgedWith`：同一跨接中的其他端子（`Terminal.Bridges`），没有时为空数组。
+- `bridgedWith`：同一跨接中的其他端子（`Terminal.Bridges`），去重，最多 10 个，没有时为空数组。按对象排除端子本身，所以多层端子中同名的另一层仍会列出。
 - `plc`：端子属于 PLC 时为 PLC 的标识（`Terminal.PLC`），否则为 `null`。
 - `main`：`IsMainTerminal`。S21 中示例项目 1331 个端子有 485 个主端子。
 - 一行摘要：`Terminal strip found: 5 terminals, 3 bridges.`，不回显标识。
@@ -54,7 +54,8 @@
 
 ## 5. 实现要点
 - 查找：`GetTerminalStrips(null)` 中按 `Name` 序数比较；找不到时按去掉结构前缀后的部分不区分大小写比较，规则与 `eplan_device_get` 的短标识相同。
-- 连接的另一端：对每条内、外连接取 `StartPin`、`EndPin` 中不属于本端子的一端。
+- 连接的另一端：对每条内、外连接（`Terminal.ConnectionInfo` 的 `Conn`）取 `StartPin`、`EndPin` 中不属于本端子的一端；3D 连接跳过。
+- `plc`：XML 说端子排上的端子读 `Terminal.PLC` 会抛 `WrongCategoryException`，这时为 `null`；所以端子排上的端子可能总是 `null`，由 Large 测试确认。
 - 待 Large 测试确认（S21 只数了个数）：
   - `Terminals` 的顺序是否就是端子图中的顺序；
   - 内、外连接的划分与端子图是否一致；

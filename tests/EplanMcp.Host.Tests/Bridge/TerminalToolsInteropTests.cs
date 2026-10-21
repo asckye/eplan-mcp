@@ -28,7 +28,7 @@ public sealed class TerminalToolsInteropTests : IAsyncDisposable
         var catalog = new Catalog();
         var terminals = new SampleTerminals();
         var router = new OperationRouter(
-            [new ProjectListOperation(catalog), new TerminalStripListOperation(catalog, terminals)],
+            [new ProjectListOperation(catalog), new TerminalStripListOperation(catalog, terminals), new TerminalStripGetOperation(catalog, terminals)],
             new InlineDispatcher(),
             null,
             new NullLog(),
@@ -83,6 +83,45 @@ public sealed class TerminalToolsInteropTests : IAsyncDisposable
         Assert.True(result.IsError);
         Assert.Contains(ErrorReason.ProjectNotOpen, ((TextContentBlock)result.Content[0]).Text, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public async Task TerminalStripGet_ByFullName_ReturnsTheTerminalsWithTheirEndsAndBridges()
+    {
+        CallToolResult result = await Get("+A2-XD2");
+
+        JsonElement data = Structured(result);
+        Assert.Equal(5, data.GetProperty("total").GetInt32());
+        JsonElement first = data.GetProperty("terminals")[0];
+        Assert.Equal(("+A2-XD2:1", "1"), (first.GetProperty("name").GetString(), first.GetProperty("designation").GetString()));
+        Assert.Equal(["=EA+A2-QA1"], first.GetProperty("inside").EnumerateArray().Select(e => e.GetProperty("device").GetString()));
+        Assert.Equal(("+B1-WG2", "1"), (first.GetProperty("outside")[0].GetProperty("device").GetString(), first.GetProperty("outside")[0].GetProperty("pin").GetString()));
+        Assert.Equal(["+A2-XD2:2"], first.GetProperty("bridgedWith").EnumerateArray().Select(b => b.GetString()));
+        Assert.Equal("Terminal strip found: 5 terminals, 3 bridges.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
+    [Fact]
+    public async Task TerminalStripGet_ShortNameAndPaging_FindTheStripAndContinueItsTerminals()
+    {
+        JsonElement first = Structured(await Get("-xz1", limit: 30));
+        JsonElement second = Structured(await Get("-xz1", limit: 30, cursor: first.GetProperty("nextCursor").GetString()));
+
+        Assert.Equal("+B2.X1-XZ1", first.GetProperty("strip").GetProperty("name").GetString());
+        Assert.Equal(["+B2.X1-XZ1:31", "+B2.X1-XZ1:32", "+B2.X1-XZ1:33"], second.GetProperty("terminals").EnumerateArray().Select(t => t.GetProperty("name").GetString()));
+    }
+
+    [Fact]
+    public async Task TerminalStripGet_AmbiguousAndUnknownNames_AreBusinessErrors()
+    {
+        CallToolResult ambiguous = await Get("-XD2");
+        CallToolResult unknown = await Get("-XD9");
+
+        Assert.Contains(ErrorReason.AmbiguousName, ((TextContentBlock)ambiguous.Content[0]).Text, StringComparison.Ordinal);
+        Assert.Contains("+A1-XD2", ((TextContentBlock)ambiguous.Content[0]).Text, StringComparison.Ordinal);
+        Assert.Contains(ErrorReason.DeviceNotFound, ((TextContentBlock)unknown.Content[0]).Text, StringComparison.Ordinal);
+    }
+
+    private Task<CallToolResult> Get(string strip, int limit = TerminalTools.DefaultGetLimit, string? cursor = null) =>
+        TerminalTools.TerminalStripGetAsync(_client, strip, null, limit, cursor, TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> List(string? nameContains = null, int limit = TerminalTools.DefaultLimit, string? cursor = null) =>
         TerminalTools.TerminalStripListAsync(_client, null, nameContains, limit, cursor, TestContext.Current.CancellationToken);
