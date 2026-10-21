@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- WPF leaves System.IO out of the implicit usings (System.Windows.Shapes.Path); the shared test files need it. -->
+    <Using Include="System.IO" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EplanMcp.Workbench\EplanMcp.Workbench.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--
+      The Workbench's own source, scanned by the theme and accessibility tests (SourceScan): embedded, so the tests
+      need no file system and read what is built, not a copied list (as TIA's tests do).
+    -->
+    <EmbeddedResource Include="..\..\src\EplanMcp.Workbench\**\*.xaml;..\..\src\EplanMcp.Workbench\**\*.cs"
+                      Exclude="..\..\src\EplanMcp.Workbench\bin\**;..\..\src\EplanMcp.Workbench\obj\**"
+                      LogicalName="Source/%(RecursiveDir)%(Filename)%(Extension)" WithCulture="false" />
+  </ItemGroup>
+</Project>
