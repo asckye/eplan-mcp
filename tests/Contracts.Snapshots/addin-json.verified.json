@@ -29,8 +29,8 @@
         "notes": [
           {
             "code": "close_eplan",
-            "zh": "这个 EPLAN 没有按要求关闭，请自己关闭它",
-            "en": "This EPLAN did not close when asked; close it yourself"
+            "zh": "这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了系统消息窗口时，请先关闭那个窗口",
+            "en": "This EPLAN did not close when asked; close it yourself, first closing its system messages window if it shows one"
           }
         ],
         "problem": null
@@ -44,8 +44,8 @@
         "notes": [],
         "problem": {
           "code": "eplan_running",
-          "zh": "Pro Panel 的 EPLAN 正在运行，或有无法判断变体的 EPLAN 在运行（进程 3388）：这时执行命令会另起一个装着全部插件的 EPLAN。请先关闭它，然后重新运行",
-          "en": "EPLAN of Pro Panel, or one whose variant cannot be told, is running (process 3388): the command would start a second EPLAN with every add-in. Close it and run again"
+          "zh": "EPLAN 正在运行（进程 3388）：这时执行命令会另起一个装着全部插件的 EPLAN；运行中的 EPLAN 是哪个变体判断不出来，所以有任何 EPLAN 在运行时都不执行。请先关闭所有 EPLAN，然后重新运行",
+          "en": "EPLAN is running (process 3388): the command would start a second EPLAN with every add-in, and which variant a running EPLAN is cannot be told, so nothing runs while any EPLAN does. Close every EPLAN and run again"
         }
       }
     ]
@@ -65,8 +65,8 @@
         "notes": [],
         "problem": {
           "code": "not_loaded",
-          "zh": "EPLAN（进程 4120）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录或授权对话框，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查",
-          "en": "EPLAN (process 4120) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog, complete it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor"
+          "zh": "EPLAN（进程 4120）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录、授权对话框或系统消息窗口，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查",
+          "en": "EPLAN (process 4120) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog or a system messages window, deal with it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor"
         }
       }
     ]
@@ -77,7 +77,7 @@
     "dll": "C:\\Users\\engineer\\EplanMcp\\app\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll",
     "problem": {
       "code": "variant_not_found",
-      "zh": "支持范围内的 EPLAN 中没有安装这些变体，没有注册任何变体：Fluid (installed: Electric P8, Pro Panel)",
+      "zh": "支持范围内的 EPLAN 中没有安装这些变体，没有注册任何变体：Fluid（已安装：Electric P8、Pro Panel）",
       "en": "No EPLAN in the supported range has these variants, so nothing was registered: Fluid (installed: Electric P8, Pro Panel)"
     },
     "results": []

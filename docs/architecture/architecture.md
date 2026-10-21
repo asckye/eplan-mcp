@@ -184,7 +184,7 @@ flowchart TB
   - `action` 取 `install`、`uninstall`；`dll` 是注册的插件，撤销时为 `null`；`eplan` 是执行命令的 `EPLAN.exe`，`version` 是它的文件版本；整个版本因不在支持范围内被跳过时 `variant` 为 `null`；`processId` 是命令启动的 EPLAN，没有启动时为 `null`；
   - `result` 取 `registered`、`unregistered`、`not_confirmed`（等待结束时 EPLAN 还没有加载插件，留着没有关）、`failed`、`refused`（没有启动 EPLAN）、`skipped`；
   - `notes` 的每一项为 `{code, zh, en}`，`code` 取 `version_untested`、`unsupported_version`、`eplan_missing`（记录的 EPLAN 或变体已不在，记录已删除）、`close_eplan`（EPLAN 没有按要求关闭）；
-  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `addin_not_found`、`no_eplan`、`variant_not_found`、`unblock_failed`、`invalid_record`、`eplan_running`、`start_failed`、`eplan_exited`、`not_loaded`、`record_failed`；顶层的 `problem` 表示什么都没有做，这时 `results` 为空。任何一处有 `problem` 时退出码为 1。
+  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `addin_not_found`、`no_eplan`、`variant_not_found`、`unblock_failed`、`invalid_record`、`eplan_running`、`start_failed`、`eplan_exited`、`not_loaded`、`path_mismatch`（EPLAN 从另一个位置加载了插件，这次的注册没有生效）、`handshake_failed`（插件没有回应握手，看不出加载的是哪一个注册）、`record_failed`；顶层的 `problem` 表示什么都没有做，这时 `results` 为空。任何一处有 `problem` 时退出码为 1。
 
 ### 5.3 Bridge 组件
 

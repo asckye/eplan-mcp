@@ -47,9 +47,9 @@ public sealed class AddinOutputTests
                 Environment.NewLine,
                 @"插件：C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll",
                 "[已注册] EPLAN 2026.0.3.25421 Electric P8（进程 4000）  " + Eplan,
-                "    这个 EPLAN 没有按要求关闭，请自己关闭它",
+                "    这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了系统消息窗口时，请先关闭那个窗口",
                 "[拒绝] EPLAN 2026.0.3.25421 Pro Panel  " + Eplan,
-                "    Pro Panel 的 EPLAN 正在运行，或有无法判断变体的 EPLAN 在运行（进程 1234）：这时执行命令会另起一个装着全部插件的 EPLAN。请先关闭它，然后重新运行",
+                "    EPLAN 正在运行（进程 1234）：这时执行命令会另起一个装着全部插件的 EPLAN；运行中的 EPLAN 是哪个变体判断不出来，所以有任何 EPLAN 在运行时都不执行。请先关闭所有 EPLAN，然后重新运行",
                 string.Empty),
             AddinOutput.Text(report, CultureInfo.GetCultureInfo("zh-CN")));
         Assert.StartsWith(@"add-in: C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll" + Environment.NewLine + "[registered] EPLAN 2026.0.3.25421 Electric P8 (process 4000)  ", AddinOutput.Text(report, CultureInfo.GetCultureInfo("de-DE")), StringComparison.Ordinal);

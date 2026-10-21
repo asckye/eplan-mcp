@@ -24,7 +24,7 @@ internal static class AddinOutput
 
         if (report.Problem is { } problem)
         {
-            return text.Append(Tag(AddinOutcome.Failed, zh)).AppendLine(AddinTexts.Problem(problem, report.Action, null, zh)).ToString();
+            return text.Append(Tag(AddinOutcome.Failed, zh)).AppendLine(AddinTexts.Problem(problem, report.Action, zh)).ToString();
         }
 
         if (report.Results.Count == 0)
@@ -38,7 +38,7 @@ internal static class AddinOutput
             text.Append(result.ProcessId is { } pid ? AddinTexts.Process(pid, zh) : string.Empty).Append("  ").AppendLine(result.Eplan);
             if (result.Problem is { } issue)
             {
-                text.Append(Indent).AppendLine(AddinTexts.Problem(issue, report.Action, result.Variant, zh));
+                text.Append(Indent).AppendLine(AddinTexts.Problem(issue, report.Action, zh));
             }
 
             foreach (AddinNote note in result.Notes)
@@ -55,7 +55,7 @@ internal static class AddinOutput
         ["schemaVersion"] = SchemaVersion,
         ["action"] = report.Action == AddinAction.Install ? "install" : "uninstall",
         ["dll"] = report.Dll,
-        ["problem"] = Issue(report.Problem, report.Action, null),
+        ["problem"] = Issue(report.Problem, report.Action),
         ["results"] = new JsonArray([.. report.Results.Select(r => Result(r, report.Action))]),
     }.ToJsonString(HostJson.Options);
 
@@ -88,10 +88,10 @@ internal static class AddinOutput
             ["zh"] = AddinTexts.Note(n, zh: true),
             ["en"] = AddinTexts.Note(n, zh: false),
         })]),
-        ["problem"] = Issue(result.Problem, action, result.Variant),
+        ["problem"] = Issue(result.Problem, action),
     };
 
-    private static JsonObject? Issue(AddinIssue? issue, AddinAction action, string? variant) => issue is null ? null : new JsonObject
+    private static JsonObject? Issue(AddinIssue? issue, AddinAction action) => issue is null ? null : new JsonObject
     {
         ["code"] = issue.Problem switch
         {
@@ -104,11 +104,13 @@ internal static class AddinOutput
             AddinProblem.StartFailed => "start_failed",
             AddinProblem.EplanExited => "eplan_exited",
             AddinProblem.NotLoaded => "not_loaded",
+            AddinProblem.PathMismatch => "path_mismatch",
+            AddinProblem.HandshakeFailed => "handshake_failed",
             AddinProblem.RecordFailed => "record_failed",
             _ => throw new UnreachableException($"Problem {issue.Problem} has no JSON name."),
         },
-        ["zh"] = AddinTexts.Problem(issue, action, variant, zh: true),
-        ["en"] = AddinTexts.Problem(issue, action, variant, zh: false),
+        ["zh"] = AddinTexts.Problem(issue, action, zh: true),
+        ["en"] = AddinTexts.Problem(issue, action, zh: false),
     };
 
     private static string Tag(AddinOutcome outcome, bool zh) => "[" + AddinTexts.Outcome(outcome, zh) + "] ";
