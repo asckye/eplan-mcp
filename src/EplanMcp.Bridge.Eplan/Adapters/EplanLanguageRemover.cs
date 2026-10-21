@@ -41,19 +41,19 @@ internal sealed class EplanLanguageRemover : ILanguageRemover
     }
 
     /// <summary>
-    /// EPLAN refuses the source language with a system message (EPLAN XML docs), which shows as false here; false and what
-    /// it throws (BaseException, ArgumentException) are EPLAN_OPERATION_FAILED; locks and licences stay with the
+    /// Returns what EPLAN returned without judging it: false also after a removal (A28, S24 r18), so the operation reads
+    /// the settings back instead; a source language EPLAN refuses with a system message (EPLAN XML docs) stays there.
+    /// What it throws (BaseException, ArgumentException) is EPLAN_OPERATION_FAILED; locks and licences stay with the
     /// exception mapper.
     /// </summary>
-    public void Remove(string projectPath, string language)
+    public bool Remove(string projectPath, string language)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
-        bool removed;
         try
         {
             using var translate = new Translate();
-            removed = translate.RemoveProjectLanguage(project, language);
+            return translate.RemoveProjectLanguage(project, language);
         }
         catch (Exception ex) when ((ex is BaseException or ArgumentException) && new EplanExceptionMapper().Map(ex) is null)
         {
@@ -63,13 +63,6 @@ internal sealed class EplanLanguageRemover : ILanguageRemover
                 ex);
             failed.Error.Metadata = new Dictionary<string, string> { ["eplanMessage"] = EplanConnectionGenerator.ForModel(ex.Message) };
             throw failed;
-        }
-
-        if (!removed)
-        {
-            throw new BridgeErrorException(
-                ErrorReason.EplanOperationFailed,
-                $"EPLAN did not remove {language}, so nothing was removed. eplan_message_list may show why.");
         }
     }
 
