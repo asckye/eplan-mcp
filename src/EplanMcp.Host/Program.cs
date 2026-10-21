@@ -4,6 +4,7 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,8 +26,8 @@ internal static class Program
     {
         switch (CliArguments.Parse(args))
         {
-            case { Command: CliCommand.Serve }:
-                return await ServeAsync().ConfigureAwait(false);
+            case { Command: CliCommand.Serve } serve:
+                return await ServeAsync(serve.Profile).ConfigureAwait(false);
             case { Command: CliCommand.Version }:
                 Console.WriteLine(HostInfo.Version);
                 return 0;
@@ -54,7 +55,7 @@ internal static class Program
         return await RunAsync(cli, utf8).ConfigureAwait(false);
     }
 
-    private static async Task<int> ServeAsync()
+    private static async Task<int> ServeAsync(ToolProfile profile)
     {
         // An invalid safety configuration must not fall back to defaults silently (architecture 8.9).
         HostDataLocations locations = HostDataLocations.FromEnvironment();
@@ -75,7 +76,7 @@ internal static class Program
             options.ColorBehavior = LoggerColorBehavior.Disabled;
         });
         builder.Services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
-        builder.Services.AddSingleton(locations).AddSingleton(config);
+        builder.Services.AddSingleton(locations).AddSingleton(config).AddSingleton(new ToolProfileChoice(profile));
         builder.Services.AddEplanMcp().WithStdioServerTransport();
 
         using IHost host = builder.Build();

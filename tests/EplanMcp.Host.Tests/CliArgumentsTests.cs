@@ -1,4 +1,5 @@
 using EplanMcp.Host.ClientConfig;
+using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Host.Tests;
 
@@ -16,6 +17,26 @@ public sealed class CliArgumentsTests
     public void Parse_AKnownCommandLine_GivesTheCommandAndFormat(string line, string command, bool json)
     {
         Assert.Equal(new CliArguments(Enum.Parse<CliCommand>(command), json), CliArguments.Parse(Split(line)));
+    }
+
+    [Theory]
+    [InlineData("serve --profile core", "Core")]
+    [InlineData("serve --profile full", "Full")]
+    public void Parse_ServeWithAProfile_GivesTheProfile(string line, string profile)
+    {
+        Assert.Equal(new CliArguments(CliCommand.Serve, Json: false, Profile: Enum.Parse<ToolProfile>(profile)), CliArguments.Parse(Split(line)));
+    }
+
+    [Theory]
+    [InlineData("serve --profile")]
+    [InlineData("serve --profile Core")]
+    [InlineData("serve --profile minimal")]
+    [InlineData("serve --profile core --profile core")]
+    [InlineData("--profile core")]
+    [InlineData("doctor --profile core")]
+    public void Parse_AWrongProfile_IsNull(string line)
+    {
+        Assert.Null(CliArguments.Parse(Split(line)));
     }
 
     [Theory]
@@ -81,7 +102,7 @@ public sealed class CliArgumentsTests
     public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
     {
         Assert.Equal(
-            "usage: eplanmcp [serve] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
+            "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
             + Environment.NewLine
             + "clients: claude-code, claude-desktop, codex, gemini-cli, qwen-code, kimi-code, codebuddy, opencode, qwen-agent, cursor, vscode-copilot",
             CliArguments.Usage);

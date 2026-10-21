@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_tool_usage` |
-| 所属分组 / Profile | `meta` / `core` |
+| 所属分组 / Profile | `meta` / `core`（在 `core` 中，`tool` 只能取 `core` 中的工具） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
 | 状态 | Proposed（M2） |
