@@ -31,8 +31,9 @@ internal interface IBridgeClient
 
     /// <summary>
     /// Runs a write's execute operation under <paramref name="requestId"/>, never sending it twice (ADR-0010), with its
-    /// progress reports going to <paramref name="progress"/>. After a timeout, a lost connection or cancellation it
-    /// fetches the outcome with outcome.get until <paramref name="limit"/>; on cancellation it first asks the Bridge to
+    /// progress reports going to <paramref name="progress"/>. The response is awaited until <paramref name="limit"/>;
+    /// after that, a lost connection or cancellation it fetches the outcome with outcome.get until the limit, at least
+    /// once; on cancellation it first asks the Bridge to
     /// stop the write at its next safe point (M4 design 4.3), and a write that stopped fails with CANCELLED. Throws
     /// <see cref="BridgeCallException"/> whose error carries <c>Execution</c>; OUTCOME_UNKNOWN when the outcome cannot be
     /// learned.

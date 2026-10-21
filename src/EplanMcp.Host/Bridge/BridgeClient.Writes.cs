@@ -8,9 +8,11 @@ namespace EplanMcp.Host.Bridge;
 
 /// <summary>
 /// Writes (ADR-0010 section 2, M3 design 4.3): the caller's request ID goes with the invoke, which is never sent
-/// twice. When the response does not come (call timeout, lost connection, the caller cancelling), the client asks the
-/// same Bridge, recognised by its pipe name, with outcome.get every <see cref="_pollInterval"/> until the write's
-/// execution limit, and reports what it recorded; when that cannot be learned, OUTCOME_UNKNOWN. When the caller
+/// twice. The response is waited for until the write's execution limit, not the read call timeout: a write may run for
+/// minutes (numbering every terminal of a project took 43 s, a backup included), and its full result comes only with
+/// the response. When it does not come (the limit passed, lost connection, the caller cancelling), the client asks the
+/// same Bridge, recognised by its pipe name, with outcome.get every <see cref="_pollInterval"/> until that limit, and
+/// at least once, and reports what it recorded; when that cannot be learned, OUTCOME_UNKNOWN. When the caller
 /// cancelled, the Bridge is first asked to stop the write at its next safe point (M4 design 4.3); a timeout does not
 /// stop it.
 /// </summary>
@@ -65,8 +67,9 @@ internal sealed partial class BridgeClient
             }
 
             LogInvoke(operation, requestId);
+            // The queue and the handshake count against the limit too, so the wait ends at the write's deadline.
             using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            wait.CancelAfter(limit < _callTimeout ? limit : _callTimeout);
+            wait.CancelAfter(TimeSpan.FromMilliseconds(Math.Max(0, deadline - Environment.TickCount64)));
             BridgeError interruption;
             try
             {
@@ -81,7 +84,7 @@ internal sealed partial class BridgeClient
             }
             catch (OperationCanceledException)
             {
-                interruption = cancellationToken.IsCancellationRequested ? BridgeErrors.Cancelled() : BridgeErrors.Timeout(_callTimeout);
+                interruption = cancellationToken.IsCancellationRequested ? BridgeErrors.Cancelled() : BridgeErrors.Timeout(limit);
             }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException)
             {

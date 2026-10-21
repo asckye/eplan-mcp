@@ -69,9 +69,39 @@ public sealed class WriteInvokeTests
     }
 
     [Fact]
-    public async Task AWrite_WhoseResponseIsLate_IsFetchedUntilItIsCommitted()
+    public async Task AWrite_SlowerThanTheCallTimeout_IsWaitedForUntilItsLimit_WithItsData()
+    {
+        // The read call timeout is 100 ms here; numbering every terminal of a project took 43 s live (2026-10-21) and
+        // came back as recovered, without its result, while the call timeout cut the wait short.
+        _execute = async token =>
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(400), token);
+            return new JsonObject { ["data"] = new JsonObject { ["pages"] = 3 } };
+        };
+
+        WriteResult<JsonObject> result = await Write();
+
+        Assert.Equal((3, false), ((int)result.Data!["pages"]!, result.Recovered));
+        Assert.Equal((1, 0), (Executes, OutcomeQuestions));
+    }
+
+    [Fact]
+    public async Task AWrite_WithoutAResponseByItsLimit_HasItsOutcomeAskedOnce()
     {
         _execute = Never;
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Committed));
+
+        WriteResult<JsonObject> result = await Write(limit: TimeSpan.FromMilliseconds(300));
+
+        Assert.Equal((null, true), (result.Data, result.Recovered));
+        Assert.Equal((1, 1), (Executes, OutcomeQuestions)); // committed ends the questions
+
+    }
+
+    [Fact]
+    public async Task AWrite_WhoseConnectionDropsWhileItRuns_IsFetchedUntilItIsCommitted()
+    {
+        _execute = Lost;
         _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
         _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
         _outcomes.Enqueue(Outcome(OutcomeStatus.Committed));
@@ -108,15 +138,30 @@ public sealed class WriteInvokeTests
     [Fact]
     public async Task AWrite_StillRunningAtItsLimit_IsUnknown()
     {
-        _execute = Never;
+        // The connection drops at once, so the outcome is asked until the limit; 300 ms left room for one poll only on a
+        // busy CI runner (2026-10-20).
+        _execute = Lost;
         _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
 
-        // The response wait alone takes 100 ms; 300 ms left room for one poll only on a busy CI runner (2026-10-20).
         BridgeError error = await Fails(limit: TimeSpan.FromSeconds(2));
 
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false), (error.Reason, error.Execution, error.Retryable));
         Assert.True(OutcomeQuestions > 1);
         Assert.Equal(1, Executes);
+    }
+
+    [Fact]
+    public async Task AWrite_StillRunningWhenItsResponseWaitEnds_IsUnknown()
+    {
+        _execute = Never;
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Running));
+
+        BridgeError error = await Fails(limit: TimeSpan.FromMilliseconds(300));
+
+        // The wait ends at the deadline, so there is time for about one question; the clock's granularity may allow another.
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+        Assert.Equal(1, Executes);
+        Assert.InRange(OutcomeQuestions, 1, 3);
     }
 
     [Theory]
