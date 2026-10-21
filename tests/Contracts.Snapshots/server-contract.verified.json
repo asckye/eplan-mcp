@@ -2882,6 +2882,102 @@
       }
     },
     {
+      "name": "eplan_import_pxf",
+      "title": "Import an EPJ (PXF) file as a new EPLAN project",
+      "description": "Imports an EPJ (PXF) file from the 'imports' folder in EplanMcp's data folder as a new project in the scratch folder's 'imported' folder, without opening it; no other project changes. May take over a minute. 'file' is its path below that folder. Example: {\"file\": \"incoming/Line1.epj\", \"name\": \"Line1_imported\"}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "Path below the imports folder",
+            "type": "string"
+          },
+          "name": {
+            "description": "New project name",
+            "type": "string"
+          },
+          "dry_run": {
+            "description": "Only return the plan",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "file",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "execution": {
+            "description": "committed, or not_started for a dry run: whether the project was made.",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "True when only the plan was returned.",
+            "type": "boolean"
+          },
+          "file": {
+            "description": "The file's path below the imports folder.",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "The file's SHA-256, lowercase hex, as the audit names it.",
+            "type": "string"
+          },
+          "bytes": {
+            "description": "The file's size in bytes.",
+            "type": "integer"
+          },
+          "project": {
+            "description": "The new project, in the scratch folder; for a dry run, where it would be.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "The new project's name.",
+                "type": "string"
+              },
+              "path": {
+                "description": "The new project's .elk file, in the scratch folder.",
+                "type": "string"
+              },
+              "opened": {
+                "description": "Always false: the import does not open the project in EPLAN.",
+                "type": "boolean"
+              }
+            }
+          },
+          "seconds": {
+            "description": "How long the import took, in seconds; null for a dry run or when 'recovered'.",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "recovered": {
+            "description": "True when the response was lost and EPLAN reported the import afterwards.",
+            "type": "boolean"
+          },
+          "hint": {
+            "description": "What to do next; null for a dry run.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "title": "Import an EPJ (PXF) file as a new EPLAN project",
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_language_remove",
       "title": "Remove languages from an EPLAN project",
       "description": "Removes translation languages from an EPLAN project with all their translations in its texts; EPLAN may change the displayed languages too. Always needs the engineer's approval, in scratch too; the project is backed up first. Example: {\"project\": \"Line1\", \"languages\": [\"sv_SE\"]}. Setting languages is eplan_language_set.",
@@ -5963,6 +6059,7 @@
               "eplan_export_labels",
               "eplan_export_untranslated",
               "eplan_import_dxf",
+              "eplan_import_pxf",
               "eplan_report_update",
               "eplan_language_set",
               "eplan_language_remove",
