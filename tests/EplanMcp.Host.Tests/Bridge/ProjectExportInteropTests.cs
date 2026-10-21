@@ -34,7 +34,7 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         var catalog = new Catalog();
         IOperation[] operations =
         [
-            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList, ProjectExportKind.Labels }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog, _exporter), new ProjectExportRunOperation(kind, catalog, _exporter) }),
+            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList, ProjectExportKind.Labels, ProjectExportKind.Untranslated }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog, _exporter), new ProjectExportRunOperation(kind, catalog, _exporter) }),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _server = new BridgeServer(
@@ -91,6 +91,18 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         Assert.Equal("Exported labels with scheme 'Terminal diagram' to a 4 bytes Excel file in a new folder; see 'directory'.", ((TextContentBlock)result.Content[0]).Text);
     }
 
+    [Fact]
+    public async Task Untranslated_WritesOneTextFile_AndNamesTheLanguagesAsTheProjectDoes()
+    {
+        CallToolResult result = await ProjectExportTools.ExportUntranslatedAsync(_runner, new RecordedProgress(), ["EN_us"], null, "missing", TestContext.Current.CancellationToken);
+
+        JsonElement data = Structured(result);
+        string directory = data.GetProperty("directory").GetString()!;
+        Assert.Equal(("en_US", "missing.txt"), (data.GetProperty("languages")[0].GetString(), data.GetProperty("files")[0].GetProperty("path").GetString()));
+        Assert.Equal(["untranslated en_US " + Path.Combine(directory, "missing.txt")], _exporter.Exports);
+        Assert.Equal("Exported the untranslated texts for en_US to a 20 bytes file in a new folder; see 'directory'.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
     private static JsonElement Structured(CallToolResult result)
     {
         ToolResultAssert.Succeeded(result);
@@ -123,6 +135,14 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         {
             Exports.Add($"labels '{scheme}' {language} {file}");
             File.WriteAllText(file, "xlsx");
+        }
+
+        public IReadOnlyList<string> TranslationLanguages(string projectPath) => ["de_DE", "en_US"];
+
+        public void ExportUntranslated(string projectPath, IReadOnlyList<string> languages, string file)
+        {
+            Exports.Add($"untranslated {string.Join(",", languages)} {file}");
+            File.WriteAllText(file, "de_DE\ten_US\tCOMMENT\n");
         }
     }
 

@@ -166,6 +166,54 @@ public sealed class ProjectExportOperationTests : IDisposable
     }
 
     [Fact]
+    public void Untranslated_IsOneTextFile_InTheLanguagesAsTheProjectNamesThem()
+    {
+        ExportRunData data = Run(new ExportArgs { Languages = ["EN_us", " zh_CN "], Directory = _folder, FileName = "缺失.txt" }, ProjectExportKind.Untranslated);
+
+        Assert.Equal(["缺失.txt"], Files());
+        Assert.Equal([@"untranslated D:\Scratch\Line1 en_US,zh_CN 缺失.txt"], _exporter.Exports);
+        Assert.Equal(("Line1", (string?)null), (data.Project, data.Scheme));
+        Assert.Equal(["en_US", "zh_CN"], data.Languages!);
+        Assert.Equal(
+            (OperationNames.ExportUntranslatedPlan, ".txt"),
+            (new ProjectExportPlanOperation(ProjectExportKind.Untranslated, _catalog, _exporter).Name,
+                ((ExportPlanData)new ProjectExportPlanOperation(ProjectExportKind.Untranslated, _catalog, _exporter).Execute(new ExportArgs { Languages = ["en_US"] })!).Extension));
+    }
+
+    [Fact]
+    public void Untranslated_EveryProblemWithTheLanguages_IsReportedAtOnce()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Languages = ["en_US", "english", "EN_US", ""], Directory = _folder, FileName = "a.txt" }, ProjectExportKind.Untranslated)).Error;
+
+        string violations = error.Metadata!["violations"];
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("languages[1] must be a language code", violations, StringComparison.Ordinal);
+        Assert.Contains("languages[2] repeats languages[0]", violations, StringComparison.Ordinal);
+        Assert.Contains("languages[3] must be a language code", violations, StringComparison.Ordinal);
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(11)]
+    public void Untranslated_NoneOrMoreThan10Languages_AreInvalid(int count)
+    {
+        List<string> languages = [.. Enumerable.Range(0, count).Select(i => "a" + (char)('a' + i) + "_BB")];
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Languages = languages, Directory = _folder, FileName = "a.txt" }, ProjectExportKind.Untranslated)).Error;
+
+        Assert.Contains("'languages' must hold 1 to 10", error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Untranslated_ALanguageTheProjectDoesNotTranslateInto_IsInvalidWithItsTranslationLanguages()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ProjectExportPlanOperation(ProjectExportKind.Untranslated, _catalog, _exporter).Execute(new ExportArgs { Languages = ["en_US", "sv_SE"] })).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, "sv_SE", "de_DE\nen_US\nfr_FR\nzh_CN", "4"), (error.Reason, error.Metadata!["missing"], error.Metadata["candidates"], error.Metadata["candidateCount"]));
+    }
+
+    [Fact]
     public void AFolderThatIsMissingNotEmptyOrNotFullyQualified_IsRefused()
     {
         File.WriteAllText(Path.Combine(_folder, "old.epj"), "x");

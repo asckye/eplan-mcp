@@ -14,6 +14,9 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class ProjectExportTests(LiveEplan eplan)
 {
+    private static readonly string[] _english = ["en_US"];
+    private static readonly string[] _englishAndKlingon = ["en_US", "tl_XX"];
+
     [Fact]
     public async Task Pxf_IsOneEpjFileInItsFolderOnly_AndTheProjectIsUnchanged()
     {
@@ -74,6 +77,45 @@ public sealed class ProjectExportTests(LiveEplan eplan)
         Assert.DoesNotContain("InternalRefDefScheme", candidates.Split('\n'));
         Assert.Equal(before, ExportFolders(exports));
         TestContext.Current.TestOutputHelper?.WriteLine("Labelling schemes: " + candidates.Replace('\n', ',') + ".");
+    }
+
+    [Fact]
+    public async Task Untranslated_IsOneTabSeparatedFile_WithAnEnUsColumn()
+    {
+        string header = string.Empty;
+        (JsonElement data, long milliseconds) = await ExportAsync(
+            "eplan_export_untranslated",
+            new() { ["languages"] = _english, ["file_name"] = "LargeMissing" },
+            directory =>
+            {
+                string file = Path.Combine(directory, "LargeMissing.txt");
+                using (var reader = new StreamReader(file, detectEncodingFromByteOrderMarks: true))
+                {
+                    header = reader.ReadLine() ?? string.Empty;
+                }
+
+                Head(file);
+            });
+
+        // S25: the columns are zh_CN, en_US and COMMENT, tab-separated, 3.7 KB.
+        Assert.Equal(["en_US"], data.GetProperty("languages").EnumerateArray().Select(l => l.GetString()));
+        Assert.Equal(("LargeMissing.txt", 1), (data.GetProperty("files")[0].GetProperty("path").GetString(), data.GetProperty("fileCount").GetInt32()));
+        Assert.Contains("en_US", header.Split('\t'));
+        Assert.Contains("COMMENT", header.Split('\t'));
+        TestContext.Current.TestOutputHelper?.WriteLine($"Untranslated texts: {milliseconds} ms, {data.GetProperty("totalBytes")} bytes (S25: 3.5 s, 3.7 KB).");
+    }
+
+    [Fact]
+    public async Task Untranslated_ALanguageThatIsNoTranslationLanguage_ListsThoseOfTheProject()
+    {
+        // S25: the sample project has 20 translation languages, de_DE to zh_TW; Klingon is not one of them.
+        JsonElement error = await eplan.ErrorAsync("eplan_export_untranslated", new() { ["languages"] = _englishAndKlingon });
+
+        string candidates = error.GetProperty("metadata").GetProperty("candidates").GetString()!;
+        Assert.Equal((ErrorReason.InvalidArgument, "tl_XX"), (error.GetProperty("reason").GetString(), error.GetProperty("metadata").GetProperty("missing").GetString()));
+        Assert.Contains("en_US", candidates.Split('\n'));
+        Assert.Equal("20", error.GetProperty("metadata").GetProperty("candidateCount").GetString());
+        TestContext.Current.TestOutputHelper?.WriteLine("Translation languages: " + candidates.Replace('\n', ',') + ".");
     }
 
     /// <summary>

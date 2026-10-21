@@ -57,6 +57,19 @@ internal sealed class FakeProjectExporter : IProjectExporter
         ThrowIfFailing();
     }
 
+    /// <summary>The sample project's translation languages are 20 (S25); a few stand for them.</summary>
+    public List<string> Translation { get; } = ["de_DE", "en_US", "fr_FR", "zh_CN"];
+
+    public IReadOnlyList<string> TranslationLanguages(string projectPath) => Translation;
+
+    public void ExportUntranslated(string projectPath, IReadOnlyList<string> languages, string file)
+    {
+        Exports.Add($"untranslated {projectPath} {string.Join(",", languages)} {Path.GetFileName(file)}");
+        During?.Invoke();
+        File.WriteAllText(file, "zh_CN\ten_US\tCOMMENT\n");
+        ThrowIfFailing();
+    }
+
     private void ThrowIfFailing()
     {
         if (Failure is not null)

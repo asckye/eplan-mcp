@@ -25,13 +25,13 @@ public sealed class ExportToolContractTests
         using ServiceProvider provider = services.BuildServiceProvider();
         Tool[] exports = [.. provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Select(t => t.ProtocolTool).Where(t => t.Name.StartsWith("eplan_export_", StringComparison.Ordinal))];
 
-        Assert.Equal([ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool], exports.Select(t => t.Name).Order(StringComparer.Ordinal));
+        Assert.Equal([ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool], exports.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.All(exports, t =>
         {
             Assert.Equal((false, false, false, false), (t.Annotations!.ReadOnlyHint, t.Annotations.DestructiveHint, t.Annotations.IdempotentHint, t.Annotations.OpenWorldHint));
             string[] arguments = [.. t.InputSchema.GetProperty("properties").EnumerateObject().Select(p => p.Name)];
             Assert.DoesNotContain(arguments, a => a.Contains("dir", StringComparison.Ordinal) || a.Contains("path", StringComparison.Ordinal));
-            Assert.Equal(t.Name == ImageExportTools.ImageTool ? ["pages"] : t.Name == ProjectExportTools.LabelsTool ? ["scheme"] : [], t.InputSchema.TryGetProperty("required", out JsonElement required) ? required.EnumerateArray().Select(r => r.GetString()) : []);
+            Assert.Equal(t.Name == ImageExportTools.ImageTool ? ["pages"] : t.Name == ProjectExportTools.LabelsTool ? ["scheme"] : t.Name == ProjectExportTools.UntranslatedTool ? ["languages"] : [], t.InputSchema.TryGetProperty("required", out JsonElement required) ? required.EnumerateArray().Select(r => r.GetString()) : []);
         });
     }
 }

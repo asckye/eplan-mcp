@@ -45,4 +45,7 @@ public sealed class ExportArgs
 
     /// <summary>Labels: the language of multi-language texts, for example <c>zh_CN</c>; null means EPLAN's user interface language.</summary>
     public string? Language { get; set; }
+
+    /// <summary>Untranslated texts: 1 to 10 target languages, for example <c>en_US</c>, each a translation language of the project.</summary>
+    public List<string>? Languages { get; set; }
 }

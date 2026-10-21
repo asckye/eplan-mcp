@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// The run of an export of a whole project (<see cref="OperationNames.ExportPxfRun"/>,
-/// <see cref="OperationNames.ExportPartsRun"/>, <see cref="OperationNames.ExportLabelsRun"/>; docs/tools/eplan_export_*.md,
+/// <see cref="OperationNames.ExportPartsRun"/>, <see cref="OperationNames.ExportLabelsRun"/>,
+/// <see cref="OperationNames.ExportUntranslatedRun"/>; docs/tools/eplan_export_*.md,
 /// section 5): checks the arguments again as the plan did, that the Host's folder is there and empty and that the file
 /// name is a name only, with the extension the plan named, then exports into that folder (SEC-20). One EPLAN call, which cannot be interrupted, so a cancel is
 /// reported when it has returned (M4 design 4.3). A read: the project's design data does not change (A25).
@@ -24,6 +25,7 @@ public sealed class ProjectExportRunOperation(ProjectExportKind kind, IProjectCa
         ProjectExportKind.Pxf => (OperationNames.ExportPxfPlan, OperationNames.ExportPxfRun),
         ProjectExportKind.PartsList => (OperationNames.ExportPartsPlan, OperationNames.ExportPartsRun),
         ProjectExportKind.Labels => (OperationNames.ExportLabelsPlan, OperationNames.ExportLabelsRun),
+        ProjectExportKind.Untranslated => (OperationNames.ExportUntranslatedPlan, OperationNames.ExportUntranslatedRun),
         _ => throw new ArgumentOutOfRangeException(nameof(kind)),
     };
 
@@ -44,13 +46,21 @@ public sealed class ProjectExportRunOperation(ProjectExportKind kind, IProjectCa
             case ProjectExportKind.PartsList:
                 exporter.ExportPartsList(projectPath, path);
                 break;
-            default:
+            case ProjectExportKind.Labels:
                 exporter.ExportLabels(projectPath, request.Scheme!, request.Language!, path);
+                break;
+            default:
+                exporter.ExportUntranslated(projectPath, request.Languages, path);
                 break;
         }
 
         OperationContext.Current.ThrowIfCancellationRequested(); // the safe point after the EPLAN call
-        return new ExportRunData { Project = request.Project.Name, Scheme = request.Scheme };
+        return new ExportRunData
+        {
+            Project = request.Project.Name,
+            Scheme = request.Scheme,
+            Languages = kind == ProjectExportKind.Untranslated ? [.. request.Languages] : null,
+        };
     }
 
     /// <summary>

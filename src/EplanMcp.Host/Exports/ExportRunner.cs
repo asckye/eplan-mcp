@@ -109,6 +109,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         WidthPx = job.Args.WidthPx,
         IncludeMasterData = job.Args.IncludeMasterData,
         Language = job.Args.Language,
+        Languages = job.Args.Languages,
         Directory = directory,
         FileName = job.FileName?.Invoke(plan),
     };

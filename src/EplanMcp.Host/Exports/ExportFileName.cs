@@ -13,6 +13,7 @@ internal static class ExportFileName
     public const string PdfExtension = ".pdf";
     public const string PxfExtension = ".epj";
     public const string XmlExtension = ".xml";
+    public const string TextExtension = ".txt";
 
     private static readonly SearchValues<char> _refused = SearchValues.Create("<>\"|?*");
 
