@@ -331,6 +331,20 @@ public static class OperationNames
     public const string CableRenumberExecute = "cable.renumber.execute";
 
     /// <summary>
+    /// The plan of eplan_connection_number: checks the scheme and counts the project's connections and wire numbers, never
+    /// writes; the new wire numbers are known only after running. Arguments: <see cref="ConnectionNumberArgs"/>; data:
+    /// <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string ConnectionNumberPlan = "connection.number.plan";
+
+    /// <summary>
+    /// Backs the project up, then lets EPLAN number the project's connections in one transaction and reads back
+    /// (ADR-0013). Arguments: <see cref="ConnectionNumberArgs"/> with the fingerprint and the backup target; data:
+    /// <see cref="ConnectionNumberData"/>.
+    /// </summary>
+    public const string ConnectionNumberExecute = "connection.number.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

@@ -507,6 +507,17 @@ public sealed class SerializerCompatibilityTests
         new CableRenumberArgs(),
         new CableRenumberData { Project = "项目 二", Changed = [new RenamedObject { From = "+A2-WD4", To = "+A2-WD5" }], ChangedCount = 4, Warning = "w" },
         new CableRenumberData(),
+        new ConnectionNumberArgs { Project = "Line1", Scheme = "Standard", Overwrite = "all", Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new ConnectionNumberArgs(),
+        new ConnectionNumberData
+        {
+            Project = "项目 二",
+            Changed = [new NumberedConnection { From = "*", To = "433", Page = "=F+A2&EFS1/2" }, new NumberedConnection { To = "011" }],
+            ChangedCount = 605,
+            DesignatedAfter = 659,
+            Warning = "w",
+        },
+        new ConnectionNumberData(),
     ];
 
     [Theory]
