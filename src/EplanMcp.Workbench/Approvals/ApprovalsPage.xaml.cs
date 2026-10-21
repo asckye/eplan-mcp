@@ -29,9 +29,20 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         InitializeComponent();
         _ticks = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Normal, (_, _) => _view?.Tick(), Dispatcher);
         SizeChanged += (_, _) => Arrange();
-        Loc.Current.LanguageChanged += OnLanguageChanged;
-        Unloaded += (_, _) => _ticks.Stop();
-        Loaded += (_, _) => _ticks.Start();
+
+        // The catalogue outlives every window: follow its language only while in one, so a closed window is let go.
+        Loaded += (_, _) =>
+        {
+            Loc.Current.LanguageChanged -= OnLanguageChanged;
+            Loc.Current.LanguageChanged += OnLanguageChanged;
+            ApplyTexts();
+            _ticks.Start();
+        };
+        Unloaded += (_, _) =>
+        {
+            Loc.Current.LanguageChanged -= OnLanguageChanged;
+            _ticks.Stop();
+        };
         ApplyTexts();
         Show();
     }

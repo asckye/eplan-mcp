@@ -6,9 +6,9 @@ namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
 /// The approval queue page without its window (workbench-ui section 11, M5 design 4.6): the waiting questions, earliest
-/// deadline first; the ended ones, latest first; the question shown, kept as that very question so an arrival never
-/// replaces it (APR-05), not by request ID, which a write's releases and approval share; the 500 ms guard (APR-04); and
-/// the one way to answer, the shown question's two buttons (APR-01, APR-06).
+/// deadline first; the ended ones, latest first, as many as the queue keeps; the question shown, kept as that very
+/// question so an arrival never replaces it (APR-05), not by request ID, which a write's releases and approval share;
+/// the 500 ms guard (APR-04); and the one way to answer, the shown question's two buttons (APR-01, APR-06).
 /// Used on the UI thread: queue changes come in through <see cref="Update"/>.
 /// </summary>
 internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
@@ -62,6 +62,12 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
     /// <summary>Takes in a change of the queue, after its <see cref="ApprovalQueue.Changed"/>.</summary>
     public void Update(Question question)
     {
+        if (question.Dropped)
+        {
+            Forget(question);
+            return;
+        }
+
         if (!_items.TryGetValue(question, out QuestionItem? item))
         {
             item = new QuestionItem(question, _clock);
@@ -150,6 +156,20 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
     {
         Loc.Current.LanguageChanged -= OnLanguageChanged;
         Guard.Dispose();
+    }
+
+    /// <summary>
+    /// The queue let an old answered question go: so does the page, and with it the question and its texts, unless the
+    /// engineer is looking at it right now.
+    /// </summary>
+    private void Forget(Question question)
+    {
+        if (_items.Remove(question, out QuestionItem? item))
+        {
+            Answered.Remove(item);
+            _executions.Remove(item);
+            OnChanged(nameof(IsEmpty));
+        }
     }
 
     private void Show(QuestionItem? item)

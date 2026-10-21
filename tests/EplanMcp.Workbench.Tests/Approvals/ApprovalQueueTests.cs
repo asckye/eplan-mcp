@@ -246,6 +246,33 @@ public sealed class ApprovalQueueTests
     }
 
     [Fact]
+    public void AQuestionTheAnsweredGroupLetsGo_IsToldOnce_AndNothingChangesItAfterwards()
+    {
+        var queue = new ApprovalQueue(_clock);
+        Question oldest = queue.Add(Asks.Write("r0"))!;
+        queue.Answer(oldest, approve: true);
+        var dropped = new List<Question>();
+        queue.Changed += q =>
+        {
+            if (q.Dropped)
+            {
+                dropped.Add(q);
+            }
+        };
+
+        for (int i = 1; i <= ApprovalQueue.MaxAnswered; i++)
+        {
+            queue.End(queue.Add(Asks.Write($"r{i}"))!, QuestionEnd.Expired);
+        }
+
+        queue.Report(oldest, WriteExecution.Committed, null);
+
+        Assert.Equal([oldest], dropped);
+        Assert.Equal(QuestionExecution.Running, oldest.Execution);
+        Assert.DoesNotContain(oldest, queue.Answered);
+    }
+
+    [Fact]
     public async Task AnAnswerAndAnEndAtTheSameTime_OneWins_AndTheAnswerSentIsThatOne()
     {
         var queue = new ApprovalQueue(_clock, capacity: 1000);

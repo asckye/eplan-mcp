@@ -37,6 +37,12 @@ internal sealed class Question
     /// <summary>The error code of a write that failed or whose outcome is unknown, such as <c>PLAN_STALE</c>.</summary>
     public string? Reason { get; internal set; }
 
+    /// <summary>
+    /// The answered group let it go, the oldest of more than <see cref="ApprovalQueue.MaxAnswered"/>: it shows no more and
+    /// nothing changes it.
+    /// </summary>
+    public bool Dropped { get; internal set; }
+
     /// <summary>The answer the connection sends; set once, when the question ends.</summary>
     internal TaskCompletionSource<WorkbenchDecision> Decision { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 }

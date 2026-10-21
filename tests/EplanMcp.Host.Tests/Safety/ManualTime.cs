@@ -26,6 +26,11 @@ internal sealed class ManualTime(DateTimeOffset start) : TimeProvider
 
     public override DateTimeOffset GetUtcNow() => Now;
 
+    /// <summary>Steady time moves with <see cref="Advance"/> too, never on its own.</summary>
+    public override long TimestampFrequency => TimeSpan.TicksPerSecond;
+
+    public override long GetTimestamp() => Now.UtcTicks;
+
     public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
     {
         var timer = new ManualTimer(this, callback, state);

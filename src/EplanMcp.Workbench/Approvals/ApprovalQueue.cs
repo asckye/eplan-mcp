@@ -161,6 +161,7 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     private bool Finish(Question question, QuestionEnd end)
     {
         bool freed;
+        Question? dropped = null;
         lock (_lock)
         {
             bool before = Free;
@@ -177,6 +178,8 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
             _answered.Add(question);
             if (_answered.Count > MaxAnswered)
             {
+                dropped = _answered[0];
+                dropped.Dropped = true;
                 _answered.RemoveAt(0);
             }
         }
@@ -189,6 +192,11 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
             _ => WorkbenchDecision.Closed,
         });
         Changed?.Invoke(question);
+        if (dropped is not null)
+        {
+            Changed?.Invoke(dropped);
+        }
+
         if (freed)
         {
             AcceptingChanged?.Invoke();
@@ -201,7 +209,7 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     {
         lock (_lock)
         {
-            if (question.Execution != QuestionExecution.Running)
+            if (question.Dropped || question.Execution != QuestionExecution.Running)
             {
                 return;
             }

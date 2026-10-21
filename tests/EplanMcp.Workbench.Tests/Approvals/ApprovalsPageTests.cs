@@ -488,6 +488,28 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         }));
     }
 
+    [Fact]
+    public void ThePage_FollowsTheLanguageWhileItsWindowIsOpen_AndLetsGoWhenItCloses()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () =>
+        {
+            var window = new MainWindow { ShowActivated = false };
+            window.Show();
+            WpfContext.Drain();
+            var group = (RadioButton)((ApprovalsPage)window.FindName("ApprovalsPage")).FindName("WaitingGroup");
+            Loc.Current.Language = AppLanguage.English;
+            string english = (string)group.Content;
+            Loc.Current.Language = AppLanguage.Chinese;
+            Assert.NotEqual(english, group.Content);
+
+            window.Close();
+            WpfContext.Drain();
+            Loc.Current.Language = AppLanguage.English;
+
+            Assert.NotEqual(english, group.Content); // no handler of the closed page is left on the catalogue
+        });
+    }
+
     private void WithPage(Action<MainWindow, ApprovalsPage> test) => With(window =>
     {
         _queue = new ApprovalQueue(_clock);
