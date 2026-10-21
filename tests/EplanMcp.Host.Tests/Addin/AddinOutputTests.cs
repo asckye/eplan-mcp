@@ -55,6 +55,16 @@ public sealed class AddinOutputTests
         Assert.StartsWith(@"add-in: C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll" + Environment.NewLine + "[registered] EPLAN 2026.0.3.25421 Electric P8 (process 4000)  ", AddinOutput.Text(report, CultureInfo.GetCultureInfo("de-DE")), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PathMismatch_WithoutAPath_SaysTheLocationIsUnknownRatherThanAQuestionMark()
+    {
+        AddinIssue unknown = new(AddinProblem.PathMismatch, string.Empty);
+
+        Assert.Equal("EPLAN 加载的是不报告路径的旧版插件，它的位置未知，看不出这次的注册是否生效", AddinTexts.Problem(unknown, AddinAction.Install, zh: true));
+        Assert.StartsWith("EPLAN loaded an older add-in that does not report its path", AddinTexts.Problem(unknown, AddinAction.Install, zh: false), StringComparison.Ordinal);
+        Assert.Contains(@"D:\old\EplanMcp.Bridge.Eplan.dll", AddinTexts.Problem(new(AddinProblem.PathMismatch, @"D:\old\EplanMcp.Bridge.Eplan.dll"), AddinAction.Install, zh: true), StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("zh-CN", "[失败] 无法读取注册记录")]
     [InlineData("en-US", "[failed] Cannot read the record of registrations")]

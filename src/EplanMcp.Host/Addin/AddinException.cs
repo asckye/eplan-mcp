@@ -30,7 +30,7 @@ internal enum AddinProblem
     /// <summary>The started EPLAN did not load the add-in in time and was left open.</summary>
     NotLoaded,
 
-    /// <summary>The started EPLAN loaded the add-in from another path: an earlier registration still holds, and this one did not take.</summary>
+    /// <summary>The started EPLAN loaded the add-in from another path, or from one an older add-in does not report (an empty detail).</summary>
     PathMismatch,
 
     /// <summary>The Bridge of the started EPLAN did not answer the handshake, so which add-in loaded cannot be told.</summary>
