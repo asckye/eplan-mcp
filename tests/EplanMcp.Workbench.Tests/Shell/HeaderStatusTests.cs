@@ -37,6 +37,27 @@ public sealed class HeaderStatusTests(WpfContext wpf)
     }
 
     [Fact]
+    public void APlaceAHandshakeReserved_CountsAgainstTheQueue_SoTheHeaderNeverSaysTakenWhileHostsAreTurnedAway()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
+        {
+            var queue = new ApprovalQueue(TimeProvider.System, capacity: 1);
+            var status = (TextBlock)window.FindName("PipeText");
+
+            window.ShowQueue(queue, listening: true);
+            Assert.Equal("正在接收审批问题", status.Text);
+            Assert.True(queue.TryReserve());
+            window.ShowQueue(queue, listening: true);
+            Assert.StartsWith("不接收新问题", status.Text, StringComparison.Ordinal);
+            queue.Release();
+            window.ShowQueue(queue, listening: true);
+            Assert.Equal("正在接收审批问题", status.Text);
+            window.ShowQueue(queue, listening: false);
+            Assert.StartsWith("不接收审批问题", status.Text, StringComparison.Ordinal);
+        }));
+    }
+
+    [Fact]
     public void TheWaitingCount_IsNamedInFull_AndOpensTheQueueWithFocusOnItsTitle()
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
