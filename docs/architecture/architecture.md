@@ -212,8 +212,10 @@ src/
   EplanMcp.Bridge.Eplan/       net481           适配层 + 插件入口；-p:EplanBinPath 指定引用的 EPLAN Bin，构建时校验它属于 EplanVersion（默认 2026）
   EplanMcp.Bridge.Offline/     net481 (M5)      离线宿主
   EplanMcp.Workbench/          net10.0-windows (M5)
+  EplanMcp.Workbench.Protocol/ net10.0 (M5)     Host 与 Workbench 之间的管道协议：管道名、帧、消息（ADR-0014）
 tests/
   EplanMcp.Contracts.Tests/            Small：两种序列化器的往返一致性
+  EplanMcp.Workbench.Protocol.Tests/   Small：管道名、帧上限、消息往返与严格解析
   EplanMcp.Host.Tests/                 Small
   EplanMcp.Host.IntegrationTests/      Medium：stdio + Fake Bridge
   EplanMcp.Bridge.Core.Tests/          Small / Medium
