@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plc` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "-KE1 这块 PLC 卡有哪些通道？每个通道的地址、符号地址是什么、接到哪个设备？哪些通道还空着？"代理看一个 PLC 盒的通道与地址，用来核对 I/O 分配。
@@ -40,7 +40,7 @@
 ```
 - 示例中的地址、数据类型和连接只是示意，示例项目中的实际值由 Large 测试确认。
 - `plc`：PLC 盒。`station`、`rack`、`slot` 是 `FUNC_PLCSTATIONNAME`、`FUNC_PLCRACK`、`FUNC_PLCSOCKET` 的显示文本；`cpu` 是 `PLC.IsCPU`（S21：示例项目中都是 false）。
-- `channels`：`PLC.PLCTerminals`（S21：每个 PLC 盒 34 个）。`address`、`symbolicAddress`、`dataType` 是 `FUNC_PLCADDRESS`、`FUNC_PLCSYMBOLICADDRESS_CALCULATED`、`FUNC_PLCDATATYPE` 的显示文本，`text` 是功能文本；没有值时为 `null`。
+- `channels`：`PLC.PLCTerminals`（S21：每个 PLC 盒 34 个）。`address`、`symbolicAddress`、`dataType` 是 `FUNC_PLCADDRESS`、`FUNC_PLCSYMBOLICADDRESS_CALCULATED`、`FUNC_PLCDATATYPE` 的显示文本，`text` 是功能文本；没有值时为 `null`。省略 `language` 而用了回退语言时，`text` 旁边有 `textLanguage`，同 `eplan_device_get`（[语言回退设计](../design/2026-10-19-text-language-fallback.md)）。
 - `connected`：通道连接点上的连接另一端，字段同 `eplan_connection_list` 的端点；没有连接时为空数组，用来找空闲通道。
 - 一行摘要：`PLC found: 34 channels, 20 connected.`，不回显标识和文本。
 
@@ -56,6 +56,7 @@
 ## 5. 实现要点
 - 查找同 `eplan_device_get`，然后要求对象是 `EObjects.PLC`（类别 `PLCBox`）。
 - `PlcIOEntry` 在 S21 中都是 `null`，不用它；地址类信息从上面列出的属性读取。
+- 通道的连接用 `ConnectionsFilter.Function` 按 PLC 端子本身查（与 `eplan_connection_list` 按设备查询的做法相同），取每条连接中不属于该端子的一端；每个通道最多 10 个。
 - 待 Large 测试确认（S21 只读了名称和个数）：
   - 示例项目中这些 PLC 属性是否有值、显示文本的形式；`FUNC_PLCSYMBOLICADDRESS_CALCULATED` 与 `_MANUAL`、`_AUTOMATIC` 中哪一个是界面上显示的符号地址；
   - 通道的连接从 `PLCTerminal` 的哪个对象读取（端子本身还是它的连接点）。
