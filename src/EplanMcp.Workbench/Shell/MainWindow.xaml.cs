@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
+using EplanMcp.Workbench.Audit;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
@@ -26,6 +27,12 @@ public partial class MainWindow : Window
     public static readonly RoutedUICommand CycleCommand = new("Cycle", nameof(CycleCommand), typeof(MainWindow));
 
     public static readonly RoutedUICommand RegionCommand = new("Region", nameof(RegionCommand), typeof(MainWindow));
+
+    /// <summary>F5: the current page reads or runs again (KEY-07).</summary>
+    public static readonly RoutedUICommand RefreshCommand = new("Refresh", nameof(RefreshCommand), typeof(MainWindow));
+
+    /// <summary>Ctrl+F: to the audit page's filters (KEY-07).</summary>
+    public static readonly RoutedUICommand FindCommand = new("Find", nameof(FindCommand), typeof(MainWindow));
 
     /// <summary>Below this window width the Sider shows icons only (3.1).</summary>
     private const double CompactBelow = 992;
@@ -52,6 +59,8 @@ public partial class MainWindow : Window
         CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut), CanNavigate));
         CommandBindings.Add(new CommandBinding(CycleCommand, (_, e) => Cycle(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
         CommandBindings.Add(new CommandBinding(RegionCommand, (_, e) => MoveRegion(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
+        CommandBindings.Add(new CommandBinding(RefreshCommand, (_, _) => Refresh(), CanNavigate));
+        CommandBindings.Add(new CommandBinding(FindCommand, (_, _) => Find(), CanNavigate));
         SizeChanged += (_, _) => ApplySider();
         Loc.Current.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
@@ -111,6 +120,9 @@ public partial class MainWindow : Window
         ApprovalsPage.View = view;
         view.Arrived += OnArrived;
     }
+
+    /// <summary>Gives the audit page its state; the app does, once.</summary>
+    internal void AttachAudit(AuditView view) => AuditPage.Attach(view);
 
     /// <summary>
     /// What a new question may do to be noticed, and no more (APR-14, PRI-07): flash the taskbar button when the window
@@ -233,6 +245,21 @@ public partial class MainWindow : Window
         int current = regions.FindLastIndex(r => r.Region.IsKeyboardFocusWithin);
         int next = current < 0 ? (step > 0 ? 0 : regions.Count - 1) : (current + step + regions.Count) % regions.Count;
         regions[next].Focus();
+    }
+
+    private void Refresh()
+    {
+        if (CurrentPage == WorkbenchPage.Audit)
+        {
+            AuditPage.Refresh();
+        }
+    }
+
+    /// <summary>Ctrl+F opens the audit page if need be, then focuses its first filter.</summary>
+    private void Find()
+    {
+        Navigate(WorkbenchPage.Audit, NavigationOrigin.Shortcut);
+        AuditPage.FocusFilters();
     }
 
     private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);

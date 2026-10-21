@@ -8,6 +8,7 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     xmlns:settings="clr-namespace:EplanMcp.Workbench.Settings"
     xmlns:approvals="clr-namespace:EplanMcp.Workbench.Approvals"
+    xmlns:audit="clr-namespace:EplanMcp.Workbench.Audit"
     Width="1200" Height="780" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
@@ -21,6 +22,8 @@
     <KeyBinding Key="D4" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Clients}" />
     <KeyBinding Key="Tab" Modifiers="Control" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="1" />
     <KeyBinding Key="Tab" Modifiers="Control+Shift" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="-1" />
+    <KeyBinding Key="F5" Command="{x:Static shell:MainWindow.RefreshCommand}" />
+    <KeyBinding Key="F" Modifiers="Control" Command="{x:Static shell:MainWindow.FindCommand}" />
     <KeyBinding Key="F6" Command="{x:Static shell:MainWindow.RegionCommand}" CommandParameter="1" />
     <KeyBinding Key="F6" Modifiers="Shift" Command="{x:Static shell:MainWindow.RegionCommand}" CommandParameter="-1" />
   </Window.InputBindings>
@@ -120,9 +123,7 @@
 
       <Grid x:Name="Body" Grid.Row="1" Margin="24" AutomationProperties.Name="{l:Tr Shell.Content}">
         <approvals:ApprovalsPage x:Name="ApprovalsPage" />
-        <shell:PageView x:Name="AuditPage" Title="{l:Tr Page.Audit}" Caption="{l:Tr Page.Audit.Caption}">
-          <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Audit.Later}" />
-        </shell:PageView>
+        <audit:AuditPage x:Name="AuditPage" />
         <shell:PageView x:Name="StatusPage" Title="{l:Tr Page.Status}" Caption="{l:Tr Page.Status.Caption}">
           <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Status.Later}" />
         </shell:PageView>

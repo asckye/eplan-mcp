@@ -1,0 +1,91 @@
+<UserControl
+    x:Class="EplanMcp.Workbench.Audit.AuditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
+    Focusable="False">
+  <!--
+    The audit page (M5 design 4.4 item 2, workbench-ui 3.4, NAV-10): read only. The head with its commands, the result
+    of verifying the chain and why the log could not be read (Banners, ERR-04), the filters, then the records as a table
+    (CTL-06) or the empty state (ERR-05). Every value from the log is plain text (CTL-12).
+  -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
+          <Button x:Name="ReloadButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.Reload}" AutomationProperties.AcceleratorKey="F5" Click="OnReload" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Audit}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
+                     Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
+          <TextBlock x:Name="Caption" Style="{StaticResource Primer.PageSubtitle}" TextWrapping="Wrap" TextTrimming="None" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <!-- STS-02, STS-03: what is running, and what came of it, told to screen readers too. -->
+    <StackPanel x:Name="Working" DockPanel.Dock="Top" Margin="0,0,0,12" Visibility="Collapsed">
+      <TextBlock x:Name="WorkingText" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+      <ProgressBar x:Name="WorkingBar" Style="{StaticResource Primer.Progress}" Maximum="1" Margin="0,8,0,0" AutomationProperties.Name="{Binding Text, ElementName=WorkingText}" />
+    </StackPanel>
+    <Border x:Name="Banner" DockPanel.Dock="Top" Margin="0,0,0,12" Visibility="Collapsed">
+      <DockPanel>
+        <Path x:Name="BannerIcon" DockPanel.Dock="Left" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <StackPanel>
+          <TextBlock x:Name="BannerText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+          <TextBox x:Name="BannerDetails" Style="{StaticResource Workbench.CodeValue}" Visibility="Collapsed" AutomationProperties.LabeledBy="{Binding ElementName=BannerText}" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <!-- Lines that are not records: something changed the log, or an append stopped halfway; audit verify says where. -->
+    <Border x:Name="NotRecordsBanner" DockPanel.Dock="Top" Margin="0,0,0,12" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
+      <DockPanel>
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <TextBlock x:Name="NotRecordsText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+      </DockPanel>
+    </Border>
+
+    <!-- The filters (CTL-03): each with its label above it, all applied together. -->
+    <WrapPanel x:Name="Filters" DockPanel.Dock="Top" AutomationProperties.Name="{l:Tr Audit.Filters}">
+      <StackPanel Margin="0,0,12,12" Width="160">
+        <TextBlock x:Name="DayLabel" Text="{l:Tr Audit.Day}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+        <ComboBox x:Name="DayFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DayLabel}" SelectionChanged="OnFilter" />
+      </StackPanel>
+      <StackPanel Margin="0,0,12,12" Width="200">
+        <TextBlock x:Name="ToolLabel" Text="{l:Tr Audit.Tool}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+        <ComboBox x:Name="ToolFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ToolLabel}" SelectionChanged="OnFilter" />
+      </StackPanel>
+      <StackPanel Margin="0,0,12,12" Width="240">
+        <TextBlock x:Name="ProjectLabel" Text="{l:Tr Audit.Project}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+        <ComboBox x:Name="ProjectFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ProjectLabel}" SelectionChanged="OnFilter" />
+      </StackPanel>
+      <StackPanel Margin="0,0,12,12" Width="160">
+        <TextBlock x:Name="DecisionLabel" Text="{l:Tr Audit.Decision}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+        <ComboBox x:Name="DecisionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DecisionLabel}" SelectionChanged="OnFilter" />
+      </StackPanel>
+      <StackPanel Margin="0,0,12,12" Width="160">
+        <TextBlock x:Name="ExecutionLabel" Text="{l:Tr Audit.Execution}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+        <ComboBox x:Name="ExecutionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ExecutionLabel}" SelectionChanged="OnFilter" />
+      </StackPanel>
+    </WrapPanel>
+
+    <Grid>
+      <ListView x:Name="Records" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                ScrollViewer.HorizontalScrollBarVisibility="Auto">
+        <ListView.View>
+          <GridView>
+            <GridViewColumn x:Name="TimeColumn" Width="160" DisplayMemberBinding="{Binding Time}" />
+            <GridViewColumn x:Name="KindColumn" Width="120" DisplayMemberBinding="{Binding Kind}" />
+            <GridViewColumn x:Name="ToolColumn" Width="180" DisplayMemberBinding="{Binding Tool}" />
+            <GridViewColumn x:Name="ProjectColumn" Width="260" DisplayMemberBinding="{Binding Project}" />
+            <GridViewColumn x:Name="ResultColumn" Width="140" DisplayMemberBinding="{Binding Result}" />
+          </GridView>
+        </ListView.View>
+      </ListView>
+      <shell:EmptyState x:Name="Empty" Title="{l:Tr Audit.Empty}" Text="{l:Tr Audit.EmptyText}" Visibility="Collapsed" />
+      <shell:EmptyState x:Name="NoMatch" Title="{l:Tr Audit.NoMatch}" Text="{l:Tr Audit.NoMatchText}" Visibility="Collapsed" />
+    </Grid>
+  </DockPanel>
+</UserControl>

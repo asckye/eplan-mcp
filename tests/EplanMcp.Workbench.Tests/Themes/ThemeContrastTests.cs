@@ -31,7 +31,7 @@ public sealed partial class ThemeContrastTests(WpfContext wpf)
         ("Primer.warn", "Primer.bg"), ("Primer.warn", "Primer.card"), ("Primer.warn", "Primer.warnBg"), ("Primer.warn", "Primer.countWarningBg"),
         ("Primer.ok", "Primer.bg"), ("Primer.ok", "Primer.card"),
         ("Primer.diffRed", "Primer.bg"), ("Primer.diffRed", "Primer.card"), ("Primer.diffRed", "Primer.cardSel"),
-        ("Primer.text", "Ant.colorErrorBg"),
+        ("Primer.text", "Ant.colorErrorBg"), ("Primer.text", "Primer.okBg"),
     ];
 
     /// <summary>Graphics against what they sit on: focus ring, progress fill on its track, alert icons, selection marks.</summary>
@@ -39,7 +39,7 @@ public sealed partial class ThemeContrastTests(WpfContext wpf)
     [
         ("Primer.focusOuter", "Primer.bg"), ("Primer.focusOuter", "Primer.card"), ("Primer.focusOuter", "Primer.cardSel"),
         ("Ant.colorPrimary", "Ant.colorFillSecondary"), ("Primer.warn", "Ant.colorFillSecondary"),
-        ("Ant.colorPrimary", "Primer.bg"), ("Primer.diffRed", "Ant.colorErrorBg"), ("Primer.warn", "Primer.bg"),
+        ("Ant.colorPrimary", "Primer.bg"), ("Primer.diffRed", "Ant.colorErrorBg"), ("Primer.warn", "Primer.bg"), ("Primer.ok", "Primer.okBg"),
     ];
 
     private static readonly string[] _paletteNames = ["Light", "Dark", "HighContrast"];
