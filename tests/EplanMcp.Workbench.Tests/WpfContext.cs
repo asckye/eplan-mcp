@@ -37,7 +37,8 @@ public sealed class WpfContext : IDisposable
         };
         _thread.SetApartmentState(ApartmentState.STA);
         _thread.Start();
-        if (!ready.Wait(TimeSpan.FromSeconds(30)))
+        // Loading the theme took over 30 s once on a busy CI runner (PR 246); a hang still ends the run.
+        if (!ready.Wait(TimeSpan.FromMinutes(2)))
         {
             throw new InvalidOperationException("The WPF test thread did not start.");
         }
