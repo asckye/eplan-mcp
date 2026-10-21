@@ -1,0 +1,97 @@
+using System.Globalization;
+using EplanMcp.Contracts;
+
+namespace EplanMcp.Bridge.Core.Operations;
+
+/// <summary>
+/// <see cref="OperationNames.DevicePlaceExecute"/>: checks the arguments and the plan's fingerprint again, then places the
+/// part's device and gives all its functions the tag in one transaction, and reads back; nothing placed on the page, or a
+/// tag EPLAN changed, rolls everything back (docs/tools/eplan_device_place.md, section 5). S20 found the placement taken
+/// back by the SafetyPoint and undone by one Ctrl+Z after the commit (api-notes A26).
+/// </summary>
+public sealed class DevicePlaceExecuteOperation(
+    IProjectCatalog catalog,
+    IPageReader pages,
+    IDeviceRenamer names,
+    IPartsDatabase parts,
+    IDevicePlacer placer,
+    ITransactionScopeFactory transactions)
+    : Operation<DevicePlaceArgs, DevicePlaceData>, IWriteOperation
+{
+    /// <summary>The tool whose undo step this is: EPLAN lists it as "AI: eplan_device_place".</summary>
+    public const string Tool = "eplan_device_place";
+
+    public override string Name => OperationNames.DevicePlaceExecute;
+
+    protected override DevicePlaceData Execute(DevicePlaceArgs args)
+    {
+        DevicePlaceRequest request;
+        try
+        {
+            if (string.IsNullOrEmpty(args.Fingerprint))
+            {
+                throw InvalidArgument("'fingerprint' is required: the one device.place.plan returned.");
+            }
+
+            request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
+            if (!string.Equals(request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
+            {
+                throw new BridgeErrorException(
+                    ErrorReason.PlanStale,
+                    "The objects on the page, or the devices using the tag, changed after the plan was made, so nothing was placed. Call eplan_device_place again for a new plan.",
+                    retryable: false,
+                    new Dictionary<string, string> { ["project"] = request.Project.Name });
+            }
+
+            request.CheckFree();
+        }
+        catch (BridgeErrorException ex)
+        {
+            throw WriteArguments.NotStarted(ex);
+        }
+
+        Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () => Place(request));
+        PlacedDevice placed = committed.Result;
+        return new DevicePlaceData
+        {
+            Project = request.Project.Name,
+            Page = request.Page.Name,
+            Part = request.Part,
+            Variant = request.Variant,
+            Tag = placed.MainName,
+            VisibleTag = DeviceTags.Shown(placed.VisibleName),
+            Category = placed.Category,
+            Functions = placed.Names.Count,
+            Unplaced = placed.Unplaced,
+            PageSizeKnown = request.Page.Width is not null,
+            Warning = committed.Warning,
+        };
+    }
+
+    /// <summary>The tool spec's steps in the transaction: place and rename (one adapter call), then check what EPLAN did.</summary>
+    private PlacedDevice Place(DevicePlaceRequest request)
+    {
+        PlacedDevice placed = placer.Place(request.Project.Path, request.Page.Name, request.Part, request.Variant, request.X, request.Y, request.Tag);
+        if (placed.Names.Count == 0 || placed.OnPage == 0)
+        {
+            throw new BridgeErrorException(
+                ErrorReason.InvalidArgument,
+                $"EPLAN placed nothing on the page for part '{request.Part}', so nothing was changed: its macro may be missing or empty. Insert a window macro with eplan_macro_insert instead.",
+                retryable: false,
+                new Dictionary<string, string> { ["part"] = request.Part, ["functions"] = placed.Names.Count.ToString(CultureInfo.InvariantCulture) });
+        }
+
+        string? other = placed.Names.FirstOrDefault(name => !string.Equals(name, request.Tag, StringComparison.Ordinal));
+        if (!string.Equals(placed.MainName, request.Tag, StringComparison.Ordinal) || other is not null)
+        {
+            string actual = string.Equals(placed.MainName, request.Tag, StringComparison.Ordinal) ? other! : placed.MainName;
+            throw new BridgeErrorException(
+                ErrorReason.InvalidArgument,
+                $"EPLAN named the device '{actual}' instead of '{request.Tag}': devices of this kind do not use every part of the tag, so nothing was placed. Use the structure that similar devices have (eplan_device_list).",
+                retryable: false,
+                new Dictionary<string, string> { ["requested"] = request.Tag, ["actual"] = actual });
+        }
+
+        return placed;
+    }
+}

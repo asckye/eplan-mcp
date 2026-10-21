@@ -124,6 +124,12 @@ public static class OperationNames
     public const string DevicePlacePlan = "device.place.plan";
 
     /// <summary>
+    /// Places the part's device on the page and gives all its functions the tag, in one transaction, then reads back.
+    /// Arguments: <see cref="DevicePlaceArgs"/> with the fingerprint; data: <see cref="DevicePlaceData"/>.
+    /// </summary>
+    public const string DevicePlaceExecute = "device.place.execute";
+
+    /// <summary>
     /// The plan of eplan_connection_generate: finds the pages and counts their connections, never writes. Arguments:
     /// <see cref="ConnectionGenerateArgs"/>; data: <see cref="WritePlan"/>.
     /// </summary>
