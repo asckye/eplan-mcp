@@ -176,6 +176,12 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A25. M4c 的导出（spike S25，部分完成，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S25](../../spikes/S25-exports/README.md)。示例项目的 scratch 副本。
+- `Export.PXFProject(project, 路径, 主数据, 连接)`：带主数据 36.9 秒、840 MB，不带主数据 19.2 秒、598 MB；扩展名 `.epj` 由 EPLAN 补上，另外留下一个与文件同名的空目录。只改写 `User.eod`。— S25。
+- `PartsService.ExportPartsList`：XML 61.9 秒、14 MB；CSV 89.9 秒、20 MB（分号分隔）。只改写 `User.eod`。— S25。
+- 🔴 部件清单 CSV 导出返回后约 1 秒，EPLAN 记录两次访问冲突（0xC0000005），随即关闭全部项目；进程留下来，但没有窗口、没有 Remote Client 端口和 Bridge 管道，不再响应。是导出的收尾还是下一个 action 触发的，尚未查清。— S25。
+
 ### A24. 电缆、端子、PLC 的读取与编号（spike S21，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S21](../../spikes/S21-cables-terminals/README.md)。示例项目的 scratch 副本。
 - `DMObjectsFinder` 能读出电缆（按类别 78 根）、端子排（45）、端子（1331）、PLC 盒（20）、插头（170）、连接（2060）；`Cable.GetSourcesAndTargets` 给出电缆两端的设备或端子，`TerminalStrip.Terminals`、`PLC.PLCTerminals` 给出所属的端子。— S21。
