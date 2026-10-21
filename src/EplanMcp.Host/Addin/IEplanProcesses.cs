@@ -1,15 +1,17 @@
 namespace EplanMcp.Host.Addin;
 
-/// <summary>A running EPLAN in this Windows session; <see cref="Variant"/> is null when it cannot be told.</summary>
-internal sealed record RunningEplan(int ProcessId, string? Variant);
-
 /// <summary>
 /// The EPLAN processes install-addin looks at and starts. Production: <see cref="EplanProcesses"/>; tests fake EPLAN
 /// completely, so no test ever starts EPLAN.exe.
 /// </summary>
 internal interface IEplanProcesses
 {
-    public IReadOnlyList<RunningEplan> Running();
+    /// <summary>
+    /// The process IDs of the EPLAN instances running in this Windows session. Which variant each runs cannot be told
+    /// from outside: the registry entry EPLAN keeps for a running instance names the licence, not the variant
+    /// (api-notes A1), so install-addin does not try.
+    /// </summary>
+    public IReadOnlyList<int> Running();
 
     /// <summary>Starts <paramref name="exe"/> with the raw <paramref name="arguments"/>; throws when it cannot.</summary>
     public IStartedEplan Start(string exe, string arguments);
