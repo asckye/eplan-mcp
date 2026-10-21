@@ -26,13 +26,15 @@ internal sealed class CheckWriteTools
         Title = "Run the check of an EPLAN project",
         ReadOnly = false,
         Destructive = false,
-        Idempotent = true,
+        // Each run adds EPLAN's summary hints again (live check, api-notes A20).
+        Idempotent = false,
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(CheckRunResult))]
     [Description(
         "Runs EPLAN's check on a project or some of its pages and returns the counts per severity and the first 20 " +
-        "messages. Replaces the project's check messages; one Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not " +
+        "messages. EPLAN replaces earlier messages, adds its summary hints, and for pages drops messages of other objects; " +
+        "one Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not " +
         "respond meanwhile. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\"}.")]
     public static async Task<CallToolResult> CheckRunAsync(
         WritePipeline pipeline,
@@ -81,11 +83,11 @@ internal sealed class CheckWriteTools
             return ToolResults.Error(ex.Error);
         }
 
-        return outcome.Data is { } data ? Checked(data) : Planned(outcome, dry_run);
+        return outcome.Data is { } data ? Checked(data, pages is not null) : Planned(outcome, dry_run);
     }
 
     /// <summary>A commit that answered in time: the messages read back, the first 20 listed (tool spec 3).</summary>
-    private static CallToolResult Checked(CheckRunData data)
+    private static CallToolResult Checked(CheckRunData data, bool somePages)
     {
         var result = new CheckRunResult
         {
@@ -99,10 +101,15 @@ internal sealed class CheckWriteTools
             Total = data.Total,
             Undo = "AI: " + RunTool,
         };
-        Shape(result, data.Warning);
+        string? warning = Join(
+            ResultShaper.CleanText(data.Warning),
+            somePages
+                ? "Checking pages also removed earlier messages of objects outside them, such as 3D connections; run eplan_check_run without 'pages' to check the whole project again."
+                : null);
+        Shape(result, warning);
         if (ResultShaper.FitItems(result, result.Messages) > 0)
         {
-            Shape(result, data.Warning);
+            Shape(result, warning);
         }
 
         string[] found =
@@ -114,6 +121,8 @@ internal sealed class CheckWriteTools
         string what = found.Length > 0 ? string.Join(", ", found) : data.Total > 0 ? ToolResults.Count(data.Total, "message") : "no messages";
         return ToolResults.Success($"Check found {what} ({ToolResults.Count(data.Before, "message")} before); Ctrl+Z in EPLAN undoes this step.", result);
     }
+
+    private static string? Join(params string?[] parts) => string.Join(" ", parts.OfType<string>()) is { Length: > 0 } text ? text : null;
 
     /// <summary>The truncation flag and the hint for the messages listed now.</summary>
     private static void Shape(CheckRunResult result, string? warning)

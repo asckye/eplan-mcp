@@ -16,7 +16,7 @@ Check two pages only:
 
 1. Call it after changing a project (placing macros, generating connections, renaming devices) to find errors before the engineer reviews the drawings.
 2. Omit `pages` to check the whole project, or give up to 50 full page names, as eplan_page_list returns them. Omit `scheme` to use the check scheme EPLAN uses now; a scheme EPLAN does not know fails with INVALID_ARGUMENT.
-3. The check replaces the project's check messages, so it is a write: one Ctrl+Z in EPLAN reverts it. It takes seconds (about 5 s for 300 pages), and EPLAN does not respond meanwhile.
+3. EPLAN replaces the earlier messages and adds its summary hints again on every run, so a second check is no no-op; a check of some pages also drops messages of other objects, such as 3D connections. It is a write: one Ctrl+Z in EPLAN reverts it. It takes seconds (about 5 s for 300 pages), and EPLAN does not respond meanwhile.
 4. Read `counts` first. `messages` lists at most 20; use eplan_check_list with `severity` and `cursor` for the others, and eplan_device_get or eplan_page_get for the object a message names.
 5. To read the messages of the last check without running a new one, use eplan_check_list.
 

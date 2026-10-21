@@ -158,7 +158,7 @@
     {
       "name": "eplan_check_run",
       "title": "Run the check of an EPLAN project",
-      "description": "Runs EPLAN's check on a project or some of its pages and returns the counts per severity and the first 20 messages. Replaces the project's check messages; one Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not respond meanwhile. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\"}.",
+      "description": "Runs EPLAN's check on a project or some of its pages and returns the counts per severity and the first 20 messages. EPLAN replaces earlier messages, adds its summary hints, and for pages drops messages of other objects; one Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not respond meanwhile. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -333,7 +333,7 @@
       "annotations": {
         "title": "Run the check of an EPLAN project",
         "destructiveHint": false,
-        "idempotentHint": true,
+        "idempotentHint": false,
         "openWorldHint": false,
         "readOnlyHint": false
       }
