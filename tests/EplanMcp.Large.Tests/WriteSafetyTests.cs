@@ -73,6 +73,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
             new PageCreateArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint },
             Guid.NewGuid().ToString("N"),
             TimeSpan.FromSeconds(60),
+            null,
             TestContext.Current.CancellationToken));
 
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (stale.Error.Reason, stale.Error.Execution));
@@ -97,6 +98,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
             new PageUpdateArgs { Project = args.Project, Pages = args.Pages, Language = args.Language, Fingerprint = plan.Fingerprint },
             Guid.NewGuid().ToString("N"),
             TimeSpan.FromSeconds(60),
+            null,
             TestContext.Current.CancellationToken));
 
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (stale.Error.Reason, stale.Error.Execution));
