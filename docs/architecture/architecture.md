@@ -100,7 +100,7 @@ flowchart LR
 |---|---|
 | **Remote Client + 动态生成 C# 脚本**（covagashi/eplan-rag-mcp 的做法） | 每次操作都要编译一次脚本；**编译失败时 Remote Client 仍然返回成功**（实机验证）；依赖 TEMP 等外部环境；结果只能通过临时文件传回；难以做事务和细粒度的错误处理；脚本访问 DataModel 同样需要 API 扩展授权 |
 | **Remote Client + 插件注册的自定义 Action** | 参数和返回值只能是字符串，并且只有同步模式才能拿到返回值；没有进度通知和取消；传输层是不加密的旧版 gRPC，客户端还需要 Bin 中没有的 `System.Memory`，所以 .NET 10 的 Host 无法直接使用，要再加一个 net481 中间进程。**保留作为后备**：如果 M1 验证表明主线程调度不可靠，就改用这种方式，借助 EPLAN 自身"空闲时才执行远程调用"的同步机制 |
-| **离线程序**（`EplApplication`，在自己的 STA 进程里无界面运行 EPLAN） | 工程师看不到实时变化；要额外占用授权；启动慢。**保留用于无界面场景**：批处理和 CI 实机测试。它和插件共用同一套 Bridge 代码（第 5.4 节） |
+| **离线程序**（`EplApplication`，在自己的 STA 进程里无界面运行 EPLAN） | 工程师看不到实时变化；要额外占用授权；启动慢。**保留用于无界面场景**：批处理和实机测试。它和插件共用同一套 Bridge 代码（第 5.4 节） |
 
 ---
 
@@ -205,7 +205,7 @@ flowchart LR
     core --- offline
 ```
 
-Host 只认管道协议，不关心对面是插件还是离线进程。离线宿主用于 CI 实机测试和批处理。离线模式下，除了显示界面的功能以外，API 功能都可以使用。
+Host 只认管道协议，不关心对面是插件还是离线进程。离线宿主用于实机测试和批处理。离线模式下，除了显示界面的功能以外，API 功能都可以使用。
 
 **离线宿主的启动**（`EplanMcp.Bridge.Offline`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.9，api-notes A22）：`[STAThread]` 主线程先让 EPLAN 的 `AssemblyResolver` 指向变体的 Bin，Platform Bin 中的其他程序集（Newtonsoft.Json）由自己的 `AssemblyResolve` 加载；然后在单独的方法中 `EplApplication.Init(string.Empty, false, false)`（不允许授权和登录对话框），在 `LockingStep` 中打开 `--project` 给出的项目，再调用与插件相同的 `BridgeHost.Start`，在主线程上运行 WPF 调度器（`Dispatcher.PushFrame`）：操作经同一个 `EplanDispatcher` 在这个线程上执行，与插件中相同。没有界面，所以 Bridge 不提供 `approval.ask`，握手中的 `eplan.offline` 为 true，Host 的 EPLAN 对话框渠道也不经它询问：经离线宿主只能写 scratch。`--idle-exit` 秒内没有 Host 连接、或者按 Ctrl+C 时，依次停止管道、等已经发出的操作完成、关闭项目、在主线程上 `Exit()` 一次。日志写 `logs\bridge-offline-*.log`，从不写 stdout。
 
@@ -476,7 +476,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | R6 | 借用授权到期，或网络授权被占用 | 调用失败 | 授权丢失作为单独的错误码；doctor 中检查 | M2 |
 | R7 | EPLAN 2024、2025、2027 上的兼容性 | 需要额外的 Bridge 构建 | 2024 起都是 4.8.1 API，2027 保留它；唯一不兼容的 `EplanMainThreadDispatcher` 已去掉（ADR-0009）；spike S7 逐版本实测 | M6 |
 | R8 | 名称中使用 "EPLAN" 的商标问题 | 公开发布受限 | 公开发布前确认命名，必要时改名 | 公开发布前 |
-| R9 | 只有一台实机测试环境 | Large 测试和日常开发争用同一个 EPLAN | 使用 scratch 项目隔离；M5 之后用离线宿主在 CI 中运行 | M5 |
+| R9 | 只有一台实机测试环境 | Large 测试和日常开发争用同一个 EPLAN | 使用 scratch 项目隔离；不用自托管 runner，在开发机上手动运行（ADR-0020） | M5 |
 | R10 | **MSIX 打包的客户端**（Claude 桌面版）启动 Host 时，写入 `%LOCALAPPDATA%` 的文件被重定向，EPLAN 和用户都看不到（S0 发现） | scratch 项目打不开；审计日志找不到 | [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)（已接受）：数据目录改为 `%USERPROFILE%\EplanMcp\`，实例发现改为枚举命名管道 | M1 |
 
 ---
@@ -494,7 +494,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | **M4 工程工作流**（完成标准已达到 2026-10-20，按 M4 设计 Q1：两批工具完成、端到端评测通过） | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |
 | **M4b Pro Panel 3D** | 先做 spike（E3D 对象的读写、坐标系、回滚与撤销），再实现 Pro Panel 工具家族：查询 3D 布局、布置导轨和线槽、把设备放进 3D 布局、钻孔、母排与铜排、生产输出。详见 [API 覆盖矩阵第 3 节](../eplan/api-coverage.md#3-pro-panel-3dm4b) | 3D 布局类 Agent 评测任务通过；写操作同样满足 Q1–Q3 |
 | **M4c 更多工程工具**（2026-10-21 加入，与 M5 并行） | 按符号放置设备；电缆、端子、PLC 的工具及端子、电缆、连接的编号；导入（DXF、PDF 注释、清单、PLC、PXF；预规划等授权）；部件库、翻译、修订；PXF、清单、标签等导出；工具 Profile（[M4c 设计](../design/2026-10-21-m4c-more-tools.md)） | 未被阻塞的批次全部完成，评测通过；写系统主数据的工具在 [ADR-0019](../adr/0019-master-data-writes.md) 接受之后才开工 |
-| **M5 可运维** | 按用户安装的安装包；**Workbench**（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名） | 在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](#71-安装验收清单m5-发布前逐项通过)全部通过 |
+| **M5 可运维** | 按用户安装的安装包；**Workbench**（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主（实机测试在开发机上手动运行，ADR-0020）；发布流水线（SBOM、来源证明，视情况加 EADN 签名；插件由维护者按标签构建） | 在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](#71-安装验收清单m5-发布前逐项通过)全部通过 |
 | **M6 多版本** | EPLAN 2024、2025、2027 验证（spike S7，[ADR-0009](../adr/0009-supported-eplan-versions.md)） | Q10 通过 |
 
 ---
