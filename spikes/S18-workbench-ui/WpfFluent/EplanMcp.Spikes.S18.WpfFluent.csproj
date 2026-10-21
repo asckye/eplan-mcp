@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S18, prototype B1 (ADR-0015 option 2 as written; replaced by B with the TIA theme): the approval card in WPF on
+    .NET 10 with the built-in Fluent theme (ThemeMode).
+    No NuGet package; the tray icon is WinForms' NotifyIcon. See ../README.md for the commands and results.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>EplanMcp.Spikes.S18.WpfFluent</RootNamespace>
+    <AssemblyName>S18.WpfFluent</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <!-- Per-monitor v2 DPI awareness; without a manifest a WPF app on .NET 10 runs system-aware (measured, see README). -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Only for System.Windows.Forms.NotifyIcon (the tray icon). -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <!--
+      WPF0001: Application.ThemeMode and Window.ThemeMode are still marked experimental in .NET 10 (ADR-0015, option 2).
+      The Fluent theme is the point of this prototype, so the warning is acknowledged here once.
+    -->
+    <NoWarn>$(NoWarn);WPF0001;CA2007</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- WPF and WinForms both define Application, Button, FontFamily...; keep WinForms out of the implicit usings. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

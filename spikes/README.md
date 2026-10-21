@@ -20,6 +20,7 @@
 | [S13](S13-client-progress/README.md) | Claude Code 是否带进度令牌、中断时是否取消、图片能否交给模型 | **部分完成** 2026-10-20 | 每次调用都带 `progressToken`，心跳送达；`inline` 的 PNG 模型能读懂；中断和 2 分钟以上的调用要在交互会话中再看 |
 | [S15](S15-offline-host/README.md) | 离线宿主：`EplApplication.Init` 的授权与登录对话框、与界面中的 EPLAN 同时运行、启动耗时、回滚与撤销 | **部分完成** 2026-10-20 | 开发机上可行：不弹窗，约 2 秒启动，与界面中的 EPLAN 互不影响，回滚规律与插件相同；要传变体的 Bin。另一用户、服务上下文下的授权未测，要项目负责人建 runner 账户 |
 | [S17](S17-client-plugin/README.md) | 客户端与插件：本地插件市场能否离线安装，插件 `.mcp.json` 中哪些变量会展开，桌面版的配置文件在哪里 | **部分完成** 2026-10-20 | 命令行不登录、网络不可达时也能装好，插件从原处加载；`${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}` 和任意环境变量在 command、args、env 中都会展开，`%VAR%` 不会，所以 `.mcp.json` 不必由安装程序生成；桌面版的配置文件只在包的 `LocalCache\Roaming\Claude\` 中。在没有网络的虚拟机上安装还没有做 |
+| [S18](S18-workbench-ui/README.md) | Workbench 审批卡片：WinUI 3（A）、WPF + TIA Workbench 主题（B）、WPF + .NET Fluent 主题（B1）能否只用 `dotnet` 构建发布，体积、冷启动、UIA、Maple Mono CN、主题切换、托盘 | **部分完成** 2026-10-20 | 三个原型都能只用 `dotnet` 构建和自包含发布，UIA 能读出按钮、可聚焦的标题和倒计时。B（项目负责人选定）可行：TIA 的 15 个文件只改两行字体，另需 7 个 TIA 类型的替身；Maple Mono CN 从程序目录加载，两个字重多 35.4 MB；窗口约 0.6 秒出现，比 A 慢约 0.3 秒。A 的 Windows App SDK 不是 MIT 许可，发布需 `EnableMsixTooling`，单文件不能启动。Windows 10、200% 缩放、系统高对比度、讲述人、离线未测 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
