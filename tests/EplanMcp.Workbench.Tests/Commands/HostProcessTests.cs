@@ -22,12 +22,9 @@ public sealed class HostProcessTests : IDisposable
     {
         var host = new HostProcess(BuiltHost(), new Dictionary<string, string> { ["EPLANMCP_HOME"] = _root.FullName });
 
-        HostRun run = await host.RunAsync(["audit", "verify", "--format", "json"], TimeSpan.FromSeconds(30), Token);
+        AuditVerifyReport report = await new HostCommands(host).VerifyAuditAsync(Token);
 
-        using var report = System.Text.Json.JsonDocument.Parse(run.Output);
-        Assert.Equal(0, run.ExitCode);
-        Assert.Equal(Path.Combine(_root.FullName, "audit"), report.RootElement.GetProperty("directory").GetString());
-        Assert.False(report.RootElement.GetProperty("exists").GetBoolean());
+        Assert.Equal((Path.Combine(_root.FullName, "audit"), false, true), (report.Directory, report.Exists, report.Intact));
     }
 
     [Fact]

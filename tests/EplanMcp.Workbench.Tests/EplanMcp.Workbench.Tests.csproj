@@ -12,6 +12,10 @@
     <Compile Include="..\EplanMcp.Host.Tests\Safety\ManualTime.cs" Link="Shared\ManualTime.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The Host commands' JSON contract (architecture 5.2): the Workbench reads the very snapshots the Host is tested against. -->
+    <EmbeddedResource Include="..\Contracts.Snapshots\*-json.verified.json" LogicalName="Snapshots/%(Filename)%(Extension)" WithCulture="false" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\EplanMcp.Workbench\EplanMcp.Workbench.csproj" />
     <!-- The real Host channel talks to the real Workbench pipe server in the Medium tests. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
