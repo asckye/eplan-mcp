@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "部件库里有没有 3RH2 的辅助接触器？""SIE.3RH2122-1HB40 是什么、有没有宏？"代理在 EPLAN 配置的系统部件库中查部件，为 `eplan_device_place` 选部件号，或者回答选型问题。只读，不改部件库，也不改项目。
@@ -39,7 +39,7 @@
   "hint": null
 }
 ```
-- `database`：配置的库，原样给出 EPLAN 的路径变量，不展开成本机路径（SEC-12）。
+- `database`：配置的库，原样给出 EPLAN 的路径变量，不展开成本机路径（SEC-12）。SQL Server 上的库在设置中是连接串 `服务器|数据库|0` 或 `服务器|数据库|2|用户名|密码`（XML），只给出前两段 `服务器|数据库`，登录信息不离开 Bridge。
 - `description`：`ARTICLE_DESCR1` 在 `language` 下的文本，回退规则同语言回退设计；回退时旁边有 `descriptionLanguage`。
 - `hasMacro`：`ARTICLE_MACRO` 是否非空，即能否直接用 `eplan_device_place` 放置。不返回宏路径。
 - 同一部件号的多个变体各占一行。顺序：按部件号、变体的序数顺序，分页稳定。

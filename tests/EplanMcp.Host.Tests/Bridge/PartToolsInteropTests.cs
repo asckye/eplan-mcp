@@ -20,6 +20,7 @@ namespace EplanMcp.Host.Tests.Bridge;
 public sealed class PartToolsInteropTests : IAsyncDisposable
 {
     private readonly string _prefix = "EplanMcpTest." + Guid.NewGuid().ToString("N") + ".";
+    private readonly SamplePartsDatabase _database = new();
     private readonly BridgeServer _server;
     private readonly BridgeClient _client;
 
@@ -27,7 +28,7 @@ public sealed class PartToolsInteropTests : IAsyncDisposable
     {
         var catalog = new Catalog();
         var router = new OperationRouter(
-            [new ProjectListOperation(catalog), new PartListOperation(catalog, new SampleParts())],
+            [new ProjectListOperation(catalog), new PartListOperation(catalog, new SampleParts()), new PartSearchOperation(_database)],
             new InlineDispatcher(),
             null,
             new NullLog(),
@@ -100,6 +101,46 @@ public sealed class PartToolsInteropTests : IAsyncDisposable
         while (cursor.Length > 0);
 
         Assert.Equal(["LAPP.4510011", "RIT.8601000", "SIE.3RT2016-1BB41", "SIE.3RV2011-1JA10"], numbers);
+    }
+
+    [Fact]
+    public async Task PartSearch_FindsEachVariantInOrder_AndNamesTheDatabase()
+    {
+        CallToolResult result = await PartTools.PartSearchAsync(_client, "3rh21", "sie", string.Empty, PartTools.DefaultSearchLimit, string.Empty, TestContext.Current.CancellationToken);
+
+        JsonElement data = Structured(result);
+        Assert.Equal(@"$(MD_PARTS)\EPLAN_parts.alk", data.GetProperty("database").GetString());
+        Assert.Equal(
+            [("SIE.3RH2122-1HB40", "1", true), ("SIE.3RH2122-1HB40", "2", false)],
+            data.GetProperty("parts").EnumerateArray().Select(p => (p.GetProperty("partNumber").GetString(), p.GetProperty("variant").GetString(), p.GetProperty("hasMacro").GetBoolean())));
+        Assert.Equal("Found 2 parts.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
+    [Fact]
+    public async Task PartSearch_PagesThroughTheMatches_AndReadsDescriptionsInTheLanguage()
+    {
+        var numbers = new List<string>();
+        string cursor = string.Empty;
+        do
+        {
+            JsonElement data = Structured(await PartTools.PartSearchAsync(_client, "接触器", string.Empty, "zh_CN", 1, cursor, TestContext.Current.CancellationToken));
+            numbers.AddRange(Numbers(data));
+            cursor = data.GetProperty("nextCursor").GetString() ?? string.Empty;
+        }
+        while (cursor.Length > 0);
+
+        Assert.Equal(["SIE.3RH2122-1HB40", "SIE.3RH2122-1HB40", "SIE.3RT2016-1BB41"], numbers);
+    }
+
+    [Fact]
+    public async Task PartSearch_ADatabaseThatCannotBeOpened_IsEplanOperationFailed()
+    {
+        _database.Broken = true;
+
+        CallToolResult result = await PartTools.PartSearchAsync(_client, "3RH21", string.Empty, string.Empty, PartTools.DefaultSearchLimit, string.Empty, TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsError);
+        Assert.Contains(ErrorReason.EplanOperationFailed, ((TextContentBlock)result.Content[0]).Text, StringComparison.Ordinal);
     }
 
     private Task<CallToolResult> List(string manufacturer = "", string text = "", string language = "", int limit = PartTools.DefaultLimit, string cursor = "") =>

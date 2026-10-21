@@ -25,6 +25,7 @@ public sealed class NoSideEffectTests(LiveEplan eplan)
         await eplan.CallAsync("eplan_terminal_strip_get", new() { ["strip"] = "+A2-XD2" });
         await eplan.CallAsync("eplan_plc_get", new() { ["plc"] = "=K1+A2-KE1" });
         await eplan.CallAsync("eplan_part_list", new() { ["limit"] = 200 });
+        await eplan.CallAsync("eplan_part_search", new() { ["query"] = "3RH21", ["limit"] = 100 });
         await eplan.CallAsync("eplan_message_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_check_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_macro_list", new() { ["limit"] = 200 });
