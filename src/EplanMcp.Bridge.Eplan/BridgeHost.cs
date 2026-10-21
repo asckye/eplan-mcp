@@ -11,14 +11,19 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan;
 
 /// <summary>
-/// Composition root of the add-in: wires the EPLAN adapters into Bridge.Core and starts the pipe server.
-/// Called from <see cref="EplanAddIn"/> on EPLAN's main thread only; the static state has no other owner.
+/// Composition root of the Bridge: wires the EPLAN adapters into Bridge.Core and starts the pipe server, for the
+/// add-in and for the offline host (architecture 5.4). Called on EPLAN's main thread only; <see cref="_server"/> is
+/// the add-in's and has no other owner.
 /// </summary>
 internal static class BridgeHost
 {
     private static readonly TimeSpan _startTimeout = TimeSpan.FromSeconds(10);
 
     private static BridgeServer? _server;
+
+    /// <summary>The Bridge's version, as the handshake reports it.</summary>
+    public static string Version =>
+        typeof(BridgeHost).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
 
     /// <summary>Main thread (OnInitGui). Kept out of line so a missing Bridge assembly fails here, inside the caller's catch.</summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -30,18 +35,28 @@ internal static class BridgeHost
         }
 
         var log = new FileBridgeLog(DataLocations.Logs);
-        string version = typeof(BridgeHost).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
-        log.Write(BridgeLogLevel.Information, $"EplanMcp add-in {version} starting");
+        log.Write(BridgeLogLevel.Information, $"EplanMcp add-in {Version} starting");
+        _server = Start(log, BridgeProtocol.PipePrefix, EplanEnvironment.Capture);
+    }
 
+    /// <summary>
+    /// Starts a Bridge in this EPLAN process and returns its running server; the caller disposes it. Main thread, once
+    /// EPLAN is up: the add-in's OnInitGui, or the offline host after <c>EplApplication.Init</c> (M5 design 4.9).
+    /// <paramref name="describe"/> runs after the dispatcher is captured. Without a user interface
+    /// (<see cref="EplanInstanceInfo.Offline"/>) there is no approval dialog, so approval.ask is not offered.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static BridgeServer Start(IBridgeLog log, string pipePrefix, Func<IBridgeLog, EplanInstanceInfo> describe)
+    {
         EplanDispatcher dispatcher = EplanDispatcher.CaptureOnMainThread();
         log.Write(BridgeLogLevel.Information, $"Main-thread dispatcher: the WPF dispatcher of thread {Environment.CurrentManagedThreadId}");
 
-        EplanInstanceInfo eplan = EplanEnvironment.Capture(log);
-        log.Write(BridgeLogLevel.Information, $"EPLAN {eplan.Version}, variant {eplan.Variant ?? "unknown"}, API extension licence {eplan.ApiExtensionLicence?.ToString() ?? "unknown"}");
+        EplanInstanceInfo eplan = describe(log);
+        log.Write(BridgeLogLevel.Information, $"EPLAN {eplan.Version}, variant {eplan.Variant ?? "unknown"}, API extension licence {eplan.ApiExtensionLicence?.ToString() ?? "unknown"}{(eplan.Offline ? ", offline" : string.Empty)}");
 
         var options = new BridgeServerOptions
         {
-            BridgeVersion = version,
+            BridgeVersion = Version,
             Eplan = eplan,
             BuildTarget = typeof(BridgeHost).Assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName,
         };
@@ -77,7 +92,7 @@ internal static class BridgeHost
             new CheckListOperation(catalog, messages),
             new MacroListOperation(macros),
             new MacroGetOperation(catalog, macros),
-            new ApprovalAskOperation(new EplanApprovalDialog()),
+            .. eplan.Offline ? [] : new IOperation[] { new ApprovalAskOperation(new EplanApprovalDialog()) },
             new PageCreatePlanOperation(catalog, pages, pageWriter),
             new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions),
             new PageUpdatePlanOperation(catalog, pages, descriptions),
@@ -106,8 +121,9 @@ internal static class BridgeHost
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
-        _server = new BridgeServer(BridgeServer.CreatePipeName(eplan.ProcessId), pipes.Create, options, router, log);
-        _server.Start();
+        var server = new BridgeServer(BridgeServer.CreatePipeName(pipePrefix, eplan.ProcessId), pipes.Create, options, router, log);
+        server.Start();
+        return server;
     }
 
     /// <summary>Main thread (OnExit). Does not wait for the listeners (see <see cref="BridgeServer.Dispose"/>).</summary>

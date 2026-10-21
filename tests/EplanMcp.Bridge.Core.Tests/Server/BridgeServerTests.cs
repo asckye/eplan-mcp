@@ -44,6 +44,44 @@ public sealed class BridgeServerTests : IDisposable
     }
 
     [Fact]
+    public void CreatePipeName_WithAnotherPrefix_UsesItInsteadOfTheAddInsOne()
+    {
+        // The offline host in tests (M5 design 4.9): a Host finds it through EPLANMCP_PIPE_PREFIX only.
+        Assert.Matches(@"^EplanMcpCi\.42\.[0-9a-f]{16}$", BridgeServer.CreatePipeName("EplanMcpCi.", 42));
+    }
+
+    [Fact]
+    public async Task IdleSinceUtc_IsNullWhileAHostIsConnected_AndTheEndOfItsConnectionAfterwards()
+    {
+        Assert.NotNull(_server.IdleSinceUtc); // nobody has connected yet
+        DateTime disconnecting;
+        await using (NamedPipeClientStream client = await ConnectAsync())
+        {
+            await CallAsync(client, Handshake); // the server is serving the connection now
+            Assert.Null(_server.IdleSinceUtc);
+            disconnecting = DateTime.UtcNow;
+        }
+
+        Assert.True(SpinWait.SpinUntil(() => _server.IdleSinceUtc is not null, _patience));
+        Assert.True(_server.IdleSinceUtc >= disconnecting);
+    }
+
+    [Fact]
+    public async Task IdleSinceUtc_StaysNullWhileAnotherHostIsStillConnected()
+    {
+        await using NamedPipeClientStream staying = await ConnectAsync();
+        await CallAsync(staying, Handshake);
+        await using (NamedPipeClientStream leaving = await ConnectAsync())
+        {
+            await CallAsync(leaving, Handshake);
+        }
+
+        // The leaving connection has ended once the server has started listening again for a third client.
+        await using NamedPipeClientStream third = await ConnectAsync();
+        Assert.Null(_server.IdleSinceUtc);
+    }
+
+    [Fact]
     public void Start_CreatesThePipeBeforeReturning()
     {
         // The Host discovers Bridges by listing \\.\pipe\ (ADR-0008) and does not wait for a pipe to appear.
