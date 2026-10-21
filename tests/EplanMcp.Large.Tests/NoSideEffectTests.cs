@@ -22,6 +22,7 @@ public sealed class NoSideEffectTests(LiveEplan eplan)
         await eplan.CallAsync("eplan_connection_list", new() { ["page"] = "=GAA+A1&EFS1/1", ["limit"] = 200 });
         await eplan.CallAsync("eplan_cable_get", new() { ["cable"] = "+B1-WG2" });
         await eplan.CallAsync("eplan_terminal_strip_list", new() { ["limit"] = 200 });
+        await eplan.CallAsync("eplan_terminal_strip_get", new() { ["strip"] = "+A2-XD2" });
         await eplan.CallAsync("eplan_part_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_message_list", new() { ["limit"] = 200 });
         await eplan.CallAsync("eplan_check_list", new() { ["limit"] = 200 });

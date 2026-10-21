@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Large.Tests;
 
@@ -35,6 +36,50 @@ public sealed class TerminalTests(LiveEplan eplan)
         JsonElement data = await eplan.CallAsync("eplan_terminal_strip_list", new() { ["name_contains"] = "+a2-xd2" });
 
         Assert.Contains("+A2-XD2", data.GetProperty("strips").EnumerateArray().Select(s => s.GetProperty("name").GetString()));
+    }
+
+    [Fact]
+    public async Task TerminalStripGet_ReadsTheBridgedSampleStrip()
+    {
+        JsonElement data = await eplan.CallAsync("eplan_terminal_strip_get", new() { ["strip"] = "+A2-XD2" });
+
+        JsonElement[] terminals = [.. data.GetProperty("terminals").EnumerateArray()];
+        Assert.Equal((5, 3), (data.GetProperty("strip").GetProperty("terminals").GetInt32(), data.GetProperty("strip").GetProperty("bridges").GetInt32()));
+        Assert.Equal(5, terminals.Length);
+        Assert.All(terminals, t => Assert.StartsWith("+A2-XD2:", t.GetProperty("name").GetString(), StringComparison.Ordinal));
+        Assert.Contains(terminals, t => t.GetProperty("bridgedWith").GetArrayLength() > 0);
+
+        // Unverified by S21 (tool spec 5): order, sides, bridges and PLC; compare them with the terminal diagram in EPLAN.
+        foreach (JsonElement t in terminals)
+        {
+            TestContext.Current.TestOutputHelper?.WriteLine(
+                $"{t.GetProperty("name")} main {t.GetProperty("main")} page {t.GetProperty("page")} inside {t.GetProperty("inside")} outside {t.GetProperty("outside")} bridged {t.GetProperty("bridgedWith")} plc {t.GetProperty("plc")}");
+        }
+    }
+
+    [Fact]
+    public async Task TerminalStripGet_TheLongestSampleStrip_IsReadInTime()
+    {
+        var clock = Stopwatch.StartNew();
+        JsonElement data = await eplan.CallAsync("eplan_terminal_strip_get", new() { ["strip"] = "+B2.X1-XZ1", ["limit"] = 200 });
+        clock.Stop();
+
+        Assert.Equal(33, data.GetProperty("total").GetInt32());
+        TestContext.Current.TestOutputHelper?.WriteLine(
+            $"33 terminals in {clock.ElapsedMilliseconds} ms; with a PLC: {data.GetProperty("terminals").EnumerateArray().Count(t => t.GetProperty("plc").ValueKind == JsonValueKind.String)}.");
+    }
+
+    [Fact]
+    public async Task TerminalStripGet_ShortNameAndUnknownName_FindTheStripOrSaySo()
+    {
+        (bool found, JsonElement result) = await eplan.CallOrErrorAsync("eplan_terminal_strip_get", new() { ["strip"] = "-XD4" });
+        JsonElement unknown = await eplan.ErrorAsync("eplan_terminal_strip_get", new() { ["strip"] = "+A1-XD999" });
+
+        // -XD4 may exist in several locations; then the full name +A1-XD4 must be among the candidates.
+        Assert.True(found
+            ? result.GetProperty("strip").GetProperty("name").GetString() == "+A1-XD4"
+            : result.GetProperty("metadata").GetProperty("candidates").GetString()!.Split('\n').Contains("+A1-XD4"));
+        Assert.Equal(ErrorReason.DeviceNotFound, unknown.GetProperty("reason").GetString());
     }
 
     private static JsonElement Strip(JsonElement[] strips, string name) => strips.Single(s => s.GetProperty("name").GetString() == name);

@@ -310,6 +310,30 @@ public sealed class SerializerCompatibilityTests
             Items = [new TerminalStripListItem { Name = "+A2-XD2", Terminals = 5, Bridges = 3 }, new TerminalStripListItem()],
             Total = 45,
         },
+        new TerminalStripGetArgs { Project = "Line1", Strip = "-XD2", Offset = 100, Limit = 100 },
+        new TerminalStripGetArgs(),
+        new TerminalStripGetData
+        {
+            Project = "项目 二",
+            Strip = new TerminalStripListItem { Name = "+A2-XD2", Terminals = 5, Bridges = 3 },
+            Terminals =
+            [
+                new TerminalItem
+                {
+                    Name = "+A2-XD2:1",
+                    Designation = "1",
+                    Main = true,
+                    Page = "=EA+A2&EFS1/1",
+                    Inside = [new ConnectionEnd { Device = "=EA+A2-QA1", Pin = "2" }],
+                    Outside = [new ConnectionEnd { Device = "+B1-WG2" }],
+                    BridgedWith = ["+A2-XD2:2"],
+                    Plc = "=K1+A2-KE1",
+                },
+                new TerminalItem(),
+            ],
+            Total = 5,
+        },
+        new TerminalStripGetData(),
         new PartListArgs { Project = "Line1", Manufacturer = "SIE", Text = "接触器", Language = "zh_CN", Offset = 50, Limit = 50 },
         new PartListArgs(),
         new ListData<PartListItem>
