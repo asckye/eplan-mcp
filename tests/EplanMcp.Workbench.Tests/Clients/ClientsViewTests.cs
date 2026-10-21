@@ -103,8 +103,48 @@ public sealed class ClientsViewTests(WpfContext wpf) : IDisposable
         await view.ApplyAsync(ClientConfigMode.Write, Token);
 
         wpf.RunWithLanguage(AppLanguage.Chinese, () => Assert.Equal(
-            [$"已写入，原文件备份为 {FileOf("codex")}.bak_1", "已是最新，没有改动", "未完成：已装插件"],
+            [$"已写入，原文件备份为 {FileOf("codex")}.bak_1", "已是最新，没有改动", "未完成（已装插件）"],
             view.Cards.Where(c => c.Result is not null).OrderBy(c => c.Name == "claude-code").ThenBy(c => c.Name).Select(c => c.ResultText)));
+    }
+
+    [Fact]
+    public async Task AFileWrittenWhoseRecordFailed_SaysWrittenWithItsBackup_AndTheProblemAsANote()
+    {
+        _host.Answer = _ => new HostRun(1, Report("write", Client("codex", FileOf("codex"), "written", backup: "C:\\b", problem: "record_failed")));
+        ClientsView view = View();
+        view.Cards.Single(c => c.Name == "codex").IsSelected = true;
+
+        await view.ApplyAsync(ClientConfigMode.Write, Token);
+
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => Assert.Equal("已写入，原文件备份为 C:\\b（已装插件）", view.Cards.Single(c => c.Name == "codex").ResultText));
+    }
+
+    [Theory]
+    [InlineData(nameof(ClientConfigMode.Write), true)]
+    [InlineData(nameof(ClientConfigMode.Remove), true)]
+    [InlineData(nameof(ClientConfigMode.DryRun), false)]
+    public async Task AWriteThatTimedOut_AsksToRefreshAndCheck_ADryRunNeedNot(string mode, bool asks)
+    {
+        _host.Answer = _ => throw new HostCommandException(HostFailure.TimedOut, "eplanmcp did not finish within 180 s.");
+        ClientsView view = View();
+        view.Cards[2].IsSelected = true;
+
+        await (mode == nameof(ClientConfigMode.DryRun) ? view.PreviewAsync(Token) : view.ApplyAsync(Enum.Parse<ClientConfigMode>(mode), Token));
+
+        Assert.Equal(ClientsState.Failed, view.State);
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => Assert.Equal(asks, view.Error!.EndsWith("请刷新，核对各客户端现在的配置。", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task AFaultWhileRunning_EndsInAnError_NeverStuckRunning()
+    {
+        _host.Answer = _ => throw new InvalidOperationException("a fault of its own");
+        ClientsView view = View();
+
+        await view.DetectAsync(Token);
+
+        Assert.Equal(ClientsState.Failed, view.State);
+        Assert.NotNull(view.Error);
     }
 
     [Fact]
