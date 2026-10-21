@@ -12,6 +12,7 @@ internal static class ExportFileName
     public const int MaxLength = 100;
     public const string PdfExtension = ".pdf";
     public const string PxfExtension = ".epj";
+    public const string XmlExtension = ".xml";
 
     private static readonly SearchValues<char> _refused = SearchValues.Create("<>\"|?*");
 
@@ -43,10 +44,16 @@ internal static class ExportFileName
     }
 
     /// <summary>The PDF's file name: <paramref name="fileName"/> or else the project's name, with <c>.pdf</c> added unless it ends with it.</summary>
-    public static string Pdf(string? fileName, string project)
+    public static string Pdf(string? fileName, string project) => WithExtension(fileName, project, PdfExtension);
+
+    /// <summary>
+    /// A file name the tool gives <paramref name="extension"/>: <paramref name="fileName"/>, or else (also when it is the
+    /// extension alone) <paramref name="fallback"/> as a folder name, with the extension added unless it ends with it.
+    /// </summary>
+    public static string WithExtension(string? fileName, string fallback, string extension)
     {
-        string name = string.IsNullOrEmpty(fileName) ? ExportFolders.FolderName(project) : fileName;
-        return name.EndsWith(PdfExtension, StringComparison.OrdinalIgnoreCase) ? name : name + PdfExtension;
+        string name = string.IsNullOrEmpty(Stem(fileName, extension)) ? ExportFolders.FolderName(fallback) : fileName!;
+        return name.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? name : name + extension;
     }
 
     /// <summary>

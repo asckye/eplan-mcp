@@ -207,6 +207,15 @@ public static class OperationNames
     /// </summary>
     public const string ExportPxfRun = "export.pxf.run";
 
+    /// <summary>The plan of eplan_export_parts: finds the project, never exports. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/>.</summary>
+    public const string ExportPartsPlan = "export.parts.plan";
+
+    /// <summary>
+    /// Exports the project's parts list as one XML file into the Host's new, empty folder. Arguments:
+    /// <see cref="ExportArgs"/> with the folder and the file name, <c>.xml</c> included; data: <see cref="ExportRunData"/>.
+    /// </summary>
+    public const string ExportPartsRun = "export.parts.run";
+
     /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.

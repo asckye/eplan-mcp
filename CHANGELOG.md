@@ -65,6 +65,7 @@
   - `eplan_part_search`：在 EPLAN 配置的系统部件库中按部件号、型号、订货号或描述中的文字查部件，可限定制造商；给出描述和是否有宏，分页。部件库只读打开、用完关闭，从不修改。
 - M4c 导出工具（只在 `full` 中；与 `eplan_export_pdf` 相同，只写进每次新建的导出目录，失败或取消时删除该目录）：
   - `eplan_export_pxf`：整个项目（含连接）导出为一个 EPJ（PXF）文件，可选带上主数据；导出前要求导出目录所在的磁盘至少有 2 GB 可用空间。
+  - `eplan_export_parts`：项目的部件清单导出为一个 XML 文件（不提供 CSV，见 api-notes A25）。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed

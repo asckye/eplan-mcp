@@ -58,6 +58,14 @@ public sealed class ExportFileNameTests
     }
 
     [Theory]
+    [InlineData(".pdf", "Line1", "Line1.pdf")]
+    [InlineData(".PDF", "Line1", "Line1.pdf")]
+    public void Pdf_TheExtensionAlone_IsTheProjectsName(string? fileName, string project, string expected)
+    {
+        Assert.Equal(expected, ExportFileName.Pdf(fileName, project));
+    }
+
+    [Theory]
     [InlineData("Line1", "Proj", "Line1")]
     [InlineData("Line1.epj", "Proj", "Line1")]
     [InlineData("Line1.EPJ", "Proj", "Line1")]

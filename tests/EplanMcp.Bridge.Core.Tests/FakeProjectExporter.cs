@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Tests;
 
 /// <summary>
 /// Exports of a whole project that write files the way S25 found EPLAN writes them (api-notes A25): PXF adds
-/// <c>.epj</c> to the name and leaves an empty folder of that name next to the file. Records every export in
+/// <c>.epj</c> to the name and leaves an empty folder of that name next to the file; the parts list is the file named.
+/// Records every export in
 /// <see cref="Exports"/>; <see cref="During"/> runs inside each export, as a cancel arriving meanwhile would.
 /// </summary>
 internal sealed class FakeProjectExporter : IProjectExporter
@@ -22,6 +23,14 @@ internal sealed class FakeProjectExporter : IProjectExporter
         During?.Invoke();
         File.WriteAllText(file + ".epj", "pxf");
         Directory.CreateDirectory(file);
+        ThrowIfFailing();
+    }
+
+    public void ExportPartsList(string projectPath, string file)
+    {
+        Exports.Add($"parts {projectPath} {Path.GetFileName(file)}");
+        During?.Invoke();
+        File.WriteAllText(file, "<parts/>");
         ThrowIfFailing();
     }
 

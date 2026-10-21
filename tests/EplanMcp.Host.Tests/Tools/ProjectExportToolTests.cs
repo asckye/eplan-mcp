@@ -11,7 +11,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
 /// The exports of a whole project on a fake Bridge that writes into the folder the Host created, a real one in a
-/// temporary data directory (docs/tools/eplan_export_pxf.md, sections 2 to 5). The steps they share with
+/// temporary data directory (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, sections 2 to 5). The steps they share with
 /// eplan_export_pdf, failures and cancels included, are <see cref="EplanMcp.Host.Tests.Exports.ExportRunnerTests"/>'s.
 /// </summary>
 [Trait("Size", "Medium")]
@@ -34,6 +34,13 @@ public sealed class ProjectExportToolTests : IDisposable
             var run = (ExportArgs)args!;
             File.WriteAllBytes(Path.Combine(run.Directory!, run.FileName + ".epj"), new byte[4096]);
             Directory.CreateDirectory(Path.Combine(run.Directory!, run.FileName!));
+            return new ExportRunData { Project = "Line1" };
+        };
+        _bridge.Handlers[OperationNames.ExportPartsPlan] = _ => new ExportPlanData { Project = "Line1" };
+        _bridge.Handlers[OperationNames.ExportPartsRun] = args =>
+        {
+            var run = (ExportArgs)args!;
+            File.WriteAllBytes(Path.Combine(run.Directory!, run.FileName!), new byte[13 * 1024 * 1024]);
             return new ExportRunData { Project = "Line1" };
         };
     }
@@ -141,6 +148,46 @@ public sealed class ProjectExportToolTests : IDisposable
         Assert.Contains("export this project in EPLAN", message, StringComparison.Ordinal);
         Assert.DoesNotContain("pages", message, StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData(null, "Line1.xml")]
+    [InlineData("Line1 parts", "Line1 parts.xml")]
+    [InlineData("Line1 parts.XML", "Line1 parts.XML")]
+    [InlineData(".xml", "Line1.xml")]
+    public async Task Parts_IsOneXmlFileInANewFolder_WithTheGivenNameOrTheProjects(string? fileName, string expected)
+    {
+        CallToolResult result = await Parts(fileName: fileName);
+
+        JsonElement data = Structured(result);
+        Assert.Equal(("Line1", expected, 1), (data.GetProperty("project").GetString(), Files(data)[0].Path, data.GetProperty("fileCount").GetInt32()));
+        Assert.Equal(["project", "directory", "files", "fileCount", "totalBytes", "truncated", "hint"], data.EnumerateObject().Select(p => p.Name));
+        Assert.Equal("Exported the parts list to a 13 MB XML file in a new folder; see 'directory'.", Text(result, 0));
+        Assert.Equal(expected, ((ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.ExportPartsRun).Args!).FileName);
+        Assert.Equal([ExportRunner.Timeout], _bridge.Timeouts);
+    }
+
+    [Fact]
+    public async Task Parts_AnInvalidFileName_IsRefusedBeforeAnythingIsCreated()
+    {
+        JsonElement error = Error(await Parts(fileName: "a/b"));
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
+        Assert.Empty(_bridge.Calls);
+        Assert.False(Directory.Exists(_locations.Exports));
+    }
+
+    [Fact]
+    public async Task Parts_NeedsNoFreeSpaceCheck_AndATimeoutSaysWhatToDo()
+    {
+        _free = 0;
+        Structured(await Parts());
+
+        _bridge.Handlers[OperationNames.ExportPartsRun] = _ => throw new BridgeCallException(new BridgeError { Reason = ErrorReason.Timeout, Message = "m", Retryable = true });
+        Assert.Contains("export this project in EPLAN", Error(await Parts()).GetProperty("message").GetString(), StringComparison.Ordinal);
+    }
+
+    private Task<CallToolResult> Parts(string? project = null, string? fileName = null) =>
+        ProjectExportTools.ExportPartsAsync(_runner, _progress, project, fileName, TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> Pxf(string? project = null, bool masterData = false, string? fileName = null) =>
         ProjectExportTools.ExportPxfAsync(_runner, _progress, project, masterData, fileName, TestContext.Current.CancellationToken);

@@ -72,6 +72,33 @@ public sealed class ProjectExportOperationTests : IDisposable
     }
 
     [Fact]
+    public void Parts_IsOneXmlFileOfTheGivenNameInTheHostsFolder()
+    {
+        ExportRunData data = Run(new ExportArgs { Directory = _folder, FileName = "部件 Line1.xml" }, ProjectExportKind.PartsList);
+
+        Assert.Equal(["部件 Line1.xml"], Files());
+        Assert.Equal([@"parts D:\Scratch\Line1 部件 Line1.xml"], _exporter.Exports);
+        Assert.Equal("Line1", data.Project);
+        Assert.Equal(
+            (OperationNames.ExportPartsPlan, OperationNames.ExportPartsRun),
+            (new ProjectExportPlanOperation(ProjectExportKind.PartsList, _catalog).Name, new ProjectExportRunOperation(ProjectExportKind.PartsList, _catalog, _exporter).Name));
+    }
+
+    [Theory]
+    [InlineData("parts")]
+    [InlineData("parts.csv")]
+    [InlineData(".xml")]
+    [InlineData(@"..\parts.xml")]
+    public void Parts_AFileNameThatIsNoPlainXmlName_IsRefusedBeforeExporting(string fileName)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Directory = _folder, FileName = fileName }, ProjectExportKind.PartsList)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("ending in .xml", error.Message, StringComparison.Ordinal);
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Fact]
     public void AFolderThatIsMissingNotEmptyOrNotFullyQualified_IsRefused()
     {
         File.WriteAllText(Path.Combine(_folder, "old.epj"), "x");
@@ -102,7 +129,7 @@ public sealed class ProjectExportOperationTests : IDisposable
         Assert.Equal(["a.epj"], Files()); // the call ran to its end; the Host deletes the folder
     }
 
-    private ExportRunData Run(ExportArgs args) => (ExportRunData)new ProjectExportRunOperation(ProjectExportKind.Pxf, _catalog, _exporter).Execute(args)!;
+    private ExportRunData Run(ExportArgs args, ProjectExportKind kind = ProjectExportKind.Pxf) => (ExportRunData)new ProjectExportRunOperation(kind, _catalog, _exporter).Execute(args)!;
 
     private string[] Files() => [.. ExportFolderCheck.Files(_folder).Order(StringComparer.Ordinal)];
 }
