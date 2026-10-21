@@ -63,6 +63,7 @@ internal static class BridgeHost
         var catalog = new EplanProjectCatalog();
         var pages = new EplanPageReader();
         var devices = new EplanDeviceReader();
+        var terminals = new EplanTerminalReader();
         var macros = new EplanMacroReader();
         var pageWriter = new EplanPageWriter();
         var transactions = new EplanTransactions();
@@ -88,6 +89,7 @@ internal static class BridgeHost
             new DeviceGetOperation(catalog, devices),
             new ConnectionListOperation(catalog, devices, new EplanConnectionReader()),
             new CableGetOperation(catalog, devices, new EplanCableReader()),
+            new TerminalStripListOperation(catalog, terminals),
             new PartListOperation(catalog, new EplanPartReader()),
             new MessageListOperation(new EplanSystemMessageReader()),
             new CheckListOperation(catalog, messages),

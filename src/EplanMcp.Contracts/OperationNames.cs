@@ -36,6 +36,9 @@ public static class OperationNames
     /// <summary>One cable by tag: type, ends, parts, and its cores sliced in the Bridge. Arguments: <see cref="CableGetArgs"/>; data: <see cref="CableGetData"/>.</summary>
     public const string CableGet = "cable.get";
 
+    /// <summary>The terminal strips of a project with their counts, filtered, sorted and sliced in the Bridge. Arguments: <see cref="TerminalStripListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="TerminalStripListItem"/>.</summary>
+    public const string TerminalStripList = "terminal.strip.list";
+
     /// <summary>
     /// Lists the parts a project uses, summed up per part number and variant, filtered and sliced in the Bridge.
     /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.

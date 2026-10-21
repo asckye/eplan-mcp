@@ -41,7 +41,8 @@
 | `device` | 设备，即带标识的一组功能 | `Function`（主功能和辅助功能） |
 | `connection` | 逻辑连接、连线 | `Connection` |
 | `cable` | 电缆 | `Cable` |
-| `terminal` | 端子、端子排 | `Terminal`、`TerminalStrip` |
+| `terminal` | 端子 | `Terminal` |
+| `terminal_strip` | 端子排（唯一由两个词组成的资源词，如 `eplan_terminal_strip_list`） | `TerminalStrip` |
 | `plc` | PLC 卡、地址 | `PLC` 相关功能 |
 | `part` | 部件（物料） | 部件库 `MDPart` |
 | `macro` | 宏 | 窗口宏、页面宏 |

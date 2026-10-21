@@ -36,14 +36,15 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [CableTools.GetTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ExportTools.PdfTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, ReportWriteTools.UpdateTool, SessionTools.SelectTool, SessionTools.StatusTool, UsageTools.UsageTool],
+            [CableTools.GetTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ExportTools.PdfTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, PartTools.ListTool, ProjectTools.GetTool, ProjectTools.ListTool, ReportWriteTools.UpdateTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalTools.ListTool, UsageTools.UsageTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
     [Fact]
     public void EveryTool_FollowsTheNamingRule()
     {
-        Assert.All(Tools, t => Assert.Matches("^eplan_[a-z]+_[a-z]+$", t.Name));
+        // terminal_strip is the one resource of two words in the vocabulary (mcp-tool-design 3.2).
+        Assert.All(Tools, t => Assert.Matches("^eplan_([a-z]+|terminal_strip)_[a-z]+$", t.Name));
     }
 
     [Fact]
