@@ -28,7 +28,9 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     private readonly FakeHost _host = new();
     private static readonly string[] _filters = ["Day", "Tool", "Project", "Decision", "Execution"];
 
+    private readonly List<string> _opened = [];
     private AuditView? _view;
+    private bool _shellWorks = true;
 
     public void Dispose() => Directory.Delete(_directory, recursive: true);
 
@@ -67,6 +69,7 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
                 Assert.True(((FrameworkElement)page.FindName("Empty")).IsVisible);
                 Assert.False(((FrameworkElement)page.FindName("Records")).IsVisible);
                 Assert.False(((FrameworkElement)page.FindName("Filters")).IsEnabled);
+                Assert.False(((Button)page.FindName("FolderButton")).IsEnabled); // no folder yet, and the tooltip says so
             },
             folder: Path.Combine(_directory, "audit")));
     }
@@ -97,7 +100,45 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     }
 
     [Fact]
-    public void F5_ReadsTheLogAgain_AndCtrlF_GoesToTheFilters()
+    public void Verifying_ShowsTheResult_InWordsWithItsIcon_AndAFailureToRun_WithItsDetails()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
+            Settle(page);
+            var banner = (TextBlock)page.FindName("BannerText");
+            _host.Answer = _ => new HostRun(1, Snapshots.Example("audit-verify-json", "changed"));
+
+            Click((Button)page.FindName("VerifyButton"));
+            Assert.Equal("错误：哈希链在 2026-10-20.jsonl 第 2 行断开：记录被修改。之前的 1 条记录完整。", banner.Text);
+            Assert.Same(page.FindResource("Primer.AlertIcon.Error"), ((FrameworkElement)page.FindName("BannerIcon")).Style);
+            Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(banner));
+
+            _host.Answer = _ => new HostRun(0, "not json");
+            Click((Button)page.FindName("VerifyButton"));
+            Assert.StartsWith("错误：Workbench 读不懂 eplanmcp.exe", banner.Text, StringComparison.Ordinal);
+            Assert.StartsWith(_host.Executable + " audit verify --format json", ((TextBox)page.FindName("BannerDetails")).Text, StringComparison.Ordinal);
+        }));
+    }
+
+    [Fact]
+    public void WithoutAHost_VerifyingIsOff_AndSaysWhy()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage(
+            (window, page) =>
+            {
+                window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
+                Settle(page);
+                var verify = (Button)page.FindName("VerifyButton");
+
+                Assert.False(verify.IsEnabled);
+                Assert.Equal("Workbench 旁边没有 eplanmcp.exe。请重新安装 EplanMcp。", AutomationProperties.GetHelpText(verify));
+            },
+            new HostCommands(null)));
+    }
+
+    [Fact]
+    public void F5_ReadsTheLogAgain_CtrlF_GoesToTheFilters_AndTheFolderOpensInExplorer()
     {
         Write("2026-10-20", Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\""));
         wpf.Run(() => WithPage((window, page) =>
@@ -111,6 +152,8 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
             Assert.Equal(2, ((ListView)page.FindName("Records")).Items.Count);
             MainWindow.FindCommand.Execute(null, window);
             Assert.Same(page.FindName("DayFilter"), Keyboard.FocusedElement);
+            Click((Button)page.FindName("FolderButton"));
+            Assert.Equal([_directory], _opened);
         }));
     }
 
@@ -138,6 +181,31 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     }
 
     [Fact]
+    public void AChangeThatKeepsTheRecords_KeepsTheChosenRowAndItsFocus()
+    {
+        Write("2026-10-20", Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\""), Line("2026-10-20T12:01:00Z", "approval", "eplan_page_create", "P2", "\"decision\":\"denied\""));
+        _host.Answer = _ => new HostRun(0, Snapshots.Example("audit-verify-json", "intact"));
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
+            Settle(page);
+            var list = (ListView)page.FindName("Records");
+            list.SelectedIndex = 1;
+            var row = (ListViewItem)list.ItemContainerGenerator.ContainerFromIndex(1);
+            row.Focus();
+
+            Click((Button)page.FindName("VerifyButton"));
+            row.Focus(); // the click took the focus to the button; a verification arriving later must not take it from the row
+            _view!.VerifyAsync(CancellationToken.None).GetAwaiter().GetResult();
+            WpfContext.Drain();
+
+            Assert.Same(row, list.ItemContainerGenerator.ContainerFromIndex(1));
+            Assert.Equal(1, list.SelectedIndex);
+            Assert.Same(row, Keyboard.FocusedElement);
+        }));
+    }
+
+    [Fact]
     public void LinesThatAreNotRecords_AreAWarning_ThatAsksToVerify()
     {
         Write("2026-10-20", Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\""), "not a record");
@@ -148,6 +216,24 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
 
             Assert.True(((FrameworkElement)page.FindName("NotRecordsBanner")).IsVisible);
             Assert.StartsWith("日志中有 1 行不是审计记录", ((TextBlock)page.FindName("NotRecordsText")).Text, StringComparison.Ordinal);
+        }));
+    }
+
+    [Fact]
+    public void AFolderWindowsCannotOpen_IsSaidWhereItWasAsked()
+    {
+        _shellWorks = false;
+        Write("2026-10-20", Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\""));
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
+            Settle(page);
+
+            Click((Button)page.FindName("FolderButton"));
+
+            var notice = (TextBlock)page.FindName("Notice");
+            Assert.True(notice.IsVisible);
+            Assert.Equal($"Windows 无法打开 {_directory}。", notice.Text);
         }));
     }
 
@@ -212,7 +298,7 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     {
         var page = (AuditPage)window.FindName("AuditPage");
         _view = new AuditView(folder ?? _directory, host ?? new HostCommands(_host), new ManualTime(DateTimeOffset.UtcNow));
-        page.Attach(_view);
+        page.Attach(_view, new FakeShell(_opened, _shellWorks));
         test(window, page);
     });
 
@@ -238,4 +324,13 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
 
     private static string Line(string time, string kind, string tool, string project, string more) =>
         $$"""{"time":"{{time}}","kind":"{{kind}}","tool":{{JsonSerializer.Serialize(tool)}},"project":{{JsonSerializer.Serialize(project)}},{{more}}}""";
+
+    private sealed class FakeShell(List<string> opened, bool works = true) : IShellOpen
+    {
+        public bool Open(string path)
+        {
+            opened.Add(path);
+            return works;
+        }
+    }
 }

@@ -1,5 +1,7 @@
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -11,11 +13,12 @@ namespace EplanMcp.Workbench.Audit;
 
 /// <summary>
 /// The audit page over its <see cref="AuditView"/>: reads the log the first time it is shown and on F5 or "Reload",
-/// never on its own (M5 design 4.4); a read that fails says so in the Banner (ERR-04, STS-02).
+/// never on its own (M5 design 4.4); a read that fails or an integrity check says so in the Banner (ERR-04, STS-02).
 /// </summary>
 public partial class AuditPage : UserControl, IWorkbenchPage
 {
     private AuditView? _view;
+    private IShellOpen _shell = new ShellOpen();
     private Task? _reading;
     private bool _choosing;
     private bool _queued;
@@ -45,10 +48,11 @@ public partial class AuditPage : UserControl, IWorkbenchPage
 
     public void FocusHeading() => Keyboard.Focus(PageTitle);
 
-    /// <summary>Gives the page its state.</summary>
-    internal void Attach(AuditView view)
+    /// <summary>Gives the page its state and, for tests, the shell that opens the folder.</summary>
+    internal void Attach(AuditView view, IShellOpen? shell = null)
     {
         _view = view;
+        _shell = shell ?? _shell;
         view.PropertyChanged += OnViewChanged;
         Show();
     }
@@ -105,7 +109,7 @@ public partial class AuditPage : UserControl, IWorkbenchPage
 
         bool loading = view.State == AuditState.Loading;
         Caption.Text = loading ? loc["Audit.Reading"] : loc.T("Audit.Count", view.Shown.Count, view.Total);
-        ShowWorking(loading ? loc["Audit.Reading"] : null, loading ? view.Progress : null);
+        ShowWorking(loading ? loc["Audit.Reading"] : view.IsVerifying ? loc["Audit.Verifying"] : null, loading ? view.Progress : null);
         ShowBanner(view);
         NotRecordsBanner.Visibility = view.State == AuditState.Ready && view.NotRecords > 0 ? Visibility.Visible : Visibility.Collapsed;
         NotRecordsText.Text = loc.T("Audit.NotRecords", view.NotRecords);
@@ -126,6 +130,14 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         Records.Visibility = view.Shown.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         Filters.IsEnabled = view.State == AuditState.Ready && !view.IsEmpty;
         ReloadButton.IsEnabled = !loading;
+
+        // NAV-05, CMD-04: a command that cannot run says why.
+        string? noVerify = view.CanVerify ? null : loc["Host.Missing"];
+        VerifyButton.IsEnabled = noVerify is null && !view.IsVerifying;
+        Explain(VerifyButton, noVerify ?? loc["Audit.VerifyHelp"]);
+        bool folder = Directory.Exists(view.Folder);
+        FolderButton.IsEnabled = folder;
+        Explain(FolderButton, folder ? view.Folder : loc.T("Audit.NoFolder", view.Folder));
     }
 
     /// <summary>
@@ -163,16 +175,16 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         WorkingBar.Value = progress ?? 0;
     }
 
-    /// <summary>The read failure: severity in icon and words (ERR-07), the details below (ERR-02).</summary>
+    /// <summary>The read failure, else the last verification: severity in icon and words (ERR-07), the details below (ERR-02).</summary>
     private void ShowBanner(AuditView view)
     {
         (string? text, string? details, bool failed) = view.State == AuditState.Failed
             ? (Loc.Current.T("Audit.Unreadable", view.Folder), view.Problem, true)
-            : (null, null, false);
+            : (view.Verification, view.VerificationDetails, view.VerificationFailed);
         Banner.Visibility = text is null ? Visibility.Collapsed : Visibility.Visible;
         Banner.SetResourceReference(StyleProperty, failed ? "Primer.Alert.Error" : "Primer.Alert.Success");
         BannerIcon.SetResourceReference(StyleProperty, failed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Success");
-        string severity = Loc.Current["Audit.Error"];
+        string severity = Loc.Current[failed ? "Audit.Error" : "Audit.Done"];
         string shown = text is null ? string.Empty : Loc.Current.T("Audit.Banner", severity, text);
         if (BannerText.Text != shown)
         {
@@ -208,4 +220,28 @@ public partial class AuditPage : UserControl, IWorkbenchPage
     }
 
     private void OnReload(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnVerify(object sender, RoutedEventArgs e) => _ = _view?.VerifyAsync(CancellationToken.None);
+
+    private void OnFolder(object sender, RoutedEventArgs e) => OpenFolder();
+
+    /// <summary>The audit folder in Explorer; when Windows cannot open it, the page says so where it was asked (STS-05).</summary>
+    internal bool OpenFolder()
+    {
+        bool opened = _view is { } view && _shell.Open(view.Folder);
+        Notice.Text = opened ? string.Empty : Loc.Current.T("Audit.FolderFailed", _view?.Folder ?? string.Empty);
+        Notice.Visibility = opened ? Visibility.Collapsed : Visibility.Visible;
+        if (!opened)
+        {
+            AccessibleStatus.Announce(Notice);
+        }
+
+        return opened;
+    }
+
+    private static void Explain(FrameworkElement element, string help)
+    {
+        element.ToolTip = help;
+        AutomationProperties.SetHelpText(element, help);
+    }
 }
