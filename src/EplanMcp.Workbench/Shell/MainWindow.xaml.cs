@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -53,6 +54,9 @@ public partial class MainWindow : Window
 
     public WorkbenchPage CurrentPage { get; private set; }
 
+    /// <summary>Closing then only hides the window to the tray, and the queue goes on (NAV-09, APR-15).</summary>
+    public bool HideOnClose { get; set; }
+
     /// <summary>
     /// Shows <paramref name="page"/>. From a menu item focus stays on the item; from anywhere else it goes to the
     /// page's heading, never to a button (NAV-07).
@@ -72,6 +76,28 @@ public partial class MainWindow : Window
             UpdateLayout();
             ((IWorkbenchPage)_pages[(int)page].View).FocusHeading();
         }
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        if (HideOnClose && !e.Cancel)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+    }
+
+    /// <summary>Shows the window from the tray or for a second start, in front: the engineer asked for it (NAV-09).</summary>
+    public void Restore()
+    {
+        Show();
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+        }
+
+        Activate();
     }
 
     /// <summary>Opens the settings drawer over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
@@ -157,6 +183,8 @@ public partial class MainWindow : Window
         Label(MinimizeButton, "Shell.Minimize");
         Label(MaximizeButton, WindowState == WindowState.Maximized ? "Shell.Restore" : "Shell.Maximize");
         Label(CloseButton, "Shell.Close");
+        CloseButton.ToolTip = loc["Shell.CloseHint"];
+        AutomationProperties.SetHelpText(CloseButton, loc["Shell.CloseHint"]);
     }
 
     private static void Label(ButtonBase button, string key)

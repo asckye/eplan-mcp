@@ -24,6 +24,16 @@ internal static class Catalogue
         ("Shell.Maximize", "Maximize", "最大化"),
         ("Shell.Restore", "Restore", "还原"),
         ("Shell.Close", "Close", "关闭"),
+        ("Shell.CloseHint", "Close to the tray; the Workbench keeps taking approval questions.", "关闭到托盘：Workbench 继续接收审批问题。"),
+
+        // Tray (STS-09, NAV-09) and leaving with questions waiting (DLG-11).
+        ("Tray.Open", "Open Workbench", "打开 Workbench"),
+        ("Tray.Exit", "Exit", "退出"),
+        ("Tray.Pending", "{0} questions wait for approval", "{0} 个问题等待审批"),
+        ("Exit.Title", "Exit the Workbench?", "退出 Workbench？"),
+        ("Exit.Message", "{0} questions are waiting. If you exit, they return to the AI as cancelled and nothing is changed.", "有 {0} 个问题在等待回答。退出后它们按“已取消”返回给 AI，不执行任何修改。"),
+        ("Exit.Cancel", "_Cancel", "取消(_C)"),
+        ("Exit.Confirm", "E_xit", "退出(_X)"),
 
         // The settings drawer: language and theme (section 7, LOC-10, COL-09); each language named in its own.
         ("Settings.Title", "Settings", "设置"),

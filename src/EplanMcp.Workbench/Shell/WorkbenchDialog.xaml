@@ -1,0 +1,27 @@
+<Window
+    x:Class="EplanMcp.Workbench.Shell.WorkbenchDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="440" SizeToContent="Height" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+    Style="{StaticResource Workbench.Window}">
+  <!--
+    The one modal message (DLG-01): owned by the main window, its title is the dialog's title. A warning icon with
+    the question (DLG-07), the consequences below it, then the safe button, default and Esc, and the action on the
+    right (DLG-03 to DLG-05).
+  -->
+  <Border Padding="24,20" AutomationProperties.IsDialog="True" AutomationProperties.Name="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}">
+    <StackPanel>
+      <DockPanel>
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="20" Height="20" Margin="0,2,12,0" VerticalAlignment="Top" />
+        <StackPanel>
+          <TextBlock x:Name="Heading" Style="{StaticResource Primer.ContainerTitle}" AutomationProperties.HeadingLevel="Level1" TextWrapping="Wrap" TextTrimming="None" />
+          <TextBlock x:Name="Message" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
+        </StackPanel>
+      </DockPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+        <Button x:Name="SafeButton" Style="{StaticResource Primer.Secondary}" MinWidth="88" IsDefault="True" IsCancel="True" />
+        <Button x:Name="ActionButton" Style="{StaticResource Primer.WarningAction}" MinWidth="88" Margin="8,0,0,0" Click="OnAction" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

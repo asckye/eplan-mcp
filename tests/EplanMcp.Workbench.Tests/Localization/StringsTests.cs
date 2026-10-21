@@ -109,6 +109,6 @@ public sealed partial class StringsTests
     private static partial Regex TrKey();
 
     /// <summary>A catalogue key as a string literal in code: two or more dotted parts, starting with a known area.</summary>
-    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Dialog|Pipe|Question)\\.[A-Za-z0-9.]+)\"")]
+    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question)\\.[A-Za-z0-9.]+)\"")]
     private static partial Regex CodeKey();
 }

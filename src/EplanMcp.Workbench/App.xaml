@@ -2,7 +2,7 @@
     x:Class="EplanMcp.Workbench.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    ShutdownMode="OnMainWindowClose">
+    ShutdownMode="OnExplicitShutdown">
   <Application.Resources>
     <ResourceDictionary>
       <!-- TIA's layout: ThemeManager swaps slot 0, the palette, to change the theme without a restart (COL-09). -->
