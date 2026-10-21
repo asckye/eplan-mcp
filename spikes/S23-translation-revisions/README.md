@@ -34,9 +34,13 @@ spikes\S23-translation-revisions\Driver\bin\Release\net481\EplanMcp.Spikes.S23.D
 **r1 补测**：
 - `SetDisplayedLanguages` 接受 `"en_US"` 和逗号分隔的 `"en_US,zh_CN"`（存为 `en_US;zh_CN;`）；`"en_US;"`、`"en_US;zh_CN;"`、`"##_##;"` 都抛 `ArgumentException`。每次都在 `SafetyPoint` 中回滚，**设置都没有被回滚**。
 - 把功能 `+A1-WE1` 的文本改为只有德语的 `Motor`，再 `TranslateObjects([function])`：0.04 秒，文本不变，没有加上其他语言。可能的原因：项目的源语言是 `##_##`（未设置），或者翻译库中没有 `Motor`；没有再查。
+- r2（`--source-language`，2026-10-21）：翻译库中有 `Motor`（S24 r11 导出：de_DE `Motor`、en_US `Motor`、zh_CN `电机`）。同一段只有德语的 `Motor`，在 `SafetyPoint` 中分别以两种源语言翻译：
+  - 源语言为 `##_##`：0.06 秒，文本不变；
+  - 用 `ProjectSettings.SetStringSetting("TRANSLATEGUI.SOURCE_LANGUAGE", "de_DE", 0)` 设为 `de_DE` 后：0.04 秒，**译进了项目的全部 19 种翻译语言**（`en_US@Motor`、`zh_CN@电机`、`ru_RU@Двигатель`、`ja_JP@モーター`……）；
+  - 之后写回源语言 `##_##`、回滚，文本和源语言都恢复原样。
 
 ## 结论
-1. **翻译还没有测出效果**：示例项目已经全部翻译；r1 中只有德语的 `Motor` 也没有被翻译。要先查清翻译的前提（项目的源语言、翻译库中的词条），`eplan_project_translate` 在那之前不实现。
+1. **翻译的前提是项目的源语言**（r2）：源语言为 `##_##`（未设置）时 `TranslateObjects` 什么也不做，也不报错；设为文本所用的语言后，按翻译库译进项目的全部翻译语言。`eplan_project_translate` 在源语言未设置时要拒绝，提示先用 `eplan_language_set` 设置源语言；翻译库中没有的词条不会被翻译（缺失词表用 `eplan_export_untranslated` 导出）。
 2. 🔴 **删除语言的回滚不完整**：`SafetyPoint` 撤回了文本，但没有撤回项目设置中的语言列表和显示语言，项目留在不一致的状态（文本中有瑞典语，语言列表中没有）。所以 `eplan_project_language_remove`：
    - 必须是 Destructive，执行前备份（ADR-0013）；
    - 失败或取消时，回滚之后还要把语言设置写回原值，或者提示工程师从备份恢复；
