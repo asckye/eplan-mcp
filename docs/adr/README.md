@@ -20,3 +20,6 @@
 | [0011](0011-approval-out-of-band.md) | 审批只经工程师独立操作的窗口（EPLAN 对话框、Workbench），不用 MCP elicitation | Accepted | 双向门（1.0 发布前） |
 | [0012](0012-export-tier.md) | 导出工具按 Read 级处理，注解 `readOnlyHint: false`，文件只写进 Host 新建的导出目录 | Accepted | 双向门（1.0 发布前） |
 | [0013](0013-destructive-backup.md) | Destructive 操作前用 `CopyProject` 的快照方式自动备份，备份失败就不执行 | Accepted | 单向门（Destructive 工具发布后） |
+| [0014](0014-workbench-approval-channel.md) | Workbench 作为单独的进程，在每个用户、每个数据根目录一个的命名管道上接收 Host 的审批 | Proposed | 双向门（1.0 发布前） |
+| [0015](0015-workbench-ui-stack.md) | Workbench 用 WPF（.NET 10）和随 .NET 发布的 Fluent 主题实现 Fluent 2 界面 | Proposed | 双向门（第一版 Workbench 发布前） |
+| [0016](0016-per-user-installer.md) | 用按用户安装的 Inno Setup 安装包分发，程序固定在 `%USERPROFILE%\EplanMcp\app\`，插件只经 `eplanmcp install-addin` 注册 | Proposed | 单向门（第一个安装包发布后） |
