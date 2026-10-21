@@ -24,6 +24,7 @@ public sealed partial class App : Application, IDisposable
     private FileLog? _log;
     private ApprovalQueue? _queue;
     private ApprovalServer? _server;
+    private ApprovalQueueView? _view;
     private bool _listening;
     private TrayIcon? _tray;
     private MainWindow? _window;
@@ -58,7 +59,13 @@ public sealed partial class App : Application, IDisposable
 
         _log = new FileLog(_locations.Logs, TimeProvider.System);
         _queue = new ApprovalQueue(TimeProvider.System);
-        _queue.Changed += _ => Dispatcher.BeginInvoke(ShowQueue);
+        _view = new ApprovalQueueView(_queue, TimeProvider.System);
+        _queue.Changed += question => Dispatcher.BeginInvoke(() =>
+        {
+            _view.Update(question);
+            ShowQueue();
+        });
+        _window.Attach(_view);
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
         ShowQueue();
@@ -68,6 +75,7 @@ public sealed partial class App : Application, IDisposable
     public void Dispose()
     {
         _tray?.Dispose();
+        _view?.Dispose();
         _log?.Dispose();
         _instance?.Dispose();
     }

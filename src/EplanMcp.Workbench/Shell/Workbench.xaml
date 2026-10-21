@@ -25,6 +25,49 @@
     </Style.Triggers>
   </Style>
 
+  <!--
+    APR-02: Reject and Approve are the same default button, never primary or danger; their text is plain, so a label
+    can never carry an access key; neither is IsDefault or IsCancel (set where they are used).
+  -->
+  <Style x:Key="Workbench.Answer" TargetType="Button" BasedOn="{StaticResource Primer.Secondary}">
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="ContentTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- APR-08: project data, read only, selectable, focusable, in the mono font, never markup. -->
+  <Style x:Key="Workbench.ProjectData" TargetType="TextBox" BasedOn="{StaticResource Primer.Input}">
+    <Setter Property="IsReadOnly" Value="True" />
+    <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="{DynamicResource Ui.FontSize.Caption}" />
+    <Setter Property="Background" Value="{DynamicResource Primer.codeBg}" />
+    <Setter Property="Foreground" Value="{DynamicResource Primer.codeText}" />
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+  </Style>
+
+  <!-- A technical value that can be selected and copied (CTL-13), such as a backup folder. -->
+  <Style x:Key="Workbench.CodeValue" TargetType="TextBox" BasedOn="{StaticResource Workbench.ProjectData}">
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Primer.text}" />
+  </Style>
+
+  <!-- CTL-05: a question row is named by the question itself, and the name follows its countdown. -->
+  <Style x:Key="Workbench.QuestionRow" TargetType="ListBoxItem" BasedOn="{StaticResource Primer.TableItem}">
+    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+  </Style>
+
   <!-- The window buttons' glyphs, drawn in the button's text colour (ICO-05). -->
   <Style x:Key="Workbench.CaptionGlyph" TargetType="Path">
     <Setter Property="Width" Value="10" />

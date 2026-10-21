@@ -7,6 +7,7 @@
     xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls"
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     xmlns:settings="clr-namespace:EplanMcp.Workbench.Settings"
+    xmlns:approvals="clr-namespace:EplanMcp.Workbench.Approvals"
     Width="1200" Height="780" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
@@ -113,9 +114,7 @@
       </Border>
 
       <Grid x:Name="Body" Grid.Row="1" Margin="24" AutomationProperties.Name="{l:Tr Shell.Content}">
-        <shell:PageView x:Name="ApprovalsPage" Title="{l:Tr Page.Approvals}" Caption="{l:Tr Page.Approvals.Caption}">
-          <shell:EmptyState Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
-        </shell:PageView>
+        <approvals:ApprovalsPage x:Name="ApprovalsPage" />
         <shell:PageView x:Name="AuditPage" Title="{l:Tr Page.Audit}" Caption="{l:Tr Page.Audit.Caption}">
           <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Audit.Later}" />
         </shell:PageView>

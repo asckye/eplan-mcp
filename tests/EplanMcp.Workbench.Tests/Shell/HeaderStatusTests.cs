@@ -52,7 +52,7 @@ public sealed class HeaderStatusTests(WpfContext wpf)
             Assert.Equal(Visibility.Visible, badge.Visibility);
             Assert.Equal("3 个问题等待审批", AutomationProperties.GetName(badge));
             Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
-            Assert.Same(((PageView)window.FindName("ApprovalsPage")).Heading, Keyboard.FocusedElement);
+            Assert.Same(((IWorkbenchPage)window.FindName("ApprovalsPage")).Heading, Keyboard.FocusedElement);
         }));
     }
 }
