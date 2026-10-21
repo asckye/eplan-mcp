@@ -69,7 +69,7 @@ public sealed class ConnectionNumberTests : IClassFixture<DestructiveHost>
         Assert.InRange(connections, 1, int.MaxValue);
 
         _host.Approvals.Approve(Tool, _host.Writable, [string.Create(CultureInfo.InvariantCulture, $"renumber wire numbers in the project ({connections} connections, {before} numbered), scheme: {Scheme}, overwrite: {overwrite.Replace('_', ' ')}")]);
-        JsonElement numbered = await _host.CallAsync(Tool, args);
+        JsonElement numbered = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, args));
         int changed = numbered.GetProperty("changedCount").GetInt32();
         TestContext.Current.TestOutputHelper?.WriteLine(
             $"{overwrite}: {connections} connections, {before} -> {numbered.GetProperty("designatedAfter")} numbered, {changed} changed; first: "
