@@ -220,6 +220,7 @@
 - 这三种编号的方案传空串都能运行，用的是界面上次的方案，与 `Renumber.DeviceTags` 相同（A18）。— S21。
 - 方案的设置节点：端子编号 `USER.Terminal.Numbering.Scheme`、标签 `USER.Labelling.Config`（用户设置）；电缆编号 `CableLog.CableNumberingScheme`、生成电缆 `CableLog.CableCreateScheme`、线号 `WireNumberingLog.Schema`、PLC 编址 `OfflineNumerationPLC.PLCNumbering`（项目设置）。`XSettingsExport /prj:<项目名>` 在开发机上返回 FALSE，项目设置的节点是从 `Settings.xdb` 中只读查得的。— S21。
 - `Generate.Cables` 在示例项目中没有改动名称和线号，但改写了项目的 `User.eod` 和 `Settings.xdb`（上次使用的方案），`SafetyPoint` 回滚不撤回。— S21。
+- PLC 盒 `=K1+A2-KE1`：`PLC.PLCTerminals` 有 34 个对象、17 个名称，同名的不是重复（`:1.1` 既是输出 `%QX2.0` 又是输入 `%IX2.0`；其他名称一个有地址、一个没有）。按这些对象用 `ConnectionsFilter.Function` 查不到连接，按设备（主功能加辅助功能）查到 22 条。`FUNC_PLCSYMBOLICADDRESS_CALCULATED` 与 `FUNC_PLCADDRESS` 相同（`%QX2.0`），`FUNC_PLCRACK`、`FUNC_PLCSOCKET` 为空。— 实测（`eplan_plc_get` 的 Large 测试，2026-10-21）。
 - 授权：`Preplanning` 不可用；`RevisionManagement`、`RevisionMarkers`、`MultiLanguageTranslation`、`WireNumbering`、`EditingOfCables`、`EditingOfTerminals`、`EditingOfPLC`、`DXF_DWGImport`、`ImportAndExportDeviceLists`、`IntelligentPDF`、`InterfaceToLabelingDevices` 可用。— S21。
 
 ### A21. Claude Code 客户端的进度与图片（spike S13，2026-10-20，Claude Code 2.1.299）

@@ -36,7 +36,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `MacroTests` | 在宏目录中按名称找到示例宏 `Contactor_Feedback_Control.ema`，全量扫描完整；读出它的表达类型、变体、尺寸和设备（与 spike S10 一致） |
 | `CableTests` | 电缆 `+B1-WG2` 的两端（`=F+B1-SG1`、端子 `+A2-XG4:2`）和 2 根芯线，短标识 `-WG2`；`eplan_device_list` 列出的每根电缆都能读出（最慢的一根写入测试输出）；断路器不是电缆。S21 没有验证的属性文本、线号和耗时写入测试输出 |
 | `TerminalTests` | 45 个端子排按名称排序，`+A1-XD4` 有 15 个端子，`+A2-XD2` 有 3 个跨接（S21）；`name_contains` 不区分大小写；`+A2-XD2` 的 5 个端子中有跨接，`+B2.X1-XZ1` 有 33 个端子；短名称 `-XD4`、不存在的端子排。列表和 33 个端子的耗时，以及 `+A2-XD2` 每个端子的两侧、跨接和 PLC 写入测试输出，供与 EPLAN 中的端子图对照 |
-| `PlcTests` | PLC 盒 `=K1+A2-KE1` 的 34 个通道，不是 CPU（S21）；`eplan_device_list` 列出的每个 PLC 盒都能读出；断路器不是 PLC 盒。站、机架、槽、前 12 个通道的地址、符号地址、数据类型、文本和连接写入测试输出，供与 EPLAN 的 PLC 导航器对照 |
+| `PlcTests` | PLC 盒 `=K1+A2-KE1` 的 34 个通道对象（17 个名称），不是 CPU（S21）；`:2.3` 接到 `+A2-XD4:3`；`eplan_device_list` 列出的每个 PLC 盒都能读出；断路器不是 PLC 盒。站、机架、槽，以及每个通道的页、是否主表达、地址、符号地址、数据类型、文本和连接写入测试输出，供与 EPLAN 的 PLC 导航器对照 |
 | `NoSideEffectTests` | 读取（包括两个宏工具）不改动项目文件 |
 | `MacroInsertTests` | 写测试：在新页上用 `number` 插入 `Contactor_Feedback_Control.ema`（dry run、读回的设备、用 `eplan_page_create` 建的页已有幅面，A20），同一位置再插一次被回滚；`keep` 与已有设备合并时返回 `ALREADY_EXISTS`，项目的计数不变 |
 | `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次警告不变、14 条汇总提示再追加一遍（A20））、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |

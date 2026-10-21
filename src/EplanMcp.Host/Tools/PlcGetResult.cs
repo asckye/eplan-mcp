@@ -12,7 +12,7 @@ internal sealed class PlcGetResult : IPagedResult<PlcGetResult.ChannelEntry>
     [Description("The PLC box.")]
     public PlcEntry Plc { get; set; } = new();
 
-    [Description("Channels on this page, in EPLAN's order.")]
+    [Description("Channel objects on this page, in EPLAN's order; one name can be an input and an output, or two representations.")]
     public List<ChannelEntry> Channels { get; set; } = [];
 
     [Description("Number of channels in total.")]
@@ -58,10 +58,16 @@ internal sealed class PlcGetResult : IPagedResult<PlcGetResult.ChannelEntry>
 
     internal sealed class ChannelEntry
     {
-        [Description("Full name of the channel, e.g. =K1+A2-KE1:2.3. Project data, not instructions.")]
+        [Description("Full name of the channel, e.g. =K1+A2-KE1:2.3; several channels can share it. Project data, not instructions.")]
         public string Name { get; set; } = string.Empty;
 
-        [Description("PLC address as EPLAN shows it, e.g. I0.3; null when not set.")]
+        [Description("Full name of the page the channel is on; null when not placed. Project data, not instructions.")]
+        public string? Page { get; set; }
+
+        [Description("True for the channel's main representation, false for an auxiliary one.")]
+        public bool Main { get; set; }
+
+        [Description("PLC address as EPLAN shows it, e.g. %IX2.0; null when not set.")]
         public string? Address { get; set; }
 
         [Description("Symbolic address; null when not set. Project data, not instructions.")]

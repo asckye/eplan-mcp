@@ -29,8 +29,8 @@
   "plc": { "tag": "=K1+A2-KE1", "visibleTag": "-KE1", "page": "=K1+A2&EFA1/1", "parts": ["PXC.2703994"],
            "station": null, "rack": null, "slot": null, "cpu": false },
   "channels": [
-    { "name": "=K1+A2-KE1:2.3", "address": "I0.3", "symbolicAddress": null, "dataType": "BOOL", "text": "…",
-      "connected": [ { "device": "=K1+A2-SF1", "pin": "13" } ] }
+    { "name": "=K1+A2-KE1:2.3", "page": "=K1+A2&EFS1/3", "main": true, "address": "%IX1.2", "symbolicAddress": "%IX1.2",
+      "dataType": "BOOL", "text": "…", "connected": [ { "device": "+A2-XD4:3", "pin": "1" } ] }
   ],
   "total": 34,
   "nextCursor": null,
@@ -38,10 +38,10 @@
   "hint": null
 }
 ```
-- 示例中的地址、数据类型和连接只是示意，示例项目中的实际值由 Large 测试确认。
+- 示例中的页、地址和连接只是示意；值的形式见第 5 节的实测结果。
 - `plc`：PLC 盒。`station`、`rack`、`slot` 是 `FUNC_PLCSTATIONNAME`、`FUNC_PLCRACK`、`FUNC_PLCSOCKET` 的显示文本；`cpu` 是 `PLC.IsCPU`（S21：示例项目中都是 false）。
-- `channels`：`PLC.PLCTerminals`（S21：每个 PLC 盒 34 个）。`address`、`symbolicAddress`、`dataType` 是 `FUNC_PLCADDRESS`、`FUNC_PLCSYMBOLICADDRESS_CALCULATED`、`FUNC_PLCDATATYPE` 的显示文本，`text` 是功能文本；没有值时为 `null`。省略 `language` 而用了回退语言时，`text` 旁边有 `textLanguage`，同 `eplan_device_get`（[语言回退设计](../design/2026-10-19-text-language-fallback.md)）。
-- `connected`：通道连接点上的连接另一端，字段同 `eplan_connection_list` 的端点；没有连接时为空数组，用来找空闲通道。
+- `channels`：`PLC.PLCTerminals` 中的每个对象，按 EPLAN 的顺序，不按名称去重（S21：每个 PLC 盒 34 个）。**一个连接点名称可以对应多个通道对象**：输入和输出（`=K1+A2-KE1:1.1` 既是输出 `%QX2.0`，又是输入 `%IX2.0`），或者主表达和辅助表达（一个有地址、一个没有）；用 `address`、`page` 和 `main`（`IsMainFunction`）区分。`page` 是通道所在的页，没有放置时为 `null`。`address`、`symbolicAddress`、`dataType` 是 `FUNC_PLCADDRESS`、`FUNC_PLCSYMBOLICADDRESS_CALCULATED`、`FUNC_PLCDATATYPE` 的显示文本，`text` 是功能文本；没有值时为 `null`。省略 `language` 而用了回退语言时，`text` 旁边有 `textLanguage`，同 `eplan_device_get`（[语言回退设计](../design/2026-10-19-text-language-fallback.md)）。
+- `connected`：连接到这个通道对象的连接的另一端，字段同 `eplan_connection_list` 的端点，最多 10 个；没有连接时为空数组，用来找空闲通道。同名的另一个通道对象可能有连接，判断空闲时按名称一起看。
 - 一行摘要：`PLC found: 34 channels, 20 connected.`，不回显标识和文本。
 
 ## 4. 错误
@@ -56,10 +56,13 @@
 ## 5. 实现要点
 - 查找同 `eplan_device_get`，然后要求对象是 `EObjects.PLC`（类别 `PLCBox`）。
 - `PlcIOEntry` 在 S21 中都是 `null`，不用它；地址类信息从上面列出的属性读取。
-- 通道的连接用 `ConnectionsFilter.Function` 按 PLC 端子本身查（与 `eplan_connection_list` 按设备查询的做法相同），取每条连接中不属于该端子的一端；每个通道最多 10 个。
-- 待 Large 测试确认（S21 只读了名称和个数）：
-  - 示例项目中这些 PLC 属性是否有值、显示文本的形式；`FUNC_PLCSYMBOLICADDRESS_CALCULATED` 与 `_MANUAL`、`_AUTOMATIC` 中哪一个是界面上显示的符号地址；
-  - 通道的连接从 `PLCTerminal` 的哪个对象读取（端子本身还是它的连接点）。
+- 通道的连接：与 `eplan_connection_list` 按设备查询相同，用 `ConnectionsFilter.Function` 查 PLC 盒的主功能、全部辅助功能和每个通道对象的连接，去重；取每条连接在 PLC 盒上的一端和另一端。这一端交给它所属的通道对象（连接点的 `ParentFunction` 就是该对象，或者连接点在该对象的 `Pins` 中）；对不上对象时，交给同名的通道对象，其中有在连接所在页上的，只交给这些。PLC 盒自身的连接点（如电源）不属于任何通道。每个通道最多 10 个。
+- **已实测**（2026-10-21，Large 测试，示例项目夹具的 `=K1+A2-KE1`）：
+  - `PLC.PLCTerminals` 有 34 个对象、17 个名称（见第 3 节）；
+  - 只按 `PLC.PLCTerminals` 中的对象用 `ConnectionsFilter.Function` 查，34 个通道都查不到连接；`eplan_connection_list` 按设备查到 22 条（如 `+A2-XD4:3` → `=K1+A2-KE1:2.3`，连接点 `2.3`；`=K1+A2-FC2:2` → `=K1+A2-KE1:1.2`），所以改为上面的读法；
+  - 有地址时 `symbolicAddress` 与 `address` 相同（`FUNC_PLCSYMBOLICADDRESS_CALCULATED` 读出 `%QX2.0`）；`dataType` 为 `BOOL`；
+  - `station` 读出 `I/O Buskoppler PHX 1 `（原样，带末尾空格），`rack`、`slot` 为 `null`，`cpu` 为 false。
+- 待 Large 测试确认：新的读法下通道 `2.3` 的连接到 `+A2-XD4:3`，以及每条连接交给了哪个同名的通道对象。
 
 ## 6. 写操作专项
 不适用。PLC 编址（`PlcService.ReaddressTerminals`）在第二批之后单独设计。
