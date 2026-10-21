@@ -280,6 +280,19 @@ public static class OperationNames
     public const string ExportUntranslatedRun = "export.untranslated.run";
 
     /// <summary>
+    /// The plan of eplan_part_export: opens the configured parts database, checks the given part numbers are in it and
+    /// closes it again, never exports. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/> with the database.
+    /// </summary>
+    public const string PartExportPlan = "part.export.plan";
+
+    /// <summary>
+    /// Exports the given parts, every variant of each, or every part of the configured parts database as one XML or EDZ
+    /// file into the Host's new, empty folder. Arguments: <see cref="ExportArgs"/> with the folder and the file name, its
+    /// extension included; data: <see cref="ExportRunData"/> with the database and the part count.
+    /// </summary>
+    public const string PartExportRun = "part.export.run";
+
+    /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

@@ -1,0 +1,90 @@
+using System.Globalization;
+using EplanMcp.Contracts;
+
+namespace EplanMcp.Bridge.Core.Operations;
+
+/// <summary>
+/// The checked arguments of the plan or run of a database export (docs/tools/eplan_part_export.md, section 2): every
+/// problem at once. Part numbers are taken as the database writes them, trimmed, each once.
+/// </summary>
+internal sealed class MasterDataExportRequest
+{
+    public const int MaxParts = 500;
+
+    private MasterDataExportRequest(MasterDataFormat format, string extension, IReadOnlyList<string>? parts)
+    {
+        Format = format;
+        Extension = extension;
+        Parts = parts;
+    }
+
+    public MasterDataFormat Format { get; }
+
+    /// <summary>The extension the Host gives the file: <c>.xml</c> or <c>.edz</c>.</summary>
+    public string Extension { get; }
+
+    /// <summary>Parts: the part numbers to export; null for every part.</summary>
+    public IReadOnlyList<string>? Parts { get; }
+
+    public static MasterDataExportRequest Check(MasterDataExportKind kind, ExportArgs args)
+    {
+        var violations = new List<string>();
+        string format = string.IsNullOrWhiteSpace(args.Format) ? string.Empty : args.Format!.Trim().ToLowerInvariant();
+        (MasterDataFormat Format, string Extension)? file = (kind, format) switch
+        {
+            (MasterDataExportKind.Parts, "" or "xml") => (MasterDataFormat.Xml, ".xml"),
+            (MasterDataExportKind.Parts, "edz") => (MasterDataFormat.Edz, ".edz"),
+            _ => null,
+        };
+        if (file is null)
+        {
+            violations.Add("'format' must be xml or edz.");
+        }
+
+        List<string>? parts = kind == MasterDataExportKind.Parts ? CheckParts(args.Parts, violations) : null;
+        return violations.Count > 0
+            ? throw WriteArguments.Invalid(violations)
+            : new MasterDataExportRequest(file!.Value.Format, file.Value.Extension, parts);
+    }
+
+    /// <summary>
+    /// PART_NOT_FOUND when <paramref name="found"/> misses part numbers (tool spec 4): at most
+    /// <see cref="ProjectResolver.MaxCandidates"/> of them in <c>metadata.missing</c>, all counted.
+    /// </summary>
+    public static PartsExport AllFound(PartsExport found) => found.Missing.Count == 0
+        ? found
+        : throw new BridgeErrorException(
+            ErrorReason.PartNotFound,
+            "The parts database has no part with some of these part numbers, so nothing was exported; metadata.missing lists them. Find the exact part numbers with eplan_part_search.",
+            retryable: false,
+            new Dictionary<string, string>
+            {
+                ["missing"] = string.Join("\n", found.Missing.Take(ProjectResolver.MaxCandidates)),
+                ["missingCount"] = found.Missing.Count.ToString(CultureInfo.InvariantCulture),
+            });
+
+    /// <summary>1 to <see cref="MaxParts"/> part numbers, none blank; null stays null (every part).</summary>
+    private static List<string>? CheckParts(List<string>? parts, List<string> violations)
+    {
+        if (parts is null)
+        {
+            return null;
+        }
+
+        if (parts.Count is < 1 or > MaxParts)
+        {
+            violations.Add($"'parts' must hold 1 to {MaxParts.ToString(CultureInfo.InvariantCulture)} part numbers; omit it for every part.");
+            return null;
+        }
+
+        for (int i = 0; i < parts.Count; i++)
+        {
+            if (string.IsNullOrWhiteSpace(parts[i]))
+            {
+                violations.Add($"parts[{i.ToString(CultureInfo.InvariantCulture)}] must be a part number, such as SIE.3RH2122-1HB40.");
+            }
+        }
+
+        return [.. parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.Trim()).Distinct(StringComparer.Ordinal)];
+    }
+}

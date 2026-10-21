@@ -67,9 +67,9 @@ public sealed class ProjectExportRunOperation(ProjectExportKind kind, IProjectCa
     /// The file's name in the folder, as the Host checked it; checked again so that EPLAN never gets a path (SEC-20).
     /// A PXF name has no <c>.epj</c>: EPLAN adds it to a name without one (S25), and whether it adds a second one to a
     /// name that has it is not verified (tool spec 5), so the Host never sends one. Other names end with
-    /// <paramref name="extension"/>.
+    /// <paramref name="extension"/>. The database exports check their names with it too.
     /// </summary>
-    private static string FileName(string? fileName, string? extension)
+    internal static string FileName(string? fileName, string? extension)
     {
         string name = fileName ?? string.Empty;
         bool plain = name.Length > 0 && name.IndexOfAny(['\\', '/', ':']) < 0 && name.IndexOf("..", StringComparison.Ordinal) < 0;

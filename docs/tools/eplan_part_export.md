@@ -23,12 +23,12 @@
 | `parts` | array of string，1–500 项 | 否 | 全部部件 | 要导出的部件号，用 `eplan_part_search` 查到的 `partNr` |
 | `file_name` | string，1–100 个字符 | 否 | `parts` | 只是文件名，规则同 `eplan_export_pdf` 的 `file_name`；扩展名 `.xml` 或 `.edz` 由工具补上 |
 
-- 部件号按部件库中的写法精确匹配。任何一个找不到就整次不导出，返回 `PART_NOT_FOUND`，列出找不到的部件号。
+- 部件号按部件库中的写法精确匹配（去掉首尾空格，重复的只导出一次），一个部件号的每个变体都导出。任何一个找不到就整次不导出，返回 `PART_NOT_FOUND`，列出找不到的部件号；这在规划阶段就核对，不新建目录。
 
 ## 3. 输出
 字段同 `eplan_export_pdf`，`files` 中只有一个文件；另加：
-- `database`：导出的是哪个部件库（配置中的写法，如 `$(MD_PARTS)\EPLAN_parts.alk`）；
-- `partCount`：导出的部件数。
+- `database`：导出的是哪个部件库（配置中的写法，如 `$(MD_PARTS)\EPLAN_parts.alk`；SQL Server 上的库只给出 `服务器|数据库`，同 `eplan_part_search`）；
+- `partCount`：导出的部件数，每个变体算一个（与 `eplan_part_search` 相同）。
 
 一行摘要：`Exported 464 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.`
 
@@ -50,7 +50,7 @@
 - **EPLAN 调用**（S24 r11，api-notes A30）：
   - `new MDPartsManagement().OpenDatabase()` 打开配置的库，用完 `Close()`；
   - 全部部件：`ExportParts(路径, MDPartsDatabase.DataFormat.XML 或 EDZ)`；
-  - 指定部件：先用 `GetPart` 逐个取，有 null 就返回 `PART_NOT_FOUND`，否则 `ExportParts(路径, 格式, 部件列表)`；
+  - 指定部件：用 `GetPartVariants` 逐个取，有部件号取不到（null 或空数组）就返回 `PART_NOT_FOUND`，否则把全部变体交给 `ExportParts(路径, 格式, 部件列表)`。不用 `GetPart`：一个部件号有几个变体时它只返回第一个（XML）；`GetPartVariants` 在 S24 中读过，取不到时返回什么没有验证；
   - 在调度器中执行，套 `QuietModeStep(ShowNoDialogs)`。
 - **已验证**（S24 r11，在还原到 scratch 的副本上）：
   - XML 全部 464 个部件 2.05 秒、5.0 MB；EDZ 44 秒、128 MB；指定一个部件的 XML 4 KB；
