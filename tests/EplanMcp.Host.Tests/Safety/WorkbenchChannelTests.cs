@@ -59,11 +59,13 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     [Fact]
     public async Task EveryInstanceBusy_TheConnectTimesOutAndItStepsAside()
     {
-        using var other = new NamedPipeClientStream(".", _workbench.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        await using var busy = new FakeWorkbench(WorkbenchPipeName.ForCurrentUser(Path.Combine(_locations.Root, "busy")), instances: 1);
+        using var other = new NamedPipeClientStream(".", busy.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
         await other.ConnectAsync(TimeSpan.FromSeconds(5), Token);
+        await busy.ConnectedAsync(1, Token);
 
-        Assert.Null(await Channel().AskAsync(Question(), Token));
-        Assert.Empty(_workbench.Handshakes);
+        Assert.Null(await Channel(busy.PipeName).AskAsync(Question(), Token));
+        Assert.Empty(busy.Handshakes);
     }
 
     [Fact]
