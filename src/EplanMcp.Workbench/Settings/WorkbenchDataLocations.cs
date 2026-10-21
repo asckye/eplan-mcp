@@ -13,6 +13,9 @@ internal sealed class WorkbenchDataLocations(string root)
     /// <summary>The Workbench's own settings (M5 design 4.1).</summary>
     public string Settings => Path.Combine(Root, "workbench", "settings.json");
 
+    /// <summary>The logs, shared with the Host (architecture 7); the Workbench's files are workbench-*.log.</summary>
+    public string Logs => Path.Combine(Root, "logs");
+
     public static WorkbenchDataLocations FromEnvironment() => new(
         Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
             ? home

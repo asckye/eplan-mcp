@@ -8,6 +8,10 @@
     <Using Include="System.IO" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The Host tests' clock that moves only when told to, for deadlines and timers. -->
+    <Compile Include="..\EplanMcp.Host.Tests\Safety\ManualTime.cs" Link="Shared\ManualTime.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\EplanMcp.Workbench\EplanMcp.Workbench.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
