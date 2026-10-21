@@ -8,8 +8,7 @@ namespace EplanMcp.Host.Addin;
 /// <remarks>
 /// The pause before closing is there because a registered add-in loads while EPLAN starts, before EPLAN runs
 /// <c>/unregister</c> (api-notes A23). With 10 seconds the live check saw the unregistration take; how long the action
-/// takes has not been measured. EPLAN ignores a close request for some seconds after the add-in loaded, while it still
-/// finishes starting (A23), hence asking again.
+/// takes has not been measured. A close request is sent again every <see cref="Resend"/> in case one did not take.
 /// </remarks>
 internal sealed record AddinTimings(TimeSpan Load, TimeSpan Settle, TimeSpan Close, TimeSpan Resend, TimeSpan Poll)
 {

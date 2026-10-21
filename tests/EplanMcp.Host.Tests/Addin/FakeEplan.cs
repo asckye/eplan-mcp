@@ -14,7 +14,8 @@ namespace EplanMcp.Host.Tests.Addin;
 /// <item><c>/unregister</c> clears the registration (unless <see cref="UnregisterTakes"/> is false); the add-in that
 /// loaded at start-up stays loaded.</item>
 /// </list>
-/// A pipe appears after <see cref="PipeAfterLooks"/> looks (never when null).
+/// A pipe appears after <see cref="PipeAfterLooks"/> looks (never when null). Like a real <c>Process</c>, an instance keeps
+/// the window handle it first found, the splash screen: a close request reaches EPLAN only after a refresh (A23).
 /// </summary>
 internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
 {
@@ -42,7 +43,7 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
     /// <summary>False: no enabled main window (a modal dialog is open), so CloseMainWindow fails.</summary>
     public bool HasWindow { get; set; } = true;
 
-    /// <summary>How many close requests an EPLAN ignores while it still finishes starting.</summary>
+    /// <summary>How many close requests that reach it an EPLAN does not react to, to show that they are sent again.</summary>
     public int IgnoresCloses { get; set; }
 
     /// <summary>False: EPLAN takes the close request but stays open (behind a system messages window, for example).</summary>
@@ -114,6 +115,10 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
     internal sealed class Instance(FakeEplan eplan, int id, string? loadedFrom) : IStartedEplan
     {
         private int _closeRequests;
+        private bool _refreshed;
+
+        /// <summary>The calls in order: "refresh", "close".</summary>
+        public List<string> Calls { get; } = [];
 
         public int Looks { get; set; }
 
@@ -128,10 +133,17 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
 
         public bool HasExited => Exited |= eplan.ExitsBeforePipe;
 
+        public void Refresh()
+        {
+            Calls.Add("refresh");
+            _refreshed = true;
+        }
+
         public bool CloseMainWindow()
         {
             eplan.Log.Add($"close {id}");
-            Exited |= eplan.HasWindow && eplan.ClosesWhenAsked && ++_closeRequests > eplan.IgnoresCloses;
+            Calls.Add("close");
+            Exited |= _refreshed && eplan.HasWindow && eplan.ClosesWhenAsked && ++_closeRequests > eplan.IgnoresCloses;
             return eplan.HasWindow;
         }
 
