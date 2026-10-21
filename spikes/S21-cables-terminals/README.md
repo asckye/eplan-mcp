@@ -47,6 +47,20 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 | `ConnectionService.DesignateConnections`（覆盖全部） | 0.9–1.1 s | 605 条连接得到线号（`*` → `433`，空 → `011` 等），有线号的连接 116 → 659 | ✅ | `Connection`、`Function`、`Page`、`Message` |
 | `Generate.Cables`（只处理自动电缆） | 0.4 s | 名称、线号都没有变化 | — | 项目的 `User.eod` 和 `Settings.xdb`（回滚之后仍是新的） |
 
+**方案的设置节点**（从用户设置的导出 `XSettingsExport /node:USER`，以及评测夹具项目的 `Settings.xdb` 中只读查得；项目设置的 `XSettingsExport /prj:<项目名>` 返回 FALSE）：
+
+| 用途 | 节点 | 位置 | 示例项目或本机中的方案 |
+|---|---|---|---|
+| 端子编号 | `USER.Terminal.Numbering.Scheme` | 用户设置 | `Gerätedefinition`、`Initiatoren`、`Numerisch` |
+| 插头编号 | `USER.Plug.Numbering.Scheme` | 用户设置 | `Gerätedefinition`、`Numerisch` |
+| 电缆编号 | `CableLog.CableNumberingScheme` | 项目设置 | `Standard` |
+| 生成电缆、电缆选型 | `CableLog.CableCreateScheme`、`CableLog.CableAutoSelectionScheme` | 项目设置 | `Standard` |
+| 线号 | `WireNumberingLog.Schema` | 项目设置 | `Standard`、`Potenzialorientiert`、`Verbindungsorientiert` 等 11 个 |
+| PLC 编址 | `OfflineNumerationPLC.PLCNumbering` | 项目设置 | `Standard` |
+| 标签 | `USER.Labelling.Config` | 用户设置 | `Device tag list`、`Summarized parts list`、`Terminal diagram`、`Cable diagram` 等 7 个 |
+
+每个节点下还有一个内部的 `InternalRefDefScheme`，不是可选的方案。
+
 **Ctrl+Z 没有测**：开发机上 EPLAN 同时打开着 scratch 之外的示例项目，驱动按规则不发送 Ctrl+Z。
 
 **授权**（3214 个选项中 2683 个可用）：
@@ -57,7 +71,7 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 ## 结论
 1. **读取工具可行**：电缆、端子排、端子、PLC 盒和连接都能在调度器中读出，关系也能读出。电缆按类别取（`FunctionsFilter.FunctionCategory`），或者用 `GetCablesWithFilterScheme(null)`（含屏蔽）；不要传空串。`GetSourcesAndTargets` 的耗时没有单独测，在写工具规格时测，再决定列表中是否默认给出源和目标。
 2. **三种编号都能被 `SafetyPoint` 回滚**，与设备、页的编号相同（A18）。工具按 M4c 设计定为 Destructive（先备份）：结果由方案决定，事先算不出；线号一次可以改几百条。
-3. **方案传空串可以运行，等于界面上次用的方案**，结果随界面状态变化。工具要传明确的方案名；各种编号方案的设置节点还没有找到，在写工具规格时查清。
+3. **方案传空串可以运行，等于界面上次用的方案**，结果随界面状态变化。工具要传明确的方案名，可选的方案从上表的节点读出：端子编号、标签在用户设置中（`SchemeSetting`），电缆编号、线号在项目设置中（项目的方案设置类，读法在写工具规格时验证）。
 4. `Generate.Cables` 在示例项目中没有可生成的自动电缆，生成的效果需要另找项目验证；它会改写项目设置（上次使用的方案），回滚不撤回。
 5. **预规划导入不能做**：授权中没有 `Preplanning`（M4c Q6）。
 6. 端子编号整个项目要 40 秒以上，工具描述写明耗时，并允许按端子排限定范围。
