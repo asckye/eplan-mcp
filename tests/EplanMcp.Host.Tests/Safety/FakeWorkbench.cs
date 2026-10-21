@@ -9,9 +9,10 @@ namespace EplanMcp.Host.Tests.Safety;
 /// A Workbench pipe server in the test process, on a pipe of the test's own. It answers the handshake with
 /// <see cref="Welcome"/> (or <see cref="HandshakeReply"/>: null keeps silent), hands each question to
 /// <see cref="Answer"/>, sends the frames it returns (none: it goes on reading; null: it hangs up), and records
-/// notifications until the Host hangs up. A pipe instance always listens, created before the constructor returns and
-/// again as each connection arrives, up to the given number of instances: the channel's 250 ms connect must never
-/// find the pipe missing on a busy test machine. Its lists are filled on the server's threads.
+/// notifications until the Host hangs up. Two pipe instances listen from before the constructor returns, and a new one
+/// starts as each connection arrives, up to the given number of instances: the channel's 250 ms connect must never
+/// find every instance taken on a busy test machine, where the next instance may start late. Its lists are filled on
+/// the server's threads.
 /// </summary>
 internal sealed class FakeWorkbench : IAsyncDisposable
 {
@@ -25,7 +26,10 @@ internal sealed class FakeWorkbench : IAsyncDisposable
     {
         PipeName = pipeName;
         _instances = instances;
-        Listen();
+        for (int i = 0; i < Math.Min(2, instances); i++)
+        {
+            Listen();
+        }
     }
 
     public string PipeName { get; }
@@ -64,9 +68,13 @@ internal sealed class FakeWorkbench : IAsyncDisposable
     /// <summary>Waits until <paramref name="count"/> connections were made, counting from the start.</summary>
     public async Task ConnectedAsync(int count, CancellationToken cancellationToken)
     {
+        // Bounded, so a connection that never came fails the test instead of hanging the run.
         for (int i = 0; i < count; i++)
         {
-            await _connected.WaitAsync(cancellationToken);
+            if (!await _connected.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken))
+            {
+                throw new TimeoutException($"Connection {i + 1} of {count} did not reach the fake Workbench within 30 s.");
+            }
         }
     }
 
