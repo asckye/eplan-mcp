@@ -12,6 +12,7 @@ using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Clients;
+using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Status;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
@@ -131,6 +132,9 @@ public partial class MainWindow : Window
         AuditPage.RecordOpened += OpenRecord;
     }
 
+    /// <summary>Gives the settings drawer the login entry and config.json, and for tests the shell; the app does, once.</summary>
+    internal void AttachSettings(StartAtLogin login, string configFile, IShellOpen? shell = null) => SettingsPane.Attach(login, configFile, shell);
+
     /// <summary>Gives the status page its state; the app does, once.</summary>
     internal void AttachStatus(StatusView view) => StatusPage.Attach(view);
 
@@ -229,6 +233,7 @@ public partial class MainWindow : Window
     public void OpenSettings()
     {
         _settingsOpener = Keyboard.FocusedElement;
+        SettingsPane.Refresh();
         SettingsLayer.Visibility = Visibility.Visible;
         UpdateLayout();
         SettingsPane.FocusHeading();

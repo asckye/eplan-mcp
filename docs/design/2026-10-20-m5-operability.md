@@ -71,6 +71,7 @@ flowchart LR
 - 位置固定为 `%USERPROFILE%\EplanMcp\app\`（架构 7），安装时不能选择（Q4）：EPLAN 的注册、客户端配置和插件都指向它。`EPLANMCP_HOME` 只改数据根目录，不改 `app\`。
 - `app\` 只放程序，升级时整体替换；数据都在数据根目录的其他子目录中，升级和卸载都不动。
 - 不修改 PATH 和任何全局环境变量（架构 7）。注册表中只有安装程序的卸载项（HKCU），以及可选的登录自启动项（Q3）。开始菜单中有 Workbench、入门指南、卸载三个快捷方式。
+- 登录自启动项是 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 中名为 `EplanMcp Workbench` 的值，内容为加引号的 Workbench 完整路径：安装程序按勾选写入，Workbench 的设置可以关闭或重新打开（只写当前用户的这一个值，从不写 HKLM），卸载时删除。这个值本身就是记录，Workbench 不另存这个选择。
 
 ### 4.2 插件注册：`eplanmcp install-addin`
 - **方式**：只用 B2 中的命令行 `EPLAN.exe /Variant:"<变体>" EplApiModuleAction /register:"<app>\bridge\net481\EplanMcp.Bridge.Eplan.dll"`，与 `eplan-addin.ps1` 相同，不写注册表、不往 EPLAN 目录复制文件（I2）。这条命令会启动 EPLAN，插件在同一会话中立即加载（A10）。

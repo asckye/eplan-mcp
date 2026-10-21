@@ -12,11 +12,8 @@ namespace EplanMcp.Workbench.Settings;
 /// </summary>
 /// <param name="Language">The interface language; null follows the system's (LOC-10).</param>
 /// <param name="Theme">Follow Windows, light or dark (COL-09); high contrast follows Windows regardless (COL-02).</param>
-/// <param name="StartAtLogin">
-/// Whether the Workbench starts when the engineer logs in. Remembered only: the installer writes the Run entry (M5
-/// design 4.3, step 11).
-/// </param>
-internal sealed record WorkbenchSettings(AppLanguage? Language = null, AppTheme Theme = AppTheme.Auto, bool StartAtLogin = false)
+/// <remarks>Start at login is not kept here: the Run entry itself is the record (<see cref="StartAtLogin"/>).</remarks>
+internal sealed record WorkbenchSettings(AppLanguage? Language = null, AppTheme Theme = AppTheme.Auto)
 {
     private static readonly JsonSerializerOptions _options = new()
     {

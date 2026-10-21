@@ -76,6 +76,7 @@ public sealed partial class App : Application, IDisposable
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
         _window.AttachClients(new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
+        _window.AttachSettings(StartAtLogin.ForCurrentUser(), _locations.Config);
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
         ShowQueue();

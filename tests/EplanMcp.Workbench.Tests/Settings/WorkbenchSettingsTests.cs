@@ -17,7 +17,7 @@ public sealed class WorkbenchSettingsTests : IDisposable
     [Fact]
     public void TheSettings_RoundTripThroughTheWorkbenchFolderOfTheDataRoot()
     {
-        var chosen = new WorkbenchSettings(AppLanguage.English, AppTheme.Dark, StartAtLogin: true);
+        var chosen = new WorkbenchSettings(AppLanguage.English, AppTheme.Dark);
 
         Assert.True(chosen.Save(File));
 
@@ -32,6 +32,7 @@ public sealed class WorkbenchSettingsTests : IDisposable
     [InlineData("""{"language":"klingon"}""")]
     [InlineData("""{"theme":2}""")]
     [InlineData("null")]
+    [InlineData("""{"startAtLogin":true}""")] // kept by earlier versions: the Run entry is the record now
     public void AMissingOrBrokenFile_GivesTheDefaults_FollowingTheSystem(string? content)
     {
         if (content is not null)
@@ -40,7 +41,7 @@ public sealed class WorkbenchSettingsTests : IDisposable
             System.IO.File.WriteAllText(File, content);
         }
 
-        Assert.Equal(new WorkbenchSettings(null, AppTheme.Auto, false), WorkbenchSettings.Load(File));
+        Assert.Equal(new WorkbenchSettings(null, AppTheme.Auto), WorkbenchSettings.Load(File));
     }
 
     [Fact]
