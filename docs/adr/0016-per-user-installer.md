@@ -26,7 +26,7 @@ M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../de
 
 ## 备选方案
 以下事实来自 2026-10-20 查阅的官方文档。
-1. **Inno Setup 安装包**（7.1.0；GitHub 的 windows-2025 镜像自带 6.7.1）：`PrivilegesRequired=lowest` 时从不请求提权，卸载信息写在 HKCU（[PrivilegesRequired](https://jrsoftware.org/ishelp/topic_setup_privilegesrequired.htm)、[非管理员模式](https://jrsoftware.org/ishelp/topic_admininstallmode.htm)）；`[Run]`、`[UninstallRun]` 可以在安装后、卸载前运行命令（[Run](https://jrsoftware.org/ishelp/topic_runsection.htm)）；升级时沿用上次的目录。默认的 `CloseApplications=yes` 在静默模式下会用重启管理器关闭占用文件的程序（[CloseApplications](https://jrsoftware.org/ishelp/topic_setup_closeapplications.htm)）。许可证允许任何用途，作者要求年收入超过 5000 美元的商业用户购买许可（[购买](https://jrsoftware.org/isorder.php)）。
+1. **Inno Setup 安装包**（7.1.0；GitHub 的 windows-2025 镜像自带 6.7.1）：`PrivilegesRequired=lowest` 时从不请求提权，卸载信息写在 HKCU（[PrivilegesRequired](https://jrsoftware.org/ishelp/topic_setup_privilegesrequired.htm)、[非管理员模式](https://jrsoftware.org/ishelp/topic_admininstallmode.htm)）；`[Run]`、`[UninstallRun]` 可以在安装后、卸载前运行命令（[Run](https://jrsoftware.org/ishelp/topic_runsection.htm)）；升级时沿用上次的目录。默认的 `CloseApplications=yes` 在静默模式下会用重启管理器关闭占用文件的程序（[CloseApplications](https://jrsoftware.org/ishelp/topic_setup_closeapplications.htm)）。许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（[购买](https://jrsoftware.org/isorder.php)）。
 2. **压缩包加 PowerShell 脚本**（TIA 的做法）。
 3. **WiX 按用户的 MSI**（7.0.0）。
 4. **MSIX**。
@@ -51,7 +51,7 @@ M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../de
   - 升级不会关掉工程师的程序，也不会打断写入；卸载不丢数据；
   - 产物都由 CI 构建，可以校验来源。
 - **坏的或要付出的代价**：
-  - 依赖 Inno Setup：需要项目负责人确认本项目属于非商业用途；它的脚本是另一种语言，需要维护；
+  - 依赖 Inno Setup：将来商业分发时，按作者的请求购买许可；它的脚本是另一种语言，需要维护；
   - 未签名时 SmartScreen 会提示，Windows 11 智能应用控制处于强制模式时可能直接阻止（M5 设计 4.10）；
   - 升级前要关闭所有客户端会话；
   - 每个变体注册时 EPLAN 都要启动一次（S14 确认能否自动退出）；
