@@ -385,3 +385,12 @@
   - 提示从标准输入传入时被当作题目读入（模型回答了"项目一共有 321 页"）。
   - `total_cost_usd` 在套餐登录时也会给出（客户端估算）；一道 1 次调用的题约 0.01–0.05 美元，输入 token 中位数约 2.4 万（几乎全部是缓存读取）。
   - — 实测（`.local/evals/` 中的轨迹，不提交）。
+
+### Claude Code 插件与桌面版配置（spike S17，2026-10-20，Claude Code 2.1.299，隔离的配置目录，未登录）
+详细数据见 [spike S17](../../spikes/S17-client-plugin/README.md)。
+- `CLAUDE_CONFIG_DIR` 把 `.claude.json`、`settings.json`、`plugins\` 都放到指定目录，`auth status` 报告这个目录；真实的 `~\.claude*` 不变。— S17。
+- 本地目录形式的插件市场：`plugin marketplace add`、`plugin install` 不需要登录，网络不可达时也成功。市场不复制；install 在 `plugins\cache\<市场>\<插件>\<版本>\` 中复制一份插件，但从源目录加载（`plugin list` 的 "Read from"、`${CLAUDE_PLUGIN_ROOT}` 都指向源目录，改写源目录的 `.mcp.json` 后下一个进程就用新内容）。源目录不在时插件 `failed to load … cache-miss`，不会退回到缓存。`marketplace remove` 同时卸载插件，缓存副本留下并标记 `.orphaned_at`。— S17。
+- 插件 `.mcp.json` 的 `command`、`args`、`env` 中 `${VAR}` 和 `${VAR:-默认值}` 都会展开，包括 `${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}`（Windows 上用正斜杠）和任意环境变量；`%VAR%` 不展开。未设置又没有默认值的变量原样保留，`mcp list` 不给出警告。插件的 stdio 服务器继承命令行进程的环境。— S17。
+- 两个插件服务器的命令行相同时，只启动一个（文档：插件按端点判断重复，本地、项目、用户范围的定义优先）。`mcp get` 隐藏插件服务器的命令、参数和环境变量。— S17。
+- `marketplace add` 能展开 `~/…`，不能展开 `%USERPROFILE%\…`（报 "Invalid marketplace source format"）。— S17。
+- 桌面版（MSIX，`Claude_pzs8sxrjxfjjc`）的 `claude_desktop_config.json` 只在 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\` 中。包外的进程看不到 `%APPDATA%\Claude\`；包内的进程看到的 `%APPDATA%\Claude\claude_desktop_config.json` 与包目录中的是同一个文件（文件 ID 相同）。桌面版运行时每隔几十秒就会改写它。— S17、A6。

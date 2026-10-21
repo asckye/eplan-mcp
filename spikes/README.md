@@ -19,6 +19,7 @@
 | [S12](S12-destructive-backup/README.md) | Destructive 操作前的备份（`CopyProject`、`Backup.Project`），删页和重编号能否回滚、撤销 | **完成** 2026-10-20 | `CopyProject(Snapshot)` 在打开的项目上 1 秒内得到完整、可打开的副本，不加锁（ADR-0013 方案 1 成立）；`MakeBackup` 慢且改写源项目文件；删页、重编号都能回滚、一步撤销；删页留下没有主功能的辅助功能；`PostNumerate` 不保证编完所有 `?` |
 | [S13](S13-client-progress/README.md) | Claude Code 是否带进度令牌、中断时是否取消、图片能否交给模型 | **部分完成** 2026-10-20 | 每次调用都带 `progressToken`，心跳送达；`inline` 的 PNG 模型能读懂；中断和 2 分钟以上的调用要在交互会话中再看 |
 | [S15](S15-offline-host/README.md) | 离线宿主：`EplApplication.Init` 的授权与登录对话框、与界面中的 EPLAN 同时运行、启动耗时、回滚与撤销 | **部分完成** 2026-10-20 | 开发机上可行：不弹窗，约 2 秒启动，与界面中的 EPLAN 互不影响，回滚规律与插件相同；要传变体的 Bin。另一用户、服务上下文下的授权未测，要项目负责人建 runner 账户 |
+| [S17](S17-client-plugin/README.md) | 客户端与插件：本地插件市场能否离线安装，插件 `.mcp.json` 中哪些变量会展开，桌面版的配置文件在哪里 | **部分完成** 2026-10-20 | 命令行不登录、网络不可达时也能装好，插件从原处加载；`${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}` 和任意环境变量在 command、args、env 中都会展开，`%VAR%` 不会，所以 `.mcp.json` 不必由安装程序生成；桌面版的配置文件只在包的 `LocalCache\Roaming\Claude\` 中。在没有网络的虚拟机上安装还没有做 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
