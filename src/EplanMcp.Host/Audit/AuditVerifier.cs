@@ -22,6 +22,7 @@ internal sealed record AuditBreak(string File, int Line, AuditProblem Problem);
 /// <summary>
 /// Checks the whole hash chain of <see cref="AuditLog"/>, file by file in date order (Q9, SEC-09). It finds a record
 /// that was changed, removed or inserted before the last one; records removed from the end leave no trace in the chain.
+/// A last line without its "\n" is a record another Host is still appending and is not checked.
 /// </summary>
 internal static class AuditVerifier
 {
@@ -32,7 +33,7 @@ internal static class AuditVerifier
         foreach (string file in Directory.EnumerateFiles(directory, AuditLog.FilePattern).Order(StringComparer.Ordinal))
         {
             int line = 0;
-            foreach (string text in File.ReadLines(file))
+            foreach (string text in AuditLog.ReadLines(file))
             {
                 line++;
                 if (text.Length == 0)
