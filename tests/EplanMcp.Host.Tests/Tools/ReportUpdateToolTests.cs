@@ -17,7 +17,7 @@ public sealed class ReportUpdateToolTests : IDisposable
 {
     private const string NewParts = "+A2&EPA1/1.2";
 
-    private readonly WriteToolHarness _harness = new();
+    private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 
     public ReportUpdateToolTests()
     {

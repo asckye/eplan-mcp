@@ -1,6 +1,7 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using ModelContextProtocol.Protocol;
 
@@ -16,7 +17,7 @@ public sealed class MacroInsertToolTests : IDisposable
     private const string Macro = "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema";
     private const string Page = "=GAA+A1&EFS1/60";
 
-    private readonly WriteToolHarness _harness = new();
+    private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 
     public MacroInsertToolTests()
     {

@@ -7,10 +7,10 @@ namespace EplanMcp.Host.Safety;
 /// <summary>What writes to projects outside every scratch root need.</summary>
 internal enum OutsideScratchWrites
 {
-    /// <summary>Refused with POLICY_DENIED: the default during M3a (M3 design Q5).</summary>
+    /// <summary>Refused with POLICY_DENIED; the default during M3a (M3 design Q5), now a choice in config.json.</summary>
     Deny,
 
-    /// <summary>Allowed after the engineer approves them (ADR-0005).</summary>
+    /// <summary>Allowed after the engineer approves each one (ADR-0005); the default since M3a ended (M3 design Q5).</summary>
     Approve,
 }
 
@@ -38,7 +38,11 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     /// <summary>How long the engineer has to answer an approval or a confirmation: <c>approvalTimeoutSeconds</c>.</summary>
     public TimeSpan ApprovalTimeout { get; init; } = DefaultApprovalTimeout;
 
-    public static HostConfig Defaults(HostDataLocations locations) => new([locations.DefaultScratch], OutsideScratchWrites.Deny);
+    /// <summary>
+    /// Without config.json: the default scratch root, and writes elsewhere each approved by the engineer (ADR-0005;
+    /// M3 design Q5 moved this from Deny once the approval dialog and Q1-Q3 passed).
+    /// </summary>
+    public static HostConfig Defaults(HostDataLocations locations) => new([locations.DefaultScratch], OutsideScratchWrites.Approve);
 
     /// <summary>
     /// The configuration in <see cref="HostDataLocations.ConfigFile"/>, or the defaults when there is none; null and

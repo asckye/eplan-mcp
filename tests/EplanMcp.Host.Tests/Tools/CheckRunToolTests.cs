@@ -15,7 +15,7 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class CheckRunToolTests : IDisposable
 {
-    private readonly WriteToolHarness _harness = new();
+    private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 
     public CheckRunToolTests()
     {

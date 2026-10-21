@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using ModelContextProtocol.Protocol;
 
@@ -9,7 +10,7 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class DeviceUpdateToolTests : IDisposable
 {
-    private readonly WriteToolHarness _harness = new();
+    private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 
     public DeviceUpdateToolTests()
     {

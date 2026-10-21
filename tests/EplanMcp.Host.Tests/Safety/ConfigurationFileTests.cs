@@ -18,7 +18,7 @@ public sealed class ConfigurationFileTests : IDisposable
 
         Assert.Equal(DoctorStatus.Ok, check.Status);
         Assert.Contains("(defaults)", check.English, StringComparison.Ordinal);
-        Assert.Contains("writes outside scratch: denied", check.English, StringComparison.Ordinal);
+        Assert.Contains("writes outside scratch: need approval", check.English, StringComparison.Ordinal);
         Assert.Contains("approval deadline 120 s", check.English, StringComparison.Ordinal);
         Assert.Contains("审批期限 120 秒", check.Chinese, StringComparison.Ordinal);
     }
