@@ -141,7 +141,7 @@ public sealed class ApprovalsPageAutomationTests(WpfContext wpf) : IDisposable
     {
         var queue = new ApprovalQueue(_clock);
         _view = new ApprovalQueueView(queue, _clock);
-        queue.Changed += q => _view.Update(q);
+        _view.Follow(window.Dispatcher, () => window.ShowQueue(queue, listening: true)); // as the app does
         window.Attach(_view);
         foreach ((ApprovalAskParams ask, int seconds) in new[] { (Asks.Write("r1"), 60), (Asks.Write("r2", tier: QuestionTier.Destructive, tool: "eplan_page_delete"), 90), (Asks.Release("r3"), 120) })
         {

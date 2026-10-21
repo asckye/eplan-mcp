@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Threading;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Approvals;
@@ -9,7 +10,7 @@ namespace EplanMcp.Workbench.Approvals;
 /// deadline first; the ended ones, latest first, as many as the queue keeps; the question shown, kept as that very
 /// question so an arrival never replaces it (APR-05), not by request ID, which a write's releases and approval share;
 /// the 500 ms guard (APR-04); and the one way to answer, the shown question's two buttons (APR-01, APR-06).
-/// Used on the UI thread: queue changes come in through <see cref="Update"/>.
+/// Used on the UI thread: queue changes come in through <see cref="Update"/>, posted there by <see cref="Follow"/>.
 /// </summary>
 internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
 {
@@ -17,6 +18,8 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
     private readonly TimeProvider _clock;
     private readonly Dictionary<Question, QuestionItem> _items = [];
     private readonly Dictionary<QuestionItem, QuestionExecution> _executions = [];
+    private Action<Question>? _changed;
+    private Action? _accepting;
     private TimeSpan? _left;
 
     public ApprovalQueueView(ApprovalQueue queue, TimeProvider clock)
@@ -58,6 +61,23 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
 
     /// <summary>Nothing waits and nothing is shown: the empty state (ERR-05).</summary>
     public bool IsEmpty => Pending.Count == 0 && Shown is null;
+
+    /// <summary>
+    /// The app's wiring, which the tests share: each change of the queue is posted to <paramref name="dispatcher"/>'s
+    /// thread, taken in there after what is already queued, and <paramref name="then"/> follows (the Header and the tray);
+    /// a change of whether questions are taken runs <paramref name="then"/> alone. Until <see cref="Dispose"/>.
+    /// </summary>
+    public void Follow(Dispatcher dispatcher, Action then)
+    {
+        _changed = question => dispatcher.BeginInvoke(() =>
+        {
+            Update(question);
+            then();
+        });
+        _accepting = () => dispatcher.BeginInvoke(then);
+        _queue.Changed += _changed;
+        _queue.AcceptingChanged += _accepting;
+    }
 
     /// <summary>Takes in a change of the queue, after its <see cref="ApprovalQueue.Changed"/>.</summary>
     public void Update(Question question)
@@ -154,6 +174,8 @@ internal sealed class ApprovalQueueView : INotifyPropertyChanged, IDisposable
 
     public void Dispose()
     {
+        _queue.Changed -= _changed;
+        _queue.AcceptingChanged -= _accepting;
         Loc.Current.LanguageChanged -= OnLanguageChanged;
         Guard.Dispose();
     }

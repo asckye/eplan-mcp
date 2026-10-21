@@ -9,8 +9,8 @@ namespace EplanMcp.Workbench.Tests.Approvals;
 /// <summary>
 /// The approval queue page's logic (workbench-ui APR-03 to APR-12, T21): earliest deadline first, the shown question kept
 /// as that very question, the next one after an answer, no answer before the guard opens or after the question ended,
-/// and the ended questions with their results and outcomes. In the WPF group only because the catalogue's language is
-/// one per process.
+/// and the ended questions with their results and outcomes. Wired to the queue as the app wires it, on the WPF thread:
+/// each change is taken in there, later than it happened.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Small")]
@@ -27,8 +27,8 @@ public sealed class ApprovalQueueViewTests : IDisposable
     {
         _wpf = wpf;
         _queue = new ApprovalQueue(_clock);
-        _queue.Changed += q => _view!.Update(q);
         _view = new ApprovalQueueView(_queue, _clock);
+        _view.Follow(wpf.Dispatcher, () => { });
         _view.Announced += _announced.Add;
         _view.ShownChanged += () => _shown++;
     }
@@ -38,73 +38,88 @@ public sealed class ApprovalQueueViewTests : IDisposable
     [Fact]
     public void AWritesReleaseAndApproval_UnderOneRequestId_AreTwoItems_AndTheApprovalCanBeAnswered()
     {
-        Question release = Add("r1", 90, Asks.Release());
-        Open();
-        Assert.True(_view.Answer(approve: true));
+        _wpf.Run(() =>
+        {
+            Question release = Add("r1", 90, Asks.Release());
+            Open();
+            Assert.True(_view.Answer(approve: true));
 
-        Question approval = Add("r1", 90);
-        Open();
+            Question approval = Add("r1", 90);
+            Open();
 
-        Assert.Same(approval, _view.Shown!.Question);
-        Assert.Same(release, Assert.Single(_view.Answered).Question);
-        Assert.NotSame(_view.Answered[0], _view.Shown);
-        Assert.True(_view.Answer(approve: true));
-        Assert.Equal(QuestionEnd.Approved, approval.End);
+            Assert.Same(approval, _view.Shown!.Question);
+            Assert.Same(release, Assert.Single(_view.Answered).Question);
+            Assert.NotSame(_view.Answered[0], _view.Shown);
+            Assert.True(_view.Answer(approve: true));
+            Assert.Equal(QuestionEnd.Approved, approval.End);
+        });
     }
 
     [Fact]
     public void TheEarliestDeadline_IsOnTop_AndEqualDeadlinesKeepTheirOrderOfArrival()
     {
-        Add("late", 90);
-        Add("soon", 30);
-        Add("mid", 60);
-        Add("mid-later", 60);
+        _wpf.Run(() =>
+        {
+            Add("late", 90);
+            Add("soon", 30);
+            Add("mid", 60);
+            Add("mid-later", 60);
 
-        Assert.Equal(["soon", "mid", "mid-later", "late"], _view.Pending.Select(i => i.RequestId));
+            Assert.Equal(["soon", "mid", "mid-later", "late"], _view.Pending.Select(i => i.RequestId));
+        });
     }
 
     [Fact]
     public void ANewQuestion_NeverReplacesTheOneShown_OnlyAnEmptyQueueShowsIt()
     {
-        Assert.True(_view.IsEmpty);
+        _wpf.Run(() =>
+        {
+            Assert.True(_view.IsEmpty);
 
-        Add("first", 90);
-        Add("sooner", 30);
+            Add("first", 90);
+            Add("sooner", 30);
 
-        Assert.Equal("first", _view.Shown!.RequestId);
-        Assert.Equal(1, _shown);
-        Assert.False(_view.IsEmpty);
+            Assert.Equal("first", _view.Shown!.RequestId);
+            Assert.Equal(1, _shown);
+            Assert.False(_view.IsEmpty);
+        });
     }
 
     [Fact]
     public void NoAnswer_BeforeTheGuardOpens()
     {
-        Add("r1", 90);
+        _wpf.Run(() =>
+        {
+            Add("r1", 90);
 
-        Assert.False(_view.Answer(approve: true));
-        _view.Guard.Rendered();
-        _clock.Advance(TimeSpan.FromMilliseconds(499));
-        Assert.False(_view.Answer(approve: true));
-        _clock.Advance(TimeSpan.FromMilliseconds(1));
+            Assert.False(_view.Answer(approve: true));
+            _view.Guard.Rendered();
+            _clock.Advance(TimeSpan.FromMilliseconds(499));
+            Assert.False(_view.Answer(approve: true));
+            _clock.Advance(TimeSpan.FromMilliseconds(1));
 
-        Assert.True(_view.CanAnswer);
-        Assert.True(_view.Answer(approve: true));
-        Assert.Equal(QuestionEnd.Approved, _queue.Answered.Single().End);
+            Assert.True(_view.CanAnswer);
+            Assert.True(_view.Answer(approve: true));
+            Assert.Equal(QuestionEnd.Approved, _queue.Answered.Single().End);
+        });
     }
 
     [Fact]
     public void AfterAnAnswer_TheNextQuestionShows_AndTheGuardStartsOver()
     {
-        Add("r1", 90);
-        Add("r2", 60);
-        Open();
+        _wpf.Run(() =>
+        {
+            Add("r1", 90);
+            Add("r2", 60);
+            Open();
 
-        Assert.True(_view.Answer(approve: false));
+            Assert.True(_view.Answer(approve: false));
 
-        Assert.Equal("r2", _view.Shown!.RequestId);
-        Assert.False(_view.CanAnswer);
-        Assert.False(_view.Answer(approve: true)); // the second click of a double click lands nowhere
-        Assert.Equal([QuestionEnd.Rejected], _queue.Answered.Select(q => q.End!.Value));
+            Assert.Equal("r2", _view.Shown!.RequestId);
+            Assert.False(_view.CanAnswer);
+            Assert.False(_view.Answer(approve: true)); // the second click of a double click lands nowhere
+            Assert.Equal([QuestionEnd.Rejected], _queue.Answered.Select(q => q.End!.Value));
+        });
     }
 
     [Theory]
@@ -120,7 +135,7 @@ public sealed class ApprovalQueueViewTests : IDisposable
             Add("r2", 120);
             Open();
 
-            _queue.End(question, end);
+            End(question, end);
 
             Assert.Equal(("r1", false, result), (_view.Shown!.RequestId, _view.Shown.IsPending, _view.Shown.Result));
             Assert.False(_view.CanAnswer);
@@ -131,17 +146,40 @@ public sealed class ApprovalQueueViewTests : IDisposable
     }
 
     [Fact]
+    public void AClickAfterTheQuestionEnded_ButBeforeThePageHeardOfIt_AnswersNothing()
+    {
+        _wpf.Run(() =>
+        {
+            Question question = Add("r1", 90);
+            Add("r2", 120);
+            Open();
+
+            _queue.End(question, QuestionEnd.Expired); // as on a pipe thread: the view's update is still queued
+
+            Assert.Same(question, _view.Shown!.Question);
+            Assert.False(_view.CanAnswer);
+            Assert.False(_view.Answer(approve: true));
+            WpfContext.Drain();
+            Assert.Equal(QuestionEnd.Expired, question.End);
+            Assert.Equal("r2", Assert.Single(_view.Pending).RequestId);
+        });
+    }
+
+    [Fact]
     public void AnEndedQuestion_CanBeLookedAt_ButNotAnswered()
     {
-        Question question = Add("r1", 90);
-        _queue.End(question, QuestionEnd.Expired);
-        Add("r2", 90);
+        _wpf.Run(() =>
+        {
+            Question question = Add("r1", 90);
+            End(question, QuestionEnd.Expired);
+            Add("r2", 90);
 
-        _view.Select(_view.Answered.Single());
-        Open();
+            _view.Select(_view.Answered.Single());
+            Open();
 
-        Assert.False(_view.CanAnswer);
-        Assert.False(_view.Answer(approve: true));
+            Assert.False(_view.CanAnswer);
+            Assert.False(_view.Answer(approve: true));
+        });
     }
 
     [Fact]
@@ -153,11 +191,13 @@ public sealed class ApprovalQueueViewTests : IDisposable
             Question second = Add("r2", 90);
             _queue.Answer(first, approve: true);
             _queue.Answer(second, approve: false);
+            WpfContext.Drain();
             QuestionItem approved = _view.Answered.Single(i => i.RequestId == "r1");
             Assert.Equal(["r2", "r1"], _view.Answered.Select(i => i.RequestId));
             Assert.Equal(("已批准", "执行中"), (approved.Result, approved.Outcome));
 
             _queue.Report(first, WriteExecution.Unknown, "OUTCOME_UNKNOWN");
+            WpfContext.Drain();
 
             Assert.Equal("结果未知：写入已暂停，下一次写入前会请你确认（OUTCOME_UNKNOWN）", approved.Outcome);
             Assert.True(approved.OutcomeIsWarning);
@@ -232,6 +272,7 @@ public sealed class ApprovalQueueViewTests : IDisposable
             Assert.DoesNotContain("Ctrl+Z", item.Note, StringComparison.Ordinal);
             Assert.EndsWith(@" · eplan_page_delete · 项目 D:\Projects\Line1", item.Suspension, StringComparison.Ordinal);
             _queue.Answer(item.Question, approve: true);
+            WpfContext.Drain();
             Assert.Equal(("已继续", string.Empty), (item.Result, item.Outcome));
         });
     }
@@ -250,27 +291,30 @@ public sealed class ApprovalQueueViewTests : IDisposable
     [Fact]
     public void TheAnsweredGroup_LetsGoOfWhatTheQueueLetGo_WithTheQuestionsAndTheirTexts()
     {
-        Add("waiting", 300); // shown throughout, so no ended question is
-        WeakReference oldest = Ended("r0");
-
-        for (int i = 1; i <= ApprovalQueue.MaxAnswered; i++)
+        _wpf.Run(() =>
         {
-            _queue.End(Add($"r{i}", 90), QuestionEnd.Expired);
-        }
+            Add("waiting", 300); // shown throughout, so no ended question is
+            WeakReference oldest = Ended("r0");
 
-        Assert.Equal(_queue.Answered.Reverse(), _view.Answered.Select(i => i.Question));
-        Assert.Equal("r1", _view.Answered[^1].RequestId);
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        Assert.False(oldest.IsAlive, "the view still holds the oldest question");
+            for (int i = 1; i <= ApprovalQueue.MaxAnswered; i++)
+            {
+                End(Add($"r{i}", 90), QuestionEnd.Expired);
+            }
+
+            Assert.Equal(_queue.Answered.Reverse(), _view.Answered.Select(i => i.Question));
+            Assert.Equal("r1", _view.Answered[^1].RequestId);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            Assert.False(oldest.IsAlive, "the view still holds the oldest question");
+        });
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private WeakReference Ended(string requestId)
     {
         Question question = Add(requestId, 90);
-        _queue.End(question, QuestionEnd.Expired);
+        End(question, QuestionEnd.Expired);
         Assert.Contains(_view.Answered, i => i.Question == question);
         return new WeakReference(question);
     }
@@ -278,7 +322,16 @@ public sealed class ApprovalQueueViewTests : IDisposable
     private Question Add(string requestId, int seconds, ApprovalAskParams? ask = null)
     {
         ApprovalAskParams question = (ask ?? Asks.Write(requestId)) with { RequestId = requestId, DeadlineUnixMs = (_clock.GetUtcNow() + TimeSpan.FromSeconds(seconds)).ToUnixTimeMilliseconds() };
-        return _queue.Add(question)!;
+        Question added = _queue.Add(question)!;
+        WpfContext.Drain();
+        return added;
+    }
+
+    /// <summary>Ends the question as a pipe connection does, then lets the view take that in.</summary>
+    private void End(Question question, QuestionEnd end)
+    {
+        _queue.End(question, end);
+        WpfContext.Drain();
     }
 
     private void Open()

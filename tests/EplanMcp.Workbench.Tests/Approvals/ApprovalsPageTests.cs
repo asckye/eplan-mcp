@@ -120,7 +120,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Button approve = Button(page, "ApproveButton");
             Assert.False(approve.IsEnabled);
 
-            Press(approve);
+            Assert.Throws<ElementNotEnabledException>(() => Invoke(approve));
             _clock.Advance(TimeSpan.FromMilliseconds(499));
             WpfContext.Drain();
             Assert.False(approve.IsEnabled);
@@ -150,6 +150,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.Equal("r2", _view!.Shown!.RequestId);
             Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
             Assert.False(approve.IsEnabled);
+            Assert.Equal("1", ((Button)window.FindName("PendingBadge")).Content); // the Header followed
         }));
     }
 
@@ -470,9 +471,10 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
                 stops.Add(Keyboard.FocusedElement);
             }
 
+            // The Header's stop is the waiting count, shown as a question waits.
             var list = (ListBox)page.FindName("Questions");
             Assert.Equal(
-                [window.FindName("MinimizeButton"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("MinimizeButton")],
+                [window.FindName("PendingBadge"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("PendingBadge")],
                 stops);
             MainWindow.RegionCommand.Execute("-1", window);
             WpfContext.Drain();
@@ -514,7 +516,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
     {
         _queue = new ApprovalQueue(_clock);
         _view = new ApprovalQueueView(_queue, _clock);
-        _queue.Changed += q => _view.Update(q);
+        _view.Follow(window.Dispatcher, () => window.ShowQueue(_queue, listening: true)); // as the app does
         window.Attach(_view);
         WpfContext.Drain();
         test(window, (ApprovalsPage)window.FindName("ApprovalsPage"));
@@ -546,16 +548,18 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         WpfContext.Drain();
     }
 
-    /// <summary>Presses the button as UI Automation and the keyboard do, through its own click handling.</summary>
+    /// <summary>
+    /// Presses the button as UI Automation and the keyboard do, through its own click handling; one that does not
+    /// respond fails the test instead of being skipped.
+    /// </summary>
     private static void Press(Button button)
     {
-        if (button.IsEnabled)
-        {
-            ((IInvokeProvider)new ButtonAutomationPeer(button).GetPattern(PatternInterface.Invoke)).Invoke();
-        }
-
+        Assert.True(button.IsEnabled, $"{button.Name} does not respond");
+        Invoke(button);
         WpfContext.Drain();
     }
+
+    private static void Invoke(Button button) => ((IInvokeProvider)new ButtonAutomationPeer(button).GetPattern(PatternInterface.Invoke)).Invoke();
 
     private static List<T> Descendants<T>(DependencyObject root)
         where T : DependencyObject

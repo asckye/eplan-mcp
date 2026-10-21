@@ -44,6 +44,9 @@ public sealed class WpfContext : IDisposable
         }
     }
 
+    /// <summary>The UI thread's dispatcher, which the app posts the queue's changes to.</summary>
+    internal Dispatcher Dispatcher => Ui();
+
     /// <summary>Runs on the UI thread, rethrowing on the caller's; work the test left queued finishes first.</summary>
     public void Run(Action action)
     {
@@ -84,8 +87,11 @@ public sealed class WpfContext : IDisposable
         }
     });
 
-    /// <summary>Lets the dispatcher finish layout, rendering and the work queued behind them.</summary>
-    internal static void Drain() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ContextIdle);
+    /// <summary>
+    /// Lets the dispatcher finish layout, rendering and the work queued behind them, including what that work queues in
+    /// turn, such as the guard's start after a queue change the app posted rendered (APR-04): until the application idles.
+    /// </summary>
+    internal static void Drain() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
     /// <summary>Waits for the dispatcher to close its windows: a host that exits first reports a crash.</summary>
     public void Dispose()
