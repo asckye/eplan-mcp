@@ -6,8 +6,9 @@
     xmlns:themes="clr-namespace:TiaOpenness.Gui.Themes"
     Focusable="False">
   <!--
-    The settings drawer (workbench-ui 3.1: 400 epx from the right; DLG-10: a modal pane, Tab stays inside, Esc closes).
-    Only language and theme so far; the switches apply at once (LOC-08, COL-09). Nothing here changes approvals (APR-16).
+    The settings drawer (workbench-ui 3.1: 400 epx from the right; DLG-10: a modal pane, Tab stays inside, Esc closes):
+    language, theme and start at login, which apply at once (LOC-08, COL-09, CMD-08), and config.json read only, with a
+    way to open it in its own program (NAV-10). Nothing here changes approvals (APR-16) or the Host's settings.
   -->
   <Border Width="400" Margin="0,8,8,8" HorizontalAlignment="Right" Style="{StaticResource Primer.Drawer}"
           AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Settings.Title}"
@@ -23,6 +24,7 @@
                      Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
         </DockPanel>
       </Border>
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel Margin="24">
         <TextBlock x:Name="LanguageLabel" Text="{l:Tr Settings.Language}" Style="{StaticResource Primer.SectionLabel}" />
         <StackPanel Orientation="Horizontal" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=LanguageLabel}"
@@ -43,7 +45,19 @@
                        IsChecked="{Binding IsDark, Source={x:Static themes:ThemeManager.Current}}" />
         </StackPanel>
         <TextBlock Text="{l:Tr Settings.HighContrast}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
+
+        <TextBlock x:Name="LoginLabel" Text="{l:Tr Settings.Login}" Style="{StaticResource Primer.SectionLabel}" Margin="0,24,0,0" />
+        <ToggleButton x:Name="LoginSwitch" Style="{StaticResource Primer.Switch}" Margin="0,8,0,0" HorizontalAlignment="Left" Content="{l:Tr Settings.LoginSwitch}"
+                      AutomationProperties.Name="{l:Tr Settings.LoginSwitch}" Checked="OnLogin" Unchecked="OnLogin" />
+        <TextBlock x:Name="LoginError" Text="{l:Tr Settings.LoginFailed}" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None"
+                   Margin="0,8,0,0" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+
+        <TextBlock x:Name="ConfigLabel" Text="{l:Tr Settings.Config}" Style="{StaticResource Primer.SectionLabel}" Margin="0,24,0,0" />
+        <TextBlock x:Name="ConfigPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
+        <TextBox x:Name="ConfigText" Style="{StaticResource Workbench.ProjectData}" MaxHeight="240" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=ConfigLabel}" />
+        <Button x:Name="ConfigButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenConfig}" Margin="0,8,0,0" HorizontalAlignment="Left" Click="OnOpenConfig" />
       </StackPanel>
+      </ScrollViewer>
     </DockPanel>
   </Border>
 </UserControl>

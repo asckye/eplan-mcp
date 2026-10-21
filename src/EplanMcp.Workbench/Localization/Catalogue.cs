@@ -53,6 +53,13 @@ internal static class Catalogue
         ("Settings.ThemeSystem", "Follow Windows", "跟随系统"),
         ("Settings.ThemeLight", "Light", "浅色"),
         ("Settings.ThemeDark", "Dark", "深色"),
+        ("Settings.Login", "Start at login", "登录时启动"),
+        ("Settings.LoginSwitch", "Start the Workbench when I log in to Windows", "登录 Windows 时启动 Workbench"),
+        ("Settings.LoginFailed", "Windows did not let the start entry change; nothing was changed.", "Windows 不允许修改启动项，没有做任何改动。"),
+        ("Settings.Config", "config.json (read only)", "config.json（只读）"),
+        ("Settings.OpenConfig", "Open with its program", "用默认程序打开"),
+        ("Settings.NoConfig", "There is no config.json: the defaults apply.", "没有 config.json：使用默认值。"),
+        ("Settings.ConfigUnreadable", "config.json cannot be read: {0}", "无法读取 config.json：{0}"),
         ("Settings.HighContrast", "While Windows uses a contrast theme, the Workbench uses its colours.", "Windows 使用对比主题时，Workbench 使用对比主题的颜色。"),
 
         // Pages (workbench-ui section 7), their captions and the placeholders of the pages still to come (ERR-05).
