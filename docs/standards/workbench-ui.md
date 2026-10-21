@@ -1,7 +1,7 @@
 # Workbench 界面规范
 
 > 依据：项目负责人的 TIA_Portal_Openness_MCP 项目（下称 TIA）的界面规范 `docs/development/design-spec/workbench-ui.md` v0.2（MIT 许可，按 TIA 的提交 `38ca2883` 阅读）和 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)。规则的结构、编号方法和以 WCAG 2.2 AA 为底线的做法沿用 TIA，文字按本项目重写；TIA 特有的内容不收录（0.4 节），有意的不同列在附录 B。
-> 适用范围：`EplanMcp.Workbench`（WPF，`net10.0-windows`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4）的全部界面：主窗口与外框，审批队列、审计、状态、客户端四个页面，设置和审计详情两个抽屉，对话框，toast、托盘和系统通知。测试放在 `tests/EplanMcp.Workbench.Tests`。两者都还没有建立。
+> 适用范围：`EplanMcp.Workbench`（WPF，`net10.0-windows`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4）的全部界面：主窗口与外框，审批队列、审计、状态、MCP 与客户端四个页面，设置和审计详情两个抽屉，对话框，toast、托盘和系统通知。测试放在 `tests/EplanMcp.Workbench.Tests`。两者都还没有建立。
 > 审批界面的规则来自 [ADR-0011](../adr/0011-approval-out-of-band.md)、[ADR-0014](../adr/0014-workbench-approval-channel.md)、M5 设计 4.6 和 [security.md](security.md) 的 SEC-23、SEC-24，优先于本文的其他规则（第 11 节）。
 
 ---
@@ -74,7 +74,8 @@ Microsoft 的新版指南以 WinUI 控件举例。Workbench 用 WPF（ADR-0017�
 | 自定义标题栏 | `WindowChrome` 加自绘的窗口按钮 | LAY-05 |
 | 托盘与通知 | WinForms 的 `NotifyIcon`（ADR-0017 第 1 条）；系统通知的做法由 spike S16 确定 | STS-09 |
 | 每显示器 DPI | 在应用清单中声明 Per-Monitor V2 | LAY-04 |
-| 文字缩放 | WPF 不自动跟随 Windows 的"文本大小"，要读取系统的缩放比例并缩放字号 token（TIA 的做法，S18 核对） | A11Y-09 |
+| 随程序的字体 | 以程序目录中 `Fonts\` 为基准 URI 的 `FontFamily`（S18） | TYP-01 |
+| 文字缩放 | WPF 不自动跟随 Windows 的"文本大小"，要读取系统的缩放比例并缩放字号 token（TIA 的做法；S18 没有测，实现时核对） | A11Y-09 |
 
 ---
 
@@ -95,7 +96,7 @@ Sider 和 Header 的高度可以按 LAY-08 随字号增长。
 - **LAY-01 · MUST** 窗口的最小尺寸不超过 1024 × 640 epx，在这个尺寸下所有功能可用（允许滚动）。理由：要放得进 1366 × 768（100%）和 1920 × 1080（150%）屏幕的工作区；WCAG 1.4.4、1.4.10 也依赖这一点。依据：[Screen sizes and breakpoints › Breakpoints](https://learn.microsoft.com/en-us/windows/apps/design/layout/screen-sizes-and-breakpoints-for-responsive-design#breakpoints)；[.NET Accessibility Best Practices › Visual UI design](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/accessibility-best-practices#visual-ui-design)。
 - **LAY-02 · SHOULD** 最小宽度不超过 960 epx，使窗口能贴靠到 1920 宽屏幕的一半，与 EPLAN 并排。理由：工程师边看 EPLAN 中的项目边回答审批。依据：[Support snap layouts for desktop apps on Windows 11](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/ui/apply-snap-layout-menu)。
 - **LAY-03 · MUST** 响应式：主体放不下"内容 + 右侧栏"两列时，右侧栏移到内容下方；审批队列放不下"列表 + 详情"时，详情移到列表下方（APR-06）。数据表格是二维内容，允许横向滚动。理由：固定宽度的侧栏会在窄窗口中挤掉主内容。依据：[Screen sizes and breakpoints](https://learn.microsoft.com/en-us/windows/apps/design/layout/screen-sizes-and-breakpoints-for-responsive-design#breakpoints)；[WCAG 2.2 › 1.4.10 Reflow](https://www.w3.org/TR/WCAG22/#reflow)。
-- **LAY-04 · MUST** 声明每显示器 DPI 感知（Per-Monitor V2），在 100–200% 缩放和跨屏拖动（混合 DPI）下不模糊、不截断。理由：笔记本、外接显示器和虚拟机的缩放各不相同。依据：[High DPI Desktop Application Development on Windows](https://learn.microsoft.com/en-us/windows/win32/hidpi/high-dpi-desktop-application-development-on-windows#dpi-awareness-mode)。
+- **LAY-04 · MUST** 声明每显示器 DPI 感知（Per-Monitor V2），在 100–200% 缩放和跨屏拖动（混合 DPI）下不模糊、不截断。WPF：要在应用清单中声明，没有清单时 .NET 10 的 WPF 只是系统 DPI 感知（S18）。理由：笔记本、外接显示器和虚拟机的缩放各不相同。依据：[High DPI Desktop Application Development on Windows](https://learn.microsoft.com/en-us/windows/win32/hidpi/high-dpi-desktop-application-development-on-windows#dpi-awareness-mode)。
 - **LAY-05 · SHOULD** 自绘的标题栏保留系统行为：空白处可以拖动，右键弹出系统菜单，双击最大化或还原，鼠标停在最大化按钮上时显示贴靠布局。理由：用户依赖这些系统级操作。依据：[Windows app title bar › Standard design](https://learn.microsoft.com/en-us/windows/apps/design/basics/titlebar-design#standard-design)；[Support snap layouts](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/ui/apply-snap-layout-menu)。
 
 ### 3.3 网格、间距与尺寸
@@ -120,8 +121,9 @@ Sider 和 Header 的高度可以按 LAY-08 随字号增长。
 ## 4. 字体
 
 - **TYP-01 · MUST** 界面文字和等宽文字都用 Maple Mono CN（SIL OFL 1.1，官方发布包 `MapleMono-CN`），由 `Ui.Font` 和 `Ui.FontMono` 两个 token 引用（值相同，保留两个是为了以后可以分开改）。
-  - 字体文件随程序放在 `app\workbench\` 中，只由 Workbench 自己加载（`FontFamily` 指向程序目录中的文件），不安装到系统；只带类型层级用到的字重（Regular、SemiBold），不修改、不裁剪字体文件；OFL 许可证文本随安装包附带。
-  - `Ui.Font` 加载失败时回退到 Segoe UI Variable、Microsoft YaHei UI；`Ui.FontMono` 先回退到 Cascadia Mono、Consolas，中文再回退到 Microsoft YaHei UI。Segoe UI Variable 在 WPF 中的表现、每个字重的体积和从程序目录加载的效果由 S18 核对。
+  - 字体文件随程序放在 `app\workbench\Fonts\` 中，只由 Workbench 自己加载，不安装到系统；只带类型层级用到的字重 Regular 和 SemiBold（两个共约 35 MB，S18），不修改、不裁剪字体文件；OFL 许可证文本随安装包附带。
+  - WPF：以 `Fonts\` 目录为基准 URI 创建 `FontFamily`（`new FontFamily(new Uri(<程序目录>\Fonts\), "./#Maple Mono CN, …")`），同一家族的各字重自动对应；`pack://siteoforigin` 和只写家族名都不行（S18）。
+  - 回退列表必须写出 Microsoft YaHei UI：`Ui.Font` 为 Segoe UI Variable Text（或 Segoe UI）、Microsoft YaHei UI；`Ui.FontMono` 为 Cascadia Mono、Consolas、Microsoft YaHei UI。只写 Segoe UI Variable Text 而语言为 en-US 时，WPF 用日文字形的 Yu Gothic UI 显示中文（S18）。
   - 这是相对 TIA 字体的偏差（附录 B）。
 
   理由：项目负责人的决定，界面与项目的其他产物用同一种字体。依据：项目规则（ADR-0017 第 4 条，M5 设计 Q2）；[Typography in Windows › Fonts for non-Latin languages](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography#languages)。
@@ -144,7 +146,8 @@ Sider 和 Header 的高度可以按 LAY-08 随字号增长。
 - **TYP-07 · SHOULD** 段落文字（说明、对话框正文）每行约 50–60 个拉丁字符（约 25–35 个汉字），对话框的宽度据此设定。理由：行太长难读。依据：[Typography › Character count](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography#character-count)。
 - **TYP-08 · MUST** 技术标识原样显示、不翻译，用 Code 层级：MCP 工具名（`eplan_page_create`）、错误的 `reason`、路径、请求 ID、哈希、命令行；项目中的页名（`=AP+ST1/3`）、设备标识（`-K1`）也原样显示。理由：工程师要据此对照日志、审计、文档和 EPLAN。依据：[Writing style › Style conventions](https://learn.microsoft.com/en-us/windows/apps/design/style/writing-style#style-conventions)；项目规则。
 - **TYP-09 · SHOULD** 根元素的 `FrameworkElement.Language` 跟随界面语言（zh-CN 或 en-US），切换语言时更新。理由：WPF 据此选择中日韩字形、断行和默认格式。依据：[Globalization › Guidelines for globalization](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/globalizing-portal#guidelines-for-globalization)。
-- **TYP-10 · MUST** 按等宽字体的实际宽度布局：Maple Mono CN 的拉丁字母比 Ant 布局所设想的比例字体宽，按它的设计每个汉字占两个拉丁字符的宽度。按钮用 `MinWidth` 而不是固定 `Width`；列宽按内容或比例分配；按钮、审批问题的标题、状态文字在两种语言、最小窗口下不截断（LOC-04）。实际宽度由 S18 记录。理由：Ant 的尺寸按比例字体设计，照搬会截断文字。依据：项目规则（ADR-0017 后果）；[Globalization › Guidelines for globalization](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/globalizing-portal#guidelines-for-globalization)。
+- **TYP-10 · MUST** 按等宽字体的实际宽度布局：Maple Mono CN 的拉丁字母比 Ant 布局所设想的比例字体宽，按它的设计每个汉字占两个拉丁字符的宽度。按钮用 `MinWidth` 而不是固定 `Width`；列宽按内容或比例分配；按钮、审批问题的标题、状态文字在两种语言、最小窗口下不截断，标题放不下时换行（LOC-04）。理由：Ant 的尺寸按比例字体设计，照搬会截断文字：S18 中 TIA 的 480 epx 抽屉放不下一行英文标题，主机名被截断，路径和变更对象都要换行。依据：项目规则（ADR-0017 后果）；[Globalization › Guidelines for globalization](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/globalizing-portal#guidelines-for-globalization)。
+- **TYP-11 · MUST** 关闭 Maple Mono 的连字（`Typography.StandardLigatures`、`ContextualLigatures`、`ContextualAlternates` 设为 False），至少在变更清单和 Code 层级的区域中关闭。WPF 中的效果 S18 没有核对，实现时用 `->`、`!=`、`==` 验证。理由：连字会把 `->`、`!=` 显示成一个符号，来自项目的数据必须按它包含的字符显示（T20）。依据：项目规则（S18"字体"，SEC-23）。
 
 ---
 
@@ -178,14 +181,14 @@ Sider 和 Header 的高度可以按 LAY-08 随字号增长。
 
 ## 7. 导航与页面
 
-Workbench 有四个页面和一个设置抽屉（M5 设计 4.4）：
+Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 
 | 页面 | 内容 | 快捷键 |
 |---|---|---|
 | 审批队列 | 等待中的问题，以及本次运行中已回答的记录（第 11 节）；启动后的默认页面 | Ctrl+1 |
 | 审计 | 只读：按日期、工具、项目、审批决定、执行结果筛选；记录详情抽屉；校验完整性；打开所在文件夹 | Ctrl+2 |
 | 状态 | `eplanmcp doctor --format json` 的结果分组显示；打开时和"刷新"时各运行一次，不自动轮询 | Ctrl+3 |
-| 客户端 | 客户端配置向导：Claude Code（推荐插件，给出两条命令）、Claude 桌面版（预览差异后写入）、其他客户端（可以复制的配置片段） | Ctrl+4 |
+| MCP 与客户端 | 客户端配置向导：M5 设计 Q7 的 11 种客户端以卡片列出，可以多选，副标题显示本机是否检测到；预览差异后写入；Claude Code 推荐插件（给出两条命令）。ADR-0018 接受后，另有"虚拟机 ↔ 宿主机"的连接设置：地址、端口、密钥、网络权限、启动服务、测试连接（M5 设计 4.12） | Ctrl+4 |
 | 设置（抽屉） | 语言、主题、登录时启动；`config.json` 只读显示 | — |
 
 - **NAV-01 · MUST** 页面是扁平的一级结构，不超过 7 个，不设二级页签。理由：少于 8 个同级页面时扁平结构最容易找到。依据：[Navigation basics › Use the right structure](https://learn.microsoft.com/en-us/windows/apps/design/basics/navigation-basics#use-the-right-structure)。
@@ -213,6 +216,7 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4）：
 - **CMD-08 · SHOULD** 立即生效的二元设置（登录时启动）用开关；复选框用于多选或要再按"保存"才生效的场合；同一抽屉中的二元设置用同一种控件。理由：开关明确表达"现在开还是关"。依据：[Toggle switches › Choosing between toggle switch and check box](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/toggles#choosing-between-toggle-switch-and-check-box)。
 - **CMD-09 · SHOULD** 同一功能出现在多处时（例如状态页和审计页都有"打开日志文件夹"），用同一文字、同一命令和同一快捷键。理由：WCAG 3.2.4 在软件中的等价要求。依据：[WCAG 2.2 › 3.2.4 Consistent Identification](https://www.w3.org/TR/WCAG22/#consistent-identification)。
 - **CMD-10 · MUST** 上下文菜单只是加速入口：其中每一项在别处都有入口；上下文菜单可以用 Shift+F10 或菜单键打开。审批的回答不放进上下文菜单。理由：上下文菜单对键盘用户不可发现。依据：[Nested UI in list items › Options for secondary actions](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/nested-ui#options-for-secondary-actions)。
+- **CMD-11 · SHOULD** 会弹出管理员授权（UAC）的命令（虚拟机连接的"网络权限"）在按钮上显示盾牌图标，ToolTip 说明需要管理员授权。理由：工程师要预先知道接下来会出现系统的授权提示。依据：[User Account Control（Win32 UX Guide）](https://learn.microsoft.com/en-us/windows/win32/uxguide/winenv-uac)；项目规则（ADR-0018，SEC-29）。
 
 ---
 
@@ -224,13 +228,14 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4）：
 - **CTL-04 · MUST** 列表：整个列表一个 Tab 停靠点，方向键在项之间移动，Enter 执行项的主要操作（打开审计记录详情；审批队列中只选中问题，APR-06）；尽量不在项中嵌按钮。理由：项中的按钮会造成两个停靠点和缺失的名称。依据：[Nested UI in list items](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/nested-ui#nested-ui-handling)；[Keyboard interactions › Enter key](https://learn.microsoft.com/en-us/windows/apps/develop/input/keyboard-interactions#enter-key)。
 - **CTL-05 · MUST** 列表项在 UIA 中有可读的名称，由 `ItemContainerStyle` 绑定来自文字表的格式串（例如"eplan_page_delete，破坏性，项目 Demo，还剩 95 秒"），不能是 CLR 类型的全名。理由：WPF 默认用数据项的 `ToString()` 作项名称。依据：[Expose basic accessibility information › Accessible names from dynamic data](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/basic-accessibility-information#accessible-names-from-dynamic-data)。
 - **CTL-06 · SHOULD** 有列头的数据表（审计列表）用套了主题的 `DataGrid` 或 `ListView` 加 `GridView`，让 UIA 暴露表格结构；自制表格的项名称要包含列名和值。理由：WCAG 1.3.1 的列头关系。依据：[Collections and lists](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/lists)。
-- **CTL-07 · MUST** 复选框有内容或名称；要按钮外观时用 `ToggleButton`，不把复选框套成按钮；只读的状态用文字显示，不用禁用的复选框。理由：外观与角色不一致会误导读屏和视觉用户。依据：[Expose basic accessibility information › Role and value](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/basic-accessibility-information#role-and-value)。
+- **CTL-07 · MUST** 复选框有内容或名称；要按钮外观时用 `ToggleButton`，不把复选框套成按钮；只读的状态用文字显示，不用禁用的复选框。可以多选的客户端卡片是套了卡片模板的复选框，UIA 名称包含客户端名和"已检测到"或"未检测到"。理由：外观与角色不一致会误导读屏和视觉用户。依据：[Expose basic accessibility information › Role and value](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/basic-accessibility-information#role-and-value)。
 - **CTL-08 · SHOULD** Expander（例如状态页的检查分组）的标题只做展开和折叠，其他按钮放在标题之外。理由：嵌套的可交互元素难以用键盘操作。依据：[Nested UI in list items](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/nested-ui#nested-ui-handling)。
 - **CTL-09 · MUST** `DataGrid`、`ToolTip`、`ContextMenu`、`ScrollBar`、`DatePicker` 等默认控件都套用调色板 token，深色和高对比主题中不出现默认的白底。理由：同一界面的视觉一致，高对比必须完整。依据：[Contrast themes › Best practices](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/high-contrast-themes#best-practices)。
 - **CTL-10 · SHOULD** 文字按钮的最小宽度约 120 epx（短标签），文字不超过 26 个拉丁字符；更长时换行或改布局。理由：太窄难点，太长难读。依据：[Buttons › Button text](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/buttons#button-text)。
 - **CTL-11 · MUST** 指针目标不小于 24 × 24 epx（图标按钮建议 32 × 32），或满足 WCAG 2.5.8 的间距例外。理由：WCAG 2.5.8。依据：[WCAG 2.2 › 2.5.8 Target Size (Minimum)](https://www.w3.org/TR/WCAG22/#target-size-minimum)。
 - **CTL-12 · MUST** 来自项目、客户端或审计记录的文字只用 `TextBlock` 或只读 `TextBox` 显示为纯文本：不解析为超链接、标记或格式串，不用作资源键，不生成任何界面元素；显示前按 APR-08 的规则清洗。审计页同样适用。理由：这些文字可能伪装成界面说明（T20）。依据：项目规则（SEC-23；审计页为本规范的补充）。
 - **CTL-13 · SHOULD** 要复制的技术值（路径、请求 ID、插件安装命令、配置片段）用可选中的只读文本框，或旁边有"复制"按钮，复制后以 live region 告知"已复制"。理由：工程师要把命令贴到终端、把 ID 贴到问题报告中。依据：项目规则（M5 设计 4.4 和 Q7）。
+- **CTL-14 · MUST** 虚拟机连接的共享密钥（ADR-0018 接受后）默认遮住显示，旁边有"显示"开关和"复制"按钮；密钥不出现在 UIA 名称、HelpText、ToolTip、通知、toast 和日志中；重新生成按 DLG-13 确认。理由：密钥能调用全部工具，宿主机的客户端配置中还是明文（SEC-30）。依据：项目规则（SEC-27、SEC-30）；[WCAG 2.2 › 3.3.8 Accessible Authentication (Minimum)](https://www.w3.org/TR/WCAG22/#accessible-authentication-minimum)（可以复制和粘贴，不必记忆）。
 
 ---
 
@@ -244,9 +249,10 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4）：
 - **DLG-06 · MUST** 标题是简短的问题或指令（"退出 Workbench？"），正文补充后果和细节，不换个说法重复标题。理由：读完标题就应能作答。依据：[Writing style › Dialogs](https://learn.microsoft.com/en-us/windows/apps/design/style/writing-style#dialogs)。
 - **DLG-07 · MUST** 风险确认和错误对话框显示对应的图标（警告、错误）和文字；正文用常规文字色，不把整段染红。理由：严重程度不能只靠颜色。依据：[Confirmations › Guidelines](https://learn.microsoft.com/en-us/windows/win32/uxguide/mess-confirm#guidelines)。
 - **DLG-08 · MUST NOT** 用对话框报告某个字段的验证错误（改为页内显示，ERR-03）。理由：与上下文有关的错误应在原位显示。依据：[Dialog controls › General guidelines](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/dialogs-and-flyouts/dialogs#general-guidelines)。
-- **DLG-09 · SHOULD** 确认只用于不可撤销或后果重大的操作：有等待中的问题时退出（DLG-11）、写入或移除客户端配置（DLG-12）。审批本身不再加确认。理由：不必要的确认会被习惯性地点掉。依据：[Commanding basics › When to confirm or undo actions](https://learn.microsoft.com/en-us/windows/apps/design/basics/commanding-basics#when-to-confirm-or-undo-actions)。
+- **DLG-09 · SHOULD** 确认只用于不可撤销或后果重大的操作：有等待中的问题时退出（DLG-11）、写入或移除客户端配置（DLG-12）、重新生成密钥（DLG-13）。审批本身不再加确认。理由：不必要的确认会被习惯性地点掉。依据：[Commanding basics › When to confirm or undo actions](https://learn.microsoft.com/en-us/windows/apps/design/basics/commanding-basics#when-to-confirm-or-undo-actions)。
 - **DLG-10 · MUST** 带遮罩的抽屉（设置、审计记录详情）按模态窗格处理：打开时焦点移到标题或第一个控件，Tab 在内循环，Esc 关闭，关闭后焦点回到触发按钮。理由：键盘用户不能操作遮罩后面看不见的控件。依据：[Keyboard interactions › Esc key](https://learn.microsoft.com/en-us/windows/apps/develop/input/keyboard-interactions#esc-key)；[WCAG 2.2 › 2.4.11 Focus Not Obscured (Minimum)](https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum)。
-- **DLG-11 · MUST** 有等待中的问题时从托盘退出，先确认：标题"退出 Workbench？"，正文写明有几个问题在等待、退出后它们按"已取消"返回、不执行任何修改，提交按钮"退出"，"取消"为默认并响应 Esc。理由：退出会让这些调用失败。依据：项目规则（M5 设计 4.4"进程"，ADR-0014 第 4 条）。
-- **DLG-12 · MUST** 写入客户端配置：先显示 `client-config --dry-run` 的差异（纯文本，行首"+ / −"），再由工程师按"写入配置"确认，正文写明原文件先备份到哪里；移除配置同样确认。理由：客户端配置是工程师自己的文件。依据：项目规则（M5 设计 4.4 第 3 项、4.11）。
+- **DLG-11 · MUST** 有等待中的问题时从托盘退出，先确认：标题"退出 Workbench？"，正文写明有几个问题在等待、退出后它们按"已取消"返回、不执行任何修改；虚拟机连接的服务在运行时，同时写明服务会停止。提交按钮"退出"，"取消"为默认并响应 Esc。理由：退出会让这些调用失败。依据：项目规则（M5 设计 4.4"进程"，ADR-0014 第 4 条，SEC-29）。
+- **DLG-12 · MUST** 写入客户端配置：可以选多个客户端，先逐个显示 `client-config --dry-run` 的差异（纯文本，行首"+ / −"），再由工程师按"写入配置"确认，正文写明原文件先备份到哪里；写入后逐个报告结果；移除配置同样确认。Claude 桌面版运行时会改写它的配置文件，写入前请工程师完全退出桌面版；已装 Claude Code 插件时不为 Claude Code 写配置，只推荐插件。理由：客户端配置是工程师自己的文件。依据：项目规则（M5 设计 4.4 第 3 项、4.7、4.11）。
+- **DLG-13 · MUST** 重新生成虚拟机连接的密钥（ADR-0018 接受后）先确认：标题"重新生成密钥？"，正文写明旧密钥立即失效、宿主机上的客户端配置要用新密钥重新写入；提交按钮"重新生成"，"取消"为默认。理由：重新生成会断开所有用旧密钥的客户端。依据：项目规则（SEC-27，M5 设计 4.12）。
 
 （第 11 节到附录 B 在后续的 PR 中加入。）
