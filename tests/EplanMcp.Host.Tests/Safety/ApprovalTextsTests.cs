@@ -118,6 +118,22 @@ public sealed class ApprovalTextsTests
         Assert.Equal([change, string.Empty, numbering], ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo(culture)).Changes);
     }
 
+    [Theory]
+    [InlineData("zh-CN", "修改项目 Line1 的语言：'display: ##_##' → 'display: en_US, zh_CN'", "Ctrl+Z 不能撤销语言设置；要恢复，用原来的值再设置一次。")]
+    [InlineData("en-US", "Change the languages of project Line1: 'display: ##_##' → 'display: en_US, zh_CN'", "Ctrl+Z in EPLAN does not undo language settings; to restore them, set the old values again.")]
+    public void ALanguageChange_IsOneLineAndSaysCtrlZDoesNotUndoIt(string culture, string change, string note)
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "update", Kind = "project", Name = "Line1", Property = "languages", OldValue = "display: ##_##", NewValue = "display: en_US, zh_CN" }],
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Tool = "eplan_language_set", Plan = plan }, CultureInfo.GetCultureInfo(culture));
+
+        Assert.Equal([change], texts.Changes);
+        Assert.Equal(note, texts.Note);
+    }
+
     [Fact]
     public void AMacroInsertsDevices_AreNotListedAsDevicesToNumber()
     {

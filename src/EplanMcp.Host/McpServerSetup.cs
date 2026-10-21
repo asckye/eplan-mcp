@@ -68,6 +68,7 @@ internal static class McpServerSetup
             .WithTools<CheckTools>(HostJson.Options)
             .WithTools<CheckWriteTools>(HostJson.Options)
             .WithTools<ReportWriteTools>(HostJson.Options)
+            .WithTools<LanguageWriteTools>(HostJson.Options)
             .WithTools<MacroTools>(HostJson.Options)
             .WithTools<MacroWriteTools>(HostJson.Options)
             .WithTools<ExportTools>(HostJson.Options)

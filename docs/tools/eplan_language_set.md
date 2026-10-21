@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "让项目在图上同时显示英文和中文""把英文加进项目的翻译语言"。代理改项目的显示语言，或者往翻译语言中加一种语言。不翻译文本（翻译是 `eplan_project_translate`，查清翻译的前提之后再做，S23），也不删除语言（`eplan_language_remove`，Destructive）。
