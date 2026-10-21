@@ -1,0 +1,17 @@
+id: export-image
+set: dev
+prompt: 把 =GAA+A1&EFS1/1 和 =GAA+A1&EFS1/2 两页导出成 PNG 图片，告诉我图片的文件名。
+answer:
+  type: object
+  required: [files]
+  properties:
+    files: { type: array, items: { type: string }, description: file names of the images without their folder }
+# An image export changes no design data (A20) and writes one file per page into a new folder of the evals' eplanmcp,
+# named after the page (A14: =GAA+A1&EFS1_72.png), so it runs on the shared fixture.
+after:
+  pngs: { tool: exported_files, args: { extension: png }, pick: $.count }
+  names: { tool: exported_files, args: { extension: png }, pick: "$.files[*].name" }
+checks:
+  - { after: pngs, equals: 2 }
+  - { answer: $.files, set_equals: after.names }
+budget: { max_tool_calls: 6 }

@@ -1,0 +1,26 @@
+id: check-run
+set: dev
+fixture: copy
+prompt: 检查一下项目 {project}，告诉我检查出几条错误、几条警告、几条提示。
+answer:
+  type: object
+  required: [errors, warnings, hints]
+  properties:
+    errors: { type: integer }
+    warnings: { type: integer }
+    hints: { type: integer }
+# The tool spec's eval (docs/tools/eplan_check_run.md, section 7). A fresh copy has no check messages; A20 checked the
+# whole project live: 6 warnings and 14 hints. A check of some pages drops the 6 warnings on 3D connections, and a
+# second check adds EPLAN's 14 summary hints again (20 -> 34 messages), so 6 and 14 afterwards also say that the model
+# checked the whole project once.
+after:
+  errors: { tool: eplan_check_list, pick: $.counts.error }
+  warnings: { tool: eplan_check_list, pick: $.counts.warning }
+  hints: { tool: eplan_check_list, pick: $.counts.hint }
+checks:
+  - { answer: $.errors, equals: after.errors }
+  - { answer: $.warnings, equals: after.warnings }
+  - { answer: $.hints, equals: after.hints }
+  - { after: warnings, equals: 6 }
+  - { after: hints, equals: 14 }
+budget: { max_tool_calls: 6 }

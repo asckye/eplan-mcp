@@ -34,7 +34,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 ### 写入题：每次作答一份新副本
 `fixture: copy` 的题目要修改项目（M3 设计第 7 节和 Q4）。运行器为这类题的**每次作答**复制一份 EPLAN 自带的 `EPLAN_Sample_Project`（在 `C:\Users\Public\EPLAN\Data` 下找，或用 `--template <.elk>` 指定），放在 `<scratch 根目录>\evals\<运行>\copies\<nn>\Eval_<运行>_<nn>`，每份的项目名都不同。题目中的 `{project}` 换成这个名字，标准调用和事后检查也都对这份副本进行（传入 `project`）。`fixture: copy_outside_scratch` 的副本放在 `outside\` 下，不在模型的 scratch 根目录中，用来考察写入被策略拒绝后模型怎么回答。
 
-**份数**：所选任务中 `fixture` 为 `copy` 或 `copy_outside_scratch` 的题数，乘以 `--repeat`；每份约 200 MB。目前开发集有 5 道这样的题，保留集有 1 道：`run` 要打开 5 份，`run --set all --repeat 3` 要打开 18 份，`run --task page-create` 只要 1 份；份数多时可以用 `--set`、`--task` 分几次运行。所选任务都在共享夹具上时，运行器不复制，也不需要打开什么。
+**份数**：所选任务中 `fixture` 为 `copy` 或 `copy_outside_scratch` 的题数，乘以 `--repeat`；每份约 200 MB。目前开发集有 8 道这样的题，保留集有 1 道：`run` 要打开 8 份，`run --set all --repeat 3` 要打开 27 份，`run --task page-create` 只要 1 份；份数多时可以用 `--set`、`--task` 分几次运行。所选任务都在共享夹具上时，运行器不复制，也不需要打开什么。
 
 **副本由工程师在 EPLAN 中手工打开**（[M3 设计 Q4](../docs/design/2026-10-19-m3-safe-writes.md#9-待定问题与决定)，2026-10-20 项目负责人决定）。运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待，最多 20 分钟（Ctrl+C 停止）：每 2 秒用 `eplan_project_list` 查看一次，情况有变化时显示已打开几份。这期间工程师：
 1. 在 EPLAN 中逐个打开列出的 `Eval_<运行>_<nn>.elk`（文件 > 打开）。打开的副本可能成为当前项目。
@@ -67,7 +67,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 因 API 错误无效、而模型还没做任何事（没有工具调用、没有花费）的作答，运行器等一分钟后**重试一次**。例如，另一个 Claude Code 进程同时刷新共享的登录时，会出现 "Failed to refresh OAuth token"。未登录不重试。两次都写进报告，重试标为"（重试）"；第一次照样是无效，不计入成功率，所以费用上限不变。
 
 ## 任务集
-`evals/tasks/` 中 29 题：开发集 22 题，保留集 7 题（文件名以 `holdout-` 开头）。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
+`evals/tasks/` 中 35 题：开发集 27 题，保留集 8 题（文件名以 `holdout-` 开头）。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
 - 项目概况：页数、设备数、连接数；
 - 页面：某个结构下的页、某种类型的页数、页上的设备；
 - 设备：所在页、用了哪些部件、没有部件的电机；
@@ -77,9 +77,10 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 - 宏：按名称在宏目录中找宏、宏的尺寸；
 - 有歧义的短标识（`-FC1` 出现在多个结构下，答案要列出它们，而不是只挑一个）；
 - 写入（在副本上，事后调用核对结果）：建两页并写中文页描述、只改一种语言的页描述、设备改名（辅助功能和部件跟着走）、一次改两页的描述；
+- M4 第一批：运行检查（只检查一次整个项目）、更新全部报表，在副本上；导出 PDF、PNG 图片、DXF，在共享夹具上，核对导出的文件；端到端的 `workflow-contactor-feedback`（M4 设计第 7 节）：新建页、插入接触器反馈控制回路、生成连接、检查、更新报表、导出这一页的 PDF，报告的错误数和文件名与事后查到的一致；
 - 超出能力或不被允许的请求：页改名（没有这样的工具，也不能拿新建的空页顶替）、删页、改 scratch 之外的项目（策略拒绝）：答案中的 `done` 必须是 `false`，项目不变。
 
-改进工具描述时只看开发集的结果；保留集只在验收时运行，不据此调整描述（[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)）。每道题的标准调用都在夹具上核对过一次：值与另行查到的数据一致。新增题目时也要先这样核对；写入题还要在一份副本上手工做一遍题目要求的修改，核对事后调用取到的值。少数题目用字面量作期望值，例如连接的对端设备，路径子集无法表达"另一端"；字面量来自同一次核对。
+改进工具描述时只看开发集的结果；保留集只在验收时运行，不据此调整描述（[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)）。每道题的标准调用都在夹具上核对过一次：值与另行查到的数据一致。新增题目时也要先这样核对；写入题还要在一份副本上手工做一遍题目要求的修改，核对事后调用取到的值。少数题目用字面量作期望值，例如连接的对端设备，路径子集无法表达"另一端"；字面量来自同一次核对。M4 第一批的 6 题（`check-run`、`report-update`、`export-pdf`、`export-image`、`holdout-export-dxf`、`workflow-contactor-feedback`）中的字面量和预期的结果来自 api-notes A16、A19、A20 的实机验证，题目本身还没有在夹具和副本上运行过：第一次运行时按上面的办法核对。
 
 `refuse-rename` 已经退役：它假定只有读工具，而 `eplan_device_update` 出现之后，模型可能真的在共享夹具上改名。改名改由 `device-rename` 在副本上考察。
 

@@ -1,0 +1,12 @@
+id: holdout-export-dxf
+set: holdout
+prompt: 机械那边要 =GAA+A1&EFS1/1 和 =GAA+A1&EFS1/2 这两页的 CAD 图纸，帮我导出成 DXF，告诉我一共生成了几个文件。
+answer: { type: object, required: [files], properties: { files: { type: integer } } }
+# The tool spec's eval (docs/tools/eplan_export_dxf.md, section 7), on the shared fixture as the other exports. EPLAN's
+# current DXF scheme writes one .dxf per page, in subfolders it makes (S11, A16, A20); no other file.
+after:
+  files: { tool: exported_files, pick: $.count }
+checks:
+  - { after: files, equals: 2 }
+  - { answer: $.files, equals: after.files }
+budget: { max_tool_calls: 6 }

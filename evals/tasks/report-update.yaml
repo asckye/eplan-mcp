@@ -1,0 +1,19 @@
+id: report-update
+set: dev
+fixture: copy
+prompt: 更新项目 {project} 的全部报表，告诉我新增和删除了哪些报表页。
+answer:
+  type: object
+  required: [added, removed]
+  properties:
+    added: { type: array, items: { type: string }, description: full names of the report pages added }
+    removed: { type: array, items: { type: string }, description: full names of the report pages removed }
+# The tool spec's eval (docs/tools/eplan_report_update.md, section 7). Updating all reports of a fresh copy adds the
+# parts list page +A2&EPA1/1.2 and removes none: 204 -> 205 report pages by page type (S11, A16; A20 again).
+after:
+  partsList: { tool: eplan_page_get, args: { page: "+A2&EPA1/1.2" }, pick: $.page.name }
+checks:
+  - { answer: $.added, set_equals: ["+A2&EPA1/1.2"] }
+  - { answer: $.removed, set_equals: [] }
+  - { after: partsList, equals: "+A2&EPA1/1.2" }
+budget: { max_tool_calls: 6 }
