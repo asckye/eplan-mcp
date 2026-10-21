@@ -34,8 +34,8 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `PartAndMessageTests` | 部件总数和各制造商的部件数；按语言读部件描述，以及省略 `language` 时的回退；系统消息和检查结果；选择 EPLAN 实例 |
 | `MacroTests` | 在宏目录中按名称找到示例宏 `Contactor_Feedback_Control.ema`，全量扫描完整；读出它的表达类型、变体、尺寸和设备（与 spike S10 一致） |
 | `NoSideEffectTests` | 读取（包括两个宏工具）不改动项目文件 |
-| `MacroInsertTests` | 写测试：在新页上用 `number` 插入 `Contactor_Feedback_Control.ema`（dry run、读回的设备、幅面未知的提示），同一位置再插一次被回滚；`keep` 与已有设备合并时返回 `ALREADY_EXISTS`，项目的计数不变 |
-| `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次消息数不变）、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |
+| `MacroInsertTests` | 写测试：在新页上用 `number` 插入 `Contactor_Feedback_Control.ema`（dry run、读回的设备、用 `eplan_page_create` 建的页已有幅面，A20），同一位置再插一次被回滚；`keep` 与已有设备合并时返回 `ALREADY_EXISTS`，项目的计数不变 |
+| `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次警告不变、14 条汇总提示再追加一遍（A20））、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |
 | `WriteSafetyTests` | **Q1**：对 scratch 之外的副本建页、改页描述、设备改名都返回 `POLICY_DENIED`、`not_started`，设计数据文件（`User.*` 除外，A17）和审计都不变。**Q2**：把电缆 `+A1-WE1` 改名为 `=F+A1-WE19`，EPLAN 丢掉 `=F`，读回不一致而回滚（A17 的自然故障）：`INVALID_ARGUMENT`、`rolled_back`，电缆的全部功能保持原名，审计为 `rolled_back`，不暂停写入。**Q6**：直接经 Host 的 `BridgeClient` 调用 `page.create.plan`，在同一结构中另建一页，再用旧指纹调用 `page.create.execute`，返回 `PLAN_STALE`、`not_started`，计划的页不存在；改页描述同理，后来的修改保留 |
 
 Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映射为 `not_started`、不打开事务）已由 Medium 测试 `PageCreateInteropTests` 在假项目上覆盖；这里只验证 Medium 测试做不到的部分：真实适配层的指纹能看到在 EPLAN 中发生的变化（[`eplan_page_create` 规格第 7 节](../../docs/tools/eplan_page_create.md)）。
