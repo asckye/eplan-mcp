@@ -6,6 +6,9 @@ internal enum ClientProblem
     /// <summary>The file cannot be read as its format, or holds the servers in a form that cannot be changed safely.</summary>
     InvalidFile,
 
+    /// <summary>Codex's TOML defines the server in a form that a line-by-line edit cannot change safely.</summary>
+    UnsupportedToml,
+
     /// <summary>Several Claude Desktop packages are installed, and none is the known one.</summary>
     AmbiguousPackage,
 }
