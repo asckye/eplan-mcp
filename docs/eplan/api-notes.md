@@ -16,6 +16,7 @@
   - 对本项目的影响：不能把 Remote Client 的返回值当作操作成功的依据。
 - **EPLAN 系统日志**在 `C:\Users\Public\EPLAN\<变体>\EplLog.eldb`。它是 SQLite 数据库，文本为 UTF-8，消息在表 `TSysMsg_v100`（字段包括 `Time`、`ErrorLevel`、`Module`、`Description`），会话在表 `TSysSession_v100`。— 只读打开数据库验证。
 - **Remote Client 连接**：`EplanRemoteClient.GetActiveEplanServersOnLocalMachine` 返回空列表，但直接连接 `localhost:49152` 成功。正在运行的实例登记在 `HKCU\Software\EPLAN\RemoteServer\<端口>`（`ProcessID`、`EplanFullPath`、`EplanProductVariant`）。— 实机验证。
+  - 2026-10-21（Electric P8，`install-addin` 实机核对）：`EplanProductVariant` 的值是 `Eplan Demo System`（授权的名称），**不是**变体名或变体目录名（`Electric P8`），所以从这里判断不出运行中的 EPLAN 是哪个变体。`install-addin` 因此在任何 EPLAN 运行时都拒绝；Bridge 在命令行没有 `/Variant:` 时也用这个值作变体，那时报告的变体同样不对。— 读取注册表。
   - 2026-10-20（Electric P8）：EPLAN 的 49152 端口**只监听各网卡地址，没有监听 127.0.0.1**，连接 `localhost` 被拒绝，改用本机网卡地址后成功。端口因此对局域网开放，而 Remote Client 没有 TLS（B4）。— `netstat`，spike S9。
 
 ### A2. 授权（`Eplan.EplApi.ApplicationFramework.License`）
