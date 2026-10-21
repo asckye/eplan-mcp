@@ -26,7 +26,7 @@
 {
   "project": "Line1",
   "strips": [ { "name": "+A1-XD4", "terminals": 15, "bridges": 0 } ],
-  "total": 45,
+  "total": 27,
   "nextCursor": null,
   "truncated": false,
   "hint": null
@@ -35,7 +35,7 @@
 - `name`：端子排定义的标识（`TerminalStrip.Name`）。
 - `terminals`：`TerminalStrip.Terminals` 的个数，包括辅助端子；`bridges`：`TerminalStrip.Bridges` 的个数（S21：示例项目中 `+A2-XD2` 有 3 个）。
 - 顺序：按 `name` 的序数顺序，分页稳定。
-- 一行摘要：`Listed 45 terminal strips.` / `Listed 50 of 120 terminal strips (more: cursor).`。
+- 一行摘要：`Listed 27 terminal strips.` / `Listed 50 of 120 terminal strips (more: cursor).`。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
@@ -45,7 +45,7 @@
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- `DMObjectsFinder.GetTerminalStrips(null)`（S21：45 排；耗时没有单独测）。端子排定义没有所在页（S21），所以不提供 `page` 参数；按页找端子用 `eplan_device_list`（`category: "Terminal"`、`page`）。
+- `DMObjectsFinder.GetTerminalStrips(null)`：示例项目返回 45 个对象，其中 18 个端子排各出现两次，两份的端子数和跨接数相同，实际是 27 排（2026-10-21 实机测试）。每个名称只列一次，两份不同时取端子数多的。端子排定义没有所在页（S21），所以不提供 `page` 参数；按页找端子用 `eplan_device_list`（`category: "Terminal"`、`page`）。
 - `TerminalStrip.Properties` 可以读；不对端子排定义使用 `FunctionBase.Properties`（XML：会抛 `ForbiddenOperationException`）。
 - 待 Large 测试确认：没有定义对象、只由端子组成的端子排是否也由 `GetTerminalStrips` 返回。
 
@@ -55,5 +55,5 @@
 ## 7. 测试
 - Small：参数校验、排序、摘要。
 - Medium：假 Bridge 上的过滤与分页。
-- Large：示例项目副本上共 45 排；`+A1-XD4` 有 15 个端子（S21）。
+- Large：示例项目副本上共 27 排，名称不重复；`+A1-XD4` 有 15 个端子（S21）。
 - Agent 评测："+A2 有几排端子？哪一排有跨接？"
