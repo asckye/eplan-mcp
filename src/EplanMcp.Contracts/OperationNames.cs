@@ -292,6 +292,20 @@ public static class OperationNames
     public const string LanguageSetExecute = "language.set.execute";
 
     /// <summary>
+    /// The plan of eplan_language_remove: checks the languages against the project's settings and counts the texts with
+    /// translations in them, never writes. Arguments: <see cref="LanguageRemoveArgs"/>; data: <see cref="WritePlan"/>
+    /// with details.
+    /// </summary>
+    public const string LanguageRemovePlan = "language.remove.plan";
+
+    /// <summary>
+    /// Backs the project up, then removes the languages with their translations in one transaction and reads the settings
+    /// back; on any failure writes the old settings back after the rollback (ADR-0013, api-notes A28). Arguments:
+    /// <see cref="LanguageRemoveArgs"/> with the fingerprint and the backup target; data: <see cref="LanguageRemoveData"/>.
+    /// </summary>
+    public const string LanguageRemoveExecute = "language.remove.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

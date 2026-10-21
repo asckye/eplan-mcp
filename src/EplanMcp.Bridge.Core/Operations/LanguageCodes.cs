@@ -38,9 +38,9 @@ public static class LanguageCodes
     /// <summary>
     /// Every problem of the argument <paramref name="name"/> at once, by its index: 1 to <see cref="MaxLanguages"/>
     /// codes of the form <c>xx_YY</c>, each once. With <paramref name="unsetAlone"/>, <c>##_##</c> is allowed as the
-    /// only entry. Nothing for an argument that was not given.
+    /// only entry. Nothing for an argument that was not given; a <paramref name="required"/> one comes as an empty list.
     /// </summary>
-    public static void Check(IReadOnlyList<string?>? languages, string name, List<string> violations, bool unsetAlone = false)
+    public static void Check(IReadOnlyList<string?>? languages, string name, List<string> violations, bool unsetAlone = false, bool required = false)
     {
         if (languages is null)
         {
@@ -49,7 +49,7 @@ public static class LanguageCodes
 
         if (languages.Count is < 1 or > MaxLanguages)
         {
-            violations.Add($"'{name}' must hold 1 to {Number(MaxLanguages)} language codes such as en_US; omit it to leave it out.");
+            violations.Add($"'{name}' must hold 1 to {Number(MaxLanguages)} language codes such as en_US{(required ? "." : "; omit it to leave it out.")}");
         }
 
         for (int i = 0; i < languages.Count && i < MaxLanguages; i++)

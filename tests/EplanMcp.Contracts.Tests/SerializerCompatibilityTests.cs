@@ -478,6 +478,18 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new LanguageSetData(),
+        new LanguageRemoveArgs { Project = "Line1", Languages = ["sv_SE", "fi_FI"], Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new LanguageRemoveArgs(),
+        new LanguageRemoveData
+        {
+            Project = "项目 二",
+            Removed = ["sv_SE"],
+            TextsAffected = 460,
+            Before = new ProjectLanguages { Translation = ["de_DE", "sv_SE", "zh_CN"], Display = ["##_##"] },
+            After = new ProjectLanguages { Translation = ["de_DE", "zh_CN"], Display = ["zh_CN"] },
+            Warning = "w",
+        },
+        new LanguageRemoveData(),
     ];
 
     [Theory]
