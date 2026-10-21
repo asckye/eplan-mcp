@@ -172,9 +172,14 @@ flowchart TB
 | `BridgeClient` | 发现 EPLAN 实例；建立管道连接并握手；**每个 EPLAN 实例一个串行队列**；超时与取消 |
 | `Cli` | `serve`（默认）、`doctor`、`install-addin` / `uninstall-addin`、`client-config <客户端>`、`audit verify` |
 
-**CLI 的 JSON 输出**（给 Workbench 用，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.11）：`doctor --format json`、`audit verify --format json` 在 stdout 输出一个 UTF-8 的 JSON 对象，退出码与文本输出相同；`--format` 只接受 `json`，其他值或缺少值按命令行错误处理（退出码 2）。结构变化时 `schemaVersion` 加 1，快照在 `tests/Contracts.Snapshots/`。
+**CLI 的 JSON 输出**（给 Workbench 用，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.11）：`doctor`、`audit verify`、`client-config` 带 `--format json` 时在 stdout 输出一个 UTF-8 的 JSON 对象，退出码与文本输出相同；`--format` 只接受 `json`，其他值或缺少值按命令行错误处理（退出码 2）。结构变化时 `schemaVersion` 加 1，快照在 `tests/Contracts.Snapshots/`。
 - `doctor`：`{schemaVersion: 1, hostVersion, status, checks: [{id, subject?, status, zh, en}]}`。`status` 取 `ok`、`info`、`warning`、`failure`；顶层的 `status` 是最严重的一项，`info` 按 `ok` 计。`checks` 按输出顺序排列，`id` 稳定，同类的几项共用一个：`host.version`、`data.directory`、`config`、`audit.directory`、`exports`、`backups`、`msix`、`suspension`、`eplan.installation`、`eplan.running`、`bridge.pipe`、`bridge.handshake`、`bridge.licence`、`path.length`。`subject` 是这一项针对的 EPLAN 版本（`eplan.installation`）或 EPLAN 进程号（其他各项），不针对某一个时省略。
 - `audit verify`：`{schemaVersion: 1, directory, exists, intactRecords, intact, break}`。`intactRecords` 是完整的记录数（断开时是断开处之前的）；`break` 为 `{file, line, problem}`，`problem` 取 `changed`、`missing`、`not_a_record`，哈希链完整时为 `null`。
+- `client-config`：`{schemaVersion: 1, mode, server: {name, command, args}, problem, clients: [{client, file, action, result, before, after, backup, notes, problem}]}`，每个客户端一项，顺序同命令行。
+  - `mode` 取 `write`、`dry_run`、`remove`；`action` 取 `write`、`remove`；`result` 取 `written`、`would_write`、`removed`、`unchanged`、`failed`；
+  - `before`、`after` 只是 `eplan` 这一项在文件中的写法（JSON 或 TOML 的文本），没有时为 `null`，从不包含文件的其他部分；`file` 在无法确定位置时为 `null`；`notes` 目前只有 `{code: "comments_dropped", zh, en}`；
+  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `invalid_file`、`unsupported_toml`、`ambiguous_package`、`file_changed`、`invalid_record`、`record_failed`、`unknown_client`、`io_error`、`not_eplanmcp`。`record_failed` 时文件已经改好，`result` 仍是 `written` 或 `removed`；
+  - 顶层的 `problem` 表示整个命令被拒绝，这时 `clients` 为空。任何一处有 `problem` 时退出码为 1。
 
 ### 5.3 Bridge 组件
 

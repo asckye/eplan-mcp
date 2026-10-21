@@ -1,0 +1,126 @@
+﻿{
+  "write": {
+    "schemaVersion": 1,
+    "mode": "write",
+    "server": {
+      "name": "eplan",
+      "command": "C:\\Users\\engineer\\EplanMcp\\app\\eplanmcp.exe",
+      "args": [
+        "serve"
+      ]
+    },
+    "problem": null,
+    "clients": [
+      {
+        "client": "codex",
+        "file": "C:\\Users\\engineer\\.codex\\config.toml",
+        "action": "write",
+        "result": "written",
+        "before": null,
+        "after": "[mcp_servers.eplan]\ncommand = \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\"",
+        "backup": "C:\\Users\\engineer\\.codex\\config.toml.bak_20261021T0815301234567Z",
+        "notes": [],
+        "problem": null
+      },
+      {
+        "client": "gemini-cli",
+        "file": "C:\\Users\\engineer\\.gemini\\settings.json",
+        "action": "write",
+        "result": "unchanged",
+        "before": "\"eplan\": {\n  \"command\": \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\",\n  \"args\": [\n    \"serve\"\n  ]\n}",
+        "after": "\"eplan\": {\n  \"command\": \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\",\n  \"args\": [\n    \"serve\"\n  ]\n}",
+        "backup": null,
+        "notes": [],
+        "problem": null
+      },
+      {
+        "client": "claude-desktop",
+        "file": null,
+        "action": "write",
+        "result": "failed",
+        "before": null,
+        "after": null,
+        "backup": null,
+        "notes": [],
+        "problem": {
+          "code": "ambiguous_package",
+          "zh": "有多个 Claude 桌面版的包，无法确定写入哪一个：Claude_0123456789abc, Claude_abcdefghijklm",
+          "en": "Cannot tell which Claude Desktop package to write: Claude_0123456789abc, Claude_abcdefghijklm"
+        }
+      }
+    ]
+  },
+  "dryRun": {
+    "schemaVersion": 1,
+    "mode": "dry_run",
+    "server": {
+      "name": "eplan",
+      "command": "C:\\Users\\engineer\\EplanMcp\\app\\eplanmcp.exe",
+      "args": [
+        "serve"
+      ]
+    },
+    "problem": null,
+    "clients": [
+      {
+        "client": "vscode-copilot",
+        "file": "C:\\Users\\engineer\\AppData\\Roaming\\Code\\User\\mcp.json",
+        "action": "write",
+        "result": "would_write",
+        "before": null,
+        "after": "\"eplan\": {\n  \"command\": \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\",\n  \"args\": [\n    \"serve\"\n  ]\n}",
+        "backup": null,
+        "notes": [
+          {
+            "code": "comments_dropped",
+            "zh": "改写会丢弃文件中的 JSONC 注释，原文件保存在备份中",
+            "en": "Rewriting drops the file's JSONC comments; the original is kept in the backup"
+          }
+        ],
+        "problem": null
+      }
+    ]
+  },
+  "remove": {
+    "schemaVersion": 1,
+    "mode": "remove",
+    "server": {
+      "name": "eplan",
+      "command": "C:\\Users\\engineer\\EplanMcp\\app\\eplanmcp.exe",
+      "args": [
+        "serve"
+      ]
+    },
+    "problem": null,
+    "clients": [
+      {
+        "client": "cursor",
+        "file": "C:\\Users\\engineer\\.cursor\\mcp.json",
+        "action": "remove",
+        "result": "removed",
+        "before": "\"eplan\": {\n  \"command\": \"C:\\\\Users\\\\engineer\\\\EplanMcp\\\\app\\\\eplanmcp.exe\",\n  \"args\": [\n    \"serve\"\n  ]\n}",
+        "after": null,
+        "backup": "C:\\Users\\engineer\\.cursor\\mcp.json.bak_20261021T0815301234567Z",
+        "notes": [],
+        "problem": null
+      }
+    ]
+  },
+  "refused": {
+    "schemaVersion": 1,
+    "mode": "write",
+    "server": {
+      "name": "eplan",
+      "command": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "args": [
+        "serve"
+      ]
+    },
+    "problem": {
+      "code": "not_eplanmcp",
+      "zh": "client-config 要由 eplanmcp.exe 本身运行，配置中写的是它的完整路径；当前进程是 C:\\Program Files\\dotnet\\dotnet.exe",
+      "en": "client-config must run as eplanmcp.exe itself, whose full path the entry gets; this process is C:\\Program Files\\dotnet\\dotnet.exe"
+    },
+    "clients": []
+  }
+}
