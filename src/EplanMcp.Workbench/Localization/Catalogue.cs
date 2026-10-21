@@ -123,6 +123,8 @@ internal static class Catalogue
         ("Outcome.NotReceived", "No result received", "未收到结果"),
         ("Outcome.Because", "{0} ({1})", "{0}（{1}）"),
 
+        ("Approvals.List", "Waiting questions", "等待中的问题"),
+        ("Approvals.Detail", "The question shown", "显示的问题"),
         ("Approvals.Empty", "No questions waiting", "没有等待中的问题"),
         ("Approvals.EmptyText", "When the AI wants to change a real project, its question shows here; while the Workbench is not running, the EPLAN dialog asks instead.", "AI 要修改真实项目时，问题会出现在这里；Workbench 不在运行时，改由 EPLAN 中的对话框询问。"),
 

@@ -3,6 +3,7 @@ using System.Globalization;
 using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Shell;
 using TiaOpenness.Gui.Localization;
+using TiaOpenness.Gui.ViewModels;
 
 namespace EplanMcp.Workbench.Approvals;
 
@@ -73,6 +74,9 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
     public double Remaining => Countdown.Fraction(Question, clock.GetUtcNow()) * 100;
 
     public bool IsWarning => IsPending && Countdown.IsWarning(Left);
+
+    /// <summary>The tone of the countdown's text and bar: the warning colour in the last 20 seconds (APR-10).</summary>
+    public FeatureTone Tone => IsWarning ? FeatureTone.Warning : FeatureTone.Normal;
 
     /// <summary>How the question ended (APR-11); empty while it waits.</summary>
     public string Result => Question.End switch

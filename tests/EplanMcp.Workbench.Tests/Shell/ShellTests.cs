@@ -40,7 +40,7 @@ public sealed class ShellTests(WpfContext wpf)
             Assert.Equal(Visibility.Visible, View(window, page).Visibility);
             Assert.Single(Views(window), v => v.Visibility == Visibility.Visible);
             Assert.True(Item(window, page).IsChecked);
-            Assert.Same(((PageView)View(window, page)).Heading, Keyboard.FocusedElement);
+            Assert.Same(((IWorkbenchPage)View(window, page)).Heading, Keyboard.FocusedElement);
             Loc.Current.Language = AppLanguage.Chinese;
             Assert.Equal($"{chinese} – EplanMcp Workbench", window.Title);
         }));

@@ -74,6 +74,11 @@ public partial class MainWindow : Window
         }
 
         ApplyTexts();
+        if (page == WorkbenchPage.Approvals && IsVisible)
+        {
+            ApprovalsPage.Rearm(); // APR-04: each time the page opens, the buttons wait again
+        }
+
         if (origin != NavigationOrigin.Menu && IsLoaded)
         {
             UpdateLayout();
@@ -90,6 +95,9 @@ public partial class MainWindow : Window
             Hide();
         }
     }
+
+    /// <summary>Gives the approval queue page its state; the app does, once.</summary>
+    internal void Attach(Approvals.ApprovalQueueView view) => ApprovalsPage.View = view;
 
     /// <summary>
     /// Shows whether approvals are taken and how many questions wait (STS-10, STS-11); a change of state is announced
