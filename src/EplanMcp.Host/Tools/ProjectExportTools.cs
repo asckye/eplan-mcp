@@ -229,8 +229,8 @@ internal sealed class ProjectExportTools
             cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Runs the export and returns the tool's result, with the folder and its files filled in, or its error.</summary>
-    private static async Task<CallToolResult> RunAsync<TResult>(
+    /// <summary>Runs the export and returns the tool's result, with the folder and its files filled in, or its error; the database exports use it too.</summary>
+    internal static async Task<CallToolResult> RunAsync<TResult>(
         ExportRunner exports,
         ExportJob job,
         IProgress<ProgressNotificationValue> progress,

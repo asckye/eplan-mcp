@@ -14,6 +14,7 @@ internal static class ExportFileName
     public const string PxfExtension = ".epj";
     public const string XmlExtension = ".xml";
     public const string TextExtension = ".txt";
+    public const string EdzExtension = ".edz";
 
     private static readonly SearchValues<char> _refused = SearchValues.Create("<>\"|?*");
 

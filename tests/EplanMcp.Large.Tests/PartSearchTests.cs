@@ -89,9 +89,9 @@ public sealed class PartSearchTests(LiveEplan eplan)
     /// <summary>
     /// The data folder of the database the tool names: <see cref="DatabaseVariable"/>, or else the one folder named like
     /// it (<c>EPLAN_parts.alk</c> links to <c>EPLAN_parts.adb</c>, A27) below %PUBLIC%\EPLAN\Data, where
-    /// <c>$(MD_PARTS)</c> lies on a default installation.
+    /// <c>$(MD_PARTS)</c> lies on a default installation. <see cref="PartExportTests"/> uses it too.
     /// </summary>
-    private static string DataFolder(string database)
+    internal static string DataFolder(string database)
     {
         if (Environment.GetEnvironmentVariable(DatabaseVariable) is { Length: > 0 } given)
         {

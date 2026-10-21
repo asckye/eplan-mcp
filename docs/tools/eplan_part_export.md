@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批） |
+| 状态 | Proposed（M4c 第四批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把部件库里西门子的继电器导出来发给同事""备份一下部件库的数据"。代理把 EPLAN 配置的**系统部件库**中的部件导出为文件。
@@ -47,7 +47,7 @@
 | `EPLAN_OPERATION_FAILED` | EPLAN 抛出异常，或者没有生成文件 | 原文附在 `message` 中；删除本次目录 |
 
 ## 5. 实现要点
-- **流程和导出目录**：同 `eplan_export_pdf` 第 5 节。
+- **流程和导出目录**：同 `eplan_export_pdf` 第 5 节，只是没有项目：目录为 `<数据根目录>\exports\parts-database\<UTC 时间>-<随机后缀>\`，由 Host 定名；规划阶段打开库核对部件号，找不到时不建目录。导出后目录中必须恰好有一个 `.xml` 或 `.edz` 文件（空文件夹不算），否则按失败处理、删除目录；EDZ 导出是否另外留下文件没有验证，由发布前的 EDZ Large 测试确认。
 - **EPLAN 调用**（S24 r11，api-notes A30）：
   - `new MDPartsManagement().OpenDatabase()` 打开配置的库，用完 `Close()`；
   - 全部部件：`ExportParts(路径, MDPartsDatabase.DataFormat.XML 或 EDZ)`；
@@ -68,8 +68,9 @@
 - Small：参数校验（`parts` 的项数、空串）、文件名规则、摘要。
 - Medium：假 Bridge 上部件号找不到、EPLAN 报错、取消时目录被删除。
 - Large（配置的部件库，只读）：
-  - XML 全部部件：一个 `.xml` 文件，`partCount` 等于 `eplan_part_search` 的总数；
+  - XML 全部部件：一个 `.xml` 文件，`partCount` 等于文件根元素 `partsmanagement` 的 `count`（S24 r13 读过这个结构；`eplan_part_search` 的查询至少两个字符，给不出全部部件的总数），`part` 元素的个数写入测试输出；
   - 指定 `SIE.3RH2122-1HB40`：`partCount` 为 1；
   - 指定一个不存在的部件号：`PART_NOT_FOUND`，没有留下目录；
-  - EDZ 不放进常规的 Large 测试（44 秒），只在发布前跑一次。
+  - 导出前后对部件库的数据文件（`.adb` 目录中除 `.lck` 外的文件和 `.alk`）计算 SHA-256，不能有变化；
+  - EDZ 不放进常规的 Large 测试（44 秒），只在发布前跑一次：设置环境变量 `EPLANMCP_LARGE_EDZ=1` 时才运行，否则跳过。
 - Agent 评测："把部件库里 3RH21 开头的部件导出成 XML，告诉我文件在哪里"（先 `eplan_part_search`，再本工具）。
