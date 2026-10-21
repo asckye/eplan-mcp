@@ -4,8 +4,8 @@ namespace EplanMcp.Bridge.Core.Tests;
 
 /// <summary>
 /// Terminal strips and their terminals, numbered the way S21 found <c>Renumber.Terminals</c> numbers them (api-notes A24):
-/// the schemes are S21's, the names in <see cref="Numbers"/> change in the strips given (all strips without any), and
-/// an unknown scheme is EPLAN's InvalidScheme with S12's message. <see cref="NewIds"/> stands for EPLAN giving the
+/// the schemes are S21's and the names in <see cref="Numbers"/> change in the strips given (all strips without any).
+/// <see cref="Refuse"/> stands for EPLAN's InvalidScheme with S12's message, <see cref="NewIds"/> for EPLAN giving the
 /// terminals new session identifiers. Records every numbering.
 /// </summary>
 internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
@@ -19,6 +19,9 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
 
     public bool NewIds { get; set; }
 
+    /// <summary>When true, EPLAN refuses the scheme while numbering, as InvalidScheme does.</summary>
+    public bool Refuse { get; set; }
+
     public List<(IReadOnlyList<string>? Strips, bool OnlyUnnumbered, string Scheme, int Start, int Step)> Renumbers { get; } = [];
 
     public IReadOnlyList<string> Schemes() => SchemeNames;
@@ -31,7 +34,7 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
     public void Renumber(string projectPath, IReadOnlyList<string>? strips, bool onlyUnnumbered, string scheme, int start, int increment)
     {
         Renumbers.Add((strips, onlyUnnumbered, scheme, start, increment));
-        if (!SchemeNames.Contains(scheme))
+        if (Refuse)
         {
             throw SchemeChoice.Refused(scheme, FakeDeviceRenumberer.InvalidSchemeMessage, "terminal", new InvalidOperationException(FakeDeviceRenumberer.InvalidSchemeMessage));
         }
