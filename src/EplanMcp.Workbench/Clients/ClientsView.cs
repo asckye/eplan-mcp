@@ -47,14 +47,17 @@ internal sealed class ClientCard(string name) : IAccessibleItem
     /// <summary>Why the client cannot be configured now, from the last dry run.</summary>
     public string? Problem => Preview?.Problem is { } problem ? ClientsView.Text(problem) : null;
 
+    /// <summary>
+    /// What the write or removal did, with the backup the Host made, then any problem as a note: the file may be written
+    /// although recording it failed (<c>record_failed</c>).
+    /// </summary>
     public string? ResultText => Result switch
     {
         null => null,
-        { Problem: { } problem } => Loc.Current.T("Clients.Failed", ClientsView.Text(problem)),
         { Result: ClientResultKind.Written, Backup: { } backup } => Loc.Current.T("Clients.WrittenBackup", ProjectText.Line(backup)),
         { Result: ClientResultKind.Removed, Backup: { } backup } => Loc.Current.T("Clients.RemovedBackup", ProjectText.Line(backup)),
         { Result: var kind } => Loc.Current["Clients.Result." + kind],
-    };
+    } + (Result?.Problem is { } problem ? Loc.Current.T("Clients.Note", ClientsView.Text(problem)) : string.Empty);
 
     public string AccessibleName => Loc.Current.T("Clients.CardName", Title, Subtitle);
 }
@@ -76,6 +79,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
     private readonly string _userProfile;
     private HostCommandException? _error;
     private HostText? _refused;
+    private ClientConfigMode _mode;
 
     public ClientsView(HostCommands host, string userProfile)
     {
@@ -92,7 +96,9 @@ internal sealed class ClientsView : INotifyPropertyChanged
     public bool CanRun => _host.IsAvailable;
 
     /// <summary>Why nothing could be done: client-config refused as a whole (such as in an MSIX client's process), or gave no result.</summary>
-    public string? Error => _refused is { } refused ? Text(refused) : _error is { } error ? HostErrors.Text(error) : null;
+    public string? Error => _refused is { } refused ? Text(refused)
+        : _error is { } error ? HostErrors.Text(error) + (error.Failure == HostFailure.TimedOut && _mode != ClientConfigMode.DryRun ? " " + Loc.Current["Clients.CheckAfterTimeout"] : string.Empty)
+        : null;
 
     public string? ErrorDetails => _error is { } error ? HostErrors.Details(error) : null;
 
@@ -151,7 +157,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
             return;
         }
 
-        State = ClientsState.Running;
+        (State, _mode) = (ClientsState.Running, mode);
         Changed();
         try
         {
@@ -178,8 +184,20 @@ internal sealed class ClientsView : INotifyPropertyChanged
         {
             (_error, _refused, State) = (ex, null, ClientsState.Failed);
         }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            (_error, _refused, State) = (new HostCommandException(HostFailure.Unreadable, ex.Message, ex), null, ClientsState.Failed);
+        }
+        finally
+        {
+            // However it ends, the page leaves "Running": its buttons are never off for good.
+            if (State == ClientsState.Running)
+            {
+                State = ClientsState.Failed;
+            }
 
-        Changed();
+            Changed();
+        }
     }
 
     /// <summary>The file is there, or its own folder is; the user profile itself, which every user has, does not count.</summary>
