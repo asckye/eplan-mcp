@@ -206,6 +206,16 @@ public sealed class ApprovalTextsTests
         Assert.Equal(line, ApprovalTexts.Change(change, zh));
     }
 
+    [Theory]
+    [InlineData(true, "在页 =GAA+A1&EFS1/92 上导入图形：4685200F.DXF (25 KB, sha256 1a2b3c4d5e6f…), scale fit, center")]
+    [InlineData(false, "Import a drawing on page =GAA+A1&EFS1/92: 4685200F.DXF (25 KB, sha256 1a2b3c4d5e6f…), scale fit, center")]
+    public void ADrawingImport_ShowsTheFileItsSizeAndSha256(bool zh, string line)
+    {
+        var change = new PlannedChange { Action = "create", Kind = "drawing", Name = "=GAA+A1&EFS1/92", NewValue = "4685200F.DXF (25 KB, sha256 1a2b3c4d5e6f…), scale fit, center" };
+
+        Assert.Equal(line, ApprovalTexts.Change(change, zh));
+    }
+
     [Fact]
     public void ProjectData_StaysOnOneLine_WithoutBidirectionalControls()
     {
