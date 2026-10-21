@@ -101,6 +101,7 @@ internal static class AddinOutput
             AddinProblem.UnblockFailed => "unblock_failed",
             AddinProblem.InvalidRecord => "invalid_record",
             AddinProblem.EplanRunning => "eplan_running",
+            AddinProblem.OtherUser => "other_user",
             AddinProblem.StartFailed => "start_failed",
             AddinProblem.EplanExited => "eplan_exited",
             AddinProblem.NotLoaded => "not_loaded",

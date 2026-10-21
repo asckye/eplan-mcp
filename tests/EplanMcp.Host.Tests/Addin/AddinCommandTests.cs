@@ -334,6 +334,21 @@ public sealed class AddinCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task Install_OverAnotherUsersAddin_GoesNoFurther()
+    {
+        string theirs = Path.Combine(_root, "Users", "other", "EplanMcp", "app", "bridge", "net481", "EplanMcp.Bridge.Eplan.dll");
+        _eplan.Registered["Electric P8"] = theirs;
+
+        AddinReport report = await Command.InstallAsync([]);
+
+        Assert.Equal((AddinOutcome.Failed, new AddinIssue(AddinProblem.OtherUser, theirs)), (report.Results[0].Outcome, report.Results[0].Problem));
+        Assert.Equal((AddinOutcome.Registered, "Pro Panel"), (report.Results[1].Outcome, report.Results[1].Variant));
+        Assert.DoesNotContain(_eplan.Log, l => l.Contains("unregister", StringComparison.Ordinal));
+        Assert.Equal(theirs, _eplan.Registered["Electric P8"]);
+        Assert.Equal(["Pro Panel"], Record.All().Select(r => r.Variant));
+    }
+
+    [Fact]
     public async Task Install_AsksEplanToCloseAgainUntilItDoes()
     {
         // Each request goes out after a refresh (second live check: Process kept the splash screen's handle).

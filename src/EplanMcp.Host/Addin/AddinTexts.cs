@@ -45,6 +45,9 @@ internal static class AddinTexts
             AddinProblem.EplanRunning => zh
                 ? $"EPLAN 正在运行（进程 {d}）：这时执行命令会另起一个装着全部插件的 EPLAN；运行中的 EPLAN 是哪个变体判断不出来，所以有任何 EPLAN 在运行时都不执行。请先关闭所有 EPLAN，然后重新运行"
                 : $"EPLAN is running (process {d}): the command would start a second EPLAN with every add-in, and which variant a running EPLAN is cannot be told, so nothing runs while any EPLAN does. Close every EPLAN and run again",
+            AddinProblem.OtherUser => zh
+                ? $"EPLAN 加载的插件在另一个 Windows 用户的目录中：{d}。插件注册是整台电脑共用的，再注册会让那个用户无法使用 EplanMcp，所以没有继续：一台电脑只由一个 Windows 用户使用 EplanMcp。请那个用户先卸载 EplanMcp"
+                : $"EPLAN loaded the add-in from another Windows user's profile: {d}. Add-in registrations are shared by the whole computer, so registering over it would break EplanMcp for that user, and nothing more was done: one Windows user per computer uses EplanMcp. Ask that user to uninstall EplanMcp first",
             AddinProblem.StartFailed => zh ? $"无法启动 EPLAN：{d}" : $"Cannot start EPLAN: {d}",
             AddinProblem.EplanExited => zh
                 ? $"EPLAN（进程 {d}）在加载插件之前就退出了，没有确认{(install ? "注册，没有记录" : "撤销，记录保留")}：如果关掉了登录或授权对话框，请重新运行"
