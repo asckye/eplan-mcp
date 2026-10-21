@@ -97,8 +97,9 @@ flowchart LR
 ### 4.2 Profile
 - 工具设计规范第 10 节已经规定：`core` 不超过 25 个工具，覆盖最常见的任务；`full` 包含全部非 Code 级工具。目前没有实现。
 - 选择方式：`eplanmcp serve --profile core|full`。`client-config` 按客户端写入：对工具数有上限的客户端写 `core`，其他写 `full`（Q7）。
-- `tools/list` 只返回所选 Profile 中的工具。`eplan_tool_usage` 对不在 Profile 中的工具说明怎样切换。
-- M4c 第一批之前实现，单独一个 PR。
+- `tools/list` 只返回所选 Profile 中的工具；`eplan_tool_usage` 的 `tool` 枚举也只列出它们，模型不会被引向调用不了的工具。
+- `core` 是全部 Read、Write 工具和导出工具（M4 时共 25 个），Destructive 工具只在 `full` 中；M4c 的新工具默认只在 `full` 中。
+- **已实现**（2026-10-21）：`serve --profile core|full`，默认 `full`。工具数超过某个客户端的上限之前，`client-config` 仍不写 `--profile`。
 
 ### 4.3 按符号放置
 - **现状**（A13，S10）：`new Function().Create(page, symbolVariant)` 只能在 `Transaction` 中进行，`UndoStep` 包住 `Transaction` 时 Ctrl+Z 能撤销；新建的功能 `VisibleName` 为空，图上不显示标识。

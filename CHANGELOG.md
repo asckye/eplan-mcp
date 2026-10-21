@@ -53,6 +53,7 @@
   - JSON 结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
 - 列表工具统一分页（`nextCursor`），结果超出大小预算时截断并提示；来自项目的文本按不可信数据处理。
 - 支持 `language` 参数读取多语言文本。
+- `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed
 - 没有 `config.json`、或其中没有设 `writesOutsideScratch` 时，scratch 之外的项目（真实项目）的写入不再一律拒绝（`POLICY_DENIED`），改为每次在 EPLAN 中弹出审批对话框，工程师批准后才执行；删除等 Destructive 操作照旧先备份。要恢复只允许 scratch，在 `config.json` 中设 `"writesOutsideScratch": "deny"`；`eplanmcp doctor` 显示当前设置。

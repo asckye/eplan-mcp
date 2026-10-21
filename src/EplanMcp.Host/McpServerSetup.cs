@@ -40,6 +40,8 @@ internal static class McpServerSetup
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
+        services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
+        services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) => ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile));
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
         return services

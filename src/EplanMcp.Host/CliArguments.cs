@@ -1,4 +1,5 @@
 using EplanMcp.Host.ClientConfig;
+using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Host;
 
@@ -14,18 +15,20 @@ internal enum CliCommand
 /// <summary>
 /// The command line of <c>eplanmcp</c>. Only doctor, audit verify and client-config take <c>--format json</c>, the
 /// output the Workbench reads (M5 design 4.4, 4.11); any other option or format is a wrong command line.
-/// <see cref="ClientConfig"/> is set for client-config only.
+/// <see cref="ClientConfig"/> is set for client-config only; <see cref="Profile"/> matters to serve only.
 /// </summary>
-internal sealed record CliArguments(CliCommand Command, bool Json, ClientConfigRequest? ClientConfig = null)
+internal sealed record CliArguments(CliCommand Command, bool Json, ClientConfigRequest? ClientConfig = null, ToolProfile Profile = ToolProfile.Full)
 {
     public static string Usage { get; } =
-        "usage: eplanmcp [serve] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
+        "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
         + Environment.NewLine + "clients: " + string.Join(", ", McpClient.All.Select(c => c.Name));
 
     /// <summary>The command, or null for a wrong command line.</summary>
     public static CliArguments? Parse(string[] args) => args switch
     {
         [] or ["serve"] => new(CliCommand.Serve, Json: false),
+        ["serve", "--profile", "full"] => new(CliCommand.Serve, Json: false),
+        ["serve", "--profile", "core"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Core),
         ["--version"] => new(CliCommand.Version, Json: false),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),
