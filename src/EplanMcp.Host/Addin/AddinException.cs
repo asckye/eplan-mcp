@@ -18,9 +18,8 @@ internal enum AddinProblem
     /// <summary><c>state\addins.json</c> cannot be read.</summary>
     InvalidRecord,
 
-    /// <summary>EPLAN of that variant runs, or one whose variant cannot be told.</summary>
+    /// <summary>EPLAN runs in this session; which variant cannot be told (api-notes A1), so any EPLAN is in the way.</summary>
     EplanRunning,
-
 
     /// <summary>EPLAN.exe could not be started.</summary>
     StartFailed,
@@ -30,6 +29,12 @@ internal enum AddinProblem
 
     /// <summary>The started EPLAN did not load the add-in in time and was left open.</summary>
     NotLoaded,
+
+    /// <summary>The started EPLAN loaded the add-in from another path: an earlier registration still holds, and this one did not take.</summary>
+    PathMismatch,
+
+    /// <summary>The Bridge of the started EPLAN did not answer the handshake, so which add-in loaded cannot be told.</summary>
+    HandshakeFailed,
 
     /// <summary>The registration was made or undone, but the record could not be updated.</summary>
     RecordFailed,
@@ -51,8 +56,8 @@ internal enum AddinNote
     CloseEplan,
 }
 
-/// <summary>A problem and what was found, in English (paths, process IDs, messages).</summary>
-internal sealed record AddinIssue(AddinProblem Problem, string Detail);
+/// <summary>A problem and what was found, in English (paths, process IDs, messages); <see cref="Installed"/> lists the installed variants for <see cref="AddinProblem.VariantNotFound"/>.</summary>
+internal sealed record AddinIssue(AddinProblem Problem, string Detail, string? Installed = null);
 
 internal sealed class AddinException : Exception
 {
