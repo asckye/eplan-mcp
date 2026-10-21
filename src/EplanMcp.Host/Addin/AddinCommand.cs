@@ -202,7 +202,7 @@ internal sealed class AddinCommand
             return first.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = recordIssue ?? HandshakeFailed(first) };
         }
 
-        string loaded = first.Handshake.AddinPath ?? "?";
+        string loaded = first.Handshake.AddinPath ?? string.Empty; // empty: an older add-in, which does not say
         if (!first.Closed)
         {
             return first.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, loaded) };
@@ -252,7 +252,7 @@ internal sealed class AddinCommand
             return again.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = recordIssue ?? HandshakeFailed(again) };
         }
 
-        return again.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, again.Handshake.AddinPath ?? "?") };
+        return again.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, again.Handshake.AddinPath ?? string.Empty) };
     }
 
     private static AddinIssue HandshakeFailed(Launch launch) =>
