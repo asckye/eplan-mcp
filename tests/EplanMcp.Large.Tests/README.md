@@ -47,7 +47,7 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 ### Destructive 工具
 `eplan_page_delete`、`eplan_device_renumber`、`eplan_page_renumber` 每次都要工程师审批，scratch 中也一样，而 `eplanmcp` 不能自己批准（ADR-0005、ADR-0011）。所以这三组测试不启动 `eplanmcp.exe`，而是由 `DestructiveHost` 在测试进程中按 `serve` 的方式组装 Host（`AddEplanMcp`，内存中的流代替 stdio），连接真实的 Bridge，只把审批渠道换成 `ScriptedApprovalChannel`（[`eplan_page_delete` 规格第 7 节](../../docs/tools/eplan_page_delete.md)）：
 - 它只批准测试在调用前登记的工具、项目和变更清单（与 EPLAN 对话框中显示的逐行相同），每次登记只用一次，其余一律拒绝，包括解除写入暂停的确认。EPLAN 中不弹出审批对话框。
-- 这个类型只在本测试程序集中。`eplanmcp.exe` 没有任何开关、配置项或环境变量能启用它；Small 测试 `PolicyEngineTests` 核对 Host 程序集中 `IApprovalChannel` 的实现只有 `EplanDialogChannel`，`AddEplanMcp` 注册的也只有它。
+- 这个类型只在本测试程序集中。`eplanmcp.exe` 没有任何开关、配置项或环境变量能启用它；Small 测试 `PolicyEngineTests` 核对 Host 程序集中 `IApprovalChannel` 的实现只有工程师操作的两个窗口 `WorkbenchChannel` 和 `EplanDialogChannel`，`AddEplanMcp` 注册的也只有这两个，Workbench 在前（ADR-0014）。
 - 数据根目录、配置与 `WriteHost` 相同：系统临时目录中新建，只把 `<scratch 根目录>\writes\` 当作 scratch，其他项目的写入一律拒绝。审计、备份都在这个目录中，测试类结束时删除。**每次执行的 Destructive 写入都先把整个副本复制到 `backups\` 下（示例项目约 210 MB），一个测试类最多留下 4 份**，运行时临时目录所在的盘要有 1 GB 左右的空闲空间。
 - 准备与写测试相同（上文第 2、3 步）：用的是 `writes\LargeWrite`；`PageDeleteTests` 中只有一个测试用 `not-scratch\writes\` 下的副本，核对 `POLICY_DENIED`。
 

@@ -322,6 +322,9 @@
       },
       "eplanmcp.contracts": {
         "type": "Project"
+      },
+      "eplanmcp.workbench.protocol": {
+        "type": "Project"
       }
     }
   }

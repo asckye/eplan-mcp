@@ -30,7 +30,9 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>()));
         services.TryAddSingleton<DanglingWrites>();
 
-        // Approval channels are registered in the order they are tried (ADR-0005 section 3); with none, approvals are refused.
+        // Approval channels are registered in the order they are tried (ADR-0011), which no setting changes: the Workbench
+        // while it runs, then EPLAN's dialog (ADR-0014 decision 4). With none, approvals are refused.
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IApprovalChannel, WorkbenchChannel>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IApprovalChannel, EplanDialogChannel>());
         services.TryAddSingleton<ApprovalService>();
         services.TryAddSingleton<BackupFolders>();

@@ -35,22 +35,24 @@ public sealed class PolicyEngineTests
     }
 
     [Fact]
-    public void TheOnlyApprovalChannelInTheHost_IsTheEplanDialog()
+    public void TheOnlyApprovalChannelsInTheHost_AreTheEngineersWindows()
     {
-        // ADR-0005, ADR-0011: nothing in eplanmcp can approve a write by itself; a test channel lives only in tests.
+        // ADR-0005, ADR-0011, ADR-0014: nothing in eplanmcp can approve a write by itself; the engineer answers in the
+        // EPLAN dialog or the Workbench, and a test channel lives only in tests.
         Type[] channels = [.. typeof(PolicyEngine).Assembly.GetTypes().Where(t => typeof(IApprovalChannel).IsAssignableFrom(t) && !t.IsInterface)];
 
-        Assert.Equal([typeof(EplanDialogChannel)], channels);
+        Assert.Equal([typeof(EplanDialogChannel), typeof(WorkbenchChannel)], channels.OrderBy(t => t.Name, StringComparer.Ordinal));
     }
 
     [Fact]
-    public void TheHostsServices_AskOnlyInTheEplanDialog()
+    public void TheHostsServices_AskInTheWorkbenchFirstThenInTheEplanDialog()
     {
-        // What serve composes: the Large tests' scripted channel is registered only by their own in-process Host.
+        // What serve composes, in the order the channels are tried (ADR-0014 decision 4): the Large tests' scripted
+        // channel is registered only by their own in-process Host.
         var services = new ServiceCollection();
         services.AddEplanMcp();
 
-        Assert.Equal([typeof(EplanDialogChannel)], services.Where(d => d.ServiceType == typeof(IApprovalChannel)).Select(d => d.ImplementationType));
+        Assert.Equal([typeof(WorkbenchChannel), typeof(EplanDialogChannel)], services.Where(d => d.ServiceType == typeof(IApprovalChannel)).Select(d => d.ImplementationType));
     }
 
     [Fact]
