@@ -2,14 +2,14 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed |
-| 日期 | 2026-10-21（提出） |
+| 状态 | Accepted |
+| 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（1.0 发布前）：协议有版本号；但"问题送达后只在 Workbench 中回答""Host 从不启动 Workbench"放宽时要新的 ADR |
 | 影响 | 落实 [ADR-0011](0011-approval-out-of-band.md) 中的"Workbench 审批队列"；在 [ADR-0002](0002-host-bridge-process-model.md) 的 Host、Bridge 之外增加第三种进程 |
 
 ## 背景与问题
-ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运行时用它的审批队列，否则用 EPLAN 内的对话框，都不可用时拒绝。它没有规定 Workbench 是什么进程、Host 怎样发现它、怎样把问题交给它、怎样判断"正在运行"。这些是进程拓扑、IPC 和审批模型的决定，属于 L3（[开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)）。详细设计见 [M5 设计](../design/2026-10-21-m5-operability.md) 4.4、4.6。
+ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运行时用它的审批队列，否则用 EPLAN 内的对话框，都不可用时拒绝。它没有规定 Workbench 是什么进程、Host 怎样发现它、怎样把问题交给它、怎样判断"正在运行"。这些是进程拓扑、IPC 和审批模型的决定，属于 L3（[开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)）。详细设计见 [M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.6。
 
 现状：Host 的 `ApprovalService` 按注册顺序询问渠道，渠道返回 null 表示"现在不能问"，换下一个；决定的绑定（请求 ID、计划指纹、参数摘要）、期限和"只能使用一次"都在 Host 中判断（SEC-06）。一台机器上可以同时有多个 Host（每个客户端会话一个），它们都写同一个数据根目录（ADR-0008）。
 
