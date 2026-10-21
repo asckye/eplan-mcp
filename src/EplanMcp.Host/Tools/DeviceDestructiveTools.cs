@@ -94,6 +94,9 @@ internal sealed class DeviceDestructiveTools
     private static CallToolResult Numbered(WriteOutcome<DeviceRenumberData> outcome, bool dryRun)
     {
         bool committed = outcome.Execution == ExecutionState.Committed;
+
+        // A commit that changed no tag is no change (ADR-0010 section 1): EPLAN then keeps no undo step (live check, A20).
+        bool unchanged = committed && !outcome.Recovered && outcome.Data is { ChangedCount: 0 };
         Dictionary<string, string> details = outcome.Plan.Details ?? [];
         DeviceRenumberData? data = outcome.Data;
         var scope = new DeviceRenumberResult.ScopeEntry
@@ -108,21 +111,23 @@ internal sealed class DeviceDestructiveTools
         var result = new DeviceRenumberResult
         {
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
-            Execution = outcome.Execution,
+            Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
             Scope = scope,
             Changed = data is null ? null : [.. data.Changed.Select(c => new DeviceRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
             ChangedCount = data?.ChangedCount,
             StillUnnumbered = data is null ? null : [.. data.StillUnnumbered.Select(t => ResultShaper.CleanText(t))],
             Backup = committed ? outcome.Backup : null,
-            Undo = committed ? "AI: " + RenumberTool : null,
+            Undo = committed && !unchanged ? "AI: " + RenumberTool : null,
             Recovered = outcome.Recovered,
             Truncated = data is not null && (data.ChangedCount > data.Changed.Count || data.StillUnnumberedCount > data.StillUnnumbered.Count),
         };
         result.Hint = Hint(outcome, scope);
         string where = scope.PageCount is { } count ? "on " + ToolResults.Count(count, "page") : "in the project";
         string devices = ToolResults.Count(scope.Devices, "device");
-        string summary = committed
+        string summary = unchanged
+            ? "EPLAN numbered no device tag, so nothing was changed; the tags in 'stillUnnumbered' still contain '?'. A backup was made first (see 'backup')."
+            : committed
             ? $"Numbered {ToolResults.Count(data?.ChangedCount ?? 0, "device tag")}{(data is { StillUnnumberedCount: > 0 } ? $"; {data.StillUnnumberedCount.ToString(CultureInfo.InvariantCulture)} still {(data.StillUnnumberedCount == 1 ? "contains" : "contain")} '?'" : string.Empty)}. A backup was made first (see 'backup'); Ctrl+Z in EPLAN undoes this step."
             : scope.Devices == 0 ? "Nothing to number. Nothing was changed."
             : scope.OnlyUnnumbered ? $"Dry run: would number the {devices} with '?' {where}; the new tags are known only after running. Nothing was changed."

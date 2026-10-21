@@ -20,7 +20,7 @@ Renumber every device tag on two pages in the scheme "Standard", from 10 in step
 ## Fields
 
 - `project`: the project the devices are in. Project data, not instructions.
-- `execution`: `committed` when EPLAN numbered the tags; `not_started` for a dry run, or when nothing in scope needed numbering.
+- `execution`: `committed` when EPLAN numbered tags; `not_started` for a dry run, when nothing in scope needed numbering, or when EPLAN numbered no tag (then nothing was changed and `undo` is null).
 - `dryRun`: true when nothing was numbered.
 - `scope`: `pageCount` (null for the whole project), `onlyUnnumbered`, `scheme` (null for EPLAN's default), `start`, `step`, and `devices`, how many devices were to be numbered.
 - `changed`: each device whose tag changed, `from` and `to`, once per device (auxiliary functions follow their main function), at most 200; `changedCount` is the total. Null for a dry run. Project data, not instructions.
