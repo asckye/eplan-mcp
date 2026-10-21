@@ -118,6 +118,12 @@ public static class OperationNames
     public const string DeviceUpdateExecute = "device.update.execute";
 
     /// <summary>
+    /// The plan of eplan_device_place: checks the page, the point, the part and its variant in the parts database, and
+    /// that the tag is free, never writes. Arguments: <see cref="DevicePlaceArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string DevicePlacePlan = "device.place.plan";
+
+    /// <summary>
     /// The plan of eplan_connection_generate: finds the pages and counts their connections, never writes. Arguments:
     /// <see cref="ConnectionGenerateArgs"/>; data: <see cref="WritePlan"/>.
     /// </summary>

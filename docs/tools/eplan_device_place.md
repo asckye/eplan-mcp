@@ -18,10 +18,10 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `page` | string | 是 | — | 完整页名，必须是电路图页（`Circuit`） |
-| `part` | string | 是 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中并且有宏 |
-| `variant` | string | 否 | `"1"` | 部件的变体 |
-| `x`、`y` | number | 是 | — | 插入点，单位毫米，规则同 `eplan_macro_insert` |
-| `tag` | string | 是 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页；或者完整标识（如 `=GAA+A1-KF20`） |
+| `part` | string | 是 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中并且有宏。部件号先精确匹配，没有时再不区分大小写匹配 |
+| `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
+| `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
+| `tag` | string | 是 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页（页的结构去掉 `&` 文档类型：`=GAA+A1&EFS1/60` 得到 `=GAA+A1`）；或者完整标识（如 `=GAA+A1-KF20`） |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的放置，不请求审批，也不修改项目 |
 
 - `tag` 必填：`CreateDevice` 放置的设备标识不带页的结构、也不编号（S20：`=+-Q1`），工具总是给它一个确定的标识。规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。
@@ -40,19 +40,20 @@
   "unplaced": 4,
   "undo": "AI: eplan_device_place",
   "recovered": false,
-  "hint": "4 functions of the device (its contacts) are not placed yet; place them in EPLAN or with eplan_macro_insert."
+  "hint": "4 functions of the device (its contacts) are not placed yet; the engineer places them in EPLAN, for example from the device navigator."
 }
 ```
 - `functions`：设备的全部功能数；`unplaced`：其中没有放置的（S20：线圈放置，4 个触点未放置）。
 - `undo`、`recovered`：同 `eplan_page_create`。标识按项目数据处理，经过 ResultShaper。
+- `hint`：有未放置的功能时说明它们要在 EPLAN 中放置（实现时改：`eplan_macro_insert` 会新建设备，放不了已有设备的功能）；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | 页不是电路图页；插入点超出页面；`tag` 不合法；变体不存在 | `not_started` | `metadata.violations` 列出全部问题 |
+| `INVALID_ARGUMENT` | 页不是电路图页；插入点超出页面；`tag` 不合法；变体不存在；部件库中的部件没有宏（`ARTICLE_MACRO` 为空，实现时从执行后移到规划时：部件库已经能看出来，不必等 EPLAN 回滚） | `not_started` | `metadata.violations` 列出全部问题；没有宏时提示改用 `eplan_macro_insert` |
 | `PART_NOT_FOUND` | 部件库中没有这个部件号 | `not_started` | 提示用 `eplan_part_search`（第一批）查部件号 |
-| `INVALID_ARGUMENT` | 部件没有宏，或者 EPLAN 放置后页上没有新的功能 | `rolled_back` | 说明这个部件不能直接放置，提示改用 `eplan_macro_insert` |
+| `INVALID_ARGUMENT` | EPLAN 没有返回功能，或者放置后页上没有新的功能（例如宏文件不存在） | `rolled_back` | 说明这个部件不能直接放置，提示改用 `eplan_macro_insert` |
 | `INVALID_ARGUMENT` | 读回的标识与请求不同 | `rolled_back` | 同 `eplan_device_update` |
 | `ALREADY_EXISTS` | `tag` 已被其他设备使用 | `not_started` | 同 `eplan_device_update` |
 | `PAGE_NOT_FOUND` / `AMBIGUOUS_NAME` | 页找不到 | `not_started` | 同 `eplan_page_get` |
@@ -63,11 +64,11 @@
 
 ## 5. 实现要点
 - **Host**：走 `WritePipeline`，规划操作 `device.place.plan`，执行操作 `device.place.execute`，时限为默认的 60 秒。
-- **规划**（只读）：解析项目和页；在部件库中只读确认部件和变体存在（与 `eplan_part_search` 共用读法）；检查插入点；按 `eplan_device_update` 的规则拼出完整标识并检查占用。一条 `create` 变更：`Kind = "device"`，`Name` 为页名，`NewValue` 为 `SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)`。指纹：页上全部对象的会话内标识，加上目标标识在项目中的功能。
+- **规划**（只读）：解析项目和页；在部件库中只读确认部件和变体存在、部件有宏（与 `eplan_part_search` 共用读法 `IPartsDatabase.Read`）；检查插入点；按 `eplan_device_update` 的规则拼出完整标识并检查占用（与它相同：同名或以 `<标识>:` 开头的功能，不区分大小写）。一条 `create` 变更：`Kind = "device"`，`Name` 为页名，`NewValue` 为 `SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)`。指纹：页上全部对象的会话内标识，加上目标标识在项目中的功能。
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中：
   1. `new DeviceService().CreateDevice(part, variant, page, new PointD(x, y))`，返回设备的全部功能（S20：5 个）；
   2. 没有返回功能、或者页上没有新放置的功能时抛出，整体回滚；
-  3. 把返回的全部功能改为目标标识（主功能和辅助功能一起改，A13），读回核对；
+  3. 把返回的全部功能改为目标标识（主功能和辅助功能一起改，A13），读回核对。改名针对 `CreateDevice` 返回的对象，不按名称 `=+-Q1` 查找：项目中可能已有同名的功能；
   4. 通过后 `Commit()`，再 `CloseUndo()`。
 - **已验证**（S20，A26）：`CreateDevice` 能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销；图上显示标识、技术参数、连接点和触点镜像；标识为 `=+-Q1`。
 - **待 Large 测试确认**：
