@@ -293,6 +293,19 @@ public static class OperationNames
     public const string PartExportRun = "part.export.run";
 
     /// <summary>
+    /// The plan of eplan_translation_export: names the configured translation database, never exports. Arguments:
+    /// <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/> with the database.
+    /// </summary>
+    public const string TranslationExportPlan = "translation.export.plan";
+
+    /// <summary>
+    /// Exports the whole configured translation database as one tab-separated text or XML file into the Host's new, empty
+    /// folder. Arguments: <see cref="ExportArgs"/> with the folder and the file name, its extension included; data:
+    /// <see cref="ExportRunData"/> with the database.
+    /// </summary>
+    public const string TranslationExportRun = "translation.export.run";
+
+    /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

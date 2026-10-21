@@ -22,6 +22,9 @@ internal sealed record ExportJob(string PlanOperation, string RunOperation, Expo
     /// <summary>The folder below the export root for an export of no project (the databases'); null means the project the plan found.</summary>
     public string? Folder { get; init; }
 
+    /// <summary>The longest the export may take; <see cref="ExportRunner.Timeout"/> unless the tool spec says less.</summary>
+    public TimeSpan? Limit { get; init; }
+
     /// <summary>What the model can do after a timeout.</summary>
     public string TimeoutHint { get; init; } = "Export fewer pages per call with 'pages'; EPLAN may still be busy for a while.";
 }
@@ -74,7 +77,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
             ExportRunData data;
             using (BridgeProgress? waiting = BridgeProgress.Start(CallProgress.For(progress), job.Label, clock, cancellationToken))
             {
-                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, waiting, cancellationToken).ConfigureAwait(false);
+                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, job.Limit ?? Timeout, waiting, cancellationToken).ConfigureAwait(false);
             }
 
             IReadOnlyList<ExportFile> files = Files(folder, job.SingleFile);
@@ -85,7 +88,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         }
         catch (BridgeCallException ex) when (ex.Error.Reason == ErrorReason.Timeout)
         {
-            string seconds = Timeout.TotalSeconds.ToString("0", CultureInfo.InvariantCulture);
+            string seconds = (job.Limit ?? Timeout).TotalSeconds.ToString("0", CultureInfo.InvariantCulture);
             throw new BridgeCallException(new BridgeError
             {
                 Reason = ErrorReason.Timeout,

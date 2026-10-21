@@ -16,7 +16,8 @@ namespace EplanMcp.Host.Tests.Bridge;
 
 /// <summary>
 /// The database exports through the real ExportRunner, BridgeClient, pipe and Bridge.Core operations; only the EPLAN
-/// adapter is fake, a parts database with two part numbers. The folder the tool reports is the one the Bridge wrote into.
+/// adapter is fake, a parts database with two part numbers and a translation database. The folder the tool reports is
+/// the one the Bridge wrote into.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class MasterDataExportInteropTests : IAsyncDisposable
@@ -32,8 +33,7 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
     {
         IOperation[] operations =
         [
-            new MasterDataExportPlanOperation(MasterDataExportKind.Parts, _exporter),
-            new MasterDataExportRunOperation(MasterDataExportKind.Parts, _exporter),
+            .. new[] { MasterDataExportKind.Parts, MasterDataExportKind.Translations }.SelectMany(kind => new IOperation[] { new MasterDataExportPlanOperation(kind, _exporter), new MasterDataExportRunOperation(kind, _exporter) }),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _server = new BridgeServer(
@@ -80,7 +80,21 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
         Assert.Empty(_exporter.Exports);
     }
 
-    /// <summary>A parts database on SQL Server whose login must never reach the tool; PXC.3209510 has two variants.</summary>
+    [Fact]
+    public async Task Translations_WriteOneTextFileIntoTheToolsFolder_NamedTranslations()
+    {
+        CallToolResult result = await MasterDataExportTools.ExportTranslationsAsync(_runner, new RecordedProgress(), "tab", null, TestContext.Current.CancellationToken);
+
+        ToolResultAssert.Succeeded(result);
+        JsonElement data = result.StructuredContent!.Value;
+        string directory = data.GetProperty("directory").GetString()!;
+        Assert.StartsWith(Path.Combine(_locations.Exports, "translation-database") + Path.DirectorySeparatorChar, directory, StringComparison.Ordinal);
+        Assert.Equal((@"$(md_translate)\Translate.db", "translations.txt"), (data.GetProperty("database").GetString(), data.GetProperty("files")[0].GetProperty("path").GetString()));
+        Assert.Equal(["Tab " + Path.Combine(directory, "translations.txt")], _exporter.Exports);
+        Assert.Equal("Exported the translation database to a 12 bytes tab-separated file in a new folder; see 'directory'.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
+    /// <summary>A parts database on SQL Server whose login must never reach the tool, PXC.3209510 with two variants, and the translation database.</summary>
     private sealed class WritingExporter : IMasterDataExporter
     {
         private readonly Dictionary<string, int> _parts = new(StringComparer.Ordinal) { ["SIE.3RH2122-1HB40"] = 1, ["PXC.3209510"] = 2 };
@@ -99,6 +113,15 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
             }
 
             return found;
+        }
+
+        public string TranslationDatabase() => @"$(md_translate)\Translate.db";
+
+        public bool ExportTranslations(string file, MasterDataFormat format)
+        {
+            Exports.Add($"{format} {file}");
+            File.WriteAllText(file, "de_DE\ten_US\n");
+            return true;
         }
     }
 

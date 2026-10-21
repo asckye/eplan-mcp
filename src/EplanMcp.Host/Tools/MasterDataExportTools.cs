@@ -10,8 +10,8 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The exports of a system database EPLAN is configured with, not of a project (docs/tools/eplan_part_export.md): Read
-/// tier, yet they write files, so readOnlyHint is false (ADR-0012); only into a new folder the Host creates for each
+/// The exports of a system database EPLAN is configured with, not of a project (docs/tools/eplan_part_export.md,
+/// eplan_translation_export.md): Read tier, yet they write files, so readOnlyHint is false (ADR-0012); only into a new folder the Host creates for each
 /// call (SEC-20), below a folder named for the database, through <see cref="ExportRunner"/>, as the project exports do.
 /// </summary>
 [McpServerToolType]
@@ -25,6 +25,17 @@ internal sealed class MasterDataExportTools
 
     /// <summary>The file's name when the call gives none (tool spec 2).</summary>
     public const string PartsFileName = "parts";
+
+    public const string TranslationTool = "eplan_translation_export";
+
+    /// <summary>The folder below the export root for the translation database's exports (eplan_translation_export.md, section 5).</summary>
+    public const string TranslationsFolder = "translation-database";
+
+    /// <summary>The file's name when the call gives none (eplan_translation_export.md, section 2).</summary>
+    public const string TranslationsFileName = "translations";
+
+    /// <summary>S24 exported the sample translation database in under a second (eplan_translation_export.md, section 5).</summary>
+    public static readonly TimeSpan TranslationLimit = TimeSpan.FromSeconds(60);
 
     [McpServerTool(
         Name = PartTool,
@@ -91,6 +102,67 @@ internal sealed class MasterDataExportTools
             progress,
             outcome => new PartExportResult { Database = ResultShaper.CleanText(outcome.Data.Database ?? string.Empty), PartCount = outcome.Data.PartCount ?? 0, VariantCount = outcome.Data.VariantCount ?? 0 },
             result => $"Exported {ToolResults.Count(result.PartCount, "part")} from the parts database to a {ByteSize.Format(result.TotalBytes)} {extension[1..].ToUpperInvariant()} file in a new folder; see 'directory'.",
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    [McpServerTool(
+        Name = TranslationTool,
+        Title = "Export EPLAN's translation database",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(TranslationExportResult))]
+    [Description(
+        "Exports EPLAN's whole translation database, which all projects share (not a project), as one file into a new " +
+        "folder the server creates: tab-separated text or EPLAN's XML. The file can be a few MB: read its first lines " +
+        "for the columns before reading on. The database is not changed and no approval is needed. Example: {}.")]
+    public static async Task<CallToolResult> ExportTranslationsAsync(
+        ExportRunner exports,
+        IProgress<ProgressNotificationValue> progress,
+        [Description("tab: tab-separated text; xml: EPLAN's XML")][AllowedValues("tab", "xml")] string format = "tab",
+        [Description("File name only; .txt or .xml is added")] string? file_name = null,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        string? extension = (format ?? "tab").Trim().ToLowerInvariant() switch
+        {
+            "tab" => ExportFileName.TextExtension,
+            "xml" => ExportFileName.XmlExtension,
+            _ => null,
+        };
+        if (extension is null)
+        {
+            violations.Add("'format' must be tab or xml.");
+        }
+
+        string? fileName = ToolArguments.Optional(file_name);
+        if (ExportFileName.Problem(fileName) is { } problem)
+        {
+            violations.Add("'file_name' " + problem);
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        bool tab = extension == ExportFileName.TextExtension;
+        var job = new ExportJob(OperationNames.TranslationExportPlan, OperationNames.TranslationExportRun, new ExportArgs { Format = tab ? "tab" : "xml" }, "Exporting translations")
+        {
+            FileName = _ => ExportFileName.WithExtension(fileName, TranslationsFileName, extension!),
+            Folder = TranslationsFolder,
+            SingleFile = extension,
+            Limit = TranslationLimit,
+            TimeoutHint = "EPLAN may still be busy for a while; ask the engineer to export the translation database in EPLAN instead.",
+        };
+        return await ProjectExportTools.RunAsync(
+            exports,
+            job,
+            progress,
+            outcome => new TranslationExportResult { Database = ResultShaper.CleanText(outcome.Data.Database ?? string.Empty) },
+            result => $"Exported the translation database to a {ByteSize.Format(result.TotalBytes)} {(tab ? "tab-separated" : "XML")} file in a new folder; see 'directory'.",
             cancellationToken).ConfigureAwait(false);
     }
 }
