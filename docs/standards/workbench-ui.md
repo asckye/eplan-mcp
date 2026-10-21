@@ -265,11 +265,11 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 
 - **APR-01 · MUST** 每个问题单独回答：没有"全部批准"、批量批准、"记住这个决定"或任何自动回答的设置。理由：每次写入都要人看过它的变更清单。依据：项目规则（ADR-0014 第 6 条，M5 设计第 2 节的非目标和 4.6，SEC-24）。
 - **APR-02 · MUST** "拒绝"和"批准"一样大、样式相同（都用默认按钮样式，TIA 主题的 `Primer.Secondary`），都不用主要样式或危险样式；都不是默认按钮，也不是取消按钮（`IsDefault`、`IsCancel` 都为假）；没有快捷键，也没有访问键，只能点击，或在按钮获得焦点后按 Enter、空格。顺序与 EPLAN 中的审批对话框相同："拒绝"在左，"批准"在右。理由：减少盲批和误触；两个渠道的同一问题看起来一样。依据：项目规则（ADR-0011 第 4 条，ADR-0014 第 6 条，ADR-0017 第 5 条，SEC-24）。
-- **APR-03 · MUST** 工程师选择或打开一个问题时，以及回答一个问题后下一个顶上来时，键盘焦点放在问题的标题上（可以获得焦点，不是 Tab 停靠点，标题级别 2），从不放在两个按钮上，即使之前焦点在按钮上。理由：一次回车或空格不能直接回答新出现的问题。依据：项目规则（ADR-0014 第 6 条）；[Keyboard interactions › Initial focus](https://learn.microsoft.com/en-us/windows/apps/develop/input/keyboard-interactions#initial-focus)。
+- **APR-03 · MUST** 工程师选择或打开一个问题时，以及回答一个问题后下一个顶上来时，键盘焦点放在问题的标题上（可以获得焦点，不是 Tab 停靠点，标题级别 2），从不放在两个按钮上，即使之前焦点在按钮上。WPF：窗口从托盘恢复或重新激活时，系统会把焦点还给上次的控件，要在 `Activated` 中再聚焦一次标题（S18）。理由：一次回车或空格不能直接回答新出现的问题。依据：项目规则（ADR-0014 第 6 条）；[Keyboard interactions › Initial focus](https://learn.microsoft.com/en-us/windows/apps/develop/input/keyboard-interactions#initial-focus)。
 - **APR-04 · MUST** 500 毫秒防误触：详情区每次显示一个不同的问题、窗口每次由隐藏或最小化变为可见、每次切到审批队列页之后，500 毫秒内两个按钮都不响应点击、Enter 和空格。时间从新内容实际显示（渲染完成）时算起，不从数据到达时算起；实现可以在这段时间内把按钮设为禁用。理由：回答完一个问题后多点的一下，不能落到下一个问题上（T21）。依据：项目规则（ADR-0011 第 4 条，ADR-0014 第 6 条，SEC-24；"切到审批队列页"是本规范的补充）。
 - **APR-05 · MUST** 新问题到达时，详情区不换掉工程师正在看的问题：选中项按请求 ID 保持，不按列表中的位置；队列原来为空时才直接显示新问题，但不移动键盘焦点（APR-14），APR-04 照样适用。理由：问题在工程师看的时候被换掉，回答就会落到别的问题上（T21）。依据：项目规则（本规范对 SEC-24 的补充）。
 - **APR-06 · MUST** 审批队列页的布局：左侧是等待中的问题，最早到期的在上，每项显示种类、工具、项目名、剩余时间（文字）和破坏性标记；右侧是选中问题的详情；"已回答"是同一页中的另一组（Ant 的 Segmented）。列表项上的 Enter、双击只选中问题并把焦点移到详情的标题，从不回答问题；列表项没有回答问题的上下文菜单。理由：回答只有一条路径：看过详情后按详情中的按钮。依据：项目规则（M5 设计 4.6）；[Nested UI in list items](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/nested-ui#nested-ui-handling)。
-- **APR-07 · MUST** 详情显示：标题；工具（Code）；级别（写入、破坏性）；项目名和完整路径；EPLAN 实例（版本、变体、进程号）；"客户端（未验证）"加客户端自报的名称，没有名称时写"未提供"；变更清单（APR-08）；撤销说明（审批写"批准后可在 EPLAN 中按 Ctrl+Z 撤销"，解除暂停不提 Ctrl+Z）；解除暂停另显示暂停记录（时间、工具、范围）；倒计时；两个按钮。文字与 EPLAN 对话框的相同（TXT-09）。理由：人要有足够的信息作决定，而客户端的名称是它自己说的。依据：项目规则（M5 设计 4.6，M3 设计 4.6，ADR-0014 第 3、6 条）。
+- **APR-07 · MUST** 详情显示：标题；工具（Code）；级别（写入、破坏性）；项目名和完整路径；EPLAN 实例（版本、变体、进程号）；"客户端（未验证）"加客户端自报的名称，没有名称时写"未提供"，经虚拟机连接的会话另标"经网络：<地址>"（SEC-30，ADR-0018 接受后；协议中还没有这个字段）；变更清单（APR-08）；撤销说明（审批写"批准后可在 EPLAN 中按 Ctrl+Z 撤销"，解除暂停不提 Ctrl+Z）；解除暂停另显示暂停记录（时间、工具、范围）；倒计时；两个按钮。文字与 EPLAN 对话框的相同（TXT-09）。理由：人要有足够的信息作决定，而客户端的名称是它自己说的。依据：项目规则（M5 设计 4.6，M3 设计 4.6，ADR-0014 第 3、6 条）。
 - **APR-08 · MUST** 变更清单只作纯文本，显示在标明"来自项目的数据"的等宽区域中：剥除控制字符和双向文字控制符（至少 U+202A–U+202E 和 U+2066–U+2069，与 Host 相同）；一项中的换行显示为可见的符号，空项保留为分隔的空行；每行和整个清单都有长度上限，超出时注明"还有 N 行"；区域只读、可以选中、可以用键盘聚焦并由读屏读出；不生成超链接、标记或任何界面元素；Workbench 的日志不记录变更清单。Host 已经清洗过，Workbench 仍要自己清洗。理由：项目中的文字可能冒充界面说明、改变显示顺序或把关键的行挤出视野（T20）。依据：项目规则（SEC-23，M5 设计第 5 节）。
 - **APR-09 · MUST** 破坏性的问题醒目标出：详情顶部有错误图标加文字"破坏性操作：执行前先备份项目"，并写出"执行前先备份到 <备份目录>"，目录以 Code 层级完整显示、可以选中；不只靠颜色；两个按钮的样式不因此改变。理由：删除、重编号难以逐项撤销，人要在批准前知道有备份、备份在哪里。依据：项目规则（M5 设计 4.6，ADR-0013，ADR-0005 的级别）。
 - **APR-10 · MUST** 倒计时用文字（"{0} 后自动拒绝"、"{0} 后自动保持暂停"）加进度条；最后 20 秒文字和进度条改用警告色，并加警告图标；读屏只在固定阈值（30 秒、10 秒）播报，不逐秒播报，倒计时文字本身不是 live region。期限默认 120 秒，只能在 `config.json` 中于 60–300 秒之间设置（ADR-0011 第 2 条），Workbench 中不能延长，按 WCAG 2.2.1 的"必要"例外处理（第 15 节）。理由：期限是安全设计的一部分，人要知道还剩多少时间。依据：项目规则（M5 设计 4.4 的 S16、4.6）；[WCAG 2.2 › 2.2.1 Timing Adjustable](https://www.w3.org/TR/WCAG22/#timing-adjustable)。
@@ -291,12 +291,13 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 - **STS-03 · MUST** 耗时的操作（运行 `doctor`、`audit verify`、`client-config`，读取大的审计文件）显示进度：知道总量时用确定进度，否则用不确定进度，旁边有文字说明正在做什么；进度放在发起操作的位置附近。理由：用户要知道程序还在工作。依据：[Progress controls › Types of progress](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/progress-controls#types-of-progress)。
 - **STS-04 · MUST** 调用 `eplanmcp.exe` 的子命令都有超时（M5 设计 4.4），超时后显示错误（ERR-02）；**SHOULD** 能取消的提供"取消"。理由：子命令卡住时界面不能一直转圈。依据：项目规则；[Commanding basics › Provide command feedback](https://learn.microsoft.com/en-us/windows/apps/design/basics/commanding-basics#provide-command-feedback)。
 - **STS-05 · MUST** 被阻止的操作说明原因和办法，不静默无效。理由：静默失败让人以为程序卡死。依据：[Commanding basics › Provide command feedback](https://learn.microsoft.com/en-us/windows/apps/design/basics/commanding-basics#provide-command-feedback)。
-- **STS-06 · MUST** 持续的全局状态（不接收审批、找不到 `eplanmcp.exe`、状态页结果中的写入暂停）用 Banner 或状态栏显示，带严重级别图标和文字，不用会自动消失的 toast。理由：持续的状态要一直看得见。依据：[InfoBar › Is this the right control?](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/infobar#is-this-the-right-control)。
+- **STS-06 · MUST** 持续的全局状态（不接收审批、找不到 `eplanmcp.exe`、状态页结果中的写入暂停、虚拟机连接的服务在运行）用 Banner 或状态栏显示，带严重级别图标和文字，不用会自动消失的 toast。理由：持续的状态要一直看得见。依据：[InfoBar › Is this the right control?](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/infobar#is-this-the-right-control)。
 - **STS-07 · SHOULD** toast 排队逐条显示，不遮住审批按钮和焦点所在的元素，可以用键盘关闭；新问题的 toast 在问题结束前不自动消失。理由：WCAG 2.4.11；审批提醒不能被下一条消息盖掉。依据：[WCAG 2.2 › 2.4.11](https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum)。
 - **STS-08 · MUST** Banner、提示和徽章不快速反复出现、消失；短时间内的多次变化合并显示。理由：闪烁影响光敏用户，也让人无法阅读。依据：[InfoBar › Recommendations](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/infobar#recommendations)；[WCAG 2.2 › 2.3.1](https://www.w3.org/TR/WCAG22/#three-flashes-or-below-threshold)。
 - **STS-09 · MUST** 托盘与系统通知：托盘图标显示待处理数，ToolTip 为"N 个问题等待审批"；窗口最小化或隐藏时发系统通知（做法由 S16 确定）；文字本地化，只写数量和工具名，**不含项目中的文字**；工程师激活通知或托盘时还原窗口并打开对应的问题（APR-14）。理由：问题会到期，人要及时知道；通知可能显示在锁屏上，也没有"来自项目的数据"的标记（T20）。依据：项目规则（M5 设计 4.4，SEC-23）。
 - **STS-10 · MUST** 计数徽章的 UIA 名称包含完整的含义（"3 个问题等待审批"），不只是数字。理由：读屏单独读"3"没有意义。依据：[Expose basic accessibility information › Accessible name](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/basic-accessibility-information#accessible-name)。
 - **STS-11 · MUST** 状态栏始终显示 Workbench 是否在接收审批；不接收时（管道名已被占用、等待中的问题已满 50 个）写明原因，并说明问题改由 EPLAN 中的对话框询问。理由：工程师要知道问题会出现在哪里。依据：项目规则（ADR-0014 第 2、3 条）。
+- **STS-12 · MUST** 虚拟机连接的服务（ADR-0018 接受后）运行时，状态栏一直显示"虚拟机连接：运行中"和监听的地址、端口；启动失败、防火墙规则缺失用 Banner 说明原因和办法；服务随 Workbench 退出而停止。理由：服务不能在无人注意时一直对网络开放（T27）。依据：项目规则（SEC-29，M5 设计 4.12）。
 
 ---
 
@@ -325,7 +326,7 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 
   | 快捷键 | 动作 | 级别 |
   |---|---|---|
-  | Ctrl+1 … Ctrl+4 | 切到审批队列、审计、状态、客户端 | MUST |
+  | Ctrl+1 … Ctrl+4 | 切到审批队列、审计、状态、MCP 与客户端 | MUST |
   | Ctrl+Tab / Ctrl+Shift+Tab | 下一个 / 上一个页面 | SHOULD |
   | Ctrl+F | 聚焦审计页的筛选框 | SHOULD |
   | F5 | 刷新当前页：状态页重新运行 `doctor`，审计页重新读取 | SHOULD |
@@ -350,7 +351,7 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 - **A11Y-01 · MUST** 每个能获得焦点或能操作的元素，UIA 名称非空、来自文字表、以可见的标签开头，且不是 CLR 类型名。验证：UIA 树测试（中英文各一遍）、AI4W。
 - **A11Y-02 · MUST** 每个输入控件的 `LabeledBy` 指向可见的标签。验证：UIA 树测试。
 - **A11Y-03 · MUST** 控件类型与行为一致，状态（选中、按下、展开）读得出。验证：Inspect 或 AI4W 人工核对。
-- **A11Y-04 · MUST** 只用键盘完成：打开审批队列、选择问题、读变更清单、批准、拒绝、确认解除暂停；筛选审计、打开记录详情、校验完整性；运行自检；配置客户端（预览差异、写入、复制命令）；切换语言和主题；从托盘打开和退出。验证：发布前的键盘脚本（人工），关键路径另用 `KeyboardDevice` 事件的自动测试。
+- **A11Y-04 · MUST** 只用键盘完成：打开审批队列、选择问题、读变更清单、批准、拒绝、确认解除暂停；筛选审计、打开记录详情、校验完整性；运行自检；配置客户端（选择、预览差异、写入、复制命令）；虚拟机连接的设置（ADR-0018 接受后）；切换语言和主题；从托盘打开和退出。验证：发布前的键盘脚本（人工），关键路径另用 `KeyboardDevice` 事件的自动测试。
 - **A11Y-05 · MUST** 焦点指示在浅色、深色、高对比下都可见，对相邻色不低于 3:1，不被 toast 或抽屉完全遮住。验证：渲染测试截取焦点元素计算对比；人工检查遮挡。
 - **A11Y-06 · MUST** 实际用到的每一对文字与背景 token 对比不低于 4.5:1，非文字指示不低于 3:1；三套调色板的键集合相同。验证：移植 TIA 的 `ThemeSurfaceTests`（阈值 4.5 / 3.0），覆盖次要文字、徽章、按钮文字、选中态和边框。
 - **A11Y-07 · MUST** Windows 的四个对比主题（Aquatic、Desert、Dusk、Night sky）下没有写死的颜色，文字读得清，选中和焦点能分辨。验证：渲染测试注入高对比调色板；发布前在真实的对比主题下人工检查。
@@ -410,10 +411,11 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 | [3.3.3 Error Suggestion](https://www.w3.org/TR/WCAG22/#error-suggestion) | AA | ERR-01 | 文字评审 |
 | [3.3.4 Error Prevention](https://www.w3.org/TR/WCAG22/#error-prevention-legal-financial-data) | AA | 修改项目经审批（第 11 节）；写入客户端配置先看差异再确认（DLG-12） | 评审 |
 | [3.3.7 Redundant Entry](https://www.w3.org/TR/WCAG22/#redundant-entry) | A | 配置向导中已填的值自动带入下一步 | 人工 |
+| [3.3.8 Accessible Authentication (Minimum)](https://www.w3.org/TR/WCAG22/#accessible-authentication-minimum) | AA | 虚拟机连接的密钥由 Workbench 生成，可以复制、粘贴，不必记忆或转写（CTL-14） | 人工 |
 | [4.1.2 Name, Role, Value](https://www.w3.org/TR/WCAG22/#name-role-value) | A | A11Y-01、A11Y-03、CTL-05、CTL-07 | UIA 树测试 |
 | [4.1.3 Status Messages](https://www.w3.org/TR/WCAG22/#status-messages) | AA | STS-02、APR-10 | A11Y-08 |
 
-不适用：1.2.1–1.2.5、1.4.2（没有音视频）；1.3.5（不收集个人信息）；2.4.5（对软件不适用）；2.5.4（没有运动操作）；3.3.8（Workbench 没有登录或认证）。4.1.1 已从 WCAG 2.2 中删除。
+不适用：1.2.1–1.2.5、1.4.2（没有音视频）；1.3.5（不收集个人信息）；2.4.5（对软件不适用）；2.5.4（没有运动操作）。4.1.1 已从 WCAG 2.2 中删除。
 
 ---
 
@@ -441,6 +443,7 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
   | 客户端（未验证） | client (unverified) | MCP 客户端自报的名称 |
   | scratch | scratch | 不翻译；"scratch 项目" |
   | 已过期 / 已取消 | Expired / Cancelled | 问题的结束方式 |
+  | 密钥 | key | 虚拟机连接的共享密钥（ADR-0018） |
   | Workbench | Workbench | 不翻译，全称 EplanMcp Workbench |
 
   理由：同一事物有几个叫法，人会以为是不同的东西。依据：[Writing style › Style conventions](https://learn.microsoft.com/en-us/windows/apps/design/style/writing-style#style-conventions)；[WCAG 2.2 › 3.2.4](https://www.w3.org/TR/WCAG22/#consistent-identification)。
@@ -557,7 +560,7 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 
 | 方面 | TIA | 本项目 | 理由 |
 |---|---|---|---|
-| 字体 | 随包的 Noto Sans SC 和 JetBrains Mono（TIA 偏差 UI-37）；TIA 的 TYP-01 建议系统字体 | 全部文字用 Maple Mono CN，私有加载，回退到 Segoe UI Variable、Microsoft YaHei UI（TYP-01）；布局按等宽字体留余量（TYP-10） | 项目负责人的决定（ADR-0017 第 4 条） |
+| 字体 | 随包的 Noto Sans SC 和 JetBrains Mono，编进程序集（TIA 偏差 UI-37）；TIA 的 TYP-01 建议系统字体 | 全部文字用 Maple Mono CN，从程序目录私有加载，回退到 Segoe UI Variable Text、Microsoft YaHei UI（TYP-01）；布局按等宽字体留余量（TYP-10）；关闭连字（TYP-11） | 项目负责人的决定（ADR-0017 第 4 条） |
 | 审批按钮 | "批准执行"可以用主要样式（TIA 的 APR-04） | 两个按钮样式相同，都不用主要或危险样式，没有快捷键和访问键（APR-02） | ADR-0014 第 6 条，ADR-0017 第 5 条 |
 | 防误触 | AI 切页或定位后 500 毫秒（TIA 的 AI-02） | 显示不同的问题、窗口变为可见、切到审批队列页之后 500 毫秒（APR-04） | ADR-0014 第 6 条 |
 | 新问题 | 工作台面板发起的请求自动打开审批卡（TIA 的 APR-02） | 从不自动切页或激活窗口，只提醒（APR-14） | 问题都来自 AI；不抢焦点（M5 设计 4.4） |
@@ -567,3 +570,4 @@ Workbench 有四个页面和一个设置抽屉（M5 设计 4.4、4.12）：
 | 类型层级与圆角 | 规范正文写 Fluent 的字号（12 / 14 / 18 / 20 / 28）和 4 / 8 圆角，主题实现的是 Ant 的取值（TIA 偏差 UI-39） | 直接按主题中 Ant 的取值（附录 A） | 规范与实现一致 |
 | 对话框按钮顺序 | 规范正文按 Windows 的顺序（提交在左），实现按 Ant（提交在右，TIA 偏差 C.0） | 按 Ant：安全按钮在左，提交按钮在最右（DLG-05） | 与 TIA 的实际观感一致 |
 | 产品名 | "TIA 工作台" | 中英文都写 Workbench（LOC-07） | 与本项目的文档一致 |
+| 完整参数 | 审批卡可以展开完整参数或生成计划（TIA 的 APR-03） | 问题只带参数摘要（哈希）和变更清单，不显示参数（APR-07） | 协议只传这些（ADR-0014 第 3 条）；变更清单就是要批准的内容 |
