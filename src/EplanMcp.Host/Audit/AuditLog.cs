@@ -169,14 +169,17 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
     /// the file with <c>FileShare.Read</c>, so it is opened sharing write and delete: a reader that shares only reading
     /// cannot open it then, and makes the append fail while it reads. Every record ends with "\n"; what follows the
     /// last one may be a record still being written and is left out, unless <paramref name="withIncompleteLast"/>: the
-    /// caller holds the lock (<see cref="TryTakeTurn"/>), so it is an append that failed halfway.
+    /// caller took the length under the lock (<see cref="TryTakeTurn"/>), so it is an append that failed halfway.
+    /// With <paramref name="length"/>, only the file's first so many bytes are read: what it held when they were taken.
     /// </summary>
-    internal static IEnumerable<string> ReadLines(string file, bool withIncompleteLast = false)
+    internal static IEnumerable<string> ReadLines(string file, bool withIncompleteLast = false, long? length = null)
     {
         string text;
         using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-        using (var reader = new StreamReader(stream))
         {
+            byte[] bytes = new byte[length ?? stream.Length];
+            int read = stream.ReadAtLeast(bytes, bytes.Length, throwOnEndOfStream: false); // shorter if it was cut meanwhile
+            using var reader = new StreamReader(new MemoryStream(bytes, 0, read));
             text = reader.ReadToEnd();
         }
 
