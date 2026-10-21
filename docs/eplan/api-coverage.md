@@ -2,7 +2,7 @@
 
 > 用途：对照官方 API，确认本项目计划的工具没有遗漏重要能力，并看清每个里程碑覆盖到哪里。
 > 原则（[ADR-0006](../adr/0006-tool-surface-design.md)）：**不追求一对一包装 API**，而是按工程师的任务设计工具。"覆盖"的含义是：这个领域里常见的工程任务有工具可用。
-> 维护：新增或调整工具家族时，同步更新本表；每个里程碑结束时复核一次。
+> 维护：新增或调整工具家族时，同步更新本表；每个里程碑结束时复核一次。最近一次复核：2026-10-20，M4 结束时；按 M4 设计 Q1，第一批、第二批之外的 M4 条目改标"M4 之后"，各自单独设计。
 
 状态图例：⬜ 计划中　🟡 进行中　✅ 已实现　➖ 暂不覆盖（写明原因）
 
@@ -14,20 +14,20 @@
 
 | 命名空间 | 公开类型 | 用途 | 对应的工具家族 | 里程碑 | 状态 |
 |---|---:|---|---|---|---|
-| `Eplan.EplApi.DataModel` | 339 | 项目、页面、功能（设备）、连接、电缆、端子、PLC、部件引用、属性 | 项目 / 页面 / 设备 / 连接 / 电缆 / 端子 / PLC / 属性 | M2（读）、M3（写） | ⬜ |
+| `Eplan.EplApi.DataModel` | 339 | 项目、页面、功能（设备）、连接、电缆、端子、PLC、部件引用、属性 | 项目 / 页面 / 设备 / 连接 / 电缆 / 端子 / PLC / 属性 | M2（读）、M3（写）；电缆、端子、PLC 的专门工具在 M4 之后 | 🟡 读：项目、页、设备、连接、部件、消息、检查结果；写：建页、改页、设备标识、删页、重编号 |
 | `Eplan.EplApi.MasterData` | 127 | 部件库、符号库、宏、表格等主数据 | 部件 / 符号 / 宏 | M3（读）、M4（写） | 🟡 宏的读取已实现（`eplan_macro_list`、`eplan_macro_get`） |
-| `Eplan.EplApi.HEServices` | 108 | 高层服务：当前选择、编辑、生成、编号、报表、检查、导入导出 | 选择 / 报表 / 检查 / 编号 / 生成 | M2–M4 | ⬜ |
-| `Eplan.EplApi.DataModel.Graphics` | 87 | 图形对象（线、文本、矩形、属性放置） | 页面图形读写、设备标识显示：按符号新建的设备不显示标识，选择属性排列方案也不行（S10）；M3b 改用窗口宏放置，宏中的设备显示标识 | M3 | ⬜ |
+| `Eplan.EplApi.HEServices` | 108 | 高层服务：当前选择、编辑、生成、编号、报表、检查、导入导出 | 选择 / 报表 / 检查 / 编号 / 生成 | M2–M4；导入和当前选择在 M4 之后 | 🟡 检查、报表、页与设备的编号、生成连接、PDF/DXF/图片导出已实现 |
+| `Eplan.EplApi.DataModel.Graphics` | 87 | 图形对象（线、文本、矩形、属性放置） | 页面图形读写、设备标识显示：按符号新建的设备不显示标识，选择属性排列方案也不行（S10）；M3b 改用窗口宏放置，宏中的设备显示标识 | M3；按符号放置在 M4 之后（M3b 设计 Q1） | 🟡 用窗口宏放置设备（`eplan_macro_insert`） |
 | **`Eplan.EplApi.DataModel.E3D`** | **80** | **Pro Panel 3D**：安装空间、机柜、安装板、导轨、线槽、元件放置、钻孔、母排、铜排、布线、装配约束 | **Pro Panel 3D**（见第 3 节） | **M4b** | ⬜ |
 | `Eplan.EplApi.Base` | 40 | 设置、路径变量、多语言文本、系统消息、进度 | 基础设施（Bridge 内部使用） | M1–M2 | 🟡 |
-| `Eplan.EplApi.ApplicationFramework` | 37 | action、插件、授权、静默模式 | 基础设施；受控 action 白名单 | M1、M4 | 🟡 |
-| `Eplan.EplApi.EServices` / `.Ged` | 29 / 12 | 消息管理、图形编辑器交互 | 检查消息；交互式插入不做（需要人在界面上操作） | M2 | ⬜ |
-| `Eplan.EplApi.DataModel.MasterData` | 25 | 项目内的主数据（项目自带的符号库、表格） | 符号目录 | M3 | ⬜ |
+| `Eplan.EplApi.ApplicationFramework` | 37 | action、插件、授权、静默模式 | 基础设施；受控 action 白名单 | M1；action 白名单在 M4 之后 | 🟡 |
+| `Eplan.EplApi.EServices` / `.Ged` | 29 / 12 | 消息管理、图形编辑器交互 | 检查消息；交互式插入不做（需要人在界面上操作） | M2 | ✅ 项目消息与检查结果的读取 |
+| `Eplan.EplApi.DataModel.MasterData` | 25 | 项目内的主数据（项目自带的符号库、表格） | 符号目录 | M3；符号目录在 M4 之后 | 🟡 窗口宏的读取和插入用到其中的宏类型 |
 | `Eplan.EplApi.DataModel.Planning` | 25 | 预规划（规划对象、管段） | 预规划 | ➖ | 当前授权中 Preplanning 不可用，暂不覆盖 |
-| `Eplan.EplApi.DataModel.EObjects` | 24 | 电气对象的扩展（如 PLC 卡、端子排定义） | 并入设备 / 端子 / PLC | M3 | ⬜ |
-| `Eplan.EplApi.DataModel.Revisions` | 4 | 修订管理 | 修订 | M4 | ⬜ |
+| `Eplan.EplApi.DataModel.EObjects` | 24 | 电气对象的扩展（如 PLC 卡、端子排定义） | 并入设备 / 端子 / PLC | M4 之后 | ⬜ |
+| `Eplan.EplApi.DataModel.Revisions` | 4 | 修订管理 | 修订 | M4 之后 | ⬜ |
 | `Eplan.EplApi.DataModel.Topology` | 4 | 布线路径拓扑 | 拓扑 | M4b | ⬜ |
-| `Eplan.EplApi.System` / `Starter` | 6 / 6 | 离线程序启动 | 离线宿主（不对外提供工具） | M5 | ⬜ |
+| `Eplan.EplApi.System` / `Starter` | 6 / 6 | 离线程序启动 | 离线宿主（不对外提供工具） | M5 | 🟡 spike S15 已验证离线程序（api-notes A22） |
 | `Eplan.EplApi.RemoteClient` / `Remoting` | 5 / 4 | 远程客户端 | 不使用（ADR-0002） | ➖ | 架构上不采用 |
 | `Eplan.EplApi.Scripting` | 6 | 脚本 | 不对外提供（Code 级，默认禁用，ADR-0005） | ➖ | 安全原因 |
 
@@ -50,18 +50,18 @@
 
 | 功能类别 | 典型 action | 本项目的处理方式 | 里程碑 |
 |---|---|---|---|
-| 导出 | PDF、DXF/DWG、图片、PXF、部件清单、设备清单、标签、3D | 任务型工具 `eplan_export_*`，统一校验输出文件 | M4 |
-| 导入 | DXF/DWG、PXF、部件、设备清单、预规划数据、PLC | 任务型工具，Destructive 级（可能覆盖数据） | M4 |
+| 导出 | PDF、DXF/DWG、图片、PXF、部件清单、设备清单、标签、3D | 任务型工具 `eplan_export_*`，统一校验输出文件：PDF、DXF、图片已实现 | M4；PXF、清单、标签、3D 在 M4 之后 |
+| 导入 | DXF/DWG、PXF、部件、设备清单、预规划数据、PLC | 任务型工具，Destructive 级（可能覆盖数据） | M4 之后 |
 | 检查与消息 | 项目检查、页面检查、消息管理 | 读取已有的检查消息（`eplan_check_list`）；运行检查（`eplan_check_run`）会写入项目 | M2（读取）、M4（运行） |
 | 报表 | 更新报表、生成报表页 | `eplan_report_update` | M4 |
-| 编号 | 设备、页面、端子、电缆、连接重编号 | `eplan_renumber`（Destructive，执行前备份） | M4 |
-| 生成 | 生成连接、电缆、宏 | 插入窗口宏：`eplan_macro_insert`；生成连接：`eplan_connection_generate`（按页，只更新）。两者都已写规格，实现排在 M3a 第 10 步之后（[M3b 设计](../design/2026-10-20-m3b-placement.md)）；电缆生成在 M4 | M3b、M4 |
+| 编号 | 设备、页面、端子、电缆、连接重编号 | `eplan_page_renumber`、`eplan_device_renumber`（Destructive，执行前备份）；端子、电缆、连接的编号在 M4 之后 | M4 |
+| 生成 | 生成连接、电缆、宏 | 插入窗口宏：`eplan_macro_insert`；生成连接：`eplan_connection_generate`（按页，只更新）。两者已实现（M3b）；生成电缆在 M4 之后（[M3b 设计](../design/2026-10-20-m3b-placement.md)）；电缆生成在 M4 | M3b、M4 |
 | 项目管理 | 打开、关闭、备份、还原、升级、压缩 | `eplan_project_*`；备份同时用作 Destructive 操作前的保护 | M2–M3 |
-| 部件管理 | 导入导出部件、同步 | `eplan_part_*` | M4 |
-| 翻译与语言 | 翻译项目、设置项目语言 | `eplan_translate_*` | M4 |
+| 部件管理 | 导入导出部件、同步 | `eplan_part_*` | M4 之后 |
+| 翻译与语言 | 翻译项目、设置项目语言 | `eplan_translate_*` | M4 之后 |
 | 设置 | 读写设置、导入导出设置 | 只读：用 `Settings` / `ProjectSettings` 类，有任务需要时再做成工具；写入属于 Code 级配置，默认不开放 | 按需（原计划 M2，见 M2 设计 Q5） |
 | 3D / 生产 | 安装空间、3D 宏、模型视图、钻孔视图、铜排展开、NC 数据、生产布线 | Pro Panel 工具家族 | M4b |
-| 其余（约 1050 个界面 action） | 各类界面命令 | 不逐个包装；需要时加入受控 action 白名单（`eplan_action_run`，只允许已标定级别的 action） | M4 |
+| 其余（约 1050 个界面 action） | 各类界面命令 | 不逐个包装；需要时加入受控 action 白名单（`eplan_action_run`，只允许已标定级别的 action） | M4 之后 |
 
 ## 3. Pro Panel 3D（M4b）
 

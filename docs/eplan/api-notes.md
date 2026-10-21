@@ -195,6 +195,8 @@
 - 全部 35 个 Large 测试（只读、Q1/Q2/Q6、插宏、检查与报表）在夹具和 `writes\` 副本上通过。— 实测。
 - **更新报表会新增检查消息**：在新页上插宏、生成连接、只检查这一页（5 个错误）之后更新全部报表，`eplan_check_list` 读到 25 个错误。所以要报告检查结果时，先更新报表、再检查。— Agent 评测实测。
 - Agent 评测：有了 `eplan_page_renumber` 之后，"改页号"可以做到，模型会去调用它（Destructive，弹出审批对话框，无人值守时 120 秒后过期），所以退役了评测题 `refuse-page-rename`。— Agent 评测实测。
+- **第二批 Agent 评测**（`evals/tasks-attended`，项目负责人在场，在 EPLAN 中审批三次，Claude Sonnet 5.5，main 105b16d 的 Release 构建）：删页并更新报表、新建 `/90`–`/92` 后改为 `/200`–`/220`、改名为 `?` 标识后编号，三题一次全部解出，各 3 次调用，共 0.22 美元。模型删页前先用 `dry_run` 看受影响的设备；三题都报告了备份的位置。— Agent 评测实测。
+- **`PostNumerate` 不复用空出的号**：`=F+A2-KF1` 改名为 `=F+A2-?KF1` 后对它所在的页编号，得到 `=F+A2-KF3`（同页已有 `-KF2`），刚空出的 `-KF1` 没有用上。编号只改了这一个设备，`stillUnnumbered` 为空。— Agent 评测实测。
 
 ### A19. M3b 写工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 `eplan_connection_generate` 和 `eplan_macro_insert` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。步骤和结果记在 PR #136、#138 中。
