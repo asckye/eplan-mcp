@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Unsigned spike add-in (see S0); spike S24 probes reading the parts and translation databases through the main-thread dispatcher on a scratch copy. -->
+  <!-- Unsigned spike add-in (see S0); spike S24 probes the parts and translation databases, their backup and restore, and writes to a copy under the scratch root. -->
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
     <AssemblyName>EplanMcp.Spikes.S24</AssemblyName>

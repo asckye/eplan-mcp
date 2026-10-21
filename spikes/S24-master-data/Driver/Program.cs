@@ -8,10 +8,11 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Spikes.S24.Driver;
 
 /// <summary>
-/// Drives the read part of spike S24 in the running EPLAN through Remote Client (api-notes B4): registers the spike
-/// add-in, runs the parts and translation database probes, and unregisters it. No project is opened or changed.
+/// Drives spike S24 in the running EPLAN through Remote Client (api-notes B4): registers the spike add-in, runs the
+/// given probes, and unregisters it. No project is opened or changed; writes go only under the scratch root.
 /// Reports go to <c>.local\spikes\s24\</c> (git-ignored).
-/// <para>Usage: <c>EplanMcp.Spikes.S24.Driver.exe --host name [--port 49152] [--part number] [--contains text]</c>.</para>
+/// <para>Usage: <c>EplanMcp.Spikes.S24.Driver.exe --host name [--revision rN] [--port 49152] [--part number] [--contains text] [--modes partsdb,translationdb] [--destination folder]</c>;
+/// <c>--modes opencopy --part "…\scratch\…\EPLAN_parts.alk"</c> runs the write part on a restored copy.</para>
 /// </summary>
 internal static class Program
 {
@@ -34,11 +35,19 @@ internal static class Program
         string host = Option(args, "--host") ?? Environment.MachineName;
         string part = Option(args, "--part") ?? "SIE.3RH2122-1HB40";
         string contains = Option(args, "--contains") ?? "3RH21";
+        string destination = Option(args, "--destination") ?? string.Empty;
+        string revision = Option(args, "--revision") ?? string.Empty; // re-registering in the same EPLAN needs a new name
         string repository = Repository();
-        const string Title = "EplanMcp.Spikes.S24";
-        const string Action = "EplanMcpSpikeS24";
-        string addIn = Path.Combine(repository, "spikes", "S24-master-data", "bin", "Release", "net481", Title + ".dll");
+        string title = "EplanMcp.Spikes.S24" + revision;
+        string action = "EplanMcpSpikeS24" + revision;
+        string addIn = Path.Combine(repository, "spikes", "S24-master-data", "bin", "Release", "net481", title + ".dll");
         string output = Directory.CreateDirectory(Path.Combine(repository, ".local", "spikes", "s24")).FullName;
+        if (!File.Exists(addIn))
+        {
+            Console.WriteLine("missing add-in " + addIn); // building another revision removes the previous one
+            return 1;
+        }
+
         foreach (string variable in new[] { "HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy", "grpc_proxy", "ALL_PROXY", "all_proxy" })
         {
             Environment.SetEnvironmentVariable(variable, null);
@@ -50,11 +59,11 @@ internal static class Program
         Console.WriteLine("register: " + client.ExecuteAction($"EplApiModuleAction /register:\"{addIn}\" /Quiet"));
         try
         {
-            foreach (string mode in new[] { "partsdb", "translationdb" })
+            foreach (string mode in (Option(args, "--modes") ?? "partsdb,translationdb").Split(','))
             {
                 string report = Path.Combine(output, "s24-" + mode + ".json");
                 File.Delete(report);
-                client.ExecuteAction($"{Action} /Mode:{mode} /Report:\"{report}\" /Part:\"{part}\" /Contains:\"{contains}\"");
+                client.ExecuteAction($"{action} /Mode:{mode} /Report:\"{report}\" /Part:\"{part}\" /Contains:\"{contains}\" /Destination:\"{destination}\"");
                 var clock = Stopwatch.StartNew();
                 while (!File.Exists(report) && clock.Elapsed < TimeSpan.FromSeconds(660))
                 {
@@ -66,7 +75,7 @@ internal static class Program
         }
         finally
         {
-            Console.WriteLine("unregister: " + client.ExecuteAction($"EplApiModuleAction /unregister:\"{Title}\" /Quiet"));
+            Console.WriteLine("unregister: " + client.ExecuteAction($"EplApiModuleAction /unregister:\"{title}\" /Quiet"));
         }
 
         return 0;
