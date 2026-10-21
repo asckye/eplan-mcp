@@ -34,9 +34,20 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 ### 写入题：每次作答一份新副本
 `fixture: copy` 的题目要修改项目（M3 设计第 7 节和 Q4）。运行器为这类题的**每次作答**复制一份 EPLAN 自带的 `EPLAN_Sample_Project`（在 `C:\Users\Public\EPLAN\Data` 下找，或用 `--template <.elk>` 指定），放在 `<scratch 根目录>\evals\<运行>\copies\<nn>\Eval_<运行>_<nn>`，每份的项目名都不同。题目中的 `{project}` 换成这个名字，标准调用和事后检查也都对这份副本进行（传入 `project`）。`fixture: copy_outside_scratch` 的副本放在 `outside\` 下，不在模型的 scratch 根目录中，用来考察写入被策略拒绝后模型怎么回答。
 
-**副本由工程师在 EPLAN 中打开**：运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待（最多 20 分钟，Ctrl+C 停止），每 2 秒用 `eplan_project_list` 查看一次。在 EPLAN 中逐个打开（文件 > 打开），全部打开后在页导航器中点回夹具 `EPLAN_Sample_Project`，让它重新成为当前项目：读取题读的是当前项目，所以运行器要等到预检时的当前项目（夹具）重新是当前项目。到时夹具仍不是当前项目，运行停止，不产生费用；到时仍未打开的副本，对应的作答记为无效。运行器不自己打开副本：从外部打开项目只有 Remote Client 的 `ProjectOpen`（spike S9–S11 的驱动程序用过），它走未加密的局域网端口，架构上不采用（ADR-0002）；插件中也还没有打开项目的操作。
+**份数**：所选任务中 `fixture` 为 `copy` 或 `copy_outside_scratch` 的题数，乘以 `--repeat`；每份约 200 MB。目前开发集有 5 道这样的题，保留集有 1 道：`run` 要打开 5 份，`run --set all --repeat 3` 要打开 18 份，`run --task page-create` 只要 1 份；份数多时可以用 `--set`、`--task` 分几次运行。所选任务都在共享夹具上时，运行器不复制，也不需要打开什么。
 
-运行结束后副本仍开在 EPLAN 中：在 EPLAN 中关闭它们，再删除 `<scratch 根目录>\evals\<运行>\`（每份约 200 MB）。
+**副本由工程师在 EPLAN 中手工打开**（[M3 设计 Q4](../docs/design/2026-10-19-m3-safe-writes.md#9-待定问题与决定)，2026-10-20 项目负责人决定）。运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待，最多 20 分钟（Ctrl+C 停止）：每 2 秒用 `eplan_project_list` 查看一次，情况有变化时显示已打开几份。这期间工程师：
+1. 在 EPLAN 中逐个打开列出的 `Eval_<运行>_<nn>.elk`（文件 > 打开）。打开的副本可能成为当前项目。
+2. 全部打开后，在页导航器中点一下夹具 `EPLAN_Sample_Project`，让它重新成为当前项目。读取题读的是当前项目，所以运行器要等到预检时的当前项目（夹具）重新是当前项目才开始作答；在此之前它提示 "select EPLAN_Sample_Project.elk in the page navigator again"。
+3. 运行结束之前不要关闭副本：标准调用、作答和事后调用都要用到它们。
+
+到时夹具仍不是当前项目，运行停止，不产生费用；到时仍未打开的副本，对应的作答记为无效（"it was not opened in EPLAN within 20 minutes"），其他作答照常进行。
+
+运行器不自己打开副本，也不重启 EPLAN。考虑过、暂不采用的做法：
+- Remote Client 辅助程序：从外部打开项目只有 Remote Client 的 `ProjectOpen`（spike S9–S11 的驱动程序用过），它走未加密的局域网端口，ADR-0002 不采用 Remote Client；
+- 插件新增 `project.open` 操作和对应的工具：改变产品和 IPC，需要单独设计。
+
+**清理**：运行结束后（Ctrl+C 停止时也一样），运行器提示副本仍开在 EPLAN 中。在 EPLAN 中关闭它们，再删除 `<scratch 根目录>\evals\<运行>\`；夹具 `scratch\fixtures\` 不要删。`.local/evals/<运行>/` 中的报告、轨迹和模型那一侧 eplanmcp 的数据（`eplanmcp\`，含审计日志）不会自动删除，不再需要时自行删除。
 
 结果在 `.local/evals/<yyyyMMdd-HHmmss>/`（不进仓库）：
 - `report.md`：中文摘要，按开发集和保留集给出成功率，以及调用次数、token、耗时的中位数，列出失败、无效的任务和提示；
