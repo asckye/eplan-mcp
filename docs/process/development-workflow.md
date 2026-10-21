@@ -158,6 +158,7 @@ Refs: #42
 - [ ] `CHANGELOG.md` 把 `Unreleased` 整理为新版本（遵循 Keep a Changelog）。
 - [ ] 发布前的 Large 实机测试和 Agent 评测都已通过，结果附在发布说明里。
 - [ ] 产物：安装包或压缩包、SHA-256 校验和、SBOM（CycloneDX）、构建来源证明（GitHub artifact attestation）。
+- [ ] 插件（引用本机 EPLAN 的 Bin）在自托管 runner `eplan-2026` 上构建，并在离线宿主上通过 Large 测试；runner 只为本仓库的标签和手动触发运行（[M5 设计](../design/2026-10-20-m5-operability.md) 4.9、4.10，SEC-26）。
 - [ ] 发布说明写明支持矩阵：EPLAN 版本、变体、需要的授权模块。
 - [ ] 打 `vX.Y.Z` 标签，由 CI 构建产物，**不发布本地构建的二进制**。
 

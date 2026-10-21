@@ -120,6 +120,7 @@ flowchart TB
         audit["审计日志<br/>(JSONL，哈希链)"]
         shaper["结果整形<br/>分页 / 截断 / 不可信内容标记"]
         bclient["BridgeClient<br/>发现 / 握手 / 串行队列 / 超时"]
+        wbchannel["WorkbenchChannel<br/>每次审批连接一次"]
         cli["CLI 子命令<br/>doctor / install-addin / client-config / audit verify"]
     end
     subgraph eplanproc["EPLAN.exe 进程（CLR：.NET Framework 4.8.1）"]
@@ -131,12 +132,18 @@ flowchart TB
         adapters["EPLAN 适配层<br/>(唯一引用 Eplan.EplApi.* 的地方)"]
         eplanapi["EPLAN API"]
     end
+    subgraph wbproc["Workbench 进程（M5，工程师启动）"]
+        wbserver["审批管道服务器<br/>每个用户、每个数据根目录一个"]
+        queue["审批队列 / 审计浏览 / 配置向导"]
+    end
 
     client -- "stdio" --> mcp --> tools
     tools --> policy
     tools --> shaper
     tools --> bclient
     policy --> audit
+    policy --> wbchannel
+    wbchannel -- "命名管道（M5）" --> wbserver --> queue
     bclient -- "命名管道" --> server
     addin --> server
     server --> dispatcher --> ops --> tx --> adapters --> eplanapi
@@ -147,7 +154,7 @@ flowchart TB
 | **Host**（`eplanmcp.exe`） | .NET 10 控制台程序，自包含单文件发布；官方 MCP C# SDK 2.x（支持 2026-07-28 规范，并兼容旧版客户端） | MCP 协议；工具注册和 Profile；参数校验；策略与审批；审计；结果整形；发现和管理 Bridge 连接；CLI 子命令 | 不引用任何 EPLAN 程序集 |
 | **Bridge**（EPLAN 插件） | net481 类库，由 EPLAN 加载；**除 EPLAN 自带的程序集外不带任何第三方依赖** | 在主线程上执行操作；事务和撤销；把 EPLAN 对象映射为契约 DTO；收集操作期间产生的 EPLAN 系统消息 | 不做策略判断，不访问 MCP，不写审计 |
 | **Contracts** | netstandard2.0 类库，纯 POCO | Host 与 Bridge 共享的请求/响应 DTO、操作名、错误码、协议版本 | 不包含逻辑，也不依赖任何序列化器 |
-| **Workbench**（M5） | .NET 10 WPF，中英双语；界面字体 Maple Mono CN（SIL OFL 1.1，随安装包附带其许可证文本） | 客户端配置向导（选择客户端、一键写入 MCP 配置）、审批队列（一种审批渠道）、审计浏览、连接与授权状态面板 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目 |
+| **Workbench**（M5） | 单独的桌面程序 `app\workbench\EplanMcp.Workbench.exe`，Fluent 2 界面，界面技术见 [ADR-0015](../adr/0015-workbench-ui-stack.md)（Proposed）；中英双语；界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI），等宽的数据区用 Maple Mono CN（SIL OFL 1.1，随安装包附带其许可证文本） | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
 
 **职责划分原则：Host 决定"能不能做"，Bridge 只负责"怎么做"。** 安全逻辑全部在 Host 中，不依赖 EPLAN，可以用 Small 测试穷尽验证。
 
@@ -159,7 +166,7 @@ flowchart TB
 | `ToolCatalog` | 用 `[McpServerTool]` 等特性声明工具，并显式设置 `ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld`；按 Profile 过滤；导出契约快照供 CI 比对 |
 | `ToolHandlers` | 每个工具一个处理器：校验参数 → 询问策略 → 调用 Bridge → 整形结果 |
 | `PolicyEngine` | 纯函数：输入（工具级别、目标项目、是否在 scratch 中、配置），输出（允许 / 需要审批 / 拒绝 + 原因）。见 [ADR-0005](../adr/0005-safety-model.md) |
-| `ApprovalService` | 只经工程师独立操作的窗口，按优先级选择：**Workbench 审批队列**（M5，Workbench 正在运行时）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝。不用 MCP elicitation。在 Host 中等待决定，期限默认 120 秒（60–300 秒可配置），客户端提供了进度令牌时每 15 秒发一次进度通知（[ADR-0011](../adr/0011-approval-out-of-band.md)） |
+| `ApprovalService` | 只经工程师独立操作的窗口，按优先级选择：**Workbench 审批队列**（M5，Workbench 正在运行时；`WorkbenchChannel` 每次审批连接一次它的管道，连接超时 250 毫秒，问题送达后只在 Workbench 中回答，[ADR-0014](../adr/0014-workbench-approval-channel.md)）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝。不用 MCP elicitation。在 Host 中等待决定，期限默认 120 秒（60–300 秒可配置），客户端提供了进度令牌时每 15 秒发一次进度通知（[ADR-0011](../adr/0011-approval-out-of-band.md)） |
 | `AuditLog` | 每次调用写一条 JSONL 记录，每条记录带上一条的哈希，形成哈希链 |
 | `ResultShaper` | 统一处理分页、截断、`response_format`（concise / detailed）、不可信内容标记，以及 token 预算（默认不超过 5k，硬上限 20k，低于 Claude Code 的 25k 限制） |
 | `BridgeClient` | 发现 EPLAN 实例；建立管道连接并握手；**每个 EPLAN 实例一个串行队列**；超时与取消 |
@@ -307,7 +314,12 @@ sequenceDiagram
     H-->>C: 结果
 ```
 
-审批对话框以 EPLAN 主窗口为所有者，打开期间其他调用返回 `EPLAN_BUSY`。M5 起 Workbench 正在运行时，由它的审批队列代替 EPLAN 对话框，流程其余部分不变。没有可用的渠道时，需要审批的操作一律拒绝；没有人回答时对话框到期自动拒绝。所以无人值守的代理不能写入真实项目，scratch 中的写入不受影响。
+审批对话框以 EPLAN 主窗口为所有者，打开期间其他调用返回 `EPLAN_BUSY`。M5 起 Workbench 正在运行时，由它的审批队列代替 EPLAN 对话框（[ADR-0014](../adr/0014-workbench-approval-channel.md)），流程其余部分不变，区别有三点：
+- `approval.ask` 由 Host 经 Workbench 的管道发出，不经 Bridge；等待期间不占用 Host 到 EPLAN 的队列，工程师可以先在 EPLAN 中查看，项目因此发生的变化由执行前的指纹比对发现（`PLAN_STALE`）；
+- 管道不存在、连接超时、对端不是本安装中的 Workbench、协议不兼容或队列已满时，改由 EPLAN 对话框询问；问题一旦送达，就只在 Workbench 中回答，连接断开按"已取消"处理，不执行，也不转到 EPLAN 对话框；
+- 绑定、期限和一次性仍只在 Host 中判断；执行结果发给 Workbench 只用于显示，不能批准任何东西。
+
+没有可用的渠道时，需要审批的操作一律拒绝；没有人回答时对话框到期自动拒绝。所以无人值守的代理不能写入真实项目，scratch 中的写入不受影响。
 
 ### 6.4 EPLAN 正忙或有模态对话框
 工程师可能正在 EPLAN 里操作，或者 EPLAN 正显示一个对话框。两种情况分开处理（spike S1）：主线程正忙时，调度在超时（默认 10 秒，可配置）后放弃，返回 `EPLAN_BUSY`，而且被放弃的调度**事后不会再执行**；主线程空闲但打开着模态对话框时，WPF 调度器会在对话框的消息循环中执行我们的代码，所以 Bridge 在执行前检查 EPLAN 主窗口是否被禁用，被禁用就立即返回 `EPLAN_BUSY`，提示"请关闭 EPLAN 中打开的对话框后重试"。**操作不会在后台排队、等到之后突然执行**，因为工程师那时可能已经改变了项目状态。
@@ -325,10 +337,12 @@ sequenceDiagram
 | 项 | 做法 | 理由 |
 |---|---|---|
 | 安装范围 | 按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限。不放在 `%LOCALAPPDATA%` 下，原因同 ADR-0008：安装命令如果从 MSIX 打包的应用中运行，写入会被重定向，EPLAN 就找不到插件 | 工程师的电脑常常没有管理员权限 |
+| 安装包 | 按用户安装的 Inno Setup 安装包（`PrivilegesRequired=lowest`），单个文件，离线可装；位置固定，不能选择；卸载项在 HKCU；升级整体替换 `app\`，不强制结束正在运行的程序；卸载保留数据根目录中的全部数据（[ADR-0016](../adr/0016-per-user-installer.md)） | 不需要管理员权限；EPLAN 的注册、客户端配置和插件都指向固定的位置 |
 | Host | 自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
-| 插件注册 | `eplanmcp install-addin` 调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`（命令行方式，或者通过 Remote Client 对正在运行的实例执行）；`uninstall-addin` 可以完全撤销。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
-| 签名 | 视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 授权要求 |
+| 插件注册 | 只经 `eplanmcp install-addin`：它用命令行方式调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次，结果记在 `<数据根目录>\state\addins.json`；探测到 MSIX 重定向时拒绝执行；`uninstall-addin` 按记录完全撤销（[ADR-0016](../adr/0016-per-user-installer.md)）。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
+| 签名 | 0.x 的安装包和程序不签名，附 SHA-256 和构建来源证明，入门指南说明 SmartScreen 的"仍要运行"和校验方法；以后是否购买代码签名证书由项目负责人决定（M5 设计 Q6）。插件的 EADN 签名视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 暂时没有证书；授权要求 |
+| Claude Code 插件 | 随安装包提供本地插件市场 `app\claude-plugin\`，插件中的 `.mcp.json` 写 `eplanmcp.exe` 的完整路径；版本必然与安装的程序一致，不联网也能装（M5 设计 4.7、Q10） | 一键安装，不依赖网络 |
 | 客户端配置 | `eplanmcp client-config claude-code` 等命令生成客户端的 MCP 配置，写入前展示 diff | 用户可以掌控被改动的内容 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
 | 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
