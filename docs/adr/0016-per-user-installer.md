@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Accepted（第 7 条中插件的构建由 [ADR-0020](0020-no-self-hosted-runner.md) 修改：不用自托管 runner，插件由维护者在开发机上按标签构建） |
-| 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"） |
+| 状态 | Accepted（第 7 条中插件的构建由 [ADR-0020](0020-no-self-hosted-runner.md) 修改：不用自托管 runner，插件由维护者在开发机上按标签构建；第 3 条的 MSIX 部分 2026-10-21 按 S14 修改，见第 3 条） |
+| 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"）· 2026-10-21（修改第 3 条：项目负责人"按实测修改"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 单向门（第一个安装包发布后）：EPLAN 中的注册、客户端配置和插件都指向安装位置，改位置要迁移每台机器；安装包工具本身是双向门 |
 | 影响 | 落实[架构第 7 节](../architecture/architecture.md#7-部署)和安装验收清单 I1–I10；补充 [ADR-0007](0007-licensing-and-distribution.md)（签名，决定不变）；[ADR-0008](0008-data-locations-and-instance-discovery.md) 的数据根目录不变 |
@@ -37,7 +37,7 @@ M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../de
 
 1. **安装包**：一个文件 `EplanMcp-Setup-<版本>.exe`，Inno Setup，`PrivilegesRequired=lowest`，从不提权；只装 x64；不显示目录页。关掉 `CloseApplications`，改为自己的进程检查（第 4 条）。CI 中固定 Inno Setup 的版本。
 2. **位置**：程序固定在 `%USERPROFILE%\EplanMcp\app\`，不能选择；`EPLANMCP_HOME` 只改数据根目录，不改程序位置。注册表中只有 HKCU 的卸载项和可选的登录自启动项；不修改 PATH 和任何全局环境变量；不往 EPLAN 目录复制文件，不写 EPLAN 的注册表。
-3. **插件注册**：只经 `eplanmcp install-addin`，它执行 `EPLAN.exe /Variant:"<变体>" EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次，结果记在 `<数据根目录>\state\addins.json`。探测到 MSIX 重定向时拒绝执行。没有任何 MCP 工具能注册插件（ADR-0005 第 1 节的 Code 级）。
+3. **插件注册**：只经 `eplanmcp install-addin`，它执行 `EPLAN.exe /Variant:"<变体>" EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次，结果记在 `<数据根目录>\state\addins.json`。~~探测到 MSIX 重定向时拒绝执行。~~ MSIX 环境下照常注册（2026-10-21 修改）：注册写的是 EPLAN 的工作站设置 `C:\Users\Public\Eplan\Settings\…\STATION.*.xdb`，不在 MSIX 会重定向的目录中（S14，api-notes A23），原来的拒绝没有依据。没有任何 MCP 工具能注册插件（ADR-0005 第 1 节的 Code 级）。
 4. **升级**：同一产品标识覆盖安装，不需要先卸载。安装前检查 `app\` 中的程序是否在运行，请工程师关闭 MCP 客户端会话和 Workbench，**不强制结束任何程序**；EPLAN 不必关闭，升级后提示重启。不支持降级。
 5. **卸载**：先按记录运行 `uninstall-addin`，再删除 `app\`、快捷方式、自启动项和卸载项。**数据根目录中的数据全部保留**，结束页列出位置。
 6. **Claude Code 插件**：本地插件市场放在 `app\claude-plugin\`，不含程序文件；其中的 `.mcp.json` 由安装程序写入 `eplanmcp.exe` 的完整路径，不依赖未核实的变量展开。
