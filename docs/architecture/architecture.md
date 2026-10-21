@@ -178,8 +178,8 @@ flowchart TB
 - `client-config`：`{schemaVersion: 1, mode, server: {name, command, args}, problem, clients: [{client, file, action, result, before, after, backup, notes, problem}]}`，每个客户端一项，顺序同命令行。
   - `mode` 取 `write`、`dry_run`、`remove`；`action` 取 `write`、`remove`；`result` 取 `written`、`would_write`、`removed`、`unchanged`、`failed`；
   - `before`、`after` 只是 `eplan` 这一项在文件中的写法（JSON 或 TOML 的文本），没有时为 `null`，从不包含文件的其他部分；`file` 在无法确定位置时为 `null`；`notes` 目前只有 `{code: "comments_dropped", zh, en}`；
-  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `invalid_file`、`unsupported_toml`、`ambiguous_package`、`file_changed`、`invalid_record`、`record_failed`、`unknown_client`、`io_error`、`not_eplanmcp`。`record_failed` 时文件已经改好，`result` 仍是 `written` 或 `removed`；
-  - 顶层的 `problem` 表示整个命令被拒绝，这时 `clients` 为空。任何一处有 `problem` 时退出码为 1。
+  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `invalid_file`、`unsupported_toml`、`ambiguous_package`、`file_changed`、`invalid_record`、`record_failed`、`unknown_client`、`io_error`、`not_eplanmcp`、`plugin_installed`、`claude_desktop_running`、`msix_redirected`。`record_failed` 时文件已经改好，`result` 仍是 `written` 或 `removed`；
+  - 顶层的 `problem` 表示整个命令被拒绝（`not_eplanmcp`、`msix_redirected`，或 `--remove` 时 `invalid_record`），这时 `clients` 为空。任何一处有 `problem` 时退出码为 1。
 
 ### 5.3 Bridge 组件
 

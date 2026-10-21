@@ -16,6 +16,8 @@ public sealed class ClientConfigCommandTests : IDisposable
 
     private readonly string _root = Directory.CreateTempSubdirectory("eplanmcp-client-config-").FullName;
     private readonly ManualTime _time = new(new DateTimeOffset(2026, 10, 21, 8, 15, 30, TimeSpan.Zero));
+    private bool _claudeDesktopRunning;
+    private string? _msixPackage;
 
     private string Profile => Path.Combine(_root, "用户");
 
@@ -159,8 +161,7 @@ public sealed class ClientConfigCommandTests : IDisposable
     [InlineData("")]
     public void Write_NotRunAsEplanmcp_IsRefusedForEveryClient(string executable)
     {
-        ClientConfigReport report = new ClientConfigCommand(Folders, new HostDataLocations(Path.Combine(_root, "数据")), executable, _time)
-            .Run(new([McpClient.Find("codex")!], ClientConfigMode.DryRun));
+        ClientConfigReport report = Command(executable).Run(new([McpClient.Find("codex")!], ClientConfigMode.DryRun));
 
         Assert.Equal(ClientProblem.NotEplanmcp, report.Problem!.Problem);
         Assert.Empty(report.Clients);
@@ -207,6 +208,84 @@ public sealed class ClientConfigCommandTests : IDisposable
     }
 
     [Theory]
+    [InlineData("Write")]
+    [InlineData("DryRun")]
+    public void ClaudeCode_WithThePluginInstalled_IsRefusedAndLeftAlone(string mode)
+    {
+        string claude = Put("claude-code", """{"mcpServers": {}}""");
+        Directory.CreateDirectory(Path.Combine(Profile, ".claude"));
+        File.WriteAllText(Path.Combine(Profile, ".claude", "settings.json"), """{"enabledPlugins": {"eplan-mcp@eplanmcp-local": true}}""");
+        Dictionary<string, byte[]> before = Contents();
+
+        ClientConfigReport report = Run(Enum.Parse<ClientConfigMode>(mode), "claude-code", "cursor");
+
+        Assert.Equal((ClientOutcome.Failed, ClientProblem.PluginInstalled), (report.Clients[0].Outcome, report.Clients[0].Problem!.Problem));
+        Assert.Equal(claude, report.Clients[0].File);
+        Assert.Null(report.Clients[1].Problem);
+        Assert.All(before, f => Assert.Equal(f.Value, File.ReadAllBytes(f.Key)));
+    }
+
+    [Fact]
+    public void ClaudeCode_WithThePluginInstalled_CanStillBeRemoved()
+    {
+        Run(ClientConfigMode.Write, "claude-code");
+        Directory.CreateDirectory(Path.Combine(Profile, ".claude", "plugins"));
+        File.WriteAllText(Path.Combine(Profile, ".claude", "plugins", "installed_plugins.json"), """{"version": 2, "plugins": {"eplan-mcp@eplanmcp-local": [{"scope": "user"}]}}""");
+
+        Assert.Equal(ClientOutcome.Removed, Run(ClientConfigMode.Remove).Clients.Single().Outcome);
+    }
+
+    [Theory]
+    [InlineData("Write")]
+    [InlineData("DryRun")]
+    [InlineData("Remove")]
+    public void ClaudeDesktop_WhileItRuns_IsRefusedAndTheOthersGoAhead(string mode)
+    {
+        string desktop = Put("claude-desktop", """{"mcpServers": {"eplan": {"command": "D:\\old\\eplanmcp.exe"}}, "preferences": {}}""");
+        _claudeDesktopRunning = true;
+
+        ClientConfigReport report = Run(Enum.Parse<ClientConfigMode>(mode), "claude-desktop", "gemini-cli");
+
+        Assert.Equal((ClientOutcome.Failed, ClientProblem.ClaudeDesktopRunning), (report.Clients[0].Outcome, report.Clients[0].Problem!.Problem));
+        Assert.Contains(@"D:\\old", File.ReadAllText(desktop), StringComparison.Ordinal);
+        Assert.False(File.Exists(desktop + Backup));
+        Assert.Null(report.Clients[1].Problem);
+    }
+
+    [Theory]
+    [InlineData("Write", "codex")]
+    [InlineData("DryRun", "codex")]
+    [InlineData("Remove", "codex")]
+    [InlineData("Remove")]
+    public void InAnMsixEnvironment_EveryModeIsRefusedAndNothingIsTouched(string mode, params string[] clients)
+    {
+        Run(ClientConfigMode.Write, "codex");
+        Dictionary<string, byte[]> before = Contents();
+        _msixPackage = "Claude_2.42304.0.0_x64__pzs8sxrjxfjjc";
+
+        ClientConfigReport report = Run(Enum.Parse<ClientConfigMode>(mode), clients);
+
+        Assert.Equal((ClientProblem.MsixRedirected, "Claude_2.42304.0.0_x64__pzs8sxrjxfjjc"), (report.Problem!.Problem, report.Problem.Detail));
+        Assert.Empty(report.Clients);
+        Assert.Equal(before.Keys, Contents().Keys);
+        Assert.All(before, f => Assert.Equal(f.Value, File.ReadAllBytes(f.Key)));
+    }
+
+    [Fact]
+    public void Write_ToARelativePath_IsRefused()
+    {
+        string relative = "eplanmcp-codex-" + Guid.NewGuid().ToString("N");
+        var folders = new UserFolders(Profile, Path.Combine(Profile, "AppData", "Roaming"), Path.Combine(Profile, "AppData", "Local"), v => v == "CODEX_HOME" ? relative : null);
+
+        ClientResult result = new ClientConfigCommand(folders, new HostDataLocations(Path.Combine(_root, "数据")), Exe, _time, () => false, () => null)
+            .Run(new([McpClient.Find("codex")!], ClientConfigMode.Write)).Clients.Single();
+
+        Assert.Equal((ClientOutcome.Failed, ClientProblem.IoError), (result.Outcome, result.Problem!.Problem));
+        Assert.Equal(Path.Combine(relative, "config.toml"), result.File);
+        Assert.False(Directory.Exists(relative));
+    }
+
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void Run_PrintsTheReportAndExitsWith1WhenAnyFailed(bool json)
@@ -233,7 +312,8 @@ public sealed class ClientConfigCommandTests : IDisposable
         Assert.Equal(0, Command(Exe).Run(new([McpClient.Find("opencode")!], ClientConfigMode.Write), again, CultureInfo.InvariantCulture, json));
     }
 
-    private ClientConfigCommand Command(string executable) => new(Folders, new HostDataLocations(Path.Combine(_root, "数据")), executable, _time);
+    private ClientConfigCommand Command(string executable) =>
+        new(Folders, new HostDataLocations(Path.Combine(_root, "数据")), executable, _time, () => _claudeDesktopRunning, () => _msixPackage);
 
     private ClientConfigReport Run(ClientConfigMode mode, params string[] clients) =>
         Command(Exe).Run(new([.. clients.Select(c => McpClient.Find(c)!)], mode));
