@@ -491,6 +491,18 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new LanguageRemoveData(),
+        new TerminalRenumberArgs { Project = "Line1", Strips = ["+A1-XD1"], Scheme = "Numerisch", OnlyUnnumbered = false, Start = 10, Step = 5, Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new TerminalRenumberArgs(),
+        new TerminalRenumberData
+        {
+            Project = "项目 二",
+            Changed = [new RenamedObject { From = "+A1-XD1:2", To = "+A1-XD1:3" }],
+            ChangedCount = 4,
+            StillUnnumbered = ["+A1-XD4:?2"],
+            StillUnnumberedCount = 1,
+            Warning = "w",
+        },
+        new TerminalRenumberData(),
     ];
 
     [Theory]
