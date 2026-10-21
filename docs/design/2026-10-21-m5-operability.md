@@ -1,0 +1,276 @@
+# 设计文档：M5 可运维
+
+| 项 | 内容 |
+|---|---|
+| 状态 | Draft |
+| 作者 | asckye |
+| 关联 Issue | — |
+| 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发） |
+| 最后更新 | 2026-10-21 |
+
+## 1. 背景
+[架构第 11 节](../architecture/architecture.md#11-里程碑)给 M5 的范围是：按用户安装的安装包；Workbench（客户端配置向导、审批队列、审计浏览，中英双语）；Claude Code 插件形式的交付包（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名）。完成标准是：在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](../architecture/architecture.md#71-安装验收清单m5-发布前逐项通过) I1–I10 全部通过。
+
+**现状**：
+- 安装只有开发脚本：`eng\scripts\eplan-addin.ps1` 用 `EPLAN.exe /Variant:"…" EplApiModuleAction /register:"<dll>"` 注册插件（会启动 EPLAN），README 用 `claude mcp add` 配置客户端。`install-addin`、`client-config` 两个子命令还没有实现（[M1 设计](2026-10-13-m1-skeleton.md)第 2 节）。
+- 审批：`ApprovalService` 按注册顺序询问渠道，渠道返回 null 表示"现在不能问"，换下一个；只有 `EplanDialogChannel` 一种渠道，它经 Bridge 的 `approval.ask` 在 EPLAN 中弹出模态对话框，等待期间占住 Host 到这个 EPLAN 的队列。
+- 数据根目录 `%USERPROFILE%\EplanMcp\`（ADR-0008）：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`、`exports\`、`backups\`。
+- Large 测试在开发机上手工运行，没有自托管 runner（[testing.md](../standards/testing.md) 第 4 节，风险 R9）。CI 用 `EplanMcp.Ci.slnf`，不构建插件：插件编译时要引用本机 EPLAN 的 API 程序集。
+- 发布清单（[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)、SEC-16）要求 CI 构建、SHA-256、CycloneDX SBOM、构建来源证明，不发布本地构建的二进制。
+- 架构 5.1 写的 Workbench 是 .NET 10 WPF、字体 Maple Mono CN。**项目负责人 2026-10-20 决定：Workbench 的界面按 Microsoft Fluent UI（Fluent 2）及其组件库设计。** 选哪一种 Fluent 实现由 4.5 比较，作为 Q1 请项目负责人决定。
+- 项目负责人的 TIA_Portal_Openness_MCP 项目（下称 TIA）已有 WPF Workbench 和管道审批，ADR-0011 借鉴过它。本文的 Workbench 管道沿用它的做法，下文注明出处。
+
+**本文依赖的已验证事实**（[api-notes](../eplan/api-notes.md)）：A5（注册与影子副本）、A6（MSIX 客户端启动的进程写 `%LOCALAPPDATA%`、`%APPDATA%` 被重定向）、A8（插件程序集在 EPLAN 退出前不能卸载）、A10（注册后同一会话立即加载；注册按变体保存；退出时调用 `OnExit`）、A12（按变体注册）、B2（三种官方注册方式；注册信息在 STATION 设置中；插件被影子复制，EPLAN 运行时可以替换原始 DLL）、B5（离线程序的要求）。
+
+**术语**：本文的"离线宿主"指 EPLAN 的离线程序（`EplApplication` 无界面运行，B5、架构 5.4）；"离线机器"指不能上网的电脑。两者无关。
+
+## 2. 目标与非目标
+- **目标**
+  - G1 **安装包**：一个文件，按用户安装，不需要管理员权限，不需要联网；升级直接覆盖；卸载撤销全部注册；满足 I1–I10。
+  - G2 **Workbench**：审批队列（ADR-0011 的渠道之一，规则与 EPLAN 对话框相同）、审计浏览、客户端配置向导、连接与授权状态，中英双语，Fluent 2。
+  - G3 **Claude Code 插件**：随安装包附带的本地插件市场，两条命令装好（不联网也能装），带入门技能。
+  - G4 **中文入门指南**：非开发人员在干净机器上按它装成功，即 M5 的完成标准。
+  - G5 **离线宿主与 CI 实机测试**：自托管 runner 每晚和发布前在 scratch 副本上运行 Large 测试。
+  - G6 **发布流水线**：打标签后由 CI 构建全部产物，附 SHA-256、SBOM、来源证明；签名按 Q6。
+- **非目标**
+  - 自动更新：检查新版本要联网（I5）。新版本由工程师下载安装包覆盖安装。
+  - 在 Workbench 中修改安全配置：安全配置只通过配置文件修改（SEC-02）。Workbench 只读显示 `config.json`，并可以用系统默认程序打开它。
+  - 在 Workbench 中编辑项目或发起 AI 操作（架构 5.1）；AI 操控 Workbench 界面（TIA 的 control 管道）。
+  - 批量批准、会话内免审批（ADR-0005 后果：另写 ADR）；解除写入暂停的单独按钮（ADR-0010 决定只在下一次写入前经审批渠道确认）。
+  - 2024、2025、2027 的安装验证（M6，S7）。M5 的支持矩阵只有 2026。
+  - EADN 签名（ADR-0007，1.0 前重新评估）；.NET 8 插件（ADR-0004）。
+  - 为其他 MCP 客户端做插件包：其他客户端只由配置向导写配置。
+
+## 3. 方案概述
+安装包把全部程序放进固定的 `app\` 目录，再用 EPLAN 官方的命令行注册插件。客户端照旧经 stdio 启动 Host。Workbench 由工程师启动（或登录时自启动），在一个固定名称的管道上等 Host 来问；Host 每次需要审批时先问 Workbench，Workbench 不在时照旧弹出 EPLAN 对话框。Workbench 需要 Host 知识的功能（自检、审计校验、写客户端配置）都调用 `eplanmcp.exe` 的子命令，规则只有一份实现。
+
+```mermaid
+flowchart LR
+    setup["安装包<br/>（按用户，不联网）"] --> app["%USERPROFILE%\EplanMcp\app\<br/>eplanmcp.exe · workbench\ · bridge\net481\<br/>claude-plugin\ · docs\"]
+    setup -- "eplanmcp install-addin<br/>（每个变体一次）" --> reg["EPLAN.exe EplApiModuleAction /register"]
+    client["Claude Code / 桌面版"] -- stdio --> host["Host（eplanmcp serve）"]
+    host -- "管道 EplanMcp.Bridge.*" --> bridge["Bridge（EPLAN 中）"]
+    host -- "管道 EplanMcp.Workbench.*<br/>（每次审批连接一次）" --> wb["Workbench"]
+    wb -- "子进程：doctor / audit verify / client-config<br/>只读：audit\、config.json" --> app
+    client -. "本地插件市场" .-> app
+```
+
+## 4. 详细设计
+
+### 4.1 安装布局
+| 位置 | 内容 |
+|---|---|
+| `app\eplanmcp.exe` | Host，自包含单文件（ADR-0004） |
+| `app\workbench\` | Workbench（自包含，ADR-0015），主程序 `EplanMcp.Workbench.exe` |
+| `app\bridge\net481\` | 插件 `EplanMcp.Bridge.Eplan.dll` 及 `Bridge.Core`、`Contracts`（架构 7） |
+| `app\claude-plugin\` | 本地插件市场（4.7） |
+| `app\docs\` | 入门指南（4.8）、第三方许可证 |
+| `<数据根目录>\state\addins.json` | `install-addin` 的注册记录（4.2），供卸载和 `doctor` 使用 |
+| `<数据根目录>\workbench\` | Workbench 的设置；日志写 `<数据根目录>\logs\workbench-*.log` |
+
+- 位置固定为 `%USERPROFILE%\EplanMcp\app\`（架构 7），安装时不能选择（Q4）：EPLAN 的注册、客户端配置和插件都指向它。`EPLANMCP_HOME` 只改数据根目录，不改 `app\`。
+- `app\` 只放程序，升级时整体替换；数据都在数据根目录的其他子目录中，升级和卸载都不动。
+- 不修改 PATH 和任何全局环境变量（架构 7）。注册表中只有安装程序的卸载项（HKCU），以及可选的登录自启动项（Q3）。开始菜单中有 Workbench、入门指南、卸载三个快捷方式。
+
+### 4.2 插件注册：`eplanmcp install-addin`
+- **方式**：只用 B2 中的命令行 `EPLAN.exe /Variant:"<变体>" EplApiModuleAction /register:"<app>\bridge\net481\EplanMcp.Bridge.Eplan.dll"`，与 `eplan-addin.ps1` 相同，不写注册表、不往 EPLAN 目录复制文件（I2）。这条命令会启动 EPLAN，插件在同一会话中立即加载（A10）。
+- **范围**：版本按 `doctor` 的办法在 `Program Files\EPLAN\Platform\<版本>\Bin\` 下查找，只处理支持矩阵中的版本（ADR-0009）。注册按变体保存（A10、A12），各版本有哪些变体没有核实（[eplan-versions](../eplan/eplan-versions.md) 3.5），所以由工程师勾选要用的变体，`--variant` 可以重复。
+- **记录**：每次成功注册写入 `state\addins.json`（版本、变体、DLL 路径、时间）；`uninstall-addin` 按记录逐个执行 `/unregister:"EplanMcp.Bridge.Eplan"`，`doctor` 报告"EPLAN 在运行但插件没有加载"的变体（A10 的要求）。
+- **升级**：DLL 的路径不变，不需要重新注册。EPLAN 加载的是影子副本，运行中也可以替换原始 DLL（B2），重启 EPLAN 后生效（A8）。握手报告插件版本，`eplan_session_status` 和 Workbench 据此提示"插件已更新，请重启 EPLAN"（I3）。开发中一直是"原路径重新构建、重启 EPLAN"，安装路径下由 S14 再确认。
+- **不在 MSIX 环境中运行**：从 MSIX 客户端内启动的进程写 `%APPDATA%` 等位置会被重定向（A6），由它启动的 EPLAN 很可能把注册写到包的重定向目录中。`install-addin` 用 `doctor` 已有的重定向探测，探测到就拒绝执行，提示在开始菜单或安装程序中运行。注册插件属于 Code 级的系统修改（ADR-0005 第 1 节），本来就没有对应的 MCP 工具，插件中的技能也不让模型执行它。
+- **spike S14（插件注册）**，在标准用户（非管理员）账户上验证：
+  1. 注册保存在哪里（B2 说是 STATION 设置），标准用户能否写入；
+  2. 注册命令能否不留下打开的 EPLAN（例如静默参数或注册后退出），用时多少，登录和授权对话框是否必然出现；
+  3. 已有 EPLAN 在运行时执行注册命令的结果；
+  4. `/unregister` 是否完全撤销（I9）；
+  5. 原路径替换 DLL 后重启 EPLAN 即加载新版本，不需要重新注册；
+  6. 从 Claude 桌面版的会话中执行时注册落在哪里（验证上面的拒绝是否必要）；
+  7. 从浏览器下载的安装包装出的插件 DLL 是否带下载标记（`Zone.Identifier`），带上时 EPLAN 能否加载：.NET Framework 4 默认拒绝来自网络区域的程序集（[loadFromRemoteSources](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/loadfromremotesources-element)）。
+
+  S14 表明命令行注册必须留下打开的 EPLAN 时，安装程序逐个变体提示工程师在注册完成后关闭 EPLAN。
+
+### 4.3 安装包、升级、卸载与离线
+- **安装包技术**：见 ADR-0016 与 Q5。
+- **安装**：复制 `app\` → 生成插件市场的 `.mcp.json`（4.7）→ 勾选变体后运行 `install-addin` → 可选：登录时启动 Workbench（Q3）→ 结束页打开入门指南，并运行一次 `eplanmcp doctor`。
+- **升级**：同一个产品标识覆盖安装，不需要先卸载（I4）。正在运行的程序文件不能覆盖，所以安装前检查 `app\` 中的 `eplanmcp.exe` 和 Workbench 是否在运行，列出它们，请工程师关闭 MCP 客户端会话和 Workbench 后继续。**不强制结束 Host**：它可能正在写入（ADR-0010 能恢复，但不必制造这种情况）。EPLAN 不用关闭，升级后提示重启（A8）。不支持降级：安装的版本比已安装的旧时，提示先卸载。
+- **卸载**：检查进程（同上）→ 按 `state\addins.json` 运行 `uninstall-addin` → 删除 `app\`、快捷方式、自启动项、卸载项。**数据根目录中的数据一律保留**（配置、审计、日志、scratch、导出、备份），卸载结束页列出位置，由工程师自己决定是否删除（与 ADR-0013 第 5 条"备份不自动删除"同理）。客户端配置：卸载时可选移除 `client-config` 写入过的条目（4.11）；Claude Code 插件用 `/plugin uninstall` 或 `claude plugin marketplace remove` 移除。
+- **离线**：安装包自带全部内容：自包含的 Host 和 Workbench（不需要另装 .NET 运行时）、插件、插件市场、入门指南、许可证。安装和使用都不访问网络（I5），也不绑定电脑（I6）。客户端自己连接模型服务，不在本项目范围内。这一条约束了 Workbench 的技术选择（4.5）。
+
+### 4.4 Workbench
+**功能**（中英双语，默认跟随系统语言，可以切换，切换立即生效）：
+1. **审批队列**（4.6、ADR-0014）：等待中的审批和解除暂停的确认，以及本次运行中已回答的记录（不持久化，审计才是记录）。
+2. **审计浏览**：只读。按日期、工具、项目、审批决定、执行结果筛选，显示一条记录的全部字段，打开所在文件夹。读取方式与 `AuditLog.ReadLines` 相同：共享读写，不加锁，忽略最后一个未写完的行，从不写入。"校验完整性"调用 `eplanmcp audit verify --format json`，并说明哈希链查不出末尾整段被删除（架构 8.8）。
+3. **客户端配置向导**：选择客户端（Claude Code、Claude 桌面版，Q7），调用 `eplanmcp client-config <客户端> --dry-run --format json` 显示将要写入的差异，工程师确认后写入，原文件先备份。Claude Code 推荐用插件（4.7），向导给出两条命令。
+4. **状态**：`eplanmcp doctor --format json` 的结果分组显示：EPLAN 安装与支持矩阵、运行中的实例和变体、插件是否加载及是否需要重启、授权、MSIX 环境、用户 PATH 长度、数据目录、写入暂停、导出与备份占用的空间、下一次审批会用哪个渠道。打开时和按"刷新"时各运行一次，不自动轮询。
+5. **设置**：语言、主题（跟随系统、浅色、深色）、登录时启动；`config.json` 只读显示。
+
+**进程**：
+- 每个用户、每个数据根目录一个 Workbench（ADR-0014）。再次启动时把已有的窗口带到前台后退出。
+- 由工程师从开始菜单启动，或登录时自启动（Q3）。**Host 从不启动 Workbench**（与 TIA 相同）：Host 可能由 MSIX 客户端启动，子进程会继承重定向（A6）；无人值守的代理也不应在桌面上弹出程序。
+- 关闭窗口时缩到托盘，队列照常工作；托盘菜单"退出"时如果还有等待中的问题，先提示，退出后这些问题按"已取消"返回，不执行。
+- 不连接 Bridge，不引用 Host 的程序集。调用 `eplanmcp.exe` 时用参数列表启动（不经命令行解释器），有超时，输出按带 `schemaVersion` 的 JSON 解析。
+
+**提醒**：新问题到达时托盘图标显示待处理数，任务栏按钮闪烁；窗口最小化或隐藏时，托盘弹出提示，点击后显示窗口。**不抢焦点**：工程师可能正在 EPLAN 中打字，按键不能落到 Workbench 上（ADR-0011 不设默认按钮也是这个原因）。
+
+**spike S16（Workbench 的窗口与提醒）**，不需要 EPLAN：
+1. 非前台进程能否把窗口显示在其他窗口之上而不激活它（Windows 的前台限制），EPLAN 最大化时工程师能否注意到；
+2. 托盘提示、任务栏闪烁在 Windows 10、11 上的表现；未打包的程序发系统通知需要什么（TIA 记录了 Windows App SDK 的 `AppNotificationManager` 作为备选）；
+3. 讲述人能否读出待处理数、倒计时（只在 30 秒、10 秒时播报）和变更清单；
+4. 第二个实例把第一个带到前台的办法。
+
+### 4.5 界面技术：Fluent 2 的实现方式（Q1，ADR-0015）
+项目负责人已决定用 Fluent 2。适合"在 EPLAN 旁边运行的 Windows 桌面工具"的实现有下面几种（2026-10-20 查阅的官方文档，出处见 ADR-0015）：
+
+| 约束 | A：WinUI 3（Windows App SDK 2.5，未打包、自包含） | B：WPF + .NET 10 自带的 Fluent 主题 | C：Blazor Hybrid（WebView2）+ Fluent UI Blazor 5 | D：WebView2 + Fluent UI Web Components 3 |
+|---|---|---|---|---|
+| 按用户安装、无管理员 | 可以：自包含后直接复制；未打包的程序没有包身份 | 可以：自包含，可以单文件 | 依赖 WebView2 运行时：Windows 11 预装，Windows 10 上"少数"设备没有；可以按用户离线安装，或随程序带固定版本（250 MB 以上） | 同 C |
+| 离线机器 | 可以；SDK 的修复只随我们的新版本到达 | 可以 | 离线时 WebView2 不更新，浏览器内核停在安装时的版本 | 同 C |
+| .NET 10 | 实际可用，官方没有明确写出 | 原生；.NET 10 是 LTS，支持到 2028-11 | 支持 net10.0 | 只有宿主是 .NET |
+| Fluent 2 的还原度 | 最高，控件本身就是 Fluent 样式 | 较好但不完整：`ThemeMode` 仍标为实验性（WPF0001），.NET 10 的说明写"Fluent 样式仍在进行中" | 较好（Web 版 Fluent） | 较好 |
+| 无障碍 | 原生 UIA、高对比度 | UIA 成熟；高对比度的崩溃在 9.0.1、10 中修复 | 经 Chromium 的 UIA；原生与网页混合时的焦点未核实 | 同 C |
+| 托盘、置顶、单实例 | 托盘要第三方库（H.NotifyIcon.WinUI，MIT）；单实例用 `AppInstance` | WinForms `NotifyIcon`（TIA 的做法）；`Topmost`；互斥体 | 由 WPF 宿主提供 | 同 C |
+| 中英文切换 | `.resw`；第三方报告未打包时改界面语言会出错（未经微软证实） | `.resx`，简单 | `IStringLocalizer` | 自己实现 |
+| 长期维护 | SDK 大版本"不超过每六个月一次"，2.x 的服务期到 2027-04；没有 XAML 设计器 | 变化最少，与 Host 同一个运行时 | 两套技术；Fluent UI Blazor 写明"不是 ASP.NET Core 的正式部分"、尽力支持，5.0 刚重写（2026-09） | 两套技术，加上 npm 依赖和自己写的消息桥 |
+| 体积 | 大（没有官方数字） | 最小 | 程序 + WebView2 | 同 C |
+
+另外两种不考虑：.NET MAUI 在 Windows 上就是 WinUI 3 外加一层抽象；WPF-UI（lepoco，MIT）还原度好，但 NuGet 把 4.0–4.2 标为"有严重缺陷"而废弃，变动较大。
+
+**建议 B**（Q1）：Workbench 只有几页，它的价值在于审批界面可靠、在离线机器上装得上。B 与 Host 同一个 .NET 10 运行时，不多一套 SDK 的生命周期，不需要第三方库（托盘用 WinForms 自带的 `NotifyIcon`），按用户、离线、单文件的发布都是成熟路径，UIA 最成熟；外观用微软随 .NET 发布的 Fluent 主题，缺的样式按 Fluent 2 的颜色、字体和间距规范自己补。代价是 `ThemeMode` 仍是实验性 API，要在代码中注明原因后抑制 WPF0001，并固定在 .NET 10。如果项目负责人更看重 Fluent 2 组件的完整和原样，选 A；A 的风险是 SDK 每年一次大版本、托盘靠第三方库、未打包时的界面语言切换。C、D 不建议：离线机器上的 WebView2，以及变更清单这种不可信文本进入网页渲染。
+
+**字体**（Q2）：Fluent 2 在 Windows 上用 Segoe UI Variable，它只覆盖西文、希腊文和俄文；微软的 Windows 排版指南建议简体中文用 Microsoft YaHei UI，最小 12px（Regular）。两者都是系统字体，不需要随程序分发。架构 5.1 和 README 定的 Maple Mono CN 建议只用在等宽的数据区（变更清单、审计记录），随安装包附带其 SIL OFL 1.1 许可证。
+
+**spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；选 A 时另查未打包时的界面语言切换和 `dotnet build` 能否在 CI 上构建。S18 发现 B 无法满足时，改用 A，ADR-0015 随之修改。
+
+### 4.6 审批队列
+**Host 一侧**（`WorkbenchChannel`，注册在 `EplanDialogChannel` 之前，即 ADR-0011 的顺序）：
+- 每次审批连接一次 Workbench 的管道，连接超时 250 毫秒（TIA 的取值）。管道不存在、超时、对端不是本安装中的 Workbench、协议版本不兼容，或者 Workbench 说不接收新问题（例如已有 50 个在等），都返回 null，由 EPLAN 对话框询问。
+- 问题送达 Workbench 之后，**只在 Workbench 中回答**：连接断开（Workbench 退出或崩溃）按"已取消"处理，不执行，也不再转到 EPLAN 对话框，避免同一问题出现在两个窗口中。模型可以再调用一次，那时 Workbench 已不在，会改为 EPLAN 对话框。
+- 不占用 Host 到 EPLAN 的队列：等待期间 EPLAN 照常可用，工程师可以先在 EPLAN 中查看再回答；项目因此发生的变化由执行前的指纹比对发现（`PLAN_STALE`）。
+- 期限、绑定和"只能使用一次"都在 Host 中判断（`ApprovalService.Checked`，SEC-06）。客户端取消调用时通知 Workbench 移除这个问题。执行结束后把执行结果发给 Workbench，只用来更新"已回答"中的显示，不能批准任何东西（TIA 的 `Kind=result`）。
+- 进度通知的 `Where` 为 "in the EplanMcp Workbench"；审计中的渠道名为 `workbench`；`doctor` 报告 Workbench 是否在运行。
+
+**界面**（ADR-0011 第 4 节，加上队列特有的规则）：
+- 左侧是等待中的问题，最早到期的在上；右侧是选中问题的详情：标题（"批准 AI 修改 EPLAN 项目？"或"上次 AI 修改的结果未知"，文字同 [M3 设计 4.6](2026-10-19-m3-safe-writes.md#46-对话框文字)）、工具、级别、项目的完整路径、EPLAN 实例（版本、变体、进程号）、发起的客户端（客户端自报的名称，标注"未验证"）、变更清单、撤销说明、倒计时、两个按钮。Destructive 操作醒目标出，并写明"执行前先备份到 …"（ADR-0013）。
+- 每个问题单独回答，**没有"全部批准"**。
+- "批准""拒绝"一样大、样式相同：**不用 Fluent 的强调色主按钮**；都不是默认按钮，没有快捷键，只能点击，或在按钮获得焦点后按 Enter、空格。问题显示或切换时，焦点放在标题上，不在按钮上。
+- **500 毫秒防误触**：详情区每次显示一个不同的问题、窗口每次由隐藏变为可见之后，500 毫秒内两个按钮都不响应。回答完一个问题、下一个顶上来时，多点的一下不会落到下一个问题上。
+- 倒计时用文字加进度条显示，最后 20 秒变为警告色；到期后问题移到"已回答"，状态为"已过期"。
+- 变更清单来自项目数据，按 5 节的规则显示。
+
+### 4.7 Claude Code 插件
+**内容**（`app\claude-plugin\`，不含任何程序文件）：
+- `.claude-plugin\marketplace.json`：本地插件市场 `eplanmcp-local`，其中一个插件 `eplan-mcp`，来源 `./eplan-mcp`；
+- `eplan-mcp\.claude-plugin\plugin.json`：名称、版本（与产品版本相同）、说明、许可证；
+- `eplan-mcp\.mcp.json`：服务器 `eplan`，命令为 `eplanmcp.exe` 的完整路径，参数 `serve`；
+- `eplan-mcp\skills\getting-started\`：`SKILL.md` 和 `guide.zh-CN.md`（4.8）。
+
+**怎样找到 `eplanmcp.exe`**：Claude Code 文档写明插件的 MCP 配置中可以用 `${CLAUDE_PLUGIN_ROOT}`，它指向插件的安装目录，每个版本不同；`${USERPROFILE}` 这类变量在插件配置中能否展开，文档没有说明（[插件清单参考](https://code.claude.com/docs/en/plugins/manifest-reference)、[MCP](https://code.claude.com/docs/en/mcp)）。所以 `.mcp.json` 由安装程序生成，直接写完整路径，不依赖变量展开。本地目录形式的插件市场不复制，插件在原处加载（[插件加载](https://code.claude.com/docs/en/plugins/loading)），升级时安装程序改写文件，新会话或 `/reload-plugins` 后生效。插件中不放程序：`eplanmcp.exe` 要和 EPLAN 中注册的插件 DLL、Workbench 同版本，在同一个固定位置；而插件从远程仓库等来源安装时会复制到按版本分开的缓存目录，旧版本 14 天后删除（同上）。
+
+**安装**：`/plugin marketplace add %USERPROFILE%\EplanMcp\app\claude-plugin`，再 `/plugin install eplan-mcp@eplanmcp-local`，默认装在用户范围；命令行用 `claude plugin marketplace add …`、`claude plugin install …`。Claude 桌面版的 Code 页签读同样的设置文件，在命令行装好的用户范围插件在桌面版中同样可用（[桌面版](https://code.claude.com/docs/en/desktop)）。
+
+**技能**：`SKILL.md` 是给模型看的，按架构 8.11 用英文（Q12）：工程师问"怎么开始""EPLAN 连不上""为什么没有弹出审批"时，先调用 `eplan_session_status`，再按 `guide.zh-CN.md` 中对应的一节用工程师的语言说明；安装、注册插件、改配置都是工程师自己的操作，模型只说明步骤，不代为执行。
+
+**spike S17（客户端与插件）**，不需要 EPLAN：在没有网络的虚拟机上用本地插件市场安装插件，Claude Code 命令行和桌面版各一次；`${USERPROFILE}` 在插件 `.mcp.json` 中是否展开；Claude 桌面版 `claude_desktop_config.json` 的实际位置（A6：桌面版的文件在包的重定向目录中），这决定 `client-config claude-desktop` 写到哪里。
+
+### 4.8 中文入门指南
+- 源文件 `docs/getting-started/zh-CN.md`，随安装包放在 `app\docs\`，并复制为插件技能的 `guide.zh-CN.md`。英文版之后补上（架构 8.11）。
+- 章节：
+  1. 准备：Windows 10/11 x64；EPLAN 2026（Electric P8 或 Pro Panel）及包含 API 扩展、允许加载未签名插件的授权（ADR-0007）；Claude Code 或 Claude 桌面版。
+  2. 下载与校验：从 GitHub Releases 下载安装包和校验和，`Get-FileHash` 比对；未签名时 Windows 会提示来源未知（Q6）。
+  3. 安装：双击安装包，勾选变体，等 EPLAN 启动并加载插件；
+  4. 自检：运行 `doctor` 或打开 Workbench 的"状态"，逐项看懂结果；
+  5. 连接客户端：Claude Code 装插件，桌面版用配置向导；
+  6. 第一次对话：只读提问（"这个项目有多少页"）；
+  7. 第一次修改：先复制一份到 scratch，在 scratch 中试；对真实项目的修改在 Workbench 或 EPLAN 中批准，用 Ctrl+Z 撤销；
+  8. 常见问题：按 I1–I10 和 `doctor` 的每一项给出处理办法；
+  9. 升级与卸载：数据保留在哪里。
+- **验收**：一名非开发人员在干净的虚拟机上（标准用户账户，没有开发工具，只装 EPLAN 2026 和客户端，I8）只按指南操作，记录用时、每一处卡住或需要别人帮忙的地方，以及 SmartScreen 的提示和智能应用控制的状态（4.10）；I1–I10 逐项留证据。结果写进发布说明。人员和虚拟机见 Q11。
+
+### 4.9 离线宿主与 CI 实机测试
+- **离线宿主** `EplanMcp.Bridge.Offline`：net481 x64 的 STA 程序，用 `EplApplication.Init` 无界面运行 EPLAN（B5），与插件共用 `Bridge.Core`、操作和适配层（架构 5.4），创建同样格式的管道。参数：管道前缀（CI 中的 Host 用 `EPLANMCP_PIPE_PREFIX` 只找它，不碰工程师的 EPLAN）、启动时打开的 scratch 项目、空闲退出时间。它不声明 `approval.ask`，所以只能写 scratch，这正是 CI 需要的。启动时自己打开测试项目，不新增打开项目的操作或工具，与 M3 设计 Q4 的决定一致。
+- **它测不了**：模态对话框（Q5）、EPLAN 中的审批对话框、Ctrl+Z（Q3）、插件的注册与加载。这些仍在发布前用界面中的 EPLAN 手工检查，列在发布清单中。
+- **spike S15（离线宿主）**：`EplApplication.Init` 在开发机上的授权和登录对话框（`allowLicenseDlg`、`allowLoginDlg`）、是否另占一个授权、与界面中的 EPLAN 能否同时运行、启动耗时；回滚、撤销、`LockingStep` 的规律是否与插件中相同（A7、A9）；未签名的离线程序在开发机授权下能否运行（B8、ADR-0007）；在没有登录桌面的上下文中（runner 作为服务）能否运行。
+- **CI**：自托管 runner 装在有 EPLAN 和授权的机器上，标签 `eplan-2026`，以单独的标准用户运行，有自己的数据根目录。新工作流 `live.yml` 只在每晚定时、手动触发和发布时运行，**从不因 pull request 运行**；仓库设置要求外部贡献者的工作流每次都经批准，改动了工作流的 fork PR 不批准；同时只运行一个（SEC-26）。GitHub 提醒公开仓库几乎不应使用自托管 runner（[安全使用](https://docs.github.com/en/actions/reference/security/secure-use)），这些条件缺一不可。步骤：构建插件和 Host → 复制示例项目到 runner 用户的 scratch → 启动离线宿主 → 运行能在离线宿主上跑的 Large 测试（新的 trait，例如 `Host=Offline`）→ 上传 TRX。日志和产物中不含项目内容（SEC-10）。机器与账户见 Q8。
+
+### 4.10 发布流水线
+在 `main` 上打 `vX.Y.Z` 标签后运行 `release.yml`（[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)），三个作业：
+1. **构建**（GitHub 托管的 runner）：Host（自包含单文件，win-x64）、Workbench（自包含）；Small、Medium 测试；CI 中设 `ContinuousIntegrationBuild=true`，带 Source Link；用 CycloneDX 的 .NET 工具（`dotnet-CycloneDX`，Apache-2.0）生成 SBOM。
+2. **插件**（自托管 runner `eplan-2026`，4.9）：引用本机 EPLAN 的 Bin 构建 Release 版插件，`EplanSign=false`（ADR-0007）；在离线宿主上运行 Large 测试。只在本仓库的标签上运行。
+3. **打包**（托管 runner）：取前两步的产物生成安装包（Q5）、SHA-256 校验和文件、合并的 SBOM；为安装包和其中每个程序文件生成来源证明（`actions/attest-build-provenance`），为 SBOM 生成证明（`actions/attest-sbom`）；建立草稿发布，附支持矩阵、验收和评测结果。只有这个作业有 `id-token`、`attestations`、`contents` 的写权限。
+
+- 来源证明在公开仓库中免费，用 `gh attestation verify <文件> -R asckye/eplan-mcp` 校验（需要联网；离线机器上核对 SHA-256）。GitHub 的证明达到 SLSA v1.0 Build L2（[GitHub 文档](https://docs.github.com/en/actions/concepts/security/artifact-attestations)）。插件在自己维护的 runner 上构建，证明同样记录工作流和提交，但这台机器的可信程度取决于我们自己的维护（SEC-26）。
+- GitHub 托管的 Windows runner 以管理员身份运行，证明不了"不需要管理员"，所以 I1 只能在 4.8 的标准用户账户上验收。
+- **签名的现状**（Q6）：未签名的程序下载后，SmartScreen 显示"Windows 已保护你的电脑"，要点"仍要运行"，企业策略可以禁止；EV 证书也不再跳过这个提示（[SmartScreen](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)）。Windows 11 的智能应用控制处于强制模式时，会阻止未知的未签名程序（[智能应用控制](https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/overview)），这可能让干净机器上的验收直接失败。可选的签名方式：
+  - SignPath Foundation：开源项目免费，但要求签名之前的每个作业都在 GitHub 托管的 runner 上运行（[SignPath](https://docs.signpath.io/trusted-build-systems/github)），插件只能在自托管 runner 上构建，所以最多签 Host 和 Workbench，签不了安装包；它的条款不允许"专有组件"，引用 EPLAN API 算不算没有核实；
+  - Azure Artifact Signing：个人只限美国、加拿大，组织只限所列国家（[快速入门](https://learn.microsoft.com/en-us/azure/trusted-signing/quickstart)）；
+  - 购买 OV 证书：2023-06 起私钥必须在硬件模块中（[CA/B 论坛](https://cabforum.org/working-groups/code-signing/requirements/)），CI 中要用证书商的云端签名服务；
+  - 插件的 EADN 签名按 ADR-0007，与上面无关。
+
+### 4.11 Host 新增的命令
+| 命令 | 用途 |
+|---|---|
+| `install-addin [--variant <变体>]…`、`uninstall-addin [--all]` | 4.2 |
+| `client-config <claude-code\|claude-desktop> [--dry-run\|--remove] [--format json]` | 写入或移除客户端的 MCP 配置，写入前显示差异、备份原文件（架构 7）；记录写入过的条目，供卸载时移除 |
+| `doctor --format json`、`audit verify --format json` | 给 Workbench 用；JSON 带 `schemaVersion`，结构用快照测试固定 |
+
+这些命令在 stdout 输出，只在 `serve` 以外使用（CLAUDE.md 规则 5 只约束 `serve`）。
+
+## 5. 安全与数据完整性
+- **新的信任边界**：Host ↔ Workbench 的管道，Workbench ↔ 工程师的界面，安装包与 CI runner。威胁模型增加 T19–T23 和 SEC-22–26（[security.md](../standards/security.md)，单独的 PR）。
+- **冒充 Workbench**：管道只允许当前用户，拒绝网络登录；第一个实例独占管道名；Host 核对管道服务器进程的映像路径是本安装中的 Workbench，Workbench 同样核对连接方是本安装中的 `eplanmcp.exe`。这一项和 TIA 一样只防"错配"（开发构建连上安装的版本、别的程序占了名字），**不能防同一用户的恶意程序**（security.md 第 2 节）。
+- **剩余风险**（Q9）：同一用户的程序，包括代理经客户端的 shell 工具执行的命令，可以用 UI Automation 操作任一个审批窗口（S8 的驱动程序就这样回答过 EPLAN 的对话框，A15），也可以替换按用户安装目录中的文件。ADR-0011 防的是客户端自己回答或被配置为自动回答，不是同一用户下的恶意程序。入门指南提醒工程师保留客户端对 shell 命令的确认。
+- **审批界面中的项目文本**：变更清单只作为纯文本显示在等宽的数据区中，标注"来自项目的数据"；剥除控制字符和双向文字控制符（如 U+202E），把换行显示为可见的符号，每行和整个清单都有长度上限，超出时注明"还有 N 行"。界面元素不由项目文本生成。Workbench 的日志不记录变更清单（SEC-10）。
+- **安装包**：只发布 CI 构建的产物；不需要管理员权限，不写 PATH、EPLAN 目录和 EPLAN 的注册表；注册插件只经 `EplApiModuleAction`；卸载不删数据。
+- **数据完整性**：Workbench 只读审计和配置；升级不强制结束 Host；问题在 Workbench 中断开按"已取消"处理，项目不变。
+
+## 6. 备选方案
+- **Host 当管道服务器，Workbench 枚举 Host 并取问题**（TIA 的 operator 管道是这个方向，但它不用于审批）：Host 要多开一个服务器，Workbench 要发现动态增减的 Host。Workbench 当服务器只需要一个固定名称，与 TIA 的审批管道相同。否决（ADR-0014）。
+- **问题和回答写成 `state\` 中的文件**：任何能写数据根目录的程序都能伪造回答，还要轮询和清理。否决。
+- **Host 在需要时启动 Workbench**：见 4.4。否决。
+- **Workbench 引用 Host 的程序集、自己实现自检和审计校验**：规则会有两份。否决，改为调用子命令。
+- **插件中带上 `eplanmcp.exe`**（TIA 的插件带启动程序）：插件缓存每个版本一个目录，EPLAN 注册的 DLL 和 Workbench 在 `app\` 中，两处版本可能不同。否决（4.7）。
+- **MSIX 打包、安装到 `%LOCALAPPDATA%` 或 Program Files**：见 ADR-0016。否决。
+- **只发压缩包（TIA 的做法）**：解压位置不固定，注册和客户端配置会指向不同的地方，也没有卸载项；用资源管理器解压时，下载标记可能传给解压出的文件，插件可能因此无法加载（S14 第 7 项）。作为 Q5 的备选。
+
+## 7. 测试与验证
+- **Small**：队列的排序、倒计时和到期；防误触的状态机（显示新问题、窗口重新可见、500 毫秒内的点击）；变更清单的清洗（控制字符、U+202E、换行、长度）；Workbench 协议的消息往返和严格解析（未知字段、超长帧）；`WorkbenchChannel` 的各种结果（不在运行、映像路径不符、送达后断开、绑定不符由 `ApprovalService` 拒绝）；`install-addin` 拼出的命令行；`client-config` 的合并、差异和移除；`doctor --format json` 的快照。
+- **Medium**：Host 与假的 Workbench 管道服务器：批准、拒绝、到期、取消、断开；映像路径不符时改用 EPLAN 对话框；名字被别的程序先占用；多个 Host 同时提问；客户端取消调用后 Workbench 移除问题。
+- **手工与实机**：S14–S18；发布前的 Workbench 冒烟清单（[testing.md](../standards/testing.md) 第 2 节）：讲述人、高对比度、200% 缩放、中英文切换、键盘操作；4.8 的干净机器验收；CI 中离线宿主上的 Large 测试。
+- **Agent 评测**：不新增题目。插件中的服务器与评测用的配置相同，`tools/list` 一致即可（S17 中核对）。
+
+## 8. 发布与兼容性
+- 不改变工具契约；Host 与 Bridge 的协议不变。新增的契约：Workbench 管道协议（第 1 版）、`doctor` 和 `audit verify` 的 JSON 输出（带 `schemaVersion`）、`state\addins.json`。
+- `CHANGELOG` 的 Added 记录安装包、Workbench、插件、新命令。
+- 实施顺序（每个 PR 目标 200 行，上限 400 行）：
+  1. 本设计文档；Proposed ADR-0014、0015、0016；威胁模型 T19–T23、SEC-22–26。
+  2. spike S16、S17、S18（不需要 EPLAN）；S14、S15（实机，项目负责人的机器）。
+  3. `doctor`、`audit verify` 的 `--format json`。
+  4. `install-addin`、`uninstall-addin`、`state\addins.json`（S14 之后）。
+  5. `client-config`（S17 之后）。
+  6. Workbench 协议（共享的小程序集）与 Host 的 `WorkbenchChannel`，含 Medium 测试。
+  7. Workbench 骨架（ADR-0015 接受、S18 之后）：单实例、托盘、管道服务器、审批队列。
+  8. 审计浏览。
+  9. 状态、客户端配置向导、设置。
+  10. 插件市场与技能；中文入门指南。
+  11. 安装包（Q5、ADR-0016 接受之后）。
+  12. 离线宿主与离线 Large 测试（S15 之后）。
+  13. `live.yml` 与自托管 runner（Q8）。
+  14. 发布工作流：SBOM、来源证明、签名（Q6）。
+  15. 干净机器验收（Q11），按结果修正，M5 收尾。
+
+## 9. 待定问题
+| # | 问题 | 建议 |
+|---|---|---|
+| Q1 | Fluent 2 用哪一种实现（4.5） | **B：WPF + .NET 10 自带的 Fluent 主题**，S18 用原型确认；更看重 Fluent 2 组件的完整和原样时选 A（WinUI 3，未打包、自包含）。不选依赖 WebView2 的 C、D。写成 Proposed ADR-0015 |
+| Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | 界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI）；Maple Mono CN 只用于等宽的数据区，随安装包附带 OFL 许可证 |
+| Q3 | Workbench 是否在登录时自启动 | 安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
+| Q4 | 安装目录能否选择 | **不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
+| Q5 | 安装包用什么技术 | **Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途，但作者要求年收入超过 5000 美元的商业用户购买许可（CI 中使用也算），非商业用户不收费，需要项目负责人确认本项目属于非商业开源。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
+| Q6 | 安装包和程序是否签名（4.10） | **0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
+| Q7 | 配置向导在 M5 支持哪些客户端 | Claude Code（推荐插件）和 Claude 桌面版；其他客户端只显示可以复制的配置片段 |
+| Q8 | 自托管 runner 装在哪台机器、用哪个账户 | 开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发 |
+| Q9 | 同一用户的程序（包括代理经 shell 执行的命令）能操作审批窗口，是否接受为剩余风险（第 5 节） | **接受**，写进威胁模型和入门指南（保留客户端对 shell 命令的确认）；有了代码签名之后，再考虑由 Host 核对 Workbench 的签名 |
+| Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场 |
+| Q11 | 干净机器验收由谁、在哪台机器上做（4.8） | 需要项目负责人安排一名非开发人员，和一台装有 EPLAN 2026 及授权的虚拟机（同时验证 I8） |
+| Q12 | 插件技能用什么语言 | `SKILL.md` 给模型看，用英文（架构 8.11）；入门指南给工程师看，用中文 |
+| Q13 | 卸载时是否删除数据 | **不删除**：配置、审计、日志、scratch、导出、备份都保留，结束页列出位置（4.3） |
