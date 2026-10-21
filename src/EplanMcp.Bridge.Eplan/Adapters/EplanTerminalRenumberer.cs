@@ -20,21 +20,7 @@ internal sealed class EplanTerminalRenumberer : ITerminalRenumberer
 {
     private const string SchemeNode = "USER.Terminal.Numbering.Scheme";
 
-    /// <summary><c>SetScheme(i)</c> leaves the last used scheme as it is, <c>GetName()</c> is the internal name (EPLAN XML docs, B9).</summary>
-    public IReadOnlyList<string> Schemes()
-    {
-        MainThread.Assert();
-        using var setting = new SchemeSetting();
-        setting.Init(SchemeNode);
-        var names = new List<string>();
-        for (int i = 0; i < setting.GetCount(); i++)
-        {
-            setting.SetScheme(i);
-            names.Add(setting.GetName() ?? string.Empty);
-        }
-
-        return names;
-    }
+    public IReadOnlyList<string> Schemes() => EplanSchemes.OfUser(SchemeNode);
 
     public IReadOnlyList<PlacedFunction>? ReadTerminals(string projectPath, string? strip)
     {
