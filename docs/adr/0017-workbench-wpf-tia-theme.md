@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed |
-| 日期 | 2026-10-20（提出） |
+| 状态 | Accepted |
+| 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人明确答复"ADR 17同意的"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（第一版 Workbench 发布前）：只影响 Workbench 一个项目；发布后再换界面技术等于重写界面 |
 | 影响 | 取代 [ADR-0015](0015-workbench-ui-stack.md)（WinUI 3）；补充 [ADR-0004](0004-runtimes-and-target-frameworks.md) 的运行时表；[ADR-0014](0014-workbench-approval-channel.md) 的界面规则不变 |
@@ -36,7 +36,7 @@ TIA 的 Workbench（2026-10-20 只读查阅其仓库）：
 4. **把 TIA 的主题做成两个仓库共用的包**：两个项目的发布和版本会绑在一起；TIA 的主题键名（`Primer.*`、`Ant.*`）和控件辅助类也不是为共用设计的。
 
 ## 决策
-**建议方案 1**，由项目负责人确认后生效：
+**选择方案 1**（项目负责人 2026-10-20 确认）：
 
 1. **运行时**：`EplanMcp.Workbench` 以 `net10.0-windows` 为目标，WPF，自包含发布到 `app\workbench\`（M5 设计 4.1）；不用 Windows App SDK。单实例用互斥体，托盘用 WinForms 自带的 `NotifyIcon`（TIA 的做法），不引入第三方界面库。
 2. **视觉**：复制 TIA 的主题文件（`Primer.xaml`、三套调色板、`Icons.xaml`、`ThemeManager.cs`）和审批卡片等界面要用的控件辅助类到 `EplanMcp.Workbench` 中。
@@ -71,9 +71,9 @@ TIA 的 Workbench（2026-10-20 只读查阅其仓库）：
   - 观感不是 Windows 自己的 Fluent 设计，原生控件的新样式不会自动得到；
   - 等宽字体比比例字体宽，Ant 的布局按比例字体设计，页面要按实际宽度留余量（S18 核对）；
   - Maple Mono CN 增加安装包体积（每个字重约 18 MB）。
-- **后续行动**（本 ADR 接受后）：
-  - ADR-0015 标为"Superseded by ADR-0017"；
-  - ADR-0004 的运行时表和架构 5.1 的 Workbench 一行改为 WPF 和 TIA 的主题；
+- **后续行动**：
+  - ADR-0015 标为"Superseded by ADR-0017"（已完成）；
+  - ADR-0004 的运行时表和架构 5.1 的 Workbench 一行改为 WPF 和 TIA 的主题（已完成）；
   - M5 设计 4.5 的观感规则改为引用 `docs/standards/workbench-ui.md`；
   - 写 `docs/standards/workbench-ui.md`；
   - 第三方声明增加 TIA 的主题。
