@@ -100,7 +100,10 @@ internal sealed class TerminalRenumberRequest
     }
 
     /// <summary>How many terminals EPLAN is asked to number: every one in scope, or with <see cref="OnlyUnnumbered"/> those with '?'.</summary>
-    public int ToNumber(IEnumerable<PlacedFunction> scope) => scope.Count(t => !OnlyUnnumbered || Unnumbered(t.Name));
+    public int ToNumber(IEnumerable<PlacedFunction> scope) => scope.Count(IsToNumber);
+
+    /// <summary>Whether EPLAN is asked to number <paramref name="terminal"/>, one of the scope; no other terminal may change.</summary>
+    public bool IsToNumber(PlacedFunction terminal) => !OnlyUnnumbered || Unnumbered(terminal.Name);
 
     /// <summary>The change list's text, e.g. <c>all terminal designations on 1 strip (12 terminals), scheme: Numerisch, start 1, step 1</c>.</summary>
     public string Describe(int terminals) =>

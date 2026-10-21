@@ -143,6 +143,37 @@ public sealed class TerminalRenumberOperationTests : IDisposable
     }
 
     [Fact]
+    public void Execute_OnlyUnnumbered_WhenEplanAlsoRenamesNumberedTerminals_RollsBackAndListsThem()
+    {
+        // The live run: given every terminal with "only number marked ones", EPLAN also reordered +A1-XD1 (A24).
+        var args = new TerminalRenumberArgs { Project = "Line1", Scheme = "Numerisch" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Overreach = true;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack, "4"), (error.Reason, error.Execution, error.Metadata!["unplannedCount"]));
+        Assert.Equal(
+            [Strip + ":2 -> " + Strip + ":3", Strip + ":3 -> " + Strip + ":5", Strip + ":4 -> " + Strip + ":2", Strip + ":5 -> " + Strip + ":4"],
+            error.Metadata["unplanned"].Split('\n'));
+        Assert.StartsWith("EPLAN also renamed 4 terminals that were not to be numbered", error.Message, StringComparison.Ordinal);
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_OneStrip_WhenEplanAlsoRenamesAnotherStrip_RollsBack()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Other], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Overreach = true;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.All(error.Metadata!["unplanned"].Split('\n'), line => Assert.StartsWith(Strip + ":", line, StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Execute_ASchemeEplanRefuses_RollsBackWithTheSchemesEplanNamed()
     {
         var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };

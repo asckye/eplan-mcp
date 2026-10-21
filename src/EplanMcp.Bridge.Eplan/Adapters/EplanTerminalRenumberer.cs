@@ -48,17 +48,21 @@ internal sealed class EplanTerminalRenumberer : ITerminalRenumberer
     /// <summary>
     /// S21's arguments (tool spec 5): in the strip's order, every terminal of the strips of the given ones
     /// (<c>AllSelectedTerminalStrips</c>, XML), N, PE and SH terminals numbered, each terminal of a group on its own,
-    /// letters kept, no prefix or suffix, no sort change, no gap filling, PLC terminals left alone; only designations with
-    /// '?' when asked (XML; not verified, the sample project has none). EPLAN's InvalidScheme names the schemes it has;
-    /// other EPLAN failures go back as EPLAN_OPERATION_FAILED with EPLAN's message.
+    /// letters kept, no prefix or suffix, no sort change, no gap filling, PLC terminals left alone. "Only number marked
+    /// ones" does not keep EPLAN off numbered terminals: given every terminal of the project with it, EPLAN also
+    /// reordered the numbered strip +A1-XD1 (Large test, 2026-10-21, api-notes A24). So with <paramref name="onlyUnnumbered"/>
+    /// only the terminals whose designation has '?' go to it, as only tags with '?' go to PostNumerate (A20), and the
+    /// operation's read-back refuses any other rename. EPLAN's InvalidScheme names the schemes it has; other EPLAN
+    /// failures go back as EPLAN_OPERATION_FAILED with EPLAN's message.
     /// </summary>
     public void Renumber(string projectPath, IReadOnlyList<string>? strips, bool onlyUnnumbered, string scheme, int start, int increment)
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        Function[] terminals = strips is null
-            ? [.. Terminals(finder, null)!.Cast<Function>()]
-            : [.. strips.SelectMany(strip => Terminals(finder, strip) ?? throw new InvalidOperationException("A strip the operation resolved is gone.")).Cast<Function>()];
+        IEnumerable<Terminal> inScope = strips is null
+            ? Terminals(finder, null)!
+            : strips.SelectMany(strip => Terminals(finder, strip) ?? throw new InvalidOperationException("A strip the operation resolved is gone."));
+        Function[] terminals = [.. inScope.Where(t => !onlyUnnumbered || Unnumbered(t.Name)).Cast<Function>()];
         if (terminals.Length == 0)
         {
             return;
@@ -100,6 +104,9 @@ internal sealed class EplanTerminalRenumberer : ITerminalRenumberer
             throw failed;
         }
     }
+
+    /// <summary>A '?' in the designation, after the strip's ':': the rule of TerminalRenumberRequest.Unnumbered.</summary>
+    private static bool Unnumbered(string? name) => name is not null && name.IndexOf(':') is var colon and >= 0 && name.IndexOf('?', colon + 1) >= 0;
 
     /// <summary>
     /// Every terminal, or those of every strip named exactly <paramref name="strip"/>: GetTerminalStrips returns some
