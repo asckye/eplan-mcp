@@ -37,9 +37,11 @@ public sealed class PageDeleteTests : IClassFixture<DestructiveHost>
         Assert.Equal(Circuit1, page.GetProperty("name").GetString());
         Assert.InRange(page.GetProperty("functions").GetInt32(), 1, 500);
 
-        // S12 (A18): the four cables whose main function is on this page keep their cores on other pages.
+        // S12 (A18): four cables have their main function on this page. The tool lists the devices whose functions left
+        // on other pages lose their main function; +A2-WE2's other function is on no page, so it is not listed (A20).
         JsonElement[] orphaned = [.. dryRun.GetProperty("orphaned").EnumerateArray()];
-        foreach (string cable in new[] { "+A1-WE1", "+A1-WE2", "+A2-WE1", "+A2-WE2" })
+        Assert.DoesNotContain(orphaned, o => o.GetProperty("tag").GetString() == "+A2-WE2");
+        foreach (string cable in new[] { "+A1-WE1", "+A1-WE2", "+A2-WE1" })
         {
             JsonElement device = Assert.Single(orphaned, o => o.GetProperty("tag").GetString() == cable);
             Assert.InRange(device.GetProperty("functionsLeft").GetInt32(), 1, 100);
