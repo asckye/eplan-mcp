@@ -40,7 +40,8 @@ internal sealed class LanguageWriteTools
     [Description(
         "Sets which languages the pages of an EPLAN project show, in order, or adds translation languages; translates " +
         "nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch it needs the engineer's " +
-        "approval. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}.")]
+        "approval. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a language is " +
+        "eplan_language_remove.")]
     public static async Task<CallToolResult> LanguageSetAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -127,7 +128,7 @@ internal sealed class LanguageWriteTools
             hints.Add(RestoreHint);
             if (added.Count > 0)
             {
-                hints.Add("This tool does not remove languages: those added with 'add' stay.");
+                hints.Add("Languages added with 'add' are taken out only by eplan_language_remove.");
             }
         }
 
@@ -175,13 +176,13 @@ internal sealed class LanguageWriteTools
             display is null ? null : display is [Unset] ? "cleared the displayed languages" : $"set the displayed languages to {string.Join(", ", display)}",
         }.OfType<string>());
 
-    private static LanguageSetResult.LanguagesEntry Entry(ProjectLanguages languages) => new()
+    internal static LanguageSetResult.LanguagesEntry Entry(ProjectLanguages languages) => new()
     {
         Translation = [.. languages.Translation.Select(code => ResultShaper.CleanText(code))],
         Display = [.. languages.Display.Select(code => ResultShaper.CleanText(code))],
     };
 
-    private static LanguageSetResult.LanguagesEntry Entry(Dictionary<string, string> details, string translation, string display) => new()
+    internal static LanguageSetResult.LanguagesEntry Entry(Dictionary<string, string> details, string translation, string display) => new()
     {
         Translation = Lines(details, translation),
         Display = Lines(details, display),

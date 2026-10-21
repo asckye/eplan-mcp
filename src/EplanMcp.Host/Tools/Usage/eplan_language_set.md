@@ -22,7 +22,7 @@ Set the displayed languages back to not set, as `before` showed them:
 2. `display` sets which languages the pages show, in order; each must be a translation language of the project or in `add`. `["##_##"]` alone clears them.
 3. `add` adds translation languages; languages the project has are skipped. With both, the languages are added first.
 4. The tool translates nothing; texts show a new language once they have a translation in it.
-5. Ctrl+Z in EPLAN does not undo language settings. To restore them, call this tool again with `display` set to `before.display`. This tool never removes a language: one added with `add` stays.
+5. Ctrl+Z in EPLAN does not undo language settings. To restore them, call this tool again with `display` set to `before.display`. A language added with `add` is taken out only by eplan_language_remove, which also deletes its translations.
 6. Repeating a call changes nothing more; when the settings are already as asked, nothing is changed and no approval is asked.
 
 ## Fields

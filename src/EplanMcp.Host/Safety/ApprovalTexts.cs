@@ -31,7 +31,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + Undo(question.Tool, plan, zh),
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
@@ -71,7 +71,7 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
-        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", _ => change.Kind } : change.Kind;
+        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
         string name = Value(change.Name, zh);
         return change.Action switch
@@ -183,7 +183,24 @@ internal static class ApprovalTexts
     /// </summary>
     private static string Undo(string tool, WritePlan plan, bool zh) => plan.Changes.Any(c => c.Property == "languages")
         ? zh ? "Ctrl+Z 不能撤销语言设置；要恢复，用原来的值再设置一次。" : "Ctrl+Z in EPLAN does not undo language settings; to restore them, set the old values again."
-        : zh ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {tool}”这一步。" : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {tool}\".";
+        : (zh ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {tool}”这一步。" : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {tool}\".")
+            + (plan.Changes.Any(c => c.Kind == "language") ? zh ? "语言设置可能不随之恢复，备份中有原样的项目。" : " The language settings may not come back with it; the backup has the project as it was." : string.Empty);
+
+    /// <summary>
+    /// After the languages a removal deletes, what goes with them (eplan_language_remove, tool spec 6): every translation
+    /// in them, in language.remove.plan's <c>textsAffected</c> texts, and maybe the displayed languages (api-notes A28).
+    /// </summary>
+    private static IEnumerable<string> Translations(WritePlan plan, bool zh)
+    {
+        if (plan.Changes.Any(c => c.Kind == "language" && c.Action == "delete"))
+        {
+            string texts = Value(plan.Details?.GetValueOrDefault("textsAffected") ?? "?", zh);
+            yield return string.Empty;
+            yield return zh
+                ? $"项目文本中这些语言的全部译文都将删除（共 {texts} 个文本）；EPLAN 可能同时修改显示语言。"
+                : $"All translations in these languages are deleted from the project's texts ({texts} texts); EPLAN may change the displayed languages too.";
+        }
+    }
 
     /// <summary>For a Destructive write: where the whole project is copied before the change (ADR-0013); else nothing.</summary>
     private static string Backup(string? folder, bool zh) => folder is null

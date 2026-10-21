@@ -91,7 +91,7 @@ public sealed class LanguageSetToolTests : IDisposable
         CallToolResult result = await Set(display: ["sv_SE"], add: ["sv_SE"]);
 
         Assert.Equal("Added sv_SE to the translation languages and set the displayed languages to sv_SE.", WriteToolHarness.Text(result, 0));
-        Assert.Equal(Restore + " This tool does not remove languages: those added with 'add' stay.", WriteToolHarness.Structured(result).GetProperty("hint").GetString());
+        Assert.Equal(Restore + " Languages added with 'add' are taken out only by eplan_language_remove.", WriteToolHarness.Structured(result).GetProperty("hint").GetString());
     }
 
     [Fact]
