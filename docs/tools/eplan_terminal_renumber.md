@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `terminal` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把 -XD1 的端子按顺序重新编号""给新加的端子编号"。代理让 EPLAN 按端子编号方案给指定端子排或整个项目的端子编号。结果由方案和端子排中的顺序决定，事先算不出，所以变更清单只列范围，执行后列出每个改变的端子（与 `eplan_device_renumber` 相同，M4 设计 Q7）。大范围改名，按 Destructive 处理：每次审批，执行前备份。
@@ -48,7 +48,8 @@
 - **待 Large 测试确认**：
   - `only_unnumbered = true` 的效果（示例项目中没有带 `?` 的端子；可先用 `eplan_macro_insert` 插入带未编号端子的宏，A13）；
   - 只给部分端子排时，`Extent.AllSelectedTerminalStrips` 是否只改这些端子排；
-  - `start`、`step` 不为 1 时的效果。
+  - `start`、`step` 不为 1 时的效果；
+  - EPLAN 没有改任何端子名时是否留下撤销步骤：工具按 `eplan_device_renumber` 的做法（A20）返回 `not_started`、`undo` 为 `null`。
 
 ## 6. 写操作专项
 同 `eplan_device_renumber` 第 6 节（Destructive 流水线、dry-run、每次审批、不标为幂等），撤销名为"AI: eplan_terminal_renumber"。

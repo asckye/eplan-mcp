@@ -151,6 +151,21 @@ public sealed class ApprovalTextsTests
         Assert.Equal(note, texts.Note);
     }
 
+    [Theory]
+    [InlineData("zh-CN", "重新编号：all terminal designations on 1 strip (12 terminals), scheme: Numerisch, start 1, step 1")]
+    [InlineData("en-US", "Renumber all terminal designations on 1 strip (12 terminals), scheme: Numerisch, start 1, step 1")]
+    public void ANumbering_ShowsTheScopeAsTheBridgeWordsIt(string culture, string change)
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "update", Kind = "terminals", Name = "Line1", Property = "numbering", OldValue = "all terminal designations on 1 strip (12 terminals), scheme: Numerisch, start 1, step 1" }],
+            Details = new Dictionary<string, string> { ["terminalCount"] = "12", ["stripCount"] = "1" },
+        };
+
+        Assert.Equal([change], ApprovalTexts.For(_question with { Plan = plan }, CultureInfo.GetCultureInfo(culture)).Changes);
+        Assert.Equal(["renumber all terminal designations on 1 strip (12 terminals), scheme: Numerisch, start 1, step 1"], WritePipeline.ChangeLines(plan));
+    }
+
     [Fact]
     public void AMacroInsertsDevices_AreNotListedAsDevicesToNumber()
     {
