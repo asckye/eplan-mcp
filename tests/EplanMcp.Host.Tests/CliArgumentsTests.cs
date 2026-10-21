@@ -1,3 +1,5 @@
+using EplanMcp.Host.ClientConfig;
+
 namespace EplanMcp.Host.Tests;
 
 [Trait("Size", "Small")]
@@ -33,15 +35,56 @@ public sealed class CliArgumentsTests
     [InlineData("serve --format json")]
     [InlineData("--version --format json")]
     [InlineData("--format json")]
+    [InlineData("client-config")]
+    [InlineData("client-config --dry-run")]
+    [InlineData("client-config --format json")]
+    [InlineData("client-config codex --dry-run --remove")]
+    [InlineData("client-config codex --dry-run --dry-run")]
+    [InlineData("client-config codex --remove --remove")]
+    [InlineData("client-config codex --format")]
+    [InlineData("client-config codex --format text")]
+    [InlineData("client-config codex --format json --format json")]
+    [InlineData("client-config Codex")]
+    [InlineData("client-config vscode")]
+    [InlineData("client-config codex --all")]
+    [InlineData("client-config codex -n")]
     public void Parse_AWrongCommandLine_IsNull(string line)
     {
         Assert.Null(CliArguments.Parse(Split(line)));
     }
 
-    [Fact]
-    public void Usage_NamesTheFormatOfBothCommands()
+    [Theory]
+    [InlineData("client-config codex", "codex", "Write", false)]
+    [InlineData("client-config codex cursor claude-desktop", "codex cursor claude-desktop", "Write", false)]
+    [InlineData("client-config codex codex cursor codex", "codex cursor", "Write", false)]
+    [InlineData("client-config --dry-run codex --format json", "codex", "DryRun", true)]
+    [InlineData("client-config codex --format json --dry-run gemini-cli", "codex gemini-cli", "DryRun", true)]
+    [InlineData("client-config vscode-copilot --remove", "vscode-copilot", "Remove", false)]
+    [InlineData("client-config --remove", "", "Remove", false)]
+    [InlineData("client-config --remove --format json", "", "Remove", true)]
+    public void Parse_ClientConfig_GivesTheClientsInOrderAndTheMode(string line, string clients, string mode, bool json)
     {
-        Assert.Equal("usage: eplanmcp [serve] | doctor [--format json] | audit verify [--format json] | --version", CliArguments.Usage);
+        CliArguments cli = CliArguments.Parse(Split(line))!;
+
+        Assert.Equal((CliCommand.ClientConfig, json), (cli.Command, cli.Json));
+        Assert.Equal(Split(clients), cli.ClientConfig!.Clients.Select(c => c.Name));
+        Assert.Equal(Enum.Parse<ClientConfigMode>(mode), cli.ClientConfig.Mode);
+    }
+
+    [Fact]
+    public void Parse_EveryClientName_IsAccepted()
+    {
+        Assert.All(McpClient.All, c => Assert.Equal([c], CliArguments.Parse(["client-config", c.Name])!.ClientConfig!.Clients));
+    }
+
+    [Fact]
+    public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
+    {
+        Assert.Equal(
+            "usage: eplanmcp [serve] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
+            + Environment.NewLine
+            + "clients: claude-code, claude-desktop, codex, gemini-cli, qwen-code, kimi-code, codebuddy, opencode, qwen-agent, cursor, vscode-copilot",
+            CliArguments.Usage);
     }
 
     private static string[] Split(string line) => line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
