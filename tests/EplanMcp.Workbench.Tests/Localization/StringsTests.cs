@@ -15,7 +15,10 @@ namespace EplanMcp.Workbench.Tests.Localization;
 public sealed partial class StringsTests
 {
     /// <summary>Texts that are the same in both languages on purpose: product names, technical identifiers, formats.</summary>
-    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English", "Question.SuspendedValue"];
+    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English", "Question.SuspendedValue",
+        "Clients.Name.ClaudeCode", "Clients.Name.Codex", "Clients.Name.GeminiCli", "Clients.Name.QwenCode", "Clients.Name.KimiCode", "Clients.Name.Codebuddy",
+        "Clients.Name.Opencode", "Clients.Name.QwenAgent", "Clients.Name.Cursor", "Clients.Name.VscodeCopilot",
+    ];
 
     public static TheoryData<string, string, string> Entries()
     {
@@ -130,6 +133,6 @@ public sealed partial class StringsTests
     /// A catalogue key as a string literal in code: two or more dotted parts, starting with a known area. A literal that
     /// ends with a dot is the start of keys made in code, which their own tests check.
     /// </summary>
-    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome|Host|Audit|Status)(?:\\.[A-Za-z0-9]+)+)\"")]
+    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome|Host|Audit|Status|Clients)(?:\\.[A-Za-z0-9]+)+)\"")]
     private static partial Regex CodeKey();
 }
