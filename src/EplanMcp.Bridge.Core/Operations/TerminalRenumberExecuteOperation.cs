@@ -8,7 +8,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// fingerprint again, backs the project up (<see cref="ProjectBackups"/>), then lets EPLAN number the terminals in one
 /// transaction and reads back which terminals changed their name and which still contain '?'
 /// (docs/tools/eplan_terminal_renumber.md, section 5; S21 saw the numbering roll back and undo in one step, api-notes A24).
-/// EPLAN changing nothing is still committed, with no change listed.
+/// EPLAN changing nothing is still committed, with no change listed; EPLAN renaming a terminal it was not to number rolls
+/// back as EPLAN_OPERATION_FAILED.
 /// </summary>
 public sealed class TerminalRenumberExecuteOperation(IProjectCatalog catalog, IPageReader pages, ITerminalRenumberer renumberer, IProjectBackup backup, ITransactionScopeFactory transactions)
     : Operation<TerminalRenumberArgs, TerminalRenumberData>, IWriteOperation
@@ -62,15 +63,42 @@ public sealed class TerminalRenumberExecuteOperation(IProjectCatalog catalog, IP
         };
     }
 
-    /// <summary>Numbers, then reads the scope back and compares it with <paramref name="before"/>, terminal by terminal.</summary>
-    private Numbered Renumber(TerminalRenumberRequest request, List<PlacedFunction> before)
+    /// <summary>
+    /// Numbers, then reads every terminal of the project back and compares it with what was there, terminal by terminal.
+    /// Only the terminals the plan counted may change: given every terminal of the project with "only number marked
+    /// ones", Renumber.Terminals also reordered the numbered strip +A1-XD1 (Large test, 2026-10-21, api-notes A24). Any
+    /// other rename, in scope or not, is a failed read-back, which rolls everything back (coding standards 9.3, rule 9).
+    /// </summary>
+    private Numbered Renumber(TerminalRenumberRequest request, List<PlacedFunction> scope)
     {
-        renumberer.Renumber(request.Project.Path, request.Strips, request.OnlyUnnumbered, request.Scheme, request.Start, request.Step);
-        List<PlacedFunction> after = request.Scope(renumberer);
-        (List<RenamedObject> changed, int unmatched) = TerminalRenumberRequest.Changes(before, after);
-        List<string> still = [.. after.Select(t => t.Name).Where(TerminalRenumberRequest.Unnumbered).Distinct(StringComparer.Ordinal)];
-        return new Numbered(changed, unmatched, still);
+        string path = request.Project.Path;
+        IReadOnlyList<PlacedFunction> before = request.Strips is null ? scope : renumberer.ReadTerminals(path, null) ?? [];
+        var planned = new HashSet<string>(scope.Where(request.IsToNumber).Select(t => t.Id), StringComparer.Ordinal);
+        renumberer.Renumber(path, request.Strips, request.OnlyUnnumbered, request.Scheme, request.Start, request.Step);
+        IReadOnlyList<PlacedFunction> after = renumberer.ReadTerminals(path, null) ?? [];
+        (List<RenamedObject> unplanned, int othersUnmatched) = TerminalRenumberRequest.Changes(before.Where(t => !planned.Contains(t.Id)), after);
+        if (unplanned.Count > 0)
+        {
+            throw new BridgeErrorException(
+                ErrorReason.EplanOperationFailed,
+                $"EPLAN also renamed {Count(unplanned.Count)} that were not to be numbered, so nothing was numbered. metadata.unplanned lists them (before -> after); "
+                + "ask the engineer to number the terminals in EPLAN, or give only the strips to renumber in 'strips' with only_unnumbered false.",
+                retryable: false,
+                new Dictionary<string, string>
+                {
+                    ["project"] = request.Project.Name,
+                    ["unplanned"] = string.Join("\n", unplanned.Take(TerminalRenumberRequest.MaxListed).Select(c => c.From + " -> " + c.To)),
+                    ["unplannedCount"] = unplanned.Count.ToString(CultureInfo.InvariantCulture),
+                });
+        }
+
+        (List<RenamedObject> changed, int unmatched) = TerminalRenumberRequest.Changes(before.Where(t => planned.Contains(t.Id)), after);
+        IEnumerable<PlacedFunction> inScope = request.Strips is null ? after : request.Scope(renumberer);
+        List<string> still = [.. inScope.Select(t => t.Name).Where(TerminalRenumberRequest.Unnumbered).Distinct(StringComparer.Ordinal)];
+        return new Numbered(changed, unmatched + othersUnmatched, still);
     }
+
+    private static string Count(int terminals) => terminals.ToString(CultureInfo.InvariantCulture) + (terminals == 1 ? " terminal" : " terminals");
 
     private sealed class Numbered(List<RenamedObject> changed, int unmatched, List<string> stillUnnumbered)
     {

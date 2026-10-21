@@ -22,6 +22,12 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
     /// <summary>When true, EPLAN refuses the scheme while numbering, as InvalidScheme does.</summary>
     public bool Refuse { get; set; }
 
+    /// <summary>
+    /// When true, EPLAN renames every terminal in <see cref="Numbers"/>, whatever it was given and whether it has '?', as
+    /// the live run found it reorder the numbered strip +A1-XD1 (Large test, 2026-10-21, api-notes A24).
+    /// </summary>
+    public bool Overreach { get; set; }
+
     public List<(IReadOnlyList<string>? Strips, bool OnlyUnnumbered, string Scheme, int Start, int Step)> Renumbers { get; } = [];
 
     public IReadOnlyList<string> Schemes() => SchemeNames;
@@ -39,9 +45,9 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
             throw SchemeChoice.Refused(scheme, FakeDeviceRenumberer.InvalidSchemeMessage, "terminal", new InvalidOperationException(FakeDeviceRenumberer.InvalidSchemeMessage));
         }
 
-        foreach (PlacedFunction terminal in Strips.Where(s => strips is null || strips.Contains(s.Key)).SelectMany(s => s.Value))
+        foreach (PlacedFunction terminal in Strips.Where(s => Overreach || strips is null || strips.Contains(s.Key)).SelectMany(s => s.Value))
         {
-            if ((!onlyUnnumbered || TerminalRenumberRequest.Unnumbered(terminal.Name)) && Numbers.TryGetValue(terminal.Name, out string? name))
+            if ((Overreach || !onlyUnnumbered || TerminalRenumberRequest.Unnumbered(terminal.Name)) && Numbers.TryGetValue(terminal.Name, out string? name))
             {
                 terminal.Name = name;
             }
