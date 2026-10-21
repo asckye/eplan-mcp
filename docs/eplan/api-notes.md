@@ -176,6 +176,14 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A28. 翻译、项目语言与修订（spike S23，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S23](../../spikes/S23-translation-revisions/README.md)。示例项目的 scratch 副本。
+- 项目语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（示例 20 种）、`DISPLAYED_LANGUAGES`（`##_##;`）、`SOURCE_LANGUAGE`（`##_##`）中。多语言文本存储为 `de_DE@…;en_US@…;`。— S23。
+- `Translate.TranslateObjects([project])` 2.6–2.9 秒；示例项目已全部翻译，没有文本改变，但改写 `Project`、`Page`、`Blob` 等文件。— S23。
+- `SetDisplayedLanguages(project, "en_US;zh_CN")` 抛 `ArgumentException`（S029035，`strLanguage` 无效）。— S23。
+- 🔴 `RemoveProjectLanguage(project, "sv_SE")` 删除该语言的全部译文、把它移出翻译语言，还把显示语言改为 `zh_CN;`。`SafetyPoint` 回滚撤回了译文，但**没有撤回语言列表和显示语言**。— S23。
+- 🔴 `Revision.CreateRevision(project, 名称, 说明, ref 路径)` 0.04 秒，返回的路径为空，项目链接文件从 `.elk` 变为 `.ell`（修订跟踪中的项目）；Ctrl+Z 不撤回。`Project.Comparisons` 和 `Revision.GetUncompletedPages` 前后都是 0。— S23。
+
 ### A27. 部件库与翻译库的只读访问（spike S24，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。
 - 开发机的部件库是 `$(MD_PARTS)\EPLAN_parts.alk`：40 字节的链接文件，指向同目录的 `EPLAN_parts.adb\`（与项目数据相同格式的目录，3.9 MB）；`MDPartsDatabase.Type` 报告 `ACCESS`。翻译库是 `$(md_translate)\Translate.db`，类型 `EPLAN`。— S24。
