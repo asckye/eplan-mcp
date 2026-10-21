@@ -1,0 +1,54 @@
+﻿{
+  "noDirectory": {
+    "schemaVersion": 1,
+    "directory": "D:\\EplanMcp\\audit",
+    "exists": false,
+    "intactRecords": 0,
+    "intact": true,
+    "break": null
+  },
+  "intact": {
+    "schemaVersion": 1,
+    "directory": "D:\\EplanMcp\\audit",
+    "exists": true,
+    "intactRecords": 3,
+    "intact": true,
+    "break": null
+  },
+  "changed": {
+    "schemaVersion": 1,
+    "directory": "D:\\EplanMcp\\audit",
+    "exists": true,
+    "intactRecords": 1,
+    "intact": false,
+    "break": {
+      "file": "2026-10-20.jsonl",
+      "line": 2,
+      "problem": "changed"
+    }
+  },
+  "missing": {
+    "schemaVersion": 1,
+    "directory": "D:\\EplanMcp\\audit",
+    "exists": true,
+    "intactRecords": 1,
+    "intact": false,
+    "break": {
+      "file": "2026-10-20.jsonl",
+      "line": 2,
+      "problem": "missing"
+    }
+  },
+  "notARecord": {
+    "schemaVersion": 1,
+    "directory": "D:\\EplanMcp\\audit",
+    "exists": true,
+    "intactRecords": 2,
+    "intact": false,
+    "break": {
+      "file": "2026-10-21.jsonl",
+      "line": 1,
+      "problem": "not_a_record"
+    }
+  }
+}
