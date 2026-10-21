@@ -98,9 +98,12 @@ public sealed class WriteHost : IAsyncLifetime
     }
 
     /// <summary>Every record of this eplanmcp's audit log, oldest first.</summary>
-    public List<JsonObject> AuditRecords()
+    public List<JsonObject> AuditRecords() => AuditRecordsIn(Home);
+
+    /// <summary>Every record of the audit log in the data root <paramref name="home"/>, oldest first.</summary>
+    internal static List<JsonObject> AuditRecordsIn(string home)
     {
-        string audit = Path.Combine(Home, "audit");
+        string audit = Path.Combine(home, "audit");
         return Directory.Exists(audit)
             ? [.. Directory.EnumerateFiles(audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadLines).Select(l => JsonNode.Parse(l)!.AsObject())]
             : [];
@@ -117,7 +120,7 @@ public sealed class WriteHost : IAsyncLifetime
     /// The path of the open project below <paramref name="folder"/>, the one named <paramref name="preferred"/> when it is
     /// open; by path, as copies may share the fixture's name.
     /// </summary>
-    private static string OpenedBelow(string[] open, string folder, string? preferred)
+    internal static string OpenedBelow(string[] open, string folder, string? preferred)
     {
         string[] below = [.. open.Where(p => IsUnder(p, folder))];
         return below.FirstOrDefault(p => string.Equals(Path.GetFileName(p), preferred, StringComparison.OrdinalIgnoreCase))
@@ -129,5 +132,5 @@ public sealed class WriteHost : IAsyncLifetime
     private static bool IsUnder(string path, string root) =>
         Path.GetFullPath(path).StartsWith(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 
-    private static string Text(CallToolResult result) => string.Join("\n", result.Content.OfType<TextContentBlock>().Select(b => b.Text));
+    internal static string Text(CallToolResult result) => string.Join("\n", result.Content.OfType<TextContentBlock>().Select(b => b.Text));
 }
