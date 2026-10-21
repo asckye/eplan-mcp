@@ -14,7 +14,7 @@ namespace EplanMcp.Spikes.S23.Driver;
 /// project, runs the translation, language and revision probes, undoes the committed ones with Ctrl+Z, then restores the
 /// previously current project, closes the copy and unregisters the add-in. Ctrl+Z is sent only while every open project
 /// is a scratch copy and the copy is current. Reports go to <c>.local\spikes\s23\</c> (git-ignored).
-/// <para>Usage: <c>EplanMcp.Spikes.S23.Driver.exe --host name [--revision rN] [--port 49152]</c>.</para>
+/// <para>Usage: <c>EplanMcp.Spikes.S23.Driver.exe --host name [--revision rN] [--port 49152] [--follow-up]</c>.</para>
 /// </summary>
 internal static class Program
 {
@@ -37,6 +37,7 @@ internal static class Program
         string revision = Option(args, "--revision") ?? string.Empty;
         string port = Option(args, "--port") ?? "49152";
         string host = Option(args, "--host") ?? Environment.MachineName;
+        bool followUp = args.Contains("--follow-up"); // r1: display language forms and a translation with work to do
         string repository = Repository();
         string title = "EplanMcp.Spikes.S23" + revision;
         string action = "EplanMcpSpikeS23" + revision;
@@ -172,17 +173,25 @@ internal static class Program
             previous = current;
             Step("select", () => Probe("select", "select"));
             Step("languages", () => Probe("languages", "languages"));
-            Step("texts", () => Probe("texts", "texts"));
-            Step("translaterollback", () => Watched(exports, () => Probe("translaterollback", "translaterollback")));
-            Step("translate", () => Watched(exports, () => Probe("translate", "translate")));
-            Step("undo-translate", Undo);
-            Step("texts-after-undo", () => Probe("texts", "texts-after-undo"));
-            Step("displayrollback", () => Watched(exports, () => Probe("displayrollback", "displayrollback")));
-            Step("removerollback", () => Watched(exports, () => Probe("removerollback", "removerollback")));
-            Step("revisionstate", () => Probe("revisionstate", "revisionstate"));
-            Step("createrevision", () => Watched(exports, () => Probe("createrevision", "createrevision")));
-            Step("undo-revision", Undo);
-            Step("revisionstate-after-undo", () => Probe("revisionstate", "revisionstate-after-undo"));
+            if (followUp)
+            {
+                Step("displayformats", () => Watched(exports, () => Probe("displayformats", "displayformats")));
+                Step("translateone", () => Watched(exports, () => Probe("translateone", "translateone")));
+            }
+            else
+            {
+                Step("texts", () => Probe("texts", "texts"));
+                Step("translaterollback", () => Watched(exports, () => Probe("translaterollback", "translaterollback")));
+                Step("translate", () => Watched(exports, () => Probe("translate", "translate")));
+                Step("undo-translate", Undo);
+                Step("texts-after-undo", () => Probe("texts", "texts-after-undo"));
+                Step("displayrollback", () => Watched(exports, () => Probe("displayrollback", "displayrollback")));
+                Step("removerollback", () => Watched(exports, () => Probe("removerollback", "removerollback")));
+                Step("revisionstate", () => Probe("revisionstate", "revisionstate"));
+                Step("createrevision", () => Watched(exports, () => Probe("createrevision", "createrevision")));
+                Step("undo-revision", Undo);
+                Step("revisionstate-after-undo", () => Probe("revisionstate", "revisionstate-after-undo"));
+            }
         }
         finally
         {

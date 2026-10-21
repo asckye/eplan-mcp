@@ -140,6 +140,12 @@ public sealed class SpikeS23Action : IEplAction
             case "displayrollback":
                 report["display"] = SettingRolledBack(project, () => new Translate().SetDisplayedLanguages(project, "en_US;zh_CN"));
                 break;
+            case "displayformats":
+                report["formats"] = DisplayFormats(project);
+                break;
+            case "translateone":
+                report["translateOne"] = TranslateOne(project);
+                break;
             case "removerollback":
                 report["remove"] = SettingRolledBack(project, () => new Translate().RemoveProjectLanguage(project, RemovedLanguage));
                 break;
@@ -285,6 +291,61 @@ public sealed class SpikeS23Action : IEplAction
 
         result["afterRollback"] = Languages(project);
         result["textsAfterRollback"] = Texts(project);
+        return result;
+    }
+
+    /// <summary>r1: which argument forms SetDisplayedLanguages accepts (r0: "en_US;zh_CN" was refused), each rolled back.</summary>
+    private static JArray DisplayFormats(Project project)
+    {
+        var results = new JArray();
+        foreach (string form in new[] { "en_US", "en_US;", "en_US;zh_CN;", "en_US,zh_CN", "##_##;" })
+        {
+            var entry = new JObject { ["form"] = form };
+            using (SafetyPoint safety = SafetyPoint.Create())
+            {
+                entry["call"] = Try(() =>
+                {
+                    new Translate().SetDisplayedLanguages(project, form);
+                    return "done";
+                });
+                entry["during"] = Languages(project)["display"];
+                safety.Rollback();
+            }
+
+            entry["afterRollback"] = Languages(project)["display"];
+            results.Add(entry);
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// r1: a translation that has something to do. The sample project is fully translated, so one function text is set to
+    /// German only ("Motor") and that function is translated; all inside a SafetyPoint that is rolled back.
+    /// </summary>
+    private static JObject TranslateOne(Project project)
+    {
+        using var finder = new DMObjectsFinder(project);
+        Function function = finder.GetFunctions(null).First(f => f.IsMainFunction && Raw(() => f.Properties.FUNC_TEXT).Length > 0);
+        var result = new JObject { ["function"] = function.Name, ["textBefore"] = Raw(() => function.Properties.FUNC_TEXT) };
+        using (SafetyPoint safety = SafetyPoint.Create())
+        {
+            var german = new MultiLangString();
+            german.AddString(ISOCode.Language.L_de_DE, "Motor");
+            function.Properties.FUNC_TEXT = german;
+            result["textGermanOnly"] = Raw(() => function.Properties.FUNC_TEXT);
+            var clock = Stopwatch.StartNew();
+            result["translate"] = Try(() =>
+            {
+                new Translate().TranslateObjects([function]);
+                return "done";
+            });
+            result["seconds"] = Math.Round(clock.Elapsed.TotalSeconds, 2);
+            result["textTranslated"] = Raw(() => function.Properties.FUNC_TEXT);
+            safety.Rollback();
+        }
+
+        result["textAfterRollback"] = Raw(() => function.Properties.FUNC_TEXT);
         return result;
     }
 

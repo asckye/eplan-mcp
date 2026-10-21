@@ -11,7 +11,7 @@
 - 文本的比较：全部功能的 `FUNC_TEXT` 和全部页的 `PAGE_NOMINATIOMN`，按存储的原始形式（`de_DE@…;en_US@…;`）逐个比较，并算摘要。
 - 项目语言从项目设置读取：`TRANSLATEGUI.TRANSLATE_LANGUAGES`、`DISPLAYED_LANGUAGES`、`SOURCE_LANGUAGE`。
 - 不试"完成修订"：它会把项目变成只读（XML）。
-- 环境：EPLAN 2026.0.3.25421，Electric P8，2026-10-21，r0。
+- 环境：EPLAN 2026.0.3.25421，Electric P8，2026-10-21。r0 跑全部模式；r1（`--follow-up`）补测显示语言的参数写法，以及一段只有德语的文本能否翻译。
 
 ```powershell
 dotnet build spikes\S23-translation-revisions\EplanMcp.Spikes.S23.csproj -c Release
@@ -31,13 +31,17 @@ spikes\S23-translation-revisions\Driver\bin\Release\net481\EplanMcp.Spikes.S23.D
 | `RemoveProjectLanguage(project, "sv_SE")` | 约 3 s | 瑞典语译文全部删除（460 → 0）；`sv_SE` 移出翻译语言；**显示语言被改为 `zh_CN;`** | 🔴 **只回滚了一半**：译文恢复（摘要与之前相同），翻译语言和显示语言**没有恢复** | `Function`、`Connection`、`Component`、`Instance`、`Blob` 等 |
 | `CreateRevision(project, "S23-1", 说明, ref 路径)` | 0.04 s | 返回的新路径为空（没有复制项目）；**项目链接文件从 `S23_Sample.elk` 变为 `S23_Sample.ell`**（修订跟踪中的项目）；比较结果 0 个，未完成的页 0 个，前后不变 | Ctrl+Z 之后仍是 `.ell` | `Project`、`Blob`、`User.eod`、`Settings.xdb` |
 
+**r1 补测**：
+- `SetDisplayedLanguages` 接受 `"en_US"` 和逗号分隔的 `"en_US,zh_CN"`（存为 `en_US;zh_CN;`）；`"en_US;"`、`"en_US;zh_CN;"`、`"##_##;"` 都抛 `ArgumentException`。每次都在 `SafetyPoint` 中回滚，**设置都没有被回滚**。
+- 把功能 `+A1-WE1` 的文本改为只有德语的 `Motor`，再 `TranslateObjects([function])`：0.04 秒，文本不变，没有加上其他语言。可能的原因：项目的源语言是 `##_##`（未设置），或者翻译库中没有 `Motor`；没有再查。
+
 ## 结论
-1. **翻译要换一个场景验证**：示例项目已经全部翻译，`TranslateObjects` 没有可改的。要先造一段只有一种语言的文本（scratch 中改一个功能文本）再翻译，才能看出它写什么、能否回滚。
+1. **翻译还没有测出效果**：示例项目已经全部翻译；r1 中只有德语的 `Motor` 也没有被翻译。要先查清翻译的前提（项目的源语言、翻译库中的词条），`eplan_project_translate` 在那之前不实现。
 2. 🔴 **删除语言的回滚不完整**：`SafetyPoint` 撤回了文本，但没有撤回项目设置中的语言列表和显示语言，项目留在不一致的状态（文本中有瑞典语，语言列表中没有）。所以 `eplan_project_language_remove`：
    - 必须是 Destructive，执行前备份（ADR-0013）；
    - 失败或取消时，回滚之后还要把语言设置写回原值，或者提示工程师从备份恢复；
    - 它会改显示语言，结果中如实列出。
-3. **设置显示语言的参数写法要查**：`"en_US;zh_CN"` 被拒绝；设置中存储的形式是 `zh_CN;`（带结尾分号），可能每次只接受一种语言，或者写法不同。查清之前 `eplan_project_language_set` 不实现。
+3. **设置显示语言的写法**（r1）：多种语言用逗号分隔（`"en_US,zh_CN"`），不能用分号。设置不被 `SafetyPoint` 回滚，`eplan_project_language_set` 执行前记下原值，失败时写回。
 4. 项目设置的改动（语言、"上次使用"）普遍不被 `SafetyPoint` 回滚（S21 的 `Generate.Cables`、本 spike 的删除语言）。改项目设置的写工具都要自己记下原值、失败时写回。
 5. 🔴 **新建修订会改变项目文件的路径**（`.elk` → `.ell`），Ctrl+Z 不撤回。Host 按路径识别项目、记录审计和暂停（ADR-0010），所以修订的写工具要单独设计：
    - 执行后按新路径重新识别项目，审计中记下新旧两个路径；
