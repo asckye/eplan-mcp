@@ -27,7 +27,7 @@
 - [SampleRequest.cs](Shared/SampleRequest.cs)：示例请求。变更清单中有 U+202E（`-K1` + U+202E + `gnp.exe`，原样显示会变成 `-K1exe.png`）、BEL、ESC 序列、零宽字符、标签字符、孤立代理项、双向隔离符、嵌入的换行和超长行，共 15 条。清洗后删掉 12 个字符，`-K1gnp.exe` 按原顺序显示，UIA 读到的变更文字中隐藏字符为 0。
 - [SpikeLog.cs](Shared/SpikeLog.cs)：命令行 `--log --lang --theme --deadline --font-check`；日志带“自进程创建起的毫秒数”，只写文件，不写 stdout。
 
-两个 WPF 原型与 A 一样实现了 ADR-0014 的 500 ms 防误触：窗口每次变为可见（启动、从托盘恢复、第二个实例转来激活）之后 500 ms 内点击按钮无效。
+三个原型都实现了 ADR-0014 的 500 ms 防误触：窗口每次变为可见（启动、从托盘恢复，A 还有第二个实例转来的激活）之后 500 ms 内点击按钮无效。
 
 ## 方法
 - 一键运行：`spikes\S18-workbench-ui\run-s18.ps1 [-FontDir <Maple Mono CN 的 fonts 目录>]`（默认 `<仓库>\.local\fonts\maple-mono-cn-v7.9\fonts`）。结果写到 `<仓库>\.local\s18\`：`summary.json`、每个变体的启动数据、UIA 树、日志和截图。它会打开窗口，每个原型打开一次任务栏的“显示隐藏的图标”浮出框（随即关闭）；打开的窗口全部关闭；不安装任何东西，不改系统设置。
@@ -57,7 +57,7 @@
 | 只用 `dotnet` 构建、自包含发布 | 可以。MSBuild 来自 `C:\Program Files\dotnet\sdk\10.0.402`；XAML 编译器 `XamlCompiler.exe`（.NET Framework 4.7.2 程序）和 `makepri.exe` 都来自 NuGet 包；日志中没有 Visual Studio 的程序 | 可以，没有 NuGet 包 | 可以，没有 NuGet 包 |
 | 必需的属性 | `TargetFramework=net10.0-windows10.0.26100.0`、`UseWinUI`、`RuntimeIdentifier=win-x64`、`WindowsPackageType=None`、`WindowsAppSDKSelfContained=true`、`SelfContained=true`、**`EnableMsixTooling=true`**（没有它发布结果缺 `.pri`，启动即 `XamlParseException`）；单实例另需 `DISABLE_XAML_GENERATED_MAIN` | `UseWPF`、`UseWindowsForms`（托盘）、`ApplicationManifest`（每显示器 DPI）；复制的主题要用 `Link` 保持 `Themes/` 资源路径 | `UseWPF`、`UseWindowsForms`、`ApplicationManifest`、`NoWarn=WPF0001` |
 | NuGet 包 | `Microsoft.WindowsAppSDK` 2.5.1，带入 Base 2.0.4、Foundation 2.3.12、InteractiveExperiences 2.1.9、WinUI 2.3.9、DWrite 2.1.0、Widgets 2.0.5、AI 2.5.5、ML 2.1.94、Search 2.5.5、Runtime 2.5.1、Microsoft.Web.WebView2 1.0.3719.77、Microsoft.Windows.SDK.BuildTools 10.0.26100.4654、…BuildTools.MSIX 1.7.251221100、Microsoft.Windows.AI.MachineLearning 2.1.74、System.Numerics.Tensors 9.0.0；另有 SDK 自动引用的 Microsoft.Windows.SDK.NET.Ref 10.0.26100.57 | 无 | 无 |
-| 许可证 | Windows App SDK 的包是 **Microsoft Software License Terms**（不是 MIT），`requireLicenseAcceptance=true`；再分发要求最终用户同意不低于该协议的条款、并为微软免责；含“数据收集”条款 | TIA 主题 MIT（Copyright (c) 2026 bulaofen0036-coder），.NET MIT，Maple Mono CN SIL OFL 1.1 | .NET MIT |
+| 许可证 | Windows App SDK 的包是 **Microsoft Software License Terms**（不是 MIT），`requireLicenseAcceptance=true`；再分发时要让分发者和最终用户同意保护程度不低于该协议的条款，并由分发者为微软承担赔偿责任（indemnify）；含“数据收集”条款 | TIA 主题 MIT（Copyright (c) 2026 bulaofen0036-coder），.NET MIT，Maple Mono CN SIL OFL 1.1 | .NET MIT |
 | 自包含发布（不含字体） | 229.6 MB，519 个文件；只引用 WinUI 组件包（`S18Slim`）173.1 MB，453 个；再裁剪 81.2 MB，284 个 | 171.4 MB，474 个 | 171.2 MB，474 个 |
 | 加两个字重的 Maple Mono CN | 265.0 MB，521 个；组件包 208.5 MB；裁剪 116.6 MB，286 个 | 206.8 MB，476 个 | — |
 | 单文件 | 能生成（一个 166.5 MB 的 exe 加 .pdb），**启动失败**：`AppInstance` 激活报 0x8007007E（找不到模块），进程以 0xE0434352 退出 | 可以：一个 165.1 MB 的 exe 加 `Fonts\` 中的两个字体文件（共 200.6 MB，另有 .pdb、.xml）；启动正常 | 可以：一个 165.0 MB 的 exe（共 165.1 MB）；启动正常 |
@@ -68,13 +68,13 @@
 | 自包含是否真的生效 | `coreclr.dll`、`Microsoft.UI.Xaml.dll`、`Microsoft.WindowsAppRuntime.dll` 都从程序目录载入；虽然本机装有 Windows App Runtime 2.5.1 框架包，没有模块来自 `WindowsApps` | `coreclr.dll`、`PresentationFramework.dll`、`wpfgfx_cor3.dll` 等都从程序目录载入，没有来自 `dotnet\shared` | 同 B |
 | UIA：按钮 | “批准”“拒绝”，Button，Invoke，341×32 与 341×32；AccessKey、AcceleratorKey 为空 | “批准”“拒绝”，Button，65.6×32 与 65.6×32（UIA 取整为 66 与 65）；`IsDefault`、`IsCancel` 为 false；另有链接样式的“参数”按钮 | “批准”“拒绝”，341×31 与 341×31 |
 | UIA：标题 | WinUI 的 `TextBlock` 不能获得焦点，标题放在 `IsTabStop=True` 的 `ContentControl` 中：Group，名称为标题文字，可聚焦，显示时是系统焦点 | `Focusable=True` 的 `TextBlock`（与 TIA 的抽屉标题相同）：Text，可聚焦，显示时是系统焦点 | 同 B |
-| UIA：倒计时 | Text“剩余 1:54，到期自动拒绝”，两秒后变为 1:52；ProgressBar 名称“剩余时间”，RangeValue 0–100 | 同 A（数字用等宽样式单独显示，可访问名称设为整句；只放数字时读出的只有“1:58”）；剩余 30 秒、10 秒时用 TIA 的 `AccessibleStatus` 发 LiveRegionChanged | 同 A |
+| UIA：倒计时 | Text“剩余 1:54，到期自动拒绝”，两秒后变为 1:52；ProgressBar 名称“剩余时间”，RangeValue 0–100 | 同 A（数字用等宽样式单独显示，可访问名称设为整句；只放数字时读出的只有“1:58”）；剩余 30 秒、10 秒时用 TIA 的 `AccessibleStatus` 发 LiveRegionChanged（日志中记录到 30 秒那次） | 同 A |
 | 显示时的焦点（APR-02） | 标题。从托盘恢复后，激活会把焦点还给上次的控件，要在 `Activated` 中再聚焦一次（已做） | 标题；同样需要在 `Activated` 中再聚焦 | 同 B |
 | 语言切换 | 立即，无需重启；UIA 读到新标题用了 22 ms | 立即，62 ms | 立即，24 ms |
 | 浅色/深色运行时切换 | 立即：根元素的 `RequestedTheme`，标题栏用 `AppWindow.TitleBar.PreferredTheme` | 立即：TIA 的 `ThemeManager` 换掉第 0 个资源字典；系统标题栏用 DWM 的深色属性 | 立即：`Application.ThemeMode`，标题栏跟着变 |
 | 高对比度 | WinUI 的 `XamlControlsResources` 有 HighContrast 主题字典，取 `SystemColor*`；A 的覆盖项也写了 HighContrast 条目 | TIA 的 `Palette.HighContrast.xaml` 只引用 `SystemColors.*`；系统开启高对比度时 `ThemeManager` 自动换用它。截图用的是 `ThemeManager` 的覆盖开关，没有改系统设置 | WPF Fluent 自带 `hc` 主题字典 |
 | 每显示器 DPI | Per-Monitor V2 | 加 `app.manifest` 后为 Per-Monitor V2；**不加时 .NET 10 的 WPF 为“系统”感知**（第一次测 B1 时实测） | 同 B |
-| 托盘 | 可以：隐藏窗口在界面线程上，WinUI 的消息循环把回调送到；新图标在“显示隐藏的图标”浮出框中，经 UIA 点击后窗口恢复并成为前台 | 可以，同 A | 可以 |
+| 托盘 | 可以：隐藏窗口在界面线程上，WinUI 的消息循环把回调送到；新图标在“显示隐藏的图标”浮出框中，经 UIA 点击后窗口恢复并成为前台 | 可以（WinForms `NotifyIcon`）；新图标同样在浮出框中，经 UIA 点击后窗口恢复并成为前台 | 同 B |
 | 单实例 | 可以：第二个进程约 0.6 秒内以 0 退出，第一个收到 `Activated` 并显示窗口 | 原型中没有做 | 没有做 |
 | 500 ms 防误触 | 从托盘恢复后 172 ms 的点击被忽略，700 ms 后的点击生效 | 235 ms 的被忽略，之后的生效 | 191 ms 的被忽略，之后的生效 |
 
@@ -121,8 +121,8 @@
 1. A：`dotnet publish` 的结果缺少应用的 `.pri`（XAML 编译结果），启动时 `MainWindow` 报 `XamlParseException`。加 `EnableMsixTooling=true` 后解决（WinUI 模板也这样设，未打包也要）。
 2. A：在 `App` 构造函数中访问 `Application.Resources` 抛出 E_UNEXPECTED（0x8000FFFF），进程以 0xC000027B 退出；移到 `OnLaunched` 后正常。
 3. A：单文件发布不能启动（`AppInstance` 激活时找不到模块），没有找到办法。
-4. A：`Microsoft.WindowsAppSDK` 元包带入 AI、ML（onnxruntime 20.7 MB、DirectML 17.8 MB）、Search、Widgets；改为只引用 `Microsoft.WindowsAppSDK.WinUI`、`.InteractiveExperiences`、`.DWrite` 后少 56 MB，功能不受影响。只引用 WinUI 和 InteractiveExperiences、不引用 DWrite 时 `MainWindow` 报 `XamlParseException`（当时缺 `.pri` 的问题也存在，没有单独确认 DWrite 是否必需）。
-5. A、B、B1：从托盘恢复窗口时，激活会把焦点还给上次获得焦点的控件，覆盖了程序设在标题上的焦点；在 `Activated` 中再聚焦一次（WinUI 另加一次低优先级的延后聚焦）后，焦点稳定在标题上。回答之后两个按钮被禁用，焦点落到第一个控件（A）或窗口（B、B1），下一个问题出现时要重新聚焦标题。
+4. A：`Microsoft.WindowsAppSDK` 元包带入 AI、ML（onnxruntime 20.7 MB、DirectML 17.8 MB）、Search、Widgets；改为只引用 `Microsoft.WindowsAppSDK.WinUI`、`.InteractiveExperiences`、`.DWrite` 后少 56 MB，原型照常启动、加载字体（单实例没有在这个变体上测）。只引用 WinUI 和 InteractiveExperiences、不引用 DWrite 时 `MainWindow` 报 `XamlParseException`（当时缺 `.pri` 的问题也存在，没有单独确认 DWrite 是否必需）。
+5. A、B、B1：从托盘恢复窗口时，激活会把焦点还给上次获得焦点的控件，覆盖了程序设在标题上的焦点；在 `Activated` 中再聚焦一次（WinUI 另加一次低优先级的延后聚焦）后，焦点稳定在标题上。回答之后两个按钮被禁用，焦点落到第一个控件（A）、一个面板（B）或窗口（B1），下一个问题出现时要重新聚焦标题。
 6. 三个原型的新托盘图标都进了“显示隐藏的图标”浮出框；`Shell_NotifyIconGetRect` 返回的是浮出框按钮的位置。
 7. 当另一个程序正在前台被使用时，Windows 不把前台交给新启动的原型窗口（一次测量中出现），此时 UIA 的系统焦点在那个程序上；这与 ADR-0014 “窗口不抢焦点”的要求一致，属于 S16 的内容。
 8. B：TIA 主题的复制见上一节；英文标题、host、项目路径、操作对象在等宽字体下放不下，见“字体”。
@@ -130,7 +130,7 @@
 ## 结论
 1. 三个原型都能在没有 Visual Studio 的情况下只用 `dotnet build` / `dotnet publish` 构建并自包含发布，适合 CI；A 需要 `EnableMsixTooling=true`，构建机需要 .NET Framework 4.7.2（XAML 编译器），windows-2025 镜像满足（未在 CI 上实测）。
 2. **项目负责人选定的 B（WPF + TIA 主题 + Maple Mono CN）在测到的各项上可行**：UIA 名称、标题焦点、倒计时、语言和主题的即时切换、托盘、防误触都与 A 相当；Maple Mono CN 从程序目录加载，不用安装，各字重自动对应；没有 NuGet 依赖，许可证都是 MIT 或 OFL；可以单文件发布。测到的代价：冷启动比 A 慢约 300 ms（同一轮中窗口可见 587 ms 对 292 ms），比 B1 慢约 60 ms；两个字重的字体使发布结果多 35.4 MB；不能裁剪；480 px 抽屉中等宽字体需要换行。
-3. **TIA 主题可以复用，但不是只复制主题文件**：15 个文件中只改两行字体，另需 7 个 TIA 类型的替身、一个保持资源路径的 `Link` 和一个关掉 4 条风格规则的 `.editorconfig`。`EplanMcp.Workbench` 至少要带：Primer.xaml、三个调色板、Icons.xaml、ThemeManager.cs，Primer 引用的 Ux.cs、ContrastSelection.cs、BoolConverters.cs、ScrollCommandNameConverter.cs、LogTailView.cs、WorkbenchLogView.cs、Loc.cs、TrExtension.cs，以及替身或真正的 FeatureTone、LogLevel、转换器和文字表；审批卡片还用到 AccessibleStatus.cs。Primer.xaml 中还有 TIA 各页面（日志、设备树、程序块、审计等）的样式，不用也照样编译。复制后两边会各自修改；是否改为两个仓库共用一份主题，由项目负责人决定。
+3. **TIA 主题可以复用，但不是只复制主题文件**：15 个文件中只改两行字体，另需 7 个 TIA 类型的替身、一个保持资源路径的 `Link` 和一个关掉 4 条风格规则的 `.editorconfig`。`EplanMcp.Workbench` 至少要带：Primer.xaml、三个调色板、Icons.xaml、ThemeManager.cs，Primer.xaml 和 App.xaml 引用的 Ux.cs、ContrastSelection.cs、BoolConverters.cs、ScrollCommandNameConverter.cs、LogTailView.cs、WorkbenchLogView.cs、Loc.cs、TrExtension.cs，以及替身或真正的 FeatureTone、LogLevel、转换器和文字表；审批卡片还用到 AccessibleStatus.cs。Primer.xaml 中还有 TIA 各页面（日志、设备树、程序块、审计等）的样式，不用也照样编译。复制后两边会各自修改；是否改为两个仓库共用一份主题，由项目负责人决定。
 4. 与 ADR-0015 的关系：ADR-0015 在 main 上已按 WinUI 3 接受，项目负责人随后改为 WPF + TIA 主题。测量结果中支持 WinUI 3 的只有冷启动和现成的单实例 API；不利于它的有：Windows App SDK 的许可证不是 MIT 且有再分发条件、发布体积更大、`EnableMsixTooling` 和资源初始化时机这类只在运行时暴露的坑、单文件发布不可用。这些事实支持把 ADR-0015 改为 WPF；修改 ADR 由项目负责人决定。
 
 ## 局限
