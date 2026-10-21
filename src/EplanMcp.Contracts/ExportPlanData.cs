@@ -12,6 +12,12 @@ public sealed class ExportPlanData
     /// <summary>How many pages the export has; 0 for the exports of a whole project (PXF, lists).</summary>
     public int PageCount { get; set; }
 
-    /// <summary>PDF, DXF: the scheme used, the given one or else the one EPLAN used last; null for images.</summary>
+    /// <summary>PDF, DXF: the scheme used, the given one or else the one EPLAN used last. Labels: the labelling scheme as EPLAN names it. Null otherwise.</summary>
     public string? Scheme { get; set; }
+
+    /// <summary>
+    /// The project exports: the extension the Host gives the file, <c>.xml</c> for the parts list and the labelling
+    /// scheme's (<c>.txt</c>, <c>.xlsx</c>) for labels; null for PXF, where EPLAN adds it, and the page exports.
+    /// </summary>
+    public string? Extension { get; set; }
 }

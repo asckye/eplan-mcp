@@ -34,7 +34,7 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         var catalog = new Catalog();
         IOperation[] operations =
         [
-            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog), new ProjectExportRunOperation(kind, catalog, _exporter) }),
+            .. new[] { ProjectExportKind.Pxf, ProjectExportKind.PartsList, ProjectExportKind.Labels }.SelectMany(kind => new IOperation[] { new ProjectExportPlanOperation(kind, catalog, _exporter), new ProjectExportRunOperation(kind, catalog, _exporter) }),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _server = new BridgeServer(
@@ -79,6 +79,18 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         Assert.Equal(["parts " + Path.Combine(directory, "Line 1.xml")], _exporter.Exports);
     }
 
+    [Fact]
+    public async Task Labels_WriteTheSchemesFormatIntoTheToolsFolder_NamedAfterTheScheme()
+    {
+        CallToolResult result = await ProjectExportTools.ExportLabelsAsync(_runner, new RecordedProgress(), "terminal diagram", null, null, null, TestContext.Current.CancellationToken);
+
+        JsonElement data = Structured(result);
+        string directory = data.GetProperty("directory").GetString()!;
+        Assert.Equal(("Terminal diagram", "Terminal diagram.xlsx"), (data.GetProperty("scheme").GetString(), data.GetProperty("files")[0].GetProperty("path").GetString()));
+        Assert.Equal(["labels 'Terminal diagram' zh_CN " + Path.Combine(directory, "Terminal diagram.xlsx")], _exporter.Exports);
+        Assert.Equal("Exported labels with scheme 'Terminal diagram' to a 4 bytes Excel file in a new folder; see 'directory'.", ((TextContentBlock)result.Content[0]).Text);
+    }
+
     private static JsonElement Structured(CallToolResult result)
     {
         ToolResultAssert.Succeeded(result);
@@ -101,6 +113,16 @@ public sealed class ProjectExportInteropTests : IAsyncDisposable
         {
             Exports.Add($"parts {file}");
             File.WriteAllText(file, "<parts/>");
+        }
+
+        public IReadOnlyList<LabelScheme> LabelSchemes() => [new() { Name = "Terminal diagram", Format = "XmlLblExcelExportConverterImpl" }];
+
+        public string? LanguageCode(string? language) => language ?? "zh_CN";
+
+        public void ExportLabels(string projectPath, string scheme, string language, string file)
+        {
+            Exports.Add($"labels '{scheme}' {language} {file}");
+            File.WriteAllText(file, "xlsx");
         }
     }
 

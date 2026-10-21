@@ -28,17 +28,17 @@ public sealed class ProjectExportOperationTests : IDisposable
     [Fact]
     public void Plan_NamesTheProject_AndExportsNothing()
     {
-        var plan = (ExportPlanData)new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog).Execute(new ExportArgs { Project = "Line2" })!;
+        var plan = (ExportPlanData)new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog, _exporter).Execute(new ExportArgs { Project = "Line2" })!;
 
         Assert.Equal(("Line2", 0, (string?)null), (plan.Project, plan.PageCount, plan.Scheme));
-        Assert.Equal(OperationNames.ExportPxfPlan, new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog).Name);
+        Assert.Equal(OperationNames.ExportPxfPlan, new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog, _exporter).Name);
         Assert.Empty(_exporter.Exports);
     }
 
     [Fact]
     public void Plan_AProjectThatIsNotOpen_IsProjectNotOpen()
     {
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog).Execute(new ExportArgs { Project = "Line9" })).Error;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ProjectExportPlanOperation(ProjectExportKind.Pxf, _catalog, _exporter).Execute(new ExportArgs { Project = "Line9" })).Error;
 
         Assert.Equal(ErrorReason.ProjectNotOpen, error.Reason);
     }
@@ -81,7 +81,7 @@ public sealed class ProjectExportOperationTests : IDisposable
         Assert.Equal("Line1", data.Project);
         Assert.Equal(
             (OperationNames.ExportPartsPlan, OperationNames.ExportPartsRun),
-            (new ProjectExportPlanOperation(ProjectExportKind.PartsList, _catalog).Name, new ProjectExportRunOperation(ProjectExportKind.PartsList, _catalog, _exporter).Name));
+            (new ProjectExportPlanOperation(ProjectExportKind.PartsList, _catalog, _exporter).Name, new ProjectExportRunOperation(ProjectExportKind.PartsList, _catalog, _exporter).Name));
     }
 
     [Theory]
@@ -95,6 +95,73 @@ public sealed class ProjectExportOperationTests : IDisposable
 
         Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
         Assert.Contains("ending in .xml", error.Message, StringComparison.Ordinal);
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Theory]
+    [InlineData("Device tag list", "Device tag list", ".txt")]
+    [InlineData(" terminal DIAGRAM ", "Terminal diagram", ".xlsx")]
+    public void LabelsPlan_NamesTheSchemeAsEplanDoes_AndTheExtensionOfItsFormat(string scheme, string name, string extension)
+    {
+        var plan = (ExportPlanData)new ProjectExportPlanOperation(ProjectExportKind.Labels, _catalog, _exporter).Execute(new ExportArgs { Scheme = scheme })!;
+
+        Assert.Equal(("Line1", name, extension), (plan.Project, plan.Scheme, plan.Extension));
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Theory]
+    [InlineData("Missing")]
+    [InlineData("InternalRefDefScheme")]
+    public void Labels_AnUnknownOrInternalScheme_IsInvalidWithTheOfferedSchemesAsCandidates(string scheme)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ProjectExportPlanOperation(ProjectExportKind.Labels, _catalog, _exporter).Execute(new ExportArgs { Scheme = scheme })).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Equal("Device tag list\nTerminal diagram\nXML list\nUnreadable", error.Metadata!["candidates"]);
+        Assert.Equal("4", error.Metadata["candidateCount"]);
+    }
+
+    [Theory]
+    [InlineData("XML list", "XmlLblXmlExportConverterImpl")]
+    [InlineData("Unreadable", "")]
+    public void Labels_ASchemeOfAFormatNotVerified_IsRefused(string scheme, string format)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Scheme = scheme, Directory = _folder, FileName = "a.txt" }, ProjectExportKind.Labels)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, format), (error.Reason, error.Metadata!["format"]));
+        Assert.Contains("does not export yet", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Empty(_exporter.Exports);
+    }
+
+    [Fact]
+    public void Labels_AMissingSchemeAndAnUnknownLanguage_AreReportedTogetherBeforeTheProject()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Project = "Line9", Scheme = " ", Language = "xx_XX", Directory = _folder, FileName = "a.txt" }, ProjectExportKind.Labels)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("'scheme' is required", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("'language' is not a language EPLAN knows", error.Metadata["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(null, "en_US")]
+    [InlineData("zh_CN", "zh_CN")]
+    public void Labels_AreOneFileWithTheSchemesExtension_InTheLanguageGivenOrEplans(string? language, string used)
+    {
+        ExportRunData data = Run(new ExportArgs { Scheme = "device tag list", Language = language, Directory = _folder, FileName = "设备.txt" }, ProjectExportKind.Labels);
+
+        Assert.Equal(["设备.txt"], Files());
+        Assert.Equal([$@"labels D:\Scratch\Line1 'Device tag list' {used} 设备.txt"], _exporter.Exports);
+        Assert.Equal(("Line1", "Device tag list"), (data.Project, data.Scheme));
+    }
+
+    [Fact]
+    public void Labels_AFileNameWithoutTheSchemesExtension_IsRefusedBeforeExporting()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Scheme = "Terminal diagram", Directory = _folder, FileName = "a.txt" }, ProjectExportKind.Labels)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("ending in .xlsx", error.Message, StringComparison.Ordinal);
         Assert.Empty(_exporter.Exports);
     }
 

@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Exports;
 /// <summary>One export as a tool states it: its Bridge operations, the plan's arguments, and how its progress reads.</summary>
 internal sealed record ExportJob(string PlanOperation, string RunOperation, ExportArgs Args, string Label)
 {
-    /// <summary>PDF and the project exports: the file's name, from what the plan found (the project's name).</summary>
+    /// <summary>PDF and the project exports: the file's name, from what the plan found (the project's name, a scheme's extension).</summary>
     public Func<ExportPlanData, string>? FileName { get; init; }
 
     /// <summary>The least free space the export root's drive needs before EPLAN is called; 0 for no check (PXF, tool spec 5).</summary>
@@ -108,6 +108,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         Format = job.Args.Format,
         WidthPx = job.Args.WidthPx,
         IncludeMasterData = job.Args.IncludeMasterData,
+        Language = job.Args.Language,
         Directory = directory,
         FileName = job.FileName?.Invoke(plan),
     };
