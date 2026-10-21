@@ -42,6 +42,9 @@ public static class OperationNames
     /// <summary>One terminal strip by name: its terminals in strip order, sliced in the Bridge, with their connections and bridges. Arguments: <see cref="TerminalStripGetArgs"/>; data: <see cref="TerminalStripGetData"/>.</summary>
     public const string TerminalStripGet = "terminal.strip.get";
 
+    /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
+    public const string PlcGet = "plc.get";
+
     /// <summary>
     /// Lists the parts a project uses, summed up per part number and variant, filtered and sliced in the Bridge.
     /// Arguments: <see cref="PartListArgs"/>; data: <see cref="ListData{TItem}"/> of <see cref="PartListItem"/>.

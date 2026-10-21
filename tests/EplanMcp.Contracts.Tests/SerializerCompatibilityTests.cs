@@ -334,6 +334,30 @@ public sealed class SerializerCompatibilityTests
             Total = 5,
         },
         new TerminalStripGetData(),
+        new PlcGetArgs { Project = "Line1", Plc = "-KE1", Language = "zh_CN", Offset = 100, Limit = 100 },
+        new PlcGetArgs(),
+        new PlcGetData
+        {
+            Project = "项目 二",
+            Plc = new PlcInfo { Tag = "=K1+A2-KE1", VisibleTag = "-KE1", Page = "=K1+A2&EFA1/1", Parts = ["PXC.2703994"], Station = "站 1", Rack = "0", Slot = "2", Cpu = true },
+            Channels =
+            [
+                new PlcChannel
+                {
+                    Name = "=K1+A2-KE1:2.3",
+                    Address = "I0.3",
+                    SymbolicAddress = "启动",
+                    DataType = "BOOL",
+                    Text = "按钮",
+                    TextLanguage = "de_DE",
+                    Connected = [new ConnectionEnd { Device = "=K1+A2-SF1", Pin = "13" }],
+                },
+                new PlcChannel(),
+            ],
+            Total = 34,
+            Connected = 20,
+        },
+        new PlcGetData(),
         new PartListArgs { Project = "Line1", Manufacturer = "SIE", Text = "接触器", Language = "zh_CN", Offset = 50, Limit = 50 },
         new PartListArgs(),
         new ListData<PartListItem>
