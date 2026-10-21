@@ -29,7 +29,7 @@
     <!--
       Microsoft Software License Terms (not MIT; see the spike README). Spike S18's WinUI 3 prototype only
       (spikes/S18-workbench-ui, ADR-0015 option 1): latest stable 2.x on 2026-10-20. No project in EplanMcp.Ci.slnf
-      references it; nothing ships with it until ADR-0015 is decided.
+      references it, and nothing ships with it: ADR-0017 chose WPF. Kept only so the spike still builds.
     -->
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <!-- The same release split into its component packages: WinUI and windowing only, without AI, ML, Search, Widgets (S18Slim). -->
