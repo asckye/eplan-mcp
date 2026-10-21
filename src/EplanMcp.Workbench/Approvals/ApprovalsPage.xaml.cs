@@ -80,9 +80,9 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     /// Shows the question a reminder was about, in its group (APR-14); one that has gone leaves the page as it is. The
     /// shell then moves focus to its title.
     /// </summary>
-    internal void Open(string requestId)
+    internal void Open(QuestionItem item)
     {
-        if (_view?.Pending.Concat(_view.Answered).FirstOrDefault(q => q.RequestId == requestId) is { } item)
+        if (_view is not null && (_view.Pending.Contains(item) || _view.Answered.Contains(item)))
         {
             (item.IsPending ? WaitingGroup : AnsweredGroup).IsChecked = true;
             _view.Select(item);

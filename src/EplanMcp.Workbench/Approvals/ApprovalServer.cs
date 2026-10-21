@@ -273,7 +273,7 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
             if (question is null)
             {
                 LogDuplicate(ask.RequestId);
-                await SendAsync(pipe, WorkbenchJson.Error(askId, InvalidRequest, "A question with this request ID is already in the queue.")).ConfigureAwait(false);
+                await SendAsync(pipe, WorkbenchJson.Error(askId, InvalidRequest, "The same question is already waiting.")).ConfigureAwait(false);
                 return;
             }
 
@@ -400,7 +400,7 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     [LoggerMessage(Level = LogLevel.Information, Message = "Connection from process {ProcessId} ended: {Problem}")]
     private partial void LogConnectionEnded(int processId, string problem);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Question {RequestId} refused: the request ID is already in the queue")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Question {RequestId} refused: the same question is already waiting")]
     private partial void LogDuplicate(string requestId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Question {RequestId} for {Tool} from process {ProcessId}")]

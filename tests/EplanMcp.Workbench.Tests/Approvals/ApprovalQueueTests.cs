@@ -6,7 +6,8 @@ namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
 /// The queue (workbench-ui APR-11 to APR-13, ADR-0014 decision 3): at most 50 waiting questions however many Hosts
-/// connect, one question per request ID, the first ending wins, and an outcome only ever changes what is shown.
+/// connect, each question its own whatever its request ID, the first ending wins, and an outcome only ever changes what
+/// is shown.
 /// </summary>
 [Trait("Size", "Small")]
 public sealed class ApprovalQueueTests
@@ -48,15 +49,44 @@ public sealed class ApprovalQueueTests
     }
 
     [Fact]
-    public void ASecondQuestionWithTheSameRequestId_IsRefused_WaitingOrEnded()
+    public void AWritesRelease_ThenItsApproval_AreTwoQuestions_UnderOneRequestId()
     {
         var queue = new ApprovalQueue(_clock);
-        Question first = queue.Add(Asks.Write("r1"))!;
+        Question release = queue.Add(Asks.Release("r1"))!;
+        Assert.True(queue.Answer(release, approve: true));
 
-        Assert.Null(queue.Add(Asks.Write("r1")));
+        Question approval = queue.Add(Asks.Write("r1"))!;
+
+        Assert.NotSame(release, approval);
+        Assert.Equal([approval], queue.Pending);
+        Assert.Equal([release], queue.Answered);
+        Assert.True(queue.Answer(approval, approve: true));
+    }
+
+    [Fact]
+    public void TwoReleasesOfDifferentWrites_ThenTheApproval_AreThreeQuestions()
+    {
+        var queue = new ApprovalQueue(_clock);
+        ApprovalAskParams first = Asks.Release("r1");
+        ApprovalAskParams second = first with { Suspension = first.Suspension! with { RequestId = "older", Tool = "eplan_device_update" } };
+
+        Question one = queue.Add(first)!;
+        Question two = queue.Add(second)!;
+        Question three = queue.Add(Asks.Write("r1"))!;
+
+        Assert.Equal([one, two, three], queue.Pending);
+    }
+
+    [Fact]
+    public void TheVerySameQuestion_AskedAgainWhileItWaits_IsRefused_ButNotOnceItEnded()
+    {
+        var queue = new ApprovalQueue(_clock);
+        Question first = queue.Add(Asks.Release("r1"))!;
+
+        Assert.Null(queue.Add(Asks.Release("r1")));
+        Assert.Equal([first], queue.Pending);
         queue.End(first, QuestionEnd.Expired);
-        Assert.Null(queue.Add(Asks.Write("r1")));
-        Assert.Empty(queue.Pending);
+        Assert.NotNull(queue.Add(Asks.Release("r1")));
     }
 
     [Theory]

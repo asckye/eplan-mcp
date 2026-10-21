@@ -70,8 +70,10 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     }
 
     /// <summary>
-    /// Takes the question into a reserved place; null when its request ID is already in the queue, waiting or ended:
-    /// questions are told apart by it (APR-05), so a second one with the same ID is refused.
+    /// Takes the question into a reserved place. Each question is its own, whatever its request ID: the Host asks a
+    /// write's releases (ADR-0010 section 3) and then its approval all under the write's ID, each on a connection of its
+    /// own. Null only while the very same question waits (same request ID, kind and suspended write), as from a Host
+    /// that asks twice.
     /// </summary>
     public Question? Add(ApprovalAskParams ask)
     {
@@ -79,7 +81,7 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
         lock (_lock)
         {
             _reserved = Math.Max(0, _reserved - 1);
-            if (_pending.Concat(_answered).Any(q => q.RequestId == ask.RequestId))
+            if (_pending.Any(q => q.RequestId == ask.RequestId && q.Ask.Kind == ask.Kind && Equals(q.Ask.Suspension, ask.Suspension)))
             {
                 return null;
             }

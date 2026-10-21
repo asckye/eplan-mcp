@@ -124,15 +124,15 @@ public partial class MainWindow : Window
     /// From the tray or a notification: the window comes back with the queue, and with the question the notification was
     /// about selected (STS-09, APR-14); without waiting questions the page stays as it was.
     /// </summary>
-    public void Open(string? requestId)
+    internal void Open(QuestionItem? question)
     {
         Restore();
-        if (requestId is not null)
+        if (question is not null)
         {
-            ApprovalsPage.Open(requestId);
+            ApprovalsPage.Open(question);
         }
 
-        if (requestId is not null || _pending > 0)
+        if (question is not null || _pending > 0)
         {
             Navigate(WorkbenchPage.Approvals, NavigationOrigin.Reminder);
         }
