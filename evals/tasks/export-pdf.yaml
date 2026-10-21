@@ -1,0 +1,18 @@
+id: export-pdf
+set: dev
+prompt: 把 =GAA+A1&EFS1/1 到 /3 这三页导出成一个 PDF，告诉我文件在哪里。
+answer:
+  type: object
+  required: [file]
+  properties:
+    file: { type: string, description: full path of the PDF file with its folder and file name }
+# The tool spec's eval (docs/tools/eplan_export_pdf.md, section 7). An export changes no design data and writes only
+# into a new folder of the evals' eplanmcp (A16, A20), so it runs on the shared fixture; exported_files lists what the
+# attempt exported, with paths below the export root, which the full path ends with.
+after:
+  pdfs: { tool: exported_files, args: { extension: pdf }, pick: $.count }
+  pdf: { tool: exported_files, args: { extension: pdf }, pick: "$.files[0].path" }
+checks:
+  - { after: pdfs, equals: 1 }
+  - { answer: $.file, contains: after.pdf }
+budget: { max_tool_calls: 6 }

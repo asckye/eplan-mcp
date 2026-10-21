@@ -1,0 +1,34 @@
+id: workflow-contactor-feedback
+set: dev
+fixture: copy
+prompt: 在项目 {project} 的新页 =GAA+A1&EFS1/60 上放一个接触器反馈控制回路并生成连接，运行检查，更新报表，导出这一页的 PDF，报告错误数和文件名。
+answer:
+  type: object
+  required: [errors, file]
+  properties:
+    errors: { type: integer, description: the errors the check found }
+    file: { type: string, description: the file name or full path of the PDF }
+# The end-to-end task of the first batch (M4 design 7). On a fresh copy: the page is not there (A17 made it); the
+# Contactor_Feedback macros of the macro catalog place devices, and a new page gets connections only by generating
+# them (A19: 0 -> 9); the copy has no check messages, and every check adds EPLAN's summary hints (S11: two pages
+# 0 -> 14; A20); updating all reports adds +A2&EPA1/1.2 (A16, A20). The PDF must come from the copy: exported_files
+# leaves out what the attempt exported from another project, such as the shared fixture.
+after:
+  type: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/60" }, pick: $.page.type }
+  devices: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/60" }, pick: $.total }
+  connections: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/60" }, pick: $.total }
+  messages: { tool: eplan_check_list, pick: $.total }
+  errors: { tool: eplan_check_list, pick: $.counts.error }
+  partsList: { tool: eplan_page_get, args: { page: "+A2&EPA1/1.2" }, pick: $.page.name }
+  pdfs: { tool: exported_files, args: { extension: pdf }, pick: $.count }
+  pdf: { tool: exported_files, args: { extension: pdf }, pick: "$.files[0].name" }
+checks:
+  - { after: type, equals: Circuit }
+  - { after: devices, at_least: 1 }
+  - { after: connections, at_least: 1 }
+  - { after: messages, at_least: 1 }
+  - { answer: $.errors, equals: after.errors }
+  - { after: partsList, equals: "+A2&EPA1/1.2" }
+  - { after: pdfs, equals: 1 }
+  - { answer: $.file, contains: after.pdf }
+budget: { max_tool_calls: 30, max_minutes: 15, max_usd: 2 }
