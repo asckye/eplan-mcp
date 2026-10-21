@@ -18,7 +18,7 @@ namespace EplanMcp.Spikes.S12;
 /// UndoStep + QuietModeStep), as S10 and S11 did: whether <c>CopyProject(Snapshot)</c> copies an open project, what
 /// <c>Backup.Project(MakeBackup)</c> does to it, and whether page removal and renumbering roll back and undo in one step.
 /// <para>
-/// Usage: <c>EplanMcpSpikeS12 /Mode:projects|select|restore|count|copy|copyall|backup|prepare|removerollback|remove|renumberdevicesrollback|renumberdevices|renumberpagesrollback|renumberpages|close
+/// Usage: <c>EplanMcpSpikeS12 /Mode:projects|select|restore|count|copy|copyall|backup|prepare|removerollback|remove|renumberdevicesrollback|renumberdevices|backuprenumber|renumberfilter|renumberpagesrollback|renumberpages|close
 /// /Report:"…\x.json" /ScratchRoot:"…\s12" /Name:project [/Out:"…\path"] [/Restore:name] [/Macro:"…\x.ema"] [/Scheme:name]</c>.
 /// Works only on the open project called Name under ScratchRoot.
 /// </para>
@@ -198,6 +198,18 @@ public sealed class SpikeS12Action : IEplAction
 
                 report["attempts"] = attempts;
                 break;
+            case "backuprenumber":
+                // r3: the Destructive pipeline's backup (copy, open the copy read-only, count its pages, close it) and then a
+                // renumbering in the same dispatch, as eplan_device_renumber does; EPLAN died in Renumber.DeviceTags there.
+                report["backup"] = Try(() => BackUpAndCount(project, p.Out));
+                report["currentAfterBackup"] = Try(() => new SelectionSet().GetCurrentProject(false)?.ProjectName);
+                report["renumber"] = Try(() => Scoped("S12 renumber after backup", () => RenumberDevices(project, string.Empty)));
+                report["state"] = State(project);
+                break;
+            case "renumberfilter":
+                // r4: which functions make Renumber.DeviceTags(PostNumerate) raise an access violation (r3 killed EPLAN).
+                report["renumber"] = Try(() => RolledBack(() => RenumberFiltered(project, p.Scheme), () => new JObject { ["questionTags"] = new JArray(QuestionTags(project)) }));
+                break;
             case "renumberdevices":
                 report["renumber"] = Try(() => Scoped("S12 renumber devices", () => RenumberDevices(project, p.Scheme)));
                 report["state"] = State(project);
@@ -265,9 +277,63 @@ public sealed class SpikeS12Action : IEplAction
         };
     }
 
+    /// <summary>
+    /// PostNumerate on the functions of /91 that match the filter passed as /Scheme: "device" ('?' in the device tag before
+    /// ':'), "terminal" ('?' only after ':'), "nonquestion" (no '?'), anything else all of them.
+    /// </summary>
+    private static JObject RenumberFiltered(Project project, string filter)
+    {
+        Page page = ProbePages(project).FirstOrDefault(pg => pg.Name == "=GAA+A1&EFS1/91") ?? throw new InvalidOperationException("page /91 missing");
+        Function[] all = Functions(project, page);
+        bool DeviceQuestion(Function f) => f.Name.Split(':')[0].Contains("?");
+        bool TerminalQuestion(Function f) => !DeviceQuestion(f) && f.Name.Contains("?");
+        // "zero-<filter>": the same functions without PostNumerate, as eplan_device_renumber with only_unnumbered false.
+        bool zero = filter.StartsWith("zero-", StringComparison.Ordinal);
+        string which = zero ? filter.Substring(5) : filter;
+        Function[] chosen = which switch
+        {
+            "device" => [.. all.Where(DeviceQuestion)],
+            "terminal" => [.. all.Where(TerminalQuestion)],
+            "nonquestion" => [.. all.Where(f => !f.Name.Contains("?"))],
+            "nonterminal" => [.. all.Where(f => !TerminalQuestion(f))],
+            _ => all,
+        };
+        var report = new JObject { ["filter"] = filter, ["chosen"] = new JArray(chosen.Select(f => f.Name + (f.IsMainFunction ? " (main)" : string.Empty))) };
+        File.WriteAllText(Path.Combine(Path.GetTempPath(), "s12r4-before-renumber.json"), report.ToString(Formatting.Indented));
+        using var renumber = new Renumber();
+        renumber.DeviceTags([.. chosen.Cast<IFunctionBase>()], null, zero ? default : Renumber.Enums.DeviceTags.PostNumerate, string.Empty, 1, 1);
+        report["after"] = new JArray(Functions(project, page).Select(f => f.Name).Distinct());
+        return report;
+    }
+
+    private static JObject BackUpAndCount(Project project, string copy)
+    {
+        using var manager = new ProjectManager();
+        manager.CopyProject(project.ProjectLinkFilePath, copy + ".elk", ProjectManager.CopyMode.Snapshot);
+        bool lockByDefault = manager.LockProjectByDefault;
+        manager.LockProjectByDefault = false;
+        try
+        {
+            Project opened = manager.OpenProject(copy + ".elk", ProjectManager.OpenMode.ReadOnly);
+            int pages;
+            using (var finder = new DMObjectsFinder(opened))
+            {
+                pages = finder.GetPages(null).Length;
+            }
+
+            opened.Close();
+            return new JObject { ["pages"] = pages };
+        }
+        finally
+        {
+            manager.LockProjectByDefault = lockByDefault;
+        }
+    }
+
     private static JObject RenumberDevices(Project project, string scheme)
     {
-        Page page = ProbePages(project).FirstOrDefault() ?? throw new InvalidOperationException("probe pages missing; run 'prepare' first");
+        // r3: the page eplan_device_renumber failed on, when the project has it.
+        Page page = ProbePages(project).FirstOrDefault(pg => pg.Name == "=GAA+A1&EFS1/91") ?? ProbePages(project).FirstOrDefault() ?? throw new InvalidOperationException("probe pages missing; run 'prepare' first");
         Function[] functions = Functions(project, page);
         string[] before = [.. functions.Select(f => f.Name)];
         using var renumber = new Renumber();
