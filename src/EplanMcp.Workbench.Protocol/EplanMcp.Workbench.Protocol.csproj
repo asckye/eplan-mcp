@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The Host-Workbench pipe protocol (ADR-0014): pipe name, frames, messages and their strict JSON, shared by the Host
+    (net10.0) and the Workbench (net10.0-windows), which must not reference the Host (M5 design 4.4). Not part of
+    EplanMcp.Contracts: that stays netstandard2.0 POCOs without logic for the net481 Bridge, which never speaks this
+    protocol, while this one needs System.Text.Json to reject unknown and duplicate fields.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>EplanMcp.Workbench.Protocol</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Windows x64 only (architecture section 2): the pipe name needs the user's SID. -->
+    <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <_Parameter1>windows</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
