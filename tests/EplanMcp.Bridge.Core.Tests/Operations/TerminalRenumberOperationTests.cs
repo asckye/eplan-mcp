@@ -6,20 +6,27 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 /// <summary>
 /// terminal.renumber.plan and terminal.renumber.execute against a fake that numbers the way spike S21 found EPLAN
 /// numbers the strip +A1-XD1 of the sample project (api-notes A24): the scheme check, what counts as unnumbered, the
-/// scope, the change list and the read-back by terminal.
+/// scope, the change list, the backup before the transaction, and the read-back by terminal. Medium: the backup goes
+/// into a real temporary folder.
 /// </summary>
-[Trait("Size", "Small")]
-public sealed class TerminalRenumberOperationTests
+[Trait("Size", "Medium")]
+public sealed class TerminalRenumberOperationTests : IDisposable
 {
     private const string Strip = "+A1-XD1";
     private const string Other = "+A1-XD4";
 
     private static readonly OpenProject _project = new() { Name = "Line1", Path = @"D:\Scratch\Line1" };
 
+    private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-terminals-").FullName;
+    private readonly FakePageReader _pages = new();
     private readonly FakeTerminalRenumberer _renumberer = new();
+    private readonly FakeProjectBackup _backup;
+    private readonly FakeTransactions _transactions = new();
 
     public TerminalRenumberOperationTests()
     {
+        _pages.Pages.Add(new PageSummary { Name = "=GAA+A1&EFS1/1" });
+        _backup = new FakeProjectBackup(_pages);
         _renumberer.Strips[Strip] = [.. Enumerable.Range(1, 5).Select(d => Terminal(Strip + ":" + d.ToString(System.Globalization.CultureInfo.InvariantCulture), "x" + d.ToString(System.Globalization.CultureInfo.InvariantCulture)))];
         _renumberer.Strips[Other] = [Terminal(Other + ":1", "o1"), Terminal(Other + ":?1", "o2"), Terminal(Other + ":?2", "o3")];
 
@@ -30,6 +37,8 @@ public sealed class TerminalRenumberOperationTests
         _renumberer.Numbers[Strip + ":5"] = Strip + ":4";
         _renumberer.Numbers[Other + ":?1"] = Other + ":2";
     }
+
+    public void Dispose() => Directory.Delete(_folder, recursive: true);
 
     [Theory]
     [InlineData("+A1-XD1:?1", true)]
@@ -100,6 +109,97 @@ public sealed class TerminalRenumberOperationTests
     }
 
     [Fact]
+    public void Execute_BacksUpFirst_ThenNumbersInOneTransaction_AndReportsByTerminal()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _transactions.Snapshot = () =>
+        {
+            Assert.Single(_backup.Copies);
+            return () => { };
+        };
+
+        TerminalRenumberData data = Execute(args);
+
+        var call = Assert.Single(_renumberer.Renumbers);
+        Assert.Equal([Strip], call.Strips!);
+        Assert.Equal((false, "Numerisch", 1, 1), (call.OnlyUnnumbered, call.Scheme, call.Start, call.Step));
+        Assert.Equal(["Begin AI: eplan_terminal_renumber", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Equal([(":2", ":3"), (":3", ":5"), (":4", ":2"), (":5", ":4")], data.Changed.Select(c => (c.From[Strip.Length..], c.To[Strip.Length..])));
+        Assert.Equal((4, 0, null), (data.ChangedCount, data.StillUnnumberedCount, data.Warning));
+    }
+
+    [Fact]
+    public void Execute_OnlyUnnumbered_InTheProject_ListsWhatStillHasQuestionMarks()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Scheme = "Numerisch" };
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        TerminalRenumberData data = Execute(args);
+
+        Assert.Null(Assert.Single(_renumberer.Renumbers).Strips);
+        Assert.Equal((Other + ":?1", Other + ":2"), (Assert.Single(data.Changed).From, data.Changed[0].To));
+        Assert.Equal((Other + ":?2", 1), (Assert.Single(data.StillUnnumbered), data.StillUnnumberedCount));
+    }
+
+    [Fact]
+    public void Execute_ASchemeEplanRefuses_RollsBackWithTheSchemesEplanNamed()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Refuse = true; // offered, but EPLAN refuses it while numbering
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal(5, error.Metadata!["candidates"].Split('\n').Length);
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_WhenTheScopeChanged_IsStaleAndNothingIsBackedUp()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.Strips[Strip][0].Name = Strip + ":9";
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Empty(_backup.Copies);
+    }
+
+    [Fact]
+    public void Execute_WhenTheSchemeIsGoneOrTheBackupFails_NothingIsNumbered()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.SchemeNames.Remove("Numerisch");
+        BridgeError gone = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        _renumberer.SchemeNames.Add("Numerisch");
+        _backup.Failure = new IOException("disk full");
+
+        BridgeError failed = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (gone.Reason, gone.Execution));
+        Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted), (failed.Reason, failed.Execution));
+        Assert.Empty(_renumberer.Renumbers);
+    }
+
+    [Fact]
+    public void Execute_WhenEplanGivesNewIdentifiers_SaysSoInsteadOfGuessing()
+    {
+        var args = new TerminalRenumberArgs { Project = "Line1", Strips = [Strip], Scheme = "Numerisch", OnlyUnnumbered = false };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renumberer.NewIds = true;
+
+        TerminalRenumberData data = Execute(args);
+
+        Assert.Empty(data.Changed);
+        Assert.StartsWith("EPLAN gave 5 terminals new identifiers", data.Warning, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Changes_AreByTerminal_EachPairOnce_AndCountTerminalsWithoutAMatch()
     {
         PlacedFunction[] before = [Terminal("-X1:2", "1"), Terminal("-X1:2", "2"), Terminal("-X1:3", "3"), Terminal("-X1:?1", "4"), Terminal("-X1:9", "5")];
@@ -121,4 +221,10 @@ public sealed class TerminalRenumberOperationTests
     private static PlacedFunction Terminal(string name, string id) => new() { Name = name, IsMain = true, Id = id };
 
     private WritePlan Plan(TerminalRenumberArgs args) => (WritePlan)new TerminalRenumberPlanOperation(new FakeCatalog(_project), _renumberer).Execute(args)!;
+
+    private TerminalRenumberData Execute(TerminalRenumberArgs args)
+    {
+        args.Backup = new BackupTarget { Path = Path.Combine(_folder, "Line1.elk"), MaxSeconds = 150 };
+        return (TerminalRenumberData)new TerminalRenumberExecuteOperation(new FakeCatalog(_project), _pages, _renumberer, _backup, _transactions).Execute(args)!;
+    }
 }
