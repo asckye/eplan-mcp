@@ -3,8 +3,8 @@ using ModelContextProtocol;
 namespace EplanMcp.Host.Safety;
 
 /// <summary>
-/// The progress the client sees of one tool call, which waits several times in turn: for the engineer's confirmation
-/// and approval, then for EPLAN. MCP wants every report to increase on the last, but each wait counts from zero; so each
+/// The progress the client sees of one tool call, which may wait several times in turn: a write for the engineer's
+/// confirmation and approval, then for EPLAN; an export only for EPLAN. MCP wants every report to increase on the last, but each wait counts from zero; so each
 /// reports through a lane of its own (<see cref="Lane"/>), whose values, total included, are moved past the last one
 /// the client saw when the lane first reports. A report that would still not increase is dropped. Thread-safe:
 /// <see cref="_lock"/> guards <see cref="_last"/>, and reports are passed on under it, in order.

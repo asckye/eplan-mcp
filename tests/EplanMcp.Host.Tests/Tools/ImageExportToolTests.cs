@@ -18,6 +18,7 @@ public sealed class ImageExportToolTests : IDisposable
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-export-image-").FullName);
     private readonly ManualTime _time = new(new DateTimeOffset(2026, 10, 21, 8, 30, 0, TimeSpan.Zero));
     private readonly FakeBridgeClient _bridge = new();
+    private readonly RecordedProgress _progress = new();
     private readonly ExportRunner _runner;
 
     public ImageExportToolTests()
@@ -30,6 +31,9 @@ public sealed class ImageExportToolTests : IDisposable
             var files = new List<ExportedPage>();
             foreach ((string page, int i) in run.Pages!.Select((p, i) => (p, i)))
             {
+                // As the Bridge does (tool spec 5): a step before each page, which takes EPLAN 2 s here.
+                _bridge.Progress?.Report(new ProgressNotification { Progress = i, Total = run.Pages!.Count, Message = $"Exporting page {i + 1} of {run.Pages!.Count}" });
+                _time.Advance(TimeSpan.FromSeconds(2));
                 string path = page.Replace('/', '_') + "." + run.Format;
                 File.WriteAllBytes(Path.Combine(run.Directory!, path), [.. Enumerable.Repeat((byte)(i + 1), 100 + i)]);
                 files.Add(new ExportedPage { Page = page, Path = path });
@@ -81,6 +85,16 @@ public sealed class ImageExportToolTests : IDisposable
     }
 
     [Fact]
+    public async Task EachPage_ReachesTheClientAsTheBridgesStep()
+    {
+        await Image(["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2", "=GAA+A1&EFS1/3"]);
+
+        Assert.Equal(
+            [("Exporting page 1 of 3", 0f), ("Exporting page 2 of 3", 2f), ("Exporting page 3 of 3", 4f)],
+            _progress.Values.Select(v => (v.Message, v.Progress)));
+    }
+
+    [Fact]
     public async Task ArgumentProblems_AreAllReportedBeforeAnythingIsCreated()
     {
         CallToolResult result = await Image([.. Enumerable.Range(1, 5).Select(i => "=A/" + i)], width: 100, inline: true);
@@ -110,7 +124,7 @@ public sealed class ImageExportToolTests : IDisposable
     }
 
     private Task<CallToolResult> Image(string[] pages, string format = "png", int width = 1600, bool inline = false) =>
-        ImageExportTools.ExportImageAsync(_runner, new RecordedProgress(), pages, project: null, format, width, inline, TestContext.Current.CancellationToken);
+        ImageExportTools.ExportImageAsync(_runner, _progress, pages, project: null, format, width, inline, TestContext.Current.CancellationToken);
 
     private static (string Page, string Path, long Bytes)[] Files(JsonElement data) =>
         [.. data.GetProperty("files").EnumerateArray().Select(f => (f.GetProperty("page").GetString()!, f.GetProperty("path").GetString()!, f.GetProperty("bytes").GetInt64()))];

@@ -153,6 +153,30 @@ public sealed class ExportRunnerTests : IDisposable
         Assert.All(_progress.Values, v => Assert.Null(v.Total));
     }
 
+    [Fact]
+    public async Task TheBridgesSteps_ReachTheClientCleaned_BetweenHeartbeats_AndNoneAfterwards()
+    {
+        IProgress<ProgressNotification>? steps = null;
+        _bridge.Handlers[Run] = args =>
+        {
+            steps = _bridge.Progress!;
+            steps.Report(new ProgressNotification { RequestId = "r", Progress = 0, Total = 2, Message = "Exporting page 1 of 2" });
+            _time.Advance(TimeSpan.FromSeconds(6));
+            steps.Report(new ProgressNotification { RequestId = "r", Progress = 1, Total = 2, Message = "Exporting page 2\u202E of 2\u0007" });
+            _time.Advance(TimeSpan.FromSeconds(5)); // the heartbeat at 10 s is left out: a step came 4 s before
+            return Write((ExportArgs)args!, "a.png", 1);
+        };
+
+        await RunAsync();
+        steps!.Report(new ProgressNotification { RequestId = "r", Progress = 2, Total = 2, Message = "Exported 2 of 2 pages" });
+        _time.Advance(TimeSpan.FromSeconds(10));
+
+        Assert.Equal(
+            [("Exporting page 1 of 2", 0f), ("Exporting page 1 of 2 (5 s)", 5f), ("Exporting page 2 of 2", 6f)],
+            _progress.Values.Select(v => (v.Message, v.Progress)));
+        Assert.All(_progress.Values, v => Assert.Null(v.Total));
+    }
+
     private Task<ExportOutcome> RunAsync(ExportJob? job = null) =>
         _runner.RunAsync(job ?? new ExportJob(Plan, Run, new ExportArgs(), "Exporting"), _progress, TestContext.Current.CancellationToken);
 

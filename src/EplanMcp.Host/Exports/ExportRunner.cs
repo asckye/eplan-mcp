@@ -1,12 +1,13 @@
 using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Safety;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol;
 
 namespace EplanMcp.Host.Exports;
 
-/// <summary>One export as a tool states it: its Bridge operations, the plan's arguments, and how its heartbeat reads.</summary>
+/// <summary>One export as a tool states it: its Bridge operations, the plan's arguments, and how its progress reads.</summary>
 internal sealed record ExportJob(string PlanOperation, string RunOperation, ExportArgs Args, string Label)
 {
     /// <summary>PDF: the file's name, from the project's name the plan returned.</summary>
@@ -28,7 +29,8 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
 
     /// <summary>
     /// Runs <paramref name="job"/>. Throws <see cref="BridgeCallException"/> with the tool's error, and
-    /// <see cref="OperationCanceledException"/> when the client cancelled. <paramref name="progress"/> gets the heartbeat.
+    /// <see cref="OperationCanceledException"/> when the client cancelled. <paramref name="progress"/> gets the wait for
+    /// EPLAN as write tools report it (<see cref="BridgeProgress"/>): the Bridge's steps and a heartbeat.
     /// </summary>
     public async Task<ExportOutcome> RunAsync(ExportJob job, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
@@ -53,9 +55,9 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         {
             ExportArgs args = RunArgs(job, folder.Path, plan.Project);
             ExportRunData data;
-            using (ExportHeartbeat.Start(progress, job.Label, clock))
+            using (BridgeProgress? waiting = BridgeProgress.Start(CallProgress.For(progress), job.Label, clock, cancellationToken))
             {
-                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, null, cancellationToken).ConfigureAwait(false);
+                data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, waiting, cancellationToken).ConfigureAwait(false);
             }
 
             IReadOnlyList<ExportFile> files = Files(folder);

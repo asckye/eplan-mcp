@@ -74,7 +74,7 @@
   - 一定传入目录中的完整文件名，从不传空串：空串时文件名和目录由方案决定（XML），文件会写到导出目录之外；
   - `color` 对应 `Export.DegreeOfColor` 的 `Color`、`GreyLevel`、`BlackAndWhite`（XML）。
 - **方案**：在 `USER.PDFExportGUI.SCHEMAS`（XML）。规划阶段用 `SchemeSetting.Init`、`CheckIfSchemeExists` 校验，候选用 `GetCount`、`SetScheme(i)`、`GetName` 列出（XML：`SetScheme` 不改"上次使用"）。省略时传空串。导出前后比较 `GetLastUsed()`，被改写就用 `SetLastUsed` 写回原值（M4 设计第 5 节），写不回时放在 `hint` 中。
-- **时限与进度**：时限 300 秒（M4 设计 4.1）。等待 Bridge 时每 5 秒发一次心跳进度，如 `Exporting PDF (40 s)`。一次 EPLAN 调用中途无法打断：已发出的调用被取消后，Bridge 在调用返回时报告取消，Host 再删除目录（M4 设计 4.3）。
+- **时限与进度**：时限 300 秒（M4 设计 4.1）。等待 Bridge 时每 5 秒发一次心跳进度，如 `Exporting PDF (40 s)`；三个导出工具与写工具共用 Host 的进度机制（`BridgeProgress`），Bridge 报告的分步进度（只有 `eplan_export_image` 逐页报告）一到就转发。一次 EPLAN 调用中途无法打断：已发出的调用被取消后，Bridge 在调用返回时报告取消，Host 再删除目录（M4 设计 4.3）。
 - **已验证**（S11，A16）：`PdfPages` 3 页 0.7 秒（204 KB），全部 321 页 12.5 秒（6.1 MB）；文件只出现在给定目录中；只改写项目的 `User.eod` / `User.eox`，设计数据不变；方案传空串时"上次使用"不变；不弹对话框。
 - **没有验证**，由 Large 测试确认：传入具体方案名时是否改写"上次使用"；方案中配置了文件名格式时，给出的文件名是否仍然生效。
 
