@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S19's driver: starts a published prototype with a key generated at run time, measures its start, and probes
+    the gate with HttpClient against 127.0.0.1 only (no proxy). No package. See ../README.md.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>S19.Probe</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S19.Probe</RootNamespace>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+</Project>

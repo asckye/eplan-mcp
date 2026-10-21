@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S19 (ADR-0018): the same one-tool server as ../Stdio, plus Streamable HTTP on Kestrel through
+    ModelContextProtocol.AspNetCore (WithHttpTransport, MapMcp("/mcp")) and the gate of ADR-0018 items 4 and 5
+    (Gate.cs). Listens on the IPv4 loopback address only. The "stdio" argument runs the stdio transport from the same
+    exe, to see whether bundling ASP.NET Core slows the stdio start. See ../README.md.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>S19.Http</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S19.Http</RootNamespace>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+    <!-- Always win-x64, so a plain build restores the same graph (and lock file) as run.ps1's self-contained publish. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- ModelContextProtocol.AspNetCore brings the Microsoft.AspNetCore.App framework reference with it. -->
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+</Project>

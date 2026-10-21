@@ -21,6 +21,7 @@
 | [S15](S15-offline-host/README.md) | 离线宿主：`EplApplication.Init` 的授权与登录对话框、与界面中的 EPLAN 同时运行、启动耗时、回滚与撤销 | **部分完成** 2026-10-20 | 开发机上可行：不弹窗，约 2 秒启动，与界面中的 EPLAN 互不影响，回滚规律与插件相同；要传变体的 Bin。另一用户、服务上下文下的授权未测，要项目负责人建 runner 账户 |
 | [S17](S17-client-plugin/README.md) | 客户端与插件：本地插件市场能否离线安装，插件 `.mcp.json` 中哪些变量会展开，桌面版的配置文件在哪里 | **部分完成** 2026-10-20 | 命令行不登录、网络不可达时也能装好，插件从原处加载；`${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}` 和任意环境变量在 command、args、env 中都会展开，`%VAR%` 不会，所以 `.mcp.json` 不必由安装程序生成；桌面版的配置文件只在包的 `LocalCache\Roaming\Claude\` 中。在没有网络的虚拟机上安装还没有做 |
 | [S18](S18-workbench-ui/README.md) | Workbench 审批卡片：WinUI 3（A）、WPF + TIA Workbench 主题（B）、WPF + .NET Fluent 主题（B1）能否只用 `dotnet` 构建发布，体积、冷启动、UIA、Maple Mono CN、主题切换、托盘 | **部分完成** 2026-10-20 | 三个原型都能只用 `dotnet` 构建和自包含发布，UIA 能读出按钮、可聚焦的标题和倒计时。B（项目负责人选定）可行：TIA 的 15 个文件只改两行字体，另需 7 个 TIA 类型的替身；Maple Mono CN 从程序目录加载，两个字重多 35.4 MB；窗口约 0.6 秒出现，比 A 慢约 0.3 秒。A 的 Windows App SDK 不是 MIT 许可，发布需 `EnableMsixTooling`，单文件不能启动。Windows 10、200% 缩放、系统高对比度、讲述人、离线未测 |
+| [S19](S19-vm-http/README.md) | 虚拟机连接（ADR-0018）：Kestrel 加 SDK 的 HTTP 传输在自包含单文件中的体积和启动，密钥、失败次数限制和 `Origin` 的中间件，SDK 的会话，Claude Code 和其他客户端的远程配置，Host 中哪些状态要按会话保存 | **部分完成** 2026-10-21 | 体积 +26.5 MB（74.3 → 100.7 MB），约 0.15 秒开始监听，stdio 不变慢；第 4、5 条的 23 项探测全部符合预期。🔴 SDK 2.2.0 的 HTTP 传输默认无状态（2026-07-28 版协议取消了会话），要设 `SessionMode = Stateful` 才能按会话保存选中的实例，Claude Code 2.1.299 这时退回 2025-11-25 并带 `Mcp-Session-Id`。Claude Code 不发 `Origin`，请求头中的 `${VAR}` 会展开；Claude 桌面版连不到私有网络中的服务器。真实虚拟机、经 UAC 的防火墙规则、明文抓包、其他客户端的实测没有做 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
