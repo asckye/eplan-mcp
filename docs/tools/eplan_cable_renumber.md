@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把项目里的电缆重新编号""给新电缆编号"。代理让 EPLAN 按电缆编号方案给指定电缆或全部电缆编号。结果事先算不出，变更清单只列范围，执行后列出每个改变的电缆标识（同 `eplan_device_renumber`）。按 Destructive 处理：每次审批，执行前备份。
@@ -40,7 +40,8 @@
 - **范围**：`cables` 中的电缆，或按类别 `Cable` 取的全部电缆（不用 `GetCablesWithFilterScheme("")`，A24）。
 - **执行**：Destructive 流水线先备份，然后在 `TransactionScope` 中：记下名称；`new CableService().RenumberCables(cables, scheme, keep_existing, true, start, step)`（第 4 个参数"保留标识符"为 true，S21）；读回、比较、提交。
 - **已验证**（S21，A24）：78 根电缆 0.2–0.3 秒，两对电缆互换了名称；能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销。
-- **待 Large 测试确认**：`keep_existing = true` 的效果；只给部分电缆时其他电缆不变；"保留标识符"为 false 时的差别。
+- **给定的电缆**：先按完整标识找，再像 `eplan_cable_get` 那样按显示的标识找（多个结构中都有时 `AMBIGUOUS_NAME`）；是其他设备时 `INVALID_ARGUMENT`，`metadata.notCables` 列出标识和类别。`keep_existing = true` 时只数标识带 `?` 的电缆（XML：EPLAN 只给这些编号），没有时不审批、不执行。
+- **待 Large 测试确认**：`keep_existing = true` 的效果；只给部分电缆时其他电缆不变；"保留标识符"为 false 时的差别；项目设置中方案的读法（`ProjectSchemeSetting.Init(节点, 项目)`，按 XML 文档）；EPLAN 没有改任何电缆时是否留下撤销步骤（工具同 `eplan_device_renumber` 返回 `not_started`）。
 
 ## 6. 写操作专项
 同 `eplan_device_renumber` 第 6 节，撤销名为"AI: eplan_cable_renumber"。
