@@ -1,6 +1,6 @@
 id: export-pdf
 set: dev
-prompt: 把 =GAA+A1&EFS1/1 到 /3 这三页导出成一个 PDF，告诉我文件在哪里。
+prompt: 把 =GAA+A1&EFS1/1 和 =GAA+A1&EFS1/2 这两页导出成一个 PDF，告诉我文件在哪里。
 answer:
   type: object
   required: [file]
