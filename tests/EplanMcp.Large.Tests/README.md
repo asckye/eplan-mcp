@@ -37,7 +37,8 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `CableTests` | 电缆 `+B1-WG2` 的两端（`=F+B1-SG1`、端子 `+A2-XG4:2`）和 2 根芯线，短标识 `-WG2`；`eplan_device_list` 列出的每根电缆都能读出（最慢的一根写入测试输出）；断路器不是电缆。S21 没有验证的属性文本、线号和耗时写入测试输出 |
 | `TerminalTests` | 45 个端子排按名称排序，`+A1-XD4` 有 15 个端子，`+A2-XD2` 有 3 个跨接（S21）；`name_contains` 不区分大小写；`+A2-XD2` 的 5 个端子中有跨接，`+B2.X1-XZ1` 有 33 个端子；短名称 `-XD4`、不存在的端子排。列表和 33 个端子的耗时，以及 `+A2-XD2` 每个端子的两侧、跨接和 PLC 写入测试输出，供与 EPLAN 中的端子图对照 |
 | `PlcTests` | PLC 盒 `=K1+A2-KE1` 的 34 个通道对象（17 个名称），不是 CPU（S21）；`:2.3` 接到 `+A2-XD4:3`；`eplan_device_list` 列出的每个 PLC 盒都能读出；断路器不是 PLC 盒。站、机架、槽，以及每个通道的页、是否主表达、地址、符号地址、数据类型、文本和连接写入测试输出，供与 EPLAN 的 PLC 导航器对照 |
-| `NoSideEffectTests` | 读取（包括两个宏工具）不改动项目文件 |
+| `PartSearchTests` | 开发机部件库（S24）中 `3RH21` 找到 `SIE.3RH2122-1HB40`（变体 1）：有宏，制造商、型号、订货号、产品组和英文描述与 S24 一致；`manufacturer` 是整个简称（`sie` 找到，`SI`、`PXC` 找不到）；省略 `language` 时读出描述（回退语言写入测试输出）；宽泛查询读完整个库的耗时写入测试输出；搜索前后部件库数据目录中的文件不变（`.lck` 除外，S24）。数据目录按库名在 `%PUBLIC%\EPLAN\Data` 下查找，找不到唯一的一个时跳过该测试，可用环境变量 `EPLANMCP_PARTS_DATABASE` 指定 `….adb` 目录 |
+| `NoSideEffectTests` | 读取（包括两个宏工具和部件库查询）不改动项目文件 |
 | `MacroInsertTests` | 写测试：在新页上用 `number` 插入 `Contactor_Feedback_Control.ema`（dry run、读回的设备、用 `eplan_page_create` 建的页已有幅面，A20），同一位置再插一次被回滚；`keep` 与已有设备合并时返回 `ALREADY_EXISTS`，项目的计数不变 |
 | `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次警告不变、14 条汇总提示再追加一遍（A20））、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |
 | `PageDeleteTests` | Destructive：dry run `=GAA+A1&EFS1/1` 列出页上的功能数，以及其他页上失去主功能的三根电缆 `+A1-WE1`、`+A1-WE2`、`+A2-WE1`（S12 的第四根 `+A2-WE2` 留下的功能不在页上，不列出），不审批；新的宏页：拒绝时 `APPROVAL_DENIED`、不建备份目录、页还在，审计只有拒绝；批准后新的备份目录中有副本（`.elk` 与 `.edb`），页没了，审计依次为批准、带 `backup` 的开始、`backupCompleted` 的结果；再删一次 `PAGE_NOT_FOUND`、不审批。一次删除 3 页。scratch 之外的副本 `POLICY_DENIED`，不审批、不备份，设计数据不变 |
@@ -57,7 +58,7 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 这三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
 
 ## 离线宿主
-标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`MacroTests`、`NoSideEffectTests`，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。
+标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。
 
 准备：
 1. 用同一个配置构建离线宿主和测试（离线宿主同插件一样需要本机的 EPLAN，不注册、不启动 EPLAN）：
