@@ -48,7 +48,7 @@
 ## 5. 实现要点
 - **流程和导出目录**：同 `eplan_export_pdf` 第 5 节，Bridge 操作是 `export.image.plan`、`export.image.run`。
 - **EPLAN 调用**：逐页 `new Export().GraphicPage(page, 目录, format, 24, width_px, Export.Compression.None, false)`，在 `QuietModeStep(ShowNoDialogs)` 中执行（M4 设计 4.1）。XML：色深 24 对 PNG、JPG 都可用，压缩方式只影响 TIF，最后一个参数为 false 表示不转成黑白。
-  - 每页之前报告分步进度 `Exporting page 3 of 20`、检查取消（M4 设计 4.3）；
+  - 每页之前报告分步进度 `Exporting page 3 of 20`、检查取消（M4 设计 4.3）。Host 一收到就转发给客户端，文字清洗后放在 `message` 中，`progress` 仍是已用秒数；5 秒内没有新的分步时补一次心跳，如 `Exporting page 3 of 20 (40 s)`，第一页之前是 `Exporting images (5 s)`（mcp-tool-design 第 9 节）；
   - 每页之后列出目录，新出现的那个文件就是这一页的图片，由此得到 `files[].page`，不依赖 EPLAN 的命名规则。
 - **`inline`**：Host 读取图片文件，作为 `image` 内容块返回。S13 验证 Claude Code 能否把结果中的图片交给模型，以及图片怎样计入客户端对结果大小的限制（mcp-tool-design 7.2）；S13 否定时，实现前从 schema 中去掉 `inline`，或者按 S13 的结论降低页数和宽度的上限。
 - **已验证**（S10，A14）：在 Bridge 调度器中用 `GraphicPage` 导出过 2 页 PNG（宽 2000 像素，约 32 KB、44 KB），文件名是页名把 `/` 换成 `_`，如 `=GAA+A1&EFS1_72.png`。

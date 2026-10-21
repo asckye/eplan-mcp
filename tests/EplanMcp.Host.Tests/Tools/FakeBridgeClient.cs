@@ -58,10 +58,21 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>The timeouts given to the long-waiting overload, in order.</summary>
     public List<TimeSpan> Timeouts { get; } = [];
 
+    /// <summary>Where the long-waiting overload's progress reports go while its handler runs, for it to report as the Bridge would.</summary>
+    public IProgress<ProgressNotification>? Progress { get; private set; }
+
     public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
     {
         Timeouts.Add(timeout);
-        return InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
+        Progress = progress;
+        try
+        {
+            return InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
+        }
+        finally
+        {
+            Progress = null;
+        }
     }
 
     /// <summary>The request IDs and limits of writes, in order.</summary>
