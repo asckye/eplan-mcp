@@ -183,6 +183,8 @@
 - 🔴 `restore /TYPE:MASTERDATA` 不覆盖已有文件：目标中已有同名文件时跳过，照样返回 true，不记日志。还原到空目录得到逐字节相同的文件。恢复要先把损坏的库移开（EPLAN 关闭时），再放回还原出的文件。— S24。
 - `new MDPartsManagement().OpenDatabase(路径)` 打开另一个库，不改 `SelectedPartsDatabaseAsString`。— S24。
 - 🔴 `MDPartsDatabase.ImportParts(文件, "XPamImportXml", …)` 在按路径打开的副本上执行时，走的是界面导入 action `XPamImportXMLAction`，同时改了**配置的那个库**的 `User.eod`/`User.eox`（一个按用户的计数），部件数据不变；放在事务中时撤不回，还留下未关闭的撤销日志，之后的导入都报"不允许套叠撤销日志"。导入、同步类的测试一律算写正在用的库。— S24 r11。
+- 不在事务中、在 `OpenDatabase()` 打开的配置的库上 `ImportParts`：0.2 秒，正常导入，`AppendNewRecords` 重复导入不重复添加。部件 XML：根元素 `partsmanagement`（`count`、源库路径 `database`），每个部件一个 `part`，部件号在 `P_ARTICLE_PARTNR`。— S24 r13（经批准，已恢复）。
+- 🔴 `Synchronize.Parts(project, StoreMode)` 要在 `LockingStep` 中（否则 `NoLockingStepException`），并且**同时写项目**：被引用但没有存进项目的部件会存入项目（夹具 293 → 341），系统消息 `S328014`"写存取前没有加锁该对象"。— S24 r15（经批准，已恢复）。
 - `MDPartsDatabase.ExportParts(文件, DataFormat.XML)` 464 个部件 2 秒、5 MB；`EDZ` 44 秒、128 MB。`Translate.ExportDatabaseTexts(文件, "XTrLanguageDbXmlConverterImpl" | "XTrLanguageDbXml2TabConverterImpl")` 不到 1 秒。导出不改库。转换器名：部件库 `XPamImportXml`、`XPamExportXml`。— S24 r11。
 - `MDPartsDatabase` 的事务：`AddPart` 提交前 `ExistsPart` 为 false，`Rollback` 撤回、`Commit` 落盘；🔴 `RemovePart` 立即生效，`Rollback` 不能恢复。部件已存在时 `AddPart` 抛出 `MDInvalidArgumentException`（`S030025`）。事务不释放时，下一次 `CreateTransaction` 抛出 `SEHException`，要用 `using`。— S24。
 

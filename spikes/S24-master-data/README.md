@@ -1,6 +1,6 @@
 # Spike S24：部件库与翻译库
 
-> 状态：**完成**（2026-10-21）。只读部分（r0）；写入、备份与恢复部分（r1–r10，ADR-0019 的前提），写入只在还原到 scratch 中的副本上进行；导入与导出（r11，第四批的规格要用）。
+> 状态：**完成**（2026-10-21）。只读部分（r0）；写入、备份与恢复部分（r1–r10，ADR-0019 的前提），写入只在还原到 scratch 中的副本上进行；导入与导出（r11，第四批的规格要用）；在正在用的库上导入和同步（r12–r16，项目负责人 2026-10-21 批准，结束后恢复）。
 >
 > 🔴 **r11 意外改动了正在用的部件库**：在副本上导入时，EPLAN 改了配置的那个库的 `User.eod`（2 个字节）和 `User.eox`（1 个字节），部件数据没变。经项目负责人批准，已按结论 6 的步骤用备份中的原文件恢复，数据文件与实验前逐字节一致。见结果中的"导入与导出"。
 
@@ -28,6 +28,8 @@
 - `backupparts`、`backuptranslation`：按 Bridge 的方式，在调度器中用 `new ActionManager().FindAction("backup").Execute(context)` 备份；`SOURCEPATH`、`FILENAME` 由配置的库路径（`SelectedPartsDatabaseAsString`、`Translate.TranslateDatabase`）拆出；目标是 scratch 中的空目录。r1 之前另用 Remote Client 执行过同样的备份。
 - `restore`：同样在调度器中执行 `restore /TYPE:MASTERDATA`，目标只在 scratch 中。
 - `opencopy`：`new MDPartsManagement().OpenDatabase(副本路径)` 打开还原出来的副本（路径必须在 scratch 中），在事务中添加测试部件 `EPLANMCP.S24-TEST` 后回滚、再添加后提交，重复添加，删除后回滚；前后读 `SelectedPartsDatabaseAsString`。
+- r12–r16（项目负责人批准："批准 r12"）：先对两个库的全部文件计算 SHA-256，按文件复制一份、再用 `backup MASTERDATA` 备份一份到 scratch；`importpart` 把 r11 导出的单个测试部件导入**配置的**部件库（不在事务中）；`syncparts` 把当前项目（scratch 中的夹具）的部件同步进部件库；最后关闭 EPLAN，用文件副本恢复，核对全部文件与之前逐字节相同。
+- `labelformat`（r17，只读）：为 `eplan_export_labels` 查标签方案输出格式的读法，结论见 api-notes B9。
 - `copyio`（r11）：在副本上 `ExportParts`（XML、EDZ、单个部件），删除测试部件后用 `ImportParts` 导入回来（先在事务中、再不在事务中）；用 `Translate.ExportDatabaseTexts` 把正在用的翻译库导出到 scratch（只读）。
 - 同一个 EPLAN 中再次注册要换程序集名：`-p:AssemblyName=EplanMcp.Spikes.S24rN`，驱动加 `--revision rN`。编译另一个版本会删掉上一个版本的 dll。
 
@@ -74,6 +76,16 @@ spikes\S24-master-data\Driver\bin\Release\net481\EplanMcp.Spikes.S24.Driver.exe 
 - 🔴 **`RemovePart` 不能回滚**：事务中删除后立即看不到这个部件，`Rollback` 之后仍然没有（464 个），重新打开后也没有。
 - r1 没有释放事务：`AddPart` 在事务中抛出异常后，下一次 `CreateTransaction` 抛出 `SEHException`。r3 起每个事务都用 `using` 释放，异常之后的事务正常。
 
+**在正在用的库上导入和同步**（r12–r16）：
+- `MDPartsDatabase.ImportParts(文件, "XPamImportXml", AppendNewRecords, false, PartNumber, "")`，在 `OpenDatabase()` 打开的配置的库上、不在事务中：0.2 秒，464 → 465 个部件，系统消息中没有错误；再导一次还是 465 个、1 个变体，不重复添加。改动的数据文件是 `Article.eod/.eox`、`User.eod/.eox`。导入的描述保存为 `??_??@EplanMcp S24 test part;`（源文件中就是这样）。
+- 部件 XML 的结构：根元素 `partsmanagement`，属性 `count`，以及源库的完整路径 `database`；每个部件一个 `part` 元素，部件号在属性 `P_ARTICLE_PARTNR` 中。
+- `Synchronize.Parts(project, StoreMode.AppendNew)`：
+  - 不在 `LockingStep` 中时抛出 `NoLockingStepException`（`S063110`）；
+  - 0.45 秒；部件库仍是 465 个（夹具项目的部件库中都已有）；
+  - 🔴 **项目也被改了**：`project.Articles` 从 293 变为 341，被引用但没有存进项目的部件被存入项目（与 XML 文档一致）；系统消息记一条 `S328014`"写存取前没有加锁该对象"。
+- 往翻译库导入一条测试词条（`Translate.ImportDatabaseTexts`）**没有做**：项目负责人批准了，但 Claude Code 自动模式的安全分类器拒绝了这条命令，没有绕过。翻译库前后逐字节相同。
+- 恢复：关闭 EPLAN，从文件副本复制回 4 个数据文件和 9 个 `.lck`，两个库的全部文件与 r12 之前逐字节相同。
+
 **导入与导出**（r11，`copyio`，副本为还原出的原样库）：
 - `MDPartsDatabase.ExportParts(文件, DataFormat.XML)`：全部 464 个部件 2.05 秒，5.0 MB；`DataFormat.EDZ`：44 秒，128 MB，日志中有几十条"无法找到宏数据"的警告（示例库中软管配置器的宏不在本机），照样返回。按部件列表导出一个部件的 XML：4 KB。导出不改正在用的库。
 - `Translate.ExportDatabaseTexts(文件, 转换器)`：`XTrLanguageDbXmlConverterImpl`（XML）0.68 秒、2.8 MB；`XTrLanguageDbXml2TabConverterImpl`（制表符）0.76 秒、2.1 MB。翻译库不变。
@@ -101,8 +113,12 @@ spikes\S24-master-data\Driver\bin\Release\net481\EplanMcp.Spikes.S24.Driver.exe 
 7. **部件库 API 的事务只能撤回添加**：`RemovePart` 立即生效，回滚不能恢复。写部件库的工具不能把事务当作回滚手段，失败时一律按备份恢复（ADR-0019）；事务要用 `using` 释放，否则下一个事务抛出 `SEHException`。
 8. **按路径打开另一个库不改配置**，`AddPart`、`RemovePart`、`ExportParts` 只作用于打开的副本。但 🔴 **导入不隔离**（r11）：在副本上调用 `ImportParts` 也改了配置的那个库的 `User` 表。所以：
    - 部件库导入、同步，翻译库导入（`partslist /TYPE:IMPORTTOSYSTEM`、`synchronize /TYPE:PARTSTOSYSTEM`、`translate /TYPE:IMPORTTOTRANSDB`）的 Large 测试一律算写正在用的库：只能由项目负责人在审批中批准后运行，运行前后按结论 6 备份和恢复；
-   - 导入不能放在 `MDPartsDatabase` 的事务中（撤销日志冲突），事务也撤不回导入，失败时一律按备份恢复；
+   - 导入不能放在 `MDPartsDatabase` 的事务中（撤销日志冲突），事务也撤不回导入，失败时一律按备份恢复；不在事务中的导入正常（r13）；
    - 导出（部件库、翻译库）只读，可以在正在用的库上自动测试。
+10. **第四批的写工具**（r12–r16）：
+    - `eplan_part_import` 用 `OpenDatabase()` 加 `ImportParts`，不开事务；审批前从文件中读出 `P_ARTICLE_PARTNR` 列出将导入的部件号，执行后逐个读回；
+    - `eplan_part_sync` 同时写项目：要在 `SafetyPoint` 中、按写项目的规则锁定对象，审批中写明"项目也会被改"；项目在 scratch 之外时同样要审批；
+    - `eplan_translation_import` 的行为没有验证（见上），实现前要先验证。
 9. **第四批的导出工具**：`eplan_part_export` 用 `MDPartsDatabase.ExportParts`，默认 XML（2 秒）；EDZ 带宏和图片，128 MB、44 秒，按需选择。`eplan_translation_export` 用 `Translate.ExportDatabaseTexts`，不到 1 秒。
 
 ## 局限
@@ -110,4 +126,4 @@ spikes\S24-master-data\Driver\bin\Release\net481\EplanMcp.Spikes.S24.Driver.exe 
 - 没有试 SQL Server 上的库。
 - 翻译库只读了配置，没有打开；只做了备份和还原，没有写入。
 - 恢复步骤的第 2–4 步没有在正在用的库上做；7z 格式的备份能否不用 EPLAN 直接解压，没有试。
-- 导入只试了在事务中的一次，不在事务中的导入、同步、翻译库导入都没有结果（见结论 8）；导入改动 `User` 表的那个计数的含义没有查。
+- 翻译库导入没有验证（r12 被安全分类器拒绝）；同步只试了 `AppendNew`，没有遇到部件库中缺少的部件；导入改动 `User` 表的那个计数的含义没有查。
