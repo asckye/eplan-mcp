@@ -121,36 +121,6 @@ internal sealed class TerminalRenumberRequest
     /// <summary>The plan's state: every terminal in scope by its session identifier and full name.</summary>
     public static string FingerprintOf(IEnumerable<PlacedFunction> scope) => Fingerprint.Of(scope.Select(t => t.Id + "\t" + t.Name));
 
-    /// <summary>
-    /// The terminals whose name changed, matched by session identifier, each pair once (the levels of a terminal can share
-    /// a name); and how many terminals of <paramref name="before"/> had no identifier left afterwards.
-    /// </summary>
-    public static (List<RenamedObject> Changed, int Unmatched) Changes(IEnumerable<PlacedFunction> before, IEnumerable<PlacedFunction> after)
-    {
-        var now = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (PlacedFunction terminal in after)
-        {
-            now[terminal.Id] = terminal.Name;
-        }
-
-        var changed = new List<RenamedObject>();
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        int unmatched = 0;
-        foreach (PlacedFunction terminal in before)
-        {
-            if (!now.TryGetValue(terminal.Id, out string? name))
-            {
-                unmatched++;
-            }
-            else if (!string.Equals(terminal.Name, name, StringComparison.Ordinal) && seen.Add(terminal.Name + "\n" + name))
-            {
-                changed.Add(new RenamedObject { From = terminal.Name, To = name });
-            }
-        }
-
-        return (changed, unmatched);
-    }
-
     private static void AddIf(List<string> violations, bool condition, string violation)
     {
         if (condition)

@@ -236,7 +236,7 @@ public sealed class TerminalRenumberOperationTests : IDisposable
         PlacedFunction[] before = [Terminal("-X1:2", "1"), Terminal("-X1:2", "2"), Terminal("-X1:3", "3"), Terminal("-X1:?1", "4"), Terminal("-X1:9", "5")];
         PlacedFunction[] after = [Terminal("-X1:3", "1"), Terminal("-X1:3", "2"), Terminal("-X1:2", "3"), Terminal("-X1:9", "5")];
 
-        (List<RenamedObject> changed, int unmatched) = TerminalRenumberRequest.Changes(before, after);
+        (List<RenamedObject> changed, int unmatched) = RenamedFunctions.Between(before, after);
 
         Assert.Equal([("-X1:2", "-X1:3"), ("-X1:3", "-X1:2")], changed.Select(c => (c.From, c.To)));
         Assert.Equal(1, unmatched);

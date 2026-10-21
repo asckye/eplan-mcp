@@ -76,7 +76,7 @@ public sealed class TerminalRenumberExecuteOperation(IProjectCatalog catalog, IP
         var planned = new HashSet<string>(scope.Where(request.IsToNumber).Select(t => t.Id), StringComparer.Ordinal);
         renumberer.Renumber(path, request.Strips, request.OnlyUnnumbered, request.Scheme, request.Start, request.Step);
         IReadOnlyList<PlacedFunction> after = renumberer.ReadTerminals(path, null) ?? [];
-        (List<RenamedObject> unplanned, int othersUnmatched) = TerminalRenumberRequest.Changes(before.Where(t => !planned.Contains(t.Id)), after);
+        (List<RenamedObject> unplanned, int othersUnmatched) = RenamedFunctions.Between(before.Where(t => !planned.Contains(t.Id)), after);
         if (unplanned.Count > 0)
         {
             throw new BridgeErrorException(
@@ -92,7 +92,7 @@ public sealed class TerminalRenumberExecuteOperation(IProjectCatalog catalog, IP
                 });
         }
 
-        (List<RenamedObject> changed, int unmatched) = TerminalRenumberRequest.Changes(before.Where(t => planned.Contains(t.Id)), after);
+        (List<RenamedObject> changed, int unmatched) = RenamedFunctions.Between(before.Where(t => planned.Contains(t.Id)), after);
         IEnumerable<PlacedFunction> inScope = request.Strips is null ? after : request.Scope(renumberer);
         List<string> still = [.. inScope.Select(t => t.Name).Where(TerminalRenumberRequest.Unnumbered).Distinct(StringComparer.Ordinal)];
         return new Numbered(changed, unmatched + othersUnmatched, still);

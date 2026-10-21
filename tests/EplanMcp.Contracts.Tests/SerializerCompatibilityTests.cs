@@ -503,6 +503,10 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new TerminalRenumberData(),
+        new CableRenumberArgs { Project = "Line1", Cables = ["+A2-WD4", "-WD5"], Scheme = "Standard", KeepExisting = true, Start = 10, Step = 5, Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new CableRenumberArgs(),
+        new CableRenumberData { Project = "项目 二", Changed = [new RenamedObject { From = "+A2-WD4", To = "+A2-WD5" }], ChangedCount = 4, Warning = "w" },
+        new CableRenumberData(),
     ];
 
     [Theory]
