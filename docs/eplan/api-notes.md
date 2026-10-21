@@ -214,7 +214,7 @@
 
 ### A24. 电缆、端子、PLC 的读取与编号（spike S21，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S21](../../spikes/S21-cables-terminals/README.md)。示例项目的 scratch 副本。
-- `DMObjectsFinder` 能读出电缆（按类别 78 根）、端子排（45）、端子（1331）、PLC 盒（20）、插头（170）、连接（2060）；`Cable.GetSourcesAndTargets` 给出电缆两端的设备或端子，`TerminalStrip.Terminals`、`PLC.PLCTerminals` 给出所属的端子。— S21。
+- `DMObjectsFinder` 能读出电缆（按类别 78 根）、端子排（45 个对象，实际 27 排：18 排各返回两次，2026-10-21 实机测试）、端子（1331）、PLC 盒（20）、插头（170）、连接（2060）；`Cable.GetSourcesAndTargets` 给出电缆两端的设备或端子，`TerminalStrip.Terminals`、`PLC.PLCTerminals` 给出所属的端子。— S21。
 - 🔴 `GetCablesWithFilterScheme("")` 用电缆导航器当前的过滤方案（示例中只返回 4 根）；`null` 返回电缆加屏蔽（89），XML 说会抛 `ArgumentNullException`，实际没有。按类别取电缆不受界面影响。— S21。
 - `Renumber.Terminals`（全部端子，41–43 秒）、`CableService.RenumberCables`（0.3 秒）、`ConnectionService.DesignateConnections`（覆盖全部，约 1 秒，605 条连接得到线号）都能被 `SafetyPoint` 回滚，回滚后名称和线号与之前完全一致；在 Bridge 的包装中提交后，都能用一次 Ctrl+Z 撤销。— S21。
 - 这三种编号的方案传空串都能运行，用的是界面上次的方案，与 `Renumber.DeviceTags` 相同（A18）。— S21。

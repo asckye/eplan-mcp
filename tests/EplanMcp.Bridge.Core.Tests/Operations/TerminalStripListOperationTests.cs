@@ -35,6 +35,18 @@ public sealed class TerminalStripListOperationTests
         Assert.Equal(_line1.Path, Assert.Single(_terminals.Reads));
     }
 
+    [Fact]
+    public void Execute_AStripEplanReturnsTwice_IsListedOnce()
+    {
+        // The fixture returns 18 of its 27 strips twice, with the same counts (Large test, 2026-10-21).
+        _terminals.Strips.Add(new TerminalStripListItem { Name = "+A1-XD4", Terminals = 15 });
+
+        ListData<TerminalStripListItem> data = Run(new TerminalStripListArgs { Limit = 50 });
+
+        Assert.Equal(["+A1-XD4", "+A1-xd1", "+A2-XD2", "+B2.X1-XZ1"], data.Items.Select(s => s.Name));
+        Assert.Equal(4, data.Total);
+    }
+
     [Theory]
     [InlineData("-xd", new[] { "+A1-XD4", "+A1-xd1", "+A2-XD2" })]
     [InlineData(" +A1 ", new[] { "+A1-XD4", "+A1-xd1" })]

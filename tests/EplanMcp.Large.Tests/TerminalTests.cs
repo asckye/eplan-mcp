@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace EplanMcp.Large.Tests;
 
 /// <summary>
-/// The terminal strip tools against the fixture's known data (api-notes A24, S21: 45 strips, +A1-XD4 with 15
+/// The terminal strip tools against the fixture's known data (api-notes A24, S21: 45 strip objects, 27 strips, +A1-XD4 with 15
 /// terminals, +A2-XD2 with 3 bridges). The time S21 did not measure goes to the test output.
 /// </summary>
 [Trait("Size", "Large")]
@@ -20,7 +20,9 @@ public sealed class TerminalTests(LiveEplan eplan)
 
         JsonElement[] strips = [.. data.GetProperty("strips").EnumerateArray()];
         string[] names = [.. strips.Select(s => s.GetProperty("name").GetString()!)];
-        Assert.Equal(45, data.GetProperty("total").GetInt32());
+        // GetTerminalStrips returns 45 objects for these 27 strips; 18 come twice (tool spec 5).
+        Assert.Equal(27, data.GetProperty("total").GetInt32());
+        Assert.Equal(names.Distinct(StringComparer.Ordinal).Count(), names.Length);
         Assert.Equal(names.Order(StringComparer.Ordinal), names);
         Assert.Equal(15, Strip(strips, "+A1-XD4").GetProperty("terminals").GetInt32());
         Assert.Equal(3, Strip(strips, "+A2-XD2").GetProperty("bridges").GetInt32());
