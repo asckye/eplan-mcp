@@ -18,10 +18,14 @@ internal sealed class TrayIcon : IDisposable
     /// <summary>The longest tip Windows shows.</summary>
     private const int MaxTip = 127;
 
+    /// <summary>The longest tool name a notification names; EPLAN's tool names are far shorter.</summary>
+    private const int MaxToolName = 64;
+
     private readonly NotifyIcon _icon = new();
     private readonly ToolStripMenuItem _open;
     private readonly ToolStripMenuItem _exit;
     private int _pending;
+    private Action? _openReminded;
 
     public TrayIcon(Action open, Action exit)
     {
@@ -36,6 +40,8 @@ internal sealed class TrayIcon : IDisposable
                 open();
             }
         };
+        _icon.BalloonTipClicked += (_, _) => _openReminded?.Invoke();
+        _icon.BalloonTipClosed += (_, _) => _openReminded = null;
         Loc.Current.LanguageChanged += OnLanguageChanged;
         ThemeManager.Current.PropertyChanged += OnThemeChanged;
         Update();
@@ -59,6 +65,27 @@ internal sealed class TrayIcon : IDisposable
         string tip = pending == 0 ? Loc.Current["App.Name"] : Loc.Current.T("Tray.Pending", pending);
         return tip.Length > MaxTip ? tip[..MaxTip] : tip;
     }
+
+    /// <summary>
+    /// The notification for a new question while the window is hidden or minimized (STS-09). It may show on the lock
+    /// screen, so it says the count and the tool and nothing from the project (T20); clicking it opens that question.
+    /// </summary>
+    public void Remind(int pending, string tool, Action open)
+    {
+        _openReminded = open;
+        _icon.ShowBalloonTip(0, Loc.Current["App.Name"], ReminderText(pending, tool), ToolTipIcon.None);
+    }
+
+    /// <summary>"3 questions wait for approval · new: eplan_page_delete"; a tool name that is not one is left out.</summary>
+    public static string ReminderText(int pending, string tool)
+    {
+        string count = Loc.Current.T("Tray.Pending", pending);
+        return IsToolName(tool) ? Loc.Current.T("Tray.Arrived", count, tool) : count;
+    }
+
+    /// <summary>Tool names are lowercase identifiers; anything else could carry text from a project (T20).</summary>
+    internal static bool IsToolName(string tool) =>
+        tool.Length is > 0 and <= MaxToolName && tool.All(c => c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_');
 
     /// <summary>The badge on the icon: nothing, the count, or "9+".</summary>
     public static string Badge(int pending) => pending switch

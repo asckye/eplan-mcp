@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
@@ -17,7 +18,8 @@ namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
 /// The approval queue page in a real window (workbench-ui APR-02 to APR-14): the two buttons, the guard, where focus
-/// goes and where it never goes, the change list as project data, the Destructive banner.
+/// goes and where it never goes, the change list as project data, the Destructive banner, the answered group, the narrow
+/// layout, the window coming back, the reminders and F6.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
@@ -210,6 +212,224 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         }));
     }
 
+    [Fact]
+    public void AnAnsweredQuestion_IsInTheAnsweredGroup_WithItsResult_AndCannotBeAnsweredThere()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            Question question = Add("r1");
+            Open();
+            Press(Button(page, "ApproveButton"));
+            var waiting = (RadioButton)page.FindName("WaitingGroup");
+            var answered = (RadioButton)page.FindName("AnsweredGroup");
+            Assert.Equal(("等待中（0）", "已回答（1）"), ((string)waiting.Content, (string)answered.Content));
+            Assert.Equal(KeyboardNavigationMode.Once, KeyboardNavigation.GetTabNavigation((DependencyObject)page.FindName("Groups")));
+
+            answered.IsChecked = true;
+            var list = (ListBox)page.FindName("Questions");
+            list.SelectedIndex = 0;
+            WpfContext.Drain();
+
+            Assert.Equal("已回答的问题", AutomationProperties.GetName(list));
+            Assert.Same(question, _view!.Shown!.Question);
+            Assert.Equal("已批准", _view.Shown.Result);
+            Assert.False(((FrameworkElement)page.FindName("Waiting")).IsVisible);
+            Assert.False(_view.Answer(approve: true));
+            Assert.False(((FrameworkElement)page.FindName("Empty")).IsVisible);
+        }));
+    }
+
+    [Fact]
+    public void InANarrowPage_TheDetailGoesBelowTheList_BothTheFullWidth_AndBackWhenWide()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Add("r1");
+            var detail = (FrameworkElement)page.FindName("DetailArea");
+            var list = (FrameworkElement)page.FindName("Questions");
+
+            Resize(window, 1000); // the Sider stays wide, the page is under 760
+            Assert.True(page.ActualWidth < 760);
+            Assert.Equal((2, 0, 2, 2), (Grid.GetRow(detail), Grid.GetColumn(detail), Grid.GetColumnSpan(detail), Grid.GetColumnSpan(list)));
+            Assert.True(detail.TranslatePoint(default, page).Y >= list.TranslatePoint(new Point(0, list.ActualHeight), page).Y);
+            Assert.True(detail.ActualHeight > list.ActualHeight);
+
+            Resize(window, 1400);
+            Assert.Equal((1, 1, 1, 1), (Grid.GetRow(detail), Grid.GetColumn(detail), Grid.GetColumnSpan(detail), Grid.GetColumnSpan(list)));
+        }));
+    }
+
+    [Fact]
+    public void TheWindowComingBack_FromHiddenOrMinimized_MakesTheButtonsWaitAgain()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Add("r1");
+            Open();
+            Button approve = Button(page, "ApproveButton");
+
+            window.Hide();
+            window.Show();
+            WpfContext.Drain();
+            Assert.False(approve.IsEnabled);
+            Open();
+            Assert.True(approve.IsEnabled);
+
+            window.WindowState = WindowState.Minimized;
+            WpfContext.Drain();
+            window.WindowState = WindowState.Normal;
+            WpfContext.Drain();
+            Assert.False(approve.IsEnabled);
+        }));
+    }
+
+    [Fact]
+    public void ActivatingTheWindow_TakesFocusOffTheButtons_ToTheTitle_ButLeavesItElsewhere()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Add("r1");
+            Add("r2", 150);
+            Open();
+            Button(page, "ApproveButton").Focus();
+
+            Activated(window);
+            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+
+            var list = (ListBox)page.FindName("Questions");
+            var row = (ListBoxItem)list.ItemContainerGenerator.ContainerFromIndex(1);
+            row.Focus();
+            Activated(window);
+            Assert.Same(row, Keyboard.FocusedElement);
+            var menu = (UIElement)window.FindName("ApprovalsItem");
+            menu.Focus();
+            Activated(window);
+            Assert.Same(menu, Keyboard.FocusedElement);
+        }));
+    }
+
+    [Fact]
+    public void AnArrival_InAHiddenWindow_AsksOnlyForANotification_TheWindowStaysHiddenOnItsPage()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            var notified = new List<QuestionItem>();
+            window.NotificationWanted += notified.Add;
+            Add("r0");
+            Assert.Empty(notified); // shown, not minimized: the taskbar flash is all
+
+            window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
+            window.Hide();
+            Add("r1", 150);
+
+            Assert.Equal("r1", Assert.Single(notified).RequestId);
+            Assert.False(window.IsVisible || window.IsActive || window.Topmost);
+            Assert.Equal(WorkbenchPage.Status, window.CurrentPage);
+        }));
+    }
+
+    [Theory]
+    [InlineData(true, false, true, Reminder.None)]
+    [InlineData(true, false, false, Reminder.Flash)]
+    [InlineData(true, true, false, Reminder.Flash | Reminder.Notify)]
+    [InlineData(false, false, false, Reminder.Flash | Reminder.Notify)]
+    public void AReminder_FlashesWhenNotActive_AndNotifiesWhenHiddenOrMinimized(bool visible, bool minimized, bool active, Reminder expected) =>
+        Assert.Equal(expected, MainWindow.ReminderFor(visible, minimized, active));
+
+    [Fact]
+    public void OpeningFromANotification_ShowsTheQueueWithThatQuestion_FocusOnItsTitle_ButtonsWaiting()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Add("r1");
+            Question second = Add("r2", 150);
+            Open();
+            window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
+            window.Hide();
+
+            window.Open("r2");
+            WpfContext.Drain();
+
+            Assert.True(window.IsVisible);
+            Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
+            Assert.Same(second, _view!.Shown!.Question);
+            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.False(Button(page, "ApproveButton").IsEnabled);
+        }));
+    }
+
+    [Fact]
+    public void OpeningAQuestionThatEnded_ShowsItAnswered_AndOneThatIsGone_ChangesNothing()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Question first = Add("r1");
+            Question second = Add("r2", 150);
+            _queue!.End(second, QuestionEnd.Expired);
+            WpfContext.Drain();
+
+            window.Open("gone");
+            WpfContext.Drain();
+            Assert.Same(first, _view!.Shown!.Question);
+
+            window.Open("r2");
+            WpfContext.Drain();
+            Assert.Same(second, _view.Shown!.Question);
+            Assert.True(((RadioButton)page.FindName("AnsweredGroup")).IsChecked);
+            Assert.False(_view.CanAnswer);
+        }));
+    }
+
+    [Fact]
+    public void OpeningFromTheTray_WithNothingWaiting_StaysOnThePage()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
+            window.Hide();
+
+            window.Open(null);
+            WpfContext.Drain();
+
+            Assert.True(window.IsVisible);
+            Assert.Equal(WorkbenchPage.Status, window.CurrentPage);
+        }));
+    }
+
+    [Fact]
+    public void F6_GoesRoundTheRegions_BothWays_NeverToAnAnswerButton_AndNotUnderTheSettingsDrawer()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Add("r1");
+            Open();
+            ((UIElement)window.FindName("SettingsButton")).Focus(); // in the Sider
+            var stops = new List<object>();
+            for (int i = 0; i < 5; i++)
+            {
+                MainWindow.RegionCommand.Execute("1", window);
+                WpfContext.Drain();
+                stops.Add(Keyboard.FocusedElement);
+            }
+
+            var list = (ListBox)page.FindName("Questions");
+            Assert.Equal(
+                [window.FindName("MinimizeButton"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("MinimizeButton")],
+                stops);
+            MainWindow.RegionCommand.Execute("-1", window);
+            WpfContext.Drain();
+            Assert.Same(window.FindName("ApprovalsItem"), Keyboard.FocusedElement);
+            MainWindow.RegionCommand.Execute("-1", window);
+            WpfContext.Drain();
+            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Contains(window.InputBindings.OfType<KeyBinding>(), b => b.Key == Key.F6 && b.Modifiers == ModifierKeys.Shift && b.Command == MainWindow.RegionCommand);
+
+            window.OpenSettings();
+            Assert.False(MainWindow.RegionCommand.CanExecute("1", window));
+            window.CloseSettings();
+        }));
+    }
+
     private void WithPage(Action<MainWindow, ApprovalsPage> test) => With(window =>
     {
         _queue = new ApprovalQueue(_clock);
@@ -236,6 +456,13 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
     }
 
     private static Button Button(ApprovalsPage page, string name) => (Button)page.FindName(name);
+
+    /// <summary>What Windows does when the window comes to the front, without taking the foreground in a test run.</summary>
+    private static void Activated(Window window)
+    {
+        typeof(Window).GetMethod("OnActivated", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(window, [EventArgs.Empty]);
+        WpfContext.Drain();
+    }
 
     /// <summary>Presses the button as UI Automation and the keyboard do, through its own click handling.</summary>
     private static void Press(Button button)

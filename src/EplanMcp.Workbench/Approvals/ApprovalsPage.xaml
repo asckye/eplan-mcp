@@ -6,8 +6,9 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
   <!--
-    The approval queue (workbench-ui section 11, M5 design 4.6): the waiting questions on the left, the shown one on the
-    right (APR-06). Answering has one path, the two buttons of the shown question (APR-01, APR-02).
+    The approval queue (workbench-ui section 11, M5 design 4.6): the waiting or the answered questions on the left, the
+    shown one on the right, or below them in a narrow window (APR-06, LAY-03). Answering has one path, the two buttons of
+    the shown question (APR-01, APR-02).
   -->
   <DockPanel>
     <!-- The page head of 3.4, as PageView draws it: the title is level 1, focusable, not a Tab stop. -->
@@ -20,7 +21,9 @@
     </Border>
     <Grid x:Name="Layout">
       <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
+        <RowDefinition x:Name="NarrowDetailRow" Height="Auto" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
@@ -28,7 +31,16 @@
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
 
-      <ListBox x:Name="Questions" Style="{StaticResource Primer.List}" ItemContainerStyle="{StaticResource Workbench.QuestionRow}"
+      <!-- Waiting and answered: one group, one Tab stop, arrows inside (Ant Segmented, KEY-10). -->
+      <Border Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="0,0,0,12" Style="{StaticResource Primer.SegmentGroup}">
+        <StackPanel x:Name="Groups" Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle"
+                    AutomationProperties.Name="{l:Tr Approvals.Groups}">
+          <RadioButton x:Name="WaitingGroup" GroupName="QuestionGroup" Style="{StaticResource Primer.Segment}" IsChecked="True" Checked="OnGroup" />
+          <RadioButton x:Name="AnsweredGroup" GroupName="QuestionGroup" Style="{StaticResource Primer.Segment}" Checked="OnGroup" />
+        </StackPanel>
+      </Border>
+
+      <ListBox x:Name="Questions" Grid.Row="1" Style="{StaticResource Primer.List}" ItemContainerStyle="{StaticResource Workbench.QuestionRow}"
                ItemsSource="{Binding Pending}" AutomationProperties.Name="{l:Tr Approvals.List}"
                SelectionChanged="OnSelectionChanged" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
         <ListBox.ItemTemplate>
@@ -54,10 +66,10 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
-      <shell:EmptyState x:Name="Empty" Grid.ColumnSpan="2" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
+      <shell:EmptyState x:Name="Empty" Grid.Row="1" Grid.ColumnSpan="2" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
 
       <!-- The shown question (APR-07). Focus goes to its title, never to a button (APR-03). -->
-      <ScrollViewer x:Name="DetailArea" Grid.Column="1" Margin="24,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+      <ScrollViewer x:Name="DetailArea" Grid.Row="1" Grid.Column="1" Margin="24,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                     Focusable="False" AutomationProperties.Name="{l:Tr Approvals.Detail}" DataContext="{Binding Shown}">
         <StackPanel x:Name="Detail" Margin="0,0,8,0">
           <TextBlock x:Name="QuestionTitle" Text="{Binding Title}" Style="{StaticResource Primer.ContainerTitle}" TextWrapping="Wrap" TextTrimming="None"
@@ -142,7 +154,7 @@
       </ScrollViewer>
 
       <!-- STS-02, A11Y-08: what screen readers are told; it takes no room. -->
-      <TextBlock x:Name="Announcer" Grid.Row="1" Height="1" Opacity="0" AutomationProperties.LiveSetting="Assertive" />
+      <TextBlock x:Name="Announcer" Grid.Row="3" Height="1" Opacity="0" AutomationProperties.LiveSetting="Assertive" />
     </Grid>
   </DockPanel>
 </UserControl>

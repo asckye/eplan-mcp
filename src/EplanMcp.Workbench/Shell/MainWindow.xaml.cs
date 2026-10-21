@@ -1,11 +1,13 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
 using TiaOpenness.Gui.Controls;
@@ -23,6 +25,8 @@ public partial class MainWindow : Window
 
     public static readonly RoutedUICommand CycleCommand = new("Cycle", nameof(CycleCommand), typeof(MainWindow));
 
+    public static readonly RoutedUICommand RegionCommand = new("Region", nameof(RegionCommand), typeof(MainWindow));
+
     /// <summary>Below this window width the Sider shows icons only (3.1).</summary>
     private const double CompactBelow = 992;
 
@@ -31,6 +35,7 @@ public partial class MainWindow : Window
     private ApprovalChannelState _channel;
     private int _pending;
     private IInputElement? _settingsOpener;
+    private WindowState _lastState = WindowState.Normal;
 
     public MainWindow()
     {
@@ -46,10 +51,15 @@ public partial class MainWindow : Window
         // The shortcuts reach no page while the settings drawer covers the window (DLG-10).
         CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut), CanNavigate));
         CommandBindings.Add(new CommandBinding(CycleCommand, (_, e) => Cycle(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
+        CommandBindings.Add(new CommandBinding(RegionCommand, (_, e) => MoveRegion(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
         SizeChanged += (_, _) => ApplySider();
         Loc.Current.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
         StateChanged += (_, _) => ApplyWindowState();
+
+        // APR-03, APR-04: when the window comes back, the buttons wait again and focus is on the question, not a button.
+        IsVisibleChanged += (_, e) => Rearm(e.NewValue is true);
+        Activated += (_, _) => Dispatcher.BeginInvoke(() => Refocus(), System.Windows.Threading.DispatcherPriority.Input);
         Loaded += (_, _) => Navigate(WorkbenchPage.Approvals, NavigationOrigin.Startup);
         ApplyWindowState();
         Navigate(WorkbenchPage.Approvals, NavigationOrigin.Menu);
@@ -74,11 +84,7 @@ public partial class MainWindow : Window
         }
 
         ApplyTexts();
-        if (page == WorkbenchPage.Approvals && IsVisible)
-        {
-            ApprovalsPage.Rearm(); // APR-04: each time the page opens, the buttons wait again
-        }
-
+        Rearm(page == WorkbenchPage.Approvals);
         if (origin != NavigationOrigin.Menu && IsLoaded)
         {
             UpdateLayout();
@@ -96,8 +102,41 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>A new question wants a tray notification: the window is hidden or minimized (STS-09).</summary>
+    internal event Action<QuestionItem>? NotificationWanted;
+
     /// <summary>Gives the approval queue page its state; the app does, once.</summary>
-    internal void Attach(Approvals.ApprovalQueueView view) => ApprovalsPage.View = view;
+    internal void Attach(ApprovalQueueView view)
+    {
+        ApprovalsPage.View = view;
+        view.Arrived += OnArrived;
+    }
+
+    /// <summary>
+    /// What a new question may do to be noticed, and no more (APR-14, PRI-07): flash the taskbar button when the window
+    /// is not active, and a tray notification when it is hidden or minimized. It never activates, raises or shows the
+    /// window, changes the page or moves focus.
+    /// </summary>
+    internal static Reminder ReminderFor(bool visible, bool minimized, bool active) =>
+        (active ? Reminder.None : Reminder.Flash) | (!visible || minimized ? Reminder.Notify : Reminder.None);
+
+    /// <summary>
+    /// From the tray or a notification: the window comes back with the queue, and with the question the notification was
+    /// about selected (STS-09, APR-14); without waiting questions the page stays as it was.
+    /// </summary>
+    public void Open(string? requestId)
+    {
+        Restore();
+        if (requestId is not null)
+        {
+            ApprovalsPage.Open(requestId);
+        }
+
+        if (requestId is not null || _pending > 0)
+        {
+            Navigate(WorkbenchPage.Approvals, NavigationOrigin.Reminder);
+        }
+    }
 
     /// <summary>
     /// Shows whether approvals are taken and how many questions wait (STS-10, STS-11); a change of state is announced
@@ -143,6 +182,50 @@ public partial class MainWindow : Window
     }
 
     private void CanNavigate(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = SettingsLayer.Visibility != Visibility.Visible;
+
+    private void OnArrived(QuestionItem item)
+    {
+        Reminder reminder = ReminderFor(IsVisible, WindowState == WindowState.Minimized, IsActive);
+        if (reminder.HasFlag(Reminder.Flash) && new WindowInteropHelper(this).Handle is var handle && handle != IntPtr.Zero)
+        {
+            var flash = new FlashInfo { Size = (uint)Marshal.SizeOf<FlashInfo>(), Window = handle, Flags = FlashTray | FlashUntilForeground };
+            FlashWindowEx(ref flash);
+        }
+
+        if (reminder.HasFlag(Reminder.Notify))
+        {
+            NotificationWanted?.Invoke(item);
+        }
+    }
+
+    /// <summary>
+    /// F6 and Shift+F6 go round the regions (NAV-08): Sider, Header, the page body, and on the approval queue the shown
+    /// question. Each stop is the region's natural focus; it is never an answer button.
+    /// </summary>
+    private void MoveRegion(int step)
+    {
+        var regions = new List<(UIElement Region, Action Focus)>
+        {
+            (Sider, () => Keyboard.Focus(_pages[(int)CurrentPage].Item)),
+            (Header, () => Keyboard.Focus(PendingBadge.IsVisible ? PendingBadge : MinimizeButton)),
+        };
+        if (CurrentPage == WorkbenchPage.Approvals)
+        {
+            regions.Add((ApprovalsPage, ApprovalsPage.FocusList));
+            if (ApprovalsPage.DetailArea.IsVisible)
+            {
+                regions.Add((ApprovalsPage.DetailArea, ApprovalsPage.FocusHeading));
+            }
+        }
+        else
+        {
+            regions.Add((Body, ((IWorkbenchPage)_pages[(int)CurrentPage].View).FocusHeading));
+        }
+
+        int current = regions.FindLastIndex(r => r.Region.IsKeyboardFocusWithin);
+        int next = current < 0 ? (step > 0 ? 0 : regions.Count - 1) : (current + step + regions.Count) % regions.Count;
+        regions[next].Focus();
+    }
 
     private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);
 
@@ -202,9 +285,33 @@ public partial class MainWindow : Window
     private void OnMenuClick(object sender, RoutedEventArgs e) =>
         Navigate(_pages.Single(p => ReferenceEquals(p.Item, sender)).Page, NavigationOrigin.Menu);
 
+    /// <summary>The approval page just became visible, or the window did with it on top: the 500 ms start over (APR-04).</summary>
+    private void Rearm(bool shown)
+    {
+        if (shown && IsVisible && WindowState != WindowState.Minimized && CurrentPage == WorkbenchPage.Approvals)
+        {
+            ApprovalsPage.Rearm();
+        }
+    }
+
+    /// <summary>
+    /// Windows gives focus back to the last control on activation (S18); when that is an answer button, focus goes to the
+    /// question's title instead (APR-03). Focus anywhere else stays: moving it would be a focus change of our own, and
+    /// one that is not needed for safety.
+    /// </summary>
+    private void Refocus()
+    {
+        if (ApprovalsPage.HasAnswerFocus)
+        {
+            ApprovalsPage.FocusHeading();
+        }
+    }
+
     private void ApplyWindowState()
     {
         bool maximized = WindowState == WindowState.Maximized;
+        Rearm(_lastState == WindowState.Minimized && WindowState != WindowState.Minimized);
+        _lastState = WindowState;
 
         // A maximized chrome-less window reaches past the screen by its resize border; keep the content on screen.
         Root.Margin = maximized ? SystemParameters.WindowResizeBorderThickness : new Thickness(0);
@@ -247,4 +354,22 @@ public partial class MainWindow : Window
     private void OnMaximize(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
     private void OnClose(object sender, RoutedEventArgs e) => Close();
+
+    private const uint FlashTray = 0x2;
+
+    private const uint FlashUntilForeground = 0xC;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct FlashInfo
+    {
+        public uint Size;
+        public IntPtr Window;
+        public uint Flags;
+        public uint Count;
+        public uint Timeout;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool FlashWindowEx(ref FlashInfo info);
 }
