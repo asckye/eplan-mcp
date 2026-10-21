@@ -56,6 +56,7 @@
 | `translation` | 系统翻译库（所有项目共用） | `Translate.TranslateDatabase` |
 | `scratch` | 沙箱项目 | 本项目的概念 |
 | `message` | EPLAN 系统消息 | 系统消息树 |
+| `action` | EPLAN 的 action，只用于受控的 `eplan_action_run`（只执行白名单中的条目，[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
 | `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
 
 ### 3.3 动作
