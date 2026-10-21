@@ -190,6 +190,7 @@ internal sealed class BridgeConnection
             Eplan = _options.Eplan,
             Operations = [.. _router.SupportedOperations],
             BuildTarget = _options.BuildTarget,
+            AddinPath = _options.AddinPath,
         });
     }
 

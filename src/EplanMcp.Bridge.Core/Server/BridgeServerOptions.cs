@@ -12,6 +12,9 @@ public sealed class BridgeServerOptions
     /// <summary>The add-in's target framework (<c>TargetFrameworkAttribute</c>); null when unknown.</summary>
     public string? BuildTarget { get; set; }
 
+    /// <summary>Where EPLAN registered the add-in (<see cref="HandshakeResult.AddinPath"/>); null when unknown.</summary>
+    public string? AddinPath { get; set; }
+
     /// <summary>How many Hosts may be connected at the same time (design 4.2).</summary>
     public int MaxConnections { get; set; } = 4;
 
