@@ -80,9 +80,9 @@ flowchart LR
 | 2 | `eplan_cable_generate` | Destructive? | 按方案生成电缆，可能改名或替换已有的自动电缆 |
 | 2 | `eplan_terminal_renumber`、`eplan_cable_renumber` | Destructive | 与 `eplan_device_renumber` 相同的形态：范围、方案、起始值、步长、只编未编号的 |
 | 2 | `eplan_connection_number` | Destructive | 线号：按方案给连接编号（覆盖矩阵第 4 节的"线号管理器"） |
-| 2 | `eplan_project_language_set` | Write | 设置项目的显示语言、可变语言、源语言，不翻译 |
+| 2 | `eplan_project_language_set` | Write | 设置项目的显示语言、可变语言、源语言，不翻译。参数写法查清后再实现（S23：`"en_US;zh_CN"` 被拒绝）；项目设置不被 `SafetyPoint` 回滚，工具自己记下原值、失败时写回 |
 | 2 | `eplan_project_translate` | Destructive | 用系统翻译库翻译整个项目或指定页（只读翻译库） |
-| 2 | `eplan_project_language_remove` | Destructive | 从项目中删除一种语言（主语言不能删） |
+| 2 | `eplan_project_language_remove` | Destructive | 从项目中删除一种语言（主语言不能删）。S23：回滚只撤回译文、不撤回语言设置，失败时还要写回设置；它会改显示语言，结果中列出 |
 | 2 | 修订的写工具 | ? | S23 之后单独设计（Q9） |
 | 3 | `eplan_import_dxf` | Destructive? | DXF/DWG 插入页面 |
 | 3 | `eplan_import_pdf_comments` | Write? | 导入审图人在 PDF 上的注释，之后可以读取和处理 |
@@ -137,6 +137,7 @@ flowchart LR
   - 比较可以删除旧的修订标记、清除以前的比较结果。
 - S23 弄清：修订在项目中怎样保存，能否读出修订列表；新建修订、完成页、比较、修订标记的结果；能否被 `SafetyPoint` 回滚。
 - 第一批只做 `eplan_revision_list`。写工具的级别和形态在 S23 之后单独设计（Q9）。完成修订、删除修订这类不可逆的操作定为 Destructive。
+- **S23 之后**：新建修订把项目链接文件从 `.elk` 改为 `.ell`、Ctrl+Z 不撤回，所以修订的写工具执行后要按新路径重新识别项目（审计和暂停都按路径，ADR-0010），定为 Destructive。修订状态的读法（修订列表存在哪里）还没有找到，`eplan_revision_list` 查清后再实现。
 
 ### 4.8 系统主数据（ADR-0019，Proposed）
 - **问题**：部件库和翻译库被所有项目共用，可能是团队共用的 SQL Server 数据库。写错了会影响每个项目，`SafetyPoint` 和 Ctrl+Z 都管不到它们，也没有"scratch 部件库"的概念。这是安全模型的扩展，属于 L3，由 ADR-0019 提议、项目负责人确认。
