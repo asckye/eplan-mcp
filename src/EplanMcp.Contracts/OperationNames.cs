@@ -52,6 +52,12 @@ public static class OperationNames
     public const string PartList = "part.list";
 
     /// <summary>
+    /// Searches the parts database EPLAN is configured with, opened and closed again in the call, never changed:
+    /// filtered, sorted and sliced in the Bridge. Arguments: <see cref="PartSearchArgs"/>; data: <see cref="PartSearchData"/>.
+    /// </summary>
+    public const string PartSearch = "part.search";
+
+    /// <summary>
     /// EPLAN's system messages of this session, newest first, filtered and sliced in the Bridge. Arguments:
     /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
     /// </summary>

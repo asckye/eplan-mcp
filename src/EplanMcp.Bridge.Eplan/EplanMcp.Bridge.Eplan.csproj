@@ -51,6 +51,11 @@
       <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- The parts database, read only for eplan_part_search (api-notes A27); its writing members are banned. -->
+    <Reference Include="Eplan.EplApi.MasterDatau">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.MasterDatau.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <!-- WPF Dispatcher: EPLAN's main-thread dispatcher, the only one with an Invoke timeout (spike S1). -->
     <Reference Include="WindowsBase" />
     <!-- WPF window of the approval dialog (M3 design 4.3); part of .NET Framework, nothing is shipped. -->

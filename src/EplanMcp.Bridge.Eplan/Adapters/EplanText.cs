@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -35,7 +36,7 @@ internal static class EplanText
                 new Dictionary<string, string> { ["language"] = code! });
     }
 
-    /// <summary>The text of a property in <paramref name="language"/>, or null; see <see cref="ReadWithLanguage"/>.</summary>
+    /// <summary>The text of a property in <paramref name="language"/>, or null; see <see cref="ReadWithLanguage(PropertyValue, TextLanguage)"/>.</summary>
     public static string? Read(PropertyValue value, TextLanguage language) => ReadWithLanguage(value, language).Text;
 
     /// <summary>
@@ -46,21 +47,28 @@ internal static class EplanText
     /// <see cref="TextLanguage.Fallback"/> the raw value is read for the languages the text has, only when the requested
     /// one has no text.
     /// </summary>
-    public static (string? Text, string? Fallback) ReadWithLanguage(PropertyValue value, TextLanguage language)
-    {
-        if (value.IsEmpty)
-        {
-            return (null, null);
-        }
+    public static (string? Text, string? Fallback) ReadWithLanguage(PropertyValue value, TextLanguage language) =>
+        value.IsEmpty ? (null, null) : Display(value.ToMultiLangString, value.ToString, language);
 
-        using MultiLangString text = value.ToMultiLangString();
+    /// <summary>
+    /// The same for a property of the parts database (eplan_part_search): <c>MDPropertyValue</c> has the same
+    /// <c>IsEmpty</c>, <c>ToMultiLangString</c> and raw <c>ToString</c> (EPLAN XML docs; S24 read the raw
+    /// <c>de_DE@…;en_US@…;</c>). That GetStringToDisplay reads master data as it reads project data is left to the
+    /// Large tests (docs/tools/eplan_part_search.md, section 5).
+    /// </summary>
+    public static (string? Text, string? Fallback) ReadWithLanguage(MDPropertyValue value, TextLanguage language) =>
+        value.IsEmpty ? (null, null) : Display(value.ToMultiLangString, value.ToString, language);
+
+    private static (string? Text, string? Fallback) Display(Func<MultiLangString> multiLanguage, Func<string> raw, TextLanguage language)
+    {
+        using MultiLangString text = multiLanguage();
         string display = text.GetStringToDisplay(language.Number);
         if (display.Length > 0 || !language.Fallback)
         {
             return (display.Length == 0 ? null : display, null);
         }
 
-        foreach (string code in TextLanguages.Fallbacks(value.ToString()))
+        foreach (string code in TextLanguages.Fallbacks(raw()))
         {
             using var iso = new ISOCode(code);
             if (iso.IsValid() && text.GetStringToDisplay(iso.GetNumber()) is { Length: > 0 } other)

@@ -372,6 +372,30 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 293,
         },
+        new PartSearchArgs { Query = "3RH21", Manufacturer = "SIE", Language = "zh_CN", Offset = 20, Limit = 20 },
+        new PartSearchArgs(),
+        new PartSearchData
+        {
+            Database = @"$(MD_PARTS)\EPLAN_parts.alk",
+            Items =
+            [
+                new PartSearchItem
+                {
+                    PartNumber = "SIE.3RH2122-1HB40",
+                    Variant = "1",
+                    Manufacturer = "SIE",
+                    TypeNumber = "3RH2122-1HB40",
+                    OrderNumber = "3RH21221HB40",
+                    ProductGroup = "ElectricalRelay",
+                    Description = "辅助接触器",
+                    DescriptionLanguage = "de_DE",
+                    HasMacro = true,
+                },
+                new PartSearchItem(),
+            ],
+            Total = 464,
+        },
+        new PartSearchData(),
         new MessageListArgs { MinLevel = SystemMessage.Error, Offset = 20, Limit = 20 },
         new MessageListArgs(),
         new MessageListData
