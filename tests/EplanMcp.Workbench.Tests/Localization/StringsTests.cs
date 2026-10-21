@@ -15,7 +15,7 @@ namespace EplanMcp.Workbench.Tests.Localization;
 public sealed partial class StringsTests
 {
     /// <summary>Texts that are the same in both languages on purpose: product names, technical identifiers, formats.</summary>
-    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb"];
+    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English"];
 
     public static TheoryData<string, string, string> Entries()
     {
@@ -67,7 +67,8 @@ public sealed partial class StringsTests
     [MemberData(nameof(Entries))]
     public void English_HoldsNoChinese_AndChinese_UsesFullWidthPunctuationWithoutExclamations(string key, string en, string zh)
     {
-        Assert.DoesNotMatch(Cjk(), en);
+        // The language picker names each language in its own language.
+        Assert.True(key == "Settings.Chinese" || !Cjk().IsMatch(en), key);
         Assert.DoesNotMatch(AsciiPunctuationAfterCjk(), zh);
         Assert.DoesNotContain('！', zh);
         Assert.False(en.Contains("  ", StringComparison.Ordinal) || zh.Contains("  ", StringComparison.Ordinal), key);

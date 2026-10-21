@@ -6,6 +6,7 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls"
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
+    xmlns:settings="clr-namespace:EplanMcp.Workbench.Settings"
     Width="1200" Height="780" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
@@ -17,6 +18,8 @@
     <KeyBinding Key="D2" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Audit}" />
     <KeyBinding Key="D3" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Status}" />
     <KeyBinding Key="D4" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Clients}" />
+    <KeyBinding Key="Tab" Modifiers="Control" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="1" />
+    <KeyBinding Key="Tab" Modifiers="Control+Shift" Command="{x:Static shell:MainWindow.CycleCommand}" CommandParameter="-1" />
   </Window.InputBindings>
 
   <Grid x:Name="Root" Background="{DynamicResource Primer.bg}">
@@ -25,10 +28,17 @@
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <!-- Sider: brand and the page menu (one Tab stop, arrow keys inside, NAV-04). -->
+    <!-- Sider: brand, the page menu (one Tab stop, arrow keys inside, NAV-04), settings, the collapse button. -->
     <Border x:Name="Sider" Width="216" Style="{StaticResource Primer.Sider}" AutomationProperties.Name="{l:Tr Shell.Menu}">
-      <DockPanel>
-        <Grid DockPanel.Dock="Top" MinHeight="56" Margin="16,0,12,0">
+      <!-- Rows, not docking, so that the Tab order is the visual order (KEY-02). -->
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid MinHeight="56" Margin="16,0,12,0">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -40,7 +50,7 @@
             <TextBlock x:Name="VersionText" Style="{StaticResource Primer.Mono.text}" />
           </Border>
         </Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
           <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="0,8,0,0">
             <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Bell}" Content="{l:Tr Page.Approvals}"
                          AutomationProperties.Name="{l:Tr Page.Approvals}" AutomationProperties.AcceleratorKey="Ctrl+1"
@@ -56,7 +66,10 @@
                          AutomationProperties.PositionInSet="4" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
           </StackPanel>
         </ScrollViewer>
-      </DockPanel>
+        <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource Primer.MenuButton}" ux:Ux.Icon="{DynamicResource Icon.Setting}" Content="{l:Tr Settings.Title}"
+                AutomationProperties.Name="{l:Tr Settings.Title}" Click="OnSettings" />
+        <Button x:Name="SiderToggle" Grid.Row="3" Style="{StaticResource Primer.MenuButton}" Margin="4,4,4,8" Click="OnSiderToggle" />
+      </Grid>
     </Border>
 
     <Grid Grid.Column="1">
@@ -101,6 +114,12 @@
           <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Clients.Later}" />
         </shell:PageView>
       </Grid>
+    </Grid>
+
+    <!-- The settings drawer over a scrim; nothing behind it takes input while it is open (DLG-10). -->
+    <Grid x:Name="SettingsLayer" Grid.ColumnSpan="2" Visibility="Collapsed">
+      <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnScrim" />
+      <settings:SettingsDrawer x:Name="SettingsPane" CloseRequested="OnSettingsClosed" />
     </Grid>
   </Grid>
 </Window>
