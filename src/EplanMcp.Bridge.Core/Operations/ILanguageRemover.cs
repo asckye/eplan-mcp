@@ -16,7 +16,9 @@ public interface ILanguageRemover
 
     /// <summary>
     /// Removes <paramref name="language"/> from the translation languages with its translations in every text
-    /// (<c>Translate.RemoveProjectLanguage</c>); EPLAN may change the displayed languages as well (A28).
+    /// (<c>Translate.RemoveProjectLanguage</c>); EPLAN may change the displayed languages as well (A28). Returns what
+    /// EPLAN returned, which does not say whether the language was removed: false also after a removal (A28, S24 r18).
+    /// Only the settings read back tell; the return value is for the log.
     /// </summary>
-    public void Remove(string projectPath, string language);
+    public bool Remove(string projectPath, string language);
 }

@@ -24,6 +24,7 @@ public sealed class LanguageRemoveOperationTests : IDisposable
     private readonly FakeLanguageRemover _remover;
     private readonly FakeProjectBackup _backup;
     private readonly FakeTransactions _transactions = new();
+    private readonly ListLog _log = new();
 
     public LanguageRemoveOperationTests()
     {
@@ -129,15 +130,35 @@ public sealed class LanguageRemoveOperationTests : IDisposable
         Assert.Equal(["Begin AI: eplan_language_remove", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
     }
 
-    [Fact]
-    public void Execute_ALanguageEplanLeftInTheList_IsRolledBack()
+    [Theory]
+    [InlineData(false)] // what RemoveProjectLanguage returned after removing sv_SE (S24 r18)
+    [InlineData(true)]
+    public void Execute_ALanguageGoneFromTheSettings_IsRemoved_WhateverEplanReturned(bool returned)
     {
-        _remover.Keep = "sv_SE";
+        _remover.Returns = returned;
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(Args("sv_SE"))).Error;
+        LanguageRemoveData data = Execute(Args("sv_SE", "fi_FI"));
 
-        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack, "sv_SE"), (error.Reason, error.Execution, error.Metadata!["notRemoved"]));
+        Assert.Equal(["de_DE", "en_US", "zh_CN"], data.After.Translation);
+        Assert.Equal(["Begin AI: eplan_language_remove", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Contains(_log.Entries, e => e.Message.EndsWith($"RemoveProjectLanguage(sv_SE) returned {returned}; read back: removed", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Execute_ALanguageStillInTheSettings_IsRolledBack_WhateverEplanReturned(bool returned)
+    {
+        _remover.Returns = returned;
+        _remover.Keep = "fi_FI";
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(Args("sv_SE", "fi_FI"))).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack, "fi_FI"), (error.Reason, error.Execution, error.Metadata!["notRemoved"]));
+        Assert.StartsWith("EPLAN did not remove fi_FI, so nothing was removed", error.Message, StringComparison.Ordinal);
         Assert.Contains("sv_SE@Kontaktor;", _remover.Stored[1].Raw, StringComparison.Ordinal);
+        Assert.Equal((Before, "##_##;"), (_languages.Settings.Translation, _languages.Settings.Display));
+        Assert.Contains(_log.Entries, e => e.Message.EndsWith($"RemoveProjectLanguage(fi_FI) returned {returned}; read back: still a translation language", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -205,7 +226,7 @@ public sealed class LanguageRemoveOperationTests : IDisposable
         args.Fingerprint = Plan(args).Fingerprint;
         args.Backup = Target();
         var router = new OperationRouter(
-            [new LanguageRemoveExecuteOperation(new FakeCatalog(_project), _pages, _languages, _remover, _backup, _transactions)], new InlineDispatcher(), null, new ListLog(), TimeSpan.FromSeconds(10));
+            [new LanguageRemoveExecuteOperation(new FakeCatalog(_project), _pages, _languages, _remover, _backup, _transactions, _log)], new InlineDispatcher(), null, new ListLog(), TimeSpan.FromSeconds(10));
         _remover.OnRemove = _ => router.Invoke(OperationNames.OperationCancel, new JObject { ["requestId"] = "r1" }, "cancel");
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => router.Invoke(OperationNames.LanguageRemoveExecute, JObject.FromObject(args, BridgeJson.Serializer), "r1")).Error;
@@ -233,6 +254,6 @@ public sealed class LanguageRemoveOperationTests : IDisposable
     private LanguageRemoveData Run(LanguageRemoveArgs args)
     {
         args.Backup = Target();
-        return (LanguageRemoveData)new LanguageRemoveExecuteOperation(new FakeCatalog(_project), _pages, _languages, _remover, _backup, _transactions).Execute(args)!;
+        return (LanguageRemoveData)new LanguageRemoveExecuteOperation(new FakeCatalog(_project), _pages, _languages, _remover, _backup, _transactions, _log).Execute(args)!;
     }
 }

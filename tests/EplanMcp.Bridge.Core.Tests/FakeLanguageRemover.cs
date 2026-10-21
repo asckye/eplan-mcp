@@ -8,7 +8,8 @@ namespace EplanMcp.Bridge.Core.Tests;
 /// translations leave every text, it leaves the translation languages in <paramref name="languages"/>, and the displayed
 /// languages become <see cref="DisplayAfter"/>. <see cref="Snapshot"/> is for FakeTransactions: a rollback restores the
 /// texts only, never the settings. <see cref="Failure"/> is thrown by the removal of <see cref="FailOn"/> (null: the
-/// first); <see cref="Keep"/> stands for a language EPLAN leaves in the list. Records every removal.
+/// first); <see cref="Keep"/> stands for a language EPLAN leaves in the list. <see cref="Returns"/> is what Remove
+/// returns: false by default, as RemoveProjectLanguage returned after removing sv_SE (S24 r18). Records every removal.
 /// </summary>
 internal sealed class FakeLanguageRemover(FakeProjectLanguages languages) : ILanguageRemover
 {
@@ -23,6 +24,8 @@ internal sealed class FakeLanguageRemover(FakeProjectLanguages languages) : ILan
     public string? FailOn { get; set; }
 
     public string? Keep { get; set; }
+
+    public bool Returns { get; set; }
 
     /// <summary>Runs after each removal, e.g. to cancel the invoke meanwhile.</summary>
     public Action<string>? OnRemove { get; set; }
@@ -41,7 +44,7 @@ internal sealed class FakeLanguageRemover(FakeProjectLanguages languages) : ILan
 
     public IReadOnlyList<LanguageText> Texts(string projectPath) => [.. Stored.Select(t => new LanguageText { Id = t.Id, Raw = t.Raw })];
 
-    public void Remove(string projectPath, string language)
+    public bool Remove(string projectPath, string language)
     {
         Removals.Add(language);
         if (Failure is not null && (FailOn is null || FailOn == language))
@@ -61,5 +64,6 @@ internal sealed class FakeLanguageRemover(FakeProjectLanguages languages) : ILan
         }
 
         OnRemove?.Invoke(language);
+        return Returns;
     }
 }
