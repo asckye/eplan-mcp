@@ -14,7 +14,7 @@ namespace EplanMcp.Spikes.S25.Driver;
 /// new folder under <c>&lt;scratch&gt;\spikes\s25\out\</c>, and records the files that appeared there and the project
 /// files that changed. Then restores the previously current project, closes the copy and unregisters the add-in.
 /// Reports go to <c>.local\spikes\s25\</c> (git-ignored).
-/// <para>Usage: <c>EplanMcp.Spikes.S25.Driver.exe --host name [--revision rN] [--port 49152]</c>.</para>
+/// <para>Usage: <c>EplanMcp.Spikes.S25.Driver.exe --host name [--revision rN] [--port 49152] [--modes m1,m2]</c>.</para>
 /// </summary>
 internal static class Program
 {
@@ -37,6 +37,7 @@ internal static class Program
         string revision = Option(args, "--revision") ?? string.Empty;
         string port = Option(args, "--port") ?? "49152";
         string host = Option(args, "--host") ?? Environment.MachineName;
+        string[] modes = Option(args, "--modes")?.Split(',') ?? ["pxf", "pxfnomaster", "partsxml", "partscsv", "devicescsv", "labeltext", "labelexcel", "plcaddresses", "missingwords"];
         string repository = Repository();
         string title = "EplanMcp.Spikes.S25" + revision;
         string action = "EplanMcpSpikeS25" + revision;
@@ -172,7 +173,7 @@ internal static class Program
             previous = current;
             Step("select", () => Probe("select", "select"));
             Step("lastused-before", () => Probe("lastused", "lastused-before"));
-            foreach (string mode in new[] { "pxf", "pxfnomaster", "partsxml", "partscsv", "devicescsv", "labeltext", "labelexcel", "plcaddresses", "missingwords" })
+            foreach (string mode in modes)
             {
                 string outDir = Path.Combine(exports, mode);
                 Directory.CreateDirectory(outDir);
