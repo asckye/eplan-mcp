@@ -197,6 +197,16 @@ public static class OperationNames
     /// </summary>
     public const string ExportImageRun = "export.image.run";
 
+    /// <summary>The plan of eplan_export_pxf: finds the project, never exports. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/>.</summary>
+    public const string ExportPxfPlan = "export.pxf.plan";
+
+    /// <summary>
+    /// Exports the whole project, connections included, as one EPJ (PXF) file into the Host's new, empty folder; EPLAN
+    /// adds the extension. Arguments: <see cref="ExportArgs"/> with the folder, the file name without extension and
+    /// <see cref="ExportArgs.IncludeMasterData"/>; data: <see cref="ExportRunData"/>.
+    /// </summary>
+    public const string ExportPxfRun = "export.pxf.run";
+
     /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.

@@ -6,7 +6,7 @@ public sealed class ExportRunData
     /// <summary>The name of the project.</summary>
     public string Project { get; set; } = string.Empty;
 
-    /// <summary>How many pages were exported.</summary>
+    /// <summary>How many pages were exported; 0 for the exports of a whole project (PXF, lists).</summary>
     public int PageCount { get; set; }
 
     /// <summary>PDF, DXF: the scheme used; null for images.</summary>

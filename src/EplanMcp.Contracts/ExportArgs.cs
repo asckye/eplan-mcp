@@ -1,9 +1,9 @@
 namespace EplanMcp.Contracts;
 
 /// <summary>
-/// Arguments of the export operations (docs/tools/eplan_export_pdf.md, eplan_export_dxf.md, eplan_export_image.md):
-/// each reads the fields its tool has and ignores the others. The plan and the run of one export take the same
-/// arguments; only the run has <see cref="Directory"/> and, for PDF, <see cref="FileName"/>.
+/// Arguments of the export operations (docs/tools/eplan_export_*.md): each reads the fields its tool has and ignores
+/// the others. The plan and the run of one export take the same arguments; only the run has <see cref="Directory"/>
+/// and, for PDF and the project exports, <see cref="FileName"/>.
 /// </summary>
 public sealed class ExportArgs
 {
@@ -34,6 +34,12 @@ public sealed class ExportArgs
     /// </summary>
     public string? Directory { get; set; }
 
-    /// <summary>The PDF run: the file's name in <see cref="Directory"/>, extension included, as the Host checked it.</summary>
+    /// <summary>
+    /// The run of PDF and the project exports: the file's name in <see cref="Directory"/>, as the Host checked it;
+    /// extension included, except for PXF, where EPLAN adds it.
+    /// </summary>
     public string? FileName { get; set; }
+
+    /// <summary>PXF: whether the project's master data (symbols, forms and the like) goes into the file too.</summary>
+    public bool IncludeMasterData { get; set; }
 }

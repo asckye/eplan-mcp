@@ -75,6 +75,7 @@ internal static class BridgeHost
         var checker = new EplanCheckRunner();
         var reports = new EplanReportUpdater();
         var exporter = new EplanExporter();
+        var projectExporter = new EplanProjectExporter();
         var remover = new EplanPageRemover();
         var renumberer = new EplanDeviceRenumberer();
         var pageRenumberer = new EplanPageRenumberer();
@@ -117,6 +118,11 @@ internal static class BridgeHost
             {
                 new ExportPlanOperation(kind, catalog, pages, exporter),
                 new ExportRunOperation(kind, catalog, pages, exporter),
+            }),
+            .. new[] { ProjectExportKind.Pxf }.SelectMany(kind => new IOperation[]
+            {
+                new ProjectExportPlanOperation(kind, catalog),
+                new ProjectExportRunOperation(kind, catalog, projectExporter),
             }),
             new PageDeletePlanOperation(catalog, remover),
             new PageDeleteExecuteOperation(catalog, pages, remover, backup, transactions),
