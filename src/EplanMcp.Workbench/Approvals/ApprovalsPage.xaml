@@ -52,14 +52,13 @@
                 </Border>
                 <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" />
               </DockPanel>
-              <TextBlock Text="{Binding Kind}" Style="{StaticResource Primer.Muted}" Margin="0,4,0,0" />
-              <DockPanel Margin="0,4,0,0">
-                <TextBlock DockPanel.Dock="Right" Text="{Binding Result}" Style="{StaticResource Primer.Muted}" Margin="8,0,0,0"
-                           Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
-                <TextBlock DockPanel.Dock="Right" Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" Margin="8,0,0,0"
-                           Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}" />
-                <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Muted}" />
-              </DockPanel>
+              <!-- One line each, wrapping: the 320 epx column must not cut a project name or a countdown (TYP-10). -->
+              <TextBlock Text="{Binding Kind}" Style="{StaticResource Primer.Muted}" Margin="0,4,0,0" TextWrapping="Wrap" TextTrimming="None" />
+              <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Muted}" Margin="0,4,0,0" TextWrapping="Wrap" TextTrimming="None" />
+              <TextBlock Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" Margin="0,4,0,0" TextWrapping="Wrap" TextTrimming="None"
+                         Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}" />
+              <TextBlock Text="{Binding Result}" Style="{StaticResource Primer.Muted}" Margin="0,4,0,0" TextWrapping="Wrap" TextTrimming="None"
+                         Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
               <TextBlock Text="{Binding Outcome}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="0,4,0,0"
                          Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
             </StackPanel>

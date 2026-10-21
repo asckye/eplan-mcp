@@ -1,8 +1,10 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Protocol;
@@ -118,6 +120,23 @@ public sealed class ApprovalsPageAutomationTests(WpfContext wpf) : IDisposable
         }));
     }
 
+    [Theory]
+    [InlineData(AppLanguage.Chinese, 960)]
+    [InlineData(AppLanguage.English, 960)]
+    [InlineData(AppLanguage.English, 1000)]
+    public void NoTextIsCutOff_InEitherLanguage_EvenInTheSmallestWindow(AppLanguage language, double width)
+    {
+        wpf.RunWithLanguage(language, () => WithQueue((window, page) =>
+        {
+            Resize(window, width);
+            var cut = Descendants<TextBlock>(window)
+                .Where(t => t.IsVisible && t.TextWrapping == TextWrapping.NoWrap && t.Text.Length > 0 && Width(t) > t.ActualWidth + 1)
+                .Select(t => $"{t.Text} ({Width(t):F0} > {t.ActualWidth:F0})");
+
+            Assert.Empty(cut);
+        }));
+    }
+
     private void WithQueue(Action<MainWindow, ApprovalsPage> test) => With(window =>
     {
         var queue = new ApprovalQueue(_clock);
@@ -155,6 +174,29 @@ public sealed class ApprovalsPageAutomationTests(WpfContext wpf) : IDisposable
     private static bool Operable(AutomationPeer peer) => peer.IsKeyboardFocusable()
         || peer.GetPattern(PatternInterface.Invoke) is not null || peer.GetPattern(PatternInterface.Toggle) is not null
         || peer.GetPattern(PatternInterface.SelectionItem) is not null;
+
+    /// <summary>How wide the text would be on one line, in the block's own font.</summary>
+    private static double Width(TextBlock block) => new FormattedText(
+        block.Text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface(block.FontFamily, block.FontStyle, block.FontWeight, block.FontStretch),
+        block.FontSize, Brushes.Black, VisualTreeHelper.GetDpi(block).PixelsPerDip).WidthIncludingTrailingWhitespace;
+
+    private static List<T> Descendants<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        var found = new List<T>();
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(root, i);
+            if (child is T match)
+            {
+                found.Add(match);
+            }
+
+            found.AddRange(Descendants<T>(child));
+        }
+
+        return found;
+    }
 
     private static string Name(ApprovalsPage page, string element) => AutomationProperties.GetName((DependencyObject)page.FindName(element));
 }
