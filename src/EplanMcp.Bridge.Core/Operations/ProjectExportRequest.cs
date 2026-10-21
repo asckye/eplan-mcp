@@ -14,9 +14,10 @@ internal sealed class ProjectExportRequest
     public const string InternalScheme = "InternalRefDefScheme";
 
     /// <summary>
-    /// The labelling outputs S25 verified, by their converter (<c>Data.File.Format</c>, api-notes B9), and the file's
-    /// extension: text and xlsx, which needs no Excel (A25). Others are refused until a Large test has verified them;
-    /// .xls is never asked for, as it needs Excel (EPLAN XML docs).
+    /// The labelling outputs S25 verified, by their converter (the scheme's <c>Data.File.Format</c>; the first Large
+    /// run read these two names from EPLAN's own schemes, api-notes B9), and the file's extension: text and xlsx, which
+    /// needs no Excel (A25). Others are refused until a Large test has verified them; .xls is never asked for, as it
+    /// needs Excel (EPLAN XML docs).
     /// </summary>
     private static readonly Dictionary<string, string> _labelExtensions = new(StringComparer.Ordinal)
     {

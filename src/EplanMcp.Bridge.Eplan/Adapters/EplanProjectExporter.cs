@@ -15,7 +15,13 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 internal sealed class EplanProjectExporter : IProjectExporter
 {
     private const string LabellingSchemes = "USER.Labelling.Config";
-    private const string LabelFormatSetting = "Data.File.Format";
+
+    /// <summary>
+    /// A labelling scheme's <c>Data.File.Format</c>, relative to the scheme's <c>Data</c> node, where SchemeSetting starts
+    /// its paths: "Data.File.Format" throws (the path in EPLAN's message is <c>…&lt;scheme&gt;.Data&lt;.Data.File.Format</c>),
+    /// "File.Format" reads the converter (api-notes B9, first Large run 2026-10-21).
+    /// </summary>
+    private const string LabelFormatSetting = "File.Format";
 
     /// <summary>
     /// <c>Export.PXFProject</c> with connections, as S25 ran it; the overload with two arguments leaves the connections
@@ -39,9 +45,8 @@ internal sealed class EplanProjectExporter : IProjectExporter
 
     /// <summary>
     /// The schemes of <c>USER.Labelling.Config</c> (A24), each with the converter in its <c>Data.File.Format</c>, the
-    /// path of EPLAN's own labelling configurations (api-notes B9). That <c>GetStringSetting</c> reads it there is left
-    /// to the Large tests (docs/tools/eplan_export_labels.md, section 5); a format that cannot be read is null, and the
-    /// operation refuses the scheme rather than guess.
+    /// path of EPLAN's own labelling configurations, read as <see cref="LabelFormatSetting"/> (api-notes B9); a format
+    /// that cannot be read is null, and the operation refuses the scheme rather than guess.
     /// </summary>
     public IReadOnlyList<LabelScheme> LabelSchemes()
     {
