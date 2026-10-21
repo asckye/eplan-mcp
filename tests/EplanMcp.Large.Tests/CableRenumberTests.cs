@@ -14,7 +14,14 @@ public sealed class CableRenumberTests : IClassFixture<DestructiveHost>
     private const string Tool = "eplan_cable_renumber";
     private const string Scheme = "Standard";
 
-    private static readonly string[] _lineCable = ["+A1-WE1"];
+    /// <summary>
+    /// A real cable that numbering in Standard leaves alone and no other write test renames: CableTests reads it as a cable
+    /// with its two ends and two cores (live, 2026-10-21), and numbering every cable in Standard renamed only +A2-WD4,
+    /// +A2-WD5, +B2.Y1-WD1 and +B2.Y1-WD2 (S21; live, 2026-10-21). Not +A1-WE1: its category is BusBarDefText.
+    /// </summary>
+    private const string Kept = "+B1-WG2";
+
+    private static readonly string[] _kept = [Kept];
     private static readonly string[] _breaker = ["=GAA+A1-FC1"];
 
     private readonly DestructiveHost _host;
@@ -27,7 +34,7 @@ public sealed class CableRenumberTests : IClassFixture<DestructiveHost>
     }
 
     [Fact]
-    public async Task EveryCable_InStandard_KeepsTheTagsUnique_AndTheCablesOtherWriteTestsUse()
+    public async Task EveryCable_InStandard_KeepsTheTagsUnique_AndLeavesTheOthersAlone()
     {
         string[] before = await CableTagsAsync();
         Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["scheme"] = Scheme };
@@ -38,14 +45,15 @@ public sealed class CableRenumberTests : IClassFixture<DestructiveHost>
         Assert.InRange(cables, 1, 200);
 
         _host.Approvals.Approve(Tool, _host.Writable, [$"renumber all cable tags in the project ({cables} cables), scheme: {Scheme}, start 1, step 1"]);
-        JsonElement numbered = await _host.CallAsync(Tool, args);
+        JsonElement numbered = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, args));
         string[] after = await CableTagsAsync();
         (string From, string To)[] changed = [.. numbered.GetProperty("changed").EnumerateArray().Select(c => (c.GetProperty("from").GetString()!, c.GetProperty("to").GetString()!))];
         TestContext.Current.TestOutputHelper?.WriteLine($"{cables} cables planned, {before.Length} listed; changed: {string.Join(", ", changed.Select(c => c.From + " -> " + c.To))} (S21: +A2-WD4 <-> +A2-WD5, +B2.Y1-WD1 <-> +B2.Y1-WD2).");
 
         Assert.Equal(after.Length, after.Distinct(StringComparer.Ordinal).Count());
         Assert.All(changed, c => Assert.Contains(c.From, before));
-        Assert.Contains("+A1-WE1", after); // WriteSafetyTests and PageDeleteTests rely on it
+        Assert.Contains(Kept, after);
+        Assert.DoesNotContain(changed, c => c.From == Kept);
         Assert.Equal(changed.Length, numbered.GetProperty("changedCount").GetInt32());
         Assert.True(File.Exists(numbered.GetProperty("backup").GetString()), "No backup copy at " + numbered.GetProperty("backup"));
         Assert.Equal(changed.Length > 0 ? "committed" : "not_started", numbered.GetProperty("execution").GetString());
@@ -61,7 +69,7 @@ public sealed class CableRenumberTests : IClassFixture<DestructiveHost>
         Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["cables"] = DestructiveHost.Json(given), ["scheme"] = Scheme };
 
         _host.Approvals.Approve(Tool, _host.Writable, [$"renumber all cable tags of the given cables (2 cables), scheme: {Scheme}, start 1, step 1"]);
-        JsonElement numbered = await _host.CallAsync(Tool, args);
+        JsonElement numbered = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, args));
         string[] after = await CableTagsAsync();
         TestContext.Current.TestOutputHelper?.WriteLine(numbered.GetProperty("changed").ToString());
 
@@ -76,7 +84,7 @@ public sealed class CableRenumberTests : IClassFixture<DestructiveHost>
     {
         int asked = _host.Approvals.Questions.Count;
 
-        JsonElement result = await _host.CallAsync(Tool, new() { ["project"] = _host.Writable, ["cables"] = DestructiveHost.Json(_lineCable), ["scheme"] = Scheme, ["keep_existing"] = true });
+        JsonElement result = await _host.CallAsync(Tool, new() { ["project"] = _host.Writable, ["cables"] = DestructiveHost.Json(_kept), ["scheme"] = Scheme, ["keep_existing"] = true });
 
         Assert.Equal(("not_started", 0, JsonValueKind.Null), (result.GetProperty("execution").GetString(), result.GetProperty("scope").GetProperty("cables").GetInt32(), result.GetProperty("backup").ValueKind));
         Assert.Equal(asked, _host.Approvals.Questions.Count);
