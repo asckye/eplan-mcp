@@ -86,6 +86,7 @@ internal static class BridgeHost
         var pageRenumberer = new EplanPageRenumberer();
         var terminalRenumberer = new EplanTerminalRenumberer();
         var cableRenumberer = new EplanCableRenumberer();
+        var connectionNumberer = new EplanConnectionNumberer();
         var backup = new EplanProjectBackup();
         var languages = new EplanProjectLanguages();
         var languageRemover = new EplanLanguageRemover();
@@ -147,6 +148,8 @@ internal static class BridgeHost
             new TerminalRenumberExecuteOperation(catalog, pages, terminalRenumberer, backup, transactions),
             new CableRenumberPlanOperation(catalog, devices, cableRenumberer),
             new CableRenumberExecuteOperation(catalog, pages, devices, cableRenumberer, backup, transactions),
+            new ConnectionNumberPlanOperation(catalog, connectionNumberer),
+            new ConnectionNumberExecuteOperation(catalog, pages, connectionNumberer, backup, transactions),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
