@@ -37,13 +37,14 @@ public sealed class PageDeleteTests : IClassFixture<DestructiveHost>
         Assert.Equal(Circuit1, page.GetProperty("name").GetString());
         Assert.InRange(page.GetProperty("functions").GetInt32(), 1, 500);
 
-        // S12 (A18): four cables have their main function on this page. The tool lists the devices whose functions left
-        // on other pages lose their main function; +A2-WE2's other function is on no page, so it is not listed (A20).
+        // S12 (A18): four devices such as +A1-WE1 (category BusBarDefText, A24; S12 called them cables) have their main
+        // function on this page. The tool lists the devices whose functions left on other pages lose their main function;
+        // +A2-WE2's other function is on no page, so it is not listed (A20).
         JsonElement[] orphaned = [.. dryRun.GetProperty("orphaned").EnumerateArray()];
         Assert.DoesNotContain(orphaned, o => o.GetProperty("tag").GetString() == "+A2-WE2");
-        foreach (string cable in new[] { "+A1-WE1", "+A1-WE2", "+A2-WE1" })
+        foreach (string tag in new[] { "+A1-WE1", "+A1-WE2", "+A2-WE1" })
         {
-            JsonElement device = Assert.Single(orphaned, o => o.GetProperty("tag").GetString() == cable);
+            JsonElement device = Assert.Single(orphaned, o => o.GetProperty("tag").GetString() == tag);
             Assert.InRange(device.GetProperty("functionsLeft").GetInt32(), 1, 100);
             Assert.DoesNotContain(Circuit1, device.GetProperty("pages").EnumerateArray().Select(p => p.GetString()));
         }

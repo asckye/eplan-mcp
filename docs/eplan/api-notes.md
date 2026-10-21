@@ -302,7 +302,7 @@
 - **`ProjectManager.CopyProject(源 .elk, 目标 .elk, CopyMode.Snapshot)` 可以复制打开着的项目**：项目保持打开，不加锁，示例项目（313 个文件、213 MB）0.6–0.7 秒；源项目只改写 `User.eod` / `User.eox`（同 A11）。副本可以直接打开，页数、功能数与源项目相同；在一次已提交的写入之后立即复制，副本包含这次写入。— S12。
 - `CopyMode.All` 同样可用（0.8 秒），但会改写源项目的 `.lck` 锁文件。`Backup.Project(…, Backup.Type.MakeBackup, false)` 用时约 10 秒，得到一个 `.zw1`（70 MB），会改写源项目多个 `.eod` / `.eox` 和 `ProjectInfo.xml`；源项目仍在原位、仍打开，但一次运行中当前项目随之改变。— S12。
 - **`Page.Remove()`、`Renumber.DeviceTags`、`Renumber.Pages` 都能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销**，在 `QuietModeStep(ShowNoDialogs)` 下都没有弹出对话框。— S12。
-- **删页会留下没有主功能的辅助功能**：删除电缆主功能所在的页后，其他页上的芯线功能仍在。报表页不随之更新。— S12。
+- **删页会留下没有主功能的辅助功能**：删除 `+A1-WE1`（类别 `BusBarDefText`，A24；S12 中称为电缆）等设备的主功能所在的页后，其他页上的辅助功能仍在。报表页不随之更新。— S12。
 - **`Renumber.DeviceTags(IFunctionBase[], null, Renumber.Enums.DeviceTags.PostNumerate, 方案, 1, 1)` 只给设备标识中的 `?` 编号**：`-?XG1` → `-XG2`（跳过已占用的 `XG1`）；端子连接点的 `?1` 不变；`=GAA+A1-?QA1` 也没有被编号（原因未查）。方案传 `""` 等同于 `Standard`；名称不存在时抛 `InvalidScheme`，消息列出可用的方案名。这个重载的第 4 个参数是方案（异常中的参数名为 `strSchemePerIdentifier`）；XML 文档中 `Project` 重载的参数名与类型顺序不一致，不要照着它传参。— S12。
   - 对本项目的影响：`eplan_device_renumber` 执行后读回，报告仍带 `?` 的标识；`eplan_page_delete` 的变更清单列出会失去主功能的设备。
 
@@ -310,7 +310,7 @@
 `eplan_page_create`、`eplan_page_update`、`eplan_device_update` 的 Release 构建，经 `eplanmcp` 调用，每个工具用一份新复制的示例项目（scratch 中），另有一份 scratch 之外的副本只用来验证拒绝。步骤和结果记在 PR #109、#114、#121 中。
 - **Q1**：对 scratch 之外的副本建页返回 `POLICY_DENIED`、`not_started`，设计数据和审计都不变。— 实测。
 - **Q3：一次写入就是一个撤销步骤**：四次建页（其中一次建 4 页）后按四次 Ctrl+Z，依次撤销四次写入；改页描述、改设备标识同样一一对应。— 实测。
-- **Q2：事务中失败时整体回滚，并且不留空的撤销步骤**：把电缆 `+A1-WE1` 改名为 `=F+A1-WE19` 时，EPLAN 把名称改成了 `+A1-WE19`（电缆不用 `=`，A13），读回不一致，返回 `INVALID_ARGUMENT`、`rolled_back`；电缆和它的 6 个辅助功能都保持原名。随后的第一次 Ctrl+Z 撤销的是之前那次成功的改名，说明回滚掉的写入没有在撤销列表中留下步骤。— 实测。
+- **Q2：事务中失败时整体回滚，并且不留空的撤销步骤**：把 `+A1-WE1`（类别 `BusBarDefText`，A24）改名为 `=F+A1-WE19` 时，EPLAN 把名称改成了 `+A1-WE19`（这类设备不用 `=`，A13），读回不一致，返回 `INVALID_ARGUMENT`、`rolled_back`；它和它的 6 个辅助功能都保持原名。随后的第一次 Ctrl+Z 撤销的是之前那次成功的改名，说明回滚掉的写入没有在撤销列表中留下步骤。— 实测。
 - `Page.Create` 支持 `Circuit`、`CircuitSingleLine`、`Overview`、`Graphics` 四种类型；页描述中的 `;`、`@` 原样写入并读回（`a;b@c`）。— 实测。
 - 只改一种语言的页描述时，其他语言保持不变；清除一页唯一的一种语言后，描述为空。— 实测。
 - 在调度器中给主功能和全部辅助功能的 `Function.Name` 赋值：另一页上的辅助功能（交叉引用）跟着改名，部件引用和 6 个连接都不变。— 实测（`=F+A2-KF1` → `=F+A2-KF19`）。

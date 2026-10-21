@@ -39,7 +39,8 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
     [Fact]
     public async Task Q2_ARenameThatFailsInsideTheTransaction_IsRolledBackAndTheCableKeepsItsTag()
     {
-        // A17: a cable does not use the plant part, so EPLAN names it +A1-WE19; the read-back sees that and rolls back.
+        // A17: +A1-WE1 (category BusBarDefText, A24) does not use the plant part, so EPLAN names it +A1-WE19; the
+        // read-back sees that and rolls back.
         string project = host.Writable;
         string[] before = Functions(await host.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = "+A1-WE1" }));
         int records = host.AuditRecords().Count;
