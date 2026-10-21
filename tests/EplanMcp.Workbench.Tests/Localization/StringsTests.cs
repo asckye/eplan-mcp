@@ -126,7 +126,10 @@ public sealed partial class StringsTests
     [GeneratedRegex(@"\{l:Tr (?<key>[A-Za-z0-9.]+)")]
     private static partial Regex TrKey();
 
-    /// <summary>A catalogue key as a string literal in code: two or more dotted parts, starting with a known area.</summary>
-    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome)\\.[A-Za-z0-9.]+)\"")]
+    /// <summary>
+    /// A catalogue key as a string literal in code: two or more dotted parts, starting with a known area. A literal that
+    /// ends with a dot is the start of keys made in code, which their own tests check.
+    /// </summary>
+    [GeneratedRegex("\"(?<key>(?:App|Access|Shell|Page|Approvals|Settings|Tray|Exit|Pipe|Question|Result|Outcome|Host|Audit)(?:\\.[A-Za-z0-9]+)+)\"")]
     private static partial Regex CodeKey();
 }
