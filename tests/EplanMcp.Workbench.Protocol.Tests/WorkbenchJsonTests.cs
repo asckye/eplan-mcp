@@ -52,6 +52,7 @@ public sealed class WorkbenchJsonTests
             BackupFolder = null,
             Suspension = new SuspensionRecord("earlier", "eplan_page_create", 1_792_999_000_000, null, 4242),
         };
+        var unknownTime = release with { Suspension = new SuspensionRecord("earlier", "eplan_page_create", null, @"D:\Projects\Line1", null) };
         var handshake = new WorkbenchHandshake(1, 1, "0.1.0", 99);
         var welcome = new WorkbenchHandshakeResult(1, "0.1.0", Accepting: true);
         var answer = new ApprovalAskResult("r1", "f1", "h1", WorkbenchDecision.Approved);
@@ -59,6 +60,7 @@ public sealed class WorkbenchJsonTests
 
         AssertSame(_ask, Params<ApprovalAskParams>(WorkbenchJson.Request(1, WorkbenchProtocol.ApprovalAskMethod, _ask)));
         AssertSame(release, Params<ApprovalAskParams>(WorkbenchJson.Request(1, WorkbenchProtocol.ApprovalAskMethod, release)));
+        AssertSame(unknownTime, Params<ApprovalAskParams>(WorkbenchJson.Request(1, WorkbenchProtocol.ApprovalAskMethod, unknownTime)));
         Assert.Equal(handshake, Params<WorkbenchHandshake>(WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, handshake)));
         Assert.Equal(new CancelParams("r1"), Params<CancelParams>(WorkbenchJson.Notification(WorkbenchProtocol.CancelMethod, new CancelParams("r1"))));
         Assert.Equal(outcome, Params<ApprovalOutcomeParams>(WorkbenchJson.Notification(WorkbenchProtocol.ApprovalOutcomeMethod, outcome)));
