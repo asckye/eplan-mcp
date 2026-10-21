@@ -2,14 +2,14 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed |
-| 日期 | 2026-10-21（提出） |
+| 状态 | Accepted |
+| 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 单向门（第一个安装包发布后）：EPLAN 中的注册、客户端配置和插件都指向安装位置，改位置要迁移每台机器；安装包工具本身是双向门 |
 | 影响 | 落实[架构第 7 节](../architecture/architecture.md#7-部署)和安装验收清单 I1–I10；补充 [ADR-0007](0007-licensing-and-distribution.md)（签名，决定不变）；[ADR-0008](0008-data-locations-and-instance-discovery.md) 的数据根目录不变 |
 
 ## 背景与问题
-M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../design/2026-10-21-m5-operability.md)）。架构第 7 节已经定下：按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限，不修改 PATH，插件用 EPLAN 官方的 `EplApiModuleAction` 注册。还没有决定的是：用什么做安装包、安装位置能否改、升级和卸载怎样对待正在运行的程序和数据、Claude Code 插件怎样找到程序、产物在哪里构建、是否签名。这些一旦发布到用户机器上就难以改变，又属于供应链（TB5，SEC-15、SEC-16），所以写成 ADR。
+M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../design/2026-10-20-m5-operability.md)）。架构第 7 节已经定下：按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限，不修改 PATH，插件用 EPLAN 官方的 `EplApiModuleAction` 注册。还没有决定的是：用什么做安装包、安装位置能否改、升级和卸载怎样对待正在运行的程序和数据、Claude Code 插件怎样找到程序、产物在哪里构建、是否签名。这些一旦发布到用户机器上就难以改变，又属于供应链（TB5，SEC-15、SEC-16），所以写成 ADR。
 
 相关事实：
 - 插件按变体注册，注册后同一会话立即加载（api-notes A10、A12）；EPLAN 加载的是影子副本，运行中可以替换原始 DLL，重启后生效（B2、A8）。
