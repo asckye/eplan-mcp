@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "项目里还有哪些文字没有英文翻译？"代理导出缺失词表（项目中的文本在翻译库中找不到的译文），交给翻译人员或自己读取后整理。翻译项目本身是第二批的 `eplan_project_translate`。
@@ -32,6 +32,8 @@
 ## 5. 实现要点
 - **流程和导出目录**：同 `eplan_export_pdf` 第 5 节。
 - **项目的翻译语言**：在 Bridge 中读出，校验 `languages`。S25 中示例项目有 20 种（`de_DE;en_US;…;zh_TW`）；读法在实现时验证（S25 用的设置名没有核实是否就是界面上的"翻译语言"）。
+  - 实现：项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（索引 0，分号分隔），即 S25 读的设置；EPLAN 的 XML（`projectsettings` 动作的示例）也用它设置翻译语言（api-notes B9）。**待 Large 测试确认**它就是界面上的翻译语言。
+  - 语言的形状（`xx_YY`）、重复（不区分大小写）和是否属于项目在 Bridge 中一次检查；匹配不区分大小写，交给 EPLAN 和结果中的 `languages` 都用项目中的写法。Host 只检查个数和 `file_name`。
 - **EPLAN 调用**：`new Translate().ExportMissingTranslation(路径, "XTrLanguageDbXml2TabConverterImpl", 语言, [project])`，在 `QuietModeStep(ShowNoDialogs)` 中执行。翻译库只读（用户设置中配置的那个）。
 - **已验证**（S25，A25）：`en_US` 3.5 秒、3.7 KB；只改写项目的 `User.eod`。
 - **时限与进度**：300 秒，每 5 秒一次心跳。

@@ -6,10 +6,12 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// The checked arguments of the plan or run of an export of a whole project (docs/tools/eplan_export_*.md, sections 2
 /// and 4): every argument problem at once, then the project, then what the kind needs (labels: the scheme and its
-/// output format).
+/// output format; untranslated texts: the project's translation languages).
 /// </summary>
 internal sealed class ProjectExportRequest
 {
+    public const int MaxLanguages = 10;
+
     /// <summary>EPLAN's own scheme of <c>USER.Labelling.Config</c>, never offered (tool spec 5).</summary>
     public const string InternalScheme = "InternalRefDefScheme";
 
@@ -44,12 +46,15 @@ internal sealed class ProjectExportRequest
     /// <summary>Labels: the language code EPLAN reads texts in.</summary>
     public string? Language { get; }
 
+    /// <summary>Untranslated texts: the target languages as the project names them, in the order given.</summary>
+    public IReadOnlyList<string> Languages { get; private set; } = [];
+
     public static ProjectExportRequest Check(ProjectExportKind kind, ExportArgs args, IProjectCatalog catalog, IProjectExporter exporter)
     {
+        var violations = new List<string>();
         string? language = null;
         if (kind == ProjectExportKind.Labels)
         {
-            var violations = new List<string>();
             if (string.IsNullOrWhiteSpace(args.Scheme))
             {
                 violations.Add("'scheme' is required: the name of a labelling scheme, such as 'Device tag list'.");
@@ -60,14 +65,24 @@ internal sealed class ProjectExportRequest
             {
                 violations.Add("'language' is not a language EPLAN knows. Use a code like zh_CN or en_US, or omit it for EPLAN's user interface language.");
             }
+        }
 
-            if (violations.Count > 0)
-            {
-                throw WriteArguments.Invalid(violations);
-            }
+        if (kind == ProjectExportKind.Untranslated)
+        {
+            CheckLanguages(args.Languages, violations);
+        }
+
+        if (violations.Count > 0)
+        {
+            throw WriteArguments.Invalid(violations);
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
+        if (kind == ProjectExportKind.Untranslated)
+        {
+            return new ProjectExportRequest(project, ".txt", null, null) { Languages = OfProject(args.Languages!, exporter.TranslationLanguages(project.Path)) };
+        }
+
         if (kind != ProjectExportKind.Labels)
         {
             return new ProjectExportRequest(project, kind == ProjectExportKind.PartsList ? ".xml" : null, null, null);
@@ -99,6 +114,55 @@ internal sealed class ProjectExportRequest
                 ["scheme"] = name,
                 ["candidates"] = string.Join("\n", offered.Take(ProjectResolver.MaxCandidates).Select(s => s.Name)),
                 ["candidateCount"] = offered.Length.ToString(CultureInfo.InvariantCulture),
+            });
+    }
+
+    /// <summary>1 to <see cref="MaxLanguages"/> codes shaped like <c>en_US</c>, none twice ignoring case (tool spec 4).</summary>
+    private static void CheckLanguages(List<string>? languages, List<string> violations)
+    {
+        if (languages is null || languages.Count is < 1 or > MaxLanguages)
+        {
+            violations.Add($"'languages' must hold 1 to {MaxLanguages.ToString(CultureInfo.InvariantCulture)} language codes, such as [\"en_US\"].");
+            return;
+        }
+
+        for (int i = 0; i < languages.Count; i++)
+        {
+            string at = "languages[" + i.ToString(CultureInfo.InvariantCulture) + "]";
+            string code = languages[i]?.Trim() ?? string.Empty;
+            int same = languages.FindIndex(0, i, l => string.Equals(l?.Trim(), code, StringComparison.OrdinalIgnoreCase));
+            if (!(code.Length == 5 && code[2] == '_' && code.Where((c, n) => n != 2).All(c => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z'))))
+            {
+                violations.Add($"{at} must be a language code like en_US.");
+            }
+            else if (same >= 0)
+            {
+                violations.Add($"{at} repeats languages[{same.ToString(CultureInfo.InvariantCulture)}] (letter case does not count).");
+            }
+        }
+    }
+
+    /// <summary>Each language as the project names it; INVALID_ARGUMENT with the project's translation languages as candidates when one is not among them.</summary>
+    private static IReadOnlyList<string> OfProject(List<string> languages, IReadOnlyList<string> translation)
+    {
+        string?[] found = [.. languages.Select(l => translation.FirstOrDefault(t => string.Equals(t, l.Trim(), StringComparison.OrdinalIgnoreCase)))];
+        string[] missing = [.. languages.Where((_, i) => found[i] is null).Select(l => l.Trim())];
+        if (missing.Length == 0)
+        {
+            return [.. found.OfType<string>()];
+        }
+
+        const string Violation = "'languages' names languages that are not translation languages of the project; use those in metadata.candidates.";
+        throw new BridgeErrorException(
+            ErrorReason.InvalidArgument,
+            "Invalid arguments: " + Violation,
+            retryable: false,
+            new Dictionary<string, string>
+            {
+                ["violations"] = Violation,
+                ["missing"] = string.Join("\n", missing),
+                ["candidates"] = string.Join("\n", translation.Take(ProjectResolver.MaxCandidates)),
+                ["candidateCount"] = translation.Count.ToString(CultureInfo.InvariantCulture),
             });
     }
 

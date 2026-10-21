@@ -17,4 +17,7 @@ public sealed class ExportRunData
 
     /// <summary>What the engineer should know although the export worked, for example a scheme setting not set back.</summary>
     public string? Warning { get; set; }
+
+    /// <summary>Untranslated texts: the languages exported, as the project names them; null otherwise.</summary>
+    public List<string>? Languages { get; set; }
 }

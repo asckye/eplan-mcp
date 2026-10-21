@@ -1,5 +1,7 @@
+using System.Collections.Specialized;
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
+using Eplan.EplApi.DataModel;
 using Eplan.EplApi.HEServices;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -15,6 +17,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 internal sealed class EplanProjectExporter : IProjectExporter
 {
     private const string LabellingSchemes = "USER.Labelling.Config";
+    private const string TranslationLanguagesSetting = "TRANSLATEGUI.TRANSLATE_LANGUAGES";
+    private const string TabConverter = "XTrLanguageDbXml2TabConverterImpl";
 
     /// <summary>
     /// A labelling scheme's <c>Data.File.Format</c>, relative to the scheme's <c>Data</c> node, where SchemeSetting starts
@@ -84,6 +88,33 @@ internal sealed class EplanProjectExporter : IProjectExporter
     {
         using var label = new Label();
         label.DoLabel(EplanProjects.ByPath(projectPath), scheme, language, file, 1, 1);
+    });
+
+    /// <summary>
+    /// The project setting <c>TRANSLATEGUI.TRANSLATE_LANGUAGES</c>, index 0, codes separated by ';': EPLAN's XML docs
+    /// set the translation languages through it (the <c>projectsettings</c> action), and S25 read the sample project's
+    /// 20 languages from it (A25). That it is the list EPLAN's dialog shows is left to the Large tests
+    /// (docs/tools/eplan_export_untranslated.md, section 5).
+    /// </summary>
+    public IReadOnlyList<string> TranslationLanguages(string projectPath)
+    {
+        MainThread.Assert();
+        using var settings = new ProjectSettings(EplanProjects.ByPath(projectPath));
+        string value = settings.GetStringSetting(TranslationLanguagesSetting, 0) ?? string.Empty;
+        return [.. value.Split(';').Select(code => code.Trim()).Where(code => code.Length > 0)];
+    }
+
+    /// <summary>
+    /// <c>Translate.ExportMissingTranslation(file, "XTrLanguageDbXml2TabConverterImpl", languages, [project])</c> as S25
+    /// ran it: tab-separated Unicode text, 3.5 s for en_US of the sample project. Reads the translation database the
+    /// user settings name and writes nothing else (A25).
+    /// </summary>
+    public void ExportUntranslated(string projectPath, IReadOnlyList<string> languages, string file) => Run("the untranslated texts", () =>
+    {
+        var codes = new StringCollection();
+        codes.AddRange([.. languages]);
+        using var translate = new Translate();
+        translate.ExportMissingTranslation(file, TabConverter, codes, [EplanProjects.ByPath(projectPath)]);
     });
 
     private static string? LabelFormat(SchemeSetting setting)

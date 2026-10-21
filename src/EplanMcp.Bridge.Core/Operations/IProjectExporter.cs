@@ -1,11 +1,12 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, eplan_export_labels.md).</summary>
+/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, eplan_export_labels.md, eplan_export_untranslated.md).</summary>
 public enum ProjectExportKind
 {
     Pxf,
     PartsList,
     Labels,
+    Untranslated,
 }
 
 /// <summary>
@@ -41,4 +42,13 @@ public interface IProjectExporter
     /// <paramref name="file"/>, whose extension fits the scheme's output format (EPLAN XML docs).
     /// </summary>
     public void ExportLabels(string projectPath, string scheme, string language, string file);
+
+    /// <summary>The project's translation languages, e.g. <c>de_DE</c>, in the order the project keeps them.</summary>
+    public IReadOnlyList<string> TranslationLanguages(string projectPath);
+
+    /// <summary>
+    /// Exports the project's texts that have no translation in the translation database for <paramref name="languages"/>
+    /// to <paramref name="file"/>, tab-separated Unicode text (A25). Reads the translation database only.
+    /// </summary>
+    public void ExportUntranslated(string projectPath, IReadOnlyList<string> languages, string file);
 }

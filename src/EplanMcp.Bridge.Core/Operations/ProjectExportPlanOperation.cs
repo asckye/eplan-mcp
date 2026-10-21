@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// The plan of an export of a whole project (<see cref="OperationNames.ExportPxfPlan"/>,
-/// <see cref="OperationNames.ExportPartsPlan"/>, <see cref="OperationNames.ExportLabelsPlan"/>): checks the arguments
+/// <see cref="OperationNames.ExportPartsPlan"/>, <see cref="OperationNames.ExportLabelsPlan"/>,
+/// <see cref="OperationNames.ExportUntranslatedPlan"/>): checks the arguments
 /// against the project and EPLAN's settings without exporting, so that the Host creates a folder only for an export that
 /// can run, and names the project, which names the folder, and for labels the scheme and the file's extension
 /// (docs/tools/eplan_export_pdf.md, section 5). Reads only.

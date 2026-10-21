@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
@@ -10,7 +11,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The exports of a whole project into one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md,
-/// eplan_export_labels.md): Read tier, yet they write files, so
+/// eplan_export_labels.md, eplan_export_untranslated.md): Read tier, yet they write files, so
 /// readOnlyHint is false (ADR-0012); only into a new folder the Host creates for each call (SEC-20), through
 /// <see cref="ExportRunner"/>, as eplan_export_pdf does.
 /// </summary>
@@ -20,6 +21,8 @@ internal sealed class ProjectExportTools
     public const string PxfTool = "eplan_export_pxf";
     public const string PartsTool = "eplan_export_parts";
     public const string LabelsTool = "eplan_export_labels";
+    public const string UntranslatedTool = "eplan_export_untranslated";
+    public const int MaxLanguages = 10;
 
     /// <summary>The free space a PXF export needs first: S25 wrote 840 MB for the sample project with master data (tool spec 5).</summary>
     public const long PxfFreeBytes = 2L * 1024 * 1024 * 1024;
@@ -164,6 +167,65 @@ internal sealed class ProjectExportTools
             progress,
             outcome => new LabelsExportResult { Project = ResultShaper.CleanText(outcome.Data.Project), Scheme = ResultShaper.CleanText(outcome.Data.Scheme) },
             result => $"Exported labels with scheme '{result.Scheme}' to a {ByteSize.Format(result.TotalBytes)} {(result.Files.All(f => f.Path.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)) ? "Excel" : "text")} file in a new folder; see 'directory'.",
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    [McpServerTool(
+        Name = UntranslatedTool,
+        Title = "Export the untranslated texts of an EPLAN project",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(UntranslatedExportResult))]
+    [Description(
+        "Exports the texts of an EPLAN project that EPLAN's translation database cannot translate into the given " +
+        "languages, as one tab-separated Unicode text file into a new folder the server creates: a header row (source " +
+        "language, each target language, COMMENT), then one text per row; read it to list them. Writes files there " +
+        "only; the project is not changed and no approval is needed. Example: {\"languages\": [\"en_US\"]}.")]
+    public static async Task<CallToolResult> ExportUntranslatedAsync(
+        ExportRunner exports,
+        IProgress<ProgressNotificationValue> progress,
+        [Description("1-10 translation languages of the project, e.g. en_US")] string[] languages,
+        [Description(ToolArguments.ProjectDescription)] string? project = null,
+        [Description("File name only; .txt is added")] string? file_name = null,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        if (languages is not { Length: >= 1 and <= MaxLanguages })
+        {
+            violations.Add($"'languages' must hold 1 to {MaxLanguages.ToString(CultureInfo.InvariantCulture)} language codes, such as [\"en_US\"].");
+        }
+
+        string? fileName = ToolArguments.Optional(file_name);
+        if (ExportFileName.Problem(fileName) is { } problem)
+        {
+            violations.Add("'file_name' " + problem);
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        // Each code's shape, repeats and whether the project translates into it are the Bridge's to check, all at once.
+        var args = new ExportArgs { Project = ToolArguments.Optional(project), Languages = [.. languages.Select(l => l ?? string.Empty)] };
+        var job = new ExportJob(OperationNames.ExportUntranslatedPlan, OperationNames.ExportUntranslatedRun, args, "Exporting untranslated texts")
+        {
+            FileName = plan => ExportFileName.WithExtension(fileName, plan.Project, ExportFileName.TextExtension),
+            TimeoutHint = ProjectTimeoutHint,
+        };
+        return await RunAsync(
+            exports,
+            job,
+            progress,
+            outcome => new UntranslatedExportResult
+            {
+                Project = ResultShaper.CleanText(outcome.Data.Project),
+                Languages = ResultShaper.CleanTexts(outcome.Data.Languages ?? args.Languages),
+            },
+            result => $"Exported the untranslated texts for {string.Join(", ", result.Languages)} to a {ByteSize.Format(result.TotalBytes)} file in a new folder; see 'directory'.",
             cancellationToken).ConfigureAwait(false);
     }
 

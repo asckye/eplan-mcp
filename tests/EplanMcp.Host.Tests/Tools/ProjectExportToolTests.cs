@@ -11,7 +11,8 @@ namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
 /// The exports of a whole project on a fake Bridge that writes into the folder the Host created, a real one in a
-/// temporary data directory (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, eplan_export_labels.md, sections 2
+/// temporary data directory (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, eplan_export_labels.md,
+/// eplan_export_untranslated.md, sections 2
 /// to 5). The steps they share with
 /// eplan_export_pdf, failures and cancels included, are <see cref="EplanMcp.Host.Tests.Exports.ExportRunnerTests"/>'s.
 /// </summary>
@@ -48,6 +49,13 @@ public sealed class ProjectExportToolTests : IDisposable
             var run = (ExportArgs)args!;
             File.WriteAllBytes(Path.Combine(run.Directory!, run.FileName!), new byte[40 * 1024]);
             return new ExportRunData { Project = "Line1", Scheme = run.FileName!.EndsWith(".xlsx", StringComparison.Ordinal) ? "Terminal diagram" : "Device tag list" };
+        };
+        _bridge.Handlers[OperationNames.ExportUntranslatedPlan] = _ => new ExportPlanData { Project = "Line1", Extension = ".txt" };
+        _bridge.Handlers[OperationNames.ExportUntranslatedRun] = args =>
+        {
+            var run = (ExportArgs)args!;
+            File.WriteAllBytes(Path.Combine(run.Directory!, run.FileName!), new byte[3800]);
+            return new ExportRunData { Project = "Line1", Languages = [.. run.Languages!.Select(l => l.ToLowerInvariant()[..2] + "_" + l.ToUpperInvariant()[3..])] };
         };
         _bridge.Handlers[OperationNames.ExportPartsPlan] = _ => new ExportPlanData { Project = "Line1" };
         _bridge.Handlers[OperationNames.ExportPartsRun] = args =>
@@ -243,6 +251,46 @@ public sealed class ProjectExportToolTests : IDisposable
         Assert.Equal("Device tag list\nTerminal diagram", error.GetProperty("metadata").GetProperty("candidates").GetString());
         Assert.False(Directory.Exists(_locations.Exports));
     }
+
+    [Fact]
+    public async Task Untranslated_IsOneTextFileNamedAfterTheProject_WithTheLanguagesAsTheBridgeNamesThem()
+    {
+        CallToolResult result = await Untranslated(["EN_us", "fr_FR"]);
+
+        JsonElement data = Structured(result);
+        Assert.Equal(("Line1", "Line1.txt", 3800L), (data.GetProperty("project").GetString(), Files(data)[0].Path, data.GetProperty("totalBytes").GetInt64()));
+        Assert.Equal(["en_US", "fr_FR"], data.GetProperty("languages").EnumerateArray().Select(l => l.GetString()));
+        Assert.Equal(["project", "languages", "directory", "files", "fileCount", "totalBytes", "truncated", "hint"], data.EnumerateObject().Select(p => p.Name));
+        Assert.Equal("Exported the untranslated texts for en_US, fr_FR to a 4 KB file in a new folder; see 'directory'.", Text(result, 0));
+        var run = (ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.ExportUntranslatedRun).Args!;
+        Assert.Equal(["EN_us", "fr_FR"], run.Languages!);
+        Assert.Equal("Line1.txt", run.FileName);
+    }
+
+    [Fact]
+    public async Task Untranslated_TakesTheGivenFileName()
+    {
+        await Untranslated(["en_US"], fileName: "missing words");
+
+        Assert.Equal("missing words.txt", ((ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.ExportUntranslatedRun).Args!).FileName);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(11)]
+    public async Task Untranslated_NoneOrMoreThan10Languages_AndABadFileName_AreReportedBeforeAnythingIsCreated(int count)
+    {
+        JsonElement error = Error(await Untranslated([.. Enumerable.Range(0, count).Select(_ => "en_US")], fileName: "C:x"));
+
+        string violations = error.GetProperty("metadata").GetProperty("violations").GetString()!;
+        Assert.Contains("'languages' must hold 1 to 10", violations, StringComparison.Ordinal);
+        Assert.Contains("'file_name'", violations, StringComparison.Ordinal);
+        Assert.Empty(_bridge.Calls);
+        Assert.False(Directory.Exists(_locations.Exports));
+    }
+
+    private Task<CallToolResult> Untranslated(string[] languages, string? project = null, string? fileName = null) =>
+        ProjectExportTools.ExportUntranslatedAsync(_runner, _progress, languages, project, fileName, TestContext.Current.CancellationToken);
 
     private Task<CallToolResult> Labels(string scheme, string? project = null, string? language = null, string? fileName = null) =>
         ProjectExportTools.ExportLabelsAsync(_runner, _progress, scheme, project, language, fileName, TestContext.Current.CancellationToken);
