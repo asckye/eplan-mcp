@@ -239,6 +239,29 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task QuittingWhileHostsConnect_WaitsForEveryInstance_ClosesEveryQuestion_AndLeavesNoneListening()
+    {
+        Task<Question> arrival = Arrival();
+        Task<ApprovalAnswer?> waiting = Channel().AskAsync(HostQuestion("r0"), Token);
+        await arrival.WaitAsync(_patience, Token);
+        Task<ApprovalAnswer?>[] asking = [waiting, .. Enumerable.Range(1, 4).Select(i => Channel().AskAsync(HostQuestion($"r{i}"), Token))];
+
+        await _server.DisposeAsync();
+
+        foreach (Task<ApprovalAnswer?> each in asking)
+        {
+            ApprovalAnswer? answer = await each.WaitAsync(_patience, Token);
+            Assert.True(answer is null || answer.Decision == ApprovalDecision.Cancelled, answer?.ToString());
+        }
+
+        Assert.Empty(_queue.Pending);
+        Assert.NotEmpty(_queue.Answered);
+        Assert.All(_queue.Answered, q => Assert.Equal(QuestionEnd.Closed, q.End));
+        await using var late = new NamedPipeClientStream(".", _pipe, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        await Assert.ThrowsAsync<TimeoutException>(() => late.ConnectAsync(TimeSpan.FromMilliseconds(200), Token));
+    }
+
+    [Fact]
     public async Task QuittingTheWorkbench_ClosesItsQuestions_AndTheHostTakesThemAsCancelled()
     {
         Task<Question> arrival = Arrival();
@@ -299,6 +322,43 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         await freed.WaitAsync(_patience, Token);
         Assert.True(queue.IsAccepting);
         Assert.True(queue.TryReserve(), "the place is free for the next Host");
+    }
+
+    public static TheoryData<string> BrokenReleases => ["release without its write", "approval with a suspended write", "suspended before 1970", "suspended at the end of time", "suspended at no time"];
+
+    [Theory]
+    [MemberData(nameof(BrokenReleases))]
+    public async Task AReleaseWithoutItsSuspendedWrite_OrAWriteOfNoShowableTime_IsRefused(string broken)
+    {
+        ApprovalAskParams release = Asks.Release("r1");
+        ApprovalAskParams ask = broken switch
+        {
+            "release without its write" => release with { Suspension = null },
+            "approval with a suspended write" => release with { Kind = QuestionKind.Approval },
+            "suspended before 1970" => release with { Suspension = release.Suspension! with { TimeUnixMs = -1 } },
+            "suspended at the end of time" => release with { Suspension = release.Suspension! with { TimeUnixMs = DateTimeOffset.MaxValue.ToUnixTimeMilliseconds() } },
+            _ => release with { Suspension = release.Suspension! with { TimeUnixMs = long.MaxValue } },
+        };
+        await using NamedPipeClientStream pipe = await ConnectAsync();
+        await HandshakeAsync(pipe);
+
+        await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, ask));
+
+        Assert.Equal(-32602, (await ReceiveAsync(pipe))!.Error!.Code);
+        Assert.Empty(_queue.Pending);
+    }
+
+    [Fact]
+    public async Task AReleaseWhoseRecordGivesNoTime_IsAsked()
+    {
+        Task<Question> arrival = Arrival();
+        await using NamedPipeClientStream pipe = await ConnectAsync();
+        await HandshakeAsync(pipe);
+        ApprovalAskParams release = Asks.Release("r1");
+
+        await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, release with { Suspension = release.Suspension! with { TimeUnixMs = null } }));
+
+        Assert.Null((await arrival.WaitAsync(_patience, Token)).Ask.Suspension!.TimeUnixMs);
     }
 
     [Theory]
@@ -424,6 +484,53 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
 
         Assert.Equal(WorkbenchProtocol.UnsupportedVersionErrorCode, (await ReceiveAsync(pipe))!.Error!.Code);
         Assert.Null(await ReceiveOrEndAsync(pipe));
+    }
+
+    [Fact]
+    public async Task ACancelNamingAnotherRequestId_CancelsNeitherQuestion()
+    {
+        Task<Question> arrival = Arrival();
+        Task<ApprovalAnswer?> other = Channel().AskAsync(HostQuestion("r2"), Token);
+        Question theirs = await arrival.WaitAsync(_patience, Token);
+        arrival = Arrival();
+        await using NamedPipeClientStream pipe = await ConnectAsync();
+        await HandshakeAsync(pipe);
+        await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r1")));
+        Question mine = await arrival.WaitAsync(_patience, Token);
+        Task ended = Changed(mine, q => q.End is not null);
+
+        await SendAsync(pipe, WorkbenchJson.Notification(WorkbenchProtocol.CancelMethod, new CancelParams("r2")));
+
+        // A message that is not this question's cancel breaks this connection only (APR-13).
+        await ended.WaitAsync(_patience, Token);
+        Assert.Equal(QuestionEnd.Disconnected, mine.End);
+        Assert.Null(theirs.End);
+        _queue.Answer(theirs, approve: false);
+        Assert.Equal(ApprovalDecision.Denied, (await other.WaitAsync(_patience, Token))!.Decision);
+    }
+
+    [Fact]
+    public async Task AnOutcomeNamingAnotherRequestId_ReportsNothing_OnEitherQuestion()
+    {
+        Task<Question> arrival = Arrival();
+        Task<ApprovalAnswer?> other = Channel().AskAsync(HostQuestion("r2"), Token);
+        Question theirs = await arrival.WaitAsync(_patience, Token);
+        _queue.Answer(theirs, approve: true);
+        ApprovalAnswer theirAnswer = (await other.WaitAsync(_patience, Token))!;
+        arrival = Arrival();
+        await using NamedPipeClientStream pipe = await ConnectAsync();
+        await HandshakeAsync(pipe);
+        await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r1")));
+        Question mine = await arrival.WaitAsync(_patience, Token);
+        Task closed = Changed(mine, q => q.Execution == QuestionExecution.NotReceived);
+        _queue.Answer(mine, approve: true);
+        Assert.Equal(WorkbenchDecision.Approved, WorkbenchJson.As<ApprovalAskResult>((await ReceiveAsync(pipe))!.Result).Decision);
+
+        await SendAsync(pipe, WorkbenchJson.Notification(WorkbenchProtocol.ApprovalOutcomeMethod, new ApprovalOutcomeParams("r2", WriteExecution.Committed, null)));
+
+        await closed.WaitAsync(_patience, Token);
+        Assert.Equal(QuestionExecution.Running, theirs.Execution);
+        theirAnswer.Outcome!.Dispose();
     }
 
     [Fact]
