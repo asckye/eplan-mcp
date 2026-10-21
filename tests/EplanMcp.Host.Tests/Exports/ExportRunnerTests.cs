@@ -46,7 +46,7 @@ public sealed class ExportRunnerTests : IDisposable
     {
         var args = new ExportArgs { Project = "Line1", Pages = ["=A/1"], Scheme = "S", Color = "grey" };
 
-        ExportOutcome outcome = await RunAsync(new ExportJob(Plan, Run, args, "Exporting") { FileName = project => project + ".pdf" });
+        ExportOutcome outcome = await RunAsync(new ExportJob(Plan, Run, args, "Exporting") { FileName = plan => plan.Project + ".pdf" });
 
         Assert.StartsWith(Path.Combine(ProjectFolder, "20261021T083000Z-"), outcome.Directory, StringComparison.Ordinal);
         Assert.Equal([new ExportFile("a.dxf", 5), new ExportFile(@"sub\b.dxf", 3)], outcome.Files);

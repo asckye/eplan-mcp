@@ -4,13 +4,14 @@ using System.Collections.Frozen;
 namespace EplanMcp.Host.Exports;
 
 /// <summary>
-/// The <c>file_name</c> of eplan_export_pdf (docs/tools/eplan_export_pdf.md, section 2; SEC-20): a file name only, so
-/// the PDF can only land in the export folder. The extension is the tool's to add.
+/// The <c>file_name</c> of the export tools (docs/tools/eplan_export_pdf.md, section 2; SEC-20): a file name only, so
+/// the file can only land in the export folder. The extension is the tool's to add, or EPLAN's (PXF).
 /// </summary>
 internal static class ExportFileName
 {
     public const int MaxLength = 100;
     public const string PdfExtension = ".pdf";
+    public const string PxfExtension = ".epj";
 
     private static readonly SearchValues<char> _refused = SearchValues.Create("<>\"|?*");
 
@@ -47,6 +48,17 @@ internal static class ExportFileName
         string name = string.IsNullOrEmpty(fileName) ? ExportFolders.FolderName(project) : fileName;
         return name.EndsWith(PdfExtension, StringComparison.OrdinalIgnoreCase) ? name : name + PdfExtension;
     }
+
+    /// <summary>
+    /// The PXF file's name without the extension, which EPLAN adds (S25): <paramref name="fileName"/> without a final
+    /// <c>.epj</c>, or else the project's name. Whether EPLAN adds a second one to a name that has it is not verified
+    /// (docs/tools/eplan_export_pxf.md, section 5), so the Bridge never gets one.
+    /// </summary>
+    public static string Pxf(string? fileName, string project) => Stem(fileName, PxfExtension) is { Length: > 0 } name ? name : ExportFolders.FolderName(project);
+
+    /// <summary><paramref name="fileName"/> without a final <paramref name="extension"/> (any case); null stays null.</summary>
+    public static string? Stem(string? fileName, string extension) =>
+        fileName is not null && fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? fileName[..^extension.Length] : fileName;
 
     /// <summary>Whether Windows treats <paramref name="name"/> as a device: the part before the first dot, trailing spaces ignored.</summary>
     public static bool IsReserved(string name) => _reserved.Contains(name.Split('.')[0].TrimEnd(' '));

@@ -61,7 +61,7 @@ internal sealed class ExportTools
 
         var job = new ExportJob(OperationNames.ExportPdfPlan, OperationNames.ExportPdfRun, Args(project, pages, scheme), "Exporting PDF")
         {
-            FileName = name => ExportFileName.Pdf(fileName, name),
+            FileName = plan => ExportFileName.Pdf(fileName, plan.Project),
         };
         job.Args.Color = color;
         return await RunAsync(exports, job, "PDF", progress, cancellationToken).ConfigureAwait(false);
@@ -159,7 +159,7 @@ internal sealed class ExportTools
         return ToolResults.Success(summary, result);
     }
 
-    private static string? Hint(string? warning, bool cut)
+    internal static string? Hint(string? warning, bool cut)
     {
         string? listed = cut ? "Not every file is listed in 'files'; all of them are in 'directory', and 'fileCount' counts them." : null;
         return warning is null ? listed : listed is null ? warning : warning + " " + listed;

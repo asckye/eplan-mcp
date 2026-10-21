@@ -58,6 +58,30 @@ public sealed class ExportFileNameTests
     }
 
     [Theory]
+    [InlineData("Line1", "Proj", "Line1")]
+    [InlineData("Line1.epj", "Proj", "Line1")]
+    [InlineData("Line1.EPJ", "Proj", "Line1")]
+    [InlineData("a.b", "Proj", "a.b")]
+    [InlineData(".epj", "Line1", "Line1")]
+    [InlineData(null, "Line1", "Line1")]
+    [InlineData("", "a/b", "a_b")]
+    public void Pxf_LeavesTheExtensionToEplan_AndDefaultsToTheProject(string? fileName, string project, string expected)
+    {
+        Assert.Equal(expected, ExportFileName.Pxf(fileName, project));
+    }
+
+    [Theory]
+    [InlineData("x.epj", "x")]
+    [InlineData("x .epj", "x ")]
+    [InlineData("x.epj.epj", "x.epj")]
+    [InlineData("x.pdf", "x.pdf")]
+    [InlineData(null, null)]
+    public void Stem_DropsOneFinalExtension(string? fileName, string? expected)
+    {
+        Assert.Equal(expected, ExportFileName.Stem(fileName, ".epj"));
+    }
+
+    [Theory]
     [InlineData(0, "0 bytes")]
     [InlineData(1023, "1023 bytes")]
     [InlineData(208_896, "204 KB")]

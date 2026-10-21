@@ -24,6 +24,12 @@ internal sealed class ExportFolders(HostDataLocations locations, TimeProvider cl
 
     private static readonly SearchValues<char> _invalid = SearchValues.Create(Path.GetInvalidFileNameChars());
 
+    /// <summary>The bytes free to this user on the drive of a full path; null when that cannot be told. Tests replace it.</summary>
+    public Func<string, long?> FreeSpace { get; init; } = DriveFreeSpace;
+
+    /// <summary>The bytes free on the drive of the export root, before an export that needs much (PXF, tool spec 5); null when unknown.</summary>
+    public long? FreeBytes() => FreeSpace(Path.GetFullPath(locations.Exports));
+
     /// <summary>
     /// Creates a new, empty folder for one export of <paramref name="project"/>. The project's folder is checked before
     /// anything is created in it, so a link there never leads a new folder elsewhere. Throws
@@ -74,6 +80,20 @@ internal sealed class ExportFolders(HostDataLocations locations, TimeProvider cl
 
         string text = name.ToString().TrimEnd('.', ' ');
         return text.Length == 0 || ExportFileName.IsReserved(text) ? FallbackName : text;
+    }
+
+    /// <summary>A network path or a drive that cannot be read has no answer, and the export is not held up by it.</summary>
+    private static long? DriveFreeSpace(string path)
+    {
+        string? root = Path.GetPathRoot(path);
+        try
+        {
+            return root is null || root.StartsWith(@"\\", StringComparison.Ordinal) ? null : new DriveInfo(root).AvailableFreeSpace;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return null;
+        }
     }
 
     /// <summary>

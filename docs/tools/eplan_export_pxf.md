@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批） |
+| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把项目打包成 PXF 发给别人""导出一份 EPJ 存档"。代理把整个项目导出为一个 EPJ（PXF）文件，得到文件所在的目录。与其他导出相同，只在服务器新建的目录中写文件（ADR-0012）。
@@ -48,7 +48,8 @@
 - **导出后的核对**：除了 SEC-20 的检查，还要允许那个与文件同名的空目录，但它必须是空的、不是链接。
 - **磁盘空间**：导出前检查导出根目录所在磁盘的可用空间，少于 2 GB 时不调用 EPLAN，返回 `EPLAN_OPERATION_FAILED`，`message` 说明可用空间不足、请清理 `exports\` 目录（`doctor` 报告它的占用）。阈值在实现时按项目大小再定。
 - **时限与进度**：300 秒，每 5 秒一次心跳（`Exporting PXF (20 s)`），一次 EPLAN 调用中途无法打断。
-- 待 Large 测试确认：给出的文件名已带 `.epj` 时 EPLAN 是否再补一次扩展名。
+- 待 Large 测试确认：给出的文件名已带 `.epj` 时 EPLAN 是否再补一次扩展名。实现时绕开了这个问题：`file_name` 以 `.epj` 结尾（不区分大小写）时工具先去掉它，交给 EPLAN 的名称总是不带扩展名（S25 验证过的情况），Bridge 也拒绝带 `.epj` 的名称。名称中间带点（如 `Line1 v1.2`）时 EPLAN 怎样补扩展名同样没有验证；导出后的核对要求目录中恰好一个 `.epj` 文件。
+- 磁盘空间的阈值实现为固定的 2 GB（示例项目带主数据 840 MB 的两倍多）；导出根目录在网络路径上、读不出可用空间时不检查。
 
 ## 6. 写操作专项
 不适用（Read 级）。

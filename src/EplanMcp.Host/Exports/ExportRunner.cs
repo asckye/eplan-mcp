@@ -10,8 +10,17 @@ namespace EplanMcp.Host.Exports;
 /// <summary>One export as a tool states it: its Bridge operations, the plan's arguments, and how its progress reads.</summary>
 internal sealed record ExportJob(string PlanOperation, string RunOperation, ExportArgs Args, string Label)
 {
-    /// <summary>PDF: the file's name, from the project's name the plan returned.</summary>
-    public Func<string, string>? FileName { get; init; }
+    /// <summary>PDF and the project exports: the file's name, from what the plan found (the project's name).</summary>
+    public Func<ExportPlanData, string>? FileName { get; init; }
+
+    /// <summary>The least free space the export root's drive needs before EPLAN is called; 0 for no check (PXF, tool spec 5).</summary>
+    public long MinFreeBytes { get; init; }
+
+    /// <summary>The extension of the one file the export must leave, at the top of its folder; null when any files do (PXF, tool spec 5).</summary>
+    public string? SingleFile { get; init; }
+
+    /// <summary>What the model can do after a timeout.</summary>
+    public string TimeoutHint { get; init; } = "Export fewer pages per call with 'pages'; EPLAN may still be busy for a while.";
 }
 
 /// <summary>What an export left: the Bridge's data, the new folder, and every file in it, sorted by path.</summary>
@@ -35,6 +44,11 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
     public async Task<ExportOutcome> RunAsync(ExportJob job, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         ExportPlanData plan = await bridge.InvokeAsync<ExportArgs, ExportPlanData>(job.PlanOperation, job.Args, cancellationToken).ConfigureAwait(false);
+        if (job.MinFreeBytes > 0 && folders.FreeBytes() is { } free && free < job.MinFreeBytes)
+        {
+            throw Failed($"Only {ByteSize.Format(free)} is free on the drive of the server's export folder, less than the {ByteSize.Format(job.MinFreeBytes)} this export needs, so nothing was exported. Ask the engineer to clean up the server's exports folder; 'eplanmcp doctor' reports its size.");
+        }
+
         ExportFolder folder;
         try
         {
@@ -53,14 +67,14 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         bool kept = false;
         try
         {
-            ExportArgs args = RunArgs(job, folder.Path, plan.Project);
+            ExportArgs args = RunArgs(job, folder.Path, plan);
             ExportRunData data;
             using (BridgeProgress? waiting = BridgeProgress.Start(CallProgress.For(progress), job.Label, clock, cancellationToken))
             {
                 data = await bridge.InvokeAsync<ExportArgs, ExportRunData>(job.RunOperation, args, Timeout, waiting, cancellationToken).ConfigureAwait(false);
             }
 
-            IReadOnlyList<ExportFile> files = Files(folder);
+            IReadOnlyList<ExportFile> files = Files(folder, job.SingleFile);
             kept = true;
             var outcome = new ExportOutcome(data, folder.Path, files);
             LogExported(job.RunOperation, files.Count);
@@ -72,7 +86,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
             throw new BridgeCallException(new BridgeError
             {
                 Reason = ErrorReason.Timeout,
-                Message = $"The export did not finish within {seconds} s, so no files were kept. Export fewer pages per call with 'pages'; EPLAN may still be busy for a while.",
+                Message = $"The export did not finish within {seconds} s, so no files were kept. {job.TimeoutHint}",
                 Retryable = true,
             });
         }
@@ -85,7 +99,7 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         }
     }
 
-    private static ExportArgs RunArgs(ExportJob job, string directory, string project) => new()
+    private static ExportArgs RunArgs(ExportJob job, string directory, ExportPlanData plan) => new()
     {
         Project = job.Args.Project,
         Pages = job.Args.Pages,
@@ -93,12 +107,17 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
         Color = job.Args.Color,
         Format = job.Args.Format,
         WidthPx = job.Args.WidthPx,
+        IncludeMasterData = job.Args.IncludeMasterData,
         Directory = directory,
-        FileName = job.FileName?.Invoke(project),
+        FileName = job.FileName?.Invoke(plan),
     };
 
-    /// <summary>The folder's files; a link, a path outside it or no file at all fails the export (SEC-20).</summary>
-    private IReadOnlyList<ExportFile> Files(ExportFolder folder)
+    /// <summary>
+    /// The folder's files; a link, a path outside it or no file at all fails the export (SEC-20), and so does anything
+    /// but one <paramref name="single"/> file at the top when the job asks for that. Empty folders are not files: PXF
+    /// leaves one named like its file (S25), which must stay empty.
+    /// </summary>
+    private IReadOnlyList<ExportFile> Files(ExportFolder folder, string? single)
     {
         IReadOnlyList<ExportFile> files;
         try
@@ -111,7 +130,14 @@ internal sealed partial class ExportRunner(IBridgeClient bridge, ExportFolders f
             throw Failed("The export left a link, a junction or a path outside its folder, so it counts as failed and no files were kept. Ask the engineer to check the export scheme in EPLAN.");
         }
 
-        return files.Count > 0 ? files : throw Failed("EPLAN reported the export as done but wrote no file, so no folder was kept. Ask the engineer to check the export scheme in EPLAN.");
+        if (files.Count == 0)
+        {
+            throw Failed("EPLAN reported the export as done but wrote no file, so no folder was kept. Ask the engineer to check the export scheme in EPLAN.");
+        }
+
+        return single is null || (files.Count == 1 && !files[0].Path.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal) && files[0].Path.EndsWith(single, StringComparison.OrdinalIgnoreCase))
+            ? files
+            : throw Failed($"EPLAN left other files than one {single} file in the export's folder, so it counts as failed and no files were kept. Ask the engineer to export it in EPLAN.");
     }
 
     private static BridgeCallException Failed(string message) => new(new BridgeError { Reason = ErrorReason.EplanOperationFailed, Message = message });
