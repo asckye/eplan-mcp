@@ -77,17 +77,26 @@ flowchart LR
 - **范围**：版本按 `doctor` 的办法在 `Program Files\EPLAN\Platform\<版本>\Bin\` 下查找，只处理支持矩阵中的版本（ADR-0009）。注册按变体保存（A10、A12），各版本有哪些变体没有核实（[eplan-versions](../eplan/eplan-versions.md) 3.5），所以由工程师勾选要用的变体，`--variant` 可以重复。
 - **记录**：每次成功注册写入 `state\addins.json`（版本、变体、DLL 路径、时间）；`uninstall-addin` 按记录逐个执行 `/unregister:"EplanMcp.Bridge.Eplan"`，`doctor` 报告"EPLAN 在运行但插件没有加载"的变体（A10 的要求）。
 - **升级**：DLL 的路径不变，不需要重新注册。EPLAN 加载的是影子副本，运行中也可以替换原始 DLL（B2），重启 EPLAN 后生效（A8）。握手报告插件版本，`eplan_session_status` 和 Workbench 据此提示"插件已更新，请重启 EPLAN"（I3）。开发中一直是"原路径重新构建、重启 EPLAN"，安装路径下由 S14 再确认。
-- **不在 MSIX 环境中运行**：从 MSIX 客户端内启动的进程写 `%APPDATA%` 等位置会被重定向（A6），由它启动的 EPLAN 很可能把注册写到包的重定向目录中。`install-addin` 用 `doctor` 已有的重定向探测，探测到就拒绝执行，提示在开始菜单或安装程序中运行。注册插件属于 Code 级的系统修改（ADR-0005 第 1 节），本来就没有对应的 MCP 工具，插件中的技能也不让模型执行它。
-- **spike S14（插件注册）**，在标准用户（非管理员）账户上验证：
-  1. 注册保存在哪里（B2 说是 STATION 设置），标准用户能否写入；
-  2. 注册命令能否不留下打开的 EPLAN（例如静默参数或注册后退出），用时多少，登录和授权对话框是否必然出现；
-  3. 已有 EPLAN 在运行时执行注册命令的结果；
-  4. `/unregister` 是否完全撤销（I9）；
-  5. 原路径替换 DLL 后重启 EPLAN 即加载新版本，不需要重新注册；
-  6. 从 Claude 桌面版的会话中执行时注册落在哪里（验证上面的拒绝是否必要）；
-  7. 从浏览器下载的安装包装出的插件 DLL 是否带下载标记（`Zone.Identifier`），带上时 EPLAN 能否加载：.NET Framework 4 默认拒绝来自网络区域的程序集（[loadFromRemoteSources](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/loadfromremotesources-element)）。
-
-  S14 表明命令行注册必须留下打开的 EPLAN 时，安装程序逐个变体提示工程师在注册完成后关闭 EPLAN。
+- **S14 的结果**（2026-10-21，[spike S14](../../spikes/S14-addin-registration/README.md)，api-notes A23）：
+  - 注册按机器保存在工作站设置中（`C:\Users\Public\Eplan\Settings\…\STATION.<…>.xdb`），标准用户可写；
+  - 命令行注册总会另起一个新的 EPLAN 实例，注册在其中生效并立即加载，这个实例不会自己退出；
+  - `/unregister` 有效，但设置中的键保留；
+  - 原路径替换 DLL 后重启即生效；
+  - 带下载标记的 DLL 无法加载；
+  - 注册不落在 MSIX 重定向的目录中。
+- **流程**（按 S14 修改）：`install-addin` 对每个勾选的变体：
+  1. 该变体的 EPLAN 正在运行时拒绝，请工程师先关闭它：否则会再起一个装着全部插件的实例。
+  2. 去掉 `app\bridge\` 下所有文件的 `Zone.Identifier`（相当于 `Unblock-File`）。
+  3. 执行注册命令，等这个命令启动的 EPLAN 进程出现它的 Bridge 管道（证明插件已加载），最多 2 分钟。
+  4. 正常关闭这个实例（它没有项目）。它显示登录、授权等对话框时不强行关闭，请工程师处理后自己关闭。
+  5. 写入 `state\addins.json`。
+- **判断是否已注册**：看 `state\addins.json` 和 Bridge 的握手，不看设置中的键：撤销后键仍保留（S14）。`doctor` 另外报告插件文件带下载标记的情况。
+- **一台电脑一个用户**（项目负责人 2026-10-21 决定，Q15）：注册是整台电脑的，而程序按用户装在 `%USERPROFILE%\EplanMcp\app\`（ADR-0016）。另一个 Windows 用户的 EPLAN 也会去加载装在第一个用户目录中的插件，通常因为没有读取权限而失败。处理方式：
+  - 保持按用户安装；
+  - 已有的 EplanMcp 注册指向另一个用户的目录时，`install-addin` 拒绝并说明原因；
+  - `doctor` 报告这种情况；
+  - 入门指南写明"一台电脑由一个 Windows 用户使用 EplanMcp"。
+- **MSIX 环境**：注册不受重定向影响（S14），`install-addin` 不再因 MSIX 环境而拒绝；`client-config` 仍然拒绝（它写 `%APPDATA%` 等位置）。
 
 ### 4.3 安装包、升级、卸载与离线
 - **安装包技术**：见 ADR-0016 与 Q5。
@@ -333,3 +342,4 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 | Q12 | 插件技能用什么语言 | **已决定**（同上）：`SKILL.md` 给模型看，用英文（架构 8.11）；入门指南给工程师看，用中文 |
 | Q13 | 卸载时是否删除数据 | **已决定**（同上）：**不删除**：配置、审计、日志、scratch、导出、备份都保留，结束页列出位置（4.3） |
 | Q14 | EPLAN 在虚拟机、AI 在宿主机时怎样连接（4.12） | **已决定**（2026-10-20，项目负责人："需要和TIA mcp一样加入虚拟机连接的系统"；选择"同 TIA，并把防火墙限制到宿主机 IP"，放在 M5）：虚拟机中的 Host 以 HTTP 提供 MCP，共享密钥认证，防火墙只放行宿主机，不加 TLS。[ADR-0018](../adr/0018-vm-http-transport.md) 2026-10-21 接受 |
+| Q15 | 一台电脑有多个 Windows 用户使用 EPLAN 时怎样处理插件注册（4.2） | **已决定**（2026-10-21，项目负责人："保持按用户安装，写明限制"）：注册按机器保存（S14），一台电脑由一个 Windows 用户使用 EplanMcp；注册已指向另一个用户的安装时 `install-addin` 拒绝，`doctor` 报告，入门指南写明 |
