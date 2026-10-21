@@ -97,6 +97,18 @@ flowchart LR
   - `doctor` 报告这种情况；
   - 入门指南写明"一台电脑由一个 Windows 用户使用 EplanMcp"。
 - **MSIX 环境**：注册不受重定向影响（S14），`install-addin` 不再因 MSIX 环境而拒绝；`client-config` 仍然拒绝（它写 `%APPDATA%` 等位置）。
+- **实现**（2026-10-21，第 8 节步骤 4；上文没有规定的地方按下面做）：
+  - 命令行：`install-addin [--variant <变体>]… [--format json]`、`uninstall-addin [--format json]`。不带 `--variant` 时注册找到的全部变体；安装程序按工程师勾选的变体逐个传 `--variant`。变体是 `<Program Files>\EPLAN\<变体>\<版本目录>\Bin\W3u.exe` 存在的目录（A22），`--variant` 不区分大小写；有一个没有安装时什么都不做，并列出已安装的变体。
+  - 版本：支持范围 2024–2027 内的都注册，未实测的（ADR-0009）附说明；范围外的跳过；只有范围外的版本时报 `no_eplan` 并列出找到的版本。
+  - 插件：只看运行中的 `eplanmcp.exe` 旁边。安装布局为 `<app>\bridge\net481\EplanMcp.Bridge.Eplan.dll`，去掉整个 `<app>\bridge\` 的下载标记；开发时（Host 在 `src\EplanMcp.Host\bin\<配置>\<框架>\`）用同一配置的 `src\EplanMcp.Bridge.Eplan\bin\<配置>\net481\` 中的插件，去掉这个目录的标记；两处都没有时报告找过的路径。
+  - 运行中的判断：本 Windows 会话中有任何 `EPLAN.exe` 在运行就拒绝。从外面判断不出运行中的 EPLAN 是哪个变体：`HKCU\Software\EPLAN\RemoteServer\<端口>` 的 `EplanProductVariant` 实测是授权名称"Eplan Demo System"（A1），不是变体名，所以不用它。
+  - 启动：经 shell 启动 `EPLAN.exe`，工作目录是 EPLAN 的 `Bin`：EPLAN 不继承 eplanmcp 的句柄（否则读取 eplanmcp 输出的安装程序、Workbench 要等到 EPLAN 退出），留下的 EPLAN 也不占用 `app\` 目录。
+  - 等待与关闭：每 0.5 秒查一次管道，等到所启动进程的 `EplanMcp.Bridge.<进程号>.*` 出现，最多 2 分钟；然后像点关闭按钮一样请 EPLAN 关闭，每 3 秒再请一次，最多 60 秒：插件此前已注册时，它在启动早期就加载，EPLAN 之后还要完成云登录、"有新版本"提示等，这期间（管道出现后约 7–9 秒）关闭请求会被忽略（A23）。主窗口不可用（有模态对话框，例如插件加载失败或撤销出错时的"系统消息"窗口）或到时没有退出时，不强制结束，请工程师自己关闭。
+  - 判断已注册：管道只说明有一个注册加载了，不说明是这一次的（A23：已注册在路径 A 时，插件在启动时从 A 加载，`/register` 路径 B 没有生效）。所以握手要报告 EPLAN 注册插件的位置（`addinPath`，取自 `IEplAddInShadowCopy.OnBeforeInit`，B2；传的是 DLL 还是目录未核实，两种都接受），与要注册的 DLL 相同才算"已注册"，写入记录。
+  - 路径变化：握手报告的是另一个路径，或者没有报告（旧版插件）时，先关闭这个 EPLAN，再单独启动一次 EPLAN 执行 `/unregister`（等管道、再等 10 秒、关闭），然后第三次启动执行 `/register`。第三次启动时没有已注册的插件，管道只能来自这次注册，所以握手不报告路径时也算"已注册"；仍报告另一个路径时为"未确认"（`path_mismatch`），不记录；第三次启动的 EPLAN 在管道出现前退出时，旧注册已撤销、新的没有做成，删除这一项的记录。**这样能否让新路径生效还没有实机确认**；第一个或第二个 EPLAN 没有关闭时到此为止，报"未确认"。插件没有回应握手（试 3 次）时看不出加载的是哪一个注册，不撤销、不再注册，报"未确认"（`handshake_failed`），但写入记录：这次的注册可能已经生效。
+  - 结果：2 分钟内没有管道、EPLAN 仍在运行为"未确认"，EPLAN 留着，**也写入记录**：工程师处理完登录或授权对话框后注册仍会生效，卸载要能撤销它；管道出现之前 EPLAN 就退出为"失败"，不记录。任何一项有问题时退出码为 1，跳过的不算。
+  - 撤销：只运行现在仍然安装着的 `EPLAN.exe` 和变体，从不运行记录中写的其他程序；EPLAN 或变体已经不在时跳过并删除这条记录。撤销时插件先加载、再执行 `/unregister`（A23），所以同样等管道出现、再等 10 秒，然后删除记录、关闭 EPLAN；未确认或失败时保留记录，可以再运行一次。`/unregister` 按程序集名撤销，不论注册指向哪里：别人后来注册的也会被撤销，启动 EPLAN 之前看不出来。
+  - `doctor` 的三项检查（插件文件带下载标记、记录的变体在运行但插件没有加载、Q15 的情况）留到后续 PR。
 
 ### 4.3 安装包、升级、卸载与离线
 - **安装包技术**：见 ADR-0016 与 Q5。
@@ -238,9 +250,9 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 ### 4.11 Host 新增的命令
 | 命令 | 用途 |
 |---|---|
-| `install-addin [--variant <变体>]…`、`uninstall-addin [--all]` | 4.2 |
+| `install-addin [--variant <变体>]… [--format json]`、`uninstall-addin [--format json]` | 4.2；撤销总是按全部记录进行，所以原来的 `--all` 不再需要 |
 | `client-config <客户端>… [--dry-run\|--remove] [--format json]` | 写入或移除客户端的 MCP 配置，写入前显示差异、备份原文件（架构 7）；可以一次写多个客户端，分别报告结果；保留文件中其他服务器和设置；记录写入过的条目，供卸载时移除。客户端与配置文件见下表 |
-| `doctor --format json`、`audit verify --format json` | 给 Workbench 用；JSON 带 `schemaVersion`，结构用快照测试固定 |
+| `doctor --format json`、`audit verify --format json` | 给 Workbench 用；JSON 带 `schemaVersion`，结构用快照测试固定（`client-config`、`install-addin`、`uninstall-addin` 的 `--format json` 也是这样） |
 
 **客户端与配置文件**（Q7；配置格式与位置沿用 TIA 已核实的那一份，TIA 的 `docs/getting-started/configuration.md`；实现时逐个用真实客户端核对）：
 

@@ -55,6 +55,7 @@
   - 写入和移除都记在 `<数据根目录>\state\clients.json`；`--remove` 不带客户端时移除记录中的全部条目，供卸载使用；
   - 拒绝的情况：由 MSIX 打包的客户端（如 Claude 桌面版）启动时一律拒绝（写入会被重定向）；已安装 Claude Code 插件 `eplan-mcp@eplanmcp-local` 时不为 Claude Code 写配置（插件已经提供服务器）；Claude 桌面版运行时不改它的配置文件，请先完全退出；配置文件是符号链接或路径不完整时不修改；桌面版以 MSIX 安装时写包中的那份文件；
   - JSON 结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
+- `eplanmcp install-addin [--variant <变体>]… [--format json]`、`eplanmcp uninstall-addin [--format json]`（M5）：用 EPLAN 官方的命令行 `EplApiModuleAction /register` 注册 `eplanmcp.exe` 旁的插件，支持范围内每个 EPLAN 版本的所选变体各一次（不带 `--variant` 时为全部已安装的变体）。先去掉插件文件的下载标记；有 EPLAN 正在运行时拒绝；等命令启动的 EPLAN 加载插件（最多 2 分钟），从握手核对加载的是这个 DLL，之前注册在别处时先撤销、再注册；然后请 EPLAN 正常关闭，从不强制结束，显示登录、授权对话框或系统消息窗口时留给工程师处理。注册记在 `state\addins.json`，`uninstall-addin` 按记录逐个 `/unregister`。任何一项失败时退出码为 1。
 - 列表工具统一分页（`nextCursor`），结果超出大小预算时截断并提示；来自项目的文本按不可信数据处理。
 - 支持 `language` 参数读取多语言文本。
 - M4c 只读工具（只在 `full` 中）：

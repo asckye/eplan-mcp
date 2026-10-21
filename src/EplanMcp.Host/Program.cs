@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using EplanMcp.Host.Addin;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
@@ -15,8 +16,8 @@ namespace EplanMcp.Host;
 /// <summary>
 /// <c>eplanmcp [serve]</c> runs the stdio MCP server; <c>eplanmcp doctor</c> checks the machine;
 /// <c>eplanmcp audit verify</c> checks the audit hash chain; <c>eplanmcp client-config</c> writes or removes the server in
-/// AI clients' configuration; with <c>--format json</c> these print JSON for the Workbench; <c>eplanmcp --version</c>
-/// prints the version.
+/// AI clients' configuration; <c>eplanmcp install-addin</c> and <c>uninstall-addin</c> register and unregister the EPLAN
+/// add-in; with <c>--format json</c> these print JSON for the Workbench; <c>eplanmcp --version</c> prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5). Exit codes: 2 for a
 /// wrong command line, 3 when serve refuses an invalid config.json.
 /// </summary>
@@ -45,6 +46,8 @@ internal static class Program
     {
         { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
         { ClientConfig: { } request } => ClientConfigCommand.ForMachine().Run(request, output, CultureInfo.CurrentUICulture, cli.Json),
+        { Command: CliCommand.InstallAddin or CliCommand.UninstallAddin } => await AddinCommand.ForMachine().RunAsync(
+            cli.Command == CliCommand.InstallAddin ? AddinAction.Install : AddinAction.Uninstall, cli.Variants ?? [], output, Console.Error, CultureInfo.CurrentUICulture, cli.Json).ConfigureAwait(false),
         _ => AuditCommand.Verify(output, CultureInfo.CurrentUICulture, HostDataLocations.FromEnvironment(), cli.Json),
     };
 

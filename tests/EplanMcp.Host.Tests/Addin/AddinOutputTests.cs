@@ -4,11 +4,37 @@ using EplanMcp.Host.Addin;
 
 namespace EplanMcp.Host.Tests.Addin;
 
-/// <summary>The report as text and JSON. Small.</summary>
+/// <summary>The command lines EPLAN gets, and the report as text and JSON. Small.</summary>
 [Trait("Size", "Small")]
 public sealed class AddinOutputTests
 {
     private const string Eplan = @"C:\Program Files\EPLAN\Platform\2026.0.3\Bin\EPLAN.exe";
+
+    [Fact]
+    public void CommandLines_AreTheDocumentedFormsOfEplApiModuleAction()
+    {
+        // api-notes B2 and eng\scripts\eplan-addin.ps1; the variant and the path inside double quotes.
+        Assert.Equal(
+            "/Variant:\"Pro Panel\" EplApiModuleAction /register:\"C:\\Users\\工程师\\EplanMcp\\app\\bridge\\net481\\EplanMcp.Bridge.Eplan.dll\"",
+            AddinCommand.RegisterArguments("Pro Panel", @"C:\Users\工程师\EplanMcp\app\bridge\net481\EplanMcp.Bridge.Eplan.dll"));
+        Assert.Equal("/Variant:\"Electric P8\" EplApiModuleAction /unregister:\"EplanMcp.Bridge.Eplan\"", AddinCommand.UnregisterArguments("Electric P8"));
+    }
+
+    [Theory]
+    [InlineData(@"C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll", true)]
+    [InlineData(@"c:\APP\bridge\net481\eplanmcp.bridge.eplan.DLL", true)]
+    [InlineData(@"C:\app\bridge\net481", true)]
+    [InlineData(@"C:\app\bridge\net481\", true)]
+    [InlineData(@"D:\Code\EplanMcp\src\EplanMcp.Bridge.Eplan\bin\Release\net481\EplanMcp.Bridge.Eplan.dll", false)]
+    [InlineData(@"C:\app\bridge", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void Loads_IsThisDllOrItsFolder(string? reported, bool loads)
+    {
+        // Whether EPLAN passes OnBeforeInit the DLL or its folder is not verified (api-notes B2).
+        Assert.Equal(loads, AddinCommand.Loads(new() { AddinPath = reported }, @"C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll"));
+        Assert.False(AddinCommand.Loads(null, @"C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll"));
+    }
 
     [Fact]
     public void EveryProblemAndNote_HasTextsInBothLanguagesAndItsOwnCode()

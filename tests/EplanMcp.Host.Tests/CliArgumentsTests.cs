@@ -14,6 +14,8 @@ public sealed class CliArgumentsTests
     [InlineData("doctor --format json", "Doctor", true)]
     [InlineData("audit verify", "AuditVerify", false)]
     [InlineData("audit verify --format json", "AuditVerify", true)]
+    [InlineData("uninstall-addin", "UninstallAddin", false)]
+    [InlineData("uninstall-addin --format json", "UninstallAddin", true)]
     public void Parse_AKnownCommandLine_GivesTheCommandAndFormat(string line, string command, bool json)
     {
         Assert.Equal(new CliArguments(Enum.Parse<CliCommand>(command), json), CliArguments.Parse(Split(line)));
@@ -69,6 +71,16 @@ public sealed class CliArgumentsTests
     [InlineData("client-config vscode")]
     [InlineData("client-config codex --all")]
     [InlineData("client-config codex -n")]
+    [InlineData("install-addin --variant")]
+    [InlineData("install-addin --variant --format json")]
+    [InlineData("install-addin Electric")]
+    [InlineData("install-addin --format json --format json")]
+    [InlineData("install-addin --format text")]
+    [InlineData("install-addin --all")]
+    [InlineData("uninstall-addin --all")]
+    [InlineData("uninstall-addin --variant Electric")]
+    [InlineData("uninstall-addin --format")]
+    [InlineData("install")]
     public void Parse_AWrongCommandLine_IsNull(string line)
     {
         Assert.Null(CliArguments.Parse(Split(line)));
@@ -92,6 +104,32 @@ public sealed class CliArgumentsTests
         Assert.Equal(Enum.Parse<ClientConfigMode>(mode), cli.ClientConfig.Mode);
     }
 
+    [Theory]
+    [InlineData(new string[] { "install-addin" }, new string[0], false)]
+    [InlineData(new[] { "install-addin", "--variant", "Electric P8" }, new[] { "Electric P8" }, false)]
+    [InlineData(new[] { "install-addin", "--format", "json", "--variant", "Pro Panel", "--variant", "Electric P8" }, new[] { "Pro Panel", "Electric P8" }, true)]
+    [InlineData(new[] { "install-addin", "--variant", "Pro Panel", "--format", "json", "--variant", "pro panel" }, new[] { "Pro Panel" }, true)]
+    public void Parse_InstallAddin_GivesTheVariantsInOrder(string[] args, string[] variants, bool json)
+    {
+        CliArguments cli = CliArguments.Parse(args)!;
+
+        Assert.Equal((CliCommand.InstallAddin, json), (cli.Command, cli.Json));
+        Assert.Equal(variants, cli.Variants);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" Pro Panel")]
+    [InlineData("Pro Panel ")]
+    [InlineData("--format")]
+    [InlineData("Pro\" EplApiModuleAction /register:\"C:\\x.dll")]
+    [InlineData("Pro\nPanel")]
+    public void Parse_InstallAddinWithAVariantThatCannotBeAFolderName_IsNull(string variant)
+    {
+        // The variant goes inside /Variant:"..." on EPLAN's command line; a quote would end it early.
+        Assert.Null(CliArguments.Parse(["install-addin", "--variant", variant]));
+    }
+
     [Fact]
     public void Parse_EveryClientName_IsAccepted()
     {
@@ -102,7 +140,8 @@ public sealed class CliArgumentsTests
     public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
     {
         Assert.Equal(
-            "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json] | --version"
+            "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+            + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
             + Environment.NewLine
             + "clients: claude-code, claude-desktop, codex, gemini-cli, qwen-code, kimi-code, codebuddy, opencode, qwen-agent, cursor, vscode-copilot",
             CliArguments.Usage);
