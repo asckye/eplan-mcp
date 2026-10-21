@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.IO.Pipelines;
 using System.IO.Pipes;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
@@ -127,15 +128,35 @@ public sealed class WriteCancellationTests : IAsyncDisposable
         timeout.CancelAfter(_patience);
         while (true)
         {
-            if (Directory.Exists(_locations.Audit)
-                && Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())
-                    .FirstOrDefault(r => r["kind"]!.GetValue<string>() == "execution_result") is { } record)
+            // The Host may be writing the audit right now: read it shared, and try again after a half-written line.
+            try
             {
-                return record;
+                if (Directory.Exists(_locations.Audit)
+                    && Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).SelectMany(SharedLines).Select(l => JsonNode.Parse(l)!.AsObject())
+                        .FirstOrDefault(r => r["kind"]!.GetValue<string>() == "execution_result") is { } record)
+                {
+                    return record;
+                }
+            }
+            catch (Exception ex) when (ex is IOException or JsonException)
+            {
             }
 
             await Task.Delay(20, timeout.Token);
         }
+    }
+
+    private static List<string> SharedLines(string path)
+    {
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        using var reader = new StreamReader(stream);
+        var lines = new List<string>();
+        while (reader.ReadLine() is { } line)
+        {
+            lines.Add(line);
+        }
+
+        return lines;
     }
 
     [McpServerToolType]
