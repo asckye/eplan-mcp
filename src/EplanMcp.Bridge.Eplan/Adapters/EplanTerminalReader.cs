@@ -53,18 +53,16 @@ internal sealed class EplanTerminalReader : ITerminalReader
     };
 
     /// <summary>
-    /// The end of each connection that is not at <paramref name="function"/> (tool spec 5). A Connection3D throws on its
-    /// ends (S6) and is skipped; StorableObject overrides Equals, as the connection reader relies on.
+    /// The end of each connection (<c>ConnectionInfo.Conn</c>) that is not at this terminal (tool spec 5). A Connection3D
+    /// throws on its ends (S6) and is skipped; StorableObject overrides Equals, as the connection reader relies on.
     /// </summary>
-    internal static List<ConnectionEnd> OtherEnds(Function function, IEnumerable<Connection?> connections) =>
+    private static List<ConnectionEnd> Ends(Terminal terminal, Terminal.ConnectionInfo[] connections) =>
     [
-        .. connections.OfType<Connection>().Where(c => c is not Connection3D)
-            .Select(c => function.Equals(c.StartPin?.ParentFunction) ? c.EndPin : c.StartPin)
+        .. connections.Select(info => info.Conn).OfType<Connection>().Where(c => c is not Connection3D)
+            .Select(c => terminal.Equals(c.StartPin?.ParentFunction) ? c.EndPin : c.StartPin)
             .OfType<Pin>()
             .Select(pin => new ConnectionEnd { Device = pin.ParentFunction?.Name, Pin = pin.Name }),
     ];
-
-    private static List<ConnectionEnd> Ends(Terminal terminal, Terminal.ConnectionInfo[] connections) => OtherEnds(terminal, connections.Select(info => info.Conn));
 
     /// <summary>
     /// Terminal.PLC throws WrongCategoryException for a terminal of a strip and BaseException when there is no PLC (EPLAN

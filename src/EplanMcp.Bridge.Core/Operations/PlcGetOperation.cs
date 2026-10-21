@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// <see cref="OperationNames.PlcGet"/> (docs/tools/eplan_plc_get.md, section 5). The PLC box is found as device.get finds
-/// a device and must then be one; any other device is INVALID_ARGUMENT naming its category.
+/// a device and must then be one; any other device is INVALID_ARGUMENT naming its category. Every channel object is kept
+/// in EPLAN's order, same names included, and each connection end at the box is given to its channel here.
 /// </summary>
 public sealed class PlcGetOperation(IProjectCatalog catalog, IDeviceReader devices, IPlcReader plcs)
     : Operation<PlcGetArgs, PlcGetData>
@@ -35,9 +36,21 @@ public sealed class PlcGetOperation(IProjectCatalog catalog, IDeviceReader devic
         }
 
         plc.VisibleTag = DeviceTags.Shown(plc.VisibleTag);
-        foreach (PlcChannel channel in record.Channels)
+        List<ConnectionEnd>[] ends = [.. record.Channels.Select(_ => new List<ConnectionEnd>())];
+        foreach (PlcConnectionRecord connection in record.Connections)
         {
-            channel.Connected = [.. channel.Connected.Select(e => ConnectionListOperation.End(e.Device, e.Pin)).OfType<ConnectionEnd>().Take(MaxEnds)];
+            if (ConnectionListOperation.End(connection.Other.Device, connection.Other.Pin) is { } end)
+            {
+                foreach (int channel in Owners(record.Channels, connection))
+                {
+                    ends[channel].Add(end);
+                }
+            }
+        }
+
+        for (int i = 0; i < ends.Length; i++)
+        {
+            record.Channels[i].Connected = [.. ends[i].Take(MaxEnds)];
         }
 
         return new PlcGetData
@@ -48,5 +61,22 @@ public sealed class PlcGetOperation(IProjectCatalog catalog, IDeviceReader devic
             Total = record.Channels.Count,
             Connected = record.Channels.Count(c => c.Connected.Count > 0),
         };
+    }
+
+    /// <summary>
+    /// The channels an end at the box belongs to: the channel object EPLAN gives, else the channels of the same name. A
+    /// name can be several channel objects (input and output, main and auxiliary representation), so those on the
+    /// connection's page are taken when there are any; otherwise every one of that name.
+    /// </summary>
+    internal static IEnumerable<int> Owners(List<PlcChannel> channels, PlcConnectionRecord connection)
+    {
+        if (connection.Channel is int known && known >= 0 && known < channels.Count)
+        {
+            return [known];
+        }
+
+        int[] named = [.. Enumerable.Range(0, channels.Count).Where(i => !string.IsNullOrEmpty(connection.Function) && string.Equals(channels[i].Name, connection.Function, StringComparison.Ordinal))];
+        int[] onPage = [.. named.Where(i => connection.Page is not null && string.Equals(channels[i].Page, connection.Page, StringComparison.Ordinal))];
+        return onPage.Length > 0 ? onPage : named;
     }
 }
