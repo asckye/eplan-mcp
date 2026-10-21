@@ -44,16 +44,17 @@
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `languages` 为空、重复或形式不对；有语言不是项目的翻译语言；是源语言 | `not_started` | `metadata.violations` 列出全部问题；`metadata.candidates` 列出项目的翻译语言 |
 | `BACKUP_FAILED` | 同 `eplan_page_delete` | `not_started` | 同 `eplan_page_delete` |
-| `EPLAN_OPERATION_FAILED` | EPLAN 删除时报错 | `rolled_back` 或 `unknown` | 见第 5 节：回滚之后还要写回语言设置；写回失败时为 `unknown`，提示从备份恢复 |
+| `EPLAN_OPERATION_FAILED` | EPLAN 删除时报错，或读回时语言仍在翻译语言中（`metadata.notRemoved`） | `rolled_back` | 见第 5 节：回滚之后还要写回语言设置；附带 EPLAN 的消息 |
+| `OUTCOME_UNKNOWN` | 写回语言设置失败，或写回后读回与原值不同；提交或回滚本身失败 | `unknown` | 不要重复调用；`metadata.translation`、`metadata.display` 给出原值，`metadata.backup` 给出备份，请工程师在项目设置中恢复或打开备份。原规格写的是 `EPLAN_OPERATION_FAILED` 加 `unknown`，按工具设计规范 6.2 的不变式（`unknown` 当且仅当 `OUTCOME_UNKNOWN`）改为这一行 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_delete` | 同 `eplan_page_delete` | 同 `eplan_page_delete` |
 
 ## 5. 实现要点
 - **Host**：走 `WritePipeline`，级别 Destructive，规划操作 `language.remove.plan`，执行操作 `language.remove.execute`。
-- **规划**（只读）：读出语言设置，数出受影响的文本；一条 `delete` 变更：`Kind = "language"`，`Name` 为语言代码。指纹：语言设置和文本的摘要。
+- **规划**（只读）：读出语言设置，数出受影响的文本；每种语言一条 `delete` 变更：`Kind = "language"`，`Name` 为语言代码，`OldValue` 为该语言的译文数（如 `460 translations`）。`textsAffected` 是含任一种语言译文的文本数，每个文本只算一次。语言是否在文本中，按存储形式（`sv_SE@…;`）判断。源语言为 `##_##`（未设置）时没有源语言的限制。指纹：三项语言设置的存储值，以及受影响的每个文本的会话内标识和存储值；与这些语言无关的文本改变不使计划失效。
 - **执行**：Destructive 流水线先备份（ADR-0013），然后：
   1. 记下翻译语言和显示语言的原值；
   2. 在 `TransactionScope` 中 `new Translate().RemoveProjectLanguage(project, 语言)`（逐个）；
-  3. 读回；失败或取消时 `SafetyPoint` 回滚**只撤回译文**，所以回滚之后**再把两项语言设置写回原值**（S23：设置不被回滚，A28），写回后读回核对；
+  3. 读回：删除的语言都不在翻译语言中，否则 `EPLAN_OPERATION_FAILED`；失败或取消时 `SafetyPoint` 回滚**只撤回译文**，所以回滚之后**再把两项语言设置写回原值**（S23：设置不被回滚，A28），写回后读回核对。写回的方法与 `eplan_language_set` 相同（`ProjectSettings.SetStringSetting`，见其规格第 5 节）；
   4. 成功时提交，读回 `after`。
 - **已验证**（S23，A28）：删除 `sv_SE` 约 3 秒，瑞典语译文 460 → 0，翻译语言中去掉 `sv_SE`，显示语言变为 `zh_CN;`；`SafetyPoint` 回滚后译文恢复，语言设置没有恢复。
 - **待 Large 测试确认**：提交后 Ctrl+Z 能撤回什么（译文、设置）；删除多种语言时的耗时。
