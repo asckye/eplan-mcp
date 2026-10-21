@@ -5,11 +5,11 @@
 | 工具名 | `eplan_check_run` |
 | 所属分组 / Profile | `check` / `core` |
 | 安全级别 | Write |
-| MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 6 步；已实现，待实机验证；进度和取消依赖第 3、4 步） |
+| MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
+| 状态 | Proposed（M4 第 6 步；已实现，2026-10-20 实机验证，见 api-notes A20） |
 
 ## 1. 这个工具解决什么任务
-"改完了，检查一下有没有错误"。代理改完图之后，用它在 EPLAN 中运行检查（消息管理中的"检查项目"），得到各级别的消息数和前 20 条消息，再决定下一步。运行检查会替换项目中的检查消息，改写项目的数据文件（A11、A16），所以是 Write 级（M4 设计 Q3）：scratch 中直接执行，真实项目需要审批，按一次 Ctrl+Z 撤销。只读取上一次检查的结果用 `eplan_check_list`。
+"改完了，检查一下有没有错误"。代理改完图之后，用它在 EPLAN 中运行检查（消息管理中的"检查项目"），得到各级别的消息数和前 20 条消息，再决定下一步。运行检查会替换项目中的检查消息，同时每次追加 EPLAN 的汇总提示，按页检查还会删掉其他对象的消息（A20），并改写项目的数据文件（A11、A16），所以是 Write 级（M4 设计 Q3）：scratch 中直接执行，真实项目需要审批，按一次 Ctrl+Z 撤销。只读取上一次检查的结果用 `eplan_check_list`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -79,7 +79,7 @@
   - 查不到时：不在规划阶段校验，也没有候选；结果的 `scheme` 只回显传入的名称，省略时为 `null`。
 - **已验证**（S11，A16）：在调度器中，`VerifyProject(project, "", false)` 用时 2.7–4.7 秒，消息 0 → 20 条，能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销；`VerifyPages`（2 页）0.2 秒；在 `QuietModeStep(ShowNoDialogs)` 下不弹对话框。
 - **没有验证**，由 Large 测试确认，结论写入 api-notes：
-  - 再检查一次是替换还是追加消息。追加时 `idempotentHint` 改为 false，变更清单的文字也要改；
+  - ~~再检查一次是替换还是追加消息~~：实测警告被替换，14 条汇总提示每次追加（A20），所以 `idempotentHint` 为 false；按页检查会删掉其他对象（例如 3D 连接）的消息，`hint` 提示这一点并建议再检查整个项目；
   - 按页检查是否删除其他页的消息；
   - 已标记为"已处理"的消息在重新检查后是否保留；
   - 传入具体的方案名。

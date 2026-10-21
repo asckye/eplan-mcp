@@ -55,7 +55,8 @@ public sealed class CheckRunToolTests : IDisposable
         CallToolResult result = await Run(pages: ["=GAA+A1&EFS1/1"], scheme: "Mine");
 
         JsonElement data = WriteToolHarness.Structured(result);
-        Assert.Equal(("committed", "AI: eplan_check_run", false, JsonValueKind.Null), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("truncated").GetBoolean(), data.GetProperty("hint").ValueKind));
+        Assert.Equal(("committed", "AI: eplan_check_run", false, JsonValueKind.String), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("truncated").GetBoolean(), data.GetProperty("hint").ValueKind));
+        Assert.Contains("removed earlier messages of objects outside them", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Equal((0, 6, 14, 20), (data.GetProperty("counts").GetProperty("error").GetInt32(), data.GetProperty("counts").GetProperty("warning").GetInt32(), data.GetProperty("counts").GetProperty("hint").GetInt32(), data.GetProperty("total").GetInt32()));
         JsonElement first = data.GetProperty("messages")[0];
         Assert.Equal((4001, "warning", "Connections", "Terminal", "=GAA+A1-X1:1"), (first.GetProperty("number").GetInt32(), first.GetProperty("severity").GetString(), first.GetProperty("region").GetString(), first.GetProperty("object").GetProperty("kind").GetString(), first.GetProperty("object").GetProperty("name").GetString()));
