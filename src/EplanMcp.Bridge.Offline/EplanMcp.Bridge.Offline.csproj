@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The offline host (M5 design 4.9, architecture 5.4): a console program that runs EPLAN without a user interface
+    (EplApplication, api-notes B5 and A22) and serves the add-in's Bridge on a pipe of the same kind, for live tests in
+    CI. Bridge.Core, the operations and the adapters come from the add-in's project; nothing is copied. Like the add-in
+    it builds only where EPLAN is installed, so it is in EplanMcp.slnx but not in EplanMcp.Ci.slnf. A development and
+    CI tool: the installer does not ship it (M5 design 4.1). x64, net481 and an STA main thread are required (B5).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <RootNamespace>EplanMcp.Bridge.Offline</RootNamespace>
+    <!-- The same Bin as the add-in's, whose ValidateEplanApiReferences checks the EPLAN version of it. -->
+    <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EplanMcp.Bridge.Eplan\EplanMcp.Bridge.Eplan.csproj" />
+  </ItemGroup>
+
+  <!--
+    The starter library is managed only and is copied next to the program, as in spike S15: it is what then points
+    the resolver at EPLAN's Bin. The API assemblies have unmanaged dependencies and load from Bin, so they are never
+    copied, and neither is EPLAN's Newtonsoft.Json, which the program loads from the Platform's Bin (api-notes A22).
+  -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.Starteru">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Starteru.dll</HintPath>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Systemu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Systemu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- The main thread's WPF dispatcher, the one the Bridge's operations run on as in the add-in (api-notes A9). -->
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>

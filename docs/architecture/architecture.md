@@ -202,6 +202,8 @@ flowchart LR
 
 Host 只认管道协议，不关心对面是插件还是离线进程。离线宿主用于 CI 实机测试和批处理。离线模式下，除了显示界面的功能以外，API 功能都可以使用。
 
+**离线宿主的启动**（`EplanMcp.Bridge.Offline`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.9，api-notes A22）：`[STAThread]` 主线程先让 EPLAN 的 `AssemblyResolver` 指向变体的 Bin，Platform Bin 中的其他程序集（Newtonsoft.Json）由自己的 `AssemblyResolve` 加载；然后在单独的方法中 `EplApplication.Init(string.Empty, false, false)`（不允许授权和登录对话框），在 `LockingStep` 中打开 `--project` 给出的项目，再调用与插件相同的 `BridgeHost.Start`，在主线程上运行 WPF 调度器（`Dispatcher.PushFrame`）：操作经同一个 `EplanDispatcher` 在这个线程上执行，与插件中相同。没有界面，所以 Bridge 不提供 `approval.ask`，握手中的 `eplan.offline` 为 true，Host 的 EPLAN 对话框渠道也不经它询问：经离线宿主只能写 scratch。`--idle-exit` 秒内没有 Host 连接、或者按 Ctrl+C 时，依次停止管道、等已经发出的操作完成、关闭项目、在主线程上 `Exit()` 一次。日志写 `logs\bridge-offline-*.log`，从不写 stdout。
+
 ### 5.5 代码仓库结构
 
 ```
@@ -210,7 +212,7 @@ src/
   EplanMcp.Host/               net10.0          eplanmcp.exe（MCP 服务器 + CLI）
   EplanMcp.Bridge.Core/        netstandard2.0   管道服务器、协议、调度抽象、操作路由（不引用 EPLAN）
   EplanMcp.Bridge.Eplan/       net481           适配层 + 插件入口；-p:EplanBinPath 指定引用的 EPLAN Bin，构建时校验它属于 EplanVersion（默认 2026）
-  EplanMcp.Bridge.Offline/     net481 (M5)      离线宿主
+  EplanMcp.Bridge.Offline/     net481 (M5)      离线宿主（同插件一样需要本机的 EPLAN，不在 EplanMcp.Ci.slnf 中）
   EplanMcp.Workbench/          net10.0-windows (M5)
   EplanMcp.Workbench.Protocol/ net10.0 (M5)     Host 与 Workbench 之间的管道协议：管道名、帧、消息（ADR-0014）
 tests/

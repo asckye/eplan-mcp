@@ -7,11 +7,12 @@ using Microsoft.Win32;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-/// <summary>Static facts about this EPLAN process, captured once on the main thread when the add-in starts.</summary>
+/// <summary>Static facts about this EPLAN process, captured once on the main thread when the Bridge starts.</summary>
 internal static class EplanEnvironment
 {
     private const string VariantSwitch = "/Variant:";
 
+    /// <summary>The add-in: EPLAN.exe with its user interface.</summary>
     public static EplanInstanceInfo Capture(IBridgeLog log)
     {
         MainThread.Assert();
@@ -22,6 +23,26 @@ internal static class EplanEnvironment
             Version = process.MainModule?.FileVersionInfo.FileVersion ?? string.Empty,
             Variant = VariantFromCommandLine() ?? VariantFromRemoteServerRegistry(process.Id, log),
             ApiExtensionLicence = ApiExtension(log),
+        };
+    }
+
+    /// <summary>
+    /// The offline host (M5 design 4.9): EPLAN runs without a user interface in this process, which has neither a
+    /// <c>/Variant</c> switch nor EPLAN.exe as its image. So the version is that of EPLAN.exe in the Platform's Bin, and
+    /// the variant is the folder above the variant's Bin version folder (<c>…\Electric P8\2026.0.3\Bin</c>, api-notes A22).
+    /// </summary>
+    public static EplanInstanceInfo CaptureOffline(IBridgeLog log, string variantBin, string platformBin)
+    {
+        MainThread.Assert();
+        using var process = Process.GetCurrentProcess();
+        string eplan = Path.Combine(platformBin, "EPLAN.exe");
+        return new EplanInstanceInfo
+        {
+            ProcessId = process.Id,
+            Version = File.Exists(eplan) ? FileVersionInfo.GetVersionInfo(eplan).FileVersion ?? string.Empty : string.Empty,
+            Variant = Directory.GetParent(variantBin.TrimEnd('\\'))?.Parent?.Name,
+            ApiExtensionLicence = ApiExtension(log),
+            Offline = true,
         };
     }
 

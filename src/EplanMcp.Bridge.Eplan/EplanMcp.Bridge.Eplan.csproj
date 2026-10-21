@@ -24,6 +24,8 @@
     <!-- Rejects EPLAN members that write while looking like reads (BannedSymbols.txt, RS0030 is an error). -->
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
     <AdditionalFiles Include="BannedSymbols.txt" />
+    <!-- The offline host composes the same Bridge through BridgeHost (M5 design 4.9). -->
+    <InternalsVisibleTo Include="EplanMcp.Bridge.Offline" />
   </ItemGroup>
 
   <!-- EPLAN assemblies come from the local installation and are never copied or shipped (Private=false). -->
