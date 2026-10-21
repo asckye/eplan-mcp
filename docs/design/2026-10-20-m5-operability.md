@@ -100,7 +100,7 @@ flowchart LR
 **功能**（中英双语，默认跟随系统语言，可以切换，切换立即生效）：
 1. **审批队列**（4.6、ADR-0014）：等待中的审批和解除暂停的确认，以及本次运行中已回答的记录（不持久化，审计才是记录）。
 2. **审计浏览**：只读。按日期、工具、项目、审批决定、执行结果筛选，显示一条记录的全部字段，打开所在文件夹。读取方式与 `AuditLog.ReadLines` 相同：共享读写，不加锁，忽略最后一个未写完的行，从不写入。"校验完整性"调用 `eplanmcp audit verify --format json`，并说明哈希链查不出末尾整段被删除（架构 8.8）。
-3. **客户端配置向导**：选择客户端（Claude Code、Claude 桌面版，Q7），调用 `eplanmcp client-config <客户端> --dry-run --format json` 显示将要写入的差异，工程师确认后写入，原文件先备份。Claude Code 推荐用插件（4.7），向导给出两条命令。
+3. **客户端配置向导**：按 TIA 的做法，客户端以卡片列出（Q7 的 11 种，可以多选），副标题显示本机是否检测到；调用 `eplanmcp client-config <客户端> --dry-run --format json` 显示将要写入的差异，工程师确认后写入，原文件先备份。Claude Code 推荐用插件（4.7），向导给出两条命令；已装插件时不再为 Claude Code 写配置（4.7"二选一"）。
 4. **状态**：`eplanmcp doctor --format json` 的结果分组显示：EPLAN 安装与支持矩阵、运行中的实例和变体、插件是否加载及是否需要重启、授权、MSIX 环境、用户 PATH 长度、数据目录、写入暂停、导出与备份占用的空间、下一次审批会用哪个渠道。打开时和按"刷新"时各运行一次，不自动轮询。
 5. **设置**：语言、主题（跟随系统、浅色、深色）、登录时启动；`config.json` 只读显示。
 
@@ -179,13 +179,17 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 - `eplan-mcp\.mcp.json`：服务器 `eplan`，命令为 `eplanmcp.exe` 的完整路径，参数 `serve`；
 - `eplan-mcp\skills\getting-started\`：`SKILL.md` 和 `guide.zh-CN.md`（4.8）。
 
-**怎样找到 `eplanmcp.exe`**：Claude Code 文档写明插件的 MCP 配置中可以用 `${CLAUDE_PLUGIN_ROOT}`，它指向插件的安装目录，每个版本不同；`${USERPROFILE}` 这类变量在插件配置中能否展开，文档没有说明（[插件清单参考](https://code.claude.com/docs/en/plugins/manifest-reference)、[MCP](https://code.claude.com/docs/en/mcp)）。所以 `.mcp.json` 由安装程序生成，直接写完整路径，不依赖变量展开。本地目录形式的插件市场不复制，插件在原处加载（[插件加载](https://code.claude.com/docs/en/plugins/loading)），升级时安装程序改写文件，新会话或 `/reload-plugins` 后生效。插件中不放程序：`eplanmcp.exe` 要和 EPLAN 中注册的插件 DLL、Workbench 同版本，在同一个固定位置；而插件从远程仓库等来源安装时会复制到按版本分开的缓存目录，旧版本 14 天后删除（同上）。
+**怎样找到 `eplanmcp.exe`**（S17 实测，api-notes C 节）：插件 `.mcp.json` 的 `command`、`args`、`env` 中，`${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}`、其他环境变量和 `${VAR:-默认值}` 都会展开，`%VAR%` 不展开，没设置又没有默认值的变量原样保留且没有警告。安装位置固定（Q4），所以 `.mcp.json` 是一个固定的文件：命令写 `${USERPROFILE}/EplanMcp/app/eplanmcp.exe`，安装程序不再生成它。本地目录形式的市场不复制；插件在缓存中虽有一份副本，但从原处加载，改写原处的 `.mcp.json` 不必重装就生效；原处被删掉时插件加载失败，不会退回到缓存。插件中不放程序：`eplanmcp.exe` 要和 EPLAN 中注册的插件 DLL、Workbench 同版本，在同一个固定位置。
 
-**安装**：`/plugin marketplace add %USERPROFILE%\EplanMcp\app\claude-plugin`，再 `/plugin install eplan-mcp@eplanmcp-local`，默认装在用户范围；命令行用 `claude plugin marketplace add …`、`claude plugin install …`。Claude 桌面版的 Code 页签读同样的设置文件，在命令行装好的用户范围插件在桌面版中同样可用（[桌面版](https://code.claude.com/docs/en/desktop)）。
+**安装**：`/plugin marketplace add ~/EplanMcp/app/claude-plugin`，再 `/plugin install eplan-mcp@eplanmcp-local`，默认装在用户范围；命令行用 `claude plugin marketplace add …`、`claude plugin install …`。`marketplace add` 能展开 `~/`，不能展开 `%USERPROFILE%`（S17）。在 S17 的隔离配置中，未登录、网络不可达时这两步都在 1 秒内完成。Claude 桌面版的 Code 页签读同样的设置文件，在命令行装好的用户范围插件在桌面版中同样可用（[桌面版](https://code.claude.com/docs/en/desktop)，未实测）。
+
+**插件与 `client-config claude-code` 二选一**：插件的服务器与用户或项目范围中命令相同的服务器重复时，Claude Code 只启动后者（S17 与文档）。所以已装插件时，`client-config claude-code` 拒绝写入并说明原因；向导对 Claude Code 只推荐插件。
 
 **技能**：`SKILL.md` 是给模型看的，按架构 8.11 用英文（Q12）：工程师问"怎么开始""EPLAN 连不上""为什么没有弹出审批"时，先调用 `eplan_session_status`，再按 `guide.zh-CN.md` 中对应的一节用工程师的语言说明；安装、注册插件、改配置都是工程师自己的操作，模型只说明步骤，不代为执行。
 
 **spike S17（客户端与插件）**，不需要 EPLAN：在没有网络的虚拟机上用本地插件市场安装插件，Claude Code 命令行和桌面版各一次；`${USERPROFILE}` 在插件 `.mcp.json` 中是否展开；Claude 桌面版 `claude_desktop_config.json` 的实际位置（A6：桌面版的文件在包的重定向目录中），这决定 `client-config claude-desktop` 写到哪里。
+
+**S17 的结果**（部分完成，[spike S17](../../spikes/S17-client-plugin/README.md)）：上面几段已按它修改；桌面版 `claude_desktop_config.json` 的位置见 4.11。还要做：在没有网络的虚拟机上实际安装（命令行、桌面版各一次），以及交互会话中的 `/plugin` 命令和工具名前缀。
 
 ### 4.8 中文入门指南
 - 源文件 `docs/getting-started/zh-CN.md`，随安装包放在 `app\docs\`，并复制为插件技能的 `guide.zh-CN.md`。英文版之后补上（架构 8.11）。
@@ -225,8 +229,26 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 | 命令 | 用途 |
 |---|---|
 | `install-addin [--variant <变体>]…`、`uninstall-addin [--all]` | 4.2 |
-| `client-config <claude-code\|claude-desktop> [--dry-run\|--remove] [--format json]` | 写入或移除客户端的 MCP 配置，写入前显示差异、备份原文件（架构 7）；记录写入过的条目，供卸载时移除 |
+| `client-config <客户端>… [--dry-run\|--remove] [--format json]` | 写入或移除客户端的 MCP 配置，写入前显示差异、备份原文件（架构 7）；可以一次写多个客户端，分别报告结果；保留文件中其他服务器和设置；记录写入过的条目，供卸载时移除。客户端与配置文件见下表 |
 | `doctor --format json`、`audit verify --format json` | 给 Workbench 用；JSON 带 `schemaVersion`，结构用快照测试固定 |
+
+**客户端与配置文件**（Q7；配置格式与位置沿用 TIA 已核实的那一份，TIA 的 `docs/getting-started/configuration.md`；实现时逐个用真实客户端核对）：
+
+| 客户端（`client-config` 的名字） | 配置文件 |
+|---|---|
+| Claude Code（`claude-code`） | `%USERPROFILE%\.claude.json`；推荐改用插件（4.7） |
+| Claude 桌面版（`claude-desktop`） | MSIX 安装：`%LOCALAPPDATA%\Packages\Claude_<包 ID>\LocalCache\Roaming\Claude\claude_desktop_config.json`（S17：包外进程看不到文档写的 `%APPDATA%\Claude\`，api-notes A6）；非 MSIX 安装：`%APPDATA%\Claude\claude_desktop_config.json`。桌面版运行时频繁改写这个文件，写入前请工程师完全退出桌面版 |
+| Codex（`codex`） | `%CODEX_HOME%\config.toml`，未设置时 `%USERPROFILE%\.codex\config.toml` |
+| Gemini CLI（`gemini-cli`） | `%USERPROFILE%\.gemini\settings.json` |
+| Qwen Code（`qwen-code`） | `%USERPROFILE%\.qwen\settings.json` |
+| Kimi Code CLI（`kimi-code`） | `%KIMI_CODE_HOME%\mcp.json`，未设置时 `%USERPROFILE%\.kimi-code\mcp.json` |
+| CodeBuddy Code（`codebuddy`，元宝） | `%USERPROFILE%\.codebuddy\.mcp.json` |
+| OpenCode（`opencode`，DeepSeek / GLM / Grok 等模型） | `%USERPROFILE%\.config\opencode\opencode.json` |
+| Qwen Agent（`qwen-agent`） | `%USERPROFILE%\.qwen-agent\mcp.json` |
+| Cursor（`cursor`） | `%USERPROFILE%\.cursor\mcp.json` |
+| VS Code Copilot（`vscode-copilot`） | `%APPDATA%\Code\User\mcp.json`；只检测到 Insiders 时用它的目录 |
+
+写入配置不代表已经与该客户端联调过；Agent 评测只用 Claude 做过，其他客户端中模型调用工具的准确度未测。审批、写入策略与审计都在 Host 中，与客户端无关（ADR-0011）。
 
 这些命令在 stdout 输出，只在 `serve` 以外使用（CLAUDE.md 规则 5 只约束 `serve`）。
 
@@ -282,10 +304,10 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 | Q4 | 安装目录能否选择 | **已决定**（同上）：**不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
 | Q5 | 安装包用什么技术 | **已决定**（同上）：**Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
 | Q6 | 安装包和程序是否签名（4.10） | **已决定**（同上）：**0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
-| Q7 | 配置向导在 M5 支持哪些客户端 | **已决定**（同上）：Claude Code（推荐插件）和 Claude 桌面版；其他客户端只显示可以复制的配置片段 |
+| Q7 | 配置向导在 M5 支持哪些客户端 | **已决定**（2026-10-20，项目负责人按建议），**同日改定**：项目负责人问能否用于 Claude Code 以外的 AI 后决定"与 TIA 相同，再加 Claude 桌面版"：Claude Code（推荐插件）、Claude 桌面版、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot，见 4.11 的表 |
 | Q8 | 自托管 runner 装在哪台机器、用哪个账户 | **已决定**（同上）：开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发。项目负责人已同意，先做 S15，结论满意再安装 |
 | Q9 | 同一用户的程序（包括代理经 shell 执行的命令）能操作审批窗口，是否接受为剩余风险（第 5 节） | **已决定**（同上）：**接受**，写进威胁模型和入门指南（保留客户端对 shell 命令的确认）；有了代码签名之后，再考虑由 Host 核对 Workbench 的签名 |
-| Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | **已决定**（同上）：M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场 |
+| Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | **已决定**（同上）：M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场。S17 已证实 `${USERPROFILE}` 能展开 |
 | Q11 | 干净机器验收由谁、在哪台机器上做（4.8） | **已决定**（同上）：需要项目负责人安排一名非开发人员，和一台装有 EPLAN 2026 及授权的虚拟机（同时验证 I8） |
 | Q12 | 插件技能用什么语言 | **已决定**（同上）：`SKILL.md` 给模型看，用英文（架构 8.11）；入门指南给工程师看，用中文 |
 | Q13 | 卸载时是否删除数据 | **已决定**（同上）：**不删除**：配置、审计、日志、scratch、导出、备份都保留，结束页列出位置（4.3） |
