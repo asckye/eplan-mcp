@@ -101,6 +101,21 @@ public sealed class SpikeS24Action : IEplAction
             case "opencopy":
                 report["copy"] = OpenCopy(p.Part);
                 break;
+            case "importpart":
+                report["importPart"] = ImportIntoConfigured(p.Part);
+                break;
+            case "syncparts":
+                report["syncParts"] = SyncProjectParts();
+                break;
+            case "importtranslation":
+                report["importTranslation"] = ImportTranslation(p.Destination, p.Contains);
+                break;
+            case "exporttranslation":
+                report["exportTranslation"] = ExportTranslation(p.Destination);
+                break;
+            case "labelformat":
+                report["labelFormat"] = LabelFormats();
+                break;
             case "copyio":
                 report["copyio"] = CopyImportExport(p.Part, p.Destination);
                 break;
@@ -330,6 +345,133 @@ public sealed class SpikeS24Action : IEplAction
 
         result["selectedAfter"] = MDPartsManagement.SelectedPartsDatabaseAsString;
         return result;
+    }
+
+    // r12 (owner-approved, 2026-10-21): the probes below write the CONFIGURED parts and translation databases. They
+    // run only after both databases were backed up and hashed; afterwards EPLAN is closed and both are restored.
+
+    /// <summary>
+    /// Read only, for eplan_export_labels (Large test 2026-10-21: <c>Data.File.Format</c> could not be read): tries
+    /// several ways to read each labelling scheme's output format.
+    /// </summary>
+    private static JArray LabelFormats()
+    {
+        var result = new JArray();
+        using var setting = new SchemeSetting();
+        setting.Init("USER.Labelling.Config");
+        for (int i = 0; i < setting.GetCount() && i < 6; i++)
+        {
+            setting.SetScheme(i);
+            string name = setting.GetName();
+            var entry = new JObject { ["name"] = name };
+            foreach (string path in new[] { "Data.File.Format", "File.Format", "Format", ".Data.File.Format" })
+            {
+                entry["scheme:" + path] = Try(() => setting.GetStringSetting(path, 0));
+            }
+
+            entry["settings:full"] = Try(() => new Settings().GetStringSetting("USER.Labelling.Config." + name + ".Data.File.Format", 0));
+            entry["settings:exists"] = Try(() => new Settings().ExistSetting("USER.Labelling.Config." + name + ".Data.File.Format"));
+            result.Add(entry);
+        }
+
+        return result;
+    }
+
+    /// <summary>r12: imports a part file into the configured parts database, not in a transaction (r11).</summary>
+    private static JObject ImportIntoConfigured(string file)
+    {
+        const string TestPart = "EPLANMCP.S24-TEST";
+        var result = new JObject { ["file"] = file, ["selected"] = MDPartsManagement.SelectedPartsDatabaseAsString };
+        MDPartsDatabase database = new MDPartsManagement().OpenDatabase();
+        try
+        {
+            result["before"] = Try(() => new JObject { ["allParts"] = database.Parts.Length, ["exists"] = database.ExistsPart(TestPart) });
+            result["imported"] = Try(() =>
+            {
+                var clock = Stopwatch.StartNew();
+                database.ImportParts(file, "XPamImportXml", MDPartsDatabase.ImportMode.AppendNewRecords, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                return new JObject
+                {
+                    ["seconds"] = Seconds(clock),
+                    ["allParts"] = database.Parts.Length,
+                    ["exists"] = database.ExistsPart(TestPart),
+                    ["description"] = Text(database.GetPart(TestPart).Properties.ARTICLE_DESCR1),
+                };
+            });
+            result["importedAgain"] = Try(() =>
+            {
+                database.ImportParts(file, "XPamImportXml", MDPartsDatabase.ImportMode.AppendNewRecords, false, MDPartsDatabase.ImportIdentifier.PartNumber, string.Empty);
+                return new JObject { ["allParts"] = database.Parts.Length, ["variants"] = database.GetPartVariants(TestPart).Length };
+            });
+        }
+        finally
+        {
+            database.Close();
+        }
+
+        return result;
+    }
+
+    /// <summary>r12: adds the current project's parts (the fixture copy under scratch) to the configured parts database.</summary>
+    private static JObject SyncProjectParts()
+    {
+        var result = new JObject();
+        using var locking = new Eplan.EplApi.DataModel.LockingStep();
+        Eplan.EplApi.DataModel.Project project = new SelectionSet().GetCurrentProject(true);
+        result["project"] = project.ProjectLinkFilePath;
+        if (project.ProjectLinkFilePath.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            result["refused"] = "the current project must be under the scratch root";
+            return result;
+        }
+
+        result["projectPartsBefore"] = Try(() => project.Articles.Length);
+        result["databasePartsBefore"] = Try(() => CountConfiguredParts());
+        result["synchronized"] = Try(() =>
+        {
+            var clock = Stopwatch.StartNew();
+            using (var synchronize = new Synchronize())
+            {
+                synchronize.Parts(project, Synchronize.StoreMode.AppendNew);
+            }
+
+            return new JObject { ["seconds"] = Seconds(clock) };
+        });
+        result["projectPartsAfter"] = Try(() => project.Articles.Length);
+        result["databasePartsAfter"] = Try(() => CountConfiguredParts());
+        return result;
+    }
+
+    private static int CountConfiguredParts()
+    {
+        MDPartsDatabase database = new MDPartsManagement().OpenDatabase();
+        try
+        {
+            return database.Parts.Length;
+        }
+        finally
+        {
+            database.Close();
+        }
+    }
+
+    /// <summary>r12: imports a tab-separated file into the configured translation database.</summary>
+    private static JObject ImportTranslation(string file, string languages)
+    {
+        var result = new JObject { ["file"] = file, ["languages"] = languages };
+        using var translate = new Translate();
+        result["database"] = Try(() => translate.TranslateDatabase.ToString());
+        var clock = Stopwatch.StartNew();
+        result["returned"] = Try(() => translate.ImportDatabaseTexts(file, "XTrLanguageDbXml2TabConverterImpl", languages));
+        result["seconds"] = Seconds(clock);
+        return result;
+    }
+
+    /// <summary>r12: exports the configured translation database as tab-separated text (read only).</summary>
+    private static JObject ExportTranslation(string file)
+    {
+        using var translate = new Translate();
+        return new JObject { ["export"] = Timed(() => translate.ExportDatabaseTexts(file, "XTrLanguageDbXml2TabConverterImpl"), file) };
     }
 
     private static JToken Timed(Func<object?> run, string file) => Try(() =>
