@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Result data of the export runs (<c>export.*.run</c>). The Host lists the folder's files itself.</summary>
 public sealed class ExportRunData
 {
-    /// <summary>The name of the project.</summary>
+    /// <summary>The name of the project; empty for the database exports.</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>How many pages were exported; 0 for the exports of a whole project (PXF, lists).</summary>
@@ -20,4 +20,10 @@ public sealed class ExportRunData
 
     /// <summary>Untranslated texts: the languages exported, as the project names them; null otherwise.</summary>
     public List<string>? Languages { get; set; }
+
+    /// <summary>The database exports: the database exported, as <see cref="ExportPlanData.Database"/> names it; null otherwise.</summary>
+    public string? Database { get; set; }
+
+    /// <summary>Parts database: how many parts were exported, each variant counted; null otherwise.</summary>
+    public int? PartCount { get; set; }
 }

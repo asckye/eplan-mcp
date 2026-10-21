@@ -81,6 +81,7 @@ internal static class BridgeHost
         var reports = new EplanReportUpdater();
         var exporter = new EplanExporter();
         var projectExporter = new EplanProjectExporter();
+        var masterData = new EplanMasterDataExporter();
         var remover = new EplanPageRemover();
         var renumberer = new EplanDeviceRenumberer();
         var pageRenumberer = new EplanPageRenumberer();
@@ -143,6 +144,8 @@ internal static class BridgeHost
                 new ProjectExportPlanOperation(kind, catalog, projectExporter),
                 new ProjectExportRunOperation(kind, catalog, projectExporter),
             }),
+            new MasterDataExportPlanOperation(MasterDataExportKind.Parts, masterData),
+            new MasterDataExportRunOperation(MasterDataExportKind.Parts, masterData),
             new PageDeletePlanOperation(catalog, remover),
             new PageDeleteExecuteOperation(catalog, pages, remover, backup, transactions),
             new DeviceRenumberPlanOperation(catalog, renumberer),

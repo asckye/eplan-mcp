@@ -22,7 +22,10 @@ public sealed class ExportArgs
     /// <summary>PDF: <c>color</c>, <c>grey</c> or <c>black_white</c>; null means <c>color</c>.</summary>
     public string? Color { get; set; }
 
-    /// <summary>Images: <c>png</c> or <c>jpg</c>; null means <c>png</c>.</summary>
+    /// <summary>
+    /// Images: <c>png</c> or <c>jpg</c>; null means <c>png</c>. Parts database: <c>xml</c> or <c>edz</c>; null means
+    /// <c>xml</c>.
+    /// </summary>
     public string? Format { get; set; }
 
     /// <summary>Images: the width in pixels, 200 to 4000; null means 1600.</summary>
@@ -48,4 +51,7 @@ public sealed class ExportArgs
 
     /// <summary>Untranslated texts: 1 to 10 target languages, for example <c>en_US</c>, each a translation language of the project.</summary>
     public List<string>? Languages { get; set; }
+
+    /// <summary>Parts database: 1 to 500 part numbers as the database writes them, each exported with every variant; null means every part.</summary>
+    public List<string>? Parts { get; set; }
 }

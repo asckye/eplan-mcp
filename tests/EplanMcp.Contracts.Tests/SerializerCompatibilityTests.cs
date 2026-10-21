@@ -210,9 +210,12 @@ public sealed class SerializerCompatibilityTests
         },
         new ExportArgs { Project = "Line1", Directory = @"C:\Users\u\EplanMcp\exports\Line1\20261021T083000Z-k3f9q2\", FileName = "项目 一", IncludeMasterData = true },
         new ExportArgs(),
+        new ExportArgs { Format = "edz", Parts = ["SIE.3RH2122-1HB40", "部件 一"], Directory = @"C:\Users\u\EplanMcp\exports\parts-database\20261021T083000Z-k3f9q2\", FileName = "parts.edz" },
         new ExportPlanData { Project = "Line1", PageCount = 321, Scheme = "Standard Settings" },
+        new ExportPlanData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", Extension = ".xml" },
         new ExportPlanData(),
         new ExportRunData { Project = "Line1", PageCount = 2, Files = [new ExportedPage { Page = "=GAA+A1&EFS1/60", Path = "=GAA+A1&EFS1_60.png" }], Warning = "w" },
+        new ExportRunData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", PartCount = 464 },
         new ExportRunData(),
         new ProjectListArgs(),
         new ProjectListData

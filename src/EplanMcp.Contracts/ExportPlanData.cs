@@ -6,7 +6,7 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class ExportPlanData
 {
-    /// <summary>The name of the project, which also names the export's folder.</summary>
+    /// <summary>The name of the project, which also names the export's folder; empty for the database exports, whose folder the Host names.</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>How many pages the export has; 0 for the exports of a whole project (PXF, lists).</summary>
@@ -20,4 +20,10 @@ public sealed class ExportPlanData
     /// scheme's (<c>.txt</c>, <c>.xlsx</c>) for labels; null for PXF, where EPLAN adds it, and the page exports.
     /// </summary>
     public string? Extension { get; set; }
+
+    /// <summary>
+    /// The database exports: the database EPLAN is configured with, as its setting names it, path variables unexpanded;
+    /// of a SQL Server connection only what names no login. Null for the other exports.
+    /// </summary>
+    public string? Database { get; set; }
 }
