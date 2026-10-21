@@ -176,6 +176,12 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A27. 部件库与翻译库的只读访问（spike S24，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。
+- 开发机的部件库是 `$(MD_PARTS)\EPLAN_parts.alk`：40 字节的链接文件，指向同目录的 `EPLAN_parts.adb\`（与项目数据相同格式的目录，3.9 MB）；`MDPartsDatabase.Type` 报告 `ACCESS`。翻译库是 `$(md_translate)\Translate.db`，类型 `EPLAN`。— S24。
+- `new MDPartsManagement().OpenDatabase()` 0.02 秒；`GetPart(部件号)` 立即返回，不存在时为 null；`Parts` 返回全部 464 个部件，0.07 秒。部件的字段：`PartNr`、`Variant`、`Type`、`ProductGroup`，`Properties` 中的 `ARTICLE_DESCR1`（多语言原始字符串）、`ARTICLE_MANUFACTURER`、`ARTICLE_TYPENR`、`ARTICLE_ORDERNR`、`ARTICLE_MACRO`（宏路径，带 `$(MD_MACROS)`）。— S24。
+- `SelectedPartsDatabaseAsString` 是静态属性。只读访问不改 `.adb` 中的数据文件，只改写 `.lck` 锁文件。— S24。
+
 ### A26. 不用窗口宏放置单个设备（spike S20，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S20](../../spikes/S20-symbol-placement/README.md)。示例项目的 scratch 副本。
 - 按库符号新建的功能已有 12 个属性放置，但显示的文字都是空的；`new PropertyPlacement().Create(function, Properties.Function.FUNC_DEVICETAG_FULLNAME)` 之后图上显示 `KF96`（没有 `-`，压在符号的插入点上），`UseLocalPropertyPlacements` 变为 true，`VisibleName` 仍为空。— S20。
