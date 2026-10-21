@@ -14,7 +14,7 @@
 - 改动前后读出全部端子名、电缆名和连接的线号（`CONNECTION_DESIGNATION`），按对象标识比较，并算摘要。
 - `Driver/` 通过 Remote Client 驱动：复制示例项目到 `<数据根目录>\scratch\spikes\s21\S21_Sample` 并打开，选为当前项目，依次运行各模式，最后选回原来的当前项目、关闭副本、注销插件。只在打开的项目全是 scratch 副本时发送 Ctrl+Z。
 - 四种操作的方案都传空串，端子编号不只编带 `?` 的，电缆编号不保留旧名、保留标识符，线号覆盖全部（`DesignateOverwrition.All`），生成电缆只处理自动电缆。
-- 环境：EPLAN 2026.0.3.25421，Electric P8，2026-10-21，r0。
+- 环境：EPLAN 2026.0.3.25421，Electric P8，2026-10-21。r0 时 EPLAN 还开着 scratch 之外的项目，没有发送 Ctrl+Z；r1 在重新启动、只开着 scratch 项目的 EPLAN 中重跑全部模式，发送了 Ctrl+Z。
 
 ```powershell
 dotnet build spikes\S21-cables-terminals\EplanMcp.Spikes.S21.csproj -c Release
@@ -40,12 +40,12 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 
 **编号与生成**（方案都是空串，都没有抛出异常）：
 
-| 操作 | 耗时 | 改了什么 | 回滚 | 改动的项目文件 |
-|---|---:|---|---|---|
-| `Renumber.Terminals`（全部 1331 个端子） | 41–43 s | 4 个端子换了号（`+A1-XD1:2` → `:3` 等），按端子排中的顺序重排 | ✅ 摘要与之前相同 | `Function`、`Page`、`ArticleRef`、`Blob` |
-| `CableService.RenumberCables`（78 根电缆） | 0.3 s | 两对电缆互换了名称（`+A2-WD4` ↔ `+A2-WD5` 等） | ✅ | `Function`、`Connection`、`ArticleRef`、`Blob` |
-| `ConnectionService.DesignateConnections`（覆盖全部） | 0.9–1.1 s | 605 条连接得到线号（`*` → `433`，空 → `011` 等），有线号的连接 116 → 659 | ✅ | `Connection`、`Function`、`Page`、`Message` |
-| `Generate.Cables`（只处理自动电缆） | 0.4 s | 名称、线号都没有变化 | — | 项目的 `User.eod` 和 `Settings.xdb`（回滚之后仍是新的） |
+| 操作 | 耗时 | 改了什么 | 回滚 | Ctrl+Z（r1） | 改动的项目文件 |
+|---|---:|---|---|---|---|
+| `Renumber.Terminals`（全部 1331 个端子） | 31–43 s | 4 个端子换了号（`+A1-XD1:2` → `:3` 等），按端子排中的顺序重排 | ✅ 摘要与之前相同 | ✅ 一步撤销，摘要与之前相同 | `Function`、`Page`、`ArticleRef`、`Blob` |
+| `CableService.RenumberCables`（78 根电缆） | 0.2–0.3 s | 两对电缆互换了名称（`+A2-WD4` ↔ `+A2-WD5` 等） | ✅ | ✅ 一步撤销 | `Function`、`Connection`、`ArticleRef`、`Blob` |
+| `ConnectionService.DesignateConnections`（覆盖全部） | 0.8–1.1 s | 605 条连接得到线号（`*` → `433`，空 → `011` 等），有线号的连接 116 → 659 | ✅ | ✅ 一步撤销，回到 116 条 | `Connection`、`Function`、`Page`、`Message` |
+| `Generate.Cables`（只处理自动电缆） | 0.3–0.4 s | 名称、线号都没有变化 | — | — | 项目的 `User.eod` 和 `Settings.xdb`（回滚之后仍是新的） |
 
 **方案的设置节点**（从用户设置的导出 `XSettingsExport /node:USER`，以及评测夹具项目的 `Settings.xdb` 中只读查得；项目设置的 `XSettingsExport /prj:<项目名>` 返回 FALSE）：
 
@@ -61,7 +61,7 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 
 每个节点下还有一个内部的 `InternalRefDefScheme`，不是可选的方案。
 
-**Ctrl+Z 没有测**：开发机上 EPLAN 同时打开着 scratch 之外的示例项目，驱动按规则不发送 Ctrl+Z。
+两次运行改动的名称完全相同。
 
 **授权**（3214 个选项中 2683 个可用）：
 - 不可用：`Preplanning`。
@@ -70,7 +70,7 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 
 ## 结论
 1. **读取工具可行**：电缆、端子排、端子、PLC 盒和连接都能在调度器中读出，关系也能读出。电缆按类别取（`FunctionsFilter.FunctionCategory`），或者用 `GetCablesWithFilterScheme(null)`（含屏蔽）；不要传空串。`GetSourcesAndTargets` 的耗时没有单独测，在写工具规格时测，再决定列表中是否默认给出源和目标。
-2. **三种编号都能被 `SafetyPoint` 回滚**，与设备、页的编号相同（A18）。工具按 M4c 设计定为 Destructive（先备份）：结果由方案决定，事先算不出；线号一次可以改几百条。
+2. **三种编号都能被 `SafetyPoint` 回滚，提交后都能用一次 Ctrl+Z 撤销**，与设备、页的编号相同（A18）。工具按 M4c 设计定为 Destructive（先备份）：结果由方案决定，事先算不出；线号一次可以改几百条。
 3. **方案传空串可以运行，等于界面上次用的方案**，结果随界面状态变化。工具要传明确的方案名，可选的方案从上表的节点读出：端子编号、标签在用户设置中（`SchemeSetting`），电缆编号、线号在项目设置中（项目的方案设置类，读法在写工具规格时验证）。
 4. `Generate.Cables` 在示例项目中没有可生成的自动电缆，生成的效果需要另找项目验证；它会改写项目设置（上次使用的方案），回滚不撤回。
 5. **预规划导入不能做**：授权中没有 `Preplanning`（M4c Q6）。
@@ -78,6 +78,5 @@ spikes\S21-cables-terminals\Driver\bin\Release\net481\EplanMcp.Spikes.S21.Driver
 
 ## 局限
 - 只在示例项目、Electric P8、EPLAN 2026 上验证；只用了空串方案。
-- Ctrl+Z 没有测，留到只打开 scratch 副本时补测。
 - 读取只覆盖名称和关系，没有逐个核对端子、电缆、PLC 的全部属性。
 - 端子编号没有试"只编带 `?` 的"：示例项目中没有这样的端子。
