@@ -11,6 +11,12 @@ internal enum ClientProblem
 
     /// <summary>Several Claude Desktop packages are installed, and none is the known one.</summary>
     AmbiguousPackage,
+
+    /// <summary>The file changed between reading it and writing it.</summary>
+    FileChanged,
+
+    /// <summary>The record of written entries (<c>state\clients.json</c>) cannot be read.</summary>
+    InvalidRecord,
 }
 
 /// <summary>A client whose configuration is not changed; <see cref="Detail"/> names what was found, in English.</summary>
