@@ -306,6 +306,19 @@ public static class OperationNames
     public const string LanguageRemoveExecute = "language.remove.execute";
 
     /// <summary>
+    /// The plan of eplan_terminal_renumber: checks the scheme and finds the strips and the terminals in scope, never
+    /// writes; the new names are known only after running. Arguments: <see cref="TerminalRenumberArgs"/>; data:
+    /// <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string TerminalRenumberPlan = "terminal.renumber.plan";
+
+    /// <summary>
+    /// Backs the project up, then lets EPLAN number the terminals in scope in one transaction and reads back (ADR-0013).
+    /// Arguments: <see cref="TerminalRenumberArgs"/> with the fingerprint and the backup target; data: <see cref="TerminalRenumberData"/>.
+    /// </summary>
+    public const string TerminalRenumberExecute = "terminal.renumber.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
