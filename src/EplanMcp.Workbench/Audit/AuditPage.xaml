@@ -78,8 +78,9 @@
     </WrapPanel>
 
     <Grid>
+      <!-- CTL-04: Enter or a double click opens the record's details. -->
       <ListView x:Name="Records" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                ScrollViewer.HorizontalScrollBarVisibility="Auto" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
         <ListView.View>
           <GridView>
             <GridViewColumn x:Name="TimeColumn" Width="160" DisplayMemberBinding="{Binding Time}" />

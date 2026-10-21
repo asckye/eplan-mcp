@@ -42,6 +42,7 @@ public partial class MainWindow : Window
     private ApprovalChannelState _channel;
     private int _pending;
     private IInputElement? _settingsOpener;
+    private IInputElement? _recordOpener;
     private WindowState _lastState = WindowState.Normal;
 
     public MainWindow()
@@ -121,8 +122,28 @@ public partial class MainWindow : Window
         view.Arrived += OnArrived;
     }
 
-    /// <summary>Gives the audit page its state; the app does, once.</summary>
-    internal void AttachAudit(AuditView view) => AuditPage.Attach(view);
+    /// <summary>Gives the audit page its state, and for tests the shell that opens folders; the app does, once.</summary>
+    internal void AttachAudit(AuditView view, IShellOpen? shell = null)
+    {
+        AuditPage.Attach(view, shell);
+        AuditPage.RecordOpened += OpenRecord;
+    }
+
+    /// <summary>Opens a record's details over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
+    internal void OpenRecord(AuditRecord record)
+    {
+        _recordOpener = Keyboard.FocusedElement;
+        RecordLayer.Visibility = Visibility.Visible;
+        UpdateLayout();
+        RecordPane.Show(record);
+    }
+
+    internal void CloseRecord()
+    {
+        RecordLayer.Visibility = Visibility.Collapsed;
+        Keyboard.Focus(_recordOpener ?? AuditPage.Heading);
+        _recordOpener = null;
+    }
 
     /// <summary>
     /// What a new question may do to be noticed, and no more (APR-14, PRI-07): flash the taskbar button when the window
@@ -138,6 +159,17 @@ public partial class MainWindow : Window
     /// </summary>
     internal void Open(QuestionItem? question)
     {
+        // A reminder opens the queue: no drawer may stay over it, holding the shortcuts and the focus (DLG-10).
+        if (RecordLayer.Visibility == Visibility.Visible)
+        {
+            CloseRecord();
+        }
+
+        if (SettingsLayer.Visibility == Visibility.Visible)
+        {
+            CloseSettings();
+        }
+
         Restore();
         if (question is not null)
         {
@@ -201,7 +233,8 @@ public partial class MainWindow : Window
         _settingsOpener = null;
     }
 
-    private void CanNavigate(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = SettingsLayer.Visibility != Visibility.Visible;
+    private void CanNavigate(object sender, CanExecuteRoutedEventArgs e) =>
+        e.CanExecute = SettingsLayer.Visibility != Visibility.Visible && RecordLayer.Visibility != Visibility.Visible;
 
     private void OnArrived(QuestionItem item)
     {
@@ -291,6 +324,12 @@ public partial class MainWindow : Window
     private void OnSettingsClosed(object? sender, EventArgs e) => CloseSettings();
 
     private void OnScrim(object sender, MouseButtonEventArgs e) => CloseSettings();
+
+    private void OnRecordClosed(object? sender, EventArgs e) => CloseRecord();
+
+    private void OnRecordScrim(object sender, MouseButtonEventArgs e) => CloseRecord();
+
+    private void OnRecordFolder(object? sender, EventArgs e) => RecordPane.ShowFolder(AuditPage.OpenFolder(), AuditPage.Folder);
 
     private void OnSiderToggle(object sender, RoutedEventArgs e)
     {

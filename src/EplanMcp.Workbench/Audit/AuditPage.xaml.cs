@@ -44,6 +44,9 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
     }
 
+    /// <summary>A record was opened from the list (CTL-04): the window shows its details.</summary>
+    internal event Action<AuditRecord>? RecordOpened;
+
     public FrameworkElement? Heading => PageTitle;
 
     public void FocusHeading() => Keyboard.Focus(PageTitle);
@@ -225,6 +228,9 @@ public partial class AuditPage : UserControl, IWorkbenchPage
 
     private void OnFolder(object sender, RoutedEventArgs e) => OpenFolder();
 
+    /// <summary>The audit folder, which holds every record's file.</summary>
+    internal string? Folder => _view?.Folder;
+
     /// <summary>The audit folder in Explorer; when Windows cannot open it, the page says so where it was asked (STS-05).</summary>
     internal bool OpenFolder()
     {
@@ -237,6 +243,23 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         }
 
         return opened;
+    }
+
+    private void OnListKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && Records.SelectedItem is AuditItem item)
+        {
+            e.Handled = true;
+            RecordOpened?.Invoke(item.Record);
+        }
+    }
+
+    private void OnListOpen(object sender, MouseButtonEventArgs e)
+    {
+        if (Records.SelectedItem is AuditItem item)
+        {
+            RecordOpened?.Invoke(item.Record);
+        }
     }
 
     private static void Explain(FrameworkElement element, string help)
