@@ -1,10 +1,11 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md).</summary>
+/// <summary>What an export of a whole project makes: one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md, eplan_export_labels.md).</summary>
 public enum ProjectExportKind
 {
     Pxf,
     PartsList,
+    Labels,
 }
 
 /// <summary>
@@ -22,4 +23,22 @@ public interface IProjectExporter
 
     /// <summary>Exports the project's parts list as XML to <paramref name="file"/>, which ends with <c>.xml</c> (S25).</summary>
     public void ExportPartsList(string projectPath, string file);
+
+    /// <summary>
+    /// The labelling schemes (<c>USER.Labelling.Config</c>, A24) in EPLAN's order with their output format; reading
+    /// them leaves the last used one as it is (EPLAN XML docs of <c>SetScheme</c>).
+    /// </summary>
+    public IReadOnlyList<LabelScheme> LabelSchemes();
+
+    /// <summary>
+    /// The code EPLAN gives <paramref name="language"/> (for example <c>zh_CN</c>), or EPLAN's user interface language's
+    /// when it is null; null when EPLAN does not know the language.
+    /// </summary>
+    public string? LanguageCode(string? language);
+
+    /// <summary>
+    /// Exports labels of the project with <paramref name="scheme"/>, texts in <paramref name="language"/>, to
+    /// <paramref name="file"/>, whose extension fits the scheme's output format (EPLAN XML docs).
+    /// </summary>
+    public void ExportLabels(string projectPath, string scheme, string language, string file);
 }

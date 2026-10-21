@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Tests;
 
 /// <summary>
 /// Exports of a whole project that write files the way S25 found EPLAN writes them (api-notes A25): PXF adds
-/// <c>.epj</c> to the name and leaves an empty folder of that name next to the file; the parts list is the file named.
+/// <c>.epj</c> to the name and leaves an empty folder of that name next to the file; the parts list and labels are the
+/// file named. The labelling schemes are the ones EPLAN 2026 ships, with S25's formats, and its internal one.
 /// Records every export in
 /// <see cref="Exports"/>; <see cref="During"/> runs inside each export, as a cancel arriving meanwhile would.
 /// </summary>
@@ -16,6 +17,15 @@ internal sealed class FakeProjectExporter : IProjectExporter
     public Action? During { get; set; }
 
     public List<string> Exports { get; } = [];
+
+    public List<LabelScheme> Schemes { get; } =
+    [
+        new() { Name = "InternalRefDefScheme" },
+        new() { Name = "Device tag list", Format = "XmlLblTextExportConverterImpl" },
+        new() { Name = "Terminal diagram", Format = "XmlLblExcelExportConverterImpl" },
+        new() { Name = "XML list", Format = "XmlLblXmlExportConverterImpl" },
+        new() { Name = "Unreadable" },
+    ];
 
     public void ExportPxf(string projectPath, string file, bool includeMasterData)
     {
@@ -31,6 +41,19 @@ internal sealed class FakeProjectExporter : IProjectExporter
         Exports.Add($"parts {projectPath} {Path.GetFileName(file)}");
         During?.Invoke();
         File.WriteAllText(file, "<parts/>");
+        ThrowIfFailing();
+    }
+
+    public IReadOnlyList<LabelScheme> LabelSchemes() => Schemes;
+
+    /// <summary>EPLAN's user interface language is en_US here; xx_XX is one EPLAN does not know.</summary>
+    public string? LanguageCode(string? language) => language is null ? "en_US" : language == "xx_XX" ? null : language;
+
+    public void ExportLabels(string projectPath, string scheme, string language, string file)
+    {
+        Exports.Add($"labels {projectPath} '{scheme}' {language} {Path.GetFileName(file)}");
+        During?.Invoke();
+        File.WriteAllText(file, "-K1");
         ThrowIfFailing();
     }
 

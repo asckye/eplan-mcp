@@ -217,6 +217,18 @@ public static class OperationNames
     public const string ExportPartsRun = "export.parts.run";
 
     /// <summary>
+    /// The plan of eplan_export_labels: finds the project, the labelling scheme and its output format, and checks the
+    /// language, never exports. Arguments: <see cref="ExportArgs"/>; data: <see cref="ExportPlanData"/> with the extension.
+    /// </summary>
+    public const string ExportLabelsPlan = "export.labels.plan";
+
+    /// <summary>
+    /// Exports labels of the project with a labelling scheme as one file into the Host's new, empty folder. Arguments:
+    /// <see cref="ExportArgs"/> with the folder and the file name, the plan's extension included; data: <see cref="ExportRunData"/>.
+    /// </summary>
+    public const string ExportLabelsRun = "export.labels.run";
+
+    /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

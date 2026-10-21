@@ -16,7 +16,7 @@ public sealed class ExportArgs
     /// </summary>
     public List<string>? Pages { get; set; }
 
-    /// <summary>PDF, DXF: the name of an export scheme; null means the scheme EPLAN used last.</summary>
+    /// <summary>PDF, DXF: the name of an export scheme; null means the scheme EPLAN used last. Labels: the labelling scheme, required.</summary>
     public string? Scheme { get; set; }
 
     /// <summary>PDF: <c>color</c>, <c>grey</c> or <c>black_white</c>; null means <c>color</c>.</summary>
@@ -42,4 +42,7 @@ public sealed class ExportArgs
 
     /// <summary>PXF: whether the project's master data (symbols, forms and the like) goes into the file too.</summary>
     public bool IncludeMasterData { get; set; }
+
+    /// <summary>Labels: the language of multi-language texts, for example <c>zh_CN</c>; null means EPLAN's user interface language.</summary>
+    public string? Language { get; set; }
 }

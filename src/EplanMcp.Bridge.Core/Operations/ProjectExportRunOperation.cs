@@ -4,9 +4,9 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// The run of an export of a whole project (<see cref="OperationNames.ExportPxfRun"/>,
-/// <see cref="OperationNames.ExportPartsRun"/>; docs/tools/eplan_export_pxf.md, eplan_export_parts.md, section 5): finds
-/// the project again, checks that the Host's folder is there and empty and that the file name is a name only, with the
-/// kind's extension, then exports into that folder (SEC-20). One EPLAN call, which cannot be interrupted, so a cancel is
+/// <see cref="OperationNames.ExportPartsRun"/>, <see cref="OperationNames.ExportLabelsRun"/>; docs/tools/eplan_export_*.md,
+/// section 5): checks the arguments again as the plan did, that the Host's folder is there and empty and that the file
+/// name is a name only, with the extension the plan named, then exports into that folder (SEC-20). One EPLAN call, which cannot be interrupted, so a cancel is
 /// reported when it has returned (M4 design 4.3). A read: the project's design data does not change (A25).
 /// </summary>
 public sealed class ProjectExportRunOperation(ProjectExportKind kind, IProjectCatalog catalog, IProjectExporter exporter) : Operation<ExportArgs, ExportRunData>
@@ -23,34 +23,34 @@ public sealed class ProjectExportRunOperation(ProjectExportKind kind, IProjectCa
     {
         ProjectExportKind.Pxf => (OperationNames.ExportPxfPlan, OperationNames.ExportPxfRun),
         ProjectExportKind.PartsList => (OperationNames.ExportPartsPlan, OperationNames.ExportPartsRun),
+        ProjectExportKind.Labels => (OperationNames.ExportLabelsPlan, OperationNames.ExportLabelsRun),
         _ => throw new ArgumentOutOfRangeException(nameof(kind)),
-    };
-
-    /// <summary>The extension the Host gives the file; null for PXF, where EPLAN adds it.</summary>
-    public static string? Extension(ProjectExportKind kind) => kind switch
-    {
-        ProjectExportKind.PartsList => ".xml",
-        _ => null,
     };
 
     protected override ExportRunData Execute(ExportArgs args)
     {
-        OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
-        string file = FileName(args.FileName, Extension(kind));
+        var request = ProjectExportRequest.Check(kind, args, catalog, exporter);
+        string file = FileName(args.FileName, request.Extension);
         string path = Path.Combine(ExportFolderCheck.CheckEmpty(args.Directory), file);
+        string projectPath = request.Project.Path;
 
-        // Always a file in the Host's folder, never a target of EPLAN's own (SEC-20).
-        if (kind == ProjectExportKind.Pxf)
+        // Always a file in the Host's folder, never a target of EPLAN's own (SEC-20): a labelling scheme's default
+        // target lies below $(MD_DOCUMENTS) (S25).
+        switch (kind)
         {
-            exporter.ExportPxf(project.Path, path, args.IncludeMasterData);
-        }
-        else
-        {
-            exporter.ExportPartsList(project.Path, path);
+            case ProjectExportKind.Pxf:
+                exporter.ExportPxf(projectPath, path, args.IncludeMasterData);
+                break;
+            case ProjectExportKind.PartsList:
+                exporter.ExportPartsList(projectPath, path);
+                break;
+            default:
+                exporter.ExportLabels(projectPath, request.Scheme!, request.Language!, path);
+                break;
         }
 
         OperationContext.Current.ThrowIfCancellationRequested(); // the safe point after the EPLAN call
-        return new ExportRunData { Project = project.Name };
+        return new ExportRunData { Project = request.Project.Name, Scheme = request.Scheme };
     }
 
     /// <summary>

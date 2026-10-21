@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using EplanMcp.Contracts;
 using EplanMcp.Host;
 
 namespace EplanMcp.Large.Tests;
@@ -34,6 +35,45 @@ public sealed class ProjectExportTests(LiveEplan eplan)
         Assert.Equal(("LargeParts.xml", 1), (data.GetProperty("files")[0].GetProperty("path").GetString(), data.GetProperty("fileCount").GetInt32()));
         Assert.InRange(data.GetProperty("totalBytes").GetInt64(), 1024L, 200L * 1024 * 1024);
         TestContext.Current.TestOutputHelper?.WriteLine($"Parts list: {milliseconds} ms, {data.GetProperty("totalBytes")} bytes (S25: 61.9 s, 14 MB).");
+    }
+
+    [Theory]
+    [InlineData("Device tag list", "LargeLabels.txt")]
+    [InlineData("Terminal diagram", "LargeLabels.xlsx")]
+    public async Task Labels_AreOneFileWithTheSchemesExtension_InItsFolderOnly(string scheme, string file)
+    {
+        // S25: the device tag list is fixed-width text of about 40 KB, the terminal diagram an xlsx of about 805 KB. That
+        // the format is read from the scheme's Data.File.Format is what this checks first (tool spec 5).
+        (JsonElement data, long milliseconds) = await ExportAsync(
+            "eplan_export_labels",
+            new() { ["scheme"] = scheme, ["language"] = "en_US", ["file_name"] = "LargeLabels" },
+            directory =>
+            {
+                if (file.EndsWith(".txt", StringComparison.Ordinal))
+                {
+                    Head(Path.Combine(directory, file));
+                }
+            });
+
+        Assert.Equal((scheme, file, 1), (data.GetProperty("scheme").GetString(), data.GetProperty("files")[0].GetProperty("path").GetString(), data.GetProperty("fileCount").GetInt32()));
+        Assert.InRange(data.GetProperty("totalBytes").GetInt64(), 1L, 50L * 1024 * 1024);
+        TestContext.Current.TestOutputHelper?.WriteLine($"Labels with '{scheme}': {milliseconds} ms, {data.GetProperty("totalBytes")} bytes (S25: about 2 s).");
+    }
+
+    [Fact]
+    public async Task Labels_AnUnknownScheme_ListsTheSchemesThereAre_AndExportsNothing()
+    {
+        string exports = Path.TrimEndingDirectorySeparator(HostDataLocations.FromEnvironment().Exports);
+        string[] before = ExportFolders(exports);
+
+        JsonElement error = await eplan.ErrorAsync("eplan_export_labels", new() { ["scheme"] = "No such labelling scheme" });
+
+        string candidates = error.GetProperty("metadata").GetProperty("candidates").GetString()!;
+        Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
+        Assert.Contains("Device tag list", candidates.Split('\n'));
+        Assert.DoesNotContain("InternalRefDefScheme", candidates.Split('\n'));
+        Assert.Equal(before, ExportFolders(exports));
+        TestContext.Current.TestOutputHelper?.WriteLine("Labelling schemes: " + candidates.Replace('\n', ',') + ".");
     }
 
     /// <summary>

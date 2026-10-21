@@ -9,7 +9,7 @@ public sealed class ExportRunData
     /// <summary>How many pages were exported; 0 for the exports of a whole project (PXF, lists).</summary>
     public int PageCount { get; set; }
 
-    /// <summary>PDF, DXF: the scheme used; null for images.</summary>
+    /// <summary>PDF, DXF, labels: the scheme used; null otherwise.</summary>
     public string? Scheme { get; set; }
 
     /// <summary>Images: the file each page became, in the order of the pages; null for PDF and DXF.</summary>

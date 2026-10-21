@@ -9,7 +9,8 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The exports of a whole project into one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md): Read tier, yet they write files, so
+/// The exports of a whole project into one file (docs/tools/eplan_export_pxf.md, eplan_export_parts.md,
+/// eplan_export_labels.md): Read tier, yet they write files, so
 /// readOnlyHint is false (ADR-0012); only into a new folder the Host creates for each call (SEC-20), through
 /// <see cref="ExportRunner"/>, as eplan_export_pdf does.
 /// </summary>
@@ -18,6 +19,7 @@ internal sealed class ProjectExportTools
 {
     public const string PxfTool = "eplan_export_pxf";
     public const string PartsTool = "eplan_export_parts";
+    public const string LabelsTool = "eplan_export_labels";
 
     /// <summary>The free space a PXF export needs first: S25 wrote 840 MB for the sample project with master data (tool spec 5).</summary>
     public const long PxfFreeBytes = 2L * 1024 * 1024 * 1024;
@@ -106,6 +108,62 @@ internal sealed class ProjectExportTools
             progress,
             outcome => new PartsExportResult { Project = ResultShaper.CleanText(outcome.Data.Project) },
             result => $"Exported the parts list to a {ByteSize.Format(result.TotalBytes)} XML file in a new folder; see 'directory'.",
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    [McpServerTool(
+        Name = LabelsTool,
+        Title = "Export EPLAN labels with a labelling scheme",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(LabelsExportResult))]
+    [Description(
+        "Exports a list of an EPLAN project made by one of EPLAN's labelling schemes, such as every device tag or a " +
+        "terminal diagram, as one text or Excel (.xlsx) file into a new folder the server creates. Writes files there " +
+        "only; the project is not changed and no approval is needed. Example: {\"scheme\": \"Device tag list\"}.")]
+    public static async Task<CallToolResult> ExportLabelsAsync(
+        ExportRunner exports,
+        IProgress<ProgressNotificationValue> progress,
+        [Description("Labelling scheme, e.g. Device tag list, Terminal diagram")] string scheme,
+        [Description(ToolArguments.ProjectDescription)] string? project = null,
+        [Description("Text language, e.g. en_US; default: EPLAN UI")] string? language = null,
+        [Description("File name only; the extension is added")] string? file_name = null,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        string? schemeName = string.IsNullOrWhiteSpace(scheme) ? null : scheme.Trim();
+        if (schemeName is null)
+        {
+            violations.Add("'scheme' is required: the name of a labelling scheme, such as 'Device tag list'.");
+        }
+
+        ToolArguments.CheckLanguage(language, violations);
+        string? fileName = ToolArguments.Optional(file_name);
+        if (ExportFileName.Problem(fileName) is { } problem)
+        {
+            violations.Add("'file_name' " + problem);
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        var args = new ExportArgs { Project = ToolArguments.Optional(project), Scheme = schemeName, Language = ToolArguments.Optional(language) };
+        var job = new ExportJob(OperationNames.ExportLabelsPlan, OperationNames.ExportLabelsRun, args, "Exporting labels")
+        {
+            FileName = plan => ExportFileName.WithExtension(fileName, plan.Scheme ?? schemeName!, plan.Extension ?? string.Empty),
+            TimeoutHint = ProjectTimeoutHint,
+        };
+        return await RunAsync(
+            exports,
+            job,
+            progress,
+            outcome => new LabelsExportResult { Project = ResultShaper.CleanText(outcome.Data.Project), Scheme = ResultShaper.CleanText(outcome.Data.Scheme) },
+            result => $"Exported labels with scheme '{result.Scheme}' to a {ByteSize.Format(result.TotalBytes)} {(result.Files.All(f => f.Path.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)) ? "Excel" : "text")} file in a new folder; see 'directory'.",
             cancellationToken).ConfigureAwait(false);
     }
 
