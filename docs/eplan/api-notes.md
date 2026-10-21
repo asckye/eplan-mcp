@@ -177,6 +177,14 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 - 变体的程序目录是 `<Program Files>\EPLAN\<变体>\<版本>\Bin`（其中有 `W3u.exe`），版本目录名与 `Platform\<版本>` 相同，变体目录名就是 `/Variant:` 的值：开发机上有 `Electric P8\2026.0.3\Bin\W3u.exe` 和 `Pro Panel\2026.0.3\Bin\W3u.exe`；`Electric P8 Data` 等目录中没有这一层。`install-addin` 按它找出已安装的变体。— 2026-10-21 只读查看开发机的 `C:\Program Files\EPLAN`；A22。
+- `install-addin` 实机核对（2026-10-21，EPLAN 2026.0.3.25421 Electric P8）：
+  - 命令行注册启动的 `EPLAN.exe` 进程就是加载插件、开管道的那个实例。没有注册过时，从启动到管道出现、注册生效约 27 秒（含关闭）。
+  - 🔴 插件已注册在路径 A 时，它在 EPLAN 启动早期就从 A 加载；同一次运行中 `/register` 路径 B **没有生效**，工作站设置中仍是 A（把 A 改名后启动 EPLAN，系统消息 S043005"加载插件 <A> 时出错"）。所以管道不能证明这一次的注册。
+  - 撤销时插件也是先加载、再执行 `/unregister`：管道出现，之后撤销生效，再启动的 EPLAN 中没有插件。
+  - 插件在启动早期加载时，管道出现后约 7–9 秒 EPLAN 还在完成云登录和"有新版本"提示，这期间 `CloseMainWindow` 被忽略；启动完成后再请求就正常退出。
+  - 插件加载失败或 `/unregister` 出错时，EPLAN 弹出"系统消息"窗口（`#32770`），它挡住关闭请求。
+  - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
+  — 实机核对（按 #287 的核对步骤）。
 
 ### A30. 主数据的备份、还原与部件库写入（spike S24 写入部分，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。写入只在还原到 scratch 中的副本上进行，正在用的库前后 SHA-256 不变。
