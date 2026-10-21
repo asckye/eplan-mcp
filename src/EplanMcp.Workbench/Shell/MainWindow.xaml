@@ -80,8 +80,25 @@
 
       <!-- Header: breadcrumb (secondary text, not a heading), the status area, the window buttons. -->
       <Border x:Name="Header" Style="{StaticResource Primer.HeaderBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
-        <DockPanel MinHeight="56" Margin="24,0,8,0">
-          <StackPanel x:Name="WindowButtons" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+        <!-- Columns, not docking, so that the Tab order is the visual order (KEY-02). -->
+        <Grid MinHeight="56" Margin="24,0,8,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="{l:Tr Shell.Breadcrumb}" Style="{StaticResource Primer.Breadcrumb}" />
+            <TextBlock Text="/" Margin="8,0" Style="{StaticResource Primer.Breadcrumb}" />
+            <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
+          </StackPanel>
+          <!-- STS-11: whether approvals are taken, always, in words; STS-10: the waiting count, which opens the queue. -->
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+            <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Click="OnPendingBadge" />
+            <Path x:Name="PipeIcon" Width="14" Height="14" Margin="8,0" VerticalAlignment="Center" />
+            <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" MaxWidth="360" AutomationProperties.LiveSetting="Polite" />
+          </StackPanel>
+          <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">
               <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
             </Button>
@@ -92,12 +109,7 @@
               <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 L9.5,9.5 M9.5,0.5 L0.5,9.5" />
             </Button>
           </StackPanel>
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="{l:Tr Shell.Breadcrumb}" Style="{StaticResource Primer.Breadcrumb}" />
-            <TextBlock Text="/" Margin="8,0" Style="{StaticResource Primer.Breadcrumb}" />
-            <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
-          </StackPanel>
-        </DockPanel>
+        </Grid>
       </Border>
 
       <Grid x:Name="Body" Grid.Row="1" Margin="24" AutomationProperties.Name="{l:Tr Shell.Content}">

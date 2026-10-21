@@ -10,30 +10,42 @@ using Microsoft.Extensions.Logging;
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// The Workbench's end of the approval pipe (ADR-0014 decisions 2 and 3, SEC-22). It takes the pipe name of this user
-/// and data root as its first instance, or serves nothing; the ACL admits the current user only and no network logon.
-/// Each connection is one Host: its process must run <c>eplanmcp.exe</c> beside the Workbench (a guard against
-/// mismatches, not authentication), the handshake comes first and every message is read strictly. It takes no question
-/// yet: the handshake says so, and the Host asks in the EPLAN dialog.
+/// The Workbench's end of the approval pipe (ADR-0014 decisions 2 and 3, SEC-22, SEC-24). It takes the pipe name of this
+/// user and data root as its first instance, or serves nothing; the ACL admits the current user only and no network
+/// logon. Each connection is one Host with one question: its process must run <c>eplanmcp.exe</c> beside the Workbench
+/// (a guard against mismatches, not authentication), the handshake comes first and every message is read strictly. The
+/// question waits in the <see cref="ApprovalQueue"/> until the engineer, the deadline, a cancel or the end of the
+/// connection settles it; an approved write's connection stays open for the outcome, which approves nothing.
 /// </summary>
 internal sealed partial class ApprovalServer : IAsyncDisposable
 {
     /// <summary>How long a Host may take for its handshake, then for its question, and to hang up after the answer.</summary>
     public static readonly TimeSpan MessageTimeout = TimeSpan.FromSeconds(5);
 
+    /// <summary>
+    /// The latest deadline a question may have: the Host's is at most 300 s away (ADR-0011 section 2), so one further
+    /// off is not a valid question.
+    /// </summary>
+    public static readonly TimeSpan MaxDeadline = TimeSpan.FromMinutes(15);
+
+    private const int InvalidRequest = -32600;
+    private const int InvalidParams = -32602;
+
     private static readonly string _version = typeof(ApprovalServer).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0";
 
+    private readonly ApprovalQueue _queue;
     private readonly string _expectedClient;
     private readonly SecurityIdentifier? _owner;
     private readonly TimeProvider _clock;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _stop = new();
     private readonly List<Task> _instances = [];
+    private volatile bool _quitting;
     private int _disposed;
 
     /// <summary>The Workbench of this user and <paramref name="dataRoot"/>, serving the Host installed beside it.</summary>
-    public ApprovalServer(string dataRoot, TimeProvider clock, ILogger logger)
-        : this(WorkbenchPipeName.ForCurrentUser(dataRoot), ClientBeside(AppContext.BaseDirectory), clock, logger)
+    public ApprovalServer(ApprovalQueue queue, string dataRoot, TimeProvider clock, ILogger logger)
+        : this(queue, WorkbenchPipeName.ForCurrentUser(dataRoot), ClientBeside(AppContext.BaseDirectory), clock, logger)
     {
     }
 
@@ -42,8 +54,9 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     /// elevated, as on CI, gives its token's owner (Administrators), which the Host's <c>CurrentUserOnly</c> compares with;
     /// the Workbench itself always makes the user the owner.
     /// </summary>
-    internal ApprovalServer(string pipeName, string expectedClient, TimeProvider clock, ILogger logger, SecurityIdentifier? owner = null)
+    internal ApprovalServer(ApprovalQueue queue, string pipeName, string expectedClient, TimeProvider clock, ILogger logger, SecurityIdentifier? owner = null)
     {
+        _queue = queue;
         PipeName = pipeName;
         _expectedClient = expectedClient;
         _owner = owner;
@@ -73,12 +86,21 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         return true;
     }
 
-    /// <summary>Ends every connection.</summary>
+    /// <summary>
+    /// Ends every waiting question as closed (DLG-11) and every connection. A Host takes a broken connection as closed
+    /// too, so its answer may or may not get out first.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
         {
             return;
+        }
+
+        _quitting = true;
+        foreach (Question question in _queue.Pending)
+        {
+            _queue.End(question, QuestionEnd.Closed);
         }
 
         await _stop.CancelAsync().ConfigureAwait(false);
@@ -181,7 +203,7 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
 
     private async Task ConverseAsync(Stream pipe, int client)
     {
-        // The handshake first: the Host's own process, and a protocol both speak.
+        // The handshake first: the Host's own process, a protocol both speak, and whether a question fits now.
         RpcMessage? hello = await ReadAsync(pipe, MessageTimeout).ConfigureAwait(false);
         if (hello is not { Id: long helloId, Method: WorkbenchProtocol.HandshakeMethod })
         {
@@ -209,7 +231,147 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
             return;
         }
 
-        await SendAsync(pipe, WorkbenchJson.Result(helloId, new WorkbenchHandshakeResult(version, _version, Accepting: false))).ConfigureAwait(false);
+        bool accepting = !_quitting && _queue.TryReserve();
+        await SendAsync(pipe, WorkbenchJson.Result(helloId, new WorkbenchHandshakeResult(version, _version, accepting))).ConfigureAwait(false);
+        if (accepting)
+        {
+            await QuestionAsync(pipe, client).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>The one question of a connection: read strictly into the queue, then answered there.</summary>
+    private async Task QuestionAsync(Stream pipe, int client)
+    {
+        Question? question = null;
+        bool reserved = true;
+        try
+        {
+            if (await ReadAsync(pipe, MessageTimeout).ConfigureAwait(false) is not { Id: long askId } request || request.Method != WorkbenchProtocol.ApprovalAskMethod)
+            {
+                LogBroken(client, "no question after the handshake");
+                return;
+            }
+
+            ApprovalAskParams? ask = null;
+            try
+            {
+                ask = WorkbenchJson.As<ApprovalAskParams>(request.Params);
+            }
+            catch (WorkbenchProtocolException ex)
+            {
+                LogBroken(client, ex.Message);
+            }
+
+            if (ask is null || !Valid(ask))
+            {
+                await SendAsync(pipe, WorkbenchJson.Error(askId, InvalidParams, "The question is not valid.")).ConfigureAwait(false);
+                return;
+            }
+
+            reserved = false; // Add takes the place, even when it refuses the question
+            question = _queue.Add(ask);
+            if (question is null)
+            {
+                LogDuplicate(ask.RequestId);
+                await SendAsync(pipe, WorkbenchJson.Error(askId, InvalidRequest, "A question with this request ID is already in the queue.")).ConfigureAwait(false);
+                return;
+            }
+
+            LogAsked(question.RequestId, ask.Tool, client);
+            await AnswerAsync(pipe, question, askId).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (reserved)
+            {
+                _queue.Release();
+            }
+
+            // Whatever went wrong, no question stays waiting without its connection.
+            if (question is not null && _queue.End(question, QuestionEnd.Disconnected))
+            {
+                LogEnded(question.RequestId, question.End);
+            }
+        }
+    }
+
+    /// <summary>What strict reading cannot check: the binding is there and the deadline is one a Host gives.</summary>
+    private bool Valid(ApprovalAskParams ask) =>
+        ask.RequestId.Length > 0 && ask.Tool.Length > 0 && ask.Fingerprint.Length > 0 && ask.ArgumentsHash.Length > 0 && ask.DeadlineUnixMs >= 0
+        && ask.DeadlineUnixMs <= (_clock.GetUtcNow() + MaxDeadline).ToUnixTimeMilliseconds();
+
+    /// <summary>Whether the message the Host sent while its question waited is the cancel of that question.</summary>
+    private static bool IsCancel(Task<RpcMessage?> next, Question question)
+    {
+        try
+        {
+            return next.IsCompletedSuccessfully && next.Result is { Method: WorkbenchProtocol.CancelMethod, Id: null } cancel
+                && WorkbenchJson.As<CancelParams>(cancel.Params).RequestId == question.RequestId;
+        }
+        catch (WorkbenchProtocolException)
+        {
+            return false; // a broken cancel is a broken connection
+        }
+    }
+
+    private async Task AnswerAsync(Stream pipe, Question question, long askId)
+    {
+        // Reading goes on while the question waits: a cancel, or the end of the connection, ends it.
+        Task<RpcMessage?> next = ReadAsync(pipe, Timeout.InfiniteTimeSpan);
+        _ = next.ContinueWith(t => t.Exception, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+        TimeSpan left = question.Deadline - _clock.GetUtcNow();
+        Task deadline = Task.Delay(left > TimeSpan.Zero ? left : TimeSpan.Zero, _clock, _stop.Token);
+        Task first = await Task.WhenAny(question.Decision.Task, next, deadline).ConfigureAwait(false);
+        if (first == next)
+        {
+            _queue.End(question, IsCancel(next, question) ? QuestionEnd.Cancelled : QuestionEnd.Disconnected);
+            _queue.NoOutcome(question); // answered at that very moment, but the Host is gone
+            LogEnded(question.RequestId, question.End);
+            return;
+        }
+
+        if (first == deadline)
+        {
+            _queue.End(question, deadline.IsCompletedSuccessfully ? QuestionEnd.Expired : QuestionEnd.Closed);
+        }
+
+        WorkbenchDecision decision = await question.Decision.Task.ConfigureAwait(false);
+        ApprovalAskParams ask = question.Ask;
+        try
+        {
+            await SendAsync(pipe, WorkbenchJson.Result(askId, new ApprovalAskResult(ask.RequestId, ask.Fingerprint, ask.ArgumentsHash, decision))).ConfigureAwait(false);
+            LogEnded(question.RequestId, question.End);
+            if (question.Execution == QuestionExecution.Running)
+            {
+                await OutcomeAsync(pipe, question, next).ConfigureAwait(false);
+            }
+            else
+            {
+                await Task.WhenAny(next, Task.Delay(MessageTimeout, _clock, _stop.Token)).ConfigureAwait(false); // the Host hangs up
+            }
+        }
+        finally
+        {
+            _queue.NoOutcome(question); // changes nothing when the outcome came
+        }
+    }
+
+    /// <summary>The approved write's outcome, once, then the end of the connection; anything else breaks the protocol.</summary>
+    private async Task OutcomeAsync(Stream pipe, Question question, Task<RpcMessage?> next)
+    {
+        RpcMessage? message = await next.ConfigureAwait(false);
+        if (message is { Method: WorkbenchProtocol.ApprovalOutcomeMethod, Id: null }
+            && WorkbenchJson.As<ApprovalOutcomeParams>(message.Params) is { } outcome && outcome.RequestId == question.RequestId)
+        {
+            _queue.Report(question, outcome.Execution, outcome.Reason);
+            LogOutcome(question.RequestId, outcome.Execution, outcome.Reason);
+            message = await ReadAsync(pipe, Timeout.InfiniteTimeSpan).ConfigureAwait(false);
+        }
+
+        if (message is not null)
+        {
+            LogNotAnOutcome(question.RequestId);
+        }
     }
 
     /// <summary>The next message, strictly read; null when the Host hung up between messages.</summary>
@@ -238,8 +400,21 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     [LoggerMessage(Level = LogLevel.Information, Message = "Connection from process {ProcessId} ended: {Problem}")]
     private partial void LogConnectionEnded(int processId, string problem);
 
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Question {RequestId} refused: the request ID is already in the queue")]
+    private partial void LogDuplicate(string requestId);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Question {RequestId} for {Tool} from process {ProcessId}")]
+    private partial void LogAsked(string requestId, string tool, int processId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Question {RequestId} ended: {End}")]
+    private partial void LogEnded(string requestId, QuestionEnd? end);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Question {RequestId}: the Host sent something other than one outcome; the connection is closed")]
+    private partial void LogNotAnOutcome(string requestId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Approval pipe {PipeName} cannot take more connections ({Problem}); new questions go to the EPLAN dialog")]
     private partial void LogNotListening(string pipeName, string problem);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Question {RequestId}: the write reports {Execution} {Reason}")]
+    private partial void LogOutcome(string requestId, WriteExecution execution, string? reason);
 }

@@ -26,6 +26,13 @@ internal static class Catalogue
         ("Shell.Close", "Close", "关闭"),
         ("Shell.CloseHint", "Close to the tray; the Workbench keeps taking approval questions.", "关闭到托盘：Workbench 继续接收审批问题。"),
 
+        // Whether approval questions are taken (STS-11), in the Header.
+        ("Pipe.Accepting", "Taking approval questions", "正在接收审批问题"),
+        ("Pipe.Full", "Taking no new questions: {0} are waiting", "不接收新问题：已有 {0} 个在等待"),
+        ("Pipe.FullHelp", "New questions are asked in the EPLAN dialog until some of these are answered.", "在回答其中一些之前，新的问题改由 EPLAN 中的对话框询问。"),
+        ("Pipe.Taken", "Taking no approval questions: the pipe name is in use", "不接收审批问题：管道名已被占用"),
+        ("Pipe.TakenHelp", "Another program holds the approval pipe name of this user and data root, so approvals are asked in the EPLAN dialog. Close that program and start the Workbench again; logs\\workbench-*.log in the data root has the details.", "另一个程序占用了这个用户和数据根目录的审批管道名，审批因此改由 EPLAN 中的对话框询问。请关闭那个程序后重新启动 Workbench；详细信息见数据根目录中的 logs\\workbench-*.log。"),
+
         // Tray (STS-09, NAV-09) and leaving with questions waiting (DLG-11).
         ("Tray.Open", "Open Workbench", "打开 Workbench"),
         ("Tray.Exit", "Exit", "退出"),
