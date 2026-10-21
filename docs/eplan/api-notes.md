@@ -209,7 +209,8 @@
 - 项目语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（示例 20 种）、`DISPLAYED_LANGUAGES`（`##_##;`）、`SOURCE_LANGUAGE`（`##_##`）中。多语言文本存储为 `de_DE@…;en_US@…;`。— S23。
 - `Translate.TranslateObjects([project])` 2.6–2.9 秒；示例项目已全部翻译，没有文本改变，但改写 `Project`、`Page`、`Blob` 等文件。— S23。
 - `SetDisplayedLanguages` 接受 `"en_US"` 和逗号分隔的 `"en_US,zh_CN"`（存为 `en_US;zh_CN;`）；用分号分隔或带结尾分号都抛 `ArgumentException`（S029035）。设置不被 `SafetyPoint` 回滚。— S23 r0、r1。
-- 只有德语的功能文本（`de_DE@Motor;`）经 `TranslateObjects` 后不变（项目源语言为 `##_##`）；翻译的前提没有查清。— S23 r1。
+- 只有德语的功能文本（`de_DE@Motor;`）经 `TranslateObjects` 后不变（项目源语言为 `##_##`）。— S23 r1。
+- **翻译的前提是项目的源语言**：`TRANSLATEGUI.SOURCE_LANGUAGE` 为 `##_##` 时 `TranslateObjects` 不翻译、不报错；设为 `de_DE` 后，`de_DE@Motor;` 0.04 秒译进项目的全部 19 种翻译语言（`zh_CN@电机` 等，按翻译库）。源语言用 `ProjectSettings.SetStringSetting` 写，不被 `SafetyPoint` 回滚，要自己写回。— S23 r2。
 - 🔴 `RemoveProjectLanguage(project, "sv_SE")` 删除该语言的全部译文、把它移出翻译语言，还把显示语言改为 `zh_CN;`。`SafetyPoint` 回滚撤回了译文，但**没有撤回语言列表和显示语言**。— S23。
 - 🔴 `RemoveProjectLanguage` 删除了语言也返回 false：在不是当前项目的写副本上、`SafetyPoint` 中删除 `sv_SE`，返回 false，翻译语言中却已没有 `sv_SE`，显示语言从 `##_##;` 变为 `zh_CN;`，回滚后设置仍是删除后的样子（与 S23 一致）。结果要按读回的翻译语言判断，不能看返回值。— 2026-10-21，S24 r18。
 - 🔴 `Revision.CreateRevision(project, 名称, 说明, ref 路径)` 0.04 秒，返回的路径为空，项目链接文件从 `.elk` 变为 `.ell`（修订跟踪中的项目）；Ctrl+Z 不撤回。`Project.Comparisons` 和 `Revision.GetUncompletedPages` 前后都是 0。— S23。

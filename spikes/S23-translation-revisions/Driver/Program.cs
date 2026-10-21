@@ -14,7 +14,7 @@ namespace EplanMcp.Spikes.S23.Driver;
 /// project, runs the translation, language and revision probes, undoes the committed ones with Ctrl+Z, then restores the
 /// previously current project, closes the copy and unregisters the add-in. Ctrl+Z is sent only while every open project
 /// is a scratch copy and the copy is current. Reports go to <c>.local\spikes\s23\</c> (git-ignored).
-/// <para>Usage: <c>EplanMcp.Spikes.S23.Driver.exe --host name [--revision rN] [--port 49152] [--follow-up]</c>.</para>
+/// <para>Usage: <c>EplanMcp.Spikes.S23.Driver.exe --host name [--revision rN] [--port 49152] [--follow-up] [--source-language]</c>.</para>
 /// </summary>
 internal static class Program
 {
@@ -38,6 +38,7 @@ internal static class Program
         string port = Option(args, "--port") ?? "49152";
         string host = Option(args, "--host") ?? Environment.MachineName;
         bool followUp = args.Contains("--follow-up"); // r1: display language forms and a translation with work to do
+        bool sourceLanguage = args.Contains("--source-language"); // r2: whether translating needs a source language
         string repository = Repository();
         string title = "EplanMcp.Spikes.S23" + revision;
         string action = "EplanMcpSpikeS23" + revision;
@@ -173,7 +174,12 @@ internal static class Program
             previous = current;
             Step("select", () => Probe("select", "select"));
             Step("languages", () => Probe("languages", "languages"));
-            if (followUp)
+            if (sourceLanguage)
+            {
+                Step("translatesource", () => Watched(exports, () => Probe("translatesource", "translatesource")));
+                Step("languages-after", () => Probe("languages", "languages-after"));
+            }
+            else if (followUp)
             {
                 Step("displayformats", () => Watched(exports, () => Probe("displayformats", "displayformats")));
                 Step("translateone", () => Watched(exports, () => Probe("translateone", "translateone")));

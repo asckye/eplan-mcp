@@ -146,6 +146,9 @@ public sealed class SpikeS23Action : IEplAction
             case "translateone":
                 report["translateOne"] = TranslateOne(project);
                 break;
+            case "translatesource":
+                report["translateSource"] = TranslateWithSource(project);
+                break;
             case "removerollback":
                 report["remove"] = SettingRolledBack(project, () => new Translate().RemoveProjectLanguage(project, RemovedLanguage));
                 break;
@@ -343,6 +346,63 @@ public sealed class SpikeS23Action : IEplAction
             result["seconds"] = Math.Round(clock.Elapsed.TotalSeconds, 2);
             result["textTranslated"] = Raw(() => function.Properties.FUNC_TEXT);
             safety.Rollback();
+        }
+
+        result["textAfterRollback"] = Raw(() => function.Properties.FUNC_TEXT);
+        return result;
+    }
+
+    /// <summary>
+    /// r2: what translation needs. r1 left a German-only "Motor" untranslated while the project's source language was
+    /// "##_##"; the translation database maps Motor to en_US "Motor" and zh_CN "电机" (S24 r11 export). The same text is
+    /// translated with the source language as it is and with de_DE, inside a SafetyPoint that is rolled back; the source
+    /// language, which the SafetyPoint does not take back (S23 r0), is written back explicitly.
+    /// </summary>
+    private static JObject TranslateWithSource(Project project)
+    {
+        const string Node = "TRANSLATEGUI.SOURCE_LANGUAGE";
+        using var finder = new DMObjectsFinder(project);
+        Function function = finder.GetFunctions(null).First(f => f.IsMainFunction && Raw(() => f.Properties.FUNC_TEXT).Length > 0);
+        using var settings = new ProjectSettings(project);
+        string original = settings.GetStringSetting(Node, 0) ?? string.Empty;
+        var result = new JObject { ["function"] = function.Name, ["sourceBefore"] = original, ["textBefore"] = Raw(() => function.Properties.FUNC_TEXT) };
+        using (SafetyPoint safety = SafetyPoint.Create())
+        {
+            try
+            {
+                foreach (string source in new[] { original, "de_DE" })
+                {
+                    var attempt = new JObject { ["source"] = source };
+                    attempt["setSource"] = Try(() =>
+                    {
+                        settings.SetStringSetting(Node, source, 0);
+                        return settings.GetStringSetting(Node, 0);
+                    });
+                    var german = new MultiLangString();
+                    german.AddString(ISOCode.Language.L_de_DE, "Motor");
+                    function.Properties.FUNC_TEXT = german;
+                    attempt["textGermanOnly"] = Raw(() => function.Properties.FUNC_TEXT);
+                    var clock = Stopwatch.StartNew();
+                    attempt["translate"] = Try(() =>
+                    {
+                        using var translate = new Translate();
+                        translate.TranslateObjects([function]);
+                        return "done";
+                    });
+                    attempt["seconds"] = Math.Round(clock.Elapsed.TotalSeconds, 2);
+                    attempt["textTranslated"] = Raw(() => function.Properties.FUNC_TEXT);
+                    result[source.Length == 0 ? "sourceEmpty" : "source_" + source] = attempt;
+                }
+            }
+            finally
+            {
+                result["sourceWrittenBack"] = Try(() =>
+                {
+                    settings.SetStringSetting(Node, original, 0);
+                    return settings.GetStringSetting(Node, 0);
+                });
+                safety.Rollback();
+            }
         }
 
         result["textAfterRollback"] = Raw(() => function.Properties.FUNC_TEXT);
