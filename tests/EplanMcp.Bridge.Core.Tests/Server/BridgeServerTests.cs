@@ -84,7 +84,9 @@ public sealed class BridgeServerTests : IDisposable
     [Fact]
     public void Start_CreatesThePipeBeforeReturning()
     {
-        // The Host discovers Bridges by listing \\.\pipe\ (ADR-0008) and does not wait for a pipe to appear.
+        // The Host discovers Bridges by listing \\.\pipe\ (ADR-0008) and does not wait for a pipe to appear. Listing the
+        // whole namespace here could skip the pipe while other tests close theirs, so the check is a connect that
+        // gives up at once when no instance is listening.
         int caller = Environment.CurrentManagedThreadId;
         bool createdByStart = false;
         using BridgeServer server = NewServer(name =>
@@ -100,7 +102,9 @@ public sealed class BridgeServerTests : IDisposable
         server.Start();
 
         Assert.True(createdByStart);
-        Assert.Contains(server.PipeName, Directory.EnumerateFiles(@"\\.\pipe\").Select(Path.GetFileName));
+        using var host = new NamedPipeClientStream(".", server.PipeName, PipeDirection.InOut);
+        host.Connect(0);
+        Assert.True(host.IsConnected);
     }
 
     [Fact]
