@@ -25,6 +25,9 @@ internal sealed class HostDataLocations(string root)
     /// <summary>The copies made before Destructive writes (ADR-0013); never deleted by EplanMcp.</summary>
     public string Backups => Path.Combine(Root, "backups");
 
+    /// <summary>The import root: the import tools read files below it only, never configurable (SEC-31, M4c design Q4).</summary>
+    public string Imports => Path.Combine(Root, "imports");
+
     public static HostDataLocations FromEnvironment() => new(
         Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
             ? home
