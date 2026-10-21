@@ -3,6 +3,9 @@ namespace EplanMcp.Host.ClientConfig;
 /// <summary>Why <c>eplanmcp client-config</c> leaves a client's configuration alone.</summary>
 internal enum ClientProblem
 {
+    /// <summary>The file cannot be read as its format, or holds the servers in a form that cannot be changed safely.</summary>
+    InvalidFile,
+
     /// <summary>Several Claude Desktop packages are installed, and none is the known one.</summary>
     AmbiguousPackage,
 }
