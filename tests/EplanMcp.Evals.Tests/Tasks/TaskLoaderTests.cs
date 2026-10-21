@@ -237,6 +237,58 @@ public sealed class TaskLoaderTests
     }
 
     [Fact]
+    public void Load_AnExpectedValueAfterDot_RefersToAnAfterCall()
+    {
+        EvalTask task = Valid("t", """
+            id: t
+            set: dev
+            fixture: copy
+            prompt: 检查 {project}，报告错误数和 PDF 的文件名
+            answer: { type: object, properties: { errors: { type: integer }, file: { type: string } } }
+            after:
+              errors: { tool: eplan_check_list, pick: $.counts.error }
+              pdf: { tool: exported_files, args: { extension: pdf }, pick: "$.files[0].name" }
+            checks:
+              - { answer: $.errors, equals: after.errors }
+              - { answer: $.file, contains: after.pdf }
+              - { answer: $.file, contains: "after.pdf" }
+            """);
+
+        Assert.Equal([("errors", null), ("pdf", null), (null, "\"after.pdf\"")], task.Checks.Select(c => (c.ExpectedAfter, c.Literal is null ? null : Comparison.Show(c.Literal))));
+        Assert.All(task.Checks, c => Assert.Null(c.Oracle));
+        Assert.Equal((EvalTask.ExportedFiles, """{"extension":"pdf"}"""), (task.After["pdf"].Tool, Comparison.Show(task.After["pdf"].Args)));
+    }
+
+    [Fact]
+    public void Load_MistakesWithExportedFilesAndExpectedAfterValues_AreReported()
+    {
+        TaskFile file = TaskLoader.Load("t", """
+            id: t
+            set: dev
+            prompt: p
+            answer: { type: object }
+            oracle: { files: { tool: exported_files, pick: $.count } }
+            after:
+              pdfs: { tool: exported_files, args: { extension: pdf, project: P }, pick: $.count }
+              dxf: { tool: exported_files, args: { extension: 1 }, pick: $.count }
+            checks:
+              - { answer: $.n, equals: oracle.files }
+              - { answer: $.n, equals: after.pdfs }
+              - { answer: $.n, equals: after.dxf }
+              - { answer: $.n, at_least: after.none }
+            """);
+
+        Assert.Equal(
+            [
+                "line 5: exported_files is an after call: the files are there once the attempt is over",
+                "line 7: exported_files takes one argument only, a string 'extension' such as pdf",
+                "line 8: exported_files takes one argument only, a string 'extension' such as pdf",
+                "line 13: after 'none' is not defined",
+            ],
+            file.Problems);
+    }
+
+    [Fact]
     public void Load_ATaskOnACopyWhosePromptDoesNotNameIt_IsReported()
     {
         TaskFile file = TaskLoader.Load("t", """

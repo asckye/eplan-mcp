@@ -105,6 +105,66 @@ public sealed class GraderTests
     }
 
     [Fact]
+    public void Grade_AnExpectedAfterValue_IsWhatTheAfterCallFound()
+    {
+        EvalTask task = TaskLoader.Load("workflow", """
+            id: workflow
+            set: dev
+            fixture: copy
+            prompt: 检查 {project}，导出 PDF，报告错误数和文件名
+            answer: { type: object, properties: { errors: { type: integer }, file: { type: string } } }
+            after:
+              errors: { tool: eplan_check_list, pick: $.counts.error }
+              pdf: { tool: exported_files, args: { extension: pdf }, pick: "$.files[0].name" }
+              names: { tool: exported_files, pick: "$.files[*].name" }
+            checks:
+              - { answer: $.errors, equals: after.errors }
+              - { answer: $.file, contains: after.pdf }
+              - { after: names, contains: after.pdf }
+            """).Task!;
+        var after = new Dictionary<string, AfterValue>
+        {
+            ["errors"] = new(JsonValue.Create(2), null),
+            ["pdf"] = new(JsonValue.Create("Eval_r1_01.pdf"), null),
+            ["names"] = new(JsonNode.Parse("""["Eval_r1_01.pdf"]"""), null),
+        };
+        var noPdf = new Dictionary<string, AfterValue>(after)
+        {
+            ["pdf"] = new(null, "$.files[0].name matches nothing in exported_files, which found 0 of the attempt's files"),
+            ["names"] = new(JsonNode.Parse("[]"), null),
+        };
+        var oracle = new Dictionary<string, JsonNode?>();
+
+        Assert.True(Grader.Grade(task, JsonNode.Parse("""{"errors": 2, "file": "C:\\exports\\Eval_r1_01\\x\\Eval_r1_01.pdf"}"""), oracle, after).Solved);
+        Assert.Equal(["$.errors equals: 3 is not 2"], Grader.Grade(task, JsonNode.Parse("""{"errors": 3, "file": "Eval_r1_01.pdf"}"""), oracle, after).Failures);
+        Assert.Equal(
+            [
+                "$.file contains: the expected after.pdf: $.files[0].name matches nothing in exported_files, which found 0 of the attempt's files",
+                "after.names contains: the expected after.pdf: $.files[0].name matches nothing in exported_files, which found 0 of the attempt's files",
+            ],
+            Grader.Grade(task, JsonNode.Parse("""{"errors": 2, "file": "Eval_r1_01.pdf"}"""), oracle, noPdf).Failures);
+    }
+
+    [Fact]
+    public void Grade_AnExpectedAfterValueTheComparisonCannotUse_FailsTheCheck()
+    {
+        EvalTask task = TaskLoader.Load("t", """
+            id: t
+            set: dev
+            prompt: p
+            answer: { type: object, properties: { n: { type: integer } } }
+            after: { total: { tool: eplan_check_list, pick: $.total } }
+            checks: [{ answer: $.n, at_least: after.total }]
+            """).Task!;
+        var after = new Dictionary<string, AfterValue> { ["total"] = new(JsonValue.Create("many"), null) };
+
+        Verdict verdict = Grader.Grade(task, JsonNode.Parse("""{"n": 2}"""), new Dictionary<string, JsonNode?>(), after);
+
+        Assert.Equal(["$.n at_least: after.total gave \"many\", but at_least compares with a number"], verdict.Failures);
+        Assert.Empty(verdict.Invalid);
+    }
+
+    [Fact]
     public void Grade_AnOracleValueTheComparisonCannotUse_MakesTheTaskInvalidNotFailed()
     {
         var scalar = new Dictionary<string, JsonNode?> { ["pages"] = JsonValue.Create(2) };

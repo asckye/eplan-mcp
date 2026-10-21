@@ -37,8 +37,9 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
     {
         IReadOnlyList<string> tools = await server.Client.ListToolsAsync(TestContext.Current.CancellationToken);
 
+        // exported_files is the runner's own after call, not a tool of eplanmcp.
         Assert.All(
-            Files.SelectMany(f => f.Task!.Oracle.Concat(f.Task.After).Select(o => (f.Name, o.Value.Tool))),
+            Files.SelectMany(f => f.Task!.Oracle.Concat(f.Task.After).Select(o => (f.Name, o.Value.Tool))).Where(o => o.Tool != EvalTask.ExportedFiles),
             o => Assert.True(tools.Contains(o.Tool), $"{o.Name}.yaml calls {o.Tool}"));
     }
 }

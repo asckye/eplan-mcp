@@ -211,6 +211,37 @@ public sealed class EvalRunTests
     }
 
     [Fact]
+    public async Task Run_TheFilesAnAttemptExported_AreWhatItsExportedFilesCallsSee()
+    {
+        EvalTask task = TaskLoader.Load("export", """
+            id: export
+            set: dev
+            prompt: 把 =GAA+A1&EFS1/1 导出成 PDF，告诉我文件名
+            answer: { type: object, properties: { file: { type: string } } }
+            after:
+              pdfs: { tool: exported_files, args: { extension: pdf }, pick: $.count }
+              pdf: { tool: exported_files, args: { extension: pdf }, pick: "$.files[0].name" }
+            checks:
+              - { after: pdfs, equals: 1 }
+              - { answer: $.file, contains: after.pdf }
+            """).Task!;
+        AgentAttempt exported = Answer("""{"file":"EPLAN_Sample_Project.pdf"}""") with
+        {
+            Exports = [new(@"EPLAN_Sample_Project\20261021T083000Z-aaaaaa\EPLAN_Sample_Project.pdf", 7)],
+        };
+        var runner = new FakeRunner(exported, Answer("""{"file":"EPLAN_Sample_Project.pdf"}"""));
+        var records = new List<TaskRecord>();
+
+        await EvalRun.RunAsync([task], 2, new FakeToolClient(), _tools, runner, TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
+
+        IReadOnlyList<AttemptRecord> attempts = Assert.Single(records).Attempts;
+        Assert.Equal([Outcome.Solved, Outcome.Failed], attempts.Select(a => a.Outcome));
+        Assert.Equal(
+            ["after.pdfs equals: 0 is not 1", "$.file contains: the expected after.pdf: $.files[0].name matches nothing in exported_files, which found 0 of the attempt's files"],
+            attempts[1].Failures);
+    }
+
+    [Fact]
     public async Task Run_ACommittedWriteTheEvalsAuditShows_IsGradedAsUsual()
     {
         int audited = 0;
