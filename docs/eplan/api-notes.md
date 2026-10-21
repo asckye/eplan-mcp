@@ -201,6 +201,7 @@
 - `SetDisplayedLanguages` 接受 `"en_US"` 和逗号分隔的 `"en_US,zh_CN"`（存为 `en_US;zh_CN;`）；用分号分隔或带结尾分号都抛 `ArgumentException`（S029035）。设置不被 `SafetyPoint` 回滚。— S23 r0、r1。
 - 只有德语的功能文本（`de_DE@Motor;`）经 `TranslateObjects` 后不变（项目源语言为 `##_##`）；翻译的前提没有查清。— S23 r1。
 - 🔴 `RemoveProjectLanguage(project, "sv_SE")` 删除该语言的全部译文、把它移出翻译语言，还把显示语言改为 `zh_CN;`。`SafetyPoint` 回滚撤回了译文，但**没有撤回语言列表和显示语言**。— S23。
+- 🔴 `RemoveProjectLanguage` 删除了语言也返回 false：在不是当前项目的写副本上、`SafetyPoint` 中删除 `sv_SE`，返回 false，翻译语言中却已没有 `sv_SE`，显示语言从 `##_##;` 变为 `zh_CN;`，回滚后设置仍是删除后的样子（与 S23 一致）。结果要按读回的翻译语言判断，不能看返回值。— 2026-10-21，S24 r18。
 - 🔴 `Revision.CreateRevision(project, 名称, 说明, ref 路径)` 0.04 秒，返回的路径为空，项目链接文件从 `.elk` 变为 `.ell`（修订跟踪中的项目）；Ctrl+Z 不撤回。`Project.Comparisons` 和 `Revision.GetUncompletedPages` 前后都是 0。— S23。
 
 ### A27. 部件库与翻译库的只读访问（spike S24，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）

@@ -54,7 +54,7 @@
 - **执行**：Destructive 流水线先备份（ADR-0013），然后：
   1. 记下翻译语言和显示语言的原值；
   2. 在 `TransactionScope` 中 `new Translate().RemoveProjectLanguage(project, 语言)`（逐个）；
-  3. 读回：删除的语言都不在翻译语言中，否则 `EPLAN_OPERATION_FAILED`；失败或取消时 `SafetyPoint` 回滚**只撤回译文**，所以回滚之后**再把两项语言设置写回原值**（S23：设置不被回滚，A28），写回后读回核对。写回的方法与 `eplan_language_set` 相同（`ProjectSettings.SetStringSetting`，见其规格第 5 节）；
+  3. 每删除一种语言就读回翻译语言（`TRANSLATEGUI.TRANSLATE_LANGUAGES`）：语言不在了就算删除成功，还在就是 `EPLAN_OPERATION_FAILED`（源语言被 EPLAN 拒绝时也落在这里）。**不看 `RemoveProjectLanguage` 的返回值**：它删除了语言也返回 false（2026-10-21 实测，S24 r18，A28），返回值只写进日志；抛出异常时照常是 `EPLAN_OPERATION_FAILED`。失败或取消时 `SafetyPoint` 回滚**只撤回译文**，所以回滚之后**再把两项语言设置写回原值**（S23：设置不被回滚，A28），写回后读回核对。写回的方法与 `eplan_language_set` 相同（`ProjectSettings.SetStringSetting`，见其规格第 5 节）；
   4. 成功时提交，读回 `after`。
 - **已验证**（S23，A28）：删除 `sv_SE` 约 3 秒，瑞典语译文 460 → 0，翻译语言中去掉 `sv_SE`，显示语言变为 `zh_CN;`；`SafetyPoint` 回滚后译文恢复，语言设置没有恢复。
 - **待 Large 测试确认**：提交后 Ctrl+Z 能撤回什么（译文、设置）；删除多种语言时的耗时。

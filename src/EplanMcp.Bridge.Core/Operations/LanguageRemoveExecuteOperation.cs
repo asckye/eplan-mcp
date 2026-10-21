@@ -1,3 +1,4 @@
+using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -5,12 +6,18 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// <see cref="OperationNames.LanguageRemoveExecute"/>: checks the arguments and the plan's fingerprint again, backs the
 /// project up (<see cref="ProjectBackups"/>), then removes the languages one by one in one transaction and reads the
-/// settings back; a removed language still among the translation languages is EPLAN_OPERATION_FAILED
-/// (docs/tools/eplan_language_remove.md, section 5). The rollback takes the translations back but not the settings
-/// (spike S23, api-notes A28), so on every failure <see cref="LanguageTransaction"/> writes them back after it.
+/// settings back after each; a language still among the translation languages is EPLAN_OPERATION_FAILED, whatever
+/// EPLAN returned (docs/tools/eplan_language_remove.md, section 5). The rollback takes the translations back but not
+/// the settings (spike S23, api-notes A28), so on every failure <see cref="LanguageTransaction"/> writes them back after it.
 /// </summary>
 public sealed class LanguageRemoveExecuteOperation(
-    IProjectCatalog catalog, IPageReader pages, IProjectLanguages languages, ILanguageRemover remover, IProjectBackup backup, ITransactionScopeFactory transactions)
+    IProjectCatalog catalog,
+    IPageReader pages,
+    IProjectLanguages languages,
+    ILanguageRemover remover,
+    IProjectBackup backup,
+    ITransactionScopeFactory transactions,
+    IBridgeLog log)
     : Operation<LanguageRemoveArgs, LanguageRemoveData>, IWriteOperation
 {
     /// <summary>The tool whose undo step this is: EPLAN lists it as "AI: eplan_language_remove".</summary>
@@ -51,22 +58,30 @@ public sealed class LanguageRemoveExecuteOperation(
         Committed<LanguageSettings> committed = LanguageTransaction.Run(transactions, languages, Tool, path, request.Before, Restore, () =>
         {
             OperationContext context = OperationContext.Current;
+            LanguageSettings after = request.Before;
             for (int i = 0; i < request.Languages.Count; i++)
             {
+                string language = request.Languages[i];
                 context.ThrowIfCancellationRequested();
                 context.ReportProgress(i, request.Languages.Count, "Removing languages");
-                remover.Remove(path, request.Languages[i]);
+
+                // RemoveProjectLanguage returns false also when it removed the language (A28, S24 r18): only the
+                // settings read back tell, and what it returned goes to the log.
+                bool returned = remover.Remove(path, language);
+                after = languages.Read(path);
+                bool removed = !LanguageCodes.Split(after.Translation).Contains(language, StringComparer.Ordinal);
+                log.Write(BridgeLogLevel.Information, $"[{context.RequestId}] RemoveProjectLanguage({language}) returned {returned}; read back: {(removed ? "removed" : "still a translation language")}");
+                if (!removed)
+                {
+                    throw new BridgeErrorException(
+                        ErrorReason.EplanOperationFailed,
+                        $"EPLAN did not remove {language}, so nothing was removed and the language settings were written back as they were. Ask the engineer to check the project's languages in EPLAN; eplan_message_list may show why.",
+                        retryable: false,
+                        new Dictionary<string, string> { ["project"] = request.Project.Name, ["notRemoved"] = language });
+                }
             }
 
-            LanguageSettings after = languages.Read(path);
-            string[] left = [.. request.Languages.Where(language => LanguageCodes.Split(after.Translation).Contains(language, StringComparer.Ordinal))];
-            return left.Length == 0
-                ? after
-                : throw new BridgeErrorException(
-                    ErrorReason.EplanOperationFailed,
-                    "EPLAN did not remove the languages as planned, so nothing was removed and the language settings were written back as they were. Ask the engineer to check the project's languages in EPLAN.",
-                    retryable: false,
-                    new Dictionary<string, string> { ["project"] = request.Project.Name, ["notRemoved"] = string.Join("\n", left) });
+            return after;
         });
         return new LanguageRemoveData
         {
