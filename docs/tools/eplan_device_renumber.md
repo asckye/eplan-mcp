@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `device` / `core` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 12 步；已实现，待实机验证） |
+| 状态 | Proposed（M4 第 12 步；已实现，2026-10-20 实机验证并修复崩溃，见 api-notes A20） |
 
 ## 1. 这个工具解决什么任务
 "把这一页上带 ? 的设备标识编号"。设备标识中的 `?` 表示还没有编号，例如插入宏后没有线圈的触点 `-?QA1`（A14）、`+A1-?XG1`（S12）。代理用它让 EPLAN 按编号方案给指定页或整个项目的设备编号：默认只给带 `?` 的标识编号（`PostNumerate`），也可以给范围内的全部设备重新编号。结果由 EPLAN 的规则决定，事先算不出（M4 设计 Q7），所以变更清单只列范围，执行后列出每个改变的标识。大范围改名难以逐项撤销，按 Destructive 处理：每次审批，执行前备份，按一次 Ctrl+Z 撤销。
@@ -43,7 +43,7 @@
 ```
 - `scope`：编号的范围。`pageCount` 为 `null` 表示整个项目；`scheme` 为 `null` 表示 EPLAN 的默认方案；`devices` 是规划时范围内要编号的设备数（`only_unnumbered` 时是带 `?` 的设备数）。
 - `changed`：执行前后完整标识改变的设备，按设备去重（辅助功能跟随主功能，不单独列出），最多 200 条，`changedCount` 是总数（M4 设计 4.2）；超出时 `truncated = true`。
-- `stillUnnumbered`：执行后范围内标识仍带 `?` 的设备，最多 50 个。S12 中 `PostNumerate` 没有给 `=GAA+A1-?QA1` 编号，原因未查，所以不能假定全部编号完（A18）；有这类设备时 `hint` 提示工程师在 EPLAN 中处理。
+- `stillUnnumbered`：执行后范围内标识仍带 `?` 的设备，最多 50 个。S12 中 `PostNumerate` 没有给 `=GAA+A1-?QA1` 编号，原因未查，所以不能假定全部编号完（A18）；有这类设备时 `hint` 提示工程师在 EPLAN 中处理。EPLAN 没有改动任何标识时，按 ADR-0010 第 1 节返回 `not_started`，`undo` 为 `null`（实测没有留下撤销步骤，A20），`backup` 照常给出。
 - `dry_run`：只有 `scope`，`changed`、`stillUnnumbered` 为 `null`。
 - 范围内没有带 `?` 的设备（`only_unnumbered` 时）：变更清单为空，返回 `not_started`，不审批、不备份，`hint` 说明没有可编号的设备。
 - `backup`：同 `eplan_page_delete`。标识是项目数据，经过 ResultShaper。`undo`、`recovered`：同 `eplan_page_create`。
@@ -72,9 +72,10 @@
   - 指纹：范围内每个功能的 `Name` 和会话内标识，排序后取 SHA-256。
 - **执行**：Destructive 流水线先重算指纹、做好备份，然后在 `TransactionScope` 中：
   1. 记下范围内每个功能的会话内标识和 `Name`；
-  2. `new Renumber().DeviceTags(functions, null, 标志, scheme ?? "", start, step)`：第二个参数是过滤方案，传 `null` 表示不过滤（XML）；`only_unnumbered` 时标志为 `Renumber.Enums.DeviceTags.PostNumerate`，否则不带标志；第 4 个参数是编号方案（A18：异常中的参数名为 `strSchemePerIdentifier`；XML 中 `Project` 重载的参数名与类型顺序不一致，不要照着它传参）；
-  3. 读回：按会话内标识对应同一个功能，比较 `Name` 得出 `changed`，再找出仍带 `?` 的设备；
-  4. `Commit()`，再 `CloseUndo()`。EPLAN 什么都没有改时仍然提交，`changedCount` 为 0，`hint` 说明。
+  2. `only_unnumbered` 时只把设备标识（`:` 之前）带 `?` 的功能交给 EPLAN：交入设备标识不带 `?` 的功能（只有连接点带 `?` 的端子、已编号的电缆）时，`PostNumerate` 发生访问冲突，EPLAN 进程直接结束（A20）。没有这样的功能就不调用。
+  3. `new Renumber().DeviceTags(functions, null, 标志, scheme ?? "", start, step)`：第二个参数是过滤方案，传 `null` 表示不过滤（XML）；`only_unnumbered` 时标志为 `Renumber.Enums.DeviceTags.PostNumerate`，否则不带标志；第 4 个参数是编号方案（A18：异常中的参数名为 `strSchemePerIdentifier`；XML 中 `Project` 重载的参数名与类型顺序不一致，不要照着它传参）；
+  4. 读回：按会话内标识对应同一个功能，比较 `Name` 得出 `changed`，再找出仍带 `?` 的设备；
+  5. `Commit()`，再 `CloseUndo()`。EPLAN 什么都没有改时仍然提交，`changedCount` 为 0，`hint` 说明。
 - **方案**：S12：传 `""` 与 `Standard` 结果相同（是总用 `Standard` 还是用界面上次使用的方案，没有区分）；名称不存在时抛出 `Eplan.EplApi.HEServices.Exceptions.InvalidScheme`，消息中用单引号列出可用方案，以 `, ` 分隔（消息随界面语言变化，S12 中是中文）。Bridge 只取最后一对单引号之间的内容作为候选，取不出时不给候选。编号方案的设置节点没有查到，所以名称要到执行时才能校验，那时已经备份；实现时若查到节点，改为在规划阶段校验（`not_started`，不必先备份）。
 - **已验证**（S12，A18）：在调度器中给一页上的 12 个功能编号 0.1–0.2 秒：`+A1-?WG1` → `+A1-WG1`，`+A1-?XG1`/`?XG2`/`?XG3` → `XG2`/`XG3`/`XG4`（跳过已占用的 `XG1`）；端子连接点 `:?1`、`:?2` 不变；`=GAA+A1-?QA1` 不变；能被 `SafetyPoint` 回滚，提交后 Ctrl+Z 一步撤销；不弹对话框。
 - **没有验证**，由 Large 测试确认：

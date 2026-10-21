@@ -35,9 +35,19 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        IFunctionBase[] functions = pages is null
-            ? [.. finder.GetFunctions(null)]
+        Function[] inScope = pages is null
+            ? finder.GetFunctions(null)
             : [.. pages.SelectMany(page => Functions(finder, page) ?? throw new InvalidOperationException("A page the operation resolved is gone."))];
+
+        // PostNumerate raised an access violation, which ends EPLAN, when it got a function whose device tag has no '?':
+        // a terminal numbered only as ':?1', or a cable already numbered (live check, api-notes A20). It numbers only the
+        // tags with '?' anyway, so only those go to it.
+        IFunctionBase[] functions = onlyUnnumbered ? [.. inScope.Where(f => Unnumbered(f.Name))] : [.. inScope];
+        if (functions.Length == 0)
+        {
+            return;
+        }
+
         using var renumber = new EplanRenumber();
         try
         {
@@ -59,6 +69,9 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
     }
 
     /// <summary>All functions, or those on the page with exactly this name (FunctionsFilter.Page, S6); null without such a page.</summary>
+    /// <summary>A '?' in the device tag before any connection point: the rule of DeviceRenumberRequest.Unnumbered.</summary>
+    private static bool Unnumbered(string? tag) => tag is not null && tag.Split(':')[0].IndexOf('?') >= 0;
+
     private static Function[]? Functions(DMObjectsFinder finder, string? page)
     {
         if (page is null)
