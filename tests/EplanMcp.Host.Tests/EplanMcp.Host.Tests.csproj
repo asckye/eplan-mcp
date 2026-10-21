@@ -5,6 +5,8 @@
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Verify.XunitV3" />
+    <!-- Reads the audit log while the Host may still append to it; see the file. -->
+    <Compile Include="..\Shared\AuditFiles.cs" Link="Shared\AuditFiles.cs" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">

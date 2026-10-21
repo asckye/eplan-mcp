@@ -2,17 +2,16 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.IO.Pipelines;
 using System.IO.Pipes;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Server;
 using EplanMcp.Bridge.Core.Threading;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
+using EplanMcp.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -128,35 +127,13 @@ public sealed class WriteCancellationTests : IAsyncDisposable
         timeout.CancelAfter(_patience);
         while (true)
         {
-            // The Host may be writing the audit right now: read it shared, and try again after a half-written line.
-            try
+            if (AuditFiles.Records(_locations.Audit).FirstOrDefault(r => r["kind"]!.GetValue<string>() == "execution_result") is { } record)
             {
-                if (Directory.Exists(_locations.Audit)
-                    && Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).SelectMany(SharedLines).Select(l => JsonNode.Parse(l)!.AsObject())
-                        .FirstOrDefault(r => r["kind"]!.GetValue<string>() == "execution_result") is { } record)
-                {
-                    return record;
-                }
-            }
-            catch (Exception ex) when (ex is IOException or JsonException)
-            {
+                return record;
             }
 
             await Task.Delay(20, timeout.Token);
         }
-    }
-
-    private static List<string> SharedLines(string path)
-    {
-        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        using var reader = new StreamReader(stream);
-        var lines = new List<string>();
-        while (reader.ReadLine() is { } line)
-        {
-            lines.Add(line);
-        }
-
-        return lines;
     }
 
     [McpServerToolType]

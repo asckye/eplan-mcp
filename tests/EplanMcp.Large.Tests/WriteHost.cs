@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using EplanMcp.Host.Audit;
+using EplanMcp.Tests;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
@@ -101,13 +101,7 @@ public sealed class WriteHost : IAsyncLifetime
     public List<JsonObject> AuditRecords() => AuditRecordsIn(Home);
 
     /// <summary>Every record of the audit log in the data root <paramref name="home"/>, oldest first.</summary>
-    internal static List<JsonObject> AuditRecordsIn(string home)
-    {
-        string audit = Path.Combine(home, "audit");
-        return Directory.Exists(audit)
-            ? [.. Directory.EnumerateFiles(audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadLines).Select(l => JsonNode.Parse(l)!.AsObject())]
-            : [];
-    }
+    internal static List<JsonObject> AuditRecordsIn(string home) => AuditFiles.Records(Path.Combine(home, "audit"));
 
     /// <summary>The write suspensions this eplanmcp keeps (ADR-0010 section 3).</summary>
     public string[] Suspensions()

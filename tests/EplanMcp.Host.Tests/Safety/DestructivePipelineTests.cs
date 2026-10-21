@@ -4,6 +4,7 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
+using EplanMcp.Tests;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EplanMcp.Host.Tests.Safety;
@@ -191,5 +192,5 @@ public sealed class DestructivePipelineTests : IDisposable
     }
 
     private List<JsonObject> AuditRecords() =>
-        [.. Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).Order(StringComparer.Ordinal).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())];
+        AuditFiles.Records(_locations.Audit);
 }

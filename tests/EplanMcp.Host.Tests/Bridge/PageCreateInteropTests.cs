@@ -10,6 +10,7 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
+using EplanMcp.Tests;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
 
@@ -137,7 +138,7 @@ public sealed class PageCreateInteropTests : IAsyncDisposable
     }
 
     private List<JsonObject> AuditRecords() =>
-        [.. Directory.EnumerateFiles(_locations.Audit, AuditLog.FilePattern).SelectMany(File.ReadAllLines).Select(l => JsonNode.Parse(l)!.AsObject())];
+        AuditFiles.Records(_locations.Audit);
 
     private string[] AuditKinds() => [.. AuditRecords().Select(r => r["kind"]!.GetValue<string>())];
 

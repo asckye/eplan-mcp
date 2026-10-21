@@ -10,6 +10,8 @@
   <ItemGroup>
     <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
+    <!-- Reads the audit log while eplanmcp may still append to it; see the file. -->
+    <Compile Include="..\Shared\AuditFiles.cs" Link="Shared\AuditFiles.cs" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
