@@ -54,7 +54,8 @@
               </DockPanel>
               <TextBlock Text="{Binding Kind}" Style="{StaticResource Primer.Muted}" Margin="0,4,0,0" />
               <DockPanel Margin="0,4,0,0">
-                <TextBlock DockPanel.Dock="Right" Text="{Binding Result}" Style="{StaticResource Primer.Muted}" Margin="8,0,0,0" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding Result}" Style="{StaticResource Primer.Muted}" Margin="8,0,0,0"
+                           Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
                 <TextBlock DockPanel.Dock="Right" Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" Margin="8,0,0,0"
                            Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}" />
                 <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Muted}" />
@@ -80,8 +81,9 @@
             <DockPanel>
               <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
               <StackPanel>
-                <TextBlock Text="{l:Tr Question.DestructiveBanner}" Style="{StaticResource Primer.Text}" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBox x:Name="BackupFolder" Text="{Binding Backup, Mode=OneWay}" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.Name="{Binding Backup}" />
+                <TextBlock x:Name="DestructiveTitle" Text="{l:Tr Question.DestructiveBanner}" Style="{StaticResource Primer.Text}" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="None" />
+                <TextBox x:Name="BackupFolder" Text="{Binding Backup, Mode=OneWay}" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.Name="{Binding Backup}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=DestructiveTitle}" />
               </StackPanel>
             </DockPanel>
           </Border>

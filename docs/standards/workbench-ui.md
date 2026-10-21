@@ -1,7 +1,7 @@
 # Workbench 界面规范
 
 > 依据：项目负责人的 TIA_Portal_Openness_MCP 项目（下称 TIA）的界面规范 `docs/development/design-spec/workbench-ui.md` v0.2（MIT 许可，按 TIA 的提交 `38ca2883` 阅读）和 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)。规则的结构、编号方法和以 WCAG 2.2 AA 为底线的做法沿用 TIA，文字按本项目重写；TIA 特有的内容不收录（0.4 节），有意的不同列在附录 B。
-> 适用范围：`EplanMcp.Workbench`（WPF，`net10.0-windows`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4）的全部界面：主窗口与外框，审批队列、审计、状态、MCP 与客户端四个页面，设置和审计详情两个抽屉，对话框，toast、托盘和系统通知。测试放在 `tests/EplanMcp.Workbench.Tests`。两者都还没有建立。
+> 适用范围：`EplanMcp.Workbench`（WPF，`net10.0-windows`，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4）的全部界面：主窗口与外框，审批队列、审计、状态、MCP 与客户端四个页面，设置和审计详情两个抽屉，对话框，toast、托盘和系统通知。测试放在 `tests/EplanMcp.Workbench.Tests`。已实现外框、设置抽屉中的语言和主题、托盘和审批队列页；审计、状态、MCP 与客户端三个页面暂为占位（第 7 节）。
 > 审批界面的规则来自 [ADR-0011](../adr/0011-approval-out-of-band.md)、[ADR-0014](../adr/0014-workbench-approval-channel.md)、M5 设计 4.6 和 [security.md](security.md) 的 SEC-23、SEC-24，优先于本文的其他规则（第 11 节）。
 
 ---
