@@ -1,6 +1,7 @@
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
+using EplanMcp.Host.Importing;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ internal static class McpServerSetup
         services.TryAddSingleton<WritePipeline>();
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
+        services.TryAddSingleton<ImportFiles>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) => ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile));
@@ -78,6 +80,7 @@ internal static class McpServerSetup
             .WithTools<ExportTools>(HostJson.Options)
             .WithTools<ImageExportTools>(HostJson.Options)
             .WithTools<ProjectExportTools>(HostJson.Options)
+            .WithTools<ImportTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
