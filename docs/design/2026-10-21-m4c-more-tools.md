@@ -73,9 +73,9 @@ flowchart LR
 | 1 | `eplan_plc_get` | Read | 一个 PLC 盒的通道与地址。列出 PLC 盒用 `eplan_device_list`（`category: "PLCBox"`） |
 | 1 | `eplan_part_search` | Read | 查询系统部件库（M2 设计 Q4 的遗留）；只读打开部件库 |
 | 1 | `eplan_revision_list` | Read | 项目的修订和修订标记（S23 之后定字段） |
-| 1 | `eplan_export_pxf` | 导出 | 项目导出为 EPJ（PXF），可选带主数据 |
-| 1 | `eplan_export_list` | 导出 | `kind`：`parts`（部件清单）、`devices`（设备清单）、`plc_addresses`（PLC 地址总览）、`missing_translations`（缺失词表） |
-| 1 | `eplan_export_labels` | 导出 | 按标签方案生成标签数据文件；只允许 txt、xml、xlsx，不输出需要 Excel 的 xls |
+| 1 | `eplan_export_pxf` | 导出 | 项目导出为 EPJ（PXF），默认不带主数据（S25：840 MB 对 598 MB）（[规格](../tools/eplan_export_pxf.md)） |
+| 1 | `eplan_export_parts`、`eplan_export_untranslated` | 导出 | 部件清单（只有 XML，A25）、缺失词表（[规格](../tools/eplan_export_parts.md)、[规格](../tools/eplan_export_untranslated.md)）。S25 之后不再合成一个 `eplan_export_list`：两者参数不同；设备清单导出的是预规划清单，由标签覆盖；PLC 地址总览不给配置项目时为空，以后单独设计 |
+| 1 | `eplan_export_labels` | 导出 | 按标签方案生成清单文件，方案必填；S25 验证了文本和 xlsx，不输出需要 Excel 的 xls（[规格](../tools/eplan_export_labels.md)） |
 | 2 | `eplan_device_place` | Write | 按库符号在页上放置一个设备并给出标识。前提是 S20 找到显示标识的方法（Q3） |
 | 2 | `eplan_cable_generate` | Destructive? | 按方案生成电缆，可能改名或替换已有的自动电缆 |
 | 2 | `eplan_terminal_renumber`、`eplan_cable_renumber` | Destructive | 与 `eplan_device_renumber` 相同的形态：范围、方案、起始值、步长、只编未编号的 |
