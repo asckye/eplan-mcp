@@ -17,6 +17,7 @@
 | [S10](S10-dispatcher-writes/README.md) | M3b 的写入在 Bridge 调度器中（不在 action 中）：插宏的编号方式、Ctrl+Z、生成连接的回滚、读宏内容、页幅面、按符号放置的撤销与标识显示 | **完成** 2026-10-20 | 插宏用 `Number` 编号不产生重复设备（`None` 会）；插宏、生成连接各占一个撤销步骤，都能被 `SafetyPoint` 回滚；不插入就能读出宏的内容；空页读不到幅面。按符号放置的设备能撤销，但图上不显示标识，Q1 继续推迟 |
 | [S11](S11-workflow-apis/README.md) | M4 的检查、报表、导出 API 在调度器中的行为：耗时、改动、回滚、撤销、导出文件的位置 | **完成** 2026-10-20 | 检查和更新报表都能被 `SafetyPoint` 回滚、一步撤销（M4 Q3 成立）；导出只在给定目录中产生文件，不改设计数据，但改写 `User.eod`；整个示例项目导出 PDF 12.5 秒，更新报表约 9 秒 |
 | [S12](S12-destructive-backup/README.md) | Destructive 操作前的备份（`CopyProject`、`Backup.Project`），删页和重编号能否回滚、撤销 | **完成** 2026-10-20 | `CopyProject(Snapshot)` 在打开的项目上 1 秒内得到完整、可打开的副本，不加锁（ADR-0013 方案 1 成立）；`MakeBackup` 慢且改写源项目文件；删页、重编号都能回滚、一步撤销；删页留下没有主功能的辅助功能；`PostNumerate` 不保证编完所有 `?` |
+| [S13](S13-client-progress/README.md) | Claude Code 是否带进度令牌、中断时是否取消、图片能否交给模型 | **部分完成** 2026-10-20 | 每次调用都带 `progressToken`，心跳送达；`inline` 的 PNG 模型能读懂；中断和 2 分钟以上的调用要在交互会话中再看 |
 
 ## 约定
 - 目录：`spikes/S<n>-<主题>/`，包含代码、驱动脚本和 `README.md`（问题、方法、结果、结论、局限）。
