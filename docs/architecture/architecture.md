@@ -265,6 +265,7 @@ sequenceDiagram
 
 - Host 启动时不要求 EPLAN 已经在运行。没有可用实例时，工具返回 `EPLAN_NOT_CONNECTED`，并提示"请启动 EPLAN 并确认 EplanMcp 插件已加载"。
 - 有多个 EPLAN 实例时不自动选择，需要先用 `eplan_session_list` / `eplan_session_select` 指定。MCP 本身没有会话，所以选择结果保存在 Host 进程中；一个 Host 进程只服务一个客户端连接（stdio）。
+- 枚举时把前缀作为查询掩码交给管道文件系统（`FindFirstFileExW`），匹配的几个管道在一次查询内返回。不能用 `Directory.EnumerateFiles` 列出整个 `\\.\pipe\`：它分多次查询读取几百个管道，每次从上次的位置继续，其间每关闭一个更早的管道，后面的管道就前移到已读过的部分而被跳过。刚启动的 Bridge 排在最后，所以在繁忙的机器上最容易漏掉，表现为间歇性的 `EPLAN_NOT_CONNECTED`。
 
 ### 6.2 只读调用
 
