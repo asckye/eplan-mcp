@@ -50,7 +50,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 **清理**：运行结束后（Ctrl+C 停止时也一样），运行器提示副本仍开在 EPLAN 中。在 EPLAN 中关闭它们，再删除 `<scratch 根目录>\evals\<运行>\`；夹具 `scratch\fixtures\` 不要删。`.local/evals/<运行>/` 中的报告、轨迹和模型那一侧 eplanmcp 的数据（`eplanmcp\`，含审计日志和导出的文件）不会自动删除，不再需要时自行删除。
 
 ### 需要工程师在场的题：`evals/tasks-attended/`
-Destructive 工具（删页、页面重编号、设备编号）即使在 scratch 中也要审批（ADR-0005、ADR-0013），而审批只能由工程师在 EPLAN 中点击（ADR-0011）。所以这些题放在单独的目录 `evals/tasks-attended/`，默认的 `run` 不会选到它们；无人值守时它们只会等到审批过期。项目负责人决定：这批评测只在工程师在场时运行（M4 第二批），其余时候由 Large 测试（测试中注册的审批渠道）覆盖。
+Destructive 工具（删页、页面重编号、设备编号，以及 M4c 的端子编号、电缆编号和线号）即使在 scratch 中也要审批（ADR-0005、ADR-0013），而审批只能由工程师在 EPLAN 中点击（ADR-0011）。所以这些题放在单独的目录 `evals/tasks-attended/`，默认的 `run` 不会选到它们；无人值守时它们只会等到审批过期。项目负责人决定：这批评测只在工程师在场时运行（M4 第二批），其余时候由 Large 测试（测试中注册的审批渠道）覆盖。
 
 运行：`run --tasks evals/tasks-attended --set all`。工程师照常打开副本；作答中 EPLAN 弹出审批对话框时，核对变更清单后点"批准"。每次审批前都会先做备份（ADR-0013）；备份放在运行器的数据根目录 `.local/evals/<运行>/eplanmcp/backups/` 中，随运行目录一起清理。
 
