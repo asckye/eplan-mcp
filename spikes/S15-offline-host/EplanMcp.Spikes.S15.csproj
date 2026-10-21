@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S15 (M5 design 4.9): an unsigned EPLAN API offline program, the kind the offline host would be. It starts
+    EPLAN without a user interface through EplApplication.Init on a scratch copy and records what the offline host
+    depends on. x64, net481 and an STA main thread are required (api-notes B5).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AssemblyName>EplanMcp.Spikes.S15</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S15</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    The starter library is managed only and is copied next to the program; it then points the resolver at EPLAN's
+    Bin. The API assemblies have unmanaged dependencies and must load from Bin, so they are never copied.
+  -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.Starteru">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Starteru.dll</HintPath>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Systemu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Systemu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
