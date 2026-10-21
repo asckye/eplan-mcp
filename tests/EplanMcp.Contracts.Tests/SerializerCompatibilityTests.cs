@@ -280,6 +280,28 @@ public sealed class SerializerCompatibilityTests
             ],
             Total = 40,
         },
+        new CableGetArgs { Project = "Line1", Cable = "-WG2", Language = "zh_CN", Offset = 100, Limit = 100 },
+        new CableGetArgs(),
+        new CableGetData
+        {
+            Project = "项目 二",
+            Cable = new CableInfo
+            {
+                Tag = "+B1-WG2",
+                VisibleTag = "-WG2",
+                Page = "=F+A2&EFS1/2",
+                Type = "ÖLFLEX CLASSIC 110",
+                WireCount = "3",
+                CrossSection = "1,5",
+                Length = "5 m",
+                Sources = ["=F+B1-SG1"],
+                Targets = ["+A2-XG4:2"],
+                Parts = ["LAPP.00101264"],
+            },
+            Cores = [new ConnectionListItem { From = new ConnectionEnd { Device = "=F+B1-SG1", Pin = "1" }, Colour = "BK", Designation = "433" }],
+            Total = 2,
+        },
+        new CableGetData(),
         new PartListArgs { Project = "Line1", Manufacturer = "SIE", Text = "接触器", Language = "zh_CN", Offset = 50, Limit = 50 },
         new PartListArgs(),
         new ListData<PartListItem>

@@ -156,12 +156,19 @@ internal sealed class EplanDeviceReader : IDeviceReader
     /// full tag (S6); the ordinal check keeps the match case-sensitive like EPLAN's prefix matching (api-notes A11).
     /// Auxiliary functions share the tag, so only the main one counts.
     /// </summary>
-    internal static Function? FindMain(DMObjectsFinder finder, string tag)
+    internal static Function? FindMain(DMObjectsFinder finder, string tag) => FindMain(finder, tag, _ => true);
+
+    /// <summary>
+    /// The same, preferring the main function <paramref name="preferred"/> accepts: a tag can have further main functions,
+    /// such as a second representation or a function in a black box (api-notes A12).
+    /// </summary>
+    internal static Function? FindMain(DMObjectsFinder finder, string tag, Func<Function, bool> preferred)
     {
         using var filter = new FunctionsFilter();
         filter.Name = tag;
         filter.ExactNameMatching = true;
-        return finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal));
+        Function[] mains = [.. finder.GetFunctions(filter).Where(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal))];
+        return mains.FirstOrDefault(preferred) ?? mains.FirstOrDefault();
     }
 
     /// <summary>

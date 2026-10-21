@@ -1,3 +1,5 @@
+using EplanMcp.Contracts;
+
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
@@ -44,6 +46,16 @@ public static class DeviceTags
     public static bool Contains(string name, string? visibleName, string text) =>
         name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0
         || (Shown(visibleName)?.IndexOf(text, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
+
+    /// <summary>
+    /// What <paramref name="read"/> gives for a device found the way device.get finds it: the full tag first, then the full
+    /// tag of the one device showing <paramref name="tag"/>; DEVICE_NOT_FOUND saying <paramref name="hint"/> otherwise.
+    /// </summary>
+    public static T Find<T>(IDeviceReader devices, string projectPath, string tag, string argument, Func<string, T?> read, string hint)
+        where T : class =>
+        read(tag)
+        ?? (FindByShownTag(devices.ReadMainFunctionNames(projectPath), tag, argument) is { } fullTag ? read(fullTag) : null)
+        ?? throw new BridgeErrorException(ErrorReason.DeviceNotFound, hint, retryable: false, new Dictionary<string, string> { [argument] = tag });
 
     /// <summary>
     /// The full tag of the one main function whose shown tag is <paramref name="tag"/>, both without '&gt;' markers and

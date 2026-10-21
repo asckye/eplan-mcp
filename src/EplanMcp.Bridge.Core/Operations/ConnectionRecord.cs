@@ -26,4 +26,7 @@ public sealed class ConnectionRecord
 
     /// <summary>The display text of <c>CONNECTION_WIRENUMBER</c>; null when not set.</summary>
     public string? Colour { get; set; }
+
+    /// <summary>The display text of <c>CONNECTION_DESIGNATION</c>, read for cable cores only; null otherwise.</summary>
+    public string? Designation { get; set; }
 }

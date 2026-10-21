@@ -55,8 +55,8 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
     }
 
     /// <summary>A 3D connection has no ends or page to give (S6), whatever the record holds.</summary>
-    private static ConnectionListItem ToContract(ConnectionRecord connection) => connection.Is3D
-        ? new ConnectionListItem { Kind = ConnectionListItem.Kind3D, CrossSection = connection.CrossSection, Colour = connection.Colour }
+    internal static ConnectionListItem ToContract(ConnectionRecord connection) => connection.Is3D
+        ? new ConnectionListItem { Kind = ConnectionListItem.Kind3D, CrossSection = connection.CrossSection, Colour = connection.Colour, Designation = connection.Designation }
         : new ConnectionListItem
         {
             From = End(connection.StartDevice, connection.StartPin),
@@ -64,6 +64,7 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
             Page = connection.Page,
             CrossSection = connection.CrossSection,
             Colour = connection.Colour,
+            Designation = connection.Designation,
             Kind = ConnectionListItem.Kind2D,
         };
 
