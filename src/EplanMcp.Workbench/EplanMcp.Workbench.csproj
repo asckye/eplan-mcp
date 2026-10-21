@@ -39,6 +39,21 @@
     <Page Include="Tia\Themes\*.xaml" Link="Themes\%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!--
+    Maple Mono CN (SIL OFL 1.1, workbench-ui TYP-01) is never committed: eng\scripts\get-fonts.ps1 downloads it on
+    request into the git-ignored .local\fonts. When the two weights of the type ramp are there (or in WorkbenchFontDir),
+    they and the licence are copied to Fonts\ next to the exe; without them the Workbench uses the system fallbacks.
+  -->
+  <PropertyGroup>
+    <WorkbenchFontDir Condition="'$(WorkbenchFontDir)' == ''">$(MSBuildThisFileDirectory)..\..\.local\fonts\maple-mono-cn-v7.9\fonts</WorkbenchFontDir>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(WorkbenchFontDir)\MapleMono-CN-Regular.ttf') And Exists('$(WorkbenchFontDir)\MapleMono-CN-SemiBold.ttf')">
+    <Content Include="$(WorkbenchFontDir)\MapleMono-CN-Regular.ttf;$(WorkbenchFontDir)\MapleMono-CN-SemiBold.ttf"
+             Link="Fonts\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(WorkbenchFontDir)\LICENSE.txt" Condition="Exists('$(WorkbenchFontDir)\LICENSE.txt')"
+             Link="Fonts\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Workbench.Tests" />
   </ItemGroup>

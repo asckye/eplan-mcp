@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     Title="{l:Tr App.Name}" Width="1200" Height="780" MinWidth="960" MinHeight="640"
-    WindowStartupLocation="CenterScreen" Style="{StaticResource Ui.Window}">
+    WindowStartupLocation="CenterScreen" Style="{StaticResource Workbench.Window}">
   <Border Margin="24" Style="{StaticResource Primer.PageHead}">
     <TextBlock Text="{l:Tr App.Name}" Style="{StaticResource Primer.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
   </Border>
