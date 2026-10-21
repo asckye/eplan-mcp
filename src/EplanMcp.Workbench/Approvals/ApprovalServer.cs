@@ -24,6 +24,7 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     private static readonly string _version = typeof(ApprovalServer).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0";
 
     private readonly string _expectedClient;
+    private readonly SecurityIdentifier? _owner;
     private readonly TimeProvider _clock;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _stop = new();
@@ -36,11 +37,16 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     {
     }
 
-    /// <summary>For tests: their own pipe and client image; never from configuration.</summary>
-    internal ApprovalServer(string pipeName, string expectedClient, TimeProvider clock, ILogger logger)
+    /// <summary>
+    /// For tests: their own pipe and client image, never from configuration, and the pipe's owner. A test that runs
+    /// elevated, as on CI, gives its token's owner (Administrators), which the Host's <c>CurrentUserOnly</c> compares with;
+    /// the Workbench itself always makes the user the owner.
+    /// </summary>
+    internal ApprovalServer(string pipeName, string expectedClient, TimeProvider clock, ILogger logger, SecurityIdentifier? owner = null)
     {
         PipeName = pipeName;
         _expectedClient = expectedClient;
+        _owner = owner;
         _clock = clock;
         _logger = logger;
     }
@@ -145,8 +151,9 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         SecurityIdentifier user = identity.User ?? throw new InvalidOperationException("The current Windows identity has no user SID.");
         var security = new PipeSecurity();
 
-        // The owner is the user even when elevated (else Administrators), which the Host's CurrentUserOnly checks.
-        security.SetOwner(user);
+        // The owner is the user even when the Workbench runs elevated (else Administrators): the Host, which runs as the
+        // user, checks it with CurrentUserOnly. A Host that runs elevated cannot use this pipe, nor the Bridge's.
+        security.SetOwner(_owner ?? user);
         security.AddAccessRule(new PipeAccessRule(user, PipeAccessRights.FullControl, AccessControlType.Allow));
         security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.NetworkSid, null), PipeAccessRights.FullControl, AccessControlType.Deny));
         PipeOptions options = PipeOptions.Asynchronous | (firstInstance ? PipeOptions.FirstPipeInstance : PipeOptions.None);

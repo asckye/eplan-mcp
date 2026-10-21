@@ -22,6 +22,12 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     /// <summary>How long a step may take before the test fails instead of hanging.</summary>
     private static readonly TimeSpan _patience = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// The owner the test servers give their pipes: the token's, which the Host's CurrentUserOnly compares with. It is
+    /// the user, unless the tests run elevated, as on CI; the real owner is checked on its own.
+    /// </summary>
+    private static readonly SecurityIdentifier _tokenOwner = TokenOwner();
+
     private readonly ManualTime _clock = new(Asks.Now);
     private readonly string _pipe = WorkbenchPipeName.For("S-1-5-21-0-0-0-1000", Path.Combine(Path.GetTempPath(), "eplanmcp-tests", Guid.NewGuid().ToString("N")));
     private readonly ApprovalServer _server;
@@ -78,10 +84,13 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     [Fact]
-    public void ThePipe_AdmitsOnlyThisUser_AndNoNetworkLogon()
+    public async Task ThePipe_IsOwnedByThisUser_AdmitsOnlyThem_AndNoNetworkLogon()
     {
-        using var probe = new NamedPipeClientStream(".", _pipe, PipeDirection.InOut, PipeOptions.CurrentUserOnly);
-        probe.Connect(TimeSpan.FromSeconds(5));
+        string pipe = _pipe + ".acl";
+        await using var server = new ApprovalServer(pipe, Environment.ProcessPath!, _clock, NullLogger.Instance);
+        Assert.True(server.Start());
+        await using var probe = new NamedPipeClientStream(".", pipe, PipeDirection.InOut, PipeOptions.Asynchronous);
+        await probe.ConnectAsync(TimeSpan.FromSeconds(5), Token);
         PipeSecurity security = probe.GetAccessControl();
         using WindowsIdentity me = WindowsIdentity.GetCurrent();
         AuthorizationRule[] rules = [.. security.GetAccessRules(true, true, typeof(SecurityIdentifier)).Cast<AuthorizationRule>()];
@@ -145,7 +154,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     private ApprovalServer Server(string? pipe = null, string? expectedClient = null) =>
-        new(pipe ?? _pipe, expectedClient ?? Environment.ProcessPath!, _clock, NullLogger.Instance);
+        new(pipe ?? _pipe, expectedClient ?? Environment.ProcessPath!, _clock, NullLogger.Instance, _tokenOwner);
 
     /// <summary>The Host's channel on this test's pipe (or <paramref name="pipe"/>), expecting this test process as the Workbench.</summary>
     private WorkbenchChannel Channel(string? pipe = null) =>
@@ -176,6 +185,12 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     private static Task SendAsync(Stream pipe, byte[] message) => WorkbenchFraming.WriteAsync(pipe, message, Token);
+
+    private static SecurityIdentifier TokenOwner()
+    {
+        using WindowsIdentity me = WindowsIdentity.GetCurrent();
+        return me.Owner ?? me.User!;
+    }
 
     private static async Task SendOrEndAsync(Stream pipe, byte[] message)
     {
