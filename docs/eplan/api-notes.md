@@ -159,6 +159,12 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A21. Claude Code 客户端的进度与图片（spike S13，2026-10-20，Claude Code 2.1.299）
+详细数据见 [spike S13](../../spikes/S13-client-progress/README.md)。
+- Claude Code 每次 `tools/call` 都在 `_meta` 中带 `progressToken`，服务器的进度通知送达；`initialize` 的协议版本为 `2025-11-25`。— S13。
+- 工具结果中的 PNG（`eplan_export_image` 的 `inline`）交给了模型，模型读出了图上的设备标识和文字。— S13。
+- 中断时是否发送 `notifications/cancelled`、超过 2 分钟的调用怎样处理，无头模式测不了，没有结论。— S13。
+
 ### A20. M4 工具的实机验证（2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
 各工具链的 Release 构建，经 `eplanmcp` 调用，每次用一份新复制的示例项目（scratch 中），EPLAN 中只打开它并让它成为当前项目。Destructive 工具的审批由项目负责人在 EPLAN 对话框中点击。
 - **检查**（`Check.VerifyProject` / `VerifyPages`）：
