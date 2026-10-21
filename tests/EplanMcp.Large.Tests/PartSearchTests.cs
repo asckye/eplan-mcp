@@ -27,8 +27,10 @@ public sealed class PartSearchTests(LiveEplan eplan)
 
         JsonElement relay = Assert.Single(data.GetProperty("parts").EnumerateArray(), p => p.GetProperty("partNumber").GetString() == Relay && p.GetProperty("variant").GetString() == "1");
         Assert.True(relay.GetProperty("hasMacro").GetBoolean());
+
+        // The database has two spaces after the comma (first Large run, 2026-10-21); the tool returns the text as it is.
         Assert.Equal(
-            ("SIE", "3RH2122-1HB40", "3RH21221HB40", "ElectricalRelay", "COUPLING CONTACTOR RELAY, 2NO+2NC"),
+            ("SIE", "3RH2122-1HB40", "3RH21221HB40", "ElectricalRelay", "COUPLING CONTACTOR RELAY,  2NO+2NC"),
             (relay.GetProperty("manufacturer").GetString(), relay.GetProperty("typeNumber").GetString(), relay.GetProperty("orderNumber").GetString(),
                 relay.GetProperty("productGroup").GetString(), relay.GetProperty("description").GetString()));
         Assert.EndsWith(".alk", data.GetProperty("database").GetString(), StringComparison.OrdinalIgnoreCase);
