@@ -84,11 +84,11 @@ flowchart LR
 | 2 | `eplan_project_translate` | Destructive | 用系统翻译库翻译整个项目或指定页（只读翻译库） |
 | 2 | `eplan_project_language_remove` | Destructive | 从项目中删除一种语言（主语言不能删）。S23：回滚只撤回译文、不撤回语言设置，失败时还要写回设置；它会改显示语言，结果中列出 |
 | 2 | 修订的写工具 | ? | S23 之后单独设计（Q9） |
-| 3 | `eplan_import_dxf` | Destructive? | DXF/DWG 插入页面 |
+| 3 | `eplan_import_dxf` | Write | DXF/DWG 插入页面。S22：只新增图形，能被 `SafetyPoint` 回滚、一步撤销 |
 | 3 | `eplan_import_pdf_comments` | Write? | 导入审图人在 PDF 上的注释，之后可以读取和处理 |
 | 3 | `eplan_import_list` | Destructive | `kind`：`parts`（部件清单）、`devices`（设备清单） |
 | 3 | `eplan_import_plc` | Destructive | PLC 总线数据；禁止会弹出比较对话框的匹配方式（`IMPORTMATCH:1`） |
-| 3 | `eplan_import_pxf` | Write | 把 EPJ（PXF）导入为新项目；新项目只建在 scratch 根目录中（Q5） |
+| 3 | `eplan_import_pxf` | Write | 把 EPJ（PXF）导入为新项目；新项目只建在 scratch 根目录中（Q5）。S22：`PXFProject` 的第二个参数是新项目的路径（不带扩展名）；约 1 分钟；失败时删除本次新建的 `.elk`、`.edb` |
 | 4 | `eplan_part_import`、`eplan_part_sync` | 系统主数据（ADR-0019） | 文件导入部件库；把项目中的部件加入部件库 |
 | 4 | `eplan_part_export` | 导出 | 从部件库导出到文件 |
 | 4 | `eplan_translation_import` | 系统主数据（ADR-0019） | 文件导入翻译库 |
