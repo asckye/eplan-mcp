@@ -2,11 +2,11 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Draft |
+| 状态 | Approved（2026-10-20，项目负责人确认第 9 节的 Q2–Q13 均按本文建议，ADR-0014、ADR-0016 同时接受；Q1 应项目负责人的提问改为建议 A，ADR-0015 保持 Proposed，等项目负责人确认） |
 | 作者 | asckye |
 | 关联 Issue | — |
-| 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发） |
-| 最后更新 | 2026-10-21 |
+| 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道，已接受）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术，Proposed）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发，已接受） |
+| 最后更新 | 2026-10-20 |
 
 ## 1. 背景
 [架构第 11 节](../architecture/architecture.md#11-里程碑)给 M5 的范围是：按用户安装的安装包；Workbench（客户端配置向导、审批队列、审计浏览，中英双语）；Claude Code 插件形式的交付包（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名）。完成标准是：在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](../architecture/architecture.md#71-安装验收清单m5-发布前逐项通过) I1–I10 全部通过。
@@ -128,18 +128,20 @@ flowchart LR
 | .NET 10 | 实际可用，官方没有明确写出 | 原生；.NET 10 是 LTS，支持到 2028-11 | 支持 net10.0 | 只有宿主是 .NET |
 | Fluent 2 的还原度 | 最高，控件本身就是 Fluent 样式 | 较好但不完整：`ThemeMode` 仍标为实验性（WPF0001），.NET 10 的说明写"Fluent 样式仍在进行中" | 较好（Web 版 Fluent） | 较好 |
 | 无障碍 | 原生 UIA、高对比度 | UIA 成熟；高对比度的崩溃在 9.0.1、10 中修复 | 经 Chromium 的 UIA；原生与网页混合时的焦点未核实 | 同 C |
-| 托盘、置顶、单实例 | 托盘要第三方库（H.NotifyIcon.WinUI，MIT）；单实例用 `AppInstance` | WinForms `NotifyIcon`（TIA 的做法）；`Topmost`；互斥体 | 由 WPF 宿主提供 | 同 C |
+| 托盘、置顶、单实例 | 没有内置托盘：用第三方库（H.NotifyIcon.WinUI，MIT），或自己封装 Win32 `Shell_NotifyIcon`；单实例用 `AppInstance` | WinForms `NotifyIcon`（TIA 的做法）；`Topmost`；互斥体 | 由 WPF 宿主提供 | 同 C |
 | 中英文切换 | `.resw`；第三方报告未打包时改界面语言会出错（未经微软证实） | `.resx`，简单 | `IStringLocalizer` | 自己实现 |
 | 长期维护 | SDK 大版本"不超过每六个月一次"，2.x 的服务期到 2027-04；没有 XAML 设计器 | 变化最少，与 Host 同一个运行时 | 两套技术；Fluent UI Blazor 写明"不是 ASP.NET Core 的正式部分"、尽力支持，5.0 刚重写（2026-09） | 两套技术，加上 npm 依赖和自己写的消息桥 |
 | 体积 | 大（没有官方数字） | 最小 | 程序 + WebView2 | 同 C |
 
 另外两种不考虑：.NET MAUI 在 Windows 上就是 WinUI 3 外加一层抽象；WPF-UI（lepoco，MIT）还原度好，但 NuGet 把 4.0–4.2 标为"有严重缺陷"而废弃，变动较大。
 
-**建议 B**（Q1）：Workbench 只有几页，它的价值在于审批界面可靠、在离线机器上装得上。B 与 Host 同一个 .NET 10 运行时，不多一套 SDK 的生命周期，不需要第三方库（托盘用 WinForms 自带的 `NotifyIcon`），按用户、离线、单文件的发布都是成熟路径，UIA 最成熟；外观用微软随 .NET 发布的 Fluent 主题，缺的样式按 Fluent 2 的颜色、字体和间距规范自己补。代价是 `ThemeMode` 仍是实验性 API，要在代码中注明原因后抑制 WPF0001，并固定在 .NET 10。如果项目负责人更看重 Fluent 2 组件的完整和原样，选 A；A 的风险是 SDK 每年一次大版本、托盘靠第三方库、未打包时的界面语言切换。C、D 不建议：离线机器上的 WebView2，以及变更清单这种不可信文本进入网页渲染。
+**建议 A**（Q1）：项目负责人要求按 Fluent UI **及其组件库**设计，在 Windows 桌面上，Fluent 2 的组件库就是 WinUI 3：控件本身就是 Fluent 2 的样式和交互，不需要自己补样式，原生支持 UIA 和高对比度。A 的风险用下面的办法控制：SDK 的大版本至少每年跟进一次，每次按 S18 的清单复查；托盘用 Win32 `Shell_NotifyIcon` 的小封装，不引入第三方库；中英文用自己的文字表（ADR-0015 第 5 条），不用 `.resw` 的界面语言切换，从而避开未打包时的问题；体积和 .NET 10 的可用性由 S18 实测。S18 发现 A 无法满足时改用 B：B 与 Host 同一个运行时、依赖最少，代价是 Fluent 2 只还原到 WPF 主题的程度，`ThemeMode` 仍是实验性 API（WPF0001）。C、D 不建议：离线机器上的 WebView2，以及变更清单这种不可信文本进入网页渲染。
+
+项目负责人 2026-10-20 还问过 Fluent UI 与苹果的设计风格（Apple Human Interface Guidelines）哪个更合适。建议 Fluent UI：苹果的规范和组件只面向苹果平台，Windows 上没有官方实现，每个控件都要自己画，讲述人、高对比度和键盘焦点也要自己保证；Workbench 放在 EPLAN 和 Windows 的对话框旁边使用，用 Windows 自己的设计语言，工程师不必面对两套交互习惯。
 
 **字体**（Q2）：Fluent 2 在 Windows 上用 Segoe UI Variable，它只覆盖西文、希腊文和俄文；微软的 Windows 排版指南建议简体中文用 Microsoft YaHei UI，最小 12px（Regular）。两者都是系统字体，不需要随程序分发。架构 5.1 和 README 定的 Maple Mono CN 建议只用在等宽的数据区（变更清单、审计记录），随安装包附带其 SIL OFL 1.1 许可证。
 
-**spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；选 A 时另查未打包时的界面语言切换和 `dotnet build` 能否在 CI 上构建。S18 发现 B 无法满足时，改用 A，ADR-0015 随之修改。
+**spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；另查托盘封装、单实例、.NET 10 下的构建和自包含发布能否在 CI（windows-2025 镜像）上用 `dotnet` 命令完成。S18 发现 A 无法满足时，改用 B，ADR-0015 随之修改。
 
 ### 4.6 审批队列
 **Host 一侧**（`WorkbenchChannel`，注册在 `EplanDialogChannel` 之前，即 ADR-0011 的顺序）：
@@ -242,7 +244,7 @@ flowchart LR
 - 不改变工具契约；Host 与 Bridge 的协议不变。新增的契约：Workbench 管道协议（第 1 版）、`doctor` 和 `audit verify` 的 JSON 输出（带 `schemaVersion`）、`state\addins.json`。
 - `CHANGELOG` 的 Added 记录安装包、Workbench、插件、新命令。
 - 实施顺序（每个 PR 目标 200 行，上限 400 行）：
-  1. 本设计文档；Proposed ADR-0014、0015、0016；威胁模型 T19–T23、SEC-22–26。
+  1. 本设计文档；ADR-0014、0016（已接受），Proposed ADR-0015；威胁模型 T19–T23、SEC-22–26。
   2. spike S16、S17、S18（不需要 EPLAN）；S14、S15（实机，项目负责人的机器）。
   3. `doctor`、`audit verify` 的 `--format json`。
   4. `install-addin`、`uninstall-addin`、`state\addins.json`（S14 之后）。
@@ -259,18 +261,18 @@ flowchart LR
   15. 干净机器验收（Q11），按结果修正，M5 收尾。
 
 ## 9. 待定问题
-| # | 问题 | 建议 |
+| # | 问题 | 结论 |
 |---|---|---|
-| Q1 | Fluent 2 用哪一种实现（4.5） | **B：WPF + .NET 10 自带的 Fluent 主题**，S18 用原型确认；更看重 Fluent 2 组件的完整和原样时选 A（WinUI 3，未打包、自包含）。不选依赖 WebView2 的 C、D。写成 Proposed ADR-0015 |
-| Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | 界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI）；Maple Mono CN 只用于等宽的数据区，随安装包附带 OFL 许可证 |
-| Q3 | Workbench 是否在登录时自启动 | 安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
-| Q4 | 安装目录能否选择 | **不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
-| Q5 | 安装包用什么技术 | **Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
-| Q6 | 安装包和程序是否签名（4.10） | **0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
-| Q7 | 配置向导在 M5 支持哪些客户端 | Claude Code（推荐插件）和 Claude 桌面版；其他客户端只显示可以复制的配置片段 |
-| Q8 | 自托管 runner 装在哪台机器、用哪个账户 | 开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发 |
-| Q9 | 同一用户的程序（包括代理经 shell 执行的命令）能操作审批窗口，是否接受为剩余风险（第 5 节） | **接受**，写进威胁模型和入门指南（保留客户端对 shell 命令的确认）；有了代码签名之后，再考虑由 Host 核对 Workbench 的签名 |
-| Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场 |
-| Q11 | 干净机器验收由谁、在哪台机器上做（4.8） | 需要项目负责人安排一名非开发人员，和一台装有 EPLAN 2026 及授权的虚拟机（同时验证 I8） |
-| Q12 | 插件技能用什么语言 | `SKILL.md` 给模型看，用英文（架构 8.11）；入门指南给工程师看，用中文 |
-| Q13 | 卸载时是否删除数据 | **不删除**：配置、审计、日志、scratch、导出、备份都保留，结束页列出位置（4.3） |
+| Q1 | Fluent 2 用哪一种实现（4.5） | **待确认**：原建议 B；项目负责人 2026-10-20 问 Fluent UI 与苹果的设计哪个可以，答复是 Fluent UI，并改为**建议 A：WinUI 3（Windows App SDK，未打包、自包含）**，因为负责人要的是 Fluent 的组件库（4.5）。S18 用原型确认，A 无法满足时改用 B。不选依赖 WebView2 的 C、D。Proposed ADR-0015 随之修改，项目负责人确认后接受 |
+| Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | **已决定**（2026-10-20，项目负责人按建议）：界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI）；Maple Mono CN 只用于等宽的数据区，随安装包附带 OFL 许可证 |
+| Q3 | Workbench 是否在登录时自启动 | **已决定**（同上）：安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
+| Q4 | 安装目录能否选择 | **已决定**（同上）：**不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
+| Q5 | 安装包用什么技术 | **已决定**（同上）：**Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
+| Q6 | 安装包和程序是否签名（4.10） | **已决定**（同上）：**0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
+| Q7 | 配置向导在 M5 支持哪些客户端 | **已决定**（同上）：Claude Code（推荐插件）和 Claude 桌面版；其他客户端只显示可以复制的配置片段 |
+| Q8 | 自托管 runner 装在哪台机器、用哪个账户 | **已决定**（同上）：开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发。项目负责人已同意，先做 S15，结论满意再安装 |
+| Q9 | 同一用户的程序（包括代理经 shell 执行的命令）能操作审批窗口，是否接受为剩余风险（第 5 节） | **已决定**（同上）：**接受**，写进威胁模型和入门指南（保留客户端对 shell 命令的确认）；有了代码签名之后，再考虑由 Host 核对 Workbench 的签名 |
+| Q10 | 插件市场只随安装包提供，还是也放在 GitHub 上 | **已决定**（同上）：M5 只做随安装包的本地市场：版本必然与安装的程序一致，不联网也能装。S17 证实 `${USERPROFILE}` 能展开后，再考虑 GitHub 上的市场 |
+| Q11 | 干净机器验收由谁、在哪台机器上做（4.8） | **已决定**（同上）：需要项目负责人安排一名非开发人员，和一台装有 EPLAN 2026 及授权的虚拟机（同时验证 I8） |
+| Q12 | 插件技能用什么语言 | **已决定**（同上）：`SKILL.md` 给模型看，用英文（架构 8.11）；入门指南给工程师看，用中文 |
+| Q13 | 卸载时是否删除数据 | **已决定**（同上）：**不删除**：配置、审计、日志、scratch、导出、备份都保留，结束页列出位置（4.3） |
