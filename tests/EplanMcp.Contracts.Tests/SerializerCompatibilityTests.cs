@@ -129,6 +129,8 @@ public sealed class SerializerCompatibilityTests
             Fingerprint = "f",
         },
         new ImportPxfArgs(),
+        new ImportPxfData { Name = "项目_imported", Path = @"C:\Users\u\EplanMcp\scratch\imported\项目_imported.elk", Seconds = 58 },
+        new ImportPxfData(),
         new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData

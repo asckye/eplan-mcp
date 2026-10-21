@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.ImportPxfPlan"/> and of its execute operation, which imports the file as a new project.</summary>
+/// <summary>Arguments of <see cref="OperationNames.ImportPxfPlan"/> and <see cref="OperationNames.ImportPxfExecute"/>.</summary>
 public sealed class ImportPxfArgs
 {
     /// <summary>The EPJ (PXF) file's path below the import folder, with <c>/</c> between folders, as the tool returns it.</summary>

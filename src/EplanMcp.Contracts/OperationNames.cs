@@ -173,6 +173,13 @@ public static class OperationNames
     public const string ImportPxfPlan = "import.pxf.plan";
 
     /// <summary>
+    /// Lets EPLAN import the EPJ file as a new project at the planned path, without opening it, and checks its files; on
+    /// any failure deletes the files the import made. Arguments: <see cref="ImportPxfArgs"/> with the fingerprint; data:
+    /// <see cref="ImportPxfData"/>.
+    /// </summary>
+    public const string ImportPxfExecute = "import.pxf.execute";
+
+    /// <summary>
     /// The plan of eplan_check_run: finds the pages and counts the project's check messages, never checks. Arguments:
     /// <see cref="CheckRunArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>
