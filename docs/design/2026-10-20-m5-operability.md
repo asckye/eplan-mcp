@@ -207,6 +207,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 
 ### 4.9 离线宿主与 CI 实机测试
 - **离线宿主** `EplanMcp.Bridge.Offline`：net481 x64 的 STA 程序，用 `EplApplication.Init` 无界面运行 EPLAN（B5），与插件共用 `Bridge.Core`、操作和适配层（架构 5.4），创建同样格式的管道。参数：管道前缀（CI 中的 Host 用 `EPLANMCP_PIPE_PREFIX` 只找它，不碰工程师的 EPLAN）、启动时打开的 scratch 项目、空闲退出时间。它不声明 `approval.ask`，所以只能写 scratch，这正是 CI 需要的。启动时自己打开测试项目，不新增打开项目的操作或工具，与 M3 设计 Q4 的决定一致。
+  - 实现（第 8 节步骤 12）：`EplanMcp.Bridge.Offline.exe --variant-bin <变体的 Bin> --project <scratch 副本的 .elk> [--pipe-prefix <前缀>] [--idle-exit <秒>]`，前缀默认与插件相同；退出码 0 为正常停止，1 为 EPLAN 或 Bridge 失败，2 为命令行错误。握手中 `eplan.offline` 为 true，Host 不经它询问审批。启动过程见架构 5.4。
 - **它测不了**：模态对话框（Q5）、EPLAN 中的审批对话框、Ctrl+Z（Q3）、插件的注册与加载。这些仍在发布前用界面中的 EPLAN 手工检查，列在发布清单中。
 - **spike S15（离线宿主）**：`EplApplication.Init` 在开发机上的授权和登录对话框（`allowLicenseDlg`、`allowLoginDlg`）、是否另占一个授权、与界面中的 EPLAN 能否同时运行、启动耗时；回滚、撤销、`LockingStep` 的规律是否与插件中相同（A7、A9）；未签名的离线程序在开发机授权下能否运行（B8、ADR-0007）；在没有登录桌面的上下文中（runner 作为服务）能否运行。
 - **CI**：自托管 runner 装在有 EPLAN 和授权的机器上，标签 `eplan-2026`，以单独的标准用户运行，有自己的数据根目录。新工作流 `live.yml` 只在每晚定时、手动触发和发布时运行，**从不因 pull request 运行**；仓库设置要求外部贡献者的工作流每次都经批准，改动了工作流的 fork PR 不批准；同时只运行一个（SEC-26）。GitHub 提醒公开仓库几乎不应使用自托管 runner（[安全使用](https://docs.github.com/en/actions/reference/security/secure-use)），这些条件缺一不可。步骤：构建插件和 Host → 复制示例项目到 runner 用户的 scratch → 启动离线宿主 → 运行能在离线宿主上跑的 Large 测试（新的 trait，例如 `Host=Offline`）→ 上传 TRX。日志和产物中不含项目内容（SEC-10）。机器与账户见 Q8。

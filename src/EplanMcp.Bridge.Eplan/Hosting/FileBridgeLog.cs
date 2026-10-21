@@ -5,10 +5,10 @@ using EplanMcp.Bridge.Core.Diagnostics;
 namespace EplanMcp.Bridge.Eplan.Hosting;
 
 /// <summary>
-/// Appends to <c>&lt;data root&gt;\logs\bridge-yyyyMMdd.log</c> (UTF-8). Never throws: logging must not be able to
-/// break an EPLAN callback. Thread-safe.
+/// Appends to <c>&lt;data root&gt;\logs\bridge-yyyyMMdd.log</c> (UTF-8), or with another file name prefix such as the
+/// offline host's <c>bridge-offline-</c>. Never throws: logging must not be able to break an EPLAN callback. Thread-safe.
 /// </summary>
-internal sealed class FileBridgeLog(string directory) : IBridgeLog
+internal sealed class FileBridgeLog(string directory, string fileNamePrefix = "bridge-") : IBridgeLog
 {
     private readonly object _gate = new();
 
@@ -26,7 +26,7 @@ internal sealed class FileBridgeLog(string directory) : IBridgeLog
             }
 
             line.Append(Environment.NewLine);
-            string path = Path.Combine(directory, "bridge-" + DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + ".log");
+            string path = Path.Combine(directory, fileNamePrefix + DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + ".log");
             lock (_gate)
             {
                 Directory.CreateDirectory(directory);
