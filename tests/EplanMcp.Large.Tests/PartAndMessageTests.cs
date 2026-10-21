@@ -4,6 +4,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>eplan_part_list, the multi-language fallback, messages, checks and the session tools on the live system.</summary>
 [Trait("Size", "Large")]
+[Trait("Host", "Offline")]
 public sealed class PartAndMessageTests(LiveEplan eplan)
 {
     private const string MotorBreaker = "SIE.3RV2011-1BA25";

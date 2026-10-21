@@ -4,6 +4,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>eplan_macro_list and eplan_macro_get on the live system's macro directory (EPLAN's own sample macros, spike S10).</summary>
 [Trait("Size", "Large")]
+[Trait("Host", "Offline")]
 public sealed class MacroTests(LiveEplan eplan)
 {
     internal const string FeedbackControl = "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema";
