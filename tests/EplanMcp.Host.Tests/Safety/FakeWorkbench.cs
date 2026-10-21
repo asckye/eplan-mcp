@@ -6,22 +6,26 @@ using EplanMcp.Workbench.Protocol;
 namespace EplanMcp.Host.Tests.Safety;
 
 /// <summary>
-/// A Workbench pipe server in the test process, on a pipe of the test's own, one connection at a time. It answers the
-/// handshake with <see cref="Welcome"/> (or <see cref="HandshakeReply"/>: null keeps silent), hands each question to
-/// <see cref="Answer"/>, sends the frames it returns (none: it goes on reading; null: it hangs up), and records notifications until the Host
-/// hangs up. Its lists are filled on the server's thread.
+/// A Workbench pipe server in the test process, on a pipe of the test's own. It answers the handshake with
+/// <see cref="Welcome"/> (or <see cref="HandshakeReply"/>: null keeps silent), hands each question to
+/// <see cref="Answer"/>, sends the frames it returns (none: it goes on reading; null: it hangs up), and records
+/// notifications until the Host hangs up. A pipe instance always listens, created before the constructor returns and
+/// again as each connection arrives, up to the given number of instances: the channel's 250 ms connect must never
+/// find the pipe missing on a busy test machine. Its lists are filled on the server's threads.
 /// </summary>
 internal sealed class FakeWorkbench : IAsyncDisposable
 {
     private readonly CancellationTokenSource _stop = new();
     private readonly SemaphoreSlim _connected = new(0);
-    private readonly Task _serving;
+    private readonly List<Task> _serving = [];
+    private readonly int _instances;
     private int _connections;
 
-    public FakeWorkbench(string pipeName)
+    public FakeWorkbench(string pipeName, int instances = 4)
     {
         PipeName = pipeName;
-        _serving = Task.Run(ServeAsync);
+        _instances = instances;
+        Listen();
     }
 
     public string PipeName { get; }
@@ -66,34 +70,76 @@ internal sealed class FakeWorkbench : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await _stop.CancelAsync();
-        await _serving;
+        while (true)
+        {
+            Task[] serving;
+            lock (_serving)
+            {
+                serving = [.. _serving];
+            }
+
+            await Task.WhenAll(serving);
+            lock (_serving)
+            {
+                if (_serving.Count == serving.Length)
+                {
+                    break;
+                }
+            }
+        }
+
         _stop.Dispose();
         _connected.Dispose();
     }
 
+    /// <summary>Starts the next instance, which exists when this returns (ServeAsync creates it before its first await).</summary>
+    private void Listen()
+    {
+        lock (_serving)
+        {
+            _serving.Add(ServeAsync());
+        }
+    }
+
+    /// <summary>A new instance; null when all are taken, as a test of a busy Workbench wants.</summary>
+    private NamedPipeServerStream? Create()
+    {
+        try
+        {
+            return new NamedPipeServerStream(PipeName, PipeDirection.InOut, _instances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
     private async Task ServeAsync()
     {
-        while (!_stop.IsCancellationRequested)
+        await using NamedPipeServerStream? pipe = Create();
+        if (pipe is null)
         {
-            using var pipe = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-            try
-            {
-                await pipe.WaitForConnectionAsync(_stop.Token);
-                Interlocked.Increment(ref _connections);
-                _connected.Release();
-                await ConnectionAsync(pipe, _stop.Token);
-            }
-            catch (OperationCanceledException) when (_stop.IsCancellationRequested)
-            {
-                return;
-            }
-            catch (IOException)
-            {
-                // The Host hung up, or sent what the protocol refuses.
-            }
-
-            HungUp.TrySetResult();
+            return;
         }
+
+        try
+        {
+            await pipe.WaitForConnectionAsync(_stop.Token);
+            Listen();
+            Interlocked.Increment(ref _connections);
+            _connected.Release();
+            await ConnectionAsync(pipe, _stop.Token);
+        }
+        catch (OperationCanceledException) when (_stop.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (IOException)
+        {
+            // The Host hung up, or sent what the protocol refuses.
+        }
+
+        HungUp.TrySetResult();
     }
 
     private async Task ConnectionAsync(NamedPipeServerStream pipe, CancellationToken stop)
