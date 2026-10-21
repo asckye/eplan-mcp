@@ -265,7 +265,7 @@ flowchart LR
 | Q2 | 界面字体：架构和 README 定的 Maple Mono CN，还是 Fluent 2 的系统字体 | 界面文字用系统字体（Segoe UI Variable，中文 Microsoft YaHei UI）；Maple Mono CN 只用于等宽的数据区，随安装包附带 OFL 许可证 |
 | Q3 | Workbench 是否在登录时自启动 | 安装程序中给一个勾选项，**默认勾选**，设置中可以关闭；写在当前用户的启动项中，卸载时删除。Workbench 不在时照旧用 EPLAN 对话框，自启动只是让队列可用 |
 | Q4 | 安装目录能否选择 | **不能**，固定为 `%USERPROFILE%\EplanMcp\app\`（4.1） |
-| Q5 | 安装包用什么技术 | **Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途，但作者要求年收入超过 5000 美元的商业用户购买许可（CI 中使用也算），非商业用户不收费，需要项目负责人确认本项目属于非商业开源。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
+| Q5 | 安装包用什么技术 | **Inno Setup**：`PrivilegesRequired=lowest` 不提权、卸载项在 HKCU、`[Run]`/`[UninstallRun]` 运行 `install-addin`/`uninstall-addin`、单个文件离线安装；GitHub 的 windows-2025 镜像自带 6.7.1（最新 7.1.0），CI 中固定版本。关掉它默认的 `CloseApplications`（静默升级时会用重启管理器关闭占用文件的程序），改为 4.3 的进程检查。它的许可证允许任何用途；从 6.5.0 起作者请求商业用户购买许可，但许可证本身并不强制（购买页和 FAQ），本项目是个人开源、非商业分发，不受影响，将来商业分发时再按作者的请求购买。备选：压缩包加 PowerShell 脚本（TIA 的做法，见 ADR-0016） |
 | Q6 | 安装包和程序是否签名（4.10） | **0.x 不签名**，附 SHA-256 和来源证明，入门指南说明"仍要运行"和校验方法；验收时记录智能应用控制的状态。如果验收因此失败，或者要面向更多用户，**购买 OV 证书并用云端签名**（能签自托管 runner 构建的插件和安装包），由项目负责人决定预算。插件的 EADN 签名仍按 ADR-0007 |
 | Q7 | 配置向导在 M5 支持哪些客户端 | Claude Code（推荐插件）和 Claude 桌面版；其他客户端只显示可以复制的配置片段 |
 | Q8 | 自托管 runner 装在哪台机器、用哪个账户 | 开发机上单独的 Windows 标准用户，夜间运行。需要项目负责人同意在开发机上安装 runner，并由 S15 确认授权能否与工程师自己的 EPLAN 同时使用；不行就只在发布前手动触发 |
