@@ -138,5 +138,11 @@
       <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnScrim" />
       <settings:SettingsDrawer x:Name="SettingsPane" CloseRequested="OnSettingsClosed" />
     </Grid>
+
+    <!-- An audit record's details, the same kind of modal pane (DLG-10). -->
+    <Grid x:Name="RecordLayer" Grid.ColumnSpan="2" Visibility="Collapsed">
+      <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnRecordScrim" />
+      <audit:AuditRecordDrawer x:Name="RecordPane" CloseRequested="OnRecordClosed" FolderRequested="OnRecordFolder" />
+    </Grid>
   </Grid>
 </Window>
