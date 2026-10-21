@@ -159,6 +159,15 @@
 - 窗口宏要选对表达类型：西门子 `3RT201x-1Bx41x.ema` 只有 `ArticlePlacement`，电路图页要用有 `MultiLine` 的宏（`WindowMacro.RepresentationTypes`）。在同一位置再插入同一个宏会抛出 `BaseException`（"S029181"，相同符号叠放）。— S9。
 - **`Generate.Connections(new[] { page }, false)` 把页上画出的自动连线变成 `Connection` 对象**（宏：0 → 9 个；两个上下对齐的线圈之间：2 个），可以在 `SafetyPoint` 中执行。— S9。
 
+### A22. 离线程序（spike S15，2026-10-20，EPLAN 2026.0.3.25421，Electric P8）
+详细数据见 [spike S15](../../spikes/S15-offline-host/README.md)。开发机，当前用户的交互桌面，界面中的 EPLAN 同时运行。
+- `EplApplication.Init(string.Empty, false, false)`（不允许授权和登录对话框）在开发机上 2.0–2.3 秒内成功，不弹出任何窗口；`QuietMode` 为 `ShowNoDialogs`。— S15。
+- `EplanBinFolder` 和 `AssemblyResolver.SetEplanBinPath` 要用**变体的** Bin（`…\Electric P8\2026.0.3\Bin`，有 `W3u.exe`）；给 Platform 的 Bin 时 `Init` 抛出 `ArgumentException`："The Variant in '…' is not valid."。`AssemblyResolver` 只解析 EPLAN 自己的程序集，Platform Bin 中的 `Newtonsoft.Json` 要自己处理 `AssemblyResolve`。— S15。
+- 授权与插件中看到的相同（3214 个选项中 2683 个可用，含 `APIExtension`）；`EplApplication.License` 的字符串是"Eplan Demo System"，但修改照常保存。未签名的离线程序读写 321 页的项目没有限制。— S15。
+- 与界面中的 EPLAN 同时运行互不影响；`SafetyPoint` 回滚、`UndoStep` 建在外面时回滚静默失效，都与插件中相同（A7）。提交后 `UndoStep.DoUndo()` 不撤销。— S15。
+- 为本用户注册的插件会被影子复制进离线进程，但不调用 `OnInitGui`，所以 EplanMcp 的 Bridge 不启动。`Init` 把线程的区域性改为界面的区域性。— S15。
+- 未验证：另一个 Windows 用户、服务上下文、网络授权或运行时授权下的行为。
+
 ### A21. Claude Code 客户端的进度与图片（spike S13，2026-10-20，Claude Code 2.1.299）
 详细数据见 [spike S13](../../spikes/S13-client-progress/README.md)。
 - Claude Code 每次 `tools/call` 都在 `_meta` 中带 `progressToken`，服务器的进度通知送达；`initialize` 的协议版本为 `2025-11-25`。— S13。
