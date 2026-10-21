@@ -1,4 +1,5 @@
 using EplanMcp.Host.Safety;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EplanMcp.Host.Tests.Safety;
 
@@ -40,6 +41,16 @@ public sealed class PolicyEngineTests
         Type[] channels = [.. typeof(PolicyEngine).Assembly.GetTypes().Where(t => typeof(IApprovalChannel).IsAssignableFrom(t) && !t.IsInterface)];
 
         Assert.Equal([typeof(EplanDialogChannel)], channels);
+    }
+
+    [Fact]
+    public void TheHostsServices_AskOnlyInTheEplanDialog()
+    {
+        // What serve composes: the Large tests' scripted channel is registered only by their own in-process Host.
+        var services = new ServiceCollection();
+        services.AddEplanMcp();
+
+        Assert.Equal([typeof(EplanDialogChannel)], services.Where(d => d.ServiceType == typeof(IApprovalChannel)).Select(d => d.ImplementationType));
     }
 
     [Fact]
