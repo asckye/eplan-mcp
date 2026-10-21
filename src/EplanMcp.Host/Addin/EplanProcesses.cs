@@ -40,10 +40,14 @@ internal sealed class EplanProcesses : IEplanProcesses
 
         public bool HasExited => process.HasExited;
 
+        public void Refresh() => process.Refresh();
+
+        /// <summary>Refreshes first as well, so that no caller sends the request to a window that is gone (see <see cref="IStartedEplan.Refresh"/>).</summary>
         public bool CloseMainWindow()
         {
             try
             {
+                process.Refresh();
                 return process.CloseMainWindow();
             }
             catch (InvalidOperationException)

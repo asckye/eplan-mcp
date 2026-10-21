@@ -24,6 +24,13 @@ internal interface IStartedEplan : IDisposable
 
     public bool HasExited { get; }
 
+    /// <summary>
+    /// Forgets what was read about the process's windows. .NET's <c>Process</c> keeps the main window handle it first
+    /// found, which early in EPLAN's start is the splash screen; a close request sent later without refreshing goes to
+    /// that window and does nothing (live check, api-notes A23). Call it before every <see cref="CloseMainWindow"/>.
+    /// </summary>
+    public void Refresh();
+
     /// <summary>Asks EPLAN to close as the window's close button does; false when it has no enabled main window.</summary>
     public bool CloseMainWindow();
 }
