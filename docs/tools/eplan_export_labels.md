@@ -36,7 +36,8 @@
 - **流程和导出目录**：同 `eplan_export_pdf` 第 5 节。
 - **方案**：在用户设置 `USER.Labelling.Config` 中（A24），用 `SchemeSetting` 校验和列出，不计内部的 `InternalRefDefScheme`。
 - **扩展名**：按方案的 `Format`：`XmlLblTextExportConverterImpl` → `.txt`，`XmlLblExcelExportConverterImpl` → `.xlsx`（S25 中两种都成功，生成 xlsx 时没有 Excel 进程）。其他格式在 Large 测试中逐个确认后再加入，确认前拒绝。读取方案 `Format` 的设置路径在实现时验证。
-  - 实现：设置路径取自 EPLAN 自带的标签配置（`Platform\2026.0.3\Cfg\LabelLog_User_Config_*.xml`，api-notes B9）：方案下的 `Data.File.Format`，用 `SchemeSetting.SetScheme(序号)` 之后 `GetStringSetting("Data.File.Format", 0)` 读取；读不出时按格式未知拒绝该方案。**待 Large 测试确认**这样能读出 S25 的两个方案的格式。
+  - 实现：设置取自 EPLAN 自带的标签配置（`Platform\2026.0.3\Cfg\LabelLog_User_Config_*.xml`，api-notes B9）：方案下的 `Data.File.Format`。用 `SchemeSetting.SetScheme(序号)` 之后 `GetStringSetting("File.Format", 0)` 读取；读不出时按格式未知拒绝该方案。
+  - **已实测**（2026-10-21，第一次 Large 测试）：`SchemeSetting` 中方案设置的相对路径**从方案的 `Data` 节点算起**。`GetStringSetting("Data.File.Format", 0)` 抛 `BaseException`（消息中的路径是 `USER.Labelling.Config.<方案>.Data<.Data.File.Format`），`"File.Format"` 能读到；完整路径 `new Settings().GetStringSetting("USER.Labelling.Config.<方案>.Data.File.Format", 0)` 也能读到。读出的转换器名：`Device tag list`、`Summarized parts list` 为 `XmlLblTextExportConverterImpl`，`Cable diagram`、`PCT-Loops`、`Rittal Length cutting C8+`、`SmartWiring` 为 `XmlLblExcelExportConverterImpl`，与上面的映射一致；`Terminal diagram` 按 S25 是 xlsx，由 Large 测试的导出确认。
   - Excel 方案总是给出 `.xlsx` 的文件名，所以不会产生需要 Excel 的 `.xls`；方案的 Excel 模板（`Data.File.Template`）是 `.xls` 时的结果没有验证。
   - 方案名先按原样匹配，找不到时接受只差大小写的唯一一个；结果中的 `scheme` 是 EPLAN 中的名称。省略 `file_name` 时文件以方案名命名。
 - **EPLAN 调用**：`new Label().DoLabel(project, scheme, language, 路径, 1, 1)`，在 `QuietModeStep(ShowNoDialogs)` 中执行。文件名总要给出：方案中的默认目标在 `$(MD_DOCUMENTS)` 下，在导出目录之外（S25）。不用带布尔参数的重载：它会打开输出文件（XML）。

@@ -43,7 +43,7 @@ public sealed class ProjectExportTests(LiveEplan eplan)
     public async Task Labels_AreOneFileWithTheSchemesExtension_InItsFolderOnly(string scheme, string file)
     {
         // S25: the device tag list is fixed-width text of about 40 KB, the terminal diagram an xlsx of about 805 KB. That
-        // the format is read from the scheme's Data.File.Format is what this checks first (tool spec 5).
+        // the format is read from the scheme's Data.File.Format, as File.Format relative to its Data node, is checked too.
         (JsonElement data, long milliseconds) = await ExportAsync(
             "eplan_export_labels",
             new() { ["scheme"] = scheme, ["language"] = "en_US", ["file_name"] = "LargeLabels" },
