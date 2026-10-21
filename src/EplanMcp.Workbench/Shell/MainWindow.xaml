@@ -10,6 +10,7 @@
     xmlns:approvals="clr-namespace:EplanMcp.Workbench.Approvals"
     xmlns:audit="clr-namespace:EplanMcp.Workbench.Audit"
     xmlns:status="clr-namespace:EplanMcp.Workbench.Status"
+    xmlns:clients="clr-namespace:EplanMcp.Workbench.Clients"
     Width="1200" Height="780" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
@@ -126,9 +127,7 @@
         <approvals:ApprovalsPage x:Name="ApprovalsPage" />
         <audit:AuditPage x:Name="AuditPage" />
         <status:StatusPage x:Name="StatusPage" />
-        <shell:PageView x:Name="ClientsPage" Title="{l:Tr Page.Clients}" Caption="{l:Tr Page.Clients.Caption}">
-          <shell:EmptyState Title="{l:Tr Page.Later}" Text="{l:Tr Page.Clients.Later}" />
-        </shell:PageView>
+        <clients:ClientsPage x:Name="ClientsPage" />
       </Grid>
     </Grid>
 

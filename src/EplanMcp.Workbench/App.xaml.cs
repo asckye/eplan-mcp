@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Threading;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Audit;
+using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Logging;
 using EplanMcp.Workbench.Protocol;
@@ -74,6 +75,7 @@ public sealed partial class App : Application, IDisposable
         var host = new HostCommands(HostLocator.Find(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null);
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
+        _window.AttachClients(new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
         ShowQueue();

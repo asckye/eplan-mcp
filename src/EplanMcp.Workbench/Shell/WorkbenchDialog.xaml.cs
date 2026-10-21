@@ -10,11 +10,17 @@ public partial class WorkbenchDialog : Window
     /// <param name="message">What happens, in words; no "Warning" (TXT-06).</param>
     /// <param name="safe">The safe button, with its access key (KEY-06).</param>
     /// <param name="action">The verb that answers the title (TXT-05), with its access key.</param>
-    public WorkbenchDialog(string title, string message, string safe, string action)
+    /// <param name="details">What the action would change, such as a diff, shown below as plain text; null for none.</param>
+    public WorkbenchDialog(string title, string message, string safe, string action, string? details = null)
     {
         InitializeComponent();
         Title = Heading.Text = title;
         Message.Text = message;
+        if (details is not null)
+        {
+            (Details.Text, Details.Visibility, Width) = (details, Visibility.Visible, 548);
+        }
+
         SafeButton.Content = safe;
         ActionButton.Content = action;
         AutomationProperties.SetName(SafeButton, Plain(safe));
@@ -23,8 +29,8 @@ public partial class WorkbenchDialog : Window
     }
 
     /// <summary>Asks; true only for the action button, never for Esc, Enter or closing the window.</summary>
-    public static bool Confirm(Window owner, string title, string message, string safe, string action) =>
-        new WorkbenchDialog(title, message, safe, action) { Owner = owner }.ShowDialog() == true;
+    public static bool Confirm(Window owner, string title, string message, string safe, string action, string? details = null) =>
+        new WorkbenchDialog(title, message, safe, action, details) { Owner = owner }.ShowDialog() == true;
 
     /// <summary>A label without its access key: "取消(_C)" is read as "取消", "E_xit" as "Exit" (A11Y-01).</summary>
     internal static string Plain(string label)
