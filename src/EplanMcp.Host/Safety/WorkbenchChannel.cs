@@ -76,10 +76,29 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
             return null; // version 1 cannot show it
         }
 
-        using NamedPipeClientStream? pipe = await ConnectAsync(cancellationToken).ConfigureAwait(false);
-        return pipe is not null && await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false) && Ask(question, tier.Value, eplan) is { } ask
-            ? await DeliverAsync(pipe, question, ask, cancellationToken).ConfigureAwait(false)
-            : null;
+        NamedPipeClientStream? pipe = await ConnectAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            if (pipe is null || !await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false) || Ask(question, tier.Value, eplan) is not { } ask
+                || await DeliverAsync(pipe, question, ask, cancellationToken).ConfigureAwait(false) is not { } answer)
+            {
+                return null;
+            }
+
+            if (answer.Decision != ApprovalDecision.Granted)
+            {
+                return answer;
+            }
+
+            // A grant keeps the connection open, for the write's outcome to be shown on it (approval.outcome).
+            var outcome = new Outcome(pipe, question.RequestId, _clock, _logger);
+            pipe = null;
+            return answer with { Outcome = outcome };
+        }
+        finally
+        {
+            pipe?.Dispose();
+        }
     }
 
     /// <summary>
@@ -338,4 +357,34 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Workbench question {RequestId} closed unanswered: {Problem}")]
     private partial void LogClosed(string requestId, string problem);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Workbench not shown the outcome of {RequestId}: {Problem}")]
+    private static partial void LogOutcomeNotShown(ILogger logger, string requestId, string problem);
+
+    /// <summary>The granted question's connection: shows the write's outcome on it, then closes it.</summary>
+    private sealed class Outcome(NamedPipeClientStream pipe, string requestId, TimeProvider clock, ILogger logger) : IApprovalOutcome
+    {
+        public async Task ReportAsync(string execution, string? reason)
+        {
+            WriteExecution state = execution switch
+            {
+                ExecutionState.NotStarted => WriteExecution.NotStarted,
+                ExecutionState.RolledBack => WriteExecution.RolledBack,
+                ExecutionState.Committed => WriteExecution.Committed,
+                _ => WriteExecution.Unknown,
+            };
+            try
+            {
+                using var timeout = new CancellationTokenSource(ReplyTimeout, clock);
+                byte[] notification = WorkbenchJson.Notification(WorkbenchProtocol.ApprovalOutcomeMethod, new ApprovalOutcomeParams(requestId, state, reason));
+                await WorkbenchFraming.WriteAsync(pipe, notification, timeout.Token).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is IOException or OperationCanceledException or InvalidOperationException)
+            {
+                LogOutcomeNotShown(logger, requestId, ex.Message); // gone, broken or closed: the write stands as it is
+            }
+        }
+
+        public void Dispose() => pipe.Dispose();
+    }
 }

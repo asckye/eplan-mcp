@@ -115,9 +115,9 @@ internal sealed partial class WritePipeline(
         }
 
         bool destructive = request.Tier == ToolTier.Destructive;
+        ApprovalResult? approval = null;
         if (decision.Verdict == PolicyVerdict.NeedsApproval)
         {
-            ApprovalResult approval;
             try
             {
                 string? backupFolder = destructive ? backups.ProjectFolder(plan) : null;
@@ -127,16 +127,31 @@ internal sealed partial class WritePipeline(
             {
                 throw NotStarted(ex.Error);
             }
-
-            await RecordApprovalAsync(request.Tool, requestId, plan, eplan, approval).ConfigureAwait(false);
-            if (approval.Decision != ApprovalDecision.Granted)
-            {
-                throw NotStarted(approvals.Refusal(approval.Decision));
-            }
         }
 
-        // Destructive writes were approved above in any case (PolicyEngine); the backup folder is made only after that.
-        BackupTarget? backup = destructive ? NewBackup(plan, request.Limit) : null;
+        // The window that granted the write shows what became of it (ADR-0014), and is let go when the call ends.
+        using IApprovalOutcome? shown = approval?.Outcome;
+        BackupTarget? backup;
+        try
+        {
+            if (approval is not null)
+            {
+                await RecordApprovalAsync(request.Tool, requestId, plan, eplan, approval).ConfigureAwait(false);
+                if (approval.Decision != ApprovalDecision.Granted)
+                {
+                    throw NotStarted(approvals.Refusal(approval.Decision));
+                }
+            }
+
+            // Destructive writes were approved above in any case (PolicyEngine); the backup folder is made only after that.
+            backup = destructive ? NewBackup(plan, request.Limit) : null;
+        }
+        catch (BridgeCallException ex)
+        {
+            await Show(shown, ExecutionState.NotStarted, ex.Error.Reason).ConfigureAwait(false);
+            throw;
+        }
+
         JsonObject record = Record("execution_started", request.Tool, requestId, plan, eplan);
         record["eplan"]!["start"] = started.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
         record["host"] = DanglingWrites.ThisHost();
@@ -157,6 +172,7 @@ internal sealed partial class WritePipeline(
         {
             LogAuditUnavailable(ex);
             Settle(backup, ExecutionState.NotStarted, null);
+            await Show(shown, ExecutionState.NotStarted, ErrorReason.AuditUnavailable).ConfigureAwait(false);
             throw NotStarted(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = AuditUnavailableMessage });
         }
 
@@ -167,6 +183,7 @@ internal sealed partial class WritePipeline(
         {
             WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
             await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered, backup).ConfigureAwait(false);
+            await Show(shown, ExecutionState.Committed, null).ConfigureAwait(false);
             return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered, backup?.Path);
         }
         catch (BridgeCallException ex)
@@ -180,9 +197,14 @@ internal sealed partial class WritePipeline(
             }
 
             Settle(backup, execution, ex.Error);
+            await Show(shown, execution, ex.Error.Reason).ConfigureAwait(false);
             throw;
         }
     }
+
+    /// <summary>Shows the write's outcome in the window that granted it, if any (ADR-0014); never fails the write.</summary>
+    private static Task Show(IApprovalOutcome? shown, string execution, string? reason) =>
+        shown?.ReportAsync(execution, reason) ?? Task.CompletedTask;
 
     /// <summary>
     /// The backup target of a Destructive write: a new folder (<see cref="BackupFolders"/>) and half the execution limit,
