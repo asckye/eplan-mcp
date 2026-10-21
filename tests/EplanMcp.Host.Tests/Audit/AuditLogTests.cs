@@ -288,6 +288,23 @@ public sealed class AuditLogTests : IDisposable
 
     private AuditLog Log() => new(AuditDirectory, _clock);
 
+    [Fact]
+    public async Task Verify_KeepsTheLockOnlyToTakeTheLengths_SoAHostCanAppendWhileItChecks()
+    {
+        await Append(new JsonObject { ["kind"] = "approval" });
+        await Append(new JsonObject { ["kind"] = "execution_started" });
+        string? appended = null;
+
+        (int records, AuditBreak? broken) = AuditVerifier.Verify(
+            AuditDirectory,
+            TimeSpan.FromSeconds(1),
+            () => appended = Log(TimeSpan.FromSeconds(1)).AppendAsync(new JsonObject { ["kind"] = "execution_result" }, CancellationToken.None).GetAwaiter().GetResult());
+
+        Assert.NotNull(appended); // the append got the lock at once, not after the whole check
+        Assert.Equal((2, null), (records, broken)); // what was there when the lengths were taken, whole
+        Assert.Equal((3, null), AuditVerifier.Verify(AuditDirectory));
+    }
+
     private AuditLog Log(TimeSpan lockWait) => new(AuditDirectory, _clock) { LockWait = lockWait };
 
     private Task<string> Append(JsonObject entry) => Log().AppendAsync(entry, TestContext.Current.CancellationToken);
