@@ -16,6 +16,12 @@ namespace EplanMcp.Host.Tests.Tools;
 internal sealed class WriteToolHarness : IDisposable
 {
     public WriteToolHarness(params IApprovalChannel[] channels)
+        : this(OutsideScratchWrites.Approve, channels)
+    {
+    }
+
+    /// <summary>With config.json setting <c>writesOutsideScratch</c> to <paramref name="outsideScratch"/>.</summary>
+    public WriteToolHarness(OutsideScratchWrites outsideScratch, params IApprovalChannel[] channels)
     {
         Locations = new HostDataLocations(Directory.CreateTempSubdirectory("eplanmcp-write-tool-").FullName);
         ProjectPath = Path.Combine(Locations.DefaultScratch, "Line1");
@@ -24,13 +30,14 @@ internal sealed class WriteToolHarness : IDisposable
             new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "b", Eplan = new EplanInstanceInfo { ProcessId = Environment.ProcessId, Version = "2026.0.3" } },
             null);
         var audit = new AuditLog(Locations.Audit, TimeProvider.System);
+        var config = new HostConfig([Locations.DefaultScratch], outsideScratch);
         Pipeline = new WritePipeline(
             Bridge,
-            HostConfig.Defaults(Locations),
+            config,
             SuspensionStore.For(Locations),
             audit,
             new DanglingWrites(Bridge, SuspensionStore.For(Locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService(channels, HostConfig.Defaults(Locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new ApprovalService(channels, config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
             new BackupFolders(Locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);

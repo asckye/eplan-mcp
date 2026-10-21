@@ -18,7 +18,7 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     private const string NewPage = "=GAA+A1&EFS1/60";
     private const string FullPage = "=GAA+A1&EFS1/1";
 
-    private readonly WriteToolHarness _harness = new();
+    private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 
     public ConnectionGenerateToolTests()
     {

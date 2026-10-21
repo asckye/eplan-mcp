@@ -41,13 +41,14 @@ public sealed class PageCreateToolTests : IDisposable
             Pages = [.. ((PageCreateArgs)args!).Pages.Select(p => new PageSummary { Name = p.Name, Type = p.PageType ?? "Circuit", Description = p.Description })],
         };
         var audit = new AuditLog(_locations.Audit, TimeProvider.System);
+        var config = new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Deny);
         _pipeline = new WritePipeline(
             _bridge,
-            HostConfig.Defaults(_locations),
+            config,
             SuspensionStore.For(_locations),
             audit,
             new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], HostConfig.Defaults(_locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
+            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
             new BackupFolders(_locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);

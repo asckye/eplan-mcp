@@ -55,6 +55,7 @@
 - 支持 `language` 参数读取多语言文本。
 
 ### Changed
+- 没有 `config.json`、或其中没有设 `writesOutsideScratch` 时，scratch 之外的项目（真实项目）的写入不再一律拒绝（`POLICY_DENIED`），改为每次在 EPLAN 中弹出审批对话框，工程师批准后才执行；删除等 Destructive 操作照旧先备份。要恢复只允许 scratch，在 `config.json` 中设 `"writesOutsideScratch": "deny"`；`eplanmcp doctor` 显示当前设置。
 - `eplan_tool_usage` 的描述和 `topic` 的说明缩短，给参数中不断增加的工具名留出篇幅（契约变更，用法不变）。
 - 省略 `language` 时，EPLAN 界面语言中没有的多语言文本（如只有德文、英文的部件描述）改为返回其他语言的文本（先英文），并在旁边的 `descriptionLanguage`、`textLanguage` 或 `language` 字段注明语言；显式传入 `language` 时行为不变。
 

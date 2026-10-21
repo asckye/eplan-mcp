@@ -16,17 +16,17 @@ public sealed class HostConfigTests
 
         Assert.Null(problem);
         Assert.Equal(["C:\\Data\\EplanMcp\\scratch"], config!.ScratchRoots);
-        Assert.Equal(OutsideScratchWrites.Deny, config.WritesOutsideScratch);
+        Assert.Equal(OutsideScratchWrites.Approve, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(120), config.ApprovalTimeout);
     }
 
     [Fact]
     public void Parse_ReadsEverySetting()
     {
-        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"approve","approvalTimeoutSeconds":90}""", _locations);
+        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"deny","approvalTimeoutSeconds":90}""", _locations);
 
         Assert.Equal(["D:\\Scratch", "E:\\Copies"], config!.ScratchRoots);
-        Assert.Equal(OutsideScratchWrites.Approve, config.WritesOutsideScratch);
+        Assert.Equal(OutsideScratchWrites.Deny, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(90), config.ApprovalTimeout);
     }
 

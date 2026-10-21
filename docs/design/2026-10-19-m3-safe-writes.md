@@ -103,7 +103,7 @@ flowchart TD
 ### 4.3 Host
 - **配置与数据目录**：
   - 新增 `HostDataLocations`，与插件的 `DataLocations` 规则相同：`EPLANMCP_HOME`，或 `%USERPROFILE%\EplanMcp`。
-  - `config.json` 第一版只有两项：`scratchRoots`，默认 `<数据根目录>\scratch`；`writesOutsideScratch`，M3a 期间默认 `deny`（Q5），M3a 收尾时默认改为 `approve`。
+  - `config.json` 第一版只有两项：`scratchRoots`，默认 `<数据根目录>\scratch`；`writesOutsideScratch`，M3a 期间默认 `deny`（Q5），M3a 收尾时默认改为 `approve`（2026-10-21 已改）。
   - [ADR-0011](../adr/0011-approval-out-of-band.md) 加了第三项 `approvalTimeoutSeconds`：工程师回答审批和解除暂停的确认的期限，默认 120 秒，只能是 60–300 之间的整数。
   - 启动时校验；无效时拒绝启动，`doctor` 指出原因（架构 8.9）。
   - 没有任何工具可以修改它（SEC-02）。
@@ -226,5 +226,5 @@ flowchart TD
 | Q2 | 审批表单的语言 | **已决定**（2026-10-19，项目负责人按建议）：跟随系统界面语言，中文和英文各一份（4.6）；变更清单中的项目数据原样 |
 | Q3 | 写操作的执行时限 | **已决定**（2026-10-19，项目负责人按建议）：默认 60 秒，上限 300 秒，建页每页加 2 秒；结果记录 256 条 |
 | Q4 | 写入评测每次作答前如何恢复夹具：每题用不同文件名的副本并由运行器打开，还是允许运行器重启 EPLAN | **已决定**（2026-10-19，项目负责人按建议）：先验证"运行器打开另一个副本"（A11：`ProjectOpen` 不一定改变当前项目），不行再考虑重启。**改为**（2026-10-20，项目负责人决定）：每次作答仍用一份不同名称的新副本，但**由工程师在 EPLAN 中手工打开**。运行器复制好副本后列出它们，等待全部打开、夹具重新成为当前项目（`ProjectCopies.WaitUntilOpenAsync`，步骤见 [evals/README.md](../../evals/README.md#写入题每次作答一份新副本)）；运行器不打开项目，也不重启 EPLAN。考虑过、暂不采用：Remote Client 辅助程序（ADR-0002 不采用 Remote Client）；插件新增 `project.open` 操作和对应的工具（改变产品和 IPC，需要单独设计） |
-| Q5 | M3a 期间，真实项目的写入是否先一律拒绝，直到 EPLAN 对话框渠道和 Large 测试 Q1–Q3 都通过 | **已决定**（2026-10-19，项目负责人按建议）：是：`config.json` 默认只允许 scratch，M3a 收尾时改为按 ADR-0005 审批 |
+| Q5 | M3a 期间，真实项目的写入是否先一律拒绝，直到 EPLAN 对话框渠道和 Large 测试 Q1–Q3 都通过 | **已决定**（2026-10-19，项目负责人按建议）：是：`config.json` 默认只允许 scratch，M3a 收尾时改为按 ADR-0005 审批。**已执行**（2026-10-21，项目负责人："改为能够修改真实项目"）：默认改为 `approve`，scratch 之外的每次写入都要工程师在 EPLAN 的审批对话框（M5 起也可以在 Workbench）中批准，Destructive 操作照旧先备份；要恢复只允许 scratch，在 `config.json` 中设 `"writesOutsideScratch": "deny"` |
 | Q6 | S4 的界面人工确认（表单如何显示中文变更清单，三种回答的往返）放在第 8 步之前 | **已决定**（2026-10-19，项目负责人按建议）：是，由项目负责人在交互式会话中确认。**不再需要**（2026-10-20，ADR-0011）：审批不用 elicitation |

@@ -106,22 +106,22 @@ public sealed class WritePipelineTests : IDisposable
     }
 
     [Fact]
-    public async Task OutsideScratch_DuringM3a_IsDeniedByPolicy()
+    public async Task OutsideScratch_WhenConfigDeniesIt_IsDeniedByPolicy()
     {
         _plan = PlanFor(_realProject);
 
-        BridgeError error = await Fails();
+        BridgeError error = await Fails(config: new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Deny));
 
         Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Empty(_bridge.Writes);
     }
 
     [Fact]
-    public async Task OutsideScratch_WithApprovalsOn_IsRefusedWhileThereIsNoChannel()
+    public async Task OutsideScratch_ByDefault_NeedsApprovalAndIsRefusedWhileThereIsNoChannel()
     {
         _plan = PlanFor(_realProject);
 
-        BridgeError error = await Fails(config: new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Approve));
+        BridgeError error = await Fails();
 
         Assert.Equal((ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Empty(_bridge.Writes);
