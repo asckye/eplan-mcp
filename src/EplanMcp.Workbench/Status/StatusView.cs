@@ -109,8 +109,20 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
         {
             (_report, _error, State) = (null, ex, StatusState.Failed);
         }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            (_report, _error, State) = (null, new HostCommandException(HostFailure.Unreadable, ex.Message, ex), StatusState.Failed);
+        }
+        finally
+        {
+            // However it ends, the page leaves "Running": Refresh is never off for good.
+            if (State == StatusState.Running)
+            {
+                (_report, State) = (null, StatusState.Failed);
+            }
 
-        Changed();
+            Changed();
+        }
     }
 
     /// <summary>The Host asks this Workbench while it takes questions, else the EPLAN dialog, else refuses (ADR-0014).</summary>

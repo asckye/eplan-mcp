@@ -87,6 +87,23 @@ public sealed class StatusViewTests(WpfContext wpf)
         });
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ANullCheck_OrAnyFaultWhileRunning_EndsInAnError_NeverStuckRunning(bool nullCheck)
+    {
+        _host.Answer = _ => nullCheck
+            ? new HostRun(0, """{"schemaVersion":1,"hostVersion":"0.1.0","status":"ok","checks":[null]}""")
+            : throw new InvalidOperationException("a fault of its own");
+        StatusView view = View();
+
+        await view.RunAsync(Token);
+
+        Assert.Equal(StatusState.Failed, view.State);
+        Assert.Empty(view.Groups);
+        Assert.NotNull(view.Error);
+    }
+
     [Fact]
     public async Task ADoctorThatGivesNoResult_IsAnError_WithItsDetails_AndNoGroups()
     {
