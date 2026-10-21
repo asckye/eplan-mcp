@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    EplanMcp.Workbench.exe (ADR-0014, ADR-0017, M5 design 4.4): the engineer's desktop app, which answers the Host's
+    approval questions over a named pipe. WPF on .NET 10 with the TIA Workbench theme (Tia\, vendored: see
+    THIRD-PARTY-NOTICES.md and Tia\.editorconfig). It never references the Host (M5 design 4.4); the pipe protocol is
+    EplanMcp.Workbench.Protocol.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>EplanMcp.Workbench</AssemblyName>
+    <RootNamespace>EplanMcp.Workbench</RootNamespace>
+    <Version>0.1.0</Version>
+    <UseWPF>true</UseWPF>
+    <!-- Only for System.Windows.Forms.NotifyIcon, the tray icon (ADR-0017 decision 1). -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- LAY-04: Per-Monitor V2 needs the manifest (spike S18). -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!--
+      WFO0003 tells WinForms apps to set DPI awareness in code; this is a WPF app (WinForms only draws the tray icon),
+      and WPF reads it from the manifest only.
+    -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF and WinForms both define Application, Button, FontFamily...: keep WinForms out of the implicit usings. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- TIA's ThemeManager loads the palettes from .../component/Themes/: the vendored dictionaries keep that path. -->
+    <Page Remove="Tia\Themes\*.xaml" />
+    <Page Include="Tia\Themes\*.xaml" Link="Themes\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EplanMcp.Workbench.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,19 @@
+# Files vendored from the TIA Portal Openness MCP repository (MIT, see THIRD-PARTY-NOTICES.md) stay as they are there,
+# so that merging TIA's later changes stays a plain diff (ADR-0017 decision 2). Their style differs from this
+# repository's, so style, formatting, clarity and performance rules are relaxed here, for this folder only.
+# Correctness rules and compiler warnings stay on: the one CA1305 finding was fixed in the file (see its header).
+[*.cs]
+# Style: braces, block-scoped namespaces, field names, using directives.
+dotnet_diagnostic.IDE0011.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.IDE0005.severity = none
+# Clarity: string.Replace(string, string) and string.IndexOf(char) already compare ordinally.
+dotnet_diagnostic.CA1307.severity = none
+# Performance: static members and arrays (making SelectionColor static would break the XAML bindings to it).
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1861.severity = none
+# Formatting: keep TIA's one-line statements, blocks and initializers when `dotnet format` runs.
+csharp_preserve_single_line_statements = true
+csharp_preserve_single_line_blocks = true
+csharp_new_line_before_members_in_object_initializers = false
