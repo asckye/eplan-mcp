@@ -182,6 +182,8 @@
 - 经 Remote Client 命令行传入含中文的路径会变成乱码（`S025033 源目录不存在`）；进程内传参不受影响。— S24。
 - 🔴 `restore /TYPE:MASTERDATA` 不覆盖已有文件：目标中已有同名文件时跳过，照样返回 true，不记日志。还原到空目录得到逐字节相同的文件。恢复要先把损坏的库移开（EPLAN 关闭时），再放回还原出的文件。— S24。
 - `new MDPartsManagement().OpenDatabase(路径)` 打开另一个库，不改 `SelectedPartsDatabaseAsString`。— S24。
+- 🔴 `MDPartsDatabase.ImportParts(文件, "XPamImportXml", …)` 在按路径打开的副本上执行时，走的是界面导入 action `XPamImportXMLAction`，同时改了**配置的那个库**的 `User.eod`/`User.eox`（一个按用户的计数），部件数据不变；放在事务中时撤不回，还留下未关闭的撤销日志，之后的导入都报"不允许套叠撤销日志"。导入、同步类的测试一律算写正在用的库。— S24 r11。
+- `MDPartsDatabase.ExportParts(文件, DataFormat.XML)` 464 个部件 2 秒、5 MB；`EDZ` 44 秒、128 MB。`Translate.ExportDatabaseTexts(文件, "XTrLanguageDbXmlConverterImpl" | "XTrLanguageDbXml2TabConverterImpl")` 不到 1 秒。导出不改库。转换器名：部件库 `XPamImportXml`、`XPamExportXml`。— S24 r11。
 - `MDPartsDatabase` 的事务：`AddPart` 提交前 `ExistsPart` 为 false，`Rollback` 撤回、`Commit` 落盘；🔴 `RemovePart` 立即生效，`Rollback` 不能恢复。部件已存在时 `AddPart` 抛出 `MDInvalidArgumentException`（`S030025`）。事务不释放时，下一次 `CreateTransaction` 抛出 `SEHException`，要用 `using`。— S24。
 
 ### A29. 导入（spike S22，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
