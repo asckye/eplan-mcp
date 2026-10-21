@@ -55,6 +55,7 @@
 - 支持 `language` 参数读取多语言文本。
 - M4c 只读工具（只在 `full` 中）：
   - `eplan_cable_get`：一根电缆的型号、芯数、截面、长度、两端的设备、部件，以及每根芯线的颜色、线号和两端；芯线分页。列出电缆用 `eplan_device_list`（`category: "Cable"`）。
+  - `eplan_terminal_strip_list`：项目中的端子排及每排的端子数、跨接数，按名称排序、分页，可按名称中的文字过滤。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed

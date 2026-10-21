@@ -302,6 +302,14 @@ public sealed class SerializerCompatibilityTests
             Total = 2,
         },
         new CableGetData(),
+        new TerminalStripListArgs { Project = "Line1", NameContains = "+A1", Offset = 50, Limit = 50 },
+        new TerminalStripListArgs(),
+        new ListData<TerminalStripListItem>
+        {
+            Project = "项目 二",
+            Items = [new TerminalStripListItem { Name = "+A2-XD2", Terminals = 5, Bridges = 3 }, new TerminalStripListItem()],
+            Total = 45,
+        },
         new PartListArgs { Project = "Line1", Manufacturer = "SIE", Text = "接触器", Language = "zh_CN", Offset = 50, Limit = 50 },
         new PartListArgs(),
         new ListData<PartListItem>
