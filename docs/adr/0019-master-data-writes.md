@@ -51,7 +51,7 @@
   - SQL Server 上的库不能用这组写工具；
   - 主数据的备份可能很大，`doctor` 报告占用的空间。
 - **后续行动**：
-  - S24；
+  - S24：已完成（2026-10-21，api-notes A30）。前提成立：`backup MASTERDATA` 在调度器中可用，按备份能恢复。还原不覆盖已有文件，恢复步骤见 [S24 结论 6](../../spikes/S24-master-data/README.md#结论)；部件库 API 的事务不能撤回删除，失败时一律按备份恢复；
   - 威胁模型加入 T29 和 SEC-32；
   - `PolicyEngine` 的决策表加入"系统主数据"目标；
   - `doctor` 显示当前的部件库和翻译库，以及 `masterDataWrites`；

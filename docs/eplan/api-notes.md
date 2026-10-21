@@ -176,6 +176,14 @@
 - 在原路径替换插件 DLL 后重启 EPLAN，加载的就是新 DLL，不需要重新注册。— S14。
 - 🔴 带 Internet 区域标记（`Zone.Identifier`）的插件 DLL 加载失败：S043005，`FileLoadException` 0x80131515 / `NotSupportedException`（loadFromRemoteSources）；影子副本连同标记一起复制。— S14。
 
+### A30. 主数据的备份、还原与部件库写入（spike S24 写入部分，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。写入只在还原到 scratch 中的副本上进行，正在用的库前后 SHA-256 不变。
+- `new ActionManager().FindAction("backup").Execute(context)`，参数 `TYPE=MASTERDATA`、`MDTYPE=ARTICLES|LANGUAGES`、`SOURCEPATH`/`FILENAME`（由配置的库路径拆出，如 `$(MD_PARTS)` + `EPLAN_parts.alk`，变量由 EPLAN 展开）、`DESTINATIONPATH`、`ARCHIVENAME`：返回 true，0.14 / 0.23 秒。得到 7z 格式的 `.zw6`（部件库，991 KB，不含 `.lck` 和 `EMPTY_SQL_Backups\`）、`.zw7`（翻译库，912 KB，只含 `Translate.db`）。— S24。
+- 经 Remote Client 命令行传入含中文的路径会变成乱码（`S025033 源目录不存在`）；进程内传参不受影响。— S24。
+- 🔴 `restore /TYPE:MASTERDATA` 不覆盖已有文件：目标中已有同名文件时跳过，照样返回 true，不记日志。还原到空目录得到逐字节相同的文件。恢复要先把损坏的库移开（EPLAN 关闭时），再放回还原出的文件。— S24。
+- `new MDPartsManagement().OpenDatabase(路径)` 打开另一个库，不改 `SelectedPartsDatabaseAsString`。— S24。
+- `MDPartsDatabase` 的事务：`AddPart` 提交前 `ExistsPart` 为 false，`Rollback` 撤回、`Commit` 落盘；🔴 `RemovePart` 立即生效，`Rollback` 不能恢复。部件已存在时 `AddPart` 抛出 `MDInvalidArgumentException`（`S030025`）。事务不释放时，下一次 `CreateTransaction` 抛出 `SEHException`，要用 `using`。— S24。
+
 ### A29. 导入（spike S22，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S22](../../spikes/S22-imports/README.md)。示例项目的 scratch 副本。
 - `new Import().DXFPage(文件, 页, new Transformation(文件, 页, "", ScalingMode.Automatic, PositionMode.Center, false), "")`：Rittal 示例 DXF 在 0.04–0.3 秒内给页加上 227 个图形对象，能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销。— S22。

@@ -11,12 +11,16 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Spikes.S24;
 
 /// <summary>
-/// Spike S24, read part (M4c design 4.8, 4.9): which parts and translation databases EPLAN is configured with, and
+/// Spike S24 (M4c design 4.8, 4.9; ADR-0019): which parts and translation databases EPLAN is configured with, and
 /// reading parts from the parts database the way eplan_part_search and eplan_device_place would, on the main thread
-/// through the dispatcher. Nothing is written: no database is created, changed, upgraded or selected, and the
-/// configured databases are only read (their settings are never set, XML: that changes the global user setting).
+/// through the dispatcher. The configured databases are only read and backed up, never written, and their settings
+/// are never set (XML: that changes the global user setting); the write part writes only to folders and database
+/// copies under the scratch root.
 /// <para>
-/// Usage: <c>EplanMcpSpikeS24 /Mode:partsdb|translationdb /Report:"…\x.json" [/Part:number] [/Contains:text]</c>.
+/// Usage: <c>EplanMcpSpikeS24 /Mode:partsdb|translationdb|opencopy /Report:"…\x.json" [/Part:number] [/Contains:text]</c>;
+/// for <c>opencopy</c> (write part) <c>/Part</c> is the path of the copy, which must be under the scratch root.
+/// <c>backupparts</c>, <c>backuptranslation</c> and <c>restore</c> (archive in <c>/Part</c>) write only to
+/// <c>/Destination</c>, also under the scratch root.
 /// </para>
 /// </summary>
 public sealed class SpikeS24Action : IEplAction
@@ -41,6 +45,7 @@ public sealed class SpikeS24Action : IEplAction
             Mode = Parameter(oActionCallingContext, "Mode"),
             Part = Parameter(oActionCallingContext, "Part"),
             Contains = Parameter(oActionCallingContext, "Contains"),
+            Destination = Parameter(oActionCallingContext, "Destination"),
         };
         Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
         var thread = new Thread(() => RunLater(dispatcher, p)) { IsBackground = true };
@@ -92,6 +97,27 @@ public sealed class SpikeS24Action : IEplAction
         {
             case "partsdb":
                 report["parts"] = PartsDatabase(p);
+                break;
+            case "opencopy":
+                report["copy"] = OpenCopy(p.Part);
+                break;
+            case "backupparts":
+                report["backup"] = RunAction(p.Destination, "backup", MasterDataBackup("ARTICLES", MDPartsManagement.SelectedPartsDatabaseAsString, p.Destination, "s24-parts"));
+                break;
+            case "backuptranslation":
+                using (var translate = new Translate())
+                {
+                    report["backup"] = RunAction(p.Destination, "backup", MasterDataBackup("LANGUAGES", translate.TranslateDatabase.ToString(), p.Destination, "s24-translate"));
+                }
+
+                break;
+            case "restore":
+                report["restore"] = RunAction(p.Destination, "restore", new Dictionary<string, string>
+                {
+                    ["TYPE"] = "MASTERDATA",
+                    ["ARCHIVENAME"] = p.Part,
+                    ["DESTINATIONPATH"] = p.Destination,
+                });
                 break;
             case "translationdb":
                 report["translation"] = new JObject
@@ -151,6 +177,112 @@ public sealed class SpikeS24Action : IEplAction
         }
 
         result["fileAfter"] = FileState(selected);
+        return result;
+    }
+
+    /// <summary>
+    /// Write part (ADR-0019): opens a copy of the parts database restored under the scratch root, never the configured
+    /// one, checks that this leaves the configured database unchanged, and adds a test part once in a transaction that
+    /// is rolled back and once in one that is committed.
+    /// </summary>
+    private static JObject OpenCopy(string path)
+    {
+        var result = new JObject { ["path"] = path, ["selectedBefore"] = MDPartsManagement.SelectedPartsDatabaseAsString };
+        if (path.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            result["refused"] = "the copy must be under the scratch root";
+            return result;
+        }
+
+        var clock = Stopwatch.StartNew();
+        MDPartsDatabase database = new MDPartsManagement().OpenDatabase(path);
+        result["openSeconds"] = Seconds(clock);
+        result["selectedAfterOpen"] = MDPartsManagement.SelectedPartsDatabaseAsString;
+        try
+        {
+            result["isReadOnly"] = Try(() => database.IsReadOnly);
+            result["allParts"] = Try(() => database.Parts.Length);
+            const string TestPart = "EPLANMCP.S24-TEST";
+            result["existsBefore"] = Try(() => database.ExistsPart(TestPart));
+            // r1 did not dispose the transactions: after AddPart threw inside one, the next CreateTransaction threw an
+            // SEHException. Every transaction is disposed now, also when the write in it throws.
+            result["rolledBack"] = Try(() =>
+            {
+                using MDPartsDatabaseTransaction transaction = database.CreateTransaction();
+                database.AddPart(TestPart, "1");
+                bool during = database.ExistsPart(TestPart);
+                transaction.Rollback();
+                return new JObject { ["during"] = during, ["after"] = database.ExistsPart(TestPart) };
+            });
+            result["committed"] = Try(() =>
+            {
+                using MDPartsDatabaseTransaction transaction = database.CreateTransaction();
+                MDPart part = database.AddPart(TestPart, "1");
+                part.Properties.ARTICLE_DESCR1 = "EplanMcp S24 test part";
+                transaction.Commit();
+                return new JObject { ["after"] = database.ExistsPart(TestPart), ["allParts"] = database.Parts.Length };
+            });
+            result["addedTwice"] = Try(() =>
+            {
+                using MDPartsDatabaseTransaction transaction = database.CreateTransaction();
+                database.AddPart(TestPart, "1");
+                transaction.Commit();
+                return "no exception";
+            });
+            result["removedRolledBack"] = Try(() =>
+            {
+                using MDPartsDatabaseTransaction transaction = database.CreateTransaction();
+                database.RemovePart(database.GetPart(TestPart));
+                bool during = database.ExistsPart(TestPart);
+                transaction.Rollback();
+                return new JObject { ["during"] = during, ["after"] = database.ExistsPart(TestPart), ["allParts"] = database.Parts.Length };
+            });
+        }
+        finally
+        {
+            database.Close();
+        }
+
+        result["selectedAfterClose"] = MDPartsManagement.SelectedPartsDatabaseAsString;
+        return result;
+    }
+
+    /// <summary>The backup ADR-0019 makes before every master-data write, of the configured database.</summary>
+    private static Dictionary<string, string> MasterDataBackup(string type, string configured, string destination, string archive) => new()
+    {
+        ["TYPE"] = "MASTERDATA",
+        ["MDTYPE"] = type,
+        ["SOURCEPATH"] = Path.GetDirectoryName(configured) ?? string.Empty,
+        ["FILENAME"] = Path.GetFileName(configured),
+        ["DESTINATIONPATH"] = destination,
+        ["ARCHIVENAME"] = archive,
+    };
+
+    /// <summary>
+    /// Runs a built-in action the way the Bridge would, in process through <see cref="ActionManager"/> on the main
+    /// thread, writing only to a folder under the scratch root, and lists that folder afterwards.
+    /// </summary>
+    private static JObject RunAction(string destination, string name, Dictionary<string, string> parameters)
+    {
+        var result = new JObject { ["action"] = name, ["parameters"] = JObject.FromObject(parameters) };
+        if (destination.IndexOf(@"\EplanMcp\scratch\", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            result["refused"] = "the destination must be under the scratch root";
+            return result;
+        }
+
+        Directory.CreateDirectory(destination);
+        using var context = new ActionCallingContext();
+        foreach (KeyValuePair<string, string> parameter in parameters)
+        {
+            context.AddParameter(parameter.Key, parameter.Value);
+        }
+
+        var clock = Stopwatch.StartNew();
+        result["returned"] = Try(() => new ActionManager().FindAction(name).Execute(context));
+        result["seconds"] = Seconds(clock);
+        result["files"] = new JArray(Directory.EnumerateFiles(destination, "*", SearchOption.AllDirectories)
+            .Select(f => f.Substring(destination.Length).TrimStart('\\') + " " + new FileInfo(f).Length));
         return result;
     }
 
@@ -229,5 +361,7 @@ public sealed class SpikeS24Action : IEplAction
         public string Part { get; set; } = string.Empty;
 
         public string Contains { get; set; } = string.Empty;
+
+        public string Destination { get; set; } = string.Empty;
     }
 }
