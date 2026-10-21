@@ -38,6 +38,15 @@ internal static class ClientConfigTexts
             ClientProblem.NotEplanmcp => zh
                 ? $"client-config 要由 eplanmcp.exe 本身运行，配置中写的是它的完整路径；当前进程是 {d}"
                 : $"client-config must run as eplanmcp.exe itself, whose full path the entry gets; this process is {d}",
+            ClientProblem.PluginInstalled => zh
+                ? $"已经安装了 Claude Code 插件 {d}，它已经提供 eplan 服务器；再写一份相同的配置，Claude Code 只会启动其中一个。保留插件即可；要改用这里的配置，先用 /plugin uninstall 卸载插件"
+                : $"The Claude Code plugin {d} is installed and already provides the eplan server; with a second entry for the same command Claude Code starts only one of them. Keep the plugin, or uninstall it (/plugin uninstall) to use this entry instead",
+            ClientProblem.ClaudeDesktopRunning => zh
+                ? "Claude 桌面版正在运行，它会频繁改写这个文件，没有改动：请从托盘图标完全退出 Claude 桌面版后重新运行"
+                : "Claude Desktop is running and rewrites this file often, so it was left unchanged: quit Claude Desktop fully (from its tray icon) and run again",
+            ClientProblem.MsixRedirected => zh
+                ? $"当前进程在 MSIX 包 {d} 的环境中（例如由 Claude 桌面版启动），写入 %APPDATA% 会被重定向，所以没有改动任何配置：请从开始菜单、Workbench 或普通的终端运行"
+                : $"This process runs in the environment of MSIX package {d} (started by Claude Desktop, for example), where writes to %APPDATA% are redirected, so no configuration was changed: run it from the Start menu, the Workbench or an ordinary terminal",
             _ => throw new UnreachableException($"Problem {issue.Problem} has no text."),
         };
     }

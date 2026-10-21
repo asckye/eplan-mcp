@@ -49,6 +49,7 @@
   - 写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`；读取之后文件被其他程序改动时拒绝写入；
   - `--dry-run` 只显示 `eplan` 这一项改动前后的写法，不显示文件的其他部分；
   - 写入和移除都记在 `<数据根目录>\state\clients.json`；`--remove` 不带客户端时移除记录中的全部条目，供卸载使用；
+  - 拒绝的情况：由 MSIX 打包的客户端（如 Claude 桌面版）启动时一律拒绝（写入会被重定向）；已安装 Claude Code 插件 `eplan-mcp@eplanmcp-local` 时不为 Claude Code 写配置（插件已经提供服务器）；Claude 桌面版运行时不改它的配置文件，请先完全退出；配置文件是符号链接或路径不完整时不修改；桌面版以 MSIX 安装时写包中的那份文件；
   - JSON 结构见[架构 5.2](docs/architecture/architecture.md#52-host-组件)。
 - 列表工具统一分页（`nextCursor`），结果超出大小预算时截断并提示；来自项目的文本按不可信数据处理。
 - 支持 `language` 参数读取多语言文本。

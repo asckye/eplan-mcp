@@ -173,6 +173,12 @@ internal static class DoctorChecks
     }
 
     /// <summary>
+    /// The MSIX package in whose environment this process runs, by identity or by where a probe file lands, or null.
+    /// <c>client-config</c> refuses to run there, since its writes to %APPDATA% would be redirected (api-notes A6).
+    /// </summary>
+    internal static string? MsixPackage(string localAppData) => CurrentPackageFullName() ?? RedirectingPackage(localAppData);
+
+    /// <summary>
     /// The package whose LocalCache a probe file written to <paramref name="localAppData"/> lands in, or null when it
     /// is not redirected or cannot be written. The probe is removed again either way.
     /// </summary>

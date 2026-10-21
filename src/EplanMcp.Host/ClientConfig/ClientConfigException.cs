@@ -29,6 +29,15 @@ internal enum ClientProblem
 
     /// <summary>client-config does not run as eplanmcp.exe, whose path the entry needs.</summary>
     NotEplanmcp,
+
+    /// <summary>The Claude Code plugin is installed and already provides the server (design 4.7).</summary>
+    PluginInstalled,
+
+    /// <summary>Claude Desktop runs and rewrites its file (spike S17).</summary>
+    ClaudeDesktopRunning,
+
+    /// <summary>The process runs in an MSIX package's environment, where writes to %APPDATA% are redirected (api-notes A6).</summary>
+    MsixRedirected,
 }
 
 /// <summary>A client whose configuration is not changed; <see cref="Detail"/> names what was found, in English.</summary>
