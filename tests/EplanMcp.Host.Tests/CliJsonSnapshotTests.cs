@@ -102,7 +102,7 @@ public sealed class CliJsonSnapshotTests
             [
                 new(Eplan, "2026.0.3.25421", "Electric P8", AddinOutcome.NotConfirmed) { ProcessId = 4120, Problem = new(AddinProblem.NotLoaded, "4120") },
             ])),
-            ["refused"] = Parse(new(AddinAction.Install, Dll, new(AddinProblem.VariantNotFound, "Fluid (installed: Electric P8, Pro Panel)"), [])),
+            ["refused"] = Parse(new(AddinAction.Install, Dll, new(AddinProblem.VariantNotFound, "Fluid", "Electric P8, Pro Panel"), [])),
             ["uninstall"] = Parse(new(AddinAction.Uninstall, null, null,
             [
                 new(Eplan, "2026.0.3.25421", "Electric P8", AddinOutcome.Unregistered) { ProcessId = 5230 },
