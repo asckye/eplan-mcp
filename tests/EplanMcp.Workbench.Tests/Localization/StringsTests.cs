@@ -15,7 +15,7 @@ namespace EplanMcp.Workbench.Tests.Localization;
 public sealed partial class StringsTests
 {
     /// <summary>Texts that are the same in both languages on purpose: product names, technical identifiers, formats.</summary>
-    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English"];
+    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English", "Question.SuspendedValue"];
 
     public static TheoryData<string, string, string> Entries()
     {
