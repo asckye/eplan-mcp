@@ -93,6 +93,7 @@ internal static class BridgeHost
             new TerminalStripGetOperation(catalog, terminals),
             new PlcGetOperation(catalog, devices, new EplanPlcReader()),
             new PartListOperation(catalog, new EplanPartReader()),
+            new PartSearchOperation(new EplanPartsDatabase()),
             new MessageListOperation(new EplanSystemMessageReader()),
             new CheckListOperation(catalog, messages),
             new MacroListOperation(macros),

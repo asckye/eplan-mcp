@@ -192,6 +192,22 @@ internal sealed class FakePartReader : IPartReader
     }
 }
 
+/// <summary>The parts database as S24 found it on the development machine (api-notes A27), with test parts.</summary>
+internal sealed class FakePartsDatabase : IPartsDatabase
+{
+    public PartsDatabaseContent Content { get; } = new() { Database = @"$(MD_PARTS)\EPLAN_parts.alk" };
+
+    public List<string?> Reads { get; } = [];
+
+    public PartsDatabaseContent Read(string? language)
+    {
+        Reads.Add(language);
+        return language == "xx_XX"
+            ? throw new BridgeErrorException(ErrorReason.InvalidArgument, "'language' is not a language EPLAN knows.")
+            : Content;
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {
