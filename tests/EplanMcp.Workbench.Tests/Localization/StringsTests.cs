@@ -99,10 +99,10 @@ public sealed partial class StringsTests
     [GeneratedRegex(@"^[A-Z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)+$")]
     private static partial Regex DottedKey();
 
-    [GeneratedRegex(@"[㐀-鿿]")]
+    [GeneratedRegex(@"[\u3400-\u9fff]")]
     private static partial Regex Cjk();
 
-    [GeneratedRegex(@"[㐀-鿿][,;:?!]")]
+    [GeneratedRegex(@"[\u3400-\u9fff][,;:?!]")]
     private static partial Regex AsciiPunctuationAfterCjk();
 
     [GeneratedRegex(@"\{l:Tr (?<key>[A-Za-z0-9.]+)")]
