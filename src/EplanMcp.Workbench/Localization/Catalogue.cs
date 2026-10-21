@@ -133,6 +133,14 @@ internal static class Catalogue
         ("Approvals.Empty", "No questions waiting", "没有等待中的问题"),
         ("Approvals.EmptyText", "When the AI wants to change a real project, its question shows here; while the Workbench is not running, the EPLAN dialog asks instead.", "AI 要修改真实项目时，问题会出现在这里；Workbench 不在运行时，改由 EPLAN 中的对话框询问。"),
 
+        // A Host command that gave no result (HostErrors, ERR-01, ERR-02).
+        ("Host.Missing", "eplanmcp.exe is not beside the Workbench. Reinstall EplanMcp.", "Workbench 旁边没有 eplanmcp.exe。请重新安装 EplanMcp。"),
+        ("Host.NotStarted", "eplanmcp.exe could not be started. Check that nothing blocks it, or reinstall EplanMcp.", "无法启动 eplanmcp.exe。请检查是否有程序阻止它运行，或重新安装 EplanMcp。"),
+        ("Host.TimedOut", "eplanmcp.exe did not finish in time and was stopped. Try again; if it keeps happening, see the logs.", "eplanmcp.exe 没有按时完成，已被停止。请重试；如果一直这样，请查看日志。"),
+        ("Host.Failed", "eplanmcp.exe ended with an error. The Workbench and eplanmcp.exe may be of different versions; reinstall EplanMcp.", "eplanmcp.exe 出错退出。Workbench 与 eplanmcp.exe 的版本可能不一致，请重新安装 EplanMcp。"),
+        ("Host.Unreadable", "The Workbench cannot read what eplanmcp.exe returned. The two may be of different versions; reinstall EplanMcp.", "Workbench 读不懂 eplanmcp.exe 返回的结果，两者的版本可能不一致，请重新安装 EplanMcp。"),
+        ("Host.ExitCode", "Exit code {0}", "退出码 {0}"),
+
         // Read by the vendored theme's scroll bars (ScrollCommandNameConverter, Primer.xaml).
         ("Access.Scroll", "Scroll", "滚动"),
         ("Access.ScrollUp", "Scroll up", "向上滚动"),

@@ -1,11 +1,13 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Logging;
 using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Shell;
+using Microsoft.Extensions.Logging;
 using TiaOpenness.Gui.Localization;
 using TiaOpenness.Gui.Themes;
 
@@ -22,6 +24,7 @@ public sealed partial class App : Application, IDisposable
     private WorkbenchSettings _settings = new();
     private SingleInstance? _instance;
     private FileLog? _log;
+    private ILogger? _uiLogger;
     private ApprovalQueue? _queue;
     private ApprovalServer? _server;
     private ApprovalQueueView? _view;
@@ -59,6 +62,8 @@ public sealed partial class App : Application, IDisposable
         _instance.Listen(() => Dispatcher.BeginInvoke(Restore));
 
         _log = new FileLog(_locations.Logs, TimeProvider.System);
+        _uiLogger = _log.CreateLogger("Workbench");
+        DispatcherUnhandledException += OnUnhandled;
         _queue = new ApprovalQueue(TimeProvider.System);
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
         _view.Follow(Dispatcher, ShowQueue);
@@ -84,6 +89,23 @@ public sealed partial class App : Application, IDisposable
     }
 
     private void Restore() => _window?.Restore();
+
+    /// <summary>
+    /// A fault in a page is logged and the Workbench goes on: ending it would close every waiting question (DLG-11) and
+    /// send the next ones to the EPLAN dialog for no reason of the engineer's.
+    /// </summary>
+    private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        if (_uiLogger is not null)
+        {
+            LogUnhandled(_uiLogger, e.Exception);
+        }
+
+        e.Handled = true;
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception on the UI thread; the Workbench goes on")]
+    private static partial void LogUnhandled(ILogger logger, Exception exception);
 
     /// <summary>The waiting count in the tray and the Header, and whether questions are taken (STS-09 to STS-11).</summary>
     private void ShowQueue()

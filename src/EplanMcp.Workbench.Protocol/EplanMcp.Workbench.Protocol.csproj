@@ -16,4 +16,9 @@
       <_Parameter1>windows</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- The Workbench reads the Host's command output as strictly as this protocol (StrictEnumConverter). -->
+    <InternalsVisibleTo Include="EplanMcp.Workbench" />
+  </ItemGroup>
 </Project>
