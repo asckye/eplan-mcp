@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Host.Addin;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
@@ -7,7 +8,7 @@ using EplanMcp.Host.Doctor;
 namespace EplanMcp.Host.Tests;
 
 /// <summary>
-/// The JSON of <c>doctor</c>, <c>audit verify</c> and <c>client-config</c> with <c>--format json</c> (architecture 5.2) as reviewed
+/// The JSON of <c>doctor</c>, <c>audit verify</c>, <c>client-config</c>, <c>install-addin</c> and <c>uninstall-addin</c> with <c>--format json</c> (architecture 5.2) as reviewed
 /// snapshots: the Workbench parses it, so a change of shape fails here until the new snapshot in
 /// tests/Contracts.Snapshots is reviewed and committed with a new schemaVersion (testing.md 3). The checks and results
 /// are fixed, so only the shape is pinned, not doctor's texts. Medium: the snapshots are files.
@@ -82,6 +83,35 @@ public sealed class CliJsonSnapshotTests
         return Snapshot(results.ToJsonString(), "client-config-json");
 
         static JsonNode Parse(ClientConfigReport report) => JsonNode.Parse(ClientConfigOutput.Json(report))!;
+    }
+
+    [Fact]
+    public Task AddinJson_MatchesTheReviewedSnapshot()
+    {
+        const string Eplan = @"C:\Program Files\EPLAN\Platform\2026.0.3\Bin\EPLAN.exe";
+        const string Dll = @"C:\Users\engineer\EplanMcp\app\bridge\net481\EplanMcp.Bridge.Eplan.dll";
+        var results = new JsonObject
+        {
+            ["install"] = Parse(new(AddinAction.Install, Dll, null,
+            [
+                new(@"C:\Program Files\EPLAN\Platform\2023.0.3\Bin\EPLAN.exe", "2023.0.3.19351", null, AddinOutcome.Skipped) { Notes = [AddinNote.UnsupportedVersion] },
+                new(Eplan, "2026.0.3.25421", "Electric P8", AddinOutcome.Registered) { ProcessId = 4120, Notes = [AddinNote.CloseEplan] },
+                new(Eplan, "2026.0.3.25421", "Pro Panel", AddinOutcome.Refused) { Problem = new(AddinProblem.EplanRunning, "3388") },
+            ])),
+            ["notConfirmed"] = Parse(new(AddinAction.Install, Dll, null,
+            [
+                new(Eplan, "2026.0.3.25421", "Electric P8", AddinOutcome.NotConfirmed) { ProcessId = 4120, Problem = new(AddinProblem.NotLoaded, "4120") },
+            ])),
+            ["refused"] = Parse(new(AddinAction.Install, Dll, new(AddinProblem.VariantNotFound, "Fluid (installed: Electric P8, Pro Panel)"), [])),
+            ["uninstall"] = Parse(new(AddinAction.Uninstall, null, null,
+            [
+                new(Eplan, "2026.0.3.25421", "Electric P8", AddinOutcome.Unregistered) { ProcessId = 5230 },
+            ])),
+        };
+
+        return Snapshot(results.ToJsonString(), "addin-json");
+
+        static JsonNode Parse(AddinReport report) => JsonNode.Parse(AddinOutput.Json(report))!;
     }
 
     private static SettingsTask Snapshot(string json, string name) =>
