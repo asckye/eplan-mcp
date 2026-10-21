@@ -79,8 +79,71 @@ public sealed class AuditLogTests : IDisposable
 
         using (AppendingHalfARecord())
         {
-            Assert.Equal((3, null), AuditVerifier.Verify(AuditDirectory));
+            Assert.Equal((3, null), AuditVerifier.Verify(AuditDirectory, TimeSpan.FromMilliseconds(50)));
         }
+    }
+
+    [Fact]
+    public async Task Verify_AnAppendThatFailedHalfway_BreaksTheChainThere()
+    {
+        // The lock is free, so no Host is appending: the half line is what a Host that died while writing left.
+        await AppendThree();
+        WriteHalfARecord("2026-10-20.jsonl");
+
+        Assert.Equal((3, new AuditBreak("2026-10-20.jsonl", 4, AuditProblem.NotARecord)), AuditVerifier.Verify(AuditDirectory));
+    }
+
+    [Fact]
+    public async Task Verify_AHalfLineInAnEarlierDay_BreaksTheChainEvenWhileAnotherHostAppends()
+    {
+        // Appends only ever go to the newest file, so a half line in an earlier one is never a record still being written.
+        await AppendThree();
+        _clock.Now = _clock.Now.AddDays(1);
+        await Append(new JsonObject { ["n"] = 4 });
+        WriteHalfARecord("2026-10-20.jsonl");
+
+        using (HoldingTheLock())
+        {
+            Assert.Equal((3, new AuditBreak("2026-10-20.jsonl", 4, AuditProblem.NotARecord)), AuditVerifier.Verify(AuditDirectory, TimeSpan.FromMilliseconds(50)));
+        }
+    }
+
+    [Fact]
+    public async Task Append_AfterAnAppendThatFailedHalfway_IsRefusedAndLeavesTheFile()
+    {
+        await AppendThree();
+        WriteHalfARecord("2026-10-20.jsonl");
+        string file = Path.Combine(AuditDirectory, "2026-10-20.jsonl");
+        byte[] before = File.ReadAllBytes(file);
+
+        var refused = await Assert.ThrowsAsync<AuditUnavailableException>(() => Append(new JsonObject { ["n"] = 4 }));
+
+        Assert.Contains("not a complete audit record", refused.Message, StringComparison.Ordinal);
+        Assert.Equal(before, File.ReadAllBytes(file));
+    }
+
+    [Fact]
+    public async Task Append_AfterALastLineThatIsNoRecord_IsRefused()
+    {
+        // Chaining on from an empty prev would hide whatever removed or replaced the records before it.
+        await AppendThree();
+        Rewrite(lines => lines.Add("{\"kind\":\"forged\"}"));
+
+        await Assert.ThrowsAsync<AuditUnavailableException>(() => Append(new JsonObject { ["n"] = 4 }));
+    }
+
+    [Fact]
+    public async Task Append_AfterARecordThatLostOnlyItsNewLine_StartsANewLine()
+    {
+        await AppendThree();
+        string file = Path.Combine(AuditDirectory, "2026-10-20.jsonl");
+        byte[] bytes = File.ReadAllBytes(file);
+        File.WriteAllBytes(file, bytes[..^1]);
+
+        await Append(new JsonObject { ["n"] = 4 });
+
+        Assert.Equal(4, File.ReadAllLines(file).Length);
+        Assert.Equal((4, null), AuditVerifier.Verify(AuditDirectory));
     }
 
     [Fact]
@@ -197,13 +260,31 @@ public sealed class AuditLogTests : IDisposable
         }
     }
 
-    // The day's file held the way AppendAsync holds it, halfway through writing the next record.
-    private FileStream AppendingHalfARecord()
+    // The lock and the day's file held the way AppendAsync holds them, halfway through writing the next record.
+    private CompositeDisposable AppendingHalfARecord()
     {
+        FileStream turn = HoldingTheLock();
         var stream = new FileStream(Path.Combine(AuditDirectory, "2026-10-20.jsonl"), FileMode.Append, FileAccess.Write, FileShare.Read);
-        stream.Write(Encoding.UTF8.GetBytes("{\"time\":\"2026-10-20T08:00:00"));
+        stream.Write(Encoding.UTF8.GetBytes(HalfARecord));
         stream.Flush();
-        return stream;
+        return new CompositeDisposable(stream, turn);
+    }
+
+    private FileStream HoldingTheLock() => new(Path.Combine(AuditDirectory, ".lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+
+    private void WriteHalfARecord(string fileName) => File.AppendAllText(Path.Combine(AuditDirectory, fileName), HalfARecord);
+
+    private const string HalfARecord = "{\"time\":\"2026-10-20T08:00:00";
+
+    private sealed class CompositeDisposable(params IDisposable[] parts) : IDisposable
+    {
+        public void Dispose()
+        {
+            foreach (IDisposable part in parts)
+            {
+                part.Dispose();
+            }
+        }
     }
 
     private void Rewrite(Action<List<string>> change)
