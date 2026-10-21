@@ -2,8 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed |
-| 日期 | 2026-10-20（提出，建议方案 2）· 2026-10-20（修改：项目负责人问 Fluent UI 与苹果的设计哪个可以之后，建议改为方案 1） |
+| 状态 | Accepted |
+| 日期 | 2026-10-20（提出，建议方案 2）· 2026-10-20（修改：项目负责人问 Fluent UI 与苹果的设计哪个可以之后，建议改为方案 1）· 2026-10-20（接受：项目负责人明确答复"可以用winUI3，但是字体的话用我之前推荐的"，字体按第 5 条） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（第一版 Workbench 发布前）：只影响 Workbench 一个项目；发布后再换界面技术等于重写界面 |
 | 影响 | 补充 [ADR-0004](0004-runtimes-and-target-frameworks.md) 的运行时表：增加 `EplanMcp.Workbench` |
@@ -30,15 +30,15 @@ M5 要做 Workbench：审批队列、审计浏览、客户端配置向导、状�
 另外考虑过、不建议的方向：**苹果的设计风格**（Apple Human Interface Guidelines），项目负责人 2026-10-20 问过它与 Fluent UI 哪个更合适。它的规范和组件只面向苹果平台，Windows 上没有官方实现，每个控件都要自己画，讲述人、高对比度和键盘焦点也要自己保证；Workbench 在 EPLAN 和 Windows 的对话框旁边使用，用 Windows 自己的设计语言，工程师不必面对两套交互习惯。
 
 ## 决策
-**建议方案 1**（项目负责人在 M5 设计 Q1 中决定）。最初建议的是方案 2；项目负责人要的是 Fluent 的组件库，在 Windows 桌面上它就是 WinUI 3，所以改为方案 1。S18 发现方案 1 无法满足时改用方案 2，并修改本 ADR。
+**选择方案 1**（项目负责人 2026-10-20 在 M5 设计 Q1 中决定）。最初建议的是方案 2；项目负责人要的是 Fluent 的组件库，在 Windows 桌面上它就是 WinUI 3，所以改为方案 1。S18 发现方案 1 无法满足时改用方案 2，并修改本 ADR。
 
 1. **运行时**：`EplanMcp.Workbench` 以 .NET 10 的 Windows 目标框架构建，WinUI 3，未打包（不需要包身份、不经 MSIX 安装）、Windows App SDK 自包含，整个程序发布到 `app\workbench\`（M5 设计 4.1），不需要另装 Windows App SDK 运行时。Windows App SDK 固定一个版本，只在本项目发布新版本时升级。
 2. **Fluent 2**：直接用 WinUI 3 自带的控件和主题资源，不另写控件样式；主题跟随系统，设置中可以切换浅色、深色；Windows 11 上用 Mica 背景，Windows 10 上用纯色。确实缺的部分按 Fluent 2 的颜色、字体、间距规范补，集中在一个资源字典中。观感按项目负责人的要求做成苹果式的简洁（留白多、颜色克制、排版层级少），只通过主题资源调整，规则见 M5 设计 4.5 的"观感"。
 3. **托盘和单实例**：托盘用 Win32 `Shell_NotifyIcon` 的小封装（P/Invoke，集中在一个类中），不引入第三方界面库；S18 核对它在 WinUI 3 窗口中的消息处理，不行再评估 H.NotifyIcon.WinUI（MIT）。单实例用 Windows App SDK 的 `AppInstance`，第二个实例把激活转给第一个后退出（M5 设计 4.4）。
 4. **例外**：审批卡片的两个按钮都用默认按钮样式，不用 Fluent 的强调色主按钮（`AccentButtonStyle`），样式相同（ADR-0011、ADR-0014）。
-5. **字体**：界面文字用系统字体：Segoe UI Variable，中文 Microsoft YaHei UI（[Windows 排版](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography)）；等宽的数据区用 Maple Mono CN，随安装包附带 SIL OFL 1.1 许可证（M5 设计 Q2）。
+5. **字体**（项目负责人 2026-10-20 决定，M5 设计 Q2）：界面文字（中英文）和等宽的数据区都用 Maple Mono CN（SIL OFL 1.1，官方发布包 `MapleMono-CN`）。字体文件随程序放在 `app\workbench\` 中，只由 Workbench 自己加载，不安装到系统；只带用到的字重，不修改、不裁剪字体文件；许可证文本随安装包附带。加载失败时回退到系统字体 Segoe UI Variable 和 Microsoft YaHei UI。不用苹果的 SF 字体。等宽字体比 Segoe UI 宽，页面布局按实际宽度留余量。
 6. **文字**：中英文放在同一张表中（每个键两种语言），测试检查缺漏和占位符一致（TIA 的做法）；切换语言立即生效。不用 `.resw` 和系统的界面语言切换，从而避开未打包时改界面语言的问题。
-7. **验证**：spike S18 用审批卡片一页的原型，在 Windows 10、11 上核对讲述人、高对比度、200% 缩放、中文字体、Windows 10 上的外观、冷启动时间和发布体积；另查第 3 条的托盘和单实例，以及能否在 CI（windows-2025 镜像）上只用 `dotnet` 命令完成构建和自包含发布。
+7. **验证**：spike S18 用审批卡片一页的原型，在 Windows 10、11 上核对讲述人、高对比度、200% 缩放、中文字体、Windows 10 上的外观、冷启动时间和发布体积；另查第 3 条的托盘和单实例、第 5 条的字体（未打包时从程序目录加载、中文显示、所带字重的体积），以及能否在 CI（windows-2025 镜像）上只用 `dotnet` 命令完成构建和自包含发布。
 8. **升级**：Windows App SDK 的大版本至少每年跟进一次（2.x 的服务期到 2027-04-29），每次按 S18 的清单复查后再发布。
 
 ## 后果
@@ -50,11 +50,12 @@ M5 要做 Workbench：审批队列、审计浏览、客户端配置向导、状�
   - 多一套 SDK 的生命周期：大版本更新快，每年至少一次升级和复查；
   - 托盘要自己封装；没有 XAML 设计器，界面只能运行后查看；
   - 体积比方案 2 大（没有官方数字），由 S18 实测；
+  - 随程序带 Maple Mono CN：官方发布包含全部字重和斜体，共约 141 MB（v7.9），只带用到的字重时增加多少由 S18 实测；
   - 官方文档只写".NET 6 或更高"，.NET 10 下的构建和发布由 S18 实测；
   - Windows 10 上没有 Mica，外观由 S18 确认。
-- **后续行动**（本 ADR 接受后）：
-  - ADR-0004 的运行时表增加 Workbench 一行（指向本 ADR）；架构 5.1 的 Workbench 一行改为"WinUI 3（Windows App SDK，未打包、自包含）"，字体按第 5 条；
-  - README 的开发工具表中 Maple Mono 的用途随之修改；
+- **后续行动**：
+  - ADR-0004 的运行时表增加 Workbench 一行（指向本 ADR）；架构 5.1 的 Workbench 一行改为"WinUI 3（Windows App SDK，未打包、自包含）"，字体按第 5 条（均已完成）；
+  - README 的开发工具表中 Maple Mono 的用途随之修改（已完成）；
   - spike S18。
 
 ## 各方案利弊
