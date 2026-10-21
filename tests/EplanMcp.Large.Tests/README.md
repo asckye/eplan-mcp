@@ -63,7 +63,7 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 
 页的三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
 
-M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整个项目，测试无法只在新页上验证，也不能按 Ctrl+Z（开着两个项目时撤销可能落在夹具上，A14），所以**它们会永久改变 `writes\LargeWrite`**：端子名、电缆名、线号按方案重排。其他写测试不依赖这些名称（`WriteSafetyTests` 和 `PageDeleteTests` 用到的 `+A1-WE1` 等电缆不在 S21 改名的电缆中）。这些测试第一次在新副本上运行时核对 S21 的改动，之后的运行核对"没有可改的"；要重新验证第一次的结果，按上文重新复制副本。
+M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整个项目，测试无法只在新页上验证，也不能按 Ctrl+Z（开着两个项目时撤销可能落在夹具上，A14），所以**它们会永久改变 `writes\LargeWrite`**：端子名、电缆名、线号按方案重排。其他写测试不依赖这些名称：`WriteSafetyTests` 和 `PageDeleteTests` 用到的 `+A1-WE1` 等设备不在 S21 改名的电缆中（`+A1-WE1` 的类别是 `BusBarDefText`，不是电缆，2026-10-21 实测）。这些测试第一次在新副本上运行时核对 S21 的改动，之后的运行核对"没有可改的"；要重新验证第一次的结果，按上文重新复制副本。
 
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。

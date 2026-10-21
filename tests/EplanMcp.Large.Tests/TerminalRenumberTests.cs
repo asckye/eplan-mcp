@@ -37,7 +37,7 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
         Assert.Equal(("not_started", 1, before.Length, JsonValueKind.Null), (dryRun.GetProperty("execution").GetString(), scope.GetProperty("stripCount").GetInt32(), scope.GetProperty("terminals").GetInt32(), dryRun.GetProperty("changed").ValueKind));
 
         _host.Approvals.Approve(Tool, _host.Writable, [$"renumber all terminal designations on 1 strip ({before.Length} terminals), scheme: {Scheme}, start 1, step 1"]);
-        JsonElement numbered = await _host.CallAsync(Tool, args);
+        JsonElement numbered = Answered(await _host.CallAsync(Tool, args));
         string[] after = await NamesAsync(Strip);
         (string From, string To)[] changed = [.. numbered.GetProperty("changed").EnumerateArray().Select(c => (c.GetProperty("from").GetString()!, c.GetProperty("to").GetString()!))];
         TestContext.Current.TestOutputHelper?.WriteLine($"{Strip} before: {string.Join(", ", before)}; after: {string.Join(", ", after)}; changed: {string.Join(", ", changed.Select(c => c.From + " -> " + c.To))}.");
@@ -72,7 +72,7 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
             Assert.InRange(terminals, 1, 200);
 
             _host.Approvals.Approve(Tool, _host.Writable, [$"renumber terminal designations containing '?' in the project ({terminals} {(terminals == 1 ? "terminal" : "terminals")}), scheme: {Scheme}, start 1, step 1"]);
-            JsonElement numbered = await _host.CallAsync(Tool, args);
+            JsonElement numbered = Answered(await _host.CallAsync(Tool, args));
             TestContext.Current.TestOutputHelper?.WriteLine(numbered.ToString());
 
             // EPLAN is still there, and it renamed only terminals whose designation had '?' (tool spec 5, to be confirmed).
@@ -106,6 +106,18 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
         Assert.Contains(Scheme, candidates);
         Assert.DoesNotContain("InternalRefDefScheme", candidates);
         Assert.Equal((asked, folders), (_host.Approvals.Questions.Count, _host.BackupFolders().Length));
+    }
+
+    /// <summary>
+    /// <paramref name="result"/> when the Host had EPLAN's response; a recovered commit has no lists to check, which a live
+    /// run of 43 s met while the Host waited only 30 s for a write (fixed: it waits until the tool's limit).
+    /// </summary>
+    internal static JsonElement Answered(JsonElement result)
+    {
+        Assert.False(
+            result.GetProperty("recovered").GetBoolean(),
+            "The Host lost EPLAN's response and only learned afterwards that the write committed, so the result has no lists to check: " + result);
+        return result;
     }
 
     /// <summary>The terminals' full names of a strip of the copy, in the strip's order.</summary>
