@@ -158,6 +158,7 @@ eplan_device_place
 | `PROJECT_NOT_OPEN` | 否 | `not_started` | 指定的项目没有在 EPLAN 中打开；提示用 `eplan_project_list` 查看已打开的项目 |
 | `AMBIGUOUS_NAME` | 否 | `not_started` | 名称对应多个对象：同一个短标识（如 `-K1`）出现在不同结构下、两个打开的项目同名，或者没有选中项目而打开了好几个；`metadata.candidates` 列出完整名称（每行一个，最多 20 个），提示选一个再调用 |
 | `PAGE_NOT_FOUND` / `DEVICE_NOT_FOUND` / `SYMBOL_NOT_FOUND` / `PART_NOT_FOUND` / `MACRO_NOT_FOUND` | 否 | `not_started` | 对象不存在；提示对应的查询工具 |
+| `FILE_NOT_FOUND` | 否 | `not_started` | 导入工具的文件不在导入目录（`<数据根目录>\imports\`，SEC-31）中；`metadata.file` 重复给出的路径，提示先把文件放进导入目录。不写导入目录的本机路径（SEC-12） |
 | `ALREADY_EXISTS` | 否 | `not_started` | 例如设备标识已存在；说明合并的后果，以及如何显式允许合并 |
 | `HANDLE_EXPIRED` | 否 | `not_started` | 句柄过期，或者所属的 EPLAN 会话已经结束；提示按名称重新查询 |
 | `SESSION_NOT_SELECTED` | 否 | `not_started` | 有多个 EPLAN 实例；提示调用 `eplan_session_select` |

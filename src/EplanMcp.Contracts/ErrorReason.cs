@@ -27,6 +27,9 @@ public static class ErrorReason
     /// <summary>No window macro has the given path below the macro directory; <c>metadata.macro</c> repeats it, and eplan_macro_list shows the paths.</summary>
     public const string MacroNotFound = "MACRO_NOT_FOUND";
 
+    /// <summary>No file has the given path below the import folder (SEC-31); <c>metadata.file</c> repeats it.</summary>
+    public const string FileNotFound = "FILE_NOT_FOUND";
+
     /// <summary>Several EPLAN instances are running and none is selected.</summary>
     public const string SessionNotSelected = "SESSION_NOT_SELECTED";
 
