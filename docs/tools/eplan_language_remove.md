@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "项目里不需要瑞典语了，删掉"。代理从项目的翻译语言中删除一种或几种语言，连同项目文本中这些语言的全部译文（S23：瑞典语 460 条译文全部删除）。删除的是数据，按 Destructive 处理：每次审批，执行前备份。

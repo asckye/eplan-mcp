@@ -43,6 +43,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `MacroInsertTests` | 写测试：在新页上用 `number` 插入 `Contactor_Feedback_Control.ema`（dry run、读回的设备、用 `eplan_page_create` 建的页已有幅面，A20），同一位置再插一次被回滚；`keep` 与已有设备合并时返回 `ALREADY_EXISTS`，项目的计数不变 |
 | `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次警告不变、14 条汇总提示再追加一遍（A20））、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |
 | `LanguageSetTests` | 写测试：显示语言设为 `en_US`、`zh_CN`，读回一致，再调用一次不改动，用 dry run 读出的 `before` 再调用一次恢复原样（示例项目是 `##_##`：按存储形式写回，A28 之外的行为）；加一种副本中没有的语言（`is_IS` 等中第一个没有的，**留在副本中**），再加一次不改动；不是翻译语言的显示语言返回 `INVALID_ARGUMENT` 和候选。耗时、新语言在列表中的位置、加语言时显示语言是否被 EPLAN 改动写入测试输出 |
+| `LanguageRemoveTests` | Destructive：先用 `eplan_language_set` 加一种副本中没有的语言（`lt_LT` 等），dry run 为 0 条译文、不备份，批准后删除：`committed`，翻译语言回到原样，有新的备份；EPLAN 改了显示语言时再设回原值。删除 `sv_SE`：dry run 的 `textsAffected` 至少 460（S23），批准后读回不含 `sv_SE`，备份存在，再删一次 `INVALID_ARGUMENT`。**这一项永久改变副本，每份副本只能运行一次**，之后跳过并提示重新复制。不是翻译语言时 `INVALID_ARGUMENT`、候选，不审批、不备份。耗时、删除后的显示语言、备份路径写入测试输出 |
 | `PageDeleteTests` | Destructive：dry run `=GAA+A1&EFS1/1` 列出页上的功能数，以及其他页上失去主功能的三根电缆 `+A1-WE1`、`+A1-WE2`、`+A2-WE1`（S12 的第四根 `+A2-WE2` 留下的功能不在页上，不列出），不审批；新的宏页：拒绝时 `APPROVAL_DENIED`、不建备份目录、页还在，审计只有拒绝；批准后新的备份目录中有副本（`.elk` 与 `.edb`），页没了，审计依次为批准、带 `backup` 的开始、`backupCompleted` 的结果；再删一次 `PAGE_NOT_FOUND`、不审批。一次删除 3 页。scratch 之外的副本 `POLICY_DENIED`，不审批、不备份，设计数据不变 |
 | `DeviceRenumberTests` | Destructive：在新页上用 `number` 插入宏后，`only_unnumbered` 编号：EPLAN 不崩溃（只交带 `?` 的设备标识，A20），`=GAA+A1-?QA…` 出现在 `stillUnnumbered` 中，没有改动所以 `not_started`、`undo` 为 null，备份照样有；方案 `Default`：`INVALID_ARGUMENT`、`rolled_back`，候选与 S12 的 5 个方案相同，备份保留，`?` 标识不变 |
 | `PageRenumberTests` | Destructive：三张新页从 200、步长 10 重编号为 `/200`、`/210`、`/220`（S12），dry run 不列新页名；`start` 为 1 时与 `/1`、`/2` 冲突：`ALREADY_EXISTS`、`rolled_back`，页名不变，备份保留 |
@@ -57,7 +58,9 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 - 数据根目录、配置与 `WriteHost` 相同：系统临时目录中新建，只把 `<scratch 根目录>\writes\` 当作 scratch，其他项目的写入一律拒绝。审计、备份都在这个目录中，测试类结束时删除。**每次执行的 Destructive 写入都先把整个副本复制到 `backups\` 下（示例项目约 210 MB），一个测试类最多留下 4 份**，运行时临时目录所在的盘要有 1 GB 左右的空闲空间。
 - 准备与写测试相同（上文第 2、3 步）：用的是 `writes\LargeWrite`；`PageDeleteTests` 中只有一个测试用 `not-scratch\writes\` 下的副本，核对 `POLICY_DENIED`。
 
-这三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
+`eplan_language_remove` 的 `LanguageRemoveTests` 也在 `DestructiveHost` 上运行。规格第 7 节中两项要在 EPLAN 中手工核对：用测试输出中的备份路径打开备份，项目设置的翻译语言中仍有 `sv_SE`；删除 `sv_SE` 之后对写副本按一次 Ctrl+Z，记录译文和语言设置是否恢复（只开着写副本、让它成为当前项目时再按，见下文"写测试"第 3 步），结果补进 api-notes A28。
+
+页的三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
 
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。

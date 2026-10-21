@@ -69,6 +69,7 @@
   - `eplan_export_labels`：按 EPLAN 的标签方案（必填，如 `Device tag list`、`Terminal diagram`）导出一个清单文件，扩展名按方案的输出格式（文本 `.txt`、Excel `.xlsx`）；方案不存在时列出可用的方案，其他输出格式暂不支持。
   - `eplan_export_untranslated`：导出项目中在翻译库里找不到指定语言译文的文本（缺失词表），制表符分隔的 Unicode 文本；语言必须是项目的翻译语言，否则列出项目的翻译语言。翻译库只读。
 - 写工具 `eplan_language_set`（M4c，只在 `full` 中）：设置项目图上显示的语言（按顺序，`["##_##"]` 清除），或往翻译语言中加语言，不翻译文本；结果给出前后的翻译语言和显示语言；设置已是所求时不写入；失败或取消时把两项设置写回原值（EPLAN 的回滚不管项目设置），写回失败时返回 `OUTCOME_UNKNOWN` 并给出原值。Ctrl+Z 不能撤销语言设置，审批对话框和结果都说明用原来的值再调用一次来恢复。
+- Destructive 工具 `eplan_language_remove`（M4c，只在 `full` 中）：从项目的翻译语言中删除 1–10 种语言，连同项目文本中这些语言的全部译文；每次审批、执行前备份；源语言和项目没有的语言返回 `INVALID_ARGUMENT` 和候选；结果给出受影响的文本数、前后的语言设置，EPLAN 同时改了显示语言时在提示中说明。失败或取消时译文由回滚撤回，语言设置由工具写回原值（EPLAN 的回滚不管项目设置）。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed

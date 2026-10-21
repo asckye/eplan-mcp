@@ -134,6 +134,23 @@ public sealed class ApprovalTextsTests
         Assert.Equal(note, texts.Note);
     }
 
+    [Theory]
+    [InlineData("zh-CN", "删除语言 sv_SE（460 translations）", "项目文本中这些语言的全部译文都将删除（共 460 个文本）；EPLAN 可能同时修改显示语言。", "执行前会先把整个项目备份到 C:\\Data\\backups\\Line1\\ 下的新文件夹。批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: eplan_language_remove”这一步。语言设置可能不随之恢复，备份中有原样的项目。")]
+    [InlineData("en-US", "Delete language sv_SE (460 translations)", "All translations in these languages are deleted from the project's texts (460 texts); EPLAN may change the displayed languages too.", "Before the change, the whole project is backed up to a new folder in C:\\Data\\backups\\Line1\\. After approval, Ctrl+Z in EPLAN undoes the step \"AI: eplan_language_remove\". The language settings may not come back with it; the backup has the project as it was.")]
+    public void ALanguageRemoval_SaysTheTranslationsGoAndTheSettingsMayNotComeBack(string culture, string change, string translations, string note)
+    {
+        WritePlan plan = new()
+        {
+            Changes = [new PlannedChange { Action = "delete", Kind = "language", Name = "sv_SE", OldValue = "460 translations" }],
+            Details = new Dictionary<string, string> { ["textsAffected"] = "460", ["translation"] = "de_DE\nsv_SE", ["display"] = "##_##" },
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Tool = "eplan_language_remove", Plan = plan, BackupFolder = @"C:\Data\backups\Line1" }, CultureInfo.GetCultureInfo(culture));
+
+        Assert.Equal([change, string.Empty, translations], texts.Changes);
+        Assert.Equal(note, texts.Note);
+    }
+
     [Fact]
     public void AMacroInsertsDevices_AreNotListedAsDevicesToNumber()
     {
