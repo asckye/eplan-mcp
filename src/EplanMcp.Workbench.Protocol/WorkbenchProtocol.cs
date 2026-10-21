@@ -20,4 +20,22 @@ public static class WorkbenchProtocol
 
     /// <summary>Largest frame body either side sends or accepts, in bytes; a larger one is a protocol error.</summary>
     public const int MaxFrameBytes = 1024 * 1024;
+
+    /// <summary>Request, the Host's first on a connection: <see cref="WorkbenchHandshake"/>, answered by <see cref="WorkbenchHandshakeResult"/>.</summary>
+    public const string HandshakeMethod = "handshake";
+
+    /// <summary>Request: <see cref="ApprovalAskParams"/>, answered by <see cref="ApprovalAskResult"/> once the engineer decided.</summary>
+    public const string ApprovalAskMethod = "approval.ask";
+
+    /// <summary>Notification: the client cancelled the call (<see cref="CancelParams"/>); the Workbench removes the question.</summary>
+    public const string CancelMethod = "cancel";
+
+    /// <summary>Notification after the write (<see cref="ApprovalOutcomeParams"/>): updates what the Workbench shows, approves nothing.</summary>
+    public const string ApprovalOutcomeMethod = "approval.outcome";
+
+    /// <summary>JSON-RPC error code of a handshake whose version range the Workbench does not speak.</summary>
+    public const int UnsupportedVersionErrorCode = -32001;
+
+    /// <summary>JSON-RPC error code of a request sent before a successful handshake.</summary>
+    public const int NotHandshakenErrorCode = -32002;
 }
