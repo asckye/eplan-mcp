@@ -13,6 +13,9 @@ internal sealed class WorkbenchDataLocations(string root)
     /// <summary>The Workbench's own settings (M5 design 4.1).</summary>
     public string Settings => Path.Combine(Root, "workbench", "settings.json");
 
+    /// <summary>The Host's audit log, which the audit page reads and never writes (M5 design 4.4).</summary>
+    public string Audit => Path.Combine(Root, "audit");
+
     /// <summary>The logs, shared with the Host (architecture 7); the Workbench's files are workbench-*.log.</summary>
     public string Logs => Path.Combine(Root, "logs");
 

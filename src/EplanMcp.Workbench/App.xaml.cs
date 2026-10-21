@@ -3,6 +3,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using EplanMcp.Workbench.Approvals;
+using EplanMcp.Workbench.Audit;
+using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Logging;
 using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Settings;
@@ -68,6 +70,8 @@ public sealed partial class App : Application, IDisposable
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
         _view.Follow(Dispatcher, ShowQueue);
         _window.Attach(_view);
+        var host = new HostCommands(HostLocator.Find(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null);
+        _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
         ShowQueue();

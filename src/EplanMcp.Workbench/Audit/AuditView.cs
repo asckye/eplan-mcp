@@ -56,6 +56,9 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
     /// <summary>Why the folder could not be read, for the error's details (ERR-02).</summary>
     public string? Problem { get; private set; }
 
+    /// <summary>How many readings have ended; the page refills its filters after each.</summary>
+    public int Reads { get; private set; }
+
     /// <summary>Lines that are not records; audit verify says where.</summary>
     public int NotRecords { get; private set; }
 
@@ -175,6 +178,7 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
 
             _values = new Values(_all, DayOf);
             Shown = Filtered();
+            Reads++;
             Changed();
         }
     }
