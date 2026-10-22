@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-22
+首个预览版。支持矩阵：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 安装包不签名，随附 SHA-256、SBOM 和构建来源证明（见 [中文入门指南](docs/getting-started/zh-CN.md)）。
+
 ### Added
 - `eplan_project_create`（full）：从 imports 中的 `.zw9` 新建或 `.zw1` 还原为关闭的新项目；scratch 外逐次审批，拒绝任何已有目标，完成后检查兼容性，失败仅清理本次产物。
 - Claude Code 本地插件市场与英文入门技能，以及中文入门指南（安装、校验、客户端连接、审批、自检和卸载）。
