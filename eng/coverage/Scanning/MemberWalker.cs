@@ -85,6 +85,19 @@ internal sealed class MemberWalker(SemanticModel model, Specialization? kind, Fu
         base.VisitInvocationExpression(node);
     }
 
+    public override void Visit(SyntaxNode? node)
+    {
+        // User-defined operators and conversions (PropertyValue to string) are calls too.
+        if (node is ExpressionSyntax expression)
+        {
+            Use(Bound(expression) is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion } op ? op : null, "call");
+            Conversion conversion = model.GetConversion(expression);
+            Use(conversion.IsUserDefined ? conversion.MethodSymbol : null, "call");
+        }
+
+        base.Visit(node);
+    }
+
     public override void VisitIfStatement(IfStatementSyntax node)
     {
         bool? taken = Evaluate(node.Condition);

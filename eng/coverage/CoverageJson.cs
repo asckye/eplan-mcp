@@ -21,6 +21,9 @@ internal static class CoverageJson
 
     public static string Serialize<T>(T value) => JsonSerializer.Serialize(value, Options) + "\n";
 
+    public static T Read<T>(string path) =>
+        JsonSerializer.Deserialize<T>(File.ReadAllText(path), Options) ?? throw new InvalidDataException(path + " is empty.");
+
     public static void Write<T>(string path, T value)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);

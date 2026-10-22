@@ -1,10 +1,14 @@
 using System.Diagnostics;
+using System.Globalization;
 using EplanMcp.Coverage.Scanning;
 using Microsoft.CodeAnalysis;
 
 namespace EplanMcp.Coverage;
 
-/// <summary><c>scan</c> records the EPLAN API members the Bridge uses; it needs EPLAN installed.</summary>
+/// <summary>
+/// <c>scan</c> records the EPLAN API members the Bridge uses (needs EPLAN installed); <c>check</c> tells whether the
+/// committed coverage files are current, without EPLAN (a CI step runs it).
+/// </summary>
 internal static class Program
 {
     private static int Main(string[] args)
@@ -24,8 +28,16 @@ internal static class Program
             case ["scan", "--eplan-bin", var eplanBin]:
                 Scan(root, eplanBin);
                 return 0;
+            case ["check"]:
+                // In GitHub Actions the lines become annotations on the run and the pull request.
+                bool github = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+                List<string> problems = CoverageCheck.Problems(root);
+                CoverageCheck.Warnings(root).ForEach(w => Console.WriteLine((github ? "::warning title=Coverage scan::" : "warning: ") + w));
+                problems.ForEach(p => Console.WriteLine((github ? "::error title=Coverage files::" : "error: ") + p));
+                Console.WriteLine(problems.Count == 0 ? "Coverage files match their inputs." : $"{problems.Count} coverage file(s) out of date.");
+                return problems.Count == 0 ? 0 : 1;
             default:
-                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>]");
+                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | check");
                 return 2;
         }
     }
@@ -54,6 +66,9 @@ internal static class Program
         var usage = new BridgeUsage
         {
             EplanApi = FileVersionInfo.GetVersionInfo(dataModel).FileVersion ?? "unknown",
+            ScannedOn = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ScannedSources = BridgeUsage.DescribeSources(root),
+            SourceHash = BridgeUsage.ComputeSourceHash(root),
             Operations = [.. operations.Select(o => new OperationEntry(o.Name, ShortName(o.ClassName), o.KindType is { } kind ? $"{ShortName(kind)}.{o.KindValue}" : null))],
             Usages = usages,
         };

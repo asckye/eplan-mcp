@@ -1,5 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
+  "scannedOn": "2026-10-22",
+  "scannedSources": "18d374c",
+  "sourceHash": "sha256:e601017f742d303b99ef43df4a60d261a040f33600ceacd0c3786d27b7507cc0",
   "operations": [
     {
       "name": "approval.ask",
@@ -4385,6 +4388,56 @@
           "plc.get",
           "project.get",
           "revision.list"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(Eplan.EplApi.Base.MultiLangString)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanPageDescriptions",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanPageWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.String)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanPageWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.create.execute"
         ]
       }
     ],
