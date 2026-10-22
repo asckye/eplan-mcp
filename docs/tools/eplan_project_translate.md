@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive：每次审批，执行前备份项目（ADR-0013） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把项目翻译成英文和中文""新加的那几页也翻译一下"。代理用 EPLAN 配置的系统翻译库，把项目（或指定的页）中的文本译进项目的全部翻译语言。只读翻译库，不改它。
@@ -27,12 +27,13 @@
 ## 3. 输出
 `structuredContent`：
 - `source`：项目的源语言；`languages`：项目的翻译语言；
-- `textsChecked`：检查过的文本数；`textsChanged`：被补上译文的文本数；
-- `changed`：前 50 个被改的文本（对象标识、属性、改动前后缺少的语言），`truncated`；
-- `stillMissing`：仍缺少某种语言的文本数（翻译库中没有对应词条），附提示"用 `eplan_export_untranslated` 导出缺失词表"；
-- `backup`、`undo`、`execution`、`auditId`。
+- `textsChecked`：检查过的文本数；`textsMissing`：规划时有源语言文本、缺少翻译语言的文本数（"可能被补全"的）；`textsChanged`：被改动的文本数（读回时存储值变了的）；
+- `changed`：前 50 个被改的文本（`kind` 为 `function` 或 `page`、`name`、`property`、改动前后缺少的语言 `missingBefore`、`missingAfter`），`truncated`；
+- `stillMissing`：仍缺少某种语言的文本数（有源语言文本的，翻译库中没有对应词条），附提示"用 `eplan_export_untranslated` 导出缺失词表"；
+- `backup`、`undo`、`execution`、`recovered`、`hint`。不返回 `auditId`：其他写工具都不返回它，审计按请求 ID 记录（2026-10-21 实现时去掉）。
+- EPLAN 提交了但没有改动任何文本时，与 `eplan_connection_number` 相同，`execution` 为 `not_started`、`undo` 为 null，备份照样有（S23 r0：已全部翻译的项目文本不变）。
 
-一行摘要：`Translated 37 texts into the project's 20 languages; 5 texts still miss a language because the translation database has no entry for them. Backup: …`
+一行摘要：`Translated 37 texts into the project's 20 languages; 5 texts still miss a language because the translation database has no entry for them. A backup was made first (see 'backup').`（备份路径在 `backup` 中，与其他 Destructive 工具相同，不写进摘要。）
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
@@ -48,7 +49,7 @@
 - **规划**（只读）：
   - 读项目设置 `TRANSLATEGUI.SOURCE_LANGUAGE`、`TRANSLATEGUI.TRANSLATE_LANGUAGES`（A25、A28）；
   - 用与 `eplan_language_remove` 相同的方法读文本：功能的 `FUNC_TEXT`、页的 `PAGE_NOMINATIOMN` 的存储值（A11、A28）；`pages` 给出时只读这些页及其上的功能；
-  - 数出缺少至少一种翻译语言的文本，作为"可能被补全"的数量；指纹为这些文本的存储值。
+  - 数出有源语言文本、缺少至少一种翻译语言的文本，作为"可能被补全"的数量；没有源语言文本的（只有 `??_??` 或只有别的语言）不算，EPLAN 从源语言翻译（S23 r2）。指纹为翻译语言、源语言和这些文本的存储值。
 - **审批对话框**：项目、源语言、翻译语言、可能被补全的文本数，"已有的译文按翻译库补全，可能改动大量文本，执行前会备份项目"。
 - **执行**：`new Translate().TranslateObjects(对象)`，对象为整个项目（`[project]`）或所选页上的页和功能；在写事务（`SafetyPoint` + `UndoStep` + `QuietModeStep(ShowNoDialogs)`）中执行。
 - **已验证**：
@@ -72,6 +73,6 @@
 - Medium：假 Bridge 上源语言未设置、没有其他翻译语言、页找不到、读回不一致、审批与备份。
 - Large（`writes\LargeWrite`）：
   - 源语言为 `##_##` 时返回 `INVALID_ARGUMENT`，不审批、不备份；
-  - 用 `eplan_language_set` 设 `source: "de_DE"`，把一个功能文本改为只有德语的 `Motor`（用 `eplan_device_update` 改功能文本），翻译所在的页：`textsChanged` 为 1，`zh_CN` 为 `电机`；
-  - 记录已有译文是否被覆盖、Ctrl+Z 的效果；最后把源语言写回 `##_##`。
+  - 用 `eplan_language_set` 设 `source: "de_DE"`；新建一页，用 `eplan_page_update` 把它的页描述设为德语 `Motor`、英语 `Engine`（翻译库中 `Motor` 的英语是 `Motor`，S24 r11），只翻译这一页：`textsChecked`、`textsChanged` 都为 1，`eplan_page_get` 读出的 `zh_CN` 描述为 `电机`。2026-10-21 实现时改：原来写的 `eplan_device_update` 只改设备标识，改不了功能文本，所以改用新页的页描述（也不改副本原有的文本）；
+  - 英语描述是否变成 `Motor`（已有译文是否被覆盖）写入测试输出；最后把源语言写回原值、删掉这一页。Ctrl+Z 的效果要在 EPLAN 中手工核对（开着两个项目时测试不能按 Ctrl+Z，A14）。
 - Agent 评测："把这页翻译成中文"（代理要先检查源语言和翻译语言）。

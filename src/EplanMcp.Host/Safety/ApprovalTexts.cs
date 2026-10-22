@@ -31,7 +31,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + Undo(question.Tool, plan, zh),
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
@@ -90,6 +90,8 @@ internal static class ApprovalTexts
             _ when change.Property == "page number" => zh ? $"重新编号{kind} {name}" : $"Renumber {kind} {name}",
             // The numbering tools of M4c (terminals, cables, wire numbers): the scope, worded by the Bridge.
             _ when change.Property == "numbering" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
+            // Only the translation database tells which texts it fills in (eplan_project_translate, tool spec 5): the scope, worded by the Bridge.
+            _ when change.Property == "translations" => (zh ? "按翻译库翻译：" : "Translate with the translation database: ") + Value(change.OldValue ?? string.Empty, zh),
             _ when change.Property == "connections" => zh
                 ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
                 : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
@@ -205,6 +207,21 @@ internal static class ApprovalTexts
             yield return zh
                 ? $"项目文本中这些语言的全部译文都将删除（共 {texts} 个文本）；EPLAN 可能同时修改显示语言。"
                 : $"All translations in these languages are deleted from the project's texts ({texts} texts); EPLAN may change the displayed languages too.";
+        }
+    }
+
+    /// <summary>
+    /// After a translation's scope, what it may do beyond the texts counted (eplan_project_translate, tool spec 5): whether
+    /// existing translations are rewritten from the database is not verified, so the engineer is told they may be.
+    /// </summary>
+    private static IEnumerable<string> Translating(WritePlan plan, bool zh)
+    {
+        if (plan.Changes.Any(c => c.Property == "translations"))
+        {
+            yield return string.Empty;
+            yield return zh
+                ? "翻译库中有词条的文本补全项目的全部翻译语言；已有的译文也可能按翻译库改写，可能改动大量文本。"
+                : "Texts the translation database has entries for are filled in for all the project's translation languages; existing translations may be rewritten from it too, so many texts may change.";
         }
     }
 
