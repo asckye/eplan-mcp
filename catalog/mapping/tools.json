@@ -127,7 +127,8 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/CableToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_cable_renumber",
@@ -292,7 +293,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CableRenumberOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A24",
+          "note": "Large：按 Standard 给全部电缆编号，复现 S21 的两对互换",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_check_list",
@@ -395,7 +408,29 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "示例项目没有检查消息，返回空列表和提示",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "检查后的 6 条警告、14 条提示与它读到的一致",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_check_run",
@@ -504,7 +539,29 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CheckRunOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "再检查一次会追加汇总提示（不幂等）；按页检查会删掉其他对象的消息",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "取消后在下一个安全点回滚，审计为 rolled_back",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_connection_generate",
@@ -624,7 +681,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionGenerateOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A19",
+          "note": "没有增删的生成不留撤销步骤，因此返回 not_started",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_connection_list",
@@ -755,7 +824,29 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "colour 在示例项目中是颜色代码，在其他项目中的含义待确认",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A19",
+          "note": "生成连接后读到的 9 条与生成结果一致",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_connection_number",
@@ -884,7 +975,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionNumberOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A24",
+          "note": "编号工具的 Large 测试中，线号的 all 和 except_manual 都通过",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_device_get",
@@ -1076,7 +1179,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "短标识 -FC1 返回 AMBIGUOUS_NAME 和候选",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_device_list",
@@ -1217,7 +1332,29 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "按页或类别过滤时 EPLAN 多返回同名主功能，改为按完整标识合并",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A24",
+          "note": "按类别 Cable 列出 56 根电缆",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_device_place",
@@ -1360,7 +1497,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_device_renumber",
@@ -1476,7 +1614,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceRenumberOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "PostNumerate 在部分输入上使 EPLAN 崩溃；改为只交带 ? 的设备标识后不再崩溃",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_device_update",
@@ -1585,7 +1735,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceUpdateOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A17",
+          "note": "Q1 拒绝、Q2 读回不一致时回滚、交叉引用跟着改名",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_export_dxf",
@@ -1678,7 +1840,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ExportRunOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A20",
+          "note": "DXF 在给定目录下按项目名和结构建子目录",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_export_image",
@@ -1790,7 +1964,27 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ExportRunOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A20",
+          "note": "PNG、JPG 都可用，只改写 User.eod、User.eox",
+          "verifies": false
+        },
+        {
+          "date": "2026-10-20",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A21",
+          "note": "inline 的 PNG 交给了模型，模型读出了图上的标识和文字",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_export_labels",
@@ -1891,7 +2085,17 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "result": "partial",
+          "basis": "stated",
+          "source": "docs/tools/eplan_export_labels.md",
+          "note": "第一次 Large 测试发现方案设置的相对路径从 Data 节点算起",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_export_parts",
@@ -1978,7 +2182,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_export_pdf",
@@ -2075,7 +2280,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ExportRunOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A20",
+          "note": "文件名不重复 .pdf；整个项目 322 页约 13 秒",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_export_pxf",
@@ -2165,7 +2382,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_export_untranslated",
@@ -2254,7 +2472,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_import_dxf",
@@ -2361,7 +2580,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportDxfOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_import_pxf",
@@ -2417,7 +2637,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPxfOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_language_remove",
@@ -2533,7 +2754,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LanguageRemoveOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_language_set",
@@ -2641,7 +2863,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LanguageSetOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_macro_get",
@@ -2722,7 +2945,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroGetOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_macro_insert",
@@ -2854,7 +3078,29 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroInsertOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A19",
+          "note": "同一位置再插入被拒绝并回滚；keep 与已有设备冲突时 ALREADY_EXISTS",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "在用 eplan_page_create 新建的页上按幅面检查外框",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_macro_list",
@@ -2908,7 +3154,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroListOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_message_list",
@@ -2983,7 +3230,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A12",
+          "note": "M2 的 13 个只读工具全部成功（A12 没有逐个列出）",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_page_create",
@@ -3234,7 +3493,29 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/PageCreateInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A17",
+          "note": "Q1 拒绝；一次写入一个撤销步骤；四种页类型",
+          "verifies": true
+        },
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "新建的页在规划时就能读到幅面",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_page_delete",
@@ -3402,7 +3683,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteExecuteTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A20",
+          "note": "删页前完整备份，一次 Ctrl+Z 恢复，拒绝时不执行",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_page_get",
@@ -3578,7 +3871,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "inferred",
+          "source": "api-notes A12",
+          "note": "M2 的 13 个只读工具全部成功（A12 没有逐个列出）",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_page_list",
@@ -3780,7 +4085,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A17",
+          "note": "调用后当前项目的 User.eod、User.eox 被改写，原因待查",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_page_renumber",
@@ -3888,7 +4205,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageRenumberOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "/90–/92 改为 /200、/210、/220；与已有页重名时返回 ALREADY_EXISTS",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_page_update",
@@ -4005,7 +4334,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageUpdateOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A17",
+          "note": "一次写入一个撤销步骤；只改一种语言时其他语言不变",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_part_export",
@@ -4091,13 +4432,24 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "docs/tools/eplan_part_export.md",
+          "note": "部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_part_import",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/PartMasterDataTools.cs",
       "operations": [
+        "masterdata.backup",
         "part.import.execute",
         "part.import.plan"
       ],
@@ -4110,7 +4462,12 @@
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.ReplaceAndAppend",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.UpdateAndAppend",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.UpdateExistingRecords",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
         "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
         "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
         "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
@@ -4120,6 +4477,9 @@
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
         "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
@@ -4132,7 +4492,10 @@
         "T:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode",
         "T:Eplan.EplApi.MasterData.MDPartsManagement"
       ],
-      "actions": [],
+      "actions": [
+        "A:backup",
+        "A:backup/MASTERDATA"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_part_import.md",
         "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
@@ -4188,6 +4551,11 @@
         ],
         "operationTests": [
           {
+            "name": "MasterDataBackupOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataBackupOperationTests.cs"
+          },
+          {
             "name": "PartImportOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartImportOperationTests.cs"
@@ -4198,7 +4566,20 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A30；Large 测试 README",
+          "note": "经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过",
+          "verifies": true
+        }
+      ],
+      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）"
     },
     {
       "name": "eplan_part_list",
@@ -4306,7 +4687,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "部件没有中文描述时为空，之后按语言回退设计实现",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_part_search",
@@ -4416,13 +4809,26 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A30",
+          "note": "部件导入的 Large 测试中找到新导入的部件，变体 1",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_part_sync",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/PartMasterDataTools.cs",
       "operations": [
+        "masterdata.backup",
         "part.sync.execute",
         "part.sync.plan"
       ],
@@ -4433,8 +4839,13 @@
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.AppendNew",
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExisting",
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExistingAndAppendNew",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
         "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
         "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
         "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
         "M:Eplan.EplApi.Base.ISOCode.GetNumber",
         "M:Eplan.EplApi.Base.ISOCode.IsValid",
@@ -4490,6 +4901,9 @@
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
         "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
@@ -4520,7 +4934,10 @@
         "T:Eplan.EplApi.MasterData.MDPartsDatabase",
         "T:Eplan.EplApi.MasterData.MDPartsManagement"
       ],
-      "actions": [],
+      "actions": [
+        "A:backup",
+        "A:backup/MASTERDATA"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_part_sync.md",
         "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
@@ -4556,12 +4973,30 @@
         ],
         "operationTests": [
           {
+            "name": "MasterDataBackupOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataBackupOperationTests.cs"
+          },
+          {
             "name": "PartSyncOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "docs/tools/eplan_part_sync.md；api-notes A30",
+          "note": "经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证",
+          "verifies": true
+        }
+      ],
+      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）"
     },
     {
       "name": "eplan_plc_get",
@@ -4693,7 +5128,17 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/PlcToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "docs/tools/eplan_plc_get.md",
+          "note": "按通道对象查不到连接，改为按设备读",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_project_get",
@@ -4848,7 +5293,19 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "detailed 最慢一次 493 ms；Large 中属性名可读",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_project_list",
@@ -5009,7 +5466,19 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-18",
+          "eplan": "2026.0.3.25421",
+          "variant": "Pro Panel 和 Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A10",
+          "note": "M1 完成标准：列出打开的项目；模态对话框时 EPLAN_BUSY",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_project_translate",
@@ -5130,7 +5599,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectTranslateOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_report_update",
@@ -5231,7 +5701,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ReportUpdateOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-20",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A20",
+          "note": "带 progressToken 时第 5 秒收到心跳，第 7 秒返回",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_revision_list",
@@ -5323,7 +5805,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/RevisionListOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_session_select",
@@ -5369,7 +5852,20 @@
           }
         ],
         "operationTests": []
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-19",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A12",
+          "note": "选中当前进程",
+          "verifies": true
+        }
+      ],
+      "note": "只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作"
     },
     {
       "name": "eplan_session_status",
@@ -5455,7 +5951,20 @@
           }
         ],
         "operationTests": []
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-18",
+          "eplan": "2026.0.3.25421",
+          "variant": "Pro Panel 和 Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "api-notes A10",
+          "note": "变体读取正确；对话框打开时仍显示已连接",
+          "verifies": true
+        }
+      ],
+      "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作"
     },
     {
       "name": "eplan_terminal_renumber",
@@ -5579,7 +6088,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TerminalRenumberOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": [
+        {
+          "date": "2026-10-21",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "api-notes A24",
+          "note": "只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_terminal_strip_get",
@@ -5683,7 +6204,8 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_terminal_strip_list",
@@ -5766,7 +6288,8 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     },
     {
       "name": "eplan_tool_usage",
@@ -5812,7 +6335,9 @@
           }
         ],
         "operationTests": []
-      }
+      },
+      "live": [],
+      "note": "只在 Host 中运行：返回工具用法文本，不接触 EPLAN"
     },
     {
       "name": "eplan_translation_export",
@@ -5890,7 +6415,8 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataExportOperationTests.cs"
           }
         ]
-      }
+      },
+      "live": []
     }
   ],
   "infrastructure": [

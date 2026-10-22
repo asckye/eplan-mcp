@@ -10,8 +10,13 @@ namespace EplanMcp.Coverage.Mapping;
 /// </summary>
 internal sealed record ToolEvidence(string? Spec, string? SpecStatus, IReadOnlyList<string> ApiNotes, IReadOnlyList<TestClass> Tests, IReadOnlyList<TestClass> OperationTests);
 
-/// <summary>One MCP tool: safety level from its annotations, Host file, Bridge operations, EPLAN API IDs, actions, evidence.</summary>
-internal sealed record ToolEntry(string Name, string Safety, string Host, IReadOnlyList<string> Operations, IReadOnlyList<string> Api, IReadOnlyList<string> Actions, ToolEvidence Evidence);
+/// <summary>
+/// One MCP tool: safety level from its annotations, Host file, Bridge operations, EPLAN API IDs, actions, evidence, and
+/// from overlay.yaml its live-verification records and a note.
+/// </summary>
+internal sealed record ToolEntry(
+    string Name, string Safety, string Host, IReadOnlyList<string> Operations, IReadOnlyList<string> Api, IReadOnlyList<string> Actions,
+    ToolEvidence Evidence, IReadOnlyList<LiveRecord> Live, string? Note);
 
 /// <summary>
 /// catalog/mapping/tools.json: every tool of the contract snapshot mapped through the Host's tool code to Bridge
@@ -39,23 +44,31 @@ internal sealed partial class ToolMapping
             .SelectMany(u => u.Value.SelectMany(s => s.Operations).Distinct().Select(operation => (Operation: operation, Id: u.Key)))
             .ToLookup(p => p.Operation, p => p.Id);
         using JsonDocument contract = JsonDocument.Parse(File.ReadAllText(Path.Combine(repositoryRoot, ContractSnapshot)));
+        JsonElement[] snapshot = [.. contract.RootElement.GetProperty("tools").EnumerateArray()];
+        Overlay overlay = Overlay.Load(repositoryRoot, [.. snapshot.Select(t => t.GetProperty("name").GetString()!)]);
         var tools = new List<ToolEntry>();
-        foreach (JsonElement tool in contract.RootElement.GetProperty("tools").EnumerateArray())
+        foreach (JsonElement tool in snapshot)
         {
             string name = tool.GetProperty("name").GetString()!;
             HostTool host = hostTools.SingleOrDefault(h => h.Name == name)
                 ?? throw new InvalidDataException($"{name} is in {ContractSnapshot} but no [McpServerTool] method in src/EplanMcp.Host/Tools has that name.");
-            string[] ids = [.. host.Operations.SelectMany(o => idsByOperation[o]).Distinct().Order(StringComparer.Ordinal)];
-            string[] classes = [.. usage.Operations.Where(o => host.Operations.Contains(o.Name)).Select(o => o.Class).Distinct()];
+            List<string> extra = overlay.Tools.GetValueOrDefault(name)?.Operations ?? [];
+            string[] operations = extra.Find(o => !usage.Operations.Any(u => u.Name == o)) is { } unknown
+                ? throw new InvalidDataException($"{Overlay.RelativePath}: {name} names the operation {unknown}, which the Bridge does not have.")
+                : [.. host.Operations.Union(extra).Order(StringComparer.Ordinal)];
+            string[] ids = [.. operations.SelectMany(o => idsByOperation[o]).Distinct().Order(StringComparer.Ordinal)];
+            string[] classes = [.. usage.Operations.Where(o => operations.Contains(o.Name)).Select(o => o.Class).Distinct()];
             string[] names = [name, .. references.Where(r => r.Value == name).Select(r => r.Key)];
             tools.Add(new ToolEntry(
                 name,
                 Safety(tool.GetProperty("annotations")),
                 host.File,
-                host.Operations,
+                operations,
                 [.. ids.Where(id => !id.StartsWith("A:", StringComparison.Ordinal))],
                 [.. ids.Where(id => id.StartsWith("A:", StringComparison.Ordinal))],
-                Evidence(repositoryRoot, name, sections, tests.Using(names), tests.Using(classes))));
+                Evidence(repositoryRoot, name, sections, tests.Using(names), tests.Using(classes)),
+                overlay.Live.GetValueOrDefault(name) ?? [],
+                overlay.Tools.GetValueOrDefault(name)?.Note));
         }
 
         return new ToolMapping
