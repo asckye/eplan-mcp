@@ -2,10 +2,12 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Packs;
 using EplanMcp.Packs;
+using EplanMcp.Packs.Knowledge;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -24,6 +26,8 @@ internal sealed class AssetTools
     public const string AnyKind = "any";
 
     public const string GetTool = "eplan_asset_get";
+
+    public const string UpdateTool = "eplan_asset_update";
 
     internal const string PreviewNote = "A page preview needs EPLAN to export the page, which comes with M6 phase 2.";
 
@@ -233,6 +237,202 @@ internal sealed class AssetTools
         }
 
         return (result, null);
+    }
+
+    [McpServerTool(
+        Name = UpdateTool,
+        Title = "Record knowledge in a development pack",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = true,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(AssetUpdateResult))]
+    [Description(
+        "Creates or replaces a knowledge document in a development pack: a candidate inferred from facts, module metadata " +
+        "for a macro, a material mapping or a gap. Never a fact or an official rule: candidates stay proposed until the " +
+        "engineer decides. eplan_tool_usage shows each kind's spec. Writes only EplanMcp's data. Example: {\"pack\": " +
+        "\"acme.panels\", \"kind\": \"gap\", \"name\": \"terminals\", \"spec\": {\"missing\": \"No terminal rules.\"}}.")]
+    public static async Task<CallToolResult> AssetUpdateAsync(
+        PackLibrary packs,
+        [Description("Development pack id")] string pack,
+        [AllowedValues("candidate", "module", "material_mapping", "gap")] string kind,
+        [Description("e.g. motor-overload")] string name,
+        [Description("The kind's content")] JsonElement spec,
+        string title = "",
+        string[]? tags = null,
+        [Description("asset or fact; page, note")] JsonElement? origin = null,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        PackTools.CheckId(pack, violations);
+        KnowledgeKind? known = Enum.GetValues<KnowledgeKind>().Cast<KnowledgeKind?>().FirstOrDefault(k => KnowledgeDocument.Folder(k!.Value) == kind);
+        if (known is null)
+        {
+            violations.Add(kind is "rule" or "fact_set"
+                ? "'kind' cannot be rule or fact_set: facts come only from extraction and only the engineer makes a rule official; record a candidate instead."
+                : "'kind' must be candidate, module, material_mapping or gap.");
+        }
+
+        if (!PackManifestValidator.IsId(name))
+        {
+            violations.Add("'name' must be lowercase letters and digits joined by '.' or '-', at most 64, such as motor-overload.");
+        }
+
+        if (ToolArguments.Optional(title) is { } given && !KnowledgeSpecs.IsText(JsonValue.Create(given), KnowledgeSpecs.MaxShortText))
+        {
+            violations.Add($"'title' must have 1 to {KnowledgeSpecs.MaxShortText} characters without control characters.");
+        }
+
+        if (tags is { } list && (list.Length > 20 || list.Any(t => !PackManifestValidator.IsId(t ?? string.Empty))))
+        {
+            violations.Add("'tags' must be at most 20 tags, each lowercase letters and digits joined by '.' or '-'.");
+        }
+
+        if (spec.ValueKind != JsonValueKind.Object)
+        {
+            violations.Add("'spec' must be an object with the kind's members; eplan_tool_usage shows them.");
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        if (packs.Locate(pack, AssetNames.Dev) is not (string folder, _))
+        {
+            return ToolResults.Error(PackLibrary.NotFound(pack, AssetNames.Dev));
+        }
+
+        (PackManifest? manifest, _, _) = await PackVerifier.ReadManifestAsync(folder, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<AssetEntry> own = manifest is null ? [] : await AssetIndex.ReadAsync(folder, manifest, cancellationToken).ConfigureAwait(false);
+        // Other packs' indexes are read before the check, which resolves references synchronously.
+        var others = new Dictionary<string, IReadOnlyList<AssetEntry>>(StringComparer.Ordinal);
+        foreach (string reference in Strings(spec).Concat(origin is { } o ? Strings(o) : []))
+        {
+            if (AssetNames.TryParse(reference, out string? p, out string? v, out _) && !(p == pack && v == AssetNames.Dev) && !others.ContainsKey($"{p}@{v}"))
+            {
+                others[$"{p}@{v}"] = await IndexAsync(packs, p, v, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        (string Stored, string Kind)? Resolve(string reference)
+        {
+            if (reference.StartsWith("fact:", StringComparison.Ordinal))
+            {
+                return manifest?.Facts.Any(f => reference == $"fact:{f.Resource}#{f.Name}") == true ? (reference, "fact") : null;
+            }
+
+            if (!AssetNames.TryParse(reference, out string? p, out string? v, out string? local))
+            {
+                return null;
+            }
+
+            IReadOnlyList<AssetEntry> entries = p == pack && v == AssetNames.Dev ? own : others.GetValueOrDefault($"{p}@{v}") ?? [];
+            return entries.FirstOrDefault(e => e.Local == local) is { } found ? (ReferenceEquals(entries, own) ? found.Local : reference, found.Kind) : null;
+        }
+
+        (JsonObject stored, List<(string Pointer, string Message)> problems) = KnowledgeSpecs.Check(known!.Value, JsonObject.Create(spec)!, Resolve);
+        KnowledgeOrigin? from = Origin(origin, Resolve, problems);
+        if (problems.Count > 0)
+        {
+            BridgeError error = ToolResults.InvalidArgumentError([.. problems.Select(x => $"{x.Pointer} {x.Message}.")]);
+            error.Metadata!["pointer"] = problems[0].Pointer;
+            return ToolResults.Error(error);
+        }
+
+        var document = new KnowledgeDocument
+        {
+            ApiVersion = KnowledgeDocument.CurrentApiVersion,
+            Kind = known.Value,
+            Metadata = new KnowledgeMetadata { Name = name, Title = ToolArguments.Optional(title), Tags = [.. tags ?? []] },
+            Origin = from,
+            Spec = stored,
+        };
+        string local = $"{kind}/{name}";
+        string requestId = Guid.NewGuid().ToString("N");
+        try
+        {
+            await packs.AuditAsync(requestId, UpdateTool, "started", new JsonObject { ["action"] = "asset_update", ["pack"] = pack, ["asset"] = local }, changed: false, cancellationToken).ConfigureAwait(false);
+            DevPackChange change;
+            try
+            {
+                change = await packs.Dev.PutAsync(pack, document, PackLibrary.CreatedBy, packs.Clock.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (DevPackException ex)
+            {
+                await packs.AuditFailedAsync(requestId, UpdateTool, ex.Error.ToString(), cancellationToken).ConfigureAwait(false);
+                return ToolResults.Error(PackLibrary.Error(ex, pack));
+            }
+
+            await packs.AuditAsync(requestId, UpdateTool, "committed", new JsonObject { ["pack"] = pack, ["asset"] = local, ["created"] = change.Created, ["digest"] = change.Digest }, changed: true, cancellationToken).ConfigureAwait(false);
+            var result = new AssetUpdateResult
+            {
+                Pack = pack,
+                Asset = AssetNames.Id(pack, AssetNames.Dev, local),
+                Created = change.Created,
+                Path = KnowledgeDocument.PathOf(known.Value, name),
+                Digest = change.Digest,
+                Standing = known is KnowledgeKind.Candidate or KnowledgeKind.MaterialMapping ? "candidate" : null,
+                Uri = $"eplanpack://{pack}/{AssetNames.Dev}/{kind}/{name}",
+            };
+            return ToolResults.Success($"{(change.Created ? "Created" : "Replaced")} {kind} {result.Asset} in development pack '{pack}'.", result);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
+    }
+
+    /// <summary>The index of another pack version, empty when it is not there.</summary>
+    private static async Task<IReadOnlyList<AssetEntry>> IndexAsync(PackLibrary packs, string pack, string version, CancellationToken cancellationToken)
+    {
+        if (!PackLibrary.IsVersion(version) || packs.Locate(pack, version) is not (string folder, _)
+            || (await PackVerifier.ReadManifestAsync(folder, cancellationToken).ConfigureAwait(false)).Manifest is not { } manifest)
+        {
+            return [];
+        }
+
+        return await AssetIndex.ReadAsync(folder, manifest, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Every string in <paramref name="element"/>, at any depth.</summary>
+    private static IEnumerable<string> Strings(JsonElement element) => element.ValueKind switch
+    {
+        JsonValueKind.String => [element.GetString()!],
+        JsonValueKind.Object => element.EnumerateObject().SelectMany(p => Strings(p.Value)),
+        JsonValueKind.Array => element.EnumerateArray().SelectMany(Strings),
+        _ => [],
+    };
+
+    /// <summary>The origin given, checked like the spec; null when none was given or it has problems.</summary>
+    private static KnowledgeOrigin? Origin(JsonElement? origin, Func<string, (string Stored, string Kind)?> resolve, List<(string Pointer, string Message)> problems)
+    {
+        if (origin is not { ValueKind: JsonValueKind.Object } given)
+        {
+            if (origin is { ValueKind: not JsonValueKind.Null })
+            {
+                problems.Add(("/origin", "must be an object with asset or fact, and optionally page and note"));
+            }
+
+            return null;
+        }
+
+        int before = problems.Count;
+        JsonObject o = JsonObject.Create(given)!;
+        problems.AddRange(o.Where(p => p.Key is not ("asset" or "fact" or "page" or "note")).Select(p => ($"/origin/{p.Key}", "is not a member of origin")));
+        string? Text(string member, int max) => o[member] is null ? null
+            : KnowledgeSpecs.IsText(o[member], max) ? o[member]!.GetValue<string>() : Problem(member, $"must be 1 to {max} characters without control characters");
+        string? Ref(string member) => o[member] is null ? null
+            : o[member] is JsonValue v && v.TryGetValue(out string? text) && resolve(text) is { } found ? found.Stored : Problem(member, "must be an existing asset id or fact:<resource path>#<fact name> of this pack");
+        string? Problem(string member, string message)
+        {
+            problems.Add(($"/origin/{member}", message));
+            return null;
+        }
+
+        var result = new KnowledgeOrigin { Asset = Ref("asset"), Fact = Ref("fact"), Page = Text("page", KnowledgeSpecs.MaxShortText), Note = Text("note", KnowledgeSpecs.MaxText) };
+        return problems.Count == before ? result : null;
     }
 
     /// <summary>The folders searched: one pack version, or of each pack (or the one given) its development pack and highest version.</summary>
