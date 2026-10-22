@@ -1,8 +1,10 @@
+using System.Globalization;
 using System.Security;
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using EplanMcp.Bridge.Core;
+using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 
@@ -13,7 +15,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// QuietModeStep(ShowNoDialogs) so that no dialog can stop the main thread (coding standards 11). Main thread, inside the
 /// dispatcher's LockingStep; there is no transaction: the operation deletes what a failed attempt made.
 /// </summary>
-internal sealed class EplanProjectFactory : IProjectFactory
+internal sealed class EplanProjectFactory(IBridgeLog log) : IProjectFactory
 {
     /// <summary>
     /// S27 made a project from GB_bas001.zw9 in 3.5 s (S30: 3 to 9 s), open exclusively for the API.
@@ -39,8 +41,37 @@ internal sealed class EplanProjectFactory : IProjectFactory
             }
 
             using var closeManager = new ProjectManager();
-            Project? openProject = closeManager.OpenProjects.FirstOrDefault(p => string.Equals(p.ProjectLinkFilePath, linkFile, StringComparison.OrdinalIgnoreCase));
-            openProject?.Close();
+            Project[] openProjects = closeManager.OpenProjects;
+            Project? openProject = openProjects.FirstOrDefault(p => string.Equals(p.ProjectLinkFilePath, linkFile, StringComparison.OrdinalIgnoreCase));
+            log.Write(BridgeLogLevel.Information,
+                $"Project create after creating ProjectManager disposal: linkFile='{linkFile}', openProjects={openProjects.Length.ToString(CultureInfo.InvariantCulture)}, matchFound={openProject is not null}, matchProjectLinkFilePath='{openProject?.ProjectLinkFilePath ?? "<none>"}'");
+            if (openProject is null)
+            {
+                foreach (Project project in openProjects.Take(10))
+                {
+                    log.Write(BridgeLogLevel.Information,
+                        $"Project create open project when no match: ProjectLinkFilePath='{project.ProjectLinkFilePath}'");
+                }
+            }
+            else
+            {
+                log.Write(BridgeLogLevel.Information, $"Project create calling Close(): linkFile='{linkFile}'");
+                try
+                {
+                    openProject.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Write(BridgeLogLevel.Information, $"Project create Close() threw: linkFile='{linkFile}'", ex);
+                    throw;
+                }
+
+                log.Write(BridgeLogLevel.Information, $"Project create Close() returned without throwing: linkFile='{linkFile}'");
+                using var verifyManager = new ProjectManager();
+                bool stillListed = verifyManager.OpenProjects.Any(p => string.Equals(p.ProjectLinkFilePath, linkFile, StringComparison.OrdinalIgnoreCase));
+                log.Write(BridgeLogLevel.Information, $"Project create after Close(): linkFile='{linkFile}', stillListed={stillListed}");
+            }
+
             return result;
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException or NotSupportedException or SecurityException or IOException
