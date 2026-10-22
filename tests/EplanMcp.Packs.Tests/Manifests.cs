@@ -51,7 +51,11 @@ internal static class Manifests
             File("resources/mappings/parts.csv", ResourceKind.MaterialMapping, 'e'),
             File("resources/rules/naming.md", ResourceKind.Rule, 'f'),
             File("resources/docs/readme.md", ResourceKind.Document, '1'),
-            File("resources/other/library.ema", ResourceKind.Macro, '2') with { Storage = ResourceStorage.Referenced })
+            File("resources/other/library.ema", ResourceKind.Macro, '2') with
+            {
+                Storage = ResourceStorage.Referenced,
+                Reference = new ResourceReference { Root = "company-macros", Path = "Siemens/library.ema" },
+            })
         with
     {
         Description = "Cabinets of the ACME line.",

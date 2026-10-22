@@ -72,7 +72,12 @@ public sealed class PackVerifierTests : IDisposable
     {
         await PackFolders.WriteAsync(_folder, m => m with
         {
-            Resources = [.. m.Resources.Select(r => r.Path == PackFolders.Macro ? r with { Storage = ResourceStorage.Referenced } : r)],
+            Resources =
+            [
+                .. m.Resources.Select(r => r.Path == PackFolders.Macro
+                    ? r with { Storage = ResourceStorage.Referenced, Reference = new ResourceReference { Root = "company-macros", Path = "Motor.ema" } }
+                    : r),
+            ],
         });
 
         PackProblem problem = Assert.Single((await CheckAsync()).Problems);
