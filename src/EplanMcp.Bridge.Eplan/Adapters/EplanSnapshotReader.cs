@@ -177,7 +177,14 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
         var values = new List<SnapshotSourceValue>();
         foreach (SnapshotProperty property in registered.Where(p => p.Scope == scope))
         {
-            Read(accessors[property.Id](list), property.Id, values);
+            try
+            {
+                Read(accessors[property.Id](list), property.Id, values);
+            }
+            catch (PropertyNotFoundException)
+            {
+                // Registered properties may be absent on objects in the scope, e.g. PLC properties on ordinary terminals (A36).
+            }
         }
 
         return values;

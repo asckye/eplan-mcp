@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "9e9e7116 + uncommitted changes",
-  "sourceHash": "sha256:950534f28fc388517f993c04c6058b563e86a3fd3e59d76e0ddf5f435baecb31",
+  "scannedSources": "a530534b + uncommitted changes",
+  "sourceHash": "sha256:e64ee732b78571e5267739205edc4355c14d8078b467a8630dab72a08bcc22a8",
   "operations": [
     {
       "name": "approval.ask",
@@ -18231,6 +18231,18 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve",
+          "project.snapshot"
         ]
       }
     ],
