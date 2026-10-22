@@ -13,6 +13,7 @@ public sealed class ImportListMessageTests
     private readonly FakeTransactions _transactions = new();
     private readonly Messages _messages = new();
     private readonly Importer _importer = new();
+    private Action _onBackup = () => { };
 
     [Fact]
     public void Success_OnlyNewMessages_MapsLevelsAndLimitsToTwenty()
@@ -32,6 +33,18 @@ public sealed class ImportListMessageTests
         Assert.All(result.EplanMessages, m => { Assert.Equal("new", m.Text); Assert.Null(m.Number); Assert.Equal(2, m.Occurrences); });
         Assert.Equal(["message", "warning", "warning", "error", "fatal", "message"], result.EplanMessages.Take(6).Select(m => m.Level));
         Assert.Equal(2, _messages.Reads);
+    }
+
+    [Fact]
+    public void BackupMessages_AreNotTheCalls()
+    {
+        _onBackup = () => _messages.Records.Add(new() { Text = @"Started opening database: C:\Users\x\backups\Line1.edb", Level = 1 });
+        _importer.Run = () => { _messages.Records.Add(new() { Text = "imported", Level = 2 }); return true; };
+
+        ImportListData result = Execute();
+
+        SystemMessage message = Assert.Single(result.EplanMessages);
+        Assert.Equal((1, "imported"), (result.EplanMessageCount, message.Text));
     }
 
     [Fact]
@@ -60,7 +73,7 @@ public sealed class ImportListMessageTests
         var args = new ImportListArgs { Project = "Line1", Kind = "devices", File = "list.xml", FilePath = @"D:\Imports\list.xml", Sha256 = new string('a', 64) };
         args.Fingerprint = ((WritePlan)new ImportListPlanOperation(_catalog, _importer, Observe).Execute(args)!).Fingerprint;
         return (ImportListData)new ImportListExecuteOperation(_catalog, _pages, _importer, new FakeProjectBackup(_pages), _transactions,
-            Observe, (_, _) => { }, () => () => TimeSpan.Zero, _messages).Execute(args)!;
+            Observe, (_, _) => _onBackup(), () => () => TimeSpan.Zero, _messages).Execute(args)!;
     }
 
     private static void Observe(ImportSource source) => source.Observe(25, 1, new string('a', 64));

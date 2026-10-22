@@ -36,7 +36,6 @@ public sealed class ImportListExecuteOperation(IProjectCatalog catalog, IPageRea
             }
 
             OperationContext.Current.ThrowIfCancellationRequested();
-            bookmark = messages?.ReadAll().Count ?? 0;
             request = ImportListRequest.Check(args, catalog, importer, ReadSource);
             request.RequireFingerprint(args.Fingerprint);
             OperationContext.Current.ReportProgress(0, message: "Backing up project before list import");
@@ -45,6 +44,8 @@ public sealed class ImportListExecuteOperation(IProjectCatalog catalog, IPageRea
             request = ImportListRequest.Check(args, catalog, importer, ReadSource);
             request.RequireFingerprint(args.Fingerprint);
             OperationContext.Current.ThrowIfCancellationRequested();
+            // After the backup: opening and closing the copy logs messages with local paths that are not this call's.
+            bookmark = messages?.ReadAll().Count ?? 0;
         }
         catch (BridgeErrorException ex)
         {
