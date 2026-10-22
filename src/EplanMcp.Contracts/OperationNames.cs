@@ -458,6 +458,14 @@ public static class OperationNames
     public const string PartSyncPlan = "part.sync.plan";
 
     /// <summary>
+    /// Backs the project up, then lets EPLAN synchronize the project's parts into the configured parts database in one
+    /// project transaction, and reads both back (S24 r15: the project stores the parts it referenced, too). The rollback
+    /// takes back only the project; a failure once the synchronization began is OUTCOME_UNKNOWN. Arguments:
+    /// <see cref="PartSyncArgs"/> with the fingerprint and the backup target; data: <see cref="PartSyncData"/>.
+    /// </summary>
+    public const string PartSyncExecute = "part.sync.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

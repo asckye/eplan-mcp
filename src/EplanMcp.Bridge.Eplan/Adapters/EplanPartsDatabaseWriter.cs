@@ -92,6 +92,27 @@ internal sealed class EplanPartsDatabaseWriter : IPartsDatabaseWriter
         }
     }
 
+    /// <summary>
+    /// <c>Synchronize.Parts(project, StoreMode)</c> as S24 r15 ran it (api-notes A30): AppendNew took 0.45 s and stored
+    /// the parts the fixture referenced in the project (293 to 341). It needs the dispatcher's LockingStep; r15 had no
+    /// SafetyPoint, so whether the caller's transaction rolls the project back is for the Large tests to show.
+    /// </summary>
+    public void Synchronize(string projectPath, string mode)
+    {
+        MainThread.Assert();
+        global::Eplan.EplApi.DataModel.Project project = EplanProjects.ByPath(projectPath);
+#pragma warning disable RS0030 // eplan_part_sync's change, approved and backed up first, inside its project transaction (ADR-0019).
+        global::Eplan.EplApi.HEServices.Synchronize.StoreMode storeMode = mode switch
+        {
+            "overwrite_existing" => global::Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExisting,
+            "overwrite_and_append" => global::Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExistingAndAppendNew,
+            _ => global::Eplan.EplApi.HEServices.Synchronize.StoreMode.AppendNew,
+        };
+        using var synchronize = new global::Eplan.EplApi.HEServices.Synchronize();
+        synchronize.Parts(project, storeMode);
+#pragma warning restore RS0030
+    }
+
     /// <summary>Runs <paramref name="read"/> on the opened configured database and closes it; EPLAN's failures are EPLAN_OPERATION_FAILED.</summary>
     private static T Opened<T>(Func<MDPartsDatabase, T> read)
     {

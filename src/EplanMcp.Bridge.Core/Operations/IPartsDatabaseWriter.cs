@@ -37,4 +37,11 @@ public interface IPartsDatabaseWriter
     /// <paramref name="mode"/> and <paramref name="matchBy"/>, outside any transaction (S24 r11), and closes it again.
     /// </summary>
     public void Import(string file, string mode, string matchBy);
+
+    /// <summary>
+    /// Lets EPLAN synchronize the parts of the open project at <paramref name="projectPath"/> into the configured
+    /// database with the tool's <paramref name="mode"/> (<c>Synchronize.Parts</c>); it stores the parts the project
+    /// references in the project too (S24 r15). Inside the caller's transaction and the dispatcher's LockingStep.
+    /// </summary>
+    public void Synchronize(string projectPath, string mode);
 }

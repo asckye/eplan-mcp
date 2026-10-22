@@ -27,7 +27,7 @@ internal sealed class FakePartsDatabaseWriter : IPartsDatabaseWriter
     public PartsDatabaseState Read()
     {
         Reads++;
-        if (ReadFailure is not null && Imports.Count > 0)
+        if (ReadFailure is not null && (Imports.Count > 0 || Syncs.Count > 0))
         {
             throw ReadFailure;
         }
@@ -44,5 +44,23 @@ internal sealed class FakePartsDatabaseWriter : IPartsDatabaseWriter
         }
 
         OnImport?.Invoke(Parts);
+    }
+
+    public List<(string Project, string Mode)> Syncs { get; } = [];
+
+    /// <summary>What EPLAN does in a synchronization; by default nothing.</summary>
+    public Action? OnSync { get; set; }
+
+    public Exception? SyncFailure { get; set; }
+
+    public void Synchronize(string projectPath, string mode)
+    {
+        Syncs.Add((projectPath, mode));
+        if (SyncFailure is not null)
+        {
+            throw SyncFailure;
+        }
+
+        OnSync?.Invoke();
     }
 }
