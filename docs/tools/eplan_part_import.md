@@ -54,9 +54,12 @@
 ## 5. 实现要点
 - **流程**：规划 → 审批 → 备份 → 执行 → 读回，同 Destructive 写工具；备份换成 ADR-0019 的主数据备份。
 - **规划**（Bridge，只读）：
-  - 用 `XmlReader` 读文件：根元素 `partsmanagement`，每个 `part` 元素的属性 `P_ARTICLE_PARTNR`（部件号）、`P_ARTICLE_VARIANT`（变体，没有时为 `1`）（S24 r12，api-notes A30）；
-  - `OpenDatabase()` 打开配置的库，逐个 `ExistsPart` 分成"新增""已有"，按 `mode` 算出 `added`、`updated`、`skipped`，然后 `Close()`；
-  - 指纹：文件的 SHA-256 加上"已有"部件的列表。
+  - 用 `XmlReader` 读文件，不处理 DTD：根元素 `partsmanagement`，每个 `part` 元素的属性 `P_ARTICLE_PARTNR`（部件号）；变体不是 `part` 的属性，而是 `part` 下的 `variant` 子元素，每个变体一个（api-notes A30）；同一部件号只算一次，变体数累加；
+  - `OpenDatabase()` 打开配置的库，用 `Parts` 一次读出全部部件号和部件总数（按变体计数，S24：464 个 0.07 秒），分成"新增""已有"，按 `mode` 算出 `added`、`updated`、`skipped`，然后 `Close()`。`match_by` 不是 `part_number` 时，分类仍按部件号估计，实际结果以读回为准；
+  - 变更清单：新增、更新各一条，带数量；部件号（每类最多 50 个）和跳过的部件在计划的 `details` 中。全部跳过时没有变更，不审批、不备份、不执行；
+  - 库在 SQL Server 上时规划就拒绝（`POLICY_DENIED`），Host 的策略再查一次；
+  - 指纹：文件的大小、修改时间和 SHA-256，库的设置，以及文件中"已有"的部件号。
+  - 与原规格的差别及原因：变体的位置按 S24 r11 的导出文件改正；`Parts` 一次给出部件号和 `partsBefore` 需要的总数，不用逐个 `ExistsPart`；全部跳过时没有变更，是写流水线对空变更清单的通用处理。
 - **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"，文件名和大小，三类部件的数量和前 20 个部件号，"导入撤不回，执行前会备份部件库"。
 - **备份**：`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`，`SOURCEPATH`、`FILENAME` 由 `SelectedPartsDatabaseAsString` 拆出，目标为 Host 新建的空目录 `<数据根目录>\backups\masterdata\<UTC 时间>\`（S24：0.14 秒，`.zw6`）。
 - **执行**：`OpenDatabase()` 后 `ImportParts(文件, "XPamImportXml", 模式, false, 识别方式, "")`，然后 `Close()`：
@@ -64,7 +67,7 @@
   - 在 `QuietModeStep(ShowNoDialogs)` 中执行：导入走的是界面的导入 action，r11 中它试图弹出系统错误对话框；
   - 最后一个参数（字段映射方案）传空串，即"界面上次使用的方案"。只对 `eplan_part_export` 导出的 XML 验证过（S24 r13）；别的来源的 XML 是否受这个方案影响，没有验证。
 - **读回**：`added` 与 `updated` 中的每个部件号都存在，`partsAfter = partsBefore + addedCount`。不一致时 `execution` 为 `committed`，结果中给出 `mismatch`（多出或缺少的部件号），提示工程师在部件管理中核对。
-- **时限与进度**：规划 60 秒；执行 300 秒，每 5 秒一次心跳（`Importing parts (30 s)`）。
+- **时限与进度**：规划用写流水线通用的 30 秒调用时限（流水线没有按工具设规划时限）；执行 300 秒，每 5 秒一次心跳（`Importing parts (30 s)`）。
 - **未验证**：
   - 除 `append_new` 外的三种模式（S24 只试了 `append_new`）；
   - 大文件的耗时；

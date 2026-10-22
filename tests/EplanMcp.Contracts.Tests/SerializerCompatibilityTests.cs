@@ -592,6 +592,8 @@ public sealed class SerializerCompatibilityTests
         new MasterDataBackupArgs(),
         new MasterDataBackupData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", Archive = @"C:\b\parts.zw6", Bytes = 991_224 },
         new MasterDataBackupData(),
+        new PartImportArgs { File = "supplier/继电器.xml", FilePath = @"C:\Users\工程师\EplanMcp\imports\supplier\继电器.xml", Sha256 = "9f86", Mode = "update_and_append", MatchBy = "unique_id", Fingerprint = "f" },
+        new PartImportArgs(),
     ];
 
     [Theory]
