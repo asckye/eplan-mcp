@@ -33,6 +33,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# robocopy reports success with exit codes below 8, which callers that set
+# `$PSNativeCommandUseErrorActionPreference` (release-addin.ps1) would otherwise treat as a failure.
+$PSNativeCommandUseErrorActionPreference = $false
 if (-not $Source) {
     $Source = Get-ChildItem 'C:\Users\Public\EPLAN\Data' -Filter 'EPLAN_Sample_Project.elk' -Recurse -Depth 3 -ErrorAction SilentlyContinue |
         Select-Object -First 1 -ExpandProperty FullName
