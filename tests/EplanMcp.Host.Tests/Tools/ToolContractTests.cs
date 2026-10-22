@@ -48,7 +48,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlcTools.GetTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool],
+            [AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlcTools.GetTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
@@ -87,6 +87,19 @@ public sealed class ToolContractTests : IDisposable
         JsonElement schema = Tools.Single(t => t.Name == PageTools.GetTool).InputSchema;
 
         Assert.Equal(["page"], schema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+    }
+
+    [Fact]
+    public void PlcImport_IsDestructive_WithOnlyTheVerifiedConvertersAndNoExtraArguments()
+    {
+        Tool tool = Tools.Single(t => t.Name == PlcImportTools.Tool);
+        Assert.True(tool.Annotations!.DestructiveHint);
+        Assert.False(tool.Annotations.ReadOnlyHint);
+        Assert.False(tool.Annotations.IdempotentHint);
+        Assert.Equal(["project", "file", "converter"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+        Assert.Equal([PlcImportTools.Pbf, PlcImportTools.Aml], Enum(tool.InputSchema.GetProperty("properties").GetProperty("converter")));
+        Assert.False(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.Contains("unverified", tool.Description, StringComparison.Ordinal);
     }
 
     [Fact]

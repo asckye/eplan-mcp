@@ -3032,6 +3032,133 @@
       "live": []
     },
     {
+      "name": "eplan_import_plc",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PlcImportTools.cs",
+      "operations": [
+        "import.plc.execute",
+        "import.plc.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.DataModel.ProjectManager.CopyMode.Snapshot",
+        "F:Eplan.EplApi.DataModel.ProjectManager.OpenMode.ReadOnly",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageIndex",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageText",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.SysMessagesCollection.#ctor",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.Project.Close",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.CopyProject(System.String,System.String,Eplan.EplApi.DataModel.ProjectManager.CopyMode)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.OpenProject(System.String,Eplan.EplApi.DataModel.ProjectManager.OpenMode)",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.BaseException.MessageLevel",
+        "P:Eplan.EplApi.Base.BaseException.NumberOfOccurrences",
+        "P:Eplan.EplApi.DataModel.Function.FunctionCategory",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.SysMessagesCollection",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.ProjectManager.CopyMode",
+        "T:Eplan.EplApi.DataModel.ProjectManager.OpenMode",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [
+        "A:plcservice",
+        "A:plcservice/BUSDATAIMPORT"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_import_plc.md",
+        "specStatus": "Proposed（S34 已验证新增对象读回和 SafetyPoint 回滚；工具的事务内重复保护 Large 测试与无冲突目标的正向导入未验证）",
+        "apiNotes": [
+          "A30"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "ImportPlcToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ImportPlcToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ImportPlcTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ImportPlcTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ImportPlcMessageTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPlcMessageTests.cs"
+          },
+          {
+            "name": "ImportPlcOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPlcOperationTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_import_pxf",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ImportTools.cs",
