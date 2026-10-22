@@ -29,7 +29,7 @@ public sealed class ProjectBackupsTests : IDisposable
     [Fact]
     public void ACopyWithThePagesOfTheProject_IsTheBackup()
     {
-        string copy = ProjectBackups.Make(_backup, _pages, _project, Target());
+        string copy = Make(Target());
 
         Assert.Equal(Copy, copy);
         Assert.Equal([(_project.Path, Copy)], _backup.Copies);
@@ -90,6 +90,14 @@ public sealed class ProjectBackupsTests : IDisposable
     }
 
     [Fact]
+    public void ABackupThatTakesExactlyTheLimit_IsTheBackup()
+    {
+        _backup.Delay = TimeSpan.FromSeconds(1);
+
+        Assert.Equal(Copy, Make(new BackupTarget { Path = Copy, MaxSeconds = 1 }));
+    }
+
+    [Fact]
     public void ABackupOverHalfTheLimit_IsNoBackup()
     {
         _backup.Delay = TimeSpan.FromSeconds(1.1);
@@ -104,16 +112,19 @@ public sealed class ProjectBackupsTests : IDisposable
     {
         _backup.Failure = new BridgeErrorException(ErrorReason.ProjectNotOpen, "gone");
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => ProjectBackups.Make(_backup, _pages, _project, Target())).Error;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Make(Target())).Error;
 
         Assert.Equal((ErrorReason.ProjectNotOpen, ExecutionState.NotStarted), (error.Reason, error.Execution));
     }
 
     private BackupTarget Target(string? path = null) => new() { Path = path ?? Copy, MaxSeconds = 90 };
 
+    /// <summary>The backup, timed by the fake EPLAN's own stopwatch: a copy takes exactly its <see cref="FakeProjectBackup.Delay"/>.</summary>
+    private string Make(BackupTarget? target) => ProjectBackups.Make(_backup, _pages, _project, target, _backup.StartClock);
+
     private BridgeError Fails(BackupTarget? target)
     {
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => ProjectBackups.Make(_backup, _pages, _project, target)).Error;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Make(target)).Error;
         Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted, false, ProjectBackups.FailedMessage), (error.Reason, error.Execution, error.Retryable, error.Message));
         return error;
     }

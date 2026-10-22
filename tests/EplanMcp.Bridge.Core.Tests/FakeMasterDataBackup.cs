@@ -4,11 +4,15 @@ namespace EplanMcp.Bridge.Core.Tests;
 
 /// <summary>
 /// EPLAN's master-data backup as S24 saw it: one 7z archive named after <c>ARCHIVENAME</c> with <c>.zw6</c> in the
-/// destination folder. <see cref="Write"/> changes what lands there; <see cref="Failure"/> makes the action fail.
+/// destination folder. <see cref="Write"/> changes what lands there; <see cref="Failure"/> makes the action fail; a
+/// slow backup takes no real time: <see cref="StartClock"/> is the stopwatch it is timed with, which moves by
+/// <see cref="Delay"/> for each backup.
 /// </summary>
 internal sealed class FakeMasterDataBackup : IMasterDataBackup
 {
     public static readonly byte[] SevenZip = [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C, 0x00, 0x04];
+
+    private TimeSpan _taken;
 
     public string Database { get; set; } = @"$(MD_PARTS)\EPLAN_parts.alk";
 
@@ -23,10 +27,17 @@ internal sealed class FakeMasterDataBackup : IMasterDataBackup
 
     public string PartsDatabase() => Database;
 
+    /// <summary>A stopwatch that has just started and reads how long the backups since then have taken.</summary>
+    public Func<TimeSpan> StartClock()
+    {
+        TimeSpan from = _taken;
+        return () => _taken - from;
+    }
+
     public void BackupParts(string database, string folder, string archiveName)
     {
         Backups.Add((database, folder, archiveName));
-        Thread.Sleep(Delay);
+        _taken += Delay;
         if (Failure is not null)
         {
             throw Failure;

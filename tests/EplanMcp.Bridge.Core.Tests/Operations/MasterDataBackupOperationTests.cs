@@ -155,7 +155,7 @@ public sealed class MasterDataBackupOperationTests : IDisposable
     private MasterDataBackupArgs Args(string? folder = null, string archiveName = "parts", int maxSeconds = 60, string database = Database) =>
         new() { Kind = MasterDataKinds.Parts, Database = database, Folder = folder ?? _folder, ArchiveName = archiveName, MaxSeconds = maxSeconds };
 
-    private MasterDataBackupData Run(MasterDataBackupArgs args) => (MasterDataBackupData)new MasterDataBackupOperation(_backup).Execute(args)!;
+    private MasterDataBackupData Run(MasterDataBackupArgs args) => (MasterDataBackupData)new MasterDataBackupOperation(_backup, _backup.StartClock).Execute(args)!;
 
     private BridgeError Fails(MasterDataBackupArgs args)
     {
