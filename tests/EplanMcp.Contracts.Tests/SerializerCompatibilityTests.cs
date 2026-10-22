@@ -431,6 +431,22 @@ public sealed class SerializerCompatibilityTests
             Total = 464,
         },
         new PartSearchData(),
+        new RevisionListArgs { Project = "Line1", Language = "zh_CN", Offset = 50, Limit = 50 },
+        new RevisionListArgs(),
+        new RevisionListData
+        {
+            Project = "项目 二",
+            Path = @"D:\Scratch\项目 二.ell",
+            State = "tracking",
+            TrackingStarted = true,
+            Parent = @"D:\Scratch\项目.elk",
+            Revisions = [new RevisionItem { Index = 1, Name = "修订 1", Description = "说明", DescriptionLanguage = "zh_CN", User = "ASCKYE", Date = "2026-10-21T08:15:00Z", DateRaw = "x" }],
+            Total = 1,
+            UncompletedPages = ["=A/1"],
+            UncompletedPageCount = 1,
+            MarkedPageCount = 2,
+        },
+        new RevisionListData(),
         new MessageListArgs { MinLevel = SystemMessage.Error, Offset = 20, Limit = 20 },
         new MessageListArgs(),
         new MessageListData

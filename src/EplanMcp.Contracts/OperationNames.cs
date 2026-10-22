@@ -58,6 +58,13 @@ public static class OperationNames
     public const string PartSearch = "part.search";
 
     /// <summary>
+    /// A project's revision state by its link file's extension, its revision log sliced in the Bridge, and the pages
+    /// EPLAN lists as changed; never changes a revision. Arguments: <see cref="RevisionListArgs"/>; data:
+    /// <see cref="RevisionListData"/>.
+    /// </summary>
+    public const string RevisionList = "revision.list";
+
+    /// <summary>
     /// EPLAN's system messages of this session, newest first, filtered and sliced in the Bridge. Arguments:
     /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
     /// </summary>
