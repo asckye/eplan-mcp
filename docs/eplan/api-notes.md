@@ -415,6 +415,7 @@
 - `Eplan.EplApi.Starteru.dll` 提供 `AssemblyResolver`（`SetEplanBinPath` 等）、`EplanFinder.SelectEplanVersion`、`EplanSignedAssemblyAttribute`。— 反射。
 - 要求：x64 进程；目标 .NET Framework 4.8.1；**必须是 STA 线程**（`[STAThread]`）；`Exit()` 只能在主线程调用一次，之后不能再次 `Init`；使用 DataModel 前要创建 `LockingStep`。— XML、`2026/UsingEplanAssemblies.html`。
 - `Init` 之后，除了会显示界面的功能（模态对话框、停靠窗口、MDI 窗口）以外，**所有 API 功能都可以使用**。— XML。
+- `ProjectManager.OpenProject(链接文件, OpenMode)`：XML 没有列出 `OpenMode` 的成员，反射得到 `Standard`=0、`ReadOnly`=1、`Exclusive`=3。离线宿主用 `ReadOnly` 打开完成的修订（`.elr`），修订中的项目（`.ell`）照常打开；能否打开这两种链接文件，待 Large 测试确认。— 反射（2026-10-21）。
 
 ### B6. 线程
 - **只能在 EPLAN 主线程上调用 API。** 官方说明："Executing API code purely out of main Eplan thread is not recommended… not tested and are out of support." — XML（`EplanMainThreadDispatcher`）。

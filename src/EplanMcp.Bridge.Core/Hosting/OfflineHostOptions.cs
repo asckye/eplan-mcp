@@ -11,7 +11,14 @@ public sealed class OfflineHostOptions
 {
     public const string Usage =
         "usage: EplanMcp.Bridge.Offline --variant-bin <Bin of an EPLAN variant, e.g. C:\\Program Files\\EPLAN\\Electric P8\\2026.0.3\\Bin> " +
-        "--project <.elk of a scratch copy> [--pipe-prefix <prefix, default " + BridgeProtocol.PipePrefix + ">] [--idle-exit <seconds>]";
+        "--project <link file of a scratch copy: .elk, .ell (revision in progress) or .elr (completed revision, opened read-only)> " +
+        "[--pipe-prefix <prefix, default " + BridgeProtocol.PipePrefix + ">] [--idle-exit <seconds>]";
+
+    /// <summary>
+    /// The link file extensions <c>--project</c> takes (api-notes A28, S23 r3): a project, one with a revision in progress,
+    /// and a completed revision, which EPLAN write-protects and the offline host opens read-only.
+    /// </summary>
+    public static readonly IReadOnlyList<string> ProjectExtensions = [".elk", ".ell", ".elr"];
 
     /// <summary>The longest pipe prefix accepted; the pipe name adds the process ID and 17 characters.</summary>
     public const int MaxPipePrefixLength = 64;
@@ -22,8 +29,11 @@ public sealed class OfflineHostOptions
     /// <summary>The variant's Bin (with W3u.exe), not the Platform's: <c>EplApplication.EplanBinFolder</c> (api-notes A22).</summary>
     public string VariantBin { get; private set; } = string.Empty;
 
-    /// <summary>The <c>.elk</c> file of the project opened at start; the Host's policy decides what may be written to it.</summary>
+    /// <summary>The link file of the project opened at start; the Host's policy decides what may be written to it.</summary>
     public string Project { get; private set; } = string.Empty;
+
+    /// <summary>True for a completed revision (<c>.elr</c>), which is opened read-only.</summary>
+    public bool ReadOnly => Project.EndsWith(".elr", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>The pipe name's prefix; a Host finds another one than the add-in's only through <c>EPLANMCP_PIPE_PREFIX</c>.</summary>
     public string PipePrefix { get; private set; } = BridgeProtocol.PipePrefix;
@@ -64,7 +74,9 @@ public sealed class OfflineHostOptions
                 return IsFullPath(value) ? null : "--variant-bin must be a full path.";
             case "--project":
                 Project = value;
-                return IsFullPath(value) && value.EndsWith(".elk", StringComparison.OrdinalIgnoreCase) ? null : "--project must be the full path of a project's .elk file.";
+                return IsFullPath(value) && ProjectExtensions.Any(extension => value.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                    ? null
+                    : "--project must be the full path of a project's link file: .elk, .ell or .elr.";
             case "--pipe-prefix":
                 PipePrefix = value;
                 return value.Length <= MaxPipePrefixLength && value.All(c => c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or '.' or '-' or '_')

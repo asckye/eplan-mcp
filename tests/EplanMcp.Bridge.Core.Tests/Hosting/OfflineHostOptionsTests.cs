@@ -26,6 +26,33 @@ public sealed class OfflineHostOptionsTests
     }
 
     [Theory]
+    [InlineData(@"C:\scratch\Line1.elk", false)]
+    [InlineData(@"C:\scratch\revisions\Line1.ell", false)] // a revision in progress (S23 r3)
+    [InlineData(@"C:\scratch\revisions\Line1.ELR", true)] // a completed revision, write-protected: opened read-only
+    public void Parse_EveryLinkFileExtension_IsAProject_AndOnlyACompletedRevisionIsReadOnly(string project, bool readOnly)
+    {
+        OfflineHostOptions options = Parse("--variant-bin", Bin, "--project", project)!;
+
+        Assert.Equal((project, readOnly), (options.Project, options.ReadOnly));
+    }
+
+    [Theory]
+    [InlineData(@"C:\scratch\Line1.elx")]
+    [InlineData(@"C:\scratch\Line1.zw1")]
+    [InlineData(@"C:\scratch\Line1.ell.bak")]
+    public void Parse_AnotherExtension_IsRefusedWithTheThreeItTakes(string project)
+    {
+        Assert.Null(OfflineHostOptions.Parse(["--variant-bin", Bin, "--project", project], out string? problem));
+        Assert.Equal("--project must be the full path of a project's link file: .elk, .ell or .elr.", problem);
+    }
+
+    [Fact]
+    public void TheUsage_NamesTheThreeExtensions()
+    {
+        Assert.All(OfflineHostOptions.ProjectExtensions, extension => Assert.Contains(extension, OfflineHostOptions.Usage, StringComparison.Ordinal));
+    }
+
+    [Theory]
     [InlineData("--project", Project)]
     [InlineData("--variant-bin", Bin)]
     public void Parse_WithoutARequiredOption_SaysWhichOne(string name, string value)
@@ -55,7 +82,7 @@ public sealed class OfflineHostOptionsTests
     [InlineData("--project", @"scratch\Line1.elk")]
     [InlineData("--project", "C:\\scratch\\Line|1.elk")]
     [InlineData("--variant-bin", @"Electric P8\2026.0.3\Bin")]
-    public void Parse_APathThatIsNotFullOrNotAnElkFile_IsRefused(string name, string value)
+    public void Parse_APathThatIsNotFullOrNotALinkFile_IsRefused(string name, string value)
     {
         string[] args = name == "--project" ? ["--variant-bin", Bin, name, value] : [name, value, "--project", Project];
 
