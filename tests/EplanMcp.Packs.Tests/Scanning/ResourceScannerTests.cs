@@ -18,7 +18,6 @@ public sealed class ResourceScannerTests : IDisposable
         _folder.Write("Inputs/Forms/F01_001.f01", "<EplanPxfRoot Type=\"Form\" />");
         _folder.Write("Inputs/parts.csv", "a;b");
         _folder.Write("Inputs/readme.md", "# readme");
-        _folder.Write("Inputs/notes.xyz", "?");
 
         ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Inputs")));
 
@@ -28,16 +27,16 @@ public sealed class ResourceScannerTests : IDisposable
                 ("resources/forms/Inputs/Forms/F01_001.f01", ResourceKind.Form, 1),
                 ("resources/macros/Inputs/Macros/Motor.ema", ResourceKind.Macro, 1),
                 ("resources/mappings/Inputs/parts.csv", ResourceKind.MaterialMapping, 1),
-                ("resources/other/Inputs/notes.xyz", ResourceKind.Other, 1),
                 ("resources/projects/Inputs/Plant/Plant.elk", ResourceKind.Project, 3),
             ],
             result.Resources.Select(r => (r.Resource.Path, r.Resource.Kind, r.Resource.Files)));
-        Assert.Equal(["eplan_compatibility_unchecked", "kind_by_extension", "unknown_kind"], result.Findings.Select(f => f.Code).Order(StringComparer.Ordinal));
+        Assert.Equal(["eplan_compatibility_unchecked", "kind_by_extension", "project_referenced"], result.Findings.Select(f => f.Code).Order(StringComparer.Ordinal));
         Assert.False(result.HasErrors);
         Assert.Equal([new PackInput { Name = "Inputs", Kind = PackInputKind.Folder }], result.Inputs);
 
         ScannedResource project = result.Resources.Single(r => r.Resource.Kind == ResourceKind.Project);
         Assert.Equal(new ResourceSource { Input = "Inputs", Path = "Plant/Plant.elk" }, project.Resource.Source);
+        Assert.Equal((ResourceStorage.Referenced, new ResourceReference { Root = "inputs", Path = "Plant/Plant.elk" }), (project.Resource.Storage, project.Resource.Reference));
         Assert.Equal((await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(_folder.PathOf("Inputs/Plant/Plant.elk")), Cancel)).Sha256, project.Resource.Sha256);
         Assert.Equal("window_macro", result.Resources.Single(r => r.Resource.Kind == ResourceKind.Macro).Resource.Subtype);
     }
@@ -78,6 +77,7 @@ public sealed class ResourceScannerTests : IDisposable
 
         ScannedResource project = Assert.Single(result.Resources);
         Assert.Equal(("resources/projects/Plant.elk", 2), (project.Resource.Path, project.Resource.Files));
+        Assert.Equal(new ResourceReference { Root = "projects", Path = "Plant.elk" }, project.Resource.Reference);
         Assert.Equal(["Plant.edb/Page.eod", "Plant.elk"], project.FilesOnDisk.Select(f => f.Relative).Order(StringComparer.Ordinal));
     }
 
@@ -142,6 +142,33 @@ public sealed class ResourceScannerTests : IDisposable
     }
 
     private const string Macro = "<EplanPxfRoot Type=\"WindowMacro\" Version=\"2026.0.25356\" />";
+
+    [Fact]
+    public async Task Scan_TypesPacksNeverHold_AreErrors()
+    {
+        _folder.Write("Inputs/notes.xyz", "?");
+        _folder.Write("Inputs/parts.xlsx", "PK");
+        _folder.Write("Inputs/manual.pdf", "%PDF");
+        _folder.Write("Inputs/run.ps1", "Remove-Item");
+
+        ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Inputs")));
+
+        Assert.Equal(4, result.Findings.Count(f => (f.Severity, f.Code) == (FindingSeverity.Error, "type_not_allowed")));
+        Assert.Contains(result.Findings, f => f.Subject == "Inputs/run.ps1" && f.Message.Contains("executable or script", StringComparison.Ordinal));
+        Assert.Empty(result.Resources);
+    }
+
+    [Fact]
+    public async Task Scan_BundleProjects_CarriesThem()
+    {
+        _folder.Write("Inputs/Plant.elk", "Plant.edb\n18.0\n");
+        _folder.Write("Inputs/Plant.edb/Page.eod", "pages");
+
+        ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Inputs"), BundleProjects: true));
+
+        Assert.Equal((ResourceStorage.Bundled, null), (Assert.Single(result.Resources).Resource.Storage, result.Resources[0].Resource.Reference));
+        Assert.DoesNotContain(result.Findings, f => f.Code == "project_referenced");
+    }
 
     public void Dispose() => _folder.Dispose();
 

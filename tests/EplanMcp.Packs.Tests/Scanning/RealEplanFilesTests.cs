@@ -15,9 +15,9 @@ public sealed class RealEplanFilesTests
     [Fact]
     public async Task SampleProjects_PairLinkFileAndDataFolder_AndTellTheirVersion()
     {
-        string folder = Existing(Path.Combine(Data, "项目", "Company name"));
+        string link = Existing(Path.Combine(Data, "项目", "Company name", "EPLAN_Sample_Project.elk"));
 
-        ScanResult result = await ResourceScanner.ScanAsync([new ScanInput(folder)], TestContext.Current.CancellationToken);
+        ScanResult result = await ResourceScanner.ScanAsync([new ScanInput(link)], TestContext.Current.CancellationToken);
 
         ScannedResource sample = result.Resources.Single(r => r.Resource.Path.EndsWith("/EPLAN_Sample_Project.elk", StringComparison.Ordinal));
         Assert.Equal(ResourceKind.Project, sample.Resource.Kind);
@@ -26,6 +26,7 @@ public sealed class RealEplanFilesTests
         Assert.Contains(sample.Facts, f => f.Name == "database_version");
         Assert.DoesNotContain(result.Findings, f => f.Severity == FindingSeverity.Error);
         Assert.Contains(result.Findings, f => f.Code == "eplan_compatibility_unchecked" && f.Subject.EndsWith("EPLAN_Sample_Project.elk", StringComparison.Ordinal));
+        Assert.Equal(new ResourceReference { Root = "company-name", Path = "EPLAN_Sample_Project.elk" }, sample.Resource.Reference);
     }
 
     [Fact]

@@ -92,6 +92,13 @@ public static class ResourceScanner
         ResourceClassifier.Classification classification = input.Kind is { } kind && (found is null || !ResourceClassifier.IsEplanFile(found))
             ? new(kind, null, Guessed: false)
             : found ?? new(ResourceKind.Other, null, Guessed: false);
+        if (ResourceTypes.Problem(classification.Kind, file.Name) is { } typeProblem)
+        {
+            scan.Add(FindingSeverity.Error, "type_not_allowed", subject,
+                $"{typeProblem}: packs hold EPLAN's own files, JSON, CSV, PNG, SVG, plain text and Markdown (ADR-0024); convert it or leave it out.");
+            return;
+        }
+
         try
         {
             IReadOnlyList<(string Relative, string FullPath)> files = classification.Kind == ResourceKind.Project
@@ -138,6 +145,20 @@ public static class ResourceScanner
                 Storage = ResourceStorage.Bundled,
                 Source = new ResourceSource { Input = inputName, Path = relative },
             };
+            if (classification.Kind == ResourceKind.Project && !input.BundleProjects)
+            {
+                // Reference projects stay where they are (design 4.1.2, Q6): large, and often with customer data. The
+                // input folder stands for the packSources root; TODO(M6): take the root from config.json packSources.
+                string rootName = RootName(relative.Length == 0 ? file.Directory?.Name ?? string.Empty : inputName);
+                resource = resource with
+                {
+                    Storage = ResourceStorage.Referenced,
+                    Reference = new ResourceReference { Root = rootName, Path = relative.Length == 0 ? file.Name : relative },
+                };
+                scan.Add(FindingSeverity.Gap, "project_referenced", subject,
+                    $"is referenced, not carried: the pack records its hash, facts and EPLAN version, and using it needs config.json packSources to list the root '{rootName}' (not checked yet). To carry a project, give its .zw1 backup.");
+            }
+
             EplanFileInspector.Inspection inspection = await EplanFileInspector.InspectAsync(resource, files, cancellationToken).ConfigureAwait(false);
             scan.Resources.Add(new ScannedResource(resource with { EplanVersion = inspection.EplanVersion }, inspection.Facts, input, files));
             foreach ((FindingSeverity severity, string code, string message) in inspection.Findings)
@@ -145,11 +166,7 @@ public static class ResourceScanner
                 scan.Add(severity, code, subject, message);
             }
 
-            if (found is null && input.Kind is null)
-            {
-                scan.Add(FindingSeverity.Warning, "unknown_kind", subject, "has an extension EplanMcp does not know; it is kept as 'other'.");
-            }
-            else if (classification.Guessed)
+            if (classification.Guessed)
             {
                 scan.Add(FindingSeverity.Warning, "kind_by_extension", subject,
                     $"is taken as {Name(classification.Kind)} from its extension alone; say its kind (such as rule=<path>) if it is something else.");
@@ -169,6 +186,14 @@ public static class ResourceScanner
     {
         (string sha256, long bytes) = await PackHasher.HashFileAsync(path, cancellationToken).ConfigureAwait(false);
         return (sha256, bytes, 1);
+    }
+
+    /// <summary>A root name from a folder name: lowercase letters and digits, other characters as '-' (<c>Company name</c> → <c>company-name</c>).</summary>
+    private static string RootName(string folder)
+    {
+        string name = string.Join('-', new string([.. folder.ToLowerInvariant().Select(c => char.IsAsciiLetterOrDigit(c) ? c : ' ')])
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        return name.Length == 0 ? "input" : name[..Math.Min(name.Length, PackManifestValidator.MaxIdLength)].TrimEnd('-');
     }
 
     private static string Subject(string inputName, string relative) => relative.Length == 0 ? inputName : inputName + "/" + relative;

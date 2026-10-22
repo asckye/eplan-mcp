@@ -39,22 +39,24 @@ internal static class PackCommand
     }
 
     /// <summary>An input as the command line gives it: <c>path</c>, <c>&lt;kind&gt;=path</c> (such as <c>rule=</c>) or <c>sample=path</c>.</summary>
-    internal static ScanInput Input(string argument, bool official)
+    internal static ScanInput Input(string argument, bool official, bool bundleProjects = false)
     {
         int equals = argument.IndexOf('=', StringComparison.Ordinal);
         string prefix = equals > 0 ? argument[..equals] : string.Empty;
         if (prefix == "sample")
         {
-            return new ScanInput(argument[(equals + 1)..], AcceptanceSample: true, Official: official);
+            return new ScanInput(argument[(equals + 1)..], AcceptanceSample: true, Official: official, BundleProjects: bundleProjects);
         }
 
         ResourceKind? kind = Enum.GetValues<ResourceKind>().Cast<ResourceKind?>().FirstOrDefault(k => JsonNamingPolicy.SnakeCaseLower.ConvertName(k!.Value.ToString()) == prefix);
-        return kind is null ? new ScanInput(argument, Official: official) : new ScanInput(argument[(equals + 1)..], kind, Official: official);
+        return kind is null
+            ? new ScanInput(argument, Official: official, BundleProjects: bundleProjects)
+            : new ScanInput(argument[(equals + 1)..], kind, Official: official, BundleProjects: bundleProjects);
     }
 
     private static async Task<JsonObject> ScanAsync(PackRequest request, CancellationToken cancellationToken)
     {
-        ScanResult scan = await ResourceScanner.ScanAsync([.. request.Paths.Select(p => Input(p, request.Official))], cancellationToken).ConfigureAwait(false);
+        ScanResult scan = await ResourceScanner.ScanAsync([.. request.Paths.Select(p => Input(p, request.Official, request.BundleProjects))], cancellationToken).ConfigureAwait(false);
         var result = new JsonObject
         {
             ["ok"] = !scan.HasErrors,

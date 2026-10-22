@@ -42,6 +42,19 @@ public sealed class PackWriterTests : IDisposable
     }
 
     [Fact]
+    public async Task Write_ReferencedProject_StaysOutOfThePack()
+    {
+        await ScanSampleAsync();
+        ScanResult scan = await ScanAsync(bundleProjects: false);
+
+        PackCheckResult result = await PackWriter.WriteAsync(scan, ManifestGenerator.Generate(scan, _identity, "eplanmcp 0.1.0", Manifests.CreatedAt), Target, Cancel);
+
+        Assert.Empty(result.Problems);
+        Assert.Equal(ResourceStorage.Referenced, result.Manifest!.Resources.Single(r => r.Kind == ResourceKind.Project).Storage);
+        Assert.False(Directory.Exists(Path.Combine(Target, "resources/projects")));
+    }
+
+    [Fact]
     public async Task Generate_SameScanAndTime_GivesTheSameManifestBytes()
     {
         ScanResult first = await ScanSampleAsync();
@@ -97,5 +110,5 @@ public sealed class PackWriterTests : IDisposable
         return ScanAsync();
     }
 
-    private Task<ScanResult> ScanAsync() => ResourceScanner.ScanAsync([new ScanInput(_in.PathOf("Inputs"))], Cancel);
+    private Task<ScanResult> ScanAsync(bool bundleProjects = true) => ResourceScanner.ScanAsync([new ScanInput(_in.PathOf("Inputs"), BundleProjects: bundleProjects)], Cancel);
 }
