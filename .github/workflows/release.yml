@@ -75,7 +75,11 @@ jobs:
             $packagePaths += @($assets.libraries.Values | Where-Object type -eq package | ForEach-Object path)
           }
           foreach ($runtime in @(@('microsoft.netcore.app.runtime.win-x64','System.Private.CoreLib.dll'), @('microsoft.windowsdesktop.app.runtime.win-x64','PresentationFramework.dll'))) {
-            $runtimeVersion = (Get-Item "stage/app/workbench/$($runtime[1])").VersionInfo.ProductVersion.Split('+')[0]
+            # Servicing runtimes report e.g. 10.0.13-servicing.26504.104 while the pack folder is 10.0.13.
+            $productVersion = (Get-Item "stage/app/workbench/$($runtime[1])").VersionInfo.ProductVersion
+            $runtimeVersion = @($productVersion.Split('+')[0], ($productVersion -replace '-servicing\..*$', '').Split('+')[0]) |
+              Where-Object { Test-Path (Join-Path $packageRoot "$($runtime[0])/$_") } | Select-Object -First 1
+            if (-not $runtimeVersion) { throw "No $($runtime[0]) package folder for runtime $productVersion." }
             $packagePaths += "$($runtime[0])/$runtimeVersion"
           }
           foreach ($path in $packagePaths | Sort-Object -Unique) {
