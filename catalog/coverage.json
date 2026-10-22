@@ -66,7 +66,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 187,
+      "implemented": 188,
       "byTools": 176,
       "partial": 38,
       "automatedTest": 176,
@@ -84,7 +84,7 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 99,
+      "implemented": 100,
       "byTools": 90,
       "partial": 38,
       "automatedTest": 90,
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 84,
+      "implemented": 85,
       "liveVerified": 74
     },
     {
@@ -1381,7 +1381,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 3,
-      "large": 2,
+      "large": 3,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -3221,6 +3221,13 @@
         "eplan_project_translate",
         "eplan_terminal_renumber"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectManager.CreateProject",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility",

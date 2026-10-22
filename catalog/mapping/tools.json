@@ -5649,6 +5649,11 @@
             "file": "tests/EplanMcp.Large.Tests/ImportPxfTests.cs"
           },
           {
+            "name": "ProjectCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectCreateTests.cs"
+          },
+          {
             "name": "SnapshotCopyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"

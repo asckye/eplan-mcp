@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "6edc9e6f",
-  "sourceHash": "sha256:6b2298a017e67a48ea5dcb659d990fe3aac2ff42afff07d0c19e628f29abd2ab",
+  "scannedSources": "15633775",
+  "sourceHash": "sha256:d83e90fc301bdde3daed45b0e020147cfdf1b5c61912a1d8ce376837dd58d83d",
   "operations": [
     {
       "name": "approval.ask",
@@ -297,6 +297,14 @@
       "class": "ProjectCompatibilityOperation"
     },
     {
+      "name": "project.create.execute",
+      "class": "ProjectCreateExecuteOperation"
+    },
+    {
+      "name": "project.create.plan",
+      "class": "ProjectCreatePlanOperation"
+    },
+    {
       "name": "project.get",
       "class": "ProjectGetOperation"
     },
@@ -502,6 +510,17 @@
           "export.parts.run",
           "export.pxf.run",
           "export.untranslated.run"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -1475,6 +1494,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "OpenReadOnly",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -2006,6 +2036,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -2971,6 +3002,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectReader.cs",
@@ -3620,6 +3662,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectReader.cs",
@@ -4152,6 +4205,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectFiles",
         "member": "Compatibility",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
@@ -4273,6 +4337,19 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ProjectManager.CreateProject(System.String,System.String)": [
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       }
     ],
@@ -4616,6 +4693,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -10977,6 +11065,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.Properties": [
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectReader.cs",
@@ -11208,6 +11307,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID": [
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
       {
         "adapter": "EplanSnapshotReader.Source",
         "member": ".ctor",
@@ -11460,6 +11570,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -12210,6 +12331,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "OpenReadOnly",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -12359,6 +12491,17 @@
           "export.parts.run",
           "export.pxf.run",
           "export.untranslated.run"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -12663,6 +12806,17 @@
           "export.parts.run",
           "export.pxf.run",
           "export.untranslated.run"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -13114,6 +13268,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -14327,6 +14482,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -16473,6 +16639,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectLanguages",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectLanguages.cs",
@@ -16806,6 +16983,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -16852,6 +17030,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -17024,6 +17213,17 @@
     ],
     "T:Eplan.EplApi.DataModel.ProjectPropertyList": [
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -17186,6 +17386,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
