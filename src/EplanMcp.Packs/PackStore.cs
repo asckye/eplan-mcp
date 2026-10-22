@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace EplanMcp.Packs;
@@ -6,11 +7,20 @@ namespace EplanMcp.Packs;
 /// The installed packs, <c>&lt;data root&gt;\packs\</c>: each version in its own folder <c>&lt;id&gt;\&lt;version&gt;\</c>, its
 /// files marked read-only. An installed version never changes: installing it again with the same <c>pack.json</c> does
 /// nothing, with another <c>pack.json</c> is refused; a newer version goes into its own folder and changes no binding.
-/// <c>bindings.json</c> pins each target to exact versions. One process changes the store at a time.
+/// <c>bindings.json</c> pins each target to exact versions. Whatever changes the store (moving a checked version into
+/// place, writing the bindings) holds the exclusive lock file <c>.store.lock</c>; checking and extracting a pack happen
+/// before, in a staging folder of its own, so a long extraction does not keep others waiting.
 /// </summary>
 public sealed class PackStore(string root)
 {
+    public const string LockFileName = ".store.lock";
+
+    private const string Busy = "is being changed by another EplanMcp (an install or a binding); try again when it is done";
+
     public string Root { get; } = root;
+
+    /// <summary>How long a change waits for another one to release the store's lock before it gives up.</summary>
+    public TimeSpan LockWait { get; init; } = TimeSpan.FromSeconds(30);
 
     public string FolderOf(string id, string version) => Path.Combine(Root, id, version);
 
@@ -27,6 +37,12 @@ public sealed class PackStore(string root)
             if (!check.Ok || check.Manifest is not { } manifest)
             {
                 return new PackInstallResult(PackInstallOutcome.Refused, check.Manifest, check.Problems);
+            }
+
+            using FileStream? held = await LockAsync(cancellationToken).ConfigureAwait(false);
+            if (held is null)
+            {
+                return new PackInstallResult(PackInstallOutcome.Refused, manifest, [new PackProblem("pack store", Busy)]);
             }
 
             string target = FolderOf(manifest.Id, manifest.Version);
@@ -131,6 +147,7 @@ public sealed class PackStore(string root)
         }
 
         var pin = new PackReference { Id = id, Version = version, ManifestSha256 = ManifestSha256(folder) };
+        using FileStream held = await LockAsync(cancellationToken).ConfigureAwait(false) ?? throw new PackFormatException("The pack store " + Busy + ".");
         PackBindings bindings = await ReadBindingsAsync(cancellationToken).ConfigureAwait(false);
         PackBinding binding = bindings.Bindings.FirstOrDefault(b => b.Target == target) ?? new PackBinding { Target = target };
         binding = binding with { Packs = [.. binding.Packs.Where(p => p.Id != id).Append(pin).OrderBy(p => p.Id, StringComparer.Ordinal)] };
@@ -154,6 +171,28 @@ public sealed class PackStore(string root)
                 .Select(p => new PackProblem($"{p.Id} {p.Version}", "is pinned but no longer installed as it was")),
         ];
         return (packs, problems);
+    }
+
+    /// <summary>The store's lock, or null when another holder keeps it longer than <see cref="LockWait"/>.</summary>
+    private async Task<FileStream?> LockAsync(CancellationToken cancellationToken)
+    {
+        Directory.CreateDirectory(Root);
+        var waited = Stopwatch.StartNew();
+        while (true)
+        {
+            try
+            {
+                return new FileStream(Path.Combine(Root, LockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException) when (waited.Elapsed < LockWait)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(50), cancellationToken).ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+        }
     }
 
     private async Task<PackBindings> ReadBindingsAsync(CancellationToken cancellationToken)
