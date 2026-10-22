@@ -186,6 +186,13 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A36. 快照提取：耗时、内存、确定性与修改标记（spike S31，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S31](../../spikes/S31-snapshot/README.md)。
+- 🔴 `UniversalPropertyList.ExistingIds`/`ExistingValues` 和属性访问器返回的 `AnyPropertyId`、`PropertyValue` 都是 `IDisposable`，批量读取时必须逐个释放：不释放时读两遍示例项目全部属性（共约 1,000 万个值），EPLAN 记下"存储空间不足"后退出。释放后工作集在调用结束时回落。— S31。
+- 读示例项目每个页、功能、连接的全部已有属性：514 万个值，约 8–10 分钟，150 MB 文本，最慢的一页约 50 秒；只读页属性加功能全名和连接两端：约 5 秒。`UniversalPropertyList` 的构造函数不公开，用各对象的 `Properties`（派生自它）。`Connection` 不是 `Placement`，不在 `Page.AllPlacements` 中，用 `Connection.Page` 归页。— S31。
+- 同一次打开中两次提取逐字节相同；关闭再打开后，值为运行时字符串标识的属性（如 2000：`53/4/21/0` → `89/4/21/0`）随库号改变。只读提取不改写项目 `.edb` 中的文件（不含 `.lck`）。— S31。
+- 改一页的描述并提交后，`PROJ_LASTMODIFICATIONDATE`（Unix 秒数）/`TIME` 和这一页的 `PAGE_LASTAUTOMODIFICATIONDATE`/`TIME` 改变，其他页不变，`PAGE_LASTMANUMODIFICATIONDATE` 不变；这一页的 `PROPUSER_LAST_USERCODE`（3010）同时被改写。3010–3013 是最后修改人的个人信息。— S31。
+
 ### A35. 工程包涉及的文件（2026-10-21，只读查看开发机上 EPLAN 2026.0.3 的数据目录和 scratch 中的 spike 文件，不启动 EPLAN）
 M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以这里为准。
 - **扩展名的来源**：API 文档写明的有 `.zw1`（`backup /TYPE:PROJECT` 的归档）、`.fn1`（图框，`MDTYPE:STANDARDSHEET`）、`.fc2`（轮廓定义）、`.epj`（PXF 项目）、`.emp`（示例 `ModelView.emp` 放进宏目录）、`.slk`（符号库）；`.ema` 由 S9/S10 实际插入验证；`.elk`/`.ell`/`.elr` 见 A3、A28；`.zw9`（基本项目）见 A31。`.ems`（符号宏）和表格 `.f01`–`.f99` 只在数据目录中观察到，API 文档没有写，**未经 EPLAN 验证**。

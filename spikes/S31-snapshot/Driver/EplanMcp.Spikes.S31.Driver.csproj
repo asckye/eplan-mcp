@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Spike S31 driver: talks to the running EPLAN through Remote Client (api-notes B4) to register the spike add-in, open
+    a scratch copy, run the probes and clean up. The Remote Client and gRPC assemblies are resolved from the EPLAN
+    installation at run time, never copied; System.Memory is the one dependency the installation lacks (B4).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.RemoteClientu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.RemoteClientu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Remotingu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Remotingu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Grpc.Core.Api">
+      <HintPath>$(EplanBinPath)\Grpc.Core.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+</Project>
