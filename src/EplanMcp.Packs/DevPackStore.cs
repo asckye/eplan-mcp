@@ -185,6 +185,28 @@ public sealed class DevPackStore(string root)
     }
 
     /// <summary>
+    /// Writes knowledge document <paramref name="document"/> into the existing pack <paramref name="id"/>, replacing one of
+    /// the same kind and name, and lists it in the manifest: a candidate in the rules slot and a mapping in the mappings
+    /// slot, both as candidates, whatever they were. Returns the change (<see cref="DevPackChange.Created"/>: the document
+    /// is new). Throws <see cref="DevPackException"/>.
+    /// </summary>
+    public async Task<DevPackChange> PutAsync(string id, KnowledgeDocument document, string createdBy, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        string path = KnowledgeDocument.PathOf(document.Kind, document.Metadata.Name);
+        bool created = false;
+        PackResource? written = null;
+        (PackManifest manifest, string digest, _) = await ChangeAsync(id, id, createdBy, now, async (current, staging) =>
+        {
+            Dictionary<string, PackResource> resources = current.Resources.ToDictionary(r => r.Path, PackPath.Comparer);
+            created = !resources.ContainsKey(path);
+            written = await WriteDocumentAsync(staging, document, cancellationToken).ConfigureAwait(false);
+            resources[path] = written;
+            return Assemble(current, resources.Values, current.Facts, [], new HashSet<string>([path], PackPath.Comparer));
+        }, cancellationToken).ConfigureAwait(false);
+        return new DevPackChange(manifest, digest, created, created ? [written!] : [], created ? [] : [written!], [], []);
+    }
+
+    /// <summary>
     /// Freezes pack <paramref name="id"/> as <paramref name="version"/> in <paramref name="installed"/> (M6 design
     /// 4.1.5): under the pack's lock, the pack must check clean, its referenced resources must match their hashes below
     /// <paramref name="roots"/> (config.json packSources) and its dependencies must resolve to installed versions; a

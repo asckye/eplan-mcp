@@ -128,6 +128,46 @@ public sealed class DevPackStoreTests : IDisposable
         Assert.False(Directory.Exists(Pack));
     }
 
+    [Fact]
+    public async Task Put_KnowledgeDocument_IsListedAsACandidate_AndReplacedByName()
+    {
+        _in.Write("In/guide.md", "# Guide");
+        await ImportAsync(new ScanInput(_in.PathOf("In")));
+        KnowledgeDocument candidate = Document(KnowledgeKind.Candidate, "motor-overload", "Motors have overload relays.");
+
+        DevPackChange first = await Store.PutAsync("acme.panels", candidate, "eplanmcp test", _now, Cancel);
+        DevPackChange second = await Store.PutAsync("acme.panels", candidate with { Metadata = candidate.Metadata with { Title = "Overload relays" } }, "eplanmcp test", _now, Cancel);
+
+        Assert.True(first.Created);
+        Assert.False(second.Created);
+        PackCheckResult check = await PackVerifier.CheckDirectoryAsync(Pack, Cancel);
+        Assert.Empty(check.Problems);
+        PackSlot slot = Assert.Single(check.Manifest!.Rules);
+        Assert.Equal(("knowledge/candidate/motor-overload.json", KnowledgeStanding.Candidate), (slot.Path, slot.Standing));
+        Assert.Equal("Overload relays", KnowledgeDocument.Read(File.ReadAllBytes(Path.Combine(Pack, "knowledge", "candidate", "motor-overload.json"))).Metadata.Title);
+    }
+
+    [Fact]
+    public async Task Put_IntoAPackEditedByHand_IsRefused()
+    {
+        _in.Write("In/guide.md", "# Guide");
+        await ImportAsync(new ScanInput(_in.PathOf("In")));
+        File.WriteAllText(Path.Combine(Pack, "stray.txt"), "not in pack.json");
+
+        var refused = await Assert.ThrowsAsync<DevPackException>(() => Store.PutAsync("acme.panels", Document(KnowledgeKind.Gap, "terminals", "No terminal rules."), "eplanmcp test", _now, Cancel));
+
+        Assert.Equal(DevPackError.Invalid, refused.Error);
+        Assert.False(Directory.Exists(Path.Combine(Pack, "knowledge")));
+    }
+
+    private static KnowledgeDocument Document(KnowledgeKind kind, string name, string text) => new()
+    {
+        ApiVersion = KnowledgeDocument.CurrentApiVersion,
+        Kind = kind,
+        Metadata = new KnowledgeMetadata { Name = name },
+        Spec = new System.Text.Json.Nodes.JsonObject { ["text"] = text },
+    };
+
     public void Dispose()
     {
         _in.Dispose();
