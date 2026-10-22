@@ -3,9 +3,9 @@
 | 项 | 内容 |
 |---|---|
 | 状态 | Draft |
-| 级别 | L2（不改变工具契约、进程拓扑和安全模型；工具面的分组另见 ADR-0022（Proposed）） |
+| 级别 | L2（不改变工具契约、进程拓扑和安全模型；工具面的分组另见 [ADR-0022](../adr/0022-domain-toolsets.md)（Proposed）） |
 | 关联 Issue | — |
-| 相关 ADR | [0002](../adr/0002-host-bridge-process-model.md)、[0005](../adr/0005-safety-model.md)、[0006](../adr/0006-tool-surface-design.md)、[0009](../adr/0009-supported-eplan-versions.md)、[0010](../adr/0010-write-outcomes.md)、[0012](../adr/0012-export-tier.md)、[0013](../adr/0013-destructive-backup.md)、[0019](../adr/0019-master-data-writes.md)、[0021](../adr/0021-action-run-whitelist.md)、0022（Proposed） |
+| 相关 ADR | [0002](../adr/0002-host-bridge-process-model.md)、[0005](../adr/0005-safety-model.md)、[0006](../adr/0006-tool-surface-design.md)、[0009](../adr/0009-supported-eplan-versions.md)、[0010](../adr/0010-write-outcomes.md)、[0012](../adr/0012-export-tier.md)、[0013](../adr/0013-destructive-backup.md)、[0019](../adr/0019-master-data-writes.md)、[0021](../adr/0021-action-run-whitelist.md)、[0022](../adr/0022-domain-toolsets.md)（Proposed） |
 | 最后更新 | 2026-10-21 |
 
 ## 1. 背景
@@ -27,7 +27,7 @@
   4. 最小包装生成器和代表性样例（第 8 节划定边界）；
   5. 后续阶段的计划和验收标准（第 11 节）。
 - **非目标**：
-  - 把每个 API 包装成一个 MCP 工具（ADR-0006 不变，工具面怎样组织见 ADR-0022）；
+  - 把每个 API 包装成一个 MCP 工具（ADR-0006 不变，工具面怎样组织见 [ADR-0022](../adr/0022-domain-toolsets.md)）；
   - 运行时的任意反射调用（ADR-0021 已否决）；
   - 在仓库中保存官方文档的文字；
   - 2026.0.3 之外的版本数据（开发机只装了这一个版本，ADR-0009 支持的其他版本在有安装时再生成）。
@@ -232,7 +232,7 @@ catalog/
 - 每个阶段开始前写自己的设计文档；"非 `registered` 的状态"包括 `excluded` 和 `env_blocked`，但都要有理由。
 
 ## 12. 工具面怎样承载这些能力
-任务工具仍是主要的工具面（ADR-0006）。能力越多，工具越多，ADR-0022（Proposed，与本设计同时提出）提出按领域分成工具集，按组加载、按需发现，并照顾不支持 `notifications/tools/list_changed` 的客户端。覆盖率不要求每项能力有自己的工具：一项能力可以经任务工具的内部步骤、白名单条目或通用属性读写到达。
+任务工具仍是主要的工具面（ADR-0006）。能力越多，工具越多，[ADR-0022](../adr/0022-domain-toolsets.md)（Proposed）提出按领域分成工具集，按组加载、按需发现，并照顾不支持 `notifications/tools/list_changed` 的客户端。覆盖率不要求每项能力有自己的工具：一项能力可以经任务工具的内部步骤、白名单条目或通用属性读写到达。
 
 ## 13. 安全与数据完整性
 - 本设计不新增运行时能力。生成器只读 EPLAN 目录，从不加载 EPLAN 程序集，也不往 EPLAN 目录写文件。
