@@ -677,6 +677,39 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new PartSyncData(),
+        new SnapshotPage
+        {
+            Type = 4,
+            Oid = 21,
+            Name = "=AP+ST1/3",
+            Hash = "9f86",
+            Modified = "1792643412 36000",
+            Objects =
+            [
+                new SnapshotObject
+                {
+                    Kind = "page",
+                    Type = 4,
+                    Oid = 21,
+                    Name = "=AP+ST1/3",
+                    Hash = "9f86",
+                    PageType = "Circuit",
+                    Values = [new SnapshotValue { Id = 11011, Name = "PAGE_NOMINATIOMN", Texts = [new SnapshotText { Language = "zh_CN", Text = "电源" }] }],
+                },
+                new SnapshotObject
+                {
+                    Kind = "connection",
+                    Type = 30,
+                    Oid = 900,
+                    Name = "17/59641:13>-",
+                    Hash = "e3b0",
+                    Page = "=AP+ST1/3",
+                    Start = new SnapshotEnd { Type = 17, Oid = 59641, Function = "=+-CU1", Pin = "13" },
+                    Values = [new SnapshotValue { Id = 31011, Name = "CONNECTION_DESIGNATION", Index = 1, Value = "433" }],
+                },
+            ],
+        },
+        new SnapshotPage(),
     ];
 
     [Theory]
