@@ -31,6 +31,7 @@
 | [S27](S27-project-create/README.md) | 从基本项目新建项目、还原项目备份、不打开项目判断版本（M6） | **完成** 2026-10-21 | CreateProject + 基本项目 3.5 秒；还原项目 6 秒，🔴目标已存在时覆盖；GetProjectDataCompatibility 不打开项目；.zw1/.zw9 是 7z；ProjectInfo.xml 的属性 10043 是 EPLAN 版本 |
 | [S28](S28-identity-extract/README.md) | 对象标识在项目副本之间是否稳定、整个项目的读取耗时（M6） | **完成** 2026-10-21 | 文件副本、备份还原、PXF 导出导入之后 825 个对象的 ObjectIdentifier 全部相同，DatabaseIdentifier 不同；示例项目完整枚举约 1 秒 |
 | [S29](S29-placeholders/README.md) | 占位符对象与值集：读宏、列出、应用、新建（M6） | **完成** 2026-10-21 | 不插入就能读出宏中的占位符和值集，扫描 695 个宏 21 秒；ApplyRecord、AddRecord + SetValue 可用，随 SafetyPoint 回滚 |
+| [S30](S30-identity-lifecycle/README.md) | 对象编号与项目生命周期：PROJ_GUID、关闭再打开、删除再新建、从基本项目新建（M6） | **完成** 2026-10-21 | PROJ_GUID 是"名称@秒数"，副本和还原沿用；重新打开编号不变、删除后不重用；同一基本项目新建的项目编号相同；旧版本升级受环境所限 |
 | [S25](S25-exports/README.md) | M4c 第一批的导出：PXF、部件清单、设备清单、标签、PLC 地址、缺失词表 | **完成** 2026-10-21 | PXF 可行但很大（840 MB / 598 MB）；部件清单 60–90 秒，CSV 导出之后 EPLAN 发生过一次访问冲突（未复现），只用 XML；标签（文本、xlsx）2 秒内、不需要 Excel；设备清单是预规划清单；PLC 地址总览要给配置项目或站 |
 
 ## 约定

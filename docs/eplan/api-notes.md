@@ -186,6 +186,13 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A34. 对象编号与项目生命周期（spike S30，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S30](../../spikes/S30-identity-lifecycle/README.md)。写入只在 scratch 中。
+- `PROJ_GUID` 是"名称@Unix 秒数"，不是 GUID：文件副本和 `backup`/`restore` 还原的项目沿用原值（示例项目 `ESS_Sample_Project-Kopie@1523807309`），PXF 导入和 `CreateProject` 生成新值（导入或新建的时刻）。它不能区分同一项目的副本。— S30。
+- 同一份项目文件 `Close()` 后再 `OpenProject`，825 个对象的 `ObjectIdentifier` 全部不变，`DatabaseIdentifier` 改变；关闭约 0.15 秒，打开约 0.8 秒。页的编号单调递增：回滚掉的、删除的编号都没有再分配，关闭再打开后接着递增（本次观察）。— S30。
+- 从同一个基本项目新建的两个项目，页的编号相同（都是 1）：`ObjectIdentifier` 只在一个项目内唯一。`IEC_bas003_sample_project.zw9` 新建的项目是 0 页。— S30。
+- 🔴 API 新建的项目：对它再调用 `OpenProject` 抛出 `ProjectOpenException`（S063045）；`ProjectManager` 释放后，用 `CreateProject` 返回的对象 `Close()` 抛出 `ObjectNotCreatedException`（S063080）；调用结束后项目不再打开，之后可以正常打开，经 `OpenProjects` 重新取得的对象能关闭。— S30。
+
 ### A33. 占位符对象与值集（spike S29，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S29](../../spikes/S29-placeholders/README.md)。写入只在 scratch 副本上、在 `SafetyPoint` 中回滚。
 - `WindowMacro.Open(path, project)` 后，对每种表达类型的每个变体 `ChangeCurrentVariant`，`Objects` 中的 `PlaceHolder` 能读出名称、值集（`NumberOfRecords`、`get_NameOfRecord(i)`）、变量（`VariableNames`）和值表（`get_Value(record, variable)`）。C# 中 `NameOfRecord`、`Value` 是带参数的属性，要调用访问器方法。扫描 `$(MD_MACROS)` 下 695 个宏、1,751 个变体用时 21 秒，72 个宏带占位符（38 个带值集，最多 8 个），项目页数不变。— S29。
