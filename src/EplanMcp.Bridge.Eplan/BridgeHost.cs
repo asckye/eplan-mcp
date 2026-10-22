@@ -188,7 +188,7 @@ internal static class BridgeHost
             new ObjectResolveOperation(catalog, new EplanObjectFinder()),
             new ProjectCompatibilityOperation(catalog, projectFiles),
             new ProjectCreatePlanOperation(),
-            new ProjectCreateExecuteOperation(factory),
+            new ProjectCreateExecuteOperation(factory, projectFiles),
             new ProjectRestorePlanOperation(),
             new ProjectRestoreExecuteOperation(factory, projectFiles),
 

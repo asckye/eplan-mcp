@@ -15,7 +15,7 @@ public sealed class NewProjectData
     /// <summary>A created project's <c>PROJ_GUID</c>, <c>&lt;template&gt;@&lt;unix-seconds&gt;</c> (api-notes A34); null for a restored one.</summary>
     public string? ProjectGuid { get; set; }
 
-    /// <summary>A restored project's database version read without opening it (A31: <c>18.0</c>); null for a created one.</summary>
+    /// <summary>The database version verified compatible inside creation or restore, without opening it (A31: <c>18.0</c>).</summary>
     public string? DatabaseVersion { get; set; }
 
     /// <summary>How long EPLAN took, in whole seconds (S27: 3.5 to create, 6 to restore the sample project).</summary>

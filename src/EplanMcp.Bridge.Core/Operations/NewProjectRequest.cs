@@ -47,9 +47,9 @@ internal sealed class NewProjectRequest
         }
 
         string destination = (args.Destination ?? string.Empty).TrimEnd('\\', '/');
-        if (!ProjectPaths.IsPlainFullPath(destination) || destination.Length <= 3 || !Directory.Exists(Path.GetDirectoryName(destination)))
+        if (!ProjectPaths.IsPlainFullPath(destination) || destination.Length <= 3)
         {
-            violations.Add("'destination' must be the full local path of a new folder in a folder that exists: the one the Host chose in its scratch folder.");
+            violations.Add("'destination' must be the full local path of a new folder chosen by the Host; missing parent folders are made only during execution.");
         }
 
         if (violations.Count > 0)
@@ -73,7 +73,7 @@ internal sealed class NewProjectRequest
 
     /// <summary>The one change, for the dry run and the audit: a new project from the file.</summary>
     public PlannedChange Change(string verb) =>
-        new() { Action = "create", Kind = "project", Name = Name, NewValue = verb + " " + Source.Describe() };
+        new() { Action = "create", Kind = "project", Name = Name, NewValue = verb + " " + Source.Describe() + "; file " + Source.File + "; sha256 " + Source.Sha256 + "; destination " + Destination + "; new project, closed afterwards; compatibility checked during execution" };
 
     /// <summary>The plan's state: the file's size, last write time and SHA-256, and where the project goes.</summary>
     public string StateFingerprint() => Fingerprint.Of([Source.FingerprintLine, "target\t" + Target, "folder\t" + (Existed ? "empty" : "absent")]);
