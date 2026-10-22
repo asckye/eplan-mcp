@@ -1,6 +1,7 @@
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Eplan.Adapters.Generated;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
@@ -25,18 +26,24 @@ internal sealed class EplanMasterDataBackup : IMasterDataBackup
     public void BackupParts(string database, string folder, string archiveName)
     {
         MainThread.Assert();
+        // The parameters as the generated class has them from the action catalog (catalog/wrappers.yaml), in the same
+        // order as before; TYPE and the action's name are written here, so the coverage scan sees A:backup/MASTERDATA.
+        var parameters = new BackupMasterDataParameters
+        {
+            MDTYPE = "ARTICLES",
+            SOURCEPATH = Path.GetDirectoryName(database) ?? string.Empty,
+            FILENAME = Path.GetFileName(database),
+            DESTINATIONPATH = folder,
+            ARCHIVENAME = archiveName,
+        };
         using var context = new ActionCallingContext();
-        context.AddParameter("TYPE", "MASTERDATA");
-        context.AddParameter("MDTYPE", "ARTICLES");
-        context.AddParameter("SOURCEPATH", Path.GetDirectoryName(database) ?? string.Empty);
-        context.AddParameter("FILENAME", Path.GetFileName(database));
-        context.AddParameter("DESTINATIONPATH", folder);
-        context.AddParameter("ARCHIVENAME", archiveName);
+        context.AddParameter("TYPE", BackupMasterDataParameters.Type);
+        parameters.AddTo(context);
         bool done;
         using (new QuietModeStep(QuietModes.ShowNoDialogs))
         {
-#pragma warning disable RS0030 // The backup of ADR-0019 before a master-data write; it writes only into the Host's new folder.
-            var action = new ActionManager().FindAction("backup") ?? throw new InvalidOperationException("EPLAN has no 'backup' action.");
+#pragma warning disable RS0030 // The backup of ADR-0019 and of eplan_part_export's backup format; it writes only into the Host's new folder.
+            var action = new ActionManager().FindAction(BackupMasterDataParameters.Action) ?? throw new InvalidOperationException("EPLAN has no 'backup' action.");
 #pragma warning restore RS0030
             done = action.Execute(context);
         }

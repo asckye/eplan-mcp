@@ -14,6 +14,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class MasterDataExportOperationTests : IDisposable
 {
     private readonly FakeMasterDataExporter _exporter = new();
+    private readonly FakeMasterDataBackup _backup = new();
     private readonly ListLog _log = new();
     private readonly string _folder = Directory.CreateTempSubdirectory("eplanmcp-database-export-").FullName + Path.DirectorySeparatorChar;
 
@@ -111,7 +112,7 @@ public sealed class MasterDataExportOperationTests : IDisposable
 
         string violations = error.Metadata!["violations"];
         Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
-        Assert.Contains("'format' must be xml or edz.", violations, StringComparison.Ordinal);
+        Assert.Contains("'format' must be xml, edz or backup.", violations, StringComparison.Ordinal);
         Assert.Contains("parts[1] must be a part number", violations, StringComparison.Ordinal);
     }
 
@@ -229,7 +230,66 @@ public sealed class MasterDataExportOperationTests : IDisposable
         Assert.Equal(ErrorReason.Cancelled, error.Reason);
     }
 
-    private ExportRunData Run(ExportArgs args, MasterDataExportKind kind = MasterDataExportKind.Parts) => (ExportRunData)new MasterDataExportRunOperation(kind, _exporter).Execute(args)!;
+    [Fact]
+    public void Backup_IsEplansArchiveOfTheWholeDatabase_UnderTheFilesName_WithTheDatabasesCounts()
+    {
+        var plan = (ExportPlanData)new MasterDataExportPlanOperation(MasterDataExportKind.Parts, _exporter).Execute(new ExportArgs { Format = "backup" })!;
+
+        ExportRunData data = Run(new ExportArgs { Format = "backup", Directory = _folder, FileName = "LargePartsBackup.zw6" });
+
+        Assert.Equal(".zw6", plan.Extension);
+        Assert.Equal([(@"$(MD_PARTS)\EPLAN_parts.alk", _folder.TrimEnd(Path.DirectorySeparatorChar), "LargePartsBackup")], _backup.Backups);
+        Assert.Equal(["LargePartsBackup.zw6"], Files());
+        Assert.Empty(_exporter.Exports);
+        Assert.Equal((@"$(MD_PARTS)\EPLAN_parts.alk", (int?)3, (int?)4), (data.Database, data.PartCount, data.VariantCount));
+        Assert.Contains("counted in the database", data.Warning, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(new[] { "SIE.3RH2122-1HB40" }, "p.zw6", "'parts' cannot be used with format backup")]
+    [InlineData(null, "部件库.zw6", "only ASCII letters, digits, - and _")]
+    [InlineData(null, "two words.zw6", "only ASCII letters, digits, - and _")]
+    public void Backup_WithPartsOrAFileNameEplanWasNotTriedWith_IsInvalid_AndBacksNothingUp(string[]? parts, string fileName, string violation)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Format = "backup", Parts = parts is null ? null : [.. parts], Directory = _folder, FileName = fileName })).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains(violation, error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Empty(_backup.Backups);
+    }
+
+    [Fact]
+    public void Backup_OfADatabaseOnSqlServer_IsRefusedInThePlan()
+    {
+        _exporter.PartsDatabase = "SRV01|EPLAN_Parts|0";
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => new MasterDataExportPlanOperation(MasterDataExportKind.Parts, _exporter).Execute(new ExportArgs { Format = "backup" })).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("Use format xml", error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Backup_ThatLeavesNoSingleArchive_FailsAsEplanOperationFailed(bool extraFile)
+    {
+        _backup.Write = (folder, name) =>
+        {
+            File.WriteAllBytes(Path.Combine(folder, name + ".zw6"), extraFile ? FakeMasterDataBackup.SevenZip : "not 7z"u8.ToArray());
+            if (extraFile)
+            {
+                File.WriteAllText(Path.Combine(folder, "x.txt"), "x");
+            }
+        };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(new ExportArgs { Format = "backup", Directory = _folder, FileName = "p.zw6" })).Error;
+
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Contains(extraFile ? "2 entries" : "not an archive", error.Metadata!["problem"], StringComparison.Ordinal);
+    }
+
+    private ExportRunData Run(ExportArgs args, MasterDataExportKind kind = MasterDataExportKind.Parts) => (ExportRunData)new MasterDataExportRunOperation(kind, _exporter, _backup).Execute(args)!;
 
     private string[] Files() => [.. ExportFolderCheck.Files(_folder).Order(StringComparer.Ordinal)];
 }

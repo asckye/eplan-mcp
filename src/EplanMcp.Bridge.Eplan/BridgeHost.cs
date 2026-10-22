@@ -153,7 +153,7 @@ internal static class BridgeHost
             .. new[] { MasterDataExportKind.Parts, MasterDataExportKind.Translations }.SelectMany(kind => new IOperation[]
             {
                 new MasterDataExportPlanOperation(kind, masterData),
-                new MasterDataExportRunOperation(kind, masterData),
+                new MasterDataExportRunOperation(kind, masterData, new EplanMasterDataBackup()),
             }),
             new PageDeletePlanOperation(catalog, remover),
             new PageDeleteExecuteOperation(catalog, pages, remover, backup, transactions),

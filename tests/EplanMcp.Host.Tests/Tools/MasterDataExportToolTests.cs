@@ -90,7 +90,32 @@ public sealed class MasterDataExportToolTests : IDisposable
 
         string violations = error.GetProperty("metadata").GetProperty("violations").GetString()!;
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
-        Assert.All(["'format' must be xml or edz.", "'parts' must hold 1 to 500", "'file_name'"], v => Assert.Contains(v, violations, StringComparison.Ordinal));
+        Assert.All(["'format' must be xml, edz or backup.", "'parts' must hold 1 to 500", "'file_name'"], v => Assert.Contains(v, violations, StringComparison.Ordinal));
+        Assert.Empty(_bridge.Calls);
+        Assert.False(Directory.Exists(_locations.Exports));
+    }
+
+    [Fact]
+    public async Task Parts_Backup_IsOneZw6ArchiveUnderTheNameAsked_WithItsOwnSummary()
+    {
+        CallToolResult result = await Parts("backup", fileName: "LargePartsBackup");
+
+        JsonElement data = Structured(result);
+        var run = (ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.PartExportRun).Args!;
+        Assert.Equal(("LargePartsBackup.zw6", "backup", (List<string>?)null), (run.FileName, run.Format, run.Parts));
+        Assert.Equal("LargePartsBackup.zw6", Files(data)[0]);
+        Assert.Equal("Backed up the parts database to a 5 MB EPLAN archive (.zw6) in a new folder; see 'directory'.", Text(result, 0));
+    }
+
+    [Theory]
+    [InlineData(new[] { "SIE.3RH2122-1HB40" }, null, "'parts' cannot be used with format backup")]
+    [InlineData(null, "部件库", "only ASCII letters, digits, - and _")]
+    [InlineData(null, "two words.zw6", "only ASCII letters, digits, - and _")]
+    public async Task Parts_BackupWithPartsOrANameEplanWasNotTriedWith_IsInvalid_BeforeAnythingIsCreated(string[]? parts, string? fileName, string violation)
+    {
+        JsonElement error = Error(await Parts("backup", parts, fileName));
+
+        Assert.Contains(violation, error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
         Assert.Empty(_bridge.Calls);
         Assert.False(Directory.Exists(_locations.Exports));
     }

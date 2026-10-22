@@ -4389,7 +4389,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_part_export.md",
-        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，待实现",
+        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，已实现，待实机验证",
         "apiNotes": [
           "A30"
         ],

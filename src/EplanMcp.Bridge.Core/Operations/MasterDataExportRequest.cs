@@ -35,13 +35,18 @@ internal sealed class MasterDataExportRequest
         {
             (MasterDataExportKind.Parts, "" or "xml") => (MasterDataFormat.Xml, ".xml"),
             (MasterDataExportKind.Parts, "edz") => (MasterDataFormat.Edz, ".edz"),
+            (MasterDataExportKind.Parts, "backup") => (MasterDataFormat.Backup, MasterDataBackupOperation.PartsExtension),
             (MasterDataExportKind.Translations, "" or "tab") => (MasterDataFormat.Tab, ".txt"),
             (MasterDataExportKind.Translations, "xml") => (MasterDataFormat.Xml, ".xml"),
             _ => null,
         };
         if (file is null)
         {
-            violations.Add(kind == MasterDataExportKind.Parts ? "'format' must be xml or edz." : "'format' must be tab or xml.");
+            violations.Add(kind == MasterDataExportKind.Parts ? "'format' must be xml, edz or backup." : "'format' must be tab or xml.");
+        }
+        else if (file.Value.Format == MasterDataFormat.Backup)
+        {
+            CheckBackup(args, violations);
         }
 
         List<string>? parts = kind == MasterDataExportKind.Parts ? CheckParts(args.Parts, violations) : null;
@@ -65,6 +70,39 @@ internal sealed class MasterDataExportRequest
                 ["missing"] = string.Join("\n", found.Missing.Take(ProjectResolver.MaxCandidates)),
                 ["missingCount"] = found.Missing.Count.ToString(CultureInfo.InvariantCulture),
             });
+
+    /// <summary>
+    /// A backup archives the whole database, and its file name is EPLAN's <c>ARCHIVENAME</c>: ASCII letters, digits,
+    /// <c>-</c> and <c>_</c> only, as S24 and the backup of ADR-0019 used it (docs/tools/eplan_part_export.md, section 2).
+    /// </summary>
+    private static void CheckBackup(ExportArgs args, List<string> violations)
+    {
+        if (args.Parts is not null)
+        {
+            violations.Add("'parts' cannot be used with format backup: the backup archives the whole database.");
+        }
+
+        if (args.FileName is { } fileName && !MasterDataBackupOperation.IsPlainName(ArchiveName(fileName)))
+        {
+            violations.Add("'fileName' must use only ASCII letters, digits, - and _ (at most 64) for format backup.");
+        }
+    }
+
+    /// <summary>
+    /// INVALID_ARGUMENT for a backup of a database on SQL Server: the backup of ADR-0019 is verified for file databases
+    /// only (S24), so it is not tried; xml exports any database.
+    /// </summary>
+    public static void CheckBackupOf(MasterDataExportRequest request, string database)
+    {
+        if (request.Format == MasterDataFormat.Backup && MasterDatabases.IsServer(database))
+        {
+            throw WriteArguments.Invalid(["format backup archives only a file database, and EPLAN's parts database is on SQL Server. Use format xml."]);
+        }
+    }
+
+    /// <summary>The archive name EPLAN gets for a backup's file name: the name without <c>.zw6</c>.</summary>
+    public static string ArchiveName(string fileName) =>
+        fileName.EndsWith(MasterDataBackupOperation.PartsExtension, StringComparison.OrdinalIgnoreCase) ? fileName.Substring(0, fileName.Length - MasterDataBackupOperation.PartsExtension.Length) : fileName;
 
     /// <summary>1 to <see cref="MaxParts"/> part numbers, none blank; null stays null (every part).</summary>
     private static List<string>? CheckParts(List<string>? parts, List<string> violations)

@@ -69,6 +69,38 @@ public sealed class PartExportTests(LiveEplan eplan)
     }
 
     [Fact]
+    public async Task Backup_IsOne7zArchiveOfTheDatabase_InANewFolder_AndTheDatabaseIsUnchanged()
+    {
+        byte[] head = [];
+        (JsonElement backup, long milliseconds) = await ExportAsync(
+            new() { ["format"] = "backup", ["file_name"] = "LargePartsBackup" },
+            "LargePartsBackup.zw6",
+            file => head = File.ReadAllBytes(file).Take(6).ToArray());
+        (JsonElement xml, _) = await ExportAsync(new() { ["file_name"] = "LargePartsDb" }, "LargePartsDb.xml");
+
+        // S24 (api-notes A30): EPLAN's master-data backups are 7z archives, 991 KB for the sample database.
+        Assert.Equal(new byte[] { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }, head);
+        Assert.InRange(backup.GetProperty("totalBytes").GetInt64(), 100L * 1024, 500L * 1024 * 1024);
+        Assert.Equal(xml.GetProperty("variantCount").GetInt32(), backup.GetProperty("variantCount").GetInt32());
+        Assert.Contains("counted in the database", backup.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        TestContext.Current.TestOutputHelper?.WriteLine(
+            $"Backup archive: {milliseconds} ms, {backup.GetProperty("totalBytes")} bytes, partCount {backup.GetProperty("partCount")}, variantCount {backup.GetProperty("variantCount")} (S24: 0.14 s, 991 KB).");
+    }
+
+    [Fact]
+    public async Task Backup_WithPartsOrANameEplanWasNotTriedWith_IsInvalid_AndLeavesNoFolder()
+    {
+        string exports = Path.TrimEndingDirectorySeparator(HostDataLocations.FromEnvironment().Exports);
+        string[] before = ExportFolders(exports);
+
+        JsonElement parts = await eplan.ErrorAsync(Tool, new() { ["format"] = "backup", ["parts"] = new[] { Relay } });
+        JsonElement name = await eplan.ErrorAsync(Tool, new() { ["format"] = "backup", ["file_name"] = "Large parts" });
+
+        Assert.Equal((ErrorReason.InvalidArgument, ErrorReason.InvalidArgument), (parts.GetProperty("reason").GetString(), name.GetProperty("reason").GetString()));
+        Assert.Equal(before, ExportFolders(exports));
+    }
+
+    [Fact]
     public async Task Edz_EveryPart_IsOneFile_BeforeAReleaseOnly()
     {
         Assert.SkipUnless(Environment.GetEnvironmentVariable(EdzVariable) == "1", $"The EDZ export takes about 44 s and 128 MB; set {EdzVariable}=1 to run it before a release.");
