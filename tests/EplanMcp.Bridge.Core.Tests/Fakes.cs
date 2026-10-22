@@ -602,10 +602,13 @@ internal sealed class FakeReportUpdater : IReportUpdater
 /// <summary>
 /// Copies the way S12 found CopyProject(Snapshot) does (api-notes A18): the copy appears at the given path, with
 /// <see cref="Pages"/> pages (default: as many as <c>pages</c> has); <see cref="Failure"/> and <see cref="Delay"/> stand
-/// for a failed or slow copy. Records every copy and count.
+/// for a failed or slow copy. A slow copy takes no real time: <see cref="StartClock"/> is the stopwatch it is timed with,
+/// which moves by <see cref="Delay"/> for each copy. Records every copy and count.
 /// </summary>
 internal sealed class FakeProjectBackup(FakePageReader? pages = null) : IProjectBackup
 {
+    private TimeSpan _taken;
+
     public List<(string Project, string Copy)> Copies { get; } = [];
 
     public List<string> Counted { get; } = [];
@@ -616,10 +619,17 @@ internal sealed class FakeProjectBackup(FakePageReader? pages = null) : IProject
 
     public TimeSpan Delay { get; set; }
 
+    /// <summary>A stopwatch that has just started and reads how long the copies since then have taken.</summary>
+    public Func<TimeSpan> StartClock()
+    {
+        TimeSpan from = _taken;
+        return () => _taken - from;
+    }
+
     public void Copy(string projectPath, string copyPath)
     {
         Copies.Add((projectPath, copyPath));
-        Thread.Sleep(Delay);
+        _taken += Delay;
         if (Failure is not null)
         {
             throw Failure;

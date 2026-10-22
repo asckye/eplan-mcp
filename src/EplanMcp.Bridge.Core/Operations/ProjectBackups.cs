@@ -18,10 +18,23 @@ public static class ProjectBackups
         "Nothing was changed because the project could not be backed up first. Ask the engineer to check the free disk space, or to run 'eplanmcp doctor'.";
 
     /// <summary>Copies <paramref name="project"/> to <paramref name="target"/> and checks the copy; returns the copy's path.</summary>
-    public static string Make(IProjectBackup backup, IPageReader pages, OpenProject project, BackupTarget? target)
+    public static string Make(IProjectBackup backup, IPageReader pages, OpenProject project, BackupTarget? target) =>
+        Make(backup, pages, project, target, StartStopwatch);
+
+    /// <summary>
+    /// A stopwatch that has just started, as what it reads: the backup is timed with it. Tests give one that moves only
+    /// when the fake EPLAN takes time, so that a slow machine cannot make a backup slower than it was.
+    /// </summary>
+    internal static Func<TimeSpan> StartStopwatch()
+    {
+        var watch = Stopwatch.StartNew();
+        return () => watch.Elapsed;
+    }
+
+    internal static string Make(IProjectBackup backup, IPageReader pages, OpenProject project, BackupTarget? target, Func<Func<TimeSpan>> startClock)
     {
         string copy = Checked(target);
-        var clock = Stopwatch.StartNew();
+        Func<TimeSpan> elapsed = startClock();
         int expected = pages.PageNames(project.Path).Count;
         int copied;
         try
@@ -43,9 +56,10 @@ public static class ProjectBackups
             throw Failed($"The copy has {Number(copied)} pages, the project {Number(expected)}.");
         }
 
-        if (clock.Elapsed.TotalSeconds > target!.MaxSeconds)
+        TimeSpan took = elapsed();
+        if (took.TotalSeconds > target!.MaxSeconds)
         {
-            throw Failed($"The backup took {Number((int)clock.Elapsed.TotalSeconds)} s, more than the {Number(target.MaxSeconds)} s it may take.");
+            throw Failed($"The backup took {Number((int)took.TotalSeconds)} s, more than the {Number(target.MaxSeconds)} s it may take.");
         }
 
         // A safe point: the copy is made and EPLAN has returned; a cancel now still leaves the project unchanged.

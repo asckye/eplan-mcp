@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using EplanMcp.Contracts;
 
@@ -12,7 +11,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// one 991 KB <c>.zw6</c> for the sample parts database), within <see cref="MasterDataBackupArgs.MaxSeconds"/>;
 /// otherwise BACKUP_FAILED. Every error is <c>not_started</c>: the database is not changed by a backup (S24).
 /// </summary>
-public sealed class MasterDataBackupOperation(IMasterDataBackup backup) : Operation<MasterDataBackupArgs, MasterDataBackupData>
+public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, MasterDataBackupData>
 {
     /// <summary>What the model reads for BACKUP_FAILED; it names no local path (SEC-12).</summary>
     public const string FailedMessage =
@@ -24,6 +23,21 @@ public sealed class MasterDataBackupOperation(IMasterDataBackup backup) : Operat
     // The first bytes of every 7z archive; S24 found EPLAN's master-data backups are 7z archives.
     private static readonly byte[] _sevenZip = [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C];
 
+    private readonly IMasterDataBackup _backup;
+    private readonly Func<Func<TimeSpan>> _startClock;
+
+    public MasterDataBackupOperation(IMasterDataBackup backup)
+        : this(backup, ProjectBackups.StartStopwatch)
+    {
+    }
+
+    /// <summary>For tests: the stopwatch the time limit is measured with, which moves only when the fake backup takes time.</summary>
+    internal MasterDataBackupOperation(IMasterDataBackup backup, Func<Func<TimeSpan>> startClock)
+    {
+        _backup = backup;
+        _startClock = startClock;
+    }
+
     public override string Name => OperationNames.MasterDataBackup;
 
     protected override MasterDataBackupData Execute(MasterDataBackupArgs args)
@@ -34,7 +48,7 @@ public sealed class MasterDataBackupOperation(IMasterDataBackup backup) : Operat
         }
 
         string folder = Checked(args);
-        string configured = backup.PartsDatabase() ?? string.Empty;
+        string configured = _backup.PartsDatabase() ?? string.Empty;
         if (MasterDatabases.IsServer(configured))
         {
             throw MasterDatabases.Denied();
@@ -47,10 +61,10 @@ public sealed class MasterDataBackupOperation(IMasterDataBackup backup) : Operat
                 "EPLAN is configured with another parts database than the one the change was planned and approved for, so nothing was backed up or changed. Call the tool again for a new plan."));
         }
 
-        var clock = Stopwatch.StartNew();
+        Func<TimeSpan> elapsed = _startClock();
         try
         {
-            backup.BackupParts(configured, folder, args.ArchiveName);
+            _backup.BackupParts(configured, folder, args.ArchiveName);
         }
         catch (BridgeErrorException known)
         {
@@ -62,9 +76,10 @@ public sealed class MasterDataBackupOperation(IMasterDataBackup backup) : Operat
         }
 
         string archive = Archive(folder);
-        if (clock.Elapsed.TotalSeconds > args.MaxSeconds)
+        TimeSpan took = elapsed();
+        if (took.TotalSeconds > args.MaxSeconds)
         {
-            throw Failed($"The backup took {Number((long)clock.Elapsed.TotalSeconds)} s, more than the {Number(args.MaxSeconds)} s it may take.");
+            throw Failed($"The backup took {Number((long)took.TotalSeconds)} s, more than the {Number(args.MaxSeconds)} s it may take.");
         }
 
         return new MasterDataBackupData { Database = configured, Archive = archive, Bytes = new FileInfo(archive).Length };
