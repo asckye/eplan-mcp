@@ -32,3 +32,4 @@
 | [0023](0023-plan-approval-and-backup.md) | 组合计划一次审批（带差异预览）、开始前备份一次、每步一个事务，计划级结果增加 `partially_committed` | Accepted | 单向门（计划工具发布后） |
 | [0024](0024-pack-trust-and-container.md) | 工程包按不可信输入处理：只含数据，安装前校验容器，安装后不可变，放在数据根目录；企业资源只按配置文件中的根目录和哈希引用 | Accepted | 单向门（第一批 `.eplanpack` 交换出去后） |
 | [0025](0025-code-plugin-worker.md) | 算法插件在单独的工作进程中运行，纯数据进、计划草稿出，按 Code 级默认关闭，列入允许列表后每次运行不再单独审批；`AssemblyLoadContext` 只用于加载依赖 | Accepted | 单向门（插件契约发布后） |
+| [0026](0026-eplan-events-and-push.md) | Bridge 订阅经验证的 EPLAN 事件，在单独的订阅连接上把带序号的失效通知推给 Host；通知只用于缓存失效，从不作为写入的依据 | Accepted | 双向门（协议有能力声明） |
