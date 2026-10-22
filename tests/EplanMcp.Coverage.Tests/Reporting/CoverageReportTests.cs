@@ -1,3 +1,4 @@
+using EplanMcp.Coverage.Mapping;
 using EplanMcp.Coverage.Reporting;
 
 namespace EplanMcp.Coverage.Tests.Reporting;
@@ -41,6 +42,35 @@ public sealed class CoverageReportTests : IDisposable
         Assert.Equal(("implemented", 0), (units[$"O:{Page}.Remove"].Status, units[$"O:{Page}.Remove"].Tools.Count)); // infrastructure only
         Assert.Equal("live_verified", units["D:Page"].Status);
         Assert.Equal(["A:export/PDF"], units.Keys.Where(k => k.StartsWith("A:", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public void Build_AUseOnlyInGeneratedCodeNoOperationReaches_CountsForNothing()
+    {
+        const string Run = "M:Eplan.EplApi.Test.Planning.Plan.Run";
+        string unusedOverload = $"M:{Page}.Create(System.String,System.Int32)";
+        ReportFixture.AddUsages(_repository, (unusedOverload, ReportFixture.GeneratedSite()), (Run, ReportFixture.GeneratedSite()));
+
+        CoverageReport report = CoverageReport.Build(_repository.Root);
+        ToolMapping mapping = ToolMapping.Build(_repository.Root);
+
+        // The generated wrapper of Create's second overload and of Plan.Run exists, but no operation calls it.
+        Assert.True(report.Units.Single(u => u.Unit == $"O:{Page}.Create").Partial);
+        Assert.DoesNotContain(report.Units, u => u.Unit == "O:Eplan.EplApi.Test.Planning.Plan.Run");
+        Assert.Equal((3, 1, 1), (report.Layers["operation"].Implemented, report.Layers["operation"].Partial, report.Layers["operation"].EnvBlocked));
+        Assert.Equal([unusedOverload, Run], mapping.UnreachedGenerated);
+        Assert.Equal(["F:Eplan.EplApi.Test.Kind.A", $"M:{Page}.Remove"], mapping.Infrastructure);
+    }
+
+    [Fact]
+    public void Build_GeneratedCodeAnOperationReaches_CountsLikeHandWrittenCode()
+    {
+        ReportFixture.AddUsages(_repository, ("M:Eplan.EplApi.Test.Planning.Plan.Run", ReportFixture.GeneratedSite("page.list")));
+
+        UnitCoverage run = CoverageReport.Build(_repository.Root).Units.Single(u => u.Unit == "O:Eplan.EplApi.Test.Planning.Plan.Run");
+
+        Assert.Equal(("live_verified", "eplan_page_list"), (run.Status, Assert.Single(run.Tools)));
+        Assert.Empty(ToolMapping.Build(_repository.Root).UnreachedGenerated);
     }
 
     [Fact]
