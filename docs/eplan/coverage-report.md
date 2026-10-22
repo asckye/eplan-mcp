@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-22 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 776f4adf）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-22 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 c6da30d6）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -9,13 +9,13 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 464 个 ID（方法 157，属性 136，类型 118，字段和枚举值 49，action 4），其中 447 个能被某个 Bridge 操作到达，16 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
+Bridge 共用到 466 个 ID（方法 159，属性 136，类型 118，字段和枚举值 49，action 4），其中 449 个能被某个 Bridge 操作到达，16 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 25 |
 | `Eplan.EplApi.Base` | 44 |
-| `Eplan.EplApi.DataModel` | 187 |
+| `Eplan.EplApi.DataModel` | 189 |
 | `Eplan.EplApi.DataModel.E3D` | 1 |
 | `Eplan.EplApi.DataModel.EObjects` | 20 |
 | `Eplan.EplApi.DataModel.Graphics` | 12 |
@@ -40,7 +40,7 @@ Bridge 共用到 464 个 ID（方法 157，属性 136，类型 118，字段和�
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 199 / 4342（4.6%）。
 - 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 104 / 1799（5.8%），live_verified 68 / 1799（3.8%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 41 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 209 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- 依赖层：Bridge 用到 211 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 2 个，没有整个排除的 action 共 64 个。
 
 ## 3. 按命名空间（操作层）与按对象类型（数据字典）
@@ -140,13 +140,13 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | 工具 | 级别 | Bridge 操作 | API ID | 操作层 | 数据字典 | 依赖 | action | 测试 S/M/L | api-notes | 最近一次实机 |
 |---|---|---|---:|---:|---:|---:|---:|---|---|---|
 | eplan_cable_get | read | cable.get | 66 | 33 | 2 | 26 | 0 | 2/2/2 | A24 | — |
-| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 117 | 62 | 2 | 52 | 0 | 1/2/1 | A24 | 2026-10-21 pass（api-notes A24） |
+| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 119 | 62 | 2 | 54 | 0 | 1/2/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 26 | 14 | 0 | 12 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 59 | 27 | 0 | 32 | 0 | 1/2/1 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 73 | 35 | 1 | 36 | 0 | 1/2/0 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 61 | 33 | 1 | 26 | 0 | 2/3/2 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 81 | 35 | 1 | 45 | 0 | 1/2/1 | A24 | — |
-| eplan_device_get | read | device.get | 72 | 43 | 2 | 26 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_device_get | read | device.get | 74 | 43 | 2 | 28 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 7/2/5 | A11 A12 | 2026-10-21 pass（api-notes A24） |
 | eplan_device_place | write | device.place.execute<br>device.place.plan | 93 | 46 | 1 | 42 | 0 | 1/2/1 | A13 A14 A26 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 66 | 28 | 0 | 38 | 0 | 1/2/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
@@ -168,7 +168,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 2/2/2 | A1 A11 | — |
 | eplan_page_create | write | page.create.execute<br>page.create.plan | 66 | 26 | 1 | 32 | 0 | 9/17/4 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 58 | 29 | 0 | 29 | 0 | 4/10/1 | A15 A18 A24 | — |
-| eplan_page_get | read | page.get | 63 | 36 | 1 | 26 | 0 | 4/4/7 | A11 A12 | — |
+| eplan_page_get | read | page.get | 65 | 36 | 1 | 28 | 0 | 4/4/7 | A11 A12 | — |
 | eplan_page_list | read | page.list | 40 | 19 | 1 | 20 | 0 | 14/4/6 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 59 | 23 | 0 | 36 | 0 | 1/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 58 | 27 | 1 | 30 | 0 | 2/2/3 | A7 A13 | 2026-10-20 pass（api-notes A17） |
@@ -180,7 +180,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 60 | 33 | 0 | 27 | 0 | 1/2/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 42 | 26 | 0 | 16 | 0 | 2/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_plc_get | read | plc.get | 72 | 37 | 1 | 28 | 0 | 2/2/2 | — | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
-| eplan_project_get | read | project.get | 53 | 30 | 0 | 23 | 0 | 5/3/4 | A11 | 2026-10-19 pass（api-notes A12） |
+| eplan_project_get | read | project.get | 55 | 30 | 0 | 25 | 0 | 5/3/4 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/3/4 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 70 | 31 | 2 | 37 | 0 | 1/2/1 | A11 A14 A25 A28 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 47 | 21 | 0 | 26 | 0 | 1/2/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
