@@ -17,27 +17,12 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanLanguageRemover : ILanguageRemover
 {
-    /// <summary>
-    /// The texts as stored (<c>de_DE@…;sv_SE@…;</c>, A11), keyed by kind and session identifier; a property that is not
-    /// set is left out, since <c>ToString()</c> on it throws (coding standards 9.5, rule 13). S23 read all 497 texts of
-    /// the sample project this way.
-    /// </summary>
+    /// <summary>Every text as <see cref="EplanLanguageTexts.All"/> reads it, as S23 read all 497 texts of the sample project.</summary>
     public IReadOnlyList<LanguageText> Texts(string projectPath)
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        var texts = new List<LanguageText>();
-        foreach (Function function in finder.GetFunctions(null))
-        {
-            Add(texts, "F " + function.ToStringIdentifier(), function.Properties.FUNC_TEXT);
-        }
-
-        foreach (Page page in finder.GetPages(null))
-        {
-            Add(texts, "P " + page.ToStringIdentifier(), page.Properties.PAGE_NOMINATIOMN);
-        }
-
-        return texts;
+        return EplanLanguageTexts.All(finder);
     }
 
     /// <summary>
@@ -63,14 +48,6 @@ internal sealed class EplanLanguageRemover : ILanguageRemover
                 ex);
             failed.Error.Metadata = new Dictionary<string, string> { ["eplanMessage"] = EplanConnectionGenerator.ForModel(ex.Message) };
             throw failed;
-        }
-    }
-
-    private static void Add(List<LanguageText> texts, string id, PropertyValue value)
-    {
-        if (!value.IsEmpty)
-        {
-            texts.Add(new LanguageText { Id = id, Raw = value.ToString() ?? string.Empty });
         }
     }
 }
