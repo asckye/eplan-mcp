@@ -137,7 +137,73 @@ public sealed class PackVerifierTests : IDisposable
         Assert.Equal("pack.lock.json: pack", problem.Location);
     }
 
+    [Fact]
+    public async Task Check_PackSig_IsNotUnlistedButCannotBeVerifiedYet()
+    {
+        await PackFolders.WriteAsync(_folder);
+        _folder.Write(ResourceTypes.SignatureFileName, "CMS");
+
+        PackProblem problem = Assert.Single((await CheckAsync()).Problems);
+
+        Assert.Equal(ResourceTypes.SignatureFileName, problem.Location);
+        Assert.StartsWith("cannot be verified by this EplanMcp yet", problem.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(1)</script></svg>", "<script>")]
+    [InlineData("<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert(1)\"/>", "'onload'")]
+    [InlineData("<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:x=\"http://www.w3.org/1999/xlink\"><image x:href=\"http://evil/a.png\"/></svg>", "outside itself")]
+    [InlineData("<svg xmlns=\"http://www.w3.org/2000/svg\"><rect fill=\"url('file:///C:/x')\"/></svg>", "outside itself")]
+    [InlineData("<svg xmlns=\"http://www.w3.org/2000/svg\"><style>@import url(#a);</style></svg>", "style refers")]
+    [InlineData("<!DOCTYPE svg [<!ENTITY x SYSTEM \"file:///C:/Windows/win.ini\">]><svg>&x;</svg>", "without a DTD")]
+    public async Task Check_SvgWithScriptOrOutsideReference_IsAProblem(string svg, string expected)
+    {
+        await WriteWithAsync("resources/previews/page.svg", svg, ResourceKind.Preview);
+
+        Assert.Contains(expected, Assert.Single((await CheckAsync()).Problems).Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Check_PlainSvg_Passes()
+    {
+        await WriteWithAsync("resources/previews/page.svg", "<svg xmlns=\"http://www.w3.org/2000/svg\"><defs><linearGradient id=\"g\"/></defs><rect fill=\"url(#g)\"/><use href=\"#g\"/></svg>", ResourceKind.Preview);
+
+        Assert.Empty((await CheckAsync()).Problems);
+    }
+
+    [Theory]
+    [InlineData("resources/rules/naming.md", "Device tags start with -", false)]
+    [InlineData("resources/rules/naming.json", """{ "apiVersion": "eplanmcp.pack/v1", "kind": "Rule", "spec": { } }""", false)]
+    [InlineData("resources/rules/naming.json", """{ "apiVersion": "eplanmcp.pack/v1", "kind": "Rule", "spec": { "source": "" } }""", false)]
+    [InlineData("resources/rules/naming.json", """{ "apiVersion": "eplanmcp.pack/v1", "kind": "Rule", "spec": { "source": { "resource": "resources/docs/standard.md", "location": "3.2" } } }""", true)]
+    [InlineData("resources/rules/naming.json", """{ "apiVersion": "eplanmcp.pack/v1", "kind": "Rule", "spec": { "source": "confirmation:2026-10-21-17" } }""", true)]
+    public async Task Check_OfficialRule_NeedsSpecSource(string path, string content, bool valid)
+    {
+        await WriteWithAsync(path, content, ResourceKind.Rule, m => m with { Rules = [new PackSlot { Path = path, Standing = KnowledgeStanding.Official }] });
+
+        IReadOnlyList<PackProblem> problems = (await CheckAsync()).Problems;
+
+        Assert.Equal(valid, problems.Count == 0);
+        Assert.All(problems, p => Assert.StartsWith("is an official rule without spec.source", p.Message, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Check_UnlistedScript_IsNamedAsSuch()
+    {
+        await PackFolders.WriteAsync(_folder);
+        _folder.Write("resources/run.ps1", "Remove-Item C:\\ -Recurse");
+
+        Assert.Equal(new PackProblem("resources/run.ps1", "is an executable or script type, which packs never hold"), Assert.Single((await CheckAsync()).Problems));
+    }
+
     public void Dispose() => _folder.Dispose();
+
+    private async Task WriteWithAsync(string path, string content, ResourceKind kind, Func<PackManifest, PackManifest>? change = null)
+    {
+        _folder.Write(path, content);
+        PackResource resource = await PackFolders.ResourceAsync(_folder, path, kind);
+        await PackFolders.WriteAsync(_folder, m => (change ?? (x => x))(m with { Resources = [.. m.Resources.Append(resource).OrderBy(r => r.Path, StringComparer.Ordinal)] }));
+    }
 
     private PackReference Reference(PackManifest manifest) => new()
     {

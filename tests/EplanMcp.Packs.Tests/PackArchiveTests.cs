@@ -31,6 +31,30 @@ public sealed class PackArchiveTests : IDisposable
     }
 
     [Fact]
+    public async Task Export_FileThatCompressesTooWell_IsStoredSoTheExtractorTakesIt()
+    {
+        _pack.Write("resources/docs/zeros.txt", new string('0', 100_000));
+        PackResource zeros = await PackFolders.ResourceAsync(_pack, "resources/docs/zeros.txt", ResourceKind.Document);
+        await PackFolders.WriteAsync(_pack, m => m with { Resources = [.. m.Resources.Append(zeros).OrderBy(r => r.Path, StringComparer.Ordinal)] });
+
+        await PackArchive.ExportAsync(_pack.Root, Archive, Cancel);
+        PackCheckResult result = await PackArchive.ExtractAsync(Archive, Destination, PackLimits.Default, Cancel);
+
+        Assert.Empty(result.Problems);
+    }
+
+    [Fact]
+    public async Task Extract_ArchiveLargerThanTheLimit_IsRefused()
+    {
+        await PackFolders.WriteAsync(_pack);
+        await PackArchive.ExportAsync(_pack.Root, Archive, Cancel);
+
+        PackCheckResult result = await PackArchive.ExtractAsync(Archive, Destination, new PackLimits { MaxArchiveBytes = 100 }, Cancel);
+
+        Assert.Equal("is larger than 100 bytes", Assert.Single(result.Problems).Message);
+    }
+
+    [Fact]
     public async Task Export_Twice_GivesTheSameBytes()
     {
         await PackFolders.WriteAsync(_pack);
