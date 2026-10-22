@@ -197,6 +197,12 @@ public static class OperationNames
     /// <summary>Backs up and imports a project list in one transaction. Arguments: <see cref="ImportListArgs"/>; data: <see cref="ImportListData"/>.</summary>
     public const string ImportListExecute = "import.list.execute";
 
+    /// <summary>Read-only PLC import plan; arguments: <see cref="ImportPlcArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ImportPlcPlan = "import.plc.plan";
+
+    /// <summary>Backs up and imports with transaction checks; arguments: <see cref="ImportPlcArgs"/>; data: <see cref="ImportPlcData"/>.</summary>
+    public const string ImportPlcExecute = "import.plc.execute";
+
     /// <summary>
     /// The plan of eplan_import_pxf: checks the EPJ file the Host resolved below its import root and that the scratch
     /// folder has no project of the name, never writes; no open project is involved. Arguments: <see cref="ImportPxfArgs"/>;
