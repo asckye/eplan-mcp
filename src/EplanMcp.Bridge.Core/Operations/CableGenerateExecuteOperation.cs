@@ -3,9 +3,11 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>Checks state on both sides of the backup, then guards readback before committing (tool spec 5; S34).</summary>
-public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPageReader pages, ICableGenerator generator, IProjectBackup backup, ITransactionScopeFactory transactions)
+public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPageReader pages, ICableGenerator generator, IProjectBackup backup, ITransactionScopeFactory transactions, ISystemMessageReader? messages = null)
     : Operation<CableGenerateArgs, CableGenerateData>, IWriteOperation
 {
+    private const string MessageWarning = "EPLAN messages could not be read; inspect the session messages in EPLAN.";
+
     // Keep backup filesystem checks in ProjectBackups; Small tests replace only this boundary.
     internal Action<OpenProject, BackupTarget?> MakeBackup { get; set; } = (project, target) => ProjectBackups.Make(backup, pages, project, target);
 
@@ -13,6 +15,8 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
 
     protected override CableGenerateData Execute(CableGenerateArgs args)
     {
+        int bookmark = -1;
+        string? messageWarning = null;
         CableGenerateRequest request;
         CableGenerationSnapshot before;
         try
@@ -25,6 +29,15 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
             request = CableGenerateRequest.Check(args, catalog, generator);
             before = generator.Read(request.Project.Path);
             request.RequireCurrent(before, args.Fingerprint);
+            try
+            {
+                bookmark = messages?.ReadAll().Count ?? 0;
+            }
+            catch (Exception)
+            {
+                messageWarning = MessageWarning;
+            }
+
             MakeBackup(request.Project, args.Backup);
             request.RequireCurrent(generator.Read(request.Project.Path), args.Fingerprint);
             OperationContext.Current.ThrowIfCancellationRequested();
@@ -34,9 +47,58 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
             throw WriteArguments.NotStarted(ex);
         }
 
-        Committed<CableGenerateData> committed = TransactionRunner.Run(transactions, "eplan_cable_generate", () => Generate(request, before));
+        Committed<CableGenerateData> committed;
+        try
+        {
+            committed = TransactionRunner.Run(transactions, "eplan_cable_generate", () => Generate(request, before));
+        }
+        catch (BridgeErrorException ex)
+        {
+            var failed = new CableGenerateData { Warning = messageWarning };
+            CollectMessages(failed, bookmark);
+            ex.Error.Metadata ??= [];
+            ex.Error.Metadata["eplanMessages"] = Protocol.BridgeJson.FromObject(failed.EplanMessages).ToString(Newtonsoft.Json.Formatting.None);
+            ex.Error.Metadata["eplanMessageCount"] = failed.EplanMessageCount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if (failed.Warning is not null)
+            {
+                ex.Error.Metadata["warning"] = failed.Warning;
+            }
+
+            throw;
+        }
+
         committed.Result.Warning = committed.Warning;
+        if (messageWarning is not null)
+        {
+            committed.Result.Warning += " " + messageWarning;
+        }
+
+        CollectMessages(committed.Result, bookmark);
         return committed.Result;
+    }
+
+    private void CollectMessages(CableGenerateData result, int bookmark)
+    {
+        if (bookmark < 0)
+        {
+            return;
+        }
+
+        try
+        {
+            List<SystemMessageRecord> added = [.. (messages?.ReadAll() ?? []).Skip(bookmark).Where(m => MessageListOperation.LevelName(m.Level) is not null)];
+            result.EplanMessageCount = added.Count;
+            result.EplanMessages = [.. added.Take(20).Select(m => new SystemMessage
+            {
+                Level = MessageListOperation.LevelName(m.Level)!, Number = m.Index.Length == 0 || m.Index == MessageListOperation.NoNumber ? null : m.Index,
+                Text = m.Text, Occurrences = m.Occurrences,
+            })];
+        }
+        catch (Exception)
+        {
+            // Message collection must not replace the known execution outcome.
+            result.Warning += " " + MessageWarning;
+        }
     }
 
     private CableGenerateData Generate(CableGenerateRequest request, CableGenerationSnapshot before)

@@ -178,7 +178,7 @@ internal static class BridgeHost
             new CableRenumberPlanOperation(catalog, devices, cableRenumberer),
             new CableRenumberExecuteOperation(catalog, pages, devices, cableRenumberer, backup, transactions),
             new CableGeneratePlanOperation(catalog, cableGenerator),
-            new CableGenerateExecuteOperation(catalog, pages, cableGenerator, backup, transactions),
+            new CableGenerateExecuteOperation(catalog, pages, cableGenerator, backup, transactions, new EplanSystemMessageReader()),
             new ConnectionNumberPlanOperation(catalog, connectionNumberer),
             new ConnectionNumberExecuteOperation(catalog, pages, connectionNumberer, backup, transactions),
             new ProjectSnapshotOperation(catalog, new EplanSnapshotReader(), projectFiles),

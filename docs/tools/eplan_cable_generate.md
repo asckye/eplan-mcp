@@ -61,7 +61,7 @@ S34 的示例项目没有自动电缆：上述模式无名称变化，不是正�
 - `changes` 按会话内对象身份比较，先列删除，再列新增/更新；相同名称的旧对象消失、新对象出现不能相互抵消。最多 200 条，`changedCount` 是全量变化记录数（替换记删除和新增各一条），超出为 `truncated=true`，提示用 `eplan_device_list(category: "Cable")` / `eplan_cable_get` 读现状，不重复执行取名单。没有 `response_format` 或写操作分页，名单也受通用结果预算限制。
 - “更新”包括保留原名时可读回的型号、规格、部件与芯线/连接归属变化；具体读取字段和判定完整性**未验证**，不能只用数量/名称差异报告完整无修改。无法完成必要读回时不提交，返回错误。
 - `undo` 暂为 null（这些 action 的提交后 Ctrl+Z **未验证**）。真实无变化得到确认后才可返回 `not_started`；仅计数/名称不变而未证明无其他变化时，action 提交返回 `committed`，`hint` 写清读回范围。`backup` 即使无变化也保留，`recovered` 同 ADR-0010。
-- `eplanMessages` 沿用 `SystemMessage` 字段，只含本次消息，最多 20 条且受结果预算限制；省略时 `truncated=true`、`hint` 给消息总数。
+- `eplanMessages` 沿用 `SystemMessage` 字段：备份前以 `ReadAll()` 条数作书签，事务结束后（成功或失败）只收集新增的非 Trace 消息，最多 20 条并保留总数；失败时放入错误元数据 `eplanMessages`，读取消息失败只附加警告。Host 再按结果预算截断，省略时 `truncated=true`、`hint` 给消息总数。
 - 摘要：`Generated or updated automatic cables with existing names preserved. A project backup was made first (see 'backup').`；dry-run：`Dry run: automatic cable generation only; new cables and selection results are known only after running. Nothing was changed.`
 
 ## 4. 错误
@@ -101,6 +101,6 @@ S34 的示例项目没有自动电缆：上述模式无名称变化，不是正�
 
 ## 8. 待定问题（均未验证）
 - Bridge 首步实现的业务读回范围为全名、显示名、主功能标记、页、自动标记、型号、芯数、截面、长度、部件号及芯线连接身份/两端/标识/截面/线号；必要读取失败即回滚。本步保守拒绝所有旧电缆消失，包括自动电缆替换，不宣称支持替换。
-- 规划指纹包含三个已校验的方案名称、页、页上对象身份、连接和电缆，不检测同名方案的内容变化；EPLAN 是否提供可读取的方案内容尚未验证。业务字段集合是否完整仍须经 Large 核实。仅计数/名称不变仍报告提交，`undo` 由后续 Host 保持 null；本步不提供 Host 工具。
+- 规划指纹包含三个已校验的方案名称、页、页上对象身份、连接和电缆，不检测同名方案的内容变化；EPLAN 是否提供可读取的方案内容尚未验证。业务字段集合是否完整仍须经 Large 核实。Host 对仅计数/名称不变仍报告提交，`undo` 保持 null。
 - 能真正创建电缆的最小 scratch 夹具、所需连接和电缆定义状态；正向生成、更新/替换、选型与连接归属的具体效果及耗时。完成前只具备无变化样例和改名风险证据。
 - 显式三方案参数、其他方案/授权下的边界，自动标记未设置的语义、完整业务字段与方案指纹、完整事务包装、无变化是否留下撤销步骤、提交后一次 Ctrl+Z；不能从“78 根不变”推出无副作用或幂等。

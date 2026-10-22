@@ -407,6 +407,7 @@ internal sealed partial class WritePipeline(
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         "delete" => c.OldValue is null ? $"delete {c.Kind} {c.Name}" : $"delete {c.Kind} {c.Name} ({c.OldValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",
+        _ when c.Kind == "cables" && c.Property == "generation" => ApprovalTexts.Change(c, zh: false, plan.Details),
         _ when c.Property == "check messages" => CheckRunLine(plan, c),
         _ when c.Property == "reports" => $"update all reports ({c.OldValue} report pages now); may create, replace or delete report pages",
         _ when c.Property == "report" => $"update report page {c.Name}",

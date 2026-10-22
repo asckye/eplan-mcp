@@ -105,6 +105,181 @@
       "live": []
     },
     {
+      "name": "eplan_cable_generate",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/CableGenerateTools.cs",
+      "operations": [
+        "cable.generate.execute",
+        "cable.generate.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable",
+        "F:Eplan.EplApi.DataModel.ProjectManager.CopyMode.Snapshot",
+        "F:Eplan.EplApi.DataModel.ProjectManager.OpenMode.ReadOnly",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageIndex",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageText",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.SchemeSetting.GetCount",
+        "M:Eplan.EplApi.Base.SchemeSetting.GetName",
+        "M:Eplan.EplApi.Base.SchemeSetting.SetScheme(System.Int32)",
+        "M:Eplan.EplApi.Base.SysMessagesCollection.#ctor",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.Project.Close",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.CopyProject(System.String,System.String,Eplan.EplApi.DataModel.ProjectManager.CopyMode)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.OpenProject(System.String,Eplan.EplApi.DataModel.ProjectManager.OpenMode)",
+        "M:Eplan.EplApi.DataModel.ProjectSchemeSetting.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectSchemeSetting.Init(System.String,Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToBool",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.BaseException.MessageLevel",
+        "P:Eplan.EplApi.Base.BaseException.NumberOfOccurrences",
+        "P:Eplan.EplApi.DataModel.ArticleReference.PartNr",
+        "P:Eplan.EplApi.DataModel.Connection.EndPin",
+        "P:Eplan.EplApi.DataModel.Connection.Page",
+        "P:Eplan.EplApi.DataModel.Connection.Properties",
+        "P:Eplan.EplApi.DataModel.Connection.StartPin",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_DESIGNATION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRENUMBER",
+        "P:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections",
+        "P:Eplan.EplApi.DataModel.Function.ArticleReferences",
+        "P:Eplan.EplApi.DataModel.Function.IsMainFunction",
+        "P:Eplan.EplApi.DataModel.Function.Properties",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEAUTOCREATED",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLELENGTH_FULL",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLETYPE",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECOUNT",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Pin.Name",
+        "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
+        "P:Eplan.EplApi.DataModel.Placement.Page",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.SchemeSetting",
+        "T:Eplan.EplApi.Base.SysMessagesCollection",
+        "T:Eplan.EplApi.DataModel.Connection",
+        "T:Eplan.EplApi.DataModel.ConnectionPropertyList",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.EObjects.Cable",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.FunctionPropertyList",
+        "T:Eplan.EplApi.DataModel.FunctionsFilter",
+        "T:Eplan.EplApi.DataModel.Pin",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.ProjectManager.CopyMode",
+        "T:Eplan.EplApi.DataModel.ProjectManager.OpenMode",
+        "T:Eplan.EplApi.DataModel.ProjectSchemeSetting",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [
+        "A:generate",
+        "A:generate/CABLES"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_cable_generate.md",
+        "specStatus": "Proposed（S34 已验证参数与改名风险；实际新增自动电缆的正向场景未验证）",
+        "apiNotes": [
+          "A24",
+          "A30",
+          "A31"
+        ],
+        "tests": [
+          {
+            "name": "ApprovalTextsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "CableGenerateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CableGenerateToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableGenerateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableGenerateTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "CableGenerateMessageTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CableGenerateMessageTests.cs"
+          },
+          {
+            "name": "CableGenerateOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CableGenerateOperationTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_cable_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/CableTools.cs",
@@ -1395,6 +1570,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableGenerateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableGenerateTests.cs"
           },
           {
             "name": "CableRenumberTests",
@@ -5930,6 +6110,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableGenerateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableGenerateTests.cs"
           },
           {
             "name": "CheckAndReportTests",

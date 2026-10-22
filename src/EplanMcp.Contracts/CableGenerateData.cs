@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Result of cable.generate.execute; the Host adds execution, backup and EPLAN messages as for other writes.</summary>
+/// <summary>Result of cable.generate.execute; the Host adds execution and backup metadata.</summary>
 public sealed class CableGenerateData
 {
     /// <summary>The actual project name.</summary>
@@ -21,9 +21,15 @@ public sealed class CableGenerateData
     /// <summary>Whether changes were omitted.</summary>
     public bool Truncated { get; set; }
 
+    /// <summary>This call's system messages, at most 20; text is untrusted project data.</summary>
+    public List<SystemMessage> EplanMessages { get; set; } = [];
+
+    /// <summary>Total messages before limiting the list.</summary>
+    public int EplanMessageCount { get; set; }
+
     /// <summary>The readback scope and how to inspect omitted changes.</summary>
     public string? Hint { get; set; }
 
-    /// <summary>A problem after commit; null when there was none.</summary>
+    /// <summary>A message collection or post-commit problem; null when there was none.</summary>
     public string? Warning { get; set; }
 }
