@@ -119,6 +119,9 @@ internal static class ApprovalTexts
         string name = Value(change.Name, zh);
         return change.Action switch
         {
+            _ when change.Property == "list" => zh
+                ? $"从 {Value(details?.GetValueOrDefault("file") ?? "?", zh)} 导入项目的 {Value(change.Kind, zh)} 清单（{Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} 字节，SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}）。现有清单及部件引用可能改变；逐行效果无法预报。转换器：{Value(details?.GetValueOrDefault("converter") ?? "?", zh)}；现有计数：{Value(details?.GetValueOrDefault("before") ?? "?", zh)}。"
+                : $"Import the {Value(change.Kind, zh)} list into this project from {Value(details?.GetValueOrDefault("file") ?? "?", zh)} ({Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} bytes, SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}). Existing project list data and article references may change. Exact row-level effects are not known in advance. Converter: {Value(details?.GetValueOrDefault("converter") ?? "?", zh)}; before: {Value(details?.GetValueOrDefault("before") ?? "?", zh)}.",
             // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
             "create" when change.Kind == "parts" => zh ? $"从 {name} 新增 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Add {Value(change.NewValue ?? "?", zh)} new parts from {name}",
             _ when change.Kind == "parts" => zh ? $"从 {name} 更新部件库中已有的 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Update {Value(change.NewValue ?? "?", zh)} parts the database has, from {name}",
@@ -245,7 +248,9 @@ internal static class ApprovalTexts
     /// How the engineer takes the change back: Ctrl+Z on the write's undo step, except for language settings, which no
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
-    private static string Undo(string tool, WritePlan plan, bool zh) => plan.Changes.Any(c => c.Property == "languages")
+    private static string Undo(string tool, WritePlan plan, bool zh) => tool == ListImportTools.ImportTool
+        ? zh ? "提交后的撤销尚未验证；必要时请工程师检查并使用备份。" : "Undo after commit has not been verified; ask the engineer to check the project and use the backup if needed."
+        : plan.Changes.Any(c => c.Property == "languages")
         ? zh ? "Ctrl+Z 不能撤销语言设置；要恢复，用原来的值再设置一次。" : "Ctrl+Z in EPLAN does not undo language settings; to restore them, set the old values again."
         : (zh ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {tool}”这一步。" : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {tool}\".")
             + (plan.Changes.Any(c => c.Kind == "language") ? zh ? "语言设置可能不随之恢复，备份中有原样的项目。" : " The language settings may not come back with it; the backup has the project as it was." : string.Empty);

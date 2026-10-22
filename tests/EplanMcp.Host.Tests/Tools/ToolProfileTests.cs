@@ -26,12 +26,14 @@ public sealed class ToolProfileTests
     public void Core_HasNoDestructiveTool()
     {
         Assert.All(Tools(ToolProfile.Core), t => Assert.False(t.Annotations?.DestructiveHint, t.Name));
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == ListImportTools.ImportTool);
+        Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ListImportTools.ImportTool);
     }
 
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(60, Tools(ToolProfile.Full).Length);
+        Assert.Equal(61, Tools(ToolProfile.Full).Length);
         Assert.Equal(ToolProfiles.Core.Order(StringComparer.Ordinal), Tools(ToolProfile.Core).Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `import` / `full`（M4c 第三批） |
 | 安全级别 | Destructive（scratch 中也逐次审批，执行前备份项目） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（action 已由 S34 验证；工具尚未实现） |
+| 状态 | Proposed（Bridge / Host 已实现，待 Large 实机验证；设备清单样本和提交后撤销尚未验证） |
 
 ## 1. 这个工具解决什么任务
 “把设备清单或部件清单导入这个项目”。`devices` 操作设备清单条目，不是在原理图上放置全部设备；`parts` 操作**项目内**的部件清单和部件引用。写所有项目共用的系统部件库用 [eplan_part_import](eplan_part_import.md)，本工具绝不调用 `partslist/IMPORTTOSYSTEM`，也不修改部件库配置（A30）。

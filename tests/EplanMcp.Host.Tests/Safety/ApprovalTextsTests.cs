@@ -27,6 +27,26 @@ public sealed class ApprovalTextsTests
     private static readonly ApprovalQuestion _question = new("r", "eplan_page_create", "h", _plan, [], DateTimeOffset.UnixEpoch) { Tier = ToolTier.Write, Eplan = null };
 
     [Theory]
+    [InlineData("en-US", "Import the parts list", "Undo after commit has not been verified")]
+    [InlineData("zh-CN", "导入项目的 parts 清单", "提交后的撤销尚未验证")]
+    public void ListImport_UsesProjectScope_FullHashAndUnverifiedUndo(string culture, string change, string note)
+    {
+        var plan = new WritePlan
+        {
+            Project = "Line1",
+            Changes = [new PlannedChange { Action = "update", Kind = "parts", Property = "list" }],
+            Details = new() { ["file"] = "incoming/parts\u202e\n.xml", ["bytes"] = "14000000", ["sha256"] = new string('a', 64), ["converter"] = "XPalXmlExporter", ["before"] = "293 parts, 2900 references" },
+        };
+        ApprovalAskArgs text = ApprovalTexts.For(_question with { Tool = "eplan_import_list", Plan = plan }, CultureInfo.GetCultureInfo(culture));
+        Assert.Contains(change, text.Changes[0], StringComparison.Ordinal);
+        Assert.Contains(new string('a', 64), text.Changes[0], StringComparison.Ordinal);
+        Assert.Contains(note, text.Note, StringComparison.Ordinal);
+        Assert.DoesNotContain('\u202e', text.Changes[0]);
+        Assert.DoesNotContain('\n', text.Changes[0]);
+        Assert.DoesNotContain("parts the database has", text.Changes[0], StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("zh-CN")]
     [InlineData("zh-TW")]
     public void InChinese_TheDialogFollowsTheDesign(string culture)
