@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "9e58625d + uncommitted changes",
-  "sourceHash": "sha256:5c9ae170b2ebaea21505de49e5cab78f33589bf8b97febc24bfcc0ede3392bea",
+  "scannedSources": "8c7ed67f",
+  "sourceHash": "sha256:74f1fbc0844a560fc39ae4cc4f76ef11db113c6cd7c714c1a76e4b1496413d0c",
   "operations": [
     {
       "name": "approval.ask",
@@ -169,6 +169,14 @@
     {
       "name": "import.dxf.plan",
       "class": "ImportDxfPlanOperation"
+    },
+    {
+      "name": "import.list.execute",
+      "class": "ImportListExecuteOperation"
+    },
+    {
+      "name": "import.list.plan",
+      "class": "ImportListPlanOperation"
     },
     {
       "name": "import.pxf.execute",
@@ -422,6 +430,32 @@
         ]
       }
     ],
+    "A:devicelist": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      }
+    ],
+    "A:devicelist/IMPORT": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      }
+    ],
     "A:generate": [
       {
         "adapter": "EplanCableGenerator",
@@ -445,6 +479,32 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      }
+    ],
+    "A:partslist": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      }
+    ],
+    "A:partslist/IMPORT": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       }
     ],
@@ -559,6 +619,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -579,6 +640,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -651,6 +713,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -832,6 +895,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -854,6 +918,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1373,6 +1438,17 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataBackup",
         "member": "BackupParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
@@ -1407,6 +1483,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       },
       {
@@ -1447,6 +1534,17 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataBackup",
         "member": "BackupParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
@@ -1481,6 +1579,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       },
       {
@@ -1670,6 +1779,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1690,6 +1800,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1762,6 +1873,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -1795,6 +1907,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -1819,6 +1932,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -1832,6 +1947,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -1846,6 +1963,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       },
       {
@@ -2316,6 +2444,8 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
+          "import.list.execute",
+          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -2791,6 +2921,8 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -3117,6 +3249,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -3203,6 +3347,7 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -3354,6 +3499,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -3510,7 +3656,33 @@
         "operations": []
       }
     ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll``1(System.Boolean)": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
       {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
@@ -3800,6 +3972,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -3935,6 +4119,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -4010,6 +4206,7 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -4055,6 +4252,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4631,6 +4829,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4684,6 +4883,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4704,6 +4904,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4781,6 +4982,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -4846,6 +5049,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4948,6 +5152,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -5420,6 +5625,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5453,6 +5659,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5486,6 +5693,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5528,6 +5736,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5701,6 +5910,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -5865,6 +6086,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5898,6 +6120,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5931,6 +6154,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5973,6 +6197,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -6006,6 +6231,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -6671,6 +6897,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -6758,6 +6986,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -7265,6 +7495,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -7278,6 +7510,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -7460,6 +7694,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7513,6 +7759,18 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       },
       {
@@ -7600,6 +7858,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7614,6 +7884,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ArticleReference.ParentObject": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
       {
         "adapter": "EplanPartReader",
         "member": "Reference",
@@ -7666,6 +7948,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7714,6 +8008,18 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       },
       {
@@ -8090,6 +8396,20 @@
         "operations": [
           "connection.list",
           "plc.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.DeviceListEntry.PartNumber": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       }
     ],
@@ -9143,6 +9463,18 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       },
       {
@@ -10567,6 +10899,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -10658,6 +11002,7 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -11835,6 +12180,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -11894,6 +12251,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -11981,6 +12340,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12063,6 +12424,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12137,6 +12500,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -12214,6 +12578,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12326,6 +12692,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -12380,6 +12747,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12490,6 +12859,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12965,6 +13336,18 @@
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -13417,6 +13800,17 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataBackup",
         "member": "BackupParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
@@ -13451,6 +13845,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       },
       {
@@ -13514,6 +13919,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute"
         ]
       },
       {
@@ -13659,6 +14075,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13679,6 +14096,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13751,6 +14169,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -13840,6 +14259,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13860,6 +14280,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13932,6 +14353,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -14291,6 +14713,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       },
@@ -14685,6 +15109,8 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
+          "import.list.execute",
+          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -14997,6 +15423,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -15046,6 +15474,18 @@
           "cable.renumber.plan",
           "device.get"
         ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ArticleReference": [
@@ -15073,6 +15513,18 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
+        ]
+      },
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       },
       {
@@ -15769,6 +16221,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -15855,6 +16319,7 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -16017,6 +16482,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -16183,6 +16649,20 @@
         "operations": [
           "terminal.renumber.execute",
           "terminal.renumber.plan"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.DeviceListEntry": [
+      {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
         ]
       }
     ],
@@ -18228,6 +18708,18 @@
         ]
       },
       {
+        "adapter": "EplanListImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.list.execute",
+          "import.list.plan"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -18349,6 +18841,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18369,6 +18862,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18526,6 +19020,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18609,6 +19105,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18720,6 +19218,8 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
+          "import.list.execute",
+          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -18757,6 +19257,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18777,6 +19278,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18854,6 +19356,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18930,6 +19434,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18952,6 +19457,7 @@
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
+          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -19361,6 +19867,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -19488,6 +19995,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -19521,6 +20029,7 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
+          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -20176,6 +20685,8 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
+          "import.list.execute",
+          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",

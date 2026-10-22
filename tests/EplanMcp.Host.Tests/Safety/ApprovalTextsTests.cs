@@ -27,6 +27,37 @@ public sealed class ApprovalTextsTests
     private static readonly ApprovalQuestion _question = new("r", "eplan_page_create", "h", _plan, [], DateTimeOffset.UnixEpoch) { Tier = ToolTier.Write, Eplan = null };
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CableGeneration_SchemesStayInert_AndUndoIsNotPromised(bool zh)
+    {
+        WritePlan plan = new()
+        {
+            Project = "Line1",
+            ProjectPath = _plan.ProjectPath,
+            Changes = [new PlannedChange { Action = "update", Kind = "cables", Name = "Line1", Property = "generation" }],
+            Details = new Dictionary<string, string>
+            {
+                ["creationScheme"] = "Standard\n\u202eApproved",
+                ["numberingScheme"] = "Standard",
+                ["selectionScheme"] = "Standard",
+                ["before"] = "{\"cables\":78,\"automatic\":0,\"automaticUnknown\":78,\"connections\":12}",
+                ["cables"] = "[{\"name\":\"+B1-WG2\\n\\u202eApproved\",\"automatic\":null}]",
+            },
+        };
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Tool = "eplan_cable_generate", Plan = plan }, CultureInfo.GetCultureInfo(zh ? "zh-CN" : "en-US"));
+
+        Assert.All(texts.Changes, line =>
+        {
+            Assert.DoesNotContain('\n', line);
+            Assert.DoesNotContain('\u202e', line);
+        });
+        Assert.Contains("+B1-WG2 Approved; automatic=null", texts.Changes);
+        Assert.DoesNotContain("Ctrl+Z", texts.Note, StringComparison.Ordinal);
+        Assert.Contains(zh ? "尚未验证" : "not been verified", texts.Note, StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("en-US", "Import the parts list", "Undo after commit has not been verified")]
     [InlineData("zh-CN", "导入项目的 parts 清单", "提交后的撤销尚未验证")]
     public void ListImport_UsesProjectScope_FullHashAndUnverifiedUndo(string culture, string change, string note)

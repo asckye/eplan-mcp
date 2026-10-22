@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Tools;
 
@@ -39,7 +40,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. ValueSet(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. ValueSet(plan, zh), .. CableGeneration(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
                 + (plan.MasterData is null ? Undo(question.Tool, plan, zh) : MasterDataUndo(plan, zh)),
             ApproveLabel = zh ? "批准" : "Approve",
@@ -145,6 +146,7 @@ internal static class ApprovalTexts
             _ when change.Property == "page number" => zh ? $"重新编号{kind} {name}" : $"Renumber {kind} {name}",
             // The numbering tools of M4c (terminals, cables, wire numbers): the scope, worded by the Bridge.
             _ when change.Property == "numbering" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
+            _ when change.Kind == "cables" && change.Property == "generation" => GenerateCables(zh, details),
             // Only the translation database tells which texts it fills in (eplan_project_translate, tool spec 5): the scope, worded by the Bridge.
             _ when change.Property == "translations" => (zh ? "按翻译库翻译：" : "Translate with the translation database: ") + Value(change.OldValue ?? string.Empty, zh),
             _ when change.Property == "connections" => zh
@@ -168,6 +170,32 @@ internal static class ApprovalTexts
                 ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
                 : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
         };
+    }
+
+    private static string GenerateCables(bool zh, IReadOnlyDictionary<string, string>? details)
+    {
+        string creation = Value(details?.GetValueOrDefault("creationScheme") ?? "?", zh);
+        string numbering = Value(details?.GetValueOrDefault("numberingScheme") ?? "?", zh);
+        string selection = Value(details?.GetValueOrDefault("selectionScheme") ?? "?", zh);
+        return zh
+            ? $"在本项目中生成或更新自动电缆，创建方案 {creation}、编号方案 {numbering}、选型方案 {selection}。保留已有电缆名称；本操作不重新编号已有电缆。无法提前预测新增电缆及选型效果。执行前会先备份项目。提交后的撤销尚未验证。"
+            : $"Generate or update automatic cables in this project using creation {creation}, numbering {numbering}, selection {selection}. Existing cable names will be preserved; existing cable renumbering is outside this operation. New cables and selection effects cannot be predicted in advance. A project backup will be made first. Undo after commit has not been verified.";
+    }
+
+    private static IEnumerable<string> CableGeneration(WritePlan plan, bool zh)
+    {
+        if (!plan.Changes.Any(c => c.Kind == "cables" && c.Property == "generation") || plan.Details is not { } details)
+        {
+            yield break;
+        }
+
+        yield return "KEEPOLDNAMES=1, ONLYAUTOCABLES=1, STARTVALUE=1, STEPVALUE=1";
+        yield return (zh ? "现有计数：" : "Before: ") + Value(details.GetValueOrDefault("before") ?? "?", zh);
+        using JsonDocument cables = JsonDocument.Parse(details.GetValueOrDefault("cables") ?? "[]");
+        foreach (JsonElement cable in cables.RootElement.EnumerateArray().Take(50))
+        {
+            yield return Value(cable.GetProperty("name").GetString() ?? string.Empty, zh) + "; automatic=" + Value(cable.GetProperty("automatic").GetRawText(), zh);
+        }
     }
 
     private static string CheckRun(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details)
@@ -250,6 +278,8 @@ internal static class ApprovalTexts
     /// </summary>
     private static string Undo(string tool, WritePlan plan, bool zh) => tool == ListImportTools.ImportTool
         ? zh ? "提交后的撤销尚未验证；必要时请工程师检查并使用备份。" : "Undo after commit has not been verified; ask the engineer to check the project and use the backup if needed."
+        : plan.Changes.Any(c => c.Kind == "cables" && c.Property == "generation")
+        ? zh ? "提交后的撤销尚未验证；请保留备份。" : "Undo after commit has not been verified; retain the backup."
         : plan.Changes.Any(c => c.Property == "languages")
         ? zh ? "Ctrl+Z 不能撤销语言设置；要恢复，用原来的值再设置一次。" : "Ctrl+Z in EPLAN does not undo language settings; to restore them, set the old values again."
         : (zh ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {tool}”这一步。" : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {tool}\".")
