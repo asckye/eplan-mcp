@@ -1,0 +1,7 @@
+<Project>
+  <!--
+    The repository rules only, not tests\Directory.Build.props: this is a helper program of the Large tests, not a test
+    project, so it gets no xUnit setup.
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../../'))" />
+</Project>

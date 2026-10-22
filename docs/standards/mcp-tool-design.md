@@ -37,6 +37,7 @@
 |---|---|---|
 | `session` | 连接的 EPLAN 实例 | 进程、Remote 端口 |
 | `project` | 项目 | `Project` |
+| `revision` | 项目的修订（变更跟踪）：状态、修订记录 | 链接文件扩展名 `.elk`/`.ell`/`.elr`、`PROJ_REVISION_LOG_*`、`HEServices.Revision` |
 | `page` | 页面 | `Page` |
 | `device` | 设备，即带标识的一组功能 | `Function`（主功能和辅助功能） |
 | `connection` | 逻辑连接、连线 | `Connection` |
