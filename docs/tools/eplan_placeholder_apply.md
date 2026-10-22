@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `placeholder` / `full`（新工具默认只在 `full` 中） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（API 能力覆盖第一期的修改样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；**提交后的持久性和 Ctrl+Z 待实机验证**（第 5 节） |
+| 状态 | Proposed（API 能力覆盖第一期的修改样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，**提交后的持久性和 Ctrl+Z 待实机验证**（第 5 节） |
 
 ## 1. 这个工具解决什么任务
 "把这页 24 V 电源宏的功能文本切换成'PLC I/O's'那一组""这个占位符改用 mA 的值集"。代理给页上的一个占位符应用一个值集：EPLAN 把值集中各变量的值写进占位符引用的对象（EPLAN 界面中的"分配值集"）。常见的顺序是 `eplan_macro_insert` 插入带占位符的宏 → `eplan_placeholder_list` 看值集 → 本工具切换。

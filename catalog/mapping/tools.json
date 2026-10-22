@@ -5004,6 +5004,48 @@
       "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）"
     },
     {
+      "name": "eplan_placeholder_apply",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PlaceholderWriteTools.cs",
+      "operations": [
+        "placeholder.apply.execute",
+        "placeholder.apply.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_placeholder_apply.md",
+        "specStatus": "Proposed（API 能力覆盖第一期的修改样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，**提交后的持久性和 Ctrl+Z 待实机验证**（第 5 节）",
+        "apiNotes": [
+          "A33"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PlaceholderApplyToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderApplyToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PlaceholderApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlaceholderApplyTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_placeholder_list",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PlaceholderTools.cs",
@@ -5035,6 +5077,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PlaceholderApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlaceholderApplyTests.cs"
           },
           {
             "name": "PlaceholderListTests",
