@@ -143,6 +143,10 @@ public sealed class CliArgumentsTests
             "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
             + Environment.NewLine
+            + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
+            + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--format json]"
+            + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
+            + Environment.NewLine
             + "clients: claude-code, claude-desktop, codex, gemini-cli, qwen-code, kimi-code, codebuddy, opencode, qwen-agent, cursor, vscode-copilot",
             CliArguments.Usage);
     }

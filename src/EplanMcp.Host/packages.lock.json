@@ -315,6 +315,9 @@
       "eplanmcp.contracts": {
         "type": "Project"
       },
+      "eplanmcp.packs": {
+        "type": "Project"
+      },
       "eplanmcp.workbench.protocol": {
         "type": "Project"
       },
