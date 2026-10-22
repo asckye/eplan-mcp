@@ -3,7 +3,7 @@
     { "assembly": "EplanMcp.Contracts.Tests", "minPassed": 115 },
     { "assembly": "EplanMcp.Bridge.Core.Tests", "minPassed": 200 },
     { "assembly": "EplanMcp.Host.Tests", "minPassed": 295 },
-    { "assembly": "EplanMcp.Packs.Tests", "minPassed": 40 },
+    { "assembly": "EplanMcp.Packs.Tests", "minPassed": 185 },
     { "assembly": "EplanMcp.Evals.Tests", "minPassed": 225 },
     { "assembly": "EplanMcp.Catalog.Tests", "minPassed": 55 },
     { "assembly": "EplanMcp.Coverage.Tests", "minPassed": 25 },

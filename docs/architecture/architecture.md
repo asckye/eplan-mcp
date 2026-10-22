@@ -170,7 +170,7 @@ flowchart TB
 | `AuditLog` | 每次调用写一条 JSONL 记录，每条记录带上一条的哈希，形成哈希链 |
 | `ResultShaper` | 统一处理分页、截断、`response_format`（concise / detailed）、不可信内容标记，以及 token 预算（默认不超过 5k，硬上限 20k，低于 Claude Code 的 25k 限制） |
 | `BridgeClient` | 发现 EPLAN 实例；建立管道连接并握手；**每个 EPLAN 实例一个串行队列**；超时与取消 |
-| `Cli` | `serve`（默认）、`doctor`、`install-addin` / `uninstall-addin`、`client-config <客户端>`、`audit verify` |
+| `Cli` | `serve`（默认）、`doctor`、`install-addin` / `uninstall-addin`、`client-config <客户端>`、`audit verify`、`pack scan / check / export / install`（M6 工程包，供手工使用和测试，库在 `EplanMcp.Packs`） |
 
 **CLI 的 JSON 输出**（给 Workbench 用，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.11）：`doctor`、`audit verify`、`client-config`、`install-addin`、`uninstall-addin` 带 `--format json` 时在 stdout 输出一个 UTF-8 的 JSON 对象，退出码与文本输出相同；`--format` 只接受 `json`，其他值或缺少值按命令行错误处理（退出码 2）。结构变化时 `schemaVersion` 加 1，快照在 `tests/Contracts.Snapshots/`。
 - `doctor`：`{schemaVersion: 1, hostVersion, status, checks: [{id, subject?, status, zh, en}]}`。`status` 取 `ok`、`info`、`warning`、`failure`；顶层的 `status` 是最严重的一项，`info` 按 `ok` 计。`checks` 按输出顺序排列，`id` 稳定，同类的几项共用一个：`host.version`、`data.directory`、`config`、`audit.directory`、`exports`、`backups`、`msix`、`suspension`、`eplan.installation`、`eplan.running`、`bridge.pipe`、`bridge.handshake`、`bridge.licence`、`path.length`。`subject` 是这一项针对的 EPLAN 版本（`eplan.installation`）或 EPLAN 进程号（其他各项），不针对某一个时省略。
@@ -185,6 +185,7 @@ flowchart TB
   - `result` 取 `registered`、`unregistered`、`not_confirmed`（等待结束时 EPLAN 还没有加载插件，留着没有关）、`failed`、`refused`（没有启动 EPLAN）、`skipped`；
   - `notes` 的每一项为 `{code, zh, en}`，`code` 取 `version_untested`、`unsupported_version`、`eplan_missing`（记录的 EPLAN 或变体已不在，记录已删除）、`close_eplan`（EPLAN 没有按要求关闭）；
   - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `addin_not_found`、`no_eplan`、`variant_not_found`、`unblock_failed`、`invalid_record`、`eplan_running`、`other_user`、`start_failed`、`eplan_exited`、`not_loaded`、`path_mismatch`（EPLAN 从另一个位置加载了插件，或者加载的是不报告路径的旧版插件，这次的注册没有生效或看不出是否生效）、`handshake_failed`（插件没有回应握手，看不出加载的是哪一个注册）、`record_failed`；顶层的 `problem` 表示什么都没有做，这时 `results` 为空。任何一处有 `problem` 时退出码为 1。
+- `pack`（M6，暂不给 Workbench 用，结构随 M6 设计可能变化）：`{schemaVersion: 1, command, ok, …}`，`ok` 为 false 时退出码为 1。`scan` 另有 `resources`、`facts`、`findings: [{severity, code, subject, message}]`（`severity` 取 `error`、`warning`、`gap`），给了 `--id`/`--name`/`--version` 时有 `manifest` 和 `problems`，写出后有 `written`；`check` 有 `id`、`version`、`resources`（个数）、`problems: [{location, message}]`；`export` 有 `file`、`bytes`；`install` 有 `outcome`（`installed`、`already_installed`、`refused`）、`id`、`version`、`folder`。
 
 ### 5.3 Bridge 组件
 
@@ -363,7 +364,7 @@ sequenceDiagram
 | Claude Code 插件 | 随安装包提供本地插件市场 `app\claude-plugin\`，插件中的 `.mcp.json` 写 `eplanmcp.exe` 的完整路径；版本必然与安装的程序一致，不联网也能装（M5 设计 4.7、Q10） | 一键安装，不依赖网络 |
 | 客户端配置 | `eplanmcp client-config <客户端>…` 为 M5 设计 4.11 中的 11 种客户端写入或移除名为 `eplan` 的本地 stdio 服务器。命令是运行 client-config 的那个 `eplanmcp.exe` 的完整路径：安装后就是 `%USERPROFILE%\EplanMcp\app\eplanmcp.exe`（ADR-0016），开发时是构建输出中的那一个，没有环境变量或配置能改变它；参数 `serve`。`--dry-run` 只显示这一项改动前后的写法；写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`，其他服务器和设置保留；每次写入和移除都记在 `<数据根目录>\state\clients.json`，卸载时 `client-config --remove`（不带客户端）按记录移除 | 用户可以掌控被改动的内容；卸载能撤销写入过的配置 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
-| 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010；`client-config` 写入过的条目 `clients.json`；`install-addin` 的注册 `addins.json`）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
+| 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010；`client-config` 写入过的条目 `clients.json`；`install-addin` 的注册 `addins.json`）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；`packs\`（M6 安装的工程包，每个版本一个只读目录 `<id>\<version>\`，以及 `bindings.json`）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
 | 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写、导出占用的空间 | 把这次环境排查中踩过的坑全部变成自动检查 |
 
 ### 7.1 安装验收清单（M5 发布前逐项通过）
