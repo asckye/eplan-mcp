@@ -11,15 +11,19 @@ public sealed record PackResource
     public required ResourceKind Kind { get; init; }
 
     [Description("A finer kind where EplanMcp knows one, such as window_macro, page_macro or plot_frame.")]
+    [Schema(Pattern = PackPatterns.Name)]
     public string? Subtype { get; init; }
 
     [Description("SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of every file (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally.")]
+    [Schema(Pattern = PackPatterns.Sha256)]
     public required string Sha256 { get; init; }
 
     [Description("The size in bytes; a project: all its files together.")]
+    [Schema(Minimum = 0)]
     public required long Bytes { get; init; }
 
     [Description("The number of files: 1, or a project's files with the link file.")]
+    [Schema(Minimum = 1)]
     public required int Files { get; init; }
 
     public required ResourceStorage Storage { get; init; }
@@ -27,5 +31,6 @@ public sealed record PackResource
     public ResourceSource? Source { get; init; }
 
     [Description("The EPLAN version the files say they were written with, when EplanMcp can read it without EPLAN; the evidence is in facts.")]
+    [Schema(Pattern = PackPatterns.EplanVersion)]
     public string? EplanVersion { get; init; }
 }

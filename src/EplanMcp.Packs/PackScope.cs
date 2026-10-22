@@ -5,6 +5,7 @@ namespace EplanMcp.Packs;
 [Description("One configuration scope, such as a cabinet type, and the resources that configure it.")]
 public sealed record PackScope
 {
+    [Schema(Pattern = PackPatterns.Id)]
     public required string Id { get; init; }
 
     public string? Name { get; init; }

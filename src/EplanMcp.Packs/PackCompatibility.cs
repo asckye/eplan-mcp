@@ -12,5 +12,6 @@ public sealed record PackCompatibility
     public IReadOnlyList<string> Variants { get; init; } = [];
 
     [Description("What the pack needs from EplanMcp or EPLAN: capability catalog ids (catalog/, such as A:backup/PROJECT) or tool names.")]
+    [Schema(Pattern = PackPatterns.Capability)]
     public IReadOnlyList<string> Capabilities { get; init; } = [];
 }
