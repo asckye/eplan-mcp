@@ -3259,6 +3259,38 @@
       ]
     },
     {
+      "name": "eplan_pack_build",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_pack_build.md",
+        "specStatus": "Proposed（M6 第 1 阶段；导出 `.eplanpack` 属于第 3 阶段，不在本工具中）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PackBuildToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PackBuildToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_pack_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PackTools.cs",
