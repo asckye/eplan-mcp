@@ -96,6 +96,7 @@
   - `eplan_asset_get`：一个资源的来源位置（输入名和相对路径）、哈希、从文件中测得的事实、知识文档的来源和内容，以及按它自己的哈希核对后是否可用；只有 PNG/SVG 资源有页面预览，宏和项目页的预览要用 EPLAN 导出（第 2 阶段）。
   - `eplan_asset_update`：在开发包中新建或替换知识文档：候选、模块元数据、物料对应表、缺口；按种类严格校验，问题带 JSON 指针；不能写事实，候选恒为 `proposed`、缺口恒为 `open`，从不设为正式规则（要工程师确认，第 3 阶段）。
   - 只读的 MCP 资源模板（只在 `full` 中）：`eplanpack://{pack}/{version}/manifest`（清单）、`eplanpack://{pack}/{version}/{kind}/{name}`（与 `eplan_asset_get` 相同的内容）、`eplanpack://{pack}/{version}/previews/{file}`（预览图片）；内容都能经工具取到。
+  - `eplan_pack_import` 的唯一输入是 `.eplanpack` 时改为安装别人的工程包（ADR-0024）：先解到临时目录完整校验，再由工程师在 EPLAN 的对话框中确认（列出包、版本、作者、摘要、EPLAN 文件、能力要求、引用的资源；Workbench 协议第 1 版没有这类问题的字段），批准后安装为只读的版本；拒绝、超时或 EPLAN 没有运行时什么都不装，不留下文件；写审计 `pack_change`。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed

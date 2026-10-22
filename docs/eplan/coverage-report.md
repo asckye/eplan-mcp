@@ -171,7 +171,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 2/2/2 | A1 A11 | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | A35 | — |
+| eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A35 | — |
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_page_create | write | page.create.execute<br>page.create.plan | 66 | 26 | 1 | 32 | 0 | 9/17/4 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 58 | 29 | 0 | 29 | 0 | 4/10/1 | A15 A18 A24 | — |

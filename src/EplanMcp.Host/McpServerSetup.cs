@@ -43,6 +43,7 @@ internal static class McpServerSetup
         services.TryAddSingleton<ExportRunner>();
         services.TryAddSingleton<ImportFiles>();
         services.TryAddSingleton<PackLibrary>();
+        services.TryAddSingleton<PackInstaller>();
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));

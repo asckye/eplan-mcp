@@ -4552,7 +4552,7 @@
             "type": "string"
           },
           "version": {
-            "description": "Always 'dev': a development pack.",
+            "description": "'dev' for a development pack; the installed version for an .eplanpack.",
             "type": "string"
           },
           "created": {
@@ -4660,6 +4660,28 @@
                 "message": {
                   "type": "string"
                 }
+              }
+            }
+          },
+          "installed": {
+            "description": "Only when the input was someone else's .eplanpack: the pack installed after the engineer confirmed it; the other lists stay empty.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string"
+              },
+              "outcome": {
+                "description": "installed, or already_installed when the same content was installed before.",
+                "type": "string"
               }
             }
           },

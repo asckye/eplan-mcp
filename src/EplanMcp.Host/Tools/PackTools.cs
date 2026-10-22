@@ -10,6 +10,7 @@ using EplanMcp.Host.Packs;
 using EplanMcp.Packs;
 using EplanMcp.Packs.Knowledge;
 using EplanMcp.Packs.Scanning;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -56,11 +57,13 @@ internal sealed class PackTools
     public static async Task<CallToolResult> PackImportAsync(
         PackLibrary packs,
         IReferenceProjectSteps references,
+        PackInstaller installer,
         [Description("Pack id; created if missing")] string pack,
         [Description("1-50 files, folders")] string[] inputs,
         [Description("Name of a new pack")] string? name = null,
         [Description("Copy projects in, not reference")] bool bundle_projects = false,
         [Description("Replace changed resources")] bool replace = false,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -86,6 +89,12 @@ internal sealed class PackTools
             return ToolResults.InvalidArguments(violations);
         }
 
+        bool install = parsed.Any(p => p.Path.EndsWith(PackArchive.Extension, StringComparison.OrdinalIgnoreCase));
+        if (install && parsed.Count != 1)
+        {
+            return ToolResults.InvalidArguments(["An .eplanpack installs someone else's pack, so it must be the only input."]);
+        }
+
         List<ScanInput> scanInputs;
         try
         {
@@ -95,6 +104,11 @@ internal sealed class PackTools
         {
             ex.Error.Execution = null;
             return ToolResults.Error(ex.Error);
+        }
+
+        if (install)
+        {
+            return await InstallAsync(installer, pack, scanInputs[0].Path, inputs![0].Trim(), progress, cancellationToken).ConfigureAwait(false);
         }
 
         ScanResult scan = await ResourceScanner.ScanAsync(scanInputs, cancellationToken).ConfigureAwait(false);
@@ -457,6 +471,30 @@ internal sealed class PackTools
                 Evidence = ResultShaper.CleanText(f.Evidence)!,
             })];
         }
+    }
+
+    /// <summary>Installs someone else's pack after the engineer confirms it (ADR-0024 section 4); <paramref name="pack"/> must be its id.</summary>
+    private static async Task<CallToolResult> InstallAsync(PackInstaller installer, string pack, string file, string given, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
+    {
+        (PackInstallResult? installed, string? digest, BridgeError? error) = await installer.InstallAsync(file, given, pack, ImportTool, progress, cancellationToken).ConfigureAwait(false);
+        if (installed?.Manifest is not { } manifest)
+        {
+            return ToolResults.Error(error!);
+        }
+
+        var result = new PackImportResult
+        {
+            Pack = manifest.Id,
+            Version = manifest.Version,
+            Digest = digest!,
+            Resources = manifest.Resources.Count,
+            Installed = new PackImportResult.InstalledEntry { Id = manifest.Id, Version = manifest.Version, Digest = digest!, Outcome = Snake(installed.Outcome) },
+        };
+        return ToolResults.Success(
+            installed.Outcome == PackInstallOutcome.Installed
+                ? $"Installed '{manifest.Id}' {manifest.Version} after the engineer confirmed it; projects can now lock it."
+                : $"'{manifest.Id}' {manifest.Version} was installed with the same content before; nothing changed.",
+            result);
     }
 
     private static CallToolResult ImportResult(string pack, DevPackChange change, IEnumerable<ScanFinding> findings)

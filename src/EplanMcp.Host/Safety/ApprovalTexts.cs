@@ -23,6 +23,11 @@ internal static class ApprovalTexts
             return Release(suspension, zh);
         }
 
+        if (question.PackInstall is { } install)
+        {
+            return PackInstall(question.Tool, install, zh);
+        }
+
         WritePlan plan = question.Plan;
         string count = plan.Changes.Count.ToString(CultureInfo.InvariantCulture);
         string project = plan.ProjectPath.Length == 0
@@ -77,6 +82,32 @@ internal static class ApprovalTexts
             ApproveLabel = zh ? "已核实，继续" : "Checked, continue",
             RejectLabel = zh ? "保持暂停" : "Keep suspended",
             CountdownFormat = zh ? "{0} 后自动保持暂停" : "Stays suspended automatically in {0}",
+        };
+    }
+
+    /// <summary>
+    /// The confirmation of installing someone else's engineering pack (ADR-0024 section 4): what it is, who the manifest
+    /// says made it (unsigned, so unchecked), its EPLAN files, its requirements, and that it only holds data.
+    /// </summary>
+    private static ApprovalAskArgs PackInstall(string tool, Packs.PackInstallInfo install, bool zh)
+    {
+        string author = install.Author is { } a ? Value(a, zh) : zh ? "（清单中没有）" : "(not in the manifest)";
+        string size = Exports.ByteSize.Format(install.Bytes);
+        string capabilities = install.Capabilities.Count == 0 ? (zh ? "无" : "none") : Value(string.Join(", ", install.Capabilities), zh);
+        int more = install.NativeFiles.Count - Packs.PackInstallInfo.MaxNamed;
+        return new ApprovalAskArgs
+        {
+            Title = zh ? "安装别人的工程包？" : "Install someone else's engineering pack?",
+            Summary = zh
+                ? $"工具：{tool}\n文件：{Value(install.File, zh)}（{size}）\n工程包：{Value(install.Id, zh)} {Value(install.Version, zh)}\n作者（清单中写的，没有签名，未核实）：{author}\n摘要：{install.Digest}\n能力要求：{capabilities}\n引用包外的资源：{install.Referenced} 个\n其中的 EPLAN 文件（共 {install.NativeFiles.Count} 个）："
+                : $"Tool: {tool}\nFile: {Value(install.File, zh)} ({size})\nPack: {Value(install.Id, zh)} {Value(install.Version, zh)}\nAuthor (as the manifest says; unsigned, not checked): {author}\nDigest: {install.Digest}\nRequires: {capabilities}\nResources referenced outside the pack: {install.Referenced}\nIts EPLAN files ({install.NativeFiles.Count}):",
+            Changes = [.. install.NativeFiles.Take(Packs.PackInstallInfo.MaxNamed).Select(f => Value(f, zh)), .. more > 0 ? [zh ? $"……另有 {more} 个" : $"... and {more} more"] : Array.Empty<string>()],
+            Note = zh
+                ? "工程包只含数据，EplanMcp 从不执行其中的内容。安装后不可变，不会改变任何项目的锁定；EPLAN 只会在 scratch 副本中打开其中的项目。只安装你信任的来源。"
+                : "Packs hold data only; EplanMcp never runs anything in them. The installed version never changes and no project's lock changes; EPLAN opens its projects only in scratch copies. Install only what you trust.",
+            ApproveLabel = zh ? "安装" : "Install",
+            RejectLabel = zh ? "不安装" : "Do not install",
+            CountdownFormat = zh ? "{0} 后自动不安装" : "Not installed automatically in {0}",
         };
     }
 

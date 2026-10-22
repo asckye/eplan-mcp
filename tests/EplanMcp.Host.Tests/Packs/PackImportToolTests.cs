@@ -5,8 +5,10 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
+using EplanMcp.Host.Tests.Tools;
 using EplanMcp.Host.Tools;
 using EplanMcp.Packs;
+using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Packs;
@@ -137,8 +139,12 @@ public sealed class PackImportToolTests : IDisposable
 
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);
 
-    private Task<CallToolResult> ImportAsync(string[] inputs, string? name = null, bool bundleProjects = false, bool replace = false) =>
-        PackTools.PackImportAsync(new PackLibrary(_locations, _config, new AuditLog(_locations.Audit, _time), _time), new GapOnlyReferenceProjectSteps(), "acme.panels", inputs, name, bundleProjects, replace, Cancel);
+    private Task<CallToolResult> ImportAsync(string[] inputs, string? name = null, bool bundleProjects = false, bool replace = false)
+    {
+        var packs = new PackLibrary(_locations, _config, new AuditLog(_locations.Audit, _time), _time);
+        var installer = new PackInstaller(packs, new ApprovalService([], _config, _time, NullLogger<ApprovalService>.Instance), new FakeBridgeClient());
+        return PackTools.PackImportAsync(packs, new GapOnlyReferenceProjectSteps(), installer, "acme.panels", inputs, name, bundleProjects, replace, null, Cancel);
+    }
 
     private static JsonElement Error(CallToolResult result, string reason, string text)
     {

@@ -8,7 +8,7 @@ internal sealed class PackImportResult
     [Description("The development pack's id.")]
     public string Pack { get; set; } = string.Empty;
 
-    [Description("Always 'dev': a development pack.")]
+    [Description("'dev' for a development pack; the installed version for an .eplanpack.")]
     public string Version { get; set; } = "dev";
 
     [Description("True when this call created the pack.")]
@@ -37,6 +37,9 @@ internal sealed class PackImportResult
 
     [Description("Warnings about the inputs, such as a kind taken from the extension alone.")]
     public List<FindingEntry> Findings { get; set; } = [];
+
+    [Description("Only when the input was someone else's .eplanpack: the pack installed after the engineer confirmed it; the other lists stay empty.")]
+    public InstalledEntry? Installed { get; set; }
 
     [Description("True when entries were cut to stay within the size budget.")]
     public bool Truncated { get; set; }
@@ -69,6 +72,18 @@ internal sealed class PackImportResult
 
         [Description("The EPLAN version the files say they were written with; null when unknown without EPLAN.")]
         public string? EplanVersion { get; set; }
+    }
+
+    internal sealed class InstalledEntry
+    {
+        public string Id { get; set; } = string.Empty;
+
+        public string Version { get; set; } = string.Empty;
+
+        public string Digest { get; set; } = string.Empty;
+
+        [Description("installed, or already_installed when the same content was installed before.")]
+        public string Outcome { get; set; } = string.Empty;
     }
 
     internal sealed class FindingEntry

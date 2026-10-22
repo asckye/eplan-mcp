@@ -3455,6 +3455,11 @@
             "file": "tests/EplanMcp.Host.Tests/Packs/PackImportToolTests.cs"
           },
           {
+            "name": "PackInstallTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PackInstallTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"

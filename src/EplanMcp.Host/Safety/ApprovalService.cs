@@ -57,6 +57,17 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     public Task<ApprovalResult> ConfirmReleaseAsync(string requestId, string tool, ToolTier tier, string argumentsHash, WritePlan plan, EplanInstanceInfo eplan, Suspension suspension, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
         AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, suspension.Changes, clock.GetUtcNow() + Timeout, suspension) { Tier = tier, Eplan = eplan }, progress, cancellationToken);
 
+    /// <summary>
+    /// Asks the engineer to confirm installing someone else's engineering pack <paramref name="install"/> (ADR-0024
+    /// section 4), bound to its digest, through the same channels as an approval; the Workbench cannot ask it in protocol
+    /// version 1, so EPLAN's dialog does, in EPLAN <paramref name="eplan"/>.
+    /// </summary>
+    public Task<ApprovalResult> ConfirmPackInstallAsync(string requestId, string tool, Packs.PackInstallInfo install, EplanInstanceInfo eplan, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(
+            new ApprovalQuestion(requestId, tool, install.Digest, new WritePlan { Fingerprint = install.Digest }, [], clock.GetUtcNow() + Timeout) { Tier = ToolTier.Write, Eplan = eplan, PackInstall = install },
+            progress,
+            cancellationToken);
+
     private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         string requestId = question.RequestId;
@@ -79,7 +90,7 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
                 LogDecided(requestId, tool, channel.Name, decision);
 
                 // Only a write that may now run has an outcome to show; a confirmation is followed by its own approval.
-                bool shows = decision == ApprovalDecision.Granted && question.Release is null;
+                bool shows = decision == ApprovalDecision.Granted && question.Release is null && question.PackInstall is null;
                 if (!shows)
                 {
                     answer.Outcome?.Dispose();
