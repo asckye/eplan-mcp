@@ -1005,6 +1005,23 @@
       ]
     },
     {
+      "name": "eplan_pack_import",
+      "safety": "write",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_pack_import.md",
+      "small": 1,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": [
+        "A35"
+      ]
+    },
+    {
       "name": "eplan_page_create",
       "safety": "write",
       "operations": [
