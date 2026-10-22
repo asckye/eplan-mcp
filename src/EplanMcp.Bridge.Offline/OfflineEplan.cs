@@ -55,8 +55,8 @@ internal static class OfflineEplan
 
     private static void Serve(OfflineHostOptions options, string platformBin, IBridgeLog log)
     {
-        Project project = Open(options.Project);
-        log.Write(BridgeLogLevel.Information, "Opened the project");
+        Project project = Open(options.Project, options.ReadOnly);
+        log.Write(BridgeLogLevel.Information, options.ReadOnly ? "Opened the project read-only" : "Opened the project");
         try
         {
             using BridgeServer server = BridgeHost.Start(log, options.PipePrefix, l => EplanEnvironment.CaptureOffline(l, options.VariantBin, platformBin));
@@ -69,12 +69,16 @@ internal static class OfflineEplan
     }
 
     /// <summary>Outside an action every EPLAN call needs a LockingStep (A9, B7); spike S15 opened its copy so.</summary>
-    private static Project Open(string path)
+    /// <remarks>
+    /// A completed revision (.elr) is write-protected (S23 r3), so it is opened with <c>OpenMode.ReadOnly</c> (the enum's
+    /// members are known by reflection only); whether OpenProject takes .ell and .elr at all is left to the Large tests.
+    /// </remarks>
+    private static Project Open(string path, bool readOnly)
     {
         using (new LockingStep())
         {
             using var manager = new ProjectManager();
-            return manager.OpenProject(path);
+            return readOnly ? manager.OpenProject(path, ProjectManager.OpenMode.ReadOnly) : manager.OpenProject(path);
         }
     }
 
