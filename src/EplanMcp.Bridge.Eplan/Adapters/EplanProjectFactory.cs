@@ -16,9 +16,10 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 internal sealed class EplanProjectFactory : IProjectFactory
 {
     /// <summary>
-    /// S27 made a project from GB_bas001.zw9 in 3.5 s (S30: 3 to 9 s), open exclusively for the API. A34: the object
-    /// CreateProject returns cannot be closed once its ProjectManager is gone and OpenProject on it throws, and the project
-    /// is no longer open after the call; so what is needed is read here, and the project is neither closed nor reopened.
+    /// S27 made a project from GB_bas001.zw9 in 3.5 s (S30: 3 to 9 s), open exclusively for the API.
+    /// S30 saw the project closed after a spike call, but it stays open through the Bridge (2026-10-22 Large test ProjectCreateTests).
+    /// Read what is needed before disposing the creating ProjectManager, then close through a fresh OpenProjects lookup
+    /// (S30 r3, api-notes A34): the object CreateProject returns cannot be closed once its ProjectManager is gone.
     /// </summary>
     public (int Pages, string? ProjectGuid) Create(string linkFile, string basicProject)
     {
@@ -26,13 +27,21 @@ internal sealed class EplanProjectFactory : IProjectFactory
         try
         {
             using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
-            using var manager = new ProjectManager();
-            Project project = manager.CreateProject(linkFile, basicProject);
-            using var finder = new DMObjectsFinder(project);
-            int pages = finder.GetPages(null).Length;
-            using ProjectPropertyList properties = project.Properties;
-            using PropertyValue guid = properties.PROJ_GUID;
-            return (pages, guid.IsEmpty ? null : guid.ToString());
+            (int Pages, string? ProjectGuid) result;
+            using (var manager = new ProjectManager())
+            {
+                Project project = manager.CreateProject(linkFile, basicProject);
+                using var finder = new DMObjectsFinder(project);
+                int pages = finder.GetPages(null).Length;
+                using ProjectPropertyList properties = project.Properties;
+                using PropertyValue guid = properties.PROJ_GUID;
+                result = (pages, guid.IsEmpty ? null : guid.ToString());
+            }
+
+            using var closeManager = new ProjectManager();
+            Project? openProject = closeManager.OpenProjects.FirstOrDefault(p => string.Equals(p.ProjectLinkFilePath, linkFile, StringComparison.OrdinalIgnoreCase));
+            openProject?.Close();
+            return result;
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException or NotSupportedException or SecurityException or IOException
             && new EplanExceptionMapper().Map(ex) is null)
