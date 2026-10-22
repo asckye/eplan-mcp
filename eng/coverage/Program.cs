@@ -6,8 +6,9 @@ using Microsoft.CodeAnalysis;
 namespace EplanMcp.Coverage;
 
 /// <summary>
-/// <c>scan</c> records the EPLAN API members the Bridge uses (needs EPLAN installed); <c>check</c> tells whether the
-/// committed coverage files are current, without EPLAN (a CI step runs it).
+/// <c>scan</c> records the EPLAN API members the Bridge uses (needs EPLAN installed); <c>generate</c> writes the files
+/// derived from committed inputs (the wrappers catalog/wrappers.yaml selects, the tool mapping and the coverage report);
+/// <c>check</c> tells whether the committed ones are current, without EPLAN (a CI step runs it).
 /// </summary>
 internal static class Program
 {
@@ -29,8 +30,7 @@ internal static class Program
                 Scan(root, eplanBin);
                 return 0;
             case ["generate"]:
-                CoverageCheck.Generate(root);
-                Console.WriteLine("Wrote " + string.Join(", ", CoverageCheck.Generated.Select(g => g.Path)) + ".");
+                Console.WriteLine("Wrote " + string.Join(", ", CoverageCheck.Generate(root)) + ".");
                 return 0;
             case ["check"]:
                 // In GitHub Actions the lines become annotations on the run and the pull request.
