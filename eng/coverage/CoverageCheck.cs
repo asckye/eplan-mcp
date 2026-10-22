@@ -20,6 +20,7 @@ internal static class CoverageCheck
     [
         (ToolMapping.RelativePath, root => CoverageJson.Serialize(ToolMapping.Build(root))),
         (CoverageReport.RelativePath, root => CoverageJson.Serialize(CoverageReport.Build(root))),
+        (CoverageMarkdown.RelativePath, CoverageMarkdown.Render),
     ];
 
     public static void Generate(string repositoryRoot)
