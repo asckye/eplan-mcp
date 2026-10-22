@@ -1,6 +1,7 @@
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.E3D;
 using Eplan.EplApi.DataModel.EObjects;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -81,10 +82,12 @@ internal sealed class EplanCableGenerator : ICableGenerator
         }
     }
 
+    /// <summary>A Connection3D throws NotSupportedException on StartPin and EndPin and has no page (S6), so only its properties count.</summary>
     private static string ConnectionState(Connection connection)
     {
         using ConnectionPropertyList properties = connection.Properties;
-        return Hash(connection.Page?.Name, End(connection.StartPin), End(connection.EndPin),
+        bool is3D = connection is Connection3D;
+        return Hash(is3D ? null : connection.Page?.Name, is3D ? null : End(connection.StartPin), is3D ? null : End(connection.EndPin),
             Raw(properties.CONNECTION_DESIGNATION), Raw(properties.CONNECTION_WIRECROSSSECTION), Raw(properties.CONNECTION_WIRENUMBER));
     }
 
