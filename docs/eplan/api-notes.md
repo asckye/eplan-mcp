@@ -186,6 +186,13 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A31. 新建项目、还原项目、判断项目版本（spike S27，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S27](../../spikes/S27-project-create/README.md)。全部写入都在 scratch 中。
+- `ProjectManager.CreateProject(链接文件, 基本项目 .zw9)`：3.5 秒，生成 `.elk` 和 `.edb\`，新项目处于打开状态（API 独占打开），带模板的页和属性（`GB_bas001`：1 页）。— S27。
+- 🔴 `restore /TYPE:PROJECT` 还原到已存在的项目时不报错，照样覆盖（89 个文件重写）；与主数据还原跳过已有文件相反（A30）。还原一个示例项目备份约 6 秒。— S27。
+- `ProjectManager.GetProjectDataCompatibility(path)` / `GetProjectDatabaseVersion(path)` 不打开项目，0.02–0.3 秒；2026.0.3 的项目为 `IsCompatible`、`18.0`；路径不存在时抛出 `ProjectNotFoundException`（S063073）。— S27。
+- `.zw9`、`.zw1` 是 7z 归档。项目 `.edb\ProjectInfo.xml` 是项目属性快照，`id="10043"` 为最新更改或更新的 EPLAN 版本（`2026.0.3`），按 `id` 取（`name` 随界面语言变化）；其中有创建者的个人信息，只取需要的字段。— S27。
+
 ### A30. 主数据的备份、还原与部件库写入（spike S24 写入部分，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../spikes/S24-master-data/README.md)。写入只在还原到 scratch 中的副本上进行，正在用的库前后 SHA-256 不变。
 - `new ActionManager().FindAction("backup").Execute(context)`，参数 `TYPE=MASTERDATA`、`MDTYPE=ARTICLES|LANGUAGES`、`SOURCEPATH`/`FILENAME`（由配置的库路径拆出，如 `$(MD_PARTS)` + `EPLAN_parts.alk`，变量由 EPLAN 展开）、`DESTINATIONPATH`、`ARCHIVENAME`：返回 true，0.14 / 0.23 秒。得到 7z 格式的 `.zw6`（部件库，991 KB，不含 `.lck` 和 `EMPTY_SQL_Backups\`）、`.zw7`（翻译库，912 KB，只含 `Translate.db`）。— S24。
