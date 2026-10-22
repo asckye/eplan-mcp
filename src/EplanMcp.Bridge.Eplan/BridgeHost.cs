@@ -95,6 +95,7 @@ internal static class BridgeHost
         var placer = new EplanDevicePlacer();
         var drawings = new EplanDrawingImporter();
         var translator = new EplanProjectTranslator();
+        var placeholders = new EplanPlaceholderReader();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -111,7 +112,7 @@ internal static class BridgeHost
             new PartListOperation(catalog, new EplanPartReader()),
             new PartSearchOperation(new EplanPartsDatabase()),
             new RevisionListOperation(catalog, new EplanRevisionReader()),
-            new PlaceholderListOperation(catalog, pages, new EplanPlaceholderReader()),
+            new PlaceholderListOperation(catalog, pages, placeholders),
             new MessageListOperation(new EplanSystemMessageReader()),
             new CheckListOperation(catalog, messages),
             new MacroListOperation(macros),
@@ -129,6 +130,8 @@ internal static class BridgeHost
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
+            new PlaceholderApplyPlanOperation(catalog, pages, placeholders),
+            new PlaceholderApplyExecuteOperation(catalog, pages, placeholders, new EplanPlaceholderWriter(), transactions),
             new ImportDxfPlanOperation(catalog, pages, drawings),
             new ImportDxfExecuteOperation(catalog, pages, drawings, transactions),
             new ImportPxfPlanOperation(),
