@@ -946,7 +946,7 @@
       "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
-      "small": 2,
+      "small": 3,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -1312,6 +1312,27 @@
         "note": "经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证",
         "verifies": true
       }
+    },
+    {
+      "name": "eplan_placeholder_list",
+      "safety": "read",
+      "operations": [
+        "placeholder.list"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_placeholder_list.md",
+      "small": 2,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A11",
+        "A14",
+        "A33"
+      ]
     },
     {
       "name": "eplan_plc_get",

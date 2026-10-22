@@ -80,6 +80,7 @@ internal static class McpServerSetup
             .WithTools<ProjectDestructiveTools>(HostJson.Options)
             .WithTools<MacroTools>(HostJson.Options)
             .WithTools<MacroWriteTools>(HostJson.Options)
+            .WithTools<PlaceholderTools>(HostJson.Options)
             .WithTools<ExportTools>(HostJson.Options)
             .WithTools<ImageExportTools>(HostJson.Options)
             .WithTools<ProjectExportTools>(HostJson.Options)
