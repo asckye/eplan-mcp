@@ -72,6 +72,18 @@ public static class OperationNames
     public const string PlaceholderList = "placeholder.list";
 
     /// <summary>
+    /// Plans applying a value set to one placeholder on a page: the change, the values it applies, the fingerprint.
+    /// Reads only. Arguments: <see cref="PlaceholderApplyArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string PlaceholderApplyPlan = "placeholder.apply.plan";
+
+    /// <summary>
+    /// Applies the planned value set in one transaction and reads the placeholder back. Arguments:
+    /// <see cref="PlaceholderApplyArgs"/> with the plan's fingerprint; data: <see cref="PlaceholderApplyData"/>.
+    /// </summary>
+    public const string PlaceholderApplyExecute = "placeholder.apply.execute";
+
+    /// <summary>
     /// EPLAN's system messages of this session, newest first, filtered and sliced in the Bridge. Arguments:
     /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
     /// </summary>
