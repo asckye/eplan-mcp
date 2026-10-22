@@ -213,6 +213,34 @@ public static class PackVerifier
         }
     }
 
+    /// <summary>
+    /// What makes the one resource <paramref name="resource"/> of the pack in <paramref name="folder"/> unavailable now,
+    /// or null: a bundled resource must have the hash, size and file count pack.json records; a referenced one is
+    /// checked below its root (<see cref="ReferenceProblemAsync"/>). Cheaper than checking the whole pack.
+    /// </summary>
+    public static async Task<string?> ResourceProblemAsync(string folder, PackResource resource, IReadOnlyDictionary<string, string> roots, CancellationToken cancellationToken)
+    {
+        if (resource.Storage == ResourceStorage.Referenced)
+        {
+            return await ReferenceProblemAsync(resource, roots, cancellationToken).ConfigureAwait(false);
+        }
+
+        string full = Path.Combine(folder, resource.Path.Replace('/', Path.DirectorySeparatorChar));
+        try
+        {
+            (string sha256, long bytes, int files) = !File.Exists(full) ? (string.Empty, -1, 0)
+                : resource.Kind == ResourceKind.Project ? await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(full), cancellationToken).ConfigureAwait(false)
+                : await HashOneAsync(full, cancellationToken).ConfigureAwait(false);
+            return bytes < 0 ? "is missing from the pack"
+                : (sha256, bytes, files) == (resource.Sha256, resource.Bytes, resource.Files) ? null
+                : "does not match pack.json: its files changed after the manifest was written";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or PackFormatException)
+        {
+            return "cannot be read";
+        }
+    }
+
     private static async Task<(string, long, int)> HashOneAsync(string path, CancellationToken cancellationToken)
     {
         (string sha256, long bytes) = await PackHasher.HashFileAsync(path, cancellationToken).ConfigureAwait(false);

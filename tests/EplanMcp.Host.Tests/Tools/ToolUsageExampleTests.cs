@@ -25,7 +25,6 @@ public sealed partial class ToolUsageExampleTests : IDisposable
     /// <summary>Tools named before they are registered. Remove the entry when the tool is registered.</summary>
     private static readonly (string Tool, string Reason)[] _planned =
     [
-        ("eplan_asset_get", "M6 phase 1, docs/tools/eplan_asset_get.md"),
         ("eplan_asset_update", "M6 phase 1, docs/tools/eplan_asset_update.md"),
     ];
 
