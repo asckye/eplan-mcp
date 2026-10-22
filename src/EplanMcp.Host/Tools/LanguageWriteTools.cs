@@ -38,29 +38,31 @@ internal sealed class LanguageWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(LanguageSetResult))]
     [Description(
-        "Sets which languages the pages of an EPLAN project show, in order, or adds translation languages; translates " +
-        "nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch it needs the engineer's " +
-        "approval. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a language is " +
-        "eplan_language_remove.")]
+        "Sets the languages an EPLAN project's pages show, adds translation languages, or sets the source language its " +
+        "texts are in; translates nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch " +
+        "the engineer approves it. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a " +
+        "language: eplan_language_remove.")]
     public static async Task<CallToolResult> LanguageSetAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("Name or path from eplan_project_list")] string project,
-        [Description("1-10 codes to show, in order; [\"##_##\"] clears")] string[]? display = null,
+        [Description("1-10 codes to show, in order; ##_## alone clears")] string[]? display = null,
         [Description("1-10 codes to add, e.g. en_US")] string[]? add = null,
-        [Description("Only return the settings before and after")] bool dry_run = false,
+        [Description("Source language, e.g. de_DE; ##_## clears")] string? source = null,
+        [Description("Only return before and after")] bool dry_run = false,
         CancellationToken cancellationToken = default)
     {
-        // The codes, and that the displayed ones are translation languages, are checked by the Bridge, all at once.
+        // The codes, and that the displayed and source ones are translation languages, are checked by the Bridge, all at once.
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
             violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
         }
 
-        if (display is null && add is null)
+        source = ToolArguments.Optional(source);
+        if (display is null && add is null && source is null)
         {
-            violations.Add("Give 'display', 'add' or both.");
+            violations.Add("Give at least one of 'display', 'add' and 'source'.");
         }
 
         foreach ((string name, string[]? codes) in new[] { ("display", display), ("add", add) })
@@ -81,6 +83,7 @@ internal sealed class LanguageWriteTools
             Project = project,
             Display = display is null ? null : [.. display.Select(code => code ?? string.Empty)],
             Add = add is null ? null : [.. add.Select(code => code ?? string.Empty)],
+            Source = source,
         };
         var request = new WriteRequest<LanguageSetArgs, LanguageSetArgs>(
             SetTool,
@@ -88,7 +91,7 @@ internal sealed class LanguageWriteTools
             OperationNames.LanguageSetPlan,
             OperationNames.LanguageSetExecute,
             args,
-            plan => new LanguageSetArgs { Project = args.Project, Display = args.Display, Add = args.Add, Fingerprint = plan.Fingerprint },
+            plan => new LanguageSetArgs { Project = args.Project, Display = args.Display, Add = args.Add, Source = args.Source, Fingerprint = plan.Fingerprint },
             dry_run,
             Limit,
             "Setting languages");
@@ -113,8 +116,8 @@ internal sealed class LanguageWriteTools
     {
         Dictionary<string, string> details = outcome.Plan.Details ?? [];
         LanguageSetData? data = outcome.Data;
-        LanguageSetResult.LanguagesEntry before = data is null ? Entry(details, "translationBefore", "displayBefore") : Entry(data.Before);
-        LanguageSetResult.LanguagesEntry after = data is null ? Entry(details, "translationAfter", "displayAfter") : Entry(data.After);
+        LanguageSetResult.LanguagesEntry before = data is null ? Entry(details, "translationBefore", "displayBefore", "sourceBefore") : Entry(data.Before);
+        LanguageSetResult.LanguagesEntry after = data is null ? Entry(details, "translationAfter", "displayAfter", "sourceAfter") : Entry(data.After);
         bool committed = outcome.Execution == ExecutionState.Committed;
         bool nothing = outcome.Plan.Changes.Count == 0;
         List<string> added = [.. after.Translation.Except(before.Translation, StringComparer.Ordinal)];
@@ -158,7 +161,8 @@ internal sealed class LanguageWriteTools
             Recovered = outcome.Recovered,
             Hint = string.Join(" ", hints),
         };
-        string change = Change(added, args.Display);
+        string? source = after.Source != before.Source ? args.Source : null;
+        string change = Change(added, source, args.Display, committed);
         string summary = nothing
             ? "Nothing to change: the project already has these languages."
             : committed
@@ -167,25 +171,36 @@ internal sealed class LanguageWriteTools
         return ToolResults.Success(summary, result);
     }
 
-    /// <summary>"add sv_SE to the translation languages and set the displayed languages to en_US, zh_CN", in the past tense once done.</summary>
-    private static string Change(List<string> added, List<string>? display) => string.Join(
-        " and ",
-        new[]
-        {
-            added.Count == 0 ? null : $"added {string.Join(", ", added)} to the translation languages",
-            display is null ? null : display is [Unset] ? "cleared the displayed languages" : $"set the displayed languages to {string.Join(", ", display)}",
-        }.OfType<string>());
+    /// <summary>
+    /// "add sv_SE to the translation languages, set the source language to de_DE and set the displayed languages to
+    /// en_US, zh_CN", in the past tense once <paramref name="done"/>.
+    /// </summary>
+    private static string Change(List<string> added, string? source, List<string>? display, bool done)
+    {
+        string[] parts =
+        [
+            .. new[]
+            {
+                added.Count == 0 ? null : $"{(done ? "added" : "add")} {string.Join(", ", added)} to the translation languages",
+                source is null ? null : source == Unset ? $"{(done ? "cleared" : "clear")} the source language" : $"set the source language to {source}",
+                display is null ? null : display is [Unset] ? $"{(done ? "cleared" : "clear")} the displayed languages" : $"set the displayed languages to {string.Join(", ", display)}",
+            }.OfType<string>(),
+        ];
+        return parts.Length <= 2 ? string.Join(" and ", parts) : string.Join(", ", parts[..^1]) + " and " + parts[^1];
+    }
 
     internal static LanguageSetResult.LanguagesEntry Entry(ProjectLanguages languages) => new()
     {
         Translation = [.. languages.Translation.Select(code => ResultShaper.CleanText(code))],
         Display = [.. languages.Display.Select(code => ResultShaper.CleanText(code))],
+        Source = ResultShaper.CleanText(languages.Source),
     };
 
-    internal static LanguageSetResult.LanguagesEntry Entry(Dictionary<string, string> details, string translation, string display) => new()
+    internal static LanguageSetResult.LanguagesEntry Entry(Dictionary<string, string> details, string translation, string display, string source) => new()
     {
         Translation = Lines(details, translation),
         Display = Lines(details, display),
+        Source = ResultShaper.CleanText(details.GetValueOrDefault(source)),
     };
 
     private static List<string> Lines(Dictionary<string, string> details, string key) =>

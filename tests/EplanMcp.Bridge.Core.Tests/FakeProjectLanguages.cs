@@ -7,7 +7,7 @@ namespace EplanMcp.Bridge.Core.Tests;
 /// A project's language settings, changed the way S23 found EPLAN changes them (api-notes A28): SetDisplayedLanguages
 /// takes codes separated by commas and refuses semicolons, the settings are stored as <c>en_US;zh_CN;</c>, and nothing
 /// here is taken back by a rollback. <see cref="Failure"/> is thrown by the change <see cref="FailOn"/> names;
-/// <see cref="KeepDisplay"/> and <see cref="IgnoreWrite"/> stand for EPLAN accepting a call but not changing the
+/// <see cref="KeepDisplay"/>, <see cref="KeepSource"/> and <see cref="IgnoreWrite"/> stand for EPLAN accepting a call but not changing the
 /// setting; <see cref="WriteFailure"/> for a write-back EPLAN refuses. Records every call.
 /// </summary>
 internal sealed class FakeProjectLanguages : IProjectLanguages
@@ -22,6 +22,8 @@ internal sealed class FakeProjectLanguages : IProjectLanguages
     public string? FailOn { get; set; }
 
     public bool KeepDisplay { get; set; }
+
+    public bool KeepSource { get; set; }
 
     public bool IgnoreWrite { get; set; }
 
@@ -56,9 +58,19 @@ internal sealed class FakeProjectLanguages : IProjectLanguages
         }
     }
 
+    public void SetSource(string projectPath, string language)
+    {
+        Change("SetSource " + language);
+        if (!KeepSource)
+        {
+            Settings.Source = language;
+        }
+    }
+
+    /// <summary>Records the source language only when it changes it, as the adapter writes it only then.</summary>
     public void Write(string projectPath, LanguageSettings settings)
     {
-        Calls.Add("Write " + settings.Translation + " " + settings.Display);
+        Calls.Add("Write " + settings.Translation + " " + settings.Display + (settings.Source == Settings.Source ? string.Empty : " " + settings.Source));
         if (WriteFailure is not null)
         {
             throw WriteFailure;
@@ -68,6 +80,7 @@ internal sealed class FakeProjectLanguages : IProjectLanguages
         {
             Settings.Translation = settings.Translation;
             Settings.Display = settings.Display;
+            Settings.Source = settings.Source;
         }
     }
 

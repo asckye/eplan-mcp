@@ -502,13 +502,13 @@ public sealed class SerializerCompatibilityTests
         new PageRenumberArgs(),
         new PageRenumberData { Project = "项目 二", Changed = [new RenamedObject { From = "=GAA+A1&EFS1/90", To = "=GAA+A1&EFS1/200" }], Unchanged = 1, Warning = "w" },
         new PageRenumberData(),
-        new LanguageSetArgs { Project = "Line1", Display = ["en_US", "zh_CN"], Add = ["sv_SE"], Fingerprint = "f" },
+        new LanguageSetArgs { Project = "Line1", Display = ["en_US", "zh_CN"], Add = ["sv_SE"], Source = "de_DE", Fingerprint = "f" },
         new LanguageSetArgs(),
         new LanguageSetData
         {
             Project = "项目 二",
-            Before = new ProjectLanguages { Translation = ["de_DE", "en_US"], Display = ["##_##"] },
-            After = new ProjectLanguages { Translation = ["de_DE", "en_US", "sv_SE"], Display = ["en_US", "zh_CN"] },
+            Before = new ProjectLanguages { Translation = ["de_DE", "en_US"], Display = ["##_##"], Source = "##_##" },
+            After = new ProjectLanguages { Translation = ["de_DE", "en_US", "sv_SE"], Display = ["en_US", "zh_CN"], Source = "de_DE" },
             Warning = "w",
         },
         new LanguageSetData(),

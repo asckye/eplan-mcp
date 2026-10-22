@@ -6,7 +6,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <see cref="OperationNames.LanguageSetPlan"/>: reads the project's language settings and returns one <c>update</c> of
 /// the project's <c>languages</c> with the settings that change before and after, as text such as
 /// <c>display: ##_##</c> → <c>display: en_US, zh_CN</c>; no change when the settings are already as asked
-/// (docs/tools/eplan_language_set.md, section 5). The details give both lists before and after. Reads only.
+/// (docs/tools/eplan_language_set.md, section 5). The details give both lists and the source language before and
+/// after. Reads only.
 /// </summary>
 public sealed class LanguageSetPlanOperation(IProjectCatalog catalog, IProjectLanguages languages) : Operation<LanguageSetArgs, WritePlan>
 {
@@ -16,6 +17,10 @@ public sealed class LanguageSetPlanOperation(IProjectCatalog catalog, IProjectLa
     public const string TranslationAfter = "translationAfter";
     public const string DisplayAfter = "displayAfter";
 
+    /// <summary>The <see cref="WritePlan.Details"/> keys of the source language before and after, one code each.</summary>
+    public const string SourceBefore = "sourceBefore";
+    public const string SourceAfter = "sourceAfter";
+
     public override string Name => OperationNames.LanguageSetPlan;
 
     protected override WritePlan Execute(LanguageSetArgs args)
@@ -24,8 +29,10 @@ public sealed class LanguageSetPlanOperation(IProjectCatalog catalog, IProjectLa
         List<string> translation = LanguageCodes.Split(request.Before.Translation);
         List<string> display = LanguageCodes.Split(request.Before.Display);
         IReadOnlyList<string> displayAfter = request.DisplayAfter();
+        string source = LanguageCodes.SourceOf(request.Before);
         bool adds = request.ToAdd.Count > 0;
         bool shows = request.Display is not null && !request.Display.SequenceEqual(display, StringComparer.Ordinal);
+        bool sources = request.SetsSource;
         return new WritePlan
         {
             Project = request.Project.Name,
@@ -40,8 +47,8 @@ public sealed class LanguageSetPlanOperation(IProjectCatalog catalog, IProjectLa
                         Kind = "project",
                         Name = request.Project.Name,
                         Property = "languages",
-                        OldValue = Text(adds ? translation : null, shows ? display : null),
-                        NewValue = Text(adds ? request.Translation : null, shows ? displayAfter : null),
+                        OldValue = Text(adds ? translation : null, sources ? source : null, shows ? display : null),
+                        NewValue = Text(adds ? request.Translation : null, sources ? request.SourceAfter() : null, shows ? displayAfter : null),
                     },
                 ],
             Fingerprint = request.StateFingerprint(),
@@ -51,12 +58,22 @@ public sealed class LanguageSetPlanOperation(IProjectCatalog catalog, IProjectLa
                 [DisplayBefore] = string.Join("\n", display),
                 [TranslationAfter] = string.Join("\n", request.Translation),
                 [DisplayAfter] = string.Join("\n", displayAfter),
+                [SourceBefore] = source,
+                [SourceAfter] = request.SourceAfter(),
             },
         };
     }
 
-    /// <summary>The settings that change, as the approval form and the audit show them: <c>translation: …; display: …</c>.</summary>
-    private static string Text(IReadOnlyList<string>? translation, IReadOnlyList<string>? display) => string.Join(
+    /// <summary>
+    /// The settings that change, in the order they are changed (tool spec 2), as the approval form and the audit show
+    /// them: <c>translation: …; source: …; display: …</c>.
+    /// </summary>
+    private static string Text(IReadOnlyList<string>? translation, string? source, IReadOnlyList<string>? display) => string.Join(
         "; ",
-        new[] { translation is null ? null : "translation: " + string.Join(", ", translation), display is null ? null : "display: " + string.Join(", ", display) }.OfType<string>());
+        new[]
+        {
+            translation is null ? null : "translation: " + string.Join(", ", translation),
+            source is null ? null : "source: " + source,
+            display is null ? null : "display: " + string.Join(", ", display),
+        }.OfType<string>());
 }

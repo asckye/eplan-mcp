@@ -37,9 +37,50 @@ public sealed class LanguageSetOperationTests
                 ["displayBefore"] = "##_##",
                 ["translationAfter"] = "de_DE\nen_US\nzh_CN",
                 ["displayAfter"] = "en_US\nzh_CN",
+                ["sourceBefore"] = "##_##",
+                ["sourceAfter"] = "##_##",
             },
             plan.Details);
         Assert.Empty(_languages.Calls);
+    }
+
+    [Fact]
+    public void Plan_Source_IsPartOfTheUpdateBetweenTheAddedLanguagesAndTheDisplay()
+    {
+        WritePlan plan = Plan(Args(display: ["en_US"], add: ["sv_SE"], source: "de_DE"));
+
+        PlannedChange change = Assert.Single(plan.Changes);
+        Assert.Equal("translation: de_DE, en_US, zh_CN; source: ##_##; display: ##_##", change.OldValue);
+        Assert.Equal("translation: de_DE, en_US, zh_CN, sv_SE; source: de_DE; display: en_US", change.NewValue);
+        Assert.Equal(("##_##", "de_DE"), (plan.Details!["sourceBefore"], plan.Details["sourceAfter"]));
+    }
+
+    [Fact]
+    public void Plan_TheSourceLanguageAlreadySet_HasNoChange()
+    {
+        _languages.Settings.Source = "de_DE";
+
+        WritePlan plan = Plan(Args(source: "de_DE"));
+
+        Assert.Empty(plan.Changes);
+    }
+
+    [Theory]
+    [InlineData("de", "'source' is not a language code of the form xx_YY, such as de_DE; ##_## clears it.")]
+    [InlineData("fr_FR", "'source' is not a translation language of the project; add it with 'add', or use one of metadata.candidates.")]
+    public void Plan_ASourceThatIsNoCodeOrNoTranslationLanguage_IsInvalid(string source, string violation)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(Args(source: source))).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, violation), (error.Reason, error.Metadata!["violations"]));
+    }
+
+    [Fact]
+    public void Plan_ASourceLanguageThatIsAdded_IsValid()
+    {
+        PlannedChange change = Assert.Single(Plan(Args(add: ["sv_SE"], source: "sv_SE")).Changes);
+
+        Assert.EndsWith("source: sv_SE", change.NewValue, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -97,7 +138,7 @@ public sealed class LanguageSetOperationTests
     {
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(new LanguageSetArgs { Project = "Line1" })).Error;
 
-        Assert.Equal((ErrorReason.InvalidArgument, "Give 'display', 'add' or both."), (error.Reason, error.Metadata!["violations"]));
+        Assert.Equal((ErrorReason.InvalidArgument, "Give at least one of 'display', 'add' and 'source'."), (error.Reason, error.Metadata!["violations"]));
     }
 
     [Fact]
@@ -158,6 +199,51 @@ public sealed class LanguageSetOperationTests
     }
 
     [Fact]
+    public void Execute_Source_IsSetAfterTheAddsAndBeforeTheDisplay_AndReadBack()
+    {
+        LanguageSetData data = Execute(Args(display: ["sv_SE"], add: ["sv_SE"], source: "de_DE"));
+
+        Assert.Equal(["Add sv_SE", "SetSource de_DE", "SetDisplayed sv_SE"], _languages.Calls);
+        Assert.Equal(("##_##", "de_DE"), (data.Before.Source, data.After.Source));
+    }
+
+    [Fact]
+    public void Execute_ClearingTheSource_SetsTheUnsetCode()
+    {
+        _languages.Settings.Source = "de_DE";
+
+        LanguageSetData data = Execute(Args(source: "##_##"));
+
+        Assert.Equal(["SetSource ##_##"], _languages.Calls);
+        Assert.Equal("##_##", data.After.Source);
+    }
+
+    [Fact]
+    public void Execute_ClearingTheDisplay_LeavesTheSourceAlone()
+    {
+        _languages.Settings = new LanguageSettings { Translation = Before, Display = "en_US;", Source = "de_DE" };
+
+        Execute(Args(display: ["##_##"]));
+
+        Assert.Equal(["Write " + Before + " ##_##;"], _languages.Calls);
+        Assert.Equal("de_DE", _languages.Settings.Source);
+    }
+
+    [Fact]
+    public void Execute_ASourceEplanDidNotTake_IsRolledBackAndTheSourceWrittenBack()
+    {
+        _languages.KeepSource = true;
+        _languages.OnChange = call => _languages.Settings.Source = call == "SetSource de_DE" ? "en_US" : _languages.Settings.Source;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(Args(source: "de_DE"))).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal("source language: asked for de_DE, EPLAN has en_US", error.Metadata!["problem"]);
+        Assert.Equal(["SetSource de_DE", "Write " + Before + " ##_##; ##_##"], _languages.Calls);
+        Assert.Equal("##_##", _languages.Settings.Source);
+    }
+
+    [Fact]
     public void Execute_AReadBackOtherThanAsked_IsRolledBackAndTheSettingsWrittenBack()
     {
         _languages.KeepDisplay = true;
@@ -206,7 +292,7 @@ public sealed class LanguageSetOperationTests
 
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
         Assert.Contains("Do not call this tool again. Ask the engineer to set the languages back in EPLAN's project settings (Translation).", error.Message, StringComparison.Ordinal);
-        Assert.Equal(("de_DE\nen_US\nzh_CN", "##_##"), (error.Metadata!["translation"], error.Metadata["display"]));
+        Assert.Equal(("de_DE\nen_US\nzh_CN", "##_##", "##_##"), (error.Metadata!["translation"], error.Metadata["display"], error.Metadata["source"]));
     }
 
     [Fact]
@@ -247,7 +333,8 @@ public sealed class LanguageSetOperationTests
         Assert.Equal(Before, _languages.Settings.Translation);
     }
 
-    private static LanguageSetArgs Args(List<string>? display = null, List<string>? add = null) => new() { Project = "Line1", Display = display, Add = add };
+    private static LanguageSetArgs Args(List<string>? display = null, List<string>? add = null, string? source = null) =>
+        new() { Project = "Line1", Display = display, Add = add, Source = source };
 
     private WritePlan Plan(LanguageSetArgs args) => (WritePlan)new LanguageSetPlanOperation(_catalog, _languages).Execute(args)!;
 

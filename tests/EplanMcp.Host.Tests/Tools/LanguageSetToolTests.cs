@@ -22,6 +22,8 @@ public sealed class LanguageSetToolTests : IDisposable
     private List<PlannedChange> _changes = [Display("display: ##_##", "display: en_US, zh_CN")];
     private string _translationAfter = "de_DE\nen_US\nzh_CN";
     private string _displayAfter = "en_US\nzh_CN";
+    private string _sourceBefore = "##_##";
+    private string _sourceAfter = "##_##";
 
     public LanguageSetToolTests()
     {
@@ -36,14 +38,16 @@ public sealed class LanguageSetToolTests : IDisposable
                 ["displayBefore"] = "##_##",
                 ["translationAfter"] = _translationAfter,
                 ["displayAfter"] = _displayAfter,
+                ["sourceBefore"] = _sourceBefore,
+                ["sourceAfter"] = _sourceAfter,
             };
             return plan;
         };
         _harness.Bridge.Handlers[OperationNames.LanguageSetExecute] = _ => new LanguageSetData
         {
             Project = "Line1",
-            Before = new ProjectLanguages { Translation = ["de_DE", "en_US", "zh_CN"], Display = ["##_##"] },
-            After = new ProjectLanguages { Translation = [.. _translationAfter.Split('\n')], Display = [.. _displayAfter.Split('\n')] },
+            Before = new ProjectLanguages { Translation = ["de_DE", "en_US", "zh_CN"], Display = ["##_##"], Source = _sourceBefore },
+            After = new ProjectLanguages { Translation = [.. _translationAfter.Split('\n')], Display = [.. _displayAfter.Split('\n')], Source = _sourceAfter },
         };
     }
 
@@ -191,15 +195,54 @@ public sealed class LanguageSetToolTests : IDisposable
 
     [Theory]
     [InlineData(" ", new[] { "en_US" }, null, "'project' is required")]
-    [InlineData("Line1", null, null, "Give 'display', 'add' or both.")]
+    [InlineData("Line1", null, null, "Give at least one of 'display', 'add' and 'source'.")]
     [InlineData("Line1", new string[0], null, "'display' must hold 1 to 10 language codes such as en_US; omit it to leave it out.")]
     [InlineData("Line1", null, new[] { "aa_AA", "ab_AA", "ac_AA", "ad_AA", "ae_AA", "af_AA", "ag_AA", "ah_AA", "ai_AA", "aj_AA", "ak_AA" }, "'add' must hold 1 to 10 language codes such as en_US; omit it to leave it out.")]
     public async Task HostChecks_FailBeforeTheBridgeIsAsked(string project, string[]? display, string[]? add, string violation)
     {
-        JsonElement error = WriteToolHarness.Error(await LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), project, display, add, false, TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), project, display, add, null, false, TestContext.Current.CancellationToken));
 
         Assert.Contains(violation, error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
+    }
+
+    [Fact]
+    public async Task AnEmptySource_IsLikeAnOmittedOne()
+    {
+        JsonElement error = WriteToolHarness.Error(await Set(source: string.Empty));
+
+        Assert.Contains("Give at least one of 'display', 'add' and 'source'.", error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SettingTheSource_IsSentReadBackAndNamed()
+    {
+        _changes = [Display("source: ##_##", "source: de_DE")];
+        _displayAfter = "##_##";
+        _sourceAfter = "de_DE";
+
+        CallToolResult dryRun = await Set(source: "de_DE", dryRun: true);
+        CallToolResult result = await Set(source: "de_DE");
+
+        Assert.Equal("Dry run: would set the source language to de_DE. Nothing was changed.", WriteToolHarness.Text(dryRun, 0));
+        Assert.Equal(("##_##", "de_DE"), (WriteToolHarness.Structured(dryRun).GetProperty("before").GetProperty("source").GetString(), WriteToolHarness.Structured(dryRun).GetProperty("after").GetProperty("source").GetString()));
+        Assert.Equal("Set the source language to de_DE.", WriteToolHarness.Text(result, 0));
+        Assert.Equal("de_DE", WriteToolHarness.Structured(result).GetProperty("after").GetProperty("source").GetString());
+        var sent = (LanguageSetArgs)_harness.Bridge.LastArgs!;
+        Assert.Equal(("de_DE", "f1", null, null), (sent.Source, sent.Fingerprint, sent.Display, sent.Add));
+    }
+
+    [Fact]
+    public async Task AddingClearingTheSourceAndShowing_InADryRun_IsWordedInThePresent()
+    {
+        _changes = [Display("translation: de_DE, en_US, zh_CN; source: de_DE; display: ##_##", "translation: de_DE, en_US, zh_CN, sv_SE; source: ##_##; display: ##_##")];
+        _translationAfter = "de_DE\nen_US\nzh_CN\nsv_SE";
+        _sourceBefore = "de_DE";
+        _displayAfter = "##_##";
+
+        CallToolResult result = await Set(display: ["##_##"], add: ["sv_SE"], source: "##_##", dryRun: true);
+
+        Assert.Equal("Dry run: would add sv_SE to the translation languages, clear the source language and clear the displayed languages. Nothing was changed.", WriteToolHarness.Text(result, 0));
     }
 
     private static PlannedChange Display(string before, string after) =>
@@ -207,6 +250,6 @@ public sealed class LanguageSetToolTests : IDisposable
 
     private static List<string?> Codes(JsonElement list) => [.. list.EnumerateArray().Select(code => code.GetString())];
 
-    private Task<CallToolResult> Set(string[]? display = null, string[]? add = null, bool dryRun = false) =>
-        LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), "Line1", display, add, dryRun, TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Set(string[]? display = null, string[]? add = null, string? source = null, bool dryRun = false) =>
+        LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), "Line1", display, add, source, dryRun, TestContext.Current.CancellationToken);
 }

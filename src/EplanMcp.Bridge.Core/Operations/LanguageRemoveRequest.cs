@@ -46,7 +46,7 @@ internal sealed class LanguageRemoveRequest
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
         LanguageSettings before = languages.Read(project.Path);
         List<string> translation = LanguageCodes.Split(before.Translation);
-        string source = LanguageCodes.Split(before.Source).FirstOrDefault() ?? LanguageCodes.Unset;
+        string source = LanguageCodes.SourceOf(before);
         for (int i = 0; i < codes.Count; i++)
         {
             if (codes[i] == source)

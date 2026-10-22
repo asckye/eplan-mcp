@@ -21,8 +21,15 @@ public interface IProjectLanguages
     public void SetDisplayed(string projectPath, string languages);
 
     /// <summary>
+    /// Sets the source language (<c>TRANSLATEGUI.SOURCE_LANGUAGE</c>) to <paramref name="language"/>, a code or
+    /// <c>##_##</c>, as spike S23 r2 wrote it with <c>ProjectSettings.SetStringSetting</c> (A28).
+    /// </summary>
+    public void SetSource(string projectPath, string language);
+
+    /// <summary>
     /// Writes <see cref="LanguageSettings.Translation"/> and <see cref="LanguageSettings.Display"/> into the project's
-    /// settings as they are given, in the stored form (<c>en_US;zh_CN;</c>).
+    /// settings as they are given, in the stored form (<c>en_US;zh_CN;</c>), and <see cref="LanguageSettings.Source"/>
+    /// when it differs from the stored one.
     /// </summary>
     public void Write(string projectPath, LanguageSettings settings);
 }

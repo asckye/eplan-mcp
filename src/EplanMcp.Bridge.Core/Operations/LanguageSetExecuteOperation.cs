@@ -4,7 +4,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// <see cref="OperationNames.LanguageSetExecute"/>: checks the arguments and the plan's fingerprint again, then in one
-/// transaction adds the languages the project lacks and sets the displayed languages, and reads both settings back
+/// transaction adds the languages the project lacks, sets the source language and the displayed languages, in this
+/// order (tool spec 2), and reads the settings back
 /// (docs/tools/eplan_language_set.md, section 5). A read-back that differs from the request is EPLAN_OPERATION_FAILED.
 /// On every failure <see cref="LanguageTransaction"/> writes the settings back as they were, because the rollback
 /// does not (api-notes A28).
@@ -54,11 +55,18 @@ public sealed class LanguageSetExecuteOperation(IProjectCatalog catalog, IProjec
                 languages.Add(path, language);
             }
 
+            if (request.SetsSource)
+            {
+                OperationContext.Current.ThrowIfCancellationRequested();
+                languages.SetSource(path, request.Source!);
+            }
+
             OperationContext.Current.ThrowIfCancellationRequested();
             if (request.ClearsDisplay)
             {
                 // SetDisplayedLanguages refuses "##_##;" (A28), so "not set" is written as the setting stores it.
-                languages.Write(path, new LanguageSettings { Translation = languages.Read(path).Translation, Display = LanguageCodes.Stored([LanguageCodes.Unset]) });
+                LanguageSettings now = languages.Read(path);
+                languages.Write(path, new LanguageSettings { Translation = now.Translation, Display = LanguageCodes.Stored([LanguageCodes.Unset]), Source = now.Source });
             }
             else if (request.Display is { } display)
             {

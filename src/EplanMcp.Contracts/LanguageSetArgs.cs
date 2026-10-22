@@ -15,6 +15,12 @@ public sealed class LanguageSetArgs
     /// <summary>1 to 10 languages to add to the translation languages; those the project has are skipped. Null adds none.</summary>
     public List<string>? Add { get; set; }
 
+    /// <summary>
+    /// The project's source language, the one its texts are written in, such as <c>de_DE</c>: a translation language of
+    /// the project or in <see cref="Add"/>; <c>##_##</c> clears it. Null leaves it as it is.
+    /// </summary>
+    public string? Source { get; set; }
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }
