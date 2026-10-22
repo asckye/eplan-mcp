@@ -1,0 +1,855 @@
+{
+  "schemaVersion": 1,
+  "namespacePrefix": "Eplan.EplApi",
+  "intellisense": {
+    "members": 42561,
+    "public": 40154,
+    "nonPublic": 954,
+    "outsideNamespace": 1376,
+    "unmatched": 77
+  },
+  "entries": {
+    "total": 43443,
+    "types": 1158,
+    "undocumented": 3289,
+    "duplicateIds": 0,
+    "publicTypesOutsidePrefix": 3810,
+    "byKind": {
+      "class": 699,
+      "constant": 26,
+      "constructor": 963,
+      "delegate": 15,
+      "delegate_method": 45,
+      "enum": 390,
+      "enum_value": 16201,
+      "event": 1,
+      "field": 77,
+      "interface": 40,
+      "lifecycle": 873,
+      "method": 3046,
+      "operator": 193,
+      "property": 20860,
+      "struct": 14
+    }
+  },
+  "layers": {
+    "operation": {
+      "members": 5917,
+      "groups": 4649,
+      "excludedMembers": 672,
+      "denominatorGroups": 4342,
+      "excludedMembersByRule": {
+        "delegate_member": 24,
+        "internal_namespace": 59,
+        "native_signature": 220,
+        "object_override": 71,
+        "obsolete_attribute": 106,
+        "operator": 192
+      },
+      "denominatorGroupsByKind": {
+        "method": 2003,
+        "property": 2339
+      },
+      "undocumentedDenominatorGroups": 320,
+      "groupsOnInterfaces": 160,
+      "byKind": {
+        "delegate_method": 45,
+        "method": 3046,
+        "operator": 193,
+        "property": 2633
+      }
+    },
+    "data_dictionary": {
+      "members": 27703,
+      "properties": 9521,
+      "obsoleteProperties": 936,
+      "undocumentedProperties": 27,
+      "objects": 69,
+      "byObject": {
+        "Arc": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.ArcPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Arc",
+          "properties": 5,
+          "inPropertyList": 5,
+          "inEnum": 5,
+          "obsolete": 0
+        },
+        "Article": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ArticlePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Article",
+          "properties": 877,
+          "inPropertyList": 876,
+          "inEnum": 877,
+          "obsolete": 16
+        },
+        "ArticleReference": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ArticleReferencePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.ArticleReference",
+          "properties": 600,
+          "inPropertyList": 600,
+          "inEnum": 600,
+          "obsolete": 23
+        },
+        "Block": {
+          "propertyList": "T:Eplan.EplApi.DataModel.BlockPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Block",
+          "properties": 13,
+          "inPropertyList": 13,
+          "inEnum": 13,
+          "obsolete": 2
+        },
+        "BusBar": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.BusBarPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.BusBar",
+          "properties": 2,
+          "inPropertyList": 2,
+          "inEnum": 2,
+          "obsolete": 1
+        },
+        "Cable": {
+          "propertyList": "T:Eplan.EplApi.DataModel.EObjects.CablePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Cable",
+          "properties": 34,
+          "inPropertyList": 11,
+          "inEnum": 34,
+          "obsolete": 0
+        },
+        "Comment": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.CommentPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Comment",
+          "properties": 3,
+          "inPropertyList": 3,
+          "inEnum": 3,
+          "obsolete": 0
+        },
+        "Connection": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ConnectionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Connection",
+          "properties": 682,
+          "inPropertyList": 682,
+          "inEnum": 682,
+          "obsolete": 32
+        },
+        "Connection3D": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Connection3D",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 1
+        },
+        "ConnectionDefinitionPoint": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.ConnectionDefinitionPoint",
+          "properties": 385,
+          "inPropertyList": 79,
+          "inEnum": 385,
+          "obsolete": 24
+        },
+        "ConnectionPointsInfo": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.ConnectionPointsInfo",
+          "properties": 19,
+          "inPropertyList": 19,
+          "inEnum": 19,
+          "obsolete": 0
+        },
+        "CopperBundle": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.CopperBundle",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "DeletedObjectInfo": {
+          "propertyList": "T:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.DeletedObjectInfo",
+          "properties": 18,
+          "inPropertyList": 18,
+          "inEnum": 18,
+          "obsolete": 2
+        },
+        "DeviceListEntry": {
+          "propertyList": "T:Eplan.EplApi.DataModel.DeviceListEntryPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.DeviceListEntry",
+          "properties": 19,
+          "inPropertyList": 19,
+          "inEnum": 19,
+          "obsolete": 0
+        },
+        "DimensionCircle": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.DimensionCircle",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "DimensionItem": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.DimensionItem",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "Function": {
+          "propertyList": "T:Eplan.EplApi.DataModel.FunctionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Function",
+          "properties": 993,
+          "inPropertyList": 992,
+          "inEnum": 993,
+          "obsolete": 198
+        },
+        "Function3D": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.Function3DPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Function3D",
+          "properties": 4,
+          "inPropertyList": 4,
+          "inEnum": 4,
+          "obsolete": 1
+        },
+        "FunctionBase": {
+          "propertyList": "T:Eplan.EplApi.DataModel.FunctionBasePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.FunctionBase",
+          "properties": 220,
+          "inPropertyList": 220,
+          "inEnum": 220,
+          "obsolete": 2
+        },
+        "FunctionDefinitionLibrary": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.FunctionDefinitionLibrary",
+          "properties": 10,
+          "inPropertyList": 10,
+          "inEnum": 10,
+          "obsolete": 1
+        },
+        "GraphicalPlacement": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.GraphicalPlacement",
+          "properties": 15,
+          "inPropertyList": 15,
+          "inEnum": 15,
+          "obsolete": 1
+        },
+        "HyperLink": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.HyperLink",
+          "properties": 3,
+          "inPropertyList": 3,
+          "inEnum": 3,
+          "obsolete": 0
+        },
+        "Image": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.ImagePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Image",
+          "properties": 2,
+          "inPropertyList": 2,
+          "inEnum": 2,
+          "obsolete": 0
+        },
+        "InstallationSpace": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.InstallationSpace",
+          "properties": 35,
+          "inPropertyList": 34,
+          "inEnum": 35,
+          "obsolete": 1
+        },
+        "InterruptionPoint": {
+          "propertyList": "T:Eplan.EplApi.DataModel.InterruptionPointPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.InterruptionPoint",
+          "properties": 25,
+          "inPropertyList": 24,
+          "inEnum": 25,
+          "obsolete": 0
+        },
+        "Line": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.LinePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Line",
+          "properties": 4,
+          "inPropertyList": 4,
+          "inEnum": 4,
+          "obsolete": 0
+        },
+        "Location": {
+          "propertyList": "T:Eplan.EplApi.DataModel.LocationPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Location",
+          "properties": 17,
+          "inPropertyList": 17,
+          "inEnum": 17,
+          "obsolete": 1
+        },
+        "LocationBox": {
+          "propertyList": "T:Eplan.EplApi.DataModel.LocationBoxPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.LocationBox",
+          "properties": 12,
+          "inPropertyList": 12,
+          "inEnum": 12,
+          "obsolete": 0
+        },
+        "MDFunctionTemplatePosition": {
+          "propertyList": "T:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList",
+          "properties": 45,
+          "inPropertyList": 45,
+          "inEnum": 0,
+          "obsolete": 0
+        },
+        "MDPartsDatabaseItem": {
+          "propertyList": "T:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList",
+          "enum": "T:Eplan.EplApi.MasterData.Properties.MDPartsDatabaseItem",
+          "properties": 958,
+          "inPropertyList": 957,
+          "inEnum": 958,
+          "obsolete": 51
+        },
+        "MDSymbol": {
+          "propertyList": "T:Eplan.EplApi.MasterData.MDSymbolPropertyList",
+          "enum": "T:Eplan.EplApi.MasterData.Properties.MDSymbol",
+          "properties": 66,
+          "inPropertyList": 66,
+          "inEnum": 66,
+          "obsolete": 1
+        },
+        "MDSymbolLibrary": {
+          "propertyList": "T:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList",
+          "enum": "T:Eplan.EplApi.MasterData.Properties.MDSymbolLibrary",
+          "properties": 33,
+          "inPropertyList": 33,
+          "inEnum": 33,
+          "obsolete": 1
+        },
+        "MDSymbolVariant": {
+          "propertyList": "T:Eplan.EplApi.MasterData.MDSymbolVariantPropertyList",
+          "enum": "T:Eplan.EplApi.MasterData.Properties.MDSymbolVariant",
+          "properties": 15,
+          "inPropertyList": 15,
+          "inEnum": 15,
+          "obsolete": 1
+        },
+        "MacroBox": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MacroBoxPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.MacroBox",
+          "properties": 43,
+          "inPropertyList": 25,
+          "inEnum": 43,
+          "obsolete": 4
+        },
+        "MacroEntry": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MacroEntryPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.MacroEntry",
+          "properties": 19,
+          "inPropertyList": 19,
+          "inEnum": 19,
+          "obsolete": 0
+        },
+        "MergedArticleReference": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.MergedArticleReference",
+          "properties": 581,
+          "inPropertyList": 581,
+          "inEnum": 581,
+          "obsolete": 23
+        },
+        "Option": {
+          "propertyList": "T:Eplan.EplApi.DataModel.OptionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Option",
+          "properties": 10,
+          "inPropertyList": 10,
+          "inEnum": 10,
+          "obsolete": 0
+        },
+        "OptionFragment": {
+          "propertyList": "T:Eplan.EplApi.DataModel.OptionFragmentPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.OptionFragment",
+          "properties": 7,
+          "inPropertyList": 7,
+          "inEnum": 7,
+          "obsolete": 0
+        },
+        "OptionGroup": {
+          "propertyList": "T:Eplan.EplApi.DataModel.OptionGroupPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.OptionGroup",
+          "properties": 2,
+          "inPropertyList": 2,
+          "inEnum": 2,
+          "obsolete": 0
+        },
+        "Page": {
+          "propertyList": "T:Eplan.EplApi.DataModel.PagePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Page",
+          "properties": 373,
+          "inPropertyList": 369,
+          "inEnum": 373,
+          "obsolete": 102
+        },
+        "PathText": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.PathTextPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PathText",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "PipingDefinition": {
+          "propertyList": "T:Eplan.EplApi.DataModel.PipingDefinitionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PipingDefinition",
+          "properties": 14,
+          "inPropertyList": 14,
+          "inEnum": 14,
+          "obsolete": 1
+        },
+        "PlaceHolder": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PlaceHolder",
+          "properties": 7,
+          "inPropertyList": 7,
+          "inEnum": 7,
+          "obsolete": 1
+        },
+        "Placement": {
+          "propertyList": "T:Eplan.EplApi.DataModel.PlacementPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Placement",
+          "properties": 9,
+          "inPropertyList": 9,
+          "inEnum": 9,
+          "obsolete": 1
+        },
+        "Placement3D": {
+          "propertyList": "T:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Placement3D",
+          "properties": 1344,
+          "inPropertyList": 1341,
+          "inEnum": 1344,
+          "obsolete": 218
+        },
+        "PlanningSegment": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PlanningSegment",
+          "properties": 568,
+          "inPropertyList": 568,
+          "inEnum": 568,
+          "obsolete": 23
+        },
+        "PlcIO": {
+          "propertyList": "T:Eplan.EplApi.DataModel.PlcIOPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PlcIO",
+          "properties": 14,
+          "inPropertyList": 14,
+          "inEnum": 14,
+          "obsolete": 3
+        },
+        "PlotFrame": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PlotFrame",
+          "properties": 42,
+          "inPropertyList": 42,
+          "inEnum": 42,
+          "obsolete": 0
+        },
+        "PlugStrip": {
+          "propertyList": "T:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PlugStrip",
+          "properties": 16,
+          "inPropertyList": 13,
+          "inEnum": 16,
+          "obsolete": 0
+        },
+        "PotentialDefinition": {
+          "propertyList": "T:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.PotentialDefinition",
+          "properties": 43,
+          "inPropertyList": 43,
+          "inEnum": 43,
+          "obsolete": 2
+        },
+        "Project": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ProjectPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Project",
+          "properties": 705,
+          "inPropertyList": 705,
+          "inEnum": 705,
+          "obsolete": 163
+        },
+        "ProtectedGroup": {
+          "propertyList": "T:Eplan.EplApi.DataModel.ProtectedGroupPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.ProtectedGroup",
+          "properties": 5,
+          "inPropertyList": 5,
+          "inEnum": 5,
+          "obsolete": 0
+        },
+        "QRCode": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.QRCode",
+          "properties": 2,
+          "inPropertyList": 2,
+          "inEnum": 2,
+          "obsolete": 0
+        },
+        "Rectangle": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Rectangle",
+          "properties": 5,
+          "inPropertyList": 5,
+          "inEnum": 5,
+          "obsolete": 0
+        },
+        "RoutedConnection": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.RoutedConnection",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "Segment": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Topology.SegmentPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Segment",
+          "properties": 10,
+          "inPropertyList": 10,
+          "inEnum": 10,
+          "obsolete": 0
+        },
+        "SegmentDefinition": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SegmentDefinition",
+          "properties": 11,
+          "inPropertyList": 11,
+          "inEnum": 11,
+          "obsolete": 0
+        },
+        "SegmentPlacement": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SegmentPlacement",
+          "properties": 1,
+          "inPropertyList": 1,
+          "inEnum": 1,
+          "obsolete": 0
+        },
+        "SegmentTemplate": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SegmentTemplate",
+          "properties": 361,
+          "inPropertyList": 361,
+          "inEnum": 361,
+          "obsolete": 22
+        },
+        "StorableObject": {
+          "propertyList": "T:Eplan.EplApi.DataModel.StorableObjectPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.StorableObject",
+          "properties": 3,
+          "inPropertyList": 3,
+          "inEnum": 3,
+          "obsolete": 2
+        },
+        "StrandConnector": {
+          "propertyList": "T:Eplan.EplApi.DataModel.StrandConnectorPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.StrandConnector",
+          "properties": 3,
+          "inPropertyList": 3,
+          "inEnum": 3,
+          "obsolete": 0
+        },
+        "Symbol": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Symbol",
+          "properties": 66,
+          "inPropertyList": 66,
+          "inEnum": 66,
+          "obsolete": 1
+        },
+        "SymbolLibrary": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MasterData.SymbolLibraryPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SymbolLibrary",
+          "properties": 33,
+          "inPropertyList": 33,
+          "inEnum": 33,
+          "obsolete": 1
+        },
+        "SymbolReference": {
+          "propertyList": "T:Eplan.EplApi.DataModel.SymbolReferencePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SymbolReference",
+          "properties": 19,
+          "inPropertyList": 19,
+          "inEnum": 19,
+          "obsolete": 2
+        },
+        "SymbolVariant": {
+          "propertyList": "T:Eplan.EplApi.DataModel.MasterData.SymbolVariantPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.SymbolVariant",
+          "properties": 6,
+          "inPropertyList": 6,
+          "inEnum": 6,
+          "obsolete": 0
+        },
+        "TerminalStrip": {
+          "propertyList": "T:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.TerminalStrip",
+          "properties": 35,
+          "inPropertyList": 13,
+          "inEnum": 35,
+          "obsolete": 0
+        },
+        "Text": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.TextPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.Text",
+          "properties": 7,
+          "inPropertyList": 6,
+          "inEnum": 7,
+          "obsolete": 5
+        },
+        "TextBase": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.TextBase",
+          "properties": 3,
+          "inPropertyList": 3,
+          "inEnum": 3,
+          "obsolete": 0
+        },
+        "ViewPlacement": {
+          "propertyList": "T:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList",
+          "enum": "T:Eplan.EplApi.DataModel.Properties.ViewPlacement",
+          "properties": 34,
+          "inPropertyList": 34,
+          "inEnum": 34,
+          "obsolete": 2
+        }
+      },
+      "byKind": {
+        "enum_value": 9476,
+        "property": 18227
+      }
+    },
+    "type": {
+      "members": 9823,
+      "byKind": {
+        "class": 699,
+        "constant": 26,
+        "constructor": 963,
+        "delegate": 15,
+        "enum": 390,
+        "enum_value": 6725,
+        "event": 1,
+        "field": 77,
+        "interface": 40,
+        "lifecycle": 873,
+        "struct": 14
+      }
+    }
+  },
+  "byNamespace": {
+    "Eplan.EplApi.ApplicationFramework": {
+      "types": 37,
+      "operationGroups": 104,
+      "operationDenominatorGroups": 88,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 3318
+    },
+    "Eplan.EplApi.ApplicationFramework.Internal": {
+      "types": 4,
+      "operationGroups": 12,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 7
+    },
+    "Eplan.EplApi.Base": {
+      "types": 40,
+      "operationGroups": 284,
+      "operationDenominatorGroups": 268,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 697
+    },
+    "Eplan.EplApi.Base.Enums": {
+      "types": 4,
+      "operationGroups": 0,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 317
+    },
+    "Eplan.EplApi.Base.Internal": {
+      "types": 12,
+      "operationGroups": 48,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 29
+    },
+    "Eplan.EplApi.BaseRemoting": {
+      "types": 2,
+      "operationGroups": 0,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 15
+    },
+    "Eplan.EplApi.DataModel": {
+      "types": 385,
+      "operationGroups": 1336,
+      "operationDenominatorGroups": 1247,
+      "dataDictionaryMembers": 19202,
+      "typeLayerMembers": 1568
+    },
+    "Eplan.EplApi.DataModel.E3D": {
+      "types": 105,
+      "operationGroups": 380,
+      "operationDenominatorGroups": 368,
+      "dataDictionaryMembers": 2766,
+      "typeLayerMembers": 541
+    },
+    "Eplan.EplApi.DataModel.EObjects": {
+      "types": 24,
+      "operationGroups": 93,
+      "operationDenominatorGroups": 83,
+      "dataDictionaryMembers": 74,
+      "typeLayerMembers": 148
+    },
+    "Eplan.EplApi.DataModel.Graphics": {
+      "types": 109,
+      "operationGroups": 424,
+      "operationDenominatorGroups": 414,
+      "dataDictionaryMembers": 184,
+      "typeLayerMembers": 496
+    },
+    "Eplan.EplApi.DataModel.Helpers": {
+      "types": 2,
+      "operationGroups": 2,
+      "operationDenominatorGroups": 2,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 9
+    },
+    "Eplan.EplApi.DataModel.Internal": {
+      "types": 4,
+      "operationGroups": 9,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 111
+    },
+    "Eplan.EplApi.DataModel.MasterData": {
+      "types": 30,
+      "operationGroups": 126,
+      "operationDenominatorGroups": 121,
+      "dataDictionaryMembers": 314,
+      "typeLayerMembers": 193
+    },
+    "Eplan.EplApi.DataModel.Planning": {
+      "types": 29,
+      "operationGroups": 123,
+      "operationDenominatorGroups": 122,
+      "dataDictionaryMembers": 1882,
+      "typeLayerMembers": 107
+    },
+    "Eplan.EplApi.DataModel.Revisions": {
+      "types": 7,
+      "operationGroups": 20,
+      "operationDenominatorGroups": 20,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 20
+    },
+    "Eplan.EplApi.DataModel.Topology": {
+      "types": 6,
+      "operationGroups": 17,
+      "operationDenominatorGroups": 17,
+      "dataDictionaryMembers": 22,
+      "typeLayerMembers": 20
+    },
+    "Eplan.EplApi.EServices": {
+      "types": 29,
+      "operationGroups": 128,
+      "operationDenominatorGroups": 127,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 128
+    },
+    "Eplan.EplApi.EServices.Ged": {
+      "types": 12,
+      "operationGroups": 94,
+      "operationDenominatorGroups": 90,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 107
+    },
+    "Eplan.EplApi.GrpcServer": {
+      "types": 22,
+      "operationGroups": 207,
+      "operationDenominatorGroups": 177,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 92
+    },
+    "Eplan.EplApi.Gui": {
+      "types": 11,
+      "operationGroups": 72,
+      "operationDenominatorGroups": 72,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 286
+    },
+    "Eplan.EplApi.HEServices": {
+      "types": 108,
+      "operationGroups": 437,
+      "operationDenominatorGroups": 417,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 495
+    },
+    "Eplan.EplApi.HEServices.Exceptions": {
+      "types": 7,
+      "operationGroups": 2,
+      "operationDenominatorGroups": 2,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 20
+    },
+    "Eplan.EplApi.MasterData": {
+      "types": 137,
+      "operationGroups": 606,
+      "operationDenominatorGroups": 592,
+      "dataDictionaryMembers": 3259,
+      "typeLayerMembers": 1004
+    },
+    "Eplan.EplApi.MasterData.Internal": {
+      "types": 2,
+      "operationGroups": 4,
+      "operationDenominatorGroups": 0,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 7
+    },
+    "Eplan.EplApi.RemoteClient": {
+      "types": 5,
+      "operationGroups": 47,
+      "operationDenominatorGroups": 44,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 15
+    },
+    "Eplan.EplApi.RemoteServer": {
+      "types": 3,
+      "operationGroups": 13,
+      "operationDenominatorGroups": 13,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 13
+    },
+    "Eplan.EplApi.Remoting": {
+      "types": 4,
+      "operationGroups": 19,
+      "operationDenominatorGroups": 19,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 8
+    },
+    "Eplan.EplApi.Scripting": {
+      "types": 6,
+      "operationGroups": 3,
+      "operationDenominatorGroups": 3,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 13
+    },
+    "Eplan.EplApi.Starter": {
+      "types": 6,
+      "operationGroups": 14,
+      "operationDenominatorGroups": 14,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 13
+    },
+    "Eplan.EplApi.System": {
+      "types": 6,
+      "operationGroups": 25,
+      "operationDenominatorGroups": 22,
+      "dataDictionaryMembers": 0,
+      "typeLayerMembers": 26
+    }
+  }
+}

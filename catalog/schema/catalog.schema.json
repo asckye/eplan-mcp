@@ -49,7 +49,7 @@
         "values": {
           "type": "object",
           "additionalProperties": { "type": "string" },
-          "description": "Enums only: name to value, in declaration order. A value's ID is F:<enum>.<name>."
+          "description": "Enums only: name to value, sorted by name (ordinal). A value's ID is F:<enum>.<name>."
         },
         "documented": { "const": false, "description": "The ID is not in the IntelliSense file; absent means it is." },
         "obsolete": { "const": true },

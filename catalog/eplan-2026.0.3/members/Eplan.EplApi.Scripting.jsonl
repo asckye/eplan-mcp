@@ -1,0 +1,10 @@
+{"id":"M:Eplan.EplApi.Scripting.DeclareAction.#ctor(System.String)","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareAction","params":[{"name":"strActionName","type":"System.String"}]}
+{"id":"M:Eplan.EplApi.Scripting.DeclareAction.#ctor(System.String,System.Int32)","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareAction","params":[{"name":"strActionName","type":"System.String"},{"name":"iOrdinal","type":"System.Int32"}]}
+{"id":"M:Eplan.EplApi.Scripting.DeclareEventHandler.#ctor(System.String)","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareEventHandler","params":[{"name":"strEventName","type":"System.String"}]}
+{"id":"M:Eplan.EplApi.Scripting.DeclareMenu.#ctor","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareMenu"}
+{"id":"M:Eplan.EplApi.Scripting.DeclareRegister.#ctor","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareRegister"}
+{"id":"M:Eplan.EplApi.Scripting.DeclareUnregister.#ctor","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.DeclareUnregister"}
+{"id":"M:Eplan.EplApi.Scripting.Start.#ctor","kind":"constructor","layer":"type","type":"T:Eplan.EplApi.Scripting.Start","documented":false}
+{"id":"P:Eplan.EplApi.Scripting.DeclareAction.Name","kind":"property","layer":"operation","type":"T:Eplan.EplApi.Scripting.DeclareAction","group":"O:Eplan.EplApi.Scripting.DeclareAction.Name","returns":"System.String","accessors":"get"}
+{"id":"P:Eplan.EplApi.Scripting.DeclareAction.Ordinal","kind":"property","layer":"operation","type":"T:Eplan.EplApi.Scripting.DeclareAction","group":"O:Eplan.EplApi.Scripting.DeclareAction.Ordinal","returns":"System.Int32","accessors":"get"}
+{"id":"P:Eplan.EplApi.Scripting.DeclareEventHandler.Name","kind":"property","layer":"operation","type":"T:Eplan.EplApi.Scripting.DeclareEventHandler","group":"O:Eplan.EplApi.Scripting.DeclareEventHandler.Name","returns":"System.String","accessors":"get","documented":false}
