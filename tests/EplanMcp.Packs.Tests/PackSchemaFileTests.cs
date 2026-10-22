@@ -12,19 +12,20 @@ public sealed class PackSchemaFileTests : IDisposable
 {
     private readonly DirectoryInfo _directory = Directory.CreateTempSubdirectory("eplanmcp-schema-");
 
-    public static string SchemaFile => Path.Combine(Repository.Root, "schemas", "pack-manifest.schema.json");
-
-    [Fact]
-    public void CommittedSchema_IsTheGeneratedOne()
+    [Theory]
+    [InlineData("pack-manifest")]
+    [InlineData("pack-lock")]
+    public void CommittedSchema_IsTheGeneratedOne(string name)
     {
-        string expected = PackSchema.Text(PackSchema.Manifest());
-        string committed = File.Exists(SchemaFile) ? File.ReadAllText(SchemaFile, Encoding.UTF8) : string.Empty;
+        string file = Path.Combine(Repository.Root, "schemas", name + ".schema.json");
+        string expected = PackSchema.Text(name == "pack-lock" ? PackSchema.Lock() : PackSchema.Manifest());
+        string committed = File.Exists(file) ? File.ReadAllText(file, Encoding.UTF8) : string.Empty;
 
         if (committed != expected)
         {
             // Accepting a schema change is a reviewed step: compare, then move the received file over the committed one.
-            File.WriteAllText(Path.ChangeExtension(SchemaFile, ".received.json"), expected, new UTF8Encoding(false));
-            Assert.Fail($"{SchemaFile} differs from the schema the types give; see pack-manifest.schema.received.json beside it.");
+            File.WriteAllText(Path.ChangeExtension(file, ".received.json"), expected, new UTF8Encoding(false));
+            Assert.Fail($"{file} differs from the schema the types give; see {name}.schema.received.json beside it.");
         }
     }
 
