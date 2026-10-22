@@ -36,6 +36,17 @@ internal sealed class BridgeUsage
     public required SortedDictionary<string, List<UsageSite>> Usages { get; init; }
 
     /// <summary>
+    /// Whether a use site counts for coverage. Generated building blocks (<c>*.g.cs</c>, written from
+    /// catalog/wrappers.yaml) count only where a Bridge operation reaches them: generated but unused code is not an
+    /// implementation (docs/design/2026-10-21-api-capability-coverage.md, section 8). Hand-written code that no
+    /// operation reaches is infrastructure (add-in start, dispatcher) and counts as before.
+    /// </summary>
+    public static bool Counts(UsageSite site) => site.Operations.Count > 0 || !IsGenerated(site.File);
+
+    /// <summary>A file the wrapper generator writes: its name ends in <c>.g.cs</c>.</summary>
+    public static bool IsGenerated(string file) => file.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// SHA-256 of the tokens (no comments or whitespace) of the add-in, Bridge.Core and OperationNames sources, which are
     /// what a scan reads; a comment or formatting change does not make the scan stale.
     /// </summary>

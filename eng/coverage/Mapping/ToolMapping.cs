@@ -21,7 +21,8 @@ internal sealed record ToolEntry(
 /// <summary>
 /// catalog/mapping/tools.json: every tool of the contract snapshot mapped through the Host's tool code to Bridge
 /// operations and, through bridge-usage.json, to EPLAN API IDs; <see cref="Infrastructure"/> are the IDs no operation
-/// reaches (add-in start, dispatcher). Derived only from files in the repository, so CI regenerates and compares it.
+/// reaches (add-in start, dispatcher), <see cref="UnreachedGenerated"/> those used only by generated code no operation
+/// reaches. Derived only from files in the repository, so CI regenerates and compares it.
 /// </summary>
 internal sealed partial class ToolMapping
 {
@@ -33,6 +34,9 @@ internal sealed partial class ToolMapping
     public required IReadOnlyList<ToolEntry> Tools { get; init; }
 
     public required IReadOnlyList<string> Infrastructure { get; init; }
+
+    /// <summary>IDs only generated building blocks use, and no operation reaches: not implemented (BridgeUsage.Counts).</summary>
+    public required IReadOnlyList<string> UnreachedGenerated { get; init; }
 
     public static ToolMapping Build(string repositoryRoot)
     {
@@ -75,7 +79,8 @@ internal sealed partial class ToolMapping
         {
             EplanApi = usage.EplanApi,
             Tools = [.. tools.OrderBy(t => t.Name, StringComparer.Ordinal)],
-            Infrastructure = [.. usage.Usages.Where(u => u.Value.All(s => s.Operations.Count == 0)).Select(u => u.Key)],
+            Infrastructure = [.. usage.Usages.Where(u => u.Value.All(s => s.Operations.Count == 0) && u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key)],
+            UnreachedGenerated = [.. usage.Usages.Where(u => !u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key)],
         };
     }
 

@@ -88,5 +88,21 @@ internal static class ReportFixture
                 """);
     }
 
+    /// <summary>Adds use sites to the fixture's scan, as a scan of more Bridge code would record them.</summary>
+    public static void AddUsages(TempRepository repository, params (string Id, UsageSite Site)[] sites)
+    {
+        BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repository.Root, BridgeUsage.RelativePath));
+        foreach ((string id, UsageSite site) in sites)
+        {
+            (usage.Usages.TryGetValue(id, out List<UsageSite>? known) ? known : usage.Usages[id] = []).Add(site);
+        }
+
+        repository.Write(BridgeUsage.RelativePath, CoverageJson.Serialize(usage));
+    }
+
+    /// <summary>A use in a file the wrapper generator writes, reached by <paramref name="operations"/>.</summary>
+    public static UsageSite GeneratedSite(params string[] operations) =>
+        new("PageApi", "Read", "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PageApi.g.cs", ["call"], operations);
+
     private static UsageSite Site(params string[] operations) => new("Adapter", "Member", "src/EplanMcp.Bridge.Eplan/Adapters/A.cs", ["call"], operations);
 }

@@ -31,7 +31,8 @@ internal sealed record ToolCoverage(
 /// coverage design (section 4), which build on each other: implemented (a Bridge use reaches the unit), automated_test
 /// (a tool that reaches it has Small or Medium tests, or its operations have Bridge.Core tests), live_verified (such a
 /// tool also has a stated live record that passed: api-notes, a spec or the Large README, with date and version). A
-/// tool-level fact stands for every unit the tool reaches, so the upper levels are upper bounds.
+/// tool-level fact stands for every unit the tool reaches, so the upper levels are upper bounds. A use only in generated
+/// code that no operation reaches counts for nothing (<see cref="BridgeUsage.Counts"/>).
 /// </summary>
 internal sealed class CoverageReport
 {
@@ -89,7 +90,7 @@ internal sealed class CoverageReport
         var properties = new HashSet<string>(StringComparer.Ordinal);
         var actionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var unmatched = new List<string>();
-        foreach (string id in usage.Usages.Keys)
+        foreach (string id in usage.Usages.Where(u => u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key))
         {
             string? unit = catalog.Resolve(id);
             properties.UnionWith(catalog.PropertyOf(id) is { } property ? [property] : []);

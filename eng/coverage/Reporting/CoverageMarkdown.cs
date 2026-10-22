@@ -49,7 +49,9 @@ internal static class CoverageMarkdown
         Line();
 
         Line("## 1. Bridge 用到的 EPLAN API");
-        Line($"Bridge 共用到 {usage.Usages.Count} 个 ID（{Kinds(usage.Usages.Keys)}），其中 {usage.Usages.Count - mapping.Infrastructure.Count} 个能被某个 Bridge 操作到达，{mapping.Infrastructure.Count} 个只属于基础设施。按命名空间：");
+        int reached = usage.Usages.Count - mapping.Infrastructure.Count - mapping.UnreachedGenerated.Count;
+        string generated = mapping.UnreachedGenerated.Count == 0 ? string.Empty : $"，{mapping.UnreachedGenerated.Count} 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）";
+        Line($"Bridge 共用到 {usage.Usages.Count} 个 ID（{Kinds(usage.Usages.Keys)}），其中 {reached} 个能被某个 Bridge 操作到达，{mapping.Infrastructure.Count} 个只属于基础设施{generated}。按命名空间：");
         Line();
         Line("| 命名空间 | ID 数 |");
         Line("|---|---:|");
