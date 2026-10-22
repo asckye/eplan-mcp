@@ -87,7 +87,7 @@ public sealed class ApprovalProgressTests
     {
         var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted) { Wait = () => _time.Advance(TimeSpan.FromSeconds(50)) };
 
-        ApprovalResult result = await Service(dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, _eplan, null, null, TestContext.Current.CancellationToken);
+        ApprovalResult result = await Service(dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, _eplan, null, null, null, TestContext.Current.CancellationToken);
 
         Assert.Equal(ApprovalDecision.Granted, result.Decision);
         Assert.Equal(0, _time.TimersCreated);
@@ -101,7 +101,7 @@ public sealed class ApprovalProgressTests
     private Task<ApprovalResult> Ask(FakeApprovalChannel channel, TimeSpan timeout) => Ask([channel], timeout);
 
     private Task<ApprovalResult> Ask(IApprovalChannel[] channels, TimeSpan timeout) =>
-        Service(channels, timeout).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, _eplan, null, _reports, TestContext.Current.CancellationToken);
+        Service(channels, timeout).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, _eplan, null, null, _reports, TestContext.Current.CancellationToken);
 
     private ApprovalService Service(params IApprovalChannel[] channels) => Service(channels, HostConfig.DefaultApprovalTimeout);
 

@@ -98,7 +98,8 @@ public static class ErrorReason
 
     /// <summary>
     /// A Destructive write was not run because the project could not be backed up first: the copy failed, took too long,
-    /// or has another page count than the project (ADR-0013). Nothing was changed; never retried automatically.
+    /// or has another page count than the project (ADR-0013); or a write to system master data was not run because the
+    /// database could not be backed up first (ADR-0019). Nothing was changed; never retried automatically.
     /// </summary>
     public const string BackupFailed = "BACKUP_FAILED";
 

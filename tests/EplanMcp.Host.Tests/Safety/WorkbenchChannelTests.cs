@@ -161,13 +161,25 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AMasterDataWrite_OrTheReleaseOfADatabase_StepsAsideForTheEplanDialog()
+    {
+        // Version 1 has no field for system master data (ADR-0019); EPLAN's dialog names the database instead.
+        var masterData = new WritePlan { Fingerprint = "f", MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = "$(MD_PARTS)\\EPLAN_parts.alk" } };
+        var database = new Suspension(null, null, null, "eplan_part_import", "r0", _clock.Now, SuspensionReason.OutcomeUnknown, [], "$(MD_PARTS)\\EPLAN_parts.alk");
+
+        Assert.Null(await Channel().AskAsync(Question() with { Plan = masterData, Tier = ToolTier.Destructive }, Token));
+        Assert.Null(await Channel().AskAsync(Question() with { Release = database }, Token));
+        Assert.Equal(0, _workbench.Connections);
+    }
+
+    [Fact]
     public async Task AQuestionVersion1CannotCarry_IsNotSentAndTheEplanDialogAsks()
     {
         var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
         EplanInstanceInfo eplan = Eplan();
         eplan.Version = null!; // as from an add-in that sent none
 
-        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, eplan, null, null, Token);
+        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, eplan, null, null, null, Token);
 
         Assert.Equal(new ApprovalResult(EplanDialogChannel.ChannelName, ApprovalDecision.Granted), result);
         Assert.Single(_workbench.Handshakes);
@@ -221,7 +233,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.Answer = (_, _, _) => Task.FromResult<IReadOnlyList<byte[]>?>(null);
         var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
 
-        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
 
         Assert.Equal(new ApprovalResult(WorkbenchChannel.ChannelName, ApprovalDecision.Cancelled), result);
         Assert.Empty(dialog.Questions);
@@ -244,7 +256,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.Answer = (_, _, _) => Task.FromResult<IReadOnlyList<byte[]>?>([Encoding.UTF8.GetBytes(answer)]);
         var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
 
-        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        ApprovalResult result = await Service(Channel(), dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
 
         Assert.Equal(ApprovalDecision.Cancelled, result.Decision);
         Assert.Empty(dialog.Questions);
@@ -270,7 +282,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
             return await FakeWorkbench.Decide(WorkbenchDecision.Approved)(ask, id, stop);
         };
 
-        Task<ApprovalResult> asking = Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        Task<ApprovalResult> asking = Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
         await _workbench.Asked.Task.WaitAsync(_patience, Token);
         _clock.Advance(_timeout + TimeSpan.FromSeconds(1));
         late.SetResult();
@@ -286,7 +298,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         _workbench.Answer = (_, id, _) => Task.FromResult<IReadOnlyList<byte[]>?>([WorkbenchJson.Result(id, new ApprovalAskResult(requestId, fingerprint, argumentsHash, WorkbenchDecision.Approved))]);
 
-        ApprovalResult result = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        ApprovalResult result = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
 
         Assert.Equal(ApprovalDecision.Denied, result.Decision);
     }
@@ -330,7 +342,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         var dialog = new FakeApprovalChannel(EplanDialogChannel.ChannelName, ApprovalDecision.Granted);
         WorkbenchChannel absent = Channel(WorkbenchPipeName.ForCurrentUser(Path.Combine(_locations.Root, "other")));
 
-        ApprovalResult result = await Service(absent, dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        ApprovalResult result = await Service(absent, dialog).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
 
         Assert.Equal(new ApprovalResult(EplanDialogChannel.ChannelName, ApprovalDecision.Granted), result);
         Assert.Single(dialog.Questions);
@@ -430,7 +442,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     public async Task AnApprovalThatDoesNotCount_OrAConfirmation_ShowsNoOutcomeAndTheConnectionCloses()
     {
         _workbench.Answer = (_, id, _) => Task.FromResult<IReadOnlyList<byte[]>?>([WorkbenchJson.Result(id, new ApprovalAskResult("earlier", "f1", "h1", WorkbenchDecision.Approved))]);
-        ApprovalResult other = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, Token);
+        ApprovalResult other = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
         await _workbench.HungUp.Task.WaitAsync(_patience, Token);
         _workbench.Answer = FakeWorkbench.Decide(WorkbenchDecision.Approved);
         var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "earlier", _clock.Now, SuspensionReason.OutcomeUnknown, []);

@@ -34,11 +34,20 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     /// Asks about <paramref name="plan"/> of write <paramref name="requestId"/> by <paramref name="tool"/> of
     /// <paramref name="tier"/> to EPLAN <paramref name="eplan"/>, and returns the decision, reporting the wait to
     /// <paramref name="progress"/> (see <see cref="ApprovalProgress"/>). <paramref name="backupFolder"/>: where a
-    /// Destructive write backs the project up first, which the dialog names; null for other writes. Throws
+    /// Destructive write backs the project up first, which the dialog names; null for other writes;
+    /// <paramref name="masterDataBackupFolder"/> the same for the master data a write changes (ADR-0019). Throws
     /// <see cref="Bridge.BridgeCallException"/> when a channel failed to ask; nothing has run then.
     /// </summary>
-    public Task<ApprovalResult> AskAsync(string requestId, string tool, ToolTier tier, string argumentsHash, WritePlan plan, EplanInstanceInfo eplan, string? backupFolder, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
-        AskAsync(new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout, BackupFolder: backupFolder) { Tier = tier, Eplan = eplan }, progress, cancellationToken);
+    public Task<ApprovalResult> AskAsync(string requestId, string tool, ToolTier tier, string argumentsHash, WritePlan plan, EplanInstanceInfo eplan, string? backupFolder, string? masterDataBackupFolder, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(
+            new ApprovalQuestion(requestId, tool, argumentsHash, plan, [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout, BackupFolder: backupFolder)
+            {
+                Tier = tier,
+                Eplan = eplan,
+                MasterDataBackupFolder = masterDataBackupFolder,
+            },
+            progress,
+            cancellationToken);
 
     /// <summary>
     /// Asks, before write <paramref name="requestId"/> goes on, whether the engineer has checked the project after the

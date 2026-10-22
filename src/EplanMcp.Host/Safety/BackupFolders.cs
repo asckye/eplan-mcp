@@ -22,8 +22,31 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
     /// <summary>BACKUP_FAILED: the write did not run.</summary>
     public static BridgeError Failure() => new() { Reason = ErrorReason.BackupFailed, Message = FailedMessage, Execution = ExecutionState.NotStarted };
 
+    /// <summary>The folder name below the backup root that holds the master-data backups (ADR-0019).</summary>
+    public const string MasterData = "masterdata";
+
+    /// <summary>The message of BACKUP_FAILED when the master data could not be backed up (ADR-0019); no local path (SEC-12).</summary>
+    public const string MasterDataFailedMessage =
+        "Nothing was changed because the parts database could not be backed up first. Ask the engineer to check the free disk space, or to run 'eplanmcp doctor'.";
+
     /// <summary>The folder that holds the backups of <paramref name="plan"/>'s project, as the approval dialog names it.</summary>
     public string ProjectFolder(WritePlan plan) => Path.Combine(locations.Backups, Path.GetFileName(plan.ProjectPath));
+
+    /// <summary>The folder that holds the master-data backups, as the approval dialog names it: <c>&lt;data root&gt;\backups\masterdata</c>.</summary>
+    public string MasterDataFolder => Path.Combine(locations.Backups, MasterData);
+
+    /// <summary>BACKUP_FAILED for the master data: the write did not run.</summary>
+    public static BridgeError MasterDataFailure() => new() { Reason = ErrorReason.BackupFailed, Message = MasterDataFailedMessage, Execution = ExecutionState.NotStarted };
+
+    /// <summary>
+    /// Makes a new, empty folder <c>&lt;data root&gt;\backups\masterdata\&lt;UTC time&gt;\</c> for one master-data backup
+    /// (ADR-0019) and returns it, under the same rules as <see cref="Create"/>.
+    /// </summary>
+    public string CreateMasterData()
+    {
+        Directory.CreateDirectory(locations.Backups); // the root itself may be a link (SEC-19)
+        return Level(Level(locations.Backups, MasterData, mayExist: true), Time(), mayExist: false);
+    }
 
     /// <summary>
     /// Makes a new, empty folder for one backup of <paramref name="plan"/>'s project and returns the path of the copy in
@@ -38,9 +61,8 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
             throw new IOException("The project's file name cannot name a backup folder.");
         }
 
-        string time = clock.GetUtcNow().UtcDateTime.ToString("yyyyMMdd'T'HHmmssfff'Z'", CultureInfo.InvariantCulture);
         Directory.CreateDirectory(locations.Backups); // the root itself may be a link (SEC-19)
-        string folder = Level(Level(locations.Backups, project, mayExist: true), time, mayExist: false);
+        string folder = Level(Level(locations.Backups, project, mayExist: true), Time(), mayExist: false);
         return Path.Combine(folder, project + ".elk");
     }
 
@@ -49,9 +71,11 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
     /// when the backup failed or the folder holds anything; removes it when it is still empty, since it holds no backup
     /// then. Returns the folder's new path, or null when it was removed. Throws <see cref="IOException"/> on failure.
     /// </summary>
-    public static string? Settle(string copy, bool failed)
+    public static string? Settle(string copy, bool failed) => SettleFolder(Path.GetDirectoryName(copy)!, failed);
+
+    /// <summary>As <see cref="Settle"/>, for a backup folder itself, such as a master-data backup's.</summary>
+    public static string? SettleFolder(string folder, bool failed)
     {
-        string folder = Path.GetDirectoryName(copy)!;
         if (!failed && !Directory.EnumerateFileSystemEntries(folder).Any())
         {
             Directory.Delete(folder);
@@ -76,6 +100,8 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
         long bytes = new DirectoryInfo(root).EnumerateFiles("*", tree).Sum(file => file.Length);
         return (backups, bytes);
     }
+
+    private string Time() => clock.GetUtcNow().UtcDateTime.ToString("yyyyMMdd'T'HHmmssfff'Z'", CultureInfo.InvariantCulture);
 
     /// <summary>The folder <paramref name="name"/> in <paramref name="parent"/>, made if needed; never a link.</summary>
     private static string Level(string parent, string name, bool mayExist)

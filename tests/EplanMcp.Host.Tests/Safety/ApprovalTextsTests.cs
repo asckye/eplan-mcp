@@ -266,6 +266,67 @@ public sealed class ApprovalTextsTests
         Assert.Equal(("Checked, continue", "Keep suspended", "Stays suspended automatically in {0}"), (texts.ApproveLabel, texts.RejectLabel, texts.CountdownFormat));
     }
 
+    [Theory]
+    [InlineData("zh-CN")]
+    [InlineData("en-US")]
+    public void AMasterDataWrite_NamesTheDatabase_EveryProject_TheBackup_AndNoUndo(string culture)
+    {
+        // ADR-0019: the database's type and path, "every project using it", and the master-data backup; no project.
+        var plan = new WritePlan
+        {
+            Changes = [new PlannedChange { Action = "create", Kind = "part", Name = "added", Property = "parts", NewValue = "3" }],
+            Fingerprint = "f",
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk", Path = @"C:\Parts\EPLAN_parts.alk" },
+        };
+        ApprovalQuestion question = _question with { Plan = plan, Tool = "eplan_part_import", Tier = ToolTier.Destructive, MasterDataBackupFolder = @"C:\Data\backups\masterdata" };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(question, CultureInfo.GetCultureInfo(culture));
+
+        if (culture == "zh-CN")
+        {
+            Assert.Equal("批准 AI 修改 EPLAN 部件库？", texts.Title);
+            Assert.Equal("工具：eplan_part_import\n部件库：$(MD_PARTS)\\EPLAN_parts.alk（文件型，C:\\Parts\\EPLAN_parts.alk）\n这个部件库被所有项目共用：修改影响使用它的所有项目。\n将进行以下修改（共 1 处）：", texts.Summary);
+            Assert.Equal("执行前会先把部件库备份到 C:\\Data\\backups\\masterdata\\ 下的新文件夹。部件库中的修改撤不回，Ctrl+Z 也不能撤销；需要时按备份恢复。", texts.Note);
+        }
+        else
+        {
+            Assert.Equal("Approve AI changes to EPLAN's parts database?", texts.Title);
+            Assert.Equal("Tool: eplan_part_import\nParts database: $(MD_PARTS)\\EPLAN_parts.alk (file database, C:\\Parts\\EPLAN_parts.alk)\nEvery project that uses this parts database is affected.\nThe following changes will be made (1):", texts.Summary);
+            Assert.Equal("Before the change, the parts database is backed up to a new folder in C:\\Data\\backups\\masterdata\\. Changes to the parts database cannot be undone, not even with Ctrl+Z. If needed, restore it from its backup.", texts.Note);
+        }
+    }
+
+    [Fact]
+    public void AMasterDataWrite_ThatChangesAProject_NamesBoth_AndBothBackups()
+    {
+        var plan = new WritePlan
+        {
+            Project = _plan.Project,
+            ProjectPath = _plan.ProjectPath,
+            Changes = _plan.Changes,
+            Fingerprint = "f",
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk" },
+        };
+        ApprovalQuestion question = _question with { Plan = plan, Tool = "eplan_part_sync", BackupFolder = @"C:\Data\backups\Line1", MasterDataBackupFolder = @"C:\Data\backups\masterdata" };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(question, CultureInfo.GetCultureInfo("zh-CN"));
+
+        Assert.Equal("批准 AI 修改 EPLAN 部件库和项目？", texts.Title);
+        Assert.StartsWith("工具：eplan_part_sync\n部件库：$(MD_PARTS)\\EPLAN_parts.alk（文件型）\n这个部件库被所有项目共用：修改影响使用它的所有项目。\n项目：Line1（D:\\Projects\\Line1）\n", texts.Summary, StringComparison.Ordinal);
+        Assert.Equal("执行前会先把整个项目备份到 C:\\Data\\backups\\Line1\\ 下的新文件夹。执行前会先把部件库备份到 C:\\Data\\backups\\masterdata\\ 下的新文件夹。部件库中的修改撤不回：Ctrl+Z 只撤销项目中的修改；需要时按备份恢复部件库。", texts.Note);
+    }
+
+    [Fact]
+    public void TheReleaseConfirmation_ForADatabase_SaysToCheckIt()
+    {
+        var suspension = new Suspension(null, null, null, "eplan_part_import", "r1", DateTimeOffset.MinValue, SuspensionReason.OutcomeUnknown, ["add 3 parts"], @"$(MD_PARTS)\EPLAN_parts.alk");
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Release = suspension }, CultureInfo.GetCultureInfo("en-US"));
+
+        Assert.Equal("Time: ?\nTool: eplan_part_import\nParts database: $(MD_PARTS)\\EPLAN_parts.alk\nThis change was interrupted and whether it was made is unknown; the parts database may contain part of it. AI writes are suspended. Planned changes (up to 20):", texts.Summary);
+        Assert.StartsWith("Check the parts database in EPLAN's parts management first; if needed, close EPLAN and restore the database", texts.Note, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void UnknownKindsAndProperties_AreShownAsTheyAre()
     {
