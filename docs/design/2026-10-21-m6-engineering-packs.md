@@ -339,14 +339,14 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 | `eplan_cabinet_list` | Read | 项目的柜、配置链、结构映射、锁 | 3 |
 | `eplan_cabinet_bind` | 本地数据；改锁要工程师确认 | 绑定或修改柜：配置层、值、结构映射 | 3 |
 | `eplan_context_get` | Read | 按需上下文（4.7） | 2（最小）、4 |
-| `eplan_project_create` | Write（scratch 中自动；之外逐次审批） | 从 `.zw9` 新建项目，或把 `.zw1`、项目副本还原到 scratch | 2 |
+| `eplan_project_create` | Write（scratch 中自动；之外逐次审批） | 从 `.zw9` 新建项目，或把 `.zw1`、项目副本还原到 scratch（[规格](../tools/eplan_project_create.md)；当前 Bridge 只支持 `.zw9` / `.zw1`，项目副本及 pack 资源输入待后续 PR） | 2 |
 | `eplan_workflow_plan` | Read | 把工作流或内联步骤编译为计划（4.8） | 2 |
 | `eplan_plan_apply` | 按步骤的最高级别 | 一次审批、计划前备份、逐步执行、校验（ADR-0023） | 2 |
 | `eplan_plan_get` | Read | 计划、各步结果、校验、差异 | 2 |
 | `eplan_rule_check` | Read | 在快照上按规则检查项目或柜；可选把修复生成计划 | 3 |
 | `eplan_connection_trace` | Read | 路径追踪、跨页、影响分析（4.12） | 4 |
 | `eplan_project_diff` | Read | 两个快照、两个项目之间的差异 | 4 |
-| `eplan_task_get`、`eplan_task_list`、`eplan_task_cancel` | Read、Read、取消 | 长任务的状态、列表、取消（4.13） | 2（get）、5 |
+| `eplan_task_get`、`eplan_task_list`、`eplan_task_cancel` | Read、Read、取消 | 长任务的状态、列表、取消（4.13；[get 规格](../tools/eplan_task_get.md)：第 2 阶段仅 Host 内存任务，持久化与恢复在第 5 阶段） | 2（get）、5 |
 
 - **与现有工具的关系**：`eplan_rule_check` 只在快照上求值，不写 EPLAN；`eplan_check_run` 是 EPLAN 自己的检查，会写消息，两者在描述中写明区别。`eplan_macro_*` 只管 `$(MD_MACROS)`；包中的宏经 `eplan_asset_*` 查询，经计划插入。`eplan_project_create` 实现 ADR-0005 第 6 节 `eplan_scratch_create` 的用途（那个名称从未发布），见 Q2。
 - **负责人建议的 `eplan_profile_*` 改名为 `eplan_cabinet_*`**：本项目中 Profile 已经指工具 Profile（ADR-0006、ADR-0022、`serve --profile`），再用于工程配置会让工程师和模型混淆；`eplan_config_*` 也不合适，`config.json` 是只能手工修改的安全配置（SEC-02）。见 Q1。
