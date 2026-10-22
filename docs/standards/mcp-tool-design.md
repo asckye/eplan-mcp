@@ -60,10 +60,13 @@
 | `message` | EPLAN 系统消息 | 系统消息树 |
 | `action` | EPLAN 的 action，只用于受控的 `eplan_action_run`（只执行白名单中的条目，[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
 | `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
+| `pack` | 工程包：开发目录 `packs-dev\`、已安装的版本 `packs\`（M6 设计 4.1） | 本项目的概念；包中的原生文件是 EPLAN 的宏、项目等 |
+| `asset` | 工程包中的一个资源：原生文件，或 EplanMcp 生成的知识文档（候选、模块、缺口等，M6 设计 4.1.3） | 本项目的概念 |
+| `cabinet`、`context`、`workflow`、`plan`、`rule`、`task` | M6 第 2 阶段起：柜与配置绑定、按需上下文、工作流、计划、规则、长任务（M6 设计 4.5.1） | 本项目的概念 |
 
 ### 3.3 动作
 - 标准动作：`list`（分页列出）、`get`（按名称取单个）、`search`（按条件查找）、`create`、`update`、`delete`。
-- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。API 能力覆盖第一期加入 `apply`（应用一组预先定义的值，如 `eplan_placeholder_apply` 应用值集）。
+- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。API 能力覆盖第一期加入 `apply`（应用一组预先定义的值，如 `eplan_placeholder_apply` 应用值集）。M6 中 `import` 也用于把工程师的材料导入工程包（`eplan_pack_import`），另加入 `build`（把开发包冻结为版本，`eplan_pack_build`），以后还有 `migrate`、`bind`、`trace`、`diff` 和只用于规则的 `check`；`apply` 在 M6 中也用于执行计划（`eplan_plan_apply`，M6 设计 4.5.1）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
 
@@ -179,6 +182,10 @@ eplan_device_place
 | `AUDIT_UNAVAILABLE` | 否 | `not_started` | 审计无法写入，所以写操作被拒绝 |
 | `INTERNAL` | 否 | 按发生的阶段：执行前 `not_started`，事务中 `rolled_back`，Bridge 已提交之后 `committed` | 本项目的缺陷；附上关联 ID，请工程师提交 Issue |
 | `OUTCOME_UNKNOWN` | 否 | `unknown` | 写操作被中断，取不回结果，无法确定项目是否被修改。提示**不要重复调用**，先请工程师在 EPLAN 中检查，可以用读工具查看现状；该项目的写入随之暂停 |
+| `PACK_INVALID` | 否 | — | 工程包或开发包校验不通过（ADR-0024：文件与清单不符、不允许的类型、超限；没有来源的正式规则）；`metadata.problems` 逐条列出，什么都没有安装或构建 |
+| `RESOURCE_NOT_FOUND` | 否 | — | 工程包、版本或资源不存在；提示用 `eplan_pack_list`、`eplan_asset_search` 查询 |
+| `CAPABILITY_MISSING` | 否 | — | 包或资源要求的能力（Bridge 操作、授权选项、工具、EPLAN 版本或变体）当前不满足；`metadata.missing` 列出缺的项（M6 设计 4.4） |
+| `CONFIG_CONFLICT` | 否 | — | 配置分层中下层放宽了硬约束，或生效的默认值不满足约束；指出冲突的两处来源（M6 设计 4.3） |
 | `WRITES_SUSPENDED` | 否 | `not_started` | 该项目（或当时那个 EPLAN 实例）的写入因此前结果未知而暂停；提示请工程师在 EPLAN 中核实，下一次写调用会请求确认，确认后解除 |
 | `BACKUP_FAILED` | 否 | `not_started` | Destructive 写操作执行前没能备份项目：复制失败、超过执行时限的一半，或副本的页数与项目不符（[ADR-0013](../adr/0013-destructive-backup.md)）；写系统主数据之前没能备份库：备份失败、超时，或备份目录中没有恰好一个非空的归档（[ADR-0019](../adr/0019-master-data-writes.md)）。项目和库都未改变；提示请工程师检查磁盘空间，或运行 `eplanmcp doctor` |
 | `CANCELLED` | 否 | 开始执行前 `not_started`，事务中 `rolled_back` | 客户端取消了调用，Bridge 在下一个安全点停下，提交之前发现取消就回滚（[M4 设计](../design/2026-10-20-m4-workflows.md) 4.3）。MCP 规定不回复被取消的请求，所以模型看不到它，只出现在 `outcome.get` 的结果和审计中 |
@@ -225,6 +232,7 @@ eplan_device_place
 - 写操作超时或中断后，Host 先向 Bridge 取回结果，**从不自动重发**；结果未知时暂停该项目的写入，没有工具可以解除，只能由工程师经审批渠道确认（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
 - 例外（[ADR-0012](../adr/0012-export-tier.md)）：Read 级工具如果会在项目之外新建文件（目前只有导出工具），`readOnlyHint`、`idempotentHint` 为 false，`destructiveHint` 仍为 false，不需要审批；文件只写进 Host 每次新建的导出目录（[security.md](security.md) SEC-20）。
+- 例外（[M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.5.1）：**本地数据**工具（`eplan_pack_import`、`eplan_pack_build`、`eplan_asset_update`）只写 EplanMcp 自己的数据目录、不碰 EPLAN 项目，注解同上一条（`readOnlyHint`、`destructiveHint` 为 false），不需要审批，没有 `dry_run` 和 `execution`，改动写审计（`pack_change`），审计写不进去就不改；安装别人的工程包要工程师经审批渠道确认（ADR-0024）。
 - 例外（[ADR-0025](../adr/0025-code-plugin-worker.md)）：算法插件按 Code 级默认关闭，在 `config.json` 中按 SHA-256 列入允许列表后，每次运行不再单独审批；它产出的计划照常审批。
 
 ---
