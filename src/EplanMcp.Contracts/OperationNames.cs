@@ -492,6 +492,14 @@ public static class OperationNames
     public const string ProjectSnapshot = "project.snapshot";
 
     /// <summary>
+    /// Finds the objects of a list of locators by type number and <c>ObjectIdentifier</c> and checks each against its
+    /// name, page, category and position: resolved with its content hash, or stale with the reason, never guessed
+    /// (docs/design/2026-10-21-m6-bridge-snapshot.md, 4.6). Reads only. Arguments: <see cref="ObjectResolveArgs"/>;
+    /// data: <see cref="ObjectResolveData"/>.
+    /// </summary>
+    public const string ObjectResolve = "object.resolve";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

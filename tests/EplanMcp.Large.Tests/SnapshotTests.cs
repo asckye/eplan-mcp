@@ -60,4 +60,41 @@ public sealed class SnapshotTests(LiveEplan eplan)
         Assert.Null(page.Chunks[0].SnapshotHash);
         TestContext.Current.TestOutputHelper?.WriteLine($"=+-CU1 on {motor.Page} at {motor.Pos}, PROJ_GUID {whole.Chunks[0].ProjectGuid}, modified {whole.Chunks[0].Modified}");
     }
+
+    [Fact]
+    public async Task Resolve_TheMotorCU1_IsResolvedWithItsSnapshotHash_AndAWrongDescriptionIsStale()
+    {
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        LiveSnapshots.Snapshot whole = await LiveSnapshots.TakeAsync(bridge, new ProjectSnapshotArgs { Project = eplan.ProjectPath });
+        SnapshotObject motor = Assert.Single(whole.Objects("function"), o => o.Name == "=+-CU1" && o.Main == true);
+        SnapshotObject page = whole.Page(motor.Page!).Objects[0];
+        SnapshotObject connection = whole.Objects("connection").First();
+        ObjectLocator Locator(SnapshotObject o) => new() { Project = whole.Chunks[0].ProjectPath, Kind = o.Kind, Type = o.Type, Oid = o.Oid, Name = o.Name, Page = o.Page, Category = o.Category, Pos = o.Pos };
+        ObjectLocator renamed = Locator(motor);
+        renamed.Name = "=+-CU9";
+        ObjectLocator moved = Locator(motor);
+        moved.Page = "=NO+SUCH/1";
+        ObjectLocator shifted = Locator(motor);
+        shifted.Pos = Shifted(motor.Pos!, 0.01);
+        ObjectLocator gone = Locator(motor);
+        gone.Oid = 999_999_999;
+
+        ObjectResolveData data = await bridge.InvokeAsync<ObjectResolveArgs, ObjectResolveData>(
+            OperationNames.ObjectResolve,
+            new ObjectResolveArgs { Project = eplan.ProjectPath, Locators = [Locator(motor), Locator(page), Locator(connection), renamed, moved, shifted, gone] },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            [(LocatorResult.Resolved, null, motor.Hash), (LocatorResult.Resolved, null, page.Hash), (LocatorResult.Resolved, null, connection.Hash)],
+            data.Results.Take(3).Select(r => (r.Status, r.Reason, r.Hash)));
+        Assert.Equal(["name", "page", "position", "not_found"], data.Results.Skip(3).Select(r => r.Reason));
+        Assert.Equal(("=+-CU1", motor.Page), (data.Results[3].ActualName, data.Results[4].ActualPage));
+    }
+
+    /// <summary>A position <paramref name="pos"/> moved by <paramref name="offset"/> millimetres in x.</summary>
+    private static string Shifted(string pos, double offset)
+    {
+        string[] xy = pos.Split(',');
+        return (double.Parse(xy[0], System.Globalization.CultureInfo.InvariantCulture) + offset).ToString(System.Globalization.CultureInfo.InvariantCulture) + "," + xy[1];
+    }
 }
