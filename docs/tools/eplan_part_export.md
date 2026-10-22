@@ -28,9 +28,10 @@
 ## 3. 输出
 字段同 `eplan_export_pdf`，`files` 中只有一个文件；另加：
 - `database`：导出的是哪个部件库（配置中的写法，如 `$(MD_PARTS)\EPLAN_parts.alk`；SQL Server 上的库只给出 `服务器|数据库`，同 `eplan_part_search`）；
-- `partCount`：导出的部件数，每个变体算一个（与 `eplan_part_search` 相同）。
+- `partCount`：文件中的部件数，一个部件号有几个变体也只算一个。XML 读文件根元素 `partsmanagement` 的 `count`，读不出时改用库中不同部件号的个数，并在 `hint` 中说明；EDZ 读不出文件，取库中不同部件号的个数（与 EDZ 文件是否同口径没有验证）；
+- `variantCount`：导出的部件变体数，每个变体算一个，即 `MDPartsDatabase.Parts` 的条数，与 `eplan_part_search` 的条目相同。2026-10-21 的 Large 测试：示例库的 `count` 为 454，`Parts` 为 464 条。
 
-一行摘要：`Exported 464 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.`
+一行摘要：`Exported 454 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.`
 
 工具描述写明：
 - 导出的是所有项目共用的部件库，不是项目；

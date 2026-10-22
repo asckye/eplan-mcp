@@ -33,13 +33,29 @@ public sealed class MasterDataExportOperationTests : IDisposable
     }
 
     [Fact]
-    public void Parts_All_IsOneXmlFileInTheHostsFolder_WithEveryPartCounted()
+    public void Parts_All_IsOneXmlFileInTheHostsFolder_WithThePartsAsTheFileCountsThem_AndTheVariants()
     {
+        _exporter.FileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?><partsmanagement count=\"454\"><part/></partsmanagement>";
+
         ExportRunData data = Run(new ExportArgs { Directory = _folder, FileName = "部件库.xml" });
 
         Assert.Equal(["部件库.xml"], Files());
         Assert.Equal(["parts Xml all 部件库.xml"], _exporter.Exports);
-        Assert.Equal((@"$(MD_PARTS)\EPLAN_parts.alk", (int?)4, string.Empty), (data.Database, data.PartCount, data.Project));
+        Assert.Equal((@"$(MD_PARTS)\EPLAN_parts.alk", (int?)454, (int?)4, string.Empty, (string?)null), (data.Database, data.PartCount, data.VariantCount, data.Project, data.Warning));
+    }
+
+    [Theory]
+    [InlineData("<partsmanagement/>")]
+    [InlineData("<partsmanagement count=\"many\"/>")]
+    [InlineData("not xml")]
+    public void Parts_AnXmlFileWhoseCountCannotBeRead_CountsTheDatabasesPartNumbers_AndSaysSo(string content)
+    {
+        _exporter.FileContent = content;
+
+        ExportRunData data = Run(new ExportArgs { Directory = _folder, FileName = "p.xml" });
+
+        Assert.Equal(((int?)3, (int?)4), (data.PartCount, data.VariantCount));
+        Assert.Contains("counted in the database", data.Warning, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -48,7 +64,15 @@ public sealed class MasterDataExportOperationTests : IDisposable
         ExportRunData data = Run(new ExportArgs { Format = "edz", Parts = [" PXC.3209510", "SIE.3RH2122-1HB40", "PXC.3209510 "], Directory = _folder, FileName = "relays.edz" });
 
         Assert.Equal(["parts Edz PXC.3209510,SIE.3RH2122-1HB40 relays.edz"], _exporter.Exports);
-        Assert.Equal(3, data.PartCount);
+        Assert.Equal(((int?)2, (int?)3, (string?)null), (data.PartCount, data.VariantCount, data.Warning));
+    }
+
+    [Fact]
+    public void Parts_Given_AsXml_AreCountedAsTheFileCountsThem()
+    {
+        ExportRunData data = Run(new ExportArgs { Parts = ["PXC.3209510"], Directory = _folder, FileName = "p.xml" });
+
+        Assert.Equal(((int?)1, (int?)2), (data.PartCount, data.VariantCount));
     }
 
     [Fact]
