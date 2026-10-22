@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)），同时写项目：每次审批，执行前备份主数据和项目 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批） |
+| 状态 | Proposed（M4c 第四批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把这个项目里用到、部件库里还没有的部件加进部件库"。代理把一个项目中的部件同步到 EPLAN 配置的**系统部件库**，对应界面上的"主数据 > 部件 > 同步"。
@@ -23,14 +23,17 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
 
 ## 3. 输出
 `structuredContent`：
-- `database`：写入的部件库；
+- `project`、`database`：写入的项目和部件库；
 - `added`、`overwritten`：部件号列表，各最多 50 个，另有数量；
-- `partsBefore`、`partsAfter`：部件库的部件总数；
-- `projectPartsBefore`、`projectPartsAfter`：项目中存储的部件数，以及 `storedInProject`（新存入项目的部件号，最多 50 个）；
-- `backup`（主数据备份）、`projectBackup`（项目备份）；
-- `execution`、`auditId`。
+- `partsBefore`、`partsAfter`：部件库的部件总数（按变体计数）；
+- `projectPartsBefore`、`projectPartsAfter`：项目中存储的部件数，以及 `storedInProject`（新存入项目的部件号，最多 50 个）和数量；
+- `missing`、`notStored`：读回时部件库中没找到的、项目中没存入的部件号；
+- `backup`（主数据备份）、`projectBackup`（项目备份）、`undo`（只撤回项目一侧的撤销步骤）；
+- `execution`、`dryRun`、`recovered`、`hint`。
 
-一行摘要：`Added 4 of the project's parts to the parts database; the project now also stores 48 parts it referenced. Backups: …`
+没有 `auditId`：现有的工具都不返回审计编号（同 `eplan_part_import`，实现时改，2026-10-21）。
+
+一行摘要：`Added 4 parts of the project to the parts database ($(MD_PARTS)\EPLAN_parts.alk); the project now also stores 48 parts it referenced. Both were backed up first (see 'backup' and 'projectBackup').`
 
 ## 4. 错误
 同 `eplan_part_import` 第 4 节，没有文件相关的错误，另有：
@@ -69,5 +72,5 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
 ## 7. 测试
 - Small：枚举、摘要、规划的分类规则。
 - Medium：假 Bridge 上的审批、两个备份各自失败、执行失败时 `unknown` 与暂停、读回不一致。
-- Large：写正在用的部件库，只在项目负责人每次批准后运行，做法同 `eplan_part_import` 第 7 节；项目用 scratch 中的写副本。
+- Large：写正在用的部件库，只在项目负责人每次批准后运行，做法同 `eplan_part_import` 第 7 节（`PartSyncTests`，同样要 `EPLANMCP_LARGE_MASTERDATA=1`）；项目用 scratch 中的写副本，同步会永久改变它（存入被引用的部件），所以只有新副本上的第一次运行会同步。系统消息 `S328014` 是否仍出现、Ctrl+Z 能否撤回项目一侧，在 EPLAN 中手工核对后补进 api-notes。
 - Agent 评测："把这个项目里部件库还没有的部件加进部件库"。

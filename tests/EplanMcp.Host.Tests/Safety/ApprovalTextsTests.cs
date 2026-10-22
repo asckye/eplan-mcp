@@ -372,6 +372,27 @@ public sealed class ApprovalTextsTests
     }
 
     [Fact]
+    public void APartsSynchronization_SaysTheProjectChangesToo_AndListsWhatItStores()
+    {
+        var plan = new WritePlan
+        {
+            Project = "Line1",
+            ProjectPath = @"D:\Projects\Line1",
+            Changes = [new PlannedChange { Action = "update", Kind = "project", Name = "Line1", Property = "stored parts", OldValue = "293", NewValue = "1" }],
+            Fingerprint = "f",
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk" },
+            Details = new Dictionary<string, string> { ["added"] = string.Empty, ["updated"] = string.Empty, ["stored"] = "PXC.3209510", ["storedCount"] = "1", ["skippedCount"] = "293", ["mode"] = "append_new" },
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Plan = plan, Tool = "eplan_part_sync" }, CultureInfo.GetCultureInfo("zh-CN"));
+
+        Assert.Equal(
+            ["项目也会被修改：在项目 Line1 中存入 1 个被引用的部件（现有 293 个）", string.Empty, "存入项目的部件：", "PXC.3209510", "部件库中不变的部件：293 个（方式 append_new）"],
+            texts.Changes);
+        Assert.Equal(["store 1 part the project references in project Line1 (now 293)"], WritePipeline.ChangeLines(plan));
+    }
+
+    [Fact]
     public void UnknownKindsAndProperties_AreShownAsTheyAre()
     {
         var change = new PlannedChange { Action = "update", Kind = "cable", Name = "-W1", Property = "length", OldValue = "1", NewValue = "2" };

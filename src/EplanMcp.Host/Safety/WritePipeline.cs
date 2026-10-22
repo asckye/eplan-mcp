@@ -400,6 +400,9 @@ internal sealed partial class WritePipeline(
         // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
         "create" when c.Kind == "parts" => $"add {Parts(c.NewValue)} from {c.Name} to the parts database",
         _ when c.Kind == "parts" => $"update {Parts(c.NewValue)} of the parts database from {c.Name}",
+
+        // part.sync.plan: the referenced parts EPLAN stores in the project as well (S24 r15).
+        _ when c.Property == "stored parts" => $"store {Parts(c.NewValue)} the project references in project {c.Name} (now {c.OldValue})",
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         "delete" => c.OldValue is null ? $"delete {c.Kind} {c.Name}" : $"delete {c.Kind} {c.Name} ({c.OldValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",

@@ -92,6 +92,11 @@ internal static class ApprovalTexts
             "create" when change.Kind == "parts" => zh ? $"从 {name} 新增 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Add {Value(change.NewValue ?? "?", zh)} new parts from {name}",
             _ when change.Kind == "parts" => zh ? $"从 {name} 更新部件库中已有的 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Update {Value(change.NewValue ?? "?", zh)} parts the database has, from {name}",
 
+            // part.sync.plan: the project changes too (S24 r15).
+            _ when change.Property == "stored parts" => zh
+                ? $"项目也会被修改：在项目 {name} 中存入 {Value(change.NewValue ?? "?", zh)} 个被引用的部件（现有 {Value(change.OldValue ?? "?", zh)} 个）"
+                : $"The project changes too: store {Value(change.NewValue ?? "?", zh)} referenced parts in project {name} (now {Value(change.OldValue ?? "?", zh)})",
+
             // A macro's change names the page; what goes there is its value (macro.insert.plan).
             "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             // A device's change names the page too; the part, the tag and the point are its value (device.place.plan).
@@ -251,14 +256,25 @@ internal static class ApprovalTexts
     /// </summary>
     private static IEnumerable<string> PartLists(WritePlan plan, bool zh)
     {
-        if (!plan.Changes.Any(c => c.Kind == "parts") || plan.Details is not { } details)
+        if (plan.MasterData is null || plan.Changes.Count == 0 || plan.Details is not { } details)
         {
             yield break;
         }
 
         yield return string.Empty;
-        yield return (zh ? "文件：" : "File: ") + Value(details.GetValueOrDefault("file") ?? "?", zh);
-        foreach ((string key, string heading) in new[] { ("added", zh ? "新增的部件：" : "Parts added:"), ("updated", zh ? "更新的部件：" : "Parts updated:") })
+        if (details.GetValueOrDefault("file") is { } file)
+        {
+            yield return (zh ? "文件：" : "File: ") + Value(file, zh);
+        }
+
+        // part.sync.plan's "updated" are overwritten with the project's data, and "stored" go into the project.
+        bool sync = details.ContainsKey("stored");
+        foreach ((string key, string heading) in new[]
+        {
+            ("added", zh ? "新增的部件：" : "Parts added:"),
+            ("updated", sync ? (zh ? "用项目数据覆盖的部件：" : "Parts overwritten with the project's data:") : (zh ? "更新的部件：" : "Parts updated:")),
+            ("stored", zh ? "存入项目的部件：" : "Parts stored in the project:"),
+        })
         {
             string[] numbers = (details.GetValueOrDefault(key) ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries);
             if (numbers.Length == 0)
@@ -281,7 +297,13 @@ internal static class ApprovalTexts
 
         string skipped = Value(details.GetValueOrDefault("skippedCount") ?? "0", zh);
         string mode = Value(details.GetValueOrDefault("mode") ?? "?", zh);
-        string matchBy = Value(details.GetValueOrDefault("matchBy") ?? "?", zh);
+        if (details.GetValueOrDefault("matchBy") is not { } given)
+        {
+            yield return zh ? $"部件库中不变的部件：{skipped} 个（方式 {mode}）" : $"Parts left as they are in the database: {skipped} (mode {mode})";
+            yield break;
+        }
+
+        string matchBy = Value(given, zh);
         yield return zh ? $"不变的部件：{skipped} 个（方式 {mode}，按 {matchBy} 判断是否已有）" : $"Parts left as they are: {skipped} (mode {mode}, matched by {matchBy})";
     }
 

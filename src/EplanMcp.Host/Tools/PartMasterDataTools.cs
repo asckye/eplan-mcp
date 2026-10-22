@@ -12,15 +12,18 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The tools that write EPLAN's parts database (docs/tools/eplan_part_import.md), system master data shared by every
-/// project (ADR-0019): through <see cref="WritePipeline"/> at <see cref="ToolTier.Destructive"/> with the database in the
-/// plan, so the engineer approves every call, in scratch too, and the database is backed up first. Nothing rolls them
-/// back; the backup is the way back.
+/// The tools that write EPLAN's parts database (docs/tools/eplan_part_import.md, eplan_part_sync.md), system master
+/// data shared by every project (ADR-0019): through <see cref="WritePipeline"/> at <see cref="ToolTier.Destructive"/>
+/// with the database in the plan, so the engineer approves every call, in scratch too, and the database is backed up
+/// first; eplan_part_sync changes and backs up its project as well. Nothing rolls the database back; its backup is the
+/// way back.
 /// </summary>
 [McpServerToolType]
 internal sealed class PartMasterDataTools
 {
     public const string ImportTool = "eplan_part_import";
+
+    public const string SyncTool = "eplan_part_sync";
 
     /// <summary>The largest file the tool imports (tool spec 2).</summary>
     public const long MaxFileBytes = 50L * 1024 * 1024;
@@ -161,6 +164,127 @@ internal sealed class PartMasterDataTools
 
         return hints.Count == 0 ? null : string.Join(" ", hints);
     }
+
+    [McpServerTool(
+        Name = SyncTool,
+        Title = "Add an EPLAN project's parts to the parts database",
+        ReadOnly = false,
+        Destructive = true,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(PartSyncResult))]
+    [Description(
+        "Synchronizes the parts an EPLAN project stores into the parts database EPLAN is configured with, which every " +
+        "project shares; EPLAN also stores the parts the project only references in the project. Always needs the " +
+        "engineer's approval; the database and the project are backed up first, and the database's side cannot be " +
+        "undone. Example: {\"project\": \"Line1\"}.")]
+    public static async Task<CallToolResult> PartSyncAsync(
+        WritePipeline pipeline,
+        [Description("From eplan_project_list")] string project,
+        [Description("append_new: only parts the database lacks")][AllowedValues("append_new", "overwrite_existing", "overwrite_and_append")] string mode = "append_new",
+        [Description("Only return the plan")] bool dry_run = false,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(project))
+        {
+            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+        }
+
+        var args = new PartSyncArgs { Project = project, Mode = mode };
+        var request = new WriteRequest<PartSyncArgs, PartSyncArgs>(
+            SyncTool,
+            ToolTier.Destructive,
+            OperationNames.PartSyncPlan,
+            OperationNames.PartSyncExecute,
+            args,
+            (plan, backup) => new PartSyncArgs { Project = args.Project, Mode = args.Mode, Fingerprint = plan.Fingerprint, Backup = backup },
+            dry_run,
+            Limit,
+            "Synchronizing parts");
+        WriteOutcome<PartSyncData> outcome;
+        try
+        {
+            outcome = await pipeline.RunAsync<PartSyncArgs, PartSyncArgs, PartSyncData>(request, progress, cancellationToken).ConfigureAwait(false);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
+
+        return Synchronized(outcome, dry_run);
+    }
+
+    /// <summary>The result: read back after a commit; from the plan for a dry run, a project with nothing to do, or a recovered commit.</summary>
+    private static CallToolResult Synchronized(WriteOutcome<PartSyncData> outcome, bool dryRun)
+    {
+        bool committed = outcome.Execution == ExecutionState.Committed;
+        PartSyncData? data = outcome.Data;
+        Dictionary<string, string> details = outcome.Plan.Details ?? [];
+        var result = new PartSyncResult
+        {
+            Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project) ?? string.Empty,
+            Database = ResultShaper.CleanText(data?.Database ?? outcome.Plan.MasterData?.Database) ?? string.Empty,
+            Execution = outcome.Execution,
+            DryRun = dryRun,
+            Added = Numbers(data?.Added, details, "added"),
+            AddedCount = data?.AddedCount ?? Count(details, "addedCount"),
+            Overwritten = Numbers(data?.Overwritten, details, "updated"),
+            OverwrittenCount = data?.OverwrittenCount ?? Count(details, "updatedCount"),
+            StoredInProject = Numbers(data?.StoredInProject, details, "stored"),
+            StoredInProjectCount = data?.StoredInProjectCount ?? Count(details, "storedCount"),
+            PartsBefore = data?.PartsBefore ?? Count(details, "partsBefore"),
+            PartsAfter = data?.PartsAfter,
+            ProjectPartsBefore = data?.ProjectPartsBefore ?? Count(details, "projectPartsBefore"),
+            ProjectPartsAfter = data?.ProjectPartsAfter,
+            Missing = [.. (data?.Missing ?? []).Select(n => ResultShaper.CleanText(n) ?? string.Empty)],
+            NotStored = [.. (data?.NotStored ?? []).Select(n => ResultShaper.CleanText(n) ?? string.Empty)],
+            Backup = committed ? outcome.MasterDataBackup : null,
+            ProjectBackup = committed ? outcome.Backup : null,
+            Undo = committed ? "AI: " + SyncTool : null,
+            Recovered = outcome.Recovered,
+        };
+        result.Hint = SyncHint(result, data, committed);
+        string what = $"{ToolResults.Count(result.AddedCount, "part")} of the project to the parts database ({result.Database})"
+            + (result.OverwrittenCount > 0 ? $", overwriting {ToolResults.Count(result.OverwrittenCount, "part")} there" : string.Empty)
+            + (result.StoredInProjectCount > 0 ? $"; the project {(committed ? "now also stores" : "would also store")} {ToolResults.Count(result.StoredInProjectCount, "part")} it referenced" : string.Empty);
+        string summary = committed
+            ? $"Added {what}. Both were backed up first (see 'backup' and 'projectBackup')."
+            : outcome.Plan.Changes.Count == 0
+                ? $"Nothing to synchronize: with {details.GetValueOrDefault("mode") ?? "this mode"}, the parts database ({result.Database}) and project {result.Project} stay as they are. Nothing was changed."
+                : $"Dry run: would add {what}. Nothing was changed.";
+        return ToolResults.Success(summary, result);
+    }
+
+    private static string? SyncHint(PartSyncResult result, PartSyncData? data, bool committed)
+    {
+        var hints = new List<string>();
+        if (committed)
+        {
+            hints.Add("Every project using this parts database sees the change. Ctrl+Z in EPLAN undoes only the project's side ('undo'); the parts database comes back only from 'backup'.");
+        }
+
+        if (data is not null && (result.Missing.Count > 0 || result.NotStored.Count > 0 || (data.PartsAfter is { } read && read != data.PartsExpected)))
+        {
+            string after = data.PartsAfter?.ToString(CultureInfo.InvariantCulture) ?? "?";
+            hints.Add($"The read-back does not match the plan ({after} parts in the database instead of {data.PartsExpected.ToString(CultureInfo.InvariantCulture)}; not in the database: {List(result.Missing)}; not stored in the project: {List(result.NotStored)}). Ask the engineer to check them in EPLAN.");
+        }
+
+        if (result.Recovered)
+        {
+            hints.Add("The response was lost, but EPLAN reported the synchronization as done; eplan_part_search and eplan_part_list show the parts.");
+        }
+
+        if (ResultShaper.CleanText(data?.Warning) is { } warning)
+        {
+            hints.Add(warning);
+        }
+
+        return hints.Count == 0 ? null : string.Join(" ", hints);
+    }
+
+    private static string List(List<string> numbers) => numbers.Count == 0 ? "none" : string.Join(", ", numbers);
 
     /// <summary>The part numbers as read back, or from the plan's details for a dry run; parts data, cleaned.</summary>
     private static List<string> Numbers(List<string>? read, Dictionary<string, string> details, string key) =>
