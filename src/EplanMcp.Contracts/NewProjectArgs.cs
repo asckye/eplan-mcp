@@ -1,7 +1,8 @@
 namespace EplanMcp.Contracts;
 
 /// <summary>
-/// Arguments of <see cref="OperationNames.ProjectCreatePlan"/> and <see cref="OperationNames.ProjectCreateExecute"/>
+/// Arguments of <see cref="OperationNames.ProjectCreatePlan"/>, <see cref="OperationNames.ProjectCreateExecute"/>,
+/// <see cref="OperationNames.ProjectRestorePlan"/> and <see cref="OperationNames.ProjectRestoreExecute"/>
 /// (docs/design/2026-10-21-m6-bridge-snapshot.md, 4.8, 4.9): a basic project (.zw9) or a project backup (.zw1), and a new
 /// empty folder for the new project.
 /// </summary>

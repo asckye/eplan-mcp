@@ -16,7 +16,7 @@ public sealed class ProjectCreateOperationTests : IDisposable
     private readonly string _root = Directory.CreateTempSubdirectory("eplanmcp-create-").FullName;
     private readonly string _file;
     private readonly string _scratch;
-    private readonly Factory _factory = new();
+    private readonly FakeProjectFactory _factory = new();
 
     public ProjectCreateOperationTests()
     {
@@ -187,36 +187,5 @@ public sealed class ProjectCreateOperationTests : IDisposable
     {
         var operation = new ProjectCreateExecuteOperation(_factory);
         return (NewProjectData)operation.Execute(operation.ParseArgs(JObject.FromObject(args)))!;
-    }
-
-    /// <summary>Makes the .elk and the .edb folder (with a file in it) as S27's CreateProject did, or fails after making them.</summary>
-    private sealed class Factory : IProjectFactory
-    {
-        public List<(string LinkFile, string BasicProject)> Calls { get; } = [];
-
-        public bool Fail { get; set; }
-
-        public bool MakeFiles { get; set; } = true;
-
-        public bool HoldOpen { get; set; }
-
-        public FileStream? Held { get; private set; }
-
-        public (int Pages, string? ProjectGuid) Create(string linkFile, string basicProject)
-        {
-            Calls.Add((linkFile, basicProject));
-            if (MakeFiles)
-            {
-                File.WriteAllText(linkFile, "link");
-                string data = Directory.CreateDirectory(Path.ChangeExtension(linkFile, ".edb")).FullName;
-                File.WriteAllText(Path.Combine(data, "User.eod"), "session");
-                if (HoldOpen)
-                {
-                    Held = new FileStream(Path.Combine(data, "User.eod"), FileMode.Open, FileAccess.Read, FileShare.None);
-                }
-            }
-
-            return Fail ? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not create a project from the basic project.") : (1, "GB_bas001@1792643412");
-        }
     }
 }

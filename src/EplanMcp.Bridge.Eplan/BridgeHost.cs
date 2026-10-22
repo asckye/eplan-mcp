@@ -97,6 +97,7 @@ internal static class BridgeHost
         var translator = new EplanProjectTranslator();
         var placeholders = new EplanPlaceholderReader();
         var projectFiles = new EplanProjectFiles();
+        var factory = new EplanProjectFactory();
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
@@ -178,7 +179,9 @@ internal static class BridgeHost
             new ObjectResolveOperation(catalog, new EplanObjectFinder()),
             new ProjectCompatibilityOperation(catalog, projectFiles),
             new ProjectCreatePlanOperation(),
-            new ProjectCreateExecuteOperation(new EplanProjectFactory()),
+            new ProjectCreateExecuteOperation(factory),
+            new ProjectRestorePlanOperation(),
+            new ProjectRestoreExecuteOperation(factory, projectFiles),
 
             // Master-data writes always need the engineer's approval (ADR-0019), which the offline host cannot ask.
             .. eplan.Offline ? [] : MasterDataOperations(catalog, pages, backup, transactions),
