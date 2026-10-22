@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EplanMcp.Packs;
 
 namespace EplanMcp.Host.Safety;
 
@@ -50,6 +51,12 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     /// <summary>What writes to system master data need: <c>masterDataWrites</c> (ADR-0019).</summary>
     public MasterDataWrites MasterDataWrites { get; init; } = MasterDataWrites.Approve;
+
+    /// <summary>
+    /// The roots engineering packs may reference in place, by name: <c>packSources</c> (ADR-0024 section 6); empty by
+    /// default, so packs copy what they hold. Read-only to EplanMcp, and only this file names them (SEC-36).
+    /// </summary>
+    public IReadOnlyDictionary<string, string> PackSources { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
     /// <summary>
     /// Without config.json: the default scratch root, and writes elsewhere each approved by the engineer (ADR-0005;
@@ -105,10 +112,18 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             return (null, $"is not valid: 'approvalTimeoutSeconds' must be a whole number of seconds from {Seconds(MinApprovalTimeout)} to {Seconds(MaxApprovalTimeout)}");
         }
 
+        Dictionary<string, string> sources = file?.PackSources ?? [];
+        if (sources.Any(s => s.Key.Length < 2 || !PackManifestValidator.IsId(s.Key) || string.IsNullOrWhiteSpace(s.Value) || !Path.IsPathFullyQualified(s.Value)))
+        {
+            // Two characters at least, so that a pack tool's '<source>:<path>' is never a drive letter.
+            return (null, "is not valid: 'packSources' must map names of two or more lowercase letters and digits joined by '.' or '-' to full paths, such as \"company-refs\": \"D:\\\\EplanRefs\"");
+        }
+
         return (new HostConfig(roots, file?.WritesOutsideScratch ?? defaults.WritesOutsideScratch)
         {
             ApprovalTimeout = timeout,
             MasterDataWrites = file?.MasterDataWrites ?? defaults.MasterDataWrites,
+            PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
         }, null);
     }
 
@@ -124,5 +139,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         public int? ApprovalTimeoutSeconds { get; set; }
 
         public MasterDataWrites? MasterDataWrites { get; set; }
+
+        public Dictionary<string, string>? PackSources { get; set; }
     }
 }

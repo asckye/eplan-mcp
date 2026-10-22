@@ -103,6 +103,21 @@ public static class ErrorReason
     /// </summary>
     public const string BackupFailed = "BACKUP_FAILED";
 
+    /// <summary>
+    /// An engineering pack or development pack fails its check (ADR-0024; an official rule without a source, M6 design
+    /// 4.2); <c>metadata.problems</c> lists every problem. Nothing was installed or built.
+    /// </summary>
+    public const string PackInvalid = "PACK_INVALID";
+
+    /// <summary>No engineering pack, pack version or pack resource has the given name (M6 design 4.5.1).</summary>
+    public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
+
+    /// <summary>What a pack or resource needs is not available now (M6 design 4.4); <c>metadata.missing</c> lists it.</summary>
+    public const string CapabilityMissing = "CAPABILITY_MISSING";
+
+    /// <summary>A configuration layer widens a hard constraint, or the effective default breaks one (M6 design 4.3).</summary>
+    public const string ConfigConflict = "CONFIG_CONFLICT";
+
     /// <summary>A defect in EplanMcp; the correlation ID identifies the log entries.</summary>
     public const string Internal = "INTERNAL";
 }
