@@ -260,7 +260,8 @@ begin
   if CurUninstallStep = usDone then begin
     DataRoot := GetEnv('EPLANMCP_HOME');
     if DataRoot = '' then DataRoot := ExpandConstant('{%USERPROFILE}\EplanMcp');
-    MsgBox('Configuration, audit, logs, scratch, exports and backups are retained in:' + #13#10 + DataRoot +
-      #13#10 + 'Remove the Claude Code plugin with its plugin commands.', mbInformation, MB_OK);
+    // A line must not start with #: the preprocessor would read #13#10 as a directive.
+    MsgBox('Configuration, audit, logs, scratch, exports and backups are retained in:' + #13#10 + DataRoot + #13#10 +
+      'Remove the Claude Code plugin with its plugin commands.', mbInformation, MB_OK);
   end;
 end;
