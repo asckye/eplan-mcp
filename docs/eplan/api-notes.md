@@ -186,6 +186,18 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A40. 长尾 action 的首批白名单（spike S26，2026-10-22，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据与报告目录见 [spike S26 r1](../../spikes/S26-action-run/README.md#结果)。版本、变体由运行者提供；结果依据六模式最终 JSON，当前项目为 fixture，显式目标为 LargeWrite，均为已打开的 scratch 副本。
+
+- **进程内 typed context 保留合法特殊字符路径**：`graphicallayertable EXPORT` 的 EXPORTFILE 带 `/` 分隔符、空格、单引号、中文，contextReadBack 精确，178.01 ms 返回 true，实际生成 `slash 子目录\空 格 '单引号' 中文.elc`，exactProducedPath=true。双引号候选 context 仍精确，但返回 false、0 文件，系统消息“路径中具有非法字符。”；Windows 禁止字面双引号文件名，这部分仍不确定，不能据此判断 action 二次解析。— S26。
+- **`changelayer` 在 SafetyPoint 与内部 UndoStep 中可回滚**：`PROJECTNAME=<LargeWrite>, LAYER1=EPLAN100, VISIBLE1=0` 在 SafetyPoint 对照（20.09 ms）与 Bridge 包装（4.85 ms）都返回 true，visible 从 true 变 false，Rollback 后恢复 true；Bridge 的 CloseUndo=true，未见冲突。独立候选 16.99 ms，同样恢复图层状态。没有提交，提交后单次 Ctrl+Z 未测；公开撤销历史不可枚举。— S26。
+- **计数未变不等于没有变化，回滚不等于恢复原字节**：changelayer 后目标图层和文件内容指纹变化，回滚后图层恢复，Layer.eod/Layer.eox 哈希仍不同；另一打开项目的可比较指纹未变。省略 PROJECTNAME 的 runner (b) 因目标不是当前项目而未运行，当前项目隔离问题尚无该探针的实证。— S26。
+- **六种 `partsmanagementapi EXPORT*` 需要属性过滤**：EXPORTPARTS、EXPORTMANUFACTURERS、EXPORTCONSTRUCTIONS、EXPORTCONNECTIONPATTERNS、EXPORTACCESSORYLISTS、EXPORTACCESSORYPLACEMENTS，FORMAT=XPamExportXml；不带 PROPERTYID1/PROPERTYVALUE1 全部返回 false、0 文件，约 1–7 ms，每次新增“输入字符串的格式不正确。”。分别用字典关键属性 22001、22900、22931、22945、22960、22970 加已有记录值后，全部返回 true、各一个非空 XML，约 16–216 ms，无新增系统消息。不能把无过滤用法当作导出全部。— S26。
+- **图层表、部件库和属性定义/方案导出未改变可观测项目指纹**：成功的 graphicallayertable EXPORT 约 12–178 ms；projectmanagement EXPORTPROPERTYPLACEMENTSSCHEMAS 为 93.24 ms；XEsUserPropertiesExportAction 用 XMLFile、Project 为 112.14 ms。它们及六种带过滤的 partsmanagementapi 导出均各一个文件，两个项目相对候选 before 的计数与文件指纹未变；parts 候选前后配置库、六类记录数、包含及排除 User.* 的内容摘要也未变。— S26。
+- **PLC 总线导出成功，但 AML 的只读副作用尚不能排除**：Phoenix1、OVERWRITE=0、LANGUAGE=de_DE；PlcDcXMLExchangerUniversal、PlcDcAMLExchangerGeneral（省略 FORMAT / AutomationML AR APC V1.4.0）分别返回 true，耗时 3,990.10 / 2,956.56 / 3,151.14 ms，输出 431,387 / 95,787 / 104,341 字节，无新增系统消息。业务计数均未变，标准格式文件指纹未变；两个 AML 候选的 LargeWrite 内容摘要变化，排除 User.* 后仍变化，回滚后未恢复，fixture 未变。报告列出 Blob/Function 文件差异；不能概括为所有导出都不改项目，需继续核实原因。— S26。
+- **返回后窗口启用不能证明执行期间无对话框**：所有实际调用返回后和收尾窗口禁用标志均为 false，没有 action/回滚/UndoStep 清理异常；但 EXPORTPARTS 的有过滤候选及三个 PLC 导出的执行期禁用采样为 true。dialogAppeared、engineerDialogObservation 均为空，不能从 JSON 单独确认弹窗与否；两个外部编辑方案发现另记录缺节点的 ArgumentException。— S26。
+- **三种原首批用法未运行，按 ADR-0021 Q2 移到“以后”**：EXPORTADDRESSOVERVIEW 缺可匹配的配置项目/站/CPU 元组（样本 CPU 读数为空）；XMActionDCCommonExport、XMExportDCArticleDataAction 没有提供已核实方案节点，未能读出方案名称。缺 CONFIGSCHEME 会弹窗来自 api-actions 7.3 的既有约束，本轮未触发。r2 需完整 PLC 元组及两个导出各自可读的方案，仍固定 EXECUTIONMODE=0、IMMEDIATEIMPORT=0。— S26。
+
 ### A39. M4c 剩余工具用到的 action（spike S34，2026-10-22，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S34](../../spikes/S34-m4c-actions/README.md)。
 
