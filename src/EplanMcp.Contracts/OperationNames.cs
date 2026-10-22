@@ -440,6 +440,12 @@ public static class OperationNames
     /// </summary>
     public const string CableRenumberExecute = "cable.renumber.execute";
 
+    /// <summary>Plans automatic cable generation. Arguments: CableGenerateArgs; data: WritePlan.</summary>
+    public const string CableGeneratePlan = "cable.generate.plan";
+
+    /// <summary>Backs up, generates and guards cable readback. Arguments: CableGenerateArgs; data: CableGenerateData.</summary>
+    public const string CableGenerateExecute = "cable.generate.execute";
+
     /// <summary>
     /// The plan of eplan_connection_number: checks the scheme and counts the project's connections and wire numbers, never
     /// writes; the new wire numbers are known only after running. Arguments: <see cref="ConnectionNumberArgs"/>; data:
