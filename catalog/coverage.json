@@ -400,10 +400,10 @@
         "cable.generate.execute",
         "cable.generate.plan"
       ],
-      "apiIds": 108,
+      "apiIds": 109,
       "operationGroups": 52,
       "dataDictionary": 2,
-      "dependencies": 44,
+      "dependencies": 45,
       "actions": 1,
       "spec": "docs/tools/eplan_cable_generate.md",
       "small": 3,

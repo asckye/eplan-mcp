@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "8c7ed67f",
-  "sourceHash": "sha256:74f1fbc0844a560fc39ae4cc4f76ef11db113c6cd7c714c1a76e4b1496413d0c",
+  "scannedSources": "09af0330",
+  "sourceHash": "sha256:08ca65114d4354fe0fe9b7e04704b595a045e46751caf13d8183cb6ab34a585c",
   "operations": [
     {
       "name": "approval.ask",
@@ -16737,6 +16737,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.E3D.Connection3D": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionReader",
         "member": "PageOf",
