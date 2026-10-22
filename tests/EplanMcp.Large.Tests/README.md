@@ -143,6 +143,10 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 `eplanmcp` 在 `EPLANMCP_PIPE_PREFIX=EplanMcpManual.` 下只找到它。按 Ctrl+C 或空闲 300 秒后，它停止管道、关闭项目、退出 EPLAN。退出码：0 正常，1 EPLAN 或 Bridge 失败（见日志），2 命令行错误。
 
 ## 写测试
+
+- `ImportPlcTests` 经 `DestructiveHost` 对 `LargeWrite` 验证事务内重复保护：当前没有 PLC 总线导出工具，可把这份写副本的 `Phoenix1` 标准格式自导出文件路径放进 `EPLANMCP_LARGE_PLC_PBF`；未设置时查找 `%USERPROFILE%\EplanMcp\scratch\spikes\s34\**\export-00\roundtrip.pbf` 中最新的 S34 示例项目自导出文件，两者都没有才跳过。预检不完整仍经审批、备份执行，期望 `ALREADY_EXISTS/rolled_back`、保留备份、冲突名单含 `=F+A2-KE1`，前后功能/PLC 盒/部件引用数相同（S34 新副本为 2,876 / 20 / 2,900；其他写测试可改变基线）。
+- PLC 无冲突目标的正向导入、新增对象之间同名的实际含义、提交后一次 Ctrl+Z 和备份恢复仍待 Large 验证；本测试不宣称覆盖这些发布门槛。
+
 写工具的测试**不写夹具**：读测试核对的页数、设备数会被改掉。它们写另一份 scratch 副本：
 1. 在夹具之外再复制一份示例项目到 scratch 根目录下的 `writes\`（与 `eval-fixture.ps1` 的复制方法相同：`.elk` 文件和 `.edb` 目录），例如
    ```powershell

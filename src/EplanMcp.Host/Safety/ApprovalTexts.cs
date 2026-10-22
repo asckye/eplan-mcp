@@ -146,6 +146,7 @@ internal static class ApprovalTexts
             _ when change.Property == "page number" => zh ? $"重新编号{kind} {name}" : $"Renumber {kind} {name}",
             // The numbering tools of M4c (terminals, cables, wire numbers): the scope, worded by the Bridge.
             _ when change.Property == "numbering" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
+            _ when change.Property == "PLC bus data" => PlcImport(name, details, zh),
             _ when change.Kind == "cables" && change.Property == "generation" => GenerateCables(zh, details),
             // Only the translation database tells which texts it fills in (eplan_project_translate, tool spec 5): the scope, worded by the Bridge.
             _ when change.Property == "translations" => (zh ? "按翻译库翻译：" : "Translate with the translation database: ") + Value(change.OldValue ?? string.Empty, zh),
@@ -276,7 +277,9 @@ internal static class ApprovalTexts
     /// How the engineer takes the change back: Ctrl+Z on the write's undo step, except for language settings, which no
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
-    private static string Undo(string tool, WritePlan plan, bool zh) => tool == ListImportTools.ImportTool
+    private static string Undo(string tool, WritePlan plan, bool zh) => tool == PlcImportTools.Tool
+        ? zh ? "提交后 Ctrl+Z 撤销尚未验证，需要时请工程师核实并使用项目备份。" : "Undo after commit has not been verified. Ask the engineer to check the project and use the backup if needed."
+        : tool == ListImportTools.ImportTool
         ? zh ? "提交后的撤销尚未验证；必要时请工程师检查并使用备份。" : "Undo after commit has not been verified; ask the engineer to check the project and use the backup if needed."
         : plan.Changes.Any(c => c.Kind == "cables" && c.Property == "generation")
         ? zh ? "提交后的撤销尚未验证；请保留备份。" : "Undo after commit has not been verified; retain the backup."
@@ -443,6 +446,17 @@ internal static class ApprovalTexts
         : zh
             ? $"执行前会先把整个项目备份到 {Value(folder, zh)}\\ 下的新文件夹。"
             : $"Before the change, the whole project is backed up to a new folder in {Value(folder, zh)}\\. ";
+
+    private static string PlcImport(string project, IReadOnlyDictionary<string, string>? details, bool zh)
+    {
+        string Field(string key) => Value(details?.GetValueOrDefault(key) ?? "?", zh);
+        return (zh
+            ? $"把 {Field("file")}（{Field("bytes")} 字节，SHA-256 {Field("sha256")}）以 {Field("converter")} 导入项目 {project}。这会导入新设备，不保证匹配更新。新增对象的全名在导入前已存在时会回滚。执行前会备份项目。提交后撤销尚未验证。"
+            : $"Import PLC bus data from {Field("file")} ({Field("bytes")} bytes, SHA-256 {Field("sha256")}) into this project using {Field("converter")}. This imports new devices; matching updates are not guaranteed. New objects whose full names already existed in the project roll the import back. A project backup will be made first. Undo after commit has not been verified.")
+            + (zh ? " 文件预检不完整；在事务内检查导入前已有的全名。" : " File preflight is incomplete; new object names will be checked against pre-import full names inside the transaction.")
+            + (zh ? $"（已识别 {Field("sourceDeviceCount")} 个源设备；现有 {Field("functions")} 个功能、{Field("plcBoxes")} 个 PLC 盒、{Field("articleReferences")} 个部件引用）。"
+                : $" ({Field("sourceDeviceCount")} source devices; {Field("functions")} functions, {Field("plcBoxes")} PLC boxes, {Field("articleReferences")} article references).");
+    }
 
     private static string Quoted(string? value, bool zh) => value is null ? (zh ? "（未设置）" : "(not set)") : "'" + Value(value, zh) + "'";
 
