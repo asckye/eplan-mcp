@@ -1,0 +1,14 @@
+{
+  "name": "eplanmcp-local",
+  "description": "EplanMcp local plugin marketplace, shipped with the installer for offline installation",
+  "owner": {
+    "name": "EplanMcp"
+  },
+  "plugins": [
+    {
+      "name": "eplan-mcp",
+      "source": "./eplan-mcp",
+      "description": "Connect Claude Code to the locally installed EplanMcp server"
+    }
+  ]
+}

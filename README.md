@@ -72,6 +72,7 @@ node eng/scripts/apply-archify-font.mjs
 
 | 想了解 | 读这里 |
 |---|---|
+| 预览安装包怎么开始使用 | [中文入门指南](docs/getting-started/zh-CN.md) |
 | 系统怎么设计、为什么这样设计 | [架构](docs/architecture/architecture.md) · [ADR](docs/adr/README.md) |
 | EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
 | 工具怎么设计 | [MCP 工具设计规范](docs/standards/mcp-tool-design.md) |

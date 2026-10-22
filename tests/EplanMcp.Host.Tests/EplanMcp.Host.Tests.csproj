@@ -11,4 +11,14 @@
       <_Parameter1>windows</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup>
+    <!-- Embed release sources so Small tests validate the shipped content without file-system access. -->
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\.claude-plugin\marketplace.json" LogicalName="ClaudePlugin.marketplace.json" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\.claude-plugin\plugin.json" LogicalName="ClaudePlugin.plugin.json" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\.mcp.json" LogicalName="ClaudePlugin.mcp.json" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\SKILL.md" LogicalName="ClaudePlugin.SKILL.md" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\guide.zh-CN.md" LogicalName="ClaudePlugin.guide.zh-CN.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\docs\getting-started\zh-CN.md" LogicalName="ClaudePlugin.source-guide.zh-CN.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\catalog\mapping\tools.json" LogicalName="ClaudePlugin.tools.json" />
+  </ItemGroup>
 </Project>
