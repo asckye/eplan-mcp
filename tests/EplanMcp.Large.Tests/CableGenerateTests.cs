@@ -47,7 +47,7 @@ public sealed class CableGenerateTests : IClassFixture<DestructiveHost>
         Assert.Empty(changes);
         Assert.Equal(0, result.GetProperty("changedCount").GetInt32());
         Assert.Empty(before.Except(after, StringComparer.Ordinal));
-        Assert.False(result.GetProperty("truncated").GetBoolean());
+        Assert.False(result.GetProperty("truncated").GetBoolean(), "Truncated: " + result.GetProperty("hint") + " " + result.GetProperty("eplanMessages"));
         TestContext.Current.TestOutputHelper?.WriteLine("Observed business changes: " + result.GetProperty("changes"));
 
         string backup = result.GetProperty("backup").GetString()!;
