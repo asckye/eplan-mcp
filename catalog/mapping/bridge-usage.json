@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "85a15b76",
-  "sourceHash": "sha256:ba6206355e7be315658b0350fd09e2ac2e570e5cb38ca12c7318644ef652331b",
+  "scannedSources": "6edc9e6f",
+  "sourceHash": "sha256:6b2298a017e67a48ea5dcb659d990fe3aac2ff42afff07d0c19e628f29abd2ab",
   "operations": [
     {
       "name": "approval.ask",
@@ -291,6 +291,10 @@
     {
       "name": "plc.get",
       "class": "PlcGetOperation"
+    },
+    {
+      "name": "project.compatibility",
+      "class": "ProjectCompatibilityOperation"
     },
     {
       "name": "project.get",
@@ -4155,6 +4159,7 @@
           "new"
         ],
         "operations": [
+          "project.compatibility",
           "project.snapshot"
         ]
       },
@@ -4223,6 +4228,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -4279,6 +4285,7 @@
           "call"
         ],
         "operations": [
+          "project.compatibility",
           "project.snapshot"
         ]
       }
@@ -4314,6 +4321,7 @@
           "call"
         ],
         "operations": [
+          "project.compatibility",
           "project.snapshot"
         ]
       }
@@ -4327,6 +4335,7 @@
           "call"
         ],
         "operations": [
+          "project.compatibility",
           "project.snapshot"
         ]
       }
@@ -5969,6 +5978,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -6050,6 +6060,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -10655,6 +10666,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -10736,6 +10748,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -10935,6 +10948,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -11083,6 +11097,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -11176,6 +11191,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -16692,6 +16708,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -16845,6 +16862,7 @@
           "type"
         ],
         "operations": [
+          "project.compatibility",
           "project.snapshot"
         ]
       },
@@ -16913,6 +16931,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
@@ -18158,6 +18177,7 @@
           "part.sync.execute",
           "part.sync.plan",
           "plc.get",
+          "project.compatibility",
           "project.get",
           "project.list",
           "project.snapshot",
