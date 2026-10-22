@@ -4,6 +4,7 @@
 - 依据：EPLAN 官方 API 帮助 `eplan.help`，2026 版目录（页脚 "Eplan API, 18.03.2026"）。2025 版（页脚 "EPLAN API , 17.02.2025"）只用于对比。
 - 方法：用 curl 下载每个 action 页面的原始 HTML，并提取文本（WebFetch 会做摘要，可能丢失参数，所以没有用它取参数）。action 名称、TYPE 值和参数名都**从页面原样复制**，大小写与拼写保持不变，包括文档中的拼写错误，例如 `DXFDWGPPAGESSCHEME`、`PAGFILTERNAME`。
 - 凡是页面没有写明的内容，都标注为“推断”或“未核实”，没有凭记忆补全。
+- 机器可读目录：第 4 节的每一行在 [`catalog/eplan-2026.0.3/actions.json`](../../catalog/eplan-2026.0.3/actions.json) 中有一个条目，格式见 [`catalog/schema/action.schema.json`](../../catalog/schema/action.schema.json)。改了表中的行，要同步改这个文件；`eng\scripts\check-action-catalog.ps1`（CI 也会运行）检查条目符合 schema，并与表的行号、action 名和 TYPE 一一对应。条目的 `status` 从 `registered` 起步，`implemented` 和 `verified` 由代码和测试推导，不手工填写；表里“不覆盖”和“默认禁用”的行标为 `excluded`，并写明原因类别。
 
 ---
 

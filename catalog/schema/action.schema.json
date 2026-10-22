@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EPLAN API action catalog entry",
+  "description": "One entry of catalog/eplan-<version>/actions.json: one row of the hand-reviewed table in docs/eplan/api-actions.md (an action, or one TYPE value of a multi-purpose action). The file is a JSON array of these entries, sorted by id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "action",
+    "type",
+    "row",
+    "docUrl",
+    "category",
+    "milestone",
+    "context",
+    "effect",
+    "effectInferred",
+    "parameters",
+    "status",
+    "plannedHandling",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "description": "A:<action> when the action has no TYPE branches, else A:<action>/<TYPE>. Unique in the file.",
+      "type": "string",
+      "pattern": "^A:[A-Za-z][A-Za-z0-9]*(/[A-Za-z][A-Za-z0-9]*)?$"
+    },
+    "action": {
+      "description": "The action name as the official action list spells it (case kept).",
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+    },
+    "type": {
+      "description": "The TYPE value in the official spelling (typos kept, e.g. DXFDWGPPAGESSCHEME), or null when the action has no TYPE branches. Mode parameters such as MachineType or EXECUTIONMODE are not TYPE values: they stay in parameters and this field is null.",
+      "type": ["string", "null"],
+      "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+    },
+    "row": {
+      "description": "The row number in section 4 of docs/eplan/api-actions.md.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "docUrl": {
+      "description": "The official 2026 page of the action (the action list page for an action without its own page).",
+      "type": "string",
+      "pattern": "^https://www\\.eplan\\.help/en-us/Infoportal/Content/api/2026/[A-Za-z0-9%._-]+\\.html$"
+    },
+    "category": {
+      "description": "The category column of the table (docs/eplan/api-actions.md section 3).",
+      "enum": [
+        "导出",
+        "导入",
+        "检查与消息",
+        "报表",
+        "编号",
+        "生成",
+        "项目管理",
+        "部件管理",
+        "翻译与语言",
+        "设置",
+        "3D/生产",
+        "受控白名单",
+        "API 替代",
+        "不覆盖"
+      ]
+    },
+    "milestone": {
+      "description": "The earliest milestone that plans a tool for this row; none when the row never becomes a tool. M4* depends on the Preplanning licence; M4b is the Pro Panel family.",
+      "enum": ["M2", "M2-M3", "M3", "M4", "M4*", "M4b", "none"]
+    },
+    "milestoneOptional": {
+      "description": "True when the table marks the milestone as optional (the row is only a candidate for that milestone).",
+      "type": "boolean"
+    },
+    "context": {
+      "description": "What the action works on. project: a project; page: pages; selection: the current UI selection or objects passed in; master_data: symbols, macros, parts or translation databases; system_settings: settings, workspaces, registrations; file: files or folders outside the project; gui: needs or changes the user interface.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["project", "page", "selection", "master_data", "system_settings", "file", "gui"]
+      }
+    },
+    "effect": {
+      "description": "Side-effect classes of the action, from the table's effect column. read: reads only; writes_project: changes project data, project settings or project messages; writes_master_data: changes system master data (parts and translation databases, macro directories); writes_files: writes files or archives outside the project; writes_settings: changes settings, registrations or workspaces; gui_only: only opens or changes UI, or needs a person; unknown: the pages do not say.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["read", "writes_project", "writes_master_data", "writes_files", "writes_settings", "gui_only", "unknown"]
+      }
+    },
+    "effectInferred": {
+      "description": "True when the table marks the effect with a question mark: it is an inference, not stated by the page.",
+      "type": "boolean"
+    },
+    "parameters": {
+      "description": "The official parameter names for this row, spelled as the table spells them (including n-suffixed forms such as PAGENAMEn and PARTNUMBER(n)).",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\[n\\]|\\(n\\)|<nr>)?$"
+          },
+          "required": {
+            "description": "true or false only where the official page marks the parameter as required or optional (read through a summarising fetch on 2026-10-21, not re-verified line by line); absent when the page says nothing.",
+            "type": "boolean"
+          },
+          "output": {
+            "description": "True for a value the action returns in the calling context.",
+            "const": true
+          },
+          "deprecated": {
+            "description": "True when the page marks the parameter as deprecated.",
+            "const": true
+          },
+          "sensitive": {
+            "description": "True for a credential: an agent must never supply it.",
+            "const": true
+          }
+        }
+      }
+    },
+    "status": {
+      "description": "registered: listed in the catalog, nothing built; implemented and verified are derived from code and tests, never set by hand; excluded: never becomes a tool (see reason).",
+      "enum": ["registered", "implemented", "verified", "excluded"]
+    },
+    "reason": {
+      "description": "Why an excluded row never becomes a tool. Present exactly when status is excluded. interactive_ui: interactive or UI-only; script_code_level: runs or registers scripts (Code level, ADR-0005); installer_registration: add-in or plug-in registration for installers only; backward_compat: kept only for backward compatibility, the official page points to a replacement; one_off_migration: one-off migration or administrator task; settings_write_disabled: writes settings or other workstation-level data, disabled by default; printing: physical printing; outside_scratch_scope: writes system master data, workstation registries or an external service, so a person must decide.",
+      "enum": [
+        "interactive_ui",
+        "script_code_level",
+        "installer_registration",
+        "backward_compat",
+        "one_off_migration",
+        "settings_write_disabled",
+        "printing",
+        "outside_scratch_scope"
+      ]
+    },
+    "plannedHandling": {
+      "description": "How the project plans to cover the row, in our own words (the table's handling column).",
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "description": "Our own summary of what the action does plus the undocumented side effects and doubts recorded in docs/eplan/api-actions.md. Never official text.",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["status"],
+        "properties": { "status": { "const": "excluded" } }
+      },
+      "then": { "required": ["reason"] },
+      "else": { "not": { "required": ["reason"] } }
+    },
+    {
+      "if": {
+        "required": ["status"],
+        "properties": { "status": { "const": "excluded" } }
+      },
+      "then": { "properties": { "milestone": { "const": "none" } } }
+    },
+    {
+      "if": {
+        "properties": { "type": { "type": "string" } },
+        "required": ["type"]
+      },
+      "then": { "properties": { "id": { "pattern": "/" } } },
+      "else": { "properties": { "id": { "not": { "pattern": "/" } } } }
+    }
+  ]
+}
