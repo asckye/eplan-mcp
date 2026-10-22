@@ -12,7 +12,7 @@
 M6 的上下文缓存（设计 4.7）需要知道 EPLAN 中的项目什么时候变了：工程师在界面中编辑、别的程序写入、项目被关闭或重新打开。现状：
 - Bridge 只在一次调用期间发 `progress` 通知（`src/EplanMcp.Bridge.Core/Server/BridgeConnection.cs`），没有在调用之外主动发消息的通道；
 - 插件只实现 `IEplAddIn`、`IEplAddInShadowCopy`，没有订阅任何 EPLAN 事件；
-- EPLAN API 用 `Eplan.EplApi.ApplicationFramework.EventHandler` 按名称订阅事件（`SetEvent(名称)` 加 `NameEvent` 事件，XML 文档）；可用的事件名和参数要实测。已知 `Page.ConnectionDirty` 没有参数，只能说明"某些连接变了"，不知道是哪些页；
+- EPLAN API 用 `Eplan.EplApi.ApplicationFramework.EventHandler` 按名称订阅事件（`SetEvent(名称)` 加 `NameEvent` 事件，XML 文档）；可用的事件名和参数要实测。S33 实测（api-notes A38）：数据变化的事件 `onDMObjectsAltered` 不带可读的范围，只能说明"项目中某些对象变了"，不知道是哪些页，被回滚的修改也会触发（提出时设想的 `Page.ConnectionDirty` 事件并不存在）；
 - 没有事件时只能靠 TTL 和写前重新核对，缓存要么常常过期，要么要频繁重新提取。
 
 这是 IPC 的变化，属于 L3，只能提议。
@@ -34,7 +34,7 @@ M6 的上下文缓存（设计 4.7）需要知道 EPLAN 中的项目什么时候
 选择方案 3（推送加序号，包含了方案 2 的续传能力）。
 
 ### 1. 订阅哪些事件
-- 只订阅 S33 验证过的事件名，列在 Bridge 代码中的白名单里。候选：页的增删改、`Page.ConnectionDirty`、项目打开和关闭。
+- 只订阅 S33 验证过的事件名，列在 Bridge 代码中的白名单里。S33（api-notes A38）验证过的：数据变化 `onDMObjectsAltered`（回滚的修改也触发，不带范围）、`onPreCommitTxn`、`onPreCloseUndo`；项目打开 `API.PreOpenProject`、`Eplan.EplApi.OnPostOpenProject`（带路径）；项目关闭 `onPreCloseProject`、`onPostCloseProject`。原候选 `Page.ConnectionDirty` 不存在。
 - **事件名、参数和触发线程都要由 S33 实测核实，实现按实测的结果来做**；本 ADR 中关于具体事件的写法只是候选。
 - S33 证明某个事件不稳定或代价过高时不订阅；一个也不能用时，握手不声明这项能力，Host 只用 TTL（第 6 条）。
 
@@ -51,7 +51,7 @@ M6 的上下文缓存（设计 4.7）需要知道 EPLAN 中的项目什么时候
 - 一个 Bridge 最多 4 个订阅连接，超出的被拒绝；每个订阅者有自己的有界发送队列，慢的订阅者只会收到缺口标记，不会拖住别人。
 
 ### 4. 通知的含义
-- `kind` 取页变化、连接变化、项目打开、项目关闭等；`Page.ConnectionDirty` 没有参数，发出 `{kind: "connections", scope: "unknown"}`，Host 把依赖连接的全部缓存项标为待核对（设计 4.7 的宽的待定范围）。
+- `kind` 取页变化、连接变化、项目打开、项目关闭等；`onDMObjectsAltered` 不带范围（S33），发出 `{kind: "objects", scope: "unknown"}`，Host 把依赖连接的全部缓存项标为待核对（设计 4.7 的宽的待定范围）。
 - 通知**只用来让缓存项失效或待核对**：从不作为写入的依据，从不触发写入或计划，从不原样转给 MCP 客户端当作指令。Host 可以据此给订阅了的 MCP 客户端发自己资源（计划、任务）的更新通知。
 - Host 收到通知后只改缓存的状态，下一次使用时按设计 4.7 重新提取、比较页哈希。
 
