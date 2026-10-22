@@ -20,6 +20,10 @@ public static class PackSchema
 
     public static JsonObject Lock() => Generate(typeof(PackLock), LockId, "EplanMcp pack lock (pack.lock.json), lockVersion 1");
 
+    public const string BindingId = "https://github.com/asckye/eplan-mcp/schemas/project-binding.schema.json";
+
+    public static JsonObject Binding() => Generate(typeof(ProjectBinding), BindingId, "EplanMcp project binding (binding.json in a project workspace), bindingVersion 1");
+
     /// <summary>A schema as the committed file holds it: the bytes <see cref="PackJson.Serialize"/> writes.</summary>
     public static string Text(JsonObject schema) => schema.ToJsonString(PackJson.Options) + "\n";
 

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asckye/eplan-mcp/schemas/project-binding.schema.json",
+  "title": "EplanMcp project binding (binding.json in a project workspace), bindingVersion 1",
+  "type": "object",
+  "properties": {
+    "bindingVersion": {
+      "type": "integer",
+      "description": "The binding format. A reader refuses a version it does not know.",
+      "const": 1
+    },
+    "project": {
+      "type": "string",
+      "description": "The project key: the project's canonical path, as the Host computes it."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Grows by one with every change; plans record it and are refused when it changed.",
+      "minimum": 0
+    },
+    "cabinets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "One cabinet of the project."
+      },
+      "description": "The project's cabinets. Slots only so far: layers, values and the mapping to the project structure come with the configuration work (design 4.3)."
+    },
+    "locks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "digest"
+        ],
+        "additionalProperties": false,
+        "description": "One exact pack version, by its pack digest: the SHA-256 of its pack.json canonicalised per RFC 8785. The manifest lists every resource's hash, so this pins the content too."
+      },
+      "description": "The pack versions the project uses, dependencies included, by pack digest; sorted by id, one version per id. Installing a newer version changes none."
+    }
+  },
+  "required": [
+    "bindingVersion",
+    "project",
+    "revision"
+  ],
+  "additionalProperties": false,
+  "description": "One EPLAN project's binding (workspaces\\<project>\\binding.json): its cabinets, the pack versions it locks by digest, and a revision that grows with every change. Kept in EplanMcp's data folder, never in the project."
+}

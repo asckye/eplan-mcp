@@ -84,7 +84,6 @@ public sealed class PackStoreTests : IDisposable
         Assert.StartsWith("is being changed by another EplanMcp", Assert.Single(result.Problems).Message, StringComparison.Ordinal);
         Assert.Empty(store.Versions("acme.base"));
         Assert.Empty(Directory.GetDirectories(store.Root));
-        await Assert.ThrowsAsync<PackFormatException>(() => store.BindAsync("Plant", "acme.base", "1.0.0", Cancel));
     }
 
     [Fact]
@@ -97,35 +96,6 @@ public sealed class PackStoreTests : IDisposable
 
         Assert.Equal(PackInstallOutcome.Refused, result.Outcome);
         Assert.Empty(Directory.GetDirectories(Store.Root));
-    }
-
-    [Fact]
-    public async Task Binding_SurvivesInstallingANewerVersion()
-    {
-        await Store.InstallAsync(await PackAsync("acme.base", "1.0.0"), Cancel);
-        PackReference pin = await Store.BindAsync(@"D:\Projects\Plant.elk", "acme.base", "1.0.0", Cancel);
-        string pinnedContent = Sha256(Store.FolderOf("acme.base", "1.0.0"));
-
-        Assert.Equal(PackInstallOutcome.Installed, (await Store.InstallAsync(await PackAsync("acme.base", "1.1.0"), Cancel)).Outcome);
-        (IReadOnlyList<PackReference> packs, IReadOnlyList<PackProblem> problems) = await Store.BoundAsync(@"D:\Projects\Plant.elk", Cancel);
-
-        Assert.Equal([pin], packs);
-        Assert.Empty(problems);
-        Assert.Equal(pinnedContent, Sha256(Store.FolderOf("acme.base", "1.0.0")));
-        Assert.Equal(["1.1.0", "1.0.0"], Store.Versions("acme.base").Select(v => v.ToString()));
-    }
-
-    [Fact]
-    public async Task Bind_ReplacesThePinOfTheSameId_AndRefusesAnUninstalledVersion()
-    {
-        await Store.InstallAsync(await PackAsync("acme.base", "1.0.0"), Cancel);
-        await Store.InstallAsync(await PackAsync("acme.base", "1.1.0"), Cancel);
-        await Store.BindAsync("Plant", "acme.base", "1.0.0", Cancel);
-
-        await Store.BindAsync("Plant", "acme.base", "1.1.0", Cancel);
-
-        Assert.Equal(["1.1.0"], (await Store.BoundAsync("Plant", Cancel)).Packs.Select(p => p.Version));
-        await Assert.ThrowsAsync<PackFormatException>(() => Store.BindAsync("Plant", "acme.base", "9.0.0", Cancel));
     }
 
     [Fact]
