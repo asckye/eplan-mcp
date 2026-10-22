@@ -133,6 +133,29 @@
               "referenced"
             ]
           },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "root": {
+                "type": "string",
+                "description": "The root's name in config.json packSources.",
+                "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+              },
+              "path": {
+                "type": "string",
+                "description": "The path below the root, '/' between folders; no drive, no '..', no EPLAN variable."
+              }
+            },
+            "required": [
+              "root",
+              "path"
+            ],
+            "additionalProperties": false,
+            "description": "Where a referenced resource lies; only and always for storage 'referenced'."
+          },
           "source": {
             "type": [
               "object",

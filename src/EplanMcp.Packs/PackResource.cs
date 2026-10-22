@@ -28,6 +28,9 @@ public sealed record PackResource
 
     public required ResourceStorage Storage { get; init; }
 
+    [Description("Where a referenced resource lies; only and always for storage 'referenced'.")]
+    public ResourceReference? Reference { get; init; }
+
     public ResourceSource? Source { get; init; }
 
     [Description("The EPLAN version the files say they were written with, when EplanMcp can read it without EPLAN; the evidence is in facts.")]

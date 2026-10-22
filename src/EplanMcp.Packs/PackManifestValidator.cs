@@ -168,6 +168,25 @@ public static partial class PackManifestValidator
                 add($"{location}.source.path", sourceProblem);
             }
         }
+
+        CheckReference(location, resource, add);
+    }
+
+    /// <summary>A referenced resource names a packSources root and a relative path below it (ADR-0024 section 6).</summary>
+    private static void CheckReference(string location, PackResource resource, Action<string, string> add)
+    {
+        if ((resource.Storage == ResourceStorage.Referenced) != (resource.Reference is not null))
+        {
+            add($"{location}.reference", "is required for a referenced resource and not allowed for a bundled one");
+        }
+        else if (resource.Reference is { } reference)
+        {
+            CheckId($"{location}.reference.root", reference.Root, add);
+            if ((PackPath.Problem(reference.Path) ?? (reference.Path.Contains("$(", StringComparison.Ordinal) ? "names an EPLAN variable" : null)) is { } problem)
+            {
+                add($"{location}.reference.path", $"must be a path below the root: it {problem}");
+            }
+        }
     }
 
     private static void CheckScopes(string location, IReadOnlyList<PackScope> scopes, HashSet<string> resources, Action<string, string> add)
