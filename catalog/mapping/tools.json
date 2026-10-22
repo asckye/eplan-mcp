@@ -4198,6 +4198,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "ObjectResolveTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ObjectResolveTests.cs"
+          },
+          {
             "name": "PageRenumberTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageRenumberTests.cs"
