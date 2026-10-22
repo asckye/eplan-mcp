@@ -171,7 +171,7 @@ internal static class BridgeHost
             new ConnectionNumberExecuteOperation(catalog, pages, connectionNumberer, backup, transactions),
 
             // Master-data writes always need the engineer's approval (ADR-0019), which the offline host cannot ask.
-            .. eplan.Offline ? [] : MasterDataOperations(),
+            .. eplan.Offline ? [] : MasterDataOperations(catalog),
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);
@@ -181,7 +181,7 @@ internal static class BridgeHost
     }
 
     /// <summary>The operations of writes to system master data and their backup (ADR-0019).</summary>
-    private static IOperation[] MasterDataOperations()
+    private static IOperation[] MasterDataOperations(IProjectCatalog catalog)
     {
         var parts = new EplanPartsDatabaseWriter();
         return
@@ -189,6 +189,7 @@ internal static class BridgeHost
             new MasterDataBackupOperation(new EplanMasterDataBackup()),
             new PartImportPlanOperation(parts),
             new PartImportExecuteOperation(parts),
+            new PartSyncPlanOperation(catalog, new EplanPartReader(), parts),
         ];
     }
 

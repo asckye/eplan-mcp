@@ -610,6 +610,8 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new PartImportData(),
+        new PartSyncArgs { Project = "Line1", Mode = "overwrite_and_append", Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new PartSyncArgs(),
     ];
 
     [Theory]
