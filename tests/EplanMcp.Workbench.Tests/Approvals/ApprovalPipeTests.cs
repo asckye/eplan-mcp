@@ -140,29 +140,19 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     [Fact]
     public async Task SeveralHostsAtOnce_EachGetTheAnswerToTheirOwnQuestion()
     {
-        var arrived = new List<Question>();
-        var both = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        _queue.Changed += q =>
-        {
-            lock (arrived)
-            {
-                if (q.End is null && !arrived.Contains(q))
-                {
-                    arrived.Add(q);
-                }
-
-                if (arrived.Count == 2)
-                {
-                    both.TrySetResult();
-                }
-            }
-        };
-
+        // The second Host asks once the first question is in the queue: the server makes its next pipe instance before it
+        // serves a connection, so from then on one is waiting. A Host that connects in the very instant the only instance
+        // is taken finds none for a moment and does not wait for one (WorkbenchChannel.ConnectTimeout, real time): its
+        // question goes to the EPLAN dialog, as it should, but then this test would depend on how fast the machine is.
+        Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> first = Channel().AskAsync(HostQuestion("r1"), Token);
+        Question askedFirst = await arrival.WaitAsync(_patience, Token);
+        arrival = Arrival();
         Task<ApprovalAnswer?> second = Channel().AskAsync(HostQuestion("r2"), Token);
-        await both.Task.WaitAsync(_patience, Token);
-        _queue.Answer(arrived.Single(q => q.RequestId == "r2"), approve: true);
-        _queue.Answer(arrived.Single(q => q.RequestId == "r1"), approve: false);
+        Question askedSecond = await arrival.WaitAsync(_patience, Token);
+
+        _queue.Answer(askedSecond, approve: true);
+        _queue.Answer(askedFirst, approve: false);
 
         ApprovalAnswer one = (await first.WaitAsync(_patience, Token))!;
         ApprovalAnswer two = (await second.WaitAsync(_patience, Token))!;
