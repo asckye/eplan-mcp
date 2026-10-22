@@ -170,6 +170,55 @@ public static class PackVerifier
         }
     }
 
+    /// <summary>
+    /// What makes the referenced <paramref name="resource"/> unavailable now, or null (ADR-0024 section 6): its root is
+    /// not among <paramref name="roots"/> (config.json packSources, name to path), the path below it is missing or leads
+    /// through a link, or its files no longer have the hash the manifest records. Reads only.
+    /// </summary>
+    public static async Task<string?> ReferenceProblemAsync(PackResource resource, IReadOnlyDictionary<string, string> roots, CancellationToken cancellationToken)
+    {
+        if (resource.Reference is not { } reference || !roots.TryGetValue(reference.Root, out string? root))
+        {
+            return $"is referenced below '{resource.Reference?.Root}', which config.json packSources does not list";
+        }
+
+        string current = root;
+        foreach (string step in reference.Path.Split('/'))
+        {
+            current = Path.Combine(current, step);
+            var entry = new FileInfo(current);
+            if (!entry.Exists && !Directory.Exists(current))
+            {
+                return $"is missing below the pack source '{reference.Root}'";
+            }
+
+            if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                return "is reached through a symbolic link or junction, which packs never follow";
+            }
+        }
+
+        try
+        {
+            (string sha256, long bytes, int files) = resource.Kind == ResourceKind.Project
+                ? await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(current), cancellationToken).ConfigureAwait(false)
+                : await HashOneAsync(current, cancellationToken).ConfigureAwait(false);
+            return (sha256, bytes, files) == (resource.Sha256, resource.Bytes, resource.Files)
+                ? null
+                : "has changed below its pack source since it was imported (its SHA-256 differs), so it is not used";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or PackFormatException)
+        {
+            return "cannot be read below its pack source";
+        }
+    }
+
+    private static async Task<(string, long, int)> HashOneAsync(string path, CancellationToken cancellationToken)
+    {
+        (string sha256, long bytes) = await PackHasher.HashFileAsync(path, cancellationToken).ConfigureAwait(false);
+        return (sha256, bytes, 1);
+    }
+
     internal static async Task<byte[]> ReadSmallAsync(string path, string name, CancellationToken cancellationToken)
     {
         if (new FileInfo(path).Length > PackJson.MaxFileBytes)
