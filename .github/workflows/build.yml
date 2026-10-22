@@ -36,6 +36,21 @@ jobs:
       - name: Format
         run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
 
+      # EplanMcp.iss must compile: a stub payload checks the script itself; release.yml packs the real programs.
+      - name: Installer script
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $payload = Join-Path $env:RUNNER_TEMP 'installer-payload'
+          foreach ($dir in 'workbench', 'bridge/net481', 'claude-plugin', 'docs') {
+            New-Item -ItemType Directory -Force (Join-Path $payload $dir) | Out-Null
+            Set-Content (Join-Path $payload "$dir/stub.txt") 'stub'
+          }
+          Set-Content (Join-Path $payload 'eplanmcp.exe') 'stub'
+          $out = New-Item -ItemType Directory -Force (Join-Path $env:RUNNER_TEMP 'installer-out')
+          & "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe" /Q /DAppVersion=0.0.0 "/DPayloadDir=$payload" "/DOutputDir=$($out.FullName)" eng/installer/EplanMcp.iss
+          if ($LASTEXITCODE) { throw 'eng/installer/EplanMcp.iss does not compile.' }
+
       # The action catalog (catalog/) and the table it comes from (docs/eplan/api-actions.md) must agree: schema, ids, rows, counts.
       - name: Action catalog
         shell: pwsh
