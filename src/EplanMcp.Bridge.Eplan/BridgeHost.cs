@@ -169,6 +169,9 @@ internal static class BridgeHost
             new CableRenumberExecuteOperation(catalog, pages, devices, cableRenumberer, backup, transactions),
             new ConnectionNumberPlanOperation(catalog, connectionNumberer),
             new ConnectionNumberExecuteOperation(catalog, pages, connectionNumberer, backup, transactions),
+
+            // Master-data writes always need the engineer's approval (ADR-0019), which the offline host cannot ask.
+            .. eplan.Offline ? [] : new IOperation[] { new MasterDataBackupOperation(new EplanMasterDataBackup()) },
         ];
         var router = new OperationRouter(operations, dispatcher, new EplanExceptionMapper(), log, _startTimeout);
         var pipes = new SecurePipeFactory(options.MaxConnections);

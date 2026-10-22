@@ -581,6 +581,10 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new ConnectionNumberData(),
+        new MasterDataBackupArgs { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk", Folder = @"C:\Users\工程师\EplanMcp\backups\masterdata\20261021T120000000Z", ArchiveName = "parts", MaxSeconds = 150 },
+        new MasterDataBackupArgs(),
+        new MasterDataBackupData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", Archive = @"C:\b\parts.zw6", Bytes = 991_224 },
+        new MasterDataBackupData(),
     ];
 
     [Theory]
