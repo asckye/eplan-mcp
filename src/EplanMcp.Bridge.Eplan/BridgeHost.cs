@@ -97,7 +97,7 @@ internal static class BridgeHost
         var translator = new EplanProjectTranslator();
         var placeholders = new EplanPlaceholderReader();
         var projectFiles = new EplanProjectFiles();
-        var factory = new EplanProjectFactory();
+        var factory = new EplanProjectFactory(log);
         IOperation[] operations =
         [
             new ProjectListOperation(catalog),
