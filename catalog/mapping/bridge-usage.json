@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "776f4adf",
-  "sourceHash": "sha256:11d0a65993c815d1acd180d7f8733df39f89ea1fcd932254fc4436084a0ce3d9",
+  "scannedSources": "c6da30d6",
+  "sourceHash": "sha256:fbf4d25fcd9df5c6ca2d1789d33c3998900b107d5434c3a1acc1807563e45470",
   "operations": [
     {
       "name": "approval.ask",
@@ -2677,6 +2677,23 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose": [
+      {
+        "adapter": "EplanProperties",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "device.get",
+          "page.get",
+          "project.get"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.ConnectionsFilter.#ctor": [
       {
         "adapter": "EplanConnectionReader",
@@ -4911,6 +4928,23 @@
         "operations": [
           "language.remove.execute",
           "language.set.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.Dispose": [
+      {
+        "adapter": "EplanProperties",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "device.get",
+          "page.get",
+          "project.get"
         ]
       }
     ],

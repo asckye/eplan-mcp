@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 209,
+    "used": 211,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -372,10 +372,10 @@
         "cable.renumber.execute",
         "cable.renumber.plan"
       ],
-      "apiIds": 117,
+      "apiIds": 119,
       "operationGroups": 62,
       "dataDictionary": 2,
-      "dependencies": 52,
+      "dependencies": 54,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_renumber.md",
       "small": 1,
@@ -543,10 +543,10 @@
       "operations": [
         "device.get"
       ],
-      "apiIds": 72,
+      "apiIds": 74,
       "operationGroups": 43,
       "dataDictionary": 2,
-      "dependencies": 26,
+      "dependencies": 28,
       "actions": 0,
       "spec": "docs/tools/eplan_device_get.md",
       "small": 9,
@@ -1064,10 +1064,10 @@
       "operations": [
         "page.get"
       ],
-      "apiIds": 63,
+      "apiIds": 65,
       "operationGroups": 36,
       "dataDictionary": 1,
-      "dependencies": 26,
+      "dependencies": 28,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
       "small": 4,
@@ -1408,10 +1408,10 @@
       "operations": [
         "project.get"
       ],
-      "apiIds": 53,
+      "apiIds": 55,
       "operationGroups": 30,
       "dataDictionary": 0,
-      "dependencies": 23,
+      "dependencies": 25,
       "actions": 0,
       "spec": "docs/tools/eplan_project_get.md",
       "small": 5,
