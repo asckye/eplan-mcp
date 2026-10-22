@@ -139,15 +139,15 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 | # | action / TYPE | 效果 | 建议级别与约束 | 验证 | 处理 |
 |---|---|---|---|---|---|
 | 2 | `backup` / `MASTERDATA` | F | Read（导出级）；`MDTYPE` 只开放 `ARTICLES`、`LANGUAGES`；库的路径由 Host 按 EPLAN 的配置填写；只支持文件型库 | 已验证（S24，A30） | **首批** |
-| 3 | `changelayer` | P | Write（S26 证实能回滚、一步撤销；否则 Destructive） | 未验证 | **首批** |
-| 41 | `graphicallayertable` / `EXPORT` | F | Read（导出级） | 未验证 | **首批** |
-| 66–71 | `partsmanagementapi` / `EXPORTPARTS`、`EXPORTMANUFACTURERS`、`EXPORTCONSTRUCTIONS`、`EXPORTCONNECTIONPATTERNS`、`EXPORTACCESSORYLISTS`、`EXPORTACCESSORYPLACEMENTS` | F | Read（导出级），读 EPLAN 配置的部件库 | 未验证；同一部件库的 API 导出已验证（A30） | **首批**（6 种） |
-| 72 | `plcservice` / `BUSDATAEXPORT` | F | Read（导出级）；`OVERWRITE` 固定为 0；`CONVERTERID` 只开放 S26 验证过的转换器 | 未验证 | **首批** |
-| 75 | `plcservice` / `EXPORTADDRESSOVERVIEW` | F | Read（导出级）；PLC 配置项目、站、CPU 必填 | 部分验证：不给这三项时输出只有一行空值（A25） | **首批** |
-| 83 | `projectmanagement` / `EXPORTPROPERTYPLACEMENTSSCHEMAS` | F | Read（导出级） | 未验证 | **首批** |
-| 150 | `XEsUserPropertiesExportAction` | F | Read（导出级） | 未验证 | **首批** |
-| 155 | `XMActionDCCommonExport` | F（模式 0） | Read（导出级）；`EXECUTIONMODE`、`IMMEDIATEIMPORT` 固定为 0；`CONFIGSCHEME` 必填（不给时弹对话框，api-actions 7.3） | 未验证 | **首批** |
-| 159 | `XMExportDCArticleDataAction` | F（模式 0） | 同上 | 未验证 | **首批** |
+| 3 | `changelayer` | P | Write（S26 证实能回滚、一步撤销；否则 Destructive） | 已验证（S26：可见性修改、SafetyPoint/UndoStep 回滚；提交后一步撤销未测） | **首批** |
+| 41 | `graphicallayertable` / `EXPORT` | F | Read（导出级） | 已验证（S26） | **首批** |
+| 66–71 | `partsmanagementapi` / `EXPORTPARTS`、`EXPORTMANUFACTURERS`、`EXPORTCONSTRUCTIONS`、`EXPORTCONNECTIONPATTERNS`、`EXPORTACCESSORYLISTS`、`EXPORTACCESSORYPLACEMENTS` | F | Read（导出级），读 EPLAN 配置的部件库 | 已验证（S26：须给 PROPERTYID1/PROPERTYVALUE1；省略过滤全部返回 false；EXPORTPARTS 执行期窗口禁用采样待核实） | **首批**（6 种） |
+| 72 | `plcservice` / `BUSDATAEXPORT` | F | Read（导出级）；`OVERWRITE` 固定为 0；`CONVERTERID` 只开放 S26 验证过的转换器 | 已验证（S26：三种组合导出成功；AML 目标项目文件指纹变化、执行期窗口禁用采样待核实，尚不能认定只读条件全部满足） | **首批** |
+| 83 | `projectmanagement` / `EXPORTPROPERTYPLACEMENTSSCHEMAS` | F | Read（导出级） | 已验证（S26） | **首批** |
+| 150 | `XEsUserPropertiesExportAction` | F | Read（导出级） | 已验证（S26） | **首批** |
+| 75 | `plcservice` / `EXPORTADDRESSOVERVIEW` | F | Read（导出级）；PLC 配置项目、站、CPU 必填 | 未运行（S26：未读出完整配置项目/站/CPU 元组；A25 的空值输出不算通过） | 以后：按 Q2 移出首批，补齐元组后验证 |
+| 155 | `XMActionDCCommonExport` | F（模式 0） | Read（导出级）；`EXECUTIONMODE`、`IMMEDIATEIMPORT` 固定为 0；`CONFIGSCHEME` 必填（不给时弹对话框，api-actions 7.3） | 未运行（S26：缺已核实节点，未读出方案名称） | 以后：按 Q2 移出首批，有可读方案后验证 |
+| 159 | `XMExportDCArticleDataAction` | F（模式 0） | 同上 | 未运行（S26：缺已核实节点，未读出方案名称） | 以后：按 Q2 移出首批，有可读方案后验证 |
 | 1 | `backup` / `PROJECT` | F，P? | Read（导出级）；只允许 `BACKUPMETHOD:BACKUP`，不给 `COMMENT`，`AUTOCOPYREFDATA` 固定为 0 | 未验证；`Backup.Project` 的文档说要锁定项目、备份后原路径失效（ADR-0013） | 以后 |
 | 7 | `check` / `PARTS` | P?/S? | Write?；消息写到哪里不明 | 未验证 | 以后：spike 后决定做条目还是给 `eplan_check_run` 加参数 |
 | 10 | `compress` | P | Destructive | 未验证；会删除什么文档没写（api-actions 7.2 第 4 条） | 以后 |
@@ -182,7 +182,9 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 | 174 | `XSettingsExport` | F | — | — | 不纳入：导出的设置可能含数据库连接等信息（未核实）；`/prj` 在开发机上返回 FALSE（A24）。负责人需要时另议 |
 | 33、50、51、170 | 预规划的 4 个 action | P/F | — | — | 不纳入：授权中没有 Preplanning，无法验证（M4c 设计 Q6） |
 
-合计：首批 15 种（只读导出 14 种、Write 1 种），以后 30 种，不纳入 12 种。
+按 Q2 应用 S26 r1 结果：上述三种未运行用法移到“以后”；其余“已验证”仅指验证列注明的范围，AML 副作用、执行期窗口禁用和提交后一步撤销的缺口见 [S26 结果](../../spikes/S26-action-run/README.md#结果) 与 [A40](../eplan/api-notes.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中)，发布前仍须满足本 ADR 的加入条件。
+
+合计：首批 12 种（建议只读导出 11 种、Write 1 种），以后 33 种，不纳入 12 种。
 
 ## 后果
 - **好的**：
