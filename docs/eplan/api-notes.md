@@ -186,12 +186,19 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A37. 模块写回为宏、新建占位符、授权选项（spike S32，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S32](../../spikes/S32-macro-create/README.md)。写入只在 scratch 副本上，在 `SafetyPoint` 中回滚。
+- `WindowMacro.Create(路径, MultiLine, 0, page.AllPlacements, 描述)` 把一页的 201 个放置写成 `.ema`（220 KB），`PageMacro.Create(路径, [page], 描述)` 写成 `.emp`；重新打开和再插入时，占位符、值集、变量、引用都保留。写出的宏文件记下 `SourceProject="<来源项目的完整路径>"`（含本机用户名）。— S32。
+- 新建参数化占位符：`new PlaceHolder().Create(page)`、`AddVariable`、`AddReference`、`SetPropertyEntry(对象, 属性, "<变量名>")`、`AddRecord`、`SetValue`，之后 `ApplyRecord` 把值写进被引用对象的属性。🔴 属性条目的值必须写成尖括号中的变量名，写 `V1` 会被当作字面文本。宏文件中占位符为 `O106`，属性条目为 `S115x1904`（`A1911` 属性号，`A1913` 值，如 `??_??@ <Task>;`）。— S32。
+- `License.GetLicenseModules(ref Dictionary<LicenseOptions, bool>)` 一次读出全部 3,214 个授权选项；开发机（演示授权）2,683 个可用，5 个 Cogineer 选项都可用，但安装目录中没有 Cogineer 的程序集。`HasOption` 只读；`LockOption` 会占用授权直到 EPLAN 退出，不要调用。— S32。
+
 ### A36. 快照提取：耗时、内存、确定性与修改标记（spike S31，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S31](../../spikes/S31-snapshot/README.md)。
 - 🔴 `UniversalPropertyList.ExistingIds`/`ExistingValues` 和属性访问器返回的 `AnyPropertyId`、`PropertyValue` 都是 `IDisposable`，批量读取时必须逐个释放：不释放时读两遍示例项目全部属性（共约 1,000 万个值），EPLAN 记下"存储空间不足"后退出。释放后工作集在调用结束时回落。— S31。
 - 读示例项目每个页、功能、连接的全部已有属性：514 万个值，约 8–10 分钟，150 MB 文本，最慢的一页约 50 秒；只读页属性加功能全名和连接两端：约 5 秒。`UniversalPropertyList` 的构造函数不公开，用各对象的 `Properties`（派生自它）。`Connection` 不是 `Placement`，不在 `Page.AllPlacements` 中，用 `Connection.Page` 归页。— S31。
 - 同一次打开中两次提取逐字节相同；关闭再打开后，值为运行时字符串标识的属性（如 2000：`53/4/21/0` → `89/4/21/0`）随库号改变。只读提取不改写项目 `.edb` 中的文件（不含 `.lck`）。— S31。
 - 改一页的描述并提交后，`PROJ_LASTMODIFICATIONDATE`（Unix 秒数）/`TIME` 和这一页的 `PAGE_LASTAUTOMODIFICATIONDATE`/`TIME` 改变，其他页不变，`PAGE_LASTMANUMODIFICATIONDATE` 不变；这一页的 `PROPUSER_LAST_USERCODE`（3010）同时被改写。3010–3013 是最后修改人的个人信息。— S31。
+- 🔴 项目 `.edb` 中缺少 `User.eod`、`User.eox`（连同 `.lck`）时，EPLAN 打不开这个项目，弹出模态对话框"无法打开项目……必须修正数据库索引"，在关闭之前 EPLAN 不处理别的请求。复制、还原、打包项目都不能去掉这两个文件。— 2026-10-21，S31 之后在 scratch 副本上验证。
 
 ### A35. 工程包涉及的文件（2026-10-21，只读查看开发机上 EPLAN 2026.0.3 的数据目录和 scratch 中的 spike 文件，不启动 EPLAN）
 M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以这里为准。
