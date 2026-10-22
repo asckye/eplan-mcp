@@ -63,11 +63,16 @@ internal static class Manifests
         {
             EplanVersions = ">=2026.0 <2027",
             Variants = ["Electric P8", "Pro Panel"],
-            Capabilities = ["A:backup/PROJECT", "eplan_macro_insert"],
+            Capabilities =
+            [
+                "A:backup/PROJECT", "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord", "op:macro.insert", "licence:CogineerBuilder",
+                "plugin:acme.terminal-allocation", "eplan_macro_insert",
+            ],
         },
         Dependencies = [new PackDependency { Id = "acme.base", Version = "^1.2.0" }, new PackDependency { Id = "acme.parts", Version = ">=2.0.0 <3.0.0" }],
         Configuration = new PackConfiguration
         {
+            Base = new PackScope { Id = "base" },
             Company = new PackScope { Id = "acme", Name = "ACME", Resources = ["resources/rules/naming.md"] },
             CabinetTypes = [new PackScope { Id = "ts8", Resources = ["resources/basic-projects/GB_bas001.zw9"] }],
         },
@@ -75,6 +80,7 @@ internal static class Manifests
         Mappings = [new PackSlot { Path = "resources/mappings/parts.csv", Standing = KnowledgeStanding.Candidate }],
         Docs = [new PackSlot { Path = "resources/docs/readme.md", Standing = KnowledgeStanding.Official }],
         AcceptanceSamples = [new PackSlot { Path = "resources/projects/Sample/Sample.elk", Standing = KnowledgeStanding.Official }],
+        Migrations = [new PackMigration { From = "^0.9.0", Notes = "From the first draft.", Changes = ["Motor macros moved to resources/macros"] }],
         Facts = [new PackFact { Resource = "resources/projects/Sample/Sample.elk", Name = "eplan_version", Value = "2026.0.1.25370", Evidence = "ProjectInfo.xml property 10088" }],
         Provenance = new PackProvenance
         {

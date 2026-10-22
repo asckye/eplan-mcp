@@ -50,7 +50,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[A-Za-z][A-Za-z0-9_.:/-]{0,127}$"
+            "pattern": "^(?:A:[A-Za-z][A-Za-z0-9]*(?:/[A-Za-z][A-Za-z0-9]*)?|O:[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_#][A-Za-z0-9_`#]*)+|op:[a-z][A-Za-z0-9_]*(?:\\.[a-z][A-Za-z0-9_]*)*|licence:[A-Za-z][A-Za-z0-9_]*|plugin:[a-z0-9]+(?:[.-][a-z0-9]+)*|eplan_[a-z0-9_]+)$"
           },
           "description": "What the pack needs from EplanMcp or EPLAN: capability catalog ids (catalog/, such as A:backup/PROJECT) or tool names."
         }
@@ -101,7 +101,15 @@
               "material_mapping",
               "document",
               "rule",
-              "other"
+              "other",
+              "module",
+              "config_schema",
+              "config_layer",
+              "gap",
+              "fact_set",
+              "workflow",
+              "sample",
+              "preview"
             ]
           },
           "subtype": {
@@ -203,7 +211,7 @@
     "configuration": {
       "type": "object",
       "properties": {
-        "company": {
+        "base": {
           "type": [
             "object",
             "null"
@@ -233,6 +241,32 @@
           "additionalProperties": false,
           "description": "One configuration scope, such as a cabinet type, and the resources that configure it."
         },
+        "company": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "resources": {
+              "$ref": "#/properties/configuration/properties/base/properties/resources"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "description": "One configuration scope, such as a cabinet type, and the resources that configure it."
+        },
         "cabinetTypes": {
           "type": "array",
           "items": {
@@ -249,7 +283,7 @@
                 ]
               },
               "resources": {
-                "$ref": "#/properties/configuration/properties/company/properties/resources"
+                "$ref": "#/properties/configuration/properties/base/properties/resources"
               }
             },
             "required": [
@@ -258,22 +292,10 @@
             "additionalProperties": false,
             "description": "One configuration scope, such as a cabinet type, and the resources that configure it."
           }
-        },
-        "projects": {
-          "type": "array",
-          "items": {
-            "$ref": "#/properties/configuration/properties/cabinetTypes/items"
-          }
-        },
-        "cabinets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/properties/configuration/properties/cabinetTypes/items"
-          }
         }
       },
       "additionalProperties": false,
-      "description": "Configuration by scope, from the widest to the narrowest. Only the slots exist so far; what a scope may configure comes with the M6 design."
+      "description": "The configuration layers a pack carries, from the widest: base (a base pack only), company, cabinet types. Project and cabinet values live in the project's workspace binding, never in a pack."
     },
     "rules": {
       "type": "array",
@@ -335,6 +357,37 @@
       },
       "description": "Finished projects that show what the pack's results should look like."
     },
+    "migrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "The older versions this applies to, as a version range such as '^1.0.0'."
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What changed, one line each."
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "additionalProperties": false,
+        "description": "How to move to this version from older ones (M6 design 4.1.5): which versions, what changed."
+      },
+      "description": "How to move here from older versions."
+    },
     "facts": {
       "type": "array",
       "items": {
@@ -366,7 +419,7 @@
         "additionalProperties": false,
         "description": "A value EplanMcp read from a resource's files."
       },
-      "description": "What EplanMcp read from the resources' own files, with the place it was read. Facts are measured, never inferred."
+      "description": "File-level facts EplanMcp read from the resources' own files (versions, archive formats), with the place it was read. Measured, never inferred; engineering facts from reference projects go into FactSet documents."
     },
     "provenance": {
       "type": "object",

@@ -13,8 +13,6 @@ public static partial class PackManifestValidator
 
     public const int MaxTextLength = 500;
 
-    private static readonly string[] _linkExtensions = [".elk", ".ell", ".elr"];
-
     public static IReadOnlyList<PackProblem> Validate(PackManifest manifest)
     {
         var problems = new List<PackProblem>();
@@ -40,7 +38,8 @@ public static partial class PackManifestValidator
         }
 
         CheckList("compatibility.variants", compatibility.Variants, v => IsText(v) ? null : "must be a name without control characters", Add);
-        CheckList("compatibility.capabilities", compatibility.Capabilities, c => Capability().IsMatch(c) ? null : "must be a catalog id or a tool name", Add);
+        CheckList("compatibility.capabilities", compatibility.Capabilities, c => c.Length <= 256 && Capability().IsMatch(c) ? null
+            : "must be A:<action>[/TYPE], O:<type>.<name>, op:<operation>, licence:<option>, plugin:<id> or an eplan_* tool name", Add);
 
         CheckList("dependencies", manifest.Dependencies.Select(d => d.Id).ToList(), id => id == manifest.Id ? "must not be the pack itself" : null, Add, StringComparer.Ordinal);
         for (int i = 0; i < manifest.Dependencies.Count; i++)
@@ -87,10 +86,20 @@ public static partial class PackManifestValidator
         }
 
         PackConfiguration configuration = manifest.Configuration;
+        CheckScopes("configuration.base", configuration.Base is { } baseScope ? [baseScope] : [], resources, Add);
         CheckScopes("configuration.company", configuration.Company is { } company ? [company] : [], resources, Add);
         CheckScopes("configuration.cabinetTypes", configuration.CabinetTypes, resources, Add);
-        CheckScopes("configuration.projects", configuration.Projects, resources, Add);
-        CheckScopes("configuration.cabinets", configuration.Cabinets, resources, Add);
+        for (int i = 0; i < manifest.Migrations.Count; i++)
+        {
+            PackMigration migration = manifest.Migrations[i];
+            if (!VersionRange.TryParse(migration.From, out _))
+            {
+                Add($"migrations[{i}].from", "must be a version range such as '^1.0.0'");
+            }
+
+            CheckText($"migrations[{i}].notes", migration.Notes, required: false, Add);
+            CheckList($"migrations[{i}].changes", migration.Changes, c => IsText(c) ? null : "must be one line of text", Add);
+        }
 
         for (int i = 0; i < manifest.Facts.Count; i++)
         {
@@ -120,9 +129,13 @@ public static partial class PackManifestValidator
         {
             add($"{location}.path", $"'{resource.Path}' {problem}");
         }
-        else if (resource.Path is PackManifest.FileName or PackManifest.LockFileName)
+        else if (ResourceTypes.IsPackFile(resource.Path))
         {
             add($"{location}.path", $"'{resource.Path}' is the name of a pack file");
+        }
+        else if (ResourceTypes.Problem(resource.Kind, resource.Path) is { } typeProblem)
+        {
+            add($"{location}.path", $"'{resource.Path}' {typeProblem}");
         }
 
         if (!Sha256().IsMatch(resource.Sha256))
@@ -139,11 +152,6 @@ public static partial class PackManifestValidator
         if (resource.Files < 1 || (!project && resource.Files != 1))
         {
             add($"{location}.files", project ? "must be at least 1" : "must be 1 for a single file");
-        }
-
-        if (project && !_linkExtensions.Any(e => resource.Path.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
-        {
-            add($"{location}.path", "of a project must be its link file: .elk, .ell or .elr");
         }
 
         if (resource.Subtype is not null && !Name().IsMatch(resource.Subtype))
