@@ -47,11 +47,20 @@ internal static class Program
     private static void Scan(string root, string? eplanBin)
     {
         var compilation = BridgeCompilation.Load(root, eplanBin);
-        SortedDictionary<string, List<UsageSite>> usages = new UsageScanner(compilation, root).Scan();
+        List<OperationRoot> operations = OperationRoot.FromBridgeCore();
+        SortedDictionary<string, List<UsageSite>> usages = new UsageScanner(compilation, root).Scan(operations);
         string dataModel = compilation.References.OfType<PortableExecutableReference>()
             .Select(r => r.FilePath!).Single(p => Path.GetFileName(p).Equals("Eplan.EplApi.DataModelu.dll", StringComparison.OrdinalIgnoreCase));
-        var usage = new BridgeUsage { EplanApi = FileVersionInfo.GetVersionInfo(dataModel).FileVersion ?? "unknown", Usages = usages };
+        var usage = new BridgeUsage
+        {
+            EplanApi = FileVersionInfo.GetVersionInfo(dataModel).FileVersion ?? "unknown",
+            Operations = [.. operations.Select(o => new OperationEntry(o.Name, ShortName(o.ClassName), o.KindType is { } kind ? $"{ShortName(kind)}.{o.KindValue}" : null))],
+            Usages = usages,
+        };
         CoverageJson.Write(Path.Combine(root, BridgeUsage.RelativePath), usage);
-        Console.WriteLine($"{usages.Count} EPLAN API IDs in {usages.Values.Sum(s => s.Count)} use sites; EPLAN {usage.EplanApi}. Wrote {BridgeUsage.RelativePath}.");
+        int reached = usages.Values.Count(sites => sites.Any(s => s.Operations.Count > 0));
+        Console.WriteLine($"{usages.Count} EPLAN API IDs in {usages.Values.Sum(s => s.Count)} use sites, {reached} reached by one of {operations.Count} operations; EPLAN {usage.EplanApi}. Wrote {BridgeUsage.RelativePath}.");
     }
+
+    private static string ShortName(string fullName) => fullName[(fullName.LastIndexOf('.') + 1)..];
 }
