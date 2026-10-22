@@ -187,3 +187,182 @@ flowchart LR
 | 导出目录（ADR-0012） | 页面预览、图纸层校验的图片、`.eplanpack` 的导出 |
 | 审计哈希链 | 新增 `plan_approval`、`plan_result`、`workspace_change`、`pack_change` 记录 |
 | 离线宿主 | 以后用于参考项目的批量提取 |
+
+## 4. 详细设计
+
+### 4.1 工程包的格式与资源模型
+并行的代码栈 PR #393–#396 已经实现清单的 v0 草案（`src/EplanMcp.Packs`，`schemaVersion` 1）。本节以它为基础，只写补充和调整。落盘格式按开发流程属于 L3：原则由本节和 ADR-0024 定下；具体字段在第 1 阶段验收之前仍可调整，不作对外承诺。
+
+#### 4.1.1 三种形态
+| 形态 | 位置 | 谁能写 | 用途 |
+|---|---|---|---|
+| 开发目录 | `packs-dev\<包 ID>\` | 只经工具（`eplan_pack_import`、`eplan_asset_update`）；工程师也可以手工修改，下次读取时重新校验 | 导入、整理、修正 |
+| 已安装的版本 | `packs\<包 ID>\<版本>\` | 没有人：构建或安装时写入一次，之后设为只读，每次使用前按清单哈希核对 | 项目锁定的对象 |
+| `.eplanpack` | 导出目录或 `imports\` | — | 在工程师之间交换；ZIP，内容与已安装的版本相同 |
+
+安装 `.eplanpack` 按 ADR-0024 校验后解到 `packs\` 下；构建开发目录得到的版本与安装得到的版本格式相同。EPLAN 自己的 `.zw1`、`.zw9` 是 7z 归档（A31），在包中作为普通文件保存，不解开。
+
+#### 4.1.2 清单 `pack.json`
+| 字段 | v0 | 本设计 |
+|---|---|---|
+| `schemaVersion`、`id`、`name`、`version`、`description` | 已有；`id` 为小写字母和数字，以 `.` 或 `-` 连接；版本为 SemVer 2.0.0 | 沿用 |
+| `compatibility` | `eplanVersions`（EPLAN 版本范围，不带运算符时按前缀匹配）、`variants`、`capabilities`（能力目录 ID 或工具名） | 沿用；`capabilities` 的写法见 4.4 |
+| `dependencies` 与 `pack.lock.json` | 依赖范围（npm 写法的子集）；锁记下解析出的版本和哈希 | 沿用。这是包自己的依赖锁，与项目绑定中的锁（4.1.5）是两回事 |
+| `resources` | 每个文件或项目：路径、种类、子类型、SHA-256、大小、文件数、`bundled` / `referenced`、来源（输入名加相对路径，从不记本机的绝对路径）、文件中读出的 EPLAN 版本 | 沿用。参考项目默认 `referenced`（不随包携带）；`referenced` 的资源每次使用前按哈希核对（ADR-0024）；种类在 v0 之外增加 4.1.3 的知识文档 |
+| `configuration` | `company`、`cabinetTypes`、`projects`、`cabinets` 四个作用域 | 包中只用 `company` 和 `cabinetTypes`（基础包另有 `base`）；项目和柜的值属于具体的 EPLAN 项目，放在项目绑定中（4.3）。建议格式定稿前去掉 `projects`、`cabinets` |
+| `rules`、`mappings`、`workflows`、`docs`、`acceptanceSamples` | 带 `standing`（`official` / `candidate`）的资源引用 | 沿用；`official` 的规则必须有来源（4.2） |
+| `facts` | 从资源文件读出的值及证据（如版本、归档格式），只记测得的 | 沿用，只放文件级的事实；从参考项目快照提取的工程事实数量大，放在知识文档中 |
+| `provenance` | 生成程序、作者（从不取自 Windows 账户）、时间、输入名 | 沿用 |
+| 签名（新增，不在清单中） | — | 签名覆盖清单的摘要，所以不能写进清单，而是旁边的分离文件 `pack.sig`，可选（ADR-0024） |
+| `migrations`（新增） | — | 从哪些旧版本迁移、改了什么（4.1.5） |
+
+- **包摘要**：`pack.json` 按 RFC 8785（JSON 规范化）序列化后的 SHA-256。`resources` 中有每个文件的哈希，所以摘要覆盖包的全部内容。项目绑定和计划都记摘要。
+- 清单永远由 EplanMcp 生成：导入、`eplan_asset_update`、构建时重算；工程师手工修改开发目录后，下一次读取时重算，并在 `status` 中报告变化。
+- **参考项目默认不随包携带**：包中只放提取的事实、预览、源文件的哈希和 EPLAN 版本。参考项目往往很大，又含客户数据。需要携带时，在 scratch 副本上用 `Backup.Project` 打成 `.zw1` 放进包（A18：它会改写被备份项目的文件，所以只在副本上做）。
+
+#### 4.1.3 知识文档
+EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档，作为资源列在 `pack.json` 中，用同一种信封（借鉴 Backstage 的实体格式）：
+```json
+{
+  "apiVersion": "eplanmcp.pack/v1",
+  "kind": "Module",
+  "id": "acme.panels.base@1.2.0:Module/motor-dol",
+  "metadata": { "name": "motor-dol", "title": { "zh": "直接起动电机回路", "en": "DOL motor circuit" }, "tags": ["motor"] },
+  "origin": { "kind": "reference_project", "resource": "projects/ref-a.elk", "page": "=AP+ST1/3", "locator": { } },
+  "status": { "level": "ok", "problems": [] },
+  "spec": { }
+}
+```
+- `id` = `<包 ID>@<版本>:<种类>/<名称>`，开发目录中版本写作 `dev`。MCP 资源的 URI 为 `eplanpack://<包 ID>/<版本>/<种类>/<名称>`。
+- `origin` 是来源位置：清单中的资源、参考项目中的页和定位符（4.6）；工程师和 AI 都能据此回到 EPLAN 中查看。
+- `status` 记录加载问题，不抛异常：有问题的资源照样列出，标明不可用的原因。
+- 按约定放在 `knowledge/<种类>/<名称>.json`、预览放在 `previews/`；是否合法不看目录名，看清单中登记的种类和扩展名（ADR-0024）。
+
+| 种类 | 内容 |
+|---|---|
+| `Module` | 参数化模块（4.10） |
+| `ConfigSchema`、`ConfigLayer` | 配置项定义；一层配置（4.3） |
+| `Rule`、`Candidate`、`Gap` | 正式规则、候选、缺口（4.2）；v0 的 `standing` 区分前两者 |
+| `FactSet` | 从参考项目快照提取的一组事实（4.2） |
+| `MaterialMapping` | 参数值到部件的对应：沿用 v0 的种类名和 `mappings` 槽，内容是带信封的 JSON 文档 |
+| `Workflow` | 可复用的工作流（4.8） |
+| `Sample` | 验收样例：输入、预期的校验结果 |
+| `Preview` | 页面预览（PNG；SVG 的限制见 ADR-0024） |
+
+#### 4.1.4 自动生成
+`eplan_pack_import` 按扩展名和内容识别材料：`.zw1` 是项目备份；`.zw9` 是基本项目；`.ema`、`.emp` 是宏；含 `.elk` 和 `.edb` 的目录是项目；`.eplanpack` 是工程包；表格和文本先作为 v0 的 `MaterialMapping` 或 `Document`，由 AI 整理成结构化的 `MaterialMapping`、`Candidate` 等。识别不了的文件拒绝，并说明原因。AI 用 `eplan_asset_update` 写入整理的结果，Host 按种类的 schema 校验，重算索引和清单。AI 不能写 `FactSet`（只来自提取），也不能把规则设为正式（4.2）。
+
+#### 4.1.5 版本、锁定与迁移
+- **版本号**：主版本：模块接口、规则的含义或配置项被删改；次版本：新增资源；修订号：不改变接口的修正。
+- **构建**：`eplan_pack_build` 把开发目录冻结为一个版本。同一个包 ID 和版本已经存在而摘要不同时拒绝；版本从不覆盖。
+- **项目锁定**：项目绑定 `workspaces\<项目键>\binding.json` 的 `locks` 记录每个柜的配置链上每个包（包括依赖）的 ID、版本和摘要。计划记下锁的摘要，执行时不同就拒绝（4.8）。
+- **安装新版本不改变任何锁**：旧版本留在 `packs\` 中；还有绑定锁定某个版本时，拒绝删除它。
+- **迁移**（`eplan_pack_migrate`，第 3 阶段）：
+  1. 列出资源的增删改；
+  2. 列出每个柜生效配置的变化，附溯源；
+  3. 列出规则的变化；
+  4. 在项目的 scratch 副本（`CopyProject(Snapshot)`）上按新版本重新跑规则检查和验收样例；
+  5. 工程师经审批渠道确认后才更新锁（它改变以后的计划受哪些规则和配置约束）。
+
+  迁移不改动 EPLAN 项目本身；新版本要求的改动另行生成计划。
+
+### 4.2 事实、推断与正式规则
+
+| 类别 | 来自 | 能否作为强制检查 | 必须带 | 谁能改 |
+|---|---|---|---|---|
+| 事实（`FactSet`；文件级的在清单 `facts` 中） | 从参考项目的快照或资源文件中测得 | 不能 | 参考项目哈希、快照哈希、定位符，或文件中的位置 | 只有提取器；要改就重新提取 |
+| `Candidate` 候选 | AI 或插件根据事实推断 | 不能；只作为建议显示 | 依据（事实 ID）、推断者、置信度、状态（`proposed` / `accepted` / `rejected`） | AI 可以新建；工程师接受或拒绝 |
+| `Rule` 正式规则 | 公司文件，或由候选转来 | `mandatory` 可以，`recommended` 只提示 | `mandatory` 必须有来源：文件资源和位置，或工程师确认的记录 | 只有工程师确认才能设为正式 |
+| `Gap` 缺口 | 资料缺失、参考项目之间互相矛盾 | 不能 | 缺什么、相关的事实 | AI 可以新建；工程师补资料后关闭 |
+
+- 没有来源的 `mandatory` 规则在构建时报 `PACK_INVALID`。
+- 参考项目之间互相矛盾时记为缺口，不归纳成规则。
+- 候选转为正式规则、缺口关闭，都要工程师经审批渠道确认（AI 不能替公司宣布一条规则是正式的），确认记录写进规则的 `source` 和审计。以后由 Workbench 的修正界面完成（第 3 阶段之后）。
+- 规则检查、关系图的结果都标明依据是事实还是推断（4.12）。
+
+### 4.3 配置分层
+
+层的顺序：`base`（通用基础）→ `company`（公司）→ `cabinet_type`（产品系列或柜型，v0 的 `cabinetTypes`）→ `project`（项目）→ `cabinet`（单个柜）。前三层是包中的 `ConfigLayer` 资源；后两层是项目自己的值，存在项目绑定 `workspaces\<项目键>\binding.json` 中，不进包。
+
+- **配置项**由包中的 `ConfigSchema` 定义：名称、类型、单位、枚举或范围、说明、哪些层可以设置。没有定义的项一律拒绝。
+- **每一处设置**要么是默认值（`default`），要么是硬约束（`constraint`：`fixed` 固定值，或 `allowed` 集合或范围）。
+- **合并**：从 `base` 到 `cabinet` 逐层处理。默认值后者覆盖前者；硬约束取交集，下层只能收窄，放宽时报 `CONFIG_CONFLICT`；最后生效的默认值必须满足全部硬约束，否则同样报 `CONFIG_CONFLICT`，指出冲突的两处来源。**从不悄悄截断或改写一个值。**
+- **溯源**：每个生效的值都带 `trace`，逐层列出 `{layer, source, pointer, kind, value}`，`source` 是 `<包 ID>@<版本>:ConfigLayer/<名称>` 或绑定的修订号。
+
+| 层 | 来源 | `motor.starter`（例） |
+|---|---|---|
+| base | `eplanmcp.base@1.0.0:ConfigLayer/defaults` | default `dol` |
+| company | `acme.panels.base@1.2.0:ConfigLayer/company` | constraint allowed `[dol, star_delta]` |
+| cabinet_type | `acme.panels.m200@2.0.1:ConfigLayer/m200` | default `star_delta` |
+| cabinet `+A2` | 绑定修订 7 | default `dol` |
+| **生效** | | `dol`，trace 4 项 |
+
+- **柜**：`binding.json` 中 `cabinets: [{id, title, layers, values, structure}]`，另有 `revision` 和 `locks`（4.1.5）。`structure` 把柜映射到项目结构（位置代号 `+`，可选高层代号 `=`）。两个柜的映射重叠时拒绝绑定；每个对象至多属于一个柜，没有映射到任何柜的对象不能被柜的计划修改。只有一个柜的项目有一个覆盖全部结构的默认柜，第 2 阶段只用它。
+- **显式标识**：写入和计划类工具必须给 `project`；项目有多个柜时必须给 `cabinet`；计划记下绑定的修订号和锁的摘要，执行时任何一个变了就拒绝（4.8）。上下文、规则检查、校验都只在一个柜的范围内取数据（4.7），所以柜与柜从不混用。
+- 项目绑定放在数据根目录，不写进 EPLAN 项目。项目被移动、复制到别处时绑定不跟着走，见待定问题 Q4。
+
+### 4.4 能力与版本检测
+- **来源**：
+  - 握手：EPLAN 版本、变体、是否离线、`operations`；
+  - 握手新增 `licence`：Bridge 启动时对一组登记的 `LicenseOptions` 调 `License.HasOption`（只检查，不占用授权；从不调 `LockOption`，A2），例如 `APIExtension`、`ElectricP8`、`ProPanel*`、`Cogineer*`、`Preplanning*`。只增加字段，协议版本仍为 1（与 ADR-0010 增加 `outcome.get` 的做法相同）；
+  - API 能力目录（`catalog/`，[覆盖设计](2026-10-21-api-capability-coverage.md)）：成员 ID；按 EPLAN 版本记录的状态（`live_verified` 等）取自 `catalog/coverage.json`，[覆盖报告](../eplan/coverage-report.md)是它的可读形式。
+- **包的要求**写在 v0 的 `compatibility` 中：`eplanVersions`、`variants`，以及 `capabilities` 中按前缀区分的条目：
+
+  | 写法 | 含义 | 例 |
+  |---|---|---|
+  | `A:<action>[/TYPE]` | Action 目录的条目 | `A:backup/PROJECT` |
+  | `O:<类型>.<名称>` | 能力目录的重载组（覆盖设计 3.1）；v0 的模式不允许成员 ID 中的括号和逗号，所以不写完整的成员 ID | `O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord` |
+  | `op:<操作>` | Bridge 操作（握手的 `operations`） | `op:module.insert` |
+  | `licence:<选项>` | `LicenseOptions` 的名称 | `licence:CogineerBuilder` |
+  | `plugin:<ID>` | 可选的插件（ADR-0025） | `plugin:acme.terminal-allocation` |
+  | `eplan_*` | 工具名 | `eplan_macro_insert` |
+
+  资源和工作流的步骤可以有自己的要求。
+- **判定**：`op:`、`licence:`、工具名和 EPLAN 版本、变体是硬要求，不满足时用到它们的资源在索引中标为不可用（照样列出），计划编译时报 `CAPABILITY_MISSING`，`metadata.missing` 列出缺的项；`A:`、`O:` 的条目在当前版本上不是 `live_verified` 时只给警告，真正的约束来自实现它的 Bridge 操作是否存在。
+- **源版本**（S27，A31）：不打开项目，在 Bridge 中用 `ProjectManager.GetProjectDataCompatibility` / `GetProjectDatabaseVersion` 判断（不到 1 秒）；不靠 EPLAN 时读 `.edb\ProjectInfo.xml` 的属性 `10043`，只取需要的字段（文件中有创建者的个人信息）。`.zw1`、`.zw9` 是 7z 归档，先还原或新建到 scratch 再判断；在 Host 中直接读 7z 要引入新的依赖，按 L2 另议。源版本比当前 EPLAN 新的材料打不开，导入时就拒绝；需要升级的只在 scratch 副本上升级（S30）。
+
+### 4.5 工具与资源面
+
+#### 4.5.1 工具
+新工具分到两个工具集（ADR-0022）：`pack`（包、资源、柜）和 `workflow`（上下文、计划、任务、关系、规则、差异），都只在 `full` 中，不进 `core`。"本地数据"指只写 EplanMcp 自己的数据目录、不碰 EPLAN 项目，按 ADR-0012 的方式标注（`readOnlyHint: false`、`destructiveHint: false`），不需要审批，写审计。三处例外要工程师经审批渠道确认：安装别人的 `.eplanpack`（ADR-0024）、改变项目锁、把候选设为正式规则（4.2）。
+
+| 工具 | 级别 | 作用 | 阶段 |
+|---|---|---|---|
+| `eplan_pack_import` | 本地数据；参考项目复制或还原到 scratch（scratch 中的新项目，Write 自动允许）；安装别人的 `.eplanpack` 要确认 | 导入材料到开发包：识别、复制、提取、生成清单和索引 | 1 |
+| `eplan_pack_list` | Read | 已安装和开发中的包、版本、被哪些项目锁定 | 1 |
+| `eplan_pack_get` | Read | 清单摘要、问题、缺口、能力是否满足 | 1 |
+| `eplan_pack_build` | 本地数据 | 冻结开发包为一个版本；可选导出 `.eplanpack` 到新建的导出目录 | 1（导出：3） |
+| `eplan_pack_migrate` | Read；更新锁要工程师确认 | 迁移的差异与重新校验（4.1.5） | 3 |
+| `eplan_asset_search` | Read | 按文字、种类、包、标签、适用条件搜索资源 | 1 |
+| `eplan_asset_get` | Read | 详情、页面预览（图片内容或资源链接）、来源位置 | 1 |
+| `eplan_asset_update` | 本地数据 | 在开发包中新建或修改候选、模块元数据、工作流、映射、缺口；不能写事实，不能把规则设为正式 | 1–3 |
+| `eplan_cabinet_list` | Read | 项目的柜、配置链、结构映射、锁 | 3 |
+| `eplan_cabinet_bind` | 本地数据；改锁要工程师确认 | 绑定或修改柜：配置层、值、结构映射 | 3 |
+| `eplan_context_get` | Read | 按需上下文（4.7） | 2（最小）、4 |
+| `eplan_project_create` | Write（scratch 中自动；之外逐次审批） | 从 `.zw9` 新建项目，或把 `.zw1`、项目副本还原到 scratch | 2 |
+| `eplan_workflow_plan` | Read | 把工作流或内联步骤编译为计划（4.8） | 2 |
+| `eplan_plan_apply` | 按步骤的最高级别 | 一次审批、计划前备份、逐步执行、校验（ADR-0023） | 2 |
+| `eplan_plan_get` | Read | 计划、各步结果、校验、差异 | 2 |
+| `eplan_rule_check` | Read | 在快照上按规则检查项目或柜；可选把修复生成计划 | 3 |
+| `eplan_connection_trace` | Read | 路径追踪、跨页、影响分析（4.12） | 4 |
+| `eplan_project_diff` | Read | 两个快照、两个项目之间的差异 | 4 |
+| `eplan_task_get`、`eplan_task_list`、`eplan_task_cancel` | Read、Read、取消 | 长任务的状态、列表、取消（4.13） | 2（get）、5 |
+
+- **与现有工具的关系**：`eplan_rule_check` 只在快照上求值，不写 EPLAN；`eplan_check_run` 是 EPLAN 自己的检查，会写消息，两者在描述中写明区别。`eplan_macro_*` 只管 `$(MD_MACROS)`；包中的宏经 `eplan_asset_*` 查询，经计划插入。`eplan_project_create` 实现 ADR-0005 第 6 节 `eplan_scratch_create` 的用途（那个名称从未发布），见 Q2。
+- **负责人建议的 `eplan_profile_*` 改名为 `eplan_cabinet_*`**：本项目中 Profile 已经指工具 Profile（ADR-0006、ADR-0022、`serve --profile`），再用于工程配置会让工程师和模型混淆；`eplan_config_*` 也不合适，`config.json` 是只能手工修改的安全配置（SEC-02）。见 Q1。
+- **资源词表**（工具设计规范 3.2）新增 `pack`、`asset`、`cabinet`、`context`、`workflow`、`plan`、`rule`、`task`；动作新增 `build`、`migrate`、`bind`、`apply`、`trace`、`diff`，以及只用于规则的 `check`（`check` 同时是已有的资源词）。
+- **新错误码**：`PACK_INVALID`、`RESOURCE_NOT_FOUND`、`CAPABILITY_MISSING`、`CONFIG_CONFLICT`。计划冲突沿用 `PLAN_STALE`，`metadata.conflicts` 列出变化了的定位符；参数错误沿用 `INVALID_ARGUMENT`，`metadata.pointer` 指出 JSON 中的位置。
+
+#### 4.5.2 MCP Resources
+| URI 模板 | 内容 | 同样能取到它的工具 |
+|---|---|---|
+| `eplanpack://{pack}/{version}/manifest` | 清单 | `eplan_pack_get` |
+| `eplanpack://{pack}/{version}/{kind}/{name}` | 一个资源 | `eplan_asset_get` |
+| `eplanpack://{pack}/{version}/previews/{file}` | 页面预览（`image/svg+xml`、`image/png`） | `eplan_asset_get` |
+| `eplanmcp://plans/{planId}` | 计划与结果 | `eplan_plan_get` |
+| `eplanmcp://tasks/{taskId}` | 任务状态 | `eplan_task_get` |
+
+- 每个资源的内容都能经工具取到：多数客户端不让模型自己读取资源。工具结果中附 `resource_link`，支持资源的客户端可以直接打开。
+- MCP 2026-07-28 要求资源的列表和读取结果带 `ttlMs` 和 `cacheScope`（未在 SDK 2.2.0 上核实）：已安装的包不可变，给长 TTL；开发包、计划、任务给短 TTL。
+- 订阅（`subscriptions/listen`、资源更新通知）只用于计划和任务，只对订阅了的客户端发；其他客户端用 `eplan_task_get` 轮询。
+- **不支持动态发现的客户端**：用静态工具集 `--toolsets pack,workflow` 或 `full`（ADR-0022）；不支持 Resources 的用工具；不支持 Tasks 的用 4.13 的等待加轮询。
