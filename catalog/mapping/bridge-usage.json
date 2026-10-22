@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "21d4b198 + uncommitted changes",
-  "sourceHash": "sha256:922fc96220dca33fb945b13b06a7db96a0a1ad728f51f2a4b207837cac7cbcbf",
+  "scannedSources": "cec5bb6e",
+  "sourceHash": "sha256:a830a47b06c3c85e0e2886e0afc187c5f35b196b158b8cc7334f60d4e8e10b19",
   "operations": [
     {
       "name": "approval.ask",
@@ -5093,6 +5093,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.create.execute",
           "project.restore.execute",
           "project.snapshot"
         ]
@@ -5245,6 +5246,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.create.execute",
           "project.restore.execute",
           "project.snapshot"
         ]
@@ -5282,6 +5284,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.create.execute",
           "project.restore.execute",
           "project.snapshot"
         ]
@@ -5297,6 +5300,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.create.execute",
           "project.restore.execute",
           "project.snapshot"
         ]
@@ -19639,6 +19643,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.create.execute",
           "project.restore.execute",
           "project.snapshot"
         ]

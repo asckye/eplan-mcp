@@ -1,0 +1,19 @@
+id: project-create
+set: dev
+fixture: shared
+prompt: 从 imports 的 basics/IEC_bas003_sample_project.zw9 在 scratch 新建一个名称未使用的项目，报告项目位置、页数、数据库版本和关闭状态。
+# Engineer stages the IEC basic project in the eval Host's imports before this task; no cross-version assertion.
+answer:
+  type: object
+  required: [path, pages, databaseVersion, opened]
+  properties:
+    path: { type: string }
+    pages: { type: integer }
+    databaseVersion: { type: string }
+    opened: { type: boolean }
+checks:
+  - { answer: $.path, contains: .elk }
+  - { answer: $.pages, equals: 0 }
+  - { answer: $.databaseVersion, equals: "18.0" }
+  - { answer: $.opened, equals: false }
+budget: { max_tool_calls: 6 }
