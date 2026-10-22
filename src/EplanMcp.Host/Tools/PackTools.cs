@@ -37,6 +37,8 @@ internal sealed class PackTools
 
     public const string GetTool = "eplan_pack_get";
 
+    public const string BuildTool = "eplan_pack_build";
+
     [McpServerTool(
         Name = ImportTool,
         Title = "Import engineering inputs into a development pack",
@@ -312,6 +314,89 @@ internal sealed class PackTools
         return ToolResults.Success(
             string.Create(CultureInfo.InvariantCulture, $"Pack '{pack}' {shown}: {ToolResults.Count(result.Resources.Total, "resource")}, {ToolResults.Count(problems.Count, "problem")}, {ToolResults.Count(result.Gaps.Count, "open gap")}, {met}."),
             result);
+    }
+
+    [McpServerTool(
+        Name = BuildTool,
+        Title = "Build a pack version",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = true,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(PackBuildResult))]
+    [Description(
+        "Freezes a development pack as an immutable version that projects can lock: checks it completely, resolves its " +
+        "dependencies, installs a read-only copy. The development pack stays editable; no version is ever overwritten. " +
+        "Major: interfaces, rule meanings or settings removed or changed; minor: resources added; patch: fixes. Changes " +
+        "only EplanMcp's data. Example: {\"pack\": \"acme.panels\", \"version\": \"1.0.0\"}.")]
+    public static async Task<CallToolResult> PackBuildAsync(
+        PackLibrary packs,
+        [Description("Development pack id")] string pack,
+        [Description("SemVer, e.g. 1.0.0")] string version,
+        CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        CheckId(pack, violations);
+        if (!SemanticVersion.TryParse(version, out _))
+        {
+            violations.Add("'version' must be a SemVer 2.0.0 version, such as 1.0.0.");
+        }
+
+        if (violations.Count > 0)
+        {
+            return ToolResults.InvalidArguments(violations);
+        }
+
+        if (packs.Locate(pack, AssetNames.Dev) is null)
+        {
+            return ToolResults.Error(PackLibrary.NotFound(pack, AssetNames.Dev));
+        }
+
+        string requestId = Guid.NewGuid().ToString("N");
+        try
+        {
+            await packs.AuditAsync(requestId, BuildTool, "started", new JsonObject { ["action"] = "build", ["pack"] = pack, ["version"] = version }, changed: false, cancellationToken).ConfigureAwait(false);
+            (PackInstallResult installed, string digest) built;
+            try
+            {
+                built = await packs.Dev.BuildAsync(pack, version, packs.Installed, packs.Config.PackSources, PackLibrary.CreatedBy, packs.Clock.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (DevPackException ex)
+            {
+                await packs.AuditFailedAsync(requestId, BuildTool, ex.Error.ToString(), cancellationToken).ConfigureAwait(false);
+                return ToolResults.Error(ex.Error == DevPackError.Conflict
+                    ? new BridgeError
+                    {
+                        Reason = ErrorReason.AlreadyExists,
+                        Message = $"'{pack}' {version} is installed already with other content, and versions never change; build it as a new version.",
+                        Metadata = PackLibrary.Problems(ex.Problems),
+                    }
+                    : PackLibrary.Error(ex, pack));
+            }
+
+            string outcome = Snake(built.installed.Outcome);
+            await packs.AuditAsync(requestId, BuildTool, "committed", new JsonObject { ["pack"] = pack, ["version"] = version, ["digest"] = built.digest, ["outcome"] = outcome }, changed: true, cancellationToken).ConfigureAwait(false);
+            var result = new PackBuildResult
+            {
+                Pack = pack,
+                Version = version,
+                Digest = built.digest,
+                Outcome = outcome,
+                Resources = built.installed.Manifest?.Resources.Count ?? 0,
+                Location = $"packs/{pack}/{version}",
+                Uri = $"eplanpack://{pack}/{version}/manifest",
+            };
+            return ToolResults.Success(
+                built.installed.Outcome == PackInstallOutcome.Installed
+                    ? $"Built '{pack}' {version} ({ToolResults.Count(result.Resources, "resource")}); projects can now lock it."
+                    : $"'{pack}' {version} was built from the same content before; nothing changed.",
+                result);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
     }
 
     /// <summary>What an open gap document says is missing; null for a closed or unreadable one (the check reports the latter).</summary>

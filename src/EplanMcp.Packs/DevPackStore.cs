@@ -184,6 +184,62 @@ public sealed class DevPackStore(string root)
         }
     }
 
+    /// <summary>
+    /// Freezes pack <paramref name="id"/> as <paramref name="version"/> in <paramref name="installed"/> (M6 design
+    /// 4.1.5): under the pack's lock, the pack must check clean, its referenced resources must match their hashes below
+    /// <paramref name="roots"/> (config.json packSources) and its dependencies must resolve to installed versions; a
+    /// copy with that version and a new lock is then installed, read-only. The development pack stays as it is. Throws
+    /// <see cref="DevPackException"/>: Invalid, or Conflict when the version is installed with other content.
+    /// </summary>
+    public async Task<(PackInstallResult Result, string Digest)> BuildAsync(
+        string id, string version, PackStore installed, IReadOnlyDictionary<string, string> roots, string createdBy, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        using FileStream held = await FileLock.AcquireAsync(Path.Combine(Root, $".{id}.lock"), LockWait, cancellationToken).ConfigureAwait(false)
+            ?? throw new DevPackException(DevPackError.Busy, [new PackProblem(id, "is being changed by another EplanMcp; try again when it is done")]);
+        PackCheckResult check = await PackVerifier.CheckDirectoryAsync(FolderOf(id), cancellationToken).ConfigureAwait(false);
+        List<PackProblem> problems = [.. check.Problems];
+        foreach (PackResource resource in check.Manifest?.Resources.Where(r => r.Storage == ResourceStorage.Referenced) ?? [])
+        {
+            if (await PackVerifier.ReferenceProblemAsync(resource, roots, cancellationToken).ConfigureAwait(false) is { } problem)
+            {
+                problems.Add(new PackProblem(resource.Path, problem));
+            }
+        }
+
+        if (problems.Count > 0 || check.Manifest is not { } manifest)
+        {
+            throw new DevPackException(DevPackError.Invalid, problems);
+        }
+
+        string staging = Path.Combine(Root, $".{id}.build-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(staging);
+            CopyTree(FolderOf(id), staging);
+            // A version built before keeps its maker and time, so building it again from the same pack is no change.
+            PackProvenance made = installed.InstalledDigest(id, version) is null ? manifest.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() }
+                : PackJson.ReadManifest(await File.ReadAllBytesAsync(Path.Combine(installed.FolderOf(id, version), PackManifest.FileName), cancellationToken).ConfigureAwait(false)).Provenance;
+            PackManifest frozen = manifest with { Version = version, Provenance = manifest.Provenance with { CreatedBy = made.CreatedBy, CreatedAt = made.CreatedAt } };
+            byte[] json = PackJson.Serialize(frozen);
+            string digest = PackDigest.Compute(json);
+            (PackLock? packLock, IReadOnlyList<PackProblem> unresolved) = installed.Lock(frozen, digest);
+            if (packLock is null)
+            {
+                throw new DevPackException(DevPackError.Invalid, unresolved);
+            }
+
+            await File.WriteAllBytesAsync(Path.Combine(staging, PackManifest.FileName), json, cancellationToken).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(Path.Combine(staging, PackManifest.LockFileName), PackJson.Serialize(packLock), cancellationToken).ConfigureAwait(false);
+            PackInstallResult result = await installed.InstallAsync(staging, cancellationToken).ConfigureAwait(false);
+            return result.Outcome != PackInstallOutcome.Refused ? (result, digest)
+                : throw new DevPackException(installed.InstalledDigest(id, version) is null ? DevPackError.Invalid : DevPackError.Conflict, result.Problems);
+        }
+        finally
+        {
+            DeleteTree(staging);
+        }
+    }
+
     private static PackManifest Fresh(string id, string name, string createdBy, DateTimeOffset now) => new()
     {
         SchemaVersion = PackManifest.CurrentSchemaVersion,
