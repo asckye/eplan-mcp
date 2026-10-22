@@ -24,6 +24,11 @@
     <!-- MIT, no dependencies. Reads the agent eval task files (evals/, agent evals design 4.1); never shipped. -->
     <PackageVersion Include="YamlDotNet" Version="18.1.0" />
     <!--
+      MIT. eng/coverage only (EPLAN API coverage, never shipped): compiles the Bridge sources to find which EPLAN members
+      the adapters bind to, overloads included. Same release as BannedApiAnalyzers.
+    -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
+    <!--
       MIT. Spike S9's driver only: EPLAN's Remote Client references System.Memory 4.0.1.2 (this package), which the
       EPLAN Bin directory lacks (api-notes B4). Never shipped.
     -->

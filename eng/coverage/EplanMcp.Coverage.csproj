@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    EPLAN API coverage tooling: `scan` compiles the Bridge with Roslyn and records the EPLAN API members it uses
+    (catalog/mapping/bridge-usage.json). A development tool: never shipped with the product. `scan` needs a local EPLAN
+    installation, because the Bridge compiles against its assemblies.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>EplanMcp.Coverage</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Semantic model of the Bridge sources: which EPLAN member each call binds to, overload included. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EplanMcp.Coverage.Tests" />
+  </ItemGroup>
+</Project>
