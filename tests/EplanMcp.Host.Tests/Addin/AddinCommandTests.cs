@@ -17,7 +17,7 @@ public sealed class AddinCommandTests : IDisposable
     private static readonly AddinTimings _timings = new(TimeSpan.FromMilliseconds(200), TimeSpan.Zero, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(1), TimeSpan.FromMilliseconds(1));
 
     private readonly string _root = Directory.CreateTempSubdirectory("eplanmcp-addin-").FullName;
-    private readonly FixedNow _clock = new(new DateTimeOffset(2026, 10, 21, 8, 15, 30, TimeSpan.Zero));
+    private readonly SteppingTime _clock = new(new DateTimeOffset(2026, 10, 21, 8, 15, 30, TimeSpan.Zero));
     private readonly FakeEplan _eplan = new();
 
     public AddinCommandTests()
@@ -548,13 +548,5 @@ public sealed class AddinCommandTests : IDisposable
             Directory.CreateDirectory(bin);
             File.WriteAllText(Path.Combine(bin, "W3u.exe"), string.Empty);
         }
-    }
-
-    /// <summary>The real clock and timers, with a fixed time of day for the record.</summary>
-    private sealed class FixedNow(DateTimeOffset now) : TimeProvider
-    {
-        public DateTimeOffset Now => now;
-
-        public override DateTimeOffset GetUtcNow() => now;
     }
 }
