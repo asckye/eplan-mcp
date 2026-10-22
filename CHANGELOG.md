@@ -87,6 +87,8 @@
   - `eplan_terminal_renumber`：让 EPLAN 按端子编号方案给 1–50 个端子排或整个项目的端子编号，默认只给名称中 `:` 之后带 `?` 的端子编号，也可以按端子排中的顺序全部重新编号；结果列出改变名称的端子，以及仍带 `?` 的端子。
   - `eplan_cable_renumber`：让 EPLAN 按电缆编号方案给指定的 1–200 根电缆（完整标识或显示的标识）或项目的全部电缆重新编号，`keep_existing` 时保留已有标识、只编带 `?` 的；结果列出改变标识的电缆（可能两两互换）。
   - `eplan_connection_number`：EPLAN 的"连接编号"，按线号方案给整个项目的连接编线号；`overwrite` 决定已有线号的处理（默认 `except_manual` 保留手工输入的，`none` 都保留，`all` 全部覆盖）；结果列出线号改变的连接（前后线号和所在页，最多 200 条）和编号后有线号的连接数。
+- M6 工程包（只在 `full` 中，不需要 EPLAN）：
+  - `eplan_pack_import`：把工程师放进导入目录（或 `config.json` 新增的 `packSources` 列出的根目录）的宏、表格、图框、文档、物料对应表、基本项目、备份和项目导入开发包 `packs-dev\<包 ID>\`，自动生成清单和资源索引；规则和物料对应表一律是候选；项目默认只引用（需要 `packSources`），工程师同意后可以复制进包；需要 EPLAN 才能判断的事项记为缺口；只写数据目录，写审计 `pack_change`。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed
