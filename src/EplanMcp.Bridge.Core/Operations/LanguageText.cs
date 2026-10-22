@@ -8,4 +8,7 @@ public sealed class LanguageText
 
     /// <summary>The text as stored with all its languages, <c>de_DE@…;en_US@…;</c>.</summary>
     public string Raw { get; set; } = string.Empty;
+
+    /// <summary>The full name of the function or page it belongs to, for results; empty when not read.</summary>
+    public string Name { get; set; } = string.Empty;
 }

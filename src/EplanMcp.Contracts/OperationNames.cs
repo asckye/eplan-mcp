@@ -377,6 +377,20 @@ public static class OperationNames
     public const string LanguageRemoveExecute = "language.remove.execute";
 
     /// <summary>
+    /// The plan of eplan_project_translate: checks the source and translation languages and counts the texts in the
+    /// scope that miss a translation language, never writes; what EPLAN fills in is known only after running. Arguments:
+    /// <see cref="ProjectTranslateArgs"/>; data: <see cref="WritePlan"/> with details.
+    /// </summary>
+    public const string ProjectTranslatePlan = "project.translate.plan";
+
+    /// <summary>
+    /// Backs the project up, then lets EPLAN translate the scope with the translation database in one transaction and
+    /// reads the texts back (ADR-0013). Arguments: <see cref="ProjectTranslateArgs"/> with the fingerprint and the backup
+    /// target; data: <see cref="ProjectTranslateData"/>.
+    /// </summary>
+    public const string ProjectTranslateExecute = "project.translate.execute";
+
+    /// <summary>
     /// The plan of eplan_terminal_renumber: checks the scheme and finds the strips and the terminals in scope, never
     /// writes; the new names are known only after running. Arguments: <see cref="TerminalRenumberArgs"/>; data:
     /// <see cref="WritePlan"/> with details.
