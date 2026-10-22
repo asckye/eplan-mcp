@@ -42,6 +42,19 @@ public sealed class ResourceScannerTests : IDisposable
     }
 
     [Fact]
+    public async Task Scan_ProjectBelowAPackSourceRoot_IsReferencedThereWithoutAGapForTheRoot()
+    {
+        _folder.Write("Share/Refs/Plant/Plant.elk", "Plant.edb\n18.0\n");
+        _folder.Write("Share/Refs/Plant/Plant.edb/Page.eod", "pages");
+
+        ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Share/Refs"), Root: new ResourceReference { Root = "company-refs", Path = "Refs" }));
+
+        ScannedResource project = Assert.Single(result.Resources);
+        Assert.Equal(new ResourceReference { Root = "company-refs", Path = "Refs/Plant/Plant.elk" }, project.Resource.Reference);
+        Assert.DoesNotContain(result.Findings, f => f.Code == "project_referenced");
+    }
+
+    [Fact]
     public async Task Scan_LinkFileWithoutDataFolder_IsAnError()
     {
         _folder.Write("Inputs/Plant.elk", "Plant.edb\n18.0\n");

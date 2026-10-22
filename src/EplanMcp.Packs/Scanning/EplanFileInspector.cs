@@ -52,7 +52,7 @@ internal static partial class EplanFileInspector
         else if (resource.Subtype is { } subtype && _pxfTypes.TryGetValue(subtype, out string? expected))
         {
             byte[] head = await ReadHeadAsync(files[0].FullPath, 1 << 20, cancellationToken).ConfigureAwait(false);
-            (string? type, string? version) = PxfRoot(head);
+            (string? type, string? version, bool sourceProject) = PxfRoot(head);
             if (type is null)
             {
                 inspection.Find(FindingSeverity.Warning, "not_eplan_xml", "is not an EPLAN XML file (no EplanPxfRoot root element); EPLAN may not read it.");
@@ -64,6 +64,14 @@ internal static partial class EplanFileInspector
                 if (type != expected)
                 {
                     inspection.Find(FindingSeverity.Warning, "pxf_type_mismatch", $"says Type '{type}' in its root element; EPLAN's own files with this extension say '{expected}'.");
+                }
+
+                if (sourceProject)
+                {
+                    // EPLAN writes the maker's project path there (A35, S32), which may hold a Windows user name; the
+                    // manifest never copies it, and phase 1 does not rewrite native files.
+                    inspection.Find(FindingSeverity.Gap, "source_project_path",
+                        "records the full local path of the project it was made from (EplanPxfRoot SourceProject), which may hold a Windows user name; remove it in EPLAN before sharing the pack.");
                 }
             }
         }
@@ -120,19 +128,22 @@ internal static partial class EplanFileInspector
             "may or may not open in this EPLAN: ProjectManager.GetProjectDataCompatibility needs EPLAN, so the Bridge has to check it.");
     }
 
-    /// <summary>The Type and Version attributes of an EplanPxfRoot root element, or nulls when the bytes do not start one.</summary>
-    private static (string? Type, string? Version) PxfRoot(byte[] head)
+    /// <summary>
+    /// The Type and Version attributes of an EplanPxfRoot root element and whether it has a SourceProject, or nulls when
+    /// the bytes do not start one.
+    /// </summary>
+    private static (string? Type, string? Version, bool SourceProject) PxfRoot(byte[] head)
     {
         try
         {
             using XmlReader reader = XmlReader.Create(new MemoryStream(head), _xml);
             return reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "EplanPxfRoot" && reader.GetAttribute("Type") is { } type
-                ? (type, reader.GetAttribute("Version"))
-                : (null, null);
+                ? (type, reader.GetAttribute("Version"), reader.GetAttribute("SourceProject") is { Length: > 0 })
+                : (null, null, false);
         }
         catch (XmlException)
         {
-            return (null, null);
+            return (null, null, false);
         }
     }
 

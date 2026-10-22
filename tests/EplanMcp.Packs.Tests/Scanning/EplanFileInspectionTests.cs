@@ -75,7 +75,7 @@ public sealed class EplanFileInspectionTests : IDisposable
     }
 
     [Fact]
-    public async Task Macro_RootElementGivesTypeAndVersion()
+    public async Task Macro_RootElementGivesTypeAndVersion_AndASourceProjectIsAGap()
     {
         _folder.Write("In/Pin.ems", "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<EplanPxfRoot Name=\"Pin\" Type=\"WindowMacro\" Version=\"2.7.11561\" SourceProject=\"D:\\Projects\\Customer.elk\" />");
 
@@ -85,7 +85,9 @@ public sealed class EplanFileInspectionTests : IDisposable
         Assert.Equal(("symbol_macro", "2.7.11561"), (macro.Resource.Subtype, macro.Resource.EplanVersion));
         Assert.Equal([("eplan_version", "2.7.11561"), ("pxf_type", "WindowMacro")], Facts(result).Order());
         Assert.DoesNotContain(macro.Facts, f => f.Value.Contains("Customer", StringComparison.Ordinal));
-        Assert.Empty(result.Findings);
+        ScanFinding finding = Assert.Single(result.Findings);
+        Assert.Equal((FindingSeverity.Gap, "source_project_path"), (finding.Severity, finding.Code));
+        Assert.DoesNotContain("Customer", finding.Message, StringComparison.Ordinal);
     }
 
     [Theory]

@@ -145,10 +145,18 @@ public static class ResourceScanner
                 Storage = ResourceStorage.Bundled,
                 Source = new ResourceSource { Input = inputName, Path = relative },
             };
-            if (classification.Kind == ResourceKind.Project && !input.BundleProjects)
+            if (classification.Kind == ResourceKind.Project && !input.BundleProjects && input.Root is { } root)
             {
-                // Reference projects stay where they are (design 4.1.2, Q6): large, and often with customer data. The
-                // input folder stands for the packSources root; TODO(M6): take the root from config.json packSources.
+                // Reference projects stay where they are (design 4.1.2, Q6): large, and often with customer data.
+                resource = resource with
+                {
+                    Storage = ResourceStorage.Referenced,
+                    Reference = new ResourceReference { Root = root.Root, Path = relative.Length == 0 ? root.Path : root.Path + "/" + relative },
+                };
+            }
+            else if (classification.Kind == ResourceKind.Project && !input.BundleProjects)
+            {
+                // Without a packSources root the input folder stands for one; the Host refuses such a pack (ADR-0024 section 6).
                 string rootName = RootName(relative.Length == 0 ? file.Directory?.Name ?? string.Empty : inputName);
                 resource = resource with
                 {

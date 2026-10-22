@@ -63,7 +63,8 @@ public static class PackWriter
         }
     }
 
-    private static async Task CopyAsync(string source, string destination, CancellationToken cancellationToken)
+    /// <summary>Copies one file into a new file, creating its folder; never overwrites.</summary>
+    internal static async Task CopyAsync(string source, string destination, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
         var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16, FileOptions.Asynchronous | FileOptions.SequentialScan);
