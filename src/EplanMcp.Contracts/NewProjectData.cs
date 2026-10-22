@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Result of <see cref="OperationNames.ProjectCreateExecute"/>: the new project, which is not left open.</summary>
+/// <summary>Result of <see cref="OperationNames.ProjectCreateExecute"/> and <see cref="OperationNames.ProjectRestoreExecute"/>: the new project, which is not left open.</summary>
 public sealed class NewProjectData
 {
     /// <summary>The new project's name.</summary>

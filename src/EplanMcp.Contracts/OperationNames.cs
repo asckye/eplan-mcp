@@ -520,6 +520,20 @@ public static class OperationNames
     public const string ProjectCreateExecute = "project.create.execute";
 
     /// <summary>
+    /// The plan of restoring a project backup (.zw1) as a new project: checks the file and that the destination folder is
+    /// absent or empty, because EPLAN overwrites a project it restores onto (api-notes A31); never writes. Arguments:
+    /// <see cref="NewProjectArgs"/>; data: <see cref="WritePlan"/> with one <c>create</c> change.
+    /// </summary>
+    public const string ProjectRestorePlan = "project.restore.plan";
+
+    /// <summary>
+    /// Restores the backup with EPLAN's <c>restore</c> action into the empty folder, which it looks at again right before,
+    /// and reads the new project's database version without opening it; on failure deletes what it made. Arguments:
+    /// <see cref="NewProjectArgs"/> with the fingerprint; data: <see cref="NewProjectData"/>.
+    /// </summary>
+    public const string ProjectRestoreExecute = "project.restore.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

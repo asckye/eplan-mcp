@@ -12,4 +12,10 @@ public interface IProjectFactory
     /// Throws EPLAN_OPERATION_FAILED when EPLAN refuses.
     /// </summary>
     public (int Pages, string? ProjectGuid) Create(string linkFile, string basicProject);
+
+    /// <summary>
+    /// Restores the project backup <paramref name="archive"/> as the project <paramref name="linkFile"/>, which is not
+    /// opened (S27: about 6 s for the sample project). Throws EPLAN_OPERATION_FAILED when EPLAN reports a failure.
+    /// </summary>
+    public void Restore(string archive, string linkFile);
 }
