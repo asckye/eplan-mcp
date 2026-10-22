@@ -29,7 +29,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 
 ## 核对的内容
 
-`ImportListTests` 使用 `DestructiveHost` 的 `LargeWrite` 副本：部件清单先经 `eplan_export_parts` 导出，再复制到 imports 回导，核对引用数 +2、备份、300 秒预算和约 5 秒心跳；会永久改变写副本。设备 XML/CSV 用例因 S34 README 未记录完整格式而跳过（`needs a device list sample from S34's export`），需提供原始两条记录样本。完整事务下的故障注入回滚、提交后 Ctrl+Z、精确引用字段和系统部件库业务文件不变仍需实机补验。
+`ImportListTests` 使用 `DestructiveHost` 的 `LargeWrite` 副本：部件清单先经 `eplan_export_parts` 导出，再复制到 imports 回导，核对引用数 +2、备份、300 秒预算和约 5 秒心跳；会永久改变写副本。设备清单用 `fixtures\` 中 S34 导出的两条条目（`XDLXmlExporter` 的 XML 和 CSV），写副本原本没有条目，导入后应恰为 2 条。完整事务下的故障注入回滚、提交后 Ctrl+Z、精确引用字段和系统部件库业务文件不变仍需实机补验。
 | 测试类 | 内容 |
 |---|---|
 | `ProjectAndPageTests` | 页数、设备数、连接数、部件引用数和各类页的数量；detailed 属性的名称和索引；按类型、名称前缀筛选页；读取页描述的耗时；页上的设备；不存在的页 |

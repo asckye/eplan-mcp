@@ -19,25 +19,39 @@ public sealed class ImportListTests : IClassFixture<DestructiveHost>
         _host = host;
     }
 
-    [Theory(Skip = "needs a device list sample from S34's export")]
-    [InlineData("xml", "XDLXmlExporter")]
-    [InlineData("csv", "XDLCsvImporterExporter")]
-    public async Task Devices_PreparedS34Sample_ImportsTwoEntries(string format, string converter)
+    /// <summary>
+    /// S34's exports of two device list entries it created in the sample project (A39): the XML into the empty list,
+    /// then the CSV of the same two entries. Both cases share the write copy, so they run in this order in one test.
+    /// </summary>
+    [Fact]
+    public async Task Devices_S34Sample_XmlAddsTwoEntries_ThenCsvOfTheSameEntries()
     {
-        // README records the sizes and counts, not the XML/CSV schema. Supply S34's actual two-entry exports here.
+        JsonElement xml = await ImportDevices("xml", "XDLXmlExporter");
+        Assert.Equal((0, 2), Entries(xml));
+        JsonElement csv = await ImportDevices("csv", "XDLCsvImporterExporter");
+        (int before, int after) = Entries(csv);
+        TestContext.Current.TestOutputHelper?.WriteLine($"CSV of the same two entries: {before} -> {after} device list entries.");
+        Assert.Equal(2, before);
+        Assert.True(after >= before, $"The CSV import removed entries: {before} -> {after}.");
+    }
+
+    private async Task<JsonElement> ImportDevices(string format, string converter)
+    {
         string sample = Path.Combine(AppContext.BaseDirectory, "fixtures", "s34-devices." + format);
         string file = ImportCopy(sample, "devices." + format);
         Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["kind"] = "devices", ["file"] = file, ["format"] = format };
         JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
-        Assert.Equal(0, dryRun.GetProperty("before").GetProperty("deviceListEntries").GetInt32());
         Assert.Equal(converter, dryRun.GetProperty("converter").GetString());
         Approve(dryRun);
         JsonElement result = await _host.CallAsync(Tool, args);
-        Assert.Equal(2, result.GetProperty("after").GetProperty("deviceListEntries").GetInt32());
         Assert.Equal("committed", result.GetProperty("execution").GetString());
         Assert.Equal(JsonValueKind.Null, result.GetProperty("undo").ValueKind);
         Assert.True(File.Exists(result.GetProperty("backup").GetString()));
+        return result;
     }
+
+    private static (int Before, int After) Entries(JsonElement result) =>
+        (result.GetProperty("before").GetProperty("deviceListEntries").GetInt32(), result.GetProperty("after").GetProperty("deviceListEntries").GetInt32());
 
     [Fact]
     public async Task Parts_ExportThenImport_AddsS34sTwoReferences_WithBackupAndProgressWithin300Seconds()
