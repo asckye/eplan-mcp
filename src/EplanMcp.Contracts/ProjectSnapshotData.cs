@@ -39,7 +39,7 @@ public sealed class ProjectSnapshotData
     /// <summary>The snapshot hash (design 4.4), only when this one chunk covers every page of the project.</summary>
     public string? SnapshotHash { get; set; }
 
-    /// <summary>Connections left out of the chunk's pages: 3D connections and connections on no page.</summary>
+    /// <summary>Connections of the project a snapshot leaves out: 3D connections and connections on no page.</summary>
     public int SkippedConnections { get; set; }
 
     /// <summary>How long the chunk took, in milliseconds.</summary>
