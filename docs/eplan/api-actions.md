@@ -419,3 +419,34 @@ action 只在三种情况下更合适：只读打开项目、页面转图片，�
 - 没有在本机 EPLAN 上执行任何 action，表中所有“效果”都依据文档文字，带 “?” 的是推断。
 - 没有核对 HEServices 类在方法层面是否与 action 等价（见 5.1）。
 - 没有读取每个 HEServices、EServices、DataModel 类的参考页面，只核对了类名是否存在。
+
+---
+
+## 8. 2026-10-21 在线复核
+
+第 1–7 节是 2026-10-18 逐页阅读的结果。2026-10-21 又对官方 2026 目录做了一次名称层面的复核，看有没有页面新增、消失、改名，TYPE 值或参数名有没有变化。
+
+### 8.1 范围与方法
+- 读取了：总表页 [API Actions.html](https://eplan.help/en-us/Infoportal/Content/api/2026/API%20Actions.html)、帮助目录数据 [_toc/c0.js](https://eplan.help/en-us/Infoportal/Content/api/2026/_toc/c0.js)，以及每个 action 的页面（99 个总表条目对应的 URL，另加 2025 独有的两个 action 在 2026 目录下的同名 URL）。主机用 `eplan.help`，与第 1 节用的 `www.eplan.help` 是同一个站点。
+- 用 WebFetch 读取，它会先摘要再返回，所以只拿来核对名称、TYPE 值、参数名和页脚日期，没有拿来取说明文字，也没有因此改动第 4 节任何一行。
+- 比较单位是整个 action：该页列出的 TYPE 值集合、参数名集合，与第 4 节表格中同一个 action 各行的并集比较（用脚本逐项比对）。多数页面的参数表不区分 TYPE（例如 `import` 页没有把任何参数和某个 TYPE 对应起来），所以没有核对“某个参数属于哪个 TYPE”，那一层仍以 2026-10-18 的阅读为准。
+
+### 8.2 结果
+- **总表页**：仍列 99 个 action，名称与第 4 节的 99 个 action 完全一致，没有新增、缺失或改名；页脚仍是 18.03.2026。
+- **帮助目录数据**：仍是 98 个子页面，与总表相比仍然只少 `XAMlExportProductionData2SmartMountingAction`，其余完全一致（只有 `XPartsSetDataSourceAction` 与 `XPamSelectPart` 的先后顺序不同）。
+- **action 页面**：98 个页面都能取到，页脚日期都是 18.03.2026，没有页面被新增或修改的迹象。`XAMlExportProductionData2SmartMountingAction` 的页面仍然返回 404（7.1 第 1 条没有变化）。
+- **2025 独有的两个 action**：`MfToggleMainMenuAction` 和 `XPamArticlesSyncAction` 的 2026 页面仍然返回 404，与附表 4.1 一致。
+- **TYPE 值**：25 个多 TYPE action 的 TYPE 值集合与表格逐个一致，没有新增、缺少或改名的 TYPE 值，包括保留原文拼写的 `DXFDWGPPAGESSCHEME` 和大小写混合的 `RouteConnections`、`CreateFunctions`。
+- **参数名**：除 8.3 的三处，每个 action 的参数名集合与表格一致，没有新增、缺少或改名的参数，包括保留原文拼写的 `PAGFILTERNAME`。
+- **计数**：官方总表仍是 99 个 action，拆分后仍是 177 行，第 6 节的数字不需要改。
+
+### 8.3 有出入的三处（都不是页面新增或改名）
+1. `export`：表格里 `PDFPAGESSCHEME` 和 `DXFDWGPPAGESSCHEME` 两行列了 `SELn`，但页面的参数表没有这一行，`SELn` 只出现在 TYPE 的说明文字里，作为 `PAGENAMEn` 的替代写法。表格的写法仍然成立，只是在参数表里查不到这个名字。另外单独核对了 `DESTINATIONPATH`：页面的说明支持表格把它列给 `DXFDWGPROJECTSCHEME` 和 `DXFDWGPPAGESSCHEME`。
+2. `import`：页面的参数表里有 `CODEPAGE`、`DRIVE`、`SOURCEMACROPATH`、`DESTINATIONFILE` 四个参数，第 4 节各行都没有列。7.4 已经记录它们没有写明适用于哪个 TYPE，看起来是遗留参数；本次读取没有改变这个判断。
+3. `selectionset`：页面的参数表里只有 `TYPE`，输出的名称（`PROJECT`、`PROJECTS`、`PAGES`、`LAYOUTSPACES`）写在说明文字里。表格把它们作为输出列出，不算错误。
+
+### 8.4 没有复核的内容
+- 三个取不到页面的 action（`XAMlExportProductionData2SmartMountingAction`、`MfToggleMainMenuAction`、`XPamArticlesSyncAction`）：页面不存在，无法复核参数。
+- 第 4 节“效果”“用途”两列、7.2–7.5 的副作用、对话框、授权说明：没有重新阅读，仍以 2026-10-18 的结果为准；没有在 EPLAN 上执行任何 action。
+- 概念页（Actions、CallingActions、AutomaticActions、Command line parameters）、HEServices、EServices、Base 的类名清单（`_toc/c554.js`、`c511.js`、`c39.js`）以及全部 2025 页面：这次没有重新读取，第 1.1 节和 5.1 节的结论不变。
+- 没有逐个核对每个参数属于哪个 TYPE（见 8.1）。
