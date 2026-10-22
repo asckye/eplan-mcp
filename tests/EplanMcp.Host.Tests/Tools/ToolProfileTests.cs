@@ -31,7 +31,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(48, Tools(ToolProfile.Full).Length);
+        Assert.Equal(49, Tools(ToolProfile.Full).Length);
         Assert.Equal(ToolProfiles.Core.Order(StringComparer.Ordinal), Tools(ToolProfile.Core).Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 

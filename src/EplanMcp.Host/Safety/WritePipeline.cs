@@ -277,6 +277,7 @@ internal sealed partial class WritePipeline(
         _ when c.Property == "device tags" => $"renumber {c.OldValue}",
         _ when c.Property == "page number" => $"renumber {c.Kind} {c.Name}",
         _ when c.Property == "numbering" => $"renumber {c.OldValue}",
+        _ when c.Property == "translations" => $"translate {c.OldValue}",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
 
