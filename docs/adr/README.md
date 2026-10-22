@@ -30,3 +30,4 @@
 | [0021](0021-action-run-whitelist.md) | 用受控的 `eplan_action_run` 覆盖长尾的 EPLAN action：只执行随产品发布、经实机验证的白名单条目，按条目的级别走任务工具的流水线；默认关闭，只在 `full` 中 | Accepted | 单向门（白名单条目发布后） |
 | [0022](0022-domain-toolsets.md) | 按领域把工具分成工具集，Profile 由工具集组成；支持工具列表变更通知的客户端可以按需加载工具集，其他客户端用固定的工具集 | Accepted | 双向门（1.0 发布前） |
 | [0023](0023-plan-approval-and-backup.md) | 组合计划一次审批（带差异预览）、开始前备份一次、每步一个事务，计划级结果增加 `partially_committed` | Accepted | 单向门（计划工具发布后） |
+| [0024](0024-pack-trust-and-container.md) | 工程包按不可信输入处理：只含数据，安装前校验容器，安装后不可变，放在数据根目录；企业资源只按配置文件中的根目录和哈希引用 | Accepted | 单向门（第一批 `.eplanpack` 交换出去后） |
