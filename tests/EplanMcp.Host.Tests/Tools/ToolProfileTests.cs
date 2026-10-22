@@ -44,6 +44,20 @@ public sealed class ToolProfileTests
         Assert.Equal(JsonValueKind.False, Tools(ToolProfile.Core).Single(t => t.Name == UsageTools.UsageTool).InputSchema.GetProperty("additionalProperties").ValueKind);
     }
 
+    [Theory]
+    [InlineData(true, 3)]
+    [InlineData(false, 0)]
+    public void PackResourceTemplates_AreInTheFullProfileOnly(bool full, int count)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(logging => logging.ClearProviders());
+        services.AddSingleton(new ToolProfileChoice(full ? ToolProfile.Full : ToolProfile.Core));
+        services.AddEplanMcp();
+        using ServiceProvider provider = services.BuildServiceProvider();
+
+        Assert.Equal(count, provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ResourceCollection?.Count ?? 0);
+    }
+
     private static Tool[] Tools(ToolProfile profile)
     {
         var services = new ServiceCollection();
