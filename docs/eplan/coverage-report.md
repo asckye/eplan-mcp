@@ -29,16 +29,16 @@ Bridge 共用到 445 个 ID（方法 151，属性 127，类型 116，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 194 / 4014（4.8%） | 187 | 39 | 187 / 4014（4.7%） | 136 / 4014（3.4%） | 122 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 101 / 1799（5.6%） | 94 | 39 | 94 / 1799（5.2%） | 64 / 1799（3.6%） | 45 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 93 / 2215（4.2%） | 93 | 0 | 93 / 2215（4.2%） | 72 / 2215（3.3%） | 77 | 68 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 194 / 4014（4.8%） | 187 | 39 | 187 / 4014（4.7%） | 147 / 4014（3.7%） | 122 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 101 / 1799（5.6%） | 94 | 39 | 94 / 1799（5.2%） | 68 / 1799（3.8%） | 45 | 66 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 93 / 2215（4.2%） | 93 | 0 | 93 / 2215（4.2%） | 79 / 2215（3.6%） | 77 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 6 / 68（8.8%） | 6 | 0 | 6 / 68（8.8%） | 5 / 68（7.4%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 1 / 137（0.7%） | 1 | 0 | 1 / 137（0.7%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 1 / 97（1.0%） | 1 | 0 | 1 / 97（1.0%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 194 / 4342（4.5%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 101 / 1799（5.6%），live_verified 64 / 1799（3.6%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 101 / 1799（5.6%），live_verified 68 / 1799（3.8%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 34 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 207 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 1 个，没有整个排除的 action 共 64 个。
@@ -48,10 +48,10 @@ Bridge 共用到 445 个 ID（方法 151，属性 127，类型 116，字段和�
 |---|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 2 |
 | `Eplan.EplApi.Base` | 268 | 24 / 268（9.0%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 81 / 1247（6.5%） | 74 |
+| `Eplan.EplApi.DataModel` | 1247 | 81 / 1247（6.5%） | 75 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 0 / 368（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 14 / 83（16.9%） | 5 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 10 / 414（2.4%） | 0 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 10 / 414（2.4%） | 10 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 5 / 121（4.1%） | 5 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 0 / 122（0.0%） | 0 |
@@ -85,7 +85,7 @@ Bridge 共用到 445 个 ID（方法 151，属性 127，类型 116，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：27 / 53（50.9%），共 33 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 53（54.7%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -119,10 +119,13 @@ Bridge 共用到 445 个 ID（方法 151，属性 127，类型 116，字段和�
 | eplan_page_renumber | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass | api-notes A20 | /90–/92 改为 /200、/210、/220；与已有页重名时返回 ALREADY_EXISTS |
 | eplan_page_update | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass | api-notes A17 | 一次写入一个撤销步骤；只改一种语言时其他语言不变 |
 | eplan_part_export | 2026-10-21 | 未注明 | 未注明 | pass_with_findings | docs/tools/eplan_part_export.md | 部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读 |
+| eplan_part_export | 2026-10-22 | 2026.0.3.25421 | Electric P8 | pass | Large 测试 README | format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变 |
 | eplan_part_import | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass | api-notes A30；Large 测试 README | 经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过 |
 | eplan_part_list | 2026-10-19 | 2026.0.3.25421 | Electric P8 | pass_with_findings | api-notes A12 | 部件没有中文描述时为空，之后按语言回退设计实现 |
 | eplan_part_search | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass | api-notes A30 | 部件导入的 Large 测试中找到新导入的部件，变体 1 |
 | eplan_part_sync | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass | docs/tools/eplan_part_sync.md；api-notes A30 | 经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证 |
+| eplan_placeholder_apply | 2026-10-22 | 2026.0.3.25421 | Electric P8 | pass_with_findings | Large 测试 README；api-notes A33 | 写副本上先应用 mA 再应用 V 都 committed，执行后的当前值等于值集的值；场外副本 POLICY_DENIED；值集 X 为 INVALID_ARGUMENT。第一次实测时规划读当前值抛 LockingException，已改为只在写事务中读。Ctrl+Z 未手工核对 |
+| eplan_placeholder_list | 2026-10-22 | 2026.0.3.25421 | Electric P8 | pass_with_findings | Large 测试 README | 夹具 2 个占位符（=TM1、=TM2 的 EFS1/1），值集 V、mA，变量 T1、T2；值未与 EPLAN 的值集对话框逐项对照 |
 | eplan_plc_get | 2026-10-21 | 未注明 | 未注明 | pass_with_findings | docs/tools/eplan_plc_get.md | 按通道对象查不到连接，改为按设备读 |
 | eplan_project_get | 2026-10-19 | 2026.0.3.25421 | Electric P8 | pass | api-notes A12 | detailed 最慢一次 493 ms；Large 中属性名可读 |
 | eplan_project_list | 2026-10-18 | 2026.0.3.25421 | Pro Panel 和 Electric P8 | pass | api-notes A10 | M1 完成标准：列出打开的项目；模态对话框时 EPLAN_BUSY |
@@ -169,13 +172,13 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_list | read | page.list | 40 | 19 | 1 | 20 | 0 | 14/4/6 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 59 | 23 | 0 | 36 | 0 | 1/2/1 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 58 | 27 | 1 | 30 | 0 | 2/2/2 | A7 A13 | 2026-10-20 pass（api-notes A17） |
-| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-21 pass_with_findings（docs/tools/eplan_part_export.md） |
+| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-22 pass（Large 测试 README） |
 | eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 39 | 11 | 0 | 26 | 1 | 2/6/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 43 | 23 | 1 | 18 | 0 | 2/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
 | eplan_part_search | read | part.search | 35 | 16 | 1 | 14 | 0 | 3/3/3 | — | 2026-10-21 pass（api-notes A30） |
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 102 | 46 | 1 | 52 | 1 | 2/2/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
-| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 60 | 33 | 0 | 27 | 0 | 1/2/1 | A14 A33 | — |
-| eplan_placeholder_list | read | placeholder.list | 42 | 26 | 0 | 16 | 0 | 2/1/1 | A11 A14 A33 | — |
+| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 60 | 33 | 0 | 27 | 0 | 1/2/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
+| eplan_placeholder_list | read | placeholder.list | 42 | 26 | 0 | 16 | 0 | 2/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_plc_get | read | plc.get | 72 | 37 | 1 | 28 | 0 | 2/2/2 | — | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_get | read | project.get | 53 | 30 | 0 | 23 | 0 | 5/3/4 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/3/1 | — | 2026-10-18 pass（api-notes A10） |

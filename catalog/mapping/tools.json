@@ -4457,6 +4457,16 @@
           "source": "docs/tools/eplan_part_export.md",
           "note": "部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读",
           "verifies": true
+        },
+        {
+          "date": "2026-10-22",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass",
+          "basis": "stated",
+          "source": "Large 测试 README",
+          "note": "format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变",
+          "verifies": true
         }
       ]
     },
@@ -5122,7 +5132,18 @@
           }
         ]
       },
-      "live": []
+      "live": [
+        {
+          "date": "2026-10-22",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "Large 测试 README；api-notes A33",
+          "note": "写副本上先应用 mA 再应用 V 都 committed，执行后的当前值等于值集的值；场外副本 POLICY_DENIED；值集 X 为 INVALID_ARGUMENT。第一次实测时规划读当前值抛 LockingException，已改为只在写事务中读。Ctrl+Z 未手工核对",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_placeholder_list",
@@ -5214,7 +5235,18 @@
           }
         ]
       },
-      "live": []
+      "live": [
+        {
+          "date": "2026-10-22",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "stated",
+          "source": "Large 测试 README",
+          "note": "夹具 2 个占位符（=TM1、=TM2 的 EFS1/1），值集 V、mA，变量 T1、T2；值未与 EPLAN 的值集对话框逐项对照",
+          "verifies": true
+        }
+      ]
     },
     {
       "name": "eplan_plc_get",
