@@ -151,9 +151,10 @@ internal static class DoctorChecks
         (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
         string timeout = HostConfig.Seconds(config.ApprovalTimeout);
         (string masterData, string masterDataEn) = config.MasterDataWrites == MasterDataWrites.Deny ? ("禁止", "denied") : ("每次审批并先备份", "approved each time, backed up first");
+        string sources = string.Join("; ", config.PackSources.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key} = {p.Value}"));
         return new(DoctorCheckIds.Config, DoctorStatus.Ok,
-            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒",
-            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s");
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒；工程包可以引用的来源（packSources）：{(sources.Length == 0 ? "无" : sources)}",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s; sources packs may reference (packSources): {(sources.Length == 0 ? "none" : sources)}");
     }
 
     /// <summary>

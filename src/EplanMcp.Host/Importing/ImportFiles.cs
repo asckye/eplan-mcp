@@ -39,6 +39,17 @@ internal sealed class ImportFiles(HostDataLocations locations)
         }
 
         string given = file.Trim();
+        return PathProblem(argument, given, RootName, $"drawings/plan{extensions[0]}")
+            ?? (extensions.Any(e => given.EndsWith(e, StringComparison.OrdinalIgnoreCase)) ? null : $"'{argument}' must end with {string.Join(" or ", extensions)}.");
+    }
+
+    /// <summary>
+    /// What is wrong with <paramref name="given"/> as a path below <paramref name="rootName"/> by the rules of SEC-19,
+    /// whatever its extension, or null; <paramref name="example"/> shows a good one. The pack tools use it for their
+    /// roots too (SEC-36).
+    /// </summary>
+    public static string? PathProblem(string argument, string given, string rootName, string example)
+    {
         if (given.Length > MaxLength)
         {
             return $"'{argument}' must have at most {MaxLength} characters.";
@@ -46,15 +57,10 @@ internal sealed class ImportFiles(HostDataLocations locations)
 
         // ':' covers drives and alternate data streams; an empty step covers a leading separator, UNC and '//'. Windows
         // drops dots and spaces at the end of a name, so such a step could name another one, '..' included.
-        if (given.Contains(':', StringComparison.Ordinal) || Steps(given).Any(s =>
-            s.Length == 0 || s is "." or ".." || s.AsSpan().ContainsAny(_invalid) || s.EndsWith('.') || s.EndsWith(' ') || ExportFileName.IsReserved(s)))
-        {
-            return $"'{argument}' must be a path below {RootName}, such as drawings/plan{extensions[0]}: no drive, no leading '/' or '\\', no '.' or '..', and no name Windows reserves.";
-        }
-
-        return extensions.Any(e => given.EndsWith(e, StringComparison.OrdinalIgnoreCase))
-            ? null
-            : $"'{argument}' must end with {string.Join(" or ", extensions)}.";
+        return given.Contains(':', StringComparison.Ordinal) || Steps(given).Any(s =>
+            s.Length == 0 || s is "." or ".." || s.AsSpan().ContainsAny(_invalid) || s.EndsWith('.') || s.EndsWith(' ') || ExportFileName.IsReserved(s))
+            ? $"'{argument}' must be a path below {rootName}, such as {example}: no drive, no leading '/' or '\\', no '.' or '..', and no name Windows reserves."
+            : null;
     }
 
     /// <summary>
@@ -68,31 +74,12 @@ internal sealed class ImportFiles(HostDataLocations locations)
         string given = Normalized(file);
         string root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(Root));
         CreateRoot(root);
-        string[] steps = Steps(given);
-        string current = root;
-        for (int i = 0; i < steps.Length; i++)
+        if (Walk(argument, root, given, RootName, folder: false) is not FileInfo info)
         {
-            current = Path.Combine(current, steps[i]);
-            FileSystemInfo step = i < steps.Length - 1 ? new DirectoryInfo(current) : new FileInfo(current);
-            if (!step.Exists)
-            {
-                throw new ImportFileException(ErrorReason.FileNotFound, $"No file '{given}' is in {RootName} (next to 'exports'). Put the file there first, then call again.", argument, given);
-            }
-
-            if ((step.Attributes & FileAttributes.ReparsePoint) != 0)
-            {
-                throw Invalid(argument, given, $"'{argument}' leads through a symbolic link or junction, which the import tools never follow; put the file itself into {RootName}.");
-            }
+            throw new ImportFileException(ErrorReason.FileNotFound, $"No file '{given}' is in {RootName} (next to 'exports'). Put the file there first, then call again.", argument, given);
         }
 
-        // Each step was checked above, so this only guards against a name Windows resolves to another place.
-        string relative = Path.GetRelativePath(root, current);
-        if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar)[0] == "..")
-        {
-            throw Invalid(argument, given, $"'{argument}' must be a path below {RootName}.");
-        }
-
-        var info = new FileInfo(current);
+        string current = info.FullName;
         if (info.Length > maxBytes)
         {
             throw Invalid(argument, given, $"'{argument}' is {ByteSize.Format(info.Length)}; this tool imports files of at most {ByteSize.Format(maxBytes)}.");
@@ -111,6 +98,38 @@ internal sealed class ImportFiles(HostDataLocations locations)
         {
             throw Invalid(argument, given, $"'{argument}' cannot be read; another program may have it open. Close it there, then call again.");
         }
+    }
+
+    /// <summary>
+    /// The file, or with <paramref name="folder"/> the file or folder, that <paramref name="given"/> names below
+    /// <paramref name="root"/>, every step there and none a symbolic link or junction (SEC-19); null when a step is
+    /// missing. Throws <see cref="ImportFileException"/> (INVALID_ARGUMENT) for a link or a path that leaves the root.
+    /// </summary>
+    public static FileSystemInfo? Walk(string argument, string root, string given, string rootName, bool folder)
+    {
+        string[] steps = Steps(given);
+        string current = root;
+        FileSystemInfo? step = null;
+        for (int i = 0; i < steps.Length; i++)
+        {
+            current = Path.Combine(current, steps[i]);
+            step = i < steps.Length - 1 || (folder && Directory.Exists(current)) ? new DirectoryInfo(current) : new FileInfo(current);
+            if (!step.Exists)
+            {
+                return null;
+            }
+
+            if ((step.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                throw Invalid(argument, given, $"'{argument}' leads through a symbolic link or junction, which EplanMcp never follows; put the files themselves into {rootName}.");
+            }
+        }
+
+        // Each step was checked above, so this only guards against a name Windows resolves to another place.
+        string relative = Path.GetRelativePath(root, current);
+        return Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar)[0] == ".."
+            ? throw Invalid(argument, given, $"'{argument}' must be a path below {rootName}.")
+            : step;
     }
 
     /// <summary>The argument as the tools return it: trimmed, with <c>/</c> between folders.</summary>

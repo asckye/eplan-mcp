@@ -274,7 +274,8 @@ public static partial class PackManifestValidator
 
     private static bool IsText(string text) => text.Length is > 0 and <= MaxTextLength && !text.Any(char.IsControl);
 
-    internal static bool IsId(string id) => id.Length <= MaxIdLength && Id().IsMatch(id);
+    /// <summary>Whether <paramref name="id"/> is a pack id; names of knowledge documents and pack sources follow the same rule.</summary>
+    public static bool IsId(string id) => id.Length <= MaxIdLength && Id().IsMatch(id);
 
     internal static bool IsSha256(string hash) => Sha256().IsMatch(hash);
 

@@ -19,17 +19,19 @@ public sealed class HostConfigTests
         Assert.Equal(OutsideScratchWrites.Approve, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(120), config.ApprovalTimeout);
         Assert.Equal(MasterDataWrites.Approve, config.MasterDataWrites);
+        Assert.Empty(config.PackSources);
     }
 
     [Fact]
     public void Parse_ReadsEverySetting()
     {
-        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"deny","approvalTimeoutSeconds":90,"masterDataWrites":"deny"}""", _locations);
+        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"deny","approvalTimeoutSeconds":90,"masterDataWrites":"deny","packSources":{"company-refs":"\\\\server\\eplan\\refs","local":"D:\\Refs"}}""", _locations);
 
         Assert.Equal(["D:\\Scratch", "E:\\Copies"], config!.ScratchRoots);
         Assert.Equal(OutsideScratchWrites.Deny, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(90), config.ApprovalTimeout);
         Assert.Equal(MasterDataWrites.Deny, config.MasterDataWrites);
+        Assert.Equal(new Dictionary<string, string> { ["company-refs"] = "\\\\server\\eplan\\refs", ["local"] = "D:\\Refs" }, config.PackSources);
     }
 
     [Theory]
@@ -57,6 +59,11 @@ public sealed class HostConfigTests
     [InlineData("""{"approvalTimeoutSeconds":-1}""", "from 60 to 300")]
     [InlineData("""{"approvalTimeoutSeconds":120.5}""", "is not valid")]
     [InlineData("""{"approvalTimeoutSeconds":"120"}""", "is not valid")]
+    [InlineData("""{"packSources":{"c":"D:\\Refs"}}""", "packSources")]
+    [InlineData("""{"packSources":{"Company":"D:\\Refs"}}""", "packSources")]
+    [InlineData("""{"packSources":{"refs":"Refs"}}""", "packSources")]
+    [InlineData("""{"packSources":{"refs":""}}""", "packSources")]
+    [InlineData("""{"packSources":["D:\\Refs"]}""", "is not valid")]
     public void Parse_AnInvalidFile_IsRefusedWithTheReason(string json, string reason)
     {
         (HostConfig? config, string? problem) = HostConfig.Parse(json, _locations);

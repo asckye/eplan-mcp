@@ -31,6 +31,9 @@ internal sealed class HostDataLocations(string root)
     /// <summary>The installed engineering packs, one read-only folder per version (M6, ADR-0024).</summary>
     public string Packs => Path.Combine(Root, "packs");
 
+    /// <summary>The development packs: plain folders that only the pack tools write (M6 design 4.1.1).</summary>
+    public string PacksDev => Path.Combine(Root, "packs-dev");
+
     /// <summary>The project bindings: one folder per project with its binding.json (M6 design 3.3).</summary>
     public string Workspaces => Path.Combine(Root, "workspaces");
 
