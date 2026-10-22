@@ -6,7 +6,7 @@
 | 作者 | asckye |
 | 关联 Issue | — |
 | 相关 ADR | ADR-0005（安全模型）、ADR-0006（工具设计）、ADR-0010（写操作的结果与恢复）、ADR-0012（导出的级别）、ADR-0013（Destructive 前的备份）、ADR-0019（系统主数据的写入，Proposed，本文 4.8） |
-| 最后更新 | 2026-10-21 |
+| 最后更新 | 2026-10-22 |
 
 ## 1. 背景
 项目负责人 2026-10-21 要求把以下能力加入范围。它们原来列在 [M4 设计](2026-10-20-m4-workflows.md) 4.7 和 [API 覆盖矩阵](../eplan/api-coverage.md)中，标为"M4 之后"：
@@ -77,7 +77,7 @@ flowchart LR
 | 1 | `eplan_export_parts`、`eplan_export_untranslated` | 导出 | 部件清单（只有 XML，A25）、缺失词表（[规格](../tools/eplan_export_parts.md)、[规格](../tools/eplan_export_untranslated.md)）。S25 之后不再合成一个 `eplan_export_list`：两者参数不同；设备清单导出的是预规划清单，由标签覆盖；PLC 地址总览不给配置项目时为空，以后单独设计 |
 | 1 | `eplan_export_labels` | 导出 | 按标签方案生成清单文件，方案必填；S25 验证了文本和 xlsx，不输出需要 Excel 的 xls（[规格](../tools/eplan_export_labels.md)） |
 | 2 | `eplan_device_place` | Write | 按部件号在页上放置一个设备（`DeviceService.CreateDevice`，S20），再按目标结构改名；按库符号放置等显示标识的问题查清后再加（Q3） |
-| 2 | `eplan_cable_generate` | Destructive? | 按方案生成电缆，可能改名或替换已有的自动电缆 |
+| 2 | `eplan_cable_generate` | Destructive | 仅生成/更新自动电缆，固定 `ONLYAUTOCABLES=1`、`KEEPOLDNAMES=1`；已有电缆重编号用 `eplan_cable_renumber`。S34：放开旧名保护会改名 70/78 根；受限模式在无自动电缆样例上无变化，正向生成未验证（[规格](../tools/eplan_cable_generate.md)） |
 | 2 | `eplan_terminal_renumber`、`eplan_cable_renumber` | Destructive | 与 `eplan_device_renumber` 相同的形态：范围、方案、起始值、步长、只编未编号的 |
 | 2 | `eplan_connection_number` | Destructive | 线号：按方案给连接编号（覆盖矩阵第 4 节的"线号管理器"） |
 | 2 | `eplan_language_set` | Write | 设置项目的显示语言、可变语言、源语言，不翻译。多种语言用逗号分隔（S23 r1：`"en_US,zh_CN"`，分号会被拒绝）；项目设置不被 `SafetyPoint` 回滚，工具自己记下原值、失败时写回 |
@@ -86,8 +86,8 @@ flowchart LR
 | 2 | 修订的写工具 | ? | S23 之后单独设计（Q9） |
 | 3 | `eplan_import_dxf` | Write | DXF/DWG 插入页面。S22：只新增图形，能被 `SafetyPoint` 回滚、一步撤销 |
 | 3 | `eplan_import_pdf_comments` | Write? | 导入审图人在 PDF 上的注释，之后可以读取和处理 |
-| 3 | `eplan_import_list` | Destructive | `kind`：`parts`（部件清单）、`devices`（设备清单） |
-| 3 | `eplan_import_plc` | Destructive | PLC 总线数据；禁止会弹出比较对话框的匹配方式（`IMPORTMATCH:1`） |
+| 3 | `eplan_import_list` | Destructive | `kind`：`parts`（仅 XML，导入项目，禁止 `IMPORTTOSYSTEM`）、`devices`（XML/CSV 设备清单条目）；S34：可回滚，部件导入约 1–1.5 分钟，执行时限 300 秒（[规格](../tools/eplan_import_list.md)） |
+| 3 | `eplan_import_plc` | Destructive | PLC 总线数据，标准 `.pbf` / 通用 `.aml`；禁止 `IMPORTMATCH:1`。S34：可按对象编号读回新增及重名并回滚；事务内发现新增对原有或新增之间重名即 `ALREADY_EXISTS/rolled_back`。文件名称预检尽力而为，不完整仍可执行；发布前验证事务内重复保护 Large 测试及无冲突目标正向导入（[规格](../tools/eplan_import_plc.md)） |
 | 3 | `eplan_import_pxf` | Write | 把 EPJ（PXF）导入为新项目；新项目只建在 scratch 根目录中（Q5）。S22：`PXFProject` 的第二个参数是新项目的路径（不带扩展名）；约 1 分钟；失败时删除本次新建的 `.elk`、`.edb` |
 | 4 | `eplan_part_import`、`eplan_part_sync` | 系统主数据（ADR-0019） | 文件导入部件库（[规格](../tools/eplan_part_import.md)）；把项目中的部件加入部件库，S24 r15：同步也写项目（[规格](../tools/eplan_part_sync.md)） |
 | 4 | `eplan_part_export` | 导出 | 从部件库导出到文件：XML 或 EDZ，全部或指定部件（[规格](../tools/eplan_part_export.md)） |
