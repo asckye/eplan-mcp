@@ -2,6 +2,7 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
 using EplanMcp.Host.Importing;
+using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +42,8 @@ internal static class McpServerSetup
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
         services.TryAddSingleton<ImportFiles>();
+        services.TryAddSingleton<PackLibrary>();
+        services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) => ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile));
