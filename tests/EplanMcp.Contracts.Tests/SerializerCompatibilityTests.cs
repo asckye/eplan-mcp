@@ -454,6 +454,31 @@ public sealed class SerializerCompatibilityTests
             MarkedPageCount = 2,
         },
         new RevisionListData(),
+        new PlaceholderListArgs { Project = "Line1", Page = "=TM1+A1&EFS1/1", Detailed = true, Language = "zh_CN", Offset = 20, Limit = 20 },
+        new PlaceholderListArgs(),
+        new PlaceholderListData
+        {
+            Project = "项目 二",
+            Page = "=TM1+A1&EFS1/1",
+            Placeholders =
+            [
+                new PlaceholderItem
+                {
+                    Name = "#<功能文本>",
+                    Page = "=TM1+A1&EFS1/1",
+                    ValueSets = ["V", "mA"],
+                    Variables = ["T1", "T2"],
+                    AssignedObjects = 2,
+                    Values = [new PlaceholderValue { ValueSet = "V", Variable = "T1", Text = "电压", TextLanguage = "de_DE" }],
+                    CurrentValues = [new PlaceholderValue { Text = "电压" }, new PlaceholderValue()],
+                },
+                new PlaceholderItem(),
+            ],
+            Total = 2,
+        },
+        new PlaceholderListData(),
+        new EplanMcp.Contracts.Generated.PlaceHolderProperties { Name = "#<功能文本>", NumberOfRecords = 2, NumberOfVariables = 3, VariableNames = ["Task", "DI1"] },
+        new EplanMcp.Contracts.Generated.PlaceHolderProperties(),
         new MessageListArgs { MinLevel = SystemMessage.Error, Offset = 20, Limit = 20 },
         new MessageListArgs(),
         new MessageListData
