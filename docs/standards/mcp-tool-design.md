@@ -224,6 +224,7 @@ eplan_device_place
 - 写操作超时或中断后，Host 先向 Bridge 取回结果，**从不自动重发**；结果未知时暂停该项目的写入，没有工具可以解除，只能由工程师经审批渠道确认（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
 - 例外（[ADR-0012](../adr/0012-export-tier.md)）：Read 级工具如果会在项目之外新建文件（目前只有导出工具），`readOnlyHint`、`idempotentHint` 为 false，`destructiveHint` 仍为 false，不需要审批；文件只写进 Host 每次新建的导出目录（[security.md](security.md) SEC-20）。
+- 例外（[ADR-0025](../adr/0025-code-plugin-worker.md)）：算法插件按 Code 级默认关闭，在 `config.json` 中按 SHA-256 列入允许列表后，每次运行不再单独审批；它产出的计划照常审批。
 
 ---
 
