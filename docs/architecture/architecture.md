@@ -432,13 +432,13 @@ sequenceDiagram
 ### 8.8 审计
 - 文件：`%USERPROFILE%\EplanMcp\audit\yyyy-MM-dd.jsonl`（UTC 日期），只追加写入；多个 Host 进程通过排他打开 `audit\.lock` 轮流写入，每条写入后刷盘。
 - 每条记录包含：时间、关联 ID、客户端信息、工具、级别、项目、参数（写操作记完整参数，读操作只记摘要）、策略决定、审批渠道与结果、变更清单、执行结果、耗时、EPLAN 版本/变体/进程号、**上一条记录的哈希和本条的哈希**。
-- 写操作发出执行请求之前先写一条"开始执行"记录，结果确定后补记；Host 重启时，只有"开始执行"、没有结果的记录要先查询并补记。写入暂停与解除也写入审计。
+- 写操作发出执行请求之前先写一条"开始执行"记录，结果确定后补记；Host 重启时，只有"开始执行"、没有结果的记录要先查询并补记。写入暂停与解除也写入审计。工程包的导入、构建、安装和整理（M6）只写数据目录，写 `pack_change` 记录（改动前 `started`，之后 `committed` 或 `failed`，记包摘要）。
 - `eplanmcp audit verify` 校验哈希链，能发现记录被删除或篡改，报告第一个断开的位置。末尾几条被整段删除时，后面没有记录可以发现，哈希链本身查不出来。
 - 审计写入失败时，**写操作一律拒绝执行**（不在没有记录的情况下修改项目）；读操作照常执行，同时记录告警。
 
 ### 8.9 配置
 - `config.json` 带 JSON Schema。优先级从低到高：内置默认值 → 用户配置 → 环境变量 → 命令行参数。启动时校验，有错误就拒绝启动，并指出具体是哪一项。
-- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。
+- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。`packSources` 为空：工程包只能复制资源，不能就地引用；列出的根目录名（如 `"packSources": {"company-refs": "\\\\server\\eplan\\refs"}`）才可以被引用（ADR-0024 第 6 节）。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
 ### 8.11 界面语言
