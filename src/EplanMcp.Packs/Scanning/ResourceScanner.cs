@@ -138,7 +138,13 @@ public static class ResourceScanner
                 Storage = ResourceStorage.Bundled,
                 Source = new ResourceSource { Input = inputName, Path = relative },
             };
-            scan.Resources.Add(new ScannedResource(resource, [], input, files));
+            EplanFileInspector.Inspection inspection = await EplanFileInspector.InspectAsync(resource, files, cancellationToken).ConfigureAwait(false);
+            scan.Resources.Add(new ScannedResource(resource with { EplanVersion = inspection.EplanVersion }, inspection.Facts, input, files));
+            foreach ((FindingSeverity severity, string code, string message) in inspection.Findings)
+            {
+                scan.Add(severity, code, subject, message);
+            }
+
             if (found is null && input.Kind is null)
             {
                 scan.Add(FindingSeverity.Warning, "unknown_kind", subject, "has an extension EplanMcp does not know; it is kept as 'other'.");
