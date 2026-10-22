@@ -8,6 +8,6 @@ public enum FindingSeverity
     /// <summary>The pack can be built, but an engineer should look: a guess, an unusual file.</summary>
     Warning,
 
-    /// <summary>What EplanMcp cannot tell without EPLAN (or a 7z reader): left for a check in EPLAN.</summary>
+    /// <summary>What EplanMcp cannot tell or settle without EPLAN (or a 7z reader) or an engineer: left for them to check.</summary>
     Gap,
 }

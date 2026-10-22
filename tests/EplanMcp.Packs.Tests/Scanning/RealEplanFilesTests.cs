@@ -39,7 +39,8 @@ public sealed class RealEplanFilesTests
 
         Assert.Contains(result.Resources.SelectMany(r => r.Facts), f => (f.Name, f.Value) == ("archive_format", "7z"));
         Assert.Contains(result.Resources.SelectMany(r => r.Facts), f => (f.Name, f.Value) == ("pxf_type", "WindowMacro"));
-        Assert.Equal(["archive_not_inspected"], result.Findings.Select(f => f.Code));
+        // EPLAN's own macros record the path of the project they were made from (S32), which the scanner reports.
+        Assert.Equal(["archive_not_inspected", "source_project_path"], result.Findings.Select(f => f.Code));
     }
 
     private static string Existing(string path)
