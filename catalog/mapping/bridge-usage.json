@@ -1,12 +1,20 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "4a0879a0",
-  "sourceHash": "sha256:be05b56e6816035c854a094a622c37968fac93d08f20ece2e3d558613fce9a5f",
+  "scannedSources": "9e58625d + uncommitted changes",
+  "sourceHash": "sha256:5c9ae170b2ebaea21505de49e5cab78f33589bf8b97febc24bfcc0ede3392bea",
   "operations": [
     {
       "name": "approval.ask",
       "class": "ApprovalAskOperation"
+    },
+    {
+      "name": "cable.generate.execute",
+      "class": "CableGenerateExecuteOperation"
+    },
+    {
+      "name": "cable.generate.plan",
+      "class": "CableGeneratePlanOperation"
     },
     {
       "name": "cable.get",
@@ -161,14 +169,6 @@
     {
       "name": "import.dxf.plan",
       "class": "ImportDxfPlanOperation"
-    },
-    {
-      "name": "import.list.execute",
-      "class": "ImportListExecuteOperation"
-    },
-    {
-      "name": "import.list.plan",
-      "class": "ImportListPlanOperation"
     },
     {
       "name": "import.pxf.execute",
@@ -422,55 +422,29 @@
         ]
       }
     ],
-    "A:devicelist": [
+    "A:generate": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "action"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       }
     ],
-    "A:devicelist/IMPORT": [
+    "A:generate/CABLES": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "action"
         ],
         "operations": [
-          "import.list.execute"
-        ]
-      }
-    ],
-    "A:partslist": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "action"
-        ],
-        "operations": [
-          "import.list.execute"
-        ]
-      }
-    ],
-    "A:partslist/IMPORT": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "action"
-        ],
-        "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       }
     ],
@@ -581,10 +555,10 @@
           "read"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -601,10 +575,10 @@
           "read"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -668,6 +642,7 @@
           "read"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -676,7 +651,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -693,6 +667,18 @@
       }
     ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "IsCable",
@@ -842,10 +828,10 @@
           "read"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -864,10 +850,10 @@
           "read"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1376,14 +1362,14 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "call"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -1413,14 +1399,14 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "new"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -1450,14 +1436,14 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "new"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -1487,14 +1473,14 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "call"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -1680,10 +1666,10 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1700,10 +1686,10 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -1767,6 +1753,7 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -1775,7 +1762,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -1800,6 +1786,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -1808,7 +1795,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -1833,7 +1819,6 @@
           "call"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
@@ -1847,21 +1832,20 @@
           "call"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
     ],
     "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "call"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -2315,6 +2299,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -2330,8 +2316,6 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
-          "import.list.execute",
-          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -2605,6 +2589,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -2667,6 +2653,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -2783,6 +2771,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -2801,7 +2791,6 @@
           "new"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
@@ -2838,6 +2827,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -3116,18 +3117,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "new"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -3196,6 +3185,7 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "check.run.plan",
@@ -3213,7 +3203,6 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -3361,10 +3350,10 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -3521,33 +3510,7 @@
         "operations": []
       }
     ],
-    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll``1(System.Boolean)": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      }
-    ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
       {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
@@ -3574,6 +3537,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionGenerator",
         "member": "ReadConnections",
@@ -3656,6 +3631,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "Cables",
@@ -3813,18 +3800,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -3871,6 +3846,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCheckRunner",
         "member": "PageIds",
@@ -3948,18 +3935,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -4017,6 +3992,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "check.run.plan",
@@ -4034,7 +4010,6 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -4076,10 +4051,10 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4236,6 +4211,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "Cables",
@@ -4640,10 +4627,10 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4693,10 +4680,10 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4713,10 +4700,10 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4757,6 +4744,8 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -4792,8 +4781,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -4855,10 +4842,10 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4957,10 +4944,10 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -4990,6 +4977,8 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -5006,6 +4995,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -5152,6 +5143,18 @@
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToBool": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -5209,6 +5212,18 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToString": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
@@ -5396,6 +5411,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5404,7 +5420,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5429,6 +5444,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5437,7 +5453,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5462,6 +5477,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5470,7 +5486,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5504,6 +5519,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5512,7 +5528,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5564,6 +5579,30 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "ReadCables",
@@ -5659,18 +5698,6 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
-        ]
-      },
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
         ]
       },
       {
@@ -5829,6 +5856,7 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5837,7 +5865,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5862,6 +5889,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5870,7 +5898,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5895,6 +5922,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5903,7 +5931,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5937,6 +5964,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5945,7 +5973,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -5970,6 +5997,7 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -5978,7 +6006,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -6607,6 +6634,8 @@
           "new"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -6642,8 +6671,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -6694,6 +6721,8 @@
           "call"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -6729,8 +6758,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -7238,7 +7265,6 @@
           "get"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
@@ -7252,7 +7278,6 @@
           "get"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
@@ -7435,18 +7460,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7500,18 +7513,6 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
-        ]
-      },
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
         ]
       },
       {
@@ -7599,18 +7600,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7626,18 +7615,6 @@
     ],
     "P:Eplan.EplApi.DataModel.ArticleReference.ParentObject": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7652,6 +7629,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ArticleReference.PartNr": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -7674,18 +7663,6 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
-        ]
-      },
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
         ]
       },
       {
@@ -7740,18 +7717,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -7766,6 +7731,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Connection.EndPin": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionReader",
         "member": "Record",
@@ -7817,6 +7794,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Connection.Page": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "PageOf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -7837,6 +7826,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Connection.Properties": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "Core",
@@ -7889,6 +7890,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Connection.StartPin": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -7939,6 +7952,18 @@
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_DESIGNATION": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanCableReader",
         "member": "Core",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableReader.cs",
@@ -7976,6 +8001,18 @@
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -8003,6 +8040,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRENUMBER": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionReader",
         "member": "Record",
@@ -8044,21 +8093,19 @@
         ]
       }
     ],
-    "P:Eplan.EplApi.DataModel.DeviceListEntry.PartNumber": [
+    "P:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections": [
       {
-        "adapter": "EplanListImporter",
+        "adapter": "EplanCableGenerator",
         "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "get"
         ],
         "operations": [
-          "import.list.execute",
-          "import.list.plan"
+          "cable.generate.execute",
+          "cable.generate.plan"
         ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections": [
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -8266,6 +8313,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Function.ArticleReferences": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableReader.cs",
@@ -8464,6 +8523,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.IsMainFunction": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "ReadCables",
@@ -8681,6 +8752,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Function.Properties": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Detail",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -8820,6 +8903,30 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionBase.Name": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "Names",
@@ -9036,18 +9143,6 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
-        ]
-      },
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
         ]
       },
       {
@@ -9285,6 +9380,18 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableReader.cs",
@@ -9432,7 +9539,33 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEAUTOCREATED": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLELENGTH_FULL": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -9459,6 +9592,18 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLETYPE": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableReader.cs",
@@ -9484,6 +9629,18 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECOUNT": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableReader.cs",
@@ -9508,6 +9665,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -9793,6 +9962,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "Cables",
@@ -10102,6 +10283,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Page.AllPlacements": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionGenerator",
         "member": "ObjectIds",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionGenerator.cs",
@@ -10176,6 +10369,30 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Page.Name": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -10350,18 +10567,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -10435,6 +10640,7 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "check.run.plan",
@@ -10452,7 +10658,6 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -11300,6 +11505,18 @@
     ],
     "P:Eplan.EplApi.DataModel.Pin.Name": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -11362,6 +11579,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Pin.ParentFunction": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionReader",
         "member": "Record",
@@ -11426,6 +11655,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Placement.Page": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -11594,18 +11835,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "ReadParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -11628,6 +11857,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -11663,8 +11894,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -11715,6 +11944,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -11750,8 +11981,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -11800,6 +12029,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -11832,8 +12063,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -11886,6 +12115,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectBackup",
         "member": "Copy",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectBackup.cs",
@@ -11893,10 +12133,10 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -11937,6 +12177,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -11972,8 +12214,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12082,10 +12322,10 @@
           "set"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -12103,6 +12343,8 @@
           "set"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -12138,8 +12380,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12213,6 +12453,8 @@
           "get"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -12248,8 +12490,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -12519,6 +12759,30 @@
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceRenamer.cs",
@@ -12700,18 +12964,6 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
       {
         "adapter": "EplanObjectFinder",
         "member": "Find",
@@ -13154,14 +13406,14 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.Action": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "type"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -13191,14 +13443,14 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "type"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -13254,14 +13506,14 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionManager": [
       {
-        "adapter": "EplanListImporter",
-        "member": "Import",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
+        "adapter": "EplanCableGenerator",
+        "member": "Generate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
         "access": [
           "type"
         ],
         "operations": [
-          "import.list.execute"
+          "cable.generate.execute"
         ]
       },
       {
@@ -13403,10 +13655,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13423,10 +13675,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13490,6 +13742,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -13498,7 +13751,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -13584,10 +13836,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13604,10 +13856,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -13671,6 +13923,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -13679,7 +13932,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -14039,7 +14291,6 @@
           "type"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       },
@@ -14067,6 +14318,18 @@
       }
     ],
     "T:Eplan.EplApi.Base.Enums.FunctionCategory": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "IsCable",
@@ -14405,6 +14668,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -14420,8 +14685,6 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
-          "import.list.execute",
-          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -14702,6 +14965,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -14732,7 +14997,6 @@
           "type"
         ],
         "operations": [
-          "import.list.execute",
           "message.list"
         ]
       }
@@ -14782,18 +15046,6 @@
           "cable.renumber.plan",
           "device.get"
         ]
-      },
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ArticleReference": [
@@ -14824,18 +15076,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -14850,6 +15090,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Connection": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "Core",
@@ -15023,6 +15275,18 @@
     ],
     "T:Eplan.EplApi.DataModel.ConnectionPropertyList": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "ConnectionState",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "ConnectionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -15050,6 +15314,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DMObjectsFinder": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "ReadCable",
@@ -15493,18 +15769,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -15573,6 +15837,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "check.run.plan",
@@ -15590,7 +15855,6 @@
           "export.pdf.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
           "language.remove.execute",
           "macro.insert.execute",
           "macro.insert.plan",
@@ -15749,10 +16013,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -15922,20 +16186,6 @@
         ]
       }
     ],
-    "T:Eplan.EplApi.DataModel.DeviceListEntry": [
-      {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      }
-    ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager": [
       {
         "adapter": "EplanPageReader",
@@ -16064,6 +16314,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Cable": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "IsCable",
@@ -16317,6 +16579,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Function": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "IsCable",
@@ -16724,6 +16998,18 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionPropertyList": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -16737,6 +17023,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.FunctionsFilter": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCableRenumberer",
         "member": "Cables",
@@ -17707,6 +18005,18 @@
     ],
     "T:Eplan.EplApi.DataModel.Pin": [
       {
+        "adapter": "EplanCableGenerator",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -17771,6 +18081,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Project": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanCheckRunner",
         "member": "Run",
@@ -17906,18 +18228,6 @@
         ]
       },
       {
-        "adapter": "EplanListImporter",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "import.list.execute",
-          "import.list.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -18035,10 +18345,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18055,10 +18365,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18182,6 +18492,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -18214,8 +18526,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18262,6 +18572,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -18297,8 +18609,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18393,6 +18703,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -18408,8 +18720,6 @@
           "export.pxf.run",
           "export.untranslated.run",
           "import.dxf.execute",
-          "import.list.execute",
-          "import.list.plan",
           "import.pxf.execute",
           "language.remove.execute",
           "language.remove.plan",
@@ -18443,10 +18753,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18463,10 +18773,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18507,6 +18817,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -18542,8 +18854,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -18616,10 +18926,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18638,10 +18948,10 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "connection.number.execute",
           "device.renumber.execute",
-          "import.list.execute",
           "language.remove.execute",
           "page.delete.execute",
           "page.renumber.execute",
@@ -18706,6 +19016,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
           "connection.number.execute",
@@ -18813,6 +19125,30 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanCableGenerator",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan"
+        ]
+      },
       {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
@@ -19016,6 +19352,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -19024,7 +19361,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -19143,6 +19479,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -19151,7 +19488,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -19176,6 +19512,7 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
           "connection.generate.execute",
@@ -19184,7 +19521,6 @@
           "device.renumber.execute",
           "device.update.execute",
           "import.dxf.execute",
-          "import.list.execute",
           "language.remove.execute",
           "language.set.execute",
           "macro.insert.execute",
@@ -19803,6 +20139,8 @@
           "type"
         ],
         "operations": [
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.renumber.execute",
           "cable.renumber.plan",
@@ -19838,8 +20176,6 @@
           "export.untranslated.run",
           "import.dxf.execute",
           "import.dxf.plan",
-          "import.list.execute",
-          "import.list.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",

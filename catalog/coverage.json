@@ -17,10 +17,10 @@
         "settings_write_disabled": 6
       },
       "denominator": 137,
-      "implemented": 4,
-      "byTools": 3,
+      "implemented": 3,
+      "byTools": 1,
       "partial": 0,
-      "automatedTest": 3,
+      "automatedTest": 1,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -33,10 +33,10 @@
         "settings_write_disabled": 1
       },
       "denominator": 97,
-      "implemented": 4,
-      "byTools": 3,
+      "implemented": 3,
+      "byTools": 1,
       "partial": 0,
-      "automatedTest": 3,
+      "automatedTest": 1,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 201,
-      "byTools": 190,
+      "implemented": 199,
+      "byTools": 187,
       "partial": 39,
-      "automatedTest": 190,
+      "automatedTest": 187,
       "liveVerified": 147,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 105,
-      "byTools": 95,
+      "implemented": 104,
+      "byTools": 94,
       "partial": 39,
-      "automatedTest": 95,
+      "automatedTest": 94,
       "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,25 +102,25 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 96,
-      "byTools": 95,
+      "implemented": 95,
+      "byTools": 93,
       "partial": 0,
-      "automatedTest": 95,
+      "automatedTest": 93,
       "liveVerified": 79,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 212,
+    "used": 211,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 41,
+    "used": 42,
     "registered": 8585
   },
   "actionNames": {
-    "used": 4,
+    "used": 3,
     "registered": 64
   },
   "operationsByNamespace": [
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 88,
+      "implemented": 86,
       "liveVerified": 75
     },
     {
@@ -249,7 +249,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 24,
-      "implemented": 1,
+      "implemented": 0,
       "liveVerified": 0
     },
     {
@@ -346,53 +346,6 @@
     }
   ],
   "tools": [
-    {
-      "name": "eplan_asset_get",
-      "safety": "read",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_asset_get.md",
-      "small": 1,
-      "medium": 2,
-      "large": 0,
-      "apiNotes": []
-    },
-    {
-      "name": "eplan_asset_search",
-      "safety": "read",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_asset_search.md",
-      "small": 1,
-      "medium": 3,
-      "large": 0,
-      "apiNotes": [
-        "A33"
-      ]
-    },
-    {
-      "name": "eplan_asset_update",
-      "safety": "write",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_asset_update.md",
-      "small": 1,
-      "medium": 2,
-      "large": 0,
-      "apiNotes": []
-    },
     {
       "name": "eplan_cable_get",
       "safety": "read",
@@ -625,7 +578,7 @@
       "spec": "docs/tools/eplan_device_list.md",
       "small": 7,
       "medium": 2,
-      "large": 6,
+      "large": 5,
       "apiNotes": [
         "A11",
         "A12"
@@ -814,7 +767,7 @@
       "spec": "docs/tools/eplan_export_parts.md",
       "small": 2,
       "medium": 3,
-      "large": 2,
+      "large": 1,
       "apiNotes": [
         "A25"
       ]
@@ -898,27 +851,6 @@
       "large": 1,
       "apiNotes": [
         "A29"
-      ]
-    },
-    {
-      "name": "eplan_import_list",
-      "safety": "destructive",
-      "operations": [
-        "import.list.execute",
-        "import.list.plan"
-      ],
-      "apiIds": 79,
-      "operationGroups": 40,
-      "dataDictionary": 0,
-      "dependencies": 35,
-      "actions": 2,
-      "spec": "docs/tools/eplan_import_list.md",
-      "small": 4,
-      "medium": 2,
-      "large": 1,
-      "apiNotes": [
-        "A30",
-        "A31"
       ]
     },
     {
@@ -1014,7 +946,7 @@
       "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
-      "small": 4,
+      "small": 3,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -1071,68 +1003,6 @@
         "A1",
         "A11"
       ]
-    },
-    {
-      "name": "eplan_pack_build",
-      "safety": "write",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_pack_build.md",
-      "small": 1,
-      "medium": 3,
-      "large": 0,
-      "apiNotes": []
-    },
-    {
-      "name": "eplan_pack_get",
-      "safety": "read",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_pack_get.md",
-      "small": 1,
-      "medium": 2,
-      "large": 0,
-      "apiNotes": []
-    },
-    {
-      "name": "eplan_pack_import",
-      "safety": "write",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_pack_import.md",
-      "small": 1,
-      "medium": 3,
-      "large": 0,
-      "apiNotes": [
-        "A35"
-      ]
-    },
-    {
-      "name": "eplan_pack_list",
-      "safety": "read",
-      "operations": [],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
-      "actions": 0,
-      "spec": "docs/tools/eplan_pack_list.md",
-      "small": 1,
-      "medium": 2,
-      "large": 0,
-      "apiNotes": []
     },
     {
       "name": "eplan_page_create",
@@ -1220,7 +1090,7 @@
       "dependencies": 20,
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
-      "small": 15,
+      "small": 14,
       "medium": 4,
       "large": 6,
       "apiNotes": [
@@ -1546,7 +1416,7 @@
       "spec": "docs/tools/eplan_project_get.md",
       "small": 5,
       "medium": 3,
-      "large": 5,
+      "large": 4,
       "apiNotes": [
         "A11"
       ],
@@ -1826,22 +1696,11 @@
       ]
     },
     {
-      "unit": "A:devicelist/IMPORT",
+      "unit": "A:generate/CABLES",
       "layer": "action",
-      "status": "automated_test",
+      "status": "implemented",
       "partial": false,
-      "tools": [
-        "eplan_import_list"
-      ]
-    },
-    {
-      "unit": "A:partslist/IMPORT",
-      "layer": "action",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_import_list"
-      ]
+      "tools": []
     },
     {
       "unit": "A:restore/PROJECT",
@@ -1929,7 +1788,6 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
@@ -1942,7 +1800,6 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
-        "eplan_import_list",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
@@ -2004,7 +1861,6 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_message_list"
       ]
     },
@@ -2014,7 +1870,6 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_message_list"
       ]
     },
@@ -2024,7 +1879,6 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_message_list"
       ]
     },
@@ -2034,7 +1888,6 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_message_list"
       ]
     },
@@ -2044,7 +1897,6 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
@@ -2164,7 +2016,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_import_pxf",
         "eplan_language_remove",
         "eplan_language_set",
@@ -2380,7 +2231,6 @@
       "tools": [
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -2405,7 +2255,6 @@
       "tools": [
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -2418,7 +2267,6 @@
       "tools": [
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -2429,7 +2277,6 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -2443,7 +2290,6 @@
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_plc_get"
@@ -2457,7 +2303,6 @@
       "tools": [
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -2524,21 +2369,11 @@
       ]
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_import_list"
-      ]
-    },
-    {
       "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_project_get"
@@ -2571,7 +2406,6 @@
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_delete",
@@ -2599,7 +2433,6 @@
         "eplan_export_image",
         "eplan_export_pdf",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_create",
@@ -2646,15 +2479,6 @@
       "partial": false,
       "tools": [
         "eplan_terminal_renumber"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.DeviceListEntry.PartNumber",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_import_list"
       ]
     },
     {
@@ -2902,7 +2726,6 @@
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_macro_get",
         "eplan_macro_insert",
@@ -3182,7 +3005,6 @@
         "eplan_export_image",
         "eplan_export_pdf",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_create",
@@ -3396,7 +3218,6 @@
       "tools": [
         "eplan_cable_renumber",
         "eplan_device_get",
-        "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync"
       ]
@@ -3410,7 +3231,6 @@
         "eplan_cable_renumber",
         "eplan_connection_number",
         "eplan_device_renumber",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_page_delete",
         "eplan_page_renumber",
@@ -3445,7 +3265,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
@@ -3497,7 +3316,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
@@ -3532,7 +3350,6 @@
         "eplan_cable_renumber",
         "eplan_connection_number",
         "eplan_device_renumber",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_page_delete",
         "eplan_page_renumber",
@@ -3568,7 +3385,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
@@ -3613,7 +3429,6 @@
         "eplan_cable_renumber",
         "eplan_connection_number",
         "eplan_device_renumber",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_page_delete",
         "eplan_page_renumber",
@@ -3669,7 +3484,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
@@ -3704,7 +3518,6 @@
         "eplan_cable_renumber",
         "eplan_connection_number",
         "eplan_device_renumber",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_page_delete",
         "eplan_page_renumber",
@@ -3739,7 +3552,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
@@ -3974,7 +3786,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4003,7 +3814,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4032,7 +3842,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4050,11 +3859,9 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "implemented",
       "partial": false,
-      "tools": [
-        "eplan_import_list"
-      ]
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
@@ -4070,7 +3877,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_delete",
@@ -4094,7 +3900,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4123,7 +3928,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4152,7 +3956,6 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_insert",
@@ -4466,7 +4269,6 @@
         "eplan_export_pxf",
         "eplan_export_untranslated",
         "eplan_import_dxf",
-        "eplan_import_list",
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_macro_get",
