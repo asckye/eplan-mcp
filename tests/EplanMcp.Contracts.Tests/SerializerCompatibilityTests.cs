@@ -75,6 +75,13 @@ public sealed class SerializerCompatibilityTests
             Fingerprint = "9f86d081884c7d65",
         },
         new WritePlan(),
+        new WritePlan
+        {
+            Changes = [new PlannedChange { Action = "create", Kind = "part", Name = "added", Property = "parts", NewValue = "3" }],
+            Fingerprint = "f",
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk", Path = @"C:\Users\Public\EPLAN\Data\部件\EPLAN_parts.alk", Server = false },
+        },
+        new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = "SRV01|Parts", Server = true },
         new PageCreateArgs
         {
             Project = "Line1",

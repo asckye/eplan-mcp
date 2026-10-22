@@ -14,6 +14,16 @@ internal enum OutsideScratchWrites
     Approve,
 }
 
+/// <summary>What writes to EPLAN's system master data, such as the parts database, need (ADR-0019).</summary>
+internal enum MasterDataWrites
+{
+    /// <summary>Allowed after the engineer approves each one, with a backup of the database first; the default.</summary>
+    Approve,
+
+    /// <summary>Refused with POLICY_DENIED.</summary>
+    Deny,
+}
+
 /// <summary>
 /// The safety settings of <c>config.json</c> (M3 design 4.3). Only the file changes them, never a tool (SEC-02).
 /// </summary>
@@ -37,6 +47,9 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     /// <summary>How long the engineer has to answer an approval or a confirmation: <c>approvalTimeoutSeconds</c>.</summary>
     public TimeSpan ApprovalTimeout { get; init; } = DefaultApprovalTimeout;
+
+    /// <summary>What writes to system master data need: <c>masterDataWrites</c> (ADR-0019).</summary>
+    public MasterDataWrites MasterDataWrites { get; init; } = MasterDataWrites.Approve;
 
     /// <summary>
     /// Without config.json: the default scratch root, and writes elsewhere each approved by the engineer (ADR-0005;
@@ -92,7 +105,11 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             return (null, $"is not valid: 'approvalTimeoutSeconds' must be a whole number of seconds from {Seconds(MinApprovalTimeout)} to {Seconds(MaxApprovalTimeout)}");
         }
 
-        return (new HostConfig(roots, file?.WritesOutsideScratch ?? defaults.WritesOutsideScratch) { ApprovalTimeout = timeout }, null);
+        return (new HostConfig(roots, file?.WritesOutsideScratch ?? defaults.WritesOutsideScratch)
+        {
+            ApprovalTimeout = timeout,
+            MasterDataWrites = file?.MasterDataWrites ?? defaults.MasterDataWrites,
+        }, null);
     }
 
     /// <summary>A whole number of seconds, as config.json, doctor and the error messages write it.</summary>
@@ -105,5 +122,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         public OutsideScratchWrites? WritesOutsideScratch { get; set; }
 
         public int? ApprovalTimeoutSeconds { get; set; }
+
+        public MasterDataWrites? MasterDataWrites { get; set; }
     }
 }

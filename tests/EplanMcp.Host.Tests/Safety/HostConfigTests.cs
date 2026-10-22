@@ -18,16 +18,18 @@ public sealed class HostConfigTests
         Assert.Equal(["C:\\Data\\EplanMcp\\scratch"], config!.ScratchRoots);
         Assert.Equal(OutsideScratchWrites.Approve, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(120), config.ApprovalTimeout);
+        Assert.Equal(MasterDataWrites.Approve, config.MasterDataWrites);
     }
 
     [Fact]
     public void Parse_ReadsEverySetting()
     {
-        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"deny","approvalTimeoutSeconds":90}""", _locations);
+        (HostConfig? config, _) = HostConfig.Parse("""{"scratchRoots":["D:\\Scratch","E:\\Copies"],"writesOutsideScratch":"deny","approvalTimeoutSeconds":90,"masterDataWrites":"deny"}""", _locations);
 
         Assert.Equal(["D:\\Scratch", "E:\\Copies"], config!.ScratchRoots);
         Assert.Equal(OutsideScratchWrites.Deny, config.WritesOutsideScratch);
         Assert.Equal(TimeSpan.FromSeconds(90), config.ApprovalTimeout);
+        Assert.Equal(MasterDataWrites.Deny, config.MasterDataWrites);
     }
 
     [Theory]
@@ -44,6 +46,8 @@ public sealed class HostConfigTests
     [InlineData("""{"scratchRoot":"D:\\Scratch"}""", "scratchRoot")]
     [InlineData("""{"writesOutsideScratch":"allow"}""", "is not valid")]
     [InlineData("""{"writesOutsideScratch":1}""", "is not valid")]
+    [InlineData("""{"masterDataWrites":"allow"}""", "is not valid")]
+    [InlineData("""{"masterDataWrites":true}""", "is not valid")]
     [InlineData("""{"scratchRoots":["Scratch"]}""", "full path")]
     [InlineData("""{"scratchRoots":[]}""", "full path")]
     [InlineData("""{"scratchRoots":[" "]}""", "full path")]

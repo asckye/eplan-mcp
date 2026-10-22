@@ -56,6 +56,28 @@ public sealed class SuspensionStoreTests : IDisposable
     }
 
     [Fact]
+    public void AMasterDataWrite_SuspendsTheDatabaseByItsPath_AndTheInstance()
+    {
+        // ADR-0019: no project; the database is keyed by its expanded path, however a later plan spells it.
+        string parts = Path.Combine(_locations.Root, "Parts", "EPLAN_parts.alk");
+        Store.Suspend(string.Empty, _eplan, _started, "eplan_part_import", "r1", DateTimeOffset.UtcNow, SuspensionReason.OutcomeUnknown, ["add 3 parts"], Parts(@"$(MD_PARTS)\EPLAN_parts.alk", parts));
+
+        Assert.Equal(2, Store.All().Count);
+        Assert.Contains(Store.Blocking(string.Empty, _eplan + 1, _started, Parts(@"C:\Elsewhere\EPLAN_parts.alk", parts.ToUpperInvariant())), s => s.Database == @"$(MD_PARTS)\EPLAN_parts.alk" && s.Project is null);
+        Assert.Empty(Store.Blocking(string.Empty, _eplan + 1, _started, Parts(@"$(MD_PARTS)\Other.alk", Path.Combine(_locations.Root, "Parts", "Other.alk"))));
+        Assert.Empty(Store.Blocking(_project, _eplan + 1, _started)); // a project write elsewhere is free
+        Assert.Contains(DoctorChecks.Suspensions(_locations), c => c.English.StartsWith(@"Writes to the parts database $(MD_PARTS)\EPLAN_parts.alk are suspended", StringComparison.Ordinal));
+        Assert.Contains("to the parts database '$(MD_PARTS)\\EPLAN_parts.alk'", SessionTools.SuspensionHint(Store.All()), StringComparison.Ordinal);
+
+        Store.Release(string.Empty, _eplan, _started, Parts(@"$(MD_PARTS)\EPLAN_parts.alk", parts));
+
+        Assert.Empty(Store.All());
+    }
+
+    private static EplanMcp.Contracts.MasterDataTarget Parts(string database, string path) =>
+        new() { Kind = EplanMcp.Contracts.MasterDataKinds.Parts, Database = database, Path = path };
+
+    [Fact]
     public void Suspend_KeepsTheFirstChangesOnly()
     {
         Store.Suspend(_project, _eplan, _started, "eplan_page_create", "r1", DateTimeOffset.UtcNow, SuspensionReason.OutcomeUnknown, Enumerable.Range(1, 30).Select(i => "Create page /" + i));

@@ -58,6 +58,32 @@ public sealed class DanglingWritesTests : IDisposable
     }
 
     [Fact]
+    public async Task AMasterDataWriteNobodyCanTell_SuspendsTheDatabase_NotAProject()
+    {
+        // ADR-0019: the record names the database and no project; the database's suspension is keyed by its path.
+        await _audit.AppendAsync(
+            new JsonObject
+            {
+                ["kind"] = "execution_started",
+                ["requestId"] = "r1",
+                ["tool"] = "eplan_part_import",
+                ["project"] = string.Empty,
+                ["masterData"] = new JsonObject { ["kind"] = MasterDataKinds.Parts, ["database"] = @"$(MD_PARTS)\EPLAN_parts.alk", ["path"] = @"C:\Parts\EPLAN_parts.alk", ["server"] = false },
+                ["eplan"] = new JsonObject { ["version"] = "2026.0.3", ["processId"] = Environment.ProcessId, ["start"] = _now },
+                ["host"] = new JsonObject { ["processId"] = Environment.ProcessId, ["start"] = _longAgo },
+                ["changes"] = new JsonArray("add 3 parts"),
+            },
+            TestContext.Current.CancellationToken);
+
+        await Settle();
+
+        IReadOnlyList<Suspension> all = Suspensions().All();
+        Assert.Contains(all, s => s.Database == @"$(MD_PARTS)\EPLAN_parts.alk" && s.RequestId == "r1");
+        Assert.DoesNotContain(all, s => s.Project is not null);
+        Assert.Equal(@"$(MD_PARTS)\EPLAN_parts.alk", Records()[^1]["masterData"]!["database"]!.GetValue<string>());
+    }
+
+    [Fact]
     public async Task AWriteStillRunning_IsSuspendedAsSuch()
     {
         await Started("r1", hostStart: _longAgo, eplanStart: _now);
