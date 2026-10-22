@@ -1,4 +1,5 @@
 using EplanMcp.Coverage.Mapping;
+using EplanMcp.Coverage.Reporting;
 using EplanMcp.Coverage.Scanning;
 
 namespace EplanMcp.Coverage;
@@ -18,6 +19,7 @@ internal static class CoverageCheck
     public static IEnumerable<(string Path, Func<string, string> Content)> Generated =>
     [
         (ToolMapping.RelativePath, root => CoverageJson.Serialize(ToolMapping.Build(root))),
+        (CoverageReport.RelativePath, root => CoverageJson.Serialize(CoverageReport.Build(root))),
     ];
 
     public static void Generate(string repositoryRoot)

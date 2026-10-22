@@ -1,0 +1,4346 @@
+{
+  "eplanApi": "2026.0.3.25421",
+  "catalog": "catalog/eplan-2026.0.3",
+  "sdkCatalog": true,
+  "actionCatalog": true,
+  "layers": {
+    "action": {
+      "registered": 177,
+      "excluded": {
+        "backward_compat": 6,
+        "installer_registration": 3,
+        "interactive_ui": 15,
+        "one_off_migration": 2,
+        "outside_scratch_scope": 3,
+        "printing": 2,
+        "script_code_level": 3,
+        "settings_write_disabled": 6
+      },
+      "denominator": 137,
+      "implemented": 1,
+      "byTools": 1,
+      "partial": 0,
+      "automatedTest": 1,
+      "liveVerified": 1,
+      "envBlocked": 0,
+      "undocumented": 0
+    },
+    "action.type": {
+      "registered": 103,
+      "excluded": {
+        "outside_scratch_scope": 3,
+        "printing": 2,
+        "settings_write_disabled": 1
+      },
+      "denominator": 97,
+      "implemented": 1,
+      "byTools": 1,
+      "partial": 0,
+      "automatedTest": 1,
+      "liveVerified": 1,
+      "envBlocked": 0,
+      "undocumented": 0
+    },
+    "data_dictionary": {
+      "registered": 69,
+      "excluded": {
+        "deprecated": 1
+      },
+      "denominator": 68,
+      "implemented": 6,
+      "byTools": 6,
+      "partial": 0,
+      "automatedTest": 6,
+      "liveVerified": 5,
+      "envBlocked": 0,
+      "undocumented": 0
+    },
+    "operation": {
+      "registered": 4649,
+      "excluded": {
+        "deprecated": 54,
+        "internal": 147,
+        "not_applicable": 106,
+        "overlay:gui": 72,
+        "overlay:not_applicable": 253,
+        "overlay:unsafe": 3
+      },
+      "denominator": 4014,
+      "implemented": 183,
+      "byTools": 176,
+      "partial": 38,
+      "automatedTest": 176,
+      "liveVerified": 136,
+      "envBlocked": 122,
+      "undocumented": 134
+    },
+    "operation.method": {
+      "registered": 2203,
+      "excluded": {
+        "deprecated": 23,
+        "internal": 124,
+        "not_applicable": 53,
+        "overlay:gui": 32,
+        "overlay:not_applicable": 172
+      },
+      "denominator": 1799,
+      "implemented": 97,
+      "byTools": 90,
+      "partial": 38,
+      "automatedTest": 90,
+      "liveVerified": 64,
+      "envBlocked": 45,
+      "undocumented": 66
+    },
+    "operation.property": {
+      "registered": 2371,
+      "excluded": {
+        "deprecated": 31,
+        "internal": 1,
+        "overlay:gui": 40,
+        "overlay:not_applicable": 81,
+        "overlay:unsafe": 3
+      },
+      "denominator": 2215,
+      "implemented": 86,
+      "byTools": 86,
+      "partial": 0,
+      "automatedTest": 86,
+      "liveVerified": 72,
+      "envBlocked": 77,
+      "undocumented": 68
+    }
+  },
+  "dependencies": {
+    "used": 206,
+    "registered": 9823
+  },
+  "dictionaryProperties": {
+    "used": 34,
+    "registered": 8585
+  },
+  "actionNames": {
+    "used": 1,
+    "registered": 64
+  },
+  "operationsByNamespace": [
+    {
+      "scope": "Eplan.EplApi.ApplicationFramework",
+      "denominator": 88,
+      "implemented": 9,
+      "liveVerified": 2
+    },
+    {
+      "scope": "Eplan.EplApi.Base",
+      "denominator": 268,
+      "implemented": 24,
+      "liveVerified": 17
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel",
+      "denominator": 1247,
+      "implemented": 80,
+      "liveVerified": 74
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.E3D",
+      "denominator": 368,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.EObjects",
+      "denominator": 83,
+      "implemented": 14,
+      "liveVerified": 5
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Graphics",
+      "denominator": 414,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Helpers",
+      "denominator": 2,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.MasterData",
+      "denominator": 121,
+      "implemented": 5,
+      "liveVerified": 5
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Planning",
+      "denominator": 122,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Revisions",
+      "denominator": 20,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Topology",
+      "denominator": 17,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.EServices",
+      "denominator": 127,
+      "implemented": 6,
+      "liveVerified": 6
+    },
+    {
+      "scope": "Eplan.EplApi.EServices.Ged",
+      "denominator": 90,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.HEServices",
+      "denominator": 417,
+      "implemented": 31,
+      "liveVerified": 13
+    },
+    {
+      "scope": "Eplan.EplApi.HEServices.Exceptions",
+      "denominator": 2,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.MasterData",
+      "denominator": 592,
+      "implemented": 14,
+      "liveVerified": 14
+    },
+    {
+      "scope": "Eplan.EplApi.Starter",
+      "denominator": 14,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.System",
+      "denominator": 22,
+      "implemented": 0,
+      "liveVerified": 0
+    }
+  ],
+  "undocumentedByNamespace": [
+    {
+      "scope": "Eplan.EplApi.ApplicationFramework",
+      "denominator": 7,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.Base",
+      "denominator": 11,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel",
+      "denominator": 24,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.E3D",
+      "denominator": 1,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Graphics",
+      "denominator": 26,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.MasterData",
+      "denominator": 2,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.DataModel.Planning",
+      "denominator": 2,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.EServices",
+      "denominator": 13,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.EServices.Ged",
+      "denominator": 4,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.HEServices",
+      "denominator": 3,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.HEServices.Exceptions",
+      "denominator": 2,
+      "implemented": 0,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Eplan.EplApi.MasterData",
+      "denominator": 39,
+      "implemented": 0,
+      "liveVerified": 0
+    }
+  ],
+  "dataDictionaryByObject": [
+    {
+      "scope": "Article",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 1
+    },
+    {
+      "scope": "Connection",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 1
+    },
+    {
+      "scope": "Function",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 1
+    },
+    {
+      "scope": "MDPartsDatabaseItem",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 1
+    },
+    {
+      "scope": "Page",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 1
+    },
+    {
+      "scope": "Project",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    }
+  ],
+  "tools": [
+    {
+      "name": "eplan_cable_get",
+      "safety": "read",
+      "operations": [
+        "cable.get"
+      ],
+      "apiIds": 66,
+      "operationGroups": 33,
+      "dataDictionary": 2,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_cable_get.md",
+      "small": 2,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [
+        "A24"
+      ]
+    },
+    {
+      "name": "eplan_cable_renumber",
+      "safety": "destructive",
+      "operations": [
+        "cable.renumber.execute",
+        "cable.renumber.plan"
+      ],
+      "apiIds": 117,
+      "operationGroups": 62,
+      "dataDictionary": 2,
+      "dependencies": 52,
+      "actions": 0,
+      "spec": "docs/tools/eplan_cable_renumber.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A24"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A24",
+        "note": "Large：按 Standard 给全部电缆编号，复现 S21 的两对互换",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_check_list",
+      "safety": "read",
+      "operations": [
+        "check.list"
+      ],
+      "apiIds": 26,
+      "operationGroups": 14,
+      "dataDictionary": 0,
+      "dependencies": 12,
+      "actions": 0,
+      "spec": "docs/tools/eplan_check_list.md",
+      "small": 2,
+      "medium": 3,
+      "large": 3,
+      "apiNotes": [
+        "A12"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A20",
+        "note": "检查后的 6 条警告、14 条提示与它读到的一致",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_check_run",
+      "safety": "write",
+      "operations": [
+        "check.run.execute",
+        "check.run.plan"
+      ],
+      "apiIds": 59,
+      "operationGroups": 27,
+      "dataDictionary": 0,
+      "dependencies": 32,
+      "actions": 0,
+      "spec": "docs/tools/eplan_check_run.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A11",
+        "A16",
+        "A20"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A20",
+        "note": "再检查一次会追加汇总提示（不幂等）；按页检查会删掉其他对象的消息",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_connection_generate",
+      "safety": "write",
+      "operations": [
+        "connection.generate.execute",
+        "connection.generate.plan"
+      ],
+      "apiIds": 73,
+      "operationGroups": 35,
+      "dataDictionary": 1,
+      "dependencies": 36,
+      "actions": 0,
+      "spec": "docs/tools/eplan_connection_generate.md",
+      "small": 1,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": [
+        "A3",
+        "A11",
+        "A13",
+        "A14",
+        "A19"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A19",
+        "note": "没有增删的生成不留撤销步骤，因此返回 not_started",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_connection_list",
+      "safety": "read",
+      "operations": [
+        "connection.list"
+      ],
+      "apiIds": 61,
+      "operationGroups": 33,
+      "dataDictionary": 1,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_connection_list.md",
+      "small": 2,
+      "medium": 3,
+      "large": 2,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A19",
+        "note": "生成连接后读到的 9 条与生成结果一致",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_connection_number",
+      "safety": "destructive",
+      "operations": [
+        "connection.number.execute",
+        "connection.number.plan"
+      ],
+      "apiIds": 81,
+      "operationGroups": 35,
+      "dataDictionary": 1,
+      "dependencies": 45,
+      "actions": 0,
+      "spec": "docs/tools/eplan_connection_number.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A24"
+      ]
+    },
+    {
+      "name": "eplan_device_get",
+      "safety": "read",
+      "operations": [
+        "device.get"
+      ],
+      "apiIds": 72,
+      "operationGroups": 43,
+      "dataDictionary": 2,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_device_get.md",
+      "small": 9,
+      "medium": 4,
+      "large": 4,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-19",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A12",
+        "note": "短标识 -FC1 返回 AMBIGUOUS_NAME 和候选",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_device_list",
+      "safety": "read",
+      "operations": [
+        "device.list"
+      ],
+      "apiIds": 33,
+      "operationGroups": 19,
+      "dataDictionary": 0,
+      "dependencies": 14,
+      "actions": 0,
+      "spec": "docs/tools/eplan_device_list.md",
+      "small": 7,
+      "medium": 2,
+      "large": 5,
+      "apiNotes": [
+        "A11",
+        "A12"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A24",
+        "note": "按类别 Cable 列出 56 根电缆",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_device_place",
+      "safety": "write",
+      "operations": [
+        "device.place.execute",
+        "device.place.plan"
+      ],
+      "apiIds": 93,
+      "operationGroups": 46,
+      "dataDictionary": 1,
+      "dependencies": 42,
+      "actions": 0,
+      "spec": "docs/tools/eplan_device_place.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A13",
+        "A14",
+        "A26"
+      ]
+    },
+    {
+      "name": "eplan_device_renumber",
+      "safety": "destructive",
+      "operations": [
+        "device.renumber.execute",
+        "device.renumber.plan"
+      ],
+      "apiIds": 66,
+      "operationGroups": 28,
+      "dataDictionary": 0,
+      "dependencies": 38,
+      "actions": 0,
+      "spec": "docs/tools/eplan_device_renumber.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A14",
+        "A18",
+        "A20"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A20",
+        "note": "PostNumerate 在部分输入上使 EPLAN 崩溃；改为只交带 ? 的设备标识后不再崩溃",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_device_update",
+      "safety": "write",
+      "operations": [
+        "device.update.execute",
+        "device.update.plan"
+      ],
+      "apiIds": 48,
+      "operationGroups": 25,
+      "dataDictionary": 1,
+      "dependencies": 22,
+      "actions": 0,
+      "spec": "docs/tools/eplan_device_update.md",
+      "small": 3,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A3",
+        "A11",
+        "A12",
+        "A13"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A17",
+        "note": "Q1 拒绝、Q2 读回不一致时回滚、交叉引用跟着改名",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_export_dxf",
+      "safety": "write",
+      "operations": [
+        "export.dxf.plan",
+        "export.dxf.run"
+      ],
+      "apiIds": 40,
+      "operationGroups": 19,
+      "dataDictionary": 0,
+      "dependencies": 21,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_dxf.md",
+      "small": 2,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": [
+        "A16"
+      ]
+    },
+    {
+      "name": "eplan_export_image",
+      "safety": "write",
+      "operations": [
+        "export.image.plan",
+        "export.image.run"
+      ],
+      "apiIds": 43,
+      "operationGroups": 17,
+      "dataDictionary": 0,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_image.md",
+      "small": 2,
+      "medium": 3,
+      "large": 2,
+      "apiNotes": [
+        "A14",
+        "A16"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A21",
+        "note": "inline 的 PNG 交给了模型，模型读出了图上的标识和文字",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_export_labels",
+      "safety": "write",
+      "operations": [
+        "export.labels.plan",
+        "export.labels.run"
+      ],
+      "apiIds": 36,
+      "operationGroups": 16,
+      "dataDictionary": 0,
+      "dependencies": 20,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_labels.md",
+      "small": 2,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A24",
+        "A25",
+        "B9"
+      ]
+    },
+    {
+      "name": "eplan_export_parts",
+      "safety": "write",
+      "operations": [
+        "export.parts.plan",
+        "export.parts.run"
+      ],
+      "apiIds": 24,
+      "operationGroups": 8,
+      "dataDictionary": 0,
+      "dependencies": 16,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_parts.md",
+      "small": 2,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A25"
+      ]
+    },
+    {
+      "name": "eplan_export_pdf",
+      "safety": "write",
+      "operations": [
+        "export.pdf.plan",
+        "export.pdf.run"
+      ],
+      "apiIds": 44,
+      "operationGroups": 19,
+      "dataDictionary": 0,
+      "dependencies": 25,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_pdf.md",
+      "small": 2,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": [
+        "A16"
+      ]
+    },
+    {
+      "name": "eplan_export_pxf",
+      "safety": "write",
+      "operations": [
+        "export.pxf.plan",
+        "export.pxf.run"
+      ],
+      "apiIds": 22,
+      "operationGroups": 8,
+      "dataDictionary": 0,
+      "dependencies": 14,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_pxf.md",
+      "small": 2,
+      "medium": 3,
+      "large": 2,
+      "apiNotes": [
+        "A25"
+      ]
+    },
+    {
+      "name": "eplan_export_untranslated",
+      "safety": "write",
+      "operations": [
+        "export.untranslated.plan",
+        "export.untranslated.run"
+      ],
+      "apiIds": 25,
+      "operationGroups": 9,
+      "dataDictionary": 0,
+      "dependencies": 16,
+      "actions": 0,
+      "spec": "docs/tools/eplan_export_untranslated.md",
+      "small": 2,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A25",
+        "B9"
+      ]
+    },
+    {
+      "name": "eplan_import_dxf",
+      "safety": "write",
+      "operations": [
+        "import.dxf.execute",
+        "import.dxf.plan"
+      ],
+      "apiIds": 59,
+      "operationGroups": 24,
+      "dataDictionary": 0,
+      "dependencies": 35,
+      "actions": 0,
+      "spec": "docs/tools/eplan_import_dxf.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A29"
+      ]
+    },
+    {
+      "name": "eplan_import_pxf",
+      "safety": "write",
+      "operations": [
+        "import.pxf.execute",
+        "import.pxf.plan"
+      ],
+      "apiIds": 7,
+      "operationGroups": 2,
+      "dataDictionary": 0,
+      "dependencies": 5,
+      "actions": 0,
+      "spec": "docs/tools/eplan_import_pxf.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A28",
+        "A29"
+      ]
+    },
+    {
+      "name": "eplan_language_remove",
+      "safety": "destructive",
+      "operations": [
+        "language.remove.execute",
+        "language.remove.plan"
+      ],
+      "apiIds": 63,
+      "operationGroups": 29,
+      "dataDictionary": 2,
+      "dependencies": 32,
+      "actions": 0,
+      "spec": "docs/tools/eplan_language_remove.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A28"
+      ]
+    },
+    {
+      "name": "eplan_language_set",
+      "safety": "write",
+      "operations": [
+        "language.set.execute",
+        "language.set.plan"
+      ],
+      "apiIds": 40,
+      "operationGroups": 17,
+      "dataDictionary": 0,
+      "dependencies": 23,
+      "actions": 0,
+      "spec": "docs/tools/eplan_language_set.md",
+      "small": 3,
+      "medium": 2,
+      "large": 3,
+      "apiNotes": [
+        "A28"
+      ]
+    },
+    {
+      "name": "eplan_macro_get",
+      "safety": "read",
+      "operations": [
+        "macro.get"
+      ],
+      "apiIds": 29,
+      "operationGroups": 18,
+      "dataDictionary": 0,
+      "dependencies": 11,
+      "actions": 0,
+      "spec": "docs/tools/eplan_macro_get.md",
+      "small": 2,
+      "medium": 1,
+      "large": 2,
+      "apiNotes": [
+        "A14"
+      ]
+    },
+    {
+      "name": "eplan_macro_insert",
+      "safety": "write",
+      "operations": [
+        "macro.insert.execute",
+        "macro.insert.plan"
+      ],
+      "apiIds": 77,
+      "operationGroups": 35,
+      "dataDictionary": 0,
+      "dependencies": 42,
+      "actions": 0,
+      "spec": "docs/tools/eplan_macro_insert.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A12",
+        "A13",
+        "A14"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A19",
+        "note": "同一位置再插入被拒绝并回滚；keep 与已有设备冲突时 ALREADY_EXISTS",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_macro_list",
+      "safety": "read",
+      "operations": [
+        "macro.list"
+      ],
+      "apiIds": 2,
+      "operationGroups": 1,
+      "dataDictionary": 0,
+      "dependencies": 1,
+      "actions": 0,
+      "spec": "docs/tools/eplan_macro_list.md",
+      "small": 2,
+      "medium": 1,
+      "large": 2,
+      "apiNotes": [
+        "A4"
+      ]
+    },
+    {
+      "name": "eplan_message_list",
+      "safety": "read",
+      "operations": [
+        "message.list"
+      ],
+      "apiIds": 7,
+      "operationGroups": 4,
+      "dataDictionary": 0,
+      "dependencies": 3,
+      "actions": 0,
+      "spec": "docs/tools/eplan_message_list.md",
+      "small": 2,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [
+        "A1",
+        "A11"
+      ]
+    },
+    {
+      "name": "eplan_page_create",
+      "safety": "write",
+      "operations": [
+        "page.create.execute",
+        "page.create.plan"
+      ],
+      "apiIds": 66,
+      "operationGroups": 26,
+      "dataDictionary": 1,
+      "dependencies": 32,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_create.md",
+      "small": 9,
+      "medium": 17,
+      "large": 4,
+      "apiNotes": [
+        "A7",
+        "A9",
+        "A13"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A17",
+        "note": "Q1 拒绝；一次写入一个撤销步骤；四种页类型",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_page_delete",
+      "safety": "destructive",
+      "operations": [
+        "page.delete.execute",
+        "page.delete.plan"
+      ],
+      "apiIds": 58,
+      "operationGroups": 29,
+      "dataDictionary": 0,
+      "dependencies": 29,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_delete.md",
+      "small": 4,
+      "medium": 10,
+      "large": 1,
+      "apiNotes": [
+        "A15",
+        "A18",
+        "A24"
+      ]
+    },
+    {
+      "name": "eplan_page_get",
+      "safety": "read",
+      "operations": [
+        "page.get"
+      ],
+      "apiIds": 63,
+      "operationGroups": 36,
+      "dataDictionary": 1,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_get.md",
+      "small": 4,
+      "medium": 4,
+      "large": 7,
+      "apiNotes": [
+        "A11",
+        "A12"
+      ]
+    },
+    {
+      "name": "eplan_page_list",
+      "safety": "read",
+      "operations": [
+        "page.list"
+      ],
+      "apiIds": 40,
+      "operationGroups": 19,
+      "dataDictionary": 1,
+      "dependencies": 20,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_list.md",
+      "small": 14,
+      "medium": 4,
+      "large": 6,
+      "apiNotes": [
+        "A11"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A17",
+        "note": "调用后当前项目的 User.eod、User.eox 被改写，原因待查",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_page_renumber",
+      "safety": "destructive",
+      "operations": [
+        "page.renumber.execute",
+        "page.renumber.plan"
+      ],
+      "apiIds": 59,
+      "operationGroups": 23,
+      "dataDictionary": 0,
+      "dependencies": 36,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_renumber.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A18",
+        "A20"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A20",
+        "note": "/90–/92 改为 /200、/210、/220；与已有页重名时返回 ALREADY_EXISTS",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_page_update",
+      "safety": "write",
+      "operations": [
+        "page.update.execute",
+        "page.update.plan"
+      ],
+      "apiIds": 58,
+      "operationGroups": 27,
+      "dataDictionary": 1,
+      "dependencies": 30,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_update.md",
+      "small": 2,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [
+        "A7",
+        "A13"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A17",
+        "note": "一次写入一个撤销步骤；只改一种语言时其他语言不变",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_part_export",
+      "safety": "write",
+      "operations": [
+        "part.export.plan",
+        "part.export.run"
+      ],
+      "apiIds": 23,
+      "operationGroups": 8,
+      "dataDictionary": 0,
+      "dependencies": 14,
+      "actions": 0,
+      "spec": "docs/tools/eplan_part_export.md",
+      "small": 2,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A30"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "docs/tools/eplan_part_export.md",
+        "note": "部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_part_import",
+      "safety": "destructive",
+      "operations": [
+        "masterdata.backup",
+        "part.import.execute",
+        "part.import.plan"
+      ],
+      "apiIds": 39,
+      "operationGroups": 11,
+      "dataDictionary": 0,
+      "dependencies": 26,
+      "actions": 1,
+      "spec": "docs/tools/eplan_part_import.md",
+      "small": 2,
+      "medium": 6,
+      "large": 1,
+      "apiNotes": [
+        "A30"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A30；Large 测试 README",
+        "note": "经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_part_list",
+      "safety": "read",
+      "operations": [
+        "part.list"
+      ],
+      "apiIds": 43,
+      "operationGroups": 23,
+      "dataDictionary": 1,
+      "dependencies": 18,
+      "actions": 0,
+      "spec": "docs/tools/eplan_part_list.md",
+      "small": 2,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-19",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A12",
+        "note": "部件没有中文描述时为空，之后按语言回退设计实现",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_part_search",
+      "safety": "read",
+      "operations": [
+        "part.search"
+      ],
+      "apiIds": 35,
+      "operationGroups": 16,
+      "dataDictionary": 1,
+      "dependencies": 14,
+      "actions": 0,
+      "spec": "docs/tools/eplan_part_search.md",
+      "small": 3,
+      "medium": 3,
+      "large": 3,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A30",
+        "note": "部件导入的 Large 测试中找到新导入的部件，变体 1",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_part_sync",
+      "safety": "destructive",
+      "operations": [
+        "masterdata.backup",
+        "part.sync.execute",
+        "part.sync.plan"
+      ],
+      "apiIds": 102,
+      "operationGroups": 46,
+      "dataDictionary": 1,
+      "dependencies": 52,
+      "actions": 1,
+      "spec": "docs/tools/eplan_part_sync.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A30"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "docs/tools/eplan_part_sync.md；api-notes A30",
+        "note": "经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_plc_get",
+      "safety": "read",
+      "operations": [
+        "plc.get"
+      ],
+      "apiIds": 72,
+      "operationGroups": 37,
+      "dataDictionary": 1,
+      "dependencies": 28,
+      "actions": 0,
+      "spec": "docs/tools/eplan_plc_get.md",
+      "small": 2,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-21",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "docs/tools/eplan_plc_get.md",
+        "note": "按通道对象查不到连接，改为按设备读",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_project_get",
+      "safety": "read",
+      "operations": [
+        "project.get"
+      ],
+      "apiIds": 53,
+      "operationGroups": 30,
+      "dataDictionary": 0,
+      "dependencies": 23,
+      "actions": 0,
+      "spec": "docs/tools/eplan_project_get.md",
+      "small": 5,
+      "medium": 3,
+      "large": 4,
+      "apiNotes": [
+        "A11"
+      ],
+      "latestLive": {
+        "date": "2026-10-19",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A12",
+        "note": "detailed 最慢一次 493 ms；Large 中属性名可读",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_project_list",
+      "safety": "read",
+      "operations": [
+        "project.list"
+      ],
+      "apiIds": 11,
+      "operationGroups": 6,
+      "dataDictionary": 0,
+      "dependencies": 5,
+      "actions": 0,
+      "spec": "docs/tools/eplan_project_list.md",
+      "small": 7,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-18",
+        "eplan": "2026.0.3.25421",
+        "variant": "Pro Panel 和 Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A10",
+        "note": "M1 完成标准：列出打开的项目；模态对话框时 EPLAN_BUSY",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_project_translate",
+      "safety": "destructive",
+      "operations": [
+        "project.translate.execute",
+        "project.translate.plan"
+      ],
+      "apiIds": 70,
+      "operationGroups": 31,
+      "dataDictionary": 2,
+      "dependencies": 37,
+      "actions": 0,
+      "spec": "docs/tools/eplan_project_translate.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A11",
+        "A14",
+        "A25",
+        "A28"
+      ]
+    },
+    {
+      "name": "eplan_report_update",
+      "safety": "write",
+      "operations": [
+        "report.update.execute",
+        "report.update.plan"
+      ],
+      "apiIds": 47,
+      "operationGroups": 21,
+      "dataDictionary": 0,
+      "dependencies": 26,
+      "actions": 0,
+      "spec": "docs/tools/eplan_report_update.md",
+      "small": 1,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": [
+        "A16",
+        "A18"
+      ],
+      "latestLive": {
+        "date": "2026-10-20",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A20",
+        "note": "带 progressToken 时第 5 秒收到心跳，第 7 秒返回",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_revision_list",
+      "safety": "read",
+      "operations": [
+        "revision.list"
+      ],
+      "apiIds": 45,
+      "operationGroups": 21,
+      "dataDictionary": 2,
+      "dependencies": 16,
+      "actions": 0,
+      "spec": "docs/tools/eplan_revision_list.md",
+      "small": 2,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A28"
+      ]
+    },
+    {
+      "name": "eplan_session_select",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_session_select.md",
+      "small": 3,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-19",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A12",
+        "note": "选中当前进程",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_session_status",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_session_status.md",
+      "small": 4,
+      "medium": 3,
+      "large": 7,
+      "apiNotes": [],
+      "latestLive": {
+        "date": "2026-10-18",
+        "eplan": "2026.0.3.25421",
+        "variant": "Pro Panel 和 Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "api-notes A10",
+        "note": "变体读取正确；对话框打开时仍显示已连接",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_terminal_renumber",
+      "safety": "destructive",
+      "operations": [
+        "terminal.renumber.execute",
+        "terminal.renumber.plan"
+      ],
+      "apiIds": 75,
+      "operationGroups": 31,
+      "dataDictionary": 0,
+      "dependencies": 44,
+      "actions": 0,
+      "spec": "docs/tools/eplan_terminal_renumber.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A20",
+        "A24"
+      ],
+      "latestLive": {
+        "date": "2026-10-21",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "api-notes A24",
+        "note": "只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_terminal_strip_get",
+      "safety": "read",
+      "operations": [
+        "terminal.strip.get"
+      ],
+      "apiIds": 39,
+      "operationGroups": 23,
+      "dataDictionary": 0,
+      "dependencies": 16,
+      "actions": 0,
+      "spec": "docs/tools/eplan_terminal_strip_get.md",
+      "small": 2,
+      "medium": 2,
+      "large": 3,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_terminal_strip_list",
+      "safety": "read",
+      "operations": [
+        "terminal.strip.list"
+      ],
+      "apiIds": 18,
+      "operationGroups": 10,
+      "dataDictionary": 0,
+      "dependencies": 8,
+      "actions": 0,
+      "spec": "docs/tools/eplan_terminal_strip_list.md",
+      "small": 3,
+      "medium": 2,
+      "large": 2,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_tool_usage",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_tool_usage.md",
+      "small": 5,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_translation_export",
+      "safety": "write",
+      "operations": [
+        "translation.export.plan",
+        "translation.export.run"
+      ],
+      "apiIds": 15,
+      "operationGroups": 4,
+      "dataDictionary": 0,
+      "dependencies": 11,
+      "actions": 0,
+      "spec": "docs/tools/eplan_translation_export.md",
+      "small": 2,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A30"
+      ]
+    }
+  ],
+  "units": [
+    {
+      "unit": "A:backup/MASTERDATA",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_import",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "D:Article",
+      "layer": "data_dictionary",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "D:Connection",
+      "layer": "data_dictionary",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number"
+      ]
+    },
+    {
+      "unit": "D:Function",
+      "layer": "data_dictionary",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_plc_get",
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "D:MDPartsDatabaseItem",
+      "layer": "data_dictionary",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "D:Page",
+      "layer": "data_dictionary",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_language_remove",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_project_translate",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "D:Project",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.Action.Execute",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_import",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_part_import",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddIn.OnExit",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddIn.OnInit",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddIn.OnInitGui",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddIn.OnRegister",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddIn.OnUnregister",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.IEplAddInShadowCopy.OnBeforeInit",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.ApplicationFramework.License.HasOption",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.BaseException.GetMessageIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_message_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.BaseException.GetMessageText",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_message_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.BaseException.MessageLevel",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_message_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.BaseException.NumberOfOccurrences",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_message_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.Context.AddParameter",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_import",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.GetNumber",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_place",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_search",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.GetString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_export_labels",
+        "eplan_page_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.IsValid",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_place",
+        "eplan_export_labels",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_search",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.Languages.GuiLanguage",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_place",
+        "eplan_export_labels",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_search",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_import_pxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber",
+        "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.MultiLangString.AddString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_create",
+        "eplan_page_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.MultiLangString.GetString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_place",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_part_list",
+        "eplan_part_search",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.PathMap.SubstitutePath",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_macro_list",
+        "eplan_part_import",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.PointD.X",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.PointD.Y",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.CheckIfSchemeExists",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.GetCount",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_pdf",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.GetLastUsed",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf",
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.GetName",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_pdf",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.GetStringSetting",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_labels"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.Init",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_pdf",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.SetLastUsed",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf",
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.SchemeSetting.SetScheme",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_pdf",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Article.PartNr",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Article.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Article.VariantNr",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReference.Count",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReference.ParentObject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReference.PartNr",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReference.VariantNr",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.EndPin",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_plc_get",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.Page",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.StartPin",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_plc_get",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionsFilter.Function",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_connection_list",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_plc_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_pdf",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_get",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminalStrips",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminals",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_cable_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PLC.IsCPU",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PLC.PLCTerminals",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PLC.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.Bridge.Terminals",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.Bridges",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.ExternalConnections",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.InternalConnections",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.IsMainTerminal",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.PLC",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Terminals",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.ArticleReferences",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_page_get",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.FunctionCategory",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_get",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.IsMainFunction",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_plc_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.Pins",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_plc_get",
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.SubFunctions",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionBase.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_translate",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_update",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_get",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionsFilter.Page",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_macro_insert",
+        "eplan_page_get",
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationTypes",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Size",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.AllPlacements",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_connection_generate",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_page_delete"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Create",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_pdf",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.PageType",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.PageTypeName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_language_remove",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_project_translate",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Remove",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_delete"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.ReportBlock",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Size",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PagesFilter.DocumentType",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_pdf",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_project_translate",
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PagesFilter.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_pdf",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_project_translate",
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Pin.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_device_get",
+        "eplan_plc_get",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Pin.ParentFunction",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_plc_get",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Placement.IsPlaced",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Placement.Page",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_page_delete",
+        "eplan_plc_get",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.Articles",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_part_list",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.Close",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_device_renumber",
+        "eplan_language_remove",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.IsReadOnly",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.ProjectFullName",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_device_renumber",
+        "eplan_language_remove",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_revision_list",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.ProjectName",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectManager.CopyProject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_device_renumber",
+        "eplan_language_remove",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectManager.OpenProject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number",
+        "eplan_device_renumber",
+        "eplan_language_remove",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectSchemeSetting.Init",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_connection_number"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectSettings.GetStringSetting",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_untranslated",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectSettings.SetStringSetting",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_language_remove",
+        "eplan_language_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsIndexed",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsInternal",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.Definition",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.Indexes",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_translate",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.Item",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToBool",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_update",
+        "eplan_language_remove",
+        "eplan_page_create",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_translate",
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SafetyPoint.Create",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_macro_insert",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_number",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_sync",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber",
+        "eplan_device_get",
+        "eplan_page_get",
+        "eplan_project_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetCategory",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetDone",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetGroup",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetId",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetObject1",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetText",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_list",
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.CableService.RenumberCables",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_cable_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Check.VerifyPages",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Check.VerifyProject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_connection_number"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.DeviceService.CreateDevice",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export.GraphicPage",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_export_image"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export.PXFProject",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_export_pxf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export.PdfPages",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Generate.Connections",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_connection_generate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Import.DXFPage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_import_dxf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Import.PXFProject",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_import_pxf"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Insert.WindowMacro",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Label.DoLabel",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_export_labels"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.PartsService.ExportPartsList",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_export_parts"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Renumber.DeviceTags",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_device_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Renumber.Pages",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Renumber.Terminals",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Reports.GenerateProject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Reports.Update",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Revision.GetUncompletedPages",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_revision_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_get",
+        "eplan_cable_renumber",
+        "eplan_check_list",
+        "eplan_check_run",
+        "eplan_connection_generate",
+        "eplan_connection_list",
+        "eplan_connection_number",
+        "eplan_device_get",
+        "eplan_device_list",
+        "eplan_device_place",
+        "eplan_device_renumber",
+        "eplan_device_update",
+        "eplan_export_dxf",
+        "eplan_export_image",
+        "eplan_export_labels",
+        "eplan_export_parts",
+        "eplan_export_pdf",
+        "eplan_export_pxf",
+        "eplan_export_untranslated",
+        "eplan_import_dxf",
+        "eplan_language_remove",
+        "eplan_language_set",
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_page_create",
+        "eplan_page_delete",
+        "eplan_page_get",
+        "eplan_page_list",
+        "eplan_page_renumber",
+        "eplan_page_update",
+        "eplan_part_list",
+        "eplan_part_sync",
+        "eplan_plc_get",
+        "eplan_project_get",
+        "eplan_project_list",
+        "eplan_project_translate",
+        "eplan_report_update",
+        "eplan_revision_list",
+        "eplan_terminal_renumber",
+        "eplan_terminal_strip_get",
+        "eplan_terminal_strip_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Synchronize.Parts",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.AddProjectLanguage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_language_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.ExportMissingTranslation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_export_untranslated"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_language_remove"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.SetDisplayedLanguages",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_language_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.TranslateObjects",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPart.PartNr",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPart.ProductGroup",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPart.Variant",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetPartVariants",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_part_import"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Properties",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_export",
+        "eplan_part_import",
+        "eplan_part_search",
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPropertyValue.IsEmpty",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPropertyValue.ToMultiLangString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPropertyValue.ToString",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_device_place",
+        "eplan_part_search"
+      ]
+    }
+  ],
+  "unmatched": [],
+  "overlayRules": [
+    {
+      "match": "N:Eplan.EplApi.RemoteClient",
+      "status": "excluded",
+      "reason": "not_applicable",
+      "note": "远程客户端，架构上不采用",
+      "source": "ADR-0002；负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.RemoteServer",
+      "status": "excluded",
+      "reason": "not_applicable",
+      "note": "远程客户端的服务端，架构上不采用",
+      "source": "ADR-0002；负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.Remoting",
+      "status": "excluded",
+      "reason": "not_applicable",
+      "note": "远程调用，架构上不采用",
+      "source": "ADR-0002；负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.GrpcServer",
+      "status": "excluded",
+      "reason": "not_applicable",
+      "note": "远程客户端的 gRPC 服务端，架构上不采用",
+      "source": "ADR-0002；负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.Gui",
+      "status": "excluded",
+      "reason": "gui",
+      "note": "需要人在界面上操作；第七阶段设计交互接入时逐项复审",
+      "source": "负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.Scripting",
+      "status": "excluded",
+      "reason": "unsafe",
+      "note": "脚本属于 Code 级，默认关闭",
+      "source": "ADR-0005；负责人决定 Q3（2026-10-21）"
+    },
+    {
+      "match": "N:Eplan.EplApi.DataModel.Planning",
+      "status": "env_blocked",
+      "condition": "开发机授权中 Preplanning 不可用",
+      "source": "api-notes A24"
+    }
+  ],
+  "availability": [
+    {
+      "scope": "EPLAN 2026.0.3.25421",
+      "status": "verified",
+      "note": "写明版本的实机记录都在这个版本上；没有其他版本的记录",
+      "source": "api-notes A10–A30"
+    },
+    {
+      "scope": "Electric P8",
+      "status": "verified",
+      "note": "大部分实机记录所用的变体",
+      "source": "api-notes A12–A30"
+    },
+    {
+      "scope": "Pro Panel",
+      "status": "verified",
+      "note": "只验证过会话与项目列表（M1）",
+      "source": "api-notes A10"
+    },
+    {
+      "scope": "N:Eplan.EplApi.DataModel.Planning",
+      "status": "env_blocked",
+      "note": "Preplanning 授权不可用，预规划 API 无法验证",
+      "source": "api-notes A24"
+    },
+    {
+      "scope": "N:Eplan.EplApi.DataModel.E3D",
+      "status": "unverified",
+      "note": "授权中有 ProPanelProfessional，但 E3D API 没有实机验证过",
+      "source": "api-notes A2"
+    }
+  ]
+}

@@ -53,7 +53,7 @@ public sealed class ToolMappingTests : IDisposable
         List<string> afterSpecChange = CoverageCheck.Problems(_repository.Root);
 
         Assert.Empty(generated);
-        Assert.StartsWith(ToolMapping.RelativePath, Assert.Single(afterSpecChange), StringComparison.Ordinal);
+        Assert.Contains(afterSpecChange, p => p.StartsWith(ToolMapping.RelativePath, StringComparison.Ordinal));
     }
 
     public void Dispose() => _repository.Dispose();
