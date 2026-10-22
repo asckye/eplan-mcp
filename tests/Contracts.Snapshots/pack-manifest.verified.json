@@ -12,6 +12,10 @@
     ],
     "capabilities": [
       "A:backup/PROJECT",
+      "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord",
+      "op:macro.insert",
+      "licence:CogineerBuilder",
+      "plugin:acme.terminal-allocation",
       "eplan_macro_insert"
     ]
   },
@@ -119,6 +123,10 @@
     }
   ],
   "configuration": {
+    "base": {
+      "id": "base",
+      "resources": []
+    },
     "company": {
       "id": "acme",
       "name": "ACME",
@@ -133,9 +141,7 @@
           "resources/basic-projects/GB_bas001.zw9"
         ]
       }
-    ],
-    "projects": [],
-    "cabinets": []
+    ]
   },
   "rules": [
     {
@@ -161,6 +167,15 @@
     {
       "path": "resources/projects/Sample/Sample.elk",
       "standing": "official"
+    }
+  ],
+  "migrations": [
+    {
+      "from": "^0.9.0",
+      "notes": "From the first draft.",
+      "changes": [
+        "Motor macros moved to resources/macros"
+      ]
     }
   ],
   "facts": [

@@ -55,7 +55,10 @@ public sealed record PackManifest
     [Description("Finished projects that show what the pack's results should look like.")]
     public IReadOnlyList<PackSlot> AcceptanceSamples { get; init; } = [];
 
-    [Description("What EplanMcp read from the resources' own files, with the place it was read. Facts are measured, never inferred.")]
+    [Description("How to move here from older versions.")]
+    public IReadOnlyList<PackMigration> Migrations { get; init; } = [];
+
+    [Description("File-level facts EplanMcp read from the resources' own files (versions, archive formats), with the place it was read. Measured, never inferred; engineering facts from reference projects go into FactSet documents.")]
     public IReadOnlyList<PackFact> Facts { get; init; } = [];
 
     public required PackProvenance Provenance { get; init; }

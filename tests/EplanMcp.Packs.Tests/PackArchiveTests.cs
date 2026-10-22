@@ -110,15 +110,15 @@ public sealed class PackArchiveTests : IDisposable
     {
         // The header is what the size limits judge, so no entry may yield more than it declares.
         string bomb = new('a', 100_000);
-        PackResource resource = Manifests.File("bomb", ResourceKind.Other) with { Sha256 = TempFolder.Sha256(bomb), Bytes = bomb.Length };
-        byte[] zip = Bytes(new Entry(PackManifest.FileName, Encoding.UTF8.GetString(PackJson.Serialize(Manifests.Minimal(resource)))), new Entry("bomb", bomb));
-        File.WriteAllBytes(Archive, WithDeclaredSize(zip, "bomb", 10));
+        PackResource resource = Manifests.File("bomb.txt", ResourceKind.Document) with { Sha256 = TempFolder.Sha256(bomb), Bytes = bomb.Length };
+        byte[] zip = Bytes(new Entry(PackManifest.FileName, Encoding.UTF8.GetString(PackJson.Serialize(Manifests.Minimal(resource)))), new Entry("bomb.txt", bomb));
+        File.WriteAllBytes(Archive, WithDeclaredSize(zip, "bomb.txt", 10));
 
         PackCheckResult result = await PackArchive.ExtractAsync(Archive, Destination, PackLimits.Default, Cancel);
 
         PackProblem problem = Assert.Single(result.Problems);
         Assert.True(
-            problem is { Location: "bomb", Message: var m } && m.StartsWith("does not match pack.json: the files have SHA-256 ", StringComparison.Ordinal) && m.Contains(", 10 bytes,", StringComparison.Ordinal)
+            problem is { Location: "bomb.txt", Message: var m } && m.StartsWith("does not match pack.json: the files have SHA-256 ", StringComparison.Ordinal) && m.Contains(", 10 bytes,", StringComparison.Ordinal)
             || problem.Message.Contains("more bytes than its ZIP header declares", StringComparison.Ordinal)
             || problem.Message.Contains("is damaged", StringComparison.Ordinal),
             problem.ToString());
