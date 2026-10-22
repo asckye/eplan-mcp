@@ -1314,6 +1314,26 @@
       }
     },
     {
+      "name": "eplan_placeholder_apply",
+      "safety": "write",
+      "operations": [
+        "placeholder.apply.execute",
+        "placeholder.apply.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_placeholder_apply.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A33"
+      ]
+    },
+    {
       "name": "eplan_placeholder_list",
       "safety": "read",
       "operations": [
@@ -1327,7 +1347,7 @@
       "spec": "docs/tools/eplan_placeholder_list.md",
       "small": 2,
       "medium": 1,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A11",
         "A14",

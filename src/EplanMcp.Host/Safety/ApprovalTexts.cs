@@ -34,7 +34,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. ValueSet(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
                 + (plan.MasterData is null ? Undo(question.Tool, plan, zh) : MasterDataUndo(plan, zh)),
             ApproveLabel = zh ? "批准" : "Approve",
@@ -123,6 +123,10 @@ internal static class ApprovalTexts
                 ? $"更新全部报表（现有报表页 {Value(change.OldValue ?? "?", zh)} 页）；可能新建、替换或删除报表页"
                 : $"Update all reports ({Value(change.OldValue ?? "?", zh)} report pages now); may create, replace or delete report pages",
             _ when change.Property == "report" => zh ? $"更新报表页 {name}" : $"Update report page {name}",
+            // EPLAN does not tell which value set is applied now (placeholder.apply.plan): only the new one; its values follow.
+            _ when change.Property == "value set" => zh
+                ? $"给占位符 {name} 应用值集 {Value(change.NewValue ?? "?", zh)}"
+                : $"Apply value set {Value(change.NewValue ?? "?", zh)} to placeholder {name}",
             _ when change.Property == "languages" => zh
                 ? $"修改项目 {name} 的语言：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
                 : $"Change the languages of project {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
@@ -214,6 +218,25 @@ internal static class ApprovalTexts
         ? zh ? "Ctrl+Z 不能撤销语言设置；要恢复，用原来的值再设置一次。" : "Ctrl+Z in EPLAN does not undo language settings; to restore them, set the old values again."
         : (zh ? $"批准后可在 EPLAN 中按 Ctrl+Z 撤销“AI: {tool}”这一步。" : $"After approval, Ctrl+Z in EPLAN undoes the step \"AI: {tool}\".")
             + (plan.Changes.Any(c => c.Kind == "language") ? zh ? "语言设置可能不随之恢复，备份中有原样的项目。" : " The language settings may not come back with it; the backup has the project as it was." : string.Empty);
+
+    /// <summary>
+    /// After a value set's change, the value it gives each variable (placeholder.apply.plan's <c>values</c>: variable TAB
+    /// text per line), so the engineer approves the values, not only a name; nothing for other plans.
+    /// </summary>
+    private static IEnumerable<string> ValueSet(WritePlan plan, bool zh)
+    {
+        if (!plan.Changes.Any(c => c.Property == "value set") || plan.Details?.GetValueOrDefault("values") is not { Length: > 0 } lines)
+        {
+            yield break;
+        }
+
+        yield return string.Empty;
+        yield return zh ? "值集中各变量的值：" : "The value set's values:";
+        foreach (string[] fields in lines.Split('\n').Select(line => line.Split('\t', 2)))
+        {
+            yield return Value(fields[0], zh) + " = " + Value(fields.Length > 1 ? fields[1] : string.Empty, zh);
+        }
+    }
 
     /// <summary>
     /// After the languages a removal deletes, what goes with them (eplan_language_remove, tool spec 6): every translation

@@ -86,7 +86,7 @@ Bridge 共用到 432 个 ID（方法 146，属性 120，类型 115，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：27 / 52（51.9%），共 33 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：27 / 53（50.9%），共 33 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -175,7 +175,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_part_list | read | part.list | 43 | 23 | 1 | 18 | 0 | 2/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
 | eplan_part_search | read | part.search | 35 | 16 | 1 | 14 | 0 | 3/3/3 | — | 2026-10-21 pass（api-notes A30） |
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 102 | 46 | 1 | 52 | 1 | 2/2/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
-| eplan_placeholder_list | read | placeholder.list | 0 | 0 | 0 | 0 | 0 | 2/1/1 | A11 A14 A33 | — |
+| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 0 | 0 | 0 | 0 | 0 | 1/2/1 | A33 | — |
+| eplan_placeholder_list | read | placeholder.list | 0 | 0 | 0 | 0 | 0 | 2/1/2 | A11 A14 A33 | — |
 | eplan_plc_get | read | plc.get | 72 | 37 | 1 | 28 | 0 | 2/2/2 | — | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_get | read | project.get | 53 | 30 | 0 | 23 | 0 | 5/3/4 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/3/1 | — | 2026-10-18 pass（api-notes A10） |
