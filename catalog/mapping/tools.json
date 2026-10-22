@@ -4327,6 +4327,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectTranslateTests.cs"
           },
           {
+            "name": "SnapshotWriteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SnapshotWriteTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -5637,6 +5642,11 @@
             "name": "ImportPxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportPxfTests.cs"
+          },
+          {
+            "name": "SnapshotCopyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"
           }
         ],
         "operationTests": [
@@ -6190,6 +6200,11 @@
             "file": "tests/EplanMcp.Large.Tests/RevisionListTests.cs"
           },
           {
+            "name": "SnapshotCopyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"
+          },
+          {
             "name": "TerminalRenumberTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/TerminalRenumberTests.cs"
@@ -6705,6 +6720,7 @@
     "M:Eplan.EplApi.ApplicationFramework.IEplAddInShadowCopy.OnBeforeInit(System.String)",
     "M:Eplan.EplApi.ApplicationFramework.License.#ctor",
     "M:Eplan.EplApi.ApplicationFramework.License.HasOption(Eplan.EplApi.ApplicationFramework.LicenseOptions)",
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.Dispose",
     "M:Eplan.EplApi.DataModel.LockingStep.#ctor",
     "T:Eplan.EplApi.ApplicationFramework.IEplAddIn",
     "T:Eplan.EplApi.ApplicationFramework.IEplAddInShadowCopy",

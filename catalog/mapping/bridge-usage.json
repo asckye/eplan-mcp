@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "6f3dadfe",
-  "sourceHash": "sha256:9640181a6a3a1020f59e0b9e7037a23b0ca2af8df766851cb6783654228abdf0",
+  "scannedSources": "870f6c4a",
+  "sourceHash": "sha256:1587925523c570f81d20981b7f308c7d85a4f77c16f5902a42d6924971d15b9b",
   "operations": [
     {
       "name": "approval.ask",
@@ -497,6 +497,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -549,6 +560,17 @@
           "cable.renumber.execute",
           "cable.renumber.plan"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCBox": [
@@ -561,6 +583,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -682,6 +715,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -1418,6 +1462,17 @@
           "export.parts.run",
           "export.pxf.run",
           "export.untranslated.run"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -2963,6 +3018,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "ReadStrip",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -3007,6 +3073,17 @@
         "operations": [
           "terminal.renumber.execute"
         ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.Dispose": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)": [
@@ -3092,6 +3169,17 @@
         ],
         "operations": [
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -3521,6 +3609,17 @@
         "operations": [
           "revision.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminalStrips(Eplan.EplApi.DataModel.FunctionsFilter)": [
@@ -3948,6 +4047,26 @@
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.ProjectManager.#ctor": [
@@ -3987,6 +4106,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFiles",
+        "member": "Compatibility",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -4066,6 +4196,17 @@
           "terminal.strip.get",
           "terminal.strip.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.ProjectManager.CopyProject(System.String,System.String,Eplan.EplApi.DataModel.ProjectManager.CopyMode)": [
@@ -4089,6 +4230,67 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.ProjectManager.DatabaseVersion.ToString": [
+      {
+        "adapter": "EplanProjectFiles",
+        "member": "Compatibility",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ProjectManager.Dispose": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility(System.String)": [
+      {
+        "adapter": "EplanProjectFiles",
+        "member": "Compatibility",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDatabaseVersion(System.String)": [
+      {
+        "adapter": "EplanProjectFiles",
+        "member": "Compatibility",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.ProjectManager.OpenProject(System.String,Eplan.EplApi.DataModel.ProjectManager.OpenMode)": [
       {
         "adapter": "EplanProjectBackup",
@@ -4107,6 +4309,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -4365,6 +4578,28 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -4785,6 +5020,50 @@
         "operations": [
           "report.update.execute",
           "report.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -6291,6 +6570,17 @@
           "macro.insert.execute",
           "macro.insert.plan"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.Base.PointD.Y": [
@@ -6321,6 +6611,17 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -6572,6 +6873,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ArticleReference.VariantNr": [
@@ -6629,6 +6941,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Ends",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -6655,7 +6978,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
-          "plc.get"
+          "plc.get",
+          "project.snapshot"
         ]
       }
     ],
@@ -6696,6 +7020,17 @@
           "connection.generate.plan",
           "connection.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Connection.StartPin": [
@@ -6722,6 +7057,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -6759,6 +7105,17 @@
           "connection.number.execute",
           "connection.number.plan"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_connection",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION": [
@@ -6775,6 +7132,17 @@
           "connection.generate.plan",
           "connection.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_connection",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRENUMBER": [
@@ -6790,6 +7158,17 @@
           "connection.generate.execute",
           "connection.generate.plan",
           "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_connection",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -7070,6 +7449,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.FunctionCategory": [
@@ -7185,6 +7575,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -7364,6 +7765,17 @@
         "operations": [
           "project.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.Pins": [
@@ -7455,6 +7867,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.SubFunctions": [
@@ -7503,6 +7926,19 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionBase.Location": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -7843,6 +8279,28 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Ends",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -8069,6 +8527,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLELENGTH_FULL": [
@@ -8081,6 +8550,17 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8095,6 +8575,17 @@
         "operations": [
           "cable.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECOUNT": [
@@ -8108,6 +8599,17 @@
         "operations": [
           "cable.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION": [
@@ -8120,6 +8622,17 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8148,6 +8661,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCDATATYPE": [
@@ -8160,6 +8684,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8174,6 +8709,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSOCKET": [
@@ -8186,6 +8732,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8200,6 +8757,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSYMBOLICADDRESS_CALCULATED": [
@@ -8212,6 +8780,30 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TECHNICAL_CHARACTERISTIC": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8252,6 +8844,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8505,6 +9108,17 @@
         "operations": [
           "page.delete.execute",
           "page.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -8908,6 +9522,39 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Pages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -9002,6 +9649,17 @@
         ],
         "operations": [
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -9100,6 +9758,17 @@
         "operations": [
           "revision.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Page.ReportBlock": [
@@ -9186,6 +9855,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_FORMPLOT": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_page",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_INSTANCE_WITH_REVISIONMARKER": [
       {
         "adapter": "EplanRevisionReader",
@@ -9196,6 +9878,32 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONDATE": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_page",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONTIME": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_page",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -9259,6 +9967,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "_page",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -9508,6 +10227,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Ends",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -9543,6 +10273,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -9950,6 +10691,7 @@
           "part.sync.plan",
           "plc.get",
           "project.get",
+          "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -9959,6 +10701,17 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -10072,6 +10825,17 @@
           "terminal.strip.get",
           "terminal.strip.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Project.Properties": [
@@ -10095,6 +10859,17 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -10197,6 +10972,18 @@
           "terminal.strip.get",
           "terminal.strip.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects": [
@@ -10276,6 +11063,45 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONDATE": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONTIME": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -10441,6 +11267,17 @@
           "page.get",
           "project.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty": [
@@ -10506,6 +11343,29 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanText",
         "member": "ReadWithLanguage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
@@ -10559,6 +11419,85 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -11101,6 +12040,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -11242,6 +12192,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -11330,7 +12291,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
-          "plc.get"
+          "plc.get",
+          "project.snapshot"
         ]
       },
       {
@@ -11683,6 +12645,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -12142,6 +13115,17 @@
           "macro.insert.execute",
           "macro.insert.plan"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.Base.SchemeSetting": [
@@ -12376,7 +13360,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
-          "plc.get"
+          "plc.get",
+          "project.snapshot"
         ]
       },
       {
@@ -12426,6 +13411,39 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -13195,6 +14213,17 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "ReadStrip",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -13338,7 +14367,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
-          "plc.get"
+          "plc.get",
+          "project.snapshot"
         ]
       },
       {
@@ -13400,6 +14430,17 @@
         "operations": [
           "cable.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.PLC": [
@@ -13435,6 +14476,17 @@
         "operations": [
           "plc.get"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Terminal": [
@@ -13469,6 +14521,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -13910,6 +14973,28 @@
         ]
       },
       {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -14073,6 +15158,17 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -14255,7 +15351,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
-          "plc.get"
+          "plc.get",
+          "project.snapshot"
         ]
       },
       {
@@ -14623,6 +15720,28 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.PagePropertyList": [
@@ -14764,6 +15883,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -15210,6 +16340,7 @@
           "part.sync.plan",
           "plc.get",
           "project.get",
+          "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -15320,6 +16451,28 @@
         "operations": [
           "revision.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ProjectLockingException": [
@@ -15409,6 +16562,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFiles",
+        "member": "Compatibility",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFiles.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
         "adapter": "EplanProjects",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjects.cs",
@@ -15485,6 +16649,28 @@
           "terminal.strip.get",
           "terminal.strip.list"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ProjectManager.CopyMode": [
@@ -15527,6 +16713,17 @@
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ProjectPropertyList": [
@@ -15539,6 +16736,17 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader.Source",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
@@ -15723,6 +16931,39 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Raw",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       },
       {
@@ -15970,6 +17211,17 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "Values",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.snapshot"
         ]
       }
     ],
