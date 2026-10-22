@@ -90,6 +90,7 @@
 - M6 工程包（只在 `full` 中，不需要 EPLAN）：
   - `eplan_pack_import`：把工程师放进导入目录（或 `config.json` 新增的 `packSources` 列出的根目录）的宏、表格、图框、文档、物料对应表、基本项目、备份和项目导入开发包 `packs-dev\<包 ID>\`，自动生成清单和资源索引；规则和物料对应表一律是候选；项目默认只引用（需要 `packSources`），工程师同意后可以复制进包；需要 EPLAN 才能判断的事项记为缺口；只写数据目录，写审计 `pack_change`。
   - `eplan_pack_list`：开发包和已安装的版本，以及锁定每个版本的项目；只读清单，不算哈希。
+  - `eplan_pack_get`：一个包的清单摘要、完整校验发现的问题（包括按 `packSources` 核对的引用资源）、开放的缺口，以及连接的 EPLAN 和本服务器是否满足包的要求（EPLAN 版本、变体、Bridge 操作、工具为硬要求；能力目录条目只警告）。
 - `eplanmcp serve --profile core|full`：`core` 只提供 25 个常用工具（全部只读、写入和导出工具，不含删页、重编号这类 Destructive 工具），给对工具数量有上限的客户端用；默认 `full`，提供全部工具。
 
 ### Changed

@@ -30,6 +30,35 @@ internal sealed class PackLibrary(HostDataLocations locations, HostConfig config
     /// <summary>The project bindings and their locks (M6 design 4.1.5).</summary>
     public WorkspaceStore Workspaces => new(locations.Workspaces, Installed);
 
+    /// <summary>
+    /// The folder and shown version of pack <paramref name="id"/> at <paramref name="version"/>: <c>dev</c>, a SemVer
+    /// version, or null for the development pack when there is one, else the highest installed version. Null when
+    /// there is no such pack or version.
+    /// </summary>
+    public (string Folder, string Version)? Locate(string id, string? version)
+    {
+        string dev = Dev.FolderOf(id);
+        if (version is null or AssetNames.Dev && File.Exists(Path.Combine(dev, PackManifest.FileName)))
+        {
+            return (dev, AssetNames.Dev);
+        }
+
+        IReadOnlyList<SemanticVersion> installed = Installed.Versions(id);
+        string? chosen = version is AssetNames.Dev ? null : version ?? (installed.Count > 0 ? installed[0].ToString() : null);
+        return chosen is not null && Installed.InstalledDigest(id, chosen) is not null ? (Installed.FolderOf(id, chosen), chosen) : null;
+    }
+
+    /// <summary>Whether <paramref name="version"/> is a version argument: absent, <c>dev</c> or SemVer.</summary>
+    public static bool IsVersion(string? version) => version is null or AssetNames.Dev || SemanticVersion.TryParse(version, out _);
+
+    /// <summary>RESOURCE_NOT_FOUND for a pack or version that is not there.</summary>
+    public static BridgeError NotFound(string pack, string? version) => new()
+    {
+        Reason = ErrorReason.ResourceNotFound,
+        Message = $"No pack '{pack}'{(version is null ? string.Empty : $" at version '{version}'")} is in EplanMcp's data folder. Call eplan_pack_list to see the packs and their versions.",
+        Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["pack"] = pack, ["version"] = version ?? string.Empty },
+    };
+
     /// <summary>What manifests name as their maker.</summary>
     public static string CreatedBy => $"eplanmcp {HostInfo.Version}";
 
