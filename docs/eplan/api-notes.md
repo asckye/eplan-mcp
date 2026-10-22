@@ -186,6 +186,17 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A39. M4c 剩余工具用到的 action（spike S34，2026-10-22，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S34](../../spikes/S34-m4c-actions/README.md)。
+
+- **`generate /TYPE:CABLES` 关闭保留旧名时会重编号已有电缆**：示例项目三个方案（创建、编号、自动选型）均只有 `Standard`；默认参数或 `KEEPOLDNAMES=1, ONLYAUTOCABLES=1` 不改变名称，项目没有自动电缆。`KEEPOLDNAMES=0, STARTVALUE=5, STEPVALUE=2, ONLYAUTOCABLES=0` 把 78 根中的 70 根改名（如 `+B1-WG2` → `+B1-W7`），没有新增或删除，约 0.2–0.7 秒；回滚恢复全部名称。工具应定为 Destructive，先备份，不能仅比较电缆数量。— S34。
+- **设备清单需要非空条目才能验证导入效果**：原清单 XML 为 `<deviceList count="0"/>`，CSV 为 0 字节。`DeviceListEntry` 无公开构造函数，`DeviceService.CreateDeviceListItem(project, partNumber, variant)` 可创建条目；创建 2 条后，默认 XML、`XDLXmlExporter`、`XDLCsvImporterExporter` 均完成导出 → 删除 → 导入恢复 2 条（新对象编号）→ 回滚恢复 0 条，单次 action 约 20–150 毫秒。— S34。
+- **部件清单 XML 导入可用但慢**：默认/`XPalXmlExporter` 导出约 14 MB，51–64 秒；`MODE` 省略、`1`、`2` 的导入均为 58–83 秒，部件引用 2,900 → 2,902 → 回滚恢复 2,900。EPLAN 导入时只读打开部件数据库；未使用 `IMPORTTOSYSTEM`，CSV 因 S25 的访问冲突记录而避开。工具需要分钟级长超时和时间余量。— S34。
+- 🔴 **PLC 自导出再导入也不可靠匹配已有设备**：`Phoenix1` 用 `PlcDcXMLExchangerUniversal` 导出 431 KB `.pbf`，用 `PlcDcAMLExchangerGeneral` 导出 96–104 KB `.aml`（含 `AutomationML AR APC V1.4.0`），r1 约 2.3 秒。`IMPORTMATCH=0`、`2`、省略均新增对象：功能 2,876 → 3,326（标准格式，新增 450）/ 2,913（AML，新增 37），PLC 盒 20 → 34 / 33；标准格式 `0`/省略的 450 个全名全部重复，AML 有 36 个重复，包括 `=F+A2-KE1`。标准格式 `2` 改名新增并记录“标记一个或多个对象以将其删除.”；`1` 会走比较对话框，始终未使用。只能限制在尚不含这些设备的目标项目，不能当作已有设备的静默更新。— S34。
+- **PDF 注释仍缺有效批注样本**：未修改的 EPLAN 自导出 PDF 导入返回 `true`，注释仍为 0；pypdf 添加注释后，全量重写和保留原字节、trailer `/ID`、EPLAN Info 键（`/ProjectId`、`/PageOffset` 等）的增量更新均返回 `false`，系统消息为“PDF 文件无法由 Eplan 生成并因此不能导入.”。需取得 Adobe Reader / Acrobat 批注 PDF 并验证后再写工具规格。— S34。
+- 完成执行的探针均在 `SafetyPoint` 内，显式 `Rollback()` 恢复可观测的名称、条目和业务计数，未出现对话框，主窗口未禁用；这不保证 `.edb` 逐字节恢复，r3 电缆模式结束仍有 18 个文件哈希不同，也不能推广到进程崩溃时的恢复。— S34。
+- 🔴 **不要释放 EPLAN 返回的 `StorableObject`**（finder、属性或集合返回的 `Function`、PLC、`DeviceListEntry` 等），工厂创建的项目条目也交给回滚，不调用 `Dispose`。r2 在约 5 秒内发生原生堆损坏 `0xc0000374`（`ntdll.dll`），无 .NET 异常、无报告；r3 只释放辅助对象（`PropertyValue`、一次获取并释放的属性列表、finder、过滤器、context、服务等），探针完成。不能把所有 `IDisposable` 的数据模型对象都包进 `using`。— S34。
+
 ### A38. EPLAN 事件（spike S33，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S33](../../spikes/S33-events/README.md)。
 - `new EventHandler(名称)` 加 `EplanNameEvent` 订阅事件；通配符 `*` 收到全部事件及其名称，`onActionStart.String.*`、`onActionEnd.String.*` 也有效。事件都在主线程上、在操作内部同步触发。— S33。
