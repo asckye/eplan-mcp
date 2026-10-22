@@ -9,8 +9,10 @@ public interface IPlaceholderWriter
 {
     /// <summary>
     /// Finds the one placeholder on <paramref name="page"/> named <paramref name="name"/> that has
-    /// <paramref name="valueSet"/>, as the operation chose it in the same call, applies the value set and returns the
-    /// placeholder read again as <see cref="IPlaceholderReader"/> reads it, in EPLAN's user interface language.
+    /// <paramref name="valueSet"/>, as the operation chose it in the same call, reads its current values, applies the
+    /// value set and reads the placeholder again as <see cref="IPlaceholderReader"/> reads it, in EPLAN's user interface
+    /// language. The current values are read here because EPLAN gives them only for a locked placeholder, as the
+    /// transaction's SafetyPoint makes it (api-notes A14, A33); a refusal throws.
     /// </summary>
-    public PlaceholderRecord Apply(string projectPath, string page, string name, string valueSet);
+    public PlaceholderApplied Apply(string projectPath, string page, string name, string valueSet);
 }

@@ -472,9 +472,14 @@ public sealed class SerializerCompatibilityTests
                     Values = [new PlaceholderValue { ValueSet = "V", Variable = "T1", Text = "电压", TextLanguage = "de_DE" }],
                     CurrentValues = [new PlaceholderValue { Text = "电压" }, new PlaceholderValue()],
                 },
-                new PlaceholderItem(),
+                new PlaceholderItem
+                {
+                    Page = "=TM2+A1&EFS1/1",
+                    Values = [new PlaceholderValue { ValueSet = "V", Variable = "T1", Text = "电压" }],
+                },
             ],
             Total = 2,
+            CurrentValuesUnavailable = 1,
         },
         new PlaceholderListData(),
         new PlaceholderApplyArgs { Project = "Line1", Page = "=TM1+A1&EFS1/1", Placeholder = string.Empty, ValueSet = "mA", Fingerprint = "9f86" },

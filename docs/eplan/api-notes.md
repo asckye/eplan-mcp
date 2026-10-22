@@ -226,6 +226,7 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 - `WindowMacro.Open(path, project)` 后，对每种表达类型的每个变体 `ChangeCurrentVariant`，`Objects` 中的 `PlaceHolder` 能读出名称、值集（`NumberOfRecords`、`get_NameOfRecord(i)`）、变量（`VariableNames`）和值表（`get_Value(record, variable)`）。C# 中 `NameOfRecord`、`Value` 是带参数的属性，要调用访问器方法。扫描 `$(MD_MACROS)` 下 695 个宏、1,751 个变体用时 21 秒，72 个宏带占位符（38 个带值集，最多 8 个），项目页数不变。— S29。
 - `DMObjectsFinder.GetPlaceholdersWithFilterScheme(null)` 列出项目中的占位符（示例项目 2 个，值集 `V`、`mA`）。— S29。
 - 插入宏后 `ApplyRecord(name)` 不到 0.01 秒，`GetAllCurrentValues()` 随值集改变；`AddRecord(name)` 返回新值集的序号，`SetValue(record, variable, MultiLangString)` 写入的值能读回并应用。插入和应用都随 `SafetyPoint.Rollback()` 撤销。值以多语言字符串存储。提交后的持久性和 Ctrl+Z 未验证。— S29。
+- `PlaceHolder.GetAllCurrentValues()` 在占位符没有锁定时抛 `LockingException`（写存取前没有加锁该对象），只读操作中不能调用；在 `SafetyPoint` 中可以读（自动锁定，A14）。— 2026-10-22，写副本上的 Large 测试。
 
 ### A32. 对象标识与整个项目的读取耗时（spike S28，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S28](../../spikes/S28-identity-extract/README.md)。只读。

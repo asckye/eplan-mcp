@@ -30,7 +30,7 @@ public sealed class PlaceholderApplyToolTests : IDisposable
     public void Dispose() => _harness.Dispose();
 
     [Fact]
-    public async Task ADryRun_ShowsTheValuesAndTheCurrentValues_AndChangesNothing()
+    public async Task ADryRun_ShowsTheValuesWithoutCurrentValues_AndChangesNothing()
     {
         CallToolResult result = await Apply(dryRun: true);
 
@@ -38,8 +38,9 @@ public sealed class PlaceholderApplyToolTests : IDisposable
         Assert.Equal(("not_started", true, "mA"), (data.GetProperty("execution").GetString(), data.GetProperty("dryRun").GetBoolean(), data.GetProperty("valueSet").GetString()));
         Assert.Equal(("", Page), (data.GetProperty("placeholder").GetProperty("name").GetString(), data.GetProperty("placeholder").GetProperty("page").GetString()));
         Assert.Equal([("T1", "4-20 mA"), ("T2", null)], data.GetProperty("values").EnumerateArray().Select(v => (v.GetProperty("variable").GetString(), v.GetProperty("text").GetString())));
-        Assert.Equal(["0-10 V", "10 V"], data.GetProperty("currentValuesBefore").EnumerateArray().Select(v => v.GetProperty("text").GetString()));
+        Assert.False(data.TryGetProperty("currentValuesBefore", out _));
         Assert.False(data.TryGetProperty("currentValuesAfter", out _));
+        Assert.False(data.TryGetProperty("currentValuesChanged", out _));
         Assert.Equal(JsonValueKind.Null, data.GetProperty("undo").ValueKind);
         Assert.Equal("Dry run: would apply the value set to the placeholder. Nothing was changed.", WriteToolHarness.Text(result, 0));
         Assert.Empty(_harness.Bridge.Writes);
@@ -52,6 +53,7 @@ public sealed class PlaceholderApplyToolTests : IDisposable
 
         JsonElement data = WriteToolHarness.Structured(result);
         Assert.Equal(("committed", "AI: eplan_placeholder_apply", true), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("currentValuesChanged").GetBoolean()));
+        Assert.Equal(["0-10 V", "10 V"], data.GetProperty("currentValuesBefore").EnumerateArray().Select(v => v.GetProperty("text").GetString()));
         Assert.Equal(["4-20 mA", "20 mA"], data.GetProperty("currentValuesAfter").EnumerateArray().Select(v => v.GetProperty("text").GetString()));
         Assert.Equal(JsonValueKind.Null, data.GetProperty("hint").ValueKind);
         Assert.Equal("Applied the value set to the placeholder; its current values changed. Ctrl+Z in EPLAN undoes this step.", WriteToolHarness.Text(result, 0));
@@ -124,6 +126,7 @@ public sealed class PlaceholderApplyToolTests : IDisposable
         ApprovalQuestion question = Assert.Single(channel.Questions);
         WritePlan plan = question.Plan;
         Assert.Equal("committed", data.GetProperty("execution").GetString());
+        Assert.False(plan.Details!.ContainsKey("currentValues"));
         Assert.Equal("apply value set 'mA' to placeholder =TM1+A1&EFS1/1 (no name)", Assert.Single(WritePipeline.ChangeLines(plan)));
         string[] form = [.. ApprovalTexts.For(question, CultureInfo.GetCultureInfo("en-US")).Changes];
         Assert.Equal(["Apply value set mA to placeholder =TM1+A1&EFS1/1 (no name)", string.Empty, "The value set's values:", "T1 = 4-20 mA", "T2 = "], form);
@@ -146,7 +149,6 @@ public sealed class PlaceholderApplyToolTests : IDisposable
             ["page"] = Page,
             ["placeholder"] = string.Empty,
             ["values"] = "T1\t4-20 mA\nT2\t",
-            ["currentValues"] = "0-10 V\n10 V",
             ["assignedObjects"] = "2",
         };
         return plan;

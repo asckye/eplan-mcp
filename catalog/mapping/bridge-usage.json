@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "d7612cad",
-  "sourceHash": "sha256:e14fd665db36c018b5e8e0a277cdbbd95f6cab285bc09f6f1965c6e13bcc4136",
+  "scannedSources": "d7612cad + uncommitted changes",
+  "sourceHash": "sha256:ca88a546feefa86c9c804cb55784e9c27a5eda3a1914d18cda1e2c43fb68f847",
   "operations": [
     {
       "name": "approval.ask",
@@ -3850,7 +3850,7 @@
     "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues": [
       {
         "adapter": "EplanPlaceholderReader",
-        "member": "Record",
+        "member": "CurrentValues",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
         "access": [
           "call"
@@ -4543,7 +4543,7 @@
       },
       {
         "adapter": "EplanPlaceholderReader",
-        "member": "Record",
+        "member": "CurrentValues",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
         "access": [
           "call"
@@ -10910,7 +10910,7 @@
       },
       {
         "adapter": "EplanPlaceholderReader",
-        "member": "Record",
+        "member": "CurrentValues",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
         "access": [
           "get"
@@ -12474,6 +12474,19 @@
           "terminal.renumber.execute",
           "translation.export.plan",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPlaceholderReader",
+        "member": "Record",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placeholder.apply.execute",
+          "placeholder.apply.plan",
+          "placeholder.list"
         ]
       }
     ],
@@ -14591,6 +14604,19 @@
     "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
       {
         "adapter": "EplanPlaceholderReader",
+        "member": "CurrentValues",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placeholder.apply.execute",
+          "placeholder.apply.plan",
+          "placeholder.list"
+        ]
+      },
+      {
+        "adapter": "EplanPlaceholderReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
         "access": [
@@ -16316,19 +16342,6 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
         ]
       },
       {

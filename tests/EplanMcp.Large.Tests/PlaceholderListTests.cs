@@ -43,7 +43,7 @@ public sealed class PlaceholderListTests(LiveEplan eplan)
     }
 
     [Fact]
-    public async Task Detailed_GivesFourValuesAndTwoCurrentValues_AndLeavesTheProjectFilesUnchanged()
+    public async Task Detailed_GivesFourValuesAndAvailableCurrentValues_AndLeavesTheProjectFilesUnchanged()
     {
         Dictionary<string, (long Size, DateTime Written)> before = NoSideEffectTests.ProjectFiles(eplan.ProjectPath, withUserData: true);
 
@@ -53,11 +53,18 @@ public sealed class PlaceholderListTests(LiveEplan eplan)
         foreach (JsonElement placeholder in listed.GetProperty("placeholders").EnumerateArray())
         {
             JsonElement[] values = [.. placeholder.GetProperty("values").EnumerateArray()];
-            JsonElement[] current = [.. placeholder.GetProperty("currentValues").EnumerateArray()];
             Assert.Equal([("V", "T1"), ("V", "T2"), ("mA", "T1"), ("mA", "T2")], values.Select(v => (v.GetProperty("valueSet").GetString(), v.GetProperty("variable").GetString())));
             Assert.Contains(values, v => v.GetProperty("text").GetString() is { Length: > 0 });
-            Assert.Equal(2, current.Length);
-            TestContext.Current.TestOutputHelper?.WriteLine($"{placeholder.GetProperty("page")}: values {JsonSerializer.Serialize(values)}; current {JsonSerializer.Serialize(current)}");
+            if (placeholder.TryGetProperty("currentValues", out JsonElement current))
+            {
+                Assert.Equal(2, current.GetArrayLength());
+            }
+            else
+            {
+                Assert.Contains("it reads them only for a locked placeholder", listed.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            }
+
+            TestContext.Current.TestOutputHelper?.WriteLine($"{placeholder.GetProperty("page")}: values {JsonSerializer.Serialize(values)}; current {(current.ValueKind == JsonValueKind.Undefined ? "unavailable" : current.GetRawText())}");
         }
 
         string[] changed = [.. after.Where(f => !before.TryGetValue(f.Key, out var old) || old != f.Value).Select(f => f.Key).Concat(before.Keys.Except(after.Keys))];

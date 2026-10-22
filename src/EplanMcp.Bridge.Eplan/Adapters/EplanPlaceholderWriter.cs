@@ -11,12 +11,13 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// overload with <c>bApplyPageAndProjectData</c> is not verified and not called. S29 applied value sets inside a
 /// SafetyPoint and rolled them back; the operation's transaction adds the UndoStep and QuietModeStep, and whether the
 /// result stays after the commit and one Ctrl+Z undoes it is left to the Large test (tool spec, section 5). The
-/// placeholder is found again as the operation chose it and read back with <see cref="EplanPlaceholderReader.Record"/>.
+/// placeholder is found again as the operation chose it and read back with <see cref="EplanPlaceholderReader.Record"/>;
+/// its current values are read only here, before and after, as EPLAN gives them only for a locked placeholder (A33).
 /// Main thread, inside the operation's transaction.
 /// </summary>
 internal sealed class EplanPlaceholderWriter : IPlaceholderWriter
 {
-    public PlaceholderRecord Apply(string projectPath, string page, string name, string valueSet)
+    public PlaceholderApplied Apply(string projectPath, string page, string name, string valueSet)
     {
         MainThread.Assert();
         TextLanguage language = EplanText.Language(null);
@@ -28,8 +29,13 @@ internal sealed class EplanPlaceholderWriter : IPlaceholderWriter
             throw new InvalidOperationException($"Expected one placeholder to apply the value set to, found {found.Length}.");
         }
 
+        // The current values before and after: only here, where the SafetyPoint locks the placeholder (A14, A33); a
+        // LockingException would roll back and become LOCK_FAILED.
+        List<PlaceholderText> before = EplanPlaceholderReader.CurrentValues(found[0], language);
         PlaceHolderApi.ApplyRecord(found[0], valueSet);
-        return EplanPlaceholderReader.Record(found[0], language);
+        PlaceholderRecord after = EplanPlaceholderReader.Record(found[0], language, currentValues: false);
+        after.CurrentValues = EplanPlaceholderReader.CurrentValues(found[0], language);
+        return new PlaceholderApplied { Before = before, After = after };
     }
 
     private static bool HasValueSet(PlaceHolder holder, string valueSet) =>

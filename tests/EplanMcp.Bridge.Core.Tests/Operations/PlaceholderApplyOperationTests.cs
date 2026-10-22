@@ -28,7 +28,7 @@ public sealed class PlaceholderApplyOperationTests
     }
 
     [Fact]
-    public void Plan_NamesTheValueSet_AndGivesItsValuesAndTheCurrentValuesInTheDetails()
+    public void Plan_NamesTheValueSet_AndGivesItsValuesInTheDetails()
     {
         WritePlan plan = Plan(Args("mA"));
 
@@ -36,18 +36,34 @@ public sealed class PlaceholderApplyOperationTests
         Assert.Equal(("update", "placeholder", Tm1 + " (no name)", "value set", null, "mA"), (change.Action, change.Kind, change.Name, change.Property, change.OldValue, change.NewValue));
         Assert.Equal(("Line1", _line1.Path), (plan.Project, plan.ProjectPath));
         Assert.Equal("T1\t4-20 mA\nT2\t20 mA", plan.Details!["values"]);
-        Assert.Equal("0-10 V\n10 V", plan.Details["currentValues"]);
+        Assert.False(plan.Details.ContainsKey("currentValues"));
         Assert.Equal((Tm1, string.Empty, "2"), (plan.Details["page"], plan.Details["placeholder"], plan.Details["assignedObjects"]));
         Assert.Equal(64, plan.Fingerprint.Length);
         Assert.Empty(_transactions.Calls);
     }
 
     [Fact]
-    public void Plan_TheFingerprint_FollowsTheValueSetAndTheCurrentValues()
+    public void Plan_NeverAsksForTheCurrentValues_WhichEplanRefusesOutsideTheTransaction()
+    {
+        // 2026-10-22: GetAllCurrentValues threw LockingException in the plan, so every call failed with LOCK_FAILED,
+        // even one that the policy then refuses (api-notes A33).
+        _reader.Unlocked = true;
+        _reader.ThrowWhenAsked = true;
+
+        WritePlan plan = Plan(Args("mA"));
+        BridgeError missing = Assert.Throws<BridgeErrorException>(() => Plan(Args("X"))).Error;
+
+        Assert.Equal("mA", plan.Changes[0].NewValue);
+        Assert.Equal(ErrorReason.InvalidArgument, missing.Reason);
+        Assert.All(_reader.Reads, read => Assert.False(read.CurrentValues));
+    }
+
+    [Fact]
+    public void Plan_TheFingerprint_FollowsTheValueSetAndTheStoredValues()
     {
         string mA = Plan(Args("mA")).Fingerprint;
         string v = Plan(Args("V")).Fingerprint;
-        _reader.Placeholders[0].CurrentValues[0].Raw = "??_??@changed;";
+        _reader.Placeholders[0].Values[2].Value.Raw = "??_??@changed;";
 
         Assert.NotEqual(mA, v);
         Assert.NotEqual(mA, Plan(Args("mA")).Fingerprint);
@@ -118,7 +134,7 @@ public sealed class PlaceholderApplyOperationTests
     {
         PlaceholderApplyArgs args = Args("mA");
         args.Fingerprint = Plan(args).Fingerprint;
-        _reader.Placeholders[0].CurrentValues[1].Raw = "??_??@edited;";
+        _reader.Placeholders[0].Values[3].Value.Raw = "??_??@edited;";
 
         BridgeError stale = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
         BridgeError none = Assert.Throws<BridgeErrorException>(() => Execute(Args("mA"))).Error;
@@ -161,7 +177,8 @@ public sealed class PlaceholderApplyOperationTests
 
         public bool LoseValueSet { get; set; }
 
-        public PlaceholderRecord Apply(string projectPath, string page, string name, string valueSet)
+        /// <summary>The current values inside the transaction, where EPLAN gives them: the placeholder's.</summary>
+        public PlaceholderApplied Apply(string projectPath, string page, string name, string valueSet)
         {
             Applied.Add((page, name, valueSet));
             PlaceholderRecord placeholder = Assert.Single(reader.Placeholders, p => p.Page == page && p.Name == name);
@@ -174,7 +191,7 @@ public sealed class PlaceholderApplyOperationTests
                 Values = placeholder.Values,
                 CurrentValues = [.. placeholder.Values.Where(v => v.ValueSet == valueSet).Select(v => new PlaceholderText { Text = v.Value.Text, Raw = v.Value.Raw })],
             };
-            return after;
+            return new PlaceholderApplied { Before = placeholder.CurrentValues!, After = after };
         }
     }
 }

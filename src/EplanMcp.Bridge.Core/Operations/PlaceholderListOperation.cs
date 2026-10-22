@@ -5,7 +5,9 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>
 /// <see cref="OperationNames.PlaceholderList"/> (docs/tools/eplan_placeholder_list.md): resolves the project and the
 /// page, reads every placeholder in the same main-thread call, keeps those on the page, sorts them by page and name
-/// (EPLAN's order for the same page and name) and slices them. The values are returned only when detailed. Reads only.
+/// (EPLAN's order for the same page and name) and slices them. The values are read and returned only when detailed;
+/// the current values only of placeholders EPLAN gives them for (api-notes A33: only locked ones), the others counted
+/// in <see cref="PlaceholderListData.CurrentValuesUnavailable"/>. Reads only.
 /// </summary>
 public sealed class PlaceholderListOperation(IProjectCatalog catalog, IPageReader pages, IPlaceholderReader reader) : Operation<PlaceholderListArgs, PlaceholderListData>
 {
@@ -24,7 +26,7 @@ public sealed class PlaceholderListOperation(IProjectCatalog catalog, IPageReade
         Variables = placeholder.Properties.VariableNames,
         AssignedObjects = placeholder.AssignedObjects,
         Values = detailed ? [.. placeholder.Values.Select(v => Value(v.Value, v.ValueSet, v.Variable))] : null,
-        CurrentValues = detailed ? [.. placeholder.CurrentValues.Select(c => Value(c, null, null))] : null,
+        CurrentValues = detailed && placeholder.CurrentValues is { } current ? [.. current.Select(c => Value(c, null, null))] : null,
     };
 
     /// <summary>A value as the tools return it: its text and fallback language, never the raw value.</summary>
@@ -35,13 +37,15 @@ public sealed class PlaceholderListOperation(IProjectCatalog catalog, IPageReade
     {
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
         string? page = args.Page is null ? null : PageScope.Resolve([args.Page], project, pages)![0];
-        List<PlaceholderRecord> placeholders = [.. Sorted(reader.Read(project.Path, args.Language).Where(p => page is null || p.Page == page))];
+        List<PlaceholderRecord> placeholders = [.. Sorted(reader.Read(project.Path, args.Language, args.Detailed).Where(p => page is null || p.Page == page))];
+        List<PlaceholderRecord> slice = Paging.Slice(placeholders, args);
         return new PlaceholderListData
         {
             Project = project.Name,
             Page = page,
-            Placeholders = [.. Paging.Slice(placeholders, args).Select(p => Item(p, args.Detailed))],
+            Placeholders = [.. slice.Select(p => Item(p, args.Detailed))],
             Total = placeholders.Count,
+            CurrentValuesUnavailable = args.Detailed ? slice.Count(p => p.CurrentValuesRefused) : 0,
         };
     }
 }

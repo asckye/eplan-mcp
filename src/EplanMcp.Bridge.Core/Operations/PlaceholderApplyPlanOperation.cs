@@ -5,8 +5,9 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// <see cref="OperationNames.PlaceholderApplyPlan"/> (docs/tools/eplan_placeholder_apply.md, section 5): finds the
-/// placeholder and returns one change, the value set, with the values it applies and the current values in the details,
-/// and the fingerprint. EPLAN does not tell which value set is applied now, so the change has no old value. Reads only.
+/// placeholder and returns one change, the value set, with the values it applies in the details, and the fingerprint.
+/// EPLAN does not tell which value set is applied now, so the change has no old value; the current values are not read,
+/// as EPLAN gives them only inside the write's transaction (api-notes A33). Reads only.
 /// </summary>
 public sealed class PlaceholderApplyPlanOperation(IProjectCatalog catalog, IPageReader pages, IPlaceholderReader reader) : Operation<PlaceholderApplyArgs, WritePlan>
 {
@@ -26,7 +27,6 @@ public sealed class PlaceholderApplyPlanOperation(IProjectCatalog catalog, IPage
                 ["page"] = request.Page,
                 ["placeholder"] = request.Target.Name,
                 ["values"] = string.Join("\n", request.Values().Select(v => Line(v.Variable) + "\t" + Line(v.Value.Text ?? string.Empty))),
-                ["currentValues"] = string.Join("\n", request.Target.CurrentValues.Select(c => Line(c.Text ?? string.Empty))),
                 ["assignedObjects"] = request.Target.AssignedObjects.ToString(CultureInfo.InvariantCulture),
             },
         };

@@ -47,7 +47,8 @@ internal sealed class PlaceholderApplyRequest
 
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
         string page = PageScope.Resolve([args.Page!], project, pages)![0];
-        PlaceholderRecord[] onPage = [.. PlaceholderListOperation.Sorted(reader.Read(project.Path, null).Where(p => p.Page == page))];
+        // No current values here: outside the write's transaction EPLAN refuses them (api-notes A33).
+        PlaceholderRecord[] onPage = [.. PlaceholderListOperation.Sorted(reader.Read(project.Path, null, currentValues: false).Where(p => p.Page == page))];
         PlaceholderRecord[] named = [.. onPage.Where(p => args.Placeholder is null || p.Name == args.Placeholder)];
         PlaceholderRecord[] matching = [.. named.Where(p => p.ValueSets.Contains(args.ValueSet!, StringComparer.Ordinal))];
         return matching.Length switch
@@ -63,14 +64,13 @@ internal sealed class PlaceholderApplyRequest
         };
     }
 
-    /// <summary>The placeholder, its values and current values as stored, and the value set: the plan's state (M3 design 4.2).</summary>
+    /// <summary>The placeholder, its values as stored, and the value set: the plan's state (M3 design 4.2).</summary>
     public string Fingerprint() => Operations.Fingerprint.Of(
     [
         "project\t" + Project.Path,
         "placeholder\t" + Page + "\t" + Target.Name + "\t" + ValueSet,
         .. Target.Properties.VariableNames.Select((v, i) => "variable\t" + i.ToString(CultureInfo.InvariantCulture) + "\t" + v),
         .. Target.Values.Select(v => "value\t" + v.ValueSet + "\t" + v.Variable + "\t" + v.Value.Raw),
-        .. Target.CurrentValues.Select((c, i) => "current\t" + i.ToString(CultureInfo.InvariantCulture) + "\t" + c.Raw),
     ]);
 
     /// <summary>The value set's value of each variable, in the variables' order.</summary>

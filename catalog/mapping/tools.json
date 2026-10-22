@@ -5072,6 +5072,7 @@
         "T:Eplan.EplApi.Base.ISOCode",
         "T:Eplan.EplApi.Base.ISOCode.Language",
         "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.LockingException",
         "T:Eplan.EplApi.Base.MultiLangString",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder",
@@ -5088,6 +5089,7 @@
         "spec": "docs/tools/eplan_placeholder_apply.md",
         "specStatus": "Proposed（API 能力覆盖第一期的修改样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，**提交后的持久性和 Ctrl+Z 待实机验证**（第 5 节）",
         "apiNotes": [
+          "A14",
           "A33"
         ],
         "tests": [
@@ -5164,6 +5166,7 @@
         "T:Eplan.EplApi.Base.ISOCode",
         "T:Eplan.EplApi.Base.ISOCode.Language",
         "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.LockingException",
         "T:Eplan.EplApi.Base.MultiLangString",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder",
@@ -5196,11 +5199,6 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
-            "name": "PlaceholderApplyTests",
-            "size": "Large",
-            "file": "tests/EplanMcp.Large.Tests/PlaceholderApplyTests.cs"
           },
           {
             "name": "PlaceholderListTests",

@@ -82,7 +82,7 @@ internal sealed class PlaceholderWriteTools
             },
             ValueSet = ResultShaper.CleanText(data?.ValueSet ?? args.ValueSet),
             Values = data is null ? PlannedValues(details) : [.. data.Values.Select(v => PlaceholderTools.Value(v, withNames: true))],
-            CurrentValuesBefore = data is null ? PlannedCurrent(details) : [.. data.CurrentValuesBefore.Select(v => PlaceholderTools.Value(v, withNames: false))],
+            CurrentValuesBefore = data?.CurrentValuesBefore.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
             CurrentValuesAfter = data?.CurrentValuesAfter.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
             CurrentValuesChanged = data?.CurrentValuesChanged,
             Undo = committed ? "AI: " + ApplyTool : null,
@@ -107,10 +107,6 @@ internal sealed class PlaceholderWriteTools
             Text = fields.Length > 1 && fields[1].Length > 0 ? ResultShaper.CleanText(fields[1]) : null,
         }),
     ];
-
-    /// <summary>The plan's <c>currentValues</c> details, one text per line.</summary>
-    private static List<PlaceholderListResult.ValueEntry> PlannedCurrent(Dictionary<string, string> details) =>
-        [.. Lines(details, "currentValues").Select(line => new PlaceholderListResult.ValueEntry { Text = line.Length > 0 ? ResultShaper.CleanText(line) : null })];
 
     private static string[] Lines(Dictionary<string, string> details, string key) =>
         details.GetValueOrDefault(key) is { Length: > 0 } text ? text.Split('\n') : [];

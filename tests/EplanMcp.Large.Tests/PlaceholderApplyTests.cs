@@ -23,16 +23,17 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
 
         JsonElement dryRun = await eplan.CallAsync("eplan_placeholder_apply", new(mA) { ["dry_run"] = true });
         JsonElement appliedMa = await eplan.CallAsync("eplan_placeholder_apply", mA);
-        string[] afterMa = await CurrentTextsAsync(project);
+        string[] afterMa = Texts(appliedMa.GetProperty("currentValuesAfter"));
         JsonElement appliedV = await eplan.CallAsync("eplan_placeholder_apply", new(mA) { ["value_set"] = "V" });
-        string[] afterV = await CurrentTextsAsync(project);
+        string[] afterV = Texts(appliedV.GetProperty("currentValuesAfter"));
 
         Assert.Equal(("not_started", JsonValueKind.Null), (dryRun.GetProperty("execution").GetString(), dryRun.GetProperty("undo").ValueKind));
         Assert.Equal(["T1", "T2"], dryRun.GetProperty("values").EnumerateArray().Select(v => v.GetProperty("variable").GetString()));
+        Assert.False(dryRun.TryGetProperty("currentValuesBefore", out _));
         Assert.Equal(("committed", "AI: eplan_placeholder_apply"), (appliedMa.GetProperty("execution").GetString(), appliedMa.GetProperty("undo").GetString()));
         Assert.Equal("committed", appliedV.GetProperty("execution").GetString());
 
-        // S29: after ApplyRecord the current values are the value set's texts; here read again by eplan_placeholder_list.
+        // A33: current values require a locked placeholder, so use the read-back inside the apply transaction.
         Assert.Equal(Texts(appliedMa.GetProperty("values")).Order(StringComparer.Ordinal), afterMa.Order(StringComparer.Ordinal));
         Assert.Equal(Texts(appliedV.GetProperty("values")).Order(StringComparer.Ordinal), afterV.Order(StringComparer.Ordinal));
         if (!Texts(appliedMa.GetProperty("values")).Order(StringComparer.Ordinal).SequenceEqual(Texts(appliedV.GetProperty("values")).Order(StringComparer.Ordinal)))
@@ -41,8 +42,8 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
         }
 
         TestContext.Current.TestOutputHelper?.WriteLine(
-            $"dry run: {dryRun.GetProperty("currentValuesBefore")}; mA: {appliedMa.GetProperty("values")} -> {JsonSerializer.Serialize(afterMa)} (changed: {appliedMa.GetProperty("currentValuesChanged")}); " +
-            $"V: {appliedV.GetProperty("values")} -> {JsonSerializer.Serialize(afterV)}. To check Ctrl+Z, apply mA once more with only the write copy open, press Ctrl+Z, and list the placeholder: its current values must be V's again.");
+            $"dry run: {dryRun.GetProperty("values")}; mA: {appliedMa.GetProperty("currentValuesBefore")} -> {JsonSerializer.Serialize(afterMa)} (changed: {appliedMa.GetProperty("currentValuesChanged")}); " +
+            $"V: {appliedV.GetProperty("currentValuesBefore")} -> {JsonSerializer.Serialize(afterV)}. To check Ctrl+Z, apply mA once more with only the write copy open, press Ctrl+Z, and apply mA again: its currentValuesBefore must be V's values.");
     }
 
     [Fact]
@@ -65,12 +66,6 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
         JsonElement error = await host.ErrorAsync("eplan_placeholder_apply", new() { ["project"] = host.Outside, ["page"] = Page, ["value_set"] = "mA" });
 
         Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
-    }
-
-    private async Task<string[]> CurrentTextsAsync(string project)
-    {
-        JsonElement listed = await eplan.CallAsync("eplan_placeholder_list", new() { ["project"] = project, ["page"] = Page, ["response_format"] = "detailed" });
-        return Texts(Assert.Single(listed.GetProperty("placeholders").EnumerateArray()).GetProperty("currentValues"));
     }
 
     private static string[] Texts(JsonElement values) => [.. values.EnumerateArray().Select(v => v.GetProperty("text").GetString() ?? string.Empty)];
