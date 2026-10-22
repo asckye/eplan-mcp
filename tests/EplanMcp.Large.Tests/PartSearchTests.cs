@@ -82,7 +82,9 @@ public sealed class PartSearchTests(LiveEplan eplan)
         await eplan.CallAsync("eplan_part_search", new() { ["query"] = "3RH21", ["language"] = "de_DE" });
 
         Dictionary<string, (long Size, DateTime Written)> after = Files(folder);
-        string[] changed = [.. after.Where(f => !before.TryGetValue(f.Key, out var old) || old != f.Value).Select(f => f.Key).Concat(before.Keys.Except(after.Keys))];
+        // User.eod/User.eox are EPLAN's per-user session record, rewritten whenever EPLAN touches the database (A30).
+        string[] changed = [.. after.Where(f => !before.TryGetValue(f.Key, out var old) || old != f.Value).Select(f => f.Key).Concat(before.Keys.Except(after.Keys))
+            .Where(f => !Path.GetFileName(f).StartsWith("User.", StringComparison.OrdinalIgnoreCase))];
         Assert.True(changed.Length == 0, "Changed by searching the parts database: " + string.Join(", ", changed));
     }
 
