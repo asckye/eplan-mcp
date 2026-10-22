@@ -413,7 +413,7 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 | 某步 `rolled_back` | — | 不变 |
 | 某步 `unknown` | 整个项目 | 该项目的全部项无效，并按 ADR-0010 暂停写入 |
 | EPLAN 的页事件（ADR-0026，经验证的） | 页 | 依赖这些页的项标为"待核对" |
-| `Page.ConnectionDirty`（**没有参数**） | 不知道是哪些页 | 依赖连接的全部项标为"待核对"：一个宽的待定范围 |
+| `onDMObjectsAltered`（S33 实测：修改项目时触发，回滚的修改也触发，**不带可读的范围**） | 不知道是哪些页、修改是否保留 | 该项目的缓存项标为"待核对"，再用页的修改日期（S31）找出变化的页，以内容哈希为准；原先设想的 `Page.ConnectionDirty` 事件不存在（S33） |
 | 项目关闭、重开，EPLAN 实例退出 | 项目或实例 | 全部项无效 |
 | 时间（TTL） | — | 来自快照的项默认 120 秒后标为"待核对"（可配置）；包和配置的项按摘要寻址，不过期 |
 
@@ -605,7 +605,7 @@ flowchart LR
 | **S30**（完成，2026-10-21） | 对象标识与项目在生命周期中的变化 | 结果见 [spike S30](../../spikes/S30-identity-lifecycle/README.md)；未做的："另存为"和复制项目、其他对象类型的编号分配。原定范围：同一份文件关闭再打开后 `ObjectIdentifier` 是否不变；删除后再新建时编号是否被重用、多快被重用；从基本项目新建、在 EPLAN 中"另存为"或复制之后是否保留原编号；复制、还原、新建时 `PROJ_GUID` 是否变化；`CreateProject` 的独占打开对后续读写、对工程师在界面中打开它有什么限制。旧版本升级（还原或打开旧版本项目是否自动、不可逆地升级，`OpenProject(…, 升级: false)` 和 `GetProjectDataCompatibility` 返回什么，`10043` 是否改写）**受环境所限**：本机只有 2026.0.3，等有旧版本的非客户样例再做 |
 | **S31**（完成，2026-10-21） | 快照提取的完整性与确定性 | 结果见 [spike S31](../../spikes/S31-snapshot/README.md)。原定范围：读取全部登记属性、连接点、端子、电缆芯线、PLC 地址、占位符的耗时和内存；项目不变时两次提取的内容哈希是否相同；位置的精度与核对容差；EPLAN 有没有可靠的项目修改标记；按页分块时单块的耗时；提取是否改写 `User.eod`（A17） |
 | **S32**（完成，2026-10-21） | 模块写回为宏、新建占位符、Cogineer 授权 | 结果见 [spike S32](../../spikes/S32-macro-create/README.md)；未做：Ctrl+Z、`ApplyRecord(名称, false)`、布尔值集、`PlaceHolderText`。原定范围： `WindowMacro.Create`、`PageMacro.Create` 把放置写成宏文件（写到 `$(MD_MACROS)` 之外），以及插入这样的宏；`PlaceHolder.Create`、`AddReference` 新建占位符，把值集写回宏文件；提交应用结果后的持久性和一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效（S29 没有覆盖）；`PlaceHolderText` 的用途；用 `License.HasOption` 检查 5 个 Cogineer 选项 |
-| **S33** | EPLAN 事件（ADR-0026 的前提） | 哪些事件名可用、参数是什么（例如 `Page.ConnectionDirty` 没有参数）、在哪个线程上触发、批量操作时的频率、`SafetyPoint` 回滚时是否也触发、处理函数的开销 |
+| **S33**（完成，2026-10-21） | EPLAN 事件（ADR-0026 的前提） | 结果见 [spike S33](../../spikes/S33-events/README.md)。原定范围： 哪些事件名可用、参数是什么（例如 `Page.ConnectionDirty` 没有参数）、在哪个线程上触发、批量操作时的频率、`SafetyPoint` 回滚时是否也触发、处理函数的开销 |
 
 ## 5. 安全与数据完整性
 - **级别**：导入、整理、构建、绑定只写 EplanMcp 自己的数据目录，按"本地数据"处理（4.5），写审计；改变项目锁和把候选设为正式规则，要工程师经审批渠道确认。读操作、规则检查、差异是 Read。`eplan_project_create` 是 Write。计划按最高步骤级别，Destructive 步骤照样每次审批（ADR-0023）。插件是 Code 级，默认关闭（ADR-0025）。

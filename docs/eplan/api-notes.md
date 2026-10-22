@@ -186,6 +186,12 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A38. EPLAN 事件（spike S33，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S33](../../spikes/S33-events/README.md)。
+- `new EventHandler(名称)` 加 `EplanNameEvent` 订阅事件；通配符 `*` 收到全部事件及其名称，`onActionStart.String.*`、`onActionEnd.String.*` 也有效。事件都在主线程上、在操作内部同步触发。— S33。
+- 修改项目时触发 `onDMObjectsAltered`、`onPreCommitTxn`、`onPreCloseUndo`，被 `SafetyPoint` 回滚的修改也触发；参数不是字符串（类型未查明），不说明改了哪里。打开项目触发 `API.PreOpenProject`、`Eplan.EplApi.OnPostOpenProject`（参数为项目路径）、`onPostOpenProject` 等，关闭触发 `onPreCloseProject`、`onPostCloseProject`。`Page.ConnectionDirty` 既不是事件也不是 API 成员（只有 `ChangeInfoService.ConnectionDirtyActive`）。— S33。
+- `ProjectManager.OpenProjects` 要在 `LockingStep` 中调用，否则抛出 `NoLockingStepException`（S063110）。— S33。
+
 ### A37. 模块写回为宏、新建占位符、授权选项（spike S32，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S32](../../spikes/S32-macro-create/README.md)。写入只在 scratch 副本上，在 `SafetyPoint` 中回滚。
 - `WindowMacro.Create(路径, MultiLine, 0, page.AllPlacements, 描述)` 把一页的 201 个放置写成 `.ema`（220 KB），`PageMacro.Create(路径, [page], 描述)` 写成 `.emp`；重新打开和再插入时，占位符、值集、变量、引用都保留。写出的宏文件记下 `SourceProject="<来源项目的完整路径>"`（含本机用户名）。— S32。
