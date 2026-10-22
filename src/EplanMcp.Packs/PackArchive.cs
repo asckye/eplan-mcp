@@ -99,7 +99,7 @@ public static class PackArchive
             string path = folder ? entry.FullName[..^1] : entry.FullName;
             string? problem = PackPath.Problem(path)
                 ?? (Nfc(path) is null ? "has a name that is not valid Unicode" : null)
-                ?? (ResourceTypes.IsExecutable(path) ? "is an executable or script type, which packs never hold" : null)
+                ?? ResourceTypes.Forbidden(path)
                 ?? (IsLink(entry) ? "is a symbolic link or reparse point" : null)
                 ?? (entry.IsEncrypted ? "is encrypted" : null)
                 ?? (folder && entry.Length != 0 ? "is a folder entry with content" : null)

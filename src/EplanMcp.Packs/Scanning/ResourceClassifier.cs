@@ -28,6 +28,10 @@ internal static partial class ResourceClassifier
         [".json"] = new(ResourceKind.MaterialMapping, null, Guessed: true),
         [".md"] = new(ResourceKind.Document, null, Guessed: false),
         [".txt"] = new(ResourceKind.Document, null, Guessed: false),
+        // Stored and hashed only, never opened or parsed (ADR-0024 revision of 2026-10-21); never taken as mappings.
+        [".xlsx"] = new(ResourceKind.Document, null, Guessed: false),
+        [".pdf"] = new(ResourceKind.Document, null, Guessed: false),
+        [".docx"] = new(ResourceKind.Document, null, Guessed: false),
         [".png"] = new(ResourceKind.Preview, null, Guessed: false),
         [".svg"] = new(ResourceKind.Preview, null, Guessed: false),
     };

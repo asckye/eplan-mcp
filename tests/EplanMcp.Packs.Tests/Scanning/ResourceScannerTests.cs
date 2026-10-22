@@ -160,15 +160,32 @@ public sealed class ResourceScannerTests : IDisposable
     public async Task Scan_TypesPacksNeverHold_AreErrors()
     {
         _folder.Write("Inputs/notes.xyz", "?");
-        _folder.Write("Inputs/parts.xlsx", "PK");
-        _folder.Write("Inputs/manual.pdf", "%PDF");
+        _folder.Write("Inputs/parts.xlsm", "PK");
         _folder.Write("Inputs/run.ps1", "Remove-Item");
 
         ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Inputs")));
 
-        Assert.Equal(4, result.Findings.Count(f => (f.Severity, f.Code) == (FindingSeverity.Error, "type_not_allowed")));
+        Assert.Equal(3, result.Findings.Count(f => (f.Severity, f.Code) == (FindingSeverity.Error, "type_not_allowed")));
         Assert.Contains(result.Findings, f => f.Subject == "Inputs/run.ps1" && f.Message.Contains("executable or script", StringComparison.Ordinal));
+        Assert.Contains(result.Findings, f => f.Subject == "Inputs/parts.xlsm" && f.Message.Contains("macro-enabled Office file", StringComparison.Ordinal));
         Assert.Empty(result.Resources);
+    }
+
+    [Fact]
+    public async Task Scan_OfficeAndPdfFiles_AreDocumentsStoredUnread_EvenWhenGivenAsMappings()
+    {
+        _folder.Write("Inputs/parts.xlsx", "PK");
+        _folder.Write("Inputs/manual.pdf", "%PDF");
+        _folder.Write("Inputs/guide.docx", "PK");
+        _folder.Write("Mapping/parts.xlsx", "PK");
+
+        ScanResult result = await ScanAsync(new ScanInput(_folder.PathOf("Inputs")), new ScanInput(_folder.PathOf("Mapping"), ResourceKind.MaterialMapping));
+
+        Assert.Equal(
+            ["resources/docs/Inputs/guide.docx", "resources/docs/Inputs/manual.pdf", "resources/docs/Inputs/parts.xlsx"],
+            result.Resources.Select(r => r.Resource.Path));
+        Assert.All(result.Resources, r => Assert.Equal((ResourceKind.Document, 0), (r.Resource.Kind, r.Facts.Count)));
+        Assert.Equal("Mapping/parts.xlsx", Assert.Single(result.Findings, f => f.Code == "type_not_allowed").Subject);
     }
 
     [Fact]
