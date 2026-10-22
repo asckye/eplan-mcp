@@ -379,6 +379,21 @@
       ]
     },
     {
+      "name": "eplan_asset_update",
+      "safety": "write",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_asset_update.md",
+      "small": 1,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_cable_get",
       "safety": "read",
       "operations": [
