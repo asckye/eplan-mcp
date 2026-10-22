@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Engineering packs (M6): the manifest, the directory and .eplanpack forms, the resource scanner. It reads EPLAN files as
+    plain files and never references the EPLAN API, so it builds and runs without EPLAN (EplanMcp.Ci.slnf).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>EplanMcp.Packs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EplanMcp.Packs.Tests" />
+  </ItemGroup>
+</Project>
