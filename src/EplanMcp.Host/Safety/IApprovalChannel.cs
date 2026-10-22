@@ -39,6 +39,12 @@ internal sealed record ApprovalQuestion(string RequestId, string Tool, string Ar
 
     /// <summary>For a write to system master data, the folder its backup goes into first (ADR-0019); null otherwise.</summary>
     public string? MasterDataBackupFolder { get; init; }
+
+    /// <summary>
+    /// For the confirmation of installing someone else's engineering pack (ADR-0024 section 4) instead of a write: what
+    /// the engineer confirms; <see cref="Plan"/> then lists no changes and its fingerprint is the pack digest.
+    /// </summary>
+    public Packs.PackInstallInfo? PackInstall { get; init; }
 }
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>
