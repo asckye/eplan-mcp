@@ -136,7 +136,8 @@ internal sealed class ApiCatalog
 
     private static bool Flag(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement value) && value.ValueKind == JsonValueKind.True;
 
-    private static IEnumerable<JsonElement> Lines(string path) =>
+    /// <summary>The JSON object on each non-empty line of a catalog <c>.jsonl</c> file.</summary>
+    internal static IEnumerable<JsonElement> Lines(string path) =>
         File.ReadLines(path).Where(l => l.Length > 0).Select(l => JsonDocument.Parse(l).RootElement.Clone());
 
     private void AddMember(JsonElement member, string ns)

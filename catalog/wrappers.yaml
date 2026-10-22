@@ -1,0 +1,16 @@
+# Internal building blocks generated from the catalog (docs/design/2026-10-21-api-capability-coverage.md, section 8).
+# `dotnet run --project eng/coverage -- generate` writes them; CI fails when they no longer match this file and the
+# catalog. Generated code is never an MCP tool, never reflects at run time, and counts as covered only where a Bridge
+# operation reaches it. List only what a tool uses, so that the output stays small enough to review.
+#
+# types: a type's doc-comment ID (T:…);
+#   properties: readable, non-indexed properties declared on it, copied into <Type>Properties (Contracts) by
+#               <Type>Api.Read (Bridge); string, bool, numbers, enums (as their name) and StringCollection only;
+#   overloads:  method groups by simple name; <Type>Api gets one typed method per overload with a plain signature
+#               and names the others with the reason (the overload table).
+catalog: eplan-2026.0.3
+types:
+  # eplan_placeholder_list, eplan_placeholder_apply (spike S29, api-notes A33).
+  - type: T:Eplan.EplApi.DataModel.Graphics.PlaceHolder
+    properties: [Name, NumberOfRecords, NumberOfVariables, VariableNames]
+    overloads: [ApplyRecord]
