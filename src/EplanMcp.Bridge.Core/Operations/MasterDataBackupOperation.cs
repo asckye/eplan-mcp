@@ -94,19 +94,25 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
         string folder = args.Folder ?? string.Empty;
         string name = args.ArchiveName ?? string.Empty;
         bool local = folder.Length > 3 && char.IsLetter(folder[0]) && folder[1] == ':' && folder[2] == '\\' && folder.IndexOf("..", StringComparison.Ordinal) < 0;
-        bool plain = name.Length is > 0 and <= 64 && name.All(c => char.IsLetterOrDigit(c) || c is '-' or '_') && name.All(c => c < 128);
-        return args.MaxSeconds > 0 && local && plain && Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any()
+        return args.MaxSeconds > 0 && local && IsPlainName(name) && Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any()
             ? folder
             : throw Failed("The write came without a new, empty backup folder.");
     }
 
-    /// <summary>The only entry of <paramref name="folder"/>, which must be a non-empty 7z archive with the parts extension.</summary>
-    private static string Archive(string folder)
+    /// <summary>An archive name as S24 used it: 1 to 64 ASCII letters, digits, <c>-</c> and <c>_</c>.</summary>
+    public static bool IsPlainName(string name) =>
+        name.Length is > 0 and <= 64 && name.All(c => char.IsLetterOrDigit(c) || c is '-' or '_') && name.All(c => c < 128);
+
+    /// <summary>
+    /// What is wrong with <paramref name="folder"/> after a backup, or null when its only entry is a non-empty 7z archive
+    /// with the parts extension; eplan_part_export's backup format checks its folder the same way.
+    /// </summary>
+    public static string? ArchiveProblem(string folder)
     {
         string[] entries = Directory.GetFileSystemEntries(folder);
         if (entries.Length != 1 || !File.Exists(entries[0]) || !entries[0].EndsWith(PartsExtension, StringComparison.OrdinalIgnoreCase))
         {
-            throw Failed($"The backup folder holds {Number(entries.Length)} entries instead of one {PartsExtension} archive.");
+            return $"The backup folder holds {Number(entries.Length)} entries instead of one {PartsExtension} archive.";
         }
 
         byte[] head = new byte[_sevenZip.Length];
@@ -116,10 +122,12 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
             read = stream.Read(head, 0, head.Length);
         }
 
-        return read == head.Length && head.SequenceEqual(_sevenZip)
-            ? entries[0]
-            : throw Failed("The backup archive is empty or not an archive.");
+        return read == head.Length && head.SequenceEqual(_sevenZip) ? null : "The backup archive is empty or not an archive.";
     }
+
+    /// <summary>The only entry of <paramref name="folder"/>, which must be a non-empty 7z archive with the parts extension.</summary>
+    private static string Archive(string folder) =>
+        ArchiveProblem(folder) is { } problem ? throw Failed(problem) : Directory.GetFileSystemEntries(folder)[0];
 
     /// <summary>BACKUP_FAILED with the problem in <c>metadata.problem</c>; the router logs the cause, or the problem itself.</summary>
     private static BridgeErrorException Failed(string problem, Exception? cause = null)

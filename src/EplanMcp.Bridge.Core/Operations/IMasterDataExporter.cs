@@ -3,7 +3,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Which system database an export reads (docs/tools/eplan_part_export.md, eplan_translation_export.md).</summary>
 public enum MasterDataExportKind
 {
-    /// <summary>The parts database EPLAN is configured with, as XML or EDZ.</summary>
+    /// <summary>The parts database EPLAN is configured with, as XML, EDZ or a backup archive.</summary>
     Parts,
 
     /// <summary>The translation database EPLAN is configured with, as tab-separated text or XML.</summary>
@@ -16,6 +16,9 @@ public enum MasterDataFormat
     Xml,
     Edz,
     Tab,
+
+    /// <summary>EPLAN's master-data backup archive of the whole parts database (<c>.zw6</c>), by <see cref="IMasterDataBackup"/>.</summary>
+    Backup,
 }
 
 /// <summary>What <see cref="IMasterDataExporter.ExportParts"/> found in the parts database.</summary>

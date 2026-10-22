@@ -4581,17 +4581,18 @@
     {
       "name": "eplan_part_export",
       "title": "Export parts from EPLAN's parts database",
-      "description": "Exports parts of EPLAN's parts database, which all projects share (not a project), as one file into a new folder the server creates. Find the part numbers with eplan_part_search first. edz adds macros and pictures but is slow (the sample database: 44 s, 128 MB): use it only for those. The database is not changed and no approval is needed. Example: {\"parts\": [\"SIE.3RH2122-1HB40\"]}.",
+      "description": "Exports parts of EPLAN's parts database, which all projects share (not a project), as one file into a new folder the server creates. Find the part numbers with eplan_part_search first. edz adds macros and pictures but is slow (44 s, 128 MB for the sample); backup is EPLAN's restorable archive (.zw6) of the whole database. Nothing is changed, no approval. Example: {\"parts\": [\"SIE.3RH2122-1HB40\"]}.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "format": {
-            "description": "xml: part data only; edz: with macros and pictures",
+            "description": "xml: part data; edz: with macros, pictures; backup: archive",
             "type": "string",
             "default": "xml",
             "enum": [
               "xml",
-              "edz"
+              "edz",
+              "backup"
             ]
           },
           "parts": {
@@ -4609,7 +4610,7 @@
             "default": null
           },
           "file_name": {
-            "description": "File name only; .xml or .edz is added",
+            "description": "File name only; .xml, .edz or .zw6 is added",
             "type": [
               "string",
               "null"

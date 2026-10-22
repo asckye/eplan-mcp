@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，待实现 |
+| 状态 | Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，已实现，待实机验证 |
 
 ## 1. 这个工具解决什么任务
 "把部件库里西门子的继电器导出来发给同事""备份一下部件库的数据"。代理把 EPLAN 配置的**系统部件库**中的部件导出为文件。
