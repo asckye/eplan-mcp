@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/eng/">
+    <Project Path="eng/catalog/EplanMcp.Catalog/EplanMcp.Catalog.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
   <Folder Name="/evals/">
     <Project Path="evals/EplanMcp.Evals/EplanMcp.Evals.csproj">
       <Platform Project="x64" />
@@ -26,6 +31,9 @@
     </Project>
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/EplanMcp.Catalog.Tests/EplanMcp.Catalog.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="tests/EplanMcp.Bridge.Core.Tests/EplanMcp.Bridge.Core.Tests.csproj">
       <Platform Project="x64" />
     </Project>
