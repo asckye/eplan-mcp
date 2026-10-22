@@ -28,3 +28,4 @@
 | [0019](0019-master-data-writes.md) | 部件库、翻译库的写入按 Destructive 处理：每次审批，先备份主数据，只支持文件型数据库 | Accepted | 单向门（写系统主数据的工具发布后） |
 | [0020](0020-no-self-hosted-runner.md) | 不使用自托管 runner：实机测试在开发机上手动运行，插件在开发机上按标签构建后交给发布工作流 | Accepted | 双向门 |
 | [0021](0021-action-run-whitelist.md) | 用受控的 `eplan_action_run` 覆盖长尾的 EPLAN action：只执行随产品发布、经实机验证的白名单条目，按条目的级别走任务工具的流水线；默认关闭，只在 `full` 中 | Accepted | 单向门（白名单条目发布后） |
+| [0022](0022-domain-toolsets.md) | 按领域把工具分成工具集，Profile 由工具集组成；支持工具列表变更通知的客户端可以按需加载工具集，其他客户端用固定的工具集 | Proposed | 双向门（1.0 发布前） |
