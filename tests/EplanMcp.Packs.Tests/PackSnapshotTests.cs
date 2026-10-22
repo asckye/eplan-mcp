@@ -23,7 +23,7 @@ public sealed class PackSnapshotTests
     [Fact]
     public Task Lock_MatchesTheReviewedSnapshot()
     {
-        PackReference Pack(string id, string version, char hash) => new() { Id = id, Version = version, ManifestSha256 = Manifests.Hash(hash) };
+        PackReference Pack(string id, string version, char hash) => new() { Id = id, Version = version, Digest = Manifests.Hash(hash) };
 
         return Snapshot(PackJson.Serialize(PackLock.Create(Pack("acme.cabinet-base", "1.0.0", 'a'), [Pack("acme.parts", "2.3.1", 'c'), Pack("acme.base", "1.4.2", 'b')])), "pack-lock");
     }

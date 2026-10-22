@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace EplanMcp.Packs.Tests;
 
 [Trait("Size", "Medium")]
@@ -132,7 +130,7 @@ public sealed class PackVerifierTests : IDisposable
     public async Task Check_LockOfAnotherManifest_IsAProblem()
     {
         PackManifest manifest = await PackFolders.WriteAsync(_folder);
-        _folder.Write(PackManifest.LockFileName, PackJson.Serialize(PackLock.Create(Reference(manifest) with { ManifestSha256 = Manifests.Hash('0') }, [])));
+        _folder.Write(PackManifest.LockFileName, PackJson.Serialize(PackLock.Create(Reference(manifest) with { Digest = Manifests.Hash('0') }, [])));
 
         PackProblem problem = Assert.Single((await CheckAsync()).Problems);
 
@@ -145,7 +143,7 @@ public sealed class PackVerifierTests : IDisposable
     {
         Id = manifest.Id,
         Version = manifest.Version,
-        ManifestSha256 = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(_folder.PathOf(PackManifest.FileName)))),
+        Digest = PackDigest.Compute(File.ReadAllBytes(_folder.PathOf(PackManifest.FileName))),
     };
 
     private Task<PackCheckResult> CheckAsync() => PackVerifier.CheckDirectoryAsync(_folder.Root, TestContext.Current.CancellationToken);

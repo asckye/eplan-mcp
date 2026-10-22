@@ -1,5 +1,4 @@
 using System.Security;
-using System.Security.Cryptography;
 
 namespace EplanMcp.Packs;
 
@@ -50,7 +49,7 @@ public static class PackVerifier
             IReadOnlyList<PackProblem> problems = PackManifestValidator.Validate(manifest);
             return problems.Count > 0
                 ? new PackCheckResult(manifest, null, problems)
-                : await CheckContentAsync(manifest, Convert.ToHexStringLower(SHA256.HashData(manifestBytes)), present, cancellationToken).ConfigureAwait(false);
+                : await CheckContentAsync(manifest, PackDigest.Compute(manifestBytes), present, cancellationToken).ConfigureAwait(false);
         }
         catch (PackFormatException ex)
         {

@@ -20,7 +20,7 @@
           "type": "string",
           "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
         },
-        "manifestSha256": {
+        "digest": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
         }
@@ -28,10 +28,10 @@
       "required": [
         "id",
         "version",
-        "manifestSha256"
+        "digest"
       ],
       "additionalProperties": false,
-      "description": "One exact pack version, by the SHA-256 of its pack.json; the manifest lists every resource's hash, so this pins the content too."
+      "description": "One exact pack version, by its pack digest: the SHA-256 of its pack.json canonicalised per RFC 8785. The manifest lists every resource's hash, so this pins the content too."
     },
     "dependencies": {
       "type": "array",
@@ -46,7 +46,7 @@
             "type": "string",
             "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
           },
-          "manifestSha256": {
+          "digest": {
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"
           }
@@ -54,10 +54,10 @@
         "required": [
           "id",
           "version",
-          "manifestSha256"
+          "digest"
         ],
         "additionalProperties": false,
-        "description": "One exact pack version, by the SHA-256 of its pack.json; the manifest lists every resource's hash, so this pins the content too."
+        "description": "One exact pack version, by its pack digest: the SHA-256 of its pack.json canonicalised per RFC 8785. The manifest lists every resource's hash, so this pins the content too."
       }
     }
   },
@@ -66,5 +66,5 @@
     "pack"
   ],
   "additionalProperties": false,
-  "description": "pack.lock.json beside pack.json: the pack itself and every pack it needs, directly or through another, at the exact version resolved. Sorted by id and without times, so one resolution gives one file."
+  "description": "pack.lock.json beside pack.json: the pack itself and every pack it needs, directly or through another, at the exact version resolved, by pack digest. Sorted by id and without times, so one resolution gives one file."
 }
