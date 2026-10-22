@@ -8,6 +8,7 @@
 ### Added
 - `eplan_project_create`（full）：从 imports 中的 `.zw9` 新建或 `.zw1` 还原为关闭的新项目；scratch 外逐次审批，拒绝任何已有目标，完成后检查兼容性，失败仅清理本次产物。
 - Claude Code 本地插件市场与英文入门技能，以及中文入门指南（安装、校验、客户端连接、审批、自检和卸载）。
+- M5 按用户离线安装器、按标签构建并实测插件的发布脚本，以及附 SHA-256、CycloneDX SBOM 和来源证明的草稿发布流程。
 - 项目启动：架构方案、ADR、设计规范、开发流程与仓库基础配置。
 - `eplanmcp`（stdio MCP 服务器）及前两个只读工具：`eplan_session_status`（EPLAN 与插件的连接状态，EPLAN 不可用时也正常返回并给出下一步提示）、`eplan_project_list`（已打开的项目和当前项目，分页）。
 - EPLAN 插件 `EplanMcp.Bridge.Eplan`：随 EPLAN 启动，通过只允许当前用户访问的命名管道为 `eplanmcp` 服务。

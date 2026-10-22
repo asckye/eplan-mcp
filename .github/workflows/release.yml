@@ -1,0 +1,246 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  TAG: ${{ github.ref_name }}
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: '0'
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          global-json-file: global.json
+      - name: Check tag and main ancestry
+        run: |
+          if ($env:TAG -cnotmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Only unsigned 0.x vX.Y.Z tags are supported.' }
+          git merge-base --is-ancestor HEAD origin/main
+          if ($LASTEXITCODE) { throw 'Release tags must point to main history.' }
+      - name: Build and test without EPLAN
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          dotnet restore EplanMcp.Ci.slnf --locked-mode
+          dotnet build EplanMcp.Ci.slnf -c Release --no-restore
+          dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait 'Size=Large' --timeout 20m --report-xunit-trx --results-directory .local/test-results
+          $passed = @{}
+          foreach ($file in Get-ChildItem .local/test-results -Filter *.trx) {
+            [xml]$trx = Get-Content $file.FullName -Raw
+            $assembly = [IO.Path]::GetFileNameWithoutExtension(@($trx.TestRun.TestDefinitions.UnitTest)[0].TestMethod.codeBase)
+            $passed[$assembly] += @($trx.TestRun.Results.UnitTestResult | Where-Object outcome -eq Passed).Count
+          }
+          foreach ($suite in (Get-Content tests/test-suites.json -Raw | ConvertFrom-Json).suites) {
+            if ($passed[$suite.assembly] -lt $suite.minPassed) { throw "Test floor failed: $($suite.assembly)" }
+          }
+          tests/release/Release.Tests.ps1
+      - name: Publish self-contained programs and SBOM inputs
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          $version = $env:TAG.Substring(1)
+          eng/scripts/get-fonts.ps1
+          dotnet publish src/EplanMcp.Host -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json "-p:PublishProfileFullPath=$((Resolve-Path eng/installer/Release.pubxml).Path)" -p:DebugType=None -p:Version=$version -o .local/host
+          dotnet publish src/EplanMcp.Workbench -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json -p:DebugType=None -p:Version=$version -o stage/app/workbench
+          New-Item -ItemType Directory stage/boms -Force | Out-Null
+          Copy-Item .local/host/eplanmcp.exe stage/app
+          Copy-Item docs stage/app/docs -Recurse
+          Copy-Item LICENSE,THIRD-PARTY-NOTICES.md stage/app/docs
+          $packagePaths = @(); $packageRoot = $null
+          foreach ($project in 'Host', 'Workbench') {
+            $assets = Get-Content "src/EplanMcp.$project/obj/project.assets.json" -Raw | ConvertFrom-Json -AsHashtable
+            $packageRoot = @($assets.packageFolders.Keys)[0]
+            $packagePaths += @($assets.libraries.Values | Where-Object type -eq package | ForEach-Object path)
+          }
+          foreach ($runtime in @(@('microsoft.netcore.app.runtime.win-x64','System.Private.CoreLib.dll'), @('microsoft.windowsdesktop.app.runtime.win-x64','PresentationFramework.dll'))) {
+            $runtimeVersion = (Get-Item "stage/app/workbench/$($runtime[1])").VersionInfo.ProductVersion.Split('+')[0]
+            $packagePaths += "$($runtime[0])/$runtimeVersion"
+          }
+          foreach ($path in $packagePaths | Sort-Object -Unique) {
+            $destination = "stage/app/docs/licenses/$path"
+            New-Item -ItemType Directory $destination -Force | Out-Null
+            Get-ChildItem (Join-Path $packageRoot $path) -File | Where-Object { $_.Name -match '^(LICENSE|LICENCE|NOTICE|THIRD-PARTY-NOTICES)(\.|$)|\.nuspec$' } | Copy-Item -Destination $destination
+          }
+          dotnet tool install CycloneDX --version 6.0.0 --tool-path .local/tools
+          foreach ($project in 'Host', 'Workbench') {
+            & .local/tools/dotnet-CycloneDX.exe "src/EplanMcp.$project/EplanMcp.$project.csproj" -rs -dpr -ed -rt win-x64 -F Json -o stage/boms -fn "$project.json" -sv $version
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: hosted
+          path: stage/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
+
+  addin:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Verify maintainer draft assets before extraction
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          if ($env:TAG -cnotmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Invalid preview tag.' }
+          $draft = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json isDraft,tagName,body | ConvertFrom-Json
+          if (-not $draft.isDraft -or $draft.tagName -cne $env:TAG) { throw 'Create the draft, run release-addin.ps1, record its hash in the notes, then rerun this workflow.' }
+          $zipName = "EplanMcp-addin-$env:TAG.zip"
+          gh release download $env:TAG --repo $env:GITHUB_REPOSITORY --pattern $zipName --pattern "$zipName.sha256" --dir addin
+          $hash = (Get-FileHash "addin/$zipName" -Algorithm SHA256).Hash.ToLowerInvariant()
+          $line = "$hash  $zipName"
+          if ((Get-Content "addin/$zipName.sha256" -Raw).Trim() -cne $line) { throw 'Attached SHA-256 does not match the add-in ZIP.' }
+          $noteLines = @($draft.body -split '\r?\n' | Where-Object { $_.StartsWith('Add-in SHA-256:') })
+          if ($noteLines.Count -ne 1 -or $noteLines[0] -cne "Add-in SHA-256: $line") { throw 'Release notes must contain the exact maintainer SHA-256 line.' }
+          $allowed = @('bridge/net481/EplanMcp.Bridge.Eplan.dll', 'bridge/net481/EplanMcp.Bridge.Core.dll', 'bridge/net481/EplanMcp.Contracts.dll', 'addin.cdx.json', 'release-addin.json')
+          $archive = [IO.Compression.ZipFile]::OpenRead((Resolve-Path "addin/$zipName"))
+          try {
+            if ($archive.Entries.Count -ne $allowed.Count) { throw 'Unexpected add-in ZIP entries.' }
+            foreach ($name in $allowed) {
+              $entries = @($archive.Entries | Where-Object FullName -ceq $name)
+              if ($entries.Count -ne 1 -or $entries[0].Length -gt 50MB) { throw "Invalid ZIP entry: $name" }
+              $target = Join-Path (Join-Path $PWD 'addin/payload') $name
+              New-Item -ItemType Directory (Split-Path $target) -Force | Out-Null
+              [IO.Compression.ZipFileExtensions]::ExtractToFile($entries[0], [IO.Path]::GetFullPath($target))
+            }
+          } finally { $archive.Dispose() }
+          $manifest = Get-Content addin/payload/release-addin.json -Raw | ConvertFrom-Json
+          if ($manifest.schemaVersion -ne 1 -or $manifest.tag -cne $env:TAG -or $manifest.commit -cne (git rev-parse HEAD) -or $manifest.eplanVersion -cne '2026' -or $manifest.eplanSign -ne $false -or $manifest.offlineLargePassed -lt 1 -or $manifest.offlineLargePassed -isnot [long]) { throw 'Add-in tag, commit or test evidence is invalid.' }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: verified-addin
+          path: addin/
+          if-no-files-found: error
+          retention-days: 7
+
+  package:
+    needs: [build, addin]
+    runs-on: windows-2025
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: hosted
+          path: stage
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: verified-addin
+          path: addin
+      - name: Stage full offline payload and merge CycloneDX SBOM
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # M5 step 10 supplies these sources. Fail closed until that change is merged into the release tag.
+          foreach ($path in 'packaging/claude-plugin/.claude-plugin/marketplace.json', 'packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'packaging/claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
+            if (-not (Test-Path $path)) { throw "Missing release input: $path (M5 step 10)" }
+          }
+          $plugin = Get-Content packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json -Raw | ConvertFrom-Json
+          if ($plugin.version -cne $env:TAG.Substring(1)) { throw 'Plugin version must match the release tag.' }
+          Copy-Item packaging/claude-plugin stage/app/claude-plugin -Recurse
+          Copy-Item addin/payload/bridge stage/app/bridge -Recurse
+          Copy-Item addin/payload/addin.cdx.json stage/boms/Addin.json
+          New-Item -ItemType Directory dist -Force | Out-Null
+          Copy-Item "addin/EplanMcp-addin-$env:TAG.zip*" dist
+          Copy-Item addin/payload/release-addin.json "dist/EplanMcp-addin-$env:TAG.json"
+          $components = @{}; $dependencies = @{}
+          foreach ($file in Get-ChildItem stage/boms -Filter *.json) {
+            $bom = Get-Content $file.FullName -Raw | ConvertFrom-Json -AsHashtable
+            foreach ($component in @($bom.metadata.component) + @($bom.components)) {
+              if ($component) { $components[$component['bom-ref']] = $component }
+            }
+            foreach ($dependency in $bom.dependencies) {
+              $ref = $dependency.ref
+              $dependencies[$ref] = @{ ref = $ref; dependsOn = @(@($dependencies[$ref].dependsOn) + @($dependency.dependsOn) | Where-Object { $_ } | Sort-Object -Unique) }
+            }
+          }
+          # Add the shipped runtime and vendored assets, which a NuGet-only BOM does not describe.
+          foreach ($item in @(@('Microsoft.NETCore.App','System.Private.CoreLib.dll','MIT'), @('Microsoft.WindowsDesktop.App','PresentationFramework.dll','MIT'), @('Maple Mono CN','Fonts/MapleMono-CN-Regular.ttf','OFL-1.1'))) {
+            $file = Get-Item "stage/app/workbench/$($item[1])"
+            $version = if ($item[0] -eq 'Maple Mono CN') { '7.9' } else { $file.VersionInfo.ProductVersion.Split('+')[0] }
+            $ref = "$($item[0])@$version"
+            $components[$ref] = @{ type = 'library'; 'bom-ref' = $ref; name = $item[0]; version = $version; licenses = @(@{ license = @{ id = $item[2] } }) }
+          }
+          $components['tia-theme'] = @{ type = 'library'; 'bom-ref' = 'tia-theme'; name = 'TIA Workbench theme'; version = 'c89b7c20'; licenses = @(@{ license = @{ id = 'MIT' } }) }
+          $root = "EplanMcp@$env:TAG"
+          $dependencies[$root] = @{ ref = $root; dependsOn = @($components.Keys) }
+          @{ bomFormat = 'CycloneDX'; specVersion = '1.6'; version = 1; serialNumber = "urn:uuid:$([guid]::NewGuid())"; metadata = @{ component = @{ type = 'application'; 'bom-ref' = $root; name = 'EplanMcp'; version = $env:TAG.Substring(1) } }; components = @($components.Values); dependencies = @($dependencies.Values) } | ConvertTo-Json -Depth 100 | Set-Content "dist/EplanMcp-$env:TAG.cdx.json" -Encoding utf8NoBOM
+      - name: Compile with pinned Inno Setup
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $compiler = "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe"
+          if ((Get-Item $compiler).VersionInfo.ProductVersion -notmatch '^6\.7\.1($|\D)') { throw 'This release requires Inno Setup 6.7.1; review the tool pin if the hosted image changed.' }
+          & $compiler "/DAppVersion=$($env:TAG.Substring(1))" "/DPayloadDir=$((Resolve-Path stage/app).Path)" "/DOutputDir=$((Resolve-Path dist).Path)" eng/installer/EplanMcp.iss
+          if ($LASTEXITCODE) { throw 'Inno Setup failed.' }
+          $payload = @(Get-ChildItem stage/app -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $name = [IO.Path]::GetRelativePath((Resolve-Path stage).Path, $_.FullName).Replace('\', '/')
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $name"
+          })
+          $payload | Set-Content "dist/EplanMcp-$env:TAG-files.sha256" -Encoding ascii
+          $subjects = @($payload) + @(Get-ChildItem dist -File | ForEach-Object { "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.Name)" })
+          $subjects | Set-Content .local-subjects.sha256 -Encoding ascii
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        id: provenance
+        with:
+          subject-checksums: .local-subjects.sha256
+      - uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3.0.0
+        id: sbom
+        with:
+          subject-path: dist/EplanMcp-Setup-*.exe
+          sbom-path: dist/EplanMcp-${{ env.TAG }}.cdx.json
+      - name: Attach checksums and attestations to the draft only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          Copy-Item $env:PROVENANCE_BUNDLE "dist/EplanMcp-$env:TAG-provenance.sigstore.json"
+          Copy-Item $env:SBOM_BUNDLE "dist/EplanMcp-$env:TAG-sbom.sigstore.json"
+          $lines = @(Get-ChildItem dist -File | Where-Object Name -NotLike '*.sha256' | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)" | Set-Content "$($_.FullName).sha256" -Encoding ascii
+            "$hash  $($_.Name)"
+          })
+          $lines | Set-Content dist/SHA256SUMS.txt -Encoding ascii
+          $draft = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json isDraft,tagName,body | ConvertFrom-Json
+          if (-not $draft.isDraft -or $draft.tagName -cne $env:TAG) { throw 'Release is no longer a draft; refusing upload.' }
+          $zip = "EplanMcp-addin-$env:TAG.zip"
+          $hash = (Get-FileHash "dist/$zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          $noteLines = @($draft.body -split '\r?\n' | Where-Object { $_.StartsWith('Add-in SHA-256:') })
+          if ($noteLines.Count -ne 1 -or $noteLines[0] -cne "Add-in SHA-256: $hash  $zip") { throw 'Maintainer hash changed during the build.' }
+          # Preserve maintainer assets; only replace outputs of this workflow on a rerun.
+          $files = @(Get-ChildItem dist -File | Where-Object { $_.Name -notin $zip, "$zip.sha256" } | ForEach-Object FullName)
+          gh release upload $env:TAG @files --repo $env:GITHUB_REPOSITORY --clobber
