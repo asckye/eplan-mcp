@@ -2,6 +2,38 @@
   "eplanApi": "2026.0.3.25421",
   "tools": [
     {
+      "name": "eplan_asset_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_asset_get.md",
+        "specStatus": "Proposed（M6 第 1 阶段）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AssetGetToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/AssetGetToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_asset_search",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
@@ -19,6 +51,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AssetGetToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/AssetGetToolTests.cs"
           },
           {
             "name": "AssetSearchToolTests",

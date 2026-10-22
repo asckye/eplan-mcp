@@ -42,10 +42,13 @@ internal static class ToolResults
         count.ToString(CultureInfo.InvariantCulture) + " " + noun + (count == 1 ? string.Empty : "s");
 
     /// <summary>Argument problems, all at once (mcp-tool-design 6.2), as INVALID_ARGUMENT.</summary>
-    public static CallToolResult InvalidArguments(IReadOnlyList<string> violations) => Error(new BridgeError
+    public static CallToolResult InvalidArguments(IReadOnlyList<string> violations) => Error(InvalidArgumentError(violations));
+
+    /// <summary>The INVALID_ARGUMENT error of <see cref="InvalidArguments"/>.</summary>
+    public static BridgeError InvalidArgumentError(IReadOnlyList<string> violations) => new()
     {
         Reason = ErrorReason.InvalidArgument,
         Message = "Invalid arguments: " + string.Join(" ", violations),
         Metadata = new Dictionary<string, string> { ["violations"] = string.Join("\n", violations) },
-    });
+    };
 }

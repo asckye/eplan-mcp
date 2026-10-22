@@ -347,6 +347,21 @@
   ],
   "tools": [
     {
+      "name": "eplan_asset_get",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_asset_get.md",
+      "small": 1,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_asset_search",
       "safety": "read",
       "operations": [],
@@ -357,7 +372,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_asset_search.md",
       "small": 1,
-      "medium": 2,
+      "medium": 3,
       "large": 0,
       "apiNotes": [
         "A33"
