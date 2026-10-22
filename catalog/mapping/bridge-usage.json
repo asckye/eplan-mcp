@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "9e9e7116",
-  "sourceHash": "sha256:dff09020b23e369b42fe56197b28bb2dc26cbc29e3ac15307e24be21ff392f9e",
+  "scannedSources": "9e9e7116 + uncommitted changes",
+  "sourceHash": "sha256:950534f28fc388517f993c04c6058b563e86a3fd3e59d76e0ddf5f435baecb31",
   "operations": [
     {
       "name": "approval.ask",
@@ -14509,6 +14509,20 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.ConnectionPropertyList": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "ConnectionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve",
+          "project.snapshot"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.ConnectionsFilter": [
       {
         "adapter": "EplanConnectionReader",
@@ -16168,6 +16182,20 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.FunctionPropertyList": [
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "FunctionObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve",
+          "project.snapshot"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.FunctionsFilter": [
       {
         "adapter": "EplanCableRenumberer",
@@ -17020,6 +17048,18 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanSnapshotReader",
+        "member": "PageObject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve",
+          "project.snapshot"
         ]
       }
     ],
