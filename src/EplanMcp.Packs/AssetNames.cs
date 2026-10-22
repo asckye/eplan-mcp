@@ -34,6 +34,9 @@ public static partial class AssetNames
 
     public static string Id(string pack, string version, string local) => $"{pack}@{version}:{local}";
 
+    /// <summary>The version an id shows for <paramref name="manifest"/>: <c>dev</c> for a development pack.</summary>
+    public static string VersionOf(PackManifest manifest) => manifest.Version == DevPackStore.ManifestVersion ? Dev : manifest.Version;
+
     /// <summary>Splits an asset id; false when it does not have the form. Whether the pack and version exist is not checked.</summary>
     public static bool TryParse(string? id, [NotNullWhen(true)] out string? pack, [NotNullWhen(true)] out string? version, [NotNullWhen(true)] out string? local)
     {
