@@ -43,6 +43,18 @@ public sealed class PackVerifierTests : IDisposable
     }
 
     [Fact]
+    public async Task Check_SessionFilesChange_ButLockFilesAreNoPartOfAPack()
+    {
+        await PackFolders.WriteAsync(_folder);
+        _folder.Write("resources/projects/Sample/Sample.edb/User.eod", "rewritten by EPLAN on every open");
+
+        Assert.Empty((await CheckAsync()).Problems);
+
+        _folder.Write("resources/projects/Sample/Sample.edb/Page.lck", "lock");
+        Assert.Equal(new PackProblem("resources/projects/Sample/Sample.edb/Page.lck", "is in the pack but not in pack.json"), Assert.Single((await CheckAsync()).Problems));
+    }
+
+    [Fact]
     public async Task Check_MissingAndUnlistedFiles_AreNamed()
     {
         await PackFolders.WriteAsync(_folder);

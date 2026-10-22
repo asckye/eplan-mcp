@@ -21,6 +21,23 @@ public sealed class PackHasherTests : IDisposable
     }
 
     [Fact]
+    public async Task HashTree_LeavesLockAndSessionFilesOut()
+    {
+        _folder.Write("P.elk", "P.edb\n18.0\n");
+        _folder.Write("P.edb/b.eod", "bb");
+        (string before, long bytes, int files) = await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(_folder.PathOf("P.elk")), TestContext.Current.CancellationToken);
+        _folder.Write("P.edb/b.lck", "lock");
+        _folder.Write("P.edb/User.eod", "session");
+        _folder.Write("P.edb/GRAPHICS.sdb/user.EOX", "session");
+
+        IReadOnlyList<(string Relative, string FullPath)> project = PackHasher.ProjectFiles(_folder.PathOf("P.elk"));
+        (string after, long bytesAfter, int filesAfter) = await PackHasher.HashTreeAsync(project, TestContext.Current.CancellationToken);
+
+        Assert.Equal((before, bytes, files), (after, bytesAfter, filesAfter));
+        Assert.Equal(["P.edb/GRAPHICS.sdb/user.EOX", "P.edb/User.eod", "P.edb/b.eod", "P.elk"], project.Select(f => f.Relative).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void ProjectFiles_WithoutDataFolder_IsTheLinkFileOnly()
     {
         _folder.Write("P.elk", "P.edb\n18.0\n");

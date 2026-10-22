@@ -124,9 +124,11 @@ public static class PackVerifier
         }
     }
 
+    /// <summary>A lock file in a project's data folder belongs to nothing, so a pack holding one fails the check.</summary>
     private static bool Belongs(PackResource resource, string relative) =>
         PackPath.Comparer.Equals(relative, resource.Path)
-        || (resource.Kind == ResourceKind.Project && relative.StartsWith(resource.Path[..^4] + ".edb/", StringComparison.OrdinalIgnoreCase));
+        || (resource.Kind == ResourceKind.Project && relative.StartsWith(resource.Path[..^4] + ".edb/", StringComparison.OrdinalIgnoreCase)
+            && !PackHasher.IsLockFile(relative));
 
     internal static async Task<byte[]> ReadSmallAsync(string path, string name, CancellationToken cancellationToken)
     {

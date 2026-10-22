@@ -114,7 +114,7 @@
           },
           "sha256": {
             "type": "string",
-            "description": "SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of every file (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally.",
+            "description": "SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of its files (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally. EPLAN's lock files (*.lck) are no part of a project; its session files User.eod and User.eox travel with it but are not hashed, nor counted in bytes and files, because EPLAN rewrites them on open, export and close.",
             "pattern": "^[0-9a-f]{64}$"
           },
           "bytes": {
@@ -124,7 +124,7 @@
           },
           "files": {
             "type": "integer",
-            "description": "The number of files: 1, or a project's files with the link file.",
+            "description": "The number of files: 1, or a project's hashed files with the link file.",
             "minimum": 1
           },
           "storage": {

@@ -14,7 +14,7 @@ public sealed record PackResource
     [Schema(Pattern = PackPatterns.Name)]
     public string? Subtype { get; init; }
 
-    [Description("SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of every file (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally.")]
+    [Description("SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of its files (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally. EPLAN's lock files (*.lck) are no part of a project; its session files User.eod and User.eox travel with it but are not hashed, nor counted in bytes and files, because EPLAN rewrites them on open, export and close.")]
     [Schema(Pattern = PackPatterns.Sha256)]
     public required string Sha256 { get; init; }
 
@@ -22,7 +22,7 @@ public sealed record PackResource
     [Schema(Minimum = 0)]
     public required long Bytes { get; init; }
 
-    [Description("The number of files: 1, or a project's files with the link file.")]
+    [Description("The number of files: 1, or a project's hashed files with the link file.")]
     [Schema(Minimum = 1)]
     public required int Files { get; init; }
 

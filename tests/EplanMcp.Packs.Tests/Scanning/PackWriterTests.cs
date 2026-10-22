@@ -27,6 +27,21 @@ public sealed class PackWriterTests : IDisposable
     }
 
     [Fact]
+    public async Task Write_Project_CarriesSessionFilesButNoLockFiles()
+    {
+        _in.Write("Inputs/Plant/Plant.edb/User.eod", "session");
+        _in.Write("Inputs/Plant/Plant.edb/Page.lck", "lock");
+        ScanResult scan = await ScanSampleAsync();
+
+        PackCheckResult result = await PackWriter.WriteAsync(scan, ManifestGenerator.Generate(scan, _identity, "eplanmcp 0.1.0", Manifests.CreatedAt), Target, Cancel);
+
+        Assert.Empty(result.Problems);
+        Assert.Equal(3, result.Manifest!.Resources.Single(r => r.Kind == ResourceKind.Project).Files);
+        Assert.True(File.Exists(Path.Combine(Target, "resources/projects/Inputs/Plant/Plant.edb/User.eod")));
+        Assert.False(File.Exists(Path.Combine(Target, "resources/projects/Inputs/Plant/Plant.edb/Page.lck")));
+    }
+
+    [Fact]
     public async Task Generate_SameScanAndTime_GivesTheSameManifestBytes()
     {
         ScanResult first = await ScanSampleAsync();
