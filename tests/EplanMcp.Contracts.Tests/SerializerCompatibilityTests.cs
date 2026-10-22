@@ -612,6 +612,26 @@ public sealed class SerializerCompatibilityTests
         new PartImportData(),
         new PartSyncArgs { Project = "Line1", Mode = "overwrite_and_append", Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
         new PartSyncArgs(),
+        new PartSyncData
+        {
+            Project = "项目 二",
+            Database = @"$(MD_PARTS)\EPLAN_parts.alk",
+            Added = ["NEW.PART"],
+            AddedCount = 1,
+            Overwritten = ["SIE.3RH2122-1HB40"],
+            OverwrittenCount = 1,
+            StoredInProject = ["PXC.3209510"],
+            StoredInProjectCount = 48,
+            PartsBefore = 465,
+            PartsAfter = 466,
+            PartsExpected = 466,
+            ProjectPartsBefore = 293,
+            ProjectPartsAfter = 341,
+            Missing = ["X"],
+            NotStored = ["Y"],
+            Warning = "w",
+        },
+        new PartSyncData(),
     ];
 
     [Theory]

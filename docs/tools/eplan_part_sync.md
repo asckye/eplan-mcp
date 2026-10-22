@@ -48,13 +48,13 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
   - 指纹：库的设置、项目中存储的部件数，存储的和只引用的部件号，以及其中库已有的部件号。
   - 与原规格的差别及原因：原规格把三个列表都算进 `added`、`overwritten`，但只引用、没有存储的部件在项目中没有数据，同步写不进库；`Parts` 一次给出部件号和 `partsBefore` 要的总数。
 - **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"；三类部件的数量和前 20 个部件号；"项目也会被修改：存入 N 个被引用的部件"；"撤不回，执行前会备份部件库和项目"。
-- **备份**：先项目（ADR-0013，`CopyProject`），再主数据（`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`）。
-- **执行**：`new Synchronize().Parts(project, StoreMode, …)`，用完释放：
-  - 在 `LockingStep` 中执行，否则抛出 `NoLockingStepException`（S24 r14）；
-  - 在写事务（`TransactionScope`：`SafetyPoint` + `UndoStep` + `QuietModeStep`）中执行，并按写项目的规则锁定对象：r15 只用了 `LockingStep`，系统消息记一条"写存取前没有加锁该对象"；
-  - `SafetyPoint` 只能撤回项目一侧，撤不回部件库。所以执行失败时：项目回滚，部件库可能已经改变，按 `unknown` 处理（同 `eplan_part_import`）。
+- **备份**：两份都在执行之前：主数据由写流水线在审批之后、发出执行请求之前用 `masterdata.backup` 备份（同 `eplan_part_import`，所有写主数据的工具都一样）；项目由执行操作在指纹检查之后、事务之前用 `CopyProject` 备份（ADR-0013 的同一次主线程调用）。所以顺序是先主数据、再项目，与原规格相反，两份都在任何修改之前，效果相同。
+- **执行**：`new Synchronize().Parts(project, StoreMode)`，用完释放：
+  - 在 `LockingStep` 中执行，否则抛出 `NoLockingStepException`（S24 r14）：Bridge 调度器的每次调用都在 `LockingStep` 中；
+  - 在写事务（`TransactionScope`：`SafetyPoint` + `UndoStep` + `QuietModeStep`）中执行。原规格还要求"按写项目的规则锁定对象"：现有的写适配器都不显式加锁，没有验证过的加锁 API（`Project.LockAllObjects` 在 BannedSymbols 中），所以没有做；r15 的系统消息"写存取前没有加锁该对象"是否仍然出现，留给 Large 测试记录；
+  - `SafetyPoint` 只能撤回项目一侧，撤不回部件库。所以同步开始之后的任何失败（包括提交前的取消）：项目回滚，部件库可能已经改变，按 `unknown` 处理（同 `eplan_part_import`）；`metadata.backup` 是主数据备份，`metadata.projectBackup` 是项目备份。
 - **已验证**（S24 r15，经批准在正在用的库上，之后已恢复）：`AppendNew` 0.45 秒；夹具的部件在部件库中都已有，部件库不变；项目中存储的部件从 293 变为 341。
-- **读回**：部件库中 `added` 的每个部件号都存在，`partsAfter = partsBefore + addedCount`；项目中 `storedInProject` 都已存储。
+- **读回**（提交之后，不在事务中）：部件库中 `added` 和 `overwritten` 的每个部件号都存在，`partsAfter` 等于 `partsBefore` 加上新增部件在项目中存储的变体数（部件总数按变体计数）；项目中 `storedInProject` 都已存储。不一致只报告（`missing`、`notStored`），不是错误；读不回时给出警告。
 - **时限与进度**：执行 300 秒，每 5 秒一次心跳。
 - **未验证**：
   - 部件库中缺少部件时 `append_new` 的效果（夹具没有遇到）；

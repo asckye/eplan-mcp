@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.PartSyncPlan"/> and of the execute operation that follows it.</summary>
+/// <summary>Arguments of <see cref="OperationNames.PartSyncPlan"/> and <see cref="OperationNames.PartSyncExecute"/>.</summary>
 public sealed class PartSyncArgs
 {
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>
