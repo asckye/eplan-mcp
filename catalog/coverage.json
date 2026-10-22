@@ -17,7 +17,7 @@
         "settings_write_disabled": 6
       },
       "denominator": 137,
-      "implemented": 1,
+      "implemented": 2,
       "byTools": 1,
       "partial": 0,
       "automatedTest": 1,
@@ -33,7 +33,7 @@
         "settings_write_disabled": 1
       },
       "denominator": 97,
-      "implemented": 1,
+      "implemented": 2,
       "byTools": 1,
       "partial": 0,
       "automatedTest": 1,
@@ -120,7 +120,7 @@
     "registered": 8585
   },
   "actionNames": {
-    "used": 1,
+    "used": 2,
     "registered": 64
   },
   "operationsByNamespace": [
@@ -1381,7 +1381,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 3,
-      "large": 3,
+      "large": 4,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -1628,6 +1628,13 @@
         "eplan_part_import",
         "eplan_part_sync"
       ]
+    },
+    {
+      "unit": "A:restore/PROJECT",
+      "layer": "action",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "D:Article",
