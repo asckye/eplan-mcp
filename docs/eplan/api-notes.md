@@ -194,7 +194,7 @@
 
 ### A32. 对象标识与整个项目的读取耗时（spike S28，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S28](../../spikes/S28-identity-extract/README.md)。只读。
-- 同一项目的两份文件副本中，825 个对象（全部主功能和页）的 `StorableObject.ObjectIdentifier` 全部相同；`DatabaseIdentifier` 按打开的项目分配（28、53）；`ToStringIdentifier()` 为 `数据库号/类型号/对象号/0`。可以用"项目身份 + 类型号 + `ObjectIdentifier`"跨副本定位；编号可能在删除后被重用，执行前要核对名称、页、类型。还原、PXF 导入、从基本项目新建之后是否保留编号，未验证。— S28。
+- 同一项目的两份文件副本中，825 个对象（全部主功能和页）的 `StorableObject.ObjectIdentifier` 全部相同；`DatabaseIdentifier` 按打开的项目分配（28、53）；`ToStringIdentifier()` 为 `数据库号/类型号/对象号/0`。可以用"项目身份 + 类型号 + `ObjectIdentifier`"跨副本定位；编号可能在删除后被重用，执行前要核对名称、页、类型。`backup`/`restore /TYPE:PROJECT` 还原出的新项目、`eplan_export_pxf` + `eplan_import_pxf` 导入的新项目中，825 个对象的编号也全部相同（`DatabaseIdentifier` 不同）；从基本项目新建、在 EPLAN 中复制项目未验证。— S28 r0、r1。
 - 示例项目（321 页）：`GetPages` 0.01 秒，`GetFunctions(null)` 2,876 个 0.01–0.04 秒，`GetConnections(null)` 2,060 个约 0.06 秒，`GetPlacements(null)` 44,735 个 0.6–0.8 秒；读全部功能的名称、页、坐标、编号 0.06 秒。— S28。
 
 ### A31. 新建项目、还原项目、判断项目版本（spike S27，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
