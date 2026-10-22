@@ -29,6 +29,10 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
             request = CableGenerateRequest.Check(args, catalog, generator);
             before = generator.Read(request.Project.Path);
             request.RequireCurrent(before, args.Fingerprint);
+            MakeBackup(request.Project, args.Backup);
+            request.RequireCurrent(generator.Read(request.Project.Path), args.Fingerprint);
+            OperationContext.Current.ThrowIfCancellationRequested();
+            // After the backup: opening and closing the copy logs messages with local paths that are not this call's.
             try
             {
                 bookmark = messages?.ReadAll().Count ?? 0;
@@ -37,10 +41,6 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
             {
                 messageWarning = MessageWarning;
             }
-
-            MakeBackup(request.Project, args.Backup);
-            request.RequireCurrent(generator.Read(request.Project.Path), args.Fingerprint);
-            OperationContext.Current.ThrowIfCancellationRequested();
         }
         catch (BridgeErrorException ex)
         {

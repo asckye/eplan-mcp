@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
-/// <summary>The call's copied system messages include backup diagnostics without changing the transaction outcome.</summary>
+/// <summary>The call's copied system messages, read after the backup, never change the transaction outcome.</summary>
 [Trait("Size", "Small")]
 public sealed class CableGenerateMessageTests
 {
@@ -34,14 +34,15 @@ public sealed class CableGenerateMessageTests
     }
 
     [Fact]
-    public void Bookmark_PrecedesBackup_AndCollectionFollowsTransactionDisposal()
+    public void Bookmark_FollowsBackup_SoOnlyTheGenerationsMessagesCount_AfterTransactionDisposal()
     {
         _messages.Records.Add(new() { Text = "old", Level = 4 });
         _onBackup = () =>
         {
-            Assert.Equal(1, _messages.Reads);
-            _messages.Records.Add(new() { Text = "backup", Index = "S123456", Level = 2 });
+            Assert.Equal(0, _messages.Reads);
+            _messages.Records.Add(new() { Text = "backup database opened", Level = 4 });
         };
+        _generator.Run = () => _messages.Records.Add(new() { Text = "generated", Index = "S123456", Level = 2 });
         _messages.BeforeRead = () =>
         {
             if (_messages.Reads == 2)
@@ -53,7 +54,7 @@ public sealed class CableGenerateMessageTests
         CableGenerateData result = Execute();
 
         SystemMessage message = Assert.Single(result.EplanMessages);
-        Assert.Equal((1, "S123456", "backup"), (result.EplanMessageCount, message.Number, message.Text));
+        Assert.Equal((1, "S123456", "generated"), (result.EplanMessageCount, message.Number, message.Text));
     }
 
     [Theory]
