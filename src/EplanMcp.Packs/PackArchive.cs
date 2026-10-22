@@ -48,7 +48,9 @@ public static class PackArchive
                 using var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true, Encoding.UTF8);
                 foreach ((string relative, string fullPath) in files.OrderBy(f => f.Relative, StringComparer.Ordinal))
                 {
-                    bool compressed = _compressed.Any(e => relative.EndsWith(e, StringComparison.OrdinalIgnoreCase));
+                    // Stored when deflating gains nothing, or would exceed the extractor's compression ratio (ADR-0024).
+                    bool compressed = _compressed.Any(e => relative.EndsWith(e, StringComparison.OrdinalIgnoreCase))
+                        || await CompressesTooWellAsync(fullPath, cancellationToken).ConfigureAwait(false);
                     ZipArchiveEntry entry = zip.CreateEntry(relative, compressed ? CompressionLevel.NoCompression : CompressionLevel.Optimal);
                     entry.LastWriteTime = _entryTime;
                     entry.ExternalAttributes = 0;
@@ -74,11 +76,13 @@ public static class PackArchive
 
     /// <summary>
     /// What makes the entries of <paramref name="archive"/> unsafe to extract, reading only the ZIP directory: names that
-    /// are not pack paths (absolute, <c>..</c>, <c>\</c>, drive, reserved), links, encrypted entries, duplicates and names
-    /// that differ only in case, a name that is both a file and a folder, and sizes over <paramref name="limits"/>.
+    /// are not pack paths (absolute, <c>..</c>, <c>\</c>, drive, reserved), executable types, links, encrypted entries,
+    /// duplicates and names that differ only in case or Unicode normalisation (compared in NFC, ADR-0024), a name that is
+    /// both a file and a folder, and sizes or compression ratios over <paramref name="limits"/> (never above the defaults).
     /// </summary>
     public static IReadOnlyList<PackProblem> CheckEntries(ZipArchive archive, PackLimits limits)
     {
+        limits = limits.Capped;
         if (archive.Entries.Count > limits.MaxEntries)
         {
             return [new PackProblem("archive", $"has {archive.Entries.Count} entries; at most {limits.MaxEntries} are allowed")];
@@ -94,12 +98,15 @@ public static class PackArchive
             bool folder = entry.FullName.EndsWith('/');
             string path = folder ? entry.FullName[..^1] : entry.FullName;
             string? problem = PackPath.Problem(path)
+                ?? (Nfc(path) is null ? "has a name that is not valid Unicode" : null)
+                ?? (ResourceTypes.IsExecutable(path) ? "is an executable or script type, which packs never hold" : null)
                 ?? (IsLink(entry) ? "is a symbolic link or reparse point" : null)
                 ?? (entry.IsEncrypted ? "is encrypted" : null)
                 ?? (folder && entry.Length != 0 ? "is a folder entry with content" : null)
                 ?? (entry.Length > limits.MaxEntryBytes ? $"is larger than {limits.MaxEntryBytes} bytes" : null)
-                ?? (names.TryGetValue(path, out string? earlier)
-                    ? earlier == path ? "is in the archive twice" : $"names the same file as '{earlier}' on Windows (only the case differs)"
+                ?? (entry.Length > (long)limits.MaxCompressionRatio * Math.Max(entry.CompressedLength, 1) ? $"is compressed more than {limits.MaxCompressionRatio}:1" : null)
+                ?? (names.TryGetValue(Nfc(path)!, out string? earlier)
+                    ? earlier == path ? "is in the archive twice" : $"names the same file as '{earlier}' (only the case or the Unicode normalisation differs)"
                     : null);
             if (problem is not null)
             {
@@ -107,18 +114,19 @@ public static class PackArchive
                 continue;
             }
 
-            names.Add(path, path);
+            string key = Nfc(path)!;
+            names.Add(key, path);
             if (folder)
             {
-                folders.Add(path);
+                folders.Add(key);
                 continue;
             }
 
-            files.Add(path);
+            files.Add(key);
             total += entry.Length;
-            for (int slash = path.IndexOf('/', StringComparison.Ordinal); slash > 0; slash = path.IndexOf('/', slash + 1))
+            for (int slash = key.IndexOf('/', StringComparison.Ordinal); slash > 0; slash = key.IndexOf('/', slash + 1))
             {
-                folders.Add(path[..slash]);
+                folders.Add(key[..slash]);
             }
         }
 
@@ -142,6 +150,12 @@ public static class PackArchive
         if (!File.Exists(file))
         {
             return PackCheckResult.Failed(name, "does not exist");
+        }
+
+        limits = limits.Capped;
+        if (new FileInfo(file).Length > limits.MaxArchiveBytes)
+        {
+            return PackCheckResult.Failed(name, $"is larger than {limits.MaxArchiveBytes} bytes");
         }
 
         if (Directory.Exists(destination) || File.Exists(destination))
@@ -253,6 +267,35 @@ public static class PackArchive
             {
                 throw new PackFormatException($"'{entry.FullName}' holds fewer bytes than its ZIP header declares.");
             }
+        }
+    }
+
+    private static string? Nfc(string path)
+    {
+        try
+        {
+            return path.Normalize(NormalizationForm.FormC);
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Whether deflating <paramref name="path"/> would shrink it more than half the allowed ratio.</summary>
+    private static async Task<bool> CompressesTooWellAsync(string path, CancellationToken cancellationToken)
+    {
+        var counter = new CountingStream();
+        var source = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16, useAsync: true);
+        await using (source.ConfigureAwait(false))
+        {
+            var deflate = new DeflateStream(counter, CompressionLevel.Optimal, leaveOpen: true);
+            await using (deflate.ConfigureAwait(false))
+            {
+                await source.CopyToAsync(deflate, cancellationToken).ConfigureAwait(false);
+            }
+
+            return source.Length > PackLimits.Default.MaxCompressionRatio / 2 * Math.Max(counter.Count, 1);
         }
     }
 
