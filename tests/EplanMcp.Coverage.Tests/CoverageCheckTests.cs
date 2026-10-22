@@ -1,4 +1,5 @@
 using EplanMcp.Coverage.Mapping;
+using EplanMcp.Coverage.Reporting;
 using EplanMcp.Coverage.Scanning;
 using EplanMcp.Coverage.Tests.Mapping;
 
@@ -26,8 +27,13 @@ public sealed class CoverageCheckTests : IDisposable
         Assert.Empty(afterComment);
         Assert.Contains("scan of 2026-10-21 (a73de2f)", Assert.Single(afterCode), StringComparison.Ordinal);
         Assert.Contains(CoverageCheck.ScanCommand, afterCode[0], StringComparison.Ordinal);
-        Assert.Empty(CoverageCheck.Problems(_repository.Root)); // a stale scan does not fail
         Assert.Contains(BridgeUsage.RelativePath, afterCode[0], StringComparison.Ordinal);
+
+        // The stale scan does not fail, but the report must say it is stale: generate (no EPLAN) puts the notice in.
+        Assert.Equal([CoverageMarkdown.RelativePath], CoverageCheck.Problems(_repository.Root).Select(p => p.Split(' ')[0]));
+        CoverageCheck.Generate(_repository.Root);
+        Assert.Empty(CoverageCheck.Problems(_repository.Root));
+        Assert.Single(CoverageCheck.Warnings(_repository.Root));
     }
 
     [Fact]
