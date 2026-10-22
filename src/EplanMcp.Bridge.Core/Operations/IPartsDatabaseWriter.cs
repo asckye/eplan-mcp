@@ -22,7 +22,7 @@ public sealed class PartsDatabaseState
 /// Writes the parts database EPLAN is configured with (ADR-0019, docs/tools/eplan_part_import.md), implemented by the
 /// EPLAN adapter layer: the only place that calls the parts database's writing members. Main thread only. Never selects,
 /// creates or upgrades a database and never changes a setting. EPLAN's failures to open or read the database throw
-/// EPLAN_OPERATION_FAILED.
+/// EPLAN_OPERATION_FAILED; a failed import throws whatever EPLAN threw.
 /// </summary>
 public interface IPartsDatabaseWriter
 {
@@ -31,4 +31,10 @@ public interface IPartsDatabaseWriter
 
     /// <summary>Opens the configured database, reads its parts and closes it again.</summary>
     public PartsDatabaseState Read();
+
+    /// <summary>
+    /// Opens the configured database, imports the parts XML file <paramref name="file"/> with the tool's
+    /// <paramref name="mode"/> and <paramref name="matchBy"/>, outside any transaction (S24 r11), and closes it again.
+    /// </summary>
+    public void Import(string file, string mode, string matchBy);
 }

@@ -444,6 +444,13 @@ public static class OperationNames
     public const string PartImportPlan = "part.import.plan";
 
     /// <summary>
+    /// Imports the file into the configured parts database, outside any transaction (S24 r11), and reads it back. A
+    /// failure once the import began is OUTCOME_UNKNOWN: nothing rolls an import back. Arguments:
+    /// <see cref="PartImportArgs"/> with the fingerprint; data: <see cref="PartImportData"/>.
+    /// </summary>
+    public const string PartImportExecute = "part.import.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
