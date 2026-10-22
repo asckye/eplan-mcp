@@ -112,7 +112,7 @@ public static class PackVerifier
         }
 
         problems.AddRange(present.Keys.Where(k => !listed.Contains(k)).Order(StringComparer.Ordinal)
-            .Select(k => new PackProblem(k, ResourceTypes.IsExecutable(k) ? "is an executable or script type, which packs never hold" : "is in the pack but not in pack.json")));
+            .Select(k => new PackProblem(k, ResourceTypes.Forbidden(k) ?? "is in the pack but not in pack.json")));
         return new PackCheckResult(manifest, lockFile, problems);
     }
 

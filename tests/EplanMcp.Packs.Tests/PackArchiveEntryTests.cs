@@ -105,6 +105,17 @@ public sealed class PackArchiveEntryTests
         Assert.Equal(new PackProblem(name, "is an executable or script type, which packs never hold"), Assert.Single(PackArchive.CheckEntries(zip, PackLimits.Default)));
     }
 
+    [Theory]
+    [InlineData("resources/docs/parts.xlsm")]
+    [InlineData("resources/docs/Template.DOTM")]
+    [InlineData("slides.pptm")]
+    public void CheckEntries_MacroEnabledOfficeFile_IsRefused(string name)
+    {
+        using ZipArchive zip = Open(new Entry("pack.json"), new Entry(name));
+
+        Assert.Contains("macro-enabled Office file", Assert.Single(PackArchive.CheckEntries(zip, PackLimits.Default)).Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Limits_AboveAdr0024_AreCapped()
     {

@@ -30,7 +30,7 @@ public sealed class PackManifestValidatorTests
         { "migrations[0].from", m => m with { Migrations = [new PackMigration { From = "1.x" }] } },
         { "migrations[0].changes[0]", m => m with { Migrations = [new PackMigration { From = "*", Changes = ["two\nlines"] }] } },
         { "resources[0].path", m => Replace(m, 0, r => r with { Path = "resources/basic-projects/GB_bas001.exe" }) },
-        { "resources[1].path", m => Replace(m, 1, r => r with { Path = "resources/docs/readme.pdf" }) },
+        { "resources[1].path", m => Replace(m, 1, r => r with { Path = "resources/docs/readme.docm" }) },
         { "resources[0].path", m => Replace(m, 0, r => r with { Path = "pack.sig" }) },
         { "dependencies[0]", m => m with { Dependencies = [new PackDependency { Id = m.Id, Version = "*" }] } },
         { "dependencies[1]", m => m with { Dependencies = [new PackDependency { Id = "a.b", Version = "*" }, new PackDependency { Id = "a.b", Version = "*" }] } },

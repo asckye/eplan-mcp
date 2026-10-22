@@ -95,7 +95,7 @@ public static class ResourceScanner
         if (ResourceTypes.Problem(classification.Kind, file.Name) is { } typeProblem)
         {
             scan.Add(FindingSeverity.Error, "type_not_allowed", subject,
-                $"{typeProblem}: packs hold EPLAN's own files, JSON, CSV, PNG, SVG, plain text and Markdown (ADR-0024); convert it or leave it out.");
+                $"{typeProblem}: packs hold EPLAN's own files, JSON, CSV, PNG, SVG, plain text, Markdown, and XLSX, PDF or DOCX documents (ADR-0024); convert it or leave it out.");
             return;
         }
 
