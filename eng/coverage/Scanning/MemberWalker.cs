@@ -233,6 +233,7 @@ internal sealed class MemberWalker(SemanticModel model, Specialization? kind, Fu
         {
             IMethodSymbol { ReducedFrom: { } extension } => extension,
             IMethodSymbol { AssociatedSymbol: IPropertySymbol or IEventSymbol } accessor => accessor.AssociatedSymbol,
+            IMethodSymbol { AssociatedSymbol: null } method when AccessorOf(method) is { } property => property,
             _ => symbol,
         };
         symbol = symbol?.OriginalDefinition;
@@ -251,6 +252,18 @@ internal sealed class MemberWalker(SemanticModel model, Specialization? kind, Fu
             Callees.Add(symbol);
         }
     }
+
+    /// <summary>
+    /// The property whose accessor <paramref name="method"/> is when C# can only call it as a method: a C++/CLI property
+    /// with parameters other than the default indexer, such as <c>PlaceHolder.NameOfRecord(int)</c>, called as
+    /// <c>get_NameOfRecord(i)</c> (spike S29). Roslyn gives such an accessor no associated property; the catalog lists the
+    /// property (<c>P:…NameOfRecord(System.Int32)</c>), so the use counts for it.
+    /// </summary>
+    private static IPropertySymbol? AccessorOf(IMethodSymbol method) =>
+        method.Name.StartsWith("get_", StringComparison.Ordinal) || method.Name.StartsWith("set_", StringComparison.Ordinal)
+            ? method.ContainingType?.GetMembers(method.Name[4..]).OfType<IPropertySymbol>()
+                .FirstOrDefault(p => SymbolEqualityComparer.Default.Equals(p.GetMethod, method) || SymbolEqualityComparer.Default.Equals(p.SetMethod, method))
+            : null;
 
     /// <summary>Whether a case label can match the kind; a default label is decided by the caller.</summary>
     private bool? LabelMatches(ExpressionSyntax governing, SwitchLabelSyntax label) => label switch
