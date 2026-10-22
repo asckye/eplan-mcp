@@ -36,7 +36,8 @@ internal static class ImportedProject
         }
     }
 
-    private static void Delete(DirectoryInfo folder)
+    /// <summary>Deletes <paramref name="folder"/> and everything in it; a link or junction is removed itself, never followed.</summary>
+    internal static void Delete(DirectoryInfo folder)
     {
         if ((folder.Attributes & FileAttributes.ReparsePoint) == 0)
         {

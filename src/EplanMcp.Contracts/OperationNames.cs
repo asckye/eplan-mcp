@@ -506,6 +506,20 @@ public static class OperationNames
     public const string ProjectCompatibility = "project.compatibility";
 
     /// <summary>
+    /// The plan of a new project from a basic project (.zw9): checks the file and that the destination folder is absent or
+    /// empty, never writes (docs/design/2026-10-21-m6-bridge-snapshot.md, 4.8). Arguments: <see cref="NewProjectArgs"/>;
+    /// data: <see cref="WritePlan"/> with one <c>create</c> change.
+    /// </summary>
+    public const string ProjectCreatePlan = "project.create.plan";
+
+    /// <summary>
+    /// Creates the project with <c>ProjectManager.CreateProject</c> (api-notes A31, A34) in the empty folder and reads its
+    /// page count and <c>PROJ_GUID</c>; on failure deletes what it made. Arguments: <see cref="NewProjectArgs"/> with the
+    /// fingerprint; data: <see cref="NewProjectData"/>.
+    /// </summary>
+    public const string ProjectCreateExecute = "project.create.execute";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
