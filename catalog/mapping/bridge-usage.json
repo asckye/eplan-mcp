@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "d7612cad + uncommitted changes",
-  "sourceHash": "sha256:ca88a546feefa86c9c804cb55784e9c27a5eda3a1914d18cda1e2c43fb68f847",
+  "scannedSources": "a16e38dc",
+  "sourceHash": "sha256:ade11d34e32d782db303491522e86115539cf37616f158874498ece76ade5844",
   "operations": [
     {
       "name": "approval.ask",
@@ -285,18 +285,6 @@
       "class": "PartSyncPlanOperation"
     },
     {
-      "name": "placeholder.apply.execute",
-      "class": "PlaceholderApplyExecuteOperation"
-    },
-    {
-      "name": "placeholder.apply.plan",
-      "class": "PlaceholderApplyPlanOperation"
-    },
-    {
-      "name": "placeholder.list",
-      "class": "PlaceholderListOperation"
-    },
-    {
       "name": "plc.get",
       "class": "PlcGetOperation"
     },
@@ -365,9 +353,7 @@
           "action"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -380,9 +366,7 @@
           "action"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -419,9 +403,7 @@
           "read"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       },
       {
@@ -433,8 +415,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -535,7 +516,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -1076,8 +1056,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -1091,8 +1070,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -1196,9 +1174,7 @@
           "call"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -1211,9 +1187,7 @@
           "new"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -1226,9 +1200,7 @@
           "new"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -1241,9 +1213,7 @@
           "call"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -1357,9 +1327,7 @@
           "new"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       },
       {
@@ -1371,8 +1339,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -1473,7 +1440,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -1505,7 +1471,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -1547,22 +1512,7 @@
           "call"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
-        ]
-      },
-      {
-        "adapter": "BackupMasterDataParameters",
-        "member": "Add",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/BackupMasterDataParameters.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -1641,9 +1591,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1675,9 +1622,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1723,9 +1667,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1757,9 +1698,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1867,9 +1805,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1901,9 +1836,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -1961,9 +1893,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -2106,9 +2035,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -2845,9 +2771,6 @@
           "page.update.execute",
           "page.update.plan",
           "part.sync.execute",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -2935,30 +2858,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "new"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "new"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
         ]
       },
       {
@@ -3548,9 +3447,6 @@
           "page.update.execute",
           "page.update.plan",
           "part.sync.execute",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -3620,32 +3516,6 @@
         ],
         "operations": [
           "revision.list"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPlaceholdersWithFilterScheme(System.String)": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
         ]
       }
     ],
@@ -3820,60 +3690,6 @@
         ],
         "operations": [
           "page.get"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String)": [
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "ApplyRecord",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String,System.Boolean)": [
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "ApplyRecord",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": []
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "CurrentValues",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
         ]
       }
     ],
@@ -4232,9 +4048,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -4493,9 +4306,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -4542,19 +4352,6 @@
         ]
       },
       {
-        "adapter": "EplanPlaceholderReader",
-        "member": "CurrentValues",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
         "adapter": "EplanRevisionReader",
         "member": "Text",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -4588,9 +4385,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -4672,7 +4466,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -4704,7 +4497,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -4736,7 +4528,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -4777,7 +4568,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5030,7 +4820,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5062,7 +4851,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5094,7 +4882,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5135,7 +4922,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5167,7 +4953,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -5842,9 +5627,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -5924,9 +5706,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -6149,8 +5928,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -6202,8 +5980,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -6217,8 +5994,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -6232,8 +6008,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -6260,8 +6035,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -6313,8 +6087,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -6476,9 +6249,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -8633,144 +8403,6 @@
         ]
       }
     ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name": [
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord(System.Int32)": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "HasValueSet",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords": [
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "HasValueSet",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables": [
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value(System.String,System.String)": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames": [
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
     "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects": [
       {
         "adapter": "EplanMacroReader",
@@ -9135,9 +8767,6 @@
           "page.update.execute",
           "page.update.plan",
           "part.sync.execute",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -9200,30 +8829,6 @@
         ],
         "operations": [
           "page.create.execute"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
         ]
       },
       {
@@ -10044,30 +9649,6 @@
         ]
       },
       {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
         "adapter": "EplanPlcReader",
         "member": "Channel",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -10205,9 +9786,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -10287,9 +9865,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -10364,9 +9939,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.translate.execute",
@@ -10477,9 +10049,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -10604,9 +10173,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -10686,9 +10252,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -10909,19 +10472,6 @@
         ]
       },
       {
-        "adapter": "EplanPlaceholderReader",
-        "member": "CurrentValues",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -10966,9 +10516,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -11075,8 +10622,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -11147,8 +10693,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -11290,8 +10835,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -11359,9 +10903,7 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -11374,35 +10916,7 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
-        ]
-      },
-      {
-        "adapter": "BackupMasterDataParameters",
-        "member": "Add",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/BackupMasterDataParameters.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
-        ]
-      },
-      {
-        "adapter": "BackupMasterDataParameters",
-        "member": "AddTo",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/BackupMasterDataParameters.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -11415,9 +10929,7 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       }
     ],
@@ -11487,9 +10999,7 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       },
       {
@@ -11501,8 +11011,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -11603,7 +11112,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -11632,9 +11140,7 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup",
-          "part.export.run",
-          "translation.export.run"
+          "masterdata.backup"
         ]
       },
       {
@@ -11646,8 +11152,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -11748,7 +11253,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -12245,9 +11749,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -12279,9 +11780,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -12313,9 +11811,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -12361,9 +11856,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -12421,9 +11913,6 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -12474,19 +11963,6 @@
           "terminal.renumber.execute",
           "translation.export.plan",
           "translation.export.run"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
         ]
       }
     ],
@@ -12551,25 +12027,9 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
-        ]
-      },
-      {
-        "adapter": "EplanText",
-        "member": "ReadWithLanguage",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
         ]
       }
     ],
@@ -13512,9 +12972,6 @@
           "page.update.execute",
           "page.update.plan",
           "part.sync.execute",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -13602,30 +13059,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
         ]
       },
       {
@@ -14601,80 +14034,6 @@
         ]
       }
     ],
-    "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "CurrentValues",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Record",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "HasValueSet",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "ApplyRecord",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
-        "adapter": "PlaceHolderApi",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      }
-    ],
     "T:Eplan.EplApi.DataModel.IFunctionBase": [
       {
         "adapter": "EplanDeviceRenumberer",
@@ -15644,30 +15003,6 @@
         ]
       },
       {
-        "adapter": "EplanPlaceholderReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list"
-        ]
-      },
-      {
-        "adapter": "EplanPlaceholderWriter",
-        "member": "Apply",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "placeholder.apply.execute"
-        ]
-      },
-      {
         "adapter": "EplanProjectBackup",
         "member": "Copy",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectBackup.cs",
@@ -15861,9 +15196,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.translate.execute",
@@ -15940,9 +15272,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -16129,9 +15458,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -16432,9 +15758,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "revision.list"
@@ -16479,7 +15802,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -16583,7 +15905,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -16615,7 +15936,6 @@
           "page.renumber.execute",
           "page.update.execute",
           "part.sync.execute",
-          "placeholder.apply.execute",
           "project.translate.execute",
           "report.update.execute",
           "terminal.renumber.execute"
@@ -17268,9 +16588,6 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "placeholder.apply.execute",
-          "placeholder.apply.plan",
-          "placeholder.list",
           "plc.get",
           "project.get",
           "project.list",
@@ -17455,8 +16772,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -17497,8 +16813,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -17510,8 +16825,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -17563,8 +16877,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
@@ -17576,8 +16889,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       }
     ],
@@ -17628,8 +16940,7 @@
         ],
         "operations": [
           "part.export.plan",
-          "part.export.run",
-          "translation.export.run"
+          "part.export.run"
         ]
       },
       {
