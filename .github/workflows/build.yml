@@ -41,6 +41,11 @@ jobs:
         shell: pwsh
         run: eng/scripts/check-action-catalog.ps1
 
+      # The committed EPLAN API coverage files must match their inputs (catalog/README.md). A Bridge scan older than the
+      # Bridge sources is only a warning: rescanning needs a machine with EPLAN installed.
+      - name: Coverage files
+        run: dotnet run --project eng/coverage -c Release --no-build -- check
+
       # --timeout ends the whole test session after 20 minutes instead of holding the runner. A test still running after
       # two minutes is written to hung-tests-<assembly>.txt in the results (tests/Shared/HangWatch.cs), and the report
       # step below names it; xUnit's --long-running report does not reach the dotnet test output.

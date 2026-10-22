@@ -26,12 +26,13 @@ public sealed class UsageScannerTests
     }
 
     [Fact]
-    public void Scan_PropertiesIndexersConstructorsAndEnums_AreRecordedWithTheirAccess()
+    public void Scan_PropertiesIndexersConstructorsEnumsAndConversions_AreRecordedWithTheirAccess()
     {
         Assert.Equal(["get", "set"], Access($"P:{ExportType}.Count"));
         Assert.Equal(["get", "set"], Access($"P:{ExportType}.Item(System.Int32)"));
         Assert.Equal(["new"], Access($"M:{ExportType}.#ctor", "Shared"));
         Assert.Equal(["read"], Access($"F:{ExportType}.Format.JPG"));
+        Assert.Equal(["call"], Access($"M:{ExportType}.op_Implicit({ExportType})~System.String"));
         Assert.Equal(["type"], Access($"T:{ExportType}", "Shared"));
     }
 
