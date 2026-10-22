@@ -99,3 +99,4 @@
 - 另一个 `eplanmcp` 正在写审计日志时，`eplanmcp audit verify` 和写工具第一次写入前对审计日志的检查不再因文件共享冲突而失败，读的同时也不再让对方的写入报 `AUDIT_UNAVAILABLE`；`audit verify` 不再把对方正在写的最后一行报为哈希链断开。
 - `eplanmcp doctor` 由 Claude 桌面版启动时，不再误报"没有 MSIX 包身份"：这类进程没有包身份，写入 `%LOCALAPPDATA%` 却仍被重定向，现在直接探测重定向。
 - 按页或类别列设备、列页上的设备时，同一设备不再出现两次（EPLAN 在过滤时会多返回黑盒里的同名功能）。
+- `eplan_project_get`、`eplan_page_get`、`eplan_device_get` 以 `detailed` 返回 `properties` 时，读过的每个属性对象随即释放。以前不释放，按 spike S31 的结果（api-notes A36），读得多了 EPLAN 会内存耗尽而退出；返回的属性不变。
