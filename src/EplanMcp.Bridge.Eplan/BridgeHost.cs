@@ -188,6 +188,7 @@ internal static class BridgeHost
         [
             new MasterDataBackupOperation(new EplanMasterDataBackup()),
             new PartImportPlanOperation(parts),
+            new PartImportExecuteOperation(parts),
         ];
     }
 

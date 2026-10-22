@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.PartImportPlan"/> and of the execute operation that follows it.</summary>
+/// <summary>Arguments of <see cref="OperationNames.PartImportPlan"/> and <see cref="OperationNames.PartImportExecute"/>.</summary>
 public sealed class PartImportArgs
 {
     /// <summary>The file's path below the import folder, with <c>/</c> between folders, as the tool returns it.</summary>

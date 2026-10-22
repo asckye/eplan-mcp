@@ -594,6 +594,22 @@ public sealed class SerializerCompatibilityTests
         new MasterDataBackupData(),
         new PartImportArgs { File = "supplier/继电器.xml", FilePath = @"C:\Users\工程师\EplanMcp\imports\supplier\继电器.xml", Sha256 = "9f86", Mode = "update_and_append", MatchBy = "unique_id", Fingerprint = "f" },
         new PartImportArgs(),
+        new PartImportData
+        {
+            Database = @"$(MD_PARTS)\EPLAN_parts.alk",
+            Added = ["EPLANMCP.LARGE-TEST"],
+            AddedCount = 1,
+            Updated = ["SIE.3RH2122-1HB40"],
+            UpdatedCount = 1,
+            Skipped = ["PXC.3209510"],
+            SkippedCount = 1,
+            PartsBefore = 464,
+            PartsAfter = 465,
+            PartsExpected = 465,
+            Missing = ["X"],
+            Warning = "w",
+        },
+        new PartImportData(),
     ];
 
     [Theory]
