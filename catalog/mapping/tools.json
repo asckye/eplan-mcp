@@ -203,6 +203,7 @@
         "T:Eplan.EplApi.DataModel.Connection",
         "T:Eplan.EplApi.DataModel.ConnectionPropertyList",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.E3D.Connection3D",
         "T:Eplan.EplApi.DataModel.EObjects.Cable",
         "T:Eplan.EplApi.DataModel.Function",
         "T:Eplan.EplApi.DataModel.FunctionPropertyList",
