@@ -61,5 +61,5 @@
 - Medium：假 Bridge 上的三种状态、空记录、多语言说明。
 - Large：
   - 夹具（`.elk`）：`state: none`，`revisions` 为空；
-  - 由测试自己在 scratch 中复制一份夹具，用 S23 的做法新建修订（测试辅助代码，不是工具）：`state: tracking`，一条修订记录，用户和日期有值；之后删除这份副本。辅助程序是 `tests/EplanMcp.Large.RevisionHelper`，在离线的 EPLAN 中新建修订；读取经这份副本上的离线宿主（`EPLANMCP_OFFLINE_VARIANT_BIN`），不碰界面中开着夹具的 EPLAN（Large 测试 README）。
+  - 由测试自己在 scratch 中复制一份夹具，用 S23 的做法新建修订（测试辅助代码，不是工具）：`state: tracking`，一条修订记录，用户和日期有值；之后删除这份副本。辅助程序是 `tests/EplanMcp.Large.RevisionHelper`，在离线的 EPLAN 中新建修订；读取经这份副本上测试自己启动的离线宿主（变体的 Bin 见 Large 测试 README，不用 `EPLANMCP_OFFLINE_VARIANT_BIN`），不碰界面中开着夹具的 EPLAN。离线宿主能否打开修订中的 `.ell` 项目尚待实机确认。
 - Agent 评测："这个项目是不是已经完成修订、还能不能改？"
