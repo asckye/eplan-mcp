@@ -1,0 +1,118 @@
+[
+  {
+    "file": "Eplan.EplApi.AFu.dll",
+    "name": "Eplan.EplApi.AFu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.AFu.xml",
+    "entries": 3502
+  },
+  {
+    "file": "Eplan.EplApi.Baseu.dll",
+    "name": "Eplan.EplApi.Baseu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.Baseu.xml",
+    "entries": 1397
+  },
+  {
+    "file": "Eplan.EplApi.CommandLineActionsu.erx",
+    "name": "Eplan.EplApi.CommandLineActionsu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.CommandLineActionsu.xml",
+    "entries": 0
+  },
+  {
+    "file": "Eplan.EplApi.Communicationu.erx",
+    "entries": 0,
+    "skipped": "no_intellisense_file"
+  },
+  {
+    "file": "Eplan.EplApi.DataModelu.dll",
+    "name": "Eplan.EplApi.DataModelu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.DataModelu.xml",
+    "entries": 30917
+  },
+  {
+    "file": "Eplan.EplApi.EServicesu.dll",
+    "name": "Eplan.EplApi.EServicesu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.EServicesu.xml",
+    "entries": 473
+  },
+  {
+    "file": "Eplan.EplApi.Guiu.dll",
+    "name": "Eplan.EplApi.Guiu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.Guiu.xml",
+    "entries": 395
+  },
+  {
+    "file": "Eplan.EplApi.HEServicesu.dll",
+    "name": "Eplan.EplApi.HEServicesu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.HEServicesu.xml",
+    "entries": 1268
+  },
+  {
+    "file": "Eplan.EplApi.MasterDatau.dll",
+    "name": "Eplan.EplApi.MasterDatau",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.MasterDatau.xml",
+    "entries": 4957
+  },
+  {
+    "file": "Eplan.EplApi.RecorderToolsu.dll",
+    "entries": 0,
+    "skipped": "no_intellisense_file"
+  },
+  {
+    "file": "Eplan.EplApi.RemoteClientu.dll",
+    "name": "Eplan.EplApi.RemoteClientu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.RemoteClientu.xml",
+    "entries": 423
+  },
+  {
+    "file": "Eplan.EplApi.Remotingu.dll",
+    "name": "Eplan.EplApi.Remotingu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.Remotingu.xml",
+    "entries": 27
+  },
+  {
+    "file": "Eplan.EplApi.Starteru.dll",
+    "name": "Eplan.EplApi.Starteru",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.Starteru.xml",
+    "entries": 29
+  },
+  {
+    "file": "Eplan.EplApi.Systemu.dll",
+    "name": "Eplan.EplApi.Systemu",
+    "assemblyVersion": "1.0.0.0",
+    "fileVersion": "2026.0.3.25421",
+    "intellisense": "Eplan.EplApi.Systemu.xml",
+    "entries": 55
+  },
+  {
+    "file": "Eplan.EplApi.WebServicesu.dll",
+    "entries": 0,
+    "skipped": "no_intellisense_file"
+  },
+  {
+    "file": "Eplan.EplApi.WebServiceu.dll",
+    "entries": 0,
+    "skipped": "no_intellisense_file"
+  }
+]
