@@ -4,28 +4,31 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
-/// The optional <c>pages</c> of eplan_check_run and eplan_report_update (tool specs, section 2): omitted for the whole
-/// project, otherwise 1 to 50 full page names, each found as eplan_page_get finds a page: exactly, or ignoring case when
-/// only one page matches.
+/// The optional <c>pages</c> of eplan_check_run, eplan_report_update and eplan_project_translate (tool specs, section 2):
+/// omitted for the whole project, otherwise 1 to 50 (200 for the translation) full page names, each found as
+/// eplan_page_get finds a page: exactly, or ignoring case when only one page matches.
 /// </summary>
 internal static class PageScope
 {
     public const int MaxPages = 50;
 
-    /// <summary>Adds every problem of <paramref name="pages"/> to <paramref name="violations"/>; null has none.</summary>
-    public static void Check(List<string>? pages, List<string> violations)
+    /// <summary>
+    /// Adds every problem of <paramref name="pages"/> to <paramref name="violations"/>; null has none. A tool with another
+    /// limit than <see cref="MaxPages"/> passes it as <paramref name="max"/> (eplan_project_translate: 200).
+    /// </summary>
+    public static void Check(List<string>? pages, List<string> violations, int max = MaxPages)
     {
         if (pages is null)
         {
             return;
         }
 
-        if (pages.Count is < 1 or > MaxPages)
+        if (pages.Count < 1 || pages.Count > max)
         {
-            violations.Add($"'pages' must hold 1 to {MaxPages.ToString(CultureInfo.InvariantCulture)} full page names; omit it for the whole project.");
+            violations.Add($"'pages' must hold 1 to {max.ToString(CultureInfo.InvariantCulture)} full page names; omit it for the whole project.");
         }
 
-        for (int i = 0; i < pages.Count && i < MaxPages; i++)
+        for (int i = 0; i < pages.Count && i < max; i++)
         {
             string at = "pages[" + i.ToString(CultureInfo.InvariantCulture) + "]";
             int same = pages.FindIndex(0, i, p => string.Equals(p, pages[i], StringComparison.OrdinalIgnoreCase));

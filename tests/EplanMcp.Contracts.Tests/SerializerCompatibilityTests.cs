@@ -540,6 +540,20 @@ public sealed class SerializerCompatibilityTests
             Warning = "w",
         },
         new LanguageRemoveData(),
+        new ProjectTranslateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/1"], Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
+        new ProjectTranslateArgs(),
+        new ProjectTranslateData
+        {
+            Project = "项目 二",
+            Source = "de_DE",
+            Languages = ["de_DE", "en_US", "zh_CN"],
+            TextsChecked = 497,
+            TextsChanged = 1,
+            Changed = [new TranslatedText { Kind = "function", Name = "=GAA+A1-WE1", Property = "FUNC_TEXT", MissingBefore = ["en_US", "zh_CN"], MissingAfter = [] }],
+            StillMissing = 5,
+            Warning = "w",
+        },
+        new ProjectTranslateData(),
         new TerminalRenumberArgs { Project = "Line1", Strips = ["+A1-XD1"], Scheme = "Numerisch", OnlyUnnumbered = false, Start = 10, Step = 5, Fingerprint = "f", Backup = new BackupTarget { Path = "p", MaxSeconds = 150 } },
         new TerminalRenumberArgs(),
         new TerminalRenumberData
