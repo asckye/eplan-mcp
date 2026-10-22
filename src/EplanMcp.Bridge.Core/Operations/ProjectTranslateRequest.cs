@@ -16,6 +16,9 @@ internal sealed class ProjectTranslateRequest
     /// <summary>The most pages one call may name (tool spec 2).</summary>
     public const int MaxPages = 200;
 
+    /// <summary>The most changed texts a result lists (tool spec 3).</summary>
+    public const int MaxChanged = 50;
+
     private ProjectTranslateRequest(OpenProject project, IReadOnlyList<string>? pages, LanguageSettings settings, IReadOnlyList<LanguageText> texts)
     {
         Project = project;
@@ -96,6 +99,62 @@ internal sealed class ProjectTranslateRequest
         .. Candidates.Select(text => "text\t" + text.Id + "\t" + text.Raw),
     ]);
 
+    /// <summary>
+    /// Null when no text read back has another text in the source language than before; otherwise how many have, and the
+    /// first few by name, for the read-back error (tool spec 5: translating must not change the source texts).
+    /// </summary>
+    public string? SourceChanged(IReadOnlyList<LanguageText> after)
+    {
+        Dictionary<string, LanguageText> before = ById(Texts);
+        LanguageText[] changed = [.. after.Where(text => before.TryGetValue(text.Id, out LanguageText? old) && TextIn(old.Raw, Source) != TextIn(text.Raw, Source))];
+        return changed.Length == 0
+            ? null
+            : $"{Number(changed.Length)} texts changed in the source language {Source}: " + string.Join(", ", changed.Take(5).Select(text => text.Name));
+    }
+
+    /// <summary>
+    /// The result from the texts read back after the translation: those whose stored value changed, matched by session
+    /// identifier, with the translation languages each missed before and misses after (the first
+    /// <see cref="MaxChanged"/>), and how many texts with a source text still miss one. Texts that were read before but
+    /// not after are counted in the warning rather than guessed at.
+    /// </summary>
+    public ProjectTranslateData Result(IReadOnlyList<LanguageText> after, string? warning)
+    {
+        Dictionary<string, LanguageText> before = ById(Texts);
+        var changed = new List<TranslatedText>();
+        int count = 0;
+        foreach (LanguageText text in after)
+        {
+            if (before.TryGetValue(text.Id, out LanguageText? old) && !string.Equals(old.Raw, text.Raw, StringComparison.Ordinal) && ++count <= MaxChanged)
+            {
+                bool page = text.Id.StartsWith("P ", StringComparison.Ordinal);
+                changed.Add(new TranslatedText
+                {
+                    Kind = page ? "page" : "function",
+                    Name = text.Name,
+                    Property = page ? "PAGE_NOMINATIOMN" : "FUNC_TEXT",
+                    MissingBefore = [.. Missing(old.Raw)],
+                    MissingAfter = [.. Missing(text.Raw)],
+                });
+            }
+        }
+
+        var found = new HashSet<string>(after.Select(text => text.Id), StringComparer.Ordinal);
+        int gone = before.Keys.Count(id => !found.Contains(id));
+        string? lost = gone == 0 ? null : $"{Number(gone)} texts read before the translation were not found afterwards, so they are not in the counts.";
+        return new ProjectTranslateData
+        {
+            Project = Project.Name,
+            Source = Source,
+            Languages = [.. Languages],
+            TextsChecked = Texts.Count,
+            TextsChanged = count,
+            Changed = changed,
+            StillMissing = after.Count(text => Has(text.Raw, Source) && Missing(text.Raw).Count > 0),
+            Warning = warning is null ? lost : lost is null ? warning : warning + " " + lost,
+        };
+    }
+
     /// <summary>"the project: 37 of 497 texts miss a translation language; from de_DE into 19 languages", for the plan's change.</summary>
     public string Scope()
     {
@@ -119,6 +178,10 @@ internal sealed class ProjectTranslateRequest
     }
 
     private static bool Has(string raw, string language) => TextIn(raw, language) is not null;
+
+    /// <summary>The texts by session identifier; a text read twice counts once.</summary>
+    private static Dictionary<string, LanguageText> ById(IEnumerable<LanguageText> texts) =>
+        texts.GroupBy(text => text.Id, StringComparer.Ordinal).ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
 
     private static string Number(int value) => value.ToString(CultureInfo.InvariantCulture);
 }
