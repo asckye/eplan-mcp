@@ -50,6 +50,7 @@ dotnet run --project eng\coverage -- check      # 与 CI 相同的检查
 |---|---|
 | `wrappers.yaml` 的 `types`：一个类型的 `properties` | `src/EplanMcp.Contracts/Generated/<类型>Properties.g.cs`（返回值的 DTO）和 `<类型>Api.Read`（属性读取的样板代码）；只收字符串、布尔、数值、枚举（取名称）和 `StringCollection` |
 | `types` 的 `overloads`：方法组的简单名称 | `src/EplanMcp.Bridge.Eplan/Adapters/Generated/<类型>Api.g.cs` 中的重载表：签名简单的重载各一个类型化的方法，其余（目录排除的、按引用传参的、泛型的）写明不生成的原因 |
+| `actions`：action 目录中的一行和类名 | `Adapters/Generated/<类名>.g.cs`：参数类（参数名和必填标记取自目录），`TYPE` 和 action 名是常量，由调用方自己写进 `ActionCallingContext`，覆盖扫描才认得出这一行 |
 
 - **选择文件要短**：只列出某个工具要用的项，生成的代码才看得过来。不能直接生成的（索引属性、继承来的属性、返回目录中的类的属性）生成器报错，改为手写。
 - `generate` 先写这些文件，再写映射和报告；同样的输入逐字节相同（LF，没有时间戳）。`check`（CI 的 "Coverage files" 步骤）发现生成的文件与 `wrappers.yaml` 和目录不一致、或者已经不再被选中时失败，消息中给出 `generate` 命令；`generate` 会删除不再被选中的文件。

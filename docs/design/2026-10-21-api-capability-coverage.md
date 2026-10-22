@@ -190,7 +190,7 @@ catalog/
   - 顺序、前置条件和读回：先锁定、再修改、再读回；
   - 每个 API 的事务、撤销与恢复：能否被 `SafetyPoint` 回滚，是否自己建撤销步骤（api-notes A7、A30）。
 - 生成的代码**不直接成为 MCP 工具**：它是任务工具内部的构件，或 ADR-0021 白名单条目的依据。运行时不做反射调用。
-- **实现**（第一期）：`eng/coverage` 的 `generate` 按 `catalog/wrappers.yaml` 中列出的目录 ID 生成返回值的 DTO 和属性读取代码、方法组的重载表；输出提交到仓库，CI 的 `check` 核对，用法见 [catalog/README.md](../../catalog/README.md#内部包装的生成)。生成的代码只在有 Bridge 操作到达时计入覆盖。三个代表性样例：`eplan_placeholder_list`（只读）、`eplan_placeholder_apply`（修改）、`eplan_part_export` 的 `backup` 格式（文件输出），规格在 `docs/tools/`。
+- **实现**（第一期）：`eng/coverage` 的 `generate` 按 `catalog/wrappers.yaml` 中列出的目录 ID 生成三种构件：返回值的 DTO 和属性读取代码、方法组的重载表、action 行的参数类；输出提交到仓库，CI 的 `check` 核对，用法见 [catalog/README.md](../../catalog/README.md#内部包装的生成)。生成的代码只在有 Bridge 操作到达时计入覆盖。三个代表性样例：`eplan_placeholder_list`（只读）、`eplan_placeholder_apply`（修改）、`eplan_part_export` 的 `backup` 格式（文件输出），规格在 `docs/tools/`。
 
 ## 9. 差距分析（main，2026-10-21）
 

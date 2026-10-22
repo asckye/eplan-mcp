@@ -14,6 +14,7 @@ public sealed class WrapperGeneratorTests : IDisposable
     private const string Page = "Eplan.EplApi.Test.Page";
     private const string Dto = WrapperGenerator.ContractsFolder + "PageProperties.g.cs";
     private const string Api = WrapperGenerator.BridgeFolder + "PageApi.g.cs";
+    private const string Action = WrapperGenerator.BridgeFolder + "ExportPdfParameters.g.cs";
 
     private readonly TempRepository _repository = FakeRepository.Create();
 
@@ -59,6 +60,22 @@ public sealed class WrapperGeneratorTests : IDisposable
         Assert.Contains($"// M:{Page}.Create(System.String@): not wrapped, it has a by-reference", api, StringComparison.Ordinal);
         Assert.Contains($"// M:{Page}.Create(System.Object): not wrapped, the catalog excludes it (deprecated, obsolete_attribute).", api, StringComparison.Ordinal);
         Assert.Contains($"    public static string Find(object @object) =>\n        global::{Page}.Find(@object);\n", SelectAndGenerate("overloads: [Find]"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Files_ForAnActionRow_WriteItsParameters_AndNameTheOnesSetByHand()
+    {
+        _repository.Write(WrapperSelection.RelativePath, "catalog: eplan-2026.0.3\nactions:\n  - action: A:export/PDF\n    class: ExportPdfParameters\n");
+
+        string action = WrapperGenerator.Files(_repository.Root)[Action];
+
+        Assert.Contains("    public const string Action = \"export\";\n", action, StringComparison.Ordinal);
+        Assert.Contains("    public const string Type = \"PDF\";\n", action, StringComparison.Ordinal);
+        Assert.Contains("    /// <summary><c>DESTINATION</c>, required.</summary>\n    public string? DESTINATION { get; set; }\n", action, StringComparison.Ordinal);
+        Assert.Contains("        Add(context, \"DESTINATION\", DESTINATION, required: true);\n        Add(context, \"LANGUAGE\", LANGUAGE, required: false);\n", action, StringComparison.Ordinal);
+        Assert.Contains("// RESULT: not generated, an output parameter, read after the call; set it by hand.", action, StringComparison.Ordinal);
+        Assert.Contains("// PAGE[n]: not generated, not a plain name; set it by hand.", action, StringComparison.Ordinal);
+        Assert.Contains("// PASSWORD: not generated, marked sensitive in the catalog; set it by hand.", action, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -141,6 +158,13 @@ public sealed class WrapperGeneratorTests : IDisposable
                 {"id":"P:{{{Page}}}.Tags","kind":"property","layer":"operation",{{{type}}},"group":"O:{{{Page}}}.Tags","returns":"System.Collections.Specialized.StringCollection","accessors":"get"}
 
                 """)
-            .Write(Directory + "data-dictionary.jsonl", string.Empty);
+            .Write(Directory + "data-dictionary.jsonl", string.Empty)
+            .Write(Directory + "actions.json", """
+                [
+                  { "id": "A:export/PDF", "action": "export", "type": "PDF", "status": "registered",
+                    "parameters": [ { "name": "DESTINATION" }, { "name": "LANGUAGE", "required": false }, { "name": "RESULT", "output": true },
+                                    { "name": "PAGE[n]" }, { "name": "PASSWORD", "sensitive": true } ] }
+                ]
+                """);
     }
 }

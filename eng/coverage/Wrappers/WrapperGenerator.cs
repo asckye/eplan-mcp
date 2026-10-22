@@ -9,7 +9,7 @@ namespace EplanMcp.Coverage.Wrappers;
 /// Writes the internal building blocks catalog/wrappers.yaml selects (docs/design/2026-10-21-api-capability-coverage.md,
 /// section 8), from the catalog alone: for a type, a DTO in Contracts with the selected properties, and in the Bridge a
 /// class with the code that copies them (<c>Read</c>) and the overload table of each selected method group (one typed
-/// method per overload, and for an overload it cannot wrap the reason).
+/// method per overload, and for an overload it cannot wrap the reason); for an action row, a class with its parameters.
 /// Only plain signatures are wrapped; anything else is an error or a listed skip, never a guess. The output depends on
 /// the selection and the catalog only and is written with LF, so the same input gives the same bytes. Generated code is
 /// never an MCP tool and never reflects at run time.
@@ -61,6 +61,18 @@ internal static partial class WrapperGenerator
                 }
 
                 files[BridgeFolder + SimpleName(type.Type) + "Api.g.cs"] = Api(selection.Catalog, type, properties, [.. type.Overloads.Select(o => Overloads(type, members, o))]);
+            }
+        }
+
+        if (selection.Actions.Count > 0)
+        {
+            using JsonDocument actions = JsonDocument.Parse(File.ReadAllText(Path.Combine(catalog, "actions.json")));
+            foreach (ActionSelection action in selection.Actions)
+            {
+                JsonElement row = actions.RootElement.EnumerateArray().FirstOrDefault(r => Text(r, "id") == action.Action);
+                files[BridgeFolder + action.Class + ".g.cs"] = row.ValueKind == JsonValueKind.Object && Identifier().IsMatch(action.Class)
+                    ? Action(selection.Catalog, action, row)
+                    : throw Invalid($"{action.Action} is not a row of catalog/{selection.Catalog}/actions.json, or '{action.Class}' is not a class name.");
             }
         }
 
@@ -199,6 +211,73 @@ internal static partial class WrapperGenerator
         return code.ToString();
     }
 
+    private static string Action(string catalog, ActionSelection action, JsonElement row)
+    {
+        string? type = Text(row, "type");
+        var code = new StringBuilder(Header(catalog));
+        Line(code, "namespace EplanMcp.Bridge.Eplan.Adapters.Generated;");
+        Line(code);
+        Line(code, "/// <summary>");
+        Line(code, $"/// The parameters of <c>{action.Action}</c> in the action catalog (catalog/{catalog}/actions.json), for an");
+        Line(code, "/// <c>ActionCallingContext</c>, set in the catalog's order. The caller adds <c>TYPE</c> itself with <see cref=\"Type\"/>, in");
+        Line(code, "/// the member that calls <c>FindAction(Action)</c>, so that the coverage scan finds the row (MemberWalker).");
+        Line(code, "/// </summary>");
+        Line(code, $"internal sealed class {action.Class}");
+        Line(code, "{");
+        Line(code, "    /// <summary>The action's name.</summary>");
+        Line(code, $"    public const string Action = \"{Text(row, "action")}\";");
+        if (type is not null)
+        {
+            Line(code);
+            Line(code, "    /// <summary>The value of its <c>TYPE</c> parameter.</summary>");
+            Line(code, $"    public const string Type = \"{type}\";");
+        }
+
+        var set = new List<(string Name, bool Required)>();
+        JsonElement[] parameters = row.TryGetProperty("parameters", out JsonElement list) ? [.. list.EnumerateArray()] : [];
+        foreach (JsonElement parameter in parameters)
+        {
+            string name = Text(parameter, "name")!;
+            bool required = !(parameter.TryGetProperty("required", out JsonElement r) && !r.GetBoolean());
+            string? skip = Flag(parameter, "output") ? "an output parameter, read after the call"
+                : Flag(parameter, "deprecated") ? "deprecated in the catalog"
+                : Flag(parameter, "sensitive") ? "marked sensitive in the catalog"
+                : !Identifier().IsMatch(name) || name is "Action" or "Type" or "AddTo" ? "not a plain name"
+                : null;
+            Line(code);
+            if (skip is not null)
+            {
+                Line(code, $"    // {name}: not generated, {skip}; set it by hand.");
+                continue;
+            }
+
+            Line(code, $"    /// <summary><c>{name}</c>, {(required ? "required" : "optional")}.</summary>");
+            Line(code, $"    public string? {name} {{ get; set; }}");
+            set.Add((name, required));
+        }
+
+        Line(code);
+        Line(code, "    /// <summary>Adds each parameter that is set to <paramref name=\"context\"/>; throws when a required one is not.</summary>");
+        Line(code, "    public void AddTo(global::Eplan.EplApi.ApplicationFramework.ActionCallingContext context)");
+        Line(code, "    {");
+        set.ForEach(p => Line(code, $"        Add(context, \"{p.Name}\", {p.Name}, required: {(p.Required ? "true" : "false")});"));
+        Line(code, "    }");
+        Line(code);
+        Line(code, "    private static void Add(global::Eplan.EplApi.ApplicationFramework.ActionCallingContext context, string name, string? value, bool required)");
+        Line(code, "    {");
+        Line(code, "        if (value is not null)");
+        Line(code, "        {");
+        Line(code, "            context.AddParameter(name, value);");
+        Line(code, "        }");
+        Line(code, "        else if (required)");
+        Line(code, "        {");
+        Line(code, "            throw new global::System.ArgumentException(\"The action parameter \" + name + \" is required.\", nameof(name));");
+        Line(code, "        }");
+        Line(code, "    }");
+        Line(code, "}");
+        return code.ToString();
+    }
+
     private static string Header(string catalog) =>
         "// <auto-generated>\n"
         + $"// Written by `dotnet run --project eng/coverage -- generate` from catalog/wrappers.yaml and catalog/{catalog}.\n"
@@ -235,6 +314,8 @@ internal static partial class WrapperGenerator
 
     private static string? Text(JsonElement element, string name) =>
         element.TryGetProperty(name, out JsonElement value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+
+    private static bool Flag(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement value) && value.ValueKind == JsonValueKind.True;
 
     private static InvalidDataException Invalid(string problem) => new($"{WrapperSelection.RelativePath}: {problem}");
 

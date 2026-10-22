@@ -15,6 +15,15 @@ internal sealed class TypeSelection
     public List<string> Overloads { get; set; } = [];
 }
 
+/// <summary>An action row to generate a parameter class for, and the class's name.</summary>
+internal sealed class ActionSelection
+{
+    /// <summary>The row's ID in the action catalog, <c>A:action/TYPE</c> or <c>A:action</c>.</summary>
+    public string Action { get; set; } = "";
+
+    public string Class { get; set; } = "";
+}
+
 /// <summary>
 /// catalog/wrappers.yaml: which catalog entries <see cref="WrapperGenerator"/> writes building blocks for. Kept short on
 /// purpose, so that the generated code stays reviewable. Unknown fields are errors, so a typo cannot drop an entry.
@@ -27,6 +36,8 @@ internal sealed class WrapperSelection
     public string Catalog { get; set; } = "";
 
     public List<TypeSelection> Types { get; set; } = [];
+
+    public List<ActionSelection> Actions { get; set; } = [];
 
     /// <summary>The selection, or null when the repository has none.</summary>
     public static WrapperSelection? Load(string repositoryRoot)
