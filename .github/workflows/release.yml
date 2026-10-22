@@ -203,11 +203,14 @@ jobs:
           $root = "EplanMcp@$env:TAG"
           $dependencies[$root] = @{ ref = $root; dependsOn = @($components.Keys) }
           @{ bomFormat = 'CycloneDX'; specVersion = '1.6'; version = 1; serialNumber = "urn:uuid:$([guid]::NewGuid())"; metadata = @{ component = @{ type = 'application'; 'bom-ref' = $root; name = 'EplanMcp'; version = $env:TAG.Substring(1) } }; components = @($components.Values); dependencies = @($dependencies.Values) } | ConvertTo-Json -Depth 100 | Set-Content "dist/EplanMcp-$env:TAG.cdx.json" -Encoding utf8NoBOM
-      - name: Compile with pinned Inno Setup
+      - name: Compile with the hosted Inno Setup
         run: |
           $ErrorActionPreference = 'Stop'
           $compiler = "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe"
-          if ((Get-Item $compiler).VersionInfo.ProductVersion -notmatch '^6\.7\.1($|\D)') { throw 'This release requires Inno Setup 6.7.1; review the tool pin if the hosted image changed.' }
+          # EplanMcp.iss needs 6.3 or later (ArchitecturesAllowed=x64compatible); the hosted image's version is logged.
+          $innoVersion = (Get-Item $compiler).VersionInfo.ProductVersion
+          Write-Host "Inno Setup $innoVersion"
+          if ([version]($innoVersion -replace '[^0-9.].*$', '') -lt [version]'6.3') { throw "Inno Setup 6.3 or later is required; the hosted image has $innoVersion." }
           & $compiler "/DAppVersion=$($env:TAG.Substring(1))" "/DPayloadDir=$((Resolve-Path stage/app).Path)" "/DOutputDir=$((Resolve-Path dist).Path)" eng/installer/EplanMcp.iss
           if ($LASTEXITCODE) { throw 'Inno Setup failed.' }
           $payload = @(Get-ChildItem stage/app -Recurse -File | Sort-Object FullName | ForEach-Object {
