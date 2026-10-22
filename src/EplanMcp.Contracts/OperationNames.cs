@@ -65,6 +65,13 @@ public static class OperationNames
     public const string RevisionList = "revision.list";
 
     /// <summary>
+    /// The placeholder objects of a project, or of one page, with their value sets, variables, values and current
+    /// values, sorted and sliced in the Bridge; never applies a value set. Arguments: <see cref="PlaceholderListArgs"/>;
+    /// data: <see cref="PlaceholderListData"/>.
+    /// </summary>
+    public const string PlaceholderList = "placeholder.list";
+
+    /// <summary>
     /// EPLAN's system messages of this session, newest first, filtered and sliced in the Bridge. Arguments:
     /// <see cref="MessageListArgs"/>; data: <see cref="MessageListData"/>.
     /// </summary>

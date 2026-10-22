@@ -111,6 +111,7 @@ internal static class BridgeHost
             new PartListOperation(catalog, new EplanPartReader()),
             new PartSearchOperation(new EplanPartsDatabase()),
             new RevisionListOperation(catalog, new EplanRevisionReader()),
+            new PlaceholderListOperation(catalog, pages, new EplanPlaceholderReader()),
             new MessageListOperation(new EplanSystemMessageReader()),
             new CheckListOperation(catalog, messages),
             new MacroListOperation(macros),

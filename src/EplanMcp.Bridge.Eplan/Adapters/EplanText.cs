@@ -59,6 +59,13 @@ internal static class EplanText
     public static (string? Text, string? Fallback) ReadWithLanguage(MDPropertyValue value, TextLanguage language) =>
         value.IsEmpty ? (null, null) : Display(value.ToMultiLangString, value.ToString, language);
 
+    /// <summary>
+    /// The same for a value a method returns rather than a property, such as a placeholder's value in a value set
+    /// (<c>GetValue</c>, with the raw <c>get_Value</c> of S29): an empty raw value is not set, so it is null.
+    /// </summary>
+    public static (string? Text, string? Fallback) ReadWithLanguage(Func<MultiLangString> value, string raw, TextLanguage language) =>
+        raw.Length == 0 ? (null, null) : Display(value, () => raw, language);
+
     private static (string? Text, string? Fallback) Display(Func<MultiLangString> multiLanguage, Func<string> raw, TextLanguage language)
     {
         using MultiLangString text = multiLanguage();
