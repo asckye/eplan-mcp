@@ -40,10 +40,13 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
 
 ## 5. 实现要点
 - **规划**（只读）：
-  - 读项目中存储的部件（`project.Articles`）和项目引用的部件号（`ArticleReference`），去重；
-  - 在配置的部件库中逐个 `ExistsPart`，按 `mode` 算出 `added`、`overwritten`；
-  - 被引用、项目中没有存储的部件，列为 `storedInProject`；
-  - 指纹：上面三个列表。
+  - 读项目中存储的部件（`project.Articles`）和项目引用的部件号（`ArticleReference`），去重（与 `eplan_part_list` 读法相同）；
+  - 用 `Parts` 一次读出部件库的部件号和总数（同 `eplan_part_import`），按 `mode` 分类。只有项目中存储的部件有数据可写进部件库：存储了、库中没有的是 `added`（`append_new`、`overwrite_and_append`），存储了、库中已有的是 `overwritten`（两种覆盖模式）；
+  - 被引用、项目中没有存储、库中有的部件列为 `storedInProject`（S24 r15 中它们是从库存入项目的）；库中也没有的，同步后仍然缺数据，不列入任何一类；
+  - 变更清单：新增、覆盖各一条（同 `eplan_part_import` 的写法，以项目名代替文件名），存入项目一条（现有和将存入的数量）；三类都为空时没有变更，不审批、不执行；
+  - 库在 SQL Server 上时规划就拒绝（`POLICY_DENIED`）；
+  - 指纹：库的设置、项目中存储的部件数，存储的和只引用的部件号，以及其中库已有的部件号。
+  - 与原规格的差别及原因：原规格把三个列表都算进 `added`、`overwritten`，但只引用、没有存储的部件在项目中没有数据，同步写不进库；`Parts` 一次给出部件号和 `partsBefore` 要的总数。
 - **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"；三类部件的数量和前 20 个部件号；"项目也会被修改：存入 N 个被引用的部件"；"撤不回，执行前会备份部件库和项目"。
 - **备份**：先项目（ADR-0013，`CopyProject`），再主数据（`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`）。
 - **执行**：`new Synchronize().Parts(project, StoreMode, …)`，用完释放：

@@ -451,6 +451,13 @@ public static class OperationNames
     public const string PartImportExecute = "part.import.execute";
 
     /// <summary>
+    /// The plan of eplan_part_sync: reads the parts the project stores and references and classifies them against the
+    /// configured parts database, never writes. Arguments: <see cref="PartSyncArgs"/>; data: <see cref="WritePlan"/>
+    /// with the project, the master data and details.
+    /// </summary>
+    public const string PartSyncPlan = "part.sync.plan";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
