@@ -36,6 +36,9 @@ internal sealed record ApprovalQuestion(string RequestId, string Tool, string Ar
 
     /// <summary>The EPLAN instance the write goes to, which the Workbench shows; null when nobody can tell.</summary>
     public required EplanInstanceInfo? Eplan { get; init; }
+
+    /// <summary>For a write to system master data, the folder its backup goes into first (ADR-0019); null otherwise.</summary>
+    public string? MasterDataBackupFolder { get; init; }
 }
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>

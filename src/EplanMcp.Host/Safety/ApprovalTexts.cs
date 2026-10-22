@@ -25,14 +25,18 @@ internal static class ApprovalTexts
 
         WritePlan plan = question.Plan;
         string count = plan.Changes.Count.ToString(CultureInfo.InvariantCulture);
+        string project = plan.ProjectPath.Length == 0
+            ? string.Empty
+            : zh ? $"项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n" : $"Project: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\n";
         return new ApprovalAskArgs
         {
-            Title = zh ? "批准 AI 修改 EPLAN 项目？" : "Approve AI changes to the EPLAN project?",
+            Title = Title(plan, zh),
             Summary = zh
-                ? $"工具：{question.Tool}\n项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n将进行以下修改（共 {count} 处）："
-                : $"Tool: {question.Tool}\nProject: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\nThe following changes will be made ({count}):",
+                ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
+                : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
             Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh)],
-            Note = Backup(question.BackupFolder, zh) + Undo(question.Tool, plan, zh),
+            Note = Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
+                + (plan.MasterData is null ? Undo(question.Tool, plan, zh) : MasterDataUndo(plan, zh)),
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
             CountdownFormat = zh ? "{0} 后自动拒绝" : "Rejected automatically in {0}",
@@ -47,19 +51,27 @@ internal static class ApprovalTexts
     {
         string time = suspension.Time == DateTimeOffset.MinValue ? "?" : suspension.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         string pid = suspension.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?";
-        string scope = suspension.Project is { } project
+        string scope = suspension.Database is { } database
+            ? (zh ? "部件库：" : "Parts database: ") + Value(database, zh)
+            : suspension.Project is { } project
             ? (zh ? "项目：" : "Project: ") + Value(project, zh)
             : zh ? $"范围：这个 EPLAN 实例（进程 {pid}）中的所有项目" : $"Scope: every project in this EPLAN instance (process {pid})";
+        bool parts = suspension.Database is not null;
+        string where = parts ? (zh ? "部件库" : "the parts database") : (zh ? "项目" : "the project");
         return new ApprovalAskArgs
         {
             Title = zh ? "上次 AI 修改的结果未知" : "The outcome of the last AI change is unknown",
             Summary = zh
-                ? $"时间：{time}\n工具：{suspension.Tool}\n{scope}\n这次修改被中断，无法确定是否已经执行，项目中可能只有其中一部分。AI 的写入因此暂停。计划中的修改（最多 {SuspensionStore.MaxChanges} 处）："
-                : $"Time: {time}\nTool: {suspension.Tool}\n{scope}\nThis change was interrupted and whether it was made is unknown; the project may contain part of it. AI writes are suspended. Planned changes (up to {SuspensionStore.MaxChanges}):",
+                ? $"时间：{time}\n工具：{suspension.Tool}\n{scope}\n这次修改被中断，无法确定是否已经执行，{where}中可能只有其中一部分。AI 的写入因此暂停。计划中的修改（最多 {SuspensionStore.MaxChanges} 处）："
+                : $"Time: {time}\nTool: {suspension.Tool}\n{scope}\nThis change was interrupted and whether it was made is unknown; {where} may contain part of it. AI writes are suspended. Planned changes (up to {SuspensionStore.MaxChanges}):",
             Changes = suspension.Changes.Count == 0
                 ? [zh ? "（暂停记录中没有变更清单）" : "(the suspension record lists no changes)"]
                 : [.. suspension.Changes.Select(c => Value(c, zh))],
-            Note = zh
+            Note = parts
+                ? zh
+                    ? "请先在 EPLAN 的部件管理中核实部件库；需要时关闭 EPLAN，按执行前的备份恢复部件库。核实之后再继续，否则请保持暂停。"
+                    : "Check the parts database in EPLAN's parts management first; if needed, close EPLAN and restore the database from the backup made before the change. Continue only after that; otherwise keep writes suspended."
+                : zh
                 ? "请先在 EPLAN 中核实项目：手动删除不完整的修改，或者恢复项目的副本；EPLAN 打开项目时如果提示检查数据，请执行检查。核实之后再继续，否则请保持暂停。"
                 : "Check the project in EPLAN first: remove any partial change by hand, or restore a copy of the project, and run EPLAN's data check if it offers one when opening the project. Continue only after that; otherwise keep writes suspended.",
             ApproveLabel = zh ? "已核实，继续" : "Checked, continue",
@@ -224,6 +236,47 @@ internal static class ApprovalTexts
                 : "Texts the translation database has entries for are filled in for all the project's translation languages; existing translations may be rewritten from it too, so many texts may change.";
         }
     }
+
+    private static string Title(WritePlan plan, bool zh) => (plan.MasterData, plan.ProjectPath.Length > 0) switch
+    {
+        (null, _) => zh ? "批准 AI 修改 EPLAN 项目？" : "Approve AI changes to the EPLAN project?",
+        (_, true) => zh ? "批准 AI 修改 EPLAN 部件库和项目？" : "Approve AI changes to EPLAN's parts database and the project?",
+        _ => zh ? "批准 AI 修改 EPLAN 部件库？" : "Approve AI changes to EPLAN's parts database?",
+    };
+
+    /// <summary>
+    /// For a write to system master data (ADR-0019): which database, its type and path, and that every project using it
+    /// is affected, as lines ahead of the project; else nothing.
+    /// </summary>
+    private static string MasterData(MasterDataTarget? target, bool zh)
+    {
+        if (target is null)
+        {
+            return string.Empty;
+        }
+
+        string type = target.Server ? "SQL Server" : zh ? "文件型" : "file database";
+        string path = target.Path.Length == 0 || target.Path == target.Database ? string.Empty : (zh ? "，" : ", ") + Value(target.Path, zh);
+        return zh
+            ? $"部件库：{Value(target.Database, zh)}（{type}{path}）\n这个部件库被所有项目共用：修改影响使用它的所有项目。\n"
+            : $"Parts database: {Value(target.Database, zh)} ({type}{path})\nEvery project that uses this parts database is affected.\n";
+    }
+
+    /// <summary>For a write to system master data: where the database is backed up before the change (ADR-0019); else nothing.</summary>
+    private static string MasterDataBackup(string? folder, bool zh) => folder is null
+        ? string.Empty
+        : zh
+            ? $"执行前会先把部件库备份到 {Value(folder, zh)}\\ 下的新文件夹。"
+            : $"Before the change, the parts database is backed up to a new folder in {Value(folder, zh)}\\. ";
+
+    /// <summary>No undo step holds a change to master data (S24: not even the parts database's own transactions); only the backup restores it.</summary>
+    private static string MasterDataUndo(WritePlan plan, bool zh) => plan.ProjectPath.Length > 0
+        ? zh
+            ? "部件库中的修改撤不回：Ctrl+Z 只撤销项目中的修改；需要时按备份恢复部件库。"
+            : "Changes to the parts database cannot be undone: Ctrl+Z undoes only the project's changes. If needed, restore the database from its backup."
+        : zh
+            ? "部件库中的修改撤不回，Ctrl+Z 也不能撤销；需要时按备份恢复。"
+            : "Changes to the parts database cannot be undone, not even with Ctrl+Z. If needed, restore it from its backup.";
 
     /// <summary>For a Destructive write: where the whole project is copied before the change (ADR-0013); else nothing.</summary>
     private static string Backup(string? folder, bool zh) => folder is null

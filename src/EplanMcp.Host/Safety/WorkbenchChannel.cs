@@ -71,7 +71,9 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     public async Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
         QuestionTier? tier = question.Tier switch { ToolTier.Write => QuestionTier.Write, ToolTier.Destructive => QuestionTier.Destructive, _ => null };
-        if (tier is null || question.Eplan is not { } eplan)
+        // Version 1 has no field for system master data (ADR-0019), so EPLAN's dialog asks about those writes and their
+        // suspensions with the database and "every project is affected" in its text.
+        if (tier is null || question.Eplan is not { } eplan || question.Plan.MasterData is not null || question.Release?.Database is not null)
         {
             return null; // version 1 cannot show it
         }
