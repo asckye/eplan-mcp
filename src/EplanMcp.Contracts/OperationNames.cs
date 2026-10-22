@@ -430,6 +430,13 @@ public static class OperationNames
     public const string ConnectionNumberExecute = "connection.number.execute";
 
     /// <summary>
+    /// Backs the configured master-data database up with EPLAN's <c>backup /TYPE:MASTERDATA</c> into the Host's new,
+    /// empty folder, before a master-data write runs (ADR-0019); changes no database. Arguments:
+    /// <see cref="MasterDataBackupArgs"/>; data: <see cref="MasterDataBackupData"/>.
+    /// </summary>
+    public const string MasterDataBackup = "masterdata.backup";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
