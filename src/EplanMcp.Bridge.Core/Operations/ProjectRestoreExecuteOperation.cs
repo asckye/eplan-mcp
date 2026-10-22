@@ -14,9 +14,9 @@ public sealed class ProjectRestoreExecuteOperation(IProjectFactory factory, IPro
 
     public override string Name => OperationNames.ProjectRestoreExecute;
 
-    protected override NewProjectData Execute(NewProjectArgs args) => NewProjectExecution.Run(args, Extension, request =>
+    protected override NewProjectData Execute(NewProjectArgs args) => NewProjectExecution.Run(args, Extension, files, request =>
     {
         factory.Restore(request.Source.FullPath, request.LinkFile);
-        return new NewProjectData { DatabaseVersion = File.Exists(request.LinkFile) ? files.Compatibility(request.LinkFile).DatabaseVersion : null };
+        return new NewProjectData();
     });
 }

@@ -13,7 +13,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// </summary>
 internal static class NewProjectExecution
 {
-    public static NewProjectData Run(NewProjectArgs args, string extension, Func<NewProjectRequest, NewProjectData> make)
+    public static NewProjectData Run(NewProjectArgs args, string extension, IProjectFiles files, Func<NewProjectRequest, NewProjectData> make)
     {
         NewProjectRequest request;
         bool made;
@@ -56,6 +56,8 @@ internal static class NewProjectExecution
                 throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN finished without making the new project's files, so no project was made.");
             }
 
+            data.DatabaseVersion = CheckCompatibility(files, request.LinkFile);
+
             // The last safe point (M4 design 4.3): a cancel that came meanwhile takes the new project away again.
             OperationContext.Current.ThrowIfCancellationRequested();
             data.Name = request.Name;
@@ -67,6 +69,31 @@ internal static class NewProjectExecution
         {
             throw Undone(request, made, failure);
         }
+    }
+
+    /// <summary>The same status check as project.compatibility (A31), inside execution so its failure is cleaned up.</summary>
+    internal static string CheckCompatibility(IProjectFiles files, string linkFile)
+    {
+        (string status, string version) compatibility;
+        try
+        {
+            compatibility = files.Compatibility(linkFile);
+        }
+        catch (Exception ex)
+        {
+            var failed = new BridgeErrorException(ErrorReason.EplanOperationFailed,
+                "The new project's compatibility check failed. The files created by this call will be deleted.", ex);
+            failed.Error.Metadata = (ex as BridgeErrorException)?.Error.Metadata;
+            throw failed;
+        }
+
+        if (!string.Equals(compatibility.status, ClosedProject.Compatible, StringComparison.Ordinal))
+        {
+            throw new BridgeErrorException(ErrorReason.InvalidArgument,
+                "The material is incompatible. Use compatible material; no automatic upgrade is supported. The files created by this call will be deleted.");
+        }
+
+        return compatibility.version;
     }
 
     private static Exception Undone(NewProjectRequest request, bool made, Exception failure)

@@ -47,8 +47,20 @@ public sealed class ProjectCreateOperationTests : IDisposable
 
         NewProjectData data = Execute(Args("Line1", "a", plan.Fingerprint));
 
-        Assert.Equal(("Line1", Path.Combine(_scratch, "a", "Line1.elk"), (int?)1, "GB_bas001@1792643412", (string?)null), (data.Name, data.Path, data.Pages, data.ProjectGuid, data.DatabaseVersion));
+        Assert.Equal(("Line1", Path.Combine(_scratch, "a", "Line1.elk"), (int?)1, "GB_bas001@1792643412", "18.0"), (data.Name, data.Path, data.Pages, data.ProjectGuid, data.DatabaseVersion));
         Assert.Equal([(Path.Combine(_scratch, "a", "Line1.elk"), _file)], _factory.Calls);
+    }
+
+    [Fact]
+    public void MissingParents_ArePlannedWithoutCreatingThem_AndMadeOnlyDuringExecute()
+    {
+        NewProjectArgs args = Args("Line1", "new-parent/project");
+        WritePlan plan = Plan(args);
+        Assert.False(Directory.Exists(Path.GetDirectoryName(args.Destination)));
+        args.Fingerprint = plan.Fingerprint;
+        NewProjectData data = Execute(args);
+        Assert.Equal("18.0", data.DatabaseVersion);
+        Assert.True(File.Exists(data.Path));
     }
 
     [Fact]
@@ -185,7 +197,7 @@ public sealed class ProjectCreateOperationTests : IDisposable
 
     private NewProjectData Execute(NewProjectArgs args)
     {
-        var operation = new ProjectCreateExecuteOperation(_factory);
+        var operation = new ProjectCreateExecuteOperation(_factory, new FakeSnapshotReader());
         return (NewProjectData)operation.Execute(operation.ParseArgs(JObject.FromObject(args)))!;
     }
 }
