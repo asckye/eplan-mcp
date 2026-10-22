@@ -1,8 +1,8 @@
 namespace EplanMcp.Packs.Scanning;
 
 /// <summary>
-/// Writes a scanned pack as a folder: copies every resource's files unchanged, writes <c>pack.json</c> and, for a pack
-/// without dependencies, <c>pack.lock.json</c>. Writes into a new folder beside the target and gives it the target's name
+/// Writes a scanned pack as a folder: copies every bundled resource's files unchanged (referenced ones stay where they
+/// are), writes <c>pack.json</c> and, for a pack without dependencies, <c>pack.lock.json</c>. Writes into a new folder beside the target and gives it the target's name
 /// only once the folder checks clean, so a file that changed after the scan never ends up in a pack. Refuses while the
 /// scan has errors, and never writes into an existing folder.
 /// </summary>
@@ -29,7 +29,7 @@ public static class PackWriter
         string staging = $"{target}.partial-{Guid.NewGuid():N}";
         try
         {
-            foreach (ScannedResource resource in scan.Resources)
+            foreach (ScannedResource resource in scan.Resources.Where(r => r.Resource.Storage == ResourceStorage.Bundled))
             {
                 string folder = Path.Combine(staging, Path.GetDirectoryName(resource.Resource.Path.Replace('/', Path.DirectorySeparatorChar)) ?? string.Empty);
                 foreach ((string relative, string fullPath) in resource.FilesOnDisk)

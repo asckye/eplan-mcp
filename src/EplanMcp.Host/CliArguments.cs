@@ -35,7 +35,7 @@ internal sealed record CliArguments(
         "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
-        + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--format json]"
+        + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
         + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
         + Environment.NewLine + "clients: " + string.Join(", ", McpClient.All.Select(c => c.Name));
 
@@ -146,7 +146,7 @@ internal sealed record CliArguments(
         var values = new Dictionary<string, string>(StringComparer.Ordinal);
         var paths = new List<string>();
         var variants = new List<string>();
-        bool json = false, official = false;
+        bool json = false, official = false, bundle = false;
         for (int i = 0; i < options.Length; i++)
         {
             string option = options[i];
@@ -159,6 +159,10 @@ internal sealed record CliArguments(
             else if (action == PackAction.Scan && option == "--official" && !official)
             {
                 official = true;
+            }
+            else if (action == PackAction.Scan && option == "--bundle-projects" && !bundle)
+            {
+                bundle = true;
             }
             else if (action == PackAction.Scan && option is "--id" or "--name" or "--version" or "--out" or "--description" or "--author" or "--eplan"
                 && hasValue && values.TryAdd(option, options[i + 1]))
@@ -191,7 +195,7 @@ internal sealed record CliArguments(
             null => false,
             _ => paths.Count == 1,
         };
-        return valid ? new(CliCommand.Pack, json, Pack: new PackRequest(action!.Value, paths, values.GetValueOrDefault("--out"), identity, official)) : null;
+        return valid ? new(CliCommand.Pack, json, Pack: new PackRequest(action!.Value, paths, values.GetValueOrDefault("--out"), identity, official, bundle)) : null;
     }
 
     private static bool IsVariant(string name) =>

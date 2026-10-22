@@ -25,12 +25,11 @@ internal static partial class ResourceClassifier
         [".zw6"] = new(ResourceKind.Other, "parts_database_backup", Guessed: false),
         [".zw7"] = new(ResourceKind.Other, "translation_database_backup", Guessed: false),
         [".csv"] = new(ResourceKind.MaterialMapping, null, Guessed: true),
-        [".xlsx"] = new(ResourceKind.MaterialMapping, null, Guessed: true),
         [".json"] = new(ResourceKind.MaterialMapping, null, Guessed: true),
         [".md"] = new(ResourceKind.Document, null, Guessed: false),
         [".txt"] = new(ResourceKind.Document, null, Guessed: false),
-        [".pdf"] = new(ResourceKind.Document, null, Guessed: false),
-        [".docx"] = new(ResourceKind.Document, null, Guessed: false),
+        [".png"] = new(ResourceKind.Preview, null, Guessed: false),
+        [".svg"] = new(ResourceKind.Preview, null, Guessed: false),
     };
 
     /// <summary>The kind of <paramref name="fileName"/>, or null for an extension EplanMcp does not know.</summary>

@@ -55,7 +55,8 @@ public sealed class EplanFileInspectionTests : IDisposable
         string manifestText = string.Join('\n', result.Resources[0].Facts.Select(f => f.Value + f.Evidence));
         Assert.DoesNotContain("Wang", manifestText, StringComparison.Ordinal);
         Assert.DoesNotContain("Somewhere", manifestText, StringComparison.Ordinal);
-        Assert.Equal((FindingSeverity.Gap, "eplan_compatibility_unchecked"), Assert.Single(result.Findings) is var f ? (f.Severity, f.Code) : default);
+        Assert.Equal(["eplan_compatibility_unchecked", "project_referenced"], result.Findings.Where(f => f.Severity == FindingSeverity.Gap).Select(f => f.Code).Order(StringComparer.Ordinal));
+        Assert.Equal(2, result.Findings.Count);
     }
 
     [Theory]
