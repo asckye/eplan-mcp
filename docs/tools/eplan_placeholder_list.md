@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `placeholder` / `full`（新工具默认只在 `full` 中） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（API 能力覆盖第一期的只读样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节） |
+| 状态 | Proposed（API 能力覆盖第一期的只读样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，待实机验证 |
 
 ## 1. 这个工具解决什么任务
 "这页上的占位符有哪些值集？""现在用的是哪组值？""插进来的宏能切换成哪几种？"代理列出项目中的占位符对象（EPLAN 的"占位符"，带值集和变量的参数化对象），看它们有哪些值集、每个值集给变量什么值，再决定用 `eplan_placeholder_apply` 切换值集。
