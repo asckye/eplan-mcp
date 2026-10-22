@@ -36,7 +36,7 @@
 ## 3. 输出
 `pack`、`version`（`dev`）、`asset`（资源 ID）、`created`（新建还是替换）、`path`、`digest`（更新后的包摘要）、`standing`（`candidate`；缺口和模块为 `null`）、`uri`。
 
-一行摘要：`Created candidate acme.panels@dev:Candidate/motor-overload in development pack 'acme.panels'.`
+一行摘要：`Created candidate acme.panels@dev:candidate/motor-overload in development pack 'acme.panels'.`
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |

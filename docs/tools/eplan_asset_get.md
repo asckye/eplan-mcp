@@ -14,7 +14,7 @@
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `asset` | string | 是 | — | `eplan_asset_search` 给出的资源 ID，如 `acme.panels@dev:Macro/ref/motor.ema` |
+| `asset` | string | 是 | — | `eplan_asset_search` 给出的资源 ID，如 `acme.panels@dev:macro/ref/motor.ema` |
 
 ## 3. 输出
 - `asset`、`pack`、`version`、`kind`、`subtype`、`name`、`title`、`tags`、`standing`、`uri`（`eplanpack://<包>/<版本>/<种类>/<名称>`，名称中的 `/` 写作 `%2F`）；
@@ -25,7 +25,7 @@
 - `preview`：资源本身是页面预览（PNG、SVG）时给出 `uri` 和 `mimeType`，结果中附 `resource_link`；其他资源为 `null`，`previewNote` 说明页面预览要用 EPLAN 导出，属于第 2 阶段；
 - 宏的占位符和值集还不在索引中（要 EPLAN 或解析宏文件），`hint` 说明。
 
-一行摘要：`Asset acme.panels@dev:Macro/ref/motor.ema: window_macro, bundled, available, 2 facts.`
+一行摘要：`Asset acme.panels@dev:macro/ref/motor.ema: window_macro, bundled, available, 2 facts.`
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
