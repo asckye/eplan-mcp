@@ -1122,7 +1122,7 @@
       "spec": "docs/tools/eplan_page_renumber.md",
       "small": 1,
       "medium": 2,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A18",
         "A20"

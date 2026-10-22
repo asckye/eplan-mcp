@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "870f6c4a",
-  "sourceHash": "sha256:1587925523c570f81d20981b7f308c7d85a4f77c16f5902a42d6924971d15b9b",
+  "scannedSources": "85a15b76",
+  "sourceHash": "sha256:ba6206355e7be315658b0350fd09e2ac2e570e5cb38ca12c7318644ef652331b",
   "operations": [
     {
       "name": "approval.ask",
@@ -209,6 +209,10 @@
     {
       "name": "message.list",
       "class": "MessageListOperation"
+    },
+    {
+      "name": "object.resolve",
+      "class": "ObjectResolveOperation"
     },
     {
       "name": "page.create.execute",
@@ -569,6 +573,7 @@
           "read"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -593,6 +598,7 @@
           "read"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -2771,6 +2777,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -3161,6 +3178,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanProjectReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectReader.cs",
@@ -3477,6 +3505,17 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.resolve"
         ]
       },
       {
@@ -4169,6 +4208,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -4599,6 +4639,7 @@
           "call"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -4975,6 +5016,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "TypeOf",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -5030,6 +5082,7 @@
           "call"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -5041,6 +5094,7 @@
           "call"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -5052,6 +5106,7 @@
           "call"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -5063,6 +5118,7 @@
           "call"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -5898,6 +5954,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -5978,6 +6035,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -6579,6 +6637,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -6621,6 +6680,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -6882,6 +6942,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -6948,6 +7009,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -6978,6 +7040,7 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "object.resolve",
           "plc.get",
           "project.snapshot"
         ]
@@ -7029,6 +7092,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7067,6 +7131,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -7114,6 +7179,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7141,6 +7207,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7168,6 +7235,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7458,6 +7526,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7585,6 +7654,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7774,6 +7844,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7876,6 +7947,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -7938,6 +8010,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8286,6 +8359,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -8297,6 +8371,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -8536,6 +8611,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8560,6 +8636,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8584,6 +8661,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8608,6 +8686,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8632,6 +8711,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8670,6 +8750,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8694,6 +8775,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8718,6 +8800,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8742,6 +8825,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8766,6 +8850,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8790,6 +8875,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8803,6 +8889,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -8854,6 +8941,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9099,6 +9187,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Placed",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -9329,6 +9428,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -9551,6 +9661,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -9659,6 +9770,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9767,6 +9879,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9864,6 +9977,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9890,6 +10004,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9903,6 +10018,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -9977,6 +10093,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -10234,6 +10351,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -10283,6 +10401,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -10521,6 +10640,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -10601,6 +10721,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -10676,6 +10797,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -10798,6 +10920,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -10945,6 +11068,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -11037,6 +11161,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -11276,6 +11401,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -11362,6 +11488,7 @@
           "set"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -11429,11 +11556,34 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Placed",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
       {
         "adapter": "EplanSnapshotReader.Source",
         "member": ".ctor",
@@ -11464,6 +11614,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -11475,6 +11626,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -11486,6 +11638,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -11497,6 +11650,7 @@
           "get"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -12291,6 +12445,7 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "object.resolve",
           "plc.get",
           "project.snapshot"
         ]
@@ -12655,6 +12810,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -13124,6 +13280,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -13360,6 +13517,7 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "object.resolve",
           "plc.get",
           "project.snapshot"
         ]
@@ -13387,6 +13545,17 @@
           "connection.generate.execute",
           "connection.generate.plan",
           "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
         ]
       },
       {
@@ -13443,6 +13612,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -13943,6 +14113,17 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -14367,6 +14548,7 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "object.resolve",
           "plc.get",
           "project.snapshot"
         ]
@@ -14439,6 +14621,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -14485,6 +14668,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -14531,6 +14715,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -14927,6 +15112,48 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Placed",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "ValueTuple",
+        "member": "Function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -14991,6 +15218,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -15168,6 +15396,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -15351,6 +15580,7 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "object.resolve",
           "plc.get",
           "project.snapshot"
         ]
@@ -15596,6 +15826,48 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Function",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "Placed",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "ValueTuple",
+        "member": "Page",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -15740,6 +16012,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -15893,6 +16166,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -16325,6 +16599,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -16402,6 +16677,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -16622,6 +16898,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
@@ -16952,6 +17229,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -16963,6 +17241,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       },
@@ -17098,6 +17377,28 @@
         ]
       },
       {
+        "adapter": "EplanObjectFinder",
+        "member": "Pick",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanObjectFinder",
+        "member": "TypeOf",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.resolve"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -17221,6 +17522,7 @@
           "type"
         ],
         "operations": [
+          "object.resolve",
           "project.snapshot"
         ]
       }
@@ -17841,6 +18143,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.resolve",
           "page.create.execute",
           "page.create.plan",
           "page.delete.execute",
