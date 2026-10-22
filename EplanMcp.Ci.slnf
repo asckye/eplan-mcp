@@ -8,11 +8,13 @@
       "src\\EplanMcp.Workbench.Protocol\\EplanMcp.Workbench.Protocol.csproj",
       "src\\EplanMcp.Workbench\\EplanMcp.Workbench.csproj",
       "evals\\EplanMcp.Evals\\EplanMcp.Evals.csproj",
+      "eng\\catalog\\EplanMcp.Catalog\\EplanMcp.Catalog.csproj",
       "tests\\EplanMcp.Contracts.Tests\\EplanMcp.Contracts.Tests.csproj",
       "tests\\EplanMcp.Bridge.Core.Tests\\EplanMcp.Bridge.Core.Tests.csproj",
       "tests\\EplanMcp.Host.Tests\\EplanMcp.Host.Tests.csproj",
       "tests\\EplanMcp.Large.Tests\\EplanMcp.Large.Tests.csproj",
       "tests\\EplanMcp.Evals.Tests\\EplanMcp.Evals.Tests.csproj",
+      "tests\\EplanMcp.Catalog.Tests\\EplanMcp.Catalog.Tests.csproj",
       "tests\\EplanMcp.Workbench.Protocol.Tests\\EplanMcp.Workbench.Protocol.Tests.csproj",
       "tests\\EplanMcp.Workbench.Tests\\EplanMcp.Workbench.Tests.csproj"
     ]

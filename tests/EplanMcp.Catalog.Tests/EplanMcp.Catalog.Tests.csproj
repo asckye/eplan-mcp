@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\eng\catalog\EplanMcp.Catalog\EplanMcp.Catalog.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    EPLAN API capability catalog extractor (docs/design/2026-10-21-api-capability-coverage.md section 5). Reads the
+    EPLAN API assemblies as metadata with System.Reflection.Metadata, never loading or running them, so it builds and
+    tests without EPLAN; only `extract` needs the EPLAN Bin folder. A development tool: never shipped with the product.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>EplanMcp.Catalog</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EplanMcp.Catalog.Tests" />
+  </ItemGroup>
+</Project>
