@@ -8,9 +8,14 @@
 #               <Type>Api.Read (Bridge); string, bool, numbers, enums (as their name) and StringCollection only;
 #   overloads:  method groups by simple name; <Type>Api gets one typed method per overload with a plain signature
 #               and names the others with the reason (the overload table).
+# actions: an action row of the action catalog (A:action/TYPE) and the name of its parameter class (Bridge).
 catalog: eplan-2026.0.3
 types:
   # eplan_placeholder_list, eplan_placeholder_apply (spike S29, api-notes A33).
   - type: T:Eplan.EplApi.DataModel.Graphics.PlaceHolder
     properties: [Name, NumberOfRecords, NumberOfVariables, VariableNames]
     overloads: [ApplyRecord]
+actions:
+  # The backup before master-data writes (ADR-0019) and eplan_part_export's backup format (spike S24, api-notes A30).
+  - action: A:backup/MASTERDATA
+    class: BackupMasterDataParameters
