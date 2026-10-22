@@ -43,6 +43,9 @@ public sealed class DestructiveHost : IAsyncLifetime
     /// <summary>The EPLAN this Host talks to.</summary>
     public int ProcessId { get; private set; }
 
+    /// <summary>False for tests that write no project, such as the parts database's (PartImportTests): no copy need be open.</summary>
+    public bool RequireWritable { get; init; } = true;
+
     /// <summary>The copy outside the scratch root, which is only ever refused; fails with what to do when it is not open.</summary>
     public string Outside => WriteHost.OpenedBelow(_open, WriteHost.OutsideFolder, null);
 
@@ -68,7 +71,7 @@ public sealed class DestructiveHost : IAsyncLifetime
             ? status.GetProperty("eplan").GetProperty("processId").GetInt32()
             : throw new InvalidOperationException("The Destructive tests' Host does not reach EPLAN: " + status.GetProperty("hint").GetString());
         _open = [.. (await CallAsync("eplan_project_list", new() { ["limit"] = 200 })).GetProperty("projects").EnumerateArray().Select(p => p.GetProperty("path").GetString()!)];
-        Writable = WriteHost.OpenedBelow(_open, WriteHost.ScratchFolder, WriteHost.WritableName);
+        Writable = RequireWritable ? WriteHost.OpenedBelow(_open, WriteHost.ScratchFolder, WriteHost.WritableName) : string.Empty;
     }
 
     public async ValueTask DisposeAsync()

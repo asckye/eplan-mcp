@@ -328,6 +328,50 @@ public sealed class ApprovalTextsTests
     }
 
     [Fact]
+    public void APartsImport_ListsTheFile_TheFirst20PartsOfEachKind_AndTheRest()
+    {
+        var plan = new WritePlan
+        {
+            Changes =
+            [
+                new PlannedChange { Action = "create", Kind = "parts", Name = "supplier/relays.xml", Property = "parts", NewValue = "25" },
+                new PlannedChange { Action = "update", Kind = "parts", Name = "supplier/relays.xml", Property = "parts", NewValue = "1" },
+            ],
+            Fingerprint = "f",
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = @"$(MD_PARTS)\EPLAN_parts.alk" },
+            Details = new Dictionary<string, string>
+            {
+                ["file"] = "relays.xml (12 KB, sha256 0123456789ab…)",
+                ["added"] = string.Join("\n", Enumerable.Range(1, 25).Select(i => "P" + i)),
+                ["addedCount"] = "25",
+                ["updated"] = "SIE.3RH2122-1HB40",
+                ["updatedCount"] = "1",
+                ["skippedCount"] = "3",
+                ["mode"] = "update_and_append",
+                ["matchBy"] = "part_number",
+            },
+        };
+
+        ApprovalAskArgs texts = ApprovalTexts.For(_question with { Plan = plan, Tool = "eplan_part_import" }, CultureInfo.GetCultureInfo("zh-CN"));
+
+        Assert.Equal(
+            [
+                "从 supplier/relays.xml 新增 25 个部件",
+                "从 supplier/relays.xml 更新部件库中已有的 1 个部件",
+                string.Empty,
+                "文件：relays.xml (12 KB, sha256 0123456789ab…)",
+                "新增的部件：",
+                .. Enumerable.Range(1, 20).Select(i => "P" + i),
+                "……共 25 个",
+                "更新的部件：",
+                "SIE.3RH2122-1HB40",
+                "不变的部件：3 个（方式 update_and_append，按 part_number 判断是否已有）",
+            ],
+            texts.Changes);
+        Assert.Equal(["add 25 parts from supplier/relays.xml to the parts database", "update 1 part of the parts database from supplier/relays.xml"], WritePipeline.ChangeLines(plan));
+    }
+
+    [Fact]
     public void UnknownKindsAndProperties_AreShownAsTheyAre()
     {
         var change = new PlannedChange { Action = "update", Kind = "cable", Name = "-W1", Property = "length", OldValue = "1", NewValue = "2" };

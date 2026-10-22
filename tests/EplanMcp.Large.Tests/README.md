@@ -47,6 +47,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 | `DevicePlaceTests` | 写测试：在新页上按部件号放置 `SIE.3RH2122-1HB40`（S20），标识 `-KF9<页号>`：dry run 不放置，标识取页的结构 `=GAA+A1`；读回类别 `Coil`、5 个功能中 4 个未放置，`eplan_device_get` 在新页上找到它；再放一次 `ALREADY_EXISTS`，页上仍只有一个设备。部件库中没有的部件 `PART_NOT_FOUND`，不存在的变体 `INVALID_ARGUMENT`（列出变体 1），页上没有设备。scratch 之外的副本 `POLICY_DENIED`。页面图片所在的目录写入测试输出，在其中核对线圈显示标识、在 (80, 160) 附近、带触点镜像；一次 Ctrl+Z 撤销放置和改名要在只开着写副本时手工核对（"写测试"第 3 步） |
 | `ImportDxfTests` | 写测试，经 `WriteHost`（数据根目录在临时目录中，导入文件由测试自己写进其 `imports\`）：测试中生成的 R12 DXF（4 条线、1 个圆）导入新页：dry run 给出 SHA-256、不导入；提交后新增 1–100 个对象，再导入一次新增同样多（不是幂等的）；审计的参数中有文件的 SHA-256。EPLAN 自带的 Rittal 图 `%PUBLIC%\EPLAN\Data\DXF_DWG\Company name\RITTAL\4685200F.DXF`（S22）复制进导入目录：`fit`、`center` 新增 227 个对象（A29），`none`、`lower_left` 导入到另一页（对象数写入测试输出）；文件不在时跳过。导入目录中没有的文件 `FILE_NOT_FOUND`、`../` 和别的扩展名 `INVALID_ARGUMENT`；scratch 之外的副本 `POLICY_DENIED`。三张页的图片经只读测试的 `eplanmcp` 导出，目录写入测试输出，在其中核对图形的位置和缩放；一次 Ctrl+Z 撤销要在只开着写副本时手工核对 |
 | `ImportPxfTests` | 写测试，经 `WriteHost`：用 `eplan_export_pxf` 把写副本导出为 EPJ（约 600 MB，S25），移进临时数据根目录的 `imports\`，再导入为 `<scratch 根目录>\writes\imported\LargeImport_<UTC 时间>`：dry run 给出新项目的路径、不建文件；提交后 `.elk` 和 `.edb` 都在，项目没有在 EPLAN 中打开，审计中没有审批、有按新项目路径的开始记录；同名再导一次 `ALREADY_EXISTS`。不存在的文件 `FILE_NOT_FOUND`，名称带点 `INVALID_ARGUMENT`。耗时和新项目的路径写入测试输出；**在 EPLAN 中打开它、核对页数与写副本相同要手工进行**。最新的一个导入项目保留，每次运行开始时删除以前的（EPLAN 中开着的删不掉，测试输出会说明）。导出和导入合计约 2 分钟，临时目录所在的盘要有 1.5 GB 以上的空闲空间 |
+| `PartImportTests` | 🔴 **写正在用的部件库**，默认跳过，见下文"系统主数据（部件库）"：导入一个测试部件 `EPLANMCP.LARGE-TEST`，先备份；再导一次不变 |
 | `CheckAndReportTests` | 写测试：检查整个项目（`dry_run` 的页数；结果与 `eplan_check_list` 一致；再检查一次警告不变、14 条汇总提示再追加一遍（A20））、只检查两页、EPLAN 不认识的方案被回滚；更新全部报表（新增 `+A2&EPA1/1.2`，再更新一次不增删）、只更新目录页、电路图页不是报表页。规格中没有验证的结果写入测试输出 |
 | `LanguageSetTests` | 写测试：显示语言设为 `en_US`、`zh_CN`，读回一致，再调用一次不改动，用 dry run 读出的 `before` 再调用一次恢复原样（示例项目是 `##_##`：按存储形式写回，A28 之外的行为）；加一种副本中没有的语言（`is_IS` 等中第一个没有的，**留在副本中**），再加一次不改动；源语言设为 `de_DE`，读回一致、其他设置不变，再设一次不改动，用 `before.source` 恢复（S23 r2）；不是翻译语言的显示语言返回 `INVALID_ARGUMENT` 和候选。耗时、新语言在列表中的位置、加语言时显示语言是否被 EPLAN 改动写入测试输出 |
 | `LanguageRemoveTests` | Destructive：先用 `eplan_language_set` 加一种副本中没有的语言（`lt_LT` 等），dry run 为 0 条译文、不备份，批准后删除：`committed`，翻译语言回到原样，有新的备份；EPLAN 改了显示语言时再设回原值。删除 `sv_SE`：dry run 的 `textsAffected` 至少 460（S23），批准后读回不含 `sv_SE`，备份存在，再删一次 `INVALID_ARGUMENT`。**这一项永久改变副本，每份副本只能运行一次**，之后跳过并提示重新复制。不是翻译语言时 `INVALID_ARGUMENT`、候选，不审批、不备份。耗时、删除后的显示语言、备份路径写入测试输出 |
@@ -73,6 +74,22 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 页的三组测试让副本保持原样：只规划（dry run）示例项目自己的页，执行的删除和重编号只针对测试在 `=GAA+A1&EFS1` 最后一页之后新建的页，测试最后再用 `eplan_page_delete`（同样由脚本批准）把这些页删掉。测试失败时会尽量删掉它们，并在测试输出中说明；删不掉时测试输出列出页名，在 EPLAN 中手工删除，或按上文重新复制副本。`PageRenumberTests` 把新页重编号为 `/200`、`/210`、`/220`，所以 `=GAA+A1&EFS1` 的页号到 200 之前都能运行（其他写测试每次运行新增 4 页）；到了 200 时它会失败并提示重新复制副本。
 
 M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整个项目，测试无法只在新页上验证，也不能按 Ctrl+Z（开着两个项目时撤销可能落在夹具上，A14），所以**它们会永久改变 `writes\LargeWrite`**：端子名、电缆名、线号按方案重排。其他写测试不依赖这些名称：`WriteSafetyTests` 和 `PageDeleteTests` 用到的 `+A1-WE1` 等设备不在 S21 改名的电缆中（`+A1-WE1` 的类别是 `BusBarDefText`，不是电缆，2026-10-21 实测）。这些测试第一次在新副本上运行时核对 S21 的改动，之后的运行核对"没有可改的"；要重新验证第一次的结果，按上文重新复制副本。
+
+### 系统主数据（部件库）
+🔴 **这些测试写 EPLAN 配置的那个部件库**，也就是工程师正在用的库：S24 证实副本隔离不了导入（结论 8），所以没有"测试库"可用（[ADR-0019](../../docs/adr/0019-master-data-writes.md)）。它们默认跳过，只有环境变量 `EPLANMCP_LARGE_MASTERDATA` 为 `1` 时才运行，跳过的判断在连接 EPLAN 之前。**每次运行都要项目负责人事先批准**，并由维护者按下面的步骤做：
+1. 运行前：确认部件库在本机文件中（不是 SQL Server；在 SQL Server 上时测试会得到 `POLICY_DENIED`），对库的全部文件（`.alk` 和 `.adb\` 中的文件）计算 SHA-256，再把它们复制一份到 scratch 之外的地方；
+2. 在同一个 PowerShell 中 `$env:EPLANMCP_LARGE_MASTERDATA = "1"`，只运行这些测试类（下面的命令），运行后 `Remove-Item Env:EPLANMCP_LARGE_MASTERDATA`；
+3. 运行后：关闭 EPLAN，用第 1 步的副本覆盖库的全部文件，再核对 SHA-256 与第 1 步相同（`User.eod`、`User.eox` 和 `.lck` 是 EPLAN 自己改写的，api-notes A30，不必一致），然后再启动 EPLAN。测试自己做的主数据备份在临时数据根目录中，测试结束时随之删除，不作为恢复手段。
+
+```powershell
+dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.PartImportTests"
+```
+
+`PartImportTests` 经 `DestructiveHost`（不需要打开写副本）调用 `eplan_part_import`，导入测试自己写进临时 `imports\` 的文件 `eplanmcp-large-test.xml`，其中只有一个部件 `EPLANMCP.LARGE-TEST`（变体 1，结构同 S24 的导出，字段只有部件号、描述和部件类型；EPLAN 是否接受这样短的文件正是要验证的）：
+- dry run：`added` 恰好是 `EPLANMCP.LARGE-TEST`（否则失败并提示先恢复库），不审批、不备份；
+- 由脚本批准变更行 `add 1 part from eplanmcp-large-test.xml to the parts database` 后导入：`committed`，`added` 为它，`partsAfter` = `partsBefore` + 1，`missing` 为空，`backup` 是临时数据根目录 `backups\masterdata\` 下非空的 `.zw6`；
+- 再导一次：`not_started`，`skipped` 为它，没有再审批，也没有再备份；
+- 测试输出：库、导入前后的部件数、备份加导入的耗时、备份大小、提示，以及审批问题中的变更行。
 
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。

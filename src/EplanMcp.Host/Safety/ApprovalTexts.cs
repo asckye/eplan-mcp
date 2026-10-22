@@ -34,7 +34,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh)],
             Note = Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
                 + (plan.MasterData is null ? Undo(question.Tool, plan, zh) : MasterDataUndo(plan, zh)),
             ApproveLabel = zh ? "批准" : "Approve",
@@ -88,6 +88,10 @@ internal static class ApprovalTexts
         string name = Value(change.Name, zh);
         return change.Action switch
         {
+            // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
+            "create" when change.Kind == "parts" => zh ? $"从 {name} 新增 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Add {Value(change.NewValue ?? "?", zh)} new parts from {name}",
+            _ when change.Kind == "parts" => zh ? $"从 {name} 更新部件库中已有的 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Update {Value(change.NewValue ?? "?", zh)} parts the database has, from {name}",
+
             // A macro's change names the page; what goes there is its value (macro.insert.plan).
             "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             // A device's change names the page too; the part, the tag and the point are its value (device.place.plan).
@@ -235,6 +239,50 @@ internal static class ApprovalTexts
                 ? "翻译库中有词条的文本补全项目的全部翻译语言；已有的译文也可能按翻译库改写，可能改动大量文本。"
                 : "Texts the translation database has entries for are filled in for all the project's translation languages; existing translations may be rewritten from it too, so many texts may change.";
         }
+    }
+
+    /// <summary>The most part numbers the dialog lists per kind (tool spec eplan_part_import, section 5).</summary>
+    public const int MaxParts = 20;
+
+    /// <summary>
+    /// After the changes of a parts import (part.import.plan's details): the file with its size and SHA-256, the first
+    /// <see cref="MaxParts"/> part numbers added and updated, how many stay as they are, and how parts were matched;
+    /// nothing for other plans.
+    /// </summary>
+    private static IEnumerable<string> PartLists(WritePlan plan, bool zh)
+    {
+        if (!plan.Changes.Any(c => c.Kind == "parts") || plan.Details is not { } details)
+        {
+            yield break;
+        }
+
+        yield return string.Empty;
+        yield return (zh ? "文件：" : "File: ") + Value(details.GetValueOrDefault("file") ?? "?", zh);
+        foreach ((string key, string heading) in new[] { ("added", zh ? "新增的部件：" : "Parts added:"), ("updated", zh ? "更新的部件：" : "Parts updated:") })
+        {
+            string[] numbers = (details.GetValueOrDefault(key) ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            if (numbers.Length == 0)
+            {
+                continue;
+            }
+
+            yield return heading;
+            foreach (string number in numbers.Take(MaxParts))
+            {
+                yield return Value(number, zh);
+            }
+
+            string total = details.GetValueOrDefault(key + "Count") ?? "?";
+            if (total != numbers.Take(MaxParts).Count().ToString(CultureInfo.InvariantCulture))
+            {
+                yield return zh ? $"……共 {Value(total, zh)} 个" : $"… {Value(total, zh)} in all";
+            }
+        }
+
+        string skipped = Value(details.GetValueOrDefault("skippedCount") ?? "0", zh);
+        string mode = Value(details.GetValueOrDefault("mode") ?? "?", zh);
+        string matchBy = Value(details.GetValueOrDefault("matchBy") ?? "?", zh);
+        yield return zh ? $"不变的部件：{skipped} 个（方式 {mode}，按 {matchBy} 判断是否已有）" : $"Parts left as they are: {skipped} (mode {mode}, matched by {matchBy})";
     }
 
     private static string Title(WritePlan plan, bool zh) => (plan.MasterData, plan.ProjectPath.Length > 0) switch

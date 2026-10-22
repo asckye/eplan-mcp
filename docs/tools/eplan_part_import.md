@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)）：每次审批，执行前备份主数据 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批） |
+| 状态 | Proposed（M4c 第四批；已实现，待实机验证） |
 
 ## 1. 这个工具解决什么任务
 "把供应商发来的部件数据导入部件库""把同事导出的那几个部件加到我的部件库"。代理把一个部件 XML 文件导入 EPLAN 配置的**系统部件库**。部件库被所有项目共用，所以每次都要工程师审批。
@@ -29,12 +29,16 @@
 ## 3. 输出
 `structuredContent`：
 - `database`：写入的部件库（配置中的写法，如 `$(MD_PARTS)\EPLAN_parts.alk`）；
+- `file`、`sha256`、`bytes`：读到的文件，与审计相同；
 - `added`、`updated`、`skipped`：部件号列表，各最多 50 个，另有 `addedCount`、`updatedCount`、`skippedCount`；
-- `partsBefore`、`partsAfter`：部件库的部件总数；
+- `partsBefore`、`partsAfter`：部件库的部件总数（按变体计数）；
+- `missing`：读回时没有找到的新增或更新的部件号；
 - `backup`：本次主数据备份的路径；
-- `execution`、`auditId`。
+- `execution`、`dryRun`、`recovered`、`hint`。
 
-一行摘要：`Imported 3 new parts into the parts database ($(MD_PARTS)\EPLAN_parts.alk); 2 already there were left as they were. Backup: …`
+没有 `auditId`：现有的工具都不返回审计编号，审计按请求 ID 关联（实现时改，2026-10-21）。
+
+一行摘要：`Imported 3 new parts into the parts database ($(MD_PARTS)\EPLAN_parts.alk); left 2 parts of the file unchanged. A backup was made first (see 'backup').`
 
 工具描述写明：写的是所有项目共用的部件库；每次都要工程师审批；导入撤不回，只能按备份恢复。
 
@@ -60,13 +64,13 @@
   - 库在 SQL Server 上时规划就拒绝（`POLICY_DENIED`），Host 的策略再查一次；
   - 指纹：文件的大小、修改时间和 SHA-256，库的设置，以及文件中"已有"的部件号。
   - 与原规格的差别及原因：变体的位置按 S24 r11 的导出文件改正；`Parts` 一次给出部件号和 `partsBefore` 需要的总数，不用逐个 `ExistsPart`；全部跳过时没有变更，是写流水线对空变更清单的通用处理。
-- **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"，文件名和大小，三类部件的数量和前 20 个部件号，"导入撤不回，执行前会备份部件库"。
-- **备份**：`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`，`SOURCEPATH`、`FILENAME` 由 `SelectedPartsDatabaseAsString` 拆出，目标为 Host 新建的空目录 `<数据根目录>\backups\masterdata\<UTC 时间>\`（S24：0.14 秒，`.zw6`）。
+- **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"，文件名和大小，三类部件的数量和前 20 个部件号，"导入撤不回，执行前会备份部件库"。只在 EPLAN 的对话框中询问：Workbench 协议第 1 版没有主数据字段，Workbench 让给 EPLAN 对话框（SEC-32）。
+- **备份**：`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`，`SOURCEPATH`、`FILENAME` 由 `SelectedPartsDatabaseAsString` 拆出，目标为 Host 新建的空目录 `<数据根目录>\backups\masterdata\<UTC 时间>\`（S24：0.14 秒，`.zw6`）。由写流水线在审批之后、发出执行请求之前调用 Bridge 操作 `masterdata.backup`（时限为执行时限的一半），所以每个写主数据的工具都一样；Bridge 只备份计划时的那个库（库变了就 `PLAN_STALE`），目录中必须恰好有一个非空的 7z 归档。
 - **执行**：`OpenDatabase()` 后 `ImportParts(文件, "XPamImportXml", 模式, false, 识别方式, "")`，然后 `Close()`：
   - **不开事务**：在 `MDPartsDatabase` 的事务中导入会留下未关闭的撤销日志，之后的导入全部失败，事务也撤不回导入（S24 r11）；不在事务中正常，0.2 秒（S24 r13）；
   - 在 `QuietModeStep(ShowNoDialogs)` 中执行：导入走的是界面的导入 action，r11 中它试图弹出系统错误对话框；
   - 最后一个参数（字段映射方案）传空串，即"界面上次使用的方案"。只对 `eplan_part_export` 导出的 XML 验证过（S24 r13）；别的来源的 XML 是否受这个方案影响，没有验证。
-- **读回**：`added` 与 `updated` 中的每个部件号都存在，`partsAfter = partsBefore + addedCount`。不一致时 `execution` 为 `committed`，结果中给出 `mismatch`（多出或缺少的部件号），提示工程师在部件管理中核对。
+- **读回**：`added` 与 `updated` 中的每个部件号都存在，`partsAfter` 等于 `partsBefore` 加上新增部件在文件中的变体数（部件总数按变体计数）。不一致时 `execution` 仍为 `committed`，结果的 `missing` 列出没找到的部件号，`hint` 写明实际和期望的部件数，提示工程师在部件管理中核对。
 - **时限与进度**：规划用写流水线通用的 30 秒调用时限（流水线没有按工具设规划时限）；执行 300 秒，每 5 秒一次心跳（`Importing parts (30 s)`）。
 - **未验证**：
   - 除 `append_new` 外的三种模式（S24 只试了 `append_new`）；
@@ -81,8 +85,8 @@
 ## 7. 测试
 - Small：路径规则（同第三批的导入用例）、枚举、摘要；按 `mode` 把"新增 / 已有"分成三类的规则。
 - Medium：假 Bridge 上的审批拒绝、备份失败、`masterDataWrites: deny`、SQL Server 库、执行中断（`unknown` 和暂停）、读回不一致。
-- Large：**写正在用的部件库**（S24 结论 8：副本隔离不了导入），不放进常规运行。只在项目负责人每次批准后运行：
+- Large：**写正在用的部件库**（S24 结论 8：副本隔离不了导入），不放进常规运行：`PartImportTests` 只在环境变量 `EPLANMCP_LARGE_MASTERDATA` 为 `1` 时运行，由维护者在项目负责人每次批准后设置（见 Large 测试的 README）：
   - 运行前对库的全部文件计算 SHA-256，并另存一份文件副本；
   - 导入一个测试部件 `EPLANMCP.LARGE-TEST`：`added` 为它，`partsAfter` 加 1；再导一次 `skipped` 为它；
-  - 运行后关闭 EPLAN，用文件副本恢复，核对全部文件与之前相同。
+  - 运行后关闭 EPLAN，用文件副本恢复，核对全部文件与之前相同（`User.eod`、`User.eox`、`.lck` 由 EPLAN 自己改写，A30，不在核对之列）。
 - Agent 评测："把 imports 目录里的 relays.xml 导入部件库，已有的部件不要动"。
