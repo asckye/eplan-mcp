@@ -20,6 +20,8 @@
     -->
     <PackageReference Include="Newtonsoft.Json" />
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
+    <!-- The hand-maintained overlay (catalog/mapping/overlay.yaml), as the agent evals read their task files. -->
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>

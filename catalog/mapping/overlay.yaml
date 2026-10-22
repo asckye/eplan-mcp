@@ -1,0 +1,117 @@
+# Coverage facts the code cannot show, maintained by hand: live verification of tools, notes, exclusions and
+# environment blocks, and availability per version, module and licence. Every entry names its source in this
+# repository; nothing is copied from the official documentation. `dotnet run --project eng/coverage -- generate`
+# reads it; CI fails when the generated files no longer match it.
+#
+# live: per tool, the runs against a real EPLAN recorded in api-notes, a tool spec or the Large test README.
+#   result: pass | pass_with_findings | partial | fail
+#   basis:  stated   - the source names the tool;
+#           inferred - the source describes the run without naming the tool. Shown, but not counted as live
+#                      verification.
+#   eplan / variant: as the source states them; left out when it does not.
+live:
+  eplan_cable_renumber:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A24, note: Large：按 Standard 给全部电缆编号，复现 S21 的两对互换 }
+  eplan_check_list:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A12, note: 示例项目没有检查消息，返回空列表和提示 }
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: 检查后的 6 条警告、14 条提示与它读到的一致 }
+  eplan_check_run:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A20, note: 再检查一次会追加汇总提示（不幂等）；按页检查会删掉其他对象的消息 }
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: 取消后在下一个安全点回滚，审计为 rolled_back }
+  eplan_connection_generate:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A19, note: 没有增删的生成不留撤销步骤，因此返回 not_started }
+  eplan_connection_list:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A12, note: colour 在示例项目中是颜色代码，在其他项目中的含义待确认 }
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A19, note: 生成连接后读到的 9 条与生成结果一致 }
+  eplan_connection_number:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A24, note: 编号工具的 Large 测试中，线号的 all 和 except_manual 都通过 }
+  eplan_device_get:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A12, note: 短标识 -FC1 返回 AMBIGUOUS_NAME 和候选 }
+  eplan_device_list:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A12, note: 按页或类别过滤时 EPLAN 多返回同名主功能，改为按完整标识合并 }
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A24, note: 按类别 Cable 列出 56 根电缆 }
+  eplan_device_renumber:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A20, note: PostNumerate 在部分输入上使 EPLAN 崩溃；改为只交带 ? 的设备标识后不再崩溃 }
+  eplan_device_update:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A17, note: Q1 拒绝、Q2 读回不一致时回滚、交叉引用跟着改名 }
+  eplan_export_dxf:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A20, note: DXF 在给定目录下按项目名和结构建子目录 }
+  eplan_export_image:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A20, note: PNG、JPG 都可用，只改写 User.eod、User.eox }
+    - { date: 2026-10-20, result: pass, basis: stated, source: api-notes A21, note: inline 的 PNG 交给了模型，模型读出了图上的标识和文字 }
+  eplan_export_labels:
+    - { date: 2026-10-21, result: partial, basis: stated, source: docs/tools/eplan_export_labels.md, note: 第一次 Large 测试发现方案设置的相对路径从 Data 节点算起 }
+  eplan_export_pdf:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A20, note: 文件名不重复 .pdf；整个项目 322 页约 13 秒 }
+  eplan_macro_insert:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A19, note: 同一位置再插入被拒绝并回滚；keep 与已有设备冲突时 ALREADY_EXISTS }
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: 在用 eplan_page_create 新建的页上按幅面检查外框 }
+  eplan_message_list:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A12, note: M2 的 13 个只读工具全部成功（A12 没有逐个列出） }
+  eplan_page_create:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A17, note: Q1 拒绝；一次写入一个撤销步骤；四种页类型 }
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: 新建的页在规划时就能读到幅面 }
+  eplan_page_delete:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A20, note: 删页前完整备份，一次 Ctrl+Z 恢复，拒绝时不执行 }
+  eplan_page_get:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: inferred, source: api-notes A12, note: M2 的 13 个只读工具全部成功（A12 没有逐个列出） }
+  eplan_page_list:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A17, note: 调用后当前项目的 User.eod、User.eox 被改写，原因待查 }
+  eplan_page_renumber:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: /90–/92 改为 /200、/210、/220；与已有页重名时返回 ALREADY_EXISTS }
+  eplan_page_update:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A17, note: 一次写入一个撤销步骤；只改一种语言时其他语言不变 }
+  eplan_part_export:
+    - { date: 2026-10-21, result: pass_with_findings, basis: stated, source: docs/tools/eplan_part_export.md, note: 部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读 }
+  eplan_part_import:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A30；Large 测试 README, note: 经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过 }
+  eplan_part_list:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A12, note: 部件没有中文描述时为空，之后按语言回退设计实现 }
+  eplan_part_search:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A30, note: 部件导入的 Large 测试中找到新导入的部件，变体 1 }
+  eplan_part_sync:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: docs/tools/eplan_part_sync.md；api-notes A30, note: 经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证 }
+  eplan_plc_get:
+    - { date: 2026-10-21, result: pass_with_findings, basis: stated, source: docs/tools/eplan_plc_get.md, note: 按通道对象查不到连接，改为按设备读 }
+  eplan_project_get:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A12, note: detailed 最慢一次 493 ms；Large 中属性名可读 }
+  eplan_project_list:
+    - { date: 2026-10-18, eplan: 2026.0.3.25421, variant: Pro Panel 和 Electric P8, result: pass, basis: stated, source: api-notes A10, note: M1 完成标准：列出打开的项目；模态对话框时 EPLAN_BUSY }
+  eplan_report_update:
+    - { date: 2026-10-20, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A20, note: 带 progressToken 时第 5 秒收到心跳，第 7 秒返回 }
+  eplan_session_select:
+    - { date: 2026-10-19, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A12, note: 选中当前进程 }
+  eplan_session_status:
+    - { date: 2026-10-18, eplan: 2026.0.3.25421, variant: Pro Panel 和 Electric P8, result: pass, basis: stated, source: api-notes A10, note: 变体读取正确；对话框打开时仍显示已连接 }
+  eplan_terminal_renumber:
+    - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A24, note: 只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子 }
+
+# tools: what a tool's code cannot say about it: a note, and Bridge operations it reaches outside its own code.
+tools:
+  eplan_part_import: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
+  eplan_part_sync: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
+  eplan_session_status: { note: 只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作 }
+  eplan_session_select: { note: 只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作 }
+  eplan_tool_usage: { note: 只在 Host 中运行：返回工具用法文本，不接触 EPLAN }
+
+# api: catalog entries the generator must not count as plain gaps. match: N:<namespace> (and its sub-namespaces),
+# T:<type> or a member ID. status: excluded (left out of the denominator) with a reason of the design's set (gui,
+# internal, deprecated, unsafe, not_applicable; docs/design/2026-10-21-api-capability-coverage.md section 4) and a
+# note | env_blocked (kept in the denominator) with its condition | partial with a note.
+api:
+  # The owner's decision Q3 of 2026-10-21: Remote client and server (253 groups), Gui (72) and Scripting (3).
+  - { match: "N:Eplan.EplApi.RemoteClient", status: excluded, reason: not_applicable, note: 远程客户端，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.RemoteServer", status: excluded, reason: not_applicable, note: 远程客户端的服务端，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.Remoting", status: excluded, reason: not_applicable, note: 远程调用，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.GrpcServer", status: excluded, reason: not_applicable, note: 远程客户端的 gRPC 服务端，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.Gui", status: excluded, reason: gui, note: 需要人在界面上操作；第七阶段设计交互接入时逐项复审, source: 负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.Scripting", status: excluded, reason: unsafe, note: 脚本属于 Code 级，默认关闭, source: ADR-0005；负责人决定 Q3（2026-10-21） }
+  - { match: "N:Eplan.EplApi.DataModel.Planning", status: env_blocked, condition: 开发机授权中 Preplanning 不可用, source: api-notes A24 }
+
+# availability: where the coverage was established, per version, module and licence.
+availability:
+  - { scope: EPLAN 2026.0.3.25421, status: verified, note: 写明版本的实机记录都在这个版本上；没有其他版本的记录, source: api-notes A10–A30 }
+  - { scope: Electric P8, status: verified, note: 大部分实机记录所用的变体, source: api-notes A12–A30 }
+  - { scope: Pro Panel, status: verified, note: 只验证过会话与项目列表（M1）, source: api-notes A10 }
+  - { scope: "N:Eplan.EplApi.DataModel.Planning", status: env_blocked, note: Preplanning 授权不可用，预规划 API 无法验证, source: api-notes A24 }
+  - { scope: "N:Eplan.EplApi.DataModel.E3D", status: unverified, note: 授权中有 ProPanelProfessional，但 E3D API 没有实机验证过, source: api-notes A2 }
