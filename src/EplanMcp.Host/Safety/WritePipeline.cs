@@ -397,6 +397,9 @@ internal sealed partial class WritePipeline(
     /// <summary>The change list as one line per change, for the audit, the suspension and the approval form.</summary>
     internal static IEnumerable<string> ChangeLines(WritePlan plan) => plan.Changes.Select(c => c.Action switch
     {
+        // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
+        "create" when c.Kind == "parts" => $"add {Parts(c.NewValue)} from {c.Name} to the parts database",
+        _ when c.Kind == "parts" => $"update {Parts(c.NewValue)} of the parts database from {c.Name}",
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         "delete" => c.OldValue is null ? $"delete {c.Kind} {c.Name}" : $"delete {c.Kind} {c.Name} ({c.OldValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",
@@ -409,6 +412,8 @@ internal sealed partial class WritePipeline(
         _ when c.Property == "translations" => $"translate {c.OldValue}",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
     });
+
+    private static string Parts(string? count) => count == "1" ? "1 part" : (count ?? "?") + " parts";
 
     /// <summary>A check replaces all the project's check messages; check.run.plan puts its scope in the details.</summary>
     private static string CheckRunLine(WritePlan plan, PlannedChange change)

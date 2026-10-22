@@ -70,6 +70,7 @@ internal static class McpServerSetup
             .WithTools<TerminalDestructiveTools>(HostJson.Options)
             .WithTools<PlcTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)
+            .WithTools<PartMasterDataTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
             .WithTools<CheckTools>(HostJson.Options)
             .WithTools<CheckWriteTools>(HostJson.Options)
