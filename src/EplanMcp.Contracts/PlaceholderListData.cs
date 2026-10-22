@@ -14,4 +14,10 @@ public sealed class PlaceholderListData
 
     /// <summary>How many placeholders the project (or the page) has.</summary>
     public int Total { get; set; }
+
+    /// <summary>
+    /// Detailed only: how many of the listed placeholders EPLAN gave no current values for, because it reads them only
+    /// for a locked placeholder (api-notes A33); their <c>currentValues</c> are null.
+    /// </summary>
+    public int CurrentValuesUnavailable { get; set; }
 }

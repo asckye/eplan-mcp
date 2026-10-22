@@ -21,6 +21,6 @@ public sealed class PlaceholderItem
     /// <summary>Detailed only: each value set's value of each variable, by value set and then variable; null otherwise.</summary>
     public List<PlaceholderValue>? Values { get; set; }
 
-    /// <summary>Detailed only: its current values, one per referenced property, in EPLAN's order; null otherwise.</summary>
+    /// <summary>Detailed only: its current values, one per referenced property, in EPLAN's order; null otherwise, or when EPLAN gave none.</summary>
     public List<PlaceholderValue>? CurrentValues { get; set; }
 }

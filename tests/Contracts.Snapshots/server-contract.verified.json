@@ -5380,8 +5380,11 @@
             }
           },
           "currentValuesBefore": {
-            "description": "The placeholder's current values before, one per referenced property.",
-            "type": "array",
+            "description": "Its current values just before the change, one per referenced property; omitted for a dry run (EPLAN gives them only inside the change).",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "$ref": "#/properties/values/items"
             }

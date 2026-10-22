@@ -1320,16 +1320,17 @@
         "placeholder.apply.execute",
         "placeholder.apply.plan"
       ],
-      "apiIds": 59,
+      "apiIds": 60,
       "operationGroups": 33,
       "dataDictionary": 0,
-      "dependencies": 26,
+      "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_apply.md",
       "small": 1,
       "medium": 2,
       "large": 1,
       "apiNotes": [
+        "A14",
         "A33"
       ]
     },
@@ -1339,15 +1340,15 @@
       "operations": [
         "placeholder.list"
       ],
-      "apiIds": 41,
+      "apiIds": 42,
       "operationGroups": 26,
       "dataDictionary": 0,
-      "dependencies": 15,
+      "dependencies": 16,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_list.md",
       "small": 2,
       "medium": 1,
-      "large": 2,
+      "large": 1,
       "apiNotes": [
         "A11",
         "A14",

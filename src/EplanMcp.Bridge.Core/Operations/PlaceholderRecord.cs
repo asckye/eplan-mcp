@@ -23,8 +23,11 @@ public sealed class PlaceholderRecord
     /// <summary>Each value set's value of each variable, by value set and then variable.</summary>
     public List<PlaceholderValueRecord> Values { get; set; } = [];
 
-    /// <summary>Its current values, one per referenced property, in EPLAN's order.</summary>
-    public List<PlaceholderText> CurrentValues { get; set; } = [];
+    /// <summary>Its current values, one per referenced property, in EPLAN's order; null when not read or refused.</summary>
+    public List<PlaceholderText>? CurrentValues { get; set; }
+
+    /// <summary>Whether EPLAN refused the current values because the placeholder was not locked (api-notes A33).</summary>
+    public bool CurrentValuesRefused { get; set; }
 
     /// <summary>The name as the tools give it: empty when EPLAN gives none.</summary>
     public string Name => Properties.Name ?? string.Empty;

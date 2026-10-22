@@ -24,8 +24,9 @@ internal sealed class PlaceholderApplyResult
     [Description("The value set's value of each variable.")]
     public List<PlaceholderListResult.ValueEntry> Values { get; set; } = [];
 
-    [Description("The placeholder's current values before, one per referenced property.")]
-    public List<PlaceholderListResult.ValueEntry> CurrentValuesBefore { get; set; } = [];
+    [Description("Its current values just before the change, one per referenced property; omitted for a dry run (EPLAN gives them only inside the change).")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<PlaceholderListResult.ValueEntry>? CurrentValuesBefore { get; set; }
 
     [Description("Its current values read back after the change; omitted for a dry run or when 'recovered'.")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

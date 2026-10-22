@@ -16,6 +16,7 @@ public sealed class PlaceholderListToolTests
     private readonly FakeBridgeClient _bridge = new();
     private readonly List<PlaceholderItem> _placeholders = [];
     private string? _page;
+    private int _currentValuesUnavailable;
 
     public PlaceholderListToolTests()
     {
@@ -28,6 +29,7 @@ public sealed class PlaceholderListToolTests
                 Page = _page,
                 Placeholders = [.. _placeholders.Skip(list.Offset).Take(list.Limit).Select(p => Shaped(p, list.Detailed))],
                 Total = _placeholders.Count,
+                CurrentValuesUnavailable = _currentValuesUnavailable,
             };
         };
     }
@@ -74,7 +76,31 @@ public sealed class PlaceholderListToolTests
         Assert.False(current.TryGetProperty("valueSet", out _));
         Assert.False(current.TryGetProperty("textLanguage", out _));
         Assert.Equal("0-10 V", current.GetProperty("text").GetString());
+        Assert.Equal(JsonValueKind.Null, Structured(result).GetProperty("hint").ValueKind);
         Assert.Equal("Listed 1 of 1 placeholder on the page.", Text(result, 0));
+    }
+
+    [Theory]
+    [InlineData(1, "1 placeholder")]
+    [InlineData(2, "2 placeholders")]
+    public async Task Detailed_WithoutCurrentValues_KeepsTheStoredValuesAndExplainsWhy(int unavailable, string count)
+    {
+        _currentValuesUnavailable = unavailable;
+        for (int i = 0; i < unavailable; i++)
+        {
+            PlaceholderItem item = Sample("=TM1+A1&EFS1/1");
+            item.CurrentValues = null;
+            _placeholders.Add(item);
+        }
+
+        JsonElement data = Structured(await List(responseFormat: "detailed"));
+
+        Assert.All(data.GetProperty("placeholders").EnumerateArray(), placeholder =>
+        {
+            Assert.Single(placeholder.GetProperty("values").EnumerateArray());
+            Assert.False(placeholder.TryGetProperty("currentValues", out _));
+        });
+        Assert.Equal($"EPLAN gave no current values for {count}: it reads them only for a locked placeholder. eplan_placeholder_apply reports them before and after a change.", data.GetProperty("hint").GetString());
     }
 
     [Fact]

@@ -7,7 +7,9 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// arguments and the plan's fingerprint again, then applies the value set in one transaction and reads the placeholder
 /// back. The read-back checks the placeholder itself (same value sets, variables and values); EPLAN does not tell which
 /// referenced property a variable sets, so the referenced objects are not compared one by one, and unchanged current
-/// values are reported, not refused (S29 compared only the current values). Any difference rolls back.
+/// values are reported, not refused (S29 compared only the current values). Any difference rolls back. The current
+/// values are read only inside the transaction, whose SafetyPoint locks the placeholder: outside it EPLAN refuses them
+/// (api-notes A14, A33).
 /// </summary>
 public sealed class PlaceholderApplyExecuteOperation(
     IProjectCatalog catalog, IPageReader pages, IPlaceholderReader reader, IPlaceholderWriter writer, ITransactionScopeFactory transactions)
@@ -43,28 +45,29 @@ public sealed class PlaceholderApplyExecuteOperation(
             throw WriteArguments.NotStarted(ex);
         }
 
-        PlaceholderRecord before = request.Target;
-        Committed<PlaceholderRecord> committed = TransactionRunner.Run(transactions, Tool, () => Apply(request));
-        PlaceholderRecord after = committed.Result;
+        Committed<PlaceholderApplied> committed = TransactionRunner.Run(transactions, Tool, () => Apply(request));
+        List<PlaceholderText> before = committed.Result.Before;
+        List<PlaceholderText> after = committed.Result.After.CurrentValues ?? [];
         return new PlaceholderApplyData
         {
             Project = request.Project.Name,
             Page = request.Page,
-            Placeholder = before.Name,
+            Placeholder = request.Target.Name,
             ValueSet = request.ValueSet,
             Values = [.. request.Values().Select(v => PlaceholderListOperation.Value(v.Value, null, v.Variable))],
-            CurrentValuesBefore = [.. before.CurrentValues.Select(c => PlaceholderListOperation.Value(c, null, null))],
-            CurrentValuesAfter = [.. after.CurrentValues.Select(c => PlaceholderListOperation.Value(c, null, null))],
-            CurrentValuesChanged = !before.CurrentValues.Select(c => c.Raw).SequenceEqual(after.CurrentValues.Select(c => c.Raw)),
+            CurrentValuesBefore = [.. before.Select(c => PlaceholderListOperation.Value(c, null, null))],
+            CurrentValuesAfter = [.. after.Select(c => PlaceholderListOperation.Value(c, null, null))],
+            CurrentValuesChanged = !before.Select(c => c.Raw).SequenceEqual(after.Select(c => c.Raw)),
             Warning = committed.Warning,
         };
     }
 
     /// <summary>Applies the value set and checks the placeholder read back; throws, and so rolls back, when it differs.</summary>
-    private PlaceholderRecord Apply(PlaceholderApplyRequest request)
+    private PlaceholderApplied Apply(PlaceholderApplyRequest request)
     {
         PlaceholderRecord before = request.Target;
-        PlaceholderRecord after = writer.Apply(request.Project.Path, request.Page, before.Name, request.ValueSet);
+        PlaceholderApplied applied = writer.Apply(request.Project.Path, request.Page, before.Name, request.ValueSet);
+        PlaceholderRecord after = applied.After;
         string? problem =
             after.Page != before.Page || after.Name != before.Name ? "it is no longer the same placeholder"
             : !after.ValueSets.SequenceEqual(before.ValueSets, StringComparer.Ordinal) ? "its value sets changed"
@@ -72,7 +75,7 @@ public sealed class PlaceholderApplyExecuteOperation(
             : !after.Values.Select(v => v.Value.Raw).SequenceEqual(before.Values.Select(v => v.Value.Raw), StringComparer.Ordinal) ? "its stored values changed"
             : null;
         return problem is null
-            ? after
+            ? applied
             : throw new BridgeErrorException(
                 ErrorReason.InvalidArgument,
                 $"After applying the value set, {problem}, so the change was rolled back and nothing was changed. Ask the engineer to check the placeholder in EPLAN.",

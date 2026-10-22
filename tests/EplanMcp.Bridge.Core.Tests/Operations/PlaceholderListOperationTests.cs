@@ -39,7 +39,8 @@ public sealed class PlaceholderListOperationTests
         Assert.Equal(2, first.AssignedObjects);
         Assert.Null(first.Values);
         Assert.Null(first.CurrentValues);
-        Assert.Equal((_line1.Path, "zh_CN"), Assert.Single(_reader.Reads));
+        Assert.Equal((_line1.Path, "zh_CN", false), Assert.Single(_reader.Reads)); // concise: no current values asked for
+        Assert.Equal(0, Run(new PlaceholderListArgs { Limit = 20 }).CurrentValuesUnavailable);
     }
 
     [Fact]
@@ -54,6 +55,19 @@ public sealed class PlaceholderListOperationTests
             item.Values!.Select(v => (v.ValueSet, v.Variable, v.Text, v.TextLanguage)));
         Assert.Equal(["0-10 V", "10 V"], item.CurrentValues!.Select(c => c.Text));
         Assert.All(item.CurrentValues!, c => Assert.Null(c.ValueSet));
+    }
+
+    [Fact]
+    public void Execute_Detailed_WhereEplanRefusesTheCurrentValues_ListsTheRestAndCountsTheRefused()
+    {
+        _reader.Unlocked = true;
+
+        PlaceholderListData data = Run(new PlaceholderListArgs { Detailed = true, Limit = 2 });
+
+        Assert.Equal(2, data.CurrentValuesUnavailable); // the two of this page of results
+        Assert.All(data.Placeholders, p => Assert.Null(p.CurrentValues));
+        Assert.All(data.Placeholders, p => Assert.Equal(4, p.Values!.Count));
+        Assert.True(Assert.Single(_reader.Reads).CurrentValues);
     }
 
     [Fact]
