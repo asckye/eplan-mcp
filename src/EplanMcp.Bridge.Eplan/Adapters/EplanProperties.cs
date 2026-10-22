@@ -16,23 +16,42 @@ internal static class EplanProperties
     /// (EPLAN XML docs; S6: 1000 in 4 ms); S6 found values that are not <c>IsEmpty</c> but display as "", which
     /// <see cref="EplanText.Read"/> drops. An indexed property throws <c>IndexedPropertyException</c> when read without
     /// an index, even for <c>IsEmpty</c> (S6), so its used indexes are read one by one. Properties EPLAN marks internal
-    /// are left out, as the XML docs ask.
+    /// are left out, as the XML docs ask. Every id, value and definition is disposed: without that, reading a project's
+    /// properties twice made EPLAN run out of memory and exit (api-notes A36).
     /// </summary>
     public static List<PropertyEntry> Read(UniversalPropertyList properties, TextLanguage language)
     {
-        AnyPropertyId[] ids = properties.ExistingIds;
-        PropertyValue[] values = properties.ExistingValues;
+        AnyPropertyId[] ids = [];
+        PropertyValue[] values = [];
         var entries = new List<PropertyEntry>();
-        for (int i = 0; i < Math.Min(ids.Length, values.Length); i++)
+        try
         {
-            try
+            ids = properties.ExistingIds;
+            values = properties.ExistingValues;
+            for (int i = 0; i < Math.Min(ids.Length, values.Length); i++)
             {
-                Add(entries, ids[i], values[i], language);
+                try
+                {
+                    Add(entries, ids[i], values[i], language);
+                }
+                catch (Exception ex) when (ex is IndexedPropertyException or NotIndexedPropertyException or EmptyPropertyException or PropertyNotFoundException)
+                {
+                    // One property EPLAN cannot read as listed costs that property, not the whole result; which ones do
+                    // is not verified on real projects yet (M2 Large tests).
+                }
             }
-            catch (Exception ex) when (ex is IndexedPropertyException or NotIndexedPropertyException or EmptyPropertyException or PropertyNotFoundException)
+        }
+        finally
+        {
+            // Both arrays whole, so a value without an id (or the reverse) is disposed as well.
+            foreach (AnyPropertyId id in ids)
             {
-                // One property EPLAN cannot read as listed costs that property, not the whole result; which ones do is
-                // not verified on real projects yet (M2 Large tests).
+                id.Dispose();
+            }
+
+            foreach (PropertyValue value in values)
+            {
+                value.Dispose();
             }
         }
 
@@ -41,7 +60,7 @@ internal static class EplanProperties
 
     private static void Add(List<PropertyEntry> entries, AnyPropertyId id, PropertyValue value, TextLanguage language)
     {
-        PropertyDefinition definition = value.Definition;
+        using PropertyDefinition definition = value.Definition;
         if (definition.IsInternal)
         {
             return;
@@ -63,7 +82,8 @@ internal static class EplanProperties
 
         foreach (int index in value.Indexes)
         {
-            if (EplanText.ReadWithLanguage(value[index], language) is ({ } text, var textLanguage))
+            using PropertyValue item = value[index];
+            if (EplanText.ReadWithLanguage(item, language) is ({ } text, var textLanguage))
             {
                 entries.Add(new PropertyEntry { Id = number, Index = index, Name = name, Value = text, Language = textLanguage });
             }
