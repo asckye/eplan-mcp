@@ -5,9 +5,9 @@ namespace EplanMcp.Packs.Tests;
 [Trait("Size", "Small")]
 public sealed class PackLockTests
 {
-    private static readonly PackReference _self = new() { Id = "acme.cabinet-base", Version = "1.0.0", ManifestSha256 = Manifests.Hash('a') };
-    private static readonly PackReference _base = new() { Id = "acme.base", Version = "1.4.2", ManifestSha256 = Manifests.Hash('b') };
-    private static readonly PackReference _parts = new() { Id = "acme.parts", Version = "2.1.0", ManifestSha256 = Manifests.Hash('c') };
+    private static readonly PackReference _self = new() { Id = "acme.cabinet-base", Version = "1.0.0", Digest = Manifests.Hash('a') };
+    private static readonly PackReference _base = new() { Id = "acme.base", Version = "1.4.2", Digest = Manifests.Hash('b') };
+    private static readonly PackReference _parts = new() { Id = "acme.parts", Version = "2.1.0", Digest = Manifests.Hash('c') };
 
     [Fact]
     public void Create_SameResolutionInAnyOrder_GivesTheSameBytes()
@@ -38,7 +38,7 @@ public sealed class PackLockTests
     [Fact]
     public void Problems_EveryDependencyLockedInRange_None()
     {
-        Assert.Empty(PackLock.Create(_self, [_base, _parts]).Problems(Manifest(), _self.ManifestSha256));
+        Assert.Empty(PackLock.Create(_self, [_base, _parts]).Problems(Manifest(), _self.Digest));
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public sealed class PackLockTests
     {
         PackLock locked = PackLock.Create(_self, [_base with { Version = "2.0.0" }, _parts]);
 
-        PackProblem problem = Assert.Single(locked.Problems(Manifest(), _self.ManifestSha256));
+        PackProblem problem = Assert.Single(locked.Problems(Manifest(), _self.Digest));
 
         Assert.Equal("locks 'acme.base' at 2.0.0, outside '^1.2.0'", problem.Message);
     }
@@ -56,7 +56,7 @@ public sealed class PackLockTests
     {
         PackLock locked = new() { LockVersion = 1, Pack = _self, Dependencies = [_parts, _parts] };
 
-        IReadOnlyList<PackProblem> problems = locked.Problems(Manifest(), _self.ManifestSha256);
+        IReadOnlyList<PackProblem> problems = locked.Problems(Manifest(), _self.Digest);
 
         Assert.Contains(problems, p => p.Message == "has no version of 'acme.base', which pack.json needs");
         Assert.Contains(problems, p => p.Message == "must be sorted by id, each id once");

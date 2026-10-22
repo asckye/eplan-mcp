@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace EplanMcp.Packs;
 
@@ -7,7 +6,7 @@ namespace EplanMcp.Packs;
 /// The installed packs, <c>&lt;data root&gt;\packs\</c>: each version in its own folder <c>&lt;id&gt;\&lt;version&gt;\</c>, its
 /// files marked read-only. An installed version never changes: installing it again with the same <c>pack.json</c> does
 /// nothing, with another <c>pack.json</c> is refused; a newer version goes into its own folder and changes no binding.
-/// <c>bindings.json</c> pins each target to exact versions. Whatever changes the store (moving a checked version into
+/// <c>bindings.json</c> pins each target to exact versions by their pack digests. Whatever changes the store (moving a checked version into
 /// place, writing the bindings) holds the exclusive lock file <c>.store.lock</c>; checking and extracting a pack happen
 /// before, in a staging folder of its own, so a long extraction does not keep others waiting.
 /// </summary>
@@ -58,7 +57,7 @@ public sealed class PackStore(string root)
                 return new PackInstallResult(PackInstallOutcome.Installed, manifest, []);
             }
 
-            return ManifestSha256(target) == ManifestSha256(staging)
+            return DigestOf(target) == DigestOf(staging)
                 ? new PackInstallResult(PackInstallOutcome.AlreadyInstalled, manifest, [])
                 : new PackInstallResult(PackInstallOutcome.Refused, manifest,
                     [new PackProblem($"{manifest.Id} {manifest.Version}", "is installed already with other content; a changed pack needs a new version")]);
@@ -95,7 +94,7 @@ public sealed class PackStore(string root)
     /// The lock of <paramref name="manifest"/> against the installed packs: for each dependency, directly or through
     /// another pack, the highest installed version in range, one version per id. No backtracking: a conflict is a problem.
     /// </summary>
-    public (PackLock? Lock, IReadOnlyList<PackProblem> Problems) Lock(PackManifest manifest, string manifestSha256)
+    public (PackLock? Lock, IReadOnlyList<PackProblem> Problems) Lock(PackManifest manifest, string manifestDigest)
     {
         var chosen = new Dictionary<string, PackReference>(StringComparer.Ordinal);
         var problems = new List<PackProblem>();
@@ -125,7 +124,7 @@ public sealed class PackStore(string root)
             else
             {
                 string folder = FolderOf(dependency.Id, best.ToString());
-                chosen[dependency.Id] = new PackReference { Id = dependency.Id, Version = best.ToString(), ManifestSha256 = ManifestSha256(folder) };
+                chosen[dependency.Id] = new PackReference { Id = dependency.Id, Version = best.ToString(), Digest = DigestOf(folder) };
                 foreach (PackDependency further in PackJson.ReadManifest(File.ReadAllBytes(Path.Combine(folder, PackManifest.FileName))).Dependencies)
                 {
                     pending.Enqueue((further, dependency.Id));
@@ -133,7 +132,7 @@ public sealed class PackStore(string root)
             }
         }
 
-        var self = new PackReference { Id = manifest.Id, Version = manifest.Version, ManifestSha256 = manifestSha256 };
+        var self = new PackReference { Id = manifest.Id, Version = manifest.Version, Digest = manifestDigest };
         return problems.Count > 0 ? (null, problems) : (PackLock.Create(self, chosen.Values), []);
     }
 
@@ -146,7 +145,7 @@ public sealed class PackStore(string root)
             throw new PackFormatException($"{id} {version} is not installed; install it before binding it.");
         }
 
-        var pin = new PackReference { Id = id, Version = version, ManifestSha256 = ManifestSha256(folder) };
+        var pin = new PackReference { Id = id, Version = version, Digest = DigestOf(folder) };
         using FileStream held = await LockAsync(cancellationToken).ConfigureAwait(false) ?? throw new PackFormatException("The pack store " + Busy + ".");
         PackBindings bindings = await ReadBindingsAsync(cancellationToken).ConfigureAwait(false);
         PackBinding binding = bindings.Bindings.FirstOrDefault(b => b.Target == target) ?? new PackBinding { Target = target };
@@ -167,7 +166,7 @@ public sealed class PackStore(string root)
         IReadOnlyList<PackReference> packs = bindings.Bindings.FirstOrDefault(b => b.Target == target)?.Packs ?? [];
         PackProblem[] problems =
         [
-            .. packs.Where(p => !File.Exists(Path.Combine(FolderOf(p.Id, p.Version), PackManifest.FileName)) || ManifestSha256(FolderOf(p.Id, p.Version)) != p.ManifestSha256)
+            .. packs.Where(p => !File.Exists(Path.Combine(FolderOf(p.Id, p.Version), PackManifest.FileName)) || DigestOf(FolderOf(p.Id, p.Version)) != p.Digest)
                 .Select(p => new PackProblem($"{p.Id} {p.Version}", "is pinned but no longer installed as it was")),
         ];
         return (packs, problems);
@@ -225,6 +224,5 @@ public sealed class PackStore(string root)
         return await PackVerifier.CheckDirectoryAsync(staging, cancellationToken).ConfigureAwait(false);
     }
 
-    private static string ManifestSha256(string folder) =>
-        Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(Path.Combine(folder, PackManifest.FileName))));
+    private static string DigestOf(string folder) => PackDigest.Compute(File.ReadAllBytes(Path.Combine(folder, PackManifest.FileName)));
 }

@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace EplanMcp.Packs;
 
-[Description("pack.lock.json beside pack.json: the pack itself and every pack it needs, directly or through another, at the exact version resolved. Sorted by id and without times, so one resolution gives one file.")]
+[Description("pack.lock.json beside pack.json: the pack itself and every pack it needs, directly or through another, at the exact version resolved, by pack digest. Sorted by id and without times, so one resolution gives one file.")]
 public sealed record PackLock
 {
     public const int CurrentLockVersion = 1;
@@ -24,11 +24,11 @@ public sealed record PackLock
 
     public static PackLock Read(byte[] utf8) => PackJson.Read<PackLock>(utf8, PackManifest.LockFileName, "lockVersion", CurrentLockVersion);
 
-    /// <summary>What makes this lock wrong for <paramref name="manifest"/>, whose pack.json has <paramref name="manifestSha256"/>.</summary>
-    public IReadOnlyList<PackProblem> Problems(PackManifest manifest, string manifestSha256)
+    /// <summary>What makes this lock wrong for <paramref name="manifest"/>, whose pack.json has <paramref name="manifestDigest"/>.</summary>
+    public IReadOnlyList<PackProblem> Problems(PackManifest manifest, string manifestDigest)
     {
         var problems = new List<PackProblem>();
-        if (Pack.Id != manifest.Id || Pack.Version != manifest.Version || Pack.ManifestSha256 != manifestSha256)
+        if (Pack.Id != manifest.Id || Pack.Version != manifest.Version || Pack.Digest != manifestDigest)
         {
             problems.Add(new("pack.lock.json: pack", "is not this pack.json (id, version or SHA-256 differ); lock the pack again"));
         }
@@ -36,7 +36,7 @@ public sealed record PackLock
         for (int i = 0; i < Dependencies.Count; i++)
         {
             PackReference locked = Dependencies[i];
-            if (!PackManifestValidator.IsId(locked.Id) || !SemanticVersion.TryParse(locked.Version, out _) || !PackManifestValidator.IsSha256(locked.ManifestSha256))
+            if (!PackManifestValidator.IsId(locked.Id) || !SemanticVersion.TryParse(locked.Version, out _) || !PackManifestValidator.IsSha256(locked.Digest))
             {
                 problems.Add(new($"pack.lock.json: dependencies[{i}]", "needs an id, a SemVer version and a SHA-256"));
             }

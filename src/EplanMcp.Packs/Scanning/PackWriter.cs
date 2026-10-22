@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace EplanMcp.Packs.Scanning;
 
 /// <summary>
@@ -44,7 +42,7 @@ public static class PackWriter
             await File.WriteAllBytesAsync(Path.Combine(staging, PackManifest.FileName), json, cancellationToken).ConfigureAwait(false);
             if (manifest.Dependencies.Count == 0)
             {
-                var self = new PackReference { Id = manifest.Id, Version = manifest.Version, ManifestSha256 = Convert.ToHexStringLower(SHA256.HashData(json)) };
+                var self = new PackReference { Id = manifest.Id, Version = manifest.Version, Digest = PackDigest.Compute(json) };
                 await File.WriteAllBytesAsync(Path.Combine(staging, PackManifest.LockFileName), PackJson.Serialize(PackLock.Create(self, [])), cancellationToken).ConfigureAwait(false);
             }
 
