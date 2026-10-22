@@ -500,6 +500,12 @@ public static class OperationNames
     public const string ObjectResolve = "object.resolve";
 
     /// <summary>
+    /// A project file's database version and compatibility, read without opening or upgrading the project (api-notes
+    /// A31). Reads only. Arguments: <see cref="ProjectCompatibilityArgs"/>; data: <see cref="ProjectCompatibilityData"/>.
+    /// </summary>
+    public const string ProjectCompatibility = "project.compatibility";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.

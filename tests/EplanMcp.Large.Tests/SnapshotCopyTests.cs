@@ -61,6 +61,31 @@ public sealed class SnapshotCopyTests(LiveEplan eplan)
         }
     }
 
+    [Fact]
+    public async Task Compatibility_OfTheFixtureAndAClosedCopy_IsCompatible_WithoutOpeningTheCopy()
+    {
+        string copy = Copy();
+        try
+        {
+            await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+
+            ProjectCompatibilityData fixture = await CompatibilityAsync(bridge, eplan.ProjectPath + ".elk");
+            ProjectCompatibilityData closed = await CompatibilityAsync(bridge, copy + ".elk");
+
+            // A31: IsCompatible and 18.0 for 2026.0.3 projects, open or not, and the check opens nothing.
+            Assert.Equal(("IsCompatible", true, "18.0", true), (fixture.Status, fixture.Compatible, fixture.DatabaseVersion, fixture.Open));
+            Assert.Equal(("IsCompatible", true, "18.0", false), (closed.Status, closed.Compatible, closed.DatabaseVersion, closed.Open));
+            Assert.False(await IsOpenAsync(copy));
+        }
+        finally
+        {
+            Delete(copy);
+        }
+    }
+
+    private static Task<ProjectCompatibilityData> CompatibilityAsync(BridgeClient bridge, string path) =>
+        bridge.InvokeAsync<ProjectCompatibilityArgs, ProjectCompatibilityData>(OperationNames.ProjectCompatibility, new ProjectCompatibilityArgs { Path = path }, TestContext.Current.CancellationToken);
+
     private static string Copy()
     {
         string copy = Path.Combine(OfflineHost.NewFolder(LiveEplan.ScratchRoot(), "snapshots"), LiveEplan.ProjectName);
