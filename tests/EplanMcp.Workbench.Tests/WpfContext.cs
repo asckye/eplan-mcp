@@ -1,5 +1,6 @@
 // Ported from TIA Portal Openness MCP, tests/Studio/TiaOpenness.Gui.Tests/WpfContext.cs at commit c89b7c20.
 // Copyright (c) 2026 bulaofen0036-coder. MIT License, see THIRD-PARTY-NOTICES.md.
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
 using TiaOpenness.Gui.Localization;
@@ -15,6 +16,9 @@ public sealed class WpfContext : IDisposable
 {
     // Another run's WPF tests take seconds; one that hangs ends this run's wait.
     private static readonly TimeSpan _desktopWait = TimeSpan.FromMinutes(5);
+
+    // How long DrainUntil waits for work on another thread before it calls the test hung.
+    private static readonly TimeSpan _hangGuard = TimeSpan.FromMinutes(2);
 
     private readonly Thread _thread;
     private Dispatcher? _dispatcher;
@@ -124,6 +128,22 @@ public sealed class WpfContext : IDisposable
     /// turn, such as the guard's start after a queue change the app posted rendered (APR-04): until the application idles.
     /// </summary>
     internal static void Drain() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+
+    /// <summary>
+    /// <see cref="Drain"/> again and again until <paramref name="done"/>, for work that finishes on another thread. The
+    /// guard only ends a hang: a wait that is met returns at once, so it is no speed limit, and on a busy machine the
+    /// work took far longer than the 10 s these waits used to allow (see the theme load in the constructor).
+    /// </summary>
+    internal static void DrainUntil(Func<bool> done, string failure)
+    {
+        long start = Stopwatch.GetTimestamp();
+        while (!done())
+        {
+            Assert.True(Stopwatch.GetElapsedTime(start) < _hangGuard, failure);
+            Drain();
+            Thread.Sleep(10);
+        }
+    }
 
     /// <summary>Waits for the dispatcher to close its windows: a host that exits first reports a crash.</summary>
     public void Dispose()

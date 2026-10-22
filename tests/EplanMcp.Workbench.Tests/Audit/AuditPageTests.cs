@@ -308,14 +308,7 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     /// </summary>
     private void Settle(AuditPage page)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (_view!.State == AuditState.Loading || ((FrameworkElement)page.FindName("Working")).IsVisible)
-        {
-            Assert.True(DateTime.UtcNow < deadline, "The audit log was not read in time.");
-            WpfContext.Drain();
-            Thread.Sleep(10);
-        }
-
+        WpfContext.DrainUntil(() => _view!.State != AuditState.Loading && !((FrameworkElement)page.FindName("Working")).IsVisible, "The audit log was not read in time.");
         WpfContext.Drain();
     }
 

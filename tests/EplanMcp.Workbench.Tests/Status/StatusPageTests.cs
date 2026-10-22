@@ -147,16 +147,7 @@ public sealed class StatusPageTests(WpfContext wpf)
         test(window, (StatusPage)window.FindName("StatusPage"));
     });
 
-    private static void Until(Func<bool> condition)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (!condition())
-        {
-            Assert.True(DateTime.UtcNow < deadline, "Not in time.");
-            WpfContext.Drain();
-            Thread.Sleep(10);
-        }
-    }
+    private static void Until(Func<bool> condition) => WpfContext.DrainUntil(condition, "Not in time.");
 
     private static List<T> Descendants<T>(DependencyObject root)
         where T : DependencyObject

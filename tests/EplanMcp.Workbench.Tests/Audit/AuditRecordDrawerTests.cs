@@ -106,16 +106,7 @@ public sealed class AuditRecordDrawerTests(WpfContext wpf) : IDisposable
 
     private static AuditRecord Record() => new("2026-10-20.jsonl", 1, null, [KeyValuePair.Create("kind", "approval")]);
 
-    private static void Until(Func<bool> condition)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-        while (!condition())
-        {
-            Assert.True(DateTime.UtcNow < deadline, "Not in time.");
-            WpfContext.Drain();
-            Thread.Sleep(10);
-        }
-    }
+    private static void Until(Func<bool> condition) => WpfContext.DrainUntil(condition, "Not in time.");
 
     private sealed class FakeShell(List<string> opened, bool works = true) : IShellOpen
     {
