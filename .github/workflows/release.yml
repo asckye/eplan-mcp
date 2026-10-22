@@ -102,6 +102,9 @@ jobs:
   addin:
     runs-on: windows-2025
     timeout-minutes: 10
+    # GitHub shows draft releases only to tokens that can push; this job only reads the draft's add-in assets.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
