@@ -10,6 +10,11 @@
 #endif
 #define ProductId "EplanMcp"
 
+; ArchitecturesAllowed=x64compatible needs Inno Setup 6.3 or later.
+#if Ver < EncodeVer(6, 3, 0)
+  #error Inno Setup 6.3 or later is required.
+#endif
+
 [Setup]
 AppId={#ProductId}
 AppName=EplanMcp

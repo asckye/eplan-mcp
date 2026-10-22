@@ -207,10 +207,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $compiler = "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe"
-          # EplanMcp.iss needs 6.3 or later (ArchitecturesAllowed=x64compatible); the hosted image's version is logged.
-          $innoVersion = (Get-Item $compiler).VersionInfo.ProductVersion
-          Write-Host "Inno Setup $innoVersion"
-          if ([version]($innoVersion -replace '[^0-9.].*$', '') -lt [version]'6.3') { throw "Inno Setup 6.3 or later is required; the hosted image has $innoVersion." }
+          # ISCC.exe carries no file version; EplanMcp.iss checks the compiler version itself and ISCC logs it.
           & $compiler "/DAppVersion=$($env:TAG.Substring(1))" "/DPayloadDir=$((Resolve-Path stage/app).Path)" "/DOutputDir=$((Resolve-Path dist).Path)" eng/installer/EplanMcp.iss
           if ($LASTEXITCODE) { throw 'Inno Setup failed.' }
           $payload = @(Get-ChildItem stage/app -Recurse -File | Sort-Object FullName | ForEach-Object {
