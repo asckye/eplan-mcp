@@ -1,0 +1,412 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asckye/eplan-mcp/schemas/pack-manifest.schema.json",
+  "title": "EplanMcp pack manifest (pack.json), schemaVersion 1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "description": "The manifest format. A reader refuses a version it does not know instead of guessing.",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "description": "The pack's identity: lowercase letters and digits in groups joined by '.' or '-', such as acme.cabinet-base.",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name shown to engineers."
+    },
+    "version": {
+      "type": "string",
+      "description": "The pack's version, SemVer 2.0.0. An installed version never changes; a change is a new version.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "eplanVersions": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "EPLAN versions as comparators that must all hold, such as '>=2026.0 <2027'; a version without an operator matches by prefix ('2026.0' is every 2026.0.x). Absent: not stated."
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "EPLAN variants, as EPLAN names them (/Variant:), such as 'Electric P8' or 'Pro Panel'. Empty: not stated."
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.:/-]{0,127}$"
+          },
+          "description": "What the pack needs from EplanMcp or EPLAN: capability catalog ids (catalog/, such as A:backup/PROJECT) or tool names."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Where the pack can be used."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "version": {
+            "type": "string",
+            "description": "The versions accepted: comparators that must all hold, such as '^1.2.0', '~1.2.0', '>=1.2.0 <2.0.0', '1.2.3' or '*'."
+          }
+        },
+        "required": [
+          "id",
+          "version"
+        ],
+        "additionalProperties": false,
+        "description": "Another pack this one needs."
+      },
+      "description": "Other packs this one needs; pack.lock.json records the exact versions resolved. Sorted by id."
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path in the pack, '/' between folders. A project's path is its link file (.elk, .ell, .elr); its data folder <name>.edb lies beside it and belongs to the same resource."
+          },
+          "kind": {
+            "enum": [
+              "basic_project",
+              "project_backup",
+              "project",
+              "macro",
+              "form",
+              "frame",
+              "material_mapping",
+              "document",
+              "rule",
+              "other"
+            ]
+          },
+          "subtype": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A finer kind where EplanMcp knows one, such as window_macro, page_macro or plot_frame.",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256, lowercase hex. A file: of its bytes. A project: of the lines '<path>\\t<bytes>\\t<sha256>\\n' of every file (link file and data folder), paths relative to the link file's folder with '/', sorted ordinally.",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "description": "The size in bytes; a project: all its files together.",
+            "minimum": 0
+          },
+          "files": {
+            "type": "integer",
+            "description": "The number of files: 1, or a project's files with the link file.",
+            "minimum": 1
+          },
+          "storage": {
+            "enum": [
+              "bundled",
+              "referenced"
+            ]
+          },
+          "source": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "input": {
+                "type": "string",
+                "description": "The input's name, as provenance.inputs lists it."
+              },
+              "path": {
+                "type": "string",
+                "description": "The path below that input, '/' between folders; empty when the input is the file itself."
+              }
+            },
+            "required": [
+              "input",
+              "path"
+            ],
+            "additionalProperties": false,
+            "description": "Where the resource came from: an input of provenance.inputs and the path below it. Never a local absolute path, so a pack can be shared."
+          },
+          "eplanVersion": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The EPLAN version the files say they were written with, when EplanMcp can read it without EPLAN; the evidence is in facts.",
+            "pattern": "^\\d{1,9}(?:\\.\\d{1,9}){0,3}$"
+          }
+        },
+        "required": [
+          "path",
+          "kind",
+          "sha256",
+          "bytes",
+          "files",
+          "storage"
+        ],
+        "additionalProperties": false,
+        "description": "A file, or an EPLAN project (link file and data folder), in the pack."
+      },
+      "description": "Every file and project in the pack, sorted by path. EPLAN files are stored unchanged."
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "resources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Paths of resources in this pack."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "description": "One configuration scope, such as a cabinet type, and the resources that configure it."
+        },
+        "cabinetTypes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "resources": {
+                "$ref": "#/properties/configuration/properties/company/properties/resources"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false,
+            "description": "One configuration scope, such as a cabinet type, and the resources that configure it."
+          }
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/configuration/properties/cabinetTypes/items"
+          }
+        },
+        "cabinets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/configuration/properties/cabinetTypes/items"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration by scope, from the widest to the narrowest. Only the slots exist so far; what a scope may configure comes with the M6 design."
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The resource's path in this pack."
+          },
+          "standing": {
+            "enum": [
+              "official",
+              "candidate"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What it is for, in a few words."
+          }
+        },
+        "required": [
+          "path",
+          "standing"
+        ],
+        "additionalProperties": false,
+        "description": "A resource given a role in the pack."
+      },
+      "description": "Rule files."
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/properties/rules/items"
+      },
+      "description": "Material mapping files: the company's material numbers against EPLAN parts."
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/properties/rules/items"
+      },
+      "description": "Workflow files; reserved until a workflow format exists."
+    },
+    "docs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/properties/rules/items"
+      },
+      "description": "Documents for engineers and agents."
+    },
+    "acceptanceSamples": {
+      "type": "array",
+      "items": {
+        "$ref": "#/properties/rules/items"
+      },
+      "description": "Finished projects that show what the pack's results should look like."
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "string",
+            "description": "The resource's path in this pack."
+          },
+          "name": {
+            "type": "string",
+            "description": "What was read, such as eplan_version or archive_format.",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "value": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Where it was read, such as 'ProjectInfo.xml property 10088'."
+          }
+        },
+        "required": [
+          "resource",
+          "name",
+          "value",
+          "evidence"
+        ],
+        "additionalProperties": false,
+        "description": "A value EplanMcp read from a resource's files."
+      },
+      "description": "What EplanMcp read from the resources' own files, with the place it was read. Facts are measured, never inferred."
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string",
+          "description": "The program that generated the manifest, such as 'eplanmcp 0.1.0'."
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The engineer, when given; never filled in from the Windows account."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the manifest was generated, UTC."
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The last part of the path given, unique among the inputs; never the full local path."
+              },
+              "kind": {
+                "enum": [
+                  "file",
+                  "folder"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "kind"
+            ],
+            "additionalProperties": false,
+            "description": "A file or folder given to build the pack."
+          },
+          "description": "The files and folders the engineer gave, by name only."
+        }
+      },
+      "required": [
+        "createdBy",
+        "createdAt"
+      ],
+      "additionalProperties": false,
+      "description": "Who made the pack, when, and from what. The only place a manifest holds a time."
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "version",
+    "compatibility",
+    "resources",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "description": "The manifest of an EplanMcp engineering pack (pack.json at the pack's root). EplanMcp generates it; nobody writes it by hand."
+}

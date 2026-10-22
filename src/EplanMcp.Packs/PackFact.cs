@@ -9,6 +9,7 @@ public sealed record PackFact
     public required string Resource { get; init; }
 
     [Description("What was read, such as eplan_version or archive_format.")]
+    [Schema(Pattern = PackPatterns.Name)]
     public required string Name { get; init; }
 
     public required string Value { get; init; }

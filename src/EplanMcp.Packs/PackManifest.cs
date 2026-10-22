@@ -14,15 +14,18 @@ public sealed record PackManifest
     public const string LockFileName = "pack.lock.json";
 
     [Description("The manifest format. A reader refuses a version it does not know instead of guessing.")]
+    [Schema(Const = CurrentSchemaVersion)]
     public required int SchemaVersion { get; init; }
 
     [Description("The pack's identity: lowercase letters and digits in groups joined by '.' or '-', such as acme.cabinet-base.")]
+    [Schema(Pattern = PackPatterns.Id)]
     public required string Id { get; init; }
 
     [Description("The name shown to engineers.")]
     public required string Name { get; init; }
 
     [Description("The pack's version, SemVer 2.0.0. An installed version never changes; a change is a new version.")]
+    [Schema(Pattern = PackPatterns.SemVer)]
     public required string Version { get; init; }
 
     public string? Description { get; init; }
