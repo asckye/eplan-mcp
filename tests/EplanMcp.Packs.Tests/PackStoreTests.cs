@@ -54,6 +54,40 @@ public sealed class PackStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task Install_TwoAtOnce_BothFinishOneAfterTheOther()
+    {
+        string first = await PackAsync("acme.base", "1.0.0");
+        string second = await PackAsync("acme.base", "1.1.0");
+        string same = await PackAsync("acme.base", "1.1.0");
+
+        PackInstallResult[] results = await Task.WhenAll(
+            Task.Run(() => Store.InstallAsync(first, Cancel), Cancel),
+            Task.Run(() => Store.InstallAsync(second, Cancel), Cancel),
+            Task.Run(() => Store.InstallAsync(same, Cancel), Cancel));
+
+        Assert.Equal(PackInstallOutcome.Installed, results[0].Outcome);
+        Assert.Equal([PackInstallOutcome.Installed, PackInstallOutcome.AlreadyInstalled], results[1..].Select(r => r.Outcome).Order());
+        Assert.Equal(["1.1.0", "1.0.0"], Store.Versions("acme.base").Select(v => v.ToString()));
+    }
+
+    [Fact]
+    public async Task Install_WhileAnotherHoldsTheLock_IsRefusedAfterTheWait()
+    {
+        string source = await PackAsync("acme.base", "1.0.0");
+        Directory.CreateDirectory(Store.Root);
+        using var other = new FileStream(Path.Combine(Store.Root, PackStore.LockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        var store = new PackStore(Store.Root) { LockWait = TimeSpan.FromMilliseconds(300) };
+
+        PackInstallResult result = await store.InstallAsync(source, Cancel);
+
+        Assert.Equal(PackInstallOutcome.Refused, result.Outcome);
+        Assert.StartsWith("is being changed by another EplanMcp", Assert.Single(result.Problems).Message, StringComparison.Ordinal);
+        Assert.Empty(store.Versions("acme.base"));
+        Assert.Empty(Directory.GetDirectories(store.Root));
+        await Assert.ThrowsAsync<PackFormatException>(() => store.BindAsync("Plant", "acme.base", "1.0.0", Cancel));
+    }
+
+    [Fact]
     public async Task Install_BrokenPack_IsRefusedAndLeavesNothing()
     {
         string source = await PackAsync("acme.base", "1.0.0");
