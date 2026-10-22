@@ -13,10 +13,9 @@ internal static class PlcFilePreflight
         while (await reader.ReadAsync().ConfigureAwait(false))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            // These are XML inclusion/schema mechanisms, not guesses about PBF or AML device records.
-            if ((reader.NamespaceURI == "http://www.w3.org/2001/XInclude" && reader.LocalName == "include")
-                || reader.GetAttribute("schemaLocation", "http://www.w3.org/2001/XMLSchema-instance") is not null
-                || reader.GetAttribute("noNamespaceSchemaLocation", "http://www.w3.org/2001/XMLSchema-instance") is not null)
+            // XInclude would pull in other files. xsi schema locations stay allowed: EPLAN's own .pbf and .aml exports name
+            // their schema (pbf.xsd, CAEX_ClassModel_V2.15.xsd; S34), and with no resolver and no validation nothing loads it.
+            if (reader.NamespaceURI == "http://www.w3.org/2001/XInclude" && reader.LocalName == "include")
             {
                 throw new XmlException("External XML references are not allowed.");
             }
