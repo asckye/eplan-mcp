@@ -68,7 +68,7 @@ internal sealed class ImportSource
     /// Finds the file and reads its size and last write time: FILE_NOT_FOUND when it is gone. With
     /// <paramref name="hash"/>, reads it whole: PLAN_STALE when its SHA-256 is no longer the Host's.
     /// </summary>
-    public void Read(bool hash)
+    public void Read(bool hash, long maxBytes = long.MaxValue)
     {
         var info = new FileInfo(FullPath);
         if (!info.Exists)
@@ -80,9 +80,20 @@ internal sealed class ImportSource
                 new Dictionary<string, string> { ["file"] = File });
         }
 
-        Bytes = info.Length;
-        Written = info.LastWriteTimeUtc.Ticks;
-        if (hash && !string.Equals(Hash(), Sha256, StringComparison.Ordinal))
+        if (info.Length > maxBytes)
+        {
+            throw WriteArguments.Invalid(["'file' exceeds the import size limit; use a smaller file below imports."]);
+        }
+
+        Observe(info.Length, info.LastWriteTimeUtc.Ticks, hash ? Hash() : Sha256);
+    }
+
+    /// <summary>Checks observed file metadata; Small tests supply it without accessing disk.</summary>
+    internal void Observe(long bytes, long written, string sha256)
+    {
+        Bytes = bytes;
+        Written = written;
+        if (!string.Equals(sha256, Sha256, StringComparison.Ordinal))
         {
             throw new BridgeErrorException(
                 ErrorReason.PlanStale,

@@ -17,7 +17,7 @@
         "settings_write_disabled": 6
       },
       "denominator": 137,
-      "implemented": 2,
+      "implemented": 4,
       "byTools": 1,
       "partial": 0,
       "automatedTest": 1,
@@ -33,7 +33,7 @@
         "settings_write_disabled": 1
       },
       "denominator": 97,
-      "implemented": 2,
+      "implemented": 4,
       "byTools": 1,
       "partial": 0,
       "automatedTest": 1,
@@ -66,7 +66,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 199,
+      "implemented": 201,
       "byTools": 187,
       "partial": 39,
       "automatedTest": 187,
@@ -84,7 +84,7 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 104,
+      "implemented": 105,
       "byTools": 94,
       "partial": 39,
       "automatedTest": 94,
@@ -102,7 +102,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 95,
+      "implemented": 96,
       "byTools": 93,
       "partial": 0,
       "automatedTest": 93,
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 211,
+    "used": 212,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -120,7 +120,7 @@
     "registered": 8585
   },
   "actionNames": {
-    "used": 2,
+    "used": 4,
     "registered": 64
   },
   "operationsByNamespace": [
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 86,
+      "implemented": 88,
       "liveVerified": 75
     },
     {
@@ -249,7 +249,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 24,
-      "implemented": 0,
+      "implemented": 1,
       "liveVerified": 0
     },
     {
@@ -1805,6 +1805,20 @@
       ]
     },
     {
+      "unit": "A:devicelist/IMPORT",
+      "layer": "action",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "A:partslist/IMPORT",
+      "layer": "action",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "A:restore/PROJECT",
       "layer": "action",
       "status": "implemented",
@@ -2471,6 +2485,13 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences",
       "layer": "operation",
       "status": "live_verified",
@@ -2582,6 +2603,13 @@
       "tools": [
         "eplan_terminal_renumber"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DeviceListEntry.PartNumber",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections",

@@ -191,6 +191,12 @@ public static class OperationNames
     /// </summary>
     public const string ImportDxfExecute = "import.dxf.execute";
 
+    /// <summary>Read-only project list import plan. Arguments: <see cref="ImportListArgs"/>; data: <see cref="WritePlan"/> with counts and converter details.</summary>
+    public const string ImportListPlan = "import.list.plan";
+
+    /// <summary>Backs up and imports a project list in one transaction. Arguments: <see cref="ImportListArgs"/>; data: <see cref="ImportListData"/>.</summary>
+    public const string ImportListExecute = "import.list.execute";
+
     /// <summary>
     /// The plan of eplan_import_pxf: checks the EPJ file the Host resolved below its import root and that the scratch
     /// folder has no project of the name, never writes; no open project is involved. Arguments: <see cref="ImportPxfArgs"/>;
