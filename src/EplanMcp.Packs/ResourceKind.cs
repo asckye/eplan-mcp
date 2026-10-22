@@ -2,7 +2,7 @@ namespace EplanMcp.Packs;
 
 /// <summary>
 /// What a resource is. The file extensions behind each kind, and how far each was verified, are in
-/// <c>docs/eplan/api-notes.md</c> (A31).
+/// <c>docs/eplan/api-notes.md</c> (A35).
 /// </summary>
 public enum ResourceKind
 {

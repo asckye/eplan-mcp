@@ -4,7 +4,7 @@ namespace EplanMcp.Packs.Scanning;
 
 /// <summary>
 /// The kind of a file by its extension; how each EPLAN extension was verified is in docs/eplan/api-notes.md (files of
-/// engineering packs). <see cref="Classification.Guessed"/>: the extension alone cannot tell (a CSV may be anything), so
+/// engineering packs, A35). <see cref="Classification.Guessed"/>: the extension alone cannot tell (a CSV may be anything), so
 /// the scanner says so.
 /// </summary>
 internal static partial class ResourceClassifier

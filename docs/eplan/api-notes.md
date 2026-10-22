@@ -186,6 +186,14 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A35. 工程包涉及的文件（2026-10-21，只读查看开发机上 EPLAN 2026.0.3 的数据目录和 scratch 中的 spike 文件，不启动 EPLAN）
+M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以这里为准。
+- **扩展名的来源**：API 文档写明的有 `.zw1`（`backup /TYPE:PROJECT` 的归档）、`.fn1`（图框，`MDTYPE:STANDARDSHEET`）、`.fc2`（轮廓定义）、`.epj`（PXF 项目）、`.emp`（示例 `ModelView.emp` 放进宏目录）、`.slk`（符号库）；`.ema` 由 S9/S10 实际插入验证；`.elk`/`.ell`/`.elr` 见 A3、A28；`.zw9`（基本项目）见 A31。`.ems`（符号宏）和表格 `.f01`–`.f99` 只在数据目录中观察到，API 文档没有写，**未经 EPLAN 验证**。
+- **XML 主数据**：宏、表格、图框、轮廓定义都是 UTF-8 XML，根元素 `EplanPxfRoot`，属性 `Type` 和 `Version`（写入时的 EPLAN 版本，如 `2026.0.25356`，旧文件 `2.7.11561`）。数据目录中：`.ema` 695 个、`.ems` 50 个都是 `Type="WindowMacro"`（**符号宏文件也标为窗口宏**），`.emp` 35 个 `PageMacro`，`.f01`–`.f48` 147 个 `Form`，`.fn1` 35 个 `Frame`，`.fc2` 21 个 `ContourDefinition`。属性 `SourceProject` 是制作者机器上的项目路径，不能抄进清单。
+- **链接文件**（`.elk`、`.ell`、`.elr` 格式相同）：UTF-16LE 带 BOM，第 1 行是数据目录名，第 2 行 `18.0`，与 `GetProjectDatabaseVersion` 的结果相同（A31）。复制出来的项目第 1 行仍是原名（`S12_Sample.elk` 写的是 `EPLAN_Sample_Project.edb`），EPLAN 照样打开了旁边的 `S12_Sample.edb`（S12），所以数据目录按链接文件自己的名字找。
+- **`ProjectInfo.xml`**：除 A31 的 10043 外，`id="10088"`（"Internal: Highest used Eplan version"）是四段版本，示例项目为 `2026.0.1.25370`（10043 为 `2026.0.1`）。用 2026.0.3 的 API 写过的副本（`LargeWrite`）两项仍是 2026.0.1：写入不一定更新它们。
+- **7z 归档的内容**（7-Zip 26.03 只读列出）：`.zw1` 中是 `.edb` 的文件，另有 `A_BAKINFO.XML`（`<prodversion>2026.0.3.25421</prodversion>`、`<appvariant>`、备份注释）、`_COMMENT.TXT`、`_elkfile.elk`；`.zw9` 另有 `_BAKINFO.XML`。文件头 `37 7A BC AF 27 1C 00 04`（7z 格式 0.4）。读取其中的版本需要 7z 解码（LZMA2），.NET 没有内置。
+
 ### A34. 对象编号与项目生命周期（spike S30，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S30](../../spikes/S30-identity-lifecycle/README.md)。写入只在 scratch 中。
 - `PROJ_GUID` 是"名称@Unix 秒数"，不是 GUID：文件副本和 `backup`/`restore` 还原的项目沿用原值（示例项目 `ESS_Sample_Project-Kopie@1523807309`），PXF 导入和 `CreateProject` 生成新值（导入或新建的时刻）。它不能区分同一项目的副本。— S30。
