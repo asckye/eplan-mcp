@@ -20,8 +20,11 @@ public sealed class PartsExport
     /// <summary>The configured database as EPLAN's setting has it: a file with path variables, or a SQL Server connection string.</summary>
     public string Database { get; set; } = string.Empty;
 
-    /// <summary>The parts found, each variant counted; all of them when no part numbers were given.</summary>
+    /// <summary>The part numbers found, a part with several variants counted once; all of them when none were given.</summary>
     public int PartCount { get; set; }
+
+    /// <summary>The parts found with each variant counted, as <c>MDPartsDatabase.Parts</c> lists them.</summary>
+    public int VariantCount { get; set; }
 
     /// <summary>The part numbers given that the database does not have, in the order given; nothing was exported when there are any.</summary>
     public List<string> Missing { get; set; } = [];

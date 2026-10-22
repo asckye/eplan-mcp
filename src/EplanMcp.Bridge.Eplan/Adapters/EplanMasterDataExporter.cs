@@ -52,7 +52,9 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
         var found = new PartsExport { Database = selected };
         if (partNumbers is null)
         {
-            found.PartCount = database.Parts.Length;
+            MDPart[] all = database.Parts;
+            found.VariantCount = all.Length;
+            found.PartCount = all.Select(part => part.PartNr).Distinct(StringComparer.Ordinal).Count();
             if (file is not null)
             {
                 using (new QuietModeStep(QuietModes.ShowNoDialogs))
@@ -76,7 +78,8 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
             parts.AddRange(variants);
         }
 
-        found.PartCount = parts.Count;
+        found.VariantCount = parts.Count;
+        found.PartCount = partNumbers.Count - found.Missing.Count;
         if (file is not null && found.Missing.Count == 0)
         {
             using (new QuietModeStep(QuietModes.ShowNoDialogs))

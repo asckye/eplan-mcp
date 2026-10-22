@@ -24,6 +24,9 @@ public sealed class ExportRunData
     /// <summary>The database exports: the database exported, as <see cref="ExportPlanData.Database"/> names it; null otherwise.</summary>
     public string? Database { get; set; }
 
-    /// <summary>Parts database: how many parts were exported, each variant counted; null otherwise.</summary>
+    /// <summary>Parts database: how many parts the file has, a part with several variants counted once; null otherwise.</summary>
     public int? PartCount { get; set; }
+
+    /// <summary>Parts database: how many parts were exported with each variant counted; null otherwise.</summary>
+    public int? VariantCount { get; set; }
 }

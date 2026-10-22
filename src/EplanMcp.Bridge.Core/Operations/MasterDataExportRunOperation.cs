@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Xml;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -31,6 +33,33 @@ public sealed class MasterDataExportRunOperation(MasterDataExportKind kind, IMas
         // A part number gone since the plan is reported as the plan reports it; the adapter then exports nothing.
         PartsExport exported = MasterDataExportRequest.AllFound(exporter.ExportParts(request.Parts, request.Format, path));
         OperationContext.Current.ThrowIfCancellationRequested(); // the safe point after the EPLAN call
-        return new ExportRunData { Database = PartSearchOperation.ForModel(exported.Database), PartCount = exported.PartCount };
+        int? inFile = request.Format == MasterDataFormat.Xml ? PartsInFile(path) : null;
+        return new ExportRunData
+        {
+            Database = PartSearchOperation.ForModel(exported.Database),
+            PartCount = inFile ?? exported.PartCount,
+            VariantCount = exported.VariantCount,
+            Warning = request.Format == MasterDataFormat.Xml && inFile is null ? "partCount was counted in the database: the file's count of parts could not be read." : null,
+        };
+    }
+
+    /// <summary>
+    /// The parts an XML file has, as its root <c>partsmanagement</c> counts them in <c>count</c> (S24 r13): a part with
+    /// several variants counts once there (Large test 2026-10-21: 454, where <c>Parts</c> gave 464); null when unreadable.
+    /// </summary>
+    private static int? PartsInFile(string path)
+    {
+        try
+        {
+            using XmlReader reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+            return reader.MoveToContent() == XmlNodeType.Element && reader.LocalName == "partsmanagement"
+                && int.TryParse(reader.GetAttribute("count"), NumberStyles.None, CultureInfo.InvariantCulture, out int count)
+                ? count
+                : null;
+        }
+        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 }

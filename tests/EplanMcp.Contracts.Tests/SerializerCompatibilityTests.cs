@@ -215,7 +215,7 @@ public sealed class SerializerCompatibilityTests
         new ExportPlanData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", Extension = ".xml" },
         new ExportPlanData(),
         new ExportRunData { Project = "Line1", PageCount = 2, Files = [new ExportedPage { Page = "=GAA+A1&EFS1/60", Path = "=GAA+A1&EFS1_60.png" }], Warning = "w" },
-        new ExportRunData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", PartCount = 464 },
+        new ExportRunData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", PartCount = 454, VariantCount = 464 },
         new ExportRunData(),
         new ProjectListArgs(),
         new ProjectListData

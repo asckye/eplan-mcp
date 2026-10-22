@@ -19,6 +19,9 @@ internal sealed class FakeMasterDataExporter : IMasterDataExporter
         ["RIT.8601000"] = 1,
     };
 
+    /// <summary>What a parts export writes instead of the XML S24 r13 read: the root counts each part number once.</summary>
+    public string? FileContent { get; set; }
+
     /// <summary>Thrown by every export, after it wrote its file.</summary>
     public Exception? Failure { get; set; }
 
@@ -30,12 +33,14 @@ internal sealed class FakeMasterDataExporter : IMasterDataExporter
     {
         var found = new PartsExport { Database = PartsDatabase };
         found.Missing.AddRange(partNumbers?.Where(p => !Parts.ContainsKey(p)) ?? []);
-        found.PartCount = partNumbers is null ? Parts.Values.Sum() : partNumbers.Where(Parts.ContainsKey).Sum(p => Parts[p]);
+        string[] numbers = [.. partNumbers?.Where(Parts.ContainsKey) ?? Parts.Keys];
+        found.PartCount = numbers.Length;
+        found.VariantCount = numbers.Sum(p => Parts[p]);
         if (file is not null && found.Missing.Count == 0)
         {
             Exports.Add($"parts {format} {(partNumbers is null ? "all" : string.Join(",", partNumbers))} {Path.GetFileName(file)}");
             During?.Invoke();
-            File.WriteAllText(file, "<partsmanagement/>");
+            File.WriteAllText(file, FileContent ?? $"<partsmanagement count=\"{numbers.Length}\" database=\"C:\\parts.alk\">{string.Concat(numbers.Select(n => $"<part P_ARTICLE_PARTNR=\"{n}\"/>"))}</partsmanagement>");
             ThrowIfFailing();
         }
 
