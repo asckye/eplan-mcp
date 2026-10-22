@@ -4365,7 +4365,12 @@
         "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat.EDZ",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat.XML",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
         "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
         "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts(System.String,Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat)",
@@ -4376,6 +4381,9 @@
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
         "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
@@ -4386,7 +4394,10 @@
         "T:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat",
         "T:Eplan.EplApi.MasterData.MDPartsManagement"
       ],
-      "actions": [],
+      "actions": [
+        "A:backup",
+        "A:backup/MASTERDATA"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_part_export.md",
         "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，已实现，待实机验证",
@@ -5011,7 +5022,67 @@
         "placeholder.apply.execute",
         "placeholder.apply.plan"
       ],
-      "api": [],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPlaceholdersWithFilterScheme(System.String)",
+        "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String)",
+        "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues",
+        "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord(System.Int32)",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value(System.String,System.String)",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Placement.Page",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placeholder_apply.md",
@@ -5041,7 +5112,13 @@
             "file": "tests/EplanMcp.Large.Tests/PlaceholderApplyTests.cs"
           }
         ],
-        "operationTests": []
+        "operationTests": [
+          {
+            "name": "PlaceholderApplyOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlaceholderApplyOperationTests.cs"
+          }
+        ]
       },
       "live": []
     },
@@ -5052,7 +5129,49 @@
       "operations": [
         "placeholder.list"
       ],
-      "api": [],
+      "api": [
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPlaceholdersWithFilterScheme(System.String)",
+        "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues",
+        "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord(System.Int32)",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value(System.String,System.String)",
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Placement.Page",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placeholder_list.md",
@@ -5089,7 +5208,13 @@
             "file": "tests/EplanMcp.Large.Tests/PlaceholderListTests.cs"
           }
         ],
-        "operationTests": []
+        "operationTests": [
+          {
+            "name": "PlaceholderListOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlaceholderListOperationTests.cs"
+          }
+        ]
       },
       "live": []
     },
@@ -6445,21 +6570,47 @@
       "api": [
         "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
         "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat.EDZ",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat.XML",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
         "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
         "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
         "M:Eplan.EplApi.HEServices.Translate.#ctor",
         "M:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts(System.String,System.String)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts(System.String,Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts(System.String,Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat,System.Collections.Generic.IEnumerable{Eplan.EplApi.MasterData.MDPart})",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.GetPartVariants(System.String)",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
         "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
         "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
+        "P:Eplan.EplApi.MasterData.MDPart.PartNr",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
+        "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
         "T:Eplan.EplApi.Base.LockingException",
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
         "T:Eplan.EplApi.HEServices.Translate",
-        "T:Eplan.EplApi.HEServices.Translate.DatabaseType"
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType",
+        "T:Eplan.EplApi.MasterData.MDPart",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase.DataFormat",
+        "T:Eplan.EplApi.MasterData.MDPartsManagement"
       ],
-      "actions": [],
+      "actions": [
+        "A:backup",
+        "A:backup/MASTERDATA"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_translation_export.md",
         "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
@@ -6531,5 +6682,7 @@
     "T:Eplan.EplApi.ApplicationFramework.LicenseOptions",
     "T:Eplan.EplApi.DataModel.LockingStep"
   ],
-  "unreachedGenerated": []
+  "unreachedGenerated": [
+    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String,System.Boolean)"
+  ]
 }
