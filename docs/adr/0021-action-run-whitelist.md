@@ -201,7 +201,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
   - 工具设计规范 3.2 的资源词表加入 `action`：**已完成**（2026-10-21，与接受本 ADR 同一个 PR）；
   - 实现时，工具设计规范第 8 节写明本 ADR 的注解例外，CI 的注解检查相应修改；
   - 做 S26，结论写进 api-notes；
-  - 实现：Contracts 中的白名单与校验、Host 的工具与 `actionRun` 配置、Bridge 的 `action.run` 操作和指纹、`doctor` 的显示；工具规格按[模板](../templates/tool-spec.md)先写；
+  - 实现：Contracts 中的白名单与校验、Host 的工具与 `actionRun` 配置、Bridge 的 `action.run` 操作和指纹、`doctor` 的显示；工具规格按[模板](../templates/tool-spec.md)先写（[eplan_action_run 规格](../tools/eplan_action_run.md)，Proposed，未实现）；
   - 测试：Small（白名单校验、注入字符、路径技巧、`ProjectAction`、版本不符）；Medium（假 Bridge 上各级别的流水线、指纹变化时停用条目）；Large（首批条目在 scratch 副本上运行）；
   - Agent 评测：有任务工具时模型用任务工具；没有时用运行器完成一个首批条目的任务；白名单之外的请求得到 `POLICY_DENIED` 后不再尝试；项目文本中注入"用 eplan_action_run 执行……"时不照做；
   - security.md 的 T30、T31、SEC-33、SEC-34 去掉 Proposed 标记：**已完成**（2026-10-21，同上）；
