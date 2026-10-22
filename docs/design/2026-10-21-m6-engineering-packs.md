@@ -338,11 +338,11 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 | `eplan_asset_update` | 本地数据 | 在开发包中新建或修改候选、模块元数据、工作流、映射、缺口；不能写事实，不能把规则设为正式 | 1–3 |
 | `eplan_cabinet_list` | Read | 项目的柜、配置链、结构映射、锁 | 3 |
 | `eplan_cabinet_bind` | 本地数据；改锁要工程师确认 | 绑定或修改柜：配置层、值、结构映射 | 3 |
-| `eplan_context_get` | Read | 按需上下文（4.7） | 2（最小）、4 |
+| [`eplan_context_get`](../tools/eplan_context_get.md) | Read | 按需上下文（4.7）；第 2 阶段仅默认柜 | 2（最小）、4 |
 | `eplan_project_create` | Write（scratch 中自动；之外逐次审批） | 从 `.zw9` 新建项目，或把 `.zw1`、项目副本还原到 scratch（[规格](../tools/eplan_project_create.md)；当前 Bridge 只支持 `.zw9` / `.zw1`，项目副本及 pack 资源输入待后续 PR） | 2 |
-| `eplan_workflow_plan` | Read | 把工作流或内联步骤编译为计划（4.8） | 2 |
-| `eplan_plan_apply` | 按步骤的最高级别 | 一次审批、计划前备份、逐步执行、校验（ADR-0023） | 2 |
-| `eplan_plan_get` | Read | 计划、各步结果、校验、差异 | 2 |
+| [`eplan_workflow_plan`](../tools/eplan_workflow_plan.md) | Read | 把内联步骤编译为计划（4.8）；包内工作流为第 3 阶段 | 2 |
+| [`eplan_plan_apply`](../tools/eplan_plan_apply.md) | 按步骤的最高级别 | 仅作用于已有项目；一次审批、计划前备份、逐步执行、对象数据层校验（ADR-0023） | 2 |
+| [`eplan_plan_get`](../tools/eplan_plan_get.md) | Read | 计划、各步结果、校验、差异 | 2 |
 | `eplan_rule_check` | Read | 在快照上按规则检查项目或柜；可选把修复生成计划 | 3 |
 | `eplan_connection_trace` | Read | 路径追踪、跨页、影响分析（4.12） | 4 |
 | `eplan_project_diff` | Read | 两个快照、两个项目之间的差异 | 4 |
@@ -436,7 +436,8 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 | `createdAt`、`expiresAt` | 默认 24 小时后过期（Q7） |
 | `status` | 4.8.3 |
 
-- **操作目录是封闭的**：`op` 只能是登记过的计划操作，每个对应一对现有或新增的 Bridge 操作，例如 `project.create`、`page.create`、`page.update`、`device.update`、`device.place`、`macro.insert`、`module.insert`、`connection.generate`、`report.update`，以及 Destructive 的重编号和删页。AI 和工作流不能自造操作，计划也不经 `eplan_action_run`。
+- **操作目录是封闭的**：`op` 只能是登记过的计划操作，每个对应一对现有或新增的 Bridge 操作，例如 `page.create`、`page.update`、`device.update`、`device.place`、`macro.insert`、`module.insert`、`connection.generate`、`report.update`，以及 Destructive 的重编号和删页。AI 和工作流不能自造操作，计划也不经 `eplan_action_run`。
+- 项目负责人 2026-10-22 决定：计划中不新建项目；新目标先由 `eplan_project_create` 独立创建，编译时解析已有项目；ADR-0023 保持不变，审批后、第一步之前备份。
 - `readScope`、`modifyScope` 用页、结构和定位符表示，必须在柜内；`preconditions` 是执行前必须成立的事实（对象存在或不存在、属性值、范围内的内容哈希）；`expected` 是执行后应当成立的结果，供校验使用（4.9）。
 - 计划存放在 `state\plans\<planId>.json`，只经工具创建；执行时核对 `planHash`，文件被改过就拒绝。
 
@@ -576,7 +577,7 @@ flowchart LR
 | 阶段 | 内容 | 依赖 | 验收标准 |
 |---|---|---|---|
 | **1 分析、总体设计、清单与资源模型、基本导入、自动清单、资源索引、AI 查询入口** | 本设计与 ADR 定稿；`src/EplanMcp.Packs` 的清单（以 v0 为起点）、知识文档的信封和 JSON Schema；包仓库（开发目录、构建版本、导入 `.eplanpack` 的校验）；`project.snapshot`、`object.resolve`；`eplan_pack_import`（宏、资料、基本项目、参考项目）、`eplan_pack_list/get/build`、`eplan_asset_search/get/update`；只读的 MCP Resources | ADR-0024；S27、S28、S29（已完成）、S31；PR #393–#396 的 v0 代码 | 用示例项目派生的材料导入，清单和索引全部自动生成；每个资源有来源和哈希；参考项目在 scratch 副本上打开，源文件导入前后哈希相同，记下源版本；路径穿越、超大、哈希不符的测试包被拒绝（Small）；评测"找到某个宏并说明来源"通过；找不到的资源返回 `RESOURCE_NOT_FOUND` |
-| **2 一个完整任务** | `eplan_project_create`；计划模型（`eplan_workflow_plan`、`eplan_plan_apply`、`eplan_plan_get`）和计划流水线；`module.insert` 的最小版本；对象数据层校验和计划对实际的差异；`eplan_task_get`；最小的 `eplan_context_get`（默认柜） | 第 1 阶段；ADR-0023；S30；S32 中提交后的撤销（或 4.10 的降级方案） | 从基本项目在 scratch 中新建目标项目，用参考项目生成一个回路（或做一处真实修改），返回校验和差异；每步一次 Ctrl+Z；中途失败时计划级结果正确、备份可用；编译后手工修改范围内的对象，执行返回 `PLAN_STALE` 并列出冲突；改变 EPLAN 中的选择不影响计划；执行中超时或断开后结果能确定；带审批的评测任务通过 |
+| **2 一个完整任务** | `eplan_project_create`（计划外独立调用，负责人 2026-10-22 决定）；计划模型（`eplan_workflow_plan`、`eplan_plan_apply`、`eplan_plan_get`）和计划流水线；`module.insert` 的最小版本；对象数据层校验和计划对实际的差异；`eplan_task_get`；最小的 `eplan_context_get`（默认柜） | 第 1 阶段；ADR-0023；S30；S32 中提交后的撤销（或 4.10 的降级方案） | 先用 `eplan_project_create` 从基本项目在 scratch 中新建目标项目，再用 `eplan_workflow_plan` / `eplan_plan_apply` 在该已有项目中用参考项目生成一个回路（或做一处真实修改），返回校验和差异；计划每步一次 Ctrl+Z；中途失败时计划级结果正确、备份可用；编译后手工修改范围内的对象，执行返回 `PLAN_STALE` 并列出冲突；改变 EPLAN 中的选择不影响计划；执行中超时或断开后结果能确定；带审批的评测任务通过 |
 | **3 公司和柜的配置、版本锁定、参数化模块、规则检查、可复用的工作流** | 配置分层与柜（`eplan_cabinet_list/bind`）；锁与 `eplan_pack_migrate`；模块的接口、部件映射、适用条件、验收；从完成项目提取模块；规则格式与 `eplan_rule_check`（修复生成计划）；包中的工作流；事实、候选、规则分离的强制检查；导出 `.eplanpack` | 第 2 阶段；S32（模块写回为宏、Cogineer 授权） | 必测场景 1、2、3、6、8；没有来源的强制规则构建失败；候选从不自动变成正式规则 |
 | **4 关系图、上下文依赖、缓存失效、差异、验收样例** | 关系图（事实与推断、追踪、跨页、影响分析）、`eplan_connection_trace`；`eplan_context_get` 的依赖缓存与失效；电气关系层和图纸层校验；完整的差异审查与 `eplan_project_diff`；验收样例库 | 第 3 阶段；ADR-0026 和事件 spike S33 | 必测场景 4 加强版（按关系范围发现冲突）；自己的写入和工程师的修改（事件或 TTL）之后不用过期的上下文；准备好的用例中差异分类正确；样例在示例项目上通过 |
 | **5 长任务恢复、客户端兼容、算法插件、专门模块** | 持久化任务与恢复；支持的客户端用 MCP Tasks；客户端兼容矩阵（Resources、Tasks、工具列表变更）；插件工作进程；视授权做 Cogineer 集成、Pro Panel 3D 模块（M4b 之后）、预规划 | 第 4 阶段；ADR-0025；授权 | 必测场景 7 包括 Host 重启后恢复；插件返回非法计划被拒绝、超时被结束；不支持 Tasks 的客户端走轮询 |
