@@ -224,6 +224,7 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 - **链接文件**（`.elk`、`.ell`、`.elr` 格式相同）：UTF-16LE 带 BOM，第 1 行是数据目录名，第 2 行 `18.0`，与 `GetProjectDatabaseVersion` 的结果相同（A31）。复制出来的项目第 1 行仍是原名（`S12_Sample.elk` 写的是 `EPLAN_Sample_Project.edb`），EPLAN 照样打开了旁边的 `S12_Sample.edb`（S12），所以数据目录按链接文件自己的名字找。
 - **`ProjectInfo.xml`**：除 A31 的 10043 外，`id="10088"`（"Internal: Highest used Eplan version"）是四段版本，示例项目为 `2026.0.1.25370`（10043 为 `2026.0.1`）。用 2026.0.3 的 API 写过的副本（`LargeWrite`）两项仍是 2026.0.1：写入不一定更新它们。
 - **7z 归档的内容**（7-Zip 26.03 只读列出）：`.zw1` 中是 `.edb` 的文件，另有 `A_BAKINFO.XML`（`<prodversion>2026.0.3.25421</prodversion>`、`<appvariant>`、备份注释）、`_COMMENT.TXT`、`_elkfile.elk`；`.zw9` 另有 `_BAKINFO.XML`。两者都**不含 `.lck` 锁文件**（S12 的数据目录 313 个文件中 109 个是 `.lck` 或 `User.*`），但含项目和各子库（`.sdb`、`.fdb`）的 `User.eod`/`User.eox`。所以工程包的项目资源不带 `.lck`；`User.eod`/`User.eox` 随项目带上但不计入哈希，因为 EPLAN 打开、导出、关闭时都会改写它们（A16、A25、A30）。文件头 `37 7A BC AF 27 1C 00 04`（7z 格式 0.4）。读取其中的版本需要 7z 解码（LZMA2），.NET 没有内置。
+- 🔴 **复制项目时不能丢掉 `User.eod`/`User.eox`**：`.edb` 中缺少它们（以及 `.lck`）的项目副本打不开，EPLAN 弹出"无法打开项目 … 必须修正数据库索引"的模态对话框（`#32770`），在工程师关闭它之前挡住 EPLAN。所以复制、还原项目时保留它们，打开前先核对；打开卡住或超时可能是这个对话框，不要替工程师点它。— 协调人实测（2026-10-21）。
 
 ### A34. 对象编号与项目生命周期（spike S30，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S30](../../spikes/S30-identity-lifecycle/README.md)。写入只在 scratch 中。
