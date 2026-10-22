@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    EPLAN API coverage tooling: `scan` compiles the Bridge with Roslyn and records the EPLAN API members it uses
-    (catalog/mapping/bridge-usage.json). A development tool: never shipped with the product. `scan` needs a local EPLAN
-    installation, because the Bridge compiles against its assemblies.
+    EPLAN API coverage tooling: `scan` compiles the Bridge with Roslyn and records the EPLAN API members it uses and the
+    Bridge operations that reach them (catalog/mapping/bridge-usage.json). A development tool: never shipped with the
+    product. `scan` needs a local EPLAN installation, because the Bridge compiles against its assemblies.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,6 +14,12 @@
   <ItemGroup>
     <!-- Semantic model of the Bridge sources: which EPLAN member each call binds to, overload included. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <!--
+      The operations are instantiated to read their names (OperationRoot); Bridge.Core compiles against Newtonsoft.Json
+      without shipping it, so the tool brings its own copy for that.
+    -->
+    <PackageReference Include="Newtonsoft.Json" />
+    <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,6 +12,12 @@
           "Microsoft.CodeAnalysis.Common": "[5.6.0]"
         }
       },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.3, )",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
       "Microsoft.CodeAnalysis.Analyzers": {
         "type": "Transitive",
         "resolved": "5.3.0",
@@ -24,6 +30,15 @@
         "dependencies": {
           "Microsoft.CodeAnalysis.Analyzers": "5.3.0"
         }
+      },
+      "eplanmcp.bridge.core": {
+        "type": "Project",
+        "dependencies": {
+          "EplanMcp.Contracts": "[1.0.0, )"
+        }
+      },
+      "eplanmcp.contracts": {
+        "type": "Project"
       }
     }
   }

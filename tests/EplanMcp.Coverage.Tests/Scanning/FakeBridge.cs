@@ -26,10 +26,14 @@ internal static class FakeBridge
                 public static implicit operator string(Export export) => "";
             }
         }
+        namespace Eplan.EplApi.Base
+        {
+            public class Context { public void AddParameter(string name, string value) { } }
+        }
         namespace Eplan.EplApi.ApplicationFramework
         {
             public interface IEplAddIn { bool OnInit(); }
-            public class ActionCallingContext { public void AddParameter(string name, string value) { } }
+            public class ActionCallingContext : Eplan.EplApi.Base.Context { }
             public class Action { public bool Execute(ActionCallingContext context) => true; }
             public class ActionManager { public Action FindAction(string name) => new Action(); }
             public class CommandLineInterpreter { public bool Execute(string command) => true; public bool Execute(string name, ActionCallingContext context) => true; }
