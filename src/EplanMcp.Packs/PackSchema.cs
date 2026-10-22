@@ -14,7 +14,11 @@ public static class PackSchema
 {
     public const string ManifestId = "https://github.com/asckye/eplan-mcp/schemas/pack-manifest.schema.json";
 
+    public const string LockId = "https://github.com/asckye/eplan-mcp/schemas/pack-lock.schema.json";
+
     public static JsonObject Manifest() => Generate(typeof(PackManifest), ManifestId, "EplanMcp pack manifest (pack.json), schemaVersion 1");
+
+    public static JsonObject Lock() => Generate(typeof(PackLock), LockId, "EplanMcp pack lock (pack.lock.json), lockVersion 1");
 
     /// <summary>A schema as the committed file holds it: the bytes <see cref="PackJson.Serialize"/> writes.</summary>
     public static string Text(JsonObject schema) => schema.ToJsonString(PackJson.Options) + "\n";

@@ -247,6 +247,10 @@ public static partial class PackManifestValidator
 
     private static bool IsText(string text) => text.Length is > 0 and <= MaxTextLength && !text.Any(char.IsControl);
 
+    internal static bool IsId(string id) => id.Length <= MaxIdLength && Id().IsMatch(id);
+
+    internal static bool IsSha256(string hash) => Sha256().IsMatch(hash);
+
     [GeneratedRegex(PackPatterns.Id, RegexOptions.ECMAScript)]
     private static partial Regex Id();
 
