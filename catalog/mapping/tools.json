@@ -7022,6 +7022,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "ClaudeCodePluginPackageTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/ClientConfig/ClaudeCodePluginPackageTests.cs"
+          },
+          {
             "name": "PreflightTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Server/PreflightTests.cs"
@@ -7450,6 +7455,11 @@
         "specStatus": "Proposed（M2）",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "ClaudeCodePluginPackageTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/ClientConfig/ClaudeCodePluginPackageTests.cs"
+          },
           {
             "name": "PageListOperationTests",
             "size": "Small",

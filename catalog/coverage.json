@@ -1763,7 +1763,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_session_status.md",
-      "small": 4,
+      "small": 5,
       "medium": 3,
       "large": 8,
       "apiNotes": [],
@@ -1853,7 +1853,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_tool_usage.md",
-      "small": 5,
+      "small": 6,
       "medium": 1,
       "large": 0,
       "apiNotes": []
