@@ -1,0 +1,185 @@
+﻿{
+  "schemaVersion": 1,
+  "id": "acme.cabinet-base",
+  "name": "ACME cabinet base",
+  "version": "1.0.0",
+  "description": "Cabinets of the ACME line.",
+  "compatibility": {
+    "eplanVersions": ">=2026.0 <2027",
+    "variants": [
+      "Electric P8",
+      "Pro Panel"
+    ],
+    "capabilities": [
+      "A:backup/PROJECT",
+      "eplan_macro_insert"
+    ]
+  },
+  "dependencies": [
+    {
+      "id": "acme.base",
+      "version": "^1.2.0"
+    },
+    {
+      "id": "acme.parts",
+      "version": ">=2.0.0 <3.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "path": "resources/basic-projects/GB_bas001.zw9",
+      "kind": "basic_project",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "bytes": 10,
+      "files": 1,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "GB_bas001.zw9"
+      }
+    },
+    {
+      "path": "resources/docs/readme.md",
+      "kind": "document",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "bytes": 10,
+      "files": 1,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "readme.md"
+      }
+    },
+    {
+      "path": "resources/macros/Motor.ema",
+      "kind": "macro",
+      "subtype": "window_macro",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "bytes": 10,
+      "files": 1,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "Motor.ema"
+      },
+      "eplanVersion": "2026.0.25356"
+    },
+    {
+      "path": "resources/mappings/parts.csv",
+      "kind": "material_mapping",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "bytes": 10,
+      "files": 1,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "parts.csv"
+      }
+    },
+    {
+      "path": "resources/other/library.ema",
+      "kind": "macro",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "bytes": 10,
+      "files": 1,
+      "storage": "referenced",
+      "reference": {
+        "root": "company-macros",
+        "path": "Siemens/library.ema"
+      },
+      "source": {
+        "input": "inputs",
+        "path": "library.ema"
+      }
+    },
+    {
+      "path": "resources/projects/Sample/Sample.elk",
+      "kind": "project",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "bytes": 2048,
+      "files": 12,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "Sample/Sample.elk"
+      },
+      "eplanVersion": "2026.0.1.25370"
+    },
+    {
+      "path": "resources/rules/naming.md",
+      "kind": "rule",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "bytes": 10,
+      "files": 1,
+      "storage": "bundled",
+      "source": {
+        "input": "inputs",
+        "path": "naming.md"
+      }
+    }
+  ],
+  "configuration": {
+    "company": {
+      "id": "acme",
+      "name": "ACME",
+      "resources": [
+        "resources/rules/naming.md"
+      ]
+    },
+    "cabinetTypes": [
+      {
+        "id": "ts8",
+        "resources": [
+          "resources/basic-projects/GB_bas001.zw9"
+        ]
+      }
+    ],
+    "projects": [],
+    "cabinets": []
+  },
+  "rules": [
+    {
+      "path": "resources/rules/naming.md",
+      "standing": "official",
+      "note": "Device tags"
+    }
+  ],
+  "mappings": [
+    {
+      "path": "resources/mappings/parts.csv",
+      "standing": "candidate"
+    }
+  ],
+  "workflows": [],
+  "docs": [
+    {
+      "path": "resources/docs/readme.md",
+      "standing": "official"
+    }
+  ],
+  "acceptanceSamples": [
+    {
+      "path": "resources/projects/Sample/Sample.elk",
+      "standing": "official"
+    }
+  ],
+  "facts": [
+    {
+      "resource": "resources/projects/Sample/Sample.elk",
+      "name": "eplan_version",
+      "value": "2026.0.1.25370",
+      "evidence": "ProjectInfo.xml property 10088"
+    }
+  ],
+  "provenance": {
+    "createdBy": "eplanmcp 0.1.0",
+    "author": "Wang",
+    "createdAt": "2026-10-21T12:00:00+00:00",
+    "inputs": [
+      {
+        "name": "inputs",
+        "kind": "folder"
+      }
+    ]
+  }
+}
