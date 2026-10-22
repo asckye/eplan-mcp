@@ -26,6 +26,9 @@
     <Project Path="src/EplanMcp.Host/EplanMcp.Host.csproj">
       <Platform Project="x64" />
     </Project>
+    <Project Path="src/EplanMcp.Packs/EplanMcp.Packs.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="src/EplanMcp.Workbench.Protocol/EplanMcp.Workbench.Protocol.csproj">
       <Platform Project="x64" />
     </Project>
@@ -56,6 +59,9 @@
       <Platform Project="x64" />
     </Project>
     <Project Path="tests/EplanMcp.Large.Tests/EplanMcp.Large.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="tests/EplanMcp.Packs.Tests/EplanMcp.Packs.Tests.csproj">
       <Platform Project="x64" />
     </Project>
     <Project Path="tests/EplanMcp.Workbench.Protocol.Tests/EplanMcp.Workbench.Protocol.Tests.csproj">
