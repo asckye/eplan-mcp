@@ -6,7 +6,8 @@ namespace EplanMcp.Host.Tests.Addin;
 
 /// <summary>
 /// One start of EPLAN for a command, against the fake EPLAN of the live check: waiting for the Bridge of the process
-/// it started, the handshake, and closing without ever forcing. No EPLAN.exe is started. Medium: real, short waits.
+/// it started, the handshake, and closing without ever forcing, on a clock that steps (<see cref="SteppingTime"/>). No
+/// EPLAN.exe is started. Medium.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class EplanLauncherTests
@@ -21,7 +22,7 @@ public sealed class EplanLauncherTests
     private readonly FakeEplan _eplan = new();
     private readonly List<HandshakeResult?> _loaded = [];
 
-    private EplanLauncher Launcher => new(_eplan, _eplan, TimeProvider.System, _timings);
+    private EplanLauncher Launcher => new(_eplan, _eplan, new SteppingTime(DateTimeOffset.UnixEpoch), _timings);
 
     [Fact]
     public async Task OnceItsBridgeIsUp_HandsOverTheHandshakeAndClosesEplan()
