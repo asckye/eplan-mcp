@@ -87,7 +87,9 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.PartSyncTests"   # 还要按"准备"第 3 步打开写副本
 ```
 
-`PartImportTests` 经 `DestructiveHost`（不需要打开写副本）调用 `eplan_part_import`，导入测试自己写进临时 `imports\` 的文件 `eplanmcp-large-test.xml`，其中只有一个部件 `EPLANMCP.LARGE-TEST`（变体 1，结构同 S24 的导出，字段只有部件号、描述和部件类型；EPLAN 是否接受这样短的文件正是要验证的）：
+2026-10-21 第一次运行：`PartImportTests` 和 `PartSyncTests` 都通过（约 11 秒），EPLAN 关闭后用文件副本恢复，库的 28 个文件的 SHA-256 与运行前完全相同（这次 `User.*` 也相同）；结果见 api-notes A30。
+
+`PartImportTests` 经 `DestructiveHost`（不需要打开写副本）调用 `eplan_part_import`，导入测试自己写进临时 `imports\` 的文件 `eplanmcp-large-test.xml`，其中只有一个部件 `EPLANMCP.LARGE-TEST`（变体 1，结构同 S24 的导出，字段只有部件号、描述和部件类型；EPLAN 接受这样短的文件，2026-10-21 实测，A30）：
 - dry run：`added` 恰好是 `EPLANMCP.LARGE-TEST`（否则失败并提示先恢复库），不审批、不备份；
 - 由脚本批准变更行 `add 1 part from eplanmcp-large-test.xml to the parts database` 后导入：`committed`，`added` 为它，`partsAfter` = `partsBefore` + 1，`missing` 为空，`backup` 是临时数据根目录 `backups\masterdata\` 下非空的 `.zw6`；
 - 再导一次：`not_started`，`skipped` 为它，没有再审批，也没有再备份；
@@ -97,7 +99,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 - dry run：输出要新增、要存入项目的部件数（S24 r15：示例项目的部件在开发机的库中都有，新增为 0），`not_started`，不审批；
 - 有可做的时，由脚本批准与 dry run 数量一致的变更行（`add N parts from LargeWrite to the parts database`、`store N parts the project references in project LargeWrite (now M)`）后同步：`committed`，`undo` 为 `AI: eplan_part_sync`，`missing`、`notStored` 为空，库和项目的部件数不少于期望，`backup`（`.zw6`）和 `projectBackup`（`.elk`）都在；
 - 再同步一次：`not_started`，新增和存入都是 0，没有再审批；
-- 测试输出：耗时、前后的部件数、提示。规格第 5 节没有验证的两点要手工核对并补进 api-notes A30：EPLAN 的系统消息中是否仍有 `S328014`（写存取前没有加锁该对象）；同步之后在只开着写副本时按一次 Ctrl+Z，项目中存入的部件是否撤回（部件库不会撤回）。
+- 测试输出：耗时、前后的部件数、提示。规格第 5 节的两点：EPLAN 的系统消息中是否仍有 `S328014`（写存取前没有加锁该对象）——第一次运行中没有出现（A30）；同步之后在只开着写副本时按一次 Ctrl+Z，项目中存入的部件是否撤回（部件库不会撤回）——要手工核对并补进 api-notes A30。
 
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。

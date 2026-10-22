@@ -65,11 +65,11 @@
   - 指纹：文件的大小、修改时间和 SHA-256，库的设置，以及文件中"已有"的部件号。
   - 与原规格的差别及原因：变体的位置按 S24 r11 的导出文件改正；`Parts` 一次给出部件号和 `partsBefore` 需要的总数，不用逐个 `ExistsPart`；全部跳过时没有变更，是写流水线对空变更清单的通用处理。
 - **审批对话框**：库的类型和路径，"影响使用这个库的所有项目"，文件名和大小，三类部件的数量和前 20 个部件号，"导入撤不回，执行前会备份部件库"。只在 EPLAN 的对话框中询问：Workbench 协议第 1 版没有主数据字段，Workbench 让给 EPLAN 对话框（SEC-32）。
-- **备份**：`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`，`SOURCEPATH`、`FILENAME` 由 `SelectedPartsDatabaseAsString` 拆出，目标为 Host 新建的空目录 `<数据根目录>\backups\masterdata\<UTC 时间>\`（S24：0.14 秒，`.zw6`）。由写流水线在审批之后、发出执行请求之前调用 Bridge 操作 `masterdata.backup`（时限为执行时限的一半），所以每个写主数据的工具都一样；Bridge 只备份计划时的那个库（库变了就 `PLAN_STALE`），目录中必须恰好有一个非空的 7z 归档。
+- **备份**：`backup /TYPE:MASTERDATA /MDTYPE:ARTICLES`，`SOURCEPATH`、`FILENAME` 由 `SelectedPartsDatabaseAsString` 拆出，目标为 Host 新建的空目录 `<数据根目录>\backups\masterdata\<UTC 时间>\`（S24：0.14 秒，`.zw6`）。由写流水线在审批之后、发出执行请求之前调用 Bridge 操作 `masterdata.backup`（时限为执行时限的一半），所以每个写主数据的工具都一样；Bridge 只备份计划时的那个库（库变了就 `PLAN_STALE`），目录中必须恰好有一个非空的 7z 归档。Large 测试（2026-10-21）中，这个备份在 `QuietModeStep(ShowNoDialogs)` 内也照常生成归档（A30）。
 - **执行**：`OpenDatabase()` 后 `ImportParts(文件, "XPamImportXml", 模式, false, 识别方式, "")`，然后 `Close()`：
   - **不开事务**：在 `MDPartsDatabase` 的事务中导入会留下未关闭的撤销日志，之后的导入全部失败，事务也撤不回导入（S24 r11）；不在事务中正常，0.2 秒（S24 r13）；
   - 在 `QuietModeStep(ShowNoDialogs)` 中执行：导入走的是界面的导入 action，r11 中它试图弹出系统错误对话框；
-  - 最后一个参数（字段映射方案）传空串，即"界面上次使用的方案"。只对 `eplan_part_export` 导出的 XML 验证过（S24 r13）；别的来源的 XML 是否受这个方案影响，没有验证。
+  - 最后一个参数（字段映射方案）传空串，即"界面上次使用的方案"。只对 `eplan_part_export` 导出的 XML 验证过（S24 r13）；别的来源的 XML 是否受这个方案影响，没有验证；只有部件号、描述和部件类型的最小 XML 在 Large 测试（2026-10-21）中被接受（A30）。
 - **读回**：`added` 与 `updated` 中的每个部件号都存在，`partsAfter` 等于 `partsBefore` 加上新增部件在文件中的变体数（部件总数按变体计数）。不一致时 `execution` 仍为 `committed`，结果的 `missing` 列出没找到的部件号，`hint` 写明实际和期望的部件数，提示工程师在部件管理中核对。
 - **时限与进度**：规划用写流水线通用的 30 秒调用时限（流水线没有按工具设规划时限）；执行 300 秒，每 5 秒一次心跳（`Importing parts (30 s)`）。
 - **未验证**：
