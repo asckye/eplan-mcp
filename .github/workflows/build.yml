@@ -36,6 +36,11 @@ jobs:
       - name: Format
         run: dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore
 
+      # The action catalog (catalog/) and the table it comes from (docs/eplan/api-actions.md) must agree: schema, ids, rows, counts.
+      - name: Action catalog
+        shell: pwsh
+        run: eng/scripts/check-action-catalog.ps1
+
       # --timeout ends the whole test session after 20 minutes instead of holding the runner. A test still running after
       # two minutes is written to hung-tests-<assembly>.txt in the results (tests/Shared/HangWatch.cs), and the report
       # step below names it; xUnit's --long-running report does not reach the dotnet test output.
