@@ -17,6 +17,8 @@ publish/
 # ---- Test results / coverage ----
 TestResults/
 coverage/
+# ... but not the EPLAN API coverage tool.
+!/eng/coverage/
 *.coverage
 *.trx
 # Verify writes these next to a snapshot that does not match; accepting one is a reviewed, manual step.
