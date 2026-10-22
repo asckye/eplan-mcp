@@ -30,6 +30,7 @@
 | [S24](S24-master-data/README.md) | 部件库与翻译库：配置的是哪个库、只读访问的耗时与字段；备份、恢复与写入（ADR-0019 的前提） | **完成** 2026-10-21 | 两个库都是本机文件；全部 464 个部件 0.07 秒；`backup MASTERDATA` 在调度器中可用（0.1–0.2 秒，7z 格式的 `.zw6`/`.zw7`），还原到空目录逐字节相同，但🔴还原不覆盖已有文件；部件库事务能撤回添加，🔴不能撤回 `RemovePart` 和导入；按路径打开副本不改配置，但🔴在副本上导入也改了正在用的库的 `User` 表（已经批准恢复）；导出 XML 2 秒、翻译库导出不到 1 秒；经批准在正在用的库上：不在事务中的导入正常，🔴同步部件还会写项目，翻译库导入未验证（已恢复，逐字节核对） |
 | [S27](S27-project-create/README.md) | 从基本项目新建项目、还原项目备份、不打开项目判断版本（M6） | **完成** 2026-10-21 | CreateProject + 基本项目 3.5 秒；还原项目 6 秒，🔴目标已存在时覆盖；GetProjectDataCompatibility 不打开项目；.zw1/.zw9 是 7z；ProjectInfo.xml 的属性 10043 是 EPLAN 版本 |
 | [S28](S28-identity-extract/README.md) | 对象标识在项目副本之间是否稳定、整个项目的读取耗时（M6） | **完成** 2026-10-21 | 两份文件副本中 825 个对象的 ObjectIdentifier 全部相同，DatabaseIdentifier 不同；示例项目完整枚举约 1 秒 |
+| [S29](S29-placeholders/README.md) | 占位符对象与值集：读宏、列出、应用、新建（M6） | **完成** 2026-10-21 | 不插入就能读出宏中的占位符和值集，扫描 695 个宏 21 秒；ApplyRecord、AddRecord + SetValue 可用，随 SafetyPoint 回滚 |
 | [S25](S25-exports/README.md) | M4c 第一批的导出：PXF、部件清单、设备清单、标签、PLC 地址、缺失词表 | **完成** 2026-10-21 | PXF 可行但很大（840 MB / 598 MB）；部件清单 60–90 秒，CSV 导出之后 EPLAN 发生过一次访问冲突（未复现），只用 XML；标签（文本、xlsx）2 秒内、不需要 Excel；设备清单是预规划清单；PLC 地址总览要给配置项目或站 |
 
 ## 约定

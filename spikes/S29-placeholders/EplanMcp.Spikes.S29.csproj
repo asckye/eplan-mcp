@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Unsigned spike add-in (see S0); spike S29 reads placeholder objects and their value sets in macros and projects, and applies value sets on a copy under the scratch root. -->
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>EplanMcp.Spikes.S29</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S29</RootNamespace>
+    <AssemblyTitle>EplanMcp.Spikes.S29</AssemblyTitle>
+  </PropertyGroup>
+
+  <!-- The driver is its own project in Driver\, run outside EPLAN. -->
+  <ItemGroup>
+    <Compile Remove="Driver\**" />
+    <None Remove="Driver\**" />
+  </ItemGroup>
+
+  <!-- EPLAN assemblies are referenced from the local installation and never copied (Private=false). -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- WPF Dispatcher (System.Windows.Threading): the probes run on EPLAN's main thread through it, as in the Bridge. -->
+    <Reference Include="WindowsBase" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
