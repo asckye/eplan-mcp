@@ -15,7 +15,7 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `text` | string | 否 | — | 名称、标题、标签、子类型或路径中包含的文字，不区分大小写 |
-| `kind` | enum | 否 | — | `macro`、`project`、`project_backup`、`basic_project`、`form`、`frame`、`material_mapping`、`document`、`rule`、`preview`、`other`、`candidate`、`module`、`gap` |
+| `kind` | enum | 否 | `any` | `any`（不限）、`macro`、`project`、`project_backup`、`basic_project`、`form`、`frame`、`material_mapping`、`document`、`rule`、`preview`、`other`、`candidate`、`module`、`gap` |
 | `pack` | string | 否 | 全部 | 包 ID |
 | `version` | string | 否 | 每个包的开发包和最高的已安装版本 | `dev` 或 SemVer；只和 `pack` 一起用 |
 | `tag` | string | 否 | — | 知识文档的标签，或原生文件的子类型（如 `window_macro`） |
