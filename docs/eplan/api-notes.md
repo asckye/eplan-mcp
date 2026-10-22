@@ -213,6 +213,7 @@
 详细数据见 [spike S31](../../spikes/S31-snapshot/README.md)。
 - 🔴 `UniversalPropertyList.ExistingIds`/`ExistingValues` 和属性访问器返回的 `AnyPropertyId`、`PropertyValue` 都是 `IDisposable`，批量读取时必须逐个释放：不释放时读两遍示例项目全部属性（共约 1,000 万个值），EPLAN 记下"存储空间不足"后退出。释放后工作集在调用结束时回落。— S31。
 - 🔴 不要在释放 `对象.Properties` 返回的属性列表之后再读同一对象的 `Properties`：2026-10-22 的快照代码先 `using (f.Properties)` 读一组属性，再对同一功能取 `f.Properties` 读 `FUNC_PLCADDRESS`，EPLAN 在 `UniversalPropertyList.getProp` 中访问冲突后退出（无法捕获）。每个对象只取一次属性列表，读完后释放一次。— M6 快照的 Large 测试。
+- 属性的类型化访问器（如 `FunctionPropertyList.FUNC_PLCADDRESS`）在对象没有这个属性时抛 `PropertyNotFoundException`（S063109 属性无效），例如普通端子上的 PLC 属性；按对象逐个读登记属性时要逐个捕获它，当作没有值。— 2026-10-22，M6 快照的 Large 测试。
 - 读示例项目每个页、功能、连接的全部已有属性：514 万个值，约 8–10 分钟，150 MB 文本，最慢的一页约 50 秒；只读页属性加功能全名和连接两端：约 5 秒。`UniversalPropertyList` 的构造函数不公开，用各对象的 `Properties`（派生自它）。`Connection` 不是 `Placement`，不在 `Page.AllPlacements` 中，用 `Connection.Page` 归页。— S31。
 - 同一次打开中两次提取逐字节相同；关闭再打开后，值为运行时字符串标识的属性（如 2000：`53/4/21/0` → `89/4/21/0`）随库号改变。只读提取不改写项目 `.edb` 中的文件（不含 `.lck`）。— S31。
 - 改一页的描述并提交后，`PROJ_LASTMODIFICATIONDATE`（Unix 秒数）/`TIME` 和这一页的 `PAGE_LASTAUTOMODIFICATIONDATE`/`TIME` 改变，其他页不变，`PAGE_LASTMANUMODIFICATIONDATE` 不变；这一页的 `PROPUSER_LAST_USERCODE`（3010）同时被改写。3010–3013 是最后修改人的个人信息。— S31。
