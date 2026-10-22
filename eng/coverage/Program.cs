@@ -28,6 +28,10 @@ internal static class Program
             case ["scan", "--eplan-bin", var eplanBin]:
                 Scan(root, eplanBin);
                 return 0;
+            case ["generate"]:
+                CoverageCheck.Generate(root);
+                Console.WriteLine("Wrote " + string.Join(", ", CoverageCheck.Generated.Select(g => g.Path)) + ".");
+                return 0;
             case ["check"]:
                 // In GitHub Actions the lines become annotations on the run and the pull request.
                 bool github = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
@@ -37,7 +41,7 @@ internal static class Program
                 Console.WriteLine(problems.Count == 0 ? "Coverage files match their inputs." : $"{problems.Count} coverage file(s) out of date.");
                 return problems.Count == 0 ? 0 : 1;
             default:
-                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | check");
+                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check");
                 return 2;
         }
     }
@@ -73,6 +77,7 @@ internal static class Program
             Usages = usages,
         };
         CoverageJson.Write(Path.Combine(root, BridgeUsage.RelativePath), usage);
+        CoverageCheck.Generate(root); // the derived files follow the new scan
         int reached = usages.Values.Count(sites => sites.Any(s => s.Operations.Count > 0));
         Console.WriteLine($"{usages.Count} EPLAN API IDs in {usages.Values.Sum(s => s.Count)} use sites, {reached} reached by one of {operations.Count} operations; EPLAN {usage.EplanApi}. Wrote {BridgeUsage.RelativePath}.");
     }
