@@ -177,6 +177,8 @@ internal static class BridgeHost
             new ProjectSnapshotOperation(catalog, new EplanSnapshotReader(), projectFiles),
             new ObjectResolveOperation(catalog, new EplanObjectFinder()),
             new ProjectCompatibilityOperation(catalog, projectFiles),
+            new ProjectCreatePlanOperation(),
+            new ProjectCreateExecuteOperation(new EplanProjectFactory()),
 
             // Master-data writes always need the engineer's approval (ADR-0019), which the offline host cannot ask.
             .. eplan.Offline ? [] : MasterDataOperations(catalog, pages, backup, transactions),
