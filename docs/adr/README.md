@@ -31,3 +31,4 @@
 | [0022](0022-domain-toolsets.md) | 按领域把工具分成工具集，Profile 由工具集组成；支持工具列表变更通知的客户端可以按需加载工具集，其他客户端用固定的工具集 | Accepted | 双向门（1.0 发布前） |
 | [0023](0023-plan-approval-and-backup.md) | 组合计划一次审批（带差异预览）、开始前备份一次、每步一个事务，计划级结果增加 `partially_committed` | Accepted | 单向门（计划工具发布后） |
 | [0024](0024-pack-trust-and-container.md) | 工程包按不可信输入处理：只含数据，安装前校验容器，安装后不可变，放在数据根目录；企业资源只按配置文件中的根目录和哈希引用 | Accepted | 单向门（第一批 `.eplanpack` 交换出去后） |
+| [0025](0025-code-plugin-worker.md) | 算法插件在单独的工作进程中运行，纯数据进、计划草稿出，按 Code 级默认关闭，列入允许列表后每次运行不再单独审批；`AssemblyLoadContext` 只用于加载依赖 | Accepted | 单向门（插件契约发布后） |
