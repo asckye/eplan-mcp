@@ -5654,6 +5654,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectCreateTests.cs"
           },
           {
+            "name": "ProjectRestoreTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectRestoreTests.cs"
+          },
+          {
             "name": "SnapshotCopyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"

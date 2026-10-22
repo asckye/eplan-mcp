@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "15633775",
-  "sourceHash": "sha256:d83e90fc301bdde3daed45b0e020147cfdf1b5c61912a1d8ce376837dd58d83d",
+  "scannedSources": "92c6830a",
+  "sourceHash": "sha256:1eb491afee0ab9441aeb61f3a954da06cdcaa264357749b289ada6a0d4de8f57",
   "operations": [
     {
       "name": "approval.ask",
@@ -313,6 +313,14 @@
       "class": "ProjectListOperation"
     },
     {
+      "name": "project.restore.execute",
+      "class": "ProjectRestoreExecuteOperation"
+    },
+    {
+      "name": "project.restore.plan",
+      "class": "ProjectRestorePlanOperation"
+    },
+    {
       "name": "project.snapshot",
       "class": "ProjectSnapshotOperation"
     },
@@ -387,6 +395,32 @@
         ],
         "operations": [
           "masterdata.backup"
+        ]
+      }
+    ],
+    "A:restore": [
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
+      }
+    ],
+    "A:restore/PROJECT": [
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       }
     ],
@@ -521,6 +555,17 @@
         ],
         "operations": [
           "project.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       },
       {
@@ -1253,6 +1298,17 @@
         "operations": [
           "masterdata.backup"
         ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor": [
@@ -1265,6 +1321,17 @@
         ],
         "operations": [
           "masterdata.backup"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       }
     ],
@@ -1279,6 +1346,17 @@
         "operations": [
           "masterdata.backup"
         ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)": [
@@ -1291,6 +1369,17 @@
         ],
         "operations": [
           "masterdata.backup"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       }
     ],
@@ -1505,6 +1594,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "OpenReadOnly",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -1612,6 +1712,17 @@
         ],
         "operations": [
           "masterdata.backup"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       }
     ],
@@ -4224,6 +4335,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.restore.execute",
           "project.snapshot"
         ]
       },
@@ -4363,6 +4475,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.restore.execute",
           "project.snapshot"
         ]
       }
@@ -4399,6 +4512,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.restore.execute",
           "project.snapshot"
         ]
       }
@@ -4413,6 +4527,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.restore.execute",
           "project.snapshot"
         ]
       }
@@ -12147,6 +12262,17 @@
         "operations": [
           "masterdata.backup"
         ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext": [
@@ -12160,6 +12286,17 @@
         "operations": [
           "masterdata.backup"
         ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionManager": [
@@ -12172,6 +12309,17 @@
         ],
         "operations": [
           "masterdata.backup"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       }
     ],
@@ -12342,6 +12490,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.restore.execute"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "OpenReadOnly",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -12502,6 +12661,17 @@
         ],
         "operations": [
           "project.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Restore",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "project.restore.execute"
         ]
       },
       {
@@ -17052,6 +17222,7 @@
         ],
         "operations": [
           "project.compatibility",
+          "project.restore.execute",
           "project.snapshot"
         ]
       },
