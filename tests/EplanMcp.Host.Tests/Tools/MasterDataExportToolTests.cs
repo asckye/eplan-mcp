@@ -31,7 +31,7 @@ public sealed class MasterDataExportToolTests : IDisposable
         {
             var run = (ExportArgs)args!;
             File.WriteAllBytes(Path.Combine(run.Directory!, run.FileName!), new byte[5 * 1024 * 1024]);
-            return new ExportRunData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", PartCount = run.Parts?.Count ?? 464 };
+            return new ExportRunData { Database = @"$(MD_PARTS)\EPLAN_parts.alk", PartCount = run.Parts?.Count ?? 454, VariantCount = run.Parts?.Count ?? 464 };
         };
     }
 
@@ -47,10 +47,10 @@ public sealed class MasterDataExportToolTests : IDisposable
         JsonElement data = Structured(result);
         string directory = data.GetProperty("directory").GetString()!;
         Assert.StartsWith(Path.Combine(PartsFolder, "20261021T083000Z-"), directory, StringComparison.Ordinal);
-        Assert.Equal((@"$(MD_PARTS)\EPLAN_parts.alk", 464), (data.GetProperty("database").GetString(), data.GetProperty("partCount").GetInt32()));
+        Assert.Equal((@"$(MD_PARTS)\EPLAN_parts.alk", 454, 464), (data.GetProperty("database").GetString(), data.GetProperty("partCount").GetInt32(), data.GetProperty("variantCount").GetInt32()));
         Assert.Equal(("parts.xml", 1), (Files(data)[0], data.GetProperty("fileCount").GetInt32()));
-        Assert.Equal(["database", "partCount", "directory", "files", "fileCount", "totalBytes", "truncated", "hint"], data.EnumerateObject().Select(p => p.Name));
-        Assert.Equal("Exported 464 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.", Text(result, 0));
+        Assert.Equal(["database", "partCount", "variantCount", "directory", "files", "fileCount", "totalBytes", "truncated", "hint"], data.EnumerateObject().Select(p => p.Name));
+        Assert.Equal("Exported 454 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.", Text(result, 0));
 
         var plan = (ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.PartExportPlan).Args!;
         var run = (ExportArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.PartExportRun).Args!;

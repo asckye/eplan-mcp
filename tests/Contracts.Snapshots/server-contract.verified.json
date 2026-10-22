@@ -4591,7 +4591,11 @@
             "type": "string"
           },
           "partCount": {
-            "description": "Parts exported; each variant counts as one.",
+            "description": "Parts in the file; a part number with several variants counts once.",
+            "type": "integer"
+          },
+          "variantCount": {
+            "description": "Parts exported with each variant counted, as eplan_part_search lists them.",
             "type": "integer"
           },
           "directory": {

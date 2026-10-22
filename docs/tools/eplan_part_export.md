@@ -54,10 +54,10 @@
   - 指定部件：用 `GetPartVariants` 逐个取，有部件号取不到（null 或空数组）就返回 `PART_NOT_FOUND`，否则把全部变体交给 `ExportParts(路径, 格式, 部件列表)`。不用 `GetPart`：一个部件号有几个变体时它只返回第一个（XML）；`GetPartVariants` 在 S24 中读过，取不到时返回什么没有验证；
   - 在调度器中执行，套 `QuietModeStep(ShowNoDialogs)`。
 - **已验证**（S24 r11，在还原到 scratch 的副本上）：
-  - XML 全部 464 个部件 2.05 秒、5.0 MB；EDZ 44 秒、128 MB；指定一个部件的 XML 4 KB；
+  - XML 全部部件（`Parts` 的 464 条）2.05 秒、5.0 MB；EDZ 44 秒、128 MB；指定一个部件的 XML 4 KB；
   - EDZ 时缺少宏文件的部件在系统消息中记一条警告（示例库有几十条），照样导出、返回；
   - 导出不改库的数据文件。
-- **未验证**：在配置的库上导出是否也不改数据文件（S24 只在副本上导出过）。第一次 Large 测试前后由维护者对库的数据文件计算 SHA-256 核对，结果补进 api-notes。
+- **已验证**（2026-10-21 Large 测试，在配置的库上导出 XML）：部件数据文件不变；变的只有 `.lck` 和 `User.eod`、`User.eox`，后两个是 EPLAN 按用户记录的会话信息，关闭一次 EPLAN 就会改写（api-notes A30），不是部件数据。文件根元素的 `count` 为 454，`Parts` 为 464 条：`count` 按部件号计，`Parts` 按变体计，所以 `partCount` 从文件读回（第 3 节）。
 - **SQL Server 上的库**：没有验证。只读导出照样尝试，失败时返回 `EPLAN_OPERATION_FAILED`。
 - **时限与进度**：300 秒，每 5 秒一次心跳（`Exporting parts (30 s)`）。
 
@@ -68,9 +68,9 @@
 - Small：参数校验（`parts` 的项数、空串）、文件名规则、摘要。
 - Medium：假 Bridge 上部件号找不到、EPLAN 报错、取消时目录被删除。
 - Large（配置的部件库，只读）：
-  - XML 全部部件：一个 `.xml` 文件，`partCount` 等于文件根元素 `partsmanagement` 的 `count`（S24 r13 读过这个结构；`eplan_part_search` 的查询至少两个字符，给不出全部部件的总数），`part` 元素的个数写入测试输出；
-  - 指定 `SIE.3RH2122-1HB40`：`partCount` 为 1；
+  - XML 全部部件：一个 `.xml` 文件，`partCount` 等于文件根元素 `partsmanagement` 的 `count`（S24 r13 读过这个结构；`eplan_part_search` 的查询至少两个字符，给不出全部部件的总数），`variantCount` 不小于它（示例库 454、464）；两个数，以及 `part` 元素数和其中不同部件号的个数写入测试输出；
+  - 指定 `SIE.3RH2122-1HB40`：`partCount` 和 `variantCount` 都为 1；
   - 指定一个不存在的部件号：`PART_NOT_FOUND`，没有留下目录；
-  - 导出前后对部件库的数据文件（`.adb` 目录中除 `.lck` 外的文件和 `.alk`）计算 SHA-256，不能有变化；
+  - 导出前后对部件库的数据文件（`.adb` 目录中除 `.lck`、`User.eod`、`User.eox` 外的文件和 `.alk`）计算 SHA-256，不能有变化；
   - EDZ 不放进常规的 Large 测试（44 秒），只在发布前跑一次：设置环境变量 `EPLANMCP_LARGE_EDZ=1` 时才运行，否则跳过。
 - Agent 评测："把部件库里 3RH21 开头的部件导出成 XML，告诉我文件在哪里"（先 `eplan_part_search`，再本工具）。
