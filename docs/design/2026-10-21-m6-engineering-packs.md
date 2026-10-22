@@ -366,3 +366,177 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 - MCP 2026-07-28 要求资源的列表和读取结果带 `ttlMs` 和 `cacheScope`（未在 SDK 2.2.0 上核实）：已安装的包不可变，给长 TTL；开发包、计划、任务给短 TTL。
 - 订阅（`subscriptions/listen`、资源更新通知）只用于计划和任务，只对订阅了的客户端发；其他客户端用 `eplan_task_get` 轮询。
 - **不支持动态发现的客户端**：用静态工具集 `--toolsets pack,workflow` 或 `full`（ADR-0022）；不支持 Resources 的用工具；不支持 Tasks 的用 4.13 的等待加轮询。
+
+### 4.6 规范快照与稳定定位符
+
+#### 4.6.1 快照
+差异、校验、缓存、事实提取和规则求值共用一份规范快照。
+
+| 内容 | 规范化 |
+|---|---|
+| 页 | 页名、类型、结构标识、页属性中登记的一组 |
+| 功能（设备） | 标识、显示的标识、类别、主/辅、页、位置（毫米）、符号、部件引用、登记的属性 |
+| 连接点、连接 | 两端的连接点（定位符 + 连接点名）、页、登记的连接属性 |
+| 端子与端子排、电缆与芯线、PLC 地址 | 归属、编号、地址、登记的属性 |
+| 占位符与值集 | 变量、值集、当前值、引用的对象（S29 已验证不插入就能读出，A33） |
+
+- **登记的属性**来自能力目录的数据字典 ID（例如 `Function` 的 `FUNC_TEXT`），在 Contracts 中列出；规则只能引用这些属性（4.11）。多语言文本带语言代码，坐标一律毫米，数字按区域无关的格式。
+- **提取**：新的 Bridge 读操作 `project.snapshot {project, pages?}`。S28 表明示例项目整体枚举约 1 秒，所以示例规模一次调用即可；更大的项目按页分块，每块一次调度，单块时间有上限，不长时间占住工程师的 EPLAN。读全部登记属性的耗时由 S31 测量。
+- **内容哈希**：每个对象按规范化的内容算哈希；每页的哈希由页中对象的哈希排序后算出；快照哈希由各页的哈希算出（借鉴 Speckle 的内容寻址）。项目没有变化时，两次提取的哈希必须相同（S31）。
+- **存放**：`cache\snapshots\<项目键>\<快照哈希>.jsonl.gz`，每行一个对象；附元数据：项目键、EPLAN 实例、打开代次、提取器版本、能力目录版本、时间、范围（整个项目或部分页）。缓存目录可以随时删除，需要时重新提取。
+
+#### 4.6.2 定位符
+按 S28 的实测（1.3），定位符这样设计：
+1. **主键是"项目键 + 类型号 + `ObjectIdentifier`"**。它在文件副本之间、备份还原和 PXF 导出导入之后都不变（S28 r0、r1 实测）；同一份文件关闭再打开之后也可用（根据文档推断，r1 中 EPLAN 重启、重新复制的副本编号不变可作旁证，S30 核实）。
+2. **执行前一律用名称、页、类型、位置核对**：对象删除后再新建时编号可能被重用，所以主键对上而描述对不上时，当作失效，从不改指别的对象。
+3. 由 `.zw1` 还原、PXF 导入（不带主数据）得到的新项目中，对象保留原来的编号（S28 r1）；从基本项目新建、在 EPLAN 中"另存为"或复制的项目是否保留，**未验证**（S30）。在此之前，跨后两种操作的引用只按描述部分查找，并标为推断。
+4. **运行时字符串标识（`ToStringIdentifier()`）和 `DatabaseIdentifier` 绝不跨调用保存**，包括计划、快照、事实和缓存键。现有工具在一次调用之内用它算指纹，不受影响。
+
+```json
+{ "project": "<项目键>", "type": 17, "oid": 59641,
+  "kind": "function", "name": "=+-CU1", "page": "=AP+ST1/3", "pos_mm": [120.0, 180.5] }
+```
+- 类型号的取法在实现时确定（S28 中取自字符串标识的第二段，实现时优先找直接的 API）。没有标识的对象（图形、文字）只靠页、类型、位置和内容哈希核对。连接用两端的定位符和连接点名。
+- 解析（Bridge 读操作 `object.resolve`）：先按主键找，再核对描述；主键找不到或核对不通过时，读操作可以按描述（页、类型、名称、位置容差）给出候选，标为"重新定位"，写操作一律报错（`RESOURCE_NOT_FOUND`，或 `AMBIGUOUS_NAME` 带候选）。位置容差由 S31 定。
+- **项目键**：规范化的项目路径（同 `ScratchPaths.Canonical`）。文件副本共享 `ObjectIdentifier`，所以副本只能靠路径区分；`PROJ_GUID` 记下来，用于判断两个项目是否同源（复制、还原、新建时它是否变化，S30）。参考项目的副本与原件同源，从副本提取的事实可以指回原件中的对象。
+- **持久化计划的前置条件**用定位符和内容哈希写，不用现有的会话指纹；每步执行前 Bridge 照常在同一次调用中重算会话指纹（4.8）。
+
+### 4.7 按需上下文与缓存
+- `eplan_context_get(project, cabinet?, scope, include, max_tokens?)`：返回一个柜范围内的紧凑上下文：生效配置及溯源、相关的模块、规则、事实、快照中范围内的对象、关系图的邻域。结果带 `contextRef = {snapshotHash, generation, bindingRevision, lockDigest}`；计划记下它，执行时据此判断是否要重新核对。`scope` 只能缩小到柜内（页、结构、对象类型、定位符），从不扩大到别的柜。
+- **缓存键**：（EPLAN 实例 = 进程号 + 启动时间，项目键，打开代次，范围，配置版本 = 绑定修订号 + 锁摘要，提取器版本）。
+- **打开代次**：Bridge 按项目路径维护的计数。有事件时（ADR-0026）在项目打开时加一；没有事件时，Bridge 在每次调用中发现项目从 `OpenProjects` 中消失又出现，或者它的 `DatabaseIdentifier` 变了（重新打开时改变，A32；只在 Bridge 的内存中比较，从不保存），就加一。没有事件时只能在下一次调用时发现，所以写前必须重新核对（下文）。
+- **依赖登记**：每个缓存项记下它依赖的页（页名 + 页哈希）、对象（定位符）、"项目的全部连接"这一伪依赖、包摘要和绑定修订号。
+
+| 失效来源 | 精度 | 处理 |
+|---|---|---|
+| 本项目自己的写入：某步 `committed` | 精确：该步的修改范围 | 依赖这些页和对象的项无效 |
+| 某步 `rolled_back` | — | 不变 |
+| 某步 `unknown` | 整个项目 | 该项目的全部项无效，并按 ADR-0010 暂停写入 |
+| EPLAN 的页事件（ADR-0026，经验证的） | 页 | 依赖这些页的项标为"待核对" |
+| `Page.ConnectionDirty`（**没有参数**） | 不知道是哪些页 | 依赖连接的全部项标为"待核对"：一个宽的待定范围 |
+| 项目关闭、重开，EPLAN 实例退出 | 项目或实例 | 全部项无效 |
+| 时间（TTL） | — | 来自快照的项默认 120 秒后标为"待核对"（可配置）；包和配置的项按摘要寻址，不过期 |
+
+- **三种状态**：有效、待核对、无效。待核对的项在使用前重新提取依赖的页，比较页哈希，相同就恢复有效。
+- **写前重新核对**：缓存只用来加快分析，**从不作为写入的依据**。计划执行时每步都在 Bridge 中重新规划、重算指纹，并按定位符和内容哈希核对前置条件（4.8）。
+- **本地观察计数不是 EPLAN 的数据库版本**：Host 和 Bridge 可以统计看到的事件和自己的写入，但 EPLAN 没有公开的项目修订号（至今没有找到；有可靠的就在 S31 中记下）。计数相同不能证明项目没有变化：没有事件的修改、另一个 EPLAN 实例、离线修改都看不到。
+- 实现：自己的内存索引加磁盘快照（理由见 4.15 对 HybridCache 的评估）。
+
+### 4.8 计划与执行
+
+#### 4.8.1 计划
+| 字段 | 说明 |
+|---|---|
+| `planId`、`planHash` | 随机 ID；计划内容（不含状态）的 SHA-256 |
+| `project`、`cabinet` | 项目键与路径；柜 ID |
+| `bindingRevision`、`lockDigest`、`contextRef` | 编译时的配置和上下文（4.3、4.7） |
+| `inputs` | 按工作流的参数 schema 校验过的输入 |
+| `steps[]` | `{index, op, args, tier, readScope, modifyScope, preconditions, expected, plannedChanges, dependsOn}` |
+| `tier` | 各步的最高级别 |
+| `createdAt`、`expiresAt` | 默认 24 小时后过期（Q7） |
+| `status` | 4.8.3 |
+
+- **操作目录是封闭的**：`op` 只能是登记过的计划操作，每个对应一对现有或新增的 Bridge 操作，例如 `project.create`、`page.create`、`page.update`、`device.update`、`device.place`、`macro.insert`、`module.insert`、`connection.generate`、`report.update`，以及 Destructive 的重编号和删页。AI 和工作流不能自造操作，计划也不经 `eplan_action_run`。
+- `readScope`、`modifyScope` 用页、结构和定位符表示，必须在柜内；`preconditions` 是执行前必须成立的事实（对象存在或不存在、属性值、范围内的内容哈希）；`expected` 是执行后应当成立的结果，供校验使用（4.9）。
+- 计划存放在 `state\plans\<planId>.json`，只经工具创建；执行时核对 `planHash`，文件被改过就拒绝。
+
+#### 4.8.2 编译：`eplan_workflow_plan`
+1. 按工作流的参数 schema 校验输入，错误报 `INVALID_ARGUMENT` 并指出位置；引用的资源找不到报 `RESOURCE_NOT_FOUND`；缺能力报 `CAPABILITY_MISSING`。
+2. 解析定位符；**用到 EPLAN 中的选择时，在这里把选择解析为定位符并写死在计划中**，执行时不再读取选择，所以选择改变不会悄悄改变计划的目标。
+3. 按适用条件和规则检查输入与生效配置。
+4. 读取范围不依赖前面步骤的步，调用 Bridge 的 `*.plan` 得到真实的变更清单；依赖前面步骤的步（例如在第 1 步新建的页上插入宏），由 Host 按操作和资源预测变更（例如 `macro.get` 列出的设备），允许按模式匹配（编号产生的标识），执行时再由 Bridge 真实规划。
+5. 检查每步的修改范围在柜内、不与别的柜重叠；生成差异预览（按步、按页分组）。
+
+#### 4.8.3 执行：`eplan_plan_apply(plan_id)`
+1. **核对**：计划没有过期、`planHash` 相同、绑定修订号和锁摘要没变、项目身份相同、能力仍然满足；对不依赖前面步骤的步，按定位符和内容哈希核对前置条件。任何一项不符时报 `PLAN_STALE`，`metadata.conflicts` 列出变化的对象；**工程师在此期间手工修改了范围内的对象，就是这样被发现的**。
+2. 策略按计划的最高级别判定，一次审批（ADR-0023），计划开始前备份一次（ADR-0023、ADR-0013）。
+3. **逐步执行**：每步先重新规划（Bridge `*.plan`），变更清单必须与批准的一致（预测的步按模式匹配）、修改范围不超出批准的范围，否则在这一步之前停下；然后调用现有的 `*.execute`，每步一个 `SafetyPoint` 和一个撤销步骤（描述"AI: plan <ID 前 8 位> 2/5 macro.insert"），读回，记录结果。
+4. 第一个失败就停下，不继续后面的步骤。结果按 ADR-0023 的计划级结果报告，审计逐步记录。
+5. 全部完成后做三层校验（4.9）和差异，写进计划的结果。
+
+- 计划只能执行一次：已经执行过的计划再次执行时拒绝；剩余的步骤要重新编译出新计划（4.13）。
+- 计划状态：`compiled` → `approved` → `running` → `committed`、`partially_committed`、`rolled_back`、`not_started`、`unknown`（ADR-0023），另记 `verification: passed / failed / skipped`。
+- 插件返回的计划草稿与工作流编译出的计划格式相同，经同样的编译和校验（4.14）。
+
+### 4.9 三层校验与差异审查
+
+| 层 | 检查什么 | 数据 | 结果 |
+|---|---|---|---|
+| 对象数据 | 预期的对象存在、属性值相符、修改范围之外没有变化 | 执行前后的快照（修改范围及其邻页） | 逐项通过、失败或未知 |
+| 电气关系 | 预期的连接、端子分配、电缆芯线、PLC 地址、跨页关系；适用的规则 | 执行后快照上的关系图（4.12） | 同上，并标明依据是事实还是推断 |
+| 图纸 | 修改范围内的页没有重叠、没有超出图框；修改范围之外的页图像不变；附修改页的前后图片 | 导出目录中的图片（ADR-0012）；放置的外框 | 自动判断只有"重叠、越界、范围外不变"三项，其余作为证据交给工程师 |
+
+- 图纸层的"范围外不变"要求同一页两次导出的图像逐像素相同，先在第 4 阶段核实 EPLAN 的导出是否稳定（例如带不带时间戳），不稳定时改为只比较对象哈希。
+- **差异**是基准（执行前快照）、计划（预期结果）、实际（执行后快照）三方比较：
+
+| 类别 | 含义 |
+|---|---|
+| 按计划完成 | 预期的变化出现了 |
+| 计划了但没有出现 | 预期的变化没有出现 |
+| 计划外，在修改范围内 | 例如自动编号多编了一个；逐条列出 |
+| 修改范围之外 | 不应出现；出现时作为警报，请工程师检查 |
+| 执行期间的外部修改 | 步骤之间有不是计划造成的变化（工程师在 EPLAN 中同时修改） |
+
+- 差异的结构化结果放在计划结果中，`eplan_plan_get` 默认只给摘要，`response_format: detailed` 给全部条目；以后由 Workbench 显示。
+
+### 4.10 参数化模块
+- **建立在 EPLAN 的机制上**：宏（窗口宏 `.ema`；页宏 `.emp` 在第 3 阶段之后）+ 占位符对象（`Eplan.EplApi.DataModel.Graphics.PlaceHolder`、`IPlaceHolder`）+ 值集（`PlaceHolder.ValueSetsClass`、`AddRecord`、`SetValue`、`ApplyRecord(String, Boolean)`）。S29（A33）实测：不插入宏，用 `WindowMacro.Open` 逐个变体读 `PlaceHolder`，就能读出占位符、值集名、变量名和值表，扫描 695 个示例宏 21 秒（72 个带占位符、38 个带值集），所以导入时把它们写进资源索引；项目中的占位符用 `DMObjectsFinder.GetPlaceholdersWithFilterScheme(null)` 列出；值是多语言文本，包中按语言保存。`PlaceHolderText` 的分组类型是表头、数据、表尾、页脚，属于表单和图框，与页模板和标题栏有关，不是宏的参数（S32 核实）。
+- **本项目的元数据只补充四样**：
+  - 接口：参数（名称、类型、单位、取值，对应的占位符变量）；对外连接（端子、电位、电缆端，用相对于宏的定位符）；标识规则；
+  - 部件映射：参数值到部件，可以按公司层不同；
+  - 适用条件：对生效配置的约束（4.11 的谓词）；
+  - 验收：插入后预期的对象和关系，以及验收样例。
+- **插入**（计划操作 `module.insert`）：在一个 `SafetyPoint` 中插入宏（沿用 `macro.insert` 的路径），找到插入的占位符，套用预定义的值集（`ApplyRecord`），或者新建一条记录写入参数值后套用（`AddRecord` + `SetValue` + `ApplyRecord`）。S29 已验证这些都能用 API 完成，并与插入一起被 `SafetyPoint` 回滚；提交后一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效，还没有验证（S32）。做不到时降级为"插入宏后用 `device.update` 改属性"，在计划中分成两步。
+- **从完成的项目中提取（例如 3 个回路扩到 8 个）**：在参考项目的关系图上找结构相同、属性不同的重复回路，生成候选模块，把不同的属性作为参数；工程师确认后：参考项目本来就用了带占位符的宏的，直接复用；否则在参考项目的 scratch 副本上用 `WindowMacro.Create(…)` 从这些放置生成宏，新建占位符（`PlaceHolder.Create`、`AddReference`）并为每个实例写一条值集，写进开发包的 `native/`（只在项目之外写文件，同导出级）。这一条路径整体未验证（S32）。
+- **宏的位置**：`macro.insert` 现在只接受 `$(MD_MACROS)` 下的宏（M3b 设计 Q3、SEC-19）。M6 增加第二个根目录：已安装的包目录（不可变，每次使用前按清单哈希核对），由 ADR-0024 决定。
+- **Cogineer**：2026.0.3 的 `LicenseOptions` 有 `CogineerDesigner`、`CogineerDesignerAdvanced`、`CogineerBuilder`、`CogineerBuilderAdvanced`、`CogineerSilentMode`；开发机是否有这些授权未知（A2 没有记录），S32 用 `HasOption` 检查。`Eplan.EplApi.*` 的 XML 文档中没有 Cogineer 的类型，集成只能经 action（eBUILD 帮助提到 `ExecuteCogineerProjectBuilderAction`，未核实）。
+  - **有授权时**：另做 spike 评估集成：包引用 Cogineer 的配置，由它生成；模块元数据和规则照用。集成方式写成 ADR。
+  - **没有授权时**，本项目的模块是轻量的等价物，边界是：没有配置器界面，没有典型回路的层级和规则编辑器；生成就是计划中的宏插入加值集；布局只有宏自身的布置加计划给出的坐标，不自动排版。两者用同一种 EPLAN 数据（宏、占位符、值集），以后换用 Cogineer 时资料不作废。
+
+### 4.11 规则格式
+规则不用表达式编译，用受限的 JSON 结构，在 Host 中解释执行：
+```json
+{
+  "kind": "Rule",
+  "metadata": { "name": "motor-needs-overload-relay" },
+  "spec": {
+    "severity": "mandatory",
+    "source": { "kind": "document", "asset": "acme.panels.base@1.2.0:Note/design-guide", "location": "4.2" },
+    "scope": { "kind": "function", "where": { "eq": ["function.category", "Motor"] } },
+    "check": { "some": { "relation": "same_potential", "where": { "eq": ["function.category", "OverloadRelay"] } } },
+    "message": { "zh": "电机 {name} 的主回路中没有过载继电器", "en": "Motor {name} has no overload relay in its main circuit" },
+    "fix": { "workflow": "acme.panels.base@1.2.0:Workflow/add-overload-relay", "inputs": { "motor": "$object" } }
+  }
+}
+```
+- **运算数**：登记的属性（`function.name`、`function.category`、数据字典 ID）、登记的关系（4.12）、生效配置（`config.<项>`）、字面值（数字可以带单位）。
+- **运算符**：比较 `eq`、`ne`、`lt`、`le`、`gt`、`ge`、`in`、`not_in`、`exists`、`empty`、`starts_with`、`ends_with`、`matches`（.NET 正则，`NonBacktracking`，带超时）；组合 `all`、`any`、`not`；关系量词 `some`、`every`、`count`（沿关系最多 3 跳）。没有算术、函数、变量和循环。
+- **限制**：嵌套不超过 8 层；单条规则在一个柜上的求值有时间上限；超限或缺数据时结果为 `unknown`，不当作通过。
+- **结果**：`{rule, version, locator, status: pass / fail / not_applicable / unknown, evidence, basis: fact / inference}`。
+- **修复**只引用一个工作流，生成计划，从不直接执行。
+- 规则在快照和关系图上求值，不调用 EPLAN，所以 `eplan_rule_check` 是 Read。
+
+### 4.12 关系图
+- **节点**：页、功能、连接点、连接、端子、端子排、电缆、芯线、PLC 地址。
+- **边**带依据：`fact` 是 EPLAN 数据中直接有的关系（连接对象的两端、端子归属、芯线归属、PLC 地址分配、交叉引用）；`inference` 是推出来的（经设备内部连接的电位延续、按名称配对的中断点、按名称匹配的电缆芯线），附推理的依据。
+- **查询**：两点之间的路径追踪；跨页（中断点、交叉引用）；影响分析（改动或删除某个设备会波及哪些连接、端子、电缆、PLC 地址、报表页）。经 `eplan_connection_trace` 和 `eplan_context_get(include: graph)` 提供，回答中的每一段都标明依据。
+- 关系图由快照建立，随快照的失效而失效（4.7）。
+
+### 4.13 长任务
+- S28 表明示例规模的整项目提取是秒级的，所以第 1 阶段的导入和提取同步执行，不依赖任务机制。需要任务的是：等审批的计划执行、迁移中的重新校验、大项目的导入。
+- **任务**：`taskId`、种类、状态（`queued`、`running`、`waiting_approval`、`succeeded`、`failed`、`cancelled`、`interrupted`、`unknown`）、进度、检查点（已完成的步骤及其结果）、结果的引用。存放在 `state\tasks\<taskId>.json`，状态变化追加记录。
+- **等待加轮询**：可能耗时长的工具带 `wait_seconds`（默认 90，最大 110，低于 Claude Code 转后台的 2 分钟）；到时完成就直接返回结果，否则返回 `{taskId, status}`，用 `eplan_task_get` 查询。返回任务 ID 不会取消任务。
+- **MCP Tasks**：客户端声明支持 Tasks 扩展时，同一个任务以 MCP 任务返回；SDK 的任务存储接到我们的任务仓库上（SDK 中的位置与版本按 4.15 核实）。
+- **中断与恢复**：
+  - 只读的步骤可以从检查点重做；
+  - 写步骤从不自动重做：Host 重启后，沿用 `DanglingWrites` 的做法，从审计中找出只有 `execution_started` 的步骤，向原来的 EPLAN 实例取回结果（`outcome.get`），取不回就按 ADR-0010 暂停写入；任务记为 `interrupted` 或 `unknown`；
+  - 继续剩余的步骤要用 `eplan_plan_apply(plan_id, resume: true)`：Host 按当前状态重新编译剩余的步骤，生成新计划，**重新审批**（ADR-0023）；
+  - 客户端断开或 Host 被结束时，Bridge 只会把正在执行的那一步做完，不会再收到下一步，所以执行到哪里总能确定。
+
+### 4.14 算法插件
+- 插件是可选的算法（例如端子分配、布局建议），只返回计划草稿，从不直接调用 EPLAN。决策见 ADR-0025，要点：
+  - 在单独的工作进程中运行，输入是纯数据（快照的一部分、生效配置、参数），输出是计划草稿；工作进程拿不到 Bridge 的管道和数据目录；
+  - Code 级，默认关闭；启用要在 `config.json` 中按插件的 SHA-256 列出，列入后每次运行不再单独审批（项目负责人 2026-10-21 决定）；
+  - `AssemblyLoadContext` 只用于在工作进程中加载插件的依赖，不是安全边界；
+  - 草稿经 4.8.2 同样的编译和校验，执行仍要审批。
+- 工程包从不包含插件（ADR-0024）；包可以在 `compatibility.capabilities` 中用 `plugin:` 声明可选的插件，没有时相关的资源标为不可用。
