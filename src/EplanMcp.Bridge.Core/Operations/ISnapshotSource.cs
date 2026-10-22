@@ -21,7 +21,7 @@ public interface ISnapshotSource : IDisposable
     /// <summary>Every page's <c>ObjectIdentifier</c> and full name, in any order.</summary>
     public IReadOnlyList<KeyValuePair<long, string>> Pages { get; }
 
-    /// <summary>How many connections the pages read so far left out: 3D connections and connections on no page.</summary>
+    /// <summary>How many connections of the project a snapshot leaves out, 3D ones and ones on no page; known once a page was read.</summary>
     public int SkippedConnections { get; }
 
     /// <summary>
