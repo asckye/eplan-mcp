@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    A helper program of the Large tests (tests/EplanMcp.Large.Tests/README.md, RevisionListTests): it gives a scratch
+    copy of the sample project a revision, the way spike S23 r3 did (api-notes A28), so that eplan_revision_list can be
+    tested on a project under change tracking. No tool creates revisions (M4c design Q9), so the test cannot do it
+    through eplanmcp. It runs EPLAN without a user interface like the offline host (api-notes B5, A22) and, like it,
+    builds only where EPLAN is installed: it is in EplanMcp.slnx but not in EplanMcp.Ci.slnf, and nothing ships it.
+    x64, net481 and an STA main thread are required (B5).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <RootNamespace>EplanMcp.Large.RevisionHelper</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
+  </PropertyGroup>
+
+  <!-- As in the offline host: the starter library is copied, the API assemblies load from EPLAN's Bin (A22). -->
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.Starteru">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Starteru.dll</HintPath>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Systemu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Systemu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Baseu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.DataModelu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

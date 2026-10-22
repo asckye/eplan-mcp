@@ -46,20 +46,27 @@ internal sealed class OfflineHost
     public string ProjectPath { get; }
 
     /// <summary>Copies the fixture, starts the offline host on the copy and waits until its pipe is there.</summary>
-    public static async Task<OfflineHost> StartAsync(string variantBin, string scratchRoot, CancellationToken cancellationToken)
+    public static Task<OfflineHost> StartAsync(string variantBin, string scratchRoot, CancellationToken cancellationToken)
     {
-        string exe = Environment.GetEnvironmentVariable(ExeVariable) is { Length: > 0 } given ? given : DefaultExe();
+        string folder = NewFolder(scratchRoot, "offline");
+        string copy = Path.Combine(folder, LiveEplan.ProjectName);
+        CopyFixture(scratchRoot, copy);
+        return StartOnAsync(variantBin, folder, copy + ".elk", cancellationToken);
+    }
+
+    /// <summary>
+    /// Starts the offline host on <paramref name="projectFile"/>, a copy in <paramref name="folder"/> that a test made,
+    /// with any link file extension, and waits until its pipe is there; <see cref="StopAsync"/> deletes the folder.
+    /// </summary>
+    public static async Task<OfflineHost> StartOnAsync(string variantBin, string folder, string projectFile, CancellationToken cancellationToken)
+    {
+        string exe = Environment.GetEnvironmentVariable(ExeVariable) is { Length: > 0 } given ? given : RepositoryFile("src", "EplanMcp.Bridge.Offline", "EplanMcp.Bridge.Offline.exe");
         if (!File.Exists(exe))
         {
             throw new InvalidOperationException($"The offline host is not built: {exe}. Build src\\EplanMcp.Bridge.Offline in the configuration of these tests, or set {ExeVariable}.");
         }
 
-        string fixture = Path.Combine(scratchRoot, "fixtures", LiveEplan.ProjectName);
-        string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + "-" + Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
-        string folder = Path.Combine(scratchRoot, "offline", stamp);
-        string copy = Path.Combine(folder, LiveEplan.ProjectName);
-        CopyProject(fixture, copy);
-
+        string copy = Path.ChangeExtension(projectFile, null);
         string prefix = "EplanMcpLarge." + Guid.NewGuid().ToString("N") + ".";
         var start = new ProcessStartInfo(exe)
         {
@@ -69,7 +76,7 @@ internal sealed class OfflineHost
             RedirectStandardError = true,
         };
         string seconds = IdleExit.TotalSeconds.ToString("0", CultureInfo.InvariantCulture);
-        foreach (string argument in new[] { "--variant-bin", variantBin, "--project", copy + ".elk", "--pipe-prefix", prefix, "--idle-exit", seconds })
+        foreach (string argument in new[] { "--variant-bin", variantBin, "--project", projectFile, "--pipe-prefix", prefix, "--idle-exit", seconds })
         {
             start.ArgumentList.Add(argument);
         }
@@ -119,9 +126,20 @@ internal sealed class OfflineHost
         }
     }
 
-    /// <summary>A plain file copy of the .elk file and the .edb folder, as eng/scripts/eval-fixture.ps1 makes it (api-notes A12).</summary>
-    private static void CopyProject(string source, string target)
+    /// <summary>A new, empty folder below <paramref name="scratchRoot"/>'s <paramref name="kind"/> folder, named by time and process.</summary>
+    public static string NewFolder(string scratchRoot, string kind)
     {
+        string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + "-" + Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
+        return Path.Combine(scratchRoot, kind, stamp);
+    }
+
+    /// <summary>
+    /// A plain file copy of the fixture's .elk file and .edb folder to <paramref name="target"/> (a path without an
+    /// extension), as eng/scripts/eval-fixture.ps1 makes it (api-notes A12).
+    /// </summary>
+    public static void CopyFixture(string scratchRoot, string target)
+    {
+        string source = Path.Combine(scratchRoot, "fixtures", LiveEplan.ProjectName);
         if (!File.Exists(source + ".elk"))
         {
             throw new InvalidOperationException($"The fixture {source}.elk is missing: copy it with eng/scripts/eval-fixture.ps1 (without -Open).");
@@ -137,8 +155,11 @@ internal sealed class OfflineHost
         }
     }
 
-    /// <summary>The offline host built in this test assembly's configuration, in the same repository.</summary>
-    private static string DefaultExe()
+    /// <summary>
+    /// A net481 program of the same repository built in this test assembly's configuration, e.g. the offline host:
+    /// <c>&lt;repository&gt;\&lt;folder&gt;\&lt;project&gt;\bin\&lt;configuration&gt;\net481\&lt;exe&gt;</c>.
+    /// </summary>
+    public static string RepositoryFile(string folder, string project, string exe)
     {
         var output = new DirectoryInfo(AppContext.BaseDirectory); // tests\EplanMcp.Large.Tests\bin\<configuration>\net10.0
         string configuration = output.Parent!.Name;
@@ -146,7 +167,7 @@ internal sealed class OfflineHost
         {
             if (File.Exists(Path.Combine(directory.FullName, "EplanMcp.slnx")))
             {
-                return Path.Combine(directory.FullName, "src", "EplanMcp.Bridge.Offline", "bin", configuration, "net481", "EplanMcp.Bridge.Offline.exe");
+                return Path.Combine(directory.FullName, folder, project, "bin", configuration, "net481", exe);
             }
         }
 
