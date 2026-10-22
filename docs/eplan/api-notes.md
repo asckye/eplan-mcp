@@ -186,6 +186,12 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A33. 占位符对象与值集（spike S29，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S29](../../spikes/S29-placeholders/README.md)。写入只在 scratch 副本上、在 `SafetyPoint` 中回滚。
+- `WindowMacro.Open(path, project)` 后，对每种表达类型的每个变体 `ChangeCurrentVariant`，`Objects` 中的 `PlaceHolder` 能读出名称、值集（`NumberOfRecords`、`get_NameOfRecord(i)`）、变量（`VariableNames`）和值表（`get_Value(record, variable)`）。C# 中 `NameOfRecord`、`Value` 是带参数的属性，要调用访问器方法。扫描 `$(MD_MACROS)` 下 695 个宏、1,751 个变体用时 21 秒，72 个宏带占位符（38 个带值集，最多 8 个），项目页数不变。— S29。
+- `DMObjectsFinder.GetPlaceholdersWithFilterScheme(null)` 列出项目中的占位符（示例项目 2 个，值集 `V`、`mA`）。— S29。
+- 插入宏后 `ApplyRecord(name)` 不到 0.01 秒，`GetAllCurrentValues()` 随值集改变；`AddRecord(name)` 返回新值集的序号，`SetValue(record, variable, MultiLangString)` 写入的值能读回并应用。插入和应用都随 `SafetyPoint.Rollback()` 撤销。值以多语言字符串存储。提交后的持久性和 Ctrl+Z 未验证。— S29。
+
 ### A32. 对象标识与整个项目的读取耗时（spike S28，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S28](../../spikes/S28-identity-extract/README.md)。只读。
 - 同一项目的两份文件副本中，825 个对象（全部主功能和页）的 `StorableObject.ObjectIdentifier` 全部相同；`DatabaseIdentifier` 按打开的项目分配（28、53）；`ToStringIdentifier()` 为 `数据库号/类型号/对象号/0`。可以用"项目身份 + 类型号 + `ObjectIdentifier`"跨副本定位；编号可能在删除后被重用，执行前要核对名称、页、类型。还原、PXF 导入、从基本项目新建之后是否保留编号，未验证。— S28。

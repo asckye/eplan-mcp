@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Unsigned spike add-in (see S0); spike S28 probes the parts and translation databases, their backup and restore, and writes to a copy under the scratch root. -->
+  <!-- Unsigned spike add-in (see S0); spike S28 reads object identifiers across project copies and times reading a whole project; it writes nothing. -->
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
     <AssemblyName>EplanMcp.Spikes.S28</AssemblyName>
