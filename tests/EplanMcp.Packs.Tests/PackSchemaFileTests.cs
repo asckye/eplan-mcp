@@ -15,10 +15,11 @@ public sealed class PackSchemaFileTests : IDisposable
     [Theory]
     [InlineData("pack-manifest")]
     [InlineData("pack-lock")]
+    [InlineData("project-binding")]
     public void CommittedSchema_IsTheGeneratedOne(string name)
     {
         string file = Path.Combine(Repository.Root, "schemas", name + ".schema.json");
-        string expected = PackSchema.Text(name == "pack-lock" ? PackSchema.Lock() : PackSchema.Manifest());
+        string expected = PackSchema.Text(name switch { "pack-lock" => PackSchema.Lock(), "project-binding" => PackSchema.Binding(), _ => PackSchema.Manifest() });
         string committed = File.Exists(file) ? File.ReadAllText(file, Encoding.UTF8) : string.Empty;
 
         if (committed != expected)

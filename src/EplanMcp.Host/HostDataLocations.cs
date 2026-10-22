@@ -28,8 +28,11 @@ internal sealed class HostDataLocations(string root)
     /// <summary>The import root: the import tools read files below it only, never configurable (SEC-31, M4c design Q4).</summary>
     public string Imports => Path.Combine(Root, "imports");
 
-    /// <summary>The installed engineering packs, one read-only folder per version, and bindings.json (M6).</summary>
+    /// <summary>The installed engineering packs, one read-only folder per version (M6, ADR-0024).</summary>
     public string Packs => Path.Combine(Root, "packs");
+
+    /// <summary>The project bindings: one folder per project with its binding.json (M6 design 3.3).</summary>
+    public string Workspaces => Path.Combine(Root, "workspaces");
 
     public static HostDataLocations FromEnvironment() => new(
         Environment.GetEnvironmentVariable("EPLANMCP_HOME") is { Length: > 0 } home
