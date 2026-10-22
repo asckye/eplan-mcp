@@ -27,6 +27,9 @@ internal sealed class PackLibrary(HostDataLocations locations, HostConfig config
 
     public PackStore Installed { get; } = new(locations.Packs);
 
+    /// <summary>The project bindings and their locks (M6 design 4.1.5).</summary>
+    public WorkspaceStore Workspaces => new(locations.Workspaces, Installed);
+
     /// <summary>What manifests name as their maker.</summary>
     public static string CreatedBy => $"eplanmcp {HostInfo.Version}";
 

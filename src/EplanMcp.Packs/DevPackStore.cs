@@ -26,6 +26,15 @@ public sealed class DevPackStore(string root)
 
     public string FolderOf(string id) => Path.Combine(Root, id);
 
+    /// <summary>The development packs' ids, sorted; folders not named like a pack, links and folders without pack.json are left out.</summary>
+    public IReadOnlyList<string> Ids() => !Directory.Exists(Root) ? [] :
+    [
+        .. new DirectoryInfo(Root).EnumerateDirectories()
+            .Where(d => (d.Attributes & FileAttributes.ReparsePoint) == 0 && PackManifestValidator.IsId(d.Name) && File.Exists(Path.Combine(d.FullName, PackManifest.FileName)))
+            .Select(d => d.Name)
+            .Order(StringComparer.Ordinal),
+    ];
+
     /// <summary>
     /// Adds the scanned resources to pack <paramref name="id"/>, created with <paramref name="name"/> when missing: a
     /// resource already there with the same hash stays, one with another hash is replaced only with

@@ -147,6 +147,29 @@ public static class PackVerifier
         || (resource.Kind == ResourceKind.Project && relative.StartsWith(resource.Path[..^4] + ".edb/", StringComparison.OrdinalIgnoreCase)
             && !PackHasher.IsLockFile(relative));
 
+    /// <summary>
+    /// The manifest of the pack in <paramref name="directory"/>, its pack digest and the problems of the manifest alone,
+    /// without hashing any file: for lists and searches, which must stay fast; <see cref="CheckDirectoryAsync"/> checks
+    /// the files. A manifest that cannot be read gives one problem and no manifest.
+    /// </summary>
+    public static async Task<(PackManifest? Manifest, string? Digest, IReadOnlyList<PackProblem> Problems)> ReadManifestAsync(string directory, CancellationToken cancellationToken)
+    {
+        try
+        {
+            byte[] bytes = await ReadSmallAsync(Path.Combine(directory, PackManifest.FileName), PackManifest.FileName, cancellationToken).ConfigureAwait(false);
+            PackManifest manifest = PackJson.ReadManifest(bytes);
+            return (manifest, PackDigest.Compute(bytes), PackManifestValidator.Validate(manifest));
+        }
+        catch (PackFormatException ex)
+        {
+            return (null, null, [new PackProblem(PackManifest.FileName, ex.Message)]);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            return (null, null, [new PackProblem(PackManifest.FileName, "cannot be read")]);
+        }
+    }
+
     internal static async Task<byte[]> ReadSmallAsync(string path, string name, CancellationToken cancellationToken)
     {
         if (new FileInfo(path).Length > PackJson.MaxFileBytes)

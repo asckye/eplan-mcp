@@ -54,6 +54,27 @@ public sealed class WorkspaceStore(string root, PackStore packs)
         return binding;
     }
 
+    /// <summary>Every project's binding, and how many binding files could not be read (left out).</summary>
+    public async Task<(IReadOnlyList<ProjectBinding> Bindings, int Unreadable)> AllAsync(CancellationToken cancellationToken)
+    {
+        List<ProjectBinding> bindings = [];
+        int unreadable = 0;
+        foreach (string file in Directory.Exists(Root) ? Directory.EnumerateFiles(Root, ProjectBinding.FileName, SearchOption.AllDirectories) : [])
+        {
+            try
+            {
+                byte[] bytes = await PackVerifier.ReadSmallAsync(file, ProjectBinding.FileName, cancellationToken).ConfigureAwait(false);
+                bindings.Add(PackJson.Read<ProjectBinding>(bytes, ProjectBinding.FileName, "bindingVersion", ProjectBinding.CurrentBindingVersion));
+            }
+            catch (Exception ex) when (ex is PackFormatException or IOException or UnauthorizedAccessException)
+            {
+                unreadable++;
+            }
+        }
+
+        return (bindings, unreadable);
+    }
+
     /// <summary>A problem for each lock whose installed version is gone or changed.</summary>
     public async Task<IReadOnlyList<PackProblem>> CheckAsync(string projectKey, CancellationToken cancellationToken)
     {
