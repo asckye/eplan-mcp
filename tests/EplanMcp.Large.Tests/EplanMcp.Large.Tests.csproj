@@ -10,6 +10,8 @@
   <ItemGroup>
     <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
+    <!-- Input files the import tests copy below the imports root (S34's device list exports of the sample project). -->
+    <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
