@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "a530534b + uncommitted changes",
-  "sourceHash": "sha256:e64ee732b78571e5267739205edc4355c14d8078b467a8630dab72a08bcc22a8",
+  "scannedSources": "5db9d588 + uncommitted changes",
+  "sourceHash": "sha256:42a71ada60510cdcdadf3df1970934d6c1ca34a67cba95defba1dc63ba968bba",
   "operations": [
     {
       "name": "approval.ask",
@@ -4437,6 +4437,17 @@
           "part.sync.execute",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "project.create.execute"
         ]
       },
       {
@@ -11502,6 +11513,17 @@
         ]
       },
       {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -11774,6 +11796,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects": [
+      {
+        "adapter": "EplanProjectFactory",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "project.create.execute"
+        ]
+      },
       {
         "adapter": "EplanProjects",
         "member": "Read",

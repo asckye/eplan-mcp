@@ -234,6 +234,7 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 - 同一份项目文件 `Close()` 后再 `OpenProject`，825 个对象的 `ObjectIdentifier` 全部不变，`DatabaseIdentifier` 改变；关闭约 0.15 秒，打开约 0.8 秒。页的编号单调递增：回滚掉的、删除的编号都没有再分配，关闭再打开后接着递增（本次观察）。— S30。
 - 从同一个基本项目新建的两个项目，页的编号相同（都是 1）：`ObjectIdentifier` 只在一个项目内唯一。`IEC_bas003_sample_project.zw9` 新建的项目是 0 页。— S30。
 - 🔴 API 新建的项目：对它再调用 `OpenProject` 抛出 `ProjectOpenException`（S063045）；`ProjectManager` 释放后，用 `CreateProject` 返回的对象 `Close()` 抛出 `ObjectNotCreatedException`（S063080）；调用结束后项目不再打开，之后可以正常打开，经 `OpenProjects` 重新取得的对象能关闭。— S30。
+- 经 Bridge 操作 `CreateProject` 新建的项目，调用结束后仍然打开（与 S30 spike 的观察不同）；用新的 `ProjectManager` 从 `OpenProjects` 重新取得它后 `Close()` 可以关闭（S30 r3）。— 2026-10-22，M6 的 Large 测试 ProjectCreateTests。
 
 ### A33. 占位符对象与值集（spike S29，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S29](../../spikes/S29-placeholders/README.md)。写入只在 scratch 副本上、在 `SafetyPoint` 中回滚。
