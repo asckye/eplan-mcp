@@ -66,11 +66,11 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 188,
-      "byTools": 176,
-      "partial": 38,
-      "automatedTest": 176,
-      "liveVerified": 136,
+      "implemented": 199,
+      "byTools": 187,
+      "partial": 39,
+      "automatedTest": 187,
+      "liveVerified": 147,
       "envBlocked": 122,
       "undocumented": 134
     },
@@ -84,11 +84,11 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 100,
-      "byTools": 90,
-      "partial": 38,
-      "automatedTest": 90,
-      "liveVerified": 64,
+      "implemented": 104,
+      "byTools": 94,
+      "partial": 39,
+      "automatedTest": 94,
+      "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
     },
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 88,
-      "byTools": 86,
+      "implemented": 95,
+      "byTools": 93,
       "partial": 0,
-      "automatedTest": 86,
-      "liveVerified": 72,
+      "automatedTest": 93,
+      "liveVerified": 79,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 208,
+    "used": 209,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,8 +139,8 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 85,
-      "liveVerified": 74
+      "implemented": 86,
+      "liveVerified": 75
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
@@ -157,8 +157,8 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 0,
-      "liveVerified": 0
+      "implemented": 10,
+      "liveVerified": 10
     },
     {
       "scope": "Eplan.EplApi.DataModel.Helpers",
@@ -946,7 +946,7 @@
       "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
-      "small": 2,
+      "small": 3,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -1176,11 +1176,11 @@
         "part.export.plan",
         "part.export.run"
       ],
-      "apiIds": 23,
-      "operationGroups": 8,
+      "apiIds": 33,
+      "operationGroups": 11,
       "dataDictionary": 0,
-      "dependencies": 14,
-      "actions": 0,
+      "dependencies": 19,
+      "actions": 1,
       "spec": "docs/tools/eplan_part_export.md",
       "small": 2,
       "medium": 3,
@@ -1189,11 +1189,13 @@
         "A30"
       ],
       "latestLive": {
-        "date": "2026-10-21",
-        "result": "pass_with_findings",
+        "date": "2026-10-22",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
         "basis": "stated",
-        "source": "docs/tools/eplan_part_export.md",
-        "note": "部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读",
+        "source": "Large 测试 README",
+        "note": "format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变",
         "verifies": true
       }
     },
@@ -1310,6 +1312,68 @@
         "basis": "stated",
         "source": "docs/tools/eplan_part_sync.md；api-notes A30",
         "note": "经批准的 Large 测试：在 SafetyPoint 中同步，存储的部件 293 → 341；一次 Ctrl+Z 能否撤回项目一侧未验证",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_placeholder_apply",
+      "safety": "write",
+      "operations": [
+        "placeholder.apply.execute",
+        "placeholder.apply.plan"
+      ],
+      "apiIds": 60,
+      "operationGroups": 33,
+      "dataDictionary": 0,
+      "dependencies": 27,
+      "actions": 0,
+      "spec": "docs/tools/eplan_placeholder_apply.md",
+      "small": 1,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A14",
+        "A33"
+      ],
+      "latestLive": {
+        "date": "2026-10-22",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "Large 测试 README；api-notes A33",
+        "note": "写副本上先应用 mA 再应用 V 都 committed，执行后的当前值等于值集的值；场外副本 POLICY_DENIED；值集 X 为 INVALID_ARGUMENT。第一次实测时规划读当前值抛 LockingException，已改为只在写事务中读。Ctrl+Z 未手工核对",
+        "verifies": true
+      }
+    },
+    {
+      "name": "eplan_placeholder_list",
+      "safety": "read",
+      "operations": [
+        "placeholder.list"
+      ],
+      "apiIds": 42,
+      "operationGroups": 26,
+      "dataDictionary": 0,
+      "dependencies": 16,
+      "actions": 0,
+      "spec": "docs/tools/eplan_placeholder_list.md",
+      "small": 2,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A11",
+        "A14",
+        "A33"
+      ],
+      "latestLive": {
+        "date": "2026-10-22",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass_with_findings",
+        "basis": "stated",
+        "source": "Large 测试 README",
+        "note": "夹具 2 个占位符（=TM1、=TM2 的 EFS1/1），值集 V、mA，变量 T1、T2；值未与 EPLAN 的值集对话框逐项对照",
         "verifies": true
       }
     },
@@ -1604,11 +1668,11 @@
         "translation.export.plan",
         "translation.export.run"
       ],
-      "apiIds": 15,
-      "operationGroups": 4,
+      "apiIds": 40,
+      "operationGroups": 14,
       "dataDictionary": 0,
-      "dependencies": 11,
-      "actions": 0,
+      "dependencies": 23,
+      "actions": 1,
       "spec": "docs/tools/eplan_translation_export.md",
       "small": 2,
       "medium": 3,
@@ -1625,8 +1689,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_part_export",
         "eplan_part_import",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -1715,8 +1781,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_part_export",
         "eplan_part_import",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -1725,8 +1793,10 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_part_export",
         "eplan_part_import",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -1820,8 +1890,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_part_export",
         "eplan_part_import",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -1844,6 +1916,8 @@
         "eplan_part_list",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_revision_list"
@@ -1880,6 +1954,8 @@
         "eplan_part_list",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_revision_list"
@@ -1906,6 +1982,8 @@
         "eplan_part_list",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_revision_list"
@@ -1984,6 +2062,8 @@
         "eplan_part_list",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_revision_list"
@@ -2355,11 +2435,23 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_project_get",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetPlaceholdersWithFilterScheme",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
       ]
     },
     {
@@ -2714,6 +2806,105 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": true,
+      "tools": [
+        "eplan_placeholder_apply"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants",
       "layer": "operation",
       "status": "live_verified",
@@ -2816,6 +3007,8 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_translate",
         "eplan_report_update",
@@ -3003,6 +3196,8 @@
         "eplan_device_renumber",
         "eplan_device_update",
         "eplan_page_delete",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get"
@@ -3075,6 +3270,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -3124,6 +3321,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -3191,6 +3390,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -3288,6 +3489,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -3354,6 +3557,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -3477,6 +3682,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
@@ -3523,6 +3730,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_revision_list"
@@ -3548,6 +3757,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
@@ -3576,6 +3787,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -3603,6 +3815,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -3630,6 +3843,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -3687,6 +3901,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -3714,6 +3929,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -3741,6 +3957,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber"
@@ -4057,6 +4274,8 @@
         "eplan_page_update",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placeholder_apply",
+        "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -4159,7 +4378,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4192,7 +4412,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4201,7 +4422,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_part_export"
+        "eplan_part_export",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4210,7 +4432,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_part_export"
+        "eplan_part_export",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4232,7 +4455,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4255,7 +4479,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
@@ -4268,7 +4493,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
-        "eplan_part_sync"
+        "eplan_part_sync",
+        "eplan_translation_export"
       ]
     },
     {
