@@ -36,10 +36,14 @@ public static class LanguageTransaction
         }
     }
 
-    /// <summary>True when <paramref name="now"/> holds the same languages in the same order as <paramref name="before"/>.</summary>
+    /// <summary>
+    /// True when <paramref name="now"/> holds the same languages in the same order as <paramref name="before"/>, and the
+    /// same source language.
+    /// </summary>
     public static bool Same(LanguageSettings now, LanguageSettings before) =>
         LanguageCodes.Split(now.Translation).SequenceEqual(LanguageCodes.Split(before.Translation), StringComparer.Ordinal)
-        && LanguageCodes.Split(now.Display).SequenceEqual(LanguageCodes.Split(before.Display), StringComparer.Ordinal);
+        && LanguageCodes.Split(now.Display).SequenceEqual(LanguageCodes.Split(before.Display), StringComparer.Ordinal)
+        && LanguageCodes.SourceOf(now) == LanguageCodes.SourceOf(before);
 
     /// <summary>Returns when the settings are as before, written back or never changed; otherwise throws OUTCOME_UNKNOWN.</summary>
     private static void WriteBack(IProjectLanguages languages, string projectPath, LanguageSettings before, string tool, string restore, Exception failure)
@@ -65,7 +69,7 @@ public static class LanguageTransaction
 
         var error = new BridgeErrorException(
             ErrorReason.OutcomeUnknown,
-            $"{tool} failed, and the project's language settings could not be written back as they were, so they may differ from before. Do not call this tool again. {restore} metadata.translation and metadata.display hold the settings as they were.",
+            $"{tool} failed, and the project's language settings could not be written back as they were, so they may differ from before. Do not call this tool again. {restore} metadata.translation, metadata.display and metadata.source hold the settings as they were.",
             cause);
         error.Error.Execution = ExecutionState.Unknown;
         Name(error.Error, before);
@@ -77,5 +81,6 @@ public static class LanguageTransaction
         error.Metadata ??= [];
         error.Metadata["translation"] = string.Join("\n", LanguageCodes.Split(before.Translation));
         error.Metadata["display"] = string.Join("\n", LanguageCodes.Split(before.Display));
+        error.Metadata["source"] = LanguageCodes.SourceOf(before);
     }
 }

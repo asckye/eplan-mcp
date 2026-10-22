@@ -36,5 +36,8 @@ internal sealed class LanguageSetResult
 
         [Description("The displayed languages in order; ##_## when none are set.")]
         public List<string> Display { get; set; } = [];
+
+        [Description("The source language, the one the texts are written in; ##_## when not set.")]
+        public string? Source { get; set; }
     }
 }

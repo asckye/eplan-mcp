@@ -3050,6 +3050,13 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "source": {
+                "description": "The source language, the one the texts are written in; ##_## when not set.",
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -3069,6 +3076,13 @@
                 "description": "The displayed languages in order; ##_## when none are set.",
                 "$ref": "#/properties/before/properties/display",
                 "items": {}
+              },
+              "source": {
+                "description": "The source language, the one the texts are written in; ##_## when not set.",
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -3110,7 +3124,7 @@
     {
       "name": "eplan_language_set",
       "title": "Set the languages of an EPLAN project",
-      "description": "Sets which languages the pages of an EPLAN project show, in order, or adds translation languages; translates nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a language is eplan_language_remove.",
+      "description": "Sets the languages an EPLAN project's pages show, adds translation languages, or sets the source language its texts are in; translates nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch the engineer approves it. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a language: eplan_language_remove.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3119,7 +3133,7 @@
             "type": "string"
           },
           "display": {
-            "description": "1-10 codes to show, in order; [\"##_##\"] clears",
+            "description": "1-10 codes to show, in order; ##_## alone clears",
             "type": [
               "array",
               "null"
@@ -3146,8 +3160,16 @@
             },
             "default": null
           },
+          "source": {
+            "description": "Source language, e.g. de_DE; ##_## clears",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
           "dry_run": {
-            "description": "Only return the settings before and after",
+            "description": "Only return before and after",
             "type": "boolean",
             "default": false
           }
@@ -3189,6 +3211,13 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "source": {
+                "description": "The source language, the one the texts are written in; ##_## when not set.",
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -3205,6 +3234,13 @@
                 "description": "The displayed languages in order; ##_## when none are set.",
                 "$ref": "#/properties/before/properties/display",
                 "items": {}
+              },
+              "source": {
+                "description": "The source language, the one the texts are written in; ##_## when not set.",
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },

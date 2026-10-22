@@ -87,7 +87,7 @@ public sealed class LanguageTransactionTests
         }));
 
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false), (thrown.Error.Reason, thrown.Error.Execution, thrown.Error.Retryable));
-        Assert.Equal("eplan_language_set failed, and the project's language settings could not be written back as they were, so they may differ from before. Do not call this tool again. Ask the engineer. metadata.translation and metadata.display hold the settings as they were.", thrown.Message);
+        Assert.Equal("eplan_language_set failed, and the project's language settings could not be written back as they were, so they may differ from before. Do not call this tool again. Ask the engineer. metadata.translation, metadata.display and metadata.source hold the settings as they were.", thrown.Message);
         Assert.Equal(("de_DE\nen_US\nzh_CN", "##_##"), (thrown.Error.Metadata!["translation"], thrown.Error.Metadata["display"]));
         Assert.Same(_languages.WriteFailure, thrown.InnerException);
     }

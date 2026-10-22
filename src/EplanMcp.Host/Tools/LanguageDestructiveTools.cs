@@ -93,7 +93,7 @@ internal sealed class LanguageDestructiveTools
         LanguageRemoveData? data = outcome.Data;
         List<string> removed = data is null ? [.. outcome.Plan.Changes.Select(c => ResultShaper.CleanText(c.Name))] : [.. data.Removed.Select(code => ResultShaper.CleanText(code))];
         int texts = data?.TextsAffected ?? (int.TryParse(details.GetValueOrDefault("textsAffected"), NumberStyles.None, CultureInfo.InvariantCulture, out int count) ? count : 0);
-        LanguageSetResult.LanguagesEntry before = data is null ? LanguageWriteTools.Entry(details, "translation", "display") : LanguageWriteTools.Entry(data.Before);
+        LanguageSetResult.LanguagesEntry before = data is null ? LanguageWriteTools.Entry(details, "translation", "display", "source") : LanguageWriteTools.Entry(data.Before);
         LanguageSetResult.LanguagesEntry? after = data is null ? null : LanguageWriteTools.Entry(data.After);
         var hints = new List<string>();
         if (after is not null && !after.Display.SequenceEqual(before.Display, StringComparer.Ordinal))

@@ -8,7 +8,7 @@ namespace EplanMcp.Large.Tests;
 /// section 7). S23 found the sample project with 20 translation languages and no displayed languages (api-notes A28);
 /// the copy keeps what earlier runs did, so the tests start from what a dry run reads. What the spec leaves to these
 /// tests goes to the test output: what AddProjectLanguage does, and whether writing the settings with SetStringSetting
-/// restores the displayed languages, "##_##" included.
+/// restores the displayed languages, "##_##" included. The source language is set and restored the way S23 r2 did.
 /// </summary>
 [Trait("Size", "Large")]
 public sealed class LanguageSetTests(LiveEplan eplan)
@@ -72,6 +72,36 @@ public sealed class LanguageSetTests(LiveEplan eplan)
         // Not verified by S23 (tool spec 5): where EPLAN puts the new language, and whether it changes the displayed ones.
         TestContext.Current.TestOutputHelper?.WriteLine(
             $"added {language}: translation {string.Join(",", Codes(added.GetProperty("after"), "translation"))}; display {string.Join(",", Codes(before, "display"))} -> {string.Join(",", Codes(added.GetProperty("after"), "display"))}; hint: {added.GetProperty("hint").GetString()}");
+    }
+
+    [Fact]
+    public async Task Source_German_IsReadBack_ThenTheBeforeValueRestoresIt()
+    {
+        string project = await eplan.WriteProjectAsync();
+        JsonElement before = await Settings(project);
+        string source = before.GetProperty("source").GetString()!;
+        Assert.Contains("de_DE", Codes(before, "translation"));
+        if (source == "de_DE")
+        {
+            // An earlier run stopped halfway: clear it first, so the change below is one.
+            await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "##_##" });
+            source = "##_##";
+        }
+
+        var clock = Stopwatch.StartNew();
+        JsonElement set = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "de_DE" });
+        double seconds = clock.Elapsed.TotalSeconds;
+        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "de_DE" });
+        JsonElement restored = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = source });
+        JsonElement after = await Settings(project);
+
+        // S23 r2 set de_DE and wrote ##_## back with SetStringSetting (api-notes A28); the other settings stay.
+        Assert.Equal(("committed", "de_DE"), (set.GetProperty("execution").GetString(), set.GetProperty("after").GetProperty("source").GetString()));
+        Assert.Equal(Codes(before, "translation"), Codes(set.GetProperty("after"), "translation"));
+        Assert.Equal(Codes(before, "display"), Codes(set.GetProperty("after"), "display"));
+        Assert.Equal("not_started", again.GetProperty("execution").GetString());
+        Assert.Equal(("committed", source), (restored.GetProperty("execution").GetString(), after.GetProperty("source").GetString()));
+        TestContext.Current.TestOutputHelper?.WriteLine($"source {source} -> de_DE in {seconds:0.00} s, then back to {after.GetProperty("source").GetString()}");
     }
 
     [Fact]

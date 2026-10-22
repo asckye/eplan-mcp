@@ -16,6 +16,7 @@ public sealed class LanguageRemovePlanOperation(IProjectCatalog catalog, IProjec
     /// <summary>The <see cref="WritePlan.Details"/> keys of the languages now, one per line.</summary>
     public const string Translation = "translation";
     public const string Display = "display";
+    public const string Source = "source";
 
     public override string Name => OperationNames.LanguageRemovePlan;
 
@@ -42,6 +43,7 @@ public sealed class LanguageRemovePlanOperation(IProjectCatalog catalog, IProjec
                 [TextsAffected] = LanguageCodes.Number(request.Affected.Count),
                 [Translation] = string.Join("\n", LanguageCodes.Split(request.Before.Translation)),
                 [Display] = string.Join("\n", LanguageCodes.Split(request.Before.Display)),
+                [Source] = LanguageCodes.SourceOf(request.Before),
             },
         };
     }

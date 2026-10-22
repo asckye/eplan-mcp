@@ -53,7 +53,7 @@ public sealed class LanguageRemoveOperationTests : IDisposable
             [("delete", "language", "sv_SE", "2 translations"), ("delete", "language", "fi_FI", "2 translations")],
             plan.Changes.Select(c => (c.Action, c.Kind, c.Name, c.OldValue)));
         Assert.Equal(
-            new Dictionary<string, string> { ["textsAffected"] = "3", ["translation"] = "de_DE\nen_US\nfi_FI\nsv_SE\nzh_CN", ["display"] = "##_##" },
+            new Dictionary<string, string> { ["textsAffected"] = "3", ["translation"] = "de_DE\nen_US\nfi_FI\nsv_SE\nzh_CN", ["display"] = "##_##", ["source"] = "##_##" },
             plan.Details);
         Assert.Empty(_remover.Removals);
     }

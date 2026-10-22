@@ -10,7 +10,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>
 /// Reads and changes a project's languages the way spike S23 did (api-notes A28): the settings with
 /// <c>ProjectSettings.GetStringSetting(node, 0)</c>, the changes with HEServices' <c>Translate</c>,
-/// <c>AddProjectLanguage(project, code)</c> and <c>SetDisplayedLanguages(project, "en_US,zh_CN")</c>. Main thread,
+/// <c>AddProjectLanguage(project, code)</c> and <c>SetDisplayedLanguages(project, "en_US,zh_CN")</c>, and the source
+/// language with <c>ProjectSettings.SetStringSetting</c> (S23 r2). Main thread,
 /// inside the dispatcher's LockingStep; the changes inside the write's TransactionScope, whose SafetyPoint does not take
 /// the settings back (A28), so <see cref="Write"/> also runs after its rollback. Only the objects this class creates are
 /// disposed.
@@ -70,10 +71,27 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
     }
 
     /// <summary>
-    /// <c>SetStringSetting(node, value, 0)</c> on both nodes, the values as <see cref="Read"/> returns them. Not
-    /// verified by a spike: the Large tests check it by reading back (docs/tools/eplan_language_set.md, section 5). A
-    /// settings call shows no dialog, as SchemeSetting in EplanExporter, so no QuietModeStep of its own: it may run
-    /// inside the write's, or after its rollback.
+    /// <c>SetStringSetting(SOURCE_LANGUAGE, code, 0)</c>, as spike S23 r2 set <c>de_DE</c> and wrote <c>##_##</c> back,
+    /// both read back as written (A28). Like <see cref="Write"/>, no QuietModeStep of its own.
+    /// </summary>
+    public void SetSource(string projectPath, string language)
+    {
+        MainThread.Assert();
+        Project project = EplanProjects.ByPath(projectPath);
+        Run("EPLAN did not set the source language, so nothing was changed.", () =>
+        {
+            using var stored = new ProjectSettings(project);
+            stored.SetStringSetting(SourceNode, language, 0);
+            return true;
+        });
+    }
+
+    /// <summary>
+    /// <c>SetStringSetting(node, value, 0)</c> on both language lists, the values as <see cref="Read"/> returns them,
+    /// and on the source language only when it differs from the stored one, so that a write-back of the lists leaves
+    /// it alone. Writing the lists is not verified by a spike: the Large tests check it by reading back
+    /// (docs/tools/eplan_language_set.md, section 5). A settings call shows no dialog, as SchemeSetting in
+    /// EplanExporter, so no QuietModeStep of its own: it may run inside the write's, or after its rollback.
     /// </summary>
     public void Write(string projectPath, LanguageSettings settings)
     {
@@ -84,6 +102,11 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
             using var stored = new ProjectSettings(project);
             stored.SetStringSetting(TranslationNode, settings.Translation, 0);
             stored.SetStringSetting(DisplayNode, settings.Display, 0);
+            if (!string.Equals(stored.GetStringSetting(SourceNode, 0) ?? string.Empty, settings.Source, StringComparison.Ordinal))
+            {
+                stored.SetStringSetting(SourceNode, settings.Source, 0);
+            }
+
             return true;
         });
     }

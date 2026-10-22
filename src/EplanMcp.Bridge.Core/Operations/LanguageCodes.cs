@@ -33,7 +33,14 @@ public static class LanguageCodes
     public static string ForDisplay(IEnumerable<string> languages) => string.Join(",", languages);
 
     /// <summary>The settings as the tool results show them.</summary>
-    public static ProjectLanguages Lists(LanguageSettings settings) => new() { Translation = Split(settings.Translation), Display = Split(settings.Display) };
+    public static ProjectLanguages Lists(LanguageSettings settings) =>
+        new() { Translation = Split(settings.Translation), Display = Split(settings.Display), Source = SourceOf(settings) };
+
+    /// <summary>The source language as one code, <see cref="Unset"/> when the setting holds none.</summary>
+    public static string SourceOf(LanguageSettings settings) => Split(settings.Source).FirstOrDefault() ?? Unset;
+
+    /// <summary>True for a code of the form <c>xx_YY</c>.</summary>
+    public static bool IsCode(string? code) => code is not null && _code.IsMatch(code);
 
     /// <summary>
     /// Every problem of the argument <paramref name="name"/> at once, by its index: 1 to <see cref="MaxLanguages"/>
