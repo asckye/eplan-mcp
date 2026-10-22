@@ -47,6 +47,7 @@
 | `plc` | PLC 卡、地址 | `PLC` 相关功能 |
 | `part` | 部件（物料）；也指系统部件库本身（`eplan_part_export`） | 部件库 `MDPart`、`MDPartsDatabase` |
 | `macro` | 宏 | 窗口宏、页面宏 |
+| `placeholder` | 占位符对象：值集、变量和当前值（宏插入后随之进入项目） | `Graphics.PlaceHolder` |
 | `symbol` | 符号 | `SymbolLibrary`、`SymbolVariant` |
 | `property` | 属性 | `PropertyValue` |
 | `report` | 报表 | 报表页、报表模板 |
@@ -62,7 +63,7 @@
 
 ### 3.3 动作
 - 标准动作：`list`（分页列出）、`get`（按名称取单个）、`search`（按条件查找）、`create`、`update`、`delete`。
-- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。
+- 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。API 能力覆盖第一期加入 `apply`（应用一组预先定义的值，如 `eplan_placeholder_apply` 应用值集）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
 

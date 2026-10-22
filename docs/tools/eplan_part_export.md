@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批；已实现，待实机验证） |
+| 状态 | Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，待实现 |
 
 ## 1. 这个工具解决什么任务
 "把部件库里西门子的继电器导出来发给同事""备份一下部件库的数据"。代理把 EPLAN 配置的**系统部件库**中的部件导出为文件。
@@ -19,10 +19,11 @@
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `format` | enum `xml` \| `edz` | 否 | `xml` | `xml`：只有部件数据，快、文件小；`edz`：EPLAN Data Portal 的格式，带宏和图片，慢、文件大（示例库全部部件 44 秒、128 MB） |
+| `format` | enum `xml` \| `edz` \| `backup` | 否 | `xml` | `xml`：只有部件数据，快、文件小；`edz`：EPLAN Data Portal 的格式，带宏和图片，慢、文件大（示例库全部部件 44 秒、128 MB）；`backup`：EPLAN 自己的主数据备份归档（`.zw6`），整个库，可以在 EPLAN 中恢复（示例库 0.14 秒、991 KB），不能与 `parts` 同用 |
 | `parts` | array of string，1–500 项 | 否 | 全部部件 | 要导出的部件号，用 `eplan_part_search` 查到的 `partNr` |
-| `file_name` | string，1–100 个字符 | 否 | `parts` | 只是文件名，规则同 `eplan_export_pdf` 的 `file_name`；扩展名 `.xml` 或 `.edz` 由工具补上 |
+| `file_name` | string，1–100 个字符 | 否 | `parts` | 只是文件名，规则同 `eplan_export_pdf` 的 `file_name`；扩展名 `.xml`、`.edz` 或 `.zw6` 由工具补上。`backup` 时只能用 ASCII 字母、数字、`-` 和 `_`，最多 64 个字符 |
 
+- `backup` 的文件名更严：它作为 EPLAN `backup` action 的 `ARCHIVENAME` 传入，S24 只用过这样的名称（与 ADR-0019 的备份相同），其他字符的效果没有验证。
 - 部件号按部件库中的写法精确匹配（去掉首尾空格，重复的只导出一次），一个部件号的每个变体都导出。任何一个找不到就整次不导出，返回 `PART_NOT_FOUND`，列出找不到的部件号；这在规划阶段就核对，不新建目录。
 
 ## 3. 输出
@@ -32,6 +33,11 @@
 - `variantCount`：导出的部件变体数，每个变体算一个，即 `MDPartsDatabase.Parts` 的条数，与 `eplan_part_search` 的条目相同。2026-10-21 的 Large 测试：示例库的 `count` 为 454，`Parts` 为 464 条。
 
 一行摘要：`Exported 454 parts from the parts database to a 5 MB XML file in a new folder; see 'directory'.`
+
+`backup` 时：
+- `files` 中只有一个 `.zw6` 文件（7z 归档，S24），它是整个部件库的备份，不是部件清单；
+- `partCount`、`variantCount` 是库中的部件数（与导出全部部件时规划阶段的计数相同），不是从归档读的，`hint` 说明这一点；
+- 一行摘要：`Backed up the parts database to a 991 KB EPLAN archive (.zw6) in a new folder; see 'directory'.`
 
 工具描述写明：
 - 导出的是所有项目共用的部件库，不是项目；
@@ -44,7 +50,8 @@
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
 | `PART_NOT_FOUND` | `parts` 中有部件号在部件库中找不到 | 列出找不到的部件号（最多 20 个，`metadata.missingCount` 给出总数），提示用 `eplan_part_search` 查准确的部件号 |
-| `EPLAN_OPERATION_FAILED` | EPLAN 抛出异常，或者没有生成文件 | 原文附在 `message` 中；删除本次目录 |
+| `EPLAN_OPERATION_FAILED` | EPLAN 抛出异常，或者没有生成文件；`backup` 时 action 返回 false，或目录中不是恰好一个非空的 7z `.zw6` 文件 | 原文附在 `message` 中；删除本次目录 |
+| `INVALID_ARGUMENT` | `backup` 与 `parts` 同用；`backup` 的 `file_name` 不是 ASCII 字母、数字、`-`、`_`；`backup` 而配置的库在 SQL Server 上（ADR-0019 的备份只支持文件型库） | `metadata.violations` 列出问题；SQL Server 时提示改用 `xml`，不新建目录 |
 
 ## 5. 实现要点
 - **流程和导出目录**：同 `eplan_export_pdf` 第 5 节，只是没有项目：目录为 `<数据根目录>\exports\parts-database\<UTC 时间>-<随机后缀>\`，由 Host 定名；规划阶段打开库核对部件号，找不到时不建目录。导出后目录中必须恰好有一个 `.xml` 或 `.edz` 文件（空文件夹不算），否则按失败处理、删除目录；EDZ 导出是否另外留下文件没有验证，由发布前的 EDZ Large 测试确认。
@@ -58,19 +65,26 @@
   - EDZ 时缺少宏文件的部件在系统消息中记一条警告（示例库有几十条），照样导出、返回；
   - 导出不改库的数据文件。
 - **已验证**（2026-10-21 Large 测试，在配置的库上导出 XML）：部件数据文件不变；变的只有 `.lck` 和 `User.eod`、`User.eox`，后两个是 EPLAN 按用户记录的会话信息，关闭一次 EPLAN 就会改写（api-notes A30），不是部件数据。文件根元素的 `count` 为 454，`Parts` 为 464 条：`count` 按部件号计，`Parts` 按变体计，所以 `partCount` 从文件读回（第 3 节）。
-- **SQL Server 上的库**：没有验证。只读导出照样尝试，失败时返回 `EPLAN_OPERATION_FAILED`。
+- **SQL Server 上的库**：没有验证。只读导出照样尝试，失败时返回 `EPLAN_OPERATION_FAILED`；`backup` 不尝试（见上）。
+- **`backup`**：
+  - 规划同"全部部件"（打开库计数，不导出）；执行时由 `IMasterDataBackup.BackupParts(库, 目录, 文件名)` 调用 EPLAN 的 `backup` action，与 ADR-0019 写入前的备份是同一个适配器：`TYPE=MASTERDATA`、`MDTYPE=ARTICLES`、`SOURCEPATH`/`FILENAME`（由配置的库路径拆出，路径变量由 EPLAN 展开）、`DESTINATIONPATH`（本次导出目录）、`ARCHIVENAME`（文件名，不带扩展名），在 `QuietModeStep(ShowNoDialogs)` 中；
+  - 参数由**生成的 action 参数类** `BackupMasterDataParameters` 写入：`catalog/wrappers.yaml` 选中 action 目录中的 `A:backup/MASTERDATA`，生成器按目录中的参数名和必填标记写出它；`TYPE` 和 action 名由适配器用生成的常量直接写，覆盖扫描因此能认出这一行；
+  - 执行后目录中必须恰好有一个文件：扩展名 `.zw6`、非空、以 7z 的文件头开始（检查同 `masterdata.backup`），否则 `EPLAN_OPERATION_FAILED`，删除目录；
+  - **已验证**（S24，api-notes A30；2026-10-21 Large 测试）：action 返回 true，0.14 秒，得到 7z 格式的 `.zw6`（991 KB，不含 `.lck` 和 `EMPTY_SQL_Backups\`）；备份前后两个库的 SHA-256 不变；在 `QuietModeStep(ShowNoDialogs)` 中照常生成归档；
+  - **待实机验证**：备份写进导出目录（`exports\parts-database\…`，以前只写过 `backups\` 下的目录）；目录中不留其他文件。
 - **时限与进度**：300 秒，每 5 秒一次心跳（`Exporting parts (30 s)`）。
 
 ## 6. 写操作专项
 不适用（Read 级）：只读部件库，只写本次新建的导出目录。
 
 ## 7. 测试
-- Small：参数校验（`parts` 的项数、空串）、文件名规则、摘要。
-- Medium：假 Bridge 上部件号找不到、EPLAN 报错、取消时目录被删除。
+- Small：参数校验（`parts` 的项数、空串；`backup` 与 `parts` 同用、`backup` 的文件名）、文件名规则、摘要。
+- Medium：假 Bridge 上部件号找不到、EPLAN 报错、取消时目录被删除；`backup` 时目录中多一个文件、不是 7z、action 返回 false 都按失败处理。
 - Large（配置的部件库，只读）：
   - XML 全部部件：一个 `.xml` 文件，`partCount` 等于文件根元素 `partsmanagement` 的 `count`（S24 r13 读过这个结构；`eplan_part_search` 的查询至少两个字符，给不出全部部件的总数），`variantCount` 不小于它（示例库 454、464）；两个数，以及 `part` 元素数和其中不同部件号的个数写入测试输出；
   - 指定 `SIE.3RH2122-1HB40`：`partCount` 和 `variantCount` 都为 1；
   - 指定一个不存在的部件号：`PART_NOT_FOUND`，没有留下目录；
   - 导出前后对部件库的数据文件（`.adb` 目录中除 `.lck`、`User.eod`、`User.eox` 外的文件和 `.alk`）计算 SHA-256，不能有变化；
-  - EDZ 不放进常规的 Large 测试（44 秒），只在发布前跑一次：设置环境变量 `EPLANMCP_LARGE_EDZ=1` 时才运行，否则跳过。
+  - EDZ 不放进常规的 Large 测试（44 秒），只在发布前跑一次：设置环境变量 `EPLANMCP_LARGE_EDZ=1` 时才运行，否则跳过；
+  - `backup`（`PartExportTests` 中的一项）：`file_name: "LargePartsBackup"` 得到一个 `LargePartsBackup.zw6`，在 `exports\parts-database\` 下新建的目录中，目录里没有别的文件；文件以 `37 7A BC AF 27 1C` 开头，大小在 100 KB–500 MB 之间（S24：991 KB），大小和耗时写入测试输出；`variantCount` 与 XML 全部部件那一项的 `variantCount` 相同（同一个库，2026-10-21 为 464），`partCount` 写入测试输出；部件库的数据文件 SHA-256 不变（同上）；`parts` 与 `backup` 同用、`file_name: "Large parts"` 都返回 `INVALID_ARGUMENT`，不新建目录。
 - Agent 评测："把部件库里 3RH21 开头的部件导出成 XML，告诉我文件在哪里"（先 `eplan_part_search`，再本工具）。
