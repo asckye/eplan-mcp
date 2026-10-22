@@ -486,10 +486,10 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
   - 部件映射：参数值到部件，可以按公司层不同；
   - 适用条件：对生效配置的约束（4.11 的谓词）；
   - 验收：插入后预期的对象和关系，以及验收样例。
-- **插入**（计划操作 `module.insert`）：在一个 `SafetyPoint` 中插入宏（沿用 `macro.insert` 的路径），找到插入的占位符，套用预定义的值集（`ApplyRecord`），或者新建一条记录写入参数值后套用（`AddRecord` + `SetValue` + `ApplyRecord`）。S29 已验证这些都能用 API 完成，并与插入一起被 `SafetyPoint` 回滚；提交后一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效，还没有验证（S32）。做不到时降级为"插入宏后用 `device.update` 改属性"，在计划中分成两步。
-- **从完成的项目中提取（例如 3 个回路扩到 8 个）**：在参考项目的关系图上找结构相同、属性不同的重复回路，生成候选模块，把不同的属性作为参数；工程师确认后：参考项目本来就用了带占位符的宏的，直接复用；否则在参考项目的 scratch 副本上用 `WindowMacro.Create(…)` 从这些放置生成宏，新建占位符（`PlaceHolder.Create`、`AddReference`）并为每个实例写一条值集，写进开发包的 `native/`（只在项目之外写文件，同导出级）。这一条路径整体未验证（S32）。
+- **插入**（计划操作 `module.insert`）：在一个 `SafetyPoint` 中插入宏（沿用 `macro.insert` 的路径），找到插入的占位符，套用预定义的值集（`ApplyRecord`），或者新建一条记录写入参数值后套用（`AddRecord` + `SetValue` + `ApplyRecord`）。S29 已验证这些都能用 API 完成，并与插入一起被 `SafetyPoint` 回滚；提交后一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效，还没有验证（S32 没有覆盖）。做不到时降级为"插入宏后用 `device.update` 改属性"，在计划中分成两步。
+- **从完成的项目中提取（例如 3 个回路扩到 8 个）**：在参考项目的关系图上找结构相同、属性不同的重复回路，生成候选模块，把不同的属性作为参数；工程师确认后：参考项目本来就用了带占位符的宏的，直接复用；否则在参考项目的 scratch 副本上用 `WindowMacro.Create(…)` 从这些放置生成宏，新建占位符（`PlaceHolder.Create`、`AddReference`）并为每个实例写一条值集，写进开发包的 `native/`（只在项目之外写文件，同导出级）。S32 已验证这条路径：`WindowMacro.Create`/`PageMacro.Create` 写出的宏保留占位符和值集，API 新建的占位符用 `SetPropertyEntry(对象, 属性, "<变量名>")` 绑定变量后 `ApplyRecord` 生效；写出的宏含来源项目的本机路径，导入包时作为缺口提示（A37）。原注（S32）。
 - **宏的位置**：`macro.insert` 现在只接受 `$(MD_MACROS)` 下的宏（M3b 设计 Q3、SEC-19）。M6 增加第二个根目录：已安装的包目录（不可变，每次使用前按清单哈希核对），由 ADR-0024 决定。
-- **Cogineer**：2026.0.3 的 `LicenseOptions` 有 `CogineerDesigner`、`CogineerDesignerAdvanced`、`CogineerBuilder`、`CogineerBuilderAdvanced`、`CogineerSilentMode`；开发机是否有这些授权未知（A2 没有记录），S32 用 `HasOption` 检查。`Eplan.EplApi.*` 的 XML 文档中没有 Cogineer 的类型，集成只能经 action（eBUILD 帮助提到 `ExecuteCogineerProjectBuilderAction`，未核实）。
+- **Cogineer**：2026.0.3 的 `LicenseOptions` 有 `CogineerDesigner`、`CogineerDesignerAdvanced`、`CogineerBuilder`、`CogineerBuilderAdvanced`、`CogineerSilentMode`；S32 实测：开发机（演示授权）这 5 个选项都可用，但没有安装 Cogineer（安装目录中没有它的程序集），所以集成 spike 受环境所限；能力检测用 `License.GetLicenseModules` 实时读取。`Eplan.EplApi.*` 的 XML 文档中没有 Cogineer 的类型，集成只能经 action（eBUILD 帮助提到 `ExecuteCogineerProjectBuilderAction`，未核实）。
   - **有授权时**：另做 spike 评估集成：包引用 Cogineer 的配置，由它生成；模块元数据和规则照用。集成方式写成 ADR。
   - **没有授权时**，本项目的模块是轻量的等价物，边界是：没有配置器界面，没有典型回路的层级和规则编辑器；生成就是计划中的宏插入加值集；布局只有宏自身的布置加计划给出的坐标，不自动排版。两者用同一种 EPLAN 数据（宏、占位符、值集），以后换用 Cogineer 时资料不作废。
 
@@ -604,7 +604,7 @@ flowchart LR
 | **S29** | 占位符与值集（**已完成** r1、r2，A33，`spikes/S29-placeholders`） | 已回答：不插入就能读出 695 个宏中的占位符、值集、变量和值（21 秒）；`GetPlaceholdersWithFilterScheme(null)` 列出项目中的占位符；`ApplyRecord`、`AddRecord` + `SetValue` 可用，并与插入一起被 `SafetyPoint` 回滚；值是多语言文本 |
 | **S30**（完成，2026-10-21） | 对象标识与项目在生命周期中的变化 | 结果见 [spike S30](../../spikes/S30-identity-lifecycle/README.md)；未做的："另存为"和复制项目、其他对象类型的编号分配。原定范围：同一份文件关闭再打开后 `ObjectIdentifier` 是否不变；删除后再新建时编号是否被重用、多快被重用；从基本项目新建、在 EPLAN 中"另存为"或复制之后是否保留原编号；复制、还原、新建时 `PROJ_GUID` 是否变化；`CreateProject` 的独占打开对后续读写、对工程师在界面中打开它有什么限制。旧版本升级（还原或打开旧版本项目是否自动、不可逆地升级，`OpenProject(…, 升级: false)` 和 `GetProjectDataCompatibility` 返回什么，`10043` 是否改写）**受环境所限**：本机只有 2026.0.3，等有旧版本的非客户样例再做 |
 | **S31**（完成，2026-10-21） | 快照提取的完整性与确定性 | 结果见 [spike S31](../../spikes/S31-snapshot/README.md)。原定范围：读取全部登记属性、连接点、端子、电缆芯线、PLC 地址、占位符的耗时和内存；项目不变时两次提取的内容哈希是否相同；位置的精度与核对容差；EPLAN 有没有可靠的项目修改标记；按页分块时单块的耗时；提取是否改写 `User.eod`（A17） |
-| **S32** | 模块写回为宏、新建占位符、Cogineer 授权 | `WindowMacro.Create`、`PageMacro.Create` 把放置写成宏文件（写到 `$(MD_MACROS)` 之外），以及插入这样的宏；`PlaceHolder.Create`、`AddReference` 新建占位符，把值集写回宏文件；提交应用结果后的持久性和一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效（S29 没有覆盖）；`PlaceHolderText` 的用途；用 `License.HasOption` 检查 5 个 Cogineer 选项 |
+| **S32**（完成，2026-10-21） | 模块写回为宏、新建占位符、Cogineer 授权 | 结果见 [spike S32](../../spikes/S32-macro-create/README.md)；未做：Ctrl+Z、`ApplyRecord(名称, false)`、布尔值集、`PlaceHolderText`。原定范围： `WindowMacro.Create`、`PageMacro.Create` 把放置写成宏文件（写到 `$(MD_MACROS)` 之外），以及插入这样的宏；`PlaceHolder.Create`、`AddReference` 新建占位符，把值集写回宏文件；提交应用结果后的持久性和一次 Ctrl+Z 能否撤销、`ApplyRecord(名称, false)` 的区别、改布尔属性的值集是否逐项生效（S29 没有覆盖）；`PlaceHolderText` 的用途；用 `License.HasOption` 检查 5 个 Cogineer 选项 |
 | **S33** | EPLAN 事件（ADR-0026 的前提） | 哪些事件名可用、参数是什么（例如 `Page.ConnectionDirty` 没有参数）、在哪个线程上触发、批量操作时的频率、`SafetyPoint` 回滚时是否也触发、处理函数的开销 |
 
 ## 5. 安全与数据完整性
