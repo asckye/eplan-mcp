@@ -210,6 +210,7 @@
 - 🔴 `Synchronize.Parts(project, StoreMode)` 要在 `LockingStep` 中（否则 `NoLockingStepException`），并且**同时写项目**：被引用但没有存进项目的部件会存入项目（夹具 293 → 341），系统消息 `S328014`"写存取前没有加锁该对象"。— S24 r15（经批准，已恢复）。
 - `MDPartsDatabase.ExportParts(文件, DataFormat.XML)` 464 个部件 2 秒、5 MB；`EDZ` 44 秒、128 MB。`Translate.ExportDatabaseTexts(文件, "XTrLanguageDbXmlConverterImpl" | "XTrLanguageDbXml2TabConverterImpl")` 不到 1 秒。导出不改库。转换器名：部件库 `XPamImportXml`、`XPamExportXml`。— S24 r11。
 - `MDPartsDatabase` 的事务：`AddPart` 提交前 `ExistsPart` 为 false，`Rollback` 撤回、`Commit` 落盘；🔴 `RemovePart` 立即生效，`Rollback` 不能恢复。部件已存在时 `AddPart` 抛出 `MDInvalidArgumentException`（`S030025`）。事务不释放时，下一次 `CreateTransaction` 抛出 `SEHException`，要用 `using`。— S24。
+- 部件 XML 中的变体：`P_ARTICLE_VARIANT` 不在 `part` 上，而在 `part` 下的 `variant` 子元素上，每个变体一个。S24 r11 导出的示例库全部部件：430 个 `part`、464 个 `variant`，`Parts` 也是 464 个（按变体计数）。根元素下另有 `propertydefinition` 等元素，不是部件；部分部件带 `P_ARTICLE_UNIQUEID`。— 2026-10-21，查看 S24 r11 的导出文件。
 
 ### A29. 导入（spike S22，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S22](../../spikes/S22-imports/README.md)。示例项目的 scratch 副本。
