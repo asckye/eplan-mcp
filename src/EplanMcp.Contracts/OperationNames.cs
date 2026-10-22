@@ -437,6 +437,13 @@ public static class OperationNames
     public const string MasterDataBackup = "masterdata.backup";
 
     /// <summary>
+    /// The plan of eplan_part_import: reads the parts XML file the Host resolved below its import root and classifies its
+    /// part numbers against the configured parts database, never writes. Arguments: <see cref="PartImportArgs"/>; data:
+    /// <see cref="WritePlan"/> with the master data and details, and no project.
+    /// </summary>
+    public const string PartImportPlan = "part.import.plan";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
