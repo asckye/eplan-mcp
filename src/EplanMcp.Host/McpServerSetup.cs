@@ -99,6 +99,7 @@ internal static class McpServerSetup
             .WithTools<ImageExportTools>(HostJson.Options)
             .WithTools<ProjectExportTools>(HostJson.Options)
             .WithTools<ImportTools>(HostJson.Options)
+            .WithTools<ListImportTools>(HostJson.Options)
             .WithTools<MasterDataExportTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)

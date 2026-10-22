@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-22",
-  "scannedSources": "9e58625d + uncommitted changes",
-  "sourceHash": "sha256:a0ae6c161370d9199316f8438205939fbbb1cc4887035b262629a759f3307a47",
+  "scannedSources": "5f701239",
+  "sourceHash": "sha256:f84eb68f335d803bec3d4fa9746280835c2eabd98ad9d4d8106a23ec1177e9c4",
   "operations": [
     {
       "name": "approval.ask",
@@ -1833,6 +1833,7 @@
           "call"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -1846,6 +1847,7 @@
           "call"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -2799,6 +2801,7 @@
           "new"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -7235,6 +7238,7 @@
           "get"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -7248,6 +7252,7 @@
           "get"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }
@@ -14034,6 +14039,7 @@
           "type"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       },
@@ -14726,6 +14732,7 @@
           "type"
         ],
         "operations": [
+          "import.list.execute",
           "message.list"
         ]
       }

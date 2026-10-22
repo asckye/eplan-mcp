@@ -27,6 +27,12 @@ public sealed class ImportListData
     /// <summary>The counts read back before committing.</summary>
     public ListImportCounts After { get; set; } = new();
 
+    /// <summary>This call's system messages, at most 20; text is untrusted project data.</summary>
+    public List<SystemMessage> EplanMessages { get; set; } = [];
+
+    /// <summary>Total messages before limiting the list.</summary>
+    public int EplanMessageCount { get; set; }
+
     /// <summary>Read-back limits, including unverified undo, and any problem after commit.</summary>
     public string? Warning { get; set; }
 }

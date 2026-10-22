@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
@@ -105,9 +106,9 @@ public sealed class DestructiveHost : IAsyncLifetime
     }
 
     /// <summary>The structured result of a successful call; a failed call fails the test with the error.</summary>
-    public async Task<JsonElement> CallAsync(string tool, Dictionary<string, object?> args)
+    public async Task<JsonElement> CallAsync(string tool, Dictionary<string, object?> args, IProgress<ProgressNotificationValue>? progress = null)
     {
-        CallToolResult result = await _client!.CallToolAsync(tool, args, cancellationToken: TestContext.Current.CancellationToken);
+        CallToolResult result = await _client!.CallToolAsync(tool, args, progress, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result.IsError != true, $"{tool} failed: {WriteHost.Text(result)}");
         return result.StructuredContent!.Value;
     }
