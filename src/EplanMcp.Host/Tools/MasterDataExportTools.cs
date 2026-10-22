@@ -89,7 +89,7 @@ internal sealed class MasterDataExportTools
             exports,
             job,
             progress,
-            outcome => new PartExportResult { Database = ResultShaper.CleanText(outcome.Data.Database ?? string.Empty), PartCount = outcome.Data.PartCount ?? 0 },
+            outcome => new PartExportResult { Database = ResultShaper.CleanText(outcome.Data.Database ?? string.Empty), PartCount = outcome.Data.PartCount ?? 0, VariantCount = outcome.Data.VariantCount ?? 0 },
             result => $"Exported {ToolResults.Count(result.PartCount, "part")} from the parts database to a {ByteSize.Format(result.TotalBytes)} {extension[1..].ToUpperInvariant()} file in a new folder; see 'directory'.",
             cancellationToken).ConfigureAwait(false);
     }

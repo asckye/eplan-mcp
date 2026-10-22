@@ -56,7 +56,7 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
     }
 
     [Fact]
-    public async Task Parts_WriteOneEdzFileIntoTheToolsFolder_WithEveryVariantCounted()
+    public async Task Parts_WriteOneEdzFileIntoTheToolsFolder_CountingPartsAndVariants()
     {
         CallToolResult result = await MasterDataExportTools.ExportPartsAsync(_runner, new RecordedProgress(), "edz", ["PXC.3209510", " SIE.3RH2122-1HB40"], "relays", TestContext.Current.CancellationToken);
 
@@ -64,7 +64,7 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
         JsonElement data = result.StructuredContent!.Value;
         string directory = data.GetProperty("directory").GetString()!;
         Assert.StartsWith(Path.Combine(_locations.Exports, "parts-database") + Path.DirectorySeparatorChar, directory, StringComparison.Ordinal);
-        Assert.Equal(("SQL01|Parts", 3, "relays.edz"), (data.GetProperty("database").GetString(), data.GetProperty("partCount").GetInt32(), data.GetProperty("files")[0].GetProperty("path").GetString()));
+        Assert.Equal(("SQL01|Parts", 2, 3, "relays.edz"), (data.GetProperty("database").GetString(), data.GetProperty("partCount").GetInt32(), data.GetProperty("variantCount").GetInt32(), data.GetProperty("files")[0].GetProperty("path").GetString()));
         Assert.Equal(["Edz PXC.3209510,SIE.3RH2122-1HB40 " + Path.Combine(directory, "relays.edz")], _exporter.Exports);
     }
 
@@ -90,7 +90,7 @@ public sealed class MasterDataExportInteropTests : IAsyncDisposable
         public PartsExport ExportParts(IReadOnlyList<string>? partNumbers, MasterDataFormat format, string? file)
         {
             IReadOnlyList<string> numbers = partNumbers ?? [.. _parts.Keys];
-            var found = new PartsExport { Database = "SQL01|Parts|2|user|secret", PartCount = numbers.Where(_parts.ContainsKey).Sum(p => _parts[p]) };
+            var found = new PartsExport { Database = "SQL01|Parts|2|user|secret", PartCount = numbers.Count(_parts.ContainsKey), VariantCount = numbers.Where(_parts.ContainsKey).Sum(p => _parts[p]) };
             found.Missing.AddRange(numbers.Where(p => !_parts.ContainsKey(p)));
             if (file is not null && found.Missing.Count == 0)
             {
