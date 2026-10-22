@@ -11,8 +11,9 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>
 /// Reads projects for project.snapshot the way spike S31 did in the dispatcher (api-notes A36): the functions placed on
 /// each page (<c>Page.AllPlacements</c>), the connections by <c>Connection.Page</c>, and only the registered properties,
-/// each through its typed accessor; every property list and <c>PropertyValue</c> is disposed once read, because
-/// thousands left to the finalizer exhausted EPLAN's memory in S31. Main thread, inside the dispatcher's LockingStep.
+/// each through its typed accessor. Each object's property list is acquired once and disposed after all its scopes
+/// are read (A36); each <c>PropertyValue</c> is disposed once read, because thousands left to the finalizer exhausted
+/// EPLAN's memory in S31. Main thread, inside the dispatcher's LockingStep.
 /// </summary>
 internal sealed class EplanSnapshotReader : ISnapshotReader
 {
@@ -102,20 +103,25 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
     }
 
     /// <summary>A page as the snapshot reads it, with its registered properties (hints included).</summary>
-    internal static SnapshotSourceObject PageObject(Page page, IEnumerable<SnapshotProperty> registered) => new()
+    internal static SnapshotSourceObject PageObject(Page page, IEnumerable<SnapshotProperty> registered)
     {
-        Kind = "page",
-        Identifier = page.ToStringIdentifier(),
-        Oid = page.ObjectIdentifier,
-        Name = page.Name,
-        PageType = page.PageType.ToString(),
-        Values = Values(page.Properties, registered, "page", _page),
-    };
+        using PagePropertyList properties = page.Properties;
+        return new SnapshotSourceObject
+        {
+            Kind = "page",
+            Identifier = page.ToStringIdentifier(),
+            Oid = page.ObjectIdentifier,
+            Name = page.Name,
+            PageType = page.PageType.ToString(),
+            Values = Values(properties, registered, "page", _page),
+        };
+    }
 
     /// <summary>A function placed on <paramref name="page"/> as the snapshot reads it.</summary>
     internal static SnapshotSourceObject FunctionObject(Function f, string? page, IEnumerable<SnapshotProperty> registered)
     {
-        List<SnapshotSourceValue> values = Values(f.Properties, registered, "function", _function);
+        using FunctionPropertyList properties = f.Properties;
+        List<SnapshotSourceValue> values = Values(properties, registered, "function", _function);
         // Kinds as the cable, PLC and terminal readers tell them (A24).
         string? scope = f is Cable && f.FunctionCategory == FunctionCategory.Cable ? "cable"
             : f is PLC && f.FunctionCategory == FunctionCategory.PLCBox ? "plc"
@@ -123,7 +129,7 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
             : null;
         if (scope is not null)
         {
-            values.AddRange(Values(f.Properties, registered, scope, _function));
+            values.AddRange(Values(properties, registered, scope, _function));
         }
 
         PointD location = f.Location;
@@ -145,31 +151,33 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
     }
 
     /// <summary>As connection.list reads one (EplanConnectionReader): StartPin and EndPin are null on an open side.</summary>
-    internal static SnapshotSourceObject ConnectionObject(Connection c, string? page, IEnumerable<SnapshotProperty> registered) => new()
+    internal static SnapshotSourceObject ConnectionObject(Connection c, string? page, IEnumerable<SnapshotProperty> registered)
     {
-        Kind = "connection",
-        Identifier = c.ToStringIdentifier(),
-        Oid = c.ObjectIdentifier,
-        Page = page,
-        Start = End(c.StartPin),
-        End = End(c.EndPin),
-        Values = Values(c.Properties, registered, "connection", _connection),
-    };
+        using ConnectionPropertyList properties = c.Properties;
+        return new SnapshotSourceObject
+        {
+            Kind = "connection",
+            Identifier = c.ToStringIdentifier(),
+            Oid = c.ObjectIdentifier,
+            Page = page,
+            Start = End(c.StartPin),
+            End = End(c.EndPin),
+            Values = Values(properties, registered, "connection", _connection),
+        };
+    }
 
     private static SnapshotSourceEnd? End(Pin? pin) => pin?.ParentFunction is not { } function
         ? null
         : new SnapshotSourceEnd { Identifier = function.ToStringIdentifier(), Oid = function.ObjectIdentifier, Function = function.Name, Pin = pin.Name };
 
+    /// <summary>Reads one scope; the caller owns the list and disposes it after all scopes are read (api-notes A36).</summary>
     private static List<SnapshotSourceValue> Values<TList>(TList list, IEnumerable<SnapshotProperty> registered, string scope, Dictionary<int, Func<TList, PropertyValue>> accessors)
         where TList : UniversalPropertyList
     {
         var values = new List<SnapshotSourceValue>();
-        using (list)
+        foreach (SnapshotProperty property in registered.Where(p => p.Scope == scope))
         {
-            foreach (SnapshotProperty property in registered.Where(p => p.Scope == scope))
-            {
-                Read(accessors[property.Id](list), property.Id, values);
-            }
+            Read(accessors[property.Id](list), property.Id, values);
         }
 
         return values;
