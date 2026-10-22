@@ -3288,6 +3288,38 @@
       "live": []
     },
     {
+      "name": "eplan_pack_list",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_pack_list.md",
+        "specStatus": "Proposed（M6 第 1 阶段）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PackListToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PackListToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_page_create",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/PageWriteTools.cs",

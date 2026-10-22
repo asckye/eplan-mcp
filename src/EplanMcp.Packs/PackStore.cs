@@ -75,6 +75,15 @@ public sealed class PackStore(string root)
         }
     }
 
+    /// <summary>The ids of the installed packs, sorted; folders not named like a pack and links are left out.</summary>
+    public IReadOnlyList<string> Ids() => !Directory.Exists(Root) ? [] :
+    [
+        .. new DirectoryInfo(Root).EnumerateDirectories()
+            .Where(d => (d.Attributes & FileAttributes.ReparsePoint) == 0 && PackManifestValidator.IsId(d.Name))
+            .Select(d => d.Name)
+            .Order(StringComparer.Ordinal),
+    ];
+
     /// <summary>The installed versions of <paramref name="id"/>, highest first.</summary>
     public IReadOnlyList<SemanticVersion> Versions(string id)
     {
