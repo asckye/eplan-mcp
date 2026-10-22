@@ -18,9 +18,9 @@
       },
       "denominator": 137,
       "implemented": 6,
-      "byTools": 5,
+      "byTools": 6,
       "partial": 0,
-      "automatedTest": 5,
+      "automatedTest": 6,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -34,9 +34,9 @@
       },
       "denominator": 97,
       "implemented": 6,
-      "byTools": 5,
+      "byTools": 6,
       "partial": 0,
-      "automatedTest": 5,
+      "automatedTest": 6,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -67,9 +67,9 @@
       },
       "denominator": 4014,
       "implemented": 202,
-      "byTools": 191,
+      "byTools": 194,
       "partial": 39,
-      "automatedTest": 191,
+      "automatedTest": 194,
       "liveVerified": 147,
       "envBlocked": 122,
       "undocumented": 134
@@ -85,9 +85,9 @@
       },
       "denominator": 1799,
       "implemented": 106,
-      "byTools": 96,
+      "byTools": 99,
       "partial": 39,
-      "automatedTest": 96,
+      "automatedTest": 99,
       "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
@@ -1575,6 +1575,31 @@
       }
     },
     {
+      "name": "eplan_project_create",
+      "safety": "write",
+      "operations": [
+        "project.create.execute",
+        "project.create.plan",
+        "project.restore.execute",
+        "project.restore.plan"
+      ],
+      "apiIds": 37,
+      "operationGroups": 15,
+      "dataDictionary": 1,
+      "dependencies": 18,
+      "actions": 1,
+      "spec": "docs/tools/eplan_project_create.md",
+      "small": 4,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A31",
+        "A32",
+        "A34",
+        "A35"
+      ]
+    },
+    {
       "name": "eplan_project_get",
       "safety": "read",
       "operations": [
@@ -1617,7 +1642,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 3,
-      "large": 4,
+      "large": 5,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -1906,9 +1931,11 @@
     {
       "unit": "A:restore/PROJECT",
       "layer": "action",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_project_create"
+      ]
     },
     {
       "unit": "D:Article",
@@ -1982,6 +2009,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_project_create",
         "eplan_revision_list"
       ]
     },
@@ -1997,6 +2025,7 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_translation_export"
       ]
     },
@@ -2012,6 +2041,7 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_translation_export"
       ]
     },
@@ -2124,6 +2154,7 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_translation_export"
       ]
     },
@@ -2252,6 +2283,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber",
@@ -2712,6 +2744,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
         "eplan_report_update",
@@ -3533,6 +3566,7 @@
         "eplan_page_delete",
         "eplan_page_renumber",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_project_translate",
         "eplan_terminal_renumber"
       ]
@@ -3661,6 +3695,7 @@
         "eplan_page_delete",
         "eplan_page_renumber",
         "eplan_part_sync",
+        "eplan_project_create",
         "eplan_project_translate",
         "eplan_revision_list",
         "eplan_terminal_renumber"
@@ -3726,6 +3761,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_project_create",
         "eplan_project_get",
         "eplan_revision_list"
       ]
@@ -3753,23 +3789,29 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectManager.CreateProject",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_project_create"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_project_create"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectManager.GetProjectDatabaseVersion",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_project_create"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
@@ -3889,6 +3931,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_plc_get",
+        "eplan_project_create",
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
@@ -4016,6 +4059,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_plc_get",
+        "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
         "eplan_revision_list"
@@ -4093,6 +4137,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_plc_get",
+        "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
         "eplan_revision_list"

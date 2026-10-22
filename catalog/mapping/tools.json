@@ -6128,6 +6128,129 @@
       ]
     },
     {
+      "name": "eplan_project_create",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ProjectCreateTools.cs",
+      "operations": [
+        "project.create.execute",
+        "project.create.plan",
+        "project.restore.execute",
+        "project.restore.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.Project.Close",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.CreateProject(System.String,System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.DatabaseVersion.ToString",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility(System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDatabaseVersion(System.String)",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "P:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.ProjectPropertyList",
+        "T:Eplan.EplApi.DataModel.PropertyValue"
+      ],
+      "actions": [
+        "A:restore",
+        "A:restore/PROJECT"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_project_create.md",
+        "specStatus": "Implemented（M6 第 2 阶段；工具 Large 验收尚未运行，跨版本行为未验证）",
+        "apiNotes": [
+          "A31",
+          "A32",
+          "A34",
+          "A35"
+        ],
+        "tests": [
+          {
+            "name": "ProjectCreateArgumentTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ProjectCreateArgumentTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "UsageToolsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "ProjectCreateRecoveryTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ProjectCreateRecoveryTests.cs"
+          },
+          {
+            "name": "ProjectCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ProjectCreateToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ProjectCreateToolTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectCreateToolTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ProjectCreateOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectCreateOperationTests.cs"
+          },
+          {
+            "name": "ProjectCreateRecoveryTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ProjectCreateRecoveryTests.cs"
+          },
+          {
+            "name": "ProjectRestoreOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectRestoreOperationTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "note": "Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。"
+    },
+    {
       "name": "eplan_project_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/ProjectTools.cs",
@@ -6391,6 +6514,11 @@
             "name": "ProjectCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectCreateTests.cs"
+          },
+          {
+            "name": "ProjectCreateToolTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectCreateToolTests.cs"
           },
           {
             "name": "ProjectRestoreTests",

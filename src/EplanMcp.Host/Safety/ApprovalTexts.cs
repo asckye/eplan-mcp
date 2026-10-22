@@ -138,6 +138,7 @@ internal static class ApprovalTexts
             "create" when change.Kind == "device" => zh ? $"在页 {name} 上放置设备：{Value(change.NewValue ?? string.Empty, zh)}" : $"Place a device on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             // An import names the file, its size and SHA-256 (import.dxf.plan; M4c design 4.5).
             "create" when change.Kind == "drawing" => zh ? $"在页 {name} 上导入图形：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import a drawing on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+            "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
             "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
             // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
@@ -277,7 +278,9 @@ internal static class ApprovalTexts
     /// How the engineer takes the change back: Ctrl+Z on the write's undo step, except for language settings, which no
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
-    private static string Undo(string tool, WritePlan plan, bool zh) => tool == PlcImportTools.Tool
+    private static string Undo(string tool, WritePlan plan, bool zh) => tool == ProjectCreateTools.CreateTool
+        ? zh ? "只新建项目，不覆盖或复用已有目录。结束后关闭；没有 EPLAN 撤销步骤，Ctrl+Z 不能撤销。" : "Creates only a new project; never overwrites or reuses a destination. Closed afterwards; no EPLAN undo step or Ctrl+Z."
+        : tool == PlcImportTools.Tool
         ? zh ? "提交后 Ctrl+Z 撤销尚未验证，需要时请工程师核实并使用项目备份。" : "Undo after commit has not been verified. Ask the engineer to check the project and use the backup if needed."
         : tool == ListImportTools.ImportTool
         ? zh ? "提交后的撤销尚未验证；必要时请工程师检查并使用备份。" : "Undo after commit has not been verified; ask the engineer to check the project and use the backup if needed."
