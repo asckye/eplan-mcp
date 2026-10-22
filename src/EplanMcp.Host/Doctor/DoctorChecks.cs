@@ -97,6 +97,14 @@ internal static class DoctorChecks
             string time = s.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string? processId = s.ProcessId?.ToString(CultureInfo.InvariantCulture);
             string pid = processId ?? "?";
+            if (s.Database is { } database)
+            {
+                yield return new(DoctorCheckIds.Suspension, DoctorStatus.Warning,
+                    $"部件库 {database} 的写入已暂停（{time}，{s.Tool} 的结果未知）：请先在 EPLAN 的部件管理中核实，需要时按备份恢复；下一次写操作会请求确认",
+                    $"Writes to the parts database {database} are suspended ({time}, outcome of {s.Tool} unknown): check it in EPLAN's parts management and restore the backup if needed; the next write asks to confirm");
+                continue;
+            }
+
             yield return s.Project is { } project
                 ? new(DoctorCheckIds.Suspension, DoctorStatus.Warning,
                     $"项目 {project} 的写入已暂停（{time}，{s.Tool} 的结果未知）：请先在 EPLAN 中核实，下一次写操作会请求确认",
@@ -142,9 +150,10 @@ internal static class DoctorChecks
         string roots = string.Join("; ", config.ScratchRoots);
         (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
         string timeout = HostConfig.Seconds(config.ApprovalTimeout);
+        (string masterData, string masterDataEn) = config.MasterDataWrites == MasterDataWrites.Deny ? ("禁止", "denied") : ("每次审批并先备份", "approved each time, backed up first");
         return new(DoctorCheckIds.Config, DoctorStatus.Ok,
-            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；审批期限 {timeout} 秒",
-            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; approval deadline {timeout} s");
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s");
     }
 
     /// <summary>

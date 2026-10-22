@@ -1,3 +1,4 @@
+using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +35,40 @@ public sealed class PolicyEngineTests
         Assert.Equal(decision.Verdict == PolicyVerdict.Deny, decision.Message is not null);
     }
 
+    /// <summary>
+    /// ADR-0019: a write to system master data always needs approval, in scratch too and without a project; it follows
+    /// masterDataWrites, is refused for SQL Server, and a project it changes as well follows the project rules on top.
+    /// </summary>
+    [Theory]
+    [InlineData("Destructive", true, "Approve", "Approve", false, "NeedsApproval")]
+    [InlineData("Destructive", false, "Approve", "Approve", false, "NeedsApproval")]
+    [InlineData("Write", true, "Approve", "Approve", false, "NeedsApproval")]
+    [InlineData("Destructive", true, "Approve", "Deny", false, "Deny")]
+    [InlineData("Destructive", true, "Deny", "Deny", false, "Deny")]
+    [InlineData("Destructive", true, "Approve", "Approve", true, "Deny")]
+    [InlineData("Destructive", false, "Deny", "Approve", false, "Deny")]
+    [InlineData("Read", true, "Approve", "Deny", true, "Allow")]
+    [InlineData("Code", true, "Approve", "Approve", false, "Deny")]
+    public void Decide_MasterData_FollowsADR0019(string tier, bool inScratch, string outside, string masterData, bool server, string expected)
+    {
+        var config = new HostConfig(["C:\\Scratch"], Enum.Parse<OutsideScratchWrites>(outside)) { MasterDataWrites = Enum.Parse<MasterDataWrites>(masterData) };
+        var target = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = server ? "SRV|Parts" : @"$(MD_PARTS)\EPLAN_parts.alk", Server = server };
+
+        PolicyDecision decision = PolicyEngine.Decide(Enum.Parse<ToolTier>(tier), inScratch, config, target);
+
+        Assert.Equal(expected, decision.Verdict.ToString());
+        Assert.Equal(decision.Verdict == PolicyVerdict.Deny, decision.Message is not null);
+    }
+
+    [Fact]
+    public void Decide_MasterData_SaysWhichPolicyRefused()
+    {
+        var target = new MasterDataTarget { Kind = MasterDataKinds.Parts, Database = "SRV|Parts", Server = true };
+
+        Assert.Equal(PolicyEngine.MasterDataDenied, PolicyEngine.Decide(ToolTier.Destructive, true, new HostConfig(["C:\\Scratch"], OutsideScratchWrites.Approve) { MasterDataWrites = MasterDataWrites.Deny }, target).Message);
+        Assert.Equal(PolicyEngine.MasterDataServerDenied, PolicyEngine.Decide(ToolTier.Destructive, true, new HostConfig(["C:\\Scratch"], OutsideScratchWrites.Approve), target).Message);
+    }
+
     [Fact]
     public void TheOnlyApprovalChannelsInTheHost_AreTheEngineersWindows()
     {
@@ -64,7 +99,7 @@ public sealed class PolicyEngineTests
         string code = PolicyEngine.Decide(ToolTier.Code, inScratch: true, config).Message!;
 
         // mcp-tool-design 6.3: POLICY_DENIED names the policy and never how to get around it.
-        Assert.All([outside, code], m => Assert.Contains("safety policy", m, StringComparison.Ordinal));
-        Assert.All([outside, code], m => Assert.DoesNotContain("config", m, StringComparison.OrdinalIgnoreCase));
+        Assert.All([outside, code, PolicyEngine.MasterDataDenied, PolicyEngine.MasterDataServerDenied], m => Assert.Contains("safety policy", m, StringComparison.Ordinal));
+        Assert.All([outside, code, PolicyEngine.MasterDataDenied, PolicyEngine.MasterDataServerDenied], m => Assert.DoesNotContain("config", m, StringComparison.OrdinalIgnoreCase));
     }
 }

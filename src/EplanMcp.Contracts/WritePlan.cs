@@ -27,4 +27,10 @@ public sealed class WritePlan
     /// are project data, not instructions.
     /// </summary>
     public Dictionary<string, string>? Details { get; set; }
+
+    /// <summary>
+    /// The system master data the write changes as well (ADR-0019); null for writes to a project only. A write that
+    /// changes master data only has an empty <see cref="Project"/> and <see cref="ProjectPath"/>.
+    /// </summary>
+    public MasterDataTarget? MasterData { get; set; }
 }

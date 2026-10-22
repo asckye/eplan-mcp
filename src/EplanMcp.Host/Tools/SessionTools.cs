@@ -105,7 +105,7 @@ internal sealed class SessionTools
     private static string? ConnectedHint(HandshakeResult handshake, SuspensionStore suspensions)
     {
         DateTimeOffset? start = SuspensionStore.StartOf(handshake.Eplan.ProcessId);
-        Suspension[] relevant = [.. suspensions.All().Where(s => s.Project is not null || (s.ProcessId == handshake.Eplan.ProcessId && s.ProcessStart == start))];
+        Suspension[] relevant = [.. suspensions.All().Where(s => s.Project is not null || s.Database is not null || (s.ProcessId == handshake.Eplan.ProcessId && s.ProcessStart == start))];
         string[] parts = [.. new[] { VersionHint(handshake.Eplan.Version), SuspensionHint(relevant) }.OfType<string>()];
         return parts.Length == 0 ? null : string.Join(" ", parts);
     }
@@ -118,11 +118,13 @@ internal sealed class SessionTools
             return null;
         }
 
-        IEnumerable<string> what = suspensions.Select(s => s.Project is { } project
+        IEnumerable<string> what = suspensions.Select(s => s.Database is { } database
+            ? $"to the parts database '{database}' since {s.Time.ToString("u", CultureInfo.InvariantCulture)} ({s.Tool})"
+            : s.Project is { } project
             ? $"to project '{project}' since {s.Time.ToString("u", CultureInfo.InvariantCulture)} ({s.Tool})"
             : $"to every project of this EPLAN since {s.Time.ToString("u", CultureInfo.InvariantCulture)} ({s.Tool})");
         return $"Writes are suspended because the outcome of an earlier write is unknown: {string.Join("; ", what)}. " +
-            "Ask the engineer to check those projects in EPLAN; the next write asks them to confirm. Reads work as usual.";
+            "Ask the engineer to check those projects or databases in EPLAN; the next write asks them to confirm. Reads work as usual.";
     }
 
     /// <summary>Null for a tested EPLAN; otherwise what to know before relying on the tools (ADR-0009).</summary>

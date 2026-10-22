@@ -21,6 +21,19 @@ public sealed class ConfigurationFileTests : IDisposable
         Assert.Contains("writes outside scratch: need approval", check.English, StringComparison.Ordinal);
         Assert.Contains("approval deadline 120 s", check.English, StringComparison.Ordinal);
         Assert.Contains("审批期限 120 秒", check.Chinese, StringComparison.Ordinal);
+        Assert.Contains("writes to system master data such as the parts database: approved each time, backed up first", check.English, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Doctor_ShowsMasterDataWritesDenied()
+    {
+        File.WriteAllText(_locations.ConfigFile, """{"masterDataWrites":"deny"}""");
+
+        DoctorCheck check = DoctorChecks.Configuration(_locations);
+
+        Assert.Equal(DoctorStatus.Ok, check.Status);
+        Assert.Contains("writes to system master data such as the parts database: denied", check.English, StringComparison.Ordinal);
+        Assert.Contains("写入部件库等系统主数据：禁止", check.Chinese, StringComparison.Ordinal);
     }
 
     [Fact]

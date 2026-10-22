@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Safety;
 
@@ -18,7 +19,8 @@ internal enum SuspensionReason
 }
 
 /// <summary>
-/// A suspension of writes to <see cref="Project"/> (a canonical path), or to every project of the EPLAN instance
+/// A suspension of writes to <see cref="Project"/> (a canonical path), to the master-data database
+/// <see cref="Database"/> (as EPLAN's setting names it, ADR-0019), or to every project of the EPLAN instance
 /// <see cref="ProcessId"/> started at <see cref="ProcessStart"/>. <see cref="Changes"/>: the plan's first lines, for the
 /// engineer's check.
 /// </summary>
@@ -30,7 +32,8 @@ internal sealed record Suspension(
     string RequestId,
     DateTimeOffset Time,
     SuspensionReason Reason,
-    IReadOnlyList<string> Changes);
+    IReadOnlyList<string> Changes,
+    string? Database = null);
 
 /// <summary>
 /// The suspensions in <c>state\suspended\</c> (ADR-0010 section 3, M3 design 4.3), one JSON file each, shared by every
@@ -51,17 +54,29 @@ internal sealed class SuspensionStore(string stateDirectory)
 
     public static SuspensionStore For(HostDataLocations locations) => new(locations.State);
 
-    /// <summary>Records one suspension for the project and one for the instance (ADR-0010: both).</summary>
-    public void Suspend(string project, int processId, DateTimeOffset processStart, string tool, string requestId, DateTimeOffset time, SuspensionReason reason, IEnumerable<string> changes)
+    /// <summary>
+    /// Records one suspension for the project, one for the master-data database the write changed too, if any, keyed
+    /// by its path (ADR-0019), and one for the instance (ADR-0010: all). An empty <paramref name="project"/> is none.
+    /// </summary>
+    public void Suspend(string project, int processId, DateTimeOffset processStart, string tool, string requestId, DateTimeOffset time, SuspensionReason reason, IEnumerable<string> changes, MasterDataTarget? masterData = null)
     {
         string[] lines = [.. changes.Take(MaxChanges)];
-        Write(ProjectFile(project), new Suspension(Canonical(project), null, null, tool, requestId, time, reason, lines));
+        if (project.Length > 0)
+        {
+            Write(ProjectFile(project), new Suspension(Canonical(project), null, null, tool, requestId, time, reason, lines));
+        }
+
+        if (masterData is not null)
+        {
+            Write(DatabaseFile(masterData), new Suspension(null, null, null, tool, requestId, time, reason, lines, masterData.Database));
+        }
+
         Write(InstanceFile(processId, processStart), new Suspension(null, processId, processStart, tool, requestId, time, reason, lines));
     }
 
-    /// <summary>The suspensions that stop a write to <paramref name="project"/> in that EPLAN instance.</summary>
-    public IReadOnlyList<Suspension> Blocking(string project, int processId, DateTimeOffset processStart) =>
-        [.. new[] { ProjectFile(project), InstanceFile(processId, processStart) }.Select(Read).OfType<Suspension>()];
+    /// <summary>The suspensions that stop a write to <paramref name="project"/> and <paramref name="masterData"/> in that EPLAN instance.</summary>
+    public IReadOnlyList<Suspension> Blocking(string project, int processId, DateTimeOffset processStart, MasterDataTarget? masterData = null) =>
+        [.. Files(project, processId, processStart, masterData).Select(Read).OfType<Suspension>()];
 
     /// <summary>Every suspension still in force; an instance's whose EPLAN has exited is deleted on the way.</summary>
     public IReadOnlyList<Suspension> All()
@@ -91,11 +106,13 @@ internal sealed class SuspensionStore(string stateDirectory)
         return all;
     }
 
-    /// <summary>Lifts both suspensions of a write; only after the engineer confirmed (ADR-0010 section 3).</summary>
-    public void Release(string project, int processId, DateTimeOffset processStart)
+    /// <summary>Lifts the suspensions that blocked a write; only after the engineer confirmed (ADR-0010 section 3).</summary>
+    public void Release(string project, int processId, DateTimeOffset processStart, MasterDataTarget? masterData = null)
     {
-        TryDelete(ProjectFile(project));
-        TryDelete(InstanceFile(processId, processStart));
+        foreach (string file in Files(project, processId, processStart, masterData))
+        {
+            TryDelete(file);
+        }
     }
 
     /// <summary>The start time that identifies an EPLAN process together with its ID; null when it has exited.</summary>
@@ -118,6 +135,32 @@ internal sealed class SuspensionStore(string stateDirectory)
     {
         byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(Canonical(project).ToUpperInvariant()));
         return Path.Combine(SuspendedDirectory, "project-" + Convert.ToHexStringLower(hash)[..16] + ".json");
+    }
+
+    /// <summary>
+    /// A database's suspension, keyed by its kind and its full path when EPLAN gave one (canonical, as a project's), else
+    /// by its setting, so the same database is suspended however a later plan spells it.
+    /// </summary>
+    private string DatabaseFile(MasterDataTarget masterData)
+    {
+        string key = masterData.Path.Length > 0 && Path.IsPathFullyQualified(masterData.Path) ? Canonical(masterData.Path) : masterData.Database;
+        byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(masterData.Kind + "\n" + key.ToUpperInvariant()));
+        return Path.Combine(SuspendedDirectory, "database-" + Convert.ToHexStringLower(hash)[..16] + ".json");
+    }
+
+    private IEnumerable<string> Files(string project, int processId, DateTimeOffset processStart, MasterDataTarget? masterData)
+    {
+        if (project.Length > 0)
+        {
+            yield return ProjectFile(project);
+        }
+
+        if (masterData is not null)
+        {
+            yield return DatabaseFile(masterData);
+        }
+
+        yield return InstanceFile(processId, processStart);
     }
 
     private string InstanceFile(int processId, DateTimeOffset start) =>

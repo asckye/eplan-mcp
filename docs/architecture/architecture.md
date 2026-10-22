@@ -437,7 +437,7 @@ sequenceDiagram
 
 ### 8.9 配置
 - `config.json` 带 JSON Schema。优先级从低到高：内置默认值 → 用户配置 → 环境变量 → 命令行参数。启动时校验，有错误就拒绝启动，并指出具体是哪一项。
-- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120。
+- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
 ### 8.11 界面语言

@@ -80,20 +80,29 @@ internal sealed partial class DanglingWrites(IBridgeClient bridge, SuspensionSto
             {
                 SuspensionReason reason = outcome?.Status is OutcomeStatus.Queued or OutcomeStatus.Running ? SuspensionReason.StillRunning : SuspensionReason.OutcomeUnknown;
                 IEnumerable<string> changes = started["changes"] is JsonArray lines ? lines.Select(l => l?.GetValue<string>() ?? string.Empty) : [];
-                suspensions.Suspend(project, processId, eplanStart ?? DateTimeOffset.MinValue, tool, requestId, clock.GetUtcNow(), reason, changes);
+                suspensions.Suspend(project, processId, eplanStart ?? DateTimeOffset.MinValue, tool, requestId, clock.GetUtcNow(), reason, changes, MasterDataOf(started));
                 await audit.AppendAsync(Settled("writes_suspended", started), cancellationToken).ConfigureAwait(false);
             }
         }
     }
 
-    private static JsonObject Settled(string kind, JsonObject started) => new()
+    private static JsonObject Settled(string kind, JsonObject started)
     {
-        ["kind"] = kind,
-        ["requestId"] = started["requestId"]?.DeepClone(),
-        ["tool"] = started["tool"]?.DeepClone(),
-        ["project"] = started["project"]?.DeepClone(),
-        ["eplan"] = started["eplan"]?.DeepClone(),
-    };
+        var record = new JsonObject
+        {
+            ["kind"] = kind,
+            ["requestId"] = started["requestId"]?.DeepClone(),
+            ["tool"] = started["tool"]?.DeepClone(),
+            ["project"] = started["project"]?.DeepClone(),
+            ["eplan"] = started["eplan"]?.DeepClone(),
+        };
+        if (started["masterData"] is { } masterData)
+        {
+            record["masterData"] = masterData.DeepClone();
+        }
+
+        return record;
+    }
 
     /// <summary>Whether the Host that wrote a record still runs; a record without a readable identity counts as exited.</summary>
     private static bool IsRunning(JsonNode? host) =>
@@ -109,6 +118,17 @@ internal sealed partial class DanglingWrites(IBridgeClient bridge, SuspensionSto
 
     private static string Text(JsonObject record, string name) =>
         record[name] is JsonValue value && value.TryGetValue(out string? text) ? text : string.Empty;
+
+    /// <summary>The system master data a record names (ADR-0019), whose suspension is keyed by it; null when it names none.</summary>
+    private static MasterDataTarget? MasterDataOf(JsonObject record) => record["masterData"] is JsonObject target
+        ? new MasterDataTarget
+        {
+            Kind = Text(target, "kind"),
+            Database = Text(target, "database"),
+            Path = Text(target, "path"),
+            Server = target["server"] is JsonValue server && server.TryGetValue(out bool value) && value,
+        }
+        : null;
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Dangling write {RequestId} settled: {Status}, recorded as {Execution}")]
     private partial void LogSettled(string requestId, string status, string execution);
