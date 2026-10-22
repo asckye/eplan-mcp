@@ -46,7 +46,16 @@ internal static class McpServerSetup
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
-        services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) => ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile));
+        services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
+        {
+            ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile);
+
+            // The pack resources belong to the pack toolset, which only the full profile offers (ADR-0022).
+            if (choice.Profile != ToolProfile.Full)
+            {
+                options.ResourceCollection?.Clear();
+            }
+        });
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
         return services
@@ -93,6 +102,7 @@ internal static class McpServerSetup
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
+            .WithResources<PackResources>()
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
 }
