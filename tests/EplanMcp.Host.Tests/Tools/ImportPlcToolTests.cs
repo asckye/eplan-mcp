@@ -164,7 +164,6 @@ public sealed class ImportPlcToolTests : IDisposable
     [InlineData("<!DOCTYPE root [<!ENTITY text 'injected'>]><root>&text;</root>")]
     [InlineData("<!DOCTYPE root SYSTEM 'file:///secret'><root/>")]
     [InlineData("<root xmlns:xi='http://www.w3.org/2001/XInclude'><xi:include href='https://example.invalid'/></root>")]
-    [InlineData("<root xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:test file:///secret'/>")]
     public async Task UnsafeOrMalformedXml_IsInvalidBeforeBridge(string xml)
     {
         System.IO.File.WriteAllText(_path, xml);

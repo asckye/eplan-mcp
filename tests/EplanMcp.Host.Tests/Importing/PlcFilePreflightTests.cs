@@ -22,11 +22,19 @@ public sealed class PlcFilePreflightTests
     [InlineData("<!DOCTYPE root [<!ENTITY x 'value'>]><root>&x;</root>")]
     [InlineData("<!DOCTYPE root SYSTEM 'https://example.invalid/test.dtd'><root/>")]
     [InlineData("<root xmlns:xi='http://www.w3.org/2001/XInclude'><xi:include href='file:///secret'/></root>")]
-    [InlineData("<root xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://example.invalid/schema'/>")]
     public async Task MalformedXmlDtdAndExternalXmlReferences_AreRefused(string xml)
     {
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
         await Assert.ThrowsAsync<XmlException>(() => PlcFilePreflight.ValidateAsync(stream, TestContext.Current.CancellationToken));
+    }
+
+    [Theory]
+    [InlineData("<pbf version='1.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='pbf.xsd'/>")]
+    [InlineData("<CAEXFile xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='CAEX_ClassModel_V2.15.xsd'/>")]
+    public async Task SchemaLocationHintsOfEplanExports_AreAccepted(string xml)
+    {
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
+        await PlcFilePreflight.ValidateAsync(stream, TestContext.Current.CancellationToken);
     }
 
     [Fact]
