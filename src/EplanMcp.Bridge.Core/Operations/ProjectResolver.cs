@@ -73,7 +73,7 @@ public static class ProjectResolver
     /// EPLAN reports a project path without ".elk" (api-notes A10); engineers and models may add it, write forward
     /// slashes or change the case. No Path.GetFullPath: a relative value must not resolve against EPLAN's directory.
     /// </summary>
-    private static bool SamePath(string projectPath, string value) =>
+    internal static bool SamePath(string projectPath, string value) =>
         string.Equals(NormalisePath(projectPath), NormalisePath(value), StringComparison.OrdinalIgnoreCase);
 
     private static string NormalisePath(string path)
