@@ -186,6 +186,11 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A32. 对象标识与整个项目的读取耗时（spike S28，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+详细数据见 [spike S28](../../spikes/S28-identity-extract/README.md)。只读。
+- 同一项目的两份文件副本中，825 个对象（全部主功能和页）的 `StorableObject.ObjectIdentifier` 全部相同；`DatabaseIdentifier` 按打开的项目分配（28、53）；`ToStringIdentifier()` 为 `数据库号/类型号/对象号/0`。可以用"项目身份 + 类型号 + `ObjectIdentifier`"跨副本定位；编号可能在删除后被重用，执行前要核对名称、页、类型。还原、PXF 导入、从基本项目新建之后是否保留编号，未验证。— S28。
+- 示例项目（321 页）：`GetPages` 0.01 秒，`GetFunctions(null)` 2,876 个 0.01–0.04 秒，`GetConnections(null)` 2,060 个约 0.06 秒，`GetPlacements(null)` 44,735 个 0.6–0.8 秒；读全部功能的名称、页、坐标、编号 0.06 秒。— S28。
+
 ### A31. 新建项目、还原项目、判断项目版本（spike S27，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S27](../../spikes/S27-project-create/README.md)。全部写入都在 scratch 中。
 - `ProjectManager.CreateProject(链接文件, 基本项目 .zw9)`：3.5 秒，生成 `.elk` 和 `.edb\`，新项目处于打开状态（API 独占打开），带模板的页和属性（`GB_bas001`：1 页）。— S27。
