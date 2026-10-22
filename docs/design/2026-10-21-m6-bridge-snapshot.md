@@ -59,7 +59,7 @@ flowchart LR
 ### 4.1 `project.snapshot`
 **参数**：`project`（同 `ProjectResolver`：省略时为选中的或唯一打开的项目）；`pages`（页全名，省略为全部）；`afterPage`（上一块返回的 `nextAfterPage`）；`profile`（只有 `standard`）；`timeLimitSeconds`（每块的时间上限，默认 10，1–20）；`openReadOnly`（见下文）。
 
-**一块**：页按 `ObjectIdentifier` 升序（改名不改变顺序）；跳过编号不大于 `afterPage` 的页；逐页读取，每页之后检查取消、报告进度；用时达到上限、或本块的规范文本超过 400 万字符（管道帧上限 16 MB）时，在页之间停下，返回 `complete: false` 和 `nextAfterPage`。每块至少一页。Host 默认调用超时 30 秒，所以上限最大 20 秒。
+**一块**：页按 `ObjectIdentifier` 升序（改名不改变顺序）；跳过编号不大于 `afterPage` 的页；逐页读取，每页之后检查取消、报告进度；用时达到上限、或本块已有 10,000 个对象（约 5 MB 的 JSON，远低于管道帧上限 16 MB；示例项目约 5,500 个）时，在页之间停下，返回 `complete: false` 和 `nextAfterPage`。每块至少一页。Host 默认调用超时 30 秒，所以上限最大 20 秒。
 
 **结果**：项目名、路径、`PROJ_GUID`、项目的修改标记、页数、本块的页（每页：编号、类型号、页名、页类型、哈希、修改标记、对象）、`missingPages`（`pages` 中找不到的页名，不报错）、`complete`、`nextAfterPage`、`snapshotHash`（只在一次调用就覆盖了整个项目时给出）、跳过的连接数、用时。
 

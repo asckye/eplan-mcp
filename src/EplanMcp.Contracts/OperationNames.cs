@@ -485,6 +485,13 @@ public static class OperationNames
     public const string PartSyncExecute = "part.sync.execute";
 
     /// <summary>
+    /// One chunk of a project's canonical snapshot: its pages in ascending order of their numbers, each with its
+    /// registered properties, functions and connections, normalised and hashed (docs/design/2026-10-21-m6-bridge-snapshot.md,
+    /// 4.1). Reads only. Arguments: <see cref="ProjectSnapshotArgs"/>; data: <see cref="ProjectSnapshotData"/>.
+    /// </summary>
+    public const string ProjectSnapshot = "project.snapshot";
+
+    /// <summary>
     /// What the Bridge recorded for a write's request ID (ADR-0010). Answered on the pipe thread, never dispatched to
     /// EPLAN's main thread, so it works while a write is running. Arguments: <see cref="OutcomeGetArgs"/>; data:
     /// <see cref="OutcomeGetData"/>.
