@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    xmlns:vm="clr-namespace:EplanMcp.Workbench.Vm"
     Focusable="False">
   <!--
     The client configuration wizard (M5 design 4.4 item 3, workbench-ui section 7, DLG-12): the clients as cards that are
@@ -75,6 +76,7 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <vm:VmPanel x:Name="VmConnection" Margin="0,12,0,0" />
       </StackPanel>
     </ScrollViewer>
   </DockPanel>

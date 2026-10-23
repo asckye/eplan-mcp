@@ -72,10 +72,12 @@ public sealed partial class App : Application, IDisposable
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
         _view.Follow(Dispatcher, ShowQueue);
         _window.Attach(_view);
-        var host = new HostCommands(ProgramLocation.FindHost(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null);
+        IHostRunner? runner = ProgramLocation.FindHost(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null;
+        var host = new HostCommands(runner);
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
         _window.AttachClients(new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
+        _window.AttachVm(new Vm.VmView(runner, new Vm.VmElevation(), Vm.VmNetwork.Addresses()));
         _window.AttachSettings(StartAtLogin.ForCurrentUser(), _locations.Config);
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
