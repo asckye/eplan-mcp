@@ -21,7 +21,6 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
     public ClientsPage()
     {
         InitializeComponent();
-        (MarketplaceCommand.Text, InstallCommand.Text) = (ClientsView.PluginCommands[0], ClientsView.PluginCommands[1]);
         Confirm = (title, message, safe, action, details) => WorkbenchDialog.Confirm(Window.GetWindow(this)!, title, message, safe, action, details);
         IsVisibleChanged += (_, e) =>
         {
@@ -85,7 +84,7 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
 
         // NAV-05, CMD-04: nothing to run without a Host, and the buttons say why.
         string help = view.CanRun ? string.Empty : loc["Host.Missing"];
-        foreach (Button button in new[] { RefreshButton, RemoveButton, WriteButton })
+        foreach (Button button in new[] { RefreshButton, RemoveButton, WriteButton, GeneratePluginButton })
         {
             button.IsEnabled = view.CanRun && !running;
             AutomationProperties.SetHelpText(button, help);
@@ -97,6 +96,8 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
         ErrorDetails.Visibility = view.ErrorDetails is null ? Visibility.Collapsed : Visibility.Visible;
         Cards.ItemsSource = null;
         Cards.ItemsSource = view.Cards;
+        (MarketplaceCommand.Text, InstallCommand.Text) = (view.PluginCommands[0], view.PluginCommands[1]);
+        MarketplaceCommand.Visibility = InstallCommand.Visibility = view.PluginCommands[0].Length == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void OnWrite(object sender, RoutedEventArgs e) => _ = WriteAsync();
@@ -168,4 +169,28 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnGeneratePlugin(object sender, RoutedEventArgs e) => _ = GeneratePluginAsync();
+
+    private async Task GeneratePluginAsync()
+    {
+        if (_view is not { CanRun: true, State: not ClientsState.Running } view)
+        {
+            return;
+        }
+
+        await view.GeneratePluginAsync(true, CancellationToken.None).ConfigureAwait(true);
+        Loc loc = Loc.Current;
+        if (view.State != ClientsState.Ready)
+        {
+            Say(loc["Clients.NotDone"]);
+            return;
+        }
+
+        if (view.State == ClientsState.Ready && Confirm(loc["Clients.GenerateTitle"], loc["Clients.GenerateMessage"], loc["Exit.Cancel"], loc["Clients.GenerateConfirm"], view.PluginDiff))
+        {
+            await view.GeneratePluginAsync(false, CancellationToken.None).ConfigureAwait(true);
+            Say(loc[view.State == ClientsState.Ready ? "Clients.PluginReady" : "Clients.NotDone"]);
+        }
+    }
 }

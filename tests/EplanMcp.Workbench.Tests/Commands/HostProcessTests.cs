@@ -79,7 +79,7 @@ public sealed class HostProcessTests : IDisposable
     {
         var output = new DirectoryInfo(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar));
         string repository = output.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-        return HostLocator.Find(Path.Combine(repository, "src", "EplanMcp.Workbench", "bin", output.Parent.Name, "net10.0-windows"))
+        return ProgramLocation.FindHost(Path.Combine(repository, "src", "EplanMcp.Workbench", "bin", output.Parent.Name, "net10.0-windows"))
             ?? throw new InvalidOperationException("eplanmcp.exe is not built; build the solution first.");
     }
 }

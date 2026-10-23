@@ -34,7 +34,7 @@ public sealed class StatusViewTests(WpfContext wpf)
     [Fact]
     public async Task TheChecks_AreGroupedAsTheDesignOrdersThem_UnknownOnesLast_EmptyGroupsLeftOut()
     {
-        _host.Answer = _ => new HostRun(1, Report);
+        _host.Answer = args => Reply(args, 1, Report);
         StatusView view = View();
 
         await view.RunAsync(Token);
@@ -51,19 +51,20 @@ public sealed class StatusViewTests(WpfContext wpf)
             Loc.Current.Language = AppLanguage.English;
             Assert.Equal("No licence", licence.Text);
         });
-        Assert.Equal(["doctor", "--format", "json"], Assert.Single(_host.Runs).Arguments);
+        Assert.Equal(["doctor", "--format", "json"], _host.Runs[0].Arguments);
+        Assert.Equal(["addin-variants", "--format", "json"], _host.Runs[1].Arguments);
     }
 
     [Fact]
     public async Task AWriteSuspension_IsAlsoForTheBanner_AndAnOkOneIsNot()
     {
-        _host.Answer = _ => new HostRun(1, Report);
+        _host.Answer = args => Reply(args, 1, Report);
         StatusView view = View();
         await view.RunAsync(Token);
 
         wpf.RunWithLanguage(AppLanguage.English, () => Assert.Equal("Writes suspended: Line1", Assert.Single(view.Suspensions).Text));
 
-        _host.Answer = _ => new HostRun(0, Report.Replace("\"status\":\"warning\",\"zh\":\"写入已暂停", "\"status\":\"ok\",\"zh\":\"写入已暂停", StringComparison.Ordinal));
+        _host.Answer = args => Reply(args, 0, Report.Replace("\"status\":\"warning\",\"zh\":\"写入已暂停", "\"status\":\"ok\",\"zh\":\"写入已暂停", StringComparison.Ordinal));
         await view.RunAsync(Token);
         Assert.Empty(view.Suspensions);
     }
@@ -75,7 +76,7 @@ public sealed class StatusViewTests(WpfContext wpf)
     {
         CheckStatus status = Enum.Parse<CheckStatus>(statusName);
         _accepting = accepting;
-        _host.Answer = _ => new HostRun(0, Snapshots.Read("doctor-json"));
+        _host.Answer = args => Reply(args, 0, Snapshots.Read("doctor-json"));
         StatusView view = View();
 
         await view.RunAsync(Token);
@@ -136,4 +137,7 @@ public sealed class StatusViewTests(WpfContext wpf)
     }
 
     private StatusView View() => new(new HostCommands(_host), () => _accepting);
+
+    private static HostRun Reply(string[] args, int code, string doctor) => args[0] == "addin-variants"
+        ? new(0, """{"schemaVersion":1,"variants":[]}""") : new(code, doctor);
 }

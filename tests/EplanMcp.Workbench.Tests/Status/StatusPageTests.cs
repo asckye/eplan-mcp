@@ -32,7 +32,7 @@ public sealed class StatusPageTests(WpfContext wpf)
     [Fact]
     public void OpeningThePage_RunsDoctorOnce_AndShowsItsGroupsAsNamedCards_SeverityInWords()
     {
-        _host.Answer = _ => new HostRun(1, Suspended);
+        _host.Answer = args => Reply(args, 1, Suspended);
         wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
         {
             Assert.Empty(_host.Runs); // not before the page is opened
@@ -40,11 +40,11 @@ public sealed class StatusPageTests(WpfContext wpf)
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
             WpfContext.Drain();
 
-            Assert.Single(_host.Runs);
+            Assert.Equal(2, _host.Runs.Count);
             Assert.Equal("eplanmcp 0.1.0：有检查给出警告", ((TextBlock)page.FindName("Caption")).Text);
             GroupBox[] cards = [.. Descendants<GroupBox>(page)];
-            Assert.Equal(["授权", "写入暂停", "下一次审批"], cards.Select(AutomationProperties.GetName));
-            Assert.Contains(Descendants<TextBlock>(cards[0]), t => t.Text == "正常");
+            Assert.Equal(["EPLAN 插件", "授权", "写入暂停", "下一次审批"], cards.Select(AutomationProperties.GetName));
+            Assert.Contains(Descendants<TextBlock>(cards[1]), t => t.Text == "正常");
             Assert.True(((FrameworkElement)page.FindName("SuspensionBanner")).IsVisible);
             Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting((TextBlock)page.FindName("Caption")));
             Assert.Same(page.FindName("PageTitle"), System.Windows.Input.Keyboard.FocusedElement);
@@ -54,7 +54,7 @@ public sealed class StatusPageTests(WpfContext wpf)
     [Fact]
     public void F5_AndOpeningAgain_RunDoctorAgain()
     {
-        _host.Answer = _ => new HostRun(0, Snapshots.Read("doctor-json"));
+        _host.Answer = args => Reply(args, 0, Snapshots.Read("doctor-json"));
         wpf.Run(() => WithPage((window, page) =>
         {
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Menu);
@@ -65,13 +65,14 @@ public sealed class StatusPageTests(WpfContext wpf)
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Menu);
             WpfContext.Drain();
 
-            Assert.Equal(3, _host.Runs.Count);
+            Assert.Equal(6, _host.Runs.Count);
         }));
     }
 
     [Fact]
     public void WhileDoctorRuns_TheProgressShows_AndRefreshWaits()
     {
+        _host.Answer = args => Reply(args, 0, Snapshots.Read("doctor-json"));
         TaskCompletionSource<HostRun> held = _host.Hold();
         wpf.Run(() => WithPage((window, page) =>
         {
@@ -97,7 +98,7 @@ public sealed class StatusPageTests(WpfContext wpf)
 
             Assert.StartsWith("错误：eplanmcp.exe 没有按时完成", ((TextBlock)page.FindName("ErrorText")).Text, StringComparison.Ordinal);
             Assert.StartsWith(_host.Executable + " doctor --format json", ((TextBox)page.FindName("ErrorDetails")).Text, StringComparison.Ordinal);
-            Assert.Empty(Descendants<GroupBox>(page));
+            Assert.Equal("EPLAN 插件", AutomationProperties.GetName(Assert.Single(Descendants<GroupBox>(page))));
         }));
     }
 
@@ -121,7 +122,7 @@ public sealed class StatusPageTests(WpfContext wpf)
     [Fact]
     public void EveryCardAndLine_HasAName_ForScreenReaders()
     {
-        _host.Answer = _ => new HostRun(1, Suspended);
+        _host.Answer = args => Reply(args, 1, Suspended);
         wpf.Run(() => WithPage((window, page) =>
         {
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Menu);
@@ -141,6 +142,40 @@ public sealed class StatusPageTests(WpfContext wpf)
         }));
     }
 
+    [Theory]
+    [InlineData(AppLanguage.Chinese)]
+    [InlineData(AppLanguage.English)]
+    public void VariantCheckboxesAndActions_AreNamedAndResponsiveWhileTheHostRuns(AppLanguage language)
+    {
+        _host.Answer = args => Reply(args, 0, AddinViewTests.Doctor);
+        wpf.RunWithLanguage(language, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Status, NavigationOrigin.Menu);
+            WpfContext.Drain();
+            var register = (Button)page.FindName("RegisterButton");
+            var unregister = (Button)page.FindName("UnregisterButton");
+            Assert.False(register.IsEnabled);
+            Assert.True(unregister.IsEnabled);
+            Assert.NotEmpty(AutomationProperties.GetHelpText(register));
+            CheckBox box = Descendants<CheckBox>(page).First();
+            Assert.Equal("Electric P8", UIElementAutomationPeer.CreatePeerForElement(box).GetName());
+            box.IsChecked = true;
+            WpfContext.Drain();
+            TaskCompletionSource<HostRun> held = _host.Hold();
+            Click(register);
+
+            Assert.False(register.IsEnabled);
+            Assert.False(unregister.IsEnabled);
+            Assert.True(((FrameworkElement)page.FindName("Working")).IsVisible);
+            Assert.Equal(["install-addin", "--variant", "Electric P8", "--format", "json"], _host.Runs[^1].Arguments);
+            held.SetResult(AddinViewTests.Result("notConfirmed"));
+            Until(() => register.IsEnabled);
+            Assert.Contains(Descendants<TextBlock>(page), t => t.Text.Contains(language == AppLanguage.Chinese ? "未确认" : "Not confirmed", StringComparison.Ordinal));
+            Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting((TextBlock)page.FindName("Caption")));
+            Assert.NotEmpty(UIElementAutomationPeer.CreatePeerForElement(unregister).GetName());
+        }));
+    }
+
     private void WithPage(Action<MainWindow, StatusPage> test, HostCommands? host = null) => With(window =>
     {
         window.AttachStatus(new StatusView(host ?? new HostCommands(_host), () => true));
@@ -148,6 +183,9 @@ public sealed class StatusPageTests(WpfContext wpf)
     });
 
     private static void Until(Func<bool> condition) => WpfContext.DrainUntil(condition, "Not in time.");
+
+    private static HostRun Reply(string[] args, int code, string doctor) => args[0] == "addin-variants"
+        ? new(0, """{"schemaVersion":1,"variants":["Electric P8","Pro Panel"]}""") : new(code, doctor);
 
     private static List<T> Descendants<T>(DependencyObject root)
         where T : DependencyObject

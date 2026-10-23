@@ -47,6 +47,7 @@
             <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
             <StackPanel>
               <TextBlock x:Name="PluginText" Text="{l:Tr Clients.Plugin}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+              <Button x:Name="GeneratePluginButton" Content="{l:Tr Clients.GeneratePlugin}" Style="{StaticResource Primer.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" Click="OnGeneratePlugin" />
               <TextBox x:Name="MarketplaceCommand" Style="{StaticResource Workbench.CodeValue}" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=PluginText}" />
               <TextBox x:Name="InstallCommand" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=PluginText}" />
             </StackPanel>

@@ -72,7 +72,7 @@ public sealed partial class App : Application, IDisposable
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
         _view.Follow(Dispatcher, ShowQueue);
         _window.Attach(_view);
-        var host = new HostCommands(HostLocator.Find(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null);
+        var host = new HostCommands(ProgramLocation.FindHost(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null);
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
         _window.AttachClients(new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));

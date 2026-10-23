@@ -78,8 +78,15 @@ internal sealed class ClientsView : INotifyPropertyChanged
     /// <summary>The clients of Q7, in its order, by their names on client-config's command line.</summary>
     public static readonly string[] Names = ["claude-code", "claude-desktop", "codex", "gemini-cli", "qwen-code", "kimi-code", "codebuddy", "opencode", "qwen-agent", "cursor", "vscode-copilot"];
 
-    /// <summary>For Claude Code the plugin is the recommended way (design 4.7): these two commands install it.</summary>
-    public static readonly string[] PluginCommands = ["claude plugin marketplace add ~/EplanMcp/app/claude-plugin", "claude plugin install eplan-mcp@eplanmcp-local"];
+    public IReadOnlyList<string> PluginCommands { get; private set; } = [string.Empty, string.Empty];
+
+    public ClientOutcome? PluginPreview { get; private set; }
+
+    public string PluginDiff => string.Join(Environment.NewLine, new[] { ProjectText.Line(PluginPreview?.File ?? string.Empty) }
+        .Concat(Lines(PluginPreview?.Before).Select(l => "− " + l)).Concat(Lines(PluginPreview?.After).Select(l => "+ " + l)));
+
+    public Task GeneratePluginAsync(bool preview, CancellationToken cancellationToken) =>
+        RunAsync([Cards[0]], preview ? ClientConfigMode.DryRun : ClientConfigMode.Write, cancellationToken, plugin: true);
 
     private readonly HostCommands _host;
     private readonly string _userProfile;
@@ -160,7 +167,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
 
     private static IEnumerable<string> Lines(string? entry) => entry is null ? [] : entry.Split('\n').Select(l => ProjectText.Line(l.TrimEnd('\r')));
 
-    private async Task RunAsync(IReadOnlyList<ClientCard> cards, ClientConfigMode mode, CancellationToken cancellationToken)
+    private async Task RunAsync(IReadOnlyList<ClientCard> cards, ClientConfigMode mode, CancellationToken cancellationToken, bool plugin = false)
     {
         if (cards.Count == 0)
         {
@@ -168,11 +175,39 @@ internal sealed class ClientsView : INotifyPropertyChanged
         }
 
         (State, _mode) = (ClientsState.Running, mode);
+        (_error, _refused) = (null, null);
+        if (plugin)
+        {
+            PluginCommands = [string.Empty, string.Empty];
+        }
+
         Changed();
         try
         {
-            ClientConfigReport report = await _host.ConfigureClientsAsync([.. cards.Select(c => c.Name)], mode, cancellationToken).ConfigureAwait(true);
+            ClientConfigReport report = plugin ? await _host.GeneratePluginAsync(mode == ClientConfigMode.DryRun, cancellationToken).ConfigureAwait(true)
+                : await _host.ConfigureClientsAsync([.. cards.Select(c => c.Name)], mode, cancellationToken).ConfigureAwait(true);
             (_error, _refused, State) = (null, report.Problem, report.Problem is null ? ClientsState.Ready : ClientsState.Failed);
+            if (plugin)
+            {
+                PluginCommands = [string.Empty, string.Empty];
+                PluginPreview = report.Problem is null ? report.Clients.Single() : null;
+                _refused = report.Problem ?? PluginPreview?.Problem;
+                State = _refused is null ? ClientsState.Ready : ClientsState.Failed;
+                if (State == ClientsState.Ready && mode == ClientConfigMode.Write)
+                {
+                    string file = PluginPreview?.File ?? string.Empty;
+                    if (!Path.IsPathFullyQualified(file) || ProjectText.Line(file) != file)
+                    {
+                        throw new HostCommandException(HostFailure.Unreadable, "The marketplace path must be absolute and contain no display control characters.");
+                    }
+
+                    string marketplace = Path.GetDirectoryName(Path.GetDirectoryName(file))!;
+                    PluginCommands = ["claude plugin marketplace add '" + marketplace.Replace("'", "''", StringComparison.Ordinal) + "'", "claude plugin install eplan-mcp@eplanmcp-local"];
+                }
+
+                return;
+            }
+
             foreach (ClientOutcome outcome in report.Clients)
             {
                 if (cards.FirstOrDefault(c => c.Name == outcome.Client) is not { } card)
