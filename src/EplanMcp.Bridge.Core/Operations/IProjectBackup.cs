@@ -1,8 +1,8 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
-/// Copies an open project before a Destructive write (ADR-0013), implemented by the EPLAN adapter layer. Main thread
-/// only, in the write's dispatch but before its transaction; called through <see cref="ProjectBackups"/> only.
+/// Copies an open project for an initial plan backup or before a Destructive write (ADR-0013), implemented by the
+/// EPLAN adapter layer. Main thread only, outside transactions; called through <see cref="ProjectBackups"/> only.
 /// </summary>
 public interface IProjectBackup
 {

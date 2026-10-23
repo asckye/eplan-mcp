@@ -40,7 +40,7 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
 
     /// <summary>
     /// Makes a new, empty folder <c>&lt;data root&gt;\backups\masterdata\&lt;UTC time&gt;\</c> for one master-data backup
-    /// (ADR-0019) and returns it, under the same rules as <see cref="Create"/>.
+    /// (ADR-0019) and returns it, under the same rules as <see cref="Create(WritePlan)"/>.
     /// </summary>
     public string CreateMasterData()
     {
@@ -53,9 +53,12 @@ internal sealed class BackupFolders(HostDataLocations locations, TimeProvider cl
     /// it, <c>&lt;project&gt;.elk</c>. Throws <see cref="IOException"/> when the folder exists already, leads through a
     /// link, or cannot be made, and <see cref="UnauthorizedAccessException"/> when that is not allowed.
     /// </summary>
-    public string Create(WritePlan plan)
+    public string Create(WritePlan plan) => Create(plan.ProjectPath);
+
+    /// <summary>Creates the same new folder for a standalone plan backup, without constructing a write plan.</summary>
+    public string Create(string projectPath)
     {
-        string project = Path.GetFileName(plan.ProjectPath);
+        string project = Path.GetFileName(projectPath);
         if (project.Length == 0 || project is "." or ".." || project.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
         {
             throw new IOException("The project's file name cannot name a backup folder.");
