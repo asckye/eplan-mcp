@@ -25,7 +25,7 @@ eng/scripts/release-addin.ps1 -Tag v0.1.0
 
 脚本还从该 worktree 构建离线宿主及 Large 测试，将示例复制到该 worktree 的 scratch，在隔离管道上运行 `--filter-trait 'Host=Offline'`。无通过测试、有失败或跳过时不上传。临时进程环境恢复后退出，不修改 PATH、全局环境、插件注册或工程师的项目。
 
-成功后输出 `EplanMcp-addin-v0.1.0.zip`、同名 `.zip.sha256`，并只上传这两个文件到**已有草稿**；禁止覆盖已有插件附件。ZIP 仅含三个产品 DLL、插件 SBOM 和标签/提交/测试数量记录，不含 EPLAN 程序集、授权、项目和测试日志。构建、测试输出及包保留在打印出的临时 worktree，供核查；保存需要的内容后，按脚本打印的 `git worktree remove --force -- ...` 命令清理。
+成功后输出 `EplanMcp-addin-v0.1.0.zip`，并只上传这个文件到**已有草稿**；禁止覆盖已有插件附件。ZIP 仅含三个产品 DLL、插件 SBOM 和标签/提交/测试数量记录，不含 EPLAN 程序集、授权、项目和测试日志。构建、测试输出及包保留在打印出的临时 worktree，供核查；保存需要的内容后，按脚本打印的 `git worktree remove --force -- ...` 命令清理。
 
 将脚本打印的以下整行原样粘贴到 GitHub 草稿发布说明中，用实际哈希替换占位符；不要放进列表、行内代码或代码围栏：
 
@@ -44,19 +44,33 @@ gh run rerun <上一步的运行 ID> --repo asckye/eplan-mcp
 
 ## CI 输出与核查
 
-三个作业分别构建/测试 Host 与 Workbench、验证插件、打包；只有打包作业有 `contents`、`id-token`、`attestations` 写权限。插件 ZIP 的实际哈希必须同时符合附件 `.sha256` 和发布说明；标签、提交和测试记录也必须符合。CI 不执行 EPLAN，不自动发布 release。
+三个作业分别构建/测试 Host 与 Workbench、验证插件、打包；只有打包作业有 `contents`、`id-token`、`attestations` 写权限。插件 ZIP 的实际哈希必须符合发布说明中唯一且格式完全一致的 `Add-in SHA-256: …  EplanMcp-addin-vX.Y.Z.zip` 行，上传前再次核对；manifest JSON 的标签、提交和测试记录也必须符合。CI 不执行 EPLAN，不自动发布 release。
 
 Host 为 win-x64 自包含单文件；Workbench 为 win-x64 自包含目录，附经固定哈希验证的 Maple Mono CN 字体及许可证。发布使用独立的 `packages.win-x64.lock.json`，常规 CI 继续使用原锁文件，两者都保持 locked mode。CycloneDX 6.0.0（Apache-2.0，仅构建工具）生成三个项目的 SBOM 后合并，并补充随包运行时、字体和 TIA 主题。编译器固定 Inno Setup 6.7.1；托管镜像中的版本变化会失败，须审查并更新版本固定后重试。
 
-附件包括安装包、维护者插件 ZIP/记录、合并 SBOM、安装文件清单及来源/SBOM 证明包。每个实质附件有 `.sha256`，`SHA256SUMS.txt` 汇总它们；校验和文件不递归计算自己的哈希。安装包及其每个文件均纳入来源证明。插件证明只证明 CI 收到的文件，不能证明维护者开发机的源码构建过程。
+以 `v0.1.0` 为例，发布保留以下 8 个附件：
+
+- `EplanMcp-Setup-0.1.0.exe`：安装包。
+- `SHA256SUMS.txt`：所有其他附件的 SHA-256，包括插件 ZIP、manifest、安装文件清单和两个证明包；不计算自身的哈希。
+- `EplanMcp-v0.1.0.cdx.json`：合并的 CycloneDX SBOM。
+- `EplanMcp-v0.1.0-provenance.sigstore.json`：来源证明包。
+- `EplanMcp-v0.1.0-sbom.sigstore.json`：SBOM 证明包。
+- `EplanMcp-v0.1.0-files.sha256`：安装包内每个文件的路径和 SHA-256，保留供安装后逐文件核查。
+- `EplanMcp-addin-v0.1.0.zip`：维护者构建的插件包。
+- `EplanMcp-addin-v0.1.0.json`：从插件包提取的标签、提交和测试记录（manifest）。
+
+不再为每个附件单独生成 `.sha256` 文件。安装文件清单是上述逐文件核查用的发布附件；用于来源证明的完整 subject 清单另存于工作区 `.local-subjects.sha256`，不上传。安装包及其每个文件仍均纳入来源证明。插件证明只证明 CI 收到的文件，不能证明维护者开发机的源码构建过程。
 
 ```powershell
-Get-FileHash .\EplanMcp-Setup-0.1.0.exe -Algorithm SHA256
-Get-Content .\EplanMcp-Setup-0.1.0.exe.sha256
-gh attestation verify .\EplanMcp-Setup-0.1.0.exe --repo asckye/eplan-mcp
+$asset = 'EplanMcp-Setup-0.1.0.exe'
+$expected = @(Get-Content .\SHA256SUMS.txt | Where-Object { $_ -cmatch "^[0-9a-f]{64}  $([regex]::Escape($asset))$" })
+if ($expected.Count -ne 1) { throw 'Missing or duplicate SHA-256 entry.' }
+$actual = (Get-FileHash -LiteralPath ".\$asset" -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actual -cne $expected[0].Substring(0, 64)) { throw 'SHA-256 mismatch.' }
+gh attestation verify ".\$asset" --repo asckye/eplan-mcp
 ```
 
-离线机器核对 SHA-256；联网时可用 `gh attestation verify` 核验 GitHub 证明。维护者须下载最终安装包，在标准用户、无开发工具、断网的干净 Windows 虚拟机上完成 I1–I10，记录 SmartScreen 和智能应用控制状态。特别验证固定目录及 `/DIR` 覆盖无效、无提权/环境修改、变体注册失败的提示、运行中拒绝升级/卸载、EPLAN 运行时升级后重启生效、拒绝降级、自启动默认开启且可关闭、卸载撤销失败时不删程序、成功卸载保留默认和自定义数据根目录。静默安装不勾选变体，工程师随后运行 `install-addin --variant ...`。
+离线机器用 `Get-FileHash` 与 `SHA256SUMS.txt` 核对 SHA-256；将 `$asset` 换成其他附件名即可核查对应文件。联网时可用 `gh attestation verify` 核验 GitHub 证明。维护者须下载最终安装包，在标准用户、无开发工具、断网的干净 Windows 虚拟机上完成 I1–I10，记录 SmartScreen 和智能应用控制状态。特别验证固定目录及 `/DIR` 覆盖无效、无提权/环境修改、变体注册失败的提示、运行中拒绝升级/卸载、EPLAN 运行时升级后重启生效、拒绝降级、自启动默认开启且可关闭、卸载撤销失败时不删程序、成功卸载保留默认和自定义数据根目录。静默安装不勾选变体，工程师随后运行 `install-addin --variant ...`。
 
 卸载时可选移除 `client-config` 记录的客户端配置，默认保留；静默卸载保留。也可在卸载前手动运行 `eplanmcp client-config --remove`；Claude Code 插件通过其插件命令移除。一台电脑由一个 Windows 用户使用 EplanMcp（Q15）。确认所有证据齐全后，维护者在 GitHub 页面手动发布草稿。
 

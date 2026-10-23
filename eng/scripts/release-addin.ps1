@@ -5,7 +5,7 @@
 .DESCRIPTION
     ADR-0020: requires local EPLAN references, its sample fixture, dotnet, git and an authenticated gh.
     No registration, global settings or published releases are changed. The worktree is retained for inspection.
-    Only the add-in ZIP and checksum are uploaded; copy the printed hash line into the draft's release notes.
+    Only the add-in ZIP is uploaded; copy the printed hash line into the draft's release notes.
 .EXAMPLE
     eng/scripts/release-addin.ps1 -Tag v0.1.0 -WhatIf
 #>
@@ -26,7 +26,7 @@ $version = $Tag.Substring(1)
 $source = (Resolve-Path "$PSScriptRoot/../..").Path
 $worktree = Join-Path ([IO.Path]::GetTempPath()) "EplanMcp-release-$Tag-$([guid]::NewGuid().ToString('N'))"
 $zipName = "EplanMcp-addin-$Tag.zip"
-if (-not $PSCmdlet.ShouldProcess($repository, "Verify pushed $Tag; create detached worktree $worktree; build Release (EplanSign=false); run Host=Offline Large tests; create $zipName and .sha256; gh release upload $Tag <zip> <sha256> --repo $repository (DRAFT ONLY)")) {
+if (-not $PSCmdlet.ShouldProcess($repository, "Verify pushed $Tag; create detached worktree $worktree; build Release (EplanSign=false); run Host=Offline Large tests; create $zipName; gh release upload $Tag <zip> --repo $repository (DRAFT ONLY)")) {
     return
 }
 foreach ($command in 'git', 'dotnet', 'gh') { Get-Command $command -ErrorAction Stop | Out-Null }
@@ -39,7 +39,7 @@ function Get-Draft {
     return $draft
 }
 $draft = Get-Draft
-if (@($draft.assets | Where-Object { $_.name -in $zipName, "$zipName.sha256" }).Count) {
+if (@($draft.assets | Where-Object name -EQ $zipName).Count) {
     throw 'Add-in assets already exist. Review and remove them manually before rebuilding; uploads never clobber.'
 }
 $ref = "refs/tags/$Tag"
@@ -114,9 +114,8 @@ try {
     $zip = Join-Path $output $zipName
     [IO.Compression.ZipFile]::CreateFromDirectory($package, $zip)
     $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
-    "$hash  $zipName" | Set-Content "$zip.sha256" -Encoding ascii
     Get-Draft | Out-Null
-    gh release upload $Tag $zip "$zip.sha256" --repo $repository
+    gh release upload $Tag $zip --repo $repository
     Write-Output "Uploaded to DRAFT only. Add this exact line to its release notes before rerunning release.yml:"
     Write-Output "Add-in SHA-256: $hash  $zipName"
     Write-Output "Tag: $Tag; commit: $commit; offline Large passed: $passed; EplanSign=false."

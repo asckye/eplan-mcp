@@ -25,12 +25,21 @@ $tokens = $null; $errors = $null
 [System.Management.Automation.Language.Parser]::ParseFile("$repositoryRoot/eng/scripts/release-addin.ps1", [ref]$tokens, [ref]$errors) | Out-Null
 if ($errors.Count) { throw ($errors | Out-String) }
 
+$script:allowUploadMock = $false
 function gh {
     param([Parameter(ValueFromRemainingArguments)][string[]] $Arguments)
     if ($Arguments[0..1] -join ' ' -eq 'release view') { return $script:draft | ConvertTo-Json -Depth 10 }
     if ($Arguments[0..1] -join ' ' -eq 'release download') {
+        $patterns = @(for ($index = 0; $index -lt $Arguments.Count; $index++) {
+            if ($Arguments[$index] -eq '--pattern') { $Arguments[$index + 1] }
+        })
+        if ($patterns.Count -ne 1 -or $patterns[0] -cne 'EplanMcp-addin-v0.1.0.zip') { throw 'Only the add-in ZIP should be downloaded.' }
         New-Item -ItemType Directory addin | Out-Null
         Copy-Item "$script:inputDirectory/*" addin
+        return
+    }
+    if ($script:allowUploadMock -and $Arguments[0..1] -join ' ' -eq 'release upload') {
+        $script:uploadArguments = @($Arguments)
         return
     }
     throw 'Unexpected gh command; network access is forbidden in these tests.'
@@ -45,7 +54,7 @@ function dotnet { throw 'WhatIf must not run dotnet.' }
 $testRoot = Join-Path $repositoryRoot ".local/release-tests-$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory $testRoot -Force | Out-Null
 $savedEnvironment = @{}
-foreach ($name in 'TAG', 'GITHUB_REPOSITORY') { $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name) }
+foreach ($name in 'TAG', 'GITHUB_REPOSITORY', 'PROVENANCE_BUNDLE', 'SBOM_BUNDLE') { $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name) }
 Push-Location $testRoot
 try {
     & "$repositoryRoot/eng/scripts/release-addin.ps1" -Tag v0.1.0 -WhatIf
@@ -55,11 +64,14 @@ try {
     $cases = @{
         valid = $null
         published = 'Create the draft'
-        checksum_mismatch = 'Attached SHA-256'
+        wrong_release_tag = 'Create the draft'
+        checksum_mismatch = 'Release notes'
         notes_mismatch = 'Release notes'
         duplicate_hash_note = 'Release notes'
+        notes_wrong_filename = 'Release notes'
         traversal = 'Invalid ZIP entry'
         duplicate_entry = 'Invalid ZIP entry'
+        wrong_tag = 'tag, commit or test evidence'
         wrong_commit = 'tag, commit or test evidence'
         no_tests = 'tag, commit or test evidence'
     }
@@ -69,6 +81,7 @@ try {
         try {
             $script:inputDirectory = (New-Item -ItemType Directory input).FullName
             $manifest = @{ schemaVersion = 1; tag = 'v0.1.0'; commit = 'a' * 40; eplanVersion = '2026'; eplanSign = $false; offlineLargePassed = 5 }
+            if ($case -eq 'wrong_tag') { $manifest.tag = 'v0.1.1' }
             if ($case -eq 'wrong_commit') { $manifest.commit = 'b' * 40 }
             if ($case -eq 'no_tests') { $manifest.offlineLargePassed = 0 }
             $entries = @('bridge/net481/EplanMcp.Bridge.Eplan.dll', 'bridge/net481/EplanMcp.Bridge.Core.dll', 'bridge/net481/EplanMcp.Contracts.dll', 'addin.cdx.json', 'release-addin.json')
@@ -84,13 +97,14 @@ try {
                 }
             } finally { $archive.Dispose() }
             $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$hash  $zipName" | Set-Content "$zipPath.sha256"
             $script:draft = @{ isDraft = $true; tagName = 'v0.1.0'; body = "Add-in SHA-256: $hash  $zipName" }
             switch ($case) {
                 published { $script:draft.isDraft = $false }
-                checksum_mismatch { ('0' * 64) + "  $zipName" | Set-Content "$zipPath.sha256" }
+                wrong_release_tag { $script:draft.tagName = 'v0.1.1' }
+                checksum_mismatch { $script:draft.body = "Add-in SHA-256: $('0' * 64)  $zipName" }
                 notes_mismatch { $script:draft.body = 'Wrong maintainer hash' }
                 duplicate_hash_note { $script:draft.body += "`n$($script:draft.body)" }
+                notes_wrong_filename { $script:draft.body = "Add-in SHA-256: $hash  EplanMcp-addin-v0.1.1.zip" }
             }
             $failure = $null
             try { & $verify } catch { $failure = $_.Exception.Message }
@@ -114,7 +128,6 @@ try {
         'Fixture guide' | Set-Content docs/getting-started/zh-CN.md
         '{}' | Set-Content addin/payload/release-addin.json
         'Fixture archive' | Set-Content "addin/$zipName"
-        'Fixture checksum' | Set-Content "addin/$zipName.sha256"
         'Fixture font' | Set-Content stage/app/workbench/Fonts/MapleMono-CN-Regular.ttf
         # Only the version resource matters here; these binaries are never executed.
         Copy-Item ([Environment]::ProcessPath) stage/app/workbench/System.Private.CoreLib.dll
@@ -131,6 +144,48 @@ try {
         if ($merged.bomFormat -ne 'CycloneDX' -or @($merged.components | Where-Object { $_.'bom-ref' -eq 'shared' }).Count -ne 1 -or
             @($merged.dependencies | Where-Object ref -eq shared).dependsOn.Count -ne 3) { throw 'SBOM merge lost components or dependency edges.' }
         Write-Output 'PASS merged SBOM deduplication and dependency union'
+
+        'Fixture installer' | Set-Content dist/EplanMcp-Setup-0.1.0.exe
+        'Fixture payload list' | Set-Content dist/EplanMcp-v0.1.0-files.sha256
+        'Fixture provenance' | Set-Content provenance.json
+        'Fixture SBOM attestation' | Set-Content sbom.json
+        $env:PROVENANCE_BUNDLE = (Resolve-Path provenance.json).Path
+        $env:SBOM_BUNDLE = (Resolve-Path sbom.json).Path
+        $hash = (Get-FileHash "dist/$zipName" -Algorithm SHA256).Hash.ToLowerInvariant()
+        $attachStep = $root.Children['jobs'].Children['package'].Children['steps'].Children |
+            Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('name')) -and $_.Children['name'].Value -eq 'Attach checksums and attestations to the draft only' }
+        $attach = [scriptblock]::Create($attachStep.Children['run'].Value)
+        $script:allowUploadMock = $true
+        foreach ($case in 'valid', 'rerun', 'published', 'wrong_tag', 'changed_hash', 'duplicate_hash_note') {
+            $script:draft = @{ isDraft = $true; tagName = 'v0.1.0'; body = "Add-in SHA-256: $hash  $zipName" }
+            switch ($case) {
+                published { $script:draft.isDraft = $false }
+                wrong_tag { $script:draft.tagName = 'v0.1.1' }
+                changed_hash { $script:draft.body = "Add-in SHA-256: $('0' * 64)  $zipName" }
+                duplicate_hash_note { $script:draft.body += "`n$($script:draft.body)" }
+            }
+            $script:uploadArguments = $null
+            $failure = $null
+            try { & $attach } catch { $failure = $_.Exception.Message }
+            if ($case -in 'valid', 'rerun') {
+                if ($failure -or -not $script:uploadArguments) { throw "Draft upload failed: $failure" }
+                $expectedAssets = @('EplanMcp-Setup-0.1.0.exe', $zipName, 'EplanMcp-addin-v0.1.0.json', 'EplanMcp-v0.1.0.cdx.json',
+                    'EplanMcp-v0.1.0-files.sha256', 'EplanMcp-v0.1.0-provenance.sigstore.json', 'EplanMcp-v0.1.0-sbom.sigstore.json', 'SHA256SUMS.txt')
+                $actualAssets = @(Get-ChildItem dist -File | ForEach-Object Name)
+                if (Compare-Object $expectedAssets $actualAssets) { throw 'Unexpected release asset list or per-asset checksum sidecar.' }
+                $checksums = @(Get-Content dist/SHA256SUMS.txt)
+                $expectedChecksums = @($expectedAssets | Where-Object { $_ -cne 'SHA256SUMS.txt' } | Sort-Object | ForEach-Object {
+                    "$((Get-FileHash "dist/$_" -Algorithm SHA256).Hash.ToLowerInvariant())  $_"
+                })
+                if ($checksums.Count -ne 7 -or (Compare-Object $expectedChecksums $checksums -SyncWindow 0)) { throw 'SHA256SUMS must cover every other release asset exactly once.' }
+                $uploaded = @($script:uploadArguments | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | ForEach-Object { Split-Path $_ -Leaf })
+                if (Compare-Object @($expectedAssets | Where-Object { $_ -cne $zipName }) $uploaded) { throw 'Upload must preserve the maintainer ZIP and attach all workflow outputs.' }
+            } else {
+                $expectedFailure = if ($case -in 'published', 'wrong_tag') { 'Release is no longer a draft' } else { 'Maintainer hash changed' }
+                if (-not $failure -or -not $failure.Contains($expectedFailure) -or $script:uploadArguments) { throw "${case}: unsafe draft upload was not refused: $failure" }
+            }
+            Write-Output "PASS draft attachment $case"
+        }
     } finally { Pop-Location }
     Write-Output 'PASS YAML, action pins, embedded PowerShell, release script parser and WhatIf'
 }

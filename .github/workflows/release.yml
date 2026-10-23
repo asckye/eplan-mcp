@@ -119,10 +119,9 @@ jobs:
           $draft = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json isDraft,tagName,body | ConvertFrom-Json
           if (-not $draft.isDraft -or $draft.tagName -cne $env:TAG) { throw 'Create the draft, run release-addin.ps1, record its hash in the notes, then rerun this workflow.' }
           $zipName = "EplanMcp-addin-$env:TAG.zip"
-          gh release download $env:TAG --repo $env:GITHUB_REPOSITORY --pattern $zipName --pattern "$zipName.sha256" --dir addin
+          gh release download $env:TAG --repo $env:GITHUB_REPOSITORY --pattern $zipName --dir addin
           $hash = (Get-FileHash "addin/$zipName" -Algorithm SHA256).Hash.ToLowerInvariant()
           $line = "$hash  $zipName"
-          if ((Get-Content "addin/$zipName.sha256" -Raw).Trim() -cne $line) { throw 'Attached SHA-256 does not match the add-in ZIP.' }
           $noteLines = @($draft.body -split '\r?\n' | Where-Object { $_.StartsWith('Add-in SHA-256:') })
           if ($noteLines.Count -ne 1 -or $noteLines[0] -cne "Add-in SHA-256: $line") { throw 'Release notes must contain the exact maintainer SHA-256 line.' }
           $allowed = @('bridge/net481/EplanMcp.Bridge.Eplan.dll', 'bridge/net481/EplanMcp.Bridge.Core.dll', 'bridge/net481/EplanMcp.Contracts.dll', 'addin.cdx.json', 'release-addin.json')
@@ -179,7 +178,7 @@ jobs:
           Copy-Item addin/payload/bridge stage/app/bridge -Recurse
           Copy-Item addin/payload/addin.cdx.json stage/boms/Addin.json
           New-Item -ItemType Directory dist -Force | Out-Null
-          Copy-Item "addin/EplanMcp-addin-$env:TAG.zip*" dist
+          Copy-Item "addin/EplanMcp-addin-$env:TAG.zip" dist
           Copy-Item addin/payload/release-addin.json "dist/EplanMcp-addin-$env:TAG.json"
           $components = @{}; $dependencies = @{}
           foreach ($file in Get-ChildItem stage/boms -Filter *.json) {
@@ -236,9 +235,8 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           Copy-Item $env:PROVENANCE_BUNDLE "dist/EplanMcp-$env:TAG-provenance.sigstore.json"
           Copy-Item $env:SBOM_BUNDLE "dist/EplanMcp-$env:TAG-sbom.sigstore.json"
-          $lines = @(Get-ChildItem dist -File | Where-Object Name -NotLike '*.sha256' | ForEach-Object {
+          $lines = @(Get-ChildItem dist -File | Where-Object Name -NE 'SHA256SUMS.txt' | Sort-Object Name | ForEach-Object {
             $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$hash  $($_.Name)" | Set-Content "$($_.FullName).sha256" -Encoding ascii
             "$hash  $($_.Name)"
           })
           $lines | Set-Content dist/SHA256SUMS.txt -Encoding ascii
@@ -249,5 +247,5 @@ jobs:
           $noteLines = @($draft.body -split '\r?\n' | Where-Object { $_.StartsWith('Add-in SHA-256:') })
           if ($noteLines.Count -ne 1 -or $noteLines[0] -cne "Add-in SHA-256: $hash  $zip") { throw 'Maintainer hash changed during the build.' }
           # Preserve maintainer assets; only replace outputs of this workflow on a rerun.
-          $files = @(Get-ChildItem dist -File | Where-Object { $_.Name -notin $zip, "$zip.sha256" } | ForEach-Object FullName)
+          $files = @(Get-ChildItem dist -File | Where-Object Name -NE $zip | ForEach-Object FullName)
           gh release upload $env:TAG @files --repo $env:GITHUB_REPOSITORY --clobber
