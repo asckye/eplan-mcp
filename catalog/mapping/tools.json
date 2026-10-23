@@ -3764,10 +3764,13 @@
         "macro.get"
       ],
       "api": [
+        "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.MultiLine",
         "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.#ctor",
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants(Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType)",
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,System.Boolean)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,System.Boolean)",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
         "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
         "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
@@ -3778,8 +3781,10 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.Name",
         "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationType",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationTypes",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Size",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Variant",
         "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
         "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
         "P:Eplan.EplApi.DataModel.Project.ProjectName",
@@ -3787,8 +3792,13 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "T:Eplan.EplApi.Base.PathMap",
         "T:Eplan.EplApi.Base.PointD",
+        "T:Eplan.EplApi.DataModel.EObjects.Cable",
+        "T:Eplan.EplApi.DataModel.EObjects.PLC",
+        "T:Eplan.EplApi.DataModel.EObjects.Terminal",
         "T:Eplan.EplApi.DataModel.Function",
         "T:Eplan.EplApi.DataModel.MasterData.WindowMacro",
+        "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums",
+        "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType",
         "T:Eplan.EplApi.DataModel.Placement",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectManager",
@@ -3826,6 +3836,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PlanMacroInspectTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanMacroInspectTests.cs"
           }
         ],
         "operationTests": [
@@ -3833,6 +3848,11 @@
             "name": "MacroGetOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroGetOperationTests.cs"
+          },
+          {
+            "name": "PlanMacroInspectOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanMacroInspectOperationTests.cs"
           }
         ]
       },
@@ -3863,6 +3883,8 @@
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.#ctor",
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants(Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType)",
         "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,System.Boolean)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,System.Boolean)",
         "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
         "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
@@ -3887,8 +3909,10 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationType",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationTypes",
         "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Size",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Variant",
         "P:Eplan.EplApi.DataModel.Page.AllPlacements",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Page.PageType",
@@ -3906,6 +3930,9 @@
         "T:Eplan.EplApi.Base.PathMap",
         "T:Eplan.EplApi.Base.PointD",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.EObjects.Cable",
+        "T:Eplan.EplApi.DataModel.EObjects.PLC",
+        "T:Eplan.EplApi.DataModel.EObjects.Terminal",
         "T:Eplan.EplApi.DataModel.Function",
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
         "T:Eplan.EplApi.DataModel.MasterData.WindowMacro",
@@ -4045,6 +4072,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PlanMacroInspectTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanMacroInspectTests.cs"
           }
         ],
         "operationTests": [

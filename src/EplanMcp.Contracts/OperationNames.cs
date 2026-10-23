@@ -6,6 +6,9 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Read-only complete macro prediction input. Arguments: PlanMacroInspectArgs; data: PlanMacroInspectData.</summary>
+    public const string PlanMacroInspect = "plan.macro.inspect";
+
     /// <summary>Read-only whitelist preview. Arguments: ActionRunArgs; data: WritePlan.</summary>
     public const string ActionRunPlan = "action.plan";
     /// <summary>Export-only whitelist execution. Arguments: ActionRunArgs; data: ActionRunData.</summary>

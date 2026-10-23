@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core.Operations;
 
@@ -20,25 +21,43 @@ internal sealed class EplanMacroReader : IMacroReader
         return string.IsNullOrWhiteSpace(resolved) || resolved.Contains("$(") ? null : resolved;
     }
 
-    public MacroContent ReadMacro(string projectPath, string macroPath)
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
 
         // Opening reads the file only: S10 saw no change to the project's files or functions (api-notes A14).
         using var macro = new WindowMacro();
-        macro.Open(macroPath, project);
+        if (defaultMultiLine)
+        {
+            macro.Open(macroPath, project, false);
+        }
+        else
+        {
+            macro.Open(macroPath, project);
+        }
+        List<KeyValuePair<string, List<int>>> representations = [.. macro.RepresentationTypes
+            .Select(t => new KeyValuePair<string, List<int>>(t.ToString(), [.. macro.GetVariants(t)]))];
+        if (defaultMultiLine && representations.Any(r => r.Key == "MultiLine" && r.Value.Contains(0)))
+        {
+            macro.Open(macroPath, project, WindowMacro.Enums.RepresentationType.MultiLine, 0, false);
+        }
         Placement[] objects = macro.Objects;
         PointD size = macro.Size;
         return new MacroContent
         {
-            Representations = [.. macro.RepresentationTypes.Select(t => new KeyValuePair<string, List<int>>(t.ToString(), [.. macro.GetVariants(t)]))],
+            Complete = true,
+            Representation = macro.RepresentationType.ToString(),
+            Variant = macro.Variant,
+            FunctionCount = objects.OfType<Function>().Count(),
+            Representations = representations,
             Width = size.X,
             Height = size.Y,
             Functions =
             [
                 .. objects.OfType<Function>().Select(f => new MacroFunctionRecord
                 {
+                    Kind = f is Terminal ? "terminal" : f is PLC ? "plc" : f is Cable ? "cable" : "function",
                     Name = f.Name ?? string.Empty,
                     VisibleName = f.VisibleName ?? string.Empty,
                     Category = f.FunctionCategory.ToString(),

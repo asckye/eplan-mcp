@@ -66,11 +66,11 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 219,
-      "byTools": 212,
+      "implemented": 221,
+      "byTools": 214,
       "partial": 39,
-      "automatedTest": 212,
-      "liveVerified": 147,
+      "automatedTest": 214,
+      "liveVerified": 149,
       "envBlocked": 122,
       "undocumented": 134
     },
@@ -102,11 +102,11 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 112,
-      "byTools": 112,
+      "implemented": 114,
+      "byTools": 114,
       "partial": 0,
-      "automatedTest": 112,
-      "liveVerified": 79,
+      "automatedTest": 114,
+      "liveVerified": 81,
       "envBlocked": 77,
       "undocumented": 68
     }
@@ -169,8 +169,8 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 5,
-      "liveVerified": 5
+      "implemented": 7,
+      "liveVerified": 7
     },
     {
       "scope": "Eplan.EplApi.DataModel.Planning",
@@ -1079,15 +1079,15 @@
       "operations": [
         "macro.get"
       ],
-      "apiIds": 29,
-      "operationGroups": 18,
+      "apiIds": 39,
+      "operationGroups": 20,
       "dataDictionary": 0,
-      "dependencies": 11,
+      "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_get.md",
       "small": 2,
       "medium": 1,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A14"
       ]
@@ -1099,10 +1099,10 @@
         "macro.insert.execute",
         "macro.insert.plan"
       ],
-      "apiIds": 77,
-      "operationGroups": 35,
+      "apiIds": 84,
+      "operationGroups": 37,
       "dataDictionary": 0,
-      "dependencies": 42,
+      "dependencies": 45,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 4,
@@ -1138,7 +1138,7 @@
       "spec": "docs/tools/eplan_macro_list.md",
       "small": 2,
       "medium": 1,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A4"
       ]
@@ -3393,6 +3393,16 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationType",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationTypes",
       "layer": "operation",
       "status": "live_verified",
@@ -3404,6 +3414,16 @@
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Size",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Variant",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
