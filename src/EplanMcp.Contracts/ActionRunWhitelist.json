@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "verification": { "major": 2026, "version": "2026.0.3.25421", "variant": "Electric P8", "date": "2026-10-22", "source": "S26 / A40; backup: S24 / A30" },
+  "limitations": "Fingerprint readback only. Export wrapping without S26's transaction is unverified. Other patches/variants are unverified.",
+  "text": { "minLength": 1, "maxLength": 100, "noControlsOrQuotes": true, "noLeadingSlash": true },
+  "lists": { "LAYER": "LAYER1", "VISIBLE": "VISIBLE1", "PROPERTYID": "PROPERTYID1", "PROPERTYVALUE": "PROPERTYVALUE1", "minItems": 1, "maxItems": 1 },
+  "entries": [
+    { "entry": "backup/MASTERDATA", "action": "backup", "tier": "export", "scope": "system", "seconds": 30, "source": 2,
+      "fixed": { "TYPE": "MASTERDATA" }, "derived": ["SOURCEPATH", "FILENAME", "DESTINATIONPATH"], "parameters": { "MDTYPE": "ARTICLES|LANGUAGES", "ARCHIVENAME": "archive" }, "output": "ARCHIVENAME", "extension": ".zw6|.zw7", "effects": "S24: database unchanged; QuietMode archive verified separately; output layout unverified." },
+    { "entry": "changelayer", "action": "changelayer", "tier": "write", "scope": "project", "projectParameter": "PROJECTNAME", "seconds": 30, "source": 3,
+      "fixed": {}, "parameters": { "LAYER1": "text", "VISIBLE1": "0|1" }, "effects": "Visibility rollback verified; Layer.eod/eox bytes may differ after rollback. Commit, one-step undo and undo history unverified." },
+    { "entry": "graphicallayertable/EXPORT", "action": "graphicallayertable", "tier": "export", "scope": "project", "projectParameter": "PROJECTNAME", "seconds": 30, "source": 41,
+      "fixed": { "TYPE": "EXPORT" }, "parameters": { "EXPORTFILE": "file" }, "output": "EXPORTFILE", "extension": ".elc", "effects": "S26: observable project fingerprints unchanged." },
+    { "entry": "partsmanagementapi/EXPORTPARTS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 66,
+      "fixed": { "TYPE": "EXPORTPARTS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22001", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged. Execution-time window disablement needs engineer observation." },
+    { "entry": "partsmanagementapi/EXPORTMANUFACTURERS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 67,
+      "fixed": { "TYPE": "EXPORTMANUFACTURERS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22900", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged; exact existing-record filter only." },
+    { "entry": "partsmanagementapi/EXPORTCONSTRUCTIONS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 68,
+      "fixed": { "TYPE": "EXPORTCONSTRUCTIONS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22931", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged; exact existing-record filter only." },
+    { "entry": "partsmanagementapi/EXPORTCONNECTIONPATTERNS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 69,
+      "fixed": { "TYPE": "EXPORTCONNECTIONPATTERNS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22945", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged; exact existing-record filter only." },
+    { "entry": "partsmanagementapi/EXPORTACCESSORYLISTS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 70,
+      "fixed": { "TYPE": "EXPORTACCESSORYLISTS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22960", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged; exact existing-record filter only." },
+    { "entry": "partsmanagementapi/EXPORTACCESSORYPLACEMENTS", "action": "partsmanagementapi", "tier": "export", "scope": "system", "seconds": 30, "source": 71,
+      "fixed": { "TYPE": "EXPORTACCESSORYPLACEMENTS", "FORMAT": "XPamExportXml" }, "parameters": { "EXPORTFILE": "file", "PROPERTYID1": "22970", "PROPERTYVALUE1": "text" }, "output": "EXPORTFILE", "extension": ".xml", "effects": "S26: library/project unchanged; exact existing-record filter only." },
+    { "entry": "plcservice/BUSDATAEXPORT", "action": "plcservice", "tier": "export", "scope": "project", "projectParameter": "PROJECTNAME", "seconds": 60, "source": 72,
+      "fixed": { "TYPE": "BUSDATAEXPORT", "OVERWRITE": "0", "LANGUAGE": "de_DE" }, "parameters": { "CONFIGURATIONPROJECT": "text", "CONVERTERID": "PlcDcXMLExchangerUniversal|PlcDcAMLExchangerGeneral", "DESTINATIONFILE": "file", "FORMAT?": "AutomationML AR APC V1.4.0" }, "output": "DESTINATIONFILE", "extension": ".pbf|.aml", "effects": "S26: AML changed Blob/Function files, cause unverified; no harmless exemption. Execution-time window disablement unverified. Phoenix1 only tested." },
+    { "entry": "projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS", "action": "projectmanagement", "tier": "export", "scope": "project", "projectParameter": "PROJECTNAME", "seconds": 30, "source": 83,
+      "fixed": { "TYPE": "EXPORTPROPERTYPLACEMENTSSCHEMAS" }, "parameters": { "FILENAME": "file" }, "output": "FILENAME", "extension": ".xml", "effects": "S26: observable project fingerprints unchanged." },
+    { "entry": "XEsUserPropertiesExportAction", "action": "XEsUserPropertiesExportAction", "tier": "export", "scope": "project", "projectParameter": "Project", "seconds": 30, "source": 150,
+      "fixed": {}, "parameters": { "XMLFile": "file" }, "output": "XMLFile", "extension": ".xml", "effects": "S26: observable project fingerprints unchanged." }
+  ]
+}

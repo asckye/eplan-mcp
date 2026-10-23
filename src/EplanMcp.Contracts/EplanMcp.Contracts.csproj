@@ -7,4 +7,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>EplanMcp.Contracts</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ActionRunWhitelist.json" />
+  </ItemGroup>
 </Project>

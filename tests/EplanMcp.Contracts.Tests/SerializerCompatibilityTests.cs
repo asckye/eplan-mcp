@@ -20,6 +20,19 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new ActionParameter(),
+        new ActionParameter { Name = "PROJECTNAME", Value = "Line1" },
+        new ActionRunArgs(),
+        new ActionRunArgs { Entry = "changelayer", Project = "Line1", Fingerprint = "f", Parameters = [new() { Name = "LAYER1", Value = "EPLAN100" }, new() { Name = "VISIBLE1", Value = "0" }] },
+        new ActionRunArgs { Entry = "XEsUserPropertiesExportAction", Project = "Line1", Directory = @"D:\exports\fresh", Parameters = [new() { Name = "XMLFile", Value = "properties.xml" }] },
+        new ActionRunData(),
+        new ActionRunData
+        {
+            Target = "Line1", Parameters = [new() { Name = "TYPE", Value = "EXPORT" }, new() { Name = "Project", Value = "Line1" }, new() { Name = "XMLFile", Value = "properties.xml" }],
+            Before = new() { ["count:pages"] = "32", ["file:Layer.eod"] = "42\t2026-10-22T00:00:00.0000000Z" },
+            After = new() { ["count:pages"] = "32", ["file:Layer.eod"] = "42\t2026-10-22T00:00:00.0000000Z" },
+            EplanMessages = ["S000001: note"], EplanMessageCount = 1, Warning = "Fingerprint only.",
+        },
         new HandshakeRequest { ProtocolVersion = 1, MinProtocolVersion = 1, HostVersion = "0.1.0" },
         new HandshakeResult
         {
