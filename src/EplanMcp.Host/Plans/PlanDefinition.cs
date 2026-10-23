@@ -50,7 +50,11 @@ internal sealed record PlanStep(
     ImmutableArray<PlanChange> PlannedChanges,
     ImmutableArray<int> DependsOn,
     JsonElement? Prediction,
-    bool Effective);
+    bool Effective)
+{
+    public ImmutableDictionary<string, string> Details { get; init; } = ImmutableDictionary<string, string>.Empty;
+    public JsonElement? Coverage { get; init; }
+}
 
 /// <summary>All three collections are exact sets; multiple filters intersect (design 4.3).</summary>
 internal sealed record PlanScope(ImmutableArray<string> Pages, ImmutableArray<string> Structures, ImmutableArray<PlanLocator> Locators);
