@@ -29,17 +29,25 @@ internal sealed class ActionRunCatalog
     {
         name ??= string.Empty;
         if (!Entries.TryGetValue(name, out JsonObject? entry))
-        { throw Denied(); }
+        {
+            throw Denied();
+        }
         if (Disabled.ContainsKey(name))
-        { throw Denied("This entry is disabled in this Host process; ask the engineer to reverify it."); }
+        {
+            throw Denied("This entry is disabled in this Host process; ask the engineer to reverify it.");
+        }
         var problems = new List<string>();
         bool projectEntry = Text(entry, "scope") == "project";
         if (projectEntry ? string.IsNullOrWhiteSpace(project) : project is not null)
-        { problems.Add("Supply a non-empty project only for project entries."); }
+        {
+            problems.Add("Supply a non-empty project only for project entries.");
+        }
         var args = new ActionRunArgs { Entry = name, Project = project };
         JsonProperty[] given = arguments.ValueKind == JsonValueKind.Object ? [.. arguments.EnumerateObject()] : [];
         if (arguments.ValueKind != JsonValueKind.Object)
-        { problems.Add("arguments must be an object."); }
+        {
+            problems.Add("arguments must be an object.");
+        }
         var allowed = new HashSet<string>(StringComparer.Ordinal);
         foreach ((string expanded, JsonNode? rule) in entry["parameters"]!.AsObject())
         {
@@ -48,7 +56,9 @@ internal sealed class ActionRunCatalog
             allowed.Add(key);
             JsonProperty[] matches = [.. given.Where(p => p.Name == key)];
             if (matches.Length == 0 && expanded.EndsWith('?'))
-            { continue; }
+            {
+                continue;
+            }
             JsonElement value = matches.Length == 1 ? matches[0].Value : default;
             string? literal = value.ValueKind == JsonValueKind.String ? value.GetString() : null;
             string kind = rule!.GetValue<string>();
@@ -64,13 +74,19 @@ internal sealed class ActionRunCatalog
                 valid &= literal.Length > extension.Length && literal.Length <= 100;
             }
             if (!valid)
-            { problems.Add(key + " is missing, duplicated or invalid."); }
+            {
+                problems.Add(key + " is missing, duplicated or invalid.");
+            }
             else
-            { args.Parameters.Add(new() { Name = expanded.TrimEnd('?'), Value = literal! }); }
+            {
+                args.Parameters.Add(new() { Name = expanded.TrimEnd('?'), Value = literal! });
+            }
         }
         problems.AddRange(given.Where(p => !allowed.Contains(p.Name)).Select(p => p.Name + " is not allowed for this entry."));
         if (args.Entry == "plcservice/BUSDATAEXPORT" && args.Parameters.Any(p => p.Name == "FORMAT") && !args.Parameters.Any(p => p.Name == "CONVERTERID" && p.Value == "PlcDcAMLExchangerGeneral"))
-        { problems.Add("FORMAT requires PlcDcAMLExchangerGeneral."); }
+        {
+            problems.Add("FORMAT requires PlcDcAMLExchangerGeneral.");
+        }
         if (problems.Count > 0)
         {
             BridgeError error = ToolResults.InvalidArgumentError(problems);
