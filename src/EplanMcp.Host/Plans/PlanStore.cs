@@ -173,7 +173,9 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
-            { return new FileStream(_paths.Check(Path.Combine(_paths.Root, name)), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None); }
+            {
+                return new FileStream(_paths.Check(Path.Combine(_paths.Root, name)), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
             catch (IOException ex) when (ex.HResult == unchecked((int)0x80070020) && Environment.TickCount64 < deadline)
             {
                 await Task.Delay(20, cancellationToken).ConfigureAwait(false);

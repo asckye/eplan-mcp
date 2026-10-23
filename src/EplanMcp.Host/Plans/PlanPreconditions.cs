@@ -43,7 +43,9 @@ internal static class PlanPreconditions
 
         conditions.AddRange((resources ?? []).Select(r => r.FileHash).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(h => new PlanResourceHash(h)));
         if (binding is not null)
-        { conditions.Add(binding); }
+        {
+            conditions.Add(binding);
+        }
         return [.. conditions];
     }
 }

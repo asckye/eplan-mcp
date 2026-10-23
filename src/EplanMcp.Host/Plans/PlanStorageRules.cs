@@ -8,7 +8,9 @@ internal static class PlanStorageRules
     public static void Validate(PlanRecord record, string id)
     {
         try
-        { ValidateCore(record, id); }
+        {
+            ValidateCore(record, id);
+        }
         catch (Exception ex) when (ex is ArgumentException or NullReferenceException or InvalidOperationException)
         {
             throw new JsonException("The plan record contains invalid contract values.", ex);

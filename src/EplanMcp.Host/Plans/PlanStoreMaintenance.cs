@@ -84,7 +84,9 @@ internal sealed partial class PlanStore
         {
             PlanRecord record;
             try
-            { record = ReadKnown(file); }
+            {
+                record = ReadKnown(file);
+            }
             catch (Exception ex) when (ex is JsonException or NotSupportedException or ArgumentException or InvalidOperationException)
             {
                 string id = Path.GetFileNameWithoutExtension(file);
