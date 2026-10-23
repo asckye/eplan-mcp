@@ -1,9 +1,9 @@
 # EplanMcp
 
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
-工程师始终掌握控制权：写入前审批，事后可审计，出错可回滚，在 EPLAN 中可以用 Ctrl+Z 撤销。
+工程师始终掌握控制权：真实项目写入逐次审批，操作可审计。
 
-> **状态：M4 工程工作流已达到完成标准**（2026-10-20），M5 可运维进行中。28 个工具（15 个只读，5 个写入，8 个工作流工具：检查、更新报表、PDF/DXF/图片导出，以及删页、页面重编号、设备编号这 3 个 Destructive 工具）在 EPLAN 2026 Electric P8 上对示例项目的 scratch 副本实机验证（[api-notes](docs/eplan/api-notes.md) A17–A20）。写入先审批（EPLAN 中的对话框，[ADR-0011](docs/adr/0011-approval-out-of-band.md)），在事务中执行，可以用 Ctrl+Z 撤销，写进审计哈希链；Destructive 操作前自动备份（[ADR-0013](docs/adr/0013-destructive-backup.md)）。43 个 [Large 测试](tests/EplanMcp.Large.Tests/README.md)在开发机上全部通过；[Agent 评测](evals/README.md)中每道写入题和工作流题都已解出，需要工程师在场审批的第二批 Destructive 题 3/3。M1 于 2026-10-18、M2 于 2026-10-19、M3 于 2026-10-20 达到完成标准。**下一步**：M5 可运维（[M5 设计](docs/design/2026-10-20-m5-operability.md)）：Workbench（WPF，[ADR-0017](docs/adr/0017-workbench-wpf-tia-theme.md)）、按用户安装的安装包、Claude Code 插件、离线宿主与实机 CI。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：v0.1.0 预览版，64 个工具**。已于 2026-10-22 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.1.0)，供测试使用。M0–M4 已完成；M4c 的 PDF 注释导入待有效样本，翻译库导入待验证；M5 虚拟机连接尚未实现，干净机器验收待完成；M6 已有工程包与资源工具，计划工具待实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 
@@ -17,24 +17,50 @@ EplanMcp Bridge（EPLAN 插件，.NET Framework 4.8.1）：在 EPLAN 主线程�
 EPLAN 2026（你正在使用的界面）
 ```
 
-## 运行要求（计划）
-- Windows 10/11 x64
-- EPLAN Electric P8 或 Pro Panel 2026；2024、2025、2027 预计可用，实测后列入支持范围（[ADR-0009](docs/adr/0009-supported-eplan-versions.md)）。2022、2023 暂不支持
-- 包含 **API 扩展**的 EPLAN 授权。具体是哪一种授权（开发者授权或运行时授权）以及签名方式，正在 M1 中验证，见 [ADR 索引](docs/adr/README.md) 中的 ADR-0007。
+## 运行要求
 
-## 现在怎么用（开发版，只读）
-还没有安装包（M5）；现在要从源码构建。只能读取项目，写入在 M3 中实现。
+- Windows 10/11 x64
+- EPLAN 2026 Electric P8 或 Pro Panel（实测版本 2026.0.3）；2024、2025、2027 尚未验证，留待 M7（[ADR-0009](docs/adr/0009-supported-eplan-versions.md)）。2022、2023 暂不支持
+- 包含 **API 扩展**、允许加载未签名插件的 EPLAN 授权；0.x 发布未签名插件（[ADR-0007](docs/adr/0007-licensing-and-distribution.md)）
+
+## 安装
+
+从 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 下载 `EplanMcp-Setup-<version>.exe`（当前为 [v0.1.0](https://github.com/asckye/eplan-mcp/releases/tag/v0.1.0)，只需下载这一个文件）。按用户安装，无需管理员权限，可离线安装；下载校验、插件注册、客户端连接和卸载按[中文入门指南](docs/getting-started/zh-CN.md)操作。
+
+## 工具概览
+
+默认 `full` 提供全部 64 个工具；`serve --profile core` 提供固定的 25 个常用工具。已实现清单见[工具映射](catalog/mapping/tools.json)，参数与限制见[工具规格](docs/tools/)（目录中也包含待实现的规格）。
+
+| 分组 | 能做什么 |
+|---|---|
+| 读取 | 查询项目、页、设备、连接、电缆、端子、PLC、部件、修订、消息、检查结果、宏与占位符 |
+| 写入 | 新建项目、建页与改页、放置与修改设备、插入宏、应用占位符值、生成连接、检查、更新报表、设置语言 |
+| Destructive | 删页、页面/设备/端子/电缆/连接编号、生成电缆、项目翻译、删除语言、导入清单与 PLC 数据 |
+| 导出 | PDF、DXF、图片、PXF、部件清单、标签、未翻译文本 |
+| 导入 | DXF/DWG、PXF、设备/部件清单、PLC 数据 |
+| 部件库与翻译库 | 系统部件库查询、导入、同步与导出；翻译库导出（导入待验证） |
+| 工程包与资源 | 导入、列出、查询、构建工程包；搜索、读取与更新资源知识 |
+
+## 安全模型
+
+普通项目写入在 scratch 内自动放行；真实项目默认逐次经 Workbench 或 EPLAN 对话框审批（[ADR-0005](docs/adr/0005-safety-model.md)、[ADR-0011](docs/adr/0011-approval-out-of-band.md)）。Destructive 操作在 scratch 中也要审批，执行前自动备份，备份失败不执行（[ADR-0013](docs/adr/0013-destructive-backup.md)）。
+
+调用记录于审计哈希链；结果未知时暂停相关项目与 EPLAN 实例的写入，待工程师核实并经审批渠道确认后解除（[ADR-0010](docs/adr/0010-write-outcomes.md)）。系统部件库写入同样每次审批并先备份，不能依靠 Ctrl+Z 恢复部件库（[ADR-0019](docs/adr/0019-master-data-writes.md)）。
+
+## 从源码构建（开发者）
+
+开发环境见 [CONTRIBUTING.md](CONTRIBUTING.md)。源码版同样支持读写，遵循上述安全模型。
 
 1. 构建 eplanmcp 和 EPLAN 插件：
    ```powershell
    dotnet build src\EplanMcp.Host -c Release
    dotnet build src\EplanMcp.Bridge.Eplan -c Release
    ```
-2. 在每个要用的 EPLAN 变体中注册一次插件（会启动 EPLAN）：
+2. 在每个要用的 EPLAN 变体中注册一次插件（会启动 EPLAN；脚本默认使用 Release 构建，插件重建后需重启 EPLAN）：
    ```powershell
    eng\scripts\eplan-addin.ps1 -Action register -Variant 'Electric P8'
    ```
-3. 在 EPLAN 中打开项目，然后自检，每一项都应是 OK 或 INFO：
+3. 在 EPLAN 中打开项目，然后自检，按输出处理 WARN / FAIL：
    ```powershell
    src\EplanMcp.Host\bin\Release\net10.0\eplanmcp.exe doctor
    ```
@@ -44,7 +70,7 @@ EPLAN 2026（你正在使用的界面）
    ```
 5. 在 Claude Code 中直接用中文提问，例如"这个项目有多少页""-K1 在哪几页上""哪些电机没有部件""=GAA+A1-FC1 的负载侧接到哪些设备"。
 
-可以查询项目概况、页、设备、连接、部件、系统消息、已有的检查结果，以及 EPLAN 宏目录中的窗口宏，共 15 个只读工具，不会修改项目。
+验证与评测见 [Large 测试](tests/EplanMcp.Large.Tests/README.md)和 [Agent 评测](evals/README.md)。
 
 ## 开发工具（新的开发电脑上安装）
 
@@ -80,7 +106,7 @@ node eng/scripts/apply-archify-font.mjs
 | 怎么测试 | [测试策略](docs/standards/testing.md) |
 | Workbench 界面怎么做 | [Workbench 界面规范](docs/standards/workbench-ui.md) |
 | 安全 | [安全标准与威胁模型](docs/standards/security.md) · [SECURITY.md](SECURITY.md) |
-| 怎么协作、怎么发布 | [开发流程](docs/process/development-workflow.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
+| 怎么协作、怎么发布 | [开发流程](docs/process/development-workflow.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
 | 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
 | 模板 | [设计文档](docs/templates/design-doc.md) · [工具规格](docs/templates/tool-spec.md) · [ADR](docs/adr/template.md) |
 
