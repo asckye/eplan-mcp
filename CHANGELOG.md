@@ -4,6 +4,7 @@
 对本项目而言，"公共 API" 指 MCP 工具契约（名称、参数、返回结构、安全注解）和配置文件格式，破坏性变更的定义见 [docs/process/development-workflow.md](docs/process/development-workflow.md#8-版本与发布)。
 
 ## [Unreleased]
+- 中英文入门指南新增虚拟机部署：两端 Workbench 与 CLI 步骤、明文密钥和网络边界、连接排错及移除流程；同步 Claude Code 插件内副本。
 - Host 新增 `client-config --vm --url http://<IPv4>:<port>/mcp --key-stdin`，为支持请求头的客户端写入独立的 `eplan-vm`；预览与报告隐藏密钥，支持 `--vm --remove` 和卸载清理；VM 模式 JSON 为第 2 版，本地模式保留第 1 版。
 - Host 新增 `vm-firewall show|add|remove --port <n> --host-address <IPv4>`（修改须管理员权限）；`doctor` 只读报告本数据目录的 HTTP 服务、绑定地址/端口和防火墙规则范围。
 - Host 新增固定单个 EPLAN 实例的无状态 HTTP 服务（`serve --http --address <IPv4>`，默认端口 8766）、DPAPI 当前用户密钥命令 `vm-key create|show|delete`、Bearer 认证及失败限流、`httpAllowedOrigins` 允许列表和来源地址审计。
