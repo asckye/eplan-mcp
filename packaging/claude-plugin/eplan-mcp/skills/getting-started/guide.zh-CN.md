@@ -130,3 +130,6 @@ claude plugin marketplace remove eplanmcp-local
 关闭 EPLAN、客户端会话和 Workbench，再从 Windows“已安装的应用”或开始菜单卸载。卸载会调用 `uninstall-addin` 撤销记录中的注册，可能启动 EPLAN；遇到窗口仍由你处理。只需撤销 EPLAN 插件时可自行运行 `& $eplanMcp uninstall-addin`。撤销失败先解决报告的问题再重试。
 
 卸载保留数据根目录中的全部数据；确认不再需要后由你自己删除。换电脑无需为 EplanMcp 办理授权转移，EPLAN 自己的授权按其规则处理。
+
+---
+EplanMcp 是独立的开源项目，与 EPLAN GmbH & Co. KG 无关联，也未经其认可或赞助。EPLAN、EPLAN Electric P8 和 EPLAN Pro Panel 是 EPLAN GmbH & Co. KG 的商标或注册商标。
