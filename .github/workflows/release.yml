@@ -202,15 +202,17 @@ jobs:
           $root = "EplanMcp@$env:TAG"
           $dependencies[$root] = @{ ref = $root; dependsOn = @($components.Keys) }
           @{ bomFormat = 'CycloneDX'; specVersion = '1.6'; version = 1; serialNumber = "urn:uuid:$([guid]::NewGuid())"; metadata = @{ component = @{ type = 'application'; 'bom-ref' = $root; name = 'EplanMcp'; version = $env:TAG.Substring(1) } }; components = @($components.Values); dependencies = @($dependencies.Values) } | ConvertTo-Json -Depth 100 | Set-Content "dist/EplanMcp-$env:TAG.cdx.json" -Encoding utf8NoBOM
-      - name: Compile with the hosted Inno Setup
+      - name: Package ZIP and hash payload
+        id: archive
         run: |
           $ErrorActionPreference = 'Stop'
-          $compiler = "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe"
-          # ISCC.exe carries no file version; EplanMcp.iss checks the compiler version itself and ISCC logs it.
-          & $compiler "/DAppVersion=$($env:TAG.Substring(1))" "/DPayloadDir=$((Resolve-Path stage/app).Path)" "/DOutputDir=$((Resolve-Path dist).Path)" eng/installer/EplanMcp.iss
-          if ($LASTEXITCODE) { throw 'Inno Setup failed.' }
-          $payload = @(Get-ChildItem stage/app -Recurse -File | Sort-Object FullName | ForEach-Object {
-            $name = [IO.Path]::GetRelativePath((Resolve-Path stage).Path, $_.FullName).Replace('\', '/')
+          $packageName = "EplanMcp-$($env:TAG.Substring(1))"
+          Copy-Item stage/app "stage/$packageName" -Recurse -Force
+          $zipPath = Join-Path (Resolve-Path dist).Path "$packageName.zip"
+          [IO.Compression.ZipFile]::CreateFromDirectory((Resolve-Path "stage/$packageName").Path, $zipPath, [IO.Compression.CompressionLevel]::Optimal, $true)
+          "zip-path=dist/$packageName.zip" | Add-Content $env:GITHUB_OUTPUT -Encoding utf8NoBOM
+          $payload = @(Get-ChildItem stage/app -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
+            $name = "$packageName/" + [IO.Path]::GetRelativePath((Resolve-Path stage/app).Path, $_.FullName).Replace('\', '/')
             "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $name"
           })
           $payload | Set-Content "dist/EplanMcp-$env:TAG-files.sha256" -Encoding ascii
@@ -223,7 +225,7 @@ jobs:
       - uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3.0.0
         id: sbom
         with:
-          subject-path: dist/EplanMcp-Setup-*.exe
+          subject-path: ${{ steps.archive.outputs.zip-path }}
           sbom-path: dist/EplanMcp-${{ env.TAG }}.cdx.json
       - name: Attach checksums and attestations to the draft only
         env:

@@ -2,13 +2,24 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Accepted（第 7 条中插件的构建由 [ADR-0020](0020-no-self-hosted-runner.md) 修改：不用自托管 runner，插件由维护者在开发机上按标签构建；第 3 条的 MSIX 部分 2026-10-21 按 S14 修改，见第 3 条） |
+| 状态 | Accepted；2026-10-22 修订：只提供 ZIP（项目负责人决定） |
 | 日期 | 2026-10-20（提出）· 2026-10-20（接受：项目负责人对 M5 设计的待定问题和三个 ADR 明确答复"全部按建议"）· 2026-10-21（修改第 3 条：项目负责人"按实测修改"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 单向门（第一个安装包发布后）：EPLAN 中的注册、客户端配置和插件都指向安装位置，改位置要迁移每台机器；安装包工具本身是双向门 |
 | 影响 | 落实[架构第 7 节](../architecture/architecture.md#7-部署)和安装验收清单 I1–I10；补充 [ADR-0007](0007-licensing-and-distribution.md)（签名，决定不变）；[ADR-0008](0008-data-locations-and-instance-discovery.md) 的数据根目录不变 |
 
-## 背景与问题
+## 2026-10-22 修订：只提供 ZIP
+
+项目负责人决定改为与 TIA MCP 相同的 ZIP 交付。本节优先于下文保留的原决策；插件来源仍按 [ADR-0020](0020-no-self-hosted-runner.md)，MSIX 注册规则仍按 S14。
+
+1. 只交付 `EplanMcp-<version>.zip`，唯一顶层目录为 `EplanMcp-<version>\`；删除 Inno Setup 安装器。CI 保留 SHA-256、逐文件清单、SBOM 和两类证明。
+2. 工程师先解除 ZIP 的下载锁定，再将整个目录解压、移至短且固定的位置（如 `D:\EplanMcp`），打开 `workbench\EplanMcp.Workbench.exe`，勾选变体注册 EPLAN 插件并配置客户端。不修改 PATH，不创建卸载项或开始菜单入口；登录自启动由 Workbench 设置管理。
+3. `install-addin` 已从运行中的 `eplanmcp.exe` 旁寻找 `bridge\net481\EplanMcp.Bridge.Eplan.dll`，注册前移除整个 `bridge\` 的下载标记；不依赖固定目录。数据根目录仍为 `%USERPROFILE%\EplanMcp`，与程序目录分开；`EPLANMCP_HOME` 只改数据目录。
+4. 升级前等待写入结束，关闭 EPLAN、Workbench 和客户端，用新 ZIP 整体替换原程序目录；保持路径不变。若改变路径，须从新位置重新注册并生成客户端配置。卸载先在 Workbench 撤销注册，成功后退出并删除程序目录；客户端配置、插件市场及登录自启动先由工程师移除，数据保留。
+5. **Claude Code 方案（Part B 实现）**：`client-config` 的插件生成模式把随包模板复制到 `<数据根目录>\claude-plugin\`，将 `.mcp.json` 写为当前 Host 的实际绝对路径，Workbench 调用并显示本地市场安装命令。S17 中市场不复制，插件有缓存副本且当时从源目录加载；绝对路径在两处都有效，不使用 `${CLAUDE_PLUGIN_ROOT}/../..` 找程序，也不再假设 `${USERPROFILE}/EplanMcp/app`。普通 `client-config claude-code` 继续写实际绝对路径，与插件二选一。
+6. 分两步审阅：Part A 只改流水线、回归检查和文档；Part B 补 Workbench 注册/撤销、任意程序目录的 Host 定位及插件生成，完成 Small/Medium 测试后才发布 ZIP。
+
+## 背景与问题（原决策记录）
 M5 要让非开发人员在干净的机器上装好 EplanMcp（[M5 设计](../design/2026-10-20-m5-operability.md)）。架构第 7 节已经定下：按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限，不修改 PATH，插件用 EPLAN 官方的 `EplApiModuleAction` 注册。还没有决定的是：用什么做安装包、安装位置能否改、升级和卸载怎样对待正在运行的程序和数据、Claude Code 插件怎样找到程序、产物在哪里构建、是否签名。这些一旦发布到用户机器上就难以改变，又属于供应链（TB5，SEC-15、SEC-16），所以写成 ADR。
 
 相关事实：

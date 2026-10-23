@@ -7,6 +7,8 @@ Add-Type -Path (Join-Path $packages 'yamldotnet/18.1.0/lib/netstandard2.0/YamlDo
 $yaml = [YamlDotNet.RepresentationModel.YamlStream]::new()
 $yaml.Load([IO.StringReader]::new((Get-Content "$repositoryRoot/.github/workflows/release.yml" -Raw)))
 $root = $yaml.Documents[0].RootNode
+if ((Test-Path "$repositoryRoot/eng/installer/EplanMcp.iss") -or
+    (Get-Content "$repositoryRoot/.github/workflows/build.yml" -Raw).Contains('name: Installer script')) { throw 'Inno Setup must not be part of delivery or CI.' }
 $addinStep = $root.Children['jobs'].Children['addin'].Children['steps'].Children |
     Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('run')) }
 $verify = [scriptblock]::Create($addinStep.Children['run'].Value)
@@ -54,7 +56,7 @@ function dotnet { throw 'WhatIf must not run dotnet.' }
 $testRoot = Join-Path $repositoryRoot ".local/release-tests-$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory $testRoot -Force | Out-Null
 $savedEnvironment = @{}
-foreach ($name in 'TAG', 'GITHUB_REPOSITORY', 'PROVENANCE_BUNDLE', 'SBOM_BUNDLE') { $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name) }
+foreach ($name in 'TAG', 'GITHUB_REPOSITORY', 'PROVENANCE_BUNDLE', 'SBOM_BUNDLE', 'GITHUB_OUTPUT') { $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name) }
 Push-Location $testRoot
 try {
     & "$repositoryRoot/eng/scripts/release-addin.ps1" -Tag v0.1.0 -WhatIf
@@ -119,13 +121,18 @@ try {
         Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('name')) -and $_.Children['name'].Value -eq 'Stage full offline payload and merge CycloneDX SBOM' }
     Push-Location (New-Item -ItemType Directory (Join-Path $testRoot 'merge'))
     try {
-        foreach ($directory in 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts') {
+        foreach ($directory in 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts', 'stage/app/docs/getting-started') {
             New-Item -ItemType Directory $directory -Force | Out-Null
         }
         '{}' | Set-Content packaging/claude-plugin/.claude-plugin/marketplace.json
         '{"version":"0.1.0"}' | Set-Content packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json
         '{}' | Set-Content packaging/claude-plugin/eplan-mcp/.mcp.json
         'Fixture guide' | Set-Content docs/getting-started/zh-CN.md
+        Copy-Item docs/getting-started/zh-CN.md stage/app/docs/getting-started
+        'Fixture Host' | Set-Content stage/app/eplanmcp.exe
+        'Fixture Workbench' | Set-Content stage/app/workbench/EplanMcp.Workbench.exe
+        foreach ($name in 'Eplan', 'Core') { 'Fixture bridge' | Set-Content "addin/payload/bridge/net481/EplanMcp.Bridge.$name.dll" }
+        'Fixture contracts' | Set-Content addin/payload/bridge/net481/EplanMcp.Contracts.dll
         '{}' | Set-Content addin/payload/release-addin.json
         'Fixture archive' | Set-Content "addin/$zipName"
         'Fixture font' | Set-Content stage/app/workbench/Fonts/MapleMono-CN-Regular.ttf
@@ -145,8 +152,46 @@ try {
             @($merged.dependencies | Where-Object ref -eq shared).dependsOn.Count -ne 3) { throw 'SBOM merge lost components or dependency edges.' }
         Write-Output 'PASS merged SBOM deduplication and dependency union'
 
-        'Fixture installer' | Set-Content dist/EplanMcp-Setup-0.1.0.exe
-        'Fixture payload list' | Set-Content dist/EplanMcp-v0.1.0-files.sha256
+        $archiveStep = $root.Children['jobs'].Children['package'].Children['steps'].Children |
+            Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('id')) -and $_.Children['id'].Value -eq 'archive' }
+        $env:GITHUB_OUTPUT = Join-Path $PWD 'github-output.txt'
+        & ([scriptblock]::Create($archiveStep.Children['run'].Value))
+        $productZip = 'EplanMcp-0.1.0.zip'
+        if ((Get-Content $env:GITHUB_OUTPUT) -cne "zip-path=dist/$productZip") { throw 'Wrong ZIP path for SBOM attestation.' }
+        $payloadLines = @(Get-Content dist/EplanMcp-v0.1.0-files.sha256)
+        $archive = [IO.Compression.ZipFile]::OpenRead((Resolve-Path "dist/$productZip"))
+        try {
+            $entries = @($archive.Entries | Where-Object { -not $_.FullName.EndsWith('/') })
+            $expectedEntries = @(Get-ChildItem stage/app -Recurse -File -Force | ForEach-Object {
+                'EplanMcp-0.1.0/' + [IO.Path]::GetRelativePath((Resolve-Path stage/app).Path, $_.FullName).Replace('\', '/')
+            })
+            if (Compare-Object $expectedEntries @($entries.FullName)) { throw 'ZIP must contain the full app layout under exactly one versioned folder.' }
+            foreach ($entry in $archive.Entries) {
+                if (-not $entry.FullName.StartsWith('EplanMcp-0.1.0/', [StringComparison]::Ordinal)) { throw 'Unexpected ZIP root.' }
+            }
+            foreach ($required in 'eplanmcp.exe', 'workbench/EplanMcp.Workbench.exe', 'bridge/net481/EplanMcp.Bridge.Eplan.dll',
+                'claude-plugin/.claude-plugin/marketplace.json', 'claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
+                if (-not $archive.GetEntry("EplanMcp-0.1.0/$required")) { throw "Missing ZIP payload: $required" }
+            }
+            $archiveLines = @(foreach ($entry in $entries) {
+                $stream = $entry.Open()
+                try { "$((Get-FileHash -InputStream $stream -Algorithm SHA256).Hash.ToLowerInvariant())  $($entry.FullName)" }
+                finally { $stream.Dispose() }
+            })
+            if ($payloadLines.Count -ne $entries.Count -or (Compare-Object $archiveLines $payloadLines)) { throw 'Payload hashes must match every archived file.' }
+        } finally { $archive.Dispose() }
+        $subjects = @(Get-Content .local-subjects.sha256)
+        $expectedSubjects = @($payloadLines) + @(Get-ChildItem dist -File | ForEach-Object {
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.Name)"
+        })
+        if ($subjects.Count -ne $expectedSubjects.Count -or (Compare-Object $expectedSubjects $subjects)) { throw 'Provenance must cover the ZIP, its files and all staged release assets.' }
+        $provenanceStep = $root.Children['jobs'].Children['package'].Children['steps'].Children | Where-Object { $_.Children['id'].Value -eq 'provenance' }
+        $sbomStep = $root.Children['jobs'].Children['package'].Children['steps'].Children | Where-Object { $_.Children['id'].Value -eq 'sbom' }
+        if ($provenanceStep.Children['with'].Children['subject-checksums'].Value -cne '.local-subjects.sha256' -or
+            $sbomStep.Children['with'].Children['subject-path'].Value -cne '${{ steps.archive.outputs.zip-path }}' -or
+            $sbomStep.Children['with'].Children['sbom-path'].Value -cne 'dist/EplanMcp-${{ env.TAG }}.cdx.json') { throw 'Attestations must bind to the product ZIP and merged SBOM.' }
+        Write-Output 'PASS ZIP layout, dotfiles, payload hashes and attestation subjects'
+
         'Fixture provenance' | Set-Content provenance.json
         'Fixture SBOM attestation' | Set-Content sbom.json
         $env:PROVENANCE_BUNDLE = (Resolve-Path provenance.json).Path
@@ -169,7 +214,7 @@ try {
             try { & $attach } catch { $failure = $_.Exception.Message }
             if ($case -in 'valid', 'rerun') {
                 if ($failure -or -not $script:uploadArguments) { throw "Draft upload failed: $failure" }
-                $expectedAssets = @('EplanMcp-Setup-0.1.0.exe', $zipName, 'EplanMcp-addin-v0.1.0.json', 'EplanMcp-v0.1.0.cdx.json',
+                $expectedAssets = @($productZip, $zipName, 'EplanMcp-addin-v0.1.0.json', 'EplanMcp-v0.1.0.cdx.json',
                     'EplanMcp-v0.1.0-files.sha256', 'EplanMcp-v0.1.0-provenance.sigstore.json', 'EplanMcp-v0.1.0-sbom.sigstore.json', 'SHA256SUMS.txt')
                 $actualAssets = @(Get-ChildItem dist -File | ForEach-Object Name)
                 if (Compare-Object $expectedAssets $actualAssets) { throw 'Unexpected release asset list or per-asset checksum sidecar.' }

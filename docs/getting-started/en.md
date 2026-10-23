@@ -2,7 +2,7 @@
 
 # EplanMcp English Getting Started Guide
 
-This guide covers the v0.1.0 preview installer. The files actually available on [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) are the source of truth. If no installer is available yet, wait for the release; see the repository README for building from source. The installation steps below describe the process once the installer is available.
+This guide covers ZIP preview releases. Use the files actually available on [GitHub Releases](https://github.com/asckye/eplan-mcp/releases). If no ZIP is available yet, wait for a later release; see the repository README for building from source.
 
 ## 1. Prerequisites
 
@@ -13,26 +13,28 @@ This guide covers the v0.1.0 preview installer. The files actually available on 
 
 ## 2. Download and SHA-256 Verification
 
-Download the installer and the SHA-256 checksum file from the same version's release page. In PowerShell, go to the download directory and replace the placeholder filename below with the name of the downloaded installer:
+Download `EplanMcp-<version>.zip` and `SHA256SUMS.txt` from the same release. In PowerShell, go to the download directory and replace the version placeholder:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath '.\<安装包文件名>.exe'
+Get-FileHash -Algorithm SHA256 -LiteralPath '.\EplanMcp-<version>.zip'
 ```
 
 Compare the output `Hash` character by character with the 64-digit hexadecimal value for **that filename** in the checksum file (letter case does not matter). If they differ, stop, do not run the file, and download it again from the release page. For an offline computer, download both files on a connected computer first, then transfer them together for verification.
 
-**The 0.x installers and programs are not code-signed.** SmartScreen may show "Windows protected your PC" or an unknown source. Check the download source and SHA-256 before selecting "More info → Run anyway". Enterprise policies or Smart App Control may block execution without offering that button; contact your administrator and follow your organisation's rules instead of turning off system protection. Loading the EPLAN add-in still depends on the licence requirements above.
+After verification, right-click the ZIP → Properties → select **Unblock**, if shown, and Apply before extracting. **The 0.x programs are not code-signed.** If SmartScreen, enterprise policy, or Smart App Control blocks execution, contact your administrator under your organisation's rules; do not change system security settings. The add-in still requires the EPLAN licence described above.
 
 ## 3. Install and Register the EPLAN Add-in
 
-Once the installer is available, close any running EPLAN instance, then double-click the installer. Run it as a standard user; administrator privileges are not required. Select the variants you use, such as Electric P8 and Pro Panel. The directory is fixed at `%USERPROFILE%\EplanMcp\app\` and cannot be changed; installation does not modify PATH.
+Extract the entire ZIP, which contains one top-level folder, `EplanMcp-<version>`. Move that whole folder to a short, permanent location; you can rename it to `D:\EplanMcp`. Keep every file and subfolder together; do not copy only the EXE or launch it from an archive preview. This program folder is separate from the data root, `%USERPROFILE%\EplanMcp`. No administrator privileges or PATH changes are needed.
+
+Close EPLAN and open **`D:\EplanMcp\workbench\EplanMcp.Workbench.exe`** (adjust the prefix for your location). On the status page, tick the detected variants you use, such as Electric P8 and Pro Panel, then choose "Register EPLAN add-in" and read each result. Keep the program folder at this location afterwards.
 
 Registration starts EPLAN, waits for the add-in to load, then requests a normal shutdown of that instance. Handle and close any login, licence, or system message windows yourself; do not force the process to end. Only after registration succeeds should you start your usual EPLAN instance and open a project.
 
-To register another variant later, close EPLAN first, then run the following in PowerShell opened from the Windows Start menu. Subsequent commands reuse `$eplanMcp` in the same window:
+Use Workbench again to register another variant, or use these commands after closing EPLAN. Adjust the program path; subsequent commands reuse `$eplanMcp` in the same PowerShell window:
 
 ```powershell
-$eplanMcp = Join-Path $env:USERPROFILE 'EplanMcp\app\eplanmcp.exe'
+$eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
 & $eplanMcp install-addin --variant 'Electric P8'
 ```
 
@@ -44,24 +46,24 @@ For Pro Panel, replace the variant name with `'Pro Panel'`; if you use both, pas
 & $eplanMcp doctor
 ```
 
-Read each result: `OK` means normal, `INFO` provides information, `WARN` needs checking, and `FAIL` needs action. Use `doctor --format json` to save structured results. The current Workbench status and client wizard pages are still placeholders; use the commands here.
+For the first run, you can use Workbench's status page directly; the command above is the CLI alternative. `OK` means normal, `INFO` provides information, `WARN` needs checking, and `FAIL` needs action. Use `doctor --format json` to save structured results.
 
 ## 5. Connect a Client
 
-The engineer must perform installation, registration, and configuration changes. Run `client-config` from PowerShell opened from the Windows Start menu, not from a Claude Desktop session: the MSIX environment redirects configuration files, and the command will refuse to write.
+On Workbench's "MCP and clients" page, select your client, preview the changes, then write them. Workbench calls Host's `client-config`, which uses the actual absolute path of the current `eplanmcp.exe`. The engineer performs these steps. Open Workbench from the extracted folder, or run CLI commands from PowerShell opened from Start; configuration commands refuse writes inside a Claude Desktop session's redirected MSIX environment.
 
 ### Claude Code: Local Plugin Recommended
 
-Enter these commands in order in a Claude Code session:
+First generate the Claude Code local marketplace on Workbench's client page, then follow its two commands. With the default data root, enter these in a Claude Code session; for a custom data root, use the actual path shown by Workbench:
 
 ```text
-/plugin marketplace add ~/EplanMcp/app/claude-plugin
+/plugin marketplace add ~/EplanMcp/claude-plugin
 /plugin install eplan-mcp@eplanmcp-local
 ```
 
-You can also run `claude plugin marketplace add ~/EplanMcp/app/claude-plugin` and `claude plugin install eplan-mcp@eplanmcp-local` in a terminal. This is a local marketplace included with the installer; no marketplace content needs downloading. Use `~/` here, not `%USERPROFILE%`, which the marketplace command does not expand. Reopen the session after installation.
+You can also use the `claude plugin marketplace add …` and `claude plugin install …` terminal commands shown by Workbench. The generated marketplace needs no content downloads and already contains the actual Host path. Do not install the template inside the program folder directly. Reopen the session afterwards.
 
-**Choose either the plugin or `client-config claude-code` below.** If you previously connected through configuration, first run `& $eplanMcp client-config claude-code --remove`, check for any manual configuration of the same server at project scope yourself, then install the plugin. With duplicate configuration, Claude Code gives priority to user or project configuration. Do not move or delete `app\claude-plugin\`; the local plugin loads from there.
+**Choose either the plugin or `client-config claude-code` below.** Remove previous configuration and check project-level entries before installing the plugin. Claude Code gives priority to user or project configuration when entries duplicate a plugin server. Keep the generated `claude-plugin\` directory in the data root.
 
 ### Claude Desktop or Other Clients: client-config
 
@@ -90,7 +92,7 @@ First use EPLAN's project copy feature to put a test copy in `%USERPROFILE%\Epla
 
 Ordinary project writes in scratch are allowed automatically. Real projects require approval for each write by default; `config.json` can also be set to deny them. Destructive operations (such as deleting pages or renumbering) require approval even in scratch. A backup is made after approval; if the backup fails, the operation does not run. Writing to the system parts database affects all projects, requires approval and a backup even when initiated in scratch, and cannot be undone with Ctrl+Z.
 
-Start Workbench yourself from the Start menu, or use its automatic startup at sign-in; Host will not start it for you. Ordinary project approvals go to Workbench first. Check the tray notification and "Approval queue"; the window will not take focus. If Workbench is unavailable, an EPLAN dialog is used instead. If the connection drops after delivery, the request is cancelled without opening a second dialog. System master data approvals still appear only in EPLAN.
+Open `workbench\EplanMcp.Workbench.exe` in your program folder yourself, or enable startup at sign-in in its settings; Host will not start it for you. Ordinary project approvals go to Workbench first. Check the tray notification and "Approval queue"; the window will not take focus. If Workbench is unavailable, an EPLAN dialog is used instead. If the connection drops after delivery, the request is cancelled without opening a second dialog. System master data approvals still appear only in EPLAN.
 
 Check the tool, instance, project, and change list, then approve or reject it yourself. By default, if nobody approves within 120 seconds, the request is denied and nothing runs. Only the engineer can edit safety settings in `config.json` in the data root; tools cannot change them. Do not turn off protection just to make a call succeed.
 
@@ -111,7 +113,7 @@ Check the tool, instance, project, and change list, then approve or reject it yo
 | Administrator privileges required, failure when offline, or cannot use a virtual machine | Local installation requires no administrator privileges and is not tied to a computer. Distinguish Windows policy, EPLAN licensing, and model client network issues. In a virtual machine, follow this guide's local connection steps; approval requirements are not relaxed for virtual machines. |
 | Registration points to another user | Stop and let the engineer responsible for the computer coordinate. Detection has only partial coverage: it cannot reliably identify another user's add-in if it is unreadable or an older version does not report its path. |
 
-The default data root is `%USERPROFILE%\EplanMcp\`. `EPLANMCP_HOME` changes only the data location, not the fixed installation directory; use the location shown by doctor when troubleshooting.
+The default data root is `%USERPROFILE%\EplanMcp\`, separate from the extracted program folder. `EPLANMCP_HOME` changes only the data location, not the program folder; use the location shown by doctor when troubleshooting.
 
 - Add-in logs: `logs\bridge-*.log`; for startup failures, check `logs\bridge-startup-error.log`. Workbench logs are in `logs\workbench-*.log`. Host logs go to stderr and are collected by the client; a Host log file is not guaranteed.
 - Audit: `audit\<date>.jsonl`. Run `& $eplanMcp audit verify` to verify the hash chain. This detects changes within the chain but cannot prove that an entire trailing sequence of records has not been deleted.
@@ -119,7 +121,7 @@ The default data root is `%USERPROFILE%\EplanMcp\`. `EPLANMCP_HOME` changes only
 
 ## 9. Upgrade and Uninstall
 
-Before upgrading, wait for writes to finish, close MCP client sessions, and exit Workbench from the tray. Then run the verified new installer over the existing installation; there is no need to uninstall first. Do not force Host to end. Restart EPLAN after upgrading to load the new add-in; direct downgrades are not supported. Configuration, audit, logs, scratch, exports, and backups are retained.
+Before upgrading, wait for writes to finish and close **EPLAN, MCP clients, and Workbench** (exit from its tray menu). Verify, unblock, and extract the new ZIP, then replace the entire program folder at the same path, such as `D:\EplanMcp`, to avoid leaving old files. Do not force Host to end. Open the new Workbench, regenerate the local marketplace or update client configuration, then start EPLAN. Registration is retained if the path stays the same; register again if it changes. Downgrades are unsupported. All data is retained separately.
 
 Before uninstalling, remove the Claude Code local marketplace yourself (this also uninstalls its plugins):
 
@@ -129,7 +131,7 @@ claude plugin marketplace remove eplanmcp-local
 
 If you used the configuration route, you can run `& $eplanMcp client-config --remove` before uninstalling to remove server entries previously written and recorded by the command. You can also specify a client, such as `client-config claude-desktop --remove`. Check any manually written project configuration yourself.
 
-Close EPLAN, client sessions, and Workbench, then uninstall from Windows "Installed apps" or the Start menu. Uninstallation calls `uninstall-addin` to undo recorded registrations and may start EPLAN; handle any windows yourself. To undo only the EPLAN add-in registration, run `& $eplanMcp uninstall-addin` yourself. If removal fails, resolve the reported issue before retrying.
+Disable startup at sign-in in Workbench settings and remove client configuration as described above. Close EPLAN and clients, then choose "Unregister" in Workbench. It calls `uninstall-addin` for all recorded registrations and may start EPLAN; handle any windows yourself. After success, exit Workbench from the tray and delete the entire program folder. If unregistering fails, keep the files, resolve the issue, and retry. The CLI alternative is `& $eplanMcp uninstall-addin`.
 
 Uninstallation retains all data in the data root; delete it yourself only after confirming you no longer need it. Moving to another computer requires no EplanMcp licence transfer; handle EPLAN's own licensing according to its rules.
 
