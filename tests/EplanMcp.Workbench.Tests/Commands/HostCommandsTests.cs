@@ -46,6 +46,12 @@ public sealed class HostCommandsTests
     public void EveryExampleOfTheHostsSnapshots_IsRead(string name, string example)
     {
         string json = Snapshots.Example(name, example);
+        if (JsonNode.Parse(json)!["schemaVersion"]!.GetValue<int>() != HostCommands.SchemaVersion)
+        {
+            // client-config --vm reports (version 2) are for the host computer's wizard, which reads them itself.
+            Assert.Equal(HostFailure.Unreadable, Assert.Throws<HostCommandException>(() => HostCommands.Parse<ClientConfigReport>(json)).Failure);
+            return;
+        }
 
         object report = name switch
         {

@@ -8,7 +8,7 @@ internal enum ClientConfigMode
 }
 
 /// <summary>What client-config is asked to do; no clients (with <see cref="ClientConfigMode.Remove"/> only) means every recorded entry.</summary>
-internal sealed record ClientConfigRequest(IReadOnlyList<McpClient> Clients, ClientConfigMode Mode, bool Plugin = false);
+internal sealed record ClientConfigRequest(IReadOnlyList<McpClient> Clients, ClientConfigMode Mode, bool Plugin = false, bool Vm = false, string? Url = null);
 
 internal enum ClientAction
 {
@@ -46,7 +46,7 @@ internal sealed record ClientResult(string Client, string? File, ClientAction Ac
 }
 
 /// <summary>A whole run: the server the entries start, a problem that stopped every client, and each client's result.</summary>
-internal sealed record ClientConfigReport(LocalServer Server, ClientConfigMode Mode, ClientIssue? Problem, IReadOnlyList<ClientResult> Clients)
+internal sealed record ClientConfigReport(LocalServer Server, ClientConfigMode Mode, ClientIssue? Problem, IReadOnlyList<ClientResult> Clients, bool Vm = false, string? Url = null)
 {
     public bool Failed => Problem is not null || Clients.Any(c => c.Problem is not null);
 }

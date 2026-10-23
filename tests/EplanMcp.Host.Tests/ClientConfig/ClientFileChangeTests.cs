@@ -136,6 +136,22 @@ public sealed class ClientFileChangeTests : IDisposable
         Assert.Equal([FilePath, backup], Directory.GetFiles(Path.GetDirectoryName(FilePath)!).Order(StringComparer.Ordinal));
     }
 
+    [Fact]
+    public void Apply_TwiceWithinOneClockTick_NeverOverwritesTheEarlierBackup()
+    {
+        WriteBytes(Encoding.UTF8.GetBytes("old"));
+        File.SetAttributes(FilePath, FileAttributes.ReadOnly);
+        ClientFileChange change = ClientFileChange.Read(FilePath);
+
+        Assert.ThrowsAny<Exception>(() => change.Apply("new", _now));
+        Assert.ThrowsAny<Exception>(() => change.Apply("new", _now));
+
+        string[] backups = Directory.GetFiles(Path.GetDirectoryName(FilePath)!, "*.bak_*");
+        Assert.Equal(2, backups.Length);
+        Assert.All(backups, backup => Assert.Equal("old", File.ReadAllText(backup)));
+        Assert.Equal("old", File.ReadAllText(FilePath));
+    }
+
     private void WriteBytes(byte[] bytes)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);

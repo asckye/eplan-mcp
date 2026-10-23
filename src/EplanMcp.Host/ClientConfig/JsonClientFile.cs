@@ -20,7 +20,11 @@ internal static class JsonClientFile
     private static readonly JsonSerializerOptions _crlf = Indented("\r\n");
 
     /// <summary>The file with <paramref name="server"/> as the entry <see cref="LocalServer.Name"/>.</summary>
-    public static ClientFileEdit Write(string text, McpClient client, LocalServer server)
+    public static ClientFileEdit Write(string text, McpClient client, LocalServer server) => Write(text, client, LocalServer.Name, client.JsonEntry(server), preserveLaunch: true);
+
+    public static ClientFileEdit Write(string text, McpClient client, RemoteServer server) => Write(text, client, RemoteServer.Name, server.JsonEntry(client), preserveLaunch: false);
+
+    private static ClientFileEdit Write(string text, McpClient client, string name, JsonObject entry, bool preserveLaunch)
     {
         try
         {
@@ -31,13 +35,12 @@ internal static class JsonClientFile
                 root[client.ServersKey] = servers;
             }
 
-            JsonObject entry = client.JsonEntry(server);
-            if (servers.TryGetPropertyValue(LocalServer.Name, out JsonNode? existing) && existing is not JsonObject)
+            if (servers.TryGetPropertyValue(name, out JsonNode? existing) && existing is not JsonObject)
             {
-                throw Invalid($"'{client.ServersKey}.{LocalServer.Name}' is not an object");
+                throw Invalid($"'{client.ServersKey}.{name}' is not an object");
             }
 
-            if (existing is JsonObject old && old.ContainsKey("command"))
+            if (preserveLaunch && existing is JsonObject old && old.ContainsKey("command"))
             {
                 // Only the launch fields change: env and other options set on the entry stay (TIA ClientProfiles.PrepareSave).
                 var updated = (JsonObject)old.DeepClone();
@@ -50,14 +53,14 @@ internal static class JsonClientFile
                 entry = updated;
             }
 
-            string? before = existing is null ? null : Show(LocalServer.Name, existing);
+            string? before = existing is null ? null : Show(name, existing);
             if (existing is not null && JsonNode.DeepEquals(existing, entry))
             {
                 return new(null, before, before);
             }
 
-            servers[LocalServer.Name] = entry;
-            return new(Serialize(root, text), before, Show(LocalServer.Name, entry), HasComments(text));
+            servers[name] = entry;
+            return new(Serialize(root, text), before, Show(name, entry), HasComments(text));
         }
         catch (Exception ex) when (ex is JsonException or ArgumentException)
         {
@@ -119,7 +122,7 @@ internal static class JsonClientFile
 
     /// <summary>One entry as it appears in the file, for the before and after of a preview.</summary>
     private static string Show(string name, JsonNode? entry) =>
-        JsonSerializer.Serialize(name, _lf) + ": " + (entry?.ToJsonString(_lf) ?? "null");
+        RemoteServer.Redact(JsonSerializer.Serialize(name, _lf) + ": " + (entry?.ToJsonString(_lf) ?? "null"))!;
 
     private static bool HasComments(string text)
     {

@@ -23,6 +23,8 @@ internal static class ClientConfigTexts
         string d = issue.Detail;
         return issue.Problem switch
         {
+            ClientProblem.InvalidVmKey => zh ? "请仅通过重定向的 stdin 提供一把有效的 VM 密钥，可带一个末尾换行" : "Provide exactly one valid VM key on redirected stdin, optionally followed by one newline",
+            ClientProblem.RemoteUnsupported => zh ? $"此客户端的配置文件不支持带认证请求头的 VM 连接：{d}（Claude 桌面版仅支持远程连接器）" : $"This client's configuration file cannot configure a VM connection with authentication headers: {d} (Claude Desktop requires remote connectors)",
             ClientProblem.ClientConfigured => zh ? $"请先移除 Claude Code 的 eplan 配置，再生成插件市场：{d}" : $"Remove Claude Code's eplan configuration before generating the plugin marketplace: {d}",
             ClientProblem.InvalidFile => zh ? $"文件无法解析，没有改动：{d}" : $"The file cannot be parsed and was left unchanged: {d}",
             ClientProblem.UnsupportedToml => zh

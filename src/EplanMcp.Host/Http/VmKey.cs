@@ -8,6 +8,9 @@ internal static class VmKey
 {
     public static string Generate() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
+    public static bool IsValid(string value) => value.Length == 43 && value.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_')
+        && "AEIMQUYcgkosw048".Contains(value[^1], StringComparison.Ordinal);
+
     private static string FileName(HostDataLocations locations) => Path.Combine(locations.Root, "vm-key.dpapi");
 
     public static string Read(HostDataLocations locations) => System.Text.Encoding.ASCII.GetString(Transform(File.ReadAllBytes(FileName(locations)), protect: false));
