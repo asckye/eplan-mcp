@@ -1,9 +1,21 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-23",
-  "scannedSources": "5c7d4219",
-  "sourceHash": "sha256:a830a47b06c3c85e0e2886e0afc187c5f35b196b158b8cc7334f60d4e8e10b19",
+  "scannedSources": "0098ce82 + uncommitted changes",
+  "sourceHash": "sha256:586e4284a70bedec374beabd1a2981d68c1bfa9ec10f523c3c0891494d6ba2b6",
   "operations": [
+    {
+      "name": "action.execute",
+      "class": "ActionRunExecuteOperation"
+    },
+    {
+      "name": "action.plan",
+      "class": "ActionRunPlanOperation"
+    },
+    {
+      "name": "action.run",
+      "class": "ActionRunOperation"
+    },
     {
       "name": "approval.ask",
       "class": "ApprovalAskOperation"
@@ -581,6 +593,18 @@
     ],
     "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -740,6 +764,7 @@
           "read"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -767,6 +792,19 @@
       }
     ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -1338,6 +1376,9 @@
           "read"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
@@ -1466,6 +1507,18 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -1524,6 +1577,18 @@
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
@@ -1584,6 +1649,18 @@
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -1642,6 +1719,18 @@
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
@@ -1789,6 +1878,18 @@
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "Run",
@@ -1949,6 +2050,7 @@
           "new"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1984,6 +2086,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -2019,6 +2122,8 @@
           "call"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -2035,6 +2140,8 @@
           "call"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -2043,6 +2150,18 @@
       }
     ],
     "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
@@ -2527,6 +2646,9 @@
           "call"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.renumber.execute",
@@ -2671,6 +2793,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMacroReader",
         "member": "MacroRoot",
@@ -3023,6 +3158,8 @@
           "new"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -3062,6 +3199,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -3789,6 +3939,19 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanListImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
@@ -3838,6 +4001,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -3932,6 +4108,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -4172,6 +4361,19 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -4185,6 +4387,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -4540,6 +4755,19 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminals(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Terminals",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -4566,6 +4794,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -5106,6 +5347,9 @@
           "new"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -5784,6 +6028,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -5819,6 +6064,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -5854,6 +6100,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -5898,6 +6145,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6249,6 +6497,7 @@
           "new"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6284,6 +6533,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6319,6 +6569,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6363,6 +6614,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6398,6 +6650,7 @@
           "call"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6878,6 +7131,36 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.PlcService.#ctor": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.PlcService.GetPLCConfigurationProjects(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Renumber.#ctor": [
       {
         "adapter": "EplanDeviceRenumberer",
@@ -7037,6 +7320,9 @@
           "new"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -7128,6 +7414,9 @@
           "call"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -7280,6 +7569,9 @@
           "new"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
@@ -7409,6 +7701,19 @@
     ],
     "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataExporter",
         "member": "ExportParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataExporter.cs",
@@ -7520,6 +7825,19 @@
     ],
     "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataExporter",
         "member": "ExportParts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataExporter.cs",
@@ -7572,6 +7890,19 @@
       }
     ],
     "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "ExportParts",
@@ -7676,6 +8007,8 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -7692,6 +8025,8 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -10502,6 +10837,19 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -10634,6 +10982,82 @@
         ],
         "operations": [
           "page.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Name": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isLocked": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isValid": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isVisible": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Layers": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -12422,6 +12846,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -12504,7 +12931,35 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Project.LayerTable": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Project.ProjectFullName": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanProjectCatalog",
         "member": "ListOpenProjects",
@@ -12513,6 +12968,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -12602,6 +13060,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -12767,6 +13228,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -12939,6 +13403,9 @@
           "set"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -13053,6 +13520,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -13728,6 +14198,9 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
@@ -13742,12 +14215,103 @@
           "get"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
       }
     ],
+    "P:Eplan.EplApi.MasterData.MDAccessoryList.Name": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDAccessoryPlacement.Name": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDAddress.ShortName": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDConnectionPointInfo.Name": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDConstruction.Name": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.MasterData.MDPart.PartNr": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "Export",
@@ -13819,7 +14383,95 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryLists": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryPlacements": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDPartsDatabase.ConnectionPointInfos": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDPartsDatabase.Constructions": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDPartsDatabase.Manufacturers": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "Export",
@@ -13953,6 +14605,19 @@
     ],
     "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataBackup",
         "member": "PartsDatabase",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
@@ -14034,6 +14699,18 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.Action": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -14092,6 +14769,18 @@
       }
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
@@ -14177,6 +14866,18 @@
       }
     ],
     "T:Eplan.EplApi.ApplicationFramework.ActionManager": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Generate",
@@ -14281,6 +14982,18 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.QuietModeStep": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -14440,6 +15153,7 @@
           "type"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -14468,6 +15182,18 @@
     ],
     "T:Eplan.EplApi.ApplicationFramework.QuietModes": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Run",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -14627,6 +15353,7 @@
           "type"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -14821,6 +15548,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "part.export.plan",
           "part.export.run",
           "translation.export.plan",
@@ -14997,6 +15727,8 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -15027,6 +15759,19 @@
       }
     ],
     "T:Eplan.EplApi.Base.Enums.FunctionCategory": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -15377,6 +16122,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.renumber.execute",
@@ -15519,6 +16267,19 @@
       }
     ],
     "T:Eplan.EplApi.Base.PathMap": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMacroReader",
         "member": "MacroRoot",
@@ -15710,6 +16471,8 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.run",
           "cable.generate.execute",
           "import.list.execute",
           "import.plc.execute",
@@ -16054,6 +16817,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DMObjectsFinder": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -17830,6 +18606,19 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionsFilter": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -17947,6 +18736,21 @@
         ],
         "operations": [
           "page.get"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayer": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -18888,6 +19692,19 @@
     ],
     "T:Eplan.EplApi.DataModel.Project": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -19314,6 +20131,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -19398,6 +20218,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -19533,6 +20356,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.renumber.execute",
@@ -19656,6 +20482,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -20199,6 +21028,7 @@
           "type"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -20328,6 +21158,7 @@
           "type"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -20363,6 +21194,7 @@
           "type"
         ],
         "operations": [
+          "action.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -20785,6 +21617,21 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.HEServices.PlcService": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.HEServices.Renumber": [
       {
         "adapter": "EplanDeviceRenumberer",
@@ -20992,6 +21839,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "cable.generate.execute",
           "cable.generate.plan",
           "cable.get",
@@ -21170,6 +22020,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
@@ -21228,6 +22081,9 @@
           "type"
         ],
         "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run",
           "translation.export.plan",
           "translation.export.run"
         ]
@@ -21276,6 +22132,19 @@
       }
     ],
     "T:Eplan.EplApi.MasterData.MDPartsDatabase": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "Export",
@@ -21396,6 +22265,19 @@
       }
     ],
     "T:Eplan.EplApi.MasterData.MDPartsManagement": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanMasterDataBackup",
         "member": "PartsDatabase",

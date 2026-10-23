@@ -13,8 +13,10 @@ public sealed class ActionRunExecuteOperation(int major, IProjectCatalog catalog
         try
         {
             request = ActionRunRequest.Check(args, major, catalog, runner, "write");
-            if (string.IsNullOrEmpty(args.Fingerprint)) { throw InvalidArgument("'fingerprint' from action.plan is required."); }
-            if (request.StateFingerprint() != args.Fingerprint) { throw new BridgeErrorException(ErrorReason.PlanStale, "The action plan changed; request a new plan."); }
+            if (string.IsNullOrEmpty(args.Fingerprint))
+            { throw InvalidArgument("'fingerprint' from action.plan is required."); }
+            if (request.StateFingerprint() != args.Fingerprint)
+            { throw new BridgeErrorException(ErrorReason.PlanStale, "The action plan changed; request a new plan."); }
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         Committed<ActionRunData> committed = TransactionRunner.Run(transactions, "eplan_action_run", () => ActionRunOperation.Run(request, runner, messages));

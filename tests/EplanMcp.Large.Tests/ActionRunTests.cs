@@ -33,7 +33,8 @@ public sealed class ActionRunTests(LiveEplan eplan) : IAsyncLifetime
     }
     public async ValueTask DisposeAsync()
     {
-        if (_services is not null) { await _services.DisposeAsync(); }
+        if (_services is not null)
+        { await _services.DisposeAsync(); }
         Directory.Delete(_home, recursive: true);
     }
 

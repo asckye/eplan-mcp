@@ -14,7 +14,8 @@ public sealed class ActionRunValidationTests
         get
         {
             var cases = new TheoryData<string>();
-            foreach (string entry in ActionRunCatalog.Entries.Keys) { cases.Add(entry); }
+            foreach (string entry in ActionRunCatalog.Entries.Keys)
+            { cases.Add(entry); }
             return cases;
         }
     }
@@ -76,7 +77,8 @@ public sealed class ActionRunValidationTests
         string[] required = [.. rule["parameters"]!.AsObject().Where(p => !p.Key.EndsWith('?')).Select(p => p.Key.EndsWith('1') ? p.Key[..^1] : p.Key)];
         BridgeError error = Invalid(entry, ActionRunCatalog.Text(rule, "scope") == "project" ? null : "Line1", new JsonObject { ["unexpected"] = "x" }, "unexpected");
         Assert.Equal(required.Length + 2, error.Metadata!["violations"].Split('\n').Length);
-        foreach (string key in required) { Assert.Contains(key, error.Metadata["violations"], StringComparison.Ordinal); }
+        foreach (string key in required)
+        { Assert.Contains(key, error.Metadata["violations"], StringComparison.Ordinal); }
         string[] allowed = [.. rule["parameters"]!.AsObject().Select(p => p.Key.EndsWith('1') ? p.Key[..^1] : p.Key.TrimEnd('?'))];
         Assert.Equal(string.Join(", ", allowed), error.Metadata["allowedArguments"]);
         Assert.Contains("topic: \"" + entry + "\"", error.Metadata["hint"], StringComparison.Ordinal);
@@ -90,7 +92,8 @@ public sealed class ActionRunValidationTests
     {
         JsonObject rule = ActionRunCatalog.Entries[entry];
         string? key = rule["parameters"]!.AsObject().FirstOrDefault(p => p.Value!.GetValue<string>() == "file").Key;
-        if (key is null) { return; }
+        if (key is null)
+        { return; }
         JsonObject example = ActionRunUsage.Example(rule);
         var fields = example["arguments"]!.AsObject();
         string? project = example["project"]?.GetValue<string>();
@@ -121,9 +124,12 @@ public sealed class ActionRunValidationTests
     public void Plc_OnlyAllowsTheThreeVerifiedCombinations(string converter, string? format, string file, bool valid)
     {
         var fields = new JsonObject { ["CONFIGURATIONPROJECT"] = "Phoenix1", ["CONVERTERID"] = converter, ["DESTINATIONFILE"] = file };
-        if (format is not null) { fields["FORMAT"] = format; }
-        if (valid) { new ActionRunCatalog().Check("plcservice/BUSDATAEXPORT", "Line1", JsonSerializer.SerializeToElement(fields)); }
-        else { Invalid("plcservice/BUSDATAEXPORT", "Line1", fields); }
+        if (format is not null)
+        { fields["FORMAT"] = format; }
+        if (valid)
+        { new ActionRunCatalog().Check("plcservice/BUSDATAEXPORT", "Line1", JsonSerializer.SerializeToElement(fields)); }
+        else
+        { Invalid("plcservice/BUSDATAEXPORT", "Line1", fields); }
     }
 
     [Theory]
@@ -156,15 +162,18 @@ public sealed class ActionRunValidationTests
     public void Backup_PinsTheDatabaseTypesAndAsciiArchiveStem(string type, string stem, bool valid)
     {
         var fields = new JsonObject { ["MDTYPE"] = type, ["ARCHIVENAME"] = stem };
-        if (valid) { new ActionRunCatalog().Check("backup/MASTERDATA", null, JsonSerializer.SerializeToElement(fields)); }
-        else { Invalid("backup/MASTERDATA", null, fields); }
+        if (valid)
+        { new ActionRunCatalog().Check("backup/MASTERDATA", null, JsonSerializer.SerializeToElement(fields)); }
+        else
+        { Invalid("backup/MASTERDATA", null, fields); }
     }
 
     private static BridgeError Invalid(string entry, string? project, JsonNode fields, string? violation = null, JsonElement? raw = null)
     {
         BridgeError error = Assert.Throws<BridgeCallException>(() => new ActionRunCatalog().Check(entry, project, raw ?? JsonSerializer.SerializeToElement(fields))).Error;
         Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
-        if (violation is not null) { Assert.Contains(violation, error.Metadata!["violations"], StringComparison.Ordinal); }
+        if (violation is not null)
+        { Assert.Contains(violation, error.Metadata!["violations"], StringComparison.Ordinal); }
         Assert.Contains(entry, error.Metadata!["hint"], StringComparison.Ordinal);
         Assert.NotEmpty(error.Metadata["allowedArguments"]);
         return error;

@@ -28,12 +28,14 @@ internal sealed class ActionExportBridge(IBridgeClient bridge, ActionRunArgs arg
             IReadOnlyList<ExportFile> files = new ExportFolder(locations.Exports, args.Directory!).Files();
             foreach (ExportFile file in files)
             {
-                if (file.Bytes <= 0) { throw Failed(); }
+                if (file.Bytes <= 0)
+                { throw Failed(); }
                 using FileStream stream = File.OpenRead(Path.Combine(args.Directory!, file.Path));
                 if (args.Entry == "backup/MASTERDATA")
                 {
                     byte[] header = new byte[6];
-                    if (stream.Read(header) != 6 || !header.AsSpan().SequenceEqual(new byte[] { 0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c })) { throw Failed(); }
+                    if (stream.Read(header) != 6 || !header.AsSpan().SequenceEqual(new byte[] { 0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c }))
+                    { throw Failed(); }
                     stream.Position = 0;
                 }
                 Files.Add(new JsonObject { ["path"] = file.Path, ["bytes"] = file.Bytes, ["sha256"] = Convert.ToHexStringLower(await SHA256.HashDataAsync(stream, cancellationToken).ConfigureAwait(false)) });
