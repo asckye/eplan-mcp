@@ -114,6 +114,7 @@ internal static class BridgeHost
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
+            new PlanFunctionsOperation(catalog, new EplanPlanFunctionReader()),
             new ConnectionListOperation(catalog, devices, new EplanConnectionReader()),
             new CableGetOperation(catalog, devices, new EplanCableReader()),
             new TerminalStripListOperation(catalog, terminals),
