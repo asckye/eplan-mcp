@@ -183,7 +183,7 @@ internal sealed class PageWriteTools
     internal static TimeSpan Limit(int pages) => TimeSpan.FromSeconds(Math.Min(300, 60 + (2 * pages)));
 
     /// <summary>What the Host checks before planning; the Bridge checks the pages themselves, all at once.</summary>
-    private static List<string> Violations(string? project, int? pages, string? language)
+    internal static List<string> Violations(string? project, int? pages, string? language)
     {
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))

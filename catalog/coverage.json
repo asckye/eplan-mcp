@@ -1214,7 +1214,7 @@
       "dependencies": 32,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 9,
+      "small": 10,
       "medium": 17,
       "large": 4,
       "apiNotes": [
@@ -1348,7 +1348,7 @@
       "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_page_update.md",
-      "small": 2,
+      "small": 3,
       "medium": 2,
       "large": 3,
       "apiNotes": [

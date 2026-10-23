@@ -21,6 +21,22 @@ internal sealed class DeviceDestructiveTools
     /// <summary>The execution limit, the backup included (tool spec, section 5).</summary>
     internal static readonly TimeSpan Limit = TimeSpan.FromSeconds(300);
 
+    internal static List<string> Violations(string? project, string[]? pages, int start, int step)
+    {
+        var violations = ToolArguments.WriteProjectViolations(project);
+        if (pages is { Length: < 1 or > PageWriteTools.MaxPages })
+        {
+            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names; omit it for the whole project.");
+        }
+
+        if (start < 1 || step < 1)
+        {
+            violations.Add("'start' and 'step' must be at least 1.");
+        }
+
+        return violations;
+    }
+
     [McpServerTool(
         Name = RenumberTool,
         Title = "Number device tags in an EPLAN project",
@@ -46,22 +62,7 @@ internal sealed class DeviceDestructiveTools
         [Description("Only return the plan")] bool dry_run = false,
         CancellationToken cancellationToken = default)
     {
-        var violations = new List<string>();
-        if (string.IsNullOrWhiteSpace(project))
-        {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
-        }
-
-        if (pages is { Length: < 1 or > PageWriteTools.MaxPages })
-        {
-            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names; omit it for the whole project.");
-        }
-
-        if (start < 1 || step < 1)
-        {
-            violations.Add("'start' and 'step' must be at least 1.");
-        }
-
+        var violations = Violations(project, pages, start, step);
         if (violations.Count > 0)
         {
             return ToolResults.InvalidArguments(violations);

@@ -46,9 +46,9 @@ internal sealed class MacroWriteTools
         CancellationToken cancellationToken = default)
     {
         // The page, the macro, the point and the numbering are checked by the Bridge, all at once (macro.insert.plan).
-        if (string.IsNullOrWhiteSpace(project))
+        if (ToolArguments.WriteProjectViolations(project) is { Count: > 0 } violations)
         {
-            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+            return ToolResults.InvalidArguments(violations);
         }
 
         var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering };
