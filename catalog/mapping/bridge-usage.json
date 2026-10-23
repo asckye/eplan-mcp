@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-23",
-  "scannedSources": "2c40c9f3",
-  "sourceHash": "sha256:b16d8cdb780f27ec25a11ebea099820334915ef07ad0e863d2f2b7fa70d820b4",
+  "scannedSources": "2c40c9f3 + uncommitted changes",
+  "sourceHash": "sha256:0842c57f4d818a57d55ae67a4c11cbf1e00b18b16b6d72ecdf8c15cae5b42142",
   "operations": [
     {
       "name": "action.execute",
@@ -339,6 +339,10 @@
     {
       "name": "plan.functions",
       "class": "PlanFunctionsOperation"
+    },
+    {
+      "name": "plan.macro.inspect",
+      "class": "PlanMacroInspectOperation"
     },
     {
       "name": "plc.get",
@@ -964,6 +968,20 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -2831,7 +2849,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
-          "macro.list"
+          "macro.list",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -5066,7 +5085,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -5081,7 +5101,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -5107,7 +5128,40 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,System.Boolean)": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,System.Boolean)": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -5470,6 +5524,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -7458,6 +7513,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -7554,6 +7610,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -8194,7 +8251,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -8237,7 +8295,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -9384,7 +9443,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -9586,7 +9646,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -10112,7 +10173,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -10470,7 +10532,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -11305,7 +11368,24 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationType": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -11320,7 +11400,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -11335,7 +11416,24 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Variant": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -13044,6 +13142,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13168,6 +13267,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13259,6 +13359,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.get",
@@ -13433,6 +13534,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13611,6 +13713,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13730,6 +13833,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -16449,7 +16553,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
-          "macro.list"
+          "macro.list",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -16532,7 +16637,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -18090,6 +18196,20 @@
         ]
       },
       {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -18103,6 +18223,20 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.PLC": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlcReader",
         "member": "Connections",
@@ -18150,6 +18284,20 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Terminal": [
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlcReader",
         "member": "Channel",
@@ -18596,7 +18744,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -19085,7 +19234,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -19099,6 +19249,20 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -19125,6 +19289,20 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanMacroReader",
+        "member": "ReadMacro",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "macro.get",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -19868,7 +20046,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       }
     ],
@@ -20092,7 +20271,8 @@
         "operations": [
           "macro.get",
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plan.macro.inspect"
         ]
       },
       {
@@ -20381,6 +20561,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.get",
@@ -20473,6 +20654,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -20741,6 +20923,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -22102,6 +22285,7 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.functions",
+          "plan.macro.inspect",
           "plc.get",
           "project.backup",
           "project.compatibility",
