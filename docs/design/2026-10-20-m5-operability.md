@@ -273,6 +273,8 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 这些命令在 stdout 输出，只在 `serve` 以外使用（CLAUDE.md 规则 5 只约束 `serve`）。
 
 ### 4.12 虚拟机连接（Q14，ADR-0018）
+步骤 15 的部署指南已完成：中英文入门指南第 10 节覆盖两端 Workbench、CLI、安全边界、`vm-test`/`doctor` 排错与移除，插件内副本同步；实机验收仍按下述待办进行。
+
 实现进度（part 3b–3d）：虚拟机内的地址、密钥、经 Windows UAC 的网络权限及服务启停已位于“MCP 与客户端”页。`vm-instances --format json` 只经 Host 发现列出 PID（`schemaVersion: 1`、`processes`），不连接 EPLAN；单实例由 Host 选择，多实例须工程师选择。子进程进入 kill-on-close Job 后才通过 stdin 放行启动，监听以自身 PID、启动时间匹配的 `state/http-*.json` 为准；运行时锁定地址、端口和密钥修改。Host 不支持无窗口子进程的优雅停止，停止或 Workbench 退出仅终止该 Host；残留状态文件由 `doctor` 按 PID/启动时间忽略。3d 提供下述宿主机连接测试命令；3e 已完成宿主机向导、VM 路径的 schema 2 读取、stdin 子进程输入及 Small/双语页面测试。跨机器连接、真实 EPLAN、UAC 和防火墙仍待实机验证。
 
 **宿主机连接测试**：`eplanmcp vm-test --url http://<IPv4>:<port>/mcp --key-stdin [--format json]` 不需要 EPLAN，也不读取本机 Host 配置或密钥文件。密钥只从重定向的 stdin 读取，校验与 `client-config --vm` 相同（43 字符的规范 base64url，可跟一个 LF 或 CRLF），不能放在参数或环境变量中。
