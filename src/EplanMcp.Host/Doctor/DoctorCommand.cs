@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EplanMcp.Host.Doctor;
@@ -27,6 +28,7 @@ internal static class DoctorCommand
             DoctorChecks.MsixEnvironment(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)),
         };
         checks.AddRange(DoctorChecks.Suspensions(locations));
+        checks.AddRange(VmDoctorChecks.Read(() => HttpServiceStateStore.Read(locations), HttpServiceStateStore.StartOf, new VmFirewall()));
         checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
         checks.AddRange(DoctorChecks.RunningEplan());
         var bridge = new BridgeClient(new PipeBridgeDiscovery(), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);

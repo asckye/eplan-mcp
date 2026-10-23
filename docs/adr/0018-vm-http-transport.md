@@ -72,6 +72,8 @@ TIA 的做法（2026-10-20 只读查阅其仓库）：
 
     宿主机的客户端配置文件中的密钥是明文，这是客户端的限制，入门指南提醒不要分享这些文件。
 11. **自检**：`doctor` 报告 HTTP 服务是否在运行、绑定的地址和端口、防火墙规则是否存在以及它放行的地址。
+    - Host 在监听成功后原子写入本数据目录的 `state/http-<PID>-<随机标识>.json`，包含 Host PID、UTC 进程启动时间、实际绑定的 IPv4 和端口；停止或释放 Host 时删除自己的文件。异常退出的残留文件由 `doctor` 核对 PID 和启动时间后忽略，诊断不删除文件、不发送网络请求。每个服务单独记录，可发现同一数据目录的多个服务；记录不包含密钥。
+    - `vm-firewall show|add|remove --port <n> --host-address <IPv4>` 使用 Windows Firewall COM API 和固定规则名 `EplanMcp.Vm.Http`。`show` 与 `doctor` 只读列出同名规则的实际范围；`add`/`remove` 在未提升权限时拒绝，由后续 Workbench 经 UAC 启动。同名规则重复或与端口、宿主机地址、当前 `eplanmcp.exe` 路径及第 6 条范围不符时拒绝修改，避免覆盖或删除其他配置。
 
 ## 后果
 - **好的**：

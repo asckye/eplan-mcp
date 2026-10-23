@@ -7,6 +7,8 @@ namespace EplanMcp.Host.Doctor;
 internal static class DoctorCheckIds
 {
     public const string HostVersion = "host.version";
+    public const string HttpService = "http.service";
+    public const string VmFirewall = "vm.firewall";
     public const string DataDirectory = "data.directory";
     public const string Config = "config";
     public const string AuditDirectory = "audit.directory";

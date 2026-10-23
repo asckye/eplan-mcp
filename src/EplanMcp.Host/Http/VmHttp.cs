@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.AspNetCore;
 
@@ -41,6 +42,7 @@ internal static class VmHttp
         var caller = new HttpCaller(accessor);
         builder.Services.AddSingleton<IHttpContextAccessor>(accessor).AddSingleton(caller);
         builder.Services.AddSingleton(locations).AddSingleton(config).AddSingleton(new ToolProfileChoice(ToolProfile.Full));
+        builder.Services.AddSingleton<IHostedService, HttpServiceStateStore>();
         builder.Services.AddEplanMcp().WithHttpTransport(http => http.SessionMode = HttpServerSessionMode.Stateless)
             .WithRequestFilters(filters => filters.AddCallToolFilter(caller.Capture));
         builder.Services.AddSingleton<IBridgeDiscovery>(new PinnedDiscovery(discovery, candidates[0]));
