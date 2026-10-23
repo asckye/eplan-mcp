@@ -210,7 +210,8 @@ public sealed class ActionRunOperationTests
     public void Plc_OnlyTheThreeVerifiedCombinationsAreAccepted(string converter, string? format, string file, bool valid)
     {
         var args = new ActionRunArgs { Entry = "plcservice/BUSDATAEXPORT", Project = "Line1", Parameters = Pairs(new Dictionary<string, string> { ["CONFIGURATIONPROJECT"] = "Phoenix1", ["CONVERTERID"] = converter, ["DESTINATIONFILE"] = file }) };
-        if (format is not null) { Set(args, "FORMAT", format); }
+        if (format is not null)
+        { Set(args, "FORMAT", format); }
         if (!valid)
         {
             Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
@@ -387,9 +388,12 @@ public sealed class ActionRunOperationTests
         _runner.Done = mode != "false";
         _runner.OnRun = () =>
         {
-            if (mode == "exception") { throw new InvalidOperationException("local path must stay private"); }
-            if (mode is "error" or "fatal") { _messages.Items.Add(new() { Text = "failure", Level = mode == "error" ? 4 : 5 }); }
-            if (mode == "readback") { _runner.FailInspection = true; }
+            if (mode == "exception")
+            { throw new InvalidOperationException("local path must stay private"); }
+            if (mode is "error" or "fatal")
+            { _messages.Items.Add(new() { Text = "failure", Level = mode == "error" ? 4 : 5 }); }
+            if (mode == "readback")
+            { _runner.FailInspection = true; }
         };
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
         Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack, false), (error.Reason, error.Execution, error.Retryable));
@@ -486,7 +490,8 @@ public sealed class ActionRunOperationTests
         public List<string> Events { get; } = [];
         public IReadOnlyList<SystemMessageRecord> ReadAll()
         {
-            if (FailRead) { throw new InvalidOperationException("message read failed"); }
+            if (FailRead)
+            { throw new InvalidOperationException("message read failed"); }
             Events.Add(Events.Contains("bookmark", StringComparer.Ordinal) ? "messages" : "bookmark");
             return Items.ToArray();
         }
@@ -504,7 +509,8 @@ public sealed class ActionRunOperationTests
         public ActionRunData Inspect(string entry, string? projectPath, IReadOnlyDictionary<string, string> parameters)
         {
             Calls.Add("Inspect");
-            if (FailInspection) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Readback failed."); }
+            if (FailInspection)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Readback failed."); }
             var state = Enumerable.Range(0, 30).ToDictionary(i => "file:" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), _ => "1\t2026-10-22T00:00:00Z");
             state["count:functions"] = "2876";
             state["layer:visible"] = Visible ? "1" : "0";
@@ -515,7 +521,8 @@ public sealed class ActionRunOperationTests
             Calls.Add("Run");
             Runs++;
             LastAction = action;
-            if (action == "changelayer") { Visible = parameters["VISIBLE1"] == "1"; }
+            if (action == "changelayer")
+            { Visible = parameters["VISIBLE1"] == "1"; }
             OnRun?.Invoke();
             return Done;
         }

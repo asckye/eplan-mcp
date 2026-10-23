@@ -12,12 +12,14 @@ public sealed class ActionRunPlanOperation(int major, IProjectCatalog catalog, I
         ActionRunRequest request = ActionRunRequest.Check(args, major, catalog, runner);
         return new WritePlan
         {
-            Project = request.Project?.Name ?? string.Empty, ProjectPath = request.Project?.Path ?? string.Empty,
+            Project = request.Project?.Name ?? string.Empty,
+            ProjectPath = request.Project?.Path ?? string.Empty,
             Fingerprint = request.StateFingerprint(),
             Changes = [new PlannedChange { Action = "run", Kind = "action", Name = args.Entry, NewValue = JsonConvert.SerializeObject(request.Data.Parameters) }],
             Details = new Dictionary<string, string>
             {
-                ["actionRun"] = JsonConvert.SerializeObject(request.Data), ["tier"] = (string)request.Entry["tier"]!,
+                ["actionRun"] = JsonConvert.SerializeObject(request.Data),
+                ["tier"] = (string)request.Entry["tier"]!,
                 ["effects"] = (string)request.Entry["effects"]!,
             },
         };

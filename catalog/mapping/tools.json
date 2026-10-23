@@ -2,6 +2,150 @@
   "eplanApi": "2026.0.3.25421",
   "tools": [
     {
+      "name": "eplan_action_run",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/ActionRunTools.cs",
+      "operations": [
+        "action.execute",
+        "action.plan",
+        "action.run"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable",
+        "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageIndex",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageText",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.Base.SysMessagesCollection.#ctor",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminals(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.PlcService.#ctor",
+        "M:Eplan.EplApi.HEServices.PlcService.GetPLCConfigurationProjects(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "M:Eplan.EplApi.HEServices.Translate.#ctor",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
+        "P:Eplan.EplApi.Base.BaseException.MessageLevel",
+        "P:Eplan.EplApi.Base.BaseException.NumberOfOccurrences",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Name",
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isLocked",
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isValid",
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isVisible",
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Layers",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.LayerTable",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
+        "P:Eplan.EplApi.MasterData.MDAccessoryList.Name",
+        "P:Eplan.EplApi.MasterData.MDAccessoryPlacement.Name",
+        "P:Eplan.EplApi.MasterData.MDAddress.ShortName",
+        "P:Eplan.EplApi.MasterData.MDConnectionPointInfo.Name",
+        "P:Eplan.EplApi.MasterData.MDConstruction.Name",
+        "P:Eplan.EplApi.MasterData.MDPart.PartNr",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryLists",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryPlacements",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.ConnectionPointInfos",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.Constructions",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.Manufacturers",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
+        "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.PathMap",
+        "T:Eplan.EplApi.Base.SysMessagesCollection",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.FunctionsFilter",
+        "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayer",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.PlcService",
+        "T:Eplan.EplApi.HEServices.SelectionSet",
+        "T:Eplan.EplApi.HEServices.Translate",
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase",
+        "T:Eplan.EplApi.MasterData.MDPartsManagement"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_action_run.md",
+        "specStatus": "Proposed（仅规格，未实现；产品流水线未验证；按 Q5 在 M4c 完成后与 M5 第 10 步规划）",
+        "apiNotes": [
+          "A11",
+          "A25",
+          "A30",
+          "A39",
+          "A40"
+        ],
+        "tests": [
+          {
+            "name": "ActionRunContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunContractTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ActionRunOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ActionRunOperationTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_asset_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
@@ -7077,6 +7221,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "ActionRunTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ActionRunTests.cs"
+          },
+          {
             "name": "DeviceRenumberTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DeviceRenumberTests.cs"
@@ -7470,6 +7619,16 @@
         "specStatus": "Proposed（M2）",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "ActionRunContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunContractTests.cs"
+          },
+          {
+            "name": "ActionRunValidationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunValidationTests.cs"
+          },
           {
             "name": "ClaudeCodePluginPackageTests",
             "size": "Small",

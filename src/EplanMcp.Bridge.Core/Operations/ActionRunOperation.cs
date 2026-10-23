@@ -16,8 +16,10 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         ActionRunRequest request = ActionRunRequest.Check(args, major, catalog, runner, "export");
         string folder = CheckFolder(args.Directory);
         string output = (string)request.Entry["output"]!;
-        if (args.Entry == "backup/MASTERDATA") { request.Data.Parameters.Add(new ActionParameter { Name = "DESTINATIONPATH", Value = folder }); }
-        else { ActionParameter file = request.Data.Parameters.Single(p => p.Name == output); file.Value = Path.Combine(folder, file.Value); }
+        if (args.Entry == "backup/MASTERDATA")
+        { request.Data.Parameters.Add(new ActionParameter { Name = "DESTINATIONPATH", Value = folder }); }
+        else
+        { ActionParameter file = request.Data.Parameters.Single(p => p.Name == output); file.Value = Path.Combine(folder, file.Value); }
         return Run(request, runner, messages);
     }
 
@@ -31,10 +33,12 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         Exception? failure = null;
         bool done = false;
         var parameters = request.Data.Parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
-        try { done = runner.Run((string)request.Entry["action"]!, parameters); }
+        try
+        { done = runner.Run((string)request.Entry["action"]!, parameters); }
         catch (Exception ex) { failure = ex; }
         List<SystemMessageRecord> added;
-        try { added = [.. messages.ReadAll().Skip(bookmark)]; }
+        try
+        { added = [.. messages.ReadAll().Skip(bookmark)]; }
         catch (Exception ex) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN action messages could not be checked; inspect the session messages in EPLAN.", ex); }
         request.Data.EplanMessageCount = added.Count;
         request.Data.EplanMessages = [.. added.Take(20).Select(m => m.Index + ": " + m.Text)];
@@ -48,7 +52,8 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         OperationContext.Current.ThrowIfCancellationRequested();
         request.Data.After = runner.Inspect((string)request.Entry["entry"]!, request.Project?.Path, parameters).Before;
         OperationContext.Current.ThrowIfCancellationRequested();
-        if (elapsed.Elapsed.TotalSeconds > (int)request.Entry["seconds"]!) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Action fingerprint readback exceeded its execution budget."); }
+        if (elapsed.Elapsed.TotalSeconds > (int)request.Entry["seconds"]!)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Action fingerprint readback exceeded its execution budget."); }
         request.Data.Warning += "Changes have not been checked item by item; use read tools to verify objects you care about. " + (string)request.Entry["effects"]!;
         return request.Data;
     }

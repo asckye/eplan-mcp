@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 202,
-      "byTools": 194,
+      "implemented": 219,
+      "byTools": 211,
       "partial": 39,
-      "automatedTest": 194,
+      "automatedTest": 211,
       "liveVerified": 147,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 106,
-      "byTools": 99,
+      "implemented": 107,
+      "byTools": 100,
       "partial": 39,
-      "automatedTest": 99,
+      "automatedTest": 100,
       "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 96,
-      "byTools": 95,
+      "implemented": 112,
+      "byTools": 111,
       "partial": 0,
-      "automatedTest": 95,
+      "automatedTest": 111,
       "liveVerified": 79,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 212,
+    "used": 215,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 89,
+      "implemented": 90,
       "liveVerified": 75
     },
     {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 10,
+      "implemented": 15,
       "liveVerified": 10
     },
     {
@@ -205,7 +205,7 @@
     {
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
-      "implemented": 31,
+      "implemented": 32,
       "liveVerified": 13
     },
     {
@@ -217,7 +217,7 @@
     {
       "scope": "Eplan.EplApi.MasterData",
       "denominator": 592,
-      "implemented": 14,
+      "implemented": 24,
       "liveVerified": 14
     },
     {
@@ -346,6 +346,31 @@
     }
   ],
   "tools": [
+    {
+      "name": "eplan_action_run",
+      "safety": "destructive",
+      "operations": [
+        "action.execute",
+        "action.plan",
+        "action.run"
+      ],
+      "apiIds": 95,
+      "operationGroups": 52,
+      "dataDictionary": 0,
+      "dependencies": 43,
+      "actions": 0,
+      "spec": "docs/tools/eplan_action_run.md",
+      "small": 2,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": [
+        "A11",
+        "A25",
+        "A30",
+        "A39",
+        "A40"
+      ]
+    },
     {
       "name": "eplan_asset_get",
       "safety": "read",
@@ -1765,7 +1790,7 @@
       "spec": "docs/tools/eplan_session_status.md",
       "small": 5,
       "medium": 3,
-      "large": 8,
+      "large": 9,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -1853,7 +1878,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_tool_usage.md",
-      "small": 6,
+      "small": 8,
       "medium": 2,
       "large": 0,
       "apiNotes": []
@@ -2019,6 +2044,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2035,6 +2061,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2100,6 +2127,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2112,6 +2140,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2124,6 +2153,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2136,6 +2166,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2148,6 +2179,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
         "eplan_import_plc",
@@ -2257,6 +2289,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -2341,6 +2374,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_action_run",
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_macro_list",
@@ -2656,6 +2690,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_import_list",
         "eplan_import_plc",
         "eplan_part_list",
@@ -2669,6 +2704,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_connection_generate",
         "eplan_connection_list",
@@ -2683,6 +2719,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -2709,6 +2746,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_import_plc"
       ]
     },
@@ -2718,6 +2756,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -2779,6 +2818,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_terminal_renumber"
       ]
     },
@@ -3099,6 +3139,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_device_list"
@@ -3130,6 +3171,51 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isLocked",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isValid",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isVisible",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Layers",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
       ]
     },
     {
@@ -3577,6 +3663,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3626,11 +3713,21 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Project.LayerTable",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Project.ProjectFullName",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3707,6 +3804,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3819,6 +3917,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3893,6 +3992,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4149,6 +4249,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4180,6 +4281,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4211,6 +4313,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4277,6 +4380,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4308,6 +4412,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4339,6 +4444,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -4584,6 +4690,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.HEServices.PlcService.GetPLCConfigurationProjects",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.HEServices.Renumber.DeviceTags",
       "layer": "operation",
       "status": "live_verified",
@@ -4643,6 +4758,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4706,6 +4822,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_translation_export"
       ]
     },
@@ -4760,6 +4877,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_translation_export"
       ]
     },
@@ -4773,11 +4891,57 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDAccessoryList.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAccessoryPlacement.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAddress.ShortName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDConnectionPointInfo.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDConstruction.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDPart.PartNr",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_device_place",
         "eplan_part_export",
         "eplan_part_import",
@@ -4807,17 +4971,54 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryLists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.AccessoryPlacements",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_device_place",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ConnectionPointInfos",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Constructions",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
       ]
     },
     {
@@ -4850,11 +5051,21 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Manufacturers",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_device_place",
         "eplan_part_export",
         "eplan_part_import",
@@ -4879,6 +5090,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_action_run",
         "eplan_device_place",
         "eplan_part_export",
         "eplan_part_import",
@@ -4893,6 +5105,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_device_place",
         "eplan_part_export",
         "eplan_part_import",

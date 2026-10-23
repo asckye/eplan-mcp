@@ -32,7 +32,8 @@ public sealed class ActionRunToolTests : IDisposable
         {
             var args = (ActionRunArgs)value!;
             WritePlan plan = _harness.Plan([new() { Action = "run", Kind = "action", Name = args.Entry, NewValue = JsonSerializer.Serialize(Data(args, after: false).Parameters, HostJson.Options) }]);
-            if (ActionRunCatalog.Text(ActionRunCatalog.Entries[args.Entry], "scope") == "system") { plan.Project = ""; plan.ProjectPath = ""; }
+            if (ActionRunCatalog.Text(ActionRunCatalog.Entries[args.Entry], "scope") == "system")
+            { plan.Project = ""; plan.ProjectPath = ""; }
             plan.Details = new() { ["actionRun"] = JsonSerializer.Serialize(Data(args, after: false), HostJson.Options), ["effects"] = "Undo after commit unverified." };
             return plan;
         };
@@ -42,11 +43,15 @@ public sealed class ActionRunToolTests : IDisposable
             var args = (ActionRunArgs)value!;
             var rule = ActionRunCatalog.Entries[args.Entry];
             string fileName = args.Parameters.Single(p => p.Name == rule["output"]!.GetValue<string>()).Value;
-            if (args.Entry == "backup/MASTERDATA") { fileName += ActionRunCatalog.Extension(rule, args); }
+            if (args.Entry == "backup/MASTERDATA")
+            { fileName += ActionRunCatalog.Extension(rule, args); }
             File.WriteAllBytes(Path.Combine(args.Directory!, _mode == "extension" ? "wrong.txt" : fileName), _mode == "empty" ? [] : args.Entry == "backup/MASTERDATA" && _mode != "header" ? [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c, 1] : [1, 2, 3]);
-            if (_mode == "extra") { File.WriteAllText(Path.Combine(args.Directory!, "extra.txt"), "extra"); }
-            if (_mode is "failed" or "timeout") { throw new BridgeCallException(new BridgeError { Reason = _mode == "timeout" ? ErrorReason.Timeout : ErrorReason.EplanOperationFailed, Message = "Action failed." }); }
-            if (_mode == "cancel") { throw new OperationCanceledException(); }
+            if (_mode == "extra")
+            { File.WriteAllText(Path.Combine(args.Directory!, "extra.txt"), "extra"); }
+            if (_mode is "failed" or "timeout")
+            { throw new BridgeCallException(new BridgeError { Reason = _mode == "timeout" ? ErrorReason.Timeout : ErrorReason.EplanOperationFailed, Message = "Action failed." }); }
+            if (_mode == "cancel")
+            { throw new OperationCanceledException(); }
             return Data(args, after: true);
         };
     }
@@ -190,8 +195,10 @@ public sealed class ActionRunToolTests : IDisposable
         Assert.Single(_dialog.Questions);
         Assert.Equal(ToolTier.Write, _dialog.Questions.Single().Tier);
         Assert.Equal(approved ? 1 : 0, _harness.Bridge.Writes.Count);
-        if (approved) { ToolResultAssert.Succeeded(result); }
-        else { Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
+        if (approved)
+        { ToolResultAssert.Succeeded(result); }
+        else
+        { Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
     }
 
     [Theory]
@@ -220,7 +227,8 @@ public sealed class ActionRunToolTests : IDisposable
     [Fact]
     public async Task ReadChangeBeyondDisplayedFiles_IsReportedAndDisablesTheEntry()
     {
-        _manyFiles = true; _changed = true;
+        _manyFiles = true;
+        _changed = true;
         JsonElement data = WriteToolHarness.Structured(await Run());
         Assert.True(data.GetProperty("entryDisabled").GetBoolean());
         Assert.True(data.GetProperty("truncated").GetBoolean());
@@ -243,10 +251,13 @@ public sealed class ActionRunToolTests : IDisposable
     private ActionRunData Data(ActionRunArgs args, bool after)
     {
         var state = new Dictionary<string, string> { ["count:functions"] = "2876", ["file:Layer.eod"] = "100\t2026-10-22T00:00:00Z" };
-        if (_manyFiles) { for (int i = 1; i <= 30; i++) { state["file:" + i.ToString(System.Globalization.CultureInfo.InvariantCulture)] = "100\t2026-10-22T00:00:00Z"; } }
+        if (_manyFiles)
+        { for (int i = 1; i <= 30; i++) { state["file:" + i.ToString(System.Globalization.CultureInfo.InvariantCulture)] = "100\t2026-10-22T00:00:00Z"; } }
         var last = new Dictionary<string, string>(state);
-        if (_changed) { last["file:Layer.eod"] = "101\t2026-10-22T00:00:01Z"; }
-        if (args.Entry == "changelayer") { state["layer:visible"] = "1"; last["layer:visible"] = "0"; }
+        if (_changed)
+        { last["file:Layer.eod"] = "101\t2026-10-22T00:00:01Z"; }
+        if (args.Entry == "changelayer")
+        { state["layer:visible"] = "1"; last["layer:visible"] = "0"; }
         return new ActionRunData { Target = _harness.ProjectPath, Parameters = args.Parameters, Before = state, After = after ? last : null, Warning = "Undo after commit unverified." };
     }
 }

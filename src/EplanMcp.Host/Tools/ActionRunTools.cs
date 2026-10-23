@@ -32,12 +32,15 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         string failure = ErrorReason.Internal;
         try
         {
-            if (config.ActionRun != ActionRunSwitch.On) { throw ActionRunCatalog.Denied("actionRun is off in config.json."); }
+            if (config.ActionRun != ActionRunSwitch.On)
+            { throw ActionRunCatalog.Denied("actionRun is off in config.json."); }
             (JsonObject rule, ActionRunArgs args) = catalog.Check(entry, project, arguments);
             read = ActionRunCatalog.Text(rule, "tier") == "export";
             HandshakeResult? status = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake;
-            if (status is null) { throw new BridgeCallException(BridgeErrors.NotConnected()); }
-            if (!Version.TryParse(status.Eplan.Version, out Version? version) || version.Major != 2026) { throw ActionRunCatalog.Denied("This EPLAN major version has not been verified."); }
+            if (status is null)
+            { throw new BridgeCallException(BridgeErrors.NotConnected()); }
+            if (!Version.TryParse(status.Eplan.Version, out Version? version) || version.Major != 2026)
+            { throw ActionRunCatalog.Denied("This EPLAN major version has not been verified."); }
             WritePlan plan;
             string? execution = null;
             bool recovered = false;
@@ -47,32 +50,41 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
                 var request = new WriteRequest<ActionRunArgs, ActionRunArgs>(Tool, ToolTier.Write, OperationNames.ActionRunPlan, OperationNames.ActionRunExecute, args,
                     p => new ActionRunArgs { Entry = args.Entry, Project = args.Project, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, limit, "Running whitelisted action");
                 WriteOutcome<ActionRunData> outcome = await writes.RunAsync<ActionRunArgs, ActionRunArgs, ActionRunData>(request, progress, cancellationToken).ConfigureAwait(false);
-                plan = outcome.Plan; data = outcome.Data; execution = outcome.Execution; recovered = outcome.Recovered;
+                plan = outcome.Plan;
+                data = outcome.Data;
+                execution = outcome.Execution;
+                recovered = outcome.Recovered;
             }
-            else if (dry_run) { plan = await bridge.InvokeAsync<ActionRunArgs, WritePlan>(OperationNames.ActionRunPlan, args, cancellationToken).ConfigureAwait(false); }
+            else if (dry_run)
+            { plan = await bridge.InvokeAsync<ActionRunArgs, WritePlan>(OperationNames.ActionRunPlan, args, cancellationToken).ConfigureAwait(false); }
             else
             {
                 var adapter = new ActionExportBridge(bridge, args, locations);
                 var runner = new ExportRunner(adapter, folders, clock, logs.CreateLogger<ExportRunner>());
                 var job = new ExportJob(OperationNames.ActionRunPlan, OperationNames.ActionRun, new ExportArgs(), "Running whitelisted action")
                 {
-                    SingleFile = ActionRunCatalog.Extension(rule, args), Limit = limit,
+                    SingleFile = ActionRunCatalog.Extension(rule, args),
+                    Limit = limit,
                     Folder = ActionRunCatalog.Text(rule, "scope") == "project" ? null : args.Parameters.Any(p => p.Name == "MDTYPE" && p.Value == "LANGUAGES") ? "translation-database" : "parts-database",
                 };
                 exported = await runner.RunAsync(job, progress, cancellationToken).ConfigureAwait(false);
-                plan = adapter.Plan!; data = adapter.Data!;
+                plan = adapter.Plan!;
+                data = adapter.Data!;
                 files = adapter.Files;
             }
             data ??= JsonSerializer.Deserialize<ActionRunData>(plan.Details!["actionRun"], HostJson.Options)!;
             bool changed = read && data.After is not null && !data.Before.OrderBy(p => p.Key, StringComparer.Ordinal).SequenceEqual(data.After.OrderBy(p => p.Key, StringComparer.Ordinal));
-            if (changed) { catalog.Disabled.TryAdd(entry, 0); LogDisabled(logs.CreateLogger<ActionRunTools>(), entry); }
+            if (changed)
+            { catalog.Disabled.TryAdd(entry, 0); LogDisabled(logs.CreateLogger<ActionRunTools>(), entry); }
             JsonObject result = Shape(rule, args, plan, data, exported, files, dry_run, recovered, execution, changed, locations);
-            if (read) { auditAttempted = true; await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["result"] = result.DeepClone() }, CancellationToken.None).ConfigureAwait(false); }
+            if (read)
+            { auditAttempted = true; await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["result"] = result.DeepClone() }, CancellationToken.None).ConfigureAwait(false); }
             return ToolResults.Success(dry_run ? "Whitelisted action planned; nothing executed." : read ? "Whitelisted action exported one file; see 'directory'." : "Whitelisted action committed; fingerprint readback only.", result);
         }
         catch (AuditUnavailableException)
         {
-            if (exported is not null) { new ExportFolder(locations.Exports, exported.Directory).TryDelete(); }
+            if (exported is not null)
+            { new ExportFolder(locations.Exports, exported.Directory).TryDelete(); }
             return ToolResults.Error(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = "The action audit could not be written; ask the engineer to check the audit directory." });
         }
         catch (BridgeCallException ex) { failure = ex.Error.Reason; if (entry == "changelayer") { ex.Error.Execution ??= ExecutionState.NotStarted; } return ToolResults.Error(ex.Error); }
@@ -81,7 +93,8 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         {
             if (read && !auditAttempted)
             {
-                try { await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["reason"] = failure }, CancellationToken.None).ConfigureAwait(false); }
+                try
+                { await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["reason"] = failure }, CancellationToken.None).ConfigureAwait(false); }
                 catch (AuditUnavailableException) { LogAuditFailure(logs.CreateLogger<ActionRunTools>()); }
             }
         }
@@ -95,17 +108,30 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         bool truncated = data.Before.Count(p => p.Key.StartsWith("file:", StringComparison.Ordinal)) > 20 || data.After?.Count(p => p.Key.StartsWith("file:", StringComparison.Ordinal)) > 20 || data.EplanMessageCount > 20 || files.Count > 50;
         var result = new JsonObject
         {
-            ["entry"] = args.Entry, ["tier"] = ActionRunCatalog.Text(rule, "tier"), ["project"] = plan.Project.Length == 0 ? null : plan.Project,
-            ["target"] = plan.Project.Length > 0 ? plan.Project : Path.GetFileName(data.Target), ["action"] = ActionRunCatalog.Text(rule, "action"), ["type"] = rule["fixed"]?["TYPE"]?.DeepClone(),
+            ["entry"] = args.Entry,
+            ["tier"] = ActionRunCatalog.Text(rule, "tier"),
+            ["project"] = plan.Project.Length == 0 ? null : plan.Project,
+            ["target"] = plan.Project.Length > 0 ? plan.Project : Path.GetFileName(data.Target),
+            ["action"] = ActionRunCatalog.Text(rule, "action"),
+            ["type"] = rule["fixed"]?["TYPE"]?.DeepClone(),
             ["parameters"] = new JsonArray([.. data.Parameters.Select(p => (JsonNode)new JsonObject { ["name"] = p.Name, ["value"] = Display(p, plan.Project, locations) })]),
-            ["dryRun"] = dry, ["before"] = Fingerprint(data.Before), ["after"] = data.After is null ? null : Fingerprint(data.After), ["readback"] = data.After is null ? "not_executed" : "fingerprint",
-            ["directory"] = export?.Directory, ["files"] = new JsonArray([.. files.Take(50).Select(f => f!.DeepClone())]), ["fileCount"] = files.Count, ["totalBytes"] = export?.Files.Sum(f => f.Bytes) ?? 0,
-            ["entryDisabled"] = disabled, ["eplanMessages"] = JsonSerializer.SerializeToNode(data.EplanMessages.Select(m => ResultShaper.CleanText(m))), ["truncated"] = truncated,
+            ["dryRun"] = dry,
+            ["before"] = Fingerprint(data.Before),
+            ["after"] = data.After is null ? null : Fingerprint(data.After),
+            ["readback"] = data.After is null ? "not_executed" : "fingerprint",
+            ["directory"] = export?.Directory,
+            ["files"] = new JsonArray([.. files.Take(50).Select(f => f!.DeepClone())]),
+            ["fileCount"] = files.Count,
+            ["totalBytes"] = export?.Files.Sum(f => f.Bytes) ?? 0,
+            ["entryDisabled"] = disabled,
+            ["eplanMessages"] = JsonSerializer.SerializeToNode(data.EplanMessages.Select(m => ResultShaper.CleanText(m))),
+            ["truncated"] = truncated,
             ["hint"] = "Changes have not been checked item by item; use read tools to verify objects you care about. " + ActionRunCatalog.Text(rule, "effects") + " " + ResultShaper.CleanText(data.Warning)
                 + (data.After is not null && data.Before.TryGetValue("layer:visible", out string? visible) ? $" Layer visibility: {visible} -> {data.After.GetValueOrDefault("layer:visible")}." : string.Empty)
                 + (recovered ? " Execution was recovered; unreadable post-action state is not inferred." : string.Empty) + (disabled ? " Entry disabled; ask the engineer to reverify it." : string.Empty),
         };
-        if (execution is not null) { result["execution"] = execution; result["recovered"] = recovered; result["undo"] = null; }
+        if (execution is not null)
+        { result["execution"] = execution; result["recovered"] = recovered; result["undo"] = null; }
         return result;
     }
     private static string Display(ActionParameter p, string project, HostDataLocations locations) => p.Name is "PROJECTNAME" or "Project" ? project
@@ -117,7 +143,8 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         {
             ["counts"] = new JsonArray([.. state.Where(p => p.Key.StartsWith("count:", StringComparison.Ordinal)).Select(p => (JsonNode)new JsonObject { ["kind"] = p.Key[6..], ["count"] = p.Value == "null" ? null : int.Parse(p.Value, CultureInfo.InvariantCulture) })]),
             ["dataFiles"] = new JsonArray([.. files.Take(20).Select(p => (JsonNode)new JsonObject { ["path"] = p.Key[5..], ["bytes"] = long.Parse(p.Value.Split('\t')[0], CultureInfo.InvariantCulture), ["modifiedUtc"] = p.Value.Split('\t')[1] })]),
-            ["fileCount"] = files.Length, ["truncated"] = files.Length > 20,
+            ["fileCount"] = files.Length,
+            ["truncated"] = files.Length > 20,
         };
     }
 }

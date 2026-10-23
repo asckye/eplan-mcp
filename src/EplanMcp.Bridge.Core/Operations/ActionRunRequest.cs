@@ -34,7 +34,8 @@ internal sealed class ActionRunRequest(JObject entry, OpenProject? project, Acti
 
         var violations = new List<string>();
         bool projectEntry = (string?)entry["scope"] == "project";
-        if (projectEntry == string.IsNullOrWhiteSpace(args.Project)) { violations.Add("Supply project only for a project entry; project entries require it."); }
+        if (projectEntry == string.IsNullOrWhiteSpace(args.Project))
+        { violations.Add("Supply project only for a project entry; project entries require it."); }
         if ((args.Parameters ?? []).Any(p => p is null || p.Name is null) || (args.Parameters ?? []).GroupBy(p => p.Name, StringComparer.Ordinal).Any(g => g.Count() > 1))
         { throw WriteArguments.Invalid(["Parameter names must be unique and non-null."]); }
         var parameters = (args.Parameters ?? []).ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
@@ -44,7 +45,8 @@ internal sealed class ActionRunRequest(JObject entry, OpenProject? project, Acti
             string key = rule.Name.TrimEnd('?');
             if (!parameters.TryGetValue(key, out string? value))
             {
-                if (!rule.Name.EndsWith("?", StringComparison.Ordinal)) { violations.Add(key + " is required."); }
+                if (!rule.Name.EndsWith("?", StringComparison.Ordinal))
+                { violations.Add(key + " is required."); }
                 continue;
             }
 
@@ -56,7 +58,8 @@ internal sealed class ActionRunRequest(JObject entry, OpenProject? project, Acti
                 "archive" => Regex.IsMatch(value, @"\A[A-Za-z0-9_-]+\z", RegexOptions.CultureInvariant),
                 _ => kind.Split('|').Contains(value, StringComparer.Ordinal),
             });
-            if (!valid) { violations.Add(key + " has an invalid value."); }
+            if (!valid)
+            { violations.Add(key + " has an invalid value."); }
         }
 
         violations.AddRange(parameters.Keys.Where(k => rules[k] is null && rules[k + "?"] is null).Select(k => k + " is not a variable parameter of this entry."));
@@ -68,12 +71,16 @@ internal sealed class ActionRunRequest(JObject entry, OpenProject? project, Acti
         string extension = args.Entry == "backup/MASTERDATA" ? string.Empty
             : args.Entry == "plcservice/BUSDATAEXPORT" ? (converter == "PlcDcXMLExchangerUniversal" ? ".pbf" : ".aml") : (string?)entry["extension"] ?? string.Empty;
         if (entry["output"] is { } output && parameters.TryGetValue((string)output!, out string? file) && extension.Length > 0
-            && (file is null || !file.EndsWith(extension, StringComparison.OrdinalIgnoreCase) || file.Length <= extension.Length)) { violations.Add("Output file must include the entry's extension."); }
-        if (violations.Count > 0) { throw WriteArguments.Invalid(violations); }
+            && (file is null || !file.EndsWith(extension, StringComparison.OrdinalIgnoreCase) || file.Length <= extension.Length))
+        { violations.Add("Output file must include the entry's extension."); }
+        if (violations.Count > 0)
+        { throw WriteArguments.Invalid(violations); }
         OpenProject? project = !projectEntry ? null : (string?)entry["tier"] == "write"
             ? WriteArguments.Writable(catalog, args.Project) : ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
-        foreach (JProperty fixedValue in ((JObject)entry["fixed"]!).Properties()) { parameters.Add(fixedValue.Name, (string)fixedValue.Value!); }
-        if (project is not null) { parameters.Add((string)entry["projectParameter"]!, project.Path); }
+        foreach (JProperty fixedValue in ((JObject)entry["fixed"]!).Properties())
+        { parameters.Add(fixedValue.Name, (string)fixedValue.Value!); }
+        if (project is not null)
+        { parameters.Add((string)entry["projectParameter"]!, project.Path); }
         ActionRunData data = runner.Inspect(args.Entry, project?.Path, parameters);
         return new ActionRunRequest(entry, project, data);
     }

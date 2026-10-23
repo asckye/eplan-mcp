@@ -41,7 +41,8 @@ internal sealed class UsageTools
                 : ActionRunUsage.For(topic);
         }
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> usage = ToolUsageCatalog.Usage;
-        if (config?.ActionRun != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core) { usage = usage.Where(p => p.Key != ActionRunTools.Tool).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal); }
+        if (config?.ActionRun != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core)
+        { usage = usage.Where(p => p.Key != ActionRunTools.Tool).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal); }
         var violations = new List<string>();
         string name = tool ?? string.Empty; // an explicit JSON null arrives as null despite the type
         IReadOnlyDictionary<string, string>? sections = usage.GetValueOrDefault(name);

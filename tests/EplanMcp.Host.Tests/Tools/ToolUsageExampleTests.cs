@@ -1,8 +1,8 @@
-using EplanMcp.Host.Safety;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -230,7 +230,8 @@ public sealed partial class ToolUsageExampleTests : IDisposable
                 }
                 else if (additional.ValueKind == JsonValueKind.Object)
                 {
-                    foreach (string violation in Violations(additional, argument.Value, Join(path, argument.Name))) { yield return violation; }
+                    foreach (string violation in Violations(additional, argument.Value, Join(path, argument.Name)))
+                    { yield return violation; }
                 }
             }
         }

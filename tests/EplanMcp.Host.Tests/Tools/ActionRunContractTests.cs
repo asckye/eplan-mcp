@@ -112,7 +112,8 @@ public sealed class ActionRunContractTests
             Assert.Equal("LAYER1", args.Parameters[0].Name);
             Assert.Equal("VISIBLE1", args.Parameters[1].Name);
         }
-        else { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeCallException>(() => catalog.Check("changelayer", "Line1", Json(json))).Error.Reason); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeCallException>(() => catalog.Check("changelayer", "Line1", Json(json))).Error.Reason); }
     }
 
     [Theory]
