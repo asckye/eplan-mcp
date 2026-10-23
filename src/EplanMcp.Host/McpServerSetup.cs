@@ -4,6 +4,7 @@ using EplanMcp.Host.Exports;
 using EplanMcp.Host.Http;
 using EplanMcp.Host.Importing;
 using EplanMcp.Host.Packs;
+using EplanMcp.Host.Plans;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,12 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>(), provider.GetService<HttpCaller>()));
         services.TryAddSingleton<DanglingWrites>();
+        services.TryAddSingleton(provider => new PlanStore(provider.GetRequiredService<HostDataLocations>(), provider.GetRequiredService<AuditLog>())
+        {
+            Clock = provider.GetRequiredService<TimeProvider>(),
+            LifetimeHours = provider.GetRequiredService<HostConfig>().PlanLifetimeHours,
+        });
+        services.AddHostedService<PlanStoreCleanup>();
 
         // Approval channels are registered in the order they are tried (ADR-0011), which no setting changes: the Workbench
         // while it runs, then EPLAN's dialog (ADR-0014 decision 4). With none, approvals are refused.

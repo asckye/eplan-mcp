@@ -112,6 +112,9 @@ public static class ErrorReason
     /// <summary>No engineering pack, pack version or pack resource has the given name (M6 design 4.5.1).</summary>
     public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
 
+    /// <summary>Storage, task capacity or a plan project lock is unavailable; metadata contains resource, limit and used. Never retryable.</summary>
+    public const string ResourceExhausted = "RESOURCE_EXHAUSTED";
+
     /// <summary>What a pack or resource needs is not available now (M6 design 4.4); <c>metadata.missing</c> lists it.</summary>
     public const string CapabilityMissing = "CAPABILITY_MISSING";
 

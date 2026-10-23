@@ -14,6 +14,7 @@ internal static class DoctorCheckIds
     public const string AuditDirectory = "audit.directory";
     public const string Exports = "exports";
     public const string Backups = "backups";
+    public const string Plans = "plans";
     public const string Msix = "msix";
     public const string Suspension = "suspension";
     public const string EplanInstallation = "eplan.installation";

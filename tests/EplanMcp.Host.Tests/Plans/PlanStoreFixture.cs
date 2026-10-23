@@ -9,7 +9,7 @@ internal sealed class PlanStoreFixture : IDisposable
 {
     public HostDataLocations Locations { get; } = new(Path.Combine(Path.GetTempPath(), "plan-tests-" + Guid.NewGuid().ToString("N")));
     public AuditLog Audit => new(Locations.Audit, TimeProvider.System);
-    public PlanStore Store => new(Locations, Audit);
+    public PlanStore Store => new(Locations, Audit) { Clock = new PlanTestClock(PlanTestData.Created) }; // fixed, so retention never depends on today
     public string Root => Path.Combine(Locations.State, "plans");
     public const string Changes = "Complete changes\n";
     public PlanDefinition Definition { get; } = PlanTestData.Definition() with

@@ -82,6 +82,7 @@ public sealed class DoctorCheckIdTests : IDisposable
         DoctorChecks.AuditDirectory(locations),
         DoctorChecks.Exports(locations),
         DoctorChecks.Backups(locations),
+        DoctorChecks.Plans(locations),
         .. DoctorChecks.Suspensions(locations),
     ];
 

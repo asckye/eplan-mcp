@@ -191,6 +191,7 @@ eplan_device_place
 | `OUTCOME_UNKNOWN` | 否 | `unknown` | 写操作被中断，取不回结果，无法确定项目是否被修改。提示**不要重复调用**，先请工程师在 EPLAN 中检查，可以用读工具查看现状；该项目的写入随之暂停 |
 | `PACK_INVALID` | 否 | — | 工程包或开发包校验不通过（ADR-0024：文件与清单不符、不允许的类型、超限；没有来源的正式规则）；`metadata.problems` 逐条列出，什么都没有安装或构建 |
 | `RESOURCE_NOT_FOUND` | 否 | — | 工程包、版本或资源不存在；提示用 `eplan_pack_list`、`eplan_asset_search` 查询 |
+| `RESOURCE_EXHAUSTED` | 否 | — | 计划存储、任务容量或计划项目锁不可用；metadata 为 `{resource,limit,used}`，受理前为 `not_started`；不自动重试，不删除未到期记录腾位置 |
 | `CAPABILITY_MISSING` | 否 | — | 包或资源要求的能力（Bridge 操作、授权选项、工具、EPLAN 版本或变体）当前不满足；`metadata.missing` 列出缺的项（M6 设计 4.4） |
 | `CONFIG_CONFLICT` | 否 | — | 配置分层中下层放宽了硬约束，或生效的默认值不满足约束；指出冲突的两处来源（M6 设计 4.3） |
 | `WRITES_SUSPENDED` | 否 | `not_started` | 该项目（或当时那个 EPLAN 实例）的写入因此前结果未知而暂停；提示请工程师在 EPLAN 中核实，下一次写调用会请求确认，确认后解除 |
