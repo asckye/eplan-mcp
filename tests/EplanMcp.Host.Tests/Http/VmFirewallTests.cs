@@ -72,11 +72,32 @@ public sealed class VmFirewallTests
         foreach (string[] extra in new[]
         {
             new[] { "--port", "8766" }, new[] { "--host-address", "192.168.56.1" },
-            new[] { "--format", "json" }, new[] { "--program", ProgramPath }, new[] { "--host-address" }, new[] { "extra" },
+            new[] { "--format", "xml" }, new[] { "--format", "json", "--format", "json" }, new[] { "--program", ProgramPath }, new[] { "--host-address" }, new[] { "extra" },
         })
         {
             Assert.Null(CliArguments.Parse(["vm-firewall", "show", .. valid, .. extra]));
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ShowJson_ReportsActualScopeWithoutElevationOrModification(bool present)
+    {
+        CliArguments cli = Assert.IsType<CliArguments>(CliArguments.Parse(["vm-firewall", "show", "--format", "json", "--host-address", "192.168.56.1", "--port", "8766"]));
+        Assert.True(cli.Json);
+        VmFirewallRule actual = new VmFirewallRequest("add", 9000, "10.0.0.1").Definition(ProgramPath) with { Profiles = 7, Enabled = false };
+        var firewall = new FakeVmFirewall { Rules = present ? [actual] : [] };
+        var command = new VmFirewallCommand(firewall, () => throw new InvalidOperationException("No elevation."), () => throw new InvalidOperationException("No path resolution."));
+        using var output = new StringWriter(CultureInfo.InvariantCulture);
+        Assert.Equal(0, command.Run(cli.Firewall!, output));
+        string expected = present
+            ? """{"schemaVersion":1,"rules":[{"name":"EplanMcp.Vm.Http","protocol":6,"port":"9000","program":"C:\\Program Files\\EplanMcp\\eplanmcp.exe","remoteAddress":"10.0.0.1","profiles":7,"direction":1,"action":1,"enabled":false,"edgeTraversal":false}]}"""
+            : """{"schemaVersion":1,"rules":[]}""";
+        Assert.Equal(expected + Environment.NewLine, output.ToString());
+        Assert.Equal(1, firewall.Reads);
+        Assert.Null(CliArguments.Parse(["vm-firewall", "add", "--port", "8766", "--host-address", "192.168.56.1", "--format", "json"]));
+        Assert.Null(CliArguments.Parse(["vm-firewall", "remove", "--port", "8766", "--host-address", "192.168.56.1", "--format", "json"]));
     }
 
     [Fact]
