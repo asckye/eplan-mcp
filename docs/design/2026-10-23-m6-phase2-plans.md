@@ -109,6 +109,9 @@
 
 `preconditions` 为带 tag 的封闭联合：`objectHash(locator,hash)`、`pageHash(locator,hash)`、`members(scope,hash,count)`、`absent(kind,name)`、`resource(sha256)`、`binding(revision,lockDigest)`。members 用按 kind/type/oid 排序的键和内容哈希计算，包含存在性/新增/删除；页名/设备名占用集合另存摘要。读取范围含名称冲突域、全部同设备功能及删页后的 orphan 影响，不能照抄最多 50 行的 Details。
 
+既有 invoke 内的只读 `plan.functions {project,names:[1–200 个完整名称],pages?:[1–50 个完整页名]}` 返回两个条件并集中的全部主辅功能（含无页和同名主功能）的 `{kind,type,oid,name,isMain,page}`，按名称、页、type、oid 排序，超过 10,000 条时 `complete=false`，Host 必须按 `CAPABILITY_MISSING` 拒绝。
+已解析的全空 scope 表示空集、全项目显式展开页名，基准双读还分页读取 `device.list(includeAuxiliary=true)` 补齐无页功能的名称占用域；删页判断 orphan 时保留无页主辅功能，但 standard 缺少其哈希证据时拒绝编译，A13/A18 的 Large 闭包检查只读示例夹具，不执行改名或删页。
+
 `expected` 分为精确存在/值/删除、或服务端编号/宏预测约束，均带来源和覆盖属性。标准快照的属性集不扩充：没有图形/文字/占位符及无页连接的完整证据。跳过连接数进入 coverage；不能声称全项目所有数据未变。plan 的 scope 限制与验证 coverage 分开保存。
 
 按 ProjectSnapshotArgs 的 complete/nextAfterPage 取全，核对路径/GUID/profile/format、页清单及 missingPages。编译前后各完整读取一次所需范围及名称集合，逐页哈希/集合必须相同；不同时报 PLAN_STALE，不自动重试。双读是稳定性筛查，不是原子快照或数据库修订证明（S31）。
