@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `task`；M6 工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 2 阶段最小版本；尚未实现） |
+| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D10–D13 为准） |
 
 ## 1. 这个工具解决什么任务
 “刚才的计划还在等审批吗？”“任务完成了吗，结果是什么？”可能耗时长的工具在等待窗口内未完成时返回 `taskId`；代理用本工具继续等待或读取状态。返回任务 ID 不取消任务（[M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.13）。它不发起计划、不回答审批、不取消任务，也不重做写步骤。
@@ -70,7 +70,7 @@
 | `RESOURCE_NOT_FOUND` | ID 未知、已过期、Host 重启后丢失，或不属于当前 Host/客户端可见范围 | `This task is unavailable in this Host session. Check the original operation's result; do not repeat a write just to obtain a new task ID.` |
 | `INTERNAL` | Host 查询逻辑缺陷 | 附关联 ID，请工程师提交 Issue |
 
-`RESOURCE_NOT_FOUND` 来自 M6 4.5.1，当前 `Contracts/ErrorReason.cs` 和标准错误码表尚未登记；实现 PR 须同步登记，不能用 `HANDLE_EXPIRED`、`PROJECT_NOT_OPEN` 或 `TIMEOUT` 代替。等待窗口用尽不是错误；EPLAN 未连接也不妨碍读取已有任务，底层的连接错误保存在任务中。本 Read 工具的查询错误不带 `execution`。
+`RESOURCE_NOT_FOUND` 已在 `Contracts/ErrorReason.cs` 和标准错误表登记，本期扩展到任务用途（D10–D13），不能用 `HANDLE_EXPIRED` 等代替。等待窗口用尽不是错误；EPLAN 离线不妨碍查询，底层连接错误保存在任务中。本 Read 工具的查询错误不带 `execution`。
 
 ## 5. 实现要点
 
@@ -95,7 +95,7 @@
 
 | # | 问题 | 建议 |
 |---|---|---|
-| Q1 | 终态任务保留多久、容量上限、是否在读取时延长 TTL？ | 设计未定；实现前确定并回填 `expiresAt` 和清理测试。不在本规格发明 24 小时或 256 条的默认值，活跃任务不能静默丢失 |
-| Q2 | progress/结果引用格式、计划结果到任务状态的映射、等待是否在非终态变化时提前返回？ | 本文给最小建议；与计划工具统一，尤其明确 `partially_committed`、校验失败、取消后已提交的表示；90/110 秒上限不变 |
-| Q3 | 同一 Host 服务多个客户端时怎样确认归属，断开重连是否保持任务可见？ | 先沿用现有客户端边界，不扩展跨客户端权限。若需进程拓扑、IPC 或认证/审批模型变化，只能另提 Proposed ADR（L3）；不能由 taskId 本身授予访问权 |
-| Q4 | 持久化、检查点恢复、MCP Tasks/Resources 的 SDK 接入如何落地？ | 第 5 阶段按设计 4.13/4.16 实现；当前不新增 `state\tasks` 格式、恢复承诺或 SDK 任务状态翻译规则，ADR-0010 已有悬空写入审计与暂停仍须保留 |
+| Q1 | 终态保留、容量与读取续期 | 已决定：[实施设计](../design/2026-10-23-m6-phase2-plans.md) D10、4.5；终态 1 h/256 条、不续期；活跃上限 8，不淘汰追踪 |
+| Q2 | 进度、结果引用、状态映射与唤醒 | 已决定：同设计 D11、4.5；固定 planId/revision 引用，等终态或到期；部分完成/校验失败为 failed，保留 execution |
+| Q3 | 客户端归属与重连 | 已决定：同设计 D12、4.5；Host 运行实例+stdio 会话，不信 clientName/IP/ID；Stateless HTTP 缺能力，跨 Host/重连不继承 |
+| Q4 | 持久化、恢复、Tasks/Resources SDK | 已决定：同设计 D13、4.4–4.5/4.7；内存任务不恢复，保留 DanglingWrites 核实/暂停；只读资源合同验证，Tasks 留阶段 5 |

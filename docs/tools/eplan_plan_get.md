@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 2 阶段；未实现） |
+| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准） |
 
 ## 1. 这个工具解决什么任务
 “查看这个计划准备做什么、已经做了什么、校验及差异是什么”。读取已保存计划，不重新规划、不触发审批/执行。与 task_get 的等待进度不同，本工具提供工程审查内容；按 [M6 4.9](../design/2026-10-21-m6-engineering-packs.md) 默认只给摘要，详细条目按需读取。
@@ -63,5 +63,5 @@ schema 为对象、`additionalProperties: false`，默认值、枚举和边界�
 ## 8. 待定问题
 | # | 问题 | 建议 |
 |---|---|---|
-| Q1 | 条目流 schema、结果修订/分页上限未定 | 上述 50/200 为提议，与计划结果合同一起定稿；完整数据不能因预算丢失 |
-| Q2 | 资源缓存、订阅和跨客户端可见性如何落地？ | Resources 的 SDK 支持需核实，先保留工具替代；归属与 task_get Q3 一起澄清，不自行定义新认证/共享模型（L3） |
+| Q1 | 条目流、结果修订与分页上限 | 已决定：[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08、4.7；50/200、section/key 流、片段重组、游标绑定 hash/revision |
+| Q2 | 资源缓存、订阅和跨客户端可见性 | 已决定：同设计 D09、4.5/4.7；同一 stdio Host 会话；复用只读模板，SDK 合同验证后注册，不订阅/不承诺缓存字段 |

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `context`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 2 阶段最小版本；未实现） |
+| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准） |
 
 ## 1. 这个工具解决什么任务
 “针对这些页/对象，给我编译任务需要的紧凑上下文，并说明来源”。按 [M6 4.3/4.7/4.16](../design/2026-10-21-m6-engineering-packs.md)，本期仅覆盖全部结构的默认柜；公司/柜型/项目/柜配置层、绑定管理、规则强制检查留第 3 阶段，关系图邻域和依赖缓存失效留第 4 阶段。
@@ -38,7 +38,7 @@ schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 sche
 - `objects` 仅范围内页/功能/连接的名称、类型、定位符、登记属性和内容哈希；`facts` 给事实值与源对象；`modules` 给窗口宏/预定义值集的候选摘要、版本/哈希及缺能力；`rules` 只读已有材料并保留事实/候选/正式规则的类别和证据，不把推断升级为强制规则。`config` 只回已知的本期默认值及来源，未配置明确空缺，不实现五层合并。
 - 每项关联 `sources`：快照事实带项目键、定位符、页/对象哈希、提取格式/版本和时间；包材料带包 ID、精确版本、资源路径/URI、清单 SHA-256、origin 和原参考对象定位符；配置带来源与 JSON Pointer。参考副本与原件的同源依据为 A32/A34，不能仅凭 oid/PROJ_GUID 把不同路径混为一个项目。
 - `contextRef` 记录本次实际可取得的依据；Bridge 当前无 generation 字段则为 null，无绑定/锁为 null。完整 snapshotHash 按快照合同取得/合成，局部范围未取得整项目快照时为 null、另在 coverage.pages 给页哈希，不能冒称整项目哈希。这些字段不是 EPLAN 数据库修订号，也不能代替 apply 的重新核对。
-- structuredContent、同内容 JSON 文本及一行摘要 `Returned context for 2 pages; 3 items omitted by the token budget.`。优先保留项目/范围、contextRef、覆盖与缺口、来源/哈希，再选最相关条目；超预算在完整条目间停止，置 truncated、计数和 hint 指导缩小 scope/include 或查 asset_get，不切断定位符/哈希。max_tokens 的默认约 5k、硬上限 20k 来自规范 7.2，去重/排序/估算办法待 Q1 定稿。
+- structuredContent、同内容 JSON 文本及一行摘要 `Returned context for 2 pages; 3 items omitted by the token budget.`。优先保留信封、来源/哈希；超预算在完整条目间停止，置 truncated/计数/hint，不切断定位符。默认约 5k、硬上限 20k；估算、稳定排序及去重按实施设计 D14、4.7。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
@@ -67,7 +67,7 @@ M6 新码的标准/Contracts 登记随实现补齐；缺可选模块能力可在
 ## 8. 待定问题
 | # | 问题 | 建议 |
 |---|---|---|
-| Q1 | token 估算、排序、必需信封最小预算及来源去重 schema 未定 | 按规范预算做确定性估算与条目截断，定稿后补边界测试，不声称精确符合任意模型的 tokenizer |
-| Q2 | 默认柜的绑定修订/锁摘要、打开代次由谁提供？ | 缺值为 null 并写前重核对；配置层留第 3 阶段、依赖缓存/事件失效留第 4 阶段；需新增 Bridge 字段时另细化合同，不持久化 DatabaseIdentifier |
+| Q1 | token 估算、排序、信封预算及来源去重 | 已决定：[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14、4.7；复用 ResultShaper，稳定排序、来源键去重、双份预算，不足信封则拒绝 |
+| Q2 | 绑定修订/锁摘要、打开代次由谁提供？ | 已决定：同设计 D15、4.7；WorkspaceStore 只读真实绑定，无绑定/generation 为 null，每次新快照 |
 
 未验证的 EPLAN 行为保持“未验证”；进程拓扑、IPC、审批/安全模型与支持版本的变化另提 Proposed ADR（L3）。

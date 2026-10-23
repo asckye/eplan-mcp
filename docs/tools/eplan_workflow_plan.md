@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `workflow`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read（保存 Host 计划记录，不执行 EPLAN 写入） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 2 阶段；未实现；目录与缺口见第 8 节） |
+| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D01–D03 为准） |
 
 ## 1. 这个工具解决什么任务
 “先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤，供 `eplan_plan_apply` 整体审批和执行。第 2 阶段只用覆盖全部结构的默认柜；包内工作流、配置分层、规则解释器留第 3 阶段。
@@ -17,14 +17,14 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string，非空 | 是 | — | 已有且已打开项目的名称或路径；编译时解析为实际项目及规范化路径，目标不存在或未打开时拒绝，不创建项目 |
-| `steps` | array | 是 | — | 有序的内联步骤；数量、请求大小上限待 Q1 定稿，超限整体拒绝，不截断执行意图 |
+| `steps` | array | 是 | — | 有序内联步骤，1–20 步、参数 JSON ≤256 KiB（D01）；超限整体拒绝，不截断执行意图 |
 | `steps[].op` | enum | 是 | — | 只能取下表中的操作名，不能传工具名、action、脚本或表达式 |
 | `steps[].args` | object | 是 | — | 按对应操作 schema 校验；字段沿用工具的 snake_case，项目由顶层固定，不接受步内 `project`、`dry_run`、`fingerprint`、审批或备份参数 |
 | `steps[].depends_on` | integer array | 否 | `[]` | 依赖的先前步骤序号（从 1 开始）；只能指向前面的步骤，不并行执行 |
 
 schema 使用 JSON Schema 2020-12、`additionalProperties: false`，`steps` 至少一项，按 `op` 用 `oneOf` 选择参数 schema。不提供 `workflow`/包工作流参数或动态 `selection` 选择器；任务涉及选中对象时先给明确页名/设备全名，编译器解析为定位符并写死，执行不重读选择。重复编译可以生成不同 `planId`，Read 幂等提示只指不修改工程数据。
 
-**提议的第 2 阶段封闭目录**如下；这是本规格的精确子集，待 Q1 评审。所有既有操作的参数限制继续有效；Bridge 已有不代表计划编排已实现。
+**候选目录**如下；第 2 阶段实际启用七项及其收窄限制以实施设计 4.2 为准，placeholder/module 延后。所有既有参数限制继续有效；Bridge 已有不代表计划编排已实现。
 
 | `op` / 级别 | 对应工具与 Bridge 操作 | 本阶段范围与依据 |
 |---|---|---|
@@ -71,7 +71,7 @@ schema 使用 JSON Schema 2020-12、`additionalProperties: false`，`steps` 至�
 | `PLAN_STALE` | 编译读取期间定位符失效、同一范围内容变化，无法形成一致基准 | `metadata.conflicts` 给定位符/范围及原因，重新读取和编译，不猜测重定位 |
 | 对象查找、项目、连接、授权、`TIMEOUT`、`INTERNAL` | 同相应读工具；目标不存在或未打开时为 `PROJECT_NOT_OPEN` | 沿用标准错误；提示先准备并打开目标项目，再重新编译 |
 
-Read 结果/错误不带 `execution`。M6 的 `RESOURCE_NOT_FOUND`、`CAPABILITY_MISSING` 尚未登记到 Contracts/标准错误表，实现 PR 须同步补齐。
+Read 结果/错误不带 `execution`。`RESOURCE_NOT_FOUND`、`CAPABILITY_MISSING` 已登记；扩展用途及新增 RESOURCE_EXHAUSTED 按实施设计 4.8 同步标准/Contracts。
 
 ## 5. 实现要点
 - **编译**：校验全部输入 → 解析并固定已有项目和默认柜 → 读取上下文、资源及快照 → 独立步骤调用真实 `*.plan` → 依赖步骤由 Host 预测 → 检查范围与预期 → 保存计划。默认值（含语言）编译时显式固定；已有多柜绑定报缺能力，不用默认柜合并。预测只针对明确依赖，例如前步新建的页；不能可靠预测时拒绝或报告缺能力。
@@ -94,8 +94,8 @@ Read 结果/错误不带 `execution`。M6 的 `RESOURCE_NOT_FOUND`、`CAPABILITY
 ## 8. 待定问题
 | # | 问题 | 建议 |
 |---|---|---|
-| Q1 | 精确目录、步骤/请求上限、依赖产物引用、预测模式及分块基准一致性检查未定 | 以上九项及仅预定义值集作为本期提议；项目创建已由负责人决定排除，不在待定范围内；分块不保证原子快照，范围变化须重新读取或拒绝；实现前定稿并补合同/预算测试，不自动开放全部操作 |
-| Q2 | 计划查询保留期、容量、原子写入和不可变内容的规范序列化未定 | 可执行期沿用已决定的 24 小时；查询保留期另定，不套用 Bridge outcome 的 256 条 |
-| Q3 | 已有目标的独立备份、占位符校验覆盖及撤销验证 | 见 apply 第 8 节；未补能力前明确拒绝 |
+| Q1 | 目录、限额、依赖预测与基准一致性 | 已决定：[实施设计](../design/2026-10-23-m6-phase2-plans.md) D01、4.2–4.3；七项、20 步/256 KiB，仅两种依赖预测，双读不稳拒绝 |
+| Q2 | 保留、容量、原子写入与规范哈希 | 已决定：同设计 D02、4.1；24 h 可执行、30 d 保留、原子 CAS、canonical SHA-256；落盘格式见 ADR-0028（已接受） |
+| Q3 | 独立备份、占位符覆盖及撤销 | 已决定：同设计 D03、4.4/4.6/9；新增 project.backup，模块/值集先补 spike，不承诺未验证撤销 |
 
 进程拓扑、IPC、审批/安全模型、支持版本的扩展均属 L3，另提 Proposed ADR；这里只引用当前合同与实测范围。
