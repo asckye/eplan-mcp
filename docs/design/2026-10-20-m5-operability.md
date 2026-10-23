@@ -273,13 +273,15 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 这些命令在 stdout 输出，只在 `serve` 以外使用（CLAUDE.md 规则 5 只约束 `serve`）。
 
 ### 4.12 虚拟机连接（Q14，ADR-0018）
-实现进度（part 3b–3d）：虚拟机内的地址、密钥、经 Windows UAC 的网络权限及服务启停已位于“MCP 与客户端”页。`vm-instances --format json` 只经 Host 发现列出 PID（`schemaVersion: 1`、`processes`），不连接 EPLAN；单实例由 Host 选择，多实例须工程师选择。子进程进入 kill-on-close Job 后才通过 stdin 放行启动，监听以自身 PID、启动时间匹配的 `state/http-*.json` 为准；运行时锁定地址、端口和密钥修改。Host 不支持无窗口子进程的优雅停止，停止或 Workbench 退出仅终止该 Host；残留状态文件由 `doctor` 按 PID/启动时间忽略。3d 提供下述宿主机连接测试命令；宿主机向导及其 schema 2 读取、stdin 子进程输入与页面测试移至 3e，以控制单次生产代码和文档改动不超过 400 行。跨机器连接、真实 EPLAN、UAC 和防火墙仍待实机验证。
+实现进度（part 3b–3d）：虚拟机内的地址、密钥、经 Windows UAC 的网络权限及服务启停已位于“MCP 与客户端”页。`vm-instances --format json` 只经 Host 发现列出 PID（`schemaVersion: 1`、`processes`），不连接 EPLAN；单实例由 Host 选择，多实例须工程师选择。子进程进入 kill-on-close Job 后才通过 stdin 放行启动，监听以自身 PID、启动时间匹配的 `state/http-*.json` 为准；运行时锁定地址、端口和密钥修改。Host 不支持无窗口子进程的优雅停止，停止或 Workbench 退出仅终止该 Host；残留状态文件由 `doctor` 按 PID/启动时间忽略。3d 提供下述宿主机连接测试命令；3e 已完成宿主机向导、VM 路径的 schema 2 读取、stdin 子进程输入及 Small/双语页面测试。跨机器连接、真实 EPLAN、UAC 和防火墙仍待实机验证。
 
 **宿主机连接测试**：`eplanmcp vm-test --url http://<IPv4>:<port>/mcp --key-stdin [--format json]` 不需要 EPLAN，也不读取本机 Host 配置或密钥文件。密钥只从重定向的 stdin 读取，校验与 `client-config --vm` 相同（43 字符的规范 base64url，可跟一个 LF 或 CRLF），不能放在参数或环境变量中。
 - 只依次 POST `initialize` 和 `tools/list`，两个请求都携带 Bearer 密钥；采用服务支持的 `2025-11-25` 协议，无通知、GET、重定向、重试或工具调用。每次请求包含响应读取限时 10 秒，响应限 8 MiB；支持 JSON 和 SSE，收到 SSE 回答即结束，不等待连接关闭。
 - 成功退出 0，文本报告服务器名称、版本、工具数；失败退出 1，仅报告 `unreachable`、`timed_out`、`unauthorized`（401）、`forbidden`（403）、`rate_limited`（429）、`protocol_error` 之一。输入密钥无效、响应格式/协议版本不符、其他 HTTP 状态或分页工具列表（两个请求内无法得到完整工具数）归为 `protocol_error`。错误参数退出 2。
 - JSON 的 `schemaVersion` 为 1；成功为 `server: { name, version }`、`toolCount` 和 `failure: null`，失败为 `server: null`、`toolCount: null` 和单个 `failure` 代码。快照固定成功与全部失败形状。响应和异常正文不输出，服务器标识中的密钥及显示控制字符被清理。
 - 只在宿主机与虚拟机之间的私有网络使用；后续写入的客户端配置含明文密钥，不要分享这些文件（SEC-30）。
+
+**宿主机向导（3e）**：在客户端页选择“虚拟机 ↔ 宿主机”，填写 VM IPv4、端口（默认 8766）及密码框中的密钥。密钥只在当前模式的内存中保留，离开模式即清空；不写设置、不进入参数或环境变量。测试、预览和写入经子进程 stdin 传入密钥，返回的输出先脱敏，错误诊断不保留原始正文或异常链；VM 运行严格读取各自的 JSON schema，本机配置仍为 schema 1，远程配置为 schema 2。移除仅针对勾选客户端的 `eplan-vm`，无需地址或密钥；Claude 桌面版与本机插件操作在此模式隐藏。写入、移除复用原来的差异确认和逐卡片结果，并显示不要分享含明文密钥的客户端配置的提示。按界面规范第 7 节，VM 侧的密钥、网络权限和服务面板继续在页底独立显示。
 
 项目负责人 2026-10-20 要求"和TIA mcp一样加入虚拟机连接的系统"：EPLAN 在虚拟机中、AI 客户端在宿主机上时也能用。做法与 TIA 相同，并把防火墙限制到宿主机 IP（[ADR-0018](../adr/0018-vm-http-transport.md)，2026-10-21 接受）：
 - **虚拟机中**：Workbench 的"MCP 与客户端"页选择"虚拟机 ↔ 宿主机"，填写虚拟机的 IPv4 和端口（默认 8766），生成密钥。

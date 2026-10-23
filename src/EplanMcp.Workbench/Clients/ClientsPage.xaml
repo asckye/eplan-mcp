@@ -21,7 +21,7 @@
         <StackPanel>
           <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Clients}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
                      Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
-          <TextBlock Text="{l:Tr Clients.Caption}" Style="{StaticResource Primer.PageSubtitle}" TextWrapping="Wrap" TextTrimming="None" />
+          <TextBlock x:Name="PageCaption" Text="{l:Tr Clients.Caption}" Style="{StaticResource Primer.PageSubtitle}" TextWrapping="Wrap" TextTrimming="None" />
         </StackPanel>
       </DockPanel>
     </Border>
@@ -43,7 +43,27 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
-        <Border Style="{StaticResource Primer.Alert.Info}" Margin="0,0,0,12">
+        <WrapPanel Margin="0,0,0,12" KeyboardNavigation.TabNavigation="Once">
+          <RadioButton x:Name="LocalChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Local}" Style="{StaticResource Primer.Radio}" IsChecked="True" Checked="OnMode" Margin="0,0,12,0" />
+          <RadioButton x:Name="VmChoice" GroupName="ClientConnection" Content="{l:Tr VmHost.Remote}" Style="{StaticResource Primer.Radio}" Checked="OnMode" />
+        </WrapPanel>
+        <StackPanel x:Name="VmHost" Visibility="Collapsed" Margin="0,0,0,12">
+          <Label x:Name="VmAddressLabel" Content="{l:Tr VmHost.Address}" Target="{Binding ElementName=VmAddress}" Margin="0,0,0,8" />
+          <TextBox x:Name="VmAddress" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=VmAddressLabel}" TextChanged="OnVmInput" />
+          <TextBlock x:Name="VmAddressError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Label x:Name="VmPortLabel" Content="{l:Tr VmHost.Port}" Target="{Binding ElementName=VmPort}" Margin="0,8,0,8" />
+          <TextBox x:Name="VmPort" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=VmPortLabel}" TextChanged="OnVmInput" />
+          <TextBlock x:Name="VmPortError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Label x:Name="VmKeyLabel" Content="{l:Tr VmHost.Key}" Target="{Binding ElementName=VmPassword}" Margin="0,8,0,8" />
+          <PasswordBox x:Name="VmPassword" Style="{StaticResource Workbench.Password}" AutomationProperties.LabeledBy="{Binding ElementName=VmKeyLabel}" PasswordChanged="OnVmInput" />
+          <TextBlock x:Name="VmKeyError" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Button x:Name="TestVm" Content="{l:Tr VmHost.Test}" Style="{StaticResource Primer.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,8" Click="OnTestVm" />
+          <TextBlock x:Name="VmTestStatus" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Border Style="{StaticResource Primer.Alert.Warning}" Margin="0,8,0,0">
+            <DockPanel><Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="16" Height="16" Margin="0,0,8,0" /><TextBlock Text="{l:Tr VmHost.Plaintext}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" /></DockPanel>
+          </Border>
+        </StackPanel>
+        <Border x:Name="LocalPlugin" Style="{StaticResource Primer.Alert.Info}" Margin="0,0,0,12">
           <DockPanel>
             <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
             <StackPanel>

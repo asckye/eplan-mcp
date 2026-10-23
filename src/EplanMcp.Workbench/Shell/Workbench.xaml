@@ -70,6 +70,21 @@
     <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
   </Style>
 
+  <!-- Native password editing and UIA masking, with the same theme tokens as other inputs. -->
+  <Style x:Key="Workbench.Password" TargetType="PasswordBox">
+    <Setter Property="MinHeight" Value="{StaticResource Ui.ControlHeight}" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="Background" Value="{DynamicResource Primer.input}" />
+    <Setter Property="Foreground" Value="{DynamicResource Primer.text}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Primer.inputBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="PasswordBox">
+      <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="{StaticResource Ui.Radius}"><ScrollViewer x:Name="PART_ContentHost" /></Border>
+    </ControlTemplate></Setter.Value></Setter>
+    <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource Ant.colorTextDisabled}" /></Trigger></Style.Triggers>
+  </Style>
+
   <!-- The window buttons' glyphs, drawn in the button's text colour (ICO-05). -->
   <Style x:Key="Workbench.CaptionGlyph" TargetType="Path">
     <Setter Property="Width" Value="10" />

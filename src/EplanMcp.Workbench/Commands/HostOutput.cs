@@ -1,6 +1,6 @@
 namespace EplanMcp.Workbench.Commands;
 
-// The JSON the Host's commands write for the Workbench (architecture 5.2, M5 design 4.11), schemaVersion 1, field by
+// The JSON the Host's commands write for the Workbench (architecture 5.2, M5 design 4.11), schemaVersion 1 (VM client-config: 2), field by
 // field: HostCommands reads it strictly, so anything else is an error (ERR-08). The snapshots in
 // tests/Contracts.Snapshots are the contract; the Workbench tests read them with these types.
 
@@ -87,6 +87,11 @@ internal sealed record ClientConfigReport(int SchemaVersion, ClientConfigMode Mo
 
 /// <summary>The entry the Host writes: the server's name and how a client starts it.</summary>
 internal sealed record ConfiguredServer(string Name, string Command, IReadOnlyList<string> Args);
+
+internal sealed record VmServer(string Name, string? Url);
+internal sealed record VmClientConfigReport(int SchemaVersion, ClientConfigMode Mode, VmServer Server, HostText? Problem, IReadOnlyList<ClientOutcome> Clients);
+internal sealed record VmServerInfo(string Name, string Version);
+internal sealed record VmConnectionReport(int SchemaVersion, VmServerInfo? Server, int? ToolCount, string? Failure);
 
 /// <summary>
 /// One client's part. <see cref="Before"/> and <see cref="After"/> are only the <c>eplan</c> entry as the file has it

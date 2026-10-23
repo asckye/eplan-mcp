@@ -74,6 +74,34 @@ public sealed class HostProcessTests : IDisposable
         Assert.Equal(HostFailure.NotStarted, error.Failure);
     }
 
+    [Fact]
+    public async Task SecretInput_ReachesOnlyStdin_IsClosed_AndNeverAppearsInHostRun()
+    {
+        string key = new('A', 43);
+        var host = new HostProcess(Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"));
+        // A child deliberately echoes both literal and JSON-escaped input; no profile, files, network or settings.
+        const string Script = """$value = [Console]::In.ReadToEnd(); [Console]::Error.Write($value); [Console]::Out.Write('{"echo":"' + $value + '","encoded":"' + ('\u0041' * $value.Length) + '"}')""";
+        HostRun run = await host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(5), key, Token);
+        Assert.Equal(0, run.ExitCode);
+        Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["echo"]!.GetValue<string>());
+        Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["encoded"]!.GetValue<string>());
+        Assert.Empty(run.Errors);
+        Assert.DoesNotContain(key, run.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SecretInput_TimeoutWithEchoedStderr_WithholdsDiagnostics()
+    {
+        string key = new('A', 43);
+        var host = new HostProcess(Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"));
+        const string Script = "[Console]::Error.Write([Console]::In.ReadToEnd()); Start-Sleep -Seconds 30";
+        var error = await Assert.ThrowsAsync<HostCommandException>(() => host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(1), key, Token));
+        Assert.Equal(HostFailure.TimedOut, error.Failure);
+        Assert.Empty(error.Errors);
+        Assert.Null(error.InnerException);
+        Assert.DoesNotContain(key, error.ToString(), StringComparison.Ordinal);
+    }
+
     /// <summary>The Host the solution built with these tests, found as the Workbench in the repository finds it.</summary>
     private static string BuiltHost()
     {

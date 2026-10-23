@@ -43,13 +43,14 @@ public sealed class HostCommandsTests
 
     [Theory]
     [MemberData(nameof(AllExamples))]
-    public void EveryExampleOfTheHostsSnapshots_IsRead(string name, string example)
+    public async Task EveryExampleOfTheHostsSnapshots_IsRead(string name, string example)
     {
         string json = Snapshots.Example(name, example);
         if (JsonNode.Parse(json)!["schemaVersion"]!.GetValue<int>() != HostCommands.SchemaVersion)
         {
-            // client-config --vm reports (version 2) are for the host computer's wizard, which reads them itself.
-            Assert.Equal(HostFailure.Unreadable, Assert.Throws<HostCommandException>(() => HostCommands.Parse<ClientConfigReport>(json)).Failure);
+            _host.Answer = _ => new(0, json);
+            ClientConfigReport vm = await Commands.ConfigureVmClientsAsync(["cursor"], ClientConfigMode.DryRun, "http://192.168.56.2:8766/mcp", new string('A', 43), TestContext.Current.CancellationToken);
+            Assert.Equal((2, "eplan-vm"), (vm.SchemaVersion, vm.Server.Name));
             return;
         }
 

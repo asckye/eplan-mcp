@@ -50,6 +50,8 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
 
     internal void Attach(ClientsView view)
     {
+        VmAddress.Text = view.VmAddress;
+        VmPort.Text = view.VmPort;
         _view = view;
         view.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(Show);
         Show();
@@ -60,6 +62,8 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
     {
         if (_view is { State: not ClientsState.Running, CanRun: true })
         {
+            if (_view.VmMode && _view.VmReason().Length > 0)
+            { Say(_view.VmReason()); FocusVmError(); return; }
             _looked = _view.DetectAsync(CancellationToken.None);
         }
     }
@@ -76,6 +80,7 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
         }
 
         bool running = view.State == ClientsState.Running;
+        ShowVm(view);
         Working.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
         if (running || !view.CanRun)
         {
@@ -83,11 +88,13 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
         }
 
         // NAV-05, CMD-04: nothing to run without a Host, and the buttons say why.
-        string help = view.CanRun ? string.Empty : loc["Host.Missing"];
         foreach (Button button in new[] { RefreshButton, RemoveButton, WriteButton, GeneratePluginButton })
         {
-            button.IsEnabled = view.CanRun && !running;
+            string help = view.VmReason(button == RemoveButton);
+            button.IsEnabled = help.Length == 0;
             AutomationProperties.SetHelpText(button, help);
+            ToolTipService.SetShowOnDisabled(button, true);
+            button.ToolTip = help.Length > 0 ? help : button == RefreshButton ? loc.T("Shell.Shortcut", loc["Clients.Refresh"], "F5") : null;
         }
 
         ErrorBanner.Visibility = view.Error is null ? Visibility.Collapsed : Visibility.Visible;
@@ -120,7 +127,7 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
 
         await view.PreviewAsync(CancellationToken.None).ConfigureAwait(true);
         Loc loc = Loc.Current;
-        string message = loc.T("Clients.WriteMessage", view.ToWrite.Count)
+        string message = loc.T(view.VmMode ? "VmHost.WriteMessage" : "Clients.WriteMessage", view.ToWrite.Count)
             + (view.ToWrite.Any(c => c.Name == "claude-desktop") ? " " + loc["Clients.QuitDesktop"] : string.Empty);
         if (view.State == ClientsState.Ready && Confirm(loc["Clients.WriteTitle"], message, loc["Exit.Cancel"], loc["Clients.WriteConfirm"], view.Diff()))
         {
@@ -137,7 +144,7 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
 
         Loc loc = Loc.Current;
         string clients = string.Join(Environment.NewLine, view.Selected.Select(c => c.Title));
-        if (Confirm(loc["Clients.RemoveTitle"], loc.T("Clients.RemoveMessage", view.Selected.Count), loc["Exit.Cancel"], loc["Clients.RemoveConfirm"], clients))
+        if (Confirm(loc["Clients.RemoveTitle"], loc.T(view.VmMode ? "VmHost.RemoveMessage" : "Clients.RemoveMessage", view.Selected.Count), loc["Exit.Cancel"], loc["Clients.RemoveConfirm"], clients))
         {
             await ApplyAsync(view, ClientConfigMode.Remove).ConfigureAwait(true);
         }

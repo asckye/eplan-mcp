@@ -73,7 +73,7 @@ internal sealed class ClientCard(string name) : IAccessibleItem
 /// cards, found by a dry run of all of them; the chosen ones previewed as a plain diff, then written or removed by the
 /// Host, which backs each file up first. The Workbench never writes a client's file itself.
 /// </summary>
-internal sealed class ClientsView : INotifyPropertyChanged
+internal sealed partial class ClientsView : INotifyPropertyChanged
 {
     /// <summary>The clients of Q7, in its order, by their names on client-config's command line.</summary>
     public static readonly string[] Names = ["claude-code", "claude-desktop", "codex", "gemini-cli", "qwen-code", "kimi-code", "codebuddy", "opencode", "qwen-agent", "cursor", "vscode-copilot"];
@@ -94,22 +94,25 @@ internal sealed class ClientsView : INotifyPropertyChanged
     private HostText? _refused;
     private ClientConfigMode _mode;
 
-    public ClientsView(HostCommands host, string userProfile)
+    private readonly Func<string?, bool> _present;
+
+    public ClientsView(HostCommands host, string userProfile, Func<string?, bool>? present = null)
     {
         (_host, _userProfile) = (host, userProfile);
+        _present = present ?? Present;
         Cards = [.. Names.Select(n => new ClientCard(n))];
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public IReadOnlyList<ClientCard> Cards { get; }
+    public IReadOnlyList<ClientCard> Cards { get; private set; }
 
     public ClientsState State { get; private set; }
 
     public bool CanRun => _host.IsAvailable;
 
     /// <summary>Why nothing could be done: client-config refused as a whole (such as in an MSIX client's process), or gave no result.</summary>
-    public string? Error => _refused is { } refused ? Text(refused)
+    public string? Error => _connection?.Failure is not null ? VmStatus : _refused is { } refused ? Text(refused)
         : _error is { } error ? HostErrors.Text(error) + (error.Failure == HostFailure.TimedOut && _mode != ClientConfigMode.DryRun ? " " + Loc.Current["Clients.CheckAfterTimeout"] : string.Empty)
         : null;
 
@@ -169,13 +172,14 @@ internal sealed class ClientsView : INotifyPropertyChanged
 
     private async Task RunAsync(IReadOnlyList<ClientCard> cards, ClientConfigMode mode, CancellationToken cancellationToken, bool plugin = false)
     {
-        if (cards.Count == 0)
+        if (cards.Count == 0 || State == ClientsState.Running || (VmMode && (plugin || VmReason(mode == ClientConfigMode.Remove).Length > 0)))
         {
             return;
         }
 
         (State, _mode) = (ClientsState.Running, mode);
         (_error, _refused) = (null, null);
+        _connection = null;
         if (plugin)
         {
             PluginCommands = [string.Empty, string.Empty];
@@ -185,6 +189,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
         try
         {
             ClientConfigReport report = plugin ? await _host.GeneratePluginAsync(mode == ClientConfigMode.DryRun, cancellationToken).ConfigureAwait(true)
+                : VmMode ? await _host.ConfigureVmClientsAsync([.. cards.Select(c => c.Name)], mode, VmUrl, _vmKey, cancellationToken).ConfigureAwait(true)
                 : await _host.ConfigureClientsAsync([.. cards.Select(c => c.Name)], mode, cancellationToken).ConfigureAwait(true);
             (_error, _refused, State) = (null, report.Problem, report.Problem is null ? ClientsState.Ready : ClientsState.Failed);
             if (plugin)
@@ -217,7 +222,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
 
                 if (mode == ClientConfigMode.DryRun)
                 {
-                    (card.Preview, card.Detected) = (outcome, Present(outcome.File));
+                    (card.Preview, card.Detected) = (outcome, _present(outcome.File));
                 }
                 else
                 {
@@ -231,7 +236,7 @@ internal sealed class ClientsView : INotifyPropertyChanged
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            (_error, _refused, State) = (new HostCommandException(HostFailure.Unreadable, ex.Message, ex), null, ClientsState.Failed);
+            (_error, _refused, State) = (VmMode ? new HostCommandException(HostFailure.Unreadable, "VM configuration failed.") : new HostCommandException(HostFailure.Unreadable, ex.Message, ex), null, ClientsState.Failed);
         }
         finally
         {
