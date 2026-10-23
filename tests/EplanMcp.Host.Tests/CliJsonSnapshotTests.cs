@@ -78,6 +78,20 @@ public sealed class CliJsonSnapshotTests
                 new("cursor", Profile + @"\.cursor\mcp.json", ClientAction.Remove, ClientOutcome.Removed) { Before = Entry, Backup = Profile + @"\.cursor\mcp.json.bak_20261021T0815301234567Z" },
             ])),
             ["refused"] = Parse(new(new LocalServer(@"C:\Program Files\dotnet\dotnet.exe"), ClientConfigMode.Write, new(ClientProblem.NotEplanmcp, @"C:\Program Files\dotnet\dotnet.exe"), [])),
+            ["vmPreview"] = Parse(new(server, ClientConfigMode.DryRun, null,
+            [
+                new("cursor", Profile + @"\.cursor\mcp.json", ClientAction.Write, ClientOutcome.WouldWrite)
+                {
+                    Before = "\"eplan-vm\": {\"url\":\"http://192.168.1.42:8766/mcp\",\"headers\":{\"Authorization\":\"Bearer " + new string('B', 42) + "A\"}}",
+                    After = "\"eplan-vm\": {\"url\":\"http://192.168.1.42:8766/mcp\",\"headers\":{\"Authorization\":\"Bearer " + new string('A', 43) + "\"}}",
+                },
+            ], Vm: true, Url: "http://192.168.1.42:8766/mcp")),
+            ["vmRemove"] = Parse(new(server, ClientConfigMode.Remove, null, [], Vm: true)),
+            ["vmUnsupported"] = Parse(new(server, ClientConfigMode.Write, null,
+            [
+                new("claude-desktop", null, ClientAction.Write, ClientOutcome.Failed) { Problem = new(ClientProblem.RemoteUnsupported, "claude-desktop") },
+            ], Vm: true, Url: "http://192.168.1.42:8766/mcp")),
+            ["vmInvalidKey"] = Parse(new(server, ClientConfigMode.Write, new(ClientProblem.InvalidVmKey, ""), [], Vm: true, Url: "http://192.168.1.42:8766/mcp")),
         };
 
         return Snapshot(results.ToJsonString(), "client-config-json");

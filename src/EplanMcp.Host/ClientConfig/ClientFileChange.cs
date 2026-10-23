@@ -62,6 +62,8 @@ internal sealed class ClientFileChange
         if (_original is not null)
         {
             backup = FilePath + ".bak_" + now.UtcDateTime.ToString("yyyyMMdd'T'HHmmssfffffff'Z'", CultureInfo.InvariantCulture);
+            // Uninstall can remove local and VM entries from the same file within one clock tick.
+            backup = File.Exists(backup) ? backup + "_" + Guid.NewGuid().ToString("N") : backup;
             using var copy = new FileStream(backup, FileMode.CreateNew, FileAccess.Write, FileShare.None);
             copy.Write(_original);
         }

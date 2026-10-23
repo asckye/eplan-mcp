@@ -11,21 +11,24 @@ internal static class ClientConfigOutput
     /// <summary>The version of the JSON shape; a change to the shape raises it.</summary>
     public const int SchemaVersion = 1;
 
+    // VM reports describe a URL rather than a local command; existing Workbench calls still use version 1.
+    public const int VmSchemaVersion = 2;
+
     private const string Indent = "    ";
 
     public static string Text(ClientConfigReport report, CultureInfo culture)
     {
         bool zh = culture.TwoLetterISOLanguageName == "zh";
         var text = new StringBuilder();
-        text.Append(LocalServer.Name).Append(": ").Append(report.Server.Command).Append(' ').AppendLine(string.Join(' ', LocalServer.Arguments));
+        text.AppendLine(report.Vm ? RemoteServer.Name + ": " + report.Url : LocalServer.Name + ": " + report.Server.Command + " " + string.Join(' ', LocalServer.Arguments));
         if (report.Problem is { } problem)
         {
-            return text.Append(Tag(ClientOutcome.Failed, zh)).AppendLine(ClientConfigTexts.Problem(problem, zh)).ToString();
+            return RemoteServer.Redact(text.Append(Tag(ClientOutcome.Failed, zh)).AppendLine(ClientConfigTexts.Problem(problem, zh)).ToString())!;
         }
 
         if (report.Clients.Count == 0)
         {
-            return text.AppendLine(ClientConfigTexts.NothingRecorded(zh)).ToString();
+            return RemoteServer.Redact(text.AppendLine(ClientConfigTexts.NothingRecorded(zh)).ToString())!;
         }
 
         foreach (ClientResult result in report.Clients)
@@ -43,14 +46,14 @@ internal static class ClientConfigOutput
             }
         }
 
-        return report.Clients.Any(c => c.Outcome is ClientOutcome.Written or ClientOutcome.Removed)
+        return RemoteServer.Redact(report.Clients.Any(c => c.Outcome is ClientOutcome.Written or ClientOutcome.Removed)
             ? text.AppendLine(ClientConfigTexts.Restart(zh)).ToString()
-            : text.ToString();
+            : text.ToString())!;
     }
 
-    public static string Json(ClientConfigReport report) => new JsonObject
+    public static string Json(ClientConfigReport report) => RemoteServer.Redact(new JsonObject
     {
-        ["schemaVersion"] = SchemaVersion,
+        ["schemaVersion"] = report.Vm ? VmSchemaVersion : SchemaVersion,
         ["mode"] = report.Mode switch
         {
             ClientConfigMode.Write => "write",
@@ -58,7 +61,7 @@ internal static class ClientConfigOutput
             ClientConfigMode.Remove => "remove",
             _ => throw new UnreachableException($"Mode {report.Mode} has no JSON name."),
         },
-        ["server"] = new JsonObject
+        ["server"] = report.Vm ? new JsonObject { ["name"] = RemoteServer.Name, ["url"] = report.Url } : new JsonObject
         {
             ["name"] = LocalServer.Name,
             ["command"] = report.Server.Command,
@@ -66,7 +69,7 @@ internal static class ClientConfigOutput
         },
         ["problem"] = Issue(report.Problem),
         ["clients"] = new JsonArray([.. report.Clients.Select(Client)]),
-    }.ToJsonString(HostJson.Options);
+    }.ToJsonString(HostJson.Options))!;
 
     private static JsonObject Client(ClientResult result) => new()
     {
@@ -95,6 +98,8 @@ internal static class ClientConfigOutput
     {
         ["code"] = issue.Problem switch
         {
+            ClientProblem.InvalidVmKey => "invalid_vm_key",
+            ClientProblem.RemoteUnsupported => "remote_unsupported",
             ClientProblem.InvalidFile => "invalid_file",
             ClientProblem.UnsupportedToml => "unsupported_toml",
             ClientProblem.AmbiguousPackage => "ambiguous_package",

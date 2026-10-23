@@ -50,7 +50,25 @@ internal sealed class ClientConfigCommand
         return report.Failed ? 1 : 0;
     }
 
-    internal ClientConfigReport Run(ClientConfigRequest request)
+    internal ClientConfigReport Run(ClientConfigRequest request, TextReader? input = null)
+    {
+        RemoteServer? remote = null;
+        try
+        {
+            if (request.Vm && request.Mode != ClientConfigMode.Remove)
+            {
+                remote = RemoteServer.Read(request.Url!, input ?? (Console.IsInputRedirected ? Console.In : TextReader.Null));
+            }
+        }
+        catch (ClientConfigException ex)
+        {
+            return new(_server, request.Mode, Issue(ex), [], request.Vm, request.Url);
+        }
+
+        return Run(request, remote) with { Vm = request.Vm, Url = request.Url };
+    }
+
+    private ClientConfigReport Run(ClientConfigRequest request, RemoteServer? remote)
     {
         ClientConfigMode mode = request.Mode;
         if (_msixPackage() is { } package)
@@ -61,19 +79,19 @@ internal sealed class ClientConfigCommand
         if (mode != ClientConfigMode.Remove)
         {
             bool eplanmcp = Path.IsPathFullyQualified(_server.Command) && string.Equals(Path.GetFileName(_server.Command), "eplanmcp.exe", StringComparison.OrdinalIgnoreCase);
-            return eplanmcp
-                ? new(_server, mode, null, [.. request.Clients.Select(c => Write(c, mode == ClientConfigMode.DryRun, request.Plugin))])
+            return remote is not null || eplanmcp
+                ? new(_server, mode, null, [.. request.Clients.Select(c => Write(c, mode == ClientConfigMode.DryRun, request.Plugin, remote))])
                 : new(_server, mode, new(ClientProblem.NotEplanmcp, _server.Command), []);
         }
 
         if (request.Clients.Count > 0)
         {
-            return new(_server, mode, null, [.. request.Clients.Select(c => Remove(c.Name, () => c.ConfigFile(_folders), LocalServer.Name))]);
+            return new(_server, mode, null, [.. request.Clients.Select(c => Remove(c.Name, () => c.ConfigFile(_folders), request.Vm ? RemoteServer.Name : LocalServer.Name))]);
         }
 
         try
         {
-            return new(_server, mode, null, [.. _record.All().Select(e => Remove(e.Client, () => e.File, e.Entry))]);
+            return new(_server, mode, null, [.. _record.All().Where(e => !request.Vm || e.Entry == RemoteServer.Name).Select(e => Remove(e.Client, () => e.File, e.Entry))]);
         }
         catch (Exception ex) when (ex is ClientConfigException or IOException or UnauthorizedAccessException)
         {
@@ -81,7 +99,7 @@ internal sealed class ClientConfigCommand
         }
     }
 
-    private ClientResult Write(McpClient client, bool dryRun, bool plugin)
+    private ClientResult Write(McpClient client, bool dryRun, bool plugin, RemoteServer? remote)
     {
         string? file = null;
         try
@@ -91,21 +109,24 @@ internal sealed class ClientConfigCommand
                 return ClaudeCodePlugin.Generate(_folders, _dataRoot, _server, _time.GetUtcNow(), dryRun);
             }
 
+            GuardRemote(client, remote is not null);
             file = client.ConfigFile(_folders);
-            Guard(client.Name, file, writing: true);
+            Guard(client.Name, file, writing: remote is null);
             ClientFileChange change = ClientFileChange.Read(file);
-            ClientFileEdit edit = client.Format == ClientFormat.CodexToml
+            ClientFileEdit edit = remote is not null
+                ? client.Format == ClientFormat.CodexToml ? CodexToml.Write(change.Text, remote) : JsonClientFile.Write(change.Text, client, remote)
+                : client.Format == ClientFormat.CodexToml
                 ? CodexToml.Write(change.Text, _server)
                 : JsonClientFile.Write(change.Text, client, _server);
             ClientOutcome outcome = edit.Text is null ? ClientOutcome.Unchanged : dryRun ? ClientOutcome.WouldWrite : ClientOutcome.Written;
-            var result = new ClientResult(client.Name, file, ClientAction.Write, outcome) { Before = edit.Before, After = edit.After, CommentsDropped = edit.CommentsDropped };
+            var result = new ClientResult(client.Name, file, ClientAction.Write, outcome) { Before = RemoteServer.Redact(edit.Before), After = RemoteServer.Redact(edit.After), CommentsDropped = edit.CommentsDropped };
             if (dryRun)
             {
                 return result;
             }
 
             result = result with { Backup = edit.Text is null ? null : change.Apply(edit.Text, _time.GetUtcNow()) };
-            return Recorded(result, () => _record.Add(new(client.Name, change.FilePath, LocalServer.Name, _time.GetUtcNow())));
+            return Recorded(result, () => _record.Add(new(client.Name, change.FilePath, remote is null ? LocalServer.Name : RemoteServer.Name, _time.GetUtcNow())));
         }
         catch (Exception ex) when (ex is ClientConfigException or IOException or UnauthorizedAccessException)
         {
@@ -119,6 +140,7 @@ internal sealed class ClientConfigCommand
         try
         {
             McpClient client = McpClient.Find(name) ?? throw new ClientConfigException(ClientProblem.UnknownClient, name);
+            GuardRemote(client, entry == RemoteServer.Name);
             file = locate();
             Guard(name, file, writing: false);
             ClientFileChange change = ClientFileChange.Read(file);
@@ -128,7 +150,7 @@ internal sealed class ClientConfigCommand
             string? backup = edit.Text is null ? null : change.Apply(edit.Text, _time.GetUtcNow());
             var result = new ClientResult(name, file, ClientAction.Remove, edit.Text is null ? ClientOutcome.Unchanged : ClientOutcome.Removed)
             {
-                Before = edit.Before,
+                Before = RemoteServer.Redact(edit.Before),
                 Backup = backup,
                 CommentsDropped = edit.CommentsDropped,
             };
@@ -137,6 +159,14 @@ internal sealed class ClientConfigCommand
         catch (Exception ex) when (ex is ClientConfigException or IOException or UnauthorizedAccessException)
         {
             return new(name, file, ClientAction.Remove, ClientOutcome.Failed) { Problem = Issue(ex) };
+        }
+    }
+
+    private static void GuardRemote(McpClient client, bool vm)
+    {
+        if (vm && !RemoteServer.Supports(client))
+        {
+            throw new ClientConfigException(ClientProblem.RemoteUnsupported, client.Name);
         }
     }
 
@@ -175,5 +205,5 @@ internal sealed class ClientConfigCommand
     }
 
     private static ClientIssue Issue(Exception ex) =>
-        ex is ClientConfigException refused ? new(refused.Problem, refused.Detail) : new(ClientProblem.IoError, ex.Message);
+        ex is ClientConfigException refused ? new(refused.Problem, RemoteServer.Redact(refused.Detail)!) : new(ClientProblem.IoError, RemoteServer.Redact(ex.Message)!);
 }

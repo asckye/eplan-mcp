@@ -3,6 +3,12 @@ namespace EplanMcp.Host.ClientConfig;
 /// <summary>Why <c>eplanmcp client-config</c> leaves a client's configuration alone.</summary>
 internal enum ClientProblem
 {
+    /// <summary>stdin did not hold exactly one VM key (ADR-0018 item 4); the key never comes from the command line.</summary>
+    InvalidVmKey,
+
+    /// <summary>The client's configuration cannot send the Authorization header, so it gets no eplan-vm (ADR-0018 item 10).</summary>
+    RemoteUnsupported,
+
     /// <summary>The file cannot be read as its format, or holds the servers in a form that cannot be changed safely.</summary>
     InvalidFile,
 

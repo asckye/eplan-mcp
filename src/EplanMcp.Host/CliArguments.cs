@@ -41,6 +41,8 @@ internal sealed record CliArguments(
     public static string Usage { get; } =
         "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
+        + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
+        + " | client-config [<client>...] --vm --remove [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
@@ -82,7 +84,8 @@ internal sealed record CliArguments(
     private static CliArguments? ClientConfigArguments(string[] options)
     {
         var clients = new List<McpClient>();
-        bool json = false, dryRun = false, remove = false, plugin = false;
+        bool json = false, dryRun = false, remove = false, plugin = false, vm = false, keyStdin = false;
+        string? url = null;
         for (int i = 0; i < options.Length; i++)
         {
             switch (options[i])
@@ -100,6 +103,15 @@ internal sealed record CliArguments(
                 case "--plugin" when !plugin:
                     plugin = true;
                     break;
+                case "--vm" when !vm:
+                    vm = true;
+                    break;
+                case "--key-stdin" when !keyStdin:
+                    keyStdin = true;
+                    break;
+                case "--url" when url is null && i + 1 < options.Length:
+                    url = options[++i];
+                    break;
                 default:
                     if (McpClient.Find(options[i]) is not { } client)
                     {
@@ -116,8 +128,9 @@ internal sealed record CliArguments(
         }
 
         ClientConfigMode mode = remove ? ClientConfigMode.Remove : dryRun ? ClientConfigMode.DryRun : ClientConfigMode.Write;
-        return (dryRun && remove) || (clients.Count == 0 && !remove) || (plugin && (remove || clients.Count != 1 || clients[0].Name != "claude-code"))
-            ? null : new(CliCommand.ClientConfig, json, new(clients, mode, plugin));
+        bool validVm = vm ? !plugin && (remove ? url is null && !keyStdin : url is not null && RemoteServer.ValidUrl(url) && keyStdin) : url is null && !keyStdin;
+        return !validVm || (dryRun && remove) || (clients.Count == 0 && !remove) || (plugin && (remove || clients.Count != 1 || clients[0].Name != "claude-code"))
+            ? null : new(CliCommand.ClientConfig, json, new(clients, mode, plugin, vm, url));
     }
 
     /// <summary>

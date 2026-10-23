@@ -46,6 +46,14 @@ internal static partial class CodexToml
             : new(null, null, null);
     }
 
+    public static ClientFileEdit Write(string text, RemoteServer server)
+    {
+        (string kept, _) = Without(text, RemoteServer.Name);
+        string newline = Newline(text);
+        string result = (kept.TrimEnd() is { Length: > 0 } rest ? rest + newline + newline : string.Empty) + server.TomlBlock(newline);
+        return new(result == text ? null : result, Table(text, RemoteServer.Name), Table(result, RemoteServer.Name));
+    }
+
     /// <summary>The text without the server's table and sub-tables, after refusing the forms it cannot handle (TIA's MergeToml).</summary>
     private static (string Kept, bool Found) Without(string text, string name)
     {
@@ -191,7 +199,7 @@ internal static partial class CodexToml
             lines.RemoveAt(lines.Count - 1);
         }
 
-        return lines.Count == 0 ? null : string.Join("\n", lines);
+        return lines.Count == 0 ? null : RemoteServer.Redact(string.Join("\n", lines));
     }
 
     /// <summary>

@@ -122,5 +122,77 @@
       "en": "client-config must run as eplanmcp.exe itself, whose full path the entry gets; this process is C:\\Program Files\\dotnet\\dotnet.exe"
     },
     "clients": []
+  },
+  "vmPreview": {
+    "schemaVersion": 2,
+    "mode": "dry_run",
+    "server": {
+      "name": "eplan-vm",
+      "url": "http://192.168.1.42:8766/mcp"
+    },
+    "problem": null,
+    "clients": [
+      {
+        "client": "cursor",
+        "file": "C:\\Users\\engineer\\.cursor\\mcp.json",
+        "action": "write",
+        "result": "would_write",
+        "before": "\"eplan-vm\": {\"url\":\"http://192.168.1.42:8766/mcp\",\"headers\":{\"Authorization\":\"Bearer <key>\"}}",
+        "after": "\"eplan-vm\": {\"url\":\"http://192.168.1.42:8766/mcp\",\"headers\":{\"Authorization\":\"Bearer <key>\"}}",
+        "backup": null,
+        "notes": [],
+        "problem": null
+      }
+    ]
+  },
+  "vmRemove": {
+    "schemaVersion": 2,
+    "mode": "remove",
+    "server": {
+      "name": "eplan-vm",
+      "url": null
+    },
+    "problem": null,
+    "clients": []
+  },
+  "vmUnsupported": {
+    "schemaVersion": 2,
+    "mode": "write",
+    "server": {
+      "name": "eplan-vm",
+      "url": "http://192.168.1.42:8766/mcp"
+    },
+    "problem": null,
+    "clients": [
+      {
+        "client": "claude-desktop",
+        "file": null,
+        "action": "write",
+        "result": "failed",
+        "before": null,
+        "after": null,
+        "backup": null,
+        "notes": [],
+        "problem": {
+          "code": "remote_unsupported",
+          "zh": "此客户端的配置文件不支持带认证请求头的 VM 连接：claude-desktop（Claude 桌面版仅支持远程连接器）",
+          "en": "This client's configuration file cannot configure a VM connection with authentication headers: claude-desktop (Claude Desktop requires remote connectors)"
+        }
+      }
+    ]
+  },
+  "vmInvalidKey": {
+    "schemaVersion": 2,
+    "mode": "write",
+    "server": {
+      "name": "eplan-vm",
+      "url": "http://192.168.1.42:8766/mcp"
+    },
+    "problem": {
+      "code": "invalid_vm_key",
+      "zh": "请仅通过重定向的 stdin 提供一把有效的 VM 密钥，可带一个末尾换行",
+      "en": "Provide exactly one valid VM key on redirected stdin, optionally followed by one newline"
+    },
+    "clients": []
   }
 }
