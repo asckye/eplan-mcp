@@ -13,7 +13,9 @@ internal static class ActionRunUsage
             return ToolResults.Success("Whitelisted action usage.", new ToolUsageResult { Tool = ActionRunTools.Tool, Topic = topic, Text = string.Join("\n\n", topic is null ? sections.Values : [sections[topic]]) });
         }
         if (!ActionRunCatalog.Entries.TryGetValue(topic, out JsonObject? rule))
-        { return ToolResults.Error(ActionRunCatalog.Denied().Error); }
+        {
+            return ToolResults.Error(ActionRunCatalog.Denied().Error);
+        }
         return ToolResults.Success("Whitelisted entry usage.", new ToolUsageResult
         {
             Tool = ActionRunTools.Tool,
@@ -37,7 +39,9 @@ internal static class ActionRunUsage
         }
         var example = new JsonObject { ["entry"] = ActionRunCatalog.Text(rule, "entry"), ["arguments"] = fields };
         if (ActionRunCatalog.Text(rule, "scope") == "project")
-        { example["project"] = "Line1"; }
+        {
+            example["project"] = "Line1";
+        }
         return example;
     }
     private static string RecordExample(JsonObject rule) => rule["parameters"]!["PROPERTYID1"]!.GetValue<string>() switch

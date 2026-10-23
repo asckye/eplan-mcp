@@ -60,11 +60,22 @@ internal static class PlanStepCatalog
             JsonObject args = ArgsSchema(entry.Op);
             AddPageReferences(args, "", entry.Op);
             if (args["properties"]!["pages"] is JsonObject pages)
-            { pages["minItems"] = 1; pages["maxItems"] = 50; }
+            {
+                pages["minItems"] = 1;
+                pages["maxItems"] = 50;
+            }
             if (entry.Op == "device.renumber")
-            { args["required"]!.AsArray().Add("pages"); args["properties"]!["pages"]!["type"] = "array"; args["properties"]!["pages"]!.AsObject().Remove("default"); }
+            {
+                args["required"]!.AsArray().Add("pages");
+                args["properties"]!["pages"]!["type"] = "array";
+                args["properties"]!["pages"]!.AsObject().Remove("default");
+            }
             if (entry.Op == "macro.insert")
-            { args["properties"]!["variant"]!["const"] = 0; args["properties"]!["numbering"]!["const"] = "keep"; args["properties"]!["numbering"]!["default"] = "keep"; }
+            {
+                args["properties"]!["variant"]!["const"] = 0;
+                args["properties"]!["numbering"]!["const"] = "keep";
+                args["properties"]!["numbering"]!["default"] = "keep";
+            }
             var step = JsonNode.Parse("""{"type":"object","properties":{"op":{},"args":{},"depends_on":{"type":"array","items":{"type":"integer","minimum":1},"uniqueItems":true,"default":[]}},"required":["op","args"],"additionalProperties":false}""")!;
             step["properties"]!["op"]!["const"] = entry.Op;
             step["properties"]!["args"] = args;
@@ -84,9 +95,16 @@ internal static class PlanStepCatalog
             schema["oneOf"] = new JsonArray(original, JsonNode.Parse("""{"type":"object","properties":{"from_step":{"type":"integer","minimum":1},"page":{"type":"string"}},"required":["from_step","page"],"additionalProperties":false}"""));
         }
         else if (schema["properties"] is JsonObject properties)
-        { foreach (var p in properties) { AddPageReferences(p.Value!.AsObject(), p.Key, op); } }
+        {
+            foreach (var p in properties)
+            {
+                AddPageReferences(p.Value!.AsObject(), p.Key, op);
+            }
+        }
         else if (schema["items"] is JsonObject items)
-        { AddPageReferences(items, field == "pages" ? "page_item" : "", op); }
+        {
+            AddPageReferences(items, field == "pages" ? "page_item" : "", op);
+        }
     }
 
     internal static bool IsPageSlot(string op, string field) => field == "page" && op == "macro.insert" || field == "name" && op == "page.update";

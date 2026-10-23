@@ -33,14 +33,20 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         try
         {
             if (config.ActionRun != ActionRunSwitch.On)
-            { throw ActionRunCatalog.Denied("actionRun is off in config.json."); }
+            {
+                throw ActionRunCatalog.Denied("actionRun is off in config.json.");
+            }
             (JsonObject rule, ActionRunArgs args) = catalog.Check(entry, project, arguments);
             read = ActionRunCatalog.Text(rule, "tier") == "export";
             HandshakeResult? status = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake;
             if (status is null)
-            { throw new BridgeCallException(BridgeErrors.NotConnected()); }
+            {
+                throw new BridgeCallException(BridgeErrors.NotConnected());
+            }
             if (!Version.TryParse(status.Eplan.Version, out Version? version) || version.Major != 2026)
-            { throw ActionRunCatalog.Denied("This EPLAN major version has not been verified."); }
+            {
+                throw ActionRunCatalog.Denied("This EPLAN major version has not been verified.");
+            }
             WritePlan plan;
             string? execution = null;
             bool recovered = false;
@@ -56,7 +62,9 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
                 recovered = outcome.Recovered;
             }
             else if (dry_run)
-            { plan = await bridge.InvokeAsync<ActionRunArgs, WritePlan>(OperationNames.ActionRunPlan, args, cancellationToken).ConfigureAwait(false); }
+            {
+                plan = await bridge.InvokeAsync<ActionRunArgs, WritePlan>(OperationNames.ActionRunPlan, args, cancellationToken).ConfigureAwait(false);
+            }
             else
             {
                 var adapter = new ActionExportBridge(bridge, args, locations);
@@ -75,16 +83,24 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             data ??= JsonSerializer.Deserialize<ActionRunData>(plan.Details!["actionRun"], HostJson.Options)!;
             bool changed = read && data.After is not null && !data.Before.OrderBy(p => p.Key, StringComparer.Ordinal).SequenceEqual(data.After.OrderBy(p => p.Key, StringComparer.Ordinal));
             if (changed)
-            { catalog.Disabled.TryAdd(entry, 0); LogDisabled(logs.CreateLogger<ActionRunTools>(), entry); }
+            {
+                catalog.Disabled.TryAdd(entry, 0);
+                LogDisabled(logs.CreateLogger<ActionRunTools>(), entry);
+            }
             JsonObject result = Shape(rule, args, plan, data, exported, files, dry_run, recovered, execution, changed, locations);
             if (read)
-            { auditAttempted = true; await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["result"] = result.DeepClone() }, CancellationToken.None).ConfigureAwait(false); }
+            {
+                auditAttempted = true;
+                await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["result"] = result.DeepClone() }, CancellationToken.None).ConfigureAwait(false);
+            }
             return ToolResults.Success(dry_run ? "Whitelisted action planned; nothing executed." : read ? "Whitelisted action exported one file; see 'directory'." : "Whitelisted action committed; fingerprint readback only.", result);
         }
         catch (AuditUnavailableException)
         {
             if (exported is not null)
-            { new ExportFolder(locations.Exports, exported.Directory).TryDelete(); }
+            {
+                new ExportFolder(locations.Exports, exported.Directory).TryDelete();
+            }
             return ToolResults.Error(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = "The action audit could not be written; ask the engineer to check the audit directory." });
         }
         catch (BridgeCallException ex) { failure = ex.Error.Reason; if (entry == "changelayer") { ex.Error.Execution ??= ExecutionState.NotStarted; } return ToolResults.Error(ex.Error); }
@@ -94,7 +110,9 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             if (read && !auditAttempted)
             {
                 try
-                { await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["reason"] = failure }, CancellationToken.None).ConfigureAwait(false); }
+                {
+                    await audit.AppendAsync(new JsonObject { ["type"] = "action_run", ["tool"] = Tool, ["entry"] = entry, ["elapsedMs"] = clock.GetElapsedTime(started).TotalMilliseconds, ["reason"] = failure }, CancellationToken.None).ConfigureAwait(false);
+                }
                 catch (AuditUnavailableException) { LogAuditFailure(logs.CreateLogger<ActionRunTools>()); }
             }
         }
@@ -131,7 +149,11 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
                 + (recovered ? " Execution was recovered; unreadable post-action state is not inferred." : string.Empty) + (disabled ? " Entry disabled; ask the engineer to reverify it." : string.Empty),
         };
         if (execution is not null)
-        { result["execution"] = execution; result["recovered"] = recovered; result["undo"] = null; }
+        {
+            result["execution"] = execution;
+            result["recovered"] = recovered;
+            result["undo"] = null;
+        }
         return result;
     }
     private static string Display(ActionParameter p, string project, HostDataLocations locations) => p.Name is "PROJECTNAME" or "Project" ? project

@@ -35,15 +35,25 @@ internal sealed class ProjectCreateTools
     {
         var violations = new List<string>();
         if (mode is not ("basic_project" or "backup"))
-        { violations.Add("'mode' must be basic_project or backup."); }
+        {
+            violations.Add("'mode' must be basic_project or backup.");
+        }
         if (ImportFiles.Problem("file", file, [mode == "backup" ? ".zw1" : ".zw9"]) is { } problem)
-        { violations.Add(problem); }
+        {
+            violations.Add(problem);
+        }
         if (ImportTools.ProjectNameProblem(name) is { } invalid)
-        { violations.Add("'name' " + invalid.Split(':')[0]); }
+        {
+            violations.Add("'name' " + invalid.Split(':')[0]);
+        }
         else if (name != name.Trim())
-        { violations.Add("'name' must not have leading or trailing spaces."); }
+        {
+            violations.Add("'name' must not have leading or trailing spaces.");
+        }
         if (destination is not null && DestinationProblem(destination) is { } pathProblem)
-        { violations.Add(pathProblem); }
+        {
+            violations.Add(pathProblem);
+        }
         if (violations.Count > 0)
         {
             BridgeError error = ToolResults.InvalidArgumentError(violations);
@@ -55,7 +65,9 @@ internal sealed class ProjectCreateTools
         {
             var clock = Stopwatch.StartNew();
             if (destination is null && config.ScratchRoots.Count == 0)
-            { throw Failure(ErrorReason.PolicyDenied, "No scratch root is configured. Ask the engineer to check config.json."); }
+            {
+                throw Failure(ErrorReason.PolicyDenied, "No scratch root is configured. Ask the engineer to check config.json.");
+            }
             string target = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination ?? Path.Combine(config.ScratchRoots[0], "projects", name)));
             CheckDestination(target, destination is not null, config);
             ImportFile source = await files.ResolveAsync("file", file, ImportTools.MaxProjectBytes, cancellationToken).ConfigureAwait(false);
@@ -116,16 +128,24 @@ internal sealed class ProjectCreateTools
     private static void CheckDestination(string target, bool explicitParent, HostConfig config)
     {
         if (Path.Exists(target) || new FileInfo(target).LinkTarget is not null || new DirectoryInfo(target).LinkTarget is not null)
-        { throw Failure(ErrorReason.AlreadyExists, "Choose a new destination; existing folders and projects are never reused."); }
+        {
+            throw Failure(ErrorReason.AlreadyExists, "Choose a new destination; existing folders and projects are never reused.");
+        }
         string? parent = Path.GetDirectoryName(target);
         if (explicitParent && !Directory.Exists(parent))
-        { throw Failure(ErrorReason.InvalidArgument, "Invalid arguments: 'destination' parent must exist."); }
+        {
+            throw Failure(ErrorReason.InvalidArgument, "Invalid arguments: 'destination' parent must exist.");
+        }
         for (string? part = parent; part is not null; part = Path.GetDirectoryName(part))
         {
             if (config.ScratchRoots.Any(r => string.Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(r)), part, StringComparison.OrdinalIgnoreCase)))
-            { break; }
+            {
+                break;
+            }
             if (Path.Exists(part) && (File.GetAttributes(part) & FileAttributes.ReparsePoint) != 0)
-            { throw Failure(ErrorReason.InvalidArgument, "Invalid arguments: 'destination' leads through a link or junction."); }
+            {
+                throw Failure(ErrorReason.InvalidArgument, "Invalid arguments: 'destination' leads through a link or junction.");
+            }
         }
     }
 
@@ -135,13 +155,19 @@ internal sealed class ProjectCreateTools
         {
             var info = ImportFiles.Walk("file", files.Root, source.Path, ImportFiles.RootName, folder: false) as FileInfo;
             if (info is null || info.Length != source.Bytes || info.LastWriteTimeUtc != source.LastWriteUtc)
-            { throw new IOException("The source changed."); }
+            {
+                throw new IOException("The source changed.");
+            }
             using var stream = new FileStream(info.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (Convert.ToHexStringLower(SHA256.HashData(stream)) != source.Sha256)
-            { throw new IOException("The source changed."); }
+            {
+                throw new IOException("The source changed.");
+            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ImportFileException)
-        { throw Failure(ErrorReason.PlanStale, "The source file changed or cannot be read. Call again to make a new plan and approval."); }
+        {
+            throw Failure(ErrorReason.PlanStale, "The source file changed or cannot be read. Call again to make a new plan and approval.");
+        }
     }
 
     private static BridgeCallException Failure(string reason, string message) => new(new BridgeError

@@ -15,21 +15,31 @@ internal static class PlanDependencies
         {
             string at = "/steps/" + (step.Index - 1).ToString(CultureInfo.InvariantCulture);
             if (step.Op is "page.renumber" or "device.renumber" && steps.Any(s => s.Effective && s.Index > step.Index))
-            { errors.Add(new(at + "/op", "Renumbering must be the last effective step.")); }
+            {
+                errors.Add(new(at + "/op", "Renumbering must be the last effective step."));
+            }
             if (step.ModifyScope.Pages.Length > 50)
-            { errors.Add(new(at + "/args/pages", "A step may affect at most 50 pages.")); }
+            {
+                errors.Add(new(at + "/args/pages", "A step may affect at most 50 pages."));
+            }
             if (step.Op == "macro.insert" && (!macroTargets.TryGetValue(step.Index, out PlanMacroTarget? target)
                 || target is not { PageType: "Circuit", Empty: true, Representation: "MultiLine" }))
-            { errors.Add(new(at + "/args/page", "macro.insert requires a proven empty Circuit page and a MultiLine macro.")); }
+            {
+                errors.Add(new(at + "/args/page", "macro.insert requires a proven empty Circuit page and a MultiLine macro."));
+            }
             foreach (PlanStep earlier in steps.Where(s => s.Effective && s.Index < step.Index))
             {
                 if (!Overlap(earlier.ModifyScope, step.ReadScope) && !Overlap(earlier.ModifyScope, step.ModifyScope))
-                { continue; }
+                {
+                    continue;
+                }
                 string[] created = earlier.Op == "page.create" ? [.. earlier.Args.GetProperty("pages").EnumerateArray().Select(p => p.GetProperty("name").GetString()!)] : [];
                 string[] wanted = step.Op == "page.update" ? [.. step.Args.GetProperty("pages").EnumerateArray().Select(p => p.GetProperty("name").GetString()!)]
                     : step.Op == "macro.insert" ? [step.Args.GetProperty("page").GetString()!] : [];
                 if (!step.DependsOn.Contains(earlier.Index) || wanted.Length == 0 || wanted.Any(p => created.Count(c => c == p) != 1))
-                { errors.Add(new(at + "/args", "Read/modify overlap has no predictor for " + earlier.Op + " -> " + step.Op + ".")); }
+                {
+                    errors.Add(new(at + "/args", "Read/modify overlap has no predictor for " + earlier.Op + " -> " + step.Op + "."));
+                }
             }
         }
         return [.. errors];

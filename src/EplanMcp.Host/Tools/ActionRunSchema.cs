@@ -12,7 +12,9 @@ internal static class ActionRunSchema
     {
         McpServerTool? tool = options.ToolCollection?.SingleOrDefault(t => t.ProtocolTool.Name == ActionRunTools.Tool);
         if (tool is null)
-        { return; }
+        {
+            return;
+        }
         var usage = options.ToolCollection!.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         var usageSchema = JsonNode.Parse(usage.InputSchema.GetRawText())!;
         var names = usageSchema["properties"]!["tool"]!["enum"]!.AsArray();
@@ -20,7 +22,9 @@ internal static class ActionRunSchema
         {
             options.ToolCollection!.Remove(tool);
             foreach (JsonNode? name in names.Where(n => n!.GetValue<string>() == ActionRunTools.Tool).ToList())
-            { names.Remove(name); }
+            {
+                names.Remove(name);
+            }
         }
         else
         {
