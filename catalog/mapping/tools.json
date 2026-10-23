@@ -1415,6 +1415,177 @@
       ]
     },
     {
+      "name": "eplan_context_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/ContextTools.cs",
+      "operations": [
+        "project.snapshot"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCBox",
+        "F:Eplan.EplApi.DataModel.ProjectManager.OpenMode.ReadOnly",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.Project.Close",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.DatabaseVersion.ToString",
+        "M:Eplan.EplApi.DataModel.ProjectManager.Dispose",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility(System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDatabaseVersion(System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.OpenProject(System.String,Eplan.EplApi.DataModel.ProjectManager.OpenMode)",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.PointD.X",
+        "P:Eplan.EplApi.Base.PointD.Y",
+        "P:Eplan.EplApi.DataModel.ArticleReference.PartNr",
+        "P:Eplan.EplApi.DataModel.Connection.EndPin",
+        "P:Eplan.EplApi.DataModel.Connection.Page",
+        "P:Eplan.EplApi.DataModel.Connection.Properties",
+        "P:Eplan.EplApi.DataModel.Connection.StartPin",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_DESIGNATION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRENUMBER",
+        "P:Eplan.EplApi.DataModel.Function.ArticleReferences",
+        "P:Eplan.EplApi.DataModel.Function.FunctionCategory",
+        "P:Eplan.EplApi.DataModel.Function.IsMainFunction",
+        "P:Eplan.EplApi.DataModel.Function.Properties",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Location",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLELENGTH_FULL",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLETYPE",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECOUNT",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCADDRESS",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCDATATYPE",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCRACK",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSOCKET",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSTATIONNAME",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSYMBOLICADDRESS_CALCULATED",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TECHNICAL_CHARACTERISTIC",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Page.PageType",
+        "P:Eplan.EplApi.DataModel.Page.Properties",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_FORMPLOT",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONDATE",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONTIME",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_NOMINATIOMN",
+        "P:Eplan.EplApi.DataModel.Pin.Name",
+        "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONDATE",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONTIME",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Indexes",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.Base.PointD",
+        "T:Eplan.EplApi.DataModel.Connection",
+        "T:Eplan.EplApi.DataModel.ConnectionPropertyList",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.E3D.Connection3D",
+        "T:Eplan.EplApi.DataModel.EObjects.Cable",
+        "T:Eplan.EplApi.DataModel.EObjects.PLC",
+        "T:Eplan.EplApi.DataModel.EObjects.Terminal",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.FunctionPropertyList",
+        "T:Eplan.EplApi.DataModel.IndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.PagePropertyList",
+        "T:Eplan.EplApi.DataModel.Pin",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.ProjectManager.OpenMode",
+        "T:Eplan.EplApi.DataModel.ProjectPropertyList",
+        "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.UniversalPropertyList",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_context_get.md",
+        "specStatus": "已实现最小只读聚合（P24）；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准；Large 待实跑",
+        "apiNotes": [
+          "A20",
+          "A33",
+          "A34",
+          "A35",
+          "A36",
+          "A39"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "ContextProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ContextProtocolTests.cs"
+          },
+          {
+            "name": "ContextToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ContextToolTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ContextGetTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ContextGetTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ProjectSnapshotOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectSnapshotOperationTests.cs"
+          },
+          {
+            "name": "SnapshotInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/SnapshotInteropTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "note": "P24 通过 PlanBaselineReader 每次读取新快照；只读包索引与真实绑定，不运行规则。Large 待实跑。"
+    },
+    {
       "name": "eplan_device_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/DeviceTools.cs",

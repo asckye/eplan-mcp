@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `eplan_macro_get` 遇到没有 2D 外框的宏（例如 3D 宏）时不再报内部错误，`size` 返回 null，摘要写"no 2D outline"。
+
 ## [0.2.0] - 2026-10-23
 第二个预览版。支持矩阵不变：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 程序不签名，随附 SHA-256、SBOM 和构建来源证明。
 

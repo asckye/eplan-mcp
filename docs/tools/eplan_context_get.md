@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `context`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准） |
+| 状态 | 已实现最小只读聚合（P24）；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准；Large 待实跑 |
 
 ## 1. 这个工具解决什么任务
 “针对这些页/对象，给我编译任务需要的紧凑上下文，并说明来源”。按 [M6 4.3/4.7/4.16](../design/2026-10-21-m6-engineering-packs.md)，本期仅覆盖全部结构的默认柜；公司/柜型/项目/柜配置层、绑定管理、规则强制检查留第 3 阶段，关系图邻域和依赖缓存失效留第 4 阶段。
@@ -43,9 +43,9 @@ schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 sche
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
-| `INVALID_ARGUMENT` | 非默认柜、范围/预算/include 非法，或无法容纳必要信封 | `metadata.violations` 列全部字段位置；提示收窄范围/调整预算，不暗中扩大预算 |
+| `INVALID_ARGUMENT` | 范围/预算/include 非法，或无法容纳必要信封 | `metadata.violations` 列全部字段位置；信封超限给 minimumEstimatedTokens；提示收窄范围/调整预算，不暗中扩大预算 |
 | `RESOURCE_NOT_FOUND` | 明确引用的源资源/定位符不存在或失效 | 列范围/定位符，重新读取，不按相似描述换目标；未绑定可选配置只是缺口 |
-| `CAPABILITY_MISSING` | 缺快照等必要读能力；已有多柜绑定超出本期能力 | `metadata.missing` 列缺项；不以默认柜合并多柜 |
+| `CAPABILITY_MISSING` | 缺快照等必要读能力；非默认柜或已有多柜绑定超出本期能力 | `metadata.missing` 列缺项；不以默认柜合并多柜 |
 | 项目解析、连接/授权、`TIMEOUT`、`INTERNAL` | 同 project_get / project.snapshot | 查询错误不带 execution；不声称返回了完整上下文 |
 
 M6 新码的标准/Contracts 登记随实现补齐；缺可选模块能力可在条目中标不可用，缺本次必需的读取能力才使调用失败。

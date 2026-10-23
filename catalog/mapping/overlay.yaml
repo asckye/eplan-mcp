@@ -96,6 +96,7 @@ live:
 
 # tools: what a tool's code cannot say about it: a note, and Bridge operations it reaches outside its own code.
 tools:
+  eplan_context_get: { note: P24 通过 PlanBaselineReader 每次读取新快照；只读包索引与真实绑定，不运行规则。Large 待实跑。, operations: [project.snapshot] }
   eplan_project_create:
     operations: [project.create.plan, project.create.execute, project.restore.plan, project.restore.execute]
     note: Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。
