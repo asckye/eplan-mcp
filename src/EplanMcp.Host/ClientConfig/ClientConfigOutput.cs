@@ -105,6 +105,7 @@ internal static class ClientConfigOutput
             ClientProblem.IoError => "io_error",
             ClientProblem.NotEplanmcp => "not_eplanmcp",
             ClientProblem.PluginInstalled => "plugin_installed",
+            ClientProblem.ClientConfigured => "client_configured",
             ClientProblem.ClaudeDesktopRunning => "claude_desktop_running",
             ClientProblem.MsixRedirected => "msix_redirected",
             _ => throw new UnreachableException($"Problem {issue.Problem} has no JSON name."),

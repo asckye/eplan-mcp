@@ -28,13 +28,13 @@ public sealed partial class ClaudeCodePluginPackageTests
     }
 
     [Fact]
-    public void McpServer_UsesFixedAppPathAndSameArgumentsAsClientConfig()
+    public void McpServer_IsATemplateWithTheSameArgumentsAsClientConfig()
     {
         using JsonDocument mcp = JsonDocument.Parse(Read("mcp.json"));
         JsonProperty server = Assert.Single(mcp.RootElement.GetProperty("mcpServers").EnumerateObject());
 
         Assert.Equal(LocalServer.Name, server.Name);
-        Assert.Equal("${USERPROFILE}/EplanMcp/app/eplanmcp.exe", server.Value.GetProperty("command").GetString());
+        Assert.Equal("__EPLANMCP_EXE__", server.Value.GetProperty("command").GetString());
         Assert.Equal(LocalServer.Arguments, server.Value.GetProperty("args").EnumerateArray().Select(a => a.GetString()));
         Assert.Equal(_serverFields, server.Value.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
     }

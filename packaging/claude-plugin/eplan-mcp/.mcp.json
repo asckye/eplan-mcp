@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "eplan": {
-      "command": "${USERPROFILE}/EplanMcp/app/eplanmcp.exe",
+      "command": "__EPLANMCP_EXE__",
       "args": ["serve"]
     }
   }

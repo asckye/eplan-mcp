@@ -41,7 +41,7 @@ public sealed class ClientConfigOutputTests
         Assert.Equal(
             [
                 "invalid_file", "unsupported_toml", "ambiguous_package", "file_changed", "invalid_record", "record_failed", "unknown_client", "io_error", "not_eplanmcp",
-                "plugin_installed", "claude_desktop_running", "msix_redirected",
+                "plugin_installed", "client_configured", "claude_desktop_running", "msix_redirected",
             ],
             Enum.GetValues<ClientProblem>().Select(p => Json(new(_server, ClientConfigMode.Write, new(p, "d"), []))["problem"]!["code"]!.GetValue<string>()));
         Assert.Equal(["write", "remove"], Enum.GetValues<ClientAction>().Select(a => Json(Report(new("x", null, a, ClientOutcome.Unchanged)))["clients"]![0]!["action"]!.GetValue<string>()));

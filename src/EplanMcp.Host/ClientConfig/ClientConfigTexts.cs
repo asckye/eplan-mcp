@@ -23,6 +23,7 @@ internal static class ClientConfigTexts
         string d = issue.Detail;
         return issue.Problem switch
         {
+            ClientProblem.ClientConfigured => zh ? $"请先移除 Claude Code 的 eplan 配置，再生成插件市场：{d}" : $"Remove Claude Code's eplan configuration before generating the plugin marketplace: {d}",
             ClientProblem.InvalidFile => zh ? $"文件无法解析，没有改动：{d}" : $"The file cannot be parsed and was left unchanged: {d}",
             ClientProblem.UnsupportedToml => zh
                 ? $"config.toml 中 MCP 服务器的写法无法逐行安全修改，没有改动：{d} 请把 eplan 写成 [mcp_servers.eplan] 表、单行的 command 和 args，或者手工删除它，然后重新运行"

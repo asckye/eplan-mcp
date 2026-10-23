@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.Json;
 using EplanMcp.Host.Addin;
 
 namespace EplanMcp.Host.Tests.Addin;
@@ -48,6 +49,23 @@ public sealed class AddinCommandTests : IDisposable
         Locations, _eplan, _eplan, _clock, _timings);
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
+
+    [Fact]
+    public void VariantDiscovery_IsReadOnlyAndUsesTheRegistrationSupportAndVariantRules()
+    {
+        InstallEplan("2023.0.3", "Old variant");
+        InstallEplan("2025.0.1", "Electric P8", "Fluid");
+
+        Assert.Equal(["Electric P8", "Fluid", "Pro Panel"], Command.Variants());
+        using var output = new StringWriter();
+        Assert.Equal(0, Command.ListVariants(output, json: true));
+        using JsonDocument report = JsonDocument.Parse(output.ToString());
+        Assert.Equal(1, report.RootElement.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(Command.Variants(), report.RootElement.GetProperty("variants").EnumerateArray().Select(v => v.GetString()));
+        Assert.Empty(_eplan.Log);
+        Assert.False(File.Exists(Path.Combine(Locations.Root, "state", "addins.json")));
+        Assert.True(File.Exists(Dll + ZoneMark.Stream));
+    }
 
     [Fact]
     public async Task Install_EveryVariant_RegistersEachWithEplansCommandLineClosesItAndRecordsIt()

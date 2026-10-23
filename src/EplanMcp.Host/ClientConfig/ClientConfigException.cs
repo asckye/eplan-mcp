@@ -33,6 +33,9 @@ internal enum ClientProblem
     /// <summary>The Claude Code plugin is installed and already provides the server (design 4.7).</summary>
     PluginInstalled,
 
+    /// <summary>Claude Code already has the eplan entry, so no plugin marketplace is generated beside it (design 4.7).</summary>
+    ClientConfigured,
+
     /// <summary>Claude Desktop runs and rewrites its file (spike S17).</summary>
     ClaudeDesktopRunning,
 

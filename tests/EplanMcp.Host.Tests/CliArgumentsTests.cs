@@ -12,6 +12,7 @@ public sealed class CliArgumentsTests
     [InlineData("--version", "Version", false)]
     [InlineData("doctor", "Doctor", false)]
     [InlineData("doctor --format json", "Doctor", true)]
+    [InlineData("addin-variants --format json", "AddinVariants", true)]
     [InlineData("audit verify", "AuditVerify", false)]
     [InlineData("audit verify --format json", "AuditVerify", true)]
     [InlineData("uninstall-addin", "UninstallAddin", false)]
@@ -71,6 +72,10 @@ public sealed class CliArgumentsTests
     [InlineData("client-config vscode")]
     [InlineData("client-config codex --all")]
     [InlineData("client-config codex -n")]
+    [InlineData("client-config codex --plugin")]
+    [InlineData("client-config claude-code cursor --plugin")]
+    [InlineData("client-config claude-code --plugin --remove")]
+    [InlineData("client-config claude-code --plugin --plugin")]
     [InlineData("install-addin --variant")]
     [InlineData("install-addin --variant --format json")]
     [InlineData("install-addin Electric")]
@@ -102,6 +107,18 @@ public sealed class CliArgumentsTests
         Assert.Equal((CliCommand.ClientConfig, json), (cli.Command, cli.Json));
         Assert.Equal(Split(clients), cli.ClientConfig!.Clients.Select(c => c.Name));
         Assert.Equal(Enum.Parse<ClientConfigMode>(mode), cli.ClientConfig.Mode);
+    }
+
+    [Theory]
+    [InlineData("client-config claude-code --plugin", "Write")]
+    [InlineData("client-config --plugin claude-code --dry-run --format json", "DryRun")]
+    public void PluginMode_IsOnlyForClaudeCodeAndAllowsPreview(string line, string mode)
+    {
+        ClientConfigRequest request = CliArguments.Parse(Split(line))!.ClientConfig!;
+
+        Assert.True(request.Plugin);
+        Assert.Equal(Enum.Parse<ClientConfigMode>(mode), request.Mode);
+        Assert.Equal("claude-code", Assert.Single(request.Clients).Name);
     }
 
     [Theory]
@@ -141,6 +158,7 @@ public sealed class CliArgumentsTests
     {
         Assert.Equal(
             "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+            + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
             + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
             + Environment.NewLine

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 
@@ -38,6 +39,17 @@ internal sealed class AddinCommand
     public static AddinCommand ForMachine() => new(
         AddinMachine.FromWindows(), HostDataLocations.FromEnvironment(), new EplanProcesses(),
         new BridgeProbe(new PipeBridgeDiscovery(), new PipeBridgeConnector()), TimeProvider.System, AddinTimings.Default);
+
+    /// <summary>Read-only discovery for Workbench; uses exactly the registration plan's installation and support rules.</summary>
+    internal IReadOnlyList<string> Variants() => [.. EplanInstallation.Find(_machine.ProgramFiles, _machine.FileVersion)
+        .Where(i => EplanVersions.Support(i.Version) != EplanSupport.Unsupported).SelectMany(i => i.Variants).Distinct(StringComparer.OrdinalIgnoreCase)];
+
+    public int ListVariants(TextWriter output, bool json)
+    {
+        IReadOnlyList<string> variants = Variants();
+        output.WriteLine(json ? JsonSerializer.Serialize(new { schemaVersion = 1, variants }, HostJson.Options) : string.Join(Environment.NewLine, variants));
+        return 0;
+    }
 
     /// <summary>Runs the command; says on <paramref name="progress"/> (stderr) before each start of EPLAN, which can take minutes.</summary>
     public async Task<int> RunAsync(AddinAction action, IReadOnlyList<string> variants, TextWriter output, TextWriter progress, CultureInfo culture, bool json)

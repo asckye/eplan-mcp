@@ -51,6 +51,7 @@ internal static class Program
         { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
         { KeyAction: { } action } => await VmKey.RunAsync(action, HostDataLocations.FromEnvironment(), output, CancellationToken.None).ConfigureAwait(false),
         { Firewall: { } firewall } => VmFirewallCommand.ForMachine().Run(firewall, output),
+        { Command: CliCommand.AddinVariants } => AddinCommand.ForMachine().ListVariants(output, cli.Json),
         { ClientConfig: { } request } => ClientConfigCommand.ForMachine().Run(request, output, CultureInfo.CurrentUICulture, cli.Json),
         { Pack: { } pack } => await PackCommand.RunAsync(pack, HostDataLocations.FromEnvironment(), output, cli.Json, CancellationToken.None).ConfigureAwait(false),
         { Command: CliCommand.InstallAddin or CliCommand.UninstallAddin } => await AddinCommand.ForMachine().RunAsync(
