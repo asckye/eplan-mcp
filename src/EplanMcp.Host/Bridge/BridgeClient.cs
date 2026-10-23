@@ -38,6 +38,8 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
     private HandshakeResult? _handshake;
     private volatile int _selectedProcessId; // 0: none chosen; no EPLAN runs as process 0
 
+    internal int? FixedProcessId { get; init; }
+
     public BridgeClient(IBridgeDiscovery discovery, IBridgeConnector connector, ILogger<BridgeClient> logger)
         : this(discovery, connector, logger, DefaultQueueTimeout, DefaultCallTimeout)
     {
@@ -71,6 +73,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         RunExclusiveAsync(
             async token =>
             {
+                processId = FixedProcessId ?? processId;
                 // Remembered only after the handshake: a failed choice leaves the previous one in place.
                 HandshakeResult handshake = await EnsureConnectedAsync(Discover(), processId, token).ConfigureAwait(false);
                 _selectedProcessId = processId;
@@ -167,7 +170,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
             ? operations.Contains(operation, StringComparer.Ordinal)
             : operation == OperationNames.ProjectList;
 
-    private int? Selected => _selectedProcessId is var selected and not 0 ? selected : null;
+    private int? Selected => FixedProcessId ?? (_selectedProcessId is var selected and not 0 ? selected : null);
 
     /// <summary>
     /// Connects to <paramref name="choice"/> when given (<see cref="SelectAsync"/>), else to the selected instance, else

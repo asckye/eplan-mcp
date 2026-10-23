@@ -1,6 +1,7 @@
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
+using EplanMcp.Host.Http;
 using EplanMcp.Host.Importing;
 using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
@@ -29,7 +30,7 @@ internal static class McpServerSetup
 
         // serve registers the configuration it loaded; tests get the defaults, never a developer's own file.
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
-        services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>()));
+        services.TryAddSingleton(provider => new AuditLog(provider.GetRequiredService<HostDataLocations>().Audit, provider.GetRequiredService<TimeProvider>(), provider.GetService<HttpCaller>()));
         services.TryAddSingleton<DanglingWrites>();
 
         // Approval channels are registered in the order they are tried (ADR-0011), which no setting changes: the Workbench

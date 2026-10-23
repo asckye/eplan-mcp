@@ -140,7 +140,7 @@ public sealed class CliArgumentsTests
     public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
     {
         Assert.Equal(
-            "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+            "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
             + Environment.NewLine
             + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"

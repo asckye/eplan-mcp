@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-22 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 5c7d4219）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-23 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 5c7d4219）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -192,16 +192,16 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_plc_get | read | plc.get | 72 | 37 | 1 | 28 | 0 | 2/2/2 | — | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 55 | 30 | 0 | 25 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
-| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/3/5 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/4/5 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 70 | 31 | 2 | 37 | 0 | 1/2/1 | A11 A14 A25 A28 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 47 | 21 | 0 | 26 | 0 | 1/2/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 45 | 21 | 2 | 16 | 0 | 2/1/1 | A28 | — |
-| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/2/1 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/3/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 5/3/8 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 75 | 31 | 0 | 44 | 0 | 1/2/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 2/2/3 | — | — |
 | eplan_terminal_strip_list | read | terminal.strip.list | 18 | 10 | 0 | 8 | 0 | 3/2/2 | — | — |
-| eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 6/1/0 | — | — |
+| eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 6/2/0 | — | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 2/3/1 | A30 | — |
 
 ## 6. 按版本、模块、授权的可用性

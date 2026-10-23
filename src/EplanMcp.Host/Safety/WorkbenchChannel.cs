@@ -3,6 +3,7 @@ using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Http;
 using EplanMcp.Workbench.Protocol;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -48,7 +49,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
         : this(
             WorkbenchPipeName.ForCurrentUser(locations.Root),
             Path.Combine(AppContext.BaseDirectory, "workbench", "EplanMcp.Workbench.exe"),
-            () => services.GetService<McpServer>()?.ClientInfo?.Name, // only under a transport, once the client said hello
+            () => services.GetService<HttpCaller>()?.Name ?? services.GetService<McpServer>()?.ClientInfo?.Name,
             clock,
             logger)
     {

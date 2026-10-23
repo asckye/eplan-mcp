@@ -467,7 +467,7 @@ internal static class ApprovalTexts
     /// Project text on one line (control characters become spaces), without the bidirectional controls that make text
     /// read differently from what it contains (as <see cref="ResultShaper.CleanText"/>), shortened with its length named.
     /// </summary>
-    private static string Value(string text, bool zh)
+    internal static string Value(string text, bool zh)
     {
         string clean = new([.. text.Where(c => c is not ((>= '‪' and <= '‮') or (>= '⁦' and <= '⁩'))).Select(c => char.IsControl(c) ? ' ' : c)]);
         if (clean.Length <= MaxValueLength)

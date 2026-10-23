@@ -1641,7 +1641,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
-      "medium": 3,
+      "medium": 4,
       "large": 5,
       "apiNotes": [],
       "latestLive": {
@@ -1739,7 +1739,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_session_select.md",
       "small": 3,
-      "medium": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": [],
       "latestLive": {
@@ -1854,7 +1854,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_tool_usage.md",
       "small": 6,
-      "medium": 1,
+      "medium": 2,
       "large": 0,
       "apiNotes": []
     },

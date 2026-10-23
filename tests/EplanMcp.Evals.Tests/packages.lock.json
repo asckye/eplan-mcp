@@ -405,7 +405,8 @@
           "EplanMcp.Packs": "[1.0.0, )",
           "EplanMcp.Workbench.Protocol": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.12, )",
-          "ModelContextProtocol": "[2.2.0, )"
+          "ModelContextProtocol": "[2.2.0, )",
+          "ModelContextProtocol.AspNetCore": "[2.2.0, )"
         }
       },
       "eplanmcp.contracts": {
@@ -472,6 +473,15 @@
           "Microsoft.Extensions.Caching.Abstractions": "10.0.10",
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.10",
           "ModelContextProtocol.Core": "[2.2.0]"
+        }
+      },
+      "ModelContextProtocol.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "3JelDMuFIwFzXybsh6K30G6wXu5gmqKnuRnieqgBMuR0FkqqXRv4B+NYZuPgthSyNq5UwRyvv2U2VJBE3RD3PQ==",
+        "dependencies": {
+          "ModelContextProtocol": "[2.2.0]"
         }
       },
       "YamlDotNet": {
