@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-23",
-  "scannedSources": "0098ce82 + uncommitted changes",
-  "sourceHash": "sha256:586e4284a70bedec374beabd1a2981d68c1bfa9ec10f523c3c0891494d6ba2b6",
+  "scannedSources": "e974018f + uncommitted changes",
+  "sourceHash": "sha256:3eb28edbf912fcf5f7572ec67217f61cf247e0acfa2d1eda6a289a69419f5c0f",
   "operations": [
     {
       "name": "action.execute",
@@ -335,6 +335,10 @@
     {
       "name": "placeholder.list",
       "class": "PlaceholderListOperation"
+    },
+    {
+      "name": "plan.functions",
+      "class": "PlanFunctionsOperation"
     },
     {
       "name": "plc.get",
@@ -3731,6 +3735,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -4336,6 +4351,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -4609,6 +4635,17 @@
         ],
         "operations": [
           "page.get"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "plan.functions"
         ]
       },
       {
@@ -5415,6 +5452,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -6416,6 +6454,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanReportUpdater",
         "member": "ReportPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReportUpdater.cs",
@@ -7388,6 +7437,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -7482,6 +7532,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -9540,6 +9591,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Channel",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -10065,6 +10127,17 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
         ]
       },
       {
@@ -11320,6 +11393,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -11736,6 +11820,17 @@
         ],
         "operations": [
           "placeholder.apply.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
         ]
       },
       {
@@ -12752,6 +12847,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Channel",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -12914,6 +13020,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -13036,6 +13143,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -13125,6 +13233,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.get",
           "project.snapshot",
@@ -13296,6 +13405,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -13471,6 +13581,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -13588,6 +13699,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -14070,6 +14182,17 @@
         ],
         "operations": [
           "object.resolve"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions"
         ]
       },
       {
@@ -17514,6 +17637,17 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -18481,6 +18615,17 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions"
         ]
       },
       {
@@ -20196,6 +20341,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.get",
           "project.snapshot",
@@ -20286,6 +20432,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -20550,6 +20697,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",
@@ -21907,6 +22055,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "plan.functions",
           "plc.get",
           "project.compatibility",
           "project.get",

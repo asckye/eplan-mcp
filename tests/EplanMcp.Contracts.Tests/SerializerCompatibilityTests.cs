@@ -20,6 +20,9 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new PlanFunctionsArgs { Project = "Line1", Names = ["=F+A1-K1"], Pages = ["=F+A1/1"] },
+        new PlanFunctionsData { Project = "Line1", ProjectPath = @"D:\Projects\Line1", Complete = false, Limit = 10_000,
+            Functions = [new() { Type = 17, Oid = 5, Name = "=F+A1-K1", IsMain = true }, new() { Type = 17, Oid = 6, Name = "=F+A1-K1", Page = "=F+A1/1" }] },
         new ActionParameter(),
         new ActionParameter { Name = "PROJECTNAME", Value = "Line1" },
         new ActionRunArgs(),
