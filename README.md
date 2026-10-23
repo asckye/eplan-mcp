@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：真实项目写入逐次审批，操作可审计。
 
-> **状态：v0.1.0 预览版，64 个工具**。已于 2026-10-22 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.1.0)，供测试使用。M0–M4 已完成；M4c 的 PDF 注释导入待有效样本，翻译库导入待验证；M5 虚拟机连接尚未实现，干净机器验收待完成；M6 已有工程包与资源工具，计划工具待实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：v0.2.0 预览版，65 个工具**。已于 2026-10-23 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.2.0)，供测试使用。M0–M4 已完成；M4c 的 PDF 注释导入待有效样本，翻译库导入待验证；M5 的 ZIP 交付和虚拟机连接已实现，干净机器验收和跨机器实测待完成；M6 第 1 阶段（工程包与资源）已完成，第 2 阶段已有 `eplan_project_create`，计划工具待实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 
