@@ -30,6 +30,8 @@ internal enum MasterDataWrites
 /// </summary>
 internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScratchWrites WritesOutsideScratch)
 {
+    /// <summary>Exact Origin values permitted over HTTP; no browser origins are allowed by default (SEC-28).</summary>
+    public IReadOnlyList<string> HttpAllowedOrigins { get; init; } = [];
     /// <summary>How long the engineer has to answer an approval or a confirmation by default (ADR-0011).</summary>
     public static readonly TimeSpan DefaultApprovalTimeout = TimeSpan.FromSeconds(120);
 
@@ -124,6 +126,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             ApprovalTimeout = timeout,
             MasterDataWrites = file?.MasterDataWrites ?? defaults.MasterDataWrites,
             PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
+            HttpAllowedOrigins = file?.HttpAllowedOrigins ?? [],
         }, null);
     }
 
@@ -132,6 +135,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     private sealed class ConfigFile
     {
+        public List<string>? HttpAllowedOrigins { get; set; }
         public List<string>? ScratchRoots { get; set; }
 
         public OutsideScratchWrites? WritesOutsideScratch { get; set; }

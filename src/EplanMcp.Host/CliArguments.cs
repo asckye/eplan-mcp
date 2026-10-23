@@ -1,4 +1,5 @@
 using EplanMcp.Host.ClientConfig;
+using EplanMcp.Host.Http;
 using EplanMcp.Host.Packs;
 using EplanMcp.Host.Tools;
 using EplanMcp.Packs.Scanning;
@@ -14,6 +15,7 @@ internal enum CliCommand
     InstallAddin,
     UninstallAddin,
     Pack,
+    VmKey,
     Version,
 }
 
@@ -29,10 +31,12 @@ internal sealed record CliArguments(
     ClientConfigRequest? ClientConfig = null,
     ToolProfile Profile = ToolProfile.Full,
     IReadOnlyList<string>? Variants = null,
-    PackRequest? Pack = null)
+    PackRequest? Pack = null,
+    HttpArguments? Http = null,
+    string? KeyAction = null)
 {
     public static string Usage { get; } =
-        "usage: eplanmcp [serve [--profile core|full]] | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+        "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
         + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
@@ -45,6 +49,8 @@ internal sealed record CliArguments(
         [] or ["serve"] => new(CliCommand.Serve, Json: false),
         ["serve", "--profile", "full"] => new(CliCommand.Serve, Json: false),
         ["serve", "--profile", "core"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Core),
+        ["serve", .. var options] when HttpArguments.Parse(options) is { } http => new(CliCommand.Serve, Json: false, Http: http),
+        ["vm-key", var action] when action is "create" or "show" or "delete" => new(CliCommand.VmKey, Json: false, KeyAction: action),
         ["--version"] => new(CliCommand.Version, Json: false),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),

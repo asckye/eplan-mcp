@@ -11,6 +11,9 @@
   <ItemGroup>
     <!-- Official MCP C# SDK (Apache-2.0); 2.x implements the 2026-07-28 revision and keeps 2025-11-25 clients working. -->
     <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <!-- Apache-2.0; official, actively maintained SDK HTTP transport on Kestrel (ADR-0018).
+         Must match ModelContextProtocol. Alternative: custom HTTP transport, rejected to keep SDK protocol handling. -->
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <!-- MIT. The Workbench logs through its ILogger (coding standards 6); the Host gets the same version through Hosting. -->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
@@ -43,12 +46,6 @@
     <PackageVersion Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
     <PackageVersion Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
     <PackageVersion Include="Microsoft.WindowsAppSDK.DWrite" Version="2.1.0" />
-    <!--
-      Apache-2.0, same release as ModelContextProtocol (it must stay equal). Spike S19's HTTP prototype only
-      (spikes/S19-vm-http, ADR-0018): Streamable HTTP on Kestrel. No project in EplanMcp.Ci.slnf references it yet; the
-      Host takes it with ADR-0018's implementation PR, which moves this line to the first group.
-    -->
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup Label="Analyzers">
     <!--

@@ -6496,6 +6496,11 @@
             "file": "tests/EplanMcp.Evals.Tests/Server/EplanMcpClientTests.cs"
           },
           {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
+          },
+          {
             "name": "SessionSelectInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/SessionSelectInteropTests.cs"
@@ -6576,6 +6581,11 @@
             "name": "HostBridgeInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/HostBridgeInteropTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
           },
           {
             "name": "PartToolsInteropTests",
@@ -6976,6 +6986,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
           },
           {
             "name": "SessionSelectInteropTests",
@@ -7484,6 +7499,11 @@
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
           },
           {
             "name": "StdioEndToEndTests",

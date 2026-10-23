@@ -1,6 +1,7 @@
 using System.Globalization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Http;
 
 namespace EplanMcp.Host.Safety;
 
@@ -10,7 +11,7 @@ namespace EplanMcp.Host.Safety;
 /// EPLAN, until the deadline and the Bridge's dispatch timeout have passed; the dialog closes itself at the deadline.
 /// An add-in without the operation cannot ask. Errors (EPLAN_BUSY while EPLAN shows another dialog) go to the caller.
 /// </summary>
-internal sealed class EplanDialogChannel(IBridgeClient bridge, TimeProvider clock) : IApprovalChannel
+internal sealed class EplanDialogChannel(IBridgeClient bridge, TimeProvider clock, HttpCaller? caller = null) : IApprovalChannel
 {
     public const string ChannelName = "eplan_dialog";
 
@@ -30,6 +31,7 @@ internal sealed class EplanDialogChannel(IBridgeClient bridge, TimeProvider cloc
         }
 
         ApprovalAskArgs args = ApprovalTexts.For(question, CultureInfo.CurrentUICulture);
+        args.Summary = caller?.Name is { } name ? name + "\n" + args.Summary : args.Summary;
         args.RequestId = question.RequestId;
         args.Fingerprint = question.Plan.Fingerprint;
         args.ArgumentsHash = question.ArgumentsHash;

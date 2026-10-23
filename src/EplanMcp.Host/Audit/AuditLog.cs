@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Host.Http;
 
 namespace EplanMcp.Host.Audit;
 
@@ -15,7 +16,7 @@ internal sealed class AuditUnavailableException(string message, Exception? inner
 /// files), and <c>hash</c> = SHA-256(prev + the record's JSON without <c>hash</c>), so a changed or removed record breaks
 /// the chain where <see cref="AuditVerifier"/> looks. Host processes take turns through an exclusive lock file.
 /// </summary>
-internal sealed class AuditLog(string directory, TimeProvider clock)
+internal sealed class AuditLog(string directory, TimeProvider clock, HttpCaller? caller = null)
 {
     public const string FilePattern = "????-??-??.jsonl";
 
@@ -47,6 +48,11 @@ internal sealed class AuditLog(string directory, TimeProvider clock)
             foreach ((string name, JsonNode? value) in entry)
             {
                 record[name] = value?.DeepClone();
+            }
+
+            if (caller?.Address is { } address)
+            {
+                record["sourceAddress"] = address;
             }
 
             record["prev"] = prev;

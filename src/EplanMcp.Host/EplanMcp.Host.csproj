@@ -13,6 +13,7 @@
     <ProjectReference Include="..\EplanMcp.Packs\EplanMcp.Packs.csproj" />
     <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
     <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
