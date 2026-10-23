@@ -110,6 +110,7 @@ internal static class BridgeHost
             new ActionRunExecuteOperation(actionMajor, catalog, actions, new EplanSystemMessageReader(), transactions),
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new EplanProjectReader()),
+            new ProjectBackupOperation(catalog, pages, backup),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),

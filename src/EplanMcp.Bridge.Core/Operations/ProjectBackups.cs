@@ -32,6 +32,10 @@ public static class ProjectBackups
     }
 
     internal static string Make(IProjectBackup backup, IPageReader pages, OpenProject project, BackupTarget? target, Func<Func<TimeSpan>> startClock)
+        => MakeData(backup, pages, project, target, startClock).Path;
+
+    /// <summary>Shares the checked copy and its measurements with the standalone backup operation.</summary>
+    internal static ProjectBackupData MakeData(IProjectBackup backup, IPageReader pages, OpenProject project, BackupTarget? target, Func<Func<TimeSpan>> startClock)
     {
         string copy = Checked(target);
         Func<TimeSpan> elapsed = startClock();
@@ -64,7 +68,7 @@ public static class ProjectBackups
 
         // A safe point: the copy is made and EPLAN has returned; a cancel now still leaves the project unchanged.
         OperationContext.Current.ThrowIfCancellationRequested();
-        return copy;
+        return new ProjectBackupData { Path = copy, Pages = copied, Seconds = (decimal)took.TotalSeconds };
     }
 
     /// <summary>
@@ -87,7 +91,7 @@ public static class ProjectBackups
     }
 
     /// <summary>BACKUP_FAILED with the problem in <c>metadata.problem</c>; the router logs the cause, or the problem itself.</summary>
-    private static BridgeErrorException Failed(string problem, Exception? cause = null)
+    internal static BridgeErrorException Failed(string problem, Exception? cause = null)
     {
         var error = new BridgeErrorException(ErrorReason.BackupFailed, FailedMessage, cause ?? new InvalidOperationException(problem));
         error.Error.Metadata = new Dictionary<string, string> { ["problem"] = problem };

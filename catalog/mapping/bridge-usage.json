@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-23",
-  "scannedSources": "e974018f + uncommitted changes",
-  "sourceHash": "sha256:3eb28edbf912fcf5f7572ec67217f61cf247e0acfa2d1eda6a289a69419f5c0f",
+  "scannedSources": "2a948e17 + uncommitted changes",
+  "sourceHash": "sha256:b16d8cdb780f27ec25a11ebea099820334915ef07ad0e863d2f2b7fa70d820b4",
   "operations": [
     {
       "name": "action.execute",
@@ -343,6 +343,10 @@
     {
       "name": "plc.get",
       "class": "PlcGetOperation"
+    },
+    {
+      "name": "project.backup",
+      "class": "ProjectBackupOperation"
     },
     {
       "name": "project.compatibility",
@@ -687,6 +691,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -709,6 +714,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -980,6 +986,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -1004,6 +1011,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -1973,6 +1981,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -1995,6 +2004,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -3621,6 +3631,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "project.backup",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -3786,6 +3797,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -4619,6 +4631,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "project.backup",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -4666,6 +4679,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -5270,6 +5284,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -5325,6 +5340,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -5347,6 +5363,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -5454,6 +5471,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -5500,6 +5518,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -5607,6 +5626,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -7439,6 +7459,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -7534,6 +7555,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -11734,6 +11756,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "project.backup",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -13022,6 +13045,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -13145,6 +13169,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -13235,6 +13260,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.get",
           "project.snapshot",
           "project.translate.execute",
@@ -13301,6 +13327,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -13407,6 +13434,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -13500,6 +13528,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -13583,6 +13612,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -13701,6 +13731,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -15195,6 +15226,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -15217,6 +15249,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -15395,6 +15428,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -15417,6 +15451,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -17523,6 +17558,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "project.backup",
           "project.translate.execute",
           "project.translate.plan",
           "report.update.execute",
@@ -17699,6 +17735,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20135,6 +20172,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20157,6 +20195,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20343,6 +20382,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.get",
           "project.snapshot",
           "project.translate.execute",
@@ -20434,6 +20474,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -20570,6 +20611,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20592,6 +20634,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20699,6 +20742,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",
@@ -20756,6 +20800,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -20780,6 +20825,7 @@
           "page.delete.execute",
           "page.renumber.execute",
           "part.sync.execute",
+          "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
@@ -22057,6 +22103,7 @@
           "placeholder.list",
           "plan.functions",
           "plc.get",
+          "project.backup",
           "project.compatibility",
           "project.get",
           "project.list",

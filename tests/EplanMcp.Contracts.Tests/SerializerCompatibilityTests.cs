@@ -254,6 +254,8 @@ public sealed class SerializerCompatibilityTests
         new ListData<OpenProject>(),
         new ProjectGetArgs { Project = @"D:\项目\二", Language = "zh_CN", IncludeProperties = true },
         new ProjectGetArgs(),
+        new ProjectBackupArgs { Project = @"D:\Scratch\Line1", Target = new() { Path = @"D:\backups\new\Line1.elk", MaxSeconds = 60 } },
+        new ProjectBackupData { Path = @"D:\backups\new\Line1.elk", Pages = 0, Seconds = 2.9m },
         new ProjectGetData
         {
             Project = new OpenProject { Name = "Line1", Path = @"D:\Projects\Line1", Current = true, ReadOnly = true },

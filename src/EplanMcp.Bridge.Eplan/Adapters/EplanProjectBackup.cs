@@ -27,8 +27,8 @@ internal sealed class EplanProjectBackup : IProjectBackup
 
     /// <summary>
     /// Opens the copy read-only, counts its pages as <see cref="EplanPageReader.PageNames"/> counts the project's, and
-    /// closes it again. S12 counted the copy's pages after opening it through the Remote Client; opening it in the
-    /// dispatcher (its duration, and whether EPLAN's current project changes meanwhile) is not verified yet.
+    /// closes it again. S35 verified that the combined Snapshot and page-count path leaves the current project and
+    /// open projects unchanged (A41); selection preservation remains a Large check.
     /// </summary>
     public int CountPages(string copyPath)
     {
