@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- 新增[英文入门指南](docs/getting-started/en.md)、中英文切换、Claude Code 插件内英文副本及开始菜单入口。
+
 ## [0.1.0] - 2026-10-22
 首个预览版。支持矩阵：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 安装包不签名，随附 SHA-256、SBOM 和构建来源证明（见 [中文入门指南](docs/getting-started/zh-CN.md)）。
 

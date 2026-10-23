@@ -67,6 +67,7 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 [Icons]
 Name: "{group}\EplanMcp Workbench"; Filename: "{app}\workbench\EplanMcp.Workbench.exe"
 Name: "{group}\Getting started"; Filename: "{app}\docs\getting-started\zh-CN.md"
+Name: "{group}\Getting started (English)"; Filename: "{app}\docs\getting-started\en.md"
 Name: "{group}\Uninstall EplanMcp"; Filename: "{uninstallexe}"
 
 [Run]

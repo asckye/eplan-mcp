@@ -19,6 +19,10 @@
     <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\SKILL.md" LogicalName="ClaudePlugin.SKILL.md" />
     <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\guide.zh-CN.md" LogicalName="ClaudePlugin.guide.zh-CN.md" WithCulture="false" />
     <EmbeddedResource Include="..\..\docs\getting-started\zh-CN.md" LogicalName="ClaudePlugin.source-guide.zh-CN.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\guide.en.md" LogicalName="ClaudePlugin.guide.en.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\docs\getting-started\en.md" LogicalName="ClaudePlugin.source-guide.en.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\zh-CN.md" LogicalName="ClaudePlugin.entry.zh-CN.md" WithCulture="false" />
+    <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\skills\getting-started\en.md" LogicalName="ClaudePlugin.entry.en.md" WithCulture="false" />
     <EmbeddedResource Include="..\..\catalog\mapping\tools.json" LogicalName="ClaudePlugin.tools.json" />
   </ItemGroup>
 </Project>

@@ -55,11 +55,14 @@ public sealed partial class ClaudeCodePluginPackageTests
         Assert.DoesNotMatch(@"[\p{IsCJKUnifiedIdeographs}\p{IsHiragana}\p{IsKatakana}\p{IsHangulSyllables}]", skill);
     }
 
-    [Fact]
-    public void SkillGuide_MatchesTheCanonicalChineseGuide()
+    [Theory]
+    [InlineData("zh-CN")]
+    [InlineData("en")]
+    public void SkillGuide_MatchesTheCanonicalGuide(string language)
     {
-        Assert.Contains("(guide.zh-CN.md)", Read("SKILL.md"), StringComparison.Ordinal);
-        Assert.Equal(Read("source-guide.zh-CN.md"), Read("guide.zh-CN.md"));
+        Assert.Contains($"(guide.{language}.md)", Read("SKILL.md"), StringComparison.Ordinal);
+        Assert.Equal(Read($"source-guide.{language}.md"), Read($"guide.{language}.md"));
+        Assert.Contains($"(guide.{language}.md)", Read($"entry.{language}.md"), StringComparison.Ordinal);
     }
 
     private static string Read(string name)
