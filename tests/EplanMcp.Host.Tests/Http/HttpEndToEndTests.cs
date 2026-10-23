@@ -168,8 +168,8 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
     [Fact]
     public void Startup_RefusesMissingOrAmbiguousSelection()
     {
-        Assert.Throws<InvalidOperationException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, null), _locations, HostConfig.Defaults(_locations), _discovery));
-        Assert.Throws<InvalidOperationException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, 999), _locations, HostConfig.Defaults(_locations), _discovery));
+        Assert.Throws<HttpStartException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, null), _locations, HostConfig.Defaults(_locations), _discovery));
+        Assert.Throws<HttpStartException>(() => VmHttp.Build(new HttpArguments(IPAddress.Loopback, 0, 999), _locations, HostConfig.Defaults(_locations), _discovery));
     }
 
     [Theory]

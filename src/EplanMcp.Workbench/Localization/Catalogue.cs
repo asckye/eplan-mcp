@@ -332,6 +332,18 @@ internal static class Catalogue
         ("Clients.DiffHead", "{0}: {1}", "{0}：{1}"),
         ("Clients.NoFile", "the file cannot be told", "无法确定文件位置"),
 
+        ("Vm.Instance", "EPLAN _instance (PID)", "EPLAN 实例（进程号）(_I)"),
+        ("Vm.CheckInstances", "Refresh instances", "刷新实例"),
+        ("Vm.NoEplan", "No EPLAN instance found. Start EPLAN with the add-in, then refresh instances.", "未找到 EPLAN 实例。请启动已加载插件的 EPLAN，再刷新实例。"),
+        ("Vm.PickInstance", "Choose an EPLAN instance first.", "请先选择一个 EPLAN 实例。"),
+        ("Vm.Start", "Start service", "启动服务"),
+        ("Vm.Stop", "Stop service", "停止服务"),
+        ("Vm.Starting", "Starting HTTP service…", "正在启动 HTTP 服务……"),
+        ("Vm.Listening", "Listening at http://{0}:{1}/mcp. Keep the Workbench running.", "正在监听 http://{0}:{1}/mcp。请保持工作台运行。"),
+        ("Vm.Stopped", "Service stopped.", "服务已停止。"),
+        ("Vm.StopFirst", "Stop the service first.", "请先停止服务。"),
+        ("Vm.StartTimeout", "HTTP did not report listening within 30 seconds. Check the Host and retry.", "HTTP 服务在 30 秒内未报告监听成功。请检查 Host 后重试。"),
+
         // Read by the vendored theme's scroll bars (ScrollCommandNameConverter, Primer.xaml).
         ("Access.Scroll", "Scroll", "滚动"),
         ("Access.ScrollUp", "Scroll up", "向上滚动"),

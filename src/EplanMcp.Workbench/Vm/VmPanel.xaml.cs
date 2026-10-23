@@ -23,13 +23,24 @@ public partial class VmPanel : UserControl
             if (IsVisible && !_loaded && _view is { Reason.Length: 0 } view)
             {
                 _loaded = true;
-                _ = view.RunAsync("load", Confirm, CopyText, CancellationToken.None);
+                _ = LoadAsync(view);
             }
         };
     }
 
     internal Func<string, bool> Confirm { get; set; }
     internal Action<string> CopyText { get; set; } = Clipboard.SetText;
+    private async Task LoadAsync(VmView view)
+    {
+        await view.RunAsync("load", Confirm, CopyText, CancellationToken.None).ConfigureAwait(true);
+        await view.RunAsync("instances", Confirm, CopyText, CancellationToken.None).ConfigureAwait(true);
+    }
+
+    private void OnInstance(object sender, SelectionChangedEventArgs e)
+    {
+        if (_view is { } view)
+        { view.SelectedProcess = Instance.SelectedItem as int?; Show(); }
+    }
     internal void Attach(VmView view)
     {
         Address.ItemsSource = view.Addresses;
@@ -68,11 +79,18 @@ public partial class VmPanel : UserControl
         }
 
         IsEnabled = true;
-        AutomationProperties.SetName(Address, WorkbenchDialog.Plain(Loc.Current["Vm.Address"]));
-        foreach (ButtonBase button in new ButtonBase[] { Generate, Reveal, Copy, Delete, Allow, Remove, Refresh })
+        // Explicit names: a Label's text does not reach the field's name through LabeledBy on every WPF servicing release.
+        foreach ((FrameworkElement field, string key) in new (FrameworkElement, string)[]
+            { (Address, "Vm.Address"), (Instance, "Vm.Instance"), (Port, "Vm.Port"), (HostAddress, "Vm.Host"), (KeyValue, "Vm.Key"), (FirewallValue, "Vm.Network") })
+        {
+            AutomationProperties.SetName(field, WorkbenchDialog.Plain(Loc.Current[key]));
+        }
+
+        foreach (ButtonBase button in new ButtonBase[] { Generate, Reveal, Copy, Delete, Allow, Remove, Refresh, Instances, Start, Stop })
         {
             string reason = view.DisabledReason((string)button.Tag);
             button.IsEnabled = reason.Length == 0;
+            ToolTipService.SetShowOnDisabled(button, true);
             AutomationProperties.SetHelpText(button, reason);
             button.ToolTip = reason.Length > 0 ? reason : button == Allow || button == Remove ? Loc.Current["Vm.Uac"] : null;
         }
@@ -85,12 +103,22 @@ public partial class VmPanel : UserControl
                 error.Text = text;
                 AccessibleStatus.Announce(error);
             }
-            AutomationProperties.SetHelpText(field, text);
+            string help = field != HostAddress && view.Running ? Loc.Current["Vm.StopFirst"] : text;
+            AutomationProperties.SetHelpText(field, help);
+            field.ToolTip = help;
             field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "Primer.warn" : "Primer.inputBorder");
         }
 
-        Address.IsEnabled = Port.IsEnabled = HostAddress.IsEnabled = !view.Busy;
-        Working.Visibility = view.Busy ? Visibility.Visible : Visibility.Collapsed;
+        if (!ReferenceEquals(Instance.ItemsSource, view.Processes))
+        { Instance.ItemsSource = view.Processes; }
+        Instance.IsEnabled = Address.IsEnabled = Port.IsEnabled = !view.Busy && !view.Running;
+        AutomationProperties.SetHelpText(Instance, view.Running ? Loc.Current["Vm.StopFirst"] : view.DisabledReason("start"));
+        Instance.ToolTip = AutomationProperties.GetHelpText(Instance);
+        HostAddress.IsEnabled = !view.Busy;
+        Working.Visibility = view.Busy || view.Starting ? Visibility.Visible : Visibility.Collapsed;
+        ServiceIcon.SetResourceReference(StyleProperty, view.ServiceFailed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Info");
+        if (ServiceStatus.Text != view.ServiceStatus)
+        { ServiceStatus.Text = view.ServiceStatus; AccessibleStatus.Announce(ServiceStatus); }
         StatusIcon.SetResourceReference(StyleProperty, view.Failed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Info");
         string status = view.Reason.Length > 0 ? view.Reason : view.Message;
         if (Status.Text != status)

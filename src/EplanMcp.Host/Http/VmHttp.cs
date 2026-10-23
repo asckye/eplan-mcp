@@ -23,10 +23,17 @@ internal static class VmHttp
         BridgeEndpoint[] candidates = [.. discovery.Discover().Where(e => options.ProcessId is null || e.ProcessId == options.ProcessId)];
         if (candidates.Length != 1)
         {
-            throw new InvalidOperationException("HTTP requires exactly one EPLAN instance; use --process <pid> when several are running.");
+            throw new HttpStartException("HTTP requires exactly one EPLAN instance; use --process <pid> when several are running.");
         }
 
-        _ = VmKey.Read(locations); // Refuse to listen without a readable key; subsequent requests reload it for rotation.
+        try
+        {
+            _ = VmKey.Read(locations); // Refuse to listen without a readable key; subsequent requests reload it for rotation.
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or CryptographicException)
+        {
+            throw new HttpStartException("VM key unavailable. Run 'vm-key create' before starting HTTP.");
+        }
         WebApplicationBuilder builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions { Args = [], ContentRootPath = AppContext.BaseDirectory });
         builder.Configuration.Sources.Clear(); // Environment/appsettings must never add listeners or HTTP logging.
         Program.ConfigureLogging(builder.Logging, builder.Services);
