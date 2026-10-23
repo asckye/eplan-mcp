@@ -51,6 +51,21 @@ public sealed class MacroGetToolTests
         Assert.Equal((Feedback, "Line1"), (args.Macro, args.Project));
     }
 
+    [Theory]
+    [InlineData(double.PositiveInfinity, double.NegativeInfinity)]
+    [InlineData(double.NaN, 10.0)]
+    public async Task MacroGet_AMacroWithoutA2DOutline_ReportsNoSize(double width, double height)
+    {
+        // A 3D macro such as ABB/S200_..._3D.ema has no 2D extent; EPLAN reports it as infinite.
+        (_data.Width, _data.Height) = (width, height);
+
+        CallToolResult result = await Get(Feedback);
+
+        Assert.NotEqual(true, result.IsError);
+        Assert.Equal(JsonValueKind.Null, Structured(result).GetProperty("macro").GetProperty("size").ValueKind);
+        Assert.Equal("Macro found: MultiLine, 2 devices, no 2D outline.", Text(result, 0));
+    }
+
     [Fact]
     public async Task MacroGet_ACutDeviceList_IsTruncatedWithAHint()
     {

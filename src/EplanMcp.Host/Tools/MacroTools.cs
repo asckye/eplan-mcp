@@ -141,7 +141,10 @@ internal sealed class MacroTools
             {
                 Path = ResultShaper.CleanText(data.Path),
                 Representations = [.. data.Representations.Select(r => new MacroGetResult.RepresentationEntry { Type = ResultShaper.CleanText(r.Type), Variants = r.Variants })],
-                Size = new MacroGetResult.SizeEntry { Width = Math.Round(data.Width, 2), Height = Math.Round(data.Height, 2) },
+                // A macro without a 2D outline (a 3D macro) reports an infinite extent, which JSON cannot carry.
+                Size = double.IsFinite(data.Width) && double.IsFinite(data.Height)
+                    ? new MacroGetResult.SizeEntry { Width = Math.Round(data.Width, 2), Height = Math.Round(data.Height, 2) }
+                    : null,
                 Devices =
                 [
                     .. data.Devices.Select(d => new MacroGetResult.DeviceEntry
@@ -169,13 +172,15 @@ internal sealed class MacroTools
             ResultShaper.FitItems(result, result.Macro.Devices);
         }
 
+        string size = result.Macro.Size is { } outline
+            ? string.Format(CultureInfo.InvariantCulture, "{0:0.#} x {1:0.#} mm", outline.Width, outline.Height)
+            : "no 2D outline";
         string summary = string.Format(
             CultureInfo.InvariantCulture,
-            "Macro found: {0}, {1}, {2:0.#} x {3:0.#} mm.",
+            "Macro found: {0}, {1}, {2}.",
             string.Join("/", result.Macro.Representations.Select(r => r.Type)),
             ToolResults.Count(result.Macro.DeviceCount, "device"),
-            result.Macro.Size.Width,
-            result.Macro.Size.Height);
+            size);
         return ToolResults.Success(result.Truncated ? summary + " Some devices were left out; see 'hint'." : summary, result);
     }
 
