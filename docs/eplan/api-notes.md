@@ -186,6 +186,16 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A41. 提交后的撤销粒度、备份副作用、宏读句柄（spike S35 第 1 部分，2026-10-23，EPLAN 2026.0.3.25421，Electric P8，经 Host 的真实工具）
+详细数据见 [spike S35](../../spikes/S35-plan-step-undo/README.md#结果)。全部写入在 scratch 副本中。
+
+- **现有写工具每次调用提交后正好一个撤销步骤**：`XEsUndoAction` 按相反顺序依次撤销删页、页重编号、改设备标识、插入宏、改页描述、一次新建两页、新建一页，之前的撤销历史完整。Destructive 工具先做的备份不增加撤销步骤。没有改变（`not_started`）的设备重编号和被回滚的插入宏，都不留撤销步骤。
+- 🔴 **撤销只作用于 EPLAN 的当前项目**：当前项目没有可撤销的步骤时，弹出模态对话框"'撤销'冲突"（"最近一次修改未能撤销：无法执行'撤销'步骤，步骤不存在"），其他项目中的修改不被撤销；对话框关闭前，所有调用返回 `EPLAN_BUSY`（ModalDialog）。执行撤销前先核对当前项目。
+- 用 `XPrjActionProjectClose` 依次关闭当前项目，可以让剩下的项目成为当前项目（A11）。只剩一个项目时，用 `ProjectOpen` 打开另一个，它成为当前项目（只观察了一次）。
+- Destructive 工具的备份不改变当前项目和打开的项目，副本不在 EPLAN 中打开。约 325 页的项目上，一次 Destructive 调用（脚本审批、`CopyProject` Snapshot 加页数核对、写入）总共 1.5–2.9 秒。
+- 另一个进程以 `FileAccess.Read`、`FileShare.Read` 持有 `.ema` 时，`eplan_macro_insert` 照常提交（28 个对象，69–82 ms）；同时以写方式打开它失败（共享冲突，`0x80070020`）。
+- 每次 `XEsUndoAction` 经 Remote Client 约 2.3 秒；Remote Client 按计算机名连接失败，按 IPv4 可以连接。
+
 ### A40. 长尾 action 的首批白名单（spike S26，2026-10-22，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据与报告目录见 [spike S26 r1](../../spikes/S26-action-run/README.md#结果)。版本、变体由运行者提供；结果依据六模式最终 JSON，当前项目为 fixture，显式目标为 LargeWrite，均为已打开的 scratch 副本。
 
