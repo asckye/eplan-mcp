@@ -67,9 +67,9 @@
       },
       "denominator": 4014,
       "implemented": 219,
-      "byTools": 211,
+      "byTools": 212,
       "partial": 39,
-      "automatedTest": 211,
+      "automatedTest": 212,
       "liveVerified": 147,
       "envBlocked": 122,
       "undocumented": 134
@@ -103,9 +103,9 @@
       },
       "denominator": 2215,
       "implemented": 112,
-      "byTools": 111,
+      "byTools": 112,
       "partial": 0,
-      "automatedTest": 111,
+      "automatedTest": 112,
       "liveVerified": 79,
       "envBlocked": 77,
       "undocumented": 68
@@ -629,6 +629,30 @@
       "large": 1,
       "apiNotes": [
         "A24"
+      ]
+    },
+    {
+      "name": "eplan_context_get",
+      "safety": "read",
+      "operations": [
+        "project.snapshot"
+      ],
+      "apiIds": 97,
+      "operationGroups": 40,
+      "dataDictionary": 4,
+      "dependencies": 31,
+      "actions": 0,
+      "spec": "docs/tools/eplan_context_get.md",
+      "small": 2,
+      "medium": 4,
+      "large": 1,
+      "apiNotes": [
+        "A20",
+        "A33",
+        "A34",
+        "A35",
+        "A36",
+        "A39"
       ]
     },
     {
@@ -1984,7 +2008,8 @@
         "eplan_cable_get",
         "eplan_connection_generate",
         "eplan_connection_list",
-        "eplan_connection_number"
+        "eplan_connection_number",
+        "eplan_context_get"
       ]
     },
     {
@@ -1996,6 +2021,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
         "eplan_language_remove",
@@ -2019,6 +2045,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_language_remove",
         "eplan_page_create",
         "eplan_page_get",
@@ -2034,6 +2061,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_project_create",
         "eplan_revision_list"
       ]
@@ -2388,6 +2416,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_get",
@@ -2400,6 +2429,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_get",
@@ -2590,6 +2620,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_import_list",
         "eplan_part_list",
@@ -2620,6 +2651,7 @@
         "eplan_cable_get",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_plc_get",
         "eplan_terminal_strip_get"
       ]
@@ -2635,6 +2667,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_plc_get"
       ]
     },
@@ -2648,7 +2681,8 @@
         "eplan_cable_get",
         "eplan_connection_generate",
         "eplan_connection_list",
-        "eplan_connection_number"
+        "eplan_connection_number",
+        "eplan_context_get"
       ]
     },
     {
@@ -2661,6 +2695,7 @@
         "eplan_cable_get",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_plc_get",
         "eplan_terminal_strip_get"
       ]
@@ -2709,6 +2744,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_plc_get",
         "eplan_project_get"
       ]
@@ -2763,6 +2799,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_list",
         "eplan_device_place",
         "eplan_device_renumber",
@@ -2971,6 +3008,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_page_get",
@@ -2985,6 +3023,7 @@
       "tools": [
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3005,6 +3044,7 @@
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3037,6 +3077,7 @@
       "tools": [
         "eplan_cable_generate",
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
         "eplan_language_remove",
@@ -3060,9 +3101,11 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.FunctionBase.Location",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_context_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.FunctionBase.Name",
@@ -3077,6 +3120,7 @@
         "eplan_check_run",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3109,6 +3153,7 @@
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3375,6 +3420,7 @@
       "tools": [
         "eplan_cable_generate",
         "eplan_connection_generate",
+        "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
@@ -3404,6 +3450,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3440,6 +3487,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
@@ -3465,6 +3513,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_language_remove",
         "eplan_page_create",
         "eplan_page_get",
@@ -3574,6 +3623,7 @@
         "eplan_cable_renumber",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_plc_get",
         "eplan_terminal_strip_get"
@@ -3589,6 +3639,7 @@
         "eplan_cable_get",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_context_get",
         "eplan_plc_get",
         "eplan_terminal_strip_get"
       ]
@@ -3645,6 +3696,7 @@
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_renumber",
         "eplan_import_list",
         "eplan_import_plc",
@@ -3672,6 +3724,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3736,6 +3789,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3813,6 +3867,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3859,6 +3914,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_project_create",
         "eplan_project_get",
         "eplan_revision_list"
@@ -3899,6 +3955,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_project_create"
       ]
     },
@@ -3908,6 +3965,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_project_create"
       ]
     },
@@ -3926,6 +3984,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -3975,6 +4034,7 @@
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_renumber",
         "eplan_import_list",
         "eplan_import_plc",
@@ -4001,6 +4061,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -4130,6 +4191,7 @@
       "partial": false,
       "tools": [
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_page_get",
         "eplan_project_get"
@@ -4147,6 +4209,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
         "eplan_language_remove",
@@ -4172,6 +4235,7 @@
       "partial": false,
       "tools": [
         "eplan_cable_renumber",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_page_get",
         "eplan_project_get",
@@ -4225,6 +4289,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
         "eplan_language_remove",
@@ -4345,6 +4410,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_context_get",
         "eplan_import_list",
         "eplan_import_plc"
       ]
@@ -4360,6 +4426,7 @@
         "eplan_check_run",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -4767,6 +4834,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",

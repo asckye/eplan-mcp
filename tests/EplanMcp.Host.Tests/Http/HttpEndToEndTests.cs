@@ -13,6 +13,7 @@ using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Http;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Bridge;
+using EplanMcp.Host.Tests.Tools;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -36,7 +37,7 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
         Assert.Equal(0, await VmKey.RunAsync("create", _locations, TextWriter.Null, Token));
         _key = VmKey.Read(_locations);
         string pipe = "EplanMcpHttpTest." + Guid.NewGuid().ToString("N");
-        var router = new OperationRouter([new ProjectListOperation(new Catalog())], new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(2));
+        var router = new OperationRouter([new ProjectListOperation(new Catalog()), new ContextTestSnapshot()], new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(2));
         _bridge = new BridgeServer(pipe,
             name => new NamedPipeServerStream(name, PipeDirection.InOut, 4, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly),
             new BridgeServerOptions { BridgeVersion = "http-test", Eplan = new EplanInstanceInfo { ProcessId = Environment.ProcessId, Version = "2026.0.3" } },
@@ -66,6 +67,22 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
         {
             Directory.Delete(_locations.Root, recursive: true);
         }
+    }
+
+    [Theory]
+    [InlineData("2025-11-25")]
+    [InlineData("2026-07-28")]
+    public async Task ContextGet_ReadWorksOnStatelessHttp_WithBothJsonCopiesAndNoExecution(string protocol)
+    {
+        JsonNode response = await RpcAsync("tools/call", new JsonObject { ["name"] = "eplan_context_get", ["arguments"] = new JsonObject { ["scope"] = new JsonObject(), ["max_tokens"] = 20000 } }, protocol);
+        JsonNode call = response["result"]!;
+        Assert.False(call["isError"]?.GetValue<bool>() ?? false, response.ToJsonString());
+        JsonNode data = call["structuredContent"]!;
+        Assert.Equal("Line1", data["project"]!["name"]!.GetValue<string>());
+        Assert.Equal(4, data["objects"]!.AsArray().Count);
+        Assert.True(JsonNode.DeepEquals(data, JsonNode.Parse(call["content"]![1]!["text"]!.GetValue<string>())));
+        Assert.Null(data["execution"]);
+        Assert.False(Directory.Exists(_locations.Workspaces));
     }
 
     [Theory]
