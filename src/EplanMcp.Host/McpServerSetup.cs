@@ -28,6 +28,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(_ => HostDataLocations.FromEnvironment());
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<TaskRegistry>();
 
         // serve registers the configuration it loaded; tests get the defaults, never a developer's own file.
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
