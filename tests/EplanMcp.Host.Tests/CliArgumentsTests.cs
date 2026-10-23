@@ -142,6 +142,7 @@ public sealed class CliArgumentsTests
         Assert.Equal(
             "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
+            + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
             + Environment.NewLine
             + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
             + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"

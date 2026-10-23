@@ -36,6 +36,7 @@ public sealed partial class ModelTextTests
     private static readonly (string Type, string Reason)[] _allowedInLiterals =
     [
         ("EplanMcp.Host.Doctor.DoctorChecks", "doctor prints each check in Chinese and English for the engineer; the model never sees it."),
+        ("EplanMcp.Host.Doctor.VmDoctorChecks", "doctor reports VM service and firewall diagnostics in Chinese and English for the engineer; the model never sees it."),
         ("EplanMcp.Host.Audit.AuditCommand", "audit verify prints its result in Chinese or English for the engineer; the model never sees it."),
         ("EplanMcp.Host.Safety.ApprovalTexts", "the approval dialog in EPLAN shows its texts in Chinese or English for the engineer; the model never sees them."),
         ("EplanMcp.Host.ClientConfig.ClientConfigTexts", "client-config reports in Chinese and English for the engineer and the Workbench; the model never sees it."),

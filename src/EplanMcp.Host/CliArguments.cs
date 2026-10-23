@@ -16,6 +16,7 @@ internal enum CliCommand
     UninstallAddin,
     Pack,
     VmKey,
+    VmFirewall,
     Version,
 }
 
@@ -33,11 +34,13 @@ internal sealed record CliArguments(
     IReadOnlyList<string>? Variants = null,
     PackRequest? Pack = null,
     HttpArguments? Http = null,
-    string? KeyAction = null)
+    string? KeyAction = null,
+    VmFirewallRequest? Firewall = null)
 {
     public static string Usage { get; } =
         "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
+        + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
         + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
         + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
@@ -51,6 +54,7 @@ internal sealed record CliArguments(
         ["serve", "--profile", "core"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Core),
         ["serve", .. var options] when HttpArguments.Parse(options) is { } http => new(CliCommand.Serve, Json: false, Http: http),
         ["vm-key", var action] when action is "create" or "show" or "delete" => new(CliCommand.VmKey, Json: false, KeyAction: action),
+        ["vm-firewall", var action, .. var options] when VmFirewallRequest.Parse(action, options) is { } firewall => new(CliCommand.VmFirewall, Json: false, Firewall: firewall),
         ["--version"] => new(CliCommand.Version, Json: false),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),

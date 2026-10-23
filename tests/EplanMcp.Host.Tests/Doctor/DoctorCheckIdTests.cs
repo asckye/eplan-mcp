@@ -4,6 +4,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Http;
 using EplanMcp.Host.Tests.Tools;
 
 namespace EplanMcp.Host.Tests.Doctor;
@@ -30,6 +31,7 @@ public sealed class DoctorCheckIdTests : IDisposable
         DoctorCheck[] checks =
         [
             DoctorChecks.HostVersion(),
+            .. VmDoctorChecks.Read(() => [], _ => null, new FakeVmFirewall()),
             .. DataChecks(Missing()),
             .. DataChecks(Populated()),
             .. DataChecks(UnwritableAudit()),
