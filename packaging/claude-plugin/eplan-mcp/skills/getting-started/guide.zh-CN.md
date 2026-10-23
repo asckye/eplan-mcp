@@ -1,3 +1,5 @@
+[中文](zh-CN.md) | [English](en.md)
+
 # EplanMcp 中文入门指南
 
 本指南面向 v0.1.0 预览安装包，以 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 实际提供的文件为准。尚无安装包时，请等待发布；源码构建见仓库 README。下面的安装步骤描述安装包交付后的流程。
