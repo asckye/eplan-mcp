@@ -4225,6 +4225,11 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/EplanDialogChannelTests.cs"
           },
           {
+            "name": "PlanArgumentsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanArgumentsTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -5181,6 +5186,11 @@
             "name": "AgentTraceTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Agent/AgentTraceTests.cs"
+          },
+          {
+            "name": "PlanArgumentsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanArgumentsTests.cs"
           },
           {
             "name": "ToolContractTests",

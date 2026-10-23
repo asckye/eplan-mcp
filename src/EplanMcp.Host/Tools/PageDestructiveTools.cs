@@ -24,6 +24,28 @@ internal sealed class PageDestructiveTools
 
     private const string ReportHint = "Reports are not updated when pages are deleted; call eplan_report_update.";
 
+    internal static List<string> RenumberViolations(string? project, string[]? pages, int start, int step)
+    {
+        var violations = DeleteViolations(project, pages);
+        if (start < 1 || step < 1)
+        {
+            violations.Add("'start' and 'step' must be at least 1.");
+        }
+
+        return violations;
+    }
+
+    internal static List<string> DeleteViolations(string? project, string[]? pages)
+    {
+        var violations = ToolArguments.WriteProjectViolations(project);
+        if (pages is null or { Length: < 1 or > PageWriteTools.MaxPages })
+        {
+            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names.");
+        }
+
+        return violations;
+    }
+
     [McpServerTool(
         Name = RenumberTool,
         Title = "Renumber pages in an EPLAN project",
@@ -49,22 +71,7 @@ internal sealed class PageDestructiveTools
         [Description("Only return the plan")] bool dry_run = false,
         CancellationToken cancellationToken = default)
     {
-        var violations = new List<string>();
-        if (string.IsNullOrWhiteSpace(project))
-        {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
-        }
-
-        if (pages is null or { Length: < 1 or > PageWriteTools.MaxPages })
-        {
-            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names.");
-        }
-
-        if (start < 1 || step < 1)
-        {
-            violations.Add("'start' and 'step' must be at least 1.");
-        }
-
+        var violations = RenumberViolations(project, pages, start, step);
         if (violations.Count > 0)
         {
             return ToolResults.InvalidArguments(violations);
@@ -146,17 +153,7 @@ internal sealed class PageDestructiveTools
         [Description("Only return the plan")] bool dry_run = false,
         CancellationToken cancellationToken = default)
     {
-        var violations = new List<string>();
-        if (string.IsNullOrWhiteSpace(project))
-        {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
-        }
-
-        if (pages is null or { Length: < 1 or > PageWriteTools.MaxPages })
-        {
-            violations.Add($"'pages' must hold 1 to {PageWriteTools.MaxPages} full page names.");
-        }
-
+        var violations = DeleteViolations(project, pages);
         if (violations.Count > 0)
         {
             return ToolResults.InvalidArguments(violations);

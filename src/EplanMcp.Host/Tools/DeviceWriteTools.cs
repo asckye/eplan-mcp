@@ -43,9 +43,9 @@ internal sealed class DeviceWriteTools
         CancellationToken cancellationToken = default)
     {
         // The tags are checked by the Bridge, all at once (device.update.plan).
-        if (string.IsNullOrWhiteSpace(project))
+        if (ToolArguments.WriteProjectViolations(project) is { Count: > 0 } violations)
         {
-            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+            return ToolResults.InvalidArguments(violations);
         }
 
         var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty };

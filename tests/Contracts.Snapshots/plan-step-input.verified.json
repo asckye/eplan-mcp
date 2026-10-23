@@ -1,0 +1,478 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "page.create"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "pages": {
+                    "description": "1-50, created in order",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "description": "Full page name",
+                          "type": "string"
+                        },
+                        "page_type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "Circuit",
+                            "CircuitSingleLine",
+                            "Overview",
+                            "Graphics"
+                          ]
+                        },
+                        "description": {
+                          "description": "Max 500 chars",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  },
+                  "language": {
+                    "description": "e.g. zh_CN; default: EPLAN UI",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "pages"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "page.update"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "pages": {
+                    "description": "1-50 pages",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "oneOf": [
+                            {
+                              "description": "Full page name",
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "from_step": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "page": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "from_step",
+                                "page"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "description": {
+                          "description": "New text, max 500 chars; empty clears it",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "description"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  },
+                  "language": {
+                    "description": "The one language to change; default: EPLAN UI",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "pages"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "device.update"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "tag": {
+                    "description": "Current tag, full or as shown, e.g. -KF1",
+                    "type": "string"
+                  },
+                  "new_tag": {
+                    "description": "Full new tag, or from '-' to keep the structure",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tag",
+                  "new_tag"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "macro.insert"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "oneOf": [
+                      {
+                        "description": "Full circuit page name",
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "from_step": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "page": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "from_step",
+                          "page"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "macro": {
+                    "description": "Path from eplan_macro_list",
+                    "type": "string"
+                  },
+                  "x": {
+                    "description": "mm",
+                    "type": "number"
+                  },
+                  "y": {
+                    "description": "mm",
+                    "type": "number"
+                  },
+                  "variant": {
+                    "description": "From eplan_macro_get",
+                    "type": "integer",
+                    "default": 0,
+                    "const": 0
+                  },
+                  "numbering": {
+                    "description": "keep: the macro's tags",
+                    "type": "string",
+                    "default": "keep",
+                    "enum": [
+                      "number",
+                      "keep"
+                    ],
+                    "const": "keep"
+                  }
+                },
+                "required": [
+                  "page",
+                  "macro",
+                  "x",
+                  "y"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "page.delete"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "pages": {
+                    "description": "1-50 exact full names",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  }
+                },
+                "required": [
+                  "pages"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "page.renumber"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "pages": {
+                    "description": "1-50 exact full names",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  },
+                  "start": {
+                    "description": "First page number",
+                    "type": "integer"
+                  },
+                  "step": {
+                    "type": "integer",
+                    "default": 1
+                  },
+                  "keep_text": {
+                    "description": "Keep letters in numbers",
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "subpages": {
+                    "type": "string",
+                    "default": "retain",
+                    "enum": [
+                      "retain",
+                      "consecutive",
+                      "to_main"
+                    ]
+                  }
+                },
+                "required": [
+                  "pages",
+                  "start"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "device.renumber"
+              },
+              "args": {
+                "type": "object",
+                "properties": {
+                  "pages": {
+                    "description": "1-50 exact full names; default: whole project",
+                    "type": "array",
+                    "items": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  },
+                  "only_unnumbered": {
+                    "description": "false: renumber every tag",
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "scheme": {
+                    "description": "Default: EPLAN's",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null
+                  },
+                  "start": {
+                    "type": "integer",
+                    "default": 1
+                  },
+                  "step": {
+                    "type": "integer",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "pages"
+                ],
+                "additionalProperties": false
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "uniqueItems": true,
+                "default": []
+              }
+            },
+            "required": [
+              "op",
+              "args"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "project",
+    "steps"
+  ],
+  "additionalProperties": false
+}
