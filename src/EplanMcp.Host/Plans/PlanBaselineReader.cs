@@ -5,7 +5,7 @@ using EplanMcp.Host.Bridge;
 namespace EplanMcp.Host.Plans;
 
 /// <summary>
-/// Reads resolved page scopes and the project-wide names visible to standard snapshots twice. No cache or retry: this screens
+/// Reads resolved page scopes and project-wide names (including unplaced functions) twice. No cache or retry: this screens
 /// stability, not atomicity (S31). Scope resolution/impact closure belongs to the compiler, not this reader.
 /// </summary>
 internal sealed class PlanBaselineReader(IBridgeClient bridge)
@@ -45,7 +45,7 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
             return null;
         }
 
-        // Standard snapshots are the existing complete source of names; a local page set cannot prove absence elsewhere.
+        // Page placements also include extra representations; neither a local scope nor standard alone proves absence.
         PlanSnapshot? names = pages is null ? scope
             : await AssembleAsync(project, null, conflicts, cancellationToken).ConfigureAwait(false);
         if (names is null)
@@ -53,9 +53,25 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
             return null;
         }
 
-        ImmutableArray<PlanOccupiedName> occupied = [.. names.Pages.SelectMany(p => p.Objects)
+        var occupiedNames = names.Pages.SelectMany(p => p.Objects)
             .Where(o => o.Kind is "page" or "function" && o.Name is not null)
-            .Select(o => new PlanOccupiedName(o.Kind, o.Name!)).Distinct()
+            .Select(o => new PlanOccupiedName(o.Kind, o.Name!)).ToList();
+        int offset = 0;
+        int? total = null;
+        do
+        {
+            ListData<DeviceListItem> part = await bridge.InvokeAsync<DeviceListArgs, ListData<DeviceListItem>>(OperationNames.DeviceList,
+                new() { Project = project.Path, IncludeAuxiliary = true, Offset = offset, Limit = 500 }, cancellationToken).ConfigureAwait(false);
+            Check("names:project", project.Name, part.Project, conflicts);
+            Check("names:total", total ?? part.Total, part.Total, conflicts);
+            Check("names:slice", Math.Min(500, part.Total - offset), part.Items.Count, conflicts);
+            if (part.Total < 0 || conflicts.Count > 0)
+            { return null; }
+            occupiedNames.AddRange(part.Items.Select(f => new PlanOccupiedName("function", f.Tag)));
+            total = part.Total;
+            offset += part.Items.Count;
+        } while (offset < total);
+        ImmutableArray<PlanOccupiedName> occupied = [.. occupiedNames.Distinct()
             .OrderBy(n => n.Kind, StringComparer.Ordinal).ThenBy(n => n.Name, StringComparer.Ordinal)];
         return new(scope, occupied, PlanSnapshotHashes.Names(project.Path, occupied));
     }

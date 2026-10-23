@@ -19,6 +19,49 @@ public sealed class PlanBaselineReaderTests
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task Names_IncludeUnplacedFunctionsAndSuffixes_FromEveryListPageOnBothReads()
+    {
+        await using var fake = new FakeSnapshotBridge((_, _) => Data(Pages()));
+        fake.NameAnswer = (args, _) => new()
+        {
+            Project = _project.Name,
+            Total = 501,
+            Items = [.. Enumerable.Range(args.Offset, Math.Min(500, 501 - args.Offset))
+                .Select(i => new DeviceListItem { Tag = "+A1-K" + i + ":1", Page = null })],
+        };
+        PlanBaseline baseline = Assert.IsType<PlanBaseline>((await fake.Reader.ReadAsync(_project, null, Token)).Baseline);
+        Assert.Equal([0, 500, 0, 500], fake.NameCalls.Select(a => a.Offset));
+        Assert.All(fake.NameCalls, a => { Assert.True(a.IncludeAuxiliary); Assert.Null(a.Page); Assert.Equal(_project.Path, a.Project); });
+        Assert.Contains(new PlanOccupiedName("function", "+A1-K500:1"), baseline.Names);
+        Assert.Throws<ArgumentException>(() => PlanPreconditions.Build(baseline, PlanScopeRules.Whole(baseline.Snapshot), [new("function", "+A1-K500")]));
+    }
+
+    [Fact]
+    public async Task Names_UnplacedFunctionAddedBetweenReads_IsStale()
+    {
+        await using var fake = new FakeSnapshotBridge((_, _) => Data(Pages()));
+        fake.NameAnswer = (_, call) => new()
+        {
+            Project = _project.Name,
+            Total = 1,
+            Items = [new() { Tag = call == 1 ? "+A1-K1" : "+A1-K2", Page = null }]
+        };
+        PlanBaselineRead result = await fake.Reader.ReadAsync(_project, null, Token);
+        Assert.Equal(ErrorReason.PlanStale, result.Reason);
+        Assert.Equal("names", Assert.Single(result.Conflicts).Scope);
+    }
+
+    [Fact]
+    public async Task Names_TruncatedList_DoesNotProveAbsence()
+    {
+        await using var fake = new FakeSnapshotBridge((_, _) => Data(Pages()));
+        fake.NameAnswer = (_, _) => new() { Project = _project.Name, Total = 1 };
+        PlanBaselineRead result = await fake.Reader.ReadAsync(_project, null, Token);
+        Assert.Null(result.Baseline);
+        Assert.Equal("names:slice", Assert.Single(result.Conflicts).Scope);
+    }
+
+    [Fact]
     public async Task WholeProject_StableDoubleRead_ReturnsCoverageHashesAndNoRuntimeIdentifiers()
     {
         await using var fake = new FakeSnapshotBridge((_, _) => Data(Pages()));
@@ -337,6 +380,8 @@ public sealed class PlanBaselineReaderTests
         private readonly BridgeClient _client;
         public List<ProjectSnapshotArgs> Calls { get; } = [];
         public PlanBaselineReader Reader { get; }
+        public Func<DeviceListArgs, int, ListData<DeviceListItem>> NameAnswer { get; set; } = (_, _) => new() { Project = _project.Name };
+        public List<DeviceListArgs> NameCalls { get; } = [];
 
         public FakeSnapshotBridge(Func<ProjectSnapshotArgs, int, ProjectSnapshotData> answer)
         {
@@ -347,6 +392,12 @@ public sealed class PlanBaselineReaderTests
             var connector = new FakeConnector(e => new FakeChannel(e, (method, envelope, _) =>
             {
                 Assert.Equal(BridgeProtocol.InvokeMethod, method);
+                if (envelope!["operation"]!.GetValue<string>() == OperationNames.DeviceList)
+                {
+                    var namesArgs = System.Text.Json.JsonSerializer.Deserialize<DeviceListArgs>(envelope["args"]!.ToJsonString(), HostJson.Options)!;
+                    NameCalls.Add(namesArgs);
+                    return Task.FromResult(JsonNode.Parse(new JObject { ["data"] = JToken.FromObject(NameAnswer(namesArgs, NameCalls.Count)) }.ToString()));
+                }
                 Assert.Equal(OperationNames.ProjectSnapshot, envelope!["operation"]!.GetValue<string>());
                 object args = operation.ParseArgs(JToken.Parse(envelope["args"]!.ToJsonString()));
                 try
@@ -361,7 +412,7 @@ public sealed class PlanBaselineReaderTests
                 }
             })
             {
-                Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(e.ProcessId, operations: [OperationNames.ProjectSnapshot])),
+                Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(e.ProcessId, operations: [OperationNames.ProjectSnapshot, OperationNames.DeviceList])),
             });
             _client = new BridgeClient(discovery, connector, NullLogger<BridgeClient>.Instance);
             Reader = new(_client);

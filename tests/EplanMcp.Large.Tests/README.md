@@ -17,6 +17,7 @@
 ```powershell
 dotnet test --project tests\EplanMcp.Large.Tests
 dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.WriteSafetyTests"   # 只跑 Q1、Q2、Q6
+dotnet test --project tests\EplanMcp.Large.Tests -c Release --no-build -- --filter-class "EplanMcp.Large.Tests.PlanFunctionsTests" --filter-class "EplanMcp.Large.Tests.PlanImpactTests"   # 只读 plan.functions 和 P06 闭包
 dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.PageDeleteTests" --filter-class "EplanMcp.Large.Tests.DeviceRenumberTests" --filter-class "EplanMcp.Large.Tests.PageRenumberTests" --filter-class "EplanMcp.Large.Tests.TerminalRenumberTests" --filter-class "EplanMcp.Large.Tests.CableRenumberTests" --filter-class "EplanMcp.Large.Tests.ConnectionNumberTests" --filter-class "EplanMcp.Large.Tests.ProjectTranslateTests"   # 只跑 Destructive 工具
 ```
 - 测试一个接一个运行。只读测试共用同一个 `eplanmcp`，它就是本项目构建出的那个（随项目引用复制到测试旁边）。
@@ -34,6 +35,8 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 `ImportListTests` 使用 `DestructiveHost` 的 `LargeWrite` 副本：部件清单先经 `eplan_export_parts` 导出，再复制到 imports 回导，核对引用数 +2、备份、300 秒预算和约 5 秒心跳；会永久改变写副本。设备清单用 `fixtures\` 中 S34 导出的两条条目（`XDLXmlExporter` 的 XML 和 CSV），写副本原本没有条目，导入后应恰为 2 条。完整事务下的故障注入回滚、提交后 Ctrl+Z、精确引用字段和系统部件库业务文件不变仍需实机补验。
 | 测试类 | 内容 |
 |---|---|
+| `PlanFunctionsTests` | 只读 `fixtures\EPLAN_Sample_Project`（或离线宿主的夹具副本），分页读取全部 device.list（含辅助功能）并结合完整快照发现全部名称，再以每批最多 200 个名称读 plan.functions：动态寻找无页功能、同名跨页主功能、超过 50 个同名辅助功能，核对完整性、持久标识、排序及与快照/列表的一致性；只有完整扫描确实没有相应对象时才跳过，并说明缺少哪类对象，能力缺失或 complete=false 必须失败，选中对象的名称、页、type/oid 写入测试输出；尚未实跑 |
+| `PlanImpactTests` | 只读 P06 闭包，不调用改名/删页的 plan 或 execute：A13 优先选择 `=F+A2-KF1`，否则动态找完全放置的跨页设备，逐项核对 read/modify scope 和对象哈希；A18 优先找 `+A1-WE1` 主功能页，否则找会留下 orphan 的页，核对全部剩余功能及修改范围，再用只读取得的局部基准验证缺页证据会 CAPABILITY_MISSING；独立测试查找同名无页功能关联的页，核对拒绝及含无页功能的 orphan 诊断，无合适样本时明确跳过；尚未实跑 |
 | `ProjectAndPageTests` | 页数、设备数、连接数、部件引用数和各类页的数量；detailed 属性的名称和索引；按类型、名称前缀筛选页；读取页描述的耗时；页上的设备；不存在的页 |
 | `DeviceAndConnectionTests` | 设备总数，同一页上的设备不重复；短标识 `-FC1` 的 14 个候选；断路器 `=GAA+A1-FC1` 的部件、连接点，以及负载侧接到哪些设备；不存在的设备 |
 | `PartAndMessageTests` | 部件总数和各制造商的部件数；按语言读部件描述，以及省略 `language` 时的回退；系统消息和检查结果；选择 EPLAN 实例 |
