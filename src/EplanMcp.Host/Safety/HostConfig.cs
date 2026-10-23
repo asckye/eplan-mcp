@@ -5,6 +5,9 @@ using EplanMcp.Packs;
 
 namespace EplanMcp.Host.Safety;
 
+/// <summary>The explicitly enabled long-tail action surface (ADR-0021); only config.json changes it.</summary>
+internal enum ActionRunSwitch { Off, On }
+
 /// <summary>What writes to projects outside every scratch root need.</summary>
 internal enum OutsideScratchWrites
 {
@@ -53,6 +56,8 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     /// <summary>What writes to system master data need: <c>masterDataWrites</c> (ADR-0019).</summary>
     public MasterDataWrites MasterDataWrites { get; init; } = MasterDataWrites.Approve;
+
+    public ActionRunSwitch ActionRun { get; init; } = ActionRunSwitch.Off;
 
     /// <summary>
     /// The roots engineering packs may reference in place, by name: <c>packSources</c> (ADR-0024 section 6); empty by
@@ -125,6 +130,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         {
             ApprovalTimeout = timeout,
             MasterDataWrites = file?.MasterDataWrites ?? defaults.MasterDataWrites,
+            ActionRun = file?.ActionRun ?? defaults.ActionRun,
             PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
             HttpAllowedOrigins = file?.HttpAllowedOrigins ?? [],
         }, null);
@@ -143,6 +149,8 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         public int? ApprovalTimeoutSeconds { get; set; }
 
         public MasterDataWrites? MasterDataWrites { get; set; }
+
+        public ActionRunSwitch? ActionRun { get; set; }
 
         public Dictionary<string, string>? PackSources { get; set; }
     }
