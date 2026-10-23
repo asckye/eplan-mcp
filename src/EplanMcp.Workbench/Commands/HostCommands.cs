@@ -41,6 +41,15 @@ internal sealed class HostCommands(IHostRunner? runner)
     public Task<DoctorReport> DoctorAsync(CancellationToken cancellationToken) =>
         RunAsync<DoctorReport>(["doctor", "--format", "json"], DoctorTimeout, cancellationToken);
 
+    public Task<AddinVariants> VariantsAsync(CancellationToken cancellationToken) =>
+        RunAsync<AddinVariants>(["addin-variants", "--format", "json"], ClientConfigTimeout, cancellationToken);
+
+    public Task<AddinReport> RegisterAsync(IReadOnlyList<string> variants, bool uninstall, CancellationToken cancellationToken) =>
+        RunAsync<AddinReport>([uninstall ? "uninstall-addin" : "install-addin", .. uninstall ? [] : variants.SelectMany(v => new[] { "--variant", v }), "--format", "json"], TimeSpan.FromMinutes(30), cancellationToken);
+
+    public Task<ClientConfigReport> GeneratePluginAsync(bool preview, CancellationToken cancellationToken) =>
+        RunAsync<ClientConfigReport>(["client-config", "claude-code", "--plugin", .. preview ? ["--dry-run"] : Array.Empty<string>(), "--format", "json"], ClientConfigWriteTimeout, cancellationToken);
+
     public Task<AuditVerifyReport> VerifyAuditAsync(CancellationToken cancellationToken) =>
         RunAsync<AuditVerifyReport>(["audit", "verify", "--format", "json"], AuditTimeout, cancellationToken);
 
@@ -152,6 +161,8 @@ internal sealed class HostCommands(IHostRunner? runner)
                 new StrictEnumConverter<ClientConfigMode>(),
                 new StrictEnumConverter<ClientAction>(),
                 new StrictEnumConverter<ClientResultKind>(),
+                new StrictEnumConverter<AddinAction>(),
+                new StrictEnumConverter<AddinResultKind>(),
             },
         };
         options.MakeReadOnly(populateMissingResolver: true);

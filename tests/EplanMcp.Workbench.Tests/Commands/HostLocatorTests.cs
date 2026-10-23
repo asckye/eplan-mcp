@@ -13,26 +13,28 @@ public sealed class HostLocatorTests : IDisposable
 
     public void Dispose() => _root.Delete(recursive: true);
 
-    [Fact]
-    public void Installed_TheHostIsInTheAppFolderAboveTheWorkbench()
+    [Theory]
+    [InlineData("app")]
+    [InlineData("EplanMcp-0.1.0")]
+    [InlineData("Portable folder with spaces")]
+    public void Installed_TheHostIsAboveTheWorkbenchWhateverTheProgramFolderIsNamed(string folder)
     {
-        string workbench = Folder("app", "workbench");
-        string host = Touch("app", "eplanmcp.exe");
+        string workbench = Folder(folder, "workbench");
+        string host = Touch(folder, "eplanmcp.exe");
 
-        Assert.Equal(host, HostLocator.Find(workbench));
-        Assert.Equal(host, HostLocator.Find(workbench + Path.DirectorySeparatorChar));
+        Assert.Equal(host, ProgramLocation.FindHost(workbench));
+        Assert.Equal(host, ProgramLocation.FindHost(workbench + Path.DirectorySeparatorChar));
     }
 
     [Theory]
-    [InlineData("other", "workbench")]
     [InlineData("app", "bin")]
     public void AFolderOnlyPlacedLikeTheInstalledOne_FindsNoHost(string app, string workbench)
     {
         string folder = Folder(app, workbench);
         Touch(app, "eplanmcp.exe");
 
-        Assert.Null(HostLocator.Installed(folder));
-        Assert.Null(HostLocator.Find(folder));
+        Assert.Null(ProgramLocation.HostBesideWorkbench(folder));
+        Assert.Null(ProgramLocation.FindHost(folder));
     }
 
     [Fact]
@@ -40,7 +42,7 @@ public sealed class HostLocatorTests : IDisposable
     {
         string host = Touch("App", "eplanmcp.exe");
 
-        Assert.Equal(host, HostLocator.Find(Folder("App", "Workbench")));
+        Assert.Equal(host, ProgramLocation.FindHost(Folder("App", "Workbench")));
     }
 
     [Theory]
@@ -50,11 +52,11 @@ public sealed class HostLocatorTests : IDisposable
     {
         string workbench = Folder("repo", "src", "EplanMcp.Workbench", "bin", configuration, "net10.0-windows");
         Touch("repo", "src", "EplanMcp.Host", "bin", configuration == "Debug" ? "Release" : "Debug", "net10.0", "eplanmcp.exe");
-        Assert.Null(HostLocator.Find(workbench));
+        Assert.Null(ProgramLocation.FindHost(workbench));
 
         string host = Touch("repo", "src", "EplanMcp.Host", "bin", configuration, "net10.0", "eplanmcp.exe");
 
-        Assert.Equal(host, HostLocator.Find(workbench));
+        Assert.Equal(host, ProgramLocation.FindHost(workbench));
     }
 
     [Fact]
@@ -65,9 +67,9 @@ public sealed class HostLocatorTests : IDisposable
         Touch("repo", "src", "EplanMcp.Host", "bin", "Debug", "net10.0", "eplanmcp.exe");
         string loose = Folder("loose");
 
-        Assert.Null(HostLocator.Find(tests));
-        Assert.Null(HostLocator.Find(loose));
-        Assert.Null(HostLocator.Built(loose));
+        Assert.Null(ProgramLocation.FindHost(tests));
+        Assert.Null(ProgramLocation.FindHost(loose));
+        Assert.Null(ProgramLocation.HostBesideWorkbench(loose));
     }
 
     [Fact]
@@ -79,7 +81,7 @@ public sealed class HostLocatorTests : IDisposable
         string repository = output.Parent.Parent!.Parent!.Parent!.Parent!.FullName;
         string workbench = Path.Combine(repository, "src", "EplanMcp.Workbench", "bin", configuration, "net10.0-windows");
 
-        Assert.Equal(Path.Combine(repository, "src", "EplanMcp.Host", "bin", configuration, "net10.0", "eplanmcp.exe"), HostLocator.Find(workbench));
+        Assert.Equal(Path.Combine(repository, "src", "EplanMcp.Host", "bin", configuration, "net10.0", "eplanmcp.exe"), ProgramLocation.FindHost(workbench));
     }
 
     private string Folder(params string[] parts) => Directory.CreateDirectory(Path.Combine([_root.FullName, .. parts])).FullName;

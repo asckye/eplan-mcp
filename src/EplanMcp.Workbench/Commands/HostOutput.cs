@@ -16,6 +16,28 @@ internal enum CheckStatus
 /// <summary>A text of the Host's in both languages, with a stable code (problems and notes).</summary>
 internal sealed record HostText(string Code, string Zh, string En);
 
+internal sealed record AddinVariants(int SchemaVersion, IReadOnlyList<string> Variants);
+
+internal enum AddinAction
+{
+    Install,
+    Uninstall,
+}
+
+internal enum AddinResultKind
+{
+    Registered,
+    Unregistered,
+    NotConfirmed,
+    Failed,
+    Refused,
+    Skipped,
+}
+
+internal sealed record AddinReport(int SchemaVersion, AddinAction Action, string? Dll, HostText? Problem, IReadOnlyList<AddinResult> Results);
+
+internal sealed record AddinResult(string Eplan, string Version, string? Variant, AddinResultKind Result, int? ProcessId, IReadOnlyList<HostText> Notes, HostText? Problem);
+
 /// <summary><c>eplanmcp doctor --format json</c>.</summary>
 internal sealed record DoctorReport(int SchemaVersion, string HostVersion, CheckStatus Status, IReadOnlyList<DoctorCheck> Checks);
 

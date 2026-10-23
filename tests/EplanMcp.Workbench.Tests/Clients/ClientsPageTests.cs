@@ -44,7 +44,8 @@ public sealed class ClientsPageTests(WpfContext wpf) : IDisposable
             Assert.True(boxes[0].IsEnabled); // Claude Code with its plugin: no entry is written, but an old one can be removed
             Assert.Equal("已装插件", AutomationProperties.GetHelpText(boxes[0]));
             var command = (TextBox)page.FindName("MarketplaceCommand");
-            Assert.Equal(("claude plugin marketplace add ~/EplanMcp/app/claude-plugin", true), (command.Text, command.IsReadOnly));
+            Assert.Equal((string.Empty, true, Visibility.Collapsed), (command.Text, command.IsReadOnly, command.Visibility));
+            Assert.True(((Button)page.FindName("GeneratePluginButton")).IsEnabled);
             Assert.Single(_host.Runs);
         }));
     }
@@ -173,6 +174,44 @@ public sealed class ClientsPageTests(WpfContext wpf) : IDisposable
             Assert.Equal(("+ line", true, 548.0), (details.Text, details.IsReadOnly, dialog.Width));
             Assert.True(((Button)dialog.FindName("SafeButton")).IsDefault);
             dialog.Close();
+        }));
+    }
+
+    [Theory]
+    [InlineData(AppLanguage.Chinese)]
+    [InlineData(AppLanguage.English)]
+    public void GeneratingTheMarketplace_PreviewsAndConfirmsBeforeShowingExactCommands(AppLanguage language)
+    {
+        string file = Path.Combine(_profile.FullName, "Separate data", "claude-plugin", "eplan-mcp", ".mcp.json");
+        _host.Answer = args =>
+        {
+            HostRun run = Answer()(args);
+            if (!args.Contains("--plugin"))
+            {
+                return run;
+            }
+
+            JsonNode report = JsonNode.Parse(run.Output)!;
+            report["clients"]![0]!["file"] = file;
+            return run with { Output = report.ToJsonString() };
+        };
+        wpf.RunWithLanguage(language, () => WithPage((window, page) =>
+        {
+            window.Navigate(WorkbenchPage.Clients, NavigationOrigin.Menu);
+            WpfContext.Drain();
+            var button = (Button)page.FindName("GeneratePluginButton");
+            Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)) && button.Content is null);
+            _confirm = false;
+            Click(button);
+            Assert.Contains("--dry-run", _host.Runs[^1].Arguments);
+            Assert.Equal(Visibility.Collapsed, ((TextBox)page.FindName("MarketplaceCommand")).Visibility);
+            _confirm = true;
+            Click(button);
+
+            Assert.Equal(["client-config", "claude-code", "--plugin", "--format", "json"], _host.Runs[^1].Arguments);
+            Assert.Equal("claude plugin marketplace add '" + Path.Combine(_profile.FullName, "Separate data", "claude-plugin") + "'", ((TextBox)page.FindName("MarketplaceCommand")).Text);
+            Assert.Equal("claude plugin install eplan-mcp@eplanmcp-local", ((TextBox)page.FindName("InstallCommand")).Text);
+            Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting((TextBlock)page.FindName("StatusText")));
         }));
     }
 

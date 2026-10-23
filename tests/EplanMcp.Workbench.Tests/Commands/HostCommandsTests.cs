@@ -17,7 +17,7 @@ public sealed class HostCommandsTests
     public static TheoryData<string, string> AllExamples()
     {
         var data = new TheoryData<string, string>();
-        foreach (string name in new[] { "audit-verify-json", "client-config-json" })
+        foreach (string name in new[] { "audit-verify-json", "client-config-json", "addin-json" })
         {
             foreach (string example in Snapshots.Examples(name))
             {
@@ -47,7 +47,12 @@ public sealed class HostCommandsTests
     {
         string json = Snapshots.Example(name, example);
 
-        object report = name == "audit-verify-json" ? HostCommands.Parse<AuditVerifyReport>(json) : HostCommands.Parse<ClientConfigReport>(json);
+        object report = name switch
+        {
+            "audit-verify-json" => HostCommands.Parse<AuditVerifyReport>(json),
+            "addin-json" => HostCommands.Parse<AddinReport>(json),
+            _ => HostCommands.Parse<ClientConfigReport>(json),
+        };
 
         Assert.NotNull(report);
     }

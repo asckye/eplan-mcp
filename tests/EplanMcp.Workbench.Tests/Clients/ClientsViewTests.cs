@@ -187,6 +187,39 @@ public sealed class ClientsViewTests(WpfContext wpf) : IDisposable
         Assert.Equal(11, ClientsView.Names.Length);
     }
 
+    [Fact]
+    public async Task PluginCommands_QuoteTheActualMarketPath_AndDisappearWhenRegenerationFails()
+    {
+        string market = Path.Combine(_profile.FullName, "Engineer's $data", "claude-plugin");
+        string file = Path.Combine(market, "eplan-mcp", ".mcp.json");
+        _host.Answer = _ => new(0, Report("write", Client("claude-code", file, "written")));
+        ClientsView view = View();
+
+        await view.GeneratePluginAsync(false, Token);
+
+        Assert.Equal("claude plugin marketplace add '" + market.Replace("'", "''", StringComparison.Ordinal) + "'", view.PluginCommands[0]);
+        _host.Answer = _ => new(1, Report("write", Client("claude-code", file, "failed", problem: "client_configured")));
+        await view.GeneratePluginAsync(false, Token);
+        Assert.Equal(ClientsState.Failed, view.State);
+        Assert.NotNull(view.Error);
+        Assert.All(view.PluginCommands, command => Assert.Empty(command));
+    }
+
+    [Theory]
+    [InlineData("relative/eplan-mcp/.mcp.json")]
+    [InlineData("D:\\data\\\u202Eclaude-plugin\\eplan-mcp\\.mcp.json")]
+    public async Task AnInvalidMarketplacePath_IsNotShownAsACopyableCommand(string file)
+    {
+        _host.Answer = _ => new(0, Report("write", Client("claude-code", file, "written")));
+        ClientsView view = View();
+
+        await view.GeneratePluginAsync(false, Token);
+
+        Assert.Equal(ClientsState.Failed, view.State);
+        Assert.All(view.PluginCommands, command => Assert.Empty(command));
+        Assert.DoesNotContain('\u202E', view.PluginDiff);
+    }
+
     private ClientsView View() => new(new HostCommands(_host), _profile.FullName);
 
     /// <summary>Where each client's file is for the tests: Claude Code's in the profile itself, the others in a folder of their own.</summary>

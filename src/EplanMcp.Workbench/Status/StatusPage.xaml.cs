@@ -67,7 +67,7 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         }
 
         bool running = view.State == StatusState.Running;
-        string caption = !view.CanRun ? loc["Host.Missing"] : running ? loc["Status.Running"] : view.Summary ?? string.Empty;
+        string caption = !view.CanRun ? loc["Host.Missing"] : running ? loc[view.Activity] : view.Summary ?? string.Empty;
         if (Caption.Text != caption)
         {
             Caption.Text = caption;
@@ -77,6 +77,17 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         // NAV-05: without a Host the page says why and Refresh stays off.
         RefreshButton.IsEnabled = view.CanRun && !running;
         AutomationProperties.SetHelpText(RefreshButton, view.CanRun ? string.Empty : loc["Host.Missing"]);
+        Variants.ItemsSource = view.Variants;
+        Variants.IsEnabled = view.CanRun && !running;
+        VariantHint.Text = !view.CanRun ? loc["Host.Missing"] : running ? loc[view.Activity] : loc[view.Variants.Count == 0 ? "Addin.NoVariants" : "Addin.Choose"];
+        foreach (Button button in new[] { RegisterButton, UnregisterButton })
+        {
+            bool chosen = button == UnregisterButton || view.Variants.Any(v => v.IsSelected);
+            button.IsEnabled = view.CanRun && !running && chosen;
+            string help = !view.CanRun ? loc["Host.Missing"] : running ? loc[view.Activity] : !chosen ? loc["Addin.Choose"] : loc["Addin.Help"];
+            AutomationProperties.SetHelpText(button, help);
+            button.ToolTip = help;
+        }
         Working.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
         ErrorBanner.Visibility = view.Error is null ? Visibility.Collapsed : Visibility.Visible;
         ErrorText.Text = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
@@ -88,4 +99,10 @@ public partial class StatusPage : UserControl, IWorkbenchPage
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnVariantChanged(object sender, RoutedEventArgs e) => Dispatcher.BeginInvoke(Show);
+
+    private void OnRegister(object sender, RoutedEventArgs e) => _ = _view?.RegisterAsync(false, CancellationToken.None);
+
+    private void OnUnregister(object sender, RoutedEventArgs e) => _ = _view?.RegisterAsync(true, CancellationToken.None);
 }

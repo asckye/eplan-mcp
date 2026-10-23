@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Localization;
@@ -37,6 +38,15 @@ internal sealed record StatusGroup(string Key, IReadOnlyList<StatusLine> Lines)
     public string Title => Loc.Current[Key];
 }
 
+internal sealed class VariantChoice(string name)
+{
+    public string Name { get; } = name;
+
+    public string Text => ProjectText.Line(Name);
+
+    public bool IsSelected { get; set; }
+}
+
 /// <summary>
 /// The status page without its window (M5 design 4.4 item 4, workbench-ui section 7): <c>eplanmcp doctor</c>, run when
 /// the page opens and on "Refresh", never polled, its checks grouped by their stable IDs (architecture 5.2); write
@@ -62,6 +72,11 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
 
     private DoctorReport? _report;
     private HostCommandException? _error;
+    private AddinReport? _addins;
+
+    public IReadOnlyList<VariantChoice> Variants { get; private set; } = [];
+
+    public string Activity { get; private set; } = "Status.Running";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -75,7 +90,7 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
     public string? ErrorDetails => _error is { } error ? HostErrors.Details(error) : null;
 
     /// <summary>The worst status of all, in words: the page's caption.</summary>
-    public string? Summary => _report is { } report ? Loc.Current.T("Status.Summary", ProjectText.Line(report.HostVersion), Loc.Current["Status.Overall." + report.Status]) : null;
+    public string? Summary => _addins is not null ? Loc.Current["Addin.Done"] : _report is { } report ? Loc.Current.T("Status.Summary", ProjectText.Line(report.HostVersion), Loc.Current["Status.Overall." + report.Status]) : null;
 
     /// <summary>The write suspensions doctor found, for the Banner: writes wait for the engineer's confirmation (ADR-0010).</summary>
     public IReadOnlyList<StatusLine> Suspensions => Lines("suspension").Where(l => l.Status is CheckStatus.Warning or CheckStatus.Failure).ToList();
@@ -84,15 +99,15 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
     {
         get
         {
-            if (_report is null)
+            if (_report is null && _addins is null)
             {
                 return [];
             }
 
             string[] known = [.. Layout.SelectMany(g => g.Ids)];
             IEnumerable<StatusGroup> groups = Layout.Select(g => new StatusGroup(g.Key, g.Key == "Status.Group.Approvals" ? [NextApproval()] : [.. g.Ids.SelectMany(Lines)]));
-            StatusLine[] other = [.. _report.Checks.Where(c => !known.Contains(c.Id)).Select(Line)];
-            return [.. groups.Append(new StatusGroup("Status.Group.Other", other)).Where(g => g.Lines.Count > 0)];
+            StatusLine[] other = [.. (_report?.Checks ?? []).Where(c => !known.Contains(c.Id)).Select(Line)];
+            return [.. groups.Append(new StatusGroup("Status.Group.Other", other)).Append(new StatusGroup("Addin.Results", AddinLines())).Where(g => g.Lines.Count > 0)];
         }
     }
 
@@ -100,10 +115,14 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         State = StatusState.Running;
+        Activity = "Status.Running";
+        _addins = null;
         Changed();
         try
         {
-            (_report, _error, State) = (await host.DoctorAsync(cancellationToken).ConfigureAwait(true), null, StatusState.Ready);
+            (_report, _error) = (await host.DoctorAsync(cancellationToken).ConfigureAwait(true), null);
+            Variants = [.. (await host.VariantsAsync(cancellationToken).ConfigureAwait(true)).Variants.Select(v => Variants.FirstOrDefault(c => c.Name == v) ?? new VariantChoice(v))];
+            State = StatusState.Ready;
         }
         catch (HostCommandException ex)
         {
@@ -123,6 +142,61 @@ internal sealed class StatusView(HostCommands host, Func<bool> accepting) : INot
 
             Changed();
         }
+    }
+
+    public async Task RegisterAsync(bool uninstall, CancellationToken cancellationToken)
+    {
+        string[] selected = [.. Variants.Where(v => v.IsSelected).Select(v => v.Name)];
+        if (!CanRun || State == StatusState.Running || (!uninstall && selected.Length == 0))
+        {
+            return;
+        }
+
+        (State, Activity, _error, _addins) = (StatusState.Running, "Addin.Running", null, null);
+        Changed();
+        try
+        {
+            _addins = await host.RegisterAsync(selected, uninstall, cancellationToken).ConfigureAwait(true);
+            State = StatusState.Ready;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            (_error, State) = (ex as HostCommandException ?? new HostCommandException(HostFailure.Unreadable, ex.Message, ex), StatusState.Failed);
+        }
+        finally
+        {
+            Changed();
+        }
+    }
+
+    private List<StatusLine> AddinLines()
+    {
+        var lines = new List<StatusLine>();
+        if (_addins is { Problem: null, Results.Count: 0 })
+        {
+            lines.Add(new(CheckStatus.Info, Catalogue.Chinese["Addin.Empty"], Catalogue.English["Addin.Empty"]));
+        }
+
+        if (_addins?.Problem is { } problem)
+        {
+            lines.Add(new(CheckStatus.Failure, problem.Zh, problem.En));
+        }
+
+        foreach (AddinResult result in _addins?.Results ?? [])
+        {
+            string Text(IReadOnlyDictionary<string, string> texts, bool zh) => string.Format(CultureInfo.CurrentCulture, texts["Addin.Line"], result.Version, result.Variant, texts["Addin.Result." + result.Result])
+                + " " + string.Join(" ", result.Notes.Concat(result.Problem is { } issue ? [issue] : []).Select(t => zh ? t.Zh : t.En));
+            CheckStatus status = result.Result switch
+            {
+                AddinResultKind.NotConfirmed => CheckStatus.Warning,
+                AddinResultKind.Failed or AddinResultKind.Refused => CheckStatus.Failure,
+                AddinResultKind.Skipped => CheckStatus.Info,
+                _ => result.Problem is null ? CheckStatus.Ok : CheckStatus.Failure,
+            };
+            lines.Add(new(status, Text(Catalogue.Chinese, true), Text(Catalogue.English, false)));
+        }
+
+        return lines;
     }
 
     /// <summary>The Host asks this Workbench while it takes questions, else the EPLAN dialog, else refuses (ADR-0014).</summary>

@@ -55,10 +55,10 @@ internal interface IHostRunner
 
 /// <summary>
 /// The real runner: the Host as a process of its own, started from an argument list, never through a shell, with no
-/// window and its input closed. A run that outlasts its timeout is killed with what it started. The Host reads the data
+/// window and its input closed. For add-in commands a timeout stops only the Host, leaving EPLAN for the engineer. The Host reads the data
 /// root from the environment it inherits, so it is the Workbench's (ADR-0008).
 /// </summary>
-/// <param name="executable">The Host <see cref="HostLocator"/> found.</param>
+/// <param name="executable">The Host <see cref="ProgramLocation"/> found.</param>
 /// <param name="environment">For tests: variables to set for the Host, such as its own data root.</param>
 internal sealed class HostProcess(string executable, IReadOnlyDictionary<string, string>? environment = null) : IHostRunner
 {
@@ -108,7 +108,7 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
         }
         catch (OperationCanceledException)
         {
-            Stop(process);
+            Stop(process, arguments[0] is not ("install-addin" or "uninstall-addin"));
             cancellationToken.ThrowIfCancellationRequested();
             throw new HostCommandException(HostFailure.TimedOut, string.Create(CultureInfo.InvariantCulture, $"eplanmcp did not finish within {timeout.TotalSeconds:0} s."))
             {
@@ -132,11 +132,11 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
         }
     }
 
-    private static void Stop(Process process)
+    private static void Stop(Process process, bool children)
     {
         try
         {
-            process.Kill(entireProcessTree: true);
+            process.Kill(entireProcessTree: children);
         }
         catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
         {

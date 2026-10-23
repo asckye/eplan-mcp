@@ -51,6 +51,28 @@
     </Border>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel>
+        <GroupBox Margin="0,0,0,12" AutomationProperties.Name="{l:Tr Addin.Title}">
+          <GroupBox.Header>
+            <TextBlock Text="{l:Tr Addin.Title}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" />
+          </GroupBox.Header>
+          <StackPanel>
+            <TextBlock Text="{l:Tr Addin.Help}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
+            <TextBlock x:Name="VariantHint" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            <ItemsControl x:Name="Variants" Focusable="False" AutomationProperties.Name="{l:Tr Addin.Title}" Margin="0,8,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox Content="{Binding Text}" IsChecked="{Binding IsSelected, Mode=TwoWay}" AutomationProperties.Name="{Binding Text}"
+                            Style="{StaticResource Primer.Checkbox}" Checked="OnVariantChanged" Unchecked="OnVariantChanged" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <WrapPanel Margin="0,12,0,0">
+              <Button x:Name="RegisterButton" Content="{l:Tr Addin.Register}" Style="{StaticResource Primer.Run}" Click="OnRegister" Margin="0,0,8,8" />
+              <Button x:Name="UnregisterButton" Content="{l:Tr Addin.Unregister}" Style="{StaticResource Primer.Secondary}" Click="OnUnregister" Margin="0,0,0,8" />
+            </WrapPanel>
+          </StackPanel>
+        </GroupBox>
       <ItemsControl x:Name="Groups" Focusable="False">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
@@ -85,6 +107,7 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+      </StackPanel>
     </ScrollViewer>
   </DockPanel>
 </UserControl>
