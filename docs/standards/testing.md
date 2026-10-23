@@ -46,7 +46,7 @@
 - 任何导致快照变化的 PR，都必须同时提交新的快照，并在 PR 描述中说明契约为什么要变（[mcp-tool-design 第 11 节](mcp-tool-design.md#11-契约变更)）。评审时快照的 diff 就是契约变更的清单。
 - 描述文字的修改也会体现在快照中。描述会直接影响模型行为，所以同样要评审，必要时重跑 Agent 评测。
 - 快照从不自动接受：契约一变，测试就失败（本地和 CI 都一样），Verify 只在旁边写出 `*.received.json`（已被 `.gitignore` 忽略），不会弹出比较工具。
-- `CliJsonSnapshotTests`（Medium）用同样的方式固定 `doctor --format json`、`audit verify --format json`、`client-config --format json`、`install-addin` 和 `uninstall-addin --format json` 的结构（`doctor-json`、`audit-verify-json`、`client-config-json`、`addin-json`，[架构 5.2](../architecture/architecture.md#52-host-组件)），更新方法与下文相同；结构变化时 `schemaVersion` 加 1。
+- `CliJsonSnapshotTests`（Medium）用同样的方式固定 `doctor --format json`、`audit verify --format json`、`client-config --format json`、`install-addin`、`uninstall-addin --format json` 和 `vm-test --format json` 的结构（`doctor-json`、`audit-verify-json`、`client-config-json`、`addin-json`、`vm-test-json`，[架构 5.2](../architecture/architecture.md#52-host-组件)），更新方法与下文相同；结构变化时 `schemaVersion` 加 1。
 - 依赖工具精确 schema 的测试类要加 `[Collection(typeof(ToolBuildIsolation))]`，让它在没有其他测试运行时构建工具：几个测试同时构建工具时，SDK 内部存在竞争，生成的 schema 会不稳定（详见该类的注释）。
 
 ### 更新快照

@@ -1,0 +1,47 @@
+﻿{
+  "success": {
+    "schemaVersion": 1,
+    "server": {
+      "name": "eplan-vm",
+      "version": "1.2.3"
+    },
+    "toolCount": 42,
+    "failure": null
+  },
+  "unreachable": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "unreachable"
+  },
+  "timed_out": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "timed_out"
+  },
+  "unauthorized": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "unauthorized"
+  },
+  "forbidden": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "forbidden"
+  },
+  "rate_limited": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "rate_limited"
+  },
+  "protocol_error": {
+    "schemaVersion": 1,
+    "server": null,
+    "toolCount": null,
+    "failure": "protocol_error"
+  }
+}

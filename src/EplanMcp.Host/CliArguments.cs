@@ -19,12 +19,13 @@ internal enum CliCommand
     VmKey,
     VmFirewall,
     VmInstances,
+    VmTest,
     Version,
 }
 
 /// <summary>
-/// The command line of <c>eplanmcp</c>. Only doctor, audit verify, client-config, install-addin and uninstall-addin
-/// take <c>--format json</c>, the output the Workbench reads (M5 design 4.4, 4.11); any other option or format is a
+/// The command line of <c>eplanmcp</c>. Diagnostic, configuration and VM test commands
+/// take <c>--format json</c>, the output the Workbench reads (M5 design 4.4, 4.11); any unknown option or format is a
 /// wrong command line. <see cref="ClientConfig"/> is set for client-config only, <see cref="Variants"/> for install-addin
 /// only, <see cref="Pack"/> for pack only; <see cref="Profile"/> matters to serve only.
 /// </summary>
@@ -37,7 +38,8 @@ internal sealed record CliArguments(
     PackRequest? Pack = null,
     HttpArguments? Http = null,
     string? KeyAction = null,
-    VmFirewallRequest? Firewall = null)
+    VmFirewallRequest? Firewall = null,
+    VmTestRequest? VmTest = null)
 {
     public static string Usage { get; } =
         "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
@@ -47,6 +49,7 @@ internal sealed record CliArguments(
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + " | vm-firewall show|add|remove --port <n> --host-address <IPv4> (show: [--format json])"
         + " | vm-instances --format json"
+        + " | vm-test --url http://<IPv4>:<port>/mcp --key-stdin [--format json]"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
         + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
         + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
@@ -63,6 +66,7 @@ internal sealed record CliArguments(
         ["vm-firewall", var action, .. var options] when VmFirewallRequest.Parse(action, options) is { } firewall => new(CliCommand.VmFirewall, Json: firewall.Json, Firewall: firewall),
         ["--version"] => new(CliCommand.Version, Json: false),
         ["vm-instances", "--format", "json"] => new(CliCommand.VmInstances, Json: true),
+        ["vm-test", .. var options] when VmTestRequest.Parse(options) is { } test => new(CliCommand.VmTest, test.Json, VmTest: test),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),
         ["client-config", .. var options] => ClientConfigArguments(options),

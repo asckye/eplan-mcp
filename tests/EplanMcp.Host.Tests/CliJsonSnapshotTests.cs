@@ -4,6 +4,7 @@ using EplanMcp.Host.Addin;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
+using EplanMcp.Host.Http;
 
 namespace EplanMcp.Host.Tests;
 
@@ -17,6 +18,18 @@ namespace EplanMcp.Host.Tests;
 public sealed class CliJsonSnapshotTests
 {
     private const string AuditDirectory = @"D:\EplanMcp\audit";
+
+    [Fact]
+    public Task VmTestJson_MatchesTheReviewedSnapshot()
+    {
+        var results = new JsonObject { ["success"] = JsonNode.Parse(VmTestCommand.FormatJson(new("eplan-vm", "1.2.3", 42, null))) };
+        foreach (string failure in new[] { "unreachable", "timed_out", "unauthorized", "forbidden", "rate_limited", "protocol_error" })
+        {
+            results[failure] = JsonNode.Parse(VmTestCommand.FormatJson(VmTestResult.Failed(failure)));
+        }
+
+        return Snapshot(results.ToJsonString(), "vm-test-json");
+    }
 
     // The command's JSON laid out for review: indented, LF line ends, Chinese text unescaped as on stdout.
     private static readonly JsonSerializerOptions _snapshotJson = new(HostJson.Options) { WriteIndented = true, NewLine = "\n" };
