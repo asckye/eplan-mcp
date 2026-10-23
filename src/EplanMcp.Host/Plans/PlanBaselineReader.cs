@@ -66,7 +66,9 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
             Check("names:total", total ?? part.Total, part.Total, conflicts);
             Check("names:slice", Math.Min(500, part.Total - offset), part.Items.Count, conflicts);
             if (part.Total < 0 || conflicts.Count > 0)
-            { return null; }
+            {
+                return null;
+            }
             occupiedNames.AddRange(part.Items.Select(f => new PlanOccupiedName("function", f.Tag)));
             total = part.Total;
             offset += part.Items.Count;
