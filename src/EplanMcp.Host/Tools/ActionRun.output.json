@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["entry","tier","project","target","action","type","parameters","dryRun","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
+  "properties": {
+    "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction"]},
+    "tier": {"enum":["export","write"]},
+    "project": {"type":["string","null"]},
+    "target": {"type":"string"},
+    "action": {"type":"string"}, "type": {"type":["string","null"]},
+    "parameters": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["name","value"],"properties":{"name":{"type":"string"},"value":{"type":"string"}}}},
+    "dryRun": {"type":"boolean"},
+    "execution": {"enum":["not_started","committed"]},
+    "recovered": {"type":"boolean"}, "undo": {"type":"null"},
+    "before": {"anyOf":[{"$ref":"#/$defs/fingerprint"},{"type":"null"}]},
+    "after": {"anyOf":[{"$ref":"#/$defs/fingerprint"},{"type":"null"}]},
+    "readback": {"enum":["fingerprint","not_executed"]},
+    "directory": {"type":["string","null"]},
+    "files": {"type":"array","maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["path","bytes","sha256"],"properties":{"path":{"type":"string"},"bytes":{"type":"integer","minimum":1},"sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}},
+    "fileCount": {"type":"integer","minimum":0}, "totalBytes": {"type":"integer","minimum":0},
+    "entryDisabled": {"type":"boolean"},
+    "eplanMessages": {"type":"array","maxItems":20,"items":{"type":"string"}},
+    "truncated": {"type":"boolean"}, "hint": {"type":["string","null"]}
+  },
+  "allOf": [{"if":{"properties":{"tier":{"const":"write"}}},"then":{"required":["execution","recovered","undo"]},"else":{"properties":{"execution":false,"recovered":false,"undo":false}}}],
+  "$defs": {
+    "fingerprint": {
+      "type":"object","additionalProperties":false,"required":["counts","dataFiles","fileCount","truncated"],
+      "properties": {
+        "counts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["kind","count"],"properties":{"kind":{"enum":["pages","functions","connections","cables","terminals","plc_boxes","part_references","parts","manufacturers","constructions","connection_patterns","accessory_lists","accessory_placements","records"]},"count":{"type":["integer","null"],"minimum":0}}}},
+        "dataFiles":{"type":"array","maxItems":20,"items":{"type":"object","additionalProperties":false,"required":["path","bytes","modifiedUtc"],"properties":{"path":{"type":"string"},"bytes":{"type":"integer","minimum":0},"modifiedUtc":{"type":"string","format":"date-time"}}}},
+        "fileCount":{"type":"integer","minimum":0},"truncated":{"type":"boolean"}
+      }
+    }
+  }
+}

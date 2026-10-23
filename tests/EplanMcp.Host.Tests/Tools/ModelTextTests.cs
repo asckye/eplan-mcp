@@ -1,3 +1,4 @@
+using EplanMcp.Host.Safety;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.Encodings.Web;
@@ -57,6 +58,7 @@ public sealed partial class ModelTextTests
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;

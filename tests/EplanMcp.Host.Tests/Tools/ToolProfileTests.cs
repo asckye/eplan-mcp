@@ -1,3 +1,4 @@
+using EplanMcp.Host.Safety;
 using System.Text.Json;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(64, Tools(ToolProfile.Full).Length);
+        Assert.Equal(65, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ProjectCreateTools.CreateTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == ProjectCreateTools.CreateTool);
         Assert.Equal(ToolProfiles.Core.Order(StringComparer.Ordinal), Tools(ToolProfile.Core).Select(t => t.Name).Order(StringComparer.Ordinal));
@@ -60,6 +61,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(full ? ToolProfile.Full : ToolProfile.Core));
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
 
@@ -71,6 +73,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(profile));
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         return [.. provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Select(t => t.ProtocolTool)];

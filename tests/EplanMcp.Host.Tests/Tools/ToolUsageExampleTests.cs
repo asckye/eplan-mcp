@@ -1,3 +1,4 @@
+using EplanMcp.Host.Safety;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -37,6 +38,7 @@ public sealed partial class ToolUsageExampleTests : IDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
         services.AddEplanMcp();
         _services = services.BuildServiceProvider();
         _options = _services.GetRequiredService<IOptions<McpServerOptions>>().Value;
@@ -176,7 +178,7 @@ public sealed partial class ToolUsageExampleTests : IDisposable
 
     /// <summary>
     /// The JSON Schema keywords the SDK generates for tool arguments: type, enum, minimum, maximum, properties, required,
-    /// additionalProperties: false, items. Enough to catch a wrong example; not a general validator.
+    /// additionalProperties, items. Enough to catch a wrong example; not a general validator.
     /// </summary>
     private static IEnumerable<string> Violations(JsonElement schema, JsonElement value, string? path)
     {
@@ -225,6 +227,10 @@ public sealed partial class ToolUsageExampleTests : IDisposable
                 else if (closed)
                 {
                     yield return $"unknown argument '{Join(path, argument.Name)}'";
+                }
+                else if (additional.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (string violation in Violations(additional, argument.Value, Join(path, argument.Name))) { yield return violation; }
                 }
             }
         }

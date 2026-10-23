@@ -115,6 +115,12 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
+        if (change.Kind == "action")
+        {
+            List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];
+            return $"Write {Value(change.Name, zh)}: " + string.Join("; ", parameters.Select(p => Value(p.Name, zh) + "=" + Value(p.Name is "PROJECTNAME" or "Project" ? Path.GetFileName(p.Value) : p.Value, zh)))
+                + "; " + string.Join("; ", (details?.GetValueOrDefault("effects") ?? string.Empty).Split(';').Select(s => Value(s, zh)));
+        }
         string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
         string name = Value(change.Name, zh);
@@ -278,7 +284,9 @@ internal static class ApprovalTexts
     /// How the engineer takes the change back: Ctrl+Z on the write's undo step, except for language settings, which no
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
-    private static string Undo(string tool, WritePlan plan, bool zh) => tool == ProjectCreateTools.CreateTool
+    private static string Undo(string tool, WritePlan plan, bool zh) => tool == ActionRunTools.Tool
+        ? zh ? "执行后只比较指纹，不逐项核对；提交后一步 Ctrl+Z 尚未验证。" : "Fingerprint readback only; changes are not checked item by item. Single-step Ctrl+Z after commit is unverified."
+        : tool == ProjectCreateTools.CreateTool
         ? zh ? "只新建项目，不覆盖或复用已有目录。结束后关闭；没有 EPLAN 撤销步骤，Ctrl+Z 不能撤销。" : "Creates only a new project; never overwrites or reuses a destination. Closed afterwards; no EPLAN undo step or Ctrl+Z."
         : tool == PlcImportTools.Tool
         ? zh ? "提交后 Ctrl+Z 撤销尚未验证，需要时请工程师核实并使用项目备份。" : "Undo after commit has not been verified. Ask the engineer to check the project and use the backup if needed."
