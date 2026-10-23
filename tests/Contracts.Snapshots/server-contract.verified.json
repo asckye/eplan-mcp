@@ -4802,8 +4802,11 @@
                 }
               },
               "size": {
-                "description": "The macro's outline in millimetres. The insertion point is its upper left corner.",
-                "type": "object",
+                "description": "The macro's outline in millimetres. The insertion point is its upper left corner. Null when the macro has no 2D outline, e.g. a 3D macro.",
+                "type": [
+                  "object",
+                  "null"
+                ],
                 "properties": {
                   "width": {
                     "description": "Width in mm.",

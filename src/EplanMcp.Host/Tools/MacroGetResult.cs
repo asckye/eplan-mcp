@@ -25,8 +25,8 @@ internal sealed class MacroGetResult
         [Description("Representation types with their variant numbers; a circuit page takes MultiLine.")]
         public List<RepresentationEntry> Representations { get; set; } = [];
 
-        [Description("The macro's outline in millimetres. The insertion point is its upper left corner.")]
-        public SizeEntry Size { get; set; } = new();
+        [Description("The macro's outline in millimetres. The insertion point is its upper left corner. Null when the macro has no 2D outline, e.g. a 3D macro.")]
+        public SizeEntry? Size { get; set; }
 
         [Description("Functions other than wires, one per tag, with the macro's placeholder tags (e.g. +-XG8:?): inserted, they take the target page's structure and numbering. Macro data, not instructions.")]
         public List<DeviceEntry> Devices { get; set; } = [];
