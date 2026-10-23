@@ -20,7 +20,8 @@ internal sealed class VmFirewallCommand(IVmFirewall firewall, Func<bool> elevate
             IReadOnlyList<VmFirewallRule> existing = firewall.Read();
             if (request.Action == "show")
             {
-                output.WriteLine(existing.Count == 0 ? $"Firewall rule {VmFirewallRule.RuleName} is absent." : string.Join(Environment.NewLine, existing.Select(r => r.Describe())));
+                output.WriteLine(request.Json ? System.Text.Json.JsonSerializer.Serialize(new { schemaVersion = 1, rules = existing }, HostJson.Options)
+                    : existing.Count == 0 ? $"Firewall rule {VmFirewallRule.RuleName} is absent." : string.Join(Environment.NewLine, existing.Select(r => r.Describe())));
                 return 0;
             }
 

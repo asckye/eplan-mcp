@@ -162,7 +162,7 @@ public sealed class CliArgumentsTests
             + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
             + " | client-config [<client>...] --vm --remove [--format json]"
             + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
-            + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
+            + " | vm-firewall show|add|remove --port <n> --host-address <IPv4> (show: [--format json])"
             + Environment.NewLine
             + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
             + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"

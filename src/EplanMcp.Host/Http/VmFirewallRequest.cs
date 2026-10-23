@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace EplanMcp.Host.Http;
 
-internal sealed record VmFirewallRequest(string Action, int Port, string HostAddress)
+internal sealed record VmFirewallRequest(string Action, int Port, string HostAddress, bool Json = false)
 {
     public static VmFirewallRequest? Parse(string action, string[] options)
     {
@@ -12,7 +12,7 @@ internal sealed record VmFirewallRequest(string Action, int Port, string HostAdd
         for (int i = 0; i < options.Length; i++)
         {
             string option = options[i];
-            if (option is not ("--port" or "--host-address") || ++i >= options.Length || !values.TryAdd(option, options[i]))
+            if (option is not ("--port" or "--host-address" or "--format") || ++i >= options.Length || !values.TryAdd(option, options[i]))
             {
                 return null;
             }
@@ -21,7 +21,8 @@ internal sealed record VmFirewallRequest(string Action, int Port, string HostAdd
         return action is "show" or "add" or "remove" && values.TryGetValue("--port", out string? number)
             && int.TryParse(number, NumberStyles.None, CultureInfo.InvariantCulture, out int port) && port is > 0 and <= 65535
             && values.TryGetValue("--host-address", out string? address) && IsHostAddress(address)
-            ? new(action, port, address) : null;
+            && (!values.TryGetValue("--format", out string? format) || (action == "show" && format == "json"))
+            ? new(action, port, address, values.ContainsKey("--format")) : null;
     }
 
     private static bool IsHostAddress(string address) => IPAddress.TryParse(address, out IPAddress? ip)
