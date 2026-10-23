@@ -141,6 +141,8 @@ public partial class MainWindow : Window
     /// <summary>Gives the client page its state; the app does, once.</summary>
     internal void AttachClients(ClientsView view) => ClientsPage.Attach(view);
 
+    internal void AttachVm(Vm.VmView view) => ClientsPage.VmConnection.Attach(view);
+
     /// <summary>Opens a record's details over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
     internal void OpenRecord(AuditRecord record)
     {

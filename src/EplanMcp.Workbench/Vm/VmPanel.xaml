@@ -1,0 +1,43 @@
+<UserControl x:Class="EplanMcp.Workbench.Vm.VmPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization" Focusable="False">
+  <Border Style="{StaticResource Primer.Container}" Padding="16" Margin="0,0,0,12">
+    <StackPanel>
+      <TextBlock Text="{l:Tr Vm.Title}" Style="{StaticResource Ui.Text.Section}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" />
+      <TextBlock Text="{l:Tr Vm.Help}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" />
+      <Label x:Name="AddressLabel" Content="{l:Tr Vm.Address}" Target="{Binding ElementName=Address}" Margin="0,8,0,8" />
+      <ComboBox x:Name="Address" Style="{StaticResource Primer.Select}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}" SelectionChanged="OnInput" />
+      <TextBlock x:Name="AddressError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      <Label x:Name="PortLabel" Content="{l:Tr Vm.Port}" Target="{Binding ElementName=Port}" Margin="0,8,0,8" />
+      <TextBox x:Name="Port" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=PortLabel}" TextChanged="OnInput" />
+      <TextBlock x:Name="PortError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      <Label x:Name="HostLabel" Content="{l:Tr Vm.Host}" Target="{Binding ElementName=HostAddress}" Margin="0,8,0,8" />
+      <TextBox x:Name="HostAddress" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=HostLabel}" TextChanged="OnInput" />
+      <TextBlock x:Name="HostError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      <TextBlock x:Name="KeyLabel" Text="{l:Tr Vm.Key}" Style="{StaticResource Primer.Text}" Margin="0,8,0,8" />
+      <TextBox x:Name="KeyValue" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=KeyLabel}" />
+      <WrapPanel Margin="0,8,0,8">
+        <Button x:Name="Generate" Tag="create" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+        <ToggleButton x:Name="Reveal" Tag="show" Content="{l:Tr Vm.Show}" Style="{StaticResource Primer.Filter}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Copy" Tag="copy" Content="{l:Tr Vm.Copy}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Delete" Tag="delete" Content="{l:Tr Vm.Delete}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+      </WrapPanel>
+      <TextBlock x:Name="FirewallLabel" Text="{l:Tr Vm.Network}" Style="{StaticResource Primer.Text}" />
+      <TextBox x:Name="FirewallValue" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=FirewallLabel}" />
+      <WrapPanel Margin="0,8,0,8">
+        <Button x:Name="Allow" Tag="allow" Content="{l:Tr Vm.Allow}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Remove" Tag="remove" Content="{l:Tr Vm.Remove}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Refresh" Tag="refresh" Content="{l:Tr Vm.Refresh}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+      </WrapPanel>
+      <TextBlock Text="{l:Tr Vm.Uac}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" />
+      <ProgressBar x:Name="Working" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" AutomationProperties.Name="{l:Tr Vm.Working}" Visibility="Collapsed" />
+      <Border Style="{StaticResource Primer.Alert.Info}" Margin="0,8,0,0">
+        <DockPanel>
+          <Path x:Name="StatusIcon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="16" Height="16" Margin="0,0,8,0" />
+          <TextBlock x:Name="Status" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </DockPanel>
+      </Border>
+    </StackPanel>
+  </Border>
+</UserControl>
