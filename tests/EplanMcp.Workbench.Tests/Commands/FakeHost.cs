@@ -16,6 +16,13 @@ internal sealed class FakeHost : IHostRunner
 
     /// <summary>The argument lists and timeouts of the runs so far.</summary>
     public List<(string[] Arguments, TimeSpan Timeout)> Runs { get; } = [];
+    public List<string?> Inputs { get; } = [];
+
+    public Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, string? input, CancellationToken cancellationToken)
+    {
+        Inputs.Add(input);
+        return RunAsync(arguments, timeout, cancellationToken);
+    }
 
     /// <summary>What the next runs give, by their arguments; the default is an error.</summary>
     public Func<string[], HostRun> Answer { get; set; } = _ => throw new HostCommandException(HostFailure.NotStarted, "No answer was set.");

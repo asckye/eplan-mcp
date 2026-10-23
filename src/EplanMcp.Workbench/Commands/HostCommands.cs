@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Protocol;
 
@@ -8,7 +10,7 @@ namespace EplanMcp.Workbench.Commands;
 
 /// <summary>
 /// The Host commands the Workbench uses (M5 design 4.4, 4.11), each through the one <see cref="IHostRunner"/>, with a
-/// timeout (STS-04), its output read strictly as the documented JSON of schema version 1 and nothing else (ERR-08).
+/// timeout (STS-04), its output read strictly as the documented JSON (VM client-config: schema 2; otherwise 1, ERR-08).
 /// The Host writes; no page writes Host data itself.
 /// </summary>
 internal sealed class HostCommands(IHostRunner? runner)
@@ -34,6 +36,26 @@ internal sealed class HostCommands(IHostRunner? runner)
     private const int ErrorLines = 20;
 
     private static readonly JsonSerializerOptions _strict = Strict();
+    private static readonly Regex _secret = new(@"[A-Za-z0-9_-]{43,}", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking);
+
+    // Decode JSON escapes before redaction; malformed output and stderr from secret-bearing commands are withheld.
+    internal static string VmOutput(string output)
+    {
+        try
+        { return _secret.Replace(JsonNode.Parse(output, documentOptions: new() { AllowDuplicateProperties = false })?.ToJsonString() ?? string.Empty, "<key>"); }
+        catch (JsonException) { return string.Empty; }
+    }
+
+    public Task<VmConnectionReport> TestVmAsync(string url, string key, CancellationToken cancellationToken) =>
+        RunAsync<VmConnectionReport>(["vm-test", "--url", url, "--key-stdin", "--format", "json"], ClientConfigTimeout, key, 1, cancellationToken);
+
+    public async Task<ClientConfigReport> ConfigureVmClientsAsync(IReadOnlyList<string> clients, ClientConfigMode mode, string url, string key, CancellationToken cancellationToken)
+    {
+        string[] options = mode switch { ClientConfigMode.Remove => ["--remove"], ClientConfigMode.DryRun => ["--url", url, "--key-stdin", "--dry-run"], _ => ["--url", url, "--key-stdin"] };
+        VmClientConfigReport report = await RunAsync<VmClientConfigReport>(["client-config", .. clients, "--vm", .. options, "--format", "json"],
+            mode == ClientConfigMode.DryRun ? ClientConfigTimeout : ClientConfigWriteTimeout, mode == ClientConfigMode.Remove ? null : key, 2, cancellationToken).ConfigureAwait(false);
+        return new(report.SchemaVersion, report.Mode, new(report.Server.Name, string.Empty, []), report.Problem, report.Clients);
+    }
 
     /// <summary>Whether there is a Host to run; without one the pages that need it say so (NAV-05).</summary>
     public bool IsAvailable => runner is not null;
@@ -61,11 +83,11 @@ internal sealed class HostCommands(IHostRunner? runner)
             cancellationToken);
 
     /// <summary>
-    /// <paramref name="output"/> as <typeparamref name="T"/>: one JSON object of schema version 1, every field known,
+    /// <paramref name="output"/> as <typeparamref name="T"/>: one JSON object of the expected schema version, every field known,
     /// present and of its type, and no list with a null in it, which none of the documented ones has; else
     /// <see cref="HostCommandException"/> with <see cref="HostFailure.Unreadable"/>.
     /// </summary>
-    internal static T Parse<T>(string output)
+    internal static T Parse<T>(string output, int schemaVersion = SchemaVersion)
         where T : class
     {
         try
@@ -81,9 +103,9 @@ internal sealed class HostCommands(IHostRunner? runner)
                 }
             }
 
-            if (version != SchemaVersion)
+            if (version != schemaVersion)
             {
-                throw new HostCommandException(HostFailure.Unreadable, version is null ? "The output has no schemaVersion." : string.Create(CultureInfo.InvariantCulture, $"schemaVersion {version} is not {SchemaVersion}."));
+                throw new HostCommandException(HostFailure.Unreadable, version is null ? "The output has no schemaVersion." : string.Create(CultureInfo.InvariantCulture, $"schemaVersion {version} is not {schemaVersion}."));
             }
 
             return JsonSerializer.Deserialize<T>(output, _strict) ?? throw new HostCommandException(HostFailure.Unreadable, "The output is null.");
@@ -94,15 +116,23 @@ internal sealed class HostCommands(IHostRunner? runner)
         }
     }
 
-    private async Task<T> RunAsync<T>(string[] arguments, TimeSpan timeout, CancellationToken cancellationToken)
+    private Task<T> RunAsync<T>(string[] arguments, TimeSpan timeout, CancellationToken cancellationToken) where T : class =>
+        RunAsync<T>(arguments, timeout, null, 1, cancellationToken);
+
+    private async Task<T> RunAsync<T>(string[] arguments, TimeSpan timeout, string? input, int schemaVersion, CancellationToken cancellationToken)
         where T : class
     {
+        bool vm = input is not null || schemaVersion == 2;
         IHostRunner host = runner ?? throw new HostCommandException(HostFailure.Missing, "eplanmcp.exe is in neither layout beside the Workbench.");
         string commandLine = string.Join(' ', new[] { host.Executable }.Concat(arguments).Select(Quoted));
         HostRun run;
         try
         {
-            run = await host.RunAsync(arguments, timeout, cancellationToken).ConfigureAwait(false);
+            run = await host.RunAsync(arguments, timeout, input, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (vm && ex is not OutOfMemoryException)
+        {
+            throw new HostCommandException(ex is HostCommandException failure ? failure.Failure : HostFailure.Unreadable, "VM command failed; secret diagnostics withheld.") { CommandLine = commandLine };
         }
         catch (HostCommandException ex)
         {
@@ -116,17 +146,18 @@ internal sealed class HostCommands(IHostRunner? runner)
             {
                 CommandLine = commandLine,
                 ExitCode = run.ExitCode,
-                Errors = Plain(run.Errors),
+                Errors = vm ? string.Empty : Plain(run.Errors),
             };
         }
 
         try
         {
-            return Parse<T>(run.Output);
+            return Parse<T>(vm ? VmOutput(run.Output) : run.Output, schemaVersion);
         }
         catch (HostCommandException ex)
         {
-            throw new HostCommandException(ex.Failure, ex.Message, ex) { CommandLine = commandLine, ExitCode = run.ExitCode, Errors = Plain(run.Errors) };
+            throw vm ? new HostCommandException(ex.Failure, "Invalid VM command output; check Host and Workbench versions.") { CommandLine = commandLine, ExitCode = run.ExitCode }
+                : new HostCommandException(ex.Failure, ex.Message, ex) { CommandLine = commandLine, ExitCode = run.ExitCode, Errors = Plain(run.Errors) };
         }
     }
 

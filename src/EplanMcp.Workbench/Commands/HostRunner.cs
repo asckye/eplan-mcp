@@ -51,11 +51,14 @@ internal interface IHostRunner
     /// <see cref="OperationCanceledException"/> when <paramref name="cancellationToken"/> is cancelled first.
     /// </summary>
     public Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken);
+
+    public Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, string? input, CancellationToken cancellationToken) =>
+        input is null ? RunAsync(arguments, timeout, cancellationToken) : throw new HostCommandException(HostFailure.NotStarted, "Stdin is not supported by this runner.");
 }
 
 /// <summary>
 /// The real runner: the Host as a process of its own, started from an argument list, never through a shell, with no
-/// window and its input closed. For add-in commands a timeout stops only the Host, leaving EPLAN for the engineer. The Host reads the data
+/// window and its input closed after any supplied VM key. For add-in commands a timeout stops only the Host, leaving EPLAN for the engineer. The Host reads the data
 /// root from the environment it inherits, so it is the Workbench's (ADR-0008).
 /// </summary>
 /// <param name="executable">The Host <see cref="ProgramLocation"/> found.</param>
@@ -64,8 +67,11 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
 {
     public string Executable { get; } = executable;
 
-    public async Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken)
+    public Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken) => RunAsync(arguments, timeout, null, cancellationToken);
+
+    public async Task<HostRun> RunAsync(IReadOnlyList<string> arguments, TimeSpan timeout, string? input, CancellationToken cancellationToken)
     {
+        bool secret = input is not null || arguments.Contains("--vm");
         var start = new ProcessStartInfo(Executable)
         {
             UseShellExecute = false,
@@ -94,17 +100,21 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
         }
         catch (Exception ex) when (ex is Win32Exception or IOException or InvalidOperationException)
         {
-            throw new HostCommandException(HostFailure.NotStarted, ex.Message, ex);
+            throw !secret ? new HostCommandException(HostFailure.NotStarted, ex.Message, ex) : new HostCommandException(HostFailure.NotStarted, "Could not start the VM command.");
         }
 
-        process.StandardInput.Close();
         Task<string> output = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
         Task<string> errors = process.StandardError.ReadToEndAsync(CancellationToken.None); // read so that it never blocks, kept for the details
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         limit.CancelAfter(timeout);
         try
         {
+            if (input is not null)
+            { await process.StandardInput.WriteAsync(input.AsMemory(), limit.Token).ConfigureAwait(false); }
+            process.StandardInput.Close();
             await process.WaitForExitAsync(limit.Token).ConfigureAwait(false);
+            string text = await output.ConfigureAwait(false), stderr = await errors.ConfigureAwait(false);
+            return new HostRun(process.ExitCode, secret ? HostCommands.VmOutput(text) : text, secret ? string.Empty : stderr);
         }
         catch (OperationCanceledException)
         {
@@ -112,11 +122,14 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
             cancellationToken.ThrowIfCancellationRequested();
             throw new HostCommandException(HostFailure.TimedOut, string.Create(CultureInfo.InvariantCulture, $"eplanmcp did not finish within {timeout.TotalSeconds:0} s."))
             {
-                Errors = await StoppedAsync(errors).ConfigureAwait(false),
+                Errors = secret ? string.Empty : await StoppedAsync(errors).ConfigureAwait(false),
             };
         }
-
-        return new HostRun(process.ExitCode, await output.ConfigureAwait(false), await errors.ConfigureAwait(false));
+        catch (Exception ex) when (secret && ex is not OutOfMemoryException)
+        {
+            Stop(process, children: true);
+            throw new HostCommandException(HostFailure.Failed, "VM command input/output failed.");
+        }
     }
 
     /// <summary>What a stopped process had written to standard error, if its end arrives soon.</summary>
