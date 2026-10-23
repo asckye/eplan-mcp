@@ -81,7 +81,7 @@ public sealed class HostProcessTests : IDisposable
         var host = new HostProcess(Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"));
         // A child deliberately echoes both literal and JSON-escaped input; no profile, files, network or settings.
         const string Script = """$value = [Console]::In.ReadToEnd(); [Console]::Error.Write($value); [Console]::Out.Write('{"echo":"' + $value + '","encoded":"' + ('\u0041' * $value.Length) + '"}')""";
-        HostRun run = await host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(5), key, Token);
+        HostRun run = await host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(60), key, Token); // Windows PowerShell can take seconds to start on CI
         Assert.Equal(0, run.ExitCode);
         Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["echo"]!.GetValue<string>());
         Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["encoded"]!.GetValue<string>());
