@@ -86,6 +86,35 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task VmTest_RealLoopbackTransport_InitializesAndListsWithoutCallingTools(bool correctKey)
+    {
+        using var input = new StringReader(correctKey ? _key : new string('A', 43));
+        using var output = new StringWriter();
+        int exit = await VmTestCommand.RunAsync(_http, new(new Uri(_http.BaseAddress!, "/mcp").AbsoluteUri, true), input, output, Token);
+        JsonNode report = JsonNode.Parse(output.ToString())!;
+        Assert.Equal(correctKey ? 0 : 1, exit);
+        if (correctKey)
+        {
+            Assert.NotEmpty(report["server"]!["name"]!.GetValue<string>());
+            Assert.Equal(HostInfo.Version, report["server"]!["version"]!.GetValue<string>());
+            Assert.True(report["toolCount"]!.GetValue<int>() > 0);
+            Assert.Null(report["failure"]);
+        }
+        else
+        {
+            Assert.Equal("unauthorized", report["failure"]!.GetValue<string>());
+            Assert.Null(report["server"]);
+        }
+
+        string[] audit = Directory.GetFiles(_locations.Audit, "*.jsonl").SelectMany(File.ReadAllLines).ToArray();
+        Assert.Equal(correctKey ? 2 : 1, audit.Length);
+        Assert.All(audit, line => Assert.Equal("http_request", JsonNode.Parse(line)!["kind"]!.GetValue<string>()));
+        Assert.DoesNotContain(_key, output.ToString() + string.Join('\n', audit), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData(null, null, "/mcp", 401)]
     [InlineData("wrong", null, "/mcp", 401)]
     [InlineData(null, null, "/", 401)]

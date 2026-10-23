@@ -37,6 +37,8 @@ internal sealed partial class RemoteServer(string url, string key)
     public static bool Supports(McpClient client) => client.Name is "claude-code" or "codex" or "gemini-cli" or "qwen-code"
         or "kimi-code" or "codebuddy" or "opencode" or "qwen-agent" or "cursor" or "vscode-copilot";
 
+    public void Authorize(HttpRequestMessage request) => request.Headers.Authorization = new("Bearer", key);
+
     public JsonObject JsonEntry(McpClient client)
     {
         var entry = new JsonObject();

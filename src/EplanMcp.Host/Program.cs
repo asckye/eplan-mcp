@@ -48,6 +48,7 @@ internal static class Program
 
     private static async Task<int> RunAsync(CliArguments cli, TextWriter output) => cli switch
     {
+        { VmTest: { } test } => await VmTestCommand.RunAsync(test, output, CancellationToken.None).ConfigureAwait(false),
         { Command: CliCommand.VmInstances } => await VmInstances.WriteAsync(new PipeBridgeDiscovery(), output).ConfigureAwait(false),
         { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
         { KeyAction: { } action } => await VmKey.RunAsync(action, HostDataLocations.FromEnvironment(), output, CancellationToken.None).ConfigureAwait(false),
