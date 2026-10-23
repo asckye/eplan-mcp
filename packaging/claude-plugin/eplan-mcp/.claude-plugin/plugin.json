@@ -1,6 +1,6 @@
 {
   "name": "eplan-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Read and change EPLAN Electric P8 / Pro Panel projects through the locally installed EplanMcp server",
   "author": {
     "name": "EplanMcp"

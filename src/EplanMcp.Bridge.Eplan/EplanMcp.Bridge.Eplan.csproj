@@ -7,7 +7,7 @@
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
     <RootNamespace>EplanMcp.Bridge.Eplan</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!--
       The EPLAN version (year) this add-in is built for, and the Bin folder of an installation of that version.
       ValidateEplanApiReferences below fails the build when the two disagree; there is no fallback to another
