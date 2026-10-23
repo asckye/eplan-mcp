@@ -4,13 +4,25 @@
 对本项目而言，"公共 API" 指 MCP 工具契约（名称、参数、返回结构、安全注解）和配置文件格式，破坏性变更的定义见 [docs/process/development-workflow.md](docs/process/development-workflow.md#8-版本与发布)。
 
 ## [Unreleased]
-- 中英文入门指南新增虚拟机部署：两端 Workbench 与 CLI 步骤、明文密钥和网络边界、连接排错及移除流程；同步 Claude Code 插件内副本。
-- Host 新增 `client-config --vm --url http://<IPv4>:<port>/mcp --key-stdin`，为支持请求头的客户端写入独立的 `eplan-vm`；预览与报告隐藏密钥，支持 `--vm --remove` 和卸载清理；VM 模式 JSON 为第 2 版，本地模式保留第 1 版。
-- Host 新增 `vm-firewall show|add|remove --port <n> --host-address <IPv4>`（修改须管理员权限）；`doctor` 只读报告本数据目录的 HTTP 服务、绑定地址/端口和防火墙规则范围。
-- Host 新增固定单个 EPLAN 实例的无状态 HTTP 服务（`serve --http --address <IPv4>`，默认端口 8766）、DPAPI 当前用户密钥命令 `vm-key create|show|delete`、Bearer 认证及失败限流、`httpAllowedOrigins` 允许列表和来源地址审计。
 
-- 交付改为 `EplanMcp-<version>.zip`，移除 Inno Setup；保留 SHA-256、SBOM、来源证明和 ADR-0020 插件交接。程序可解压到短且固定的任意目录，数据根目录不变；Workbench 支持勾选 EPLAN 变体注册、撤销全部记录，以及预览并生成含 Host 实际绝对路径的 Claude Code 本地市场。
-- 新增[英文入门指南](docs/getting-started/en.md)、中英文切换和 Claude Code 插件内英文副本。
+## [0.2.0] - 2026-10-23
+第二个预览版。支持矩阵不变：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 程序不签名，随附 SHA-256、SBOM 和构建来源证明。
+
+### Changed
+- 交付改为一个 `EplanMcp-<version>.zip`，不再提供 Inno Setup 安装包：解压到短且固定的任意目录，打开 `workbench\EplanMcp.Workbench.exe`；数据根目录仍是 `%USERPROFILE%\EplanMcp`。升级时关闭 EPLAN、Workbench 和客户端后整体替换程序目录；卸载时先在 Workbench 撤销注册，再删除程序目录。
+
+### Added
+- `eplan_action_run`（full，默认关闭，须在 `config.json` 打开 `actionRun`）：只运行随产品发布、经 S26 验证的 12 个白名单 EPLAN 动作，Host 逐条校验参数，比较执行前后的指纹。
+- Workbench 状态页：列出检测到的 EPLAN 变体，勾选后"注册 EPLAN 插件"或"撤销注册"，逐个变体显示结果。新命令 `addin-variants`。
+- Claude Code 插件：`client-config claude-code --plugin` 和 Workbench 的"生成本地市场"把市场模板复制到数据根目录，写入 Host 的实际绝对路径。
+- 虚拟机连接（ADR-0018）：EPLAN 在虚拟机中、AI 客户端在宿主机上时使用。
+  - 虚拟机中：`serve --http --address <IPv4>`（Streamable HTTP，默认端口 8766，固定一个 EPLAN 实例，无状态），`vm-key create|show|delete`（DPAPI 保存的共享密钥，Bearer 认证、失败限流），`httpAllowedOrigins` 允许列表，审计记录来源地址；`vm-firewall show|add|remove`（只放行宿主机 IPv4，修改须管理员权限）；`vm-instances`；`doctor` 报告 HTTP 服务和防火墙规则。Workbench 客户端页底部的"虚拟机连接"面板：选择地址和端口、生成和复制密钥、经 UAC"允许网络访问"、启动和停止服务（随 Workbench 退出停止）。
+  - 宿主机上：`client-config <客户端>... --vm --url http://<IPv4>:<端口>/mcp --key-stdin` 为能发送请求头的客户端写入 `eplan-vm`（Claude 桌面版不支持），`--vm --remove` 移除；`vm-test` 测试连接；Workbench 客户端页的"虚拟机 ↔ 宿主机"向导。密钥只经 stdin 传递，报告中显示为 `<key>`。
+  - HTTP 不加密，只在宿主机与虚拟机之间的私有网络中使用；宿主机客户端配置文件中的密钥是明文。
+- 中英文入门指南：英文版、语言切换、ZIP 的安装/升级/卸载、虚拟机部署（第 10 节）；Claude Code 插件内同步副本。
+
+### Not yet verified
+- 跨机器的虚拟机连接、UAC 授权、各客户端的远程配置实际连接，以及干净机器上的 ZIP 验收，交由测试人员完成。
 
 ## [0.1.0] - 2026-10-22
 首个预览版。支持矩阵：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 安装包不签名，随附 SHA-256、SBOM 和构建来源证明（见 [中文入门指南](docs/getting-started/zh-CN.md)）。

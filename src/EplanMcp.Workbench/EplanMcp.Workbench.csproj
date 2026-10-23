@@ -10,7 +10,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>EplanMcp.Workbench</AssemblyName>
     <RootNamespace>EplanMcp.Workbench</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <UseWPF>true</UseWPF>
     <!-- Only for System.Windows.Forms.NotifyIcon, the tray icon (ADR-0017 decision 1). -->
     <UseWindowsForms>true</UseWindowsForms>
