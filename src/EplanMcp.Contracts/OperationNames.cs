@@ -6,6 +6,12 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Read-only whitelist preview. Arguments: ActionRunArgs; data: WritePlan.</summary>
+    public const string ActionRunPlan = "action.plan";
+    /// <summary>Export-only whitelist execution. Arguments: ActionRunArgs; data: ActionRunData.</summary>
+    public const string ActionRun = "action.run";
+    /// <summary>Write-only whitelist execution with outcome recovery. Arguments: ActionRunArgs; data: ActionRunData.</summary>
+    public const string ActionRunExecute = "action.execute";
     /// <summary>Lists the projects open in EPLAN. Arguments: <see cref="ProjectListArgs"/>; data: <see cref="ProjectListData"/>.</summary>
     public const string ProjectList = "project.list";
 
