@@ -380,7 +380,7 @@ internal sealed class FakeMacroReader(string root) : IMacroReader
 
     public string? MacroRoot() => root;
 
-    public MacroContent ReadMacro(string projectPath, string macroPath)
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false)
     {
         (OpenedIn, Opened) = (projectPath, macroPath);
         return Content;

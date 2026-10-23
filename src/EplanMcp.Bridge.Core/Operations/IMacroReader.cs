@@ -17,12 +17,27 @@ public interface IMacroReader
     /// the open project at <paramref name="projectPath"/>, without inserting it (S10: the project does not change), and
     /// copies out what it holds.
     /// </summary>
-    public MacroContent ReadMacro(string projectPath, string macroPath);
+    /// <param name="projectPath">The resolved open project's full path.</param>
+    /// <param name="macroPath">The path checked by MacroFiles.</param>
+    /// <param name="defaultMultiLine">Select MultiLine variant 0 without caching when available; report the actual selection.</param>
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false);
 }
 
 /// <summary>What <see cref="IMacroReader.ReadMacro"/> copies out of a window macro.</summary>
 public sealed class MacroContent
 {
+    /// <summary>True only when every function and object has been read without a limit.</summary>
+    public bool Complete { get; set; }
+
+    /// <summary>The representation actually read, not just one available in the file.</summary>
+    public string Representation { get; set; } = string.Empty;
+
+    /// <summary>The variant actually read.</summary>
+    public int Variant { get; set; } = -1;
+
+    /// <summary>The full function count before any reader limit.</summary>
+    public int FunctionCount { get; set; }
+
     /// <summary>Each representation type's name with its variant numbers.</summary>
     public List<KeyValuePair<string, List<int>>> Representations { get; set; } = [];
 
@@ -42,6 +57,9 @@ public sealed class MacroContent
 /// <summary>A function in a macro, as plain strings.</summary>
 public sealed class MacroFunctionRecord
 {
+    /// <summary>function, terminal, plc or cable, copied without retaining EPLAN objects.</summary>
+    public string Kind { get; set; } = string.Empty;
+
     /// <summary><c>Function.Name</c>, with the macro's structure placeholders.</summary>
     public string Name { get; set; } = string.Empty;
 

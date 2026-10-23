@@ -10,6 +10,32 @@ namespace EplanMcp.Host.Plans;
 /// </summary>
 internal sealed class PlanBaselineReader(IBridgeClient bridge)
 {
+    /// <summary>Fresh context evidence, without the compiler's double read or project-wide name domain.</summary>
+    public async Task<PlanSnapshot> SnapshotAsync(string? project, string[]? pages, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ProjectSnapshotData first = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot,
+            new() { Project = project, Pages = pages?.ToList(), Profile = SnapshotProfiles.StandardName }, cancellationToken).ConfigureAwait(false);
+        if (!Path.IsPathFullyQualified(first.ProjectPath))
+        {
+            throw new BridgeCallException(new BridgeError
+            {
+                Reason = ErrorReason.CapabilityMissing,
+                Message = "Snapshot project identity is unavailable. Read again with a compatible Bridge.",
+                Metadata = new() { ["missing"] = "snapshot:project_path" },
+            });
+        }
+
+        var conflicts = new List<PlanSnapshotConflict>();
+        return await AssembleAsync(new(first.Project, first.ProjectPath, first.ProjectGuid), pages, conflicts, cancellationToken, first).ConfigureAwait(false)
+            ?? throw new BridgeCallException(new BridgeError
+            {
+                Reason = conflicts.Any(c => c.Reason == "missing") ? ErrorReason.ResourceNotFound : ErrorReason.CapabilityMissing,
+                Message = "Snapshot coverage is incomplete or inconsistent. Narrow the scope and read again.",
+                Metadata = new() { ["missing"] = string.Join("\n", conflicts.Select(c => c.Scope + ":" + c.Reason)) },
+            });
+    }
+
     public async Task<PlanBaselineRead> ReadAsync(PlanProject project, IReadOnlyList<string>? pages, CancellationToken cancellationToken)
     {
         string[]? wanted = pages?.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
@@ -78,7 +104,7 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
         return new(scope, occupied, PlanSnapshotHashes.Names(project.Path, occupied));
     }
 
-    private async Task<PlanSnapshot?> AssembleAsync(PlanProject project, string[]? wanted, List<PlanSnapshotConflict> conflicts, CancellationToken cancellationToken)
+    private async Task<PlanSnapshot?> AssembleAsync(PlanProject project, string[]? wanted, List<PlanSnapshotConflict> conflicts, CancellationToken cancellationToken, ProjectSnapshotData? initial = null)
     {
         List<SnapshotPage> pages = [];
         var members = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -91,8 +117,9 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            ProjectSnapshotData chunk = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot,
+            ProjectSnapshotData chunk = initial ?? await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot,
                 new() { Project = project.Path, Pages = wanted?.ToList(), AfterPage = after, Profile = SnapshotProfiles.StandardName }, cancellationToken).ConfigureAwait(false);
+            initial = null;
             chunks++;
             string? actualPath = Path.IsPathFullyQualified(chunk.ProjectPath) ? PlanSnapshotHashes.ProjectKey(chunk.ProjectPath) : null;
             Check("projectPath", PlanSnapshotHashes.ProjectKey(project.Path), actualPath, conflicts);

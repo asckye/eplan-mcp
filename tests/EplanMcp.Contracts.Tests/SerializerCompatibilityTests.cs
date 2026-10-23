@@ -20,6 +20,12 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new PlanMacroInspectArgs { Macro = "Samples/Starter.ema" },
+        new PlanMacroInspectData { Sha256 = new string('a', 64), ObjectCount = 4, Frame = new() { Right = 52, Bottom = -268 },
+            Functions = [new() { Kind = "terminal", Category = "Terminal", Name = "=+A1-X1:?", VisibleName = "-X1", Main = true, StructureSegments = ["=", "+A1"] }] },
+        new PlanMacroInspectData(),
+        new PlanMacroFunction(),
+        new PlanMacroFrame(),
         new PlanFunctionsArgs { Project = "Line1", Names = ["=F+A1-K1"], Pages = ["=F+A1/1"] },
         new PlanFunctionsData { Project = "Line1", ProjectPath = @"D:\Projects\Line1", Complete = false, Limit = 10_000,
             Functions = [new() { Type = 17, Oid = 5, Name = "=F+A1-K1", IsMain = true }, new() { Type = 17, Oid = 6, Name = "=F+A1-K1", Page = "=F+A1/1" }] },
