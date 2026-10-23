@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | 计划中最高步骤级别（Write / Destructive），由服务端判定 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false；静态注解覆盖目录内的 Destructive 计划，不代替运行时 tier |
-| 状态 | Proposed（M6 第 2 阶段；未实现） |
+| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D04–D07 为准） |
 
 ## 1. 这个工具解决什么任务
 “执行刚才审阅的完整计划，并报告做到了哪里”。以 [ADR-0023](../adr/0023-plan-approval-and-backup.md) 为审批、备份及计划级结果的权威；不是逐次调用 MCP 写工具，也不是一个覆盖全计划的事务。只执行 [`eplan_workflow_plan`](eplan_workflow_plan.md) 的第 2 阶段目录。
@@ -19,9 +19,8 @@
 | `plan_id` | string，非空 | 是 | — | 编译返回的 ID；目标项目已显式固定，不使用当前项目或当前选择 |
 | `dry_run` | boolean | 否 | false | 重新核对并返回变更预览；不审批、不备份、不创建目录、不消耗计划 |
 | `wait_seconds` | integer，0–110 | 否 | 90 | 非 dry-run 时等待终态的窗口；到时未完成返回任务 ID，任务继续；0 立即返回任务回执 |
-| `resume` | boolean | 否 | false | 仅对已知部分完成的原计划，按当前状态重新编译剩余步骤为**新计划**；重新走策略和审批，不复用批准 |
 
-schema 为对象，`additionalProperties: false`，范围/默认值写入 schema。不接收 planHash、步骤、审批回答、目标路径或 backup 路径替换。`resume` 的实现阶段见 Q2；第 2 阶段不得承诺 Host 重启后恢复。
+schema 为对象，`additionalProperties: false`，范围/默认值写入 schema。不接收 planHash、步骤、审批回答、目标路径或 backup 路径替换；本期不提供 `resume`，传入即 INVALID_ARGUMENT，剩余意图须重新编译、重新审批（D05）。
 
 ## 3. 输出
 终态使用以下形状；失败时 `isError: true`，同时保留计划结果与标准 `error`，不能只返回失败步骤：
@@ -42,7 +41,7 @@ schema 为对象，`additionalProperties: false`，范围/默认值写入 schema
 }
 ```
 
-`outputSchema` 声明终态和任务回执两个分支。终态 `execution` 为下表五值；步骤只用 ADR-0010 四值；`completedSteps` 是已提交步骤序号，未发送的步骤为 `not_started`、`reason/undo=null`。路径、名称为 string；无备份为 null，不能用源 `.zw1` 充当备份；`stepBackups` 记录步骤号和副本路径。错误含计划级 execution；单步原因和结果继续保留。`resume` 成功编译时回显新 `planId` 及 `resumedFrom`，原记录不改写。
+`outputSchema` 声明终态、任务回执及实施设计 4.8 的失败结果分支。终态 `execution` 为下表五值；步骤只用 ADR-0010 四值；`completedSteps` 是已提交步骤序号，未发送的步骤为 `not_started`、`reason/undo=null`。无备份为 null，不能用源 `.zw1` 充当备份；`stepBackups` 记录步骤号和副本路径。错误含计划级 execution，保留单步结果；本期无 `resumedFrom`。
 
 | 计划 `execution` | 条件（ADR-0023，unknown 优先） |
 |---|---|
@@ -53,7 +52,7 @@ schema 为对象，`additionalProperties: false`，范围/默认值写入 schema
 | `unknown` | 任一步 OUTCOME_UNKNOWN；计划不可重试，按项目及当时实例暂停写入 |
 
 - `verification` 为 passed/failed/skipped，仅汇总本期对象数据要求：全部必需项可证且通过才为 passed；有失败为 failed，其余未完成/未知为 skipped 并附原因。逐项为 passed/failed/unknown，未覆盖项不得算通过。提交后发现校验差异仍为 `committed`、`verification: failed`，附警报供审查，不自动修复；其他两层 skipped 不冒充已验证。
-- 等待未完返回 `{taskId,status,planId}`（任务受理回执，不是最终 execution）；状态及 90/110 秒窗口与 [`eplan_task_get`](eplan_task_get.md) 一致。任务结果引用同一计划；不能用回执推断未写入。建议映射：等待审批 waiting_approval，执行/核实 running；全部提交 succeeded（仍须读 verification）；确定失败/部分完成 failed；确认取消 cancelled；中断 interrupted；任一步未知 unknown（映射待 Q2 统一）。
+- 等待未完返回 `{taskId,status,planId}`（受理回执，不是最终 execution）；90/110 秒窗口与 [`eplan_task_get`](eplan_task_get.md) 一致。任务引用同一计划；不能用回执推断未写入。状态映射按实施设计 4.5：部分完成或 verification 失败/跳过为 failed，仍保留 committed 等工程事实。
 - structuredContent、同内容 JSON 文本和一行计数摘要，如 `Plan stopped: 1 step committed, 1 rolled back; inspect the diff and backup.`；默认约 5k、硬上限 20k token，含双份 JSON。超限保留计划级结果、失败位置、完成计数、备份/结果引用及 `truncated/hint`，完整步骤和差异用 `eplan_plan_get` 分页取。
 
 ## 4. 错误
@@ -95,9 +94,9 @@ schema 为对象，`additionalProperties: false`，范围/默认值写入 schema
 ## 8. 待定问题
 | # | 问题 | 建议 |
 |---|---|---|
-| Q1 | 已有目标的独立备份、步内重新规划、undo 名称和计划消耗点的合同尚缺 | 另细化独立备份能力/操作名；备份/整计划时限、审批前失败是否终结计划及跨 Host 互斥细节仍待定 |
-| Q2 | resume 的阶段、任务映射/进度及结果引用如何与 task_get Q2 对齐？ | ADR-0023/4.13 的继续语义必须保留；建议本期只对同一 Host 已知结果重新编译剩余步骤，旧/新计划关联，重新审批；具体是否本期开放 resume 待定，未开放时拒绝 true。持久化检查点、Host 重启后恢复与 MCP Tasks 明确留第 5 阶段 |
-| Q3 | standard 快照不含占位符和完整引用属性，如何界定写范围并校验模块？ | 全部可能写入的引用范围须先能确定，否则报缺能力；新增覆盖另定合同。范围已明确但属性未覆盖的校验项为 unknown；组合提交/一次 Ctrl+Z、页/项目数据及布尔重载效果仍未验证（A33、S32），不能越过获批范围 |
-| Q4 | 动态 tier/静态注解、结构化冲突如何接入当前注册/错误合同？ | 本文 destructiveHint=true 为目录最高风险的保守提议，实际审批仍按计划 tier；需补注册/契约检查。当前 BridgeError.Metadata 为 string 字典，conflicts 数组的 Host/Bridge 表达须细化，不能声称已有强类型合同 |
+| Q1 | 独立备份、步内复核、undo 与消耗点 | 已决定：[实施设计](../design/2026-10-23-m6-phase2-plans.md) D04、4.4；project.backup、plan.step.execute、命名 factory、受理 CAS 消耗、文件互斥；不加 WritePipeline hooks |
+| Q2 | resume、任务映射与进度 | 已决定：同设计 D05、4.5；本期无 resume，任务映射/90–110 s 等待固定；恢复留阶段 5，重新编译审批义务保留 |
+| Q3 | 占位符/模块范围与校验 | 已决定：同设计 D06、4.6/9；两项均延后，S32 后续先验证完整引用/组合提交/持久性/撤销；不以 unknown 放行未知写范围 |
+| Q4 | tier、注解及结构化错误 | 已决定：同设计 D07、4.8；静态 Destructive、动态最高 tier；专用 PlanToolError/结果分支，Bridge 字典不改 |
 
 未定的进程拓扑、IPC、跨客户端权限/审批模型和支持版本不在本规格决定；若需改变，另提 Proposed ADR。
