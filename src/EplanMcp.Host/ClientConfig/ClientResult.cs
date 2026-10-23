@@ -8,7 +8,7 @@ internal enum ClientConfigMode
 }
 
 /// <summary>What client-config is asked to do; no clients (with <see cref="ClientConfigMode.Remove"/> only) means every recorded entry.</summary>
-internal sealed record ClientConfigRequest(IReadOnlyList<McpClient> Clients, ClientConfigMode Mode);
+internal sealed record ClientConfigRequest(IReadOnlyList<McpClient> Clients, ClientConfigMode Mode, bool Plugin = false);
 
 internal enum ClientAction
 {

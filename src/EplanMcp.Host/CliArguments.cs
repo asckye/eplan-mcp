@@ -13,6 +13,7 @@ internal enum CliCommand
     AuditVerify,
     ClientConfig,
     InstallAddin,
+    AddinVariants,
     UninstallAddin,
     Pack,
     VmKey,
@@ -39,6 +40,7 @@ internal sealed record CliArguments(
 {
     public static string Usage { get; } =
         "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+        + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + " | vm-firewall show|add|remove --port <n> --host-address <IPv4>"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
@@ -60,6 +62,7 @@ internal sealed record CliArguments(
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),
         ["client-config", .. var options] => ClientConfigArguments(options),
         ["install-addin", .. var options] => InstallAddinArguments(options),
+        ["addin-variants", .. var options] => WithFormat(CliCommand.AddinVariants, options),
         ["uninstall-addin", .. var options] => WithFormat(CliCommand.UninstallAddin, options),
         ["pack", var verb, .. var options] => PackArguments(verb, options),
         _ => null,
@@ -79,7 +82,7 @@ internal sealed record CliArguments(
     private static CliArguments? ClientConfigArguments(string[] options)
     {
         var clients = new List<McpClient>();
-        bool json = false, dryRun = false, remove = false;
+        bool json = false, dryRun = false, remove = false, plugin = false;
         for (int i = 0; i < options.Length; i++)
         {
             switch (options[i])
@@ -93,6 +96,9 @@ internal sealed record CliArguments(
                     break;
                 case "--remove" when !remove:
                     remove = true;
+                    break;
+                case "--plugin" when !plugin:
+                    plugin = true;
                     break;
                 default:
                     if (McpClient.Find(options[i]) is not { } client)
@@ -110,7 +116,8 @@ internal sealed record CliArguments(
         }
 
         ClientConfigMode mode = remove ? ClientConfigMode.Remove : dryRun ? ClientConfigMode.DryRun : ClientConfigMode.Write;
-        return (dryRun && remove) || (clients.Count == 0 && !remove) ? null : new(CliCommand.ClientConfig, json, new(clients, mode));
+        return (dryRun && remove) || (clients.Count == 0 && !remove) || (plugin && (remove || clients.Count != 1 || clients[0].Name != "claude-code"))
+            ? null : new(CliCommand.ClientConfig, json, new(clients, mode, plugin));
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 {
   "name": "eplanmcp-local",
-  "description": "EplanMcp local plugin marketplace, shipped with the installer for offline installation",
+  "description": "EplanMcp local plugin marketplace, generated from the shipped template for offline installation",
   "owner": {
     "name": "EplanMcp"
   },

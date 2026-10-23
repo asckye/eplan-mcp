@@ -19,6 +19,7 @@ internal sealed class ClientConfigCommand
     private readonly TimeProvider _time;
     private readonly Func<bool> _claudeDesktopRunning;
     private readonly Func<string?> _msixPackage;
+    private readonly string _dataRoot;
 
     /// <summary>
     /// For tests: a temporary profile and data root, any path for eplanmcp.exe, a fixed clock, and answers for whether
@@ -27,6 +28,7 @@ internal sealed class ClientConfigCommand
     internal ClientConfigCommand(UserFolders folders, HostDataLocations locations, string executable, TimeProvider time, Func<bool> claudeDesktopRunning, Func<string?> msixPackage)
     {
         _folders = folders;
+        _dataRoot = locations.Root;
         _record = ClientRecord.For(locations);
         _server = new LocalServer(executable);
         _time = time;
@@ -60,7 +62,7 @@ internal sealed class ClientConfigCommand
         {
             bool eplanmcp = Path.IsPathFullyQualified(_server.Command) && string.Equals(Path.GetFileName(_server.Command), "eplanmcp.exe", StringComparison.OrdinalIgnoreCase);
             return eplanmcp
-                ? new(_server, mode, null, [.. request.Clients.Select(c => Write(c, mode == ClientConfigMode.DryRun))])
+                ? new(_server, mode, null, [.. request.Clients.Select(c => Write(c, mode == ClientConfigMode.DryRun, request.Plugin))])
                 : new(_server, mode, new(ClientProblem.NotEplanmcp, _server.Command), []);
         }
 
@@ -79,11 +81,16 @@ internal sealed class ClientConfigCommand
         }
     }
 
-    private ClientResult Write(McpClient client, bool dryRun)
+    private ClientResult Write(McpClient client, bool dryRun, bool plugin)
     {
         string? file = null;
         try
         {
+            if (plugin)
+            {
+                return ClaudeCodePlugin.Generate(_folders, _dataRoot, _server, _time.GetUtcNow(), dryRun);
+            }
+
             file = client.ConfigFile(_folders);
             Guard(client.Name, file, writing: true);
             ClientFileChange change = ClientFileChange.Read(file);
