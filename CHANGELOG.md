@@ -7,7 +7,8 @@
 - Host 新增 `vm-firewall show|add|remove --port <n> --host-address <IPv4>`（修改须管理员权限）；`doctor` 只读报告本数据目录的 HTTP 服务、绑定地址/端口和防火墙规则范围。
 - Host 新增固定单个 EPLAN 实例的无状态 HTTP 服务（`serve --http --address <IPv4>`，默认端口 8766）、DPAPI 当前用户密钥命令 `vm-key create|show|delete`、Bearer 认证及失败限流、`httpAllowedOrigins` 允许列表和来源地址审计。
 
-- 新增[英文入门指南](docs/getting-started/en.md)、中英文切换、Claude Code 插件内英文副本及开始菜单入口。
+- 交付改为 `EplanMcp-<version>.zip`，移除 Inno Setup；保留 SHA-256、SBOM、来源证明和 ADR-0020 插件交接。程序可解压到短且固定的任意目录，数据根目录不变；Workbench 注册/撤销和 Claude Code 绝对路径市场生成将在后续 Part B 实现。
+- 新增[英文入门指南](docs/getting-started/en.md)、中英文切换和 Claude Code 插件内英文副本。
 
 ## [0.1.0] - 2026-10-22
 首个预览版。支持矩阵：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 安装包不签名，随附 SHA-256、SBOM 和构建来源证明（见 [中文入门指南](docs/getting-started/zh-CN.md)）。

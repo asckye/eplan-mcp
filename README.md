@@ -25,7 +25,7 @@ EPLAN 2026（你正在使用的界面）
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 下载 `EplanMcp-Setup-<version>.exe`（当前为 [v0.1.0](https://github.com/asckye/eplan-mcp/releases/tag/v0.1.0)，只需下载这一个文件）。按用户安装，无需管理员权限，可离线安装；下载校验、插件注册、客户端连接和卸载按[中文入门指南](docs/getting-started/zh-CN.md)操作。
+后续版本只提供 `EplanMcp-<version>.zip`，以 [GitHub Releases](https://github.com/asckye/eplan-mcp/releases) 的实际附件为准。下载 ZIP 和 `SHA256SUMS.txt`，校验后解除 ZIP 锁定，将整个目录解压到短且固定的位置（如 `D:\EplanMcp`），打开 **`workbench\EplanMcp.Workbench.exe`**，勾选变体注册 EPLAN 插件并配置客户端。无需管理员或联网，数据仍在独立的 `%USERPROFILE%\EplanMcp`；升级先关闭 EPLAN、Workbench 和客户端再整体替换程序目录，卸载先在 Workbench 撤销注册再删除目录。详细步骤见[中文入门指南](docs/getting-started/zh-CN.md)。
 
 ## 工具概览
 
@@ -98,7 +98,7 @@ node eng/scripts/apply-archify-font.mjs
 
 | 想了解 | 读这里 |
 |---|---|
-| 预览安装包怎么开始使用 | [中文入门指南](docs/getting-started/zh-CN.md) |
+| ZIP 预览版怎么开始使用 | [中文入门指南](docs/getting-started/zh-CN.md) |
 | 系统怎么设计、为什么这样设计 | [架构](docs/architecture/architecture.md) · [ADR](docs/adr/README.md) |
 | EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
 | 工具怎么设计 | [MCP 工具设计规范](docs/standards/mcp-tool-design.md) |
