@@ -20,17 +20,19 @@ namespace EplanMcp.Host.Tests.EndToEnd;
 public sealed class StdioEndToEndTests : IAsyncLifetime
 {
     private readonly string _prefix = "EplanMcpE2E." + Guid.NewGuid().ToString("N") + ".";
+    private readonly string _home = Directory.CreateTempSubdirectory("eplanmcp-action-e2e-").FullName;
     private BridgeServer? _bridge;
     private McpClient? _client;
 
     public async ValueTask InitializeAsync()
     {
+        File.WriteAllText(Path.Combine(_home, "config.json"), "{\"actionRun\":\"on\"}");
         var transport = new StdioClientTransport(new StdioClientTransportOptions
         {
             Name = "eplanmcp",
             Command = Path.Combine(AppContext.BaseDirectory, "eplanmcp.exe"),
             Arguments = ["serve"],
-            EnvironmentVariables = new Dictionary<string, string?> { [PipeBridgeDiscovery.PrefixVariable] = _prefix },
+            EnvironmentVariables = new Dictionary<string, string?> { [PipeBridgeDiscovery.PrefixVariable] = _prefix, ["EPLANMCP_HOME"] = _home },
         });
         _client = await McpClient.CreateAsync(transport, cancellationToken: TestContext.Current.CancellationToken);
     }
@@ -43,6 +45,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         }
 
         _bridge?.Dispose();
+        Directory.Delete(_home, recursive: true);
     }
 
     [Fact]
@@ -51,7 +54,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export"],
+            ["eplan_action_run", "eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -68,6 +71,18 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.Equal("Usage of eplan_project_list: examples.", Text(usage));
         Assert.True(unknown.IsError);
         Assert.Contains(ErrorReason.InvalidArgument, Text(unknown), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ActionRun_MissingFilterIsRefusedBeforeAnyBridge_AndEntryUsageWorks()
+    {
+        CallToolResult invalid = await Call("eplan_action_run", new() { ["entry"] = "partsmanagementapi/EXPORTMANUFACTURERS", ["arguments"] = new { EXPORTFILE = "parts.xml" } });
+        Assert.Contains(ErrorReason.InvalidArgument, Text(invalid), StringComparison.Ordinal);
+        Assert.Contains("PROPERTYID", Text(invalid), StringComparison.Ordinal);
+        Assert.Contains("PROPERTYVALUE", Text(invalid), StringComparison.Ordinal);
+        CallToolResult usage = await Call("eplan_tool_usage", new() { ["tool"] = "eplan_action_run", ["topic"] = "partsmanagementapi/EXPORTMANUFACTURERS" });
+        Assert.False(usage.IsError == true, Text(usage));
+        Assert.Contains("22900", usage.StructuredContent!.Value.GetProperty("text").GetString(), StringComparison.Ordinal);
     }
 
     [Theory]
@@ -119,7 +134,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         CallToolResult status = await Call("eplan_session_status");
         CallToolResult list = await Call("eplan_project_list", new() { ["limit"] = 10 });
 
-        Assert.True(status.StructuredContent!.Value.GetProperty("connected").GetBoolean());
+        Assert.True(status.StructuredContent!.Value.GetProperty("connected").GetBoolean(), status.StructuredContent.Value.GetRawText());
         JsonElement projects = list.StructuredContent!.Value.GetProperty("projects");
         Assert.Equal("Line1", projects[0].GetProperty("name").GetString());
         Assert.True(projects[0].GetProperty("current").GetBoolean());

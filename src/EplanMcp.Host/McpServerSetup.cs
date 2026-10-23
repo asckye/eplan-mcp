@@ -42,11 +42,13 @@ internal static class McpServerSetup
         services.TryAddSingleton<WritePipeline>();
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
+        services.TryAddSingleton(ActionRunCatalog.Process);
         services.TryAddSingleton<ImportFiles>();
         services.TryAddSingleton<PackLibrary>();
         services.TryAddSingleton<PackInstaller>();
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
         {
@@ -105,6 +107,7 @@ internal static class McpServerSetup
             .WithTools<ListImportTools>(HostJson.Options)
             .WithTools<PlcImportTools>(HostJson.Options)
             .WithTools<MasterDataExportTools>(HostJson.Options)
+            .WithTools<ActionRunTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)

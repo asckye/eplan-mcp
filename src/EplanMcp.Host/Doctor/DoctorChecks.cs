@@ -5,6 +5,7 @@ using EplanMcp.Host.Addin;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tools;
 using Microsoft.Win32;
 
 namespace EplanMcp.Host.Doctor;
@@ -153,8 +154,8 @@ internal static class DoctorChecks
         (string masterData, string masterDataEn) = config.MasterDataWrites == MasterDataWrites.Deny ? ("禁止", "denied") : ("每次审批并先备份", "approved each time, backed up first");
         string sources = string.Join("; ", config.PackSources.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key} = {p.Value}"));
         return new(DoctorCheckIds.Config, DoctorStatus.Ok,
-            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒；工程包可以引用的来源（packSources）：{(sources.Length == 0 ? "无" : sources)}",
-            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s; sources packs may reference (packSources): {(sources.Length == 0 ? "none" : sources)}");
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒；actionRun：{config.ActionRun}，条目 {ActionRunCatalog.Entries.Count}，本进程停用：{string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}；工程包可以引用的来源（packSources）：{(sources.Length == 0 ? "无" : sources)}",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s; actionRun: {config.ActionRun}, entries {ActionRunCatalog.Entries.Count}, disabled in this process: {string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}; sources packs may reference (packSources): {(sources.Length == 0 ? "none" : sources)}");
     }
 
     /// <summary>

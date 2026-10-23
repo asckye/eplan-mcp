@@ -1,3 +1,4 @@
+using EplanMcp.Host.Safety;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -31,6 +32,7 @@ public sealed class ToolContractSnapshotTests
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
         services.AddEplanMcp();
         await using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;

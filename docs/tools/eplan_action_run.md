@@ -17,10 +17,10 @@
 工具描述的英文草案如下；描述加参数说明遵守约 250 token 的预算，12 项枚举也计入预算。每条的参数表、副作用、示例移入 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")`；无 TYPE 的 topic 就是 action 名。不增加对任意 action 的发现或执行入口（[ADR §1][adr1]）。这是 usage 的专用 topic 扩展，产品实现及预算检查**未验证**，不改变其他工具的四种 topic。
 
 ```text
-Run a shipped, verified whitelist entry for a long-tail EPLAN task.
-Use task tools when available: they preview and verify individual changes; this tool compares fingerprints only.
-Write entries support dry_run and require approval outside scratch; denial returns APPROVAL_DENIED without changes.
-Only full profile with actionRun enabled. See eplan_tool_usage for entry parameters and side effects.
+Run a whitelisted EPLAN task; fingerprint checks only.
+Prefer task tools. Write supports dry_run; approval outside scratch; denial: APPROVAL_DENIED.
+full + actionRun:on only.
+Parameters/effects: eplan_tool_usage.
 Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"EXPORTFILE":"layers.elc"}}
 ```
 
@@ -30,10 +30,10 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 |---|---|---|---|---|
 | `entry` | string，`enum` 为下表精确的 12 个值 | 是 | — | ADR §8 的 action/TYPE 名称；无 TYPE 时只写 action 名，区分大小写 |
 | `project` | string，非空 | 项目条目是；系统条目不给 | — | 项目名或 `eplan_project_list` 返回的 `path`，不隐式采用当前项目 |
-| `arguments` | object，按 `entry` 校验 | 是 | — | 只允许相应条目表中的参数；参数名保持 EPLAN 大小写 |
+| `arguments` | object，值均为 string，按 `entry` 校验 | 是 | — | 只允许相应条目表中的参数；参数名保持 EPLAN 大小写 |
 | `dry_run` | boolean | 否 | false | 所有条目可用，Write 必须支持；true 只返回处理后的调用、级别和已知副作用，不审批、不执行、不创建输出目录 |
 
-按本规格的输入形态，`entry` 封装 [ADR §1][adr1] 的 `action` + `type` 组合，`arguments` 对应其 `parameters`；不接受独立的 `action`、`type` 或命令行。Host 从嵌入白名单生成枚举及每条 `arguments` 的 schema（JSON Schema 2020-12）；以 `oneOf` 的 `entry.const` 选择分支，每个对象均 `additionalProperties: false`，schema 与运行时校验一致。字段名和序列化尚**未验证**，不改变 ADR 的白名单边界。
+按本规格的输入形态，`entry` 封装 [ADR §1][adr1] 的 `action` + `type` 组合，`arguments` 对应其 `parameters`；不接受独立的 `action`、`type` 或命令行。公开 schema 只含上述四个参数及完整的 12 项枚举；`arguments.additionalProperties` 为 string，不生成逐条 `oneOf` 或条件分支。Host 按嵌入白名单校验全部逐条规则，包括必填、允许的参数名、单值数量及格式；`INVALID_ARGUMENT` 一次列出全部问题、该条允许的参数名，并提示调用 `eplan_tool_usage` 的相应 topic。每条的参数表、副作用及示例由 usage 提供。Bridge 的大小写敏感参数名作为 `ActionParameter` 列表的 `Name` 数据传输，不改变共享 IPC 序列化规则。
 
 ### 2.1 首批枚举、固定参数与作用范围
 
@@ -42,7 +42,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 | `entry`（action/TYPE） | 级别 / 范围 | Host 固定或派生的参数 | 模型可给的 `arguments`（均必填，除非注明） / 输出 |
 |---|---|---|---|
 | `backup/MASTERDATA` | 导出级 / 系统 | `TYPE=MASTERDATA`；按 EPLAN 配置拆出 `SOURCEPATH`、`FILENAME`；`DESTINATIONPATH` 为本次目录；不传 `COMMENT` | `MDTYPE`：enum `ARTICLES`、`LANGUAGES`；`ARCHIVENAME`：归档名；分别一个 `.zw6` / `.zw7`（S24/A30） |
-| `changelayer` | Write / 项目 | `PROJECTNAME` 为解析的目标项目；无 TYPE | `LAYER`：string 数组；`VISIBLE`：boolean 数组；无导出文件 |
+| `changelayer` | Write / 项目 | `PROJECTNAME` 为解析的目标项目；无 TYPE | `LAYER`：单个图层名；`VISIBLE`：string enum `0`、`1`；无导出文件 |
 | `graphicallayertable/EXPORT` | 导出级 / 项目 | `TYPE=EXPORT`、`PROJECTNAME`；`EXPORTFILE` 拼入本次目录 | `EXPORTFILE`：文件名；一个 `.elc` |
 | `partsmanagementapi/EXPORTPARTS` | 导出级 / 系统部件库 | 对应 TYPE；`FORMAT=XPamExportXml`；`EXPORTFILE` 拼入本次目录 | `EXPORTFILE`、`PROPERTYID`、`PROPERTYVALUE`，过滤规则见下表；一个 `.xml` |
 | `partsmanagementapi/EXPORTMANUFACTURERS` | 导出级 / 系统部件库 | 同上 | 同上；一个 `.xml` |
@@ -56,14 +56,14 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 ### 2.2 逐条校验
 
-以下长度、数组上限和预检属于输入契约，产品实现**未验证**；允许值只取验证过的用途，不开放 api-actions 中全部参数（[ADR §2][adr2]、[§7][adr7]，SEC-33）。
+以下长度、单值数量和预检属于输入契约，产品实现**未验证**；允许值只取验证过的用途，不开放 api-actions 中全部参数（[ADR §2][adr2]、[§7][adr7]，SEC-33）。
 
 - 文本名称、过滤值：1–100 字符，保留大小写、空格和中文，不裁剪或改写合法值；不含控制字符或引号、不以 `/` 开头。S26 的 context 全部 exact=true 不放宽这些限制。
 - 文件名参数：1–100 字符，只是文件名；不含分隔符、绝对路径、UNC、驱动器号、`.` / `..` 路径段、`<>:"|?*`、控制字符或引号，不以点或空格结尾，不是 Windows 保留名。限定为该条目的扩展名；未带时由 Host 补上，已有正确扩展名时不重复补。归档 `ARCHIVENAME` 只接受 ASCII 字母、数字、`-`、`_` 的无扩展名主体（沿用 `eplan_part_export` 的备份名约束），扩展名由 EPLAN 生成。没有目录参数。
-- `changelayer`：`LAYER`、`VISIBLE` 均恰好 1 项，索引一一对应；图层名须为目标项目已有、可读且未锁定的图层。Host 展开成 `LAYER1`、`VISIBLE1`，布尔转为 `0` / `1`。模型不传展开后的键。S26 只测了 `EPLAN100` 的可见性翻转及回滚；设置其他图层、直接设 true、多图层以及 `PRINTED`、`TEXTHEIGHT`、`COLORID`、`TRANSPARENCY` 均**未验证**；多图层与这四类其他属性不在本规格开放范围（[ADR §2、§8][adr8]）。
-- 六种部件导出：`PROPERTYID` 为恰好 1 项的 integer 数组，每条的 `items.enum` 只有下表对应属性号；`PROPERTYVALUE` 为恰好 1 项的 string 数组。二者必填，Host 展开成 **`PROPERTYID1` / `PROPERTYVALUE1`**，不允许空过滤、第二组过滤或通配符用法。过滤值取已有记录的精确名称；未知记录的行为、多属性组合及其他 FORMAT **未验证**。不得把省略过滤解释为“导出全部”（[ADR §8][adr8]，A40）。
+- `changelayer`：`LAYER`、`VISIBLE` 均为单个字符串，每个参数名恰好出现一次；不接受数组或第二个图层。图层名须为目标项目已有、可读且未锁定的图层。Host 展开成 `LAYER1`、`VISIBLE1`，可见性只允许字符串 `0` / `1`。模型不传展开后的键。S26 只测了 `EPLAN100` 的可见性翻转及回滚；设置其他图层、直接设 true、多图层以及 `PRINTED`、`TEXTHEIGHT`、`COLORID`、`TRANSPARENCY` 均**未验证**；多图层与这四类其他属性不在本规格开放范围（[ADR §2、§8][adr8]）。
+- 六种部件导出：`PROPERTYID` 为下表对应属性号的精确十进制字符串；`PROPERTYVALUE` 为单个字符串。每个参数名恰好出现一次，数组被拒绝。二者必填，Host 展开成 **`PROPERTYID1` / `PROPERTYVALUE1`**，不允许空过滤、第二组过滤或通配符用法。过滤值取已有记录的精确名称；未知记录的行为、多属性组合及其他 FORMAT **未验证**。不得把省略过滤解释为“导出全部”（[ADR §8][adr8]，A40）。
 
-| TYPE | `PROPERTYID[0]` 唯一允许值 | 属性 / S26 的 `PROPERTYVALUE[0]` 样本 |
+| TYPE | `PROPERTYID` 唯一允许值 | 属性 / S26 的 `PROPERTYVALUE` 样本 |
 |---|---:|---|
 | `EXPORTPARTS` | 22001 | `ARTICLE_PARTNR` / `10 20 206` |
 | `EXPORTMANUFACTURERS` | 22900 | `PART_ADDRESS_SHORTNAME` / `ABB` |
@@ -84,11 +84,11 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 示例（产品输入处理**未验证**；其对应 action 参数来自 S26/A30）：
 
 ```json
-{"entry":"partsmanagementapi/EXPORTMANUFACTURERS","arguments":{"EXPORTFILE":"manufacturers.xml","PROPERTYID":[22900],"PROPERTYVALUE":["ABB"]}}
+{"entry":"partsmanagementapi/EXPORTMANUFACTURERS","arguments":{"EXPORTFILE":"manufacturers.xml","PROPERTYID":"22900","PROPERTYVALUE":"ABB"}}
 ```
 
 ```json
-{"entry":"changelayer","project":"LargeWrite","arguments":{"LAYER":["EPLAN100"],"VISIBLE":[false]},"dry_run":true}
+{"entry":"changelayer","project":"LargeWrite","arguments":{"LAYER":"EPLAN100","VISIBLE":"0"},"dry_run":true}
 ```
 
 ```json
