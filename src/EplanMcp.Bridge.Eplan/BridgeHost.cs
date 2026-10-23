@@ -101,8 +101,13 @@ internal static class BridgeHost
         var placeholders = new EplanPlaceholderReader();
         var projectFiles = new EplanProjectFiles();
         var factory = new EplanProjectFactory(log);
+        var actions = new EplanActionRunner();
+        int actionMajor = System.Version.TryParse(eplan.Version, out System.Version? actionVersion) ? actionVersion.Major : 0;
         IOperation[] operations =
         [
+            new ActionRunPlanOperation(actionMajor, catalog, actions),
+            new ActionRunOperation(actionMajor, catalog, actions, new EplanSystemMessageReader()),
+            new ActionRunExecuteOperation(actionMajor, catalog, actions, new EplanSystemMessageReader(), transactions),
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new EplanProjectReader()),
             new PageListOperation(catalog, pages),
