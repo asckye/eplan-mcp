@@ -48,6 +48,8 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     {
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
         NumberHandling = JsonNumberHandling.Strict,
+        PropertyNameCaseInsensitive = false,
+        AllowDuplicateProperties = false,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
     };
 
@@ -58,6 +60,8 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     public MasterDataWrites MasterDataWrites { get; init; } = MasterDataWrites.Approve;
 
     public ActionRunSwitch ActionRun { get; init; } = ActionRunSwitch.Off;
+
+    public int PlanLifetimeHours { get; init; } = 24;
 
     /// <summary>
     /// The roots engineering packs may reference in place, by name: <c>packSources</c> (ADR-0024 section 6); empty by
@@ -107,6 +111,11 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         }
 
         HostConfig defaults = Defaults(locations);
+        int lifetime = file?.PlanLifetimeHours ?? 24;
+        if (lifetime is < 1 or > 24)
+        {
+            return (null, "is not valid: 'planLifetimeHours' must be an integer from 1 to 24");
+        }
         List<string> roots = file?.ScratchRoots ?? [.. defaults.ScratchRoots];
         if (roots.Count == 0 || roots.Any(r => string.IsNullOrWhiteSpace(r) || !Path.IsPathFullyQualified(r)))
         {
@@ -133,6 +142,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             ActionRun = file?.ActionRun ?? defaults.ActionRun,
             PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
             HttpAllowedOrigins = file?.HttpAllowedOrigins ?? [],
+            PlanLifetimeHours = lifetime,
         }, null);
     }
 
@@ -141,6 +151,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     private sealed class ConfigFile
     {
+        public int PlanLifetimeHours { get; set; } = 24;
         public List<string>? HttpAllowedOrigins { get; set; }
         public List<string>? ScratchRoots { get; set; }
 

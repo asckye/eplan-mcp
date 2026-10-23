@@ -173,7 +173,7 @@ flowchart TB
 | `Cli` | `serve`（默认）、`doctor`、`install-addin` / `uninstall-addin`、`client-config <客户端>`、`audit verify`、`pack scan / check / export / install`（M6 工程包，供手工使用和测试，库在 `EplanMcp.Packs`） |
 
 **CLI 的 JSON 输出**（给 Workbench 用，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.11）：`doctor`、`audit verify`、`client-config`、`install-addin`、`uninstall-addin` 带 `--format json` 时在 stdout 输出一个 UTF-8 的 JSON 对象，退出码与文本输出相同；`--format` 只接受 `json`，其他值或缺少值按命令行错误处理（退出码 2）。结构变化时 `schemaVersion` 加 1，快照在 `tests/Contracts.Snapshots/`。
-- `doctor`：`{schemaVersion: 1, hostVersion, status, checks: [{id, subject?, status, zh, en}]}`。`status` 取 `ok`、`info`、`warning`、`failure`；顶层的 `status` 是最严重的一项，`info` 按 `ok` 计。`checks` 按输出顺序排列，`id` 稳定，同类的几项共用一个：`host.version`、`data.directory`、`config`、`audit.directory`、`exports`、`backups`、`msix`、`suspension`、`http.service`、`vm.firewall`、`eplan.installation`、`eplan.running`、`bridge.pipe`、`bridge.handshake`、`bridge.licence`、`path.length`。HTTP 状态发现文件与固定防火墙规则见 ADR-0018 第 11 条。`subject` 是这一项针对的 EPLAN 版本（`eplan.installation`）或 EPLAN 进程号（其他各项），不针对某一个时省略。
+- `doctor`：`{schemaVersion: 1, hostVersion, status, checks: [{id, subject?, status, zh, en}]}`。`status` 取 `ok`、`info`、`warning`、`failure`；顶层的 `status` 是最严重的一项，`info` 按 `ok` 计。`checks` 按输出顺序排列，`id` 稳定，同类的几项共用一个：`host.version`、`data.directory`、`config`、`audit.directory`、`exports`、`backups`、`plans`、`msix`、`suspension`、`http.service`、`vm.firewall`、`eplan.installation`、`eplan.running`、`bridge.pipe`、`bridge.handshake`、`bridge.licence`、`path.length`。HTTP 状态发现文件与固定防火墙规则见 ADR-0018 第 11 条。`subject` 是这一项针对的 EPLAN 版本（`eplan.installation`）或 EPLAN 进程号（其他各项），不针对某一个时省略。
 - `audit verify`：`{schemaVersion: 1, directory, exists, intactRecords, intact, break}`。`intactRecords` 是完整的记录数（断开时是断开处之前的）；`break` 为 `{file, line, problem}`，`problem` 取 `changed`、`missing`、`not_a_record`，哈希链完整时为 `null`。
 - `client-config`：`{schemaVersion: 1, mode, server: {name, command, args}, problem, clients: [{client, file, action, result, before, after, backup, notes, problem}]}`，每个客户端一项，顺序同命令行。
   - `mode` 取 `write`、`dry_run`、`remove`；`action` 取 `write`、`remove`；`result` 取 `written`、`would_write`、`removed`、`unchanged`、`failed`；
@@ -437,6 +437,8 @@ sequenceDiagram
 - 审计写入失败时，**写操作一律拒绝执行**（不在没有记录的情况下修改项目）；读操作照常执行，同时记录告警。
 
 ### 8.9 配置
+- `planLifetimeHours` 为整数 1–24，默认 24，只能缩短新计划的可执行期；仅通过 `config.json` 修改，doctor 展示，无 MCP 修改入口（ADR-0028）。
+- 计划存储在创建前及每小时清理已到保留期限的普通记录；隔离数据及崩溃残留计入总占用。每份仍在主存储中的记录（含终态）保留完整 16 MiB 准入预留；doctor 的 `plans` 项报告记录数、实际字节及隔离数，不触发清理。
 - `config.json` 带 JSON Schema。优先级从低到高：内置默认值 → 用户配置 → 环境变量 → 命令行参数。启动时校验，有错误就拒绝启动，并指出具体是哪一项。
 - 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。`packSources` 为空：工程包只能复制资源，不能就地引用；列出的根目录名（如 `"packSources": {"company-refs": "\\\\server\\eplan\\refs"}`）才可以被引用（ADR-0024 第 6 节）。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。

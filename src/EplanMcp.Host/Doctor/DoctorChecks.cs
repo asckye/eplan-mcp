@@ -2,8 +2,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using EplanMcp.Host.Addin;
+using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Exports;
+using EplanMcp.Host.Plans;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Win32;
@@ -21,6 +23,21 @@ internal static class DoctorChecks
 
     public static DoctorCheck HostVersion() =>
         new(DoctorCheckIds.HostVersion, DoctorStatus.Info, $"eplanmcp {HostInfo.Version}", $"eplanmcp {HostInfo.Version}");
+
+    public static DoctorCheck Plans(HostDataLocations locations)
+    {
+        try
+        {
+            (int count, long bytes, int quarantined) = new PlanStore(locations, new AuditLog(locations.Audit, TimeProvider.System)).Usage();
+            string text = string.Create(CultureInfo.InvariantCulture, $"Plan store: {count} records, {bytes} bytes, {quarantined} quarantined");
+            string chinese = string.Create(CultureInfo.InvariantCulture, $"计划存储：{count} 份记录，{bytes} 字节，{quarantined} 份已隔离");
+            return new(DoctorCheckIds.Plans, quarantined == 0 ? DoctorStatus.Info : DoctorStatus.Warning, chinese, text);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return new(DoctorCheckIds.Plans, DoctorStatus.Failure, "无法检查计划存储：" + ex.Message, "Plan store cannot be inspected: " + ex.Message);
+        }
+    }
 
     public static DoctorCheck DataDirectory(HostDataLocations locations)
     {
@@ -151,11 +168,12 @@ internal static class DoctorChecks
         string roots = string.Join("; ", config.ScratchRoots);
         (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
         string timeout = HostConfig.Seconds(config.ApprovalTimeout);
+        string lifetime = config.PlanLifetimeHours.ToString(CultureInfo.InvariantCulture);
         (string masterData, string masterDataEn) = config.MasterDataWrites == MasterDataWrites.Deny ? ("禁止", "denied") : ("每次审批并先备份", "approved each time, backed up first");
         string sources = string.Join("; ", config.PackSources.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key} = {p.Value}"));
         return new(DoctorCheckIds.Config, DoctorStatus.Ok,
-            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒；actionRun：{config.ActionRun}，条目 {ActionRunCatalog.Entries.Count}，本进程停用：{string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}；工程包可以引用的来源（packSources）：{(sources.Length == 0 ? "无" : sources)}",
-            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s; actionRun: {config.ActionRun}, entries {ActionRunCatalog.Entries.Count}, disabled in this process: {string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}; sources packs may reference (packSources): {(sources.Length == 0 ? "none" : sources)}");
+            $"配置（{source}）：scratch 根目录 {roots}；写入 scratch 之外的项目：{outside}；写入部件库等系统主数据：{masterData}；审批期限 {timeout} 秒；planLifetimeHours: {lifetime} h；actionRun：{config.ActionRun}，条目 {ActionRunCatalog.Entries.Count}，本进程停用：{string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}；工程包可以引用的来源（packSources）：{(sources.Length == 0 ? "无" : sources)}",
+            $"Configuration ({sourceEn}): scratch roots {roots}; writes outside scratch: {outsideEn}; writes to system master data such as the parts database: {masterDataEn}; approval deadline {timeout} s; planLifetimeHours: {lifetime} h; actionRun: {config.ActionRun}, entries {ActionRunCatalog.Entries.Count}, disabled in this process: {string.Join(", ", ActionRunCatalog.Process.Disabled.Keys)}; sources packs may reference (packSources): {(sources.Length == 0 ? "none" : sources)}");
     }
 
     /// <summary>
