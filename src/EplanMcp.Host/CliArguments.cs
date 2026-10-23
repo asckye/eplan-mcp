@@ -18,6 +18,7 @@ internal enum CliCommand
     Pack,
     VmKey,
     VmFirewall,
+    VmInstances,
     Version,
 }
 
@@ -45,6 +46,7 @@ internal sealed record CliArguments(
         + " | client-config [<client>...] --vm --remove [--format json]"
         + " | install-addin [--variant <variant>]... [--format json] | uninstall-addin [--format json] | --version"
         + " | vm-firewall show|add|remove --port <n> --host-address <IPv4> (show: [--format json])"
+        + " | vm-instances --format json"
         + Environment.NewLine + "       eplanmcp pack scan <[kind=|sample=]path>... [--id <id> --name <name> --version <semver> [--out <folder>] [--description <text>]"
         + " [--author <name>] [--eplan <range>] [--variant <variant>]... [--official]] [--bundle-projects] [--format json]"
         + " | pack check <folder|file.eplanpack> | pack export <folder> <file.eplanpack> | pack install <folder|file.eplanpack> (each [--format json])"
@@ -60,6 +62,7 @@ internal sealed record CliArguments(
         ["vm-key", var action] when action is "create" or "show" or "delete" => new(CliCommand.VmKey, Json: false, KeyAction: action),
         ["vm-firewall", var action, .. var options] when VmFirewallRequest.Parse(action, options) is { } firewall => new(CliCommand.VmFirewall, Json: firewall.Json, Firewall: firewall),
         ["--version"] => new(CliCommand.Version, Json: false),
+        ["vm-instances", "--format", "json"] => new(CliCommand.VmInstances, Json: true),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),
         ["client-config", .. var options] => ClientConfigArguments(options),

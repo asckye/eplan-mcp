@@ -6,6 +6,19 @@
     <StackPanel>
       <TextBlock Text="{l:Tr Vm.Title}" Style="{StaticResource Ui.Text.Section}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" />
       <TextBlock Text="{l:Tr Vm.Help}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" />
+      <Label x:Name="InstanceLabel" Content="{l:Tr Vm.Instance}" Target="{Binding ElementName=Instance}" Margin="0,8,0,8" />
+      <ComboBox x:Name="Instance" Style="{StaticResource Primer.Select}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=InstanceLabel}" SelectionChanged="OnInstance" />
+      <WrapPanel Margin="0,8,0,8">
+        <Button x:Name="Instances" Tag="instances" Content="{l:Tr Vm.CheckInstances}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Start" Tag="start" Content="{l:Tr Vm.Start}" Style="{StaticResource Primer.Primary}" Click="OnAction" Margin="0,0,8,8" />
+        <Button x:Name="Stop" Tag="stop" Content="{l:Tr Vm.Stop}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="0,0,8,8" />
+      </WrapPanel>
+      <Border Style="{StaticResource Primer.Alert.Info}">
+        <DockPanel>
+          <Path x:Name="ServiceIcon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="16" Height="16" Margin="0,0,8,0" />
+          <TextBlock x:Name="ServiceStatus" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </DockPanel>
+      </Border>
       <Label x:Name="AddressLabel" Content="{l:Tr Vm.Address}" Target="{Binding ElementName=Address}" Margin="0,8,0,8" />
       <ComboBox x:Name="Address" Style="{StaticResource Primer.Select}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}" SelectionChanged="OnInput" />
       <TextBlock x:Name="AddressError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />

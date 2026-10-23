@@ -273,7 +273,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 这些命令在 stdout 输出，只在 `serve` 以外使用（CLAUDE.md 规则 5 只约束 `serve`）。
 
 ### 4.12 虚拟机连接（Q14，ADR-0018）
-实现进度（part 3b）：虚拟机内的地址选择、密钥和经 Windows UAC 的网络权限位于“MCP 与客户端”页；`vm-firewall show --port <n> --host-address <IPv4> --format json` 返回 `schemaVersion: 1` 和实际 `rules`。为遵守每部分约 400 行的限制，服务启动、停止、监听状态和 Workbench 退出清理留至 part 3c，本部分不启动服务。
+实现进度（part 3b、3c）：虚拟机内的地址、密钥、经 Windows UAC 的网络权限及服务启停已位于“MCP 与客户端”页。`vm-instances --format json` 只经 Host 发现列出 PID（`schemaVersion: 1`、`processes`），不连接 EPLAN；单实例由 Host 选择，多实例须工程师选择。子进程进入 kill-on-close Job 后才通过 stdin 放行启动，监听以自身 PID、启动时间匹配的 `state/http-*.json` 为准；运行时锁定地址、端口和密钥修改。Host 不支持无窗口子进程的优雅停止，停止或 Workbench 退出仅终止该 Host；残留状态文件由 `doctor` 按 PID/启动时间忽略。跨机器连接、真实 EPLAN、UAC 和防火墙仍待实机验证；宿主机向导与连接测试随后实现。
 项目负责人 2026-10-20 要求"和TIA mcp一样加入虚拟机连接的系统"：EPLAN 在虚拟机中、AI 客户端在宿主机上时也能用。做法与 TIA 相同，并把防火墙限制到宿主机 IP（[ADR-0018](../adr/0018-vm-http-transport.md)，2026-10-21 接受）：
 - **虚拟机中**：Workbench 的"MCP 与客户端"页选择"虚拟机 ↔ 宿主机"，填写虚拟机的 IPv4 和端口（默认 8766），生成密钥。
   - "网络权限"经管理员授权建防火墙规则，只放行宿主机的 IPv4；

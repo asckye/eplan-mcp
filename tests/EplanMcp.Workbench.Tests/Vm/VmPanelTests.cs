@@ -15,8 +15,10 @@ namespace EplanMcp.Workbench.Tests.Vm;
 [Trait("Size", "Medium")]
 public sealed class VmPanelTests(WpfContext wpf)
 {
-    private static readonly string[] _inputs = ["Address", "Port", "HostAddress", "KeyValue", "FirewallValue"];
-    private static readonly string[] _commands = ["Generate", "Reveal", "Copy", "Delete", "Allow", "Remove", "Refresh"];
+    private static readonly string[] _inputs = ["Address", "Port", "HostAddress", "KeyValue", "FirewallValue", "Instance"];
+    private static readonly string[] _commands = ["Generate", "Reveal", "Copy", "Delete", "Allow", "Remove", "Refresh", "Instances", "Start", "Stop"];
+    private static readonly string[] _locked = ["Address", "Port", "Instance", "Generate", "Delete", "Instances", "Start"];
+    private static readonly string[] _available = ["HostAddress", "Allow", "Remove", "Refresh", "Reveal", "Copy"];
     [Theory]
     [InlineData(AppLanguage.Chinese)]
     [InlineData(AppLanguage.English)]
@@ -35,7 +37,7 @@ public sealed class VmPanelTests(WpfContext wpf)
             {
                 var input = (FrameworkElement)panel.FindName(name);
                 Assert.NotNull(AutomationProperties.GetLabeledBy(input));
-                Assert.False(string.IsNullOrWhiteSpace(UIElementAutomationPeer.CreatePeerForElement(input)!.GetName()));
+                Assert.False(string.IsNullOrWhiteSpace(UIElementAutomationPeer.CreatePeerForElement(input)!.GetName()), name);
             }
 
             foreach (ButtonBase button in Descendants<ButtonBase>(panel))
@@ -56,7 +58,7 @@ public sealed class VmPanelTests(WpfContext wpf)
             Assert.False(allow.IsEnabled);
             Assert.Equal(Loc.Current["Vm.PortError"], AutomationProperties.GetHelpText(allow));
             Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting((TextBlock)panel.FindName("Status")));
-            Assert.Single(fake.Host.Runs);
+            Assert.Equal(2, fake.Host.Runs.Count);
             Assert.Empty(fake.Elevated);
         }));
 
@@ -75,7 +77,7 @@ public sealed class VmPanelTests(WpfContext wpf)
             Click((Button)panel.FindName("Generate"));
             Click((Button)panel.FindName("Delete"));
             Assert.Equal(["Regenerate", "Delete"], questions);
-            Assert.Single(fake.Host.Runs);
+            Assert.Equal(2, fake.Host.Runs.Count);
             Assert.Empty(fake.Clipboard);
             Click((ToggleButton)panel.FindName("Reveal"));
             Assert.Equal(FakeVm.Key, ((TextBox)panel.FindName("KeyValue")).Text);
@@ -130,6 +132,109 @@ public sealed class VmPanelTests(WpfContext wpf)
             Assert.Equal(Loc.Current["Host.Missing"], AutomationProperties.GetHelpText((Button)panel.FindName("Allow")));
             Assert.Empty(fake.Host.Runs);
             Assert.Empty(fake.Elevated);
+        }));
+
+    [Theory]
+    [InlineData(AppLanguage.Chinese)]
+    [InlineData(AppLanguage.English)]
+    public void Service_StartingListeningStopped_ExplainsLockedSettingsAndKeepsNetworkCommands(AppLanguage language) =>
+        wpf.RunWithLanguage(language, () => With(window =>
+        {
+            var fake = new FakeVm { StoredKey = FakeVm.Key };
+            var launcher = new FakeVmLauncher();
+            using VmView view = fake.Create(launcher: launcher);
+            VmPanel panel = Attach(window, view);
+            var start = (Button)panel.FindName("Start");
+            var stop = (Button)panel.FindName("Stop");
+            var status = (TextBlock)panel.FindName("ServiceStatus");
+            Assert.Equal(Loc.Current["Vm.Start"], start.Content);
+            Assert.True(start.IsEnabled);
+            Assert.False(stop.IsEnabled);
+            Assert.Equal(Loc.Current["Vm.Stopped"], status.Text);
+            Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(status));
+            Assert.Empty(launcher.Starts);
+            Click(start);
+            Assert.Equal(Loc.Current["Vm.Starting"], status.Text);
+            Assert.True(stop.IsEnabled);
+            foreach (string name in _locked)
+            {
+                var field = (Control)panel.FindName(name);
+                Assert.False(field.IsEnabled);
+                Assert.Equal(Loc.Current["Vm.StopFirst"], AutomationProperties.GetHelpText(field));
+            }
+            foreach (string name in _available)
+            {
+                Assert.True(((Control)panel.FindName(name)).IsEnabled);
+            }
+            launcher.Child.Listening.SetResult(new VmEndpoint(view.Address, 8766));
+            WpfContext.DrainUntil(() => !view.Starting, "The listening signal did not reach the page.");
+            Assert.Contains("http://192.168.56.2:8766/mcp", status.Text, StringComparison.Ordinal);
+            Loc.Current.Language = language == AppLanguage.Chinese ? AppLanguage.English : AppLanguage.Chinese;
+            WpfContext.Drain();
+            Assert.Equal(Loc.Current["Vm.Start"], start.Content);
+            Assert.Equal(Loc.Current["Vm.StopFirst"], AutomationProperties.GetHelpText(start));
+            Assert.Equal(view.ServiceStatus, status.Text);
+            Click(stop);
+            WpfContext.DrainUntil(() => !view.Running, "The stopped child did not reach the page.");
+            Assert.True(launcher.Child.Stopped);
+            Assert.Equal(Loc.Current["Vm.Stopped"], status.Text);
+            Assert.True(((Control)panel.FindName("Port")).IsEnabled);
+            Assert.True(((Button)panel.FindName("Generate")).IsEnabled);
+            Assert.Single(launcher.Starts);
+        }));
+
+    [Theory]
+    [InlineData(AppLanguage.Chinese, false, "[100]", "Vm.NoKey")]
+    [InlineData(AppLanguage.English, false, "[100]", "Vm.NoKey")]
+    [InlineData(AppLanguage.Chinese, true, "[]", "Vm.NoEplan")]
+    [InlineData(AppLanguage.English, true, "[]", "Vm.NoEplan")]
+    [InlineData(AppLanguage.Chinese, true, "[100,200]", "Vm.PickInstance")]
+    [InlineData(AppLanguage.English, true, "[100,200]", "Vm.PickInstance")]
+    public void Service_PrerequisitesAndExplicitInstanceSelection_HaveLocalizedReasons(AppLanguage language, bool key, string processes, string reason) =>
+        wpf.RunWithLanguage(language, () => With(window =>
+        {
+            var fake = new FakeVm { StoredKey = key ? FakeVm.Key : null, Instances = "{\"schemaVersion\":1,\"processes\":" + processes + "}" };
+            var launcher = new FakeVmLauncher();
+            using VmView view = fake.Create(launcher: launcher);
+            VmPanel panel = Attach(window, view);
+            var start = (Button)panel.FindName("Start");
+            Assert.False(start.IsEnabled);
+            Assert.Equal(Loc.Current[reason], AutomationProperties.GetHelpText(start));
+            Assert.Equal(Loc.Current[reason], start.ToolTip);
+            Assert.Empty(launcher.Starts);
+            if (reason == "Vm.PickInstance")
+            {
+                var instance = (ComboBox)panel.FindName("Instance");
+                Assert.Equal(-1, instance.SelectedIndex);
+                instance.SelectedItem = 200;
+                WpfContext.Drain();
+                Assert.True(start.IsEnabled);
+                Click(start);
+                Assert.Equal(200, Assert.Single(launcher.Starts).Process);
+                Click((Button)panel.FindName("Stop"));
+                WpfContext.DrainUntil(() => !view.Running, "The stopped child did not reach the page.");
+            }
+        }));
+
+    [Theory]
+    [InlineData(AppLanguage.Chinese)]
+    [InlineData(AppLanguage.English)]
+    public void ServiceFailure_ShowsPlainRedactedHostErrorWithAccessibleStatus(AppLanguage language) =>
+        wpf.RunWithLanguage(language, () => With(window =>
+        {
+            var fake = new FakeVm { StoredKey = FakeVm.Key };
+            var launcher = new FakeVmLauncher();
+            using VmView view = fake.Create(launcher: launcher);
+            VmPanel panel = Attach(window, view);
+            Click((Button)panel.FindName("Start"));
+            launcher.Child.Exit.SetResult("Address already in use: " + FakeVm.Key);
+            WpfContext.DrainUntil(() => !view.Running, "The failed child did not reach the page.");
+            var status = (TextBlock)panel.FindName("ServiceStatus");
+            Assert.Contains(Loc.Current["Vm.Failed"], status.Text, StringComparison.Ordinal);
+            Assert.Contains("Address already in use", status.Text, StringComparison.Ordinal);
+            Assert.DoesNotContain(FakeVm.Key, status.Text, StringComparison.Ordinal);
+            Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(status));
+            Assert.True(((Button)panel.FindName("Start")).IsEnabled);
         }));
 
     private static VmPanel Attach(MainWindow window, VmView view)

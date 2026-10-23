@@ -48,6 +48,7 @@ internal static class Program
 
     private static async Task<int> RunAsync(CliArguments cli, TextWriter output) => cli switch
     {
+        { Command: CliCommand.VmInstances } => await VmInstances.WriteAsync(new PipeBridgeDiscovery(), output).ConfigureAwait(false),
         { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
         { KeyAction: { } action } => await VmKey.RunAsync(action, HostDataLocations.FromEnvironment(), output, CancellationToken.None).ConfigureAwait(false),
         { Firewall: { } firewall } => VmFirewallCommand.ForMachine().Run(firewall, output),
@@ -90,7 +91,7 @@ internal static class Program
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.Cryptography.CryptographicException or InvalidOperationException)
             {
-                await Console.Error.WriteLineAsync("HTTP service could not start. Check the IPv4/port, EPLAN selection and 'vm-key create'.").ConfigureAwait(false);
+                await Console.Error.WriteLineAsync(ex is HttpStartException ? ex.Message : "HTTP service could not start: IPv4/port unavailable (address in use or access refused), or configuration refused. Check the Host diagnostics above.").ConfigureAwait(false);
                 return 3;
             }
         }

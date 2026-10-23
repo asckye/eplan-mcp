@@ -55,7 +55,7 @@ public sealed class VmViewTests
     public async Task Key_CreateReadMaskShowCopyDelete_OnlyAfterConfirmation()
     {
         var fake = new FakeVm();
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         Assert.Equal(("192.168.56.2", "8766"), (view.Address, view.Port));
         await fake.RunAsync(view, "load");
         Assert.False(view.HasKey);
@@ -93,7 +93,7 @@ public sealed class VmViewTests
     public async Task Key_UnknownPresence_ConfirmsBeforeOverwriting()
     {
         var fake = new FakeVm { Confirmed = false };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, "create");
         Assert.Equal(["Regenerate"], fake.Questions);
         Assert.Empty(fake.Host.Runs);
@@ -106,7 +106,7 @@ public sealed class VmViewTests
     public async Task Key_FailureOrException_RedactsAllOutputAndLeavesNoRevealedKey(string action)
     {
         var fake = new FakeVm { StoredKey = FakeVm.Key };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         foreach (bool exception in new[] { false, true })
         {
             fake.Host.Answer = _ => new HostRun(0, FakeVm.Key);
@@ -125,7 +125,7 @@ public sealed class VmViewTests
     public async Task ClipboardFailure_IsRedacted_AndDoesNotWriteSettingsOrRerunHost()
     {
         var fake = new FakeVm { StoredKey = FakeVm.Key };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, "load");
         await view.RunAsync("copy", _ => true, _ => throw new InvalidOperationException(FakeVm.Key), CancellationToken.None);
         Assert.DoesNotContain(FakeVm.Key, view.Message, StringComparison.Ordinal);
@@ -143,7 +143,7 @@ public sealed class VmViewTests
     public async Task Firewall_ElevatesOnlyMutation_ThenReadsActualStateUnelevated(string action, int? exit)
     {
         var fake = new FakeVm { ExitCode = exit };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, action);
         Assert.Equal((fake.Host.Executable, action == "remove", "8766", "192.168.56.1"), Assert.Single(fake.Elevated));
         Assert.Equal(["vm-firewall", "show", "--port", "8766", "--host-address", "192.168.56.1", "--format", "json"], Assert.Single(fake.Host.Runs).Arguments);
@@ -160,7 +160,7 @@ public sealed class VmViewTests
     public async Task Firewall_UnreadableOrUnsupportedResult_IsAnErrorWithNoPartialState(string json)
     {
         var fake = new FakeVm { Rules = json };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, "refresh");
         Assert.Equal(Loc.Current["Vm.Failed"], view.Message);
         Assert.Equal(Loc.Current["Vm.Unknown"], view.Firewall);
@@ -171,7 +171,7 @@ public sealed class VmViewTests
     public async Task Firewall_CancelledConsent_StillHasOwnMessageWhenRefreshFails()
     {
         var fake = new FakeVm { ExitCode = null, Rules = "bad" };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, "allow");
         Assert.Equal(Loc.Current["Vm.CancelledUnknown"], view.Message);
     }
@@ -180,7 +180,7 @@ public sealed class VmViewTests
     public async Task Firewall_LaunchFailure_IsRedactedAndReenablesCommands()
     {
         var fake = new FakeVm { Error = new InvalidOperationException(FakeVm.Key) };
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         await fake.RunAsync(view, "allow");
         Assert.Equal(Loc.Current["Vm.Failed"], view.Message);
         Assert.False(view.Busy);
@@ -191,10 +191,10 @@ public sealed class VmViewTests
     public async Task ValidationOrMissingHost_PreventsCommands_AndExplainsWhy()
     {
         var fake = new FakeVm();
-        VmView view = fake.Create(available: false);
-        await fake.RunAsync(view, "create");
-        Assert.NotEmpty(view.Reason);
-        view = fake.Create();
+        using VmView unavailable = fake.Create(available: false);
+        await fake.RunAsync(unavailable, "create");
+        Assert.NotEmpty(unavailable.Reason);
+        using VmView view = fake.Create();
         view.Address = "10.0.0.3";
         Assert.NotEmpty(view.AddressError);
         view.Port = "65536";
@@ -212,7 +212,7 @@ public sealed class VmViewTests
     public async Task RunningCommand_DisablesReentryUntilCompletion()
     {
         var fake = new FakeVm();
-        VmView view = fake.Create();
+        using VmView view = fake.Create();
         TaskCompletionSource<HostRun> held = fake.Host.Hold();
         Task pending = fake.RunAsync(view, "load");
         Assert.True(view.Busy);

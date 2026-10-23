@@ -5,7 +5,7 @@ using TiaOpenness.Gui.Localization;
 namespace EplanMcp.Workbench.Vm;
 
 /// <summary>The UI thread owns this state. Secret stdout stays here, never in errors, logs or settings.</summary>
-internal sealed class VmView(IHostRunner? host, IVmElevation elevation, IReadOnlyList<string> addresses) : INotifyPropertyChanged
+internal sealed partial class VmView(IHostRunner? host, IVmElevation elevation, IReadOnlyList<string> addresses, IVmLauncher? launcher = null) : INotifyPropertyChanged, IDisposable
 {
     private string? _key;
     private bool _checkedKey, _shown;
@@ -29,7 +29,12 @@ internal sealed class VmView(IHostRunner? host, IVmElevation elevation, IReadOnl
     public string Message => Loc.Current[_message];
     public string Firewall => _firewall is null ? Loc.Current["Vm.Unknown"] : _firewall.Rules.Count == 0 ? Loc.Current["Vm.Absent"]
         : string.Join(Environment.NewLine, _firewall.Rules.Select(r => Loc.Current.T("Vm.Rule", Approvals.ProjectText.Line(r.RemoteAddress), Approvals.ProjectText.Line(r.Port), Approvals.ProjectText.Line(r.Program), r.Profiles, r.Protocol, r.Direction, r.Action, r.Enabled, r.EdgeTraversal)));
-    public string DisabledReason(string action) => Reason.Length > 0 ? Reason : action is "allow" or "remove" or "refresh" ? PortError.Length > 0 ? PortError : HostError
+    public string DisabledReason(string action) => host is null ? Loc.Current["Host.Missing"] : action == "stop" ? Running && !_stopping ? string.Empty : Loc.Current["Vm.Stopped"]
+        : Running && action is "start" or "create" or "delete" or "settings" or "instances" ? Loc.Current["Vm.StopFirst"]
+        : Reason.Length > 0 ? Reason : action == "start" ? AddressError.Length > 0 ? AddressError : PortError.Length > 0 ? PortError
+        : !HasKey ? Loc.Current["Vm.NoKey"] : !_instancesKnown ? Loc.Current["Vm.CheckInstances"] : Processes.Count == 0 ? Loc.Current["Vm.NoEplan"]
+        : Processes.Count > 1 && !Processes.Contains(SelectedProcess ?? 0) ? Loc.Current["Vm.PickInstance"] : string.Empty
+        : action is "allow" or "remove" or "refresh" ? PortError.Length > 0 ? PortError : HostError
         : action is "show" or "copy" or "delete" && !HasKey ? Loc.Current["Vm.NoKey"] : string.Empty;
 
     public async Task RunAsync(string action, Func<string, bool> confirm, Action<string> clipboard, CancellationToken cancellationToken)
@@ -39,6 +44,10 @@ internal sealed class VmView(IHostRunner? host, IVmElevation elevation, IReadOnl
             return;
         }
 
+        if (action == "start")
+        { await ServeAsync(cancellationToken).ConfigureAwait(true); return; }
+        if (action == "stop")
+        { StopService(); return; }
         Busy = true;
         _message = "Vm.Ready";
         Changed();
@@ -48,6 +57,14 @@ internal sealed class VmView(IHostRunner? host, IVmElevation elevation, IReadOnl
             {
                 case "load":
                     await LoadKeyAsync(cancellationToken).ConfigureAwait(true);
+                    break;
+                case "instances":
+                    _instancesKnown = false;
+                    HostRun instances = await host!.RunAsync(["vm-instances", "--format", "json"], TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(true);
+                    Require(instances);
+                    Processes = HostCommands.Parse<InstanceReport>(instances.Output).Processes;
+                    _instancesKnown = Processes.All(p => p > 0) && Processes.Distinct().Count() == Processes.Count;
+                    SelectedProcess = null;
                     break;
                 case "create":
                 case "delete":
