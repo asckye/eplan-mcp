@@ -411,14 +411,29 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Open();
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
             window.Hide();
+            // Keyboard focus needs the window active. The click on the notification lets the Workbench come to the
+            // front; a test run does not get that, and once its window hid, the program in the foreground (on a desktop
+            // in use, or a full solution run) can keep or take back activation, and with it the focus. So what is
+            // checked is where the window asks for focus, and the focus itself where the window is still active.
+            var asked = new List<object>();
+            window.AddHandler(
+                Keyboard.KeyboardInputProviderAcquireFocusEvent,
+                new KeyboardInputProviderAcquireFocusEventHandler((_, e) => asked.Add(e.OriginalSource)),
+                handledEventsToo: true);
 
             window.Open(Item(second));
             WpfContext.Drain();
 
+            object title = page.FindName("QuestionTitle");
             Assert.True(window.IsVisible);
             Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
             Assert.Same(second, _view!.Shown!.Question);
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Same(title, asked.LastOrDefault());
+            if (window.IsActive)
+            {
+                Assert.Same(title, Keyboard.FocusedElement);
+            }
+
             Assert.False(Button(page, "ApproveButton").IsEnabled);
         }));
     }
