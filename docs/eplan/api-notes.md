@@ -186,6 +186,16 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A43. 用 Page.CopyTo 放大示例项目、全项目名称枚举的规模（spike S37，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
+
+- `Page.CopyTo(Project, PagePropertyList, PageMacro.Enums.NumerationMode, bOverwrite: false, bDontUseProgressBar: true)` 在同一项目内复制整页内容，热身后约 80 ms/页（首次约 0.6 s）。新页名用源页 `NameParts` 复制出的 `PagePropertyList`，再改写 `DESIGNATION_PLANT` 与 `DESIGNATION_LOCATION` 得到；只改 `=` 时，按位置命名的设备（如 `+A1-WE1`）保持原名，会与源页设备同名合并。5 种 NumerationMode（Ignore、None、Number、NumberWithQuestionMark、NumberPreferPrefix）都不改这些名称；同时改 `+` 后只剩无名称的 `+` / `=+` 功能和显式定位的电缆共用名称。已有功能从未被改变。
+- 页名部分为空时（如 `&AAA1/1` 没有 `=`），`PropertyValue.ToString()` 抛 `EmptyPropertyException`；先判断 `IsEmpty`。
+- 流体页（示例中的 `&PFB`，36 页）的 CopyTo 抛 `InvalidHandleException`（“可能已删除对象”），推测与授权有关，未核实。
+- 在 SafetyPoint 中复制、未提交的批次回滚后完全消失，计数与批前一致；提交的 1,000 页副本正常退出、重启重开后计数一致。
+- 同名同版本的插件程序集不会在同一 EPLAN 进程内重新加载：注销再注册仍执行旧代码，须重启 EPLAN 或换程序集名（与 S8 的做法一致）。
+- 规模（示例派生，约 17 standard 对象/页）：1,000 页 6,141 功能、133,228 放置、265 MB；3,000 页 24,572 功能、395,684 放置、464 MB；8,800 页 77,271 功能、1,161,136 放置、62,201 个不同功能名、1.04 GB。finder 名称元数据 + 全部放置的合并枚举约 0.4–0.5 s（1,000 页）、2.2 s（3,000 页）、7.5 s（8,800 页，GetPlacements 5.7 s），随页数线性增长，所以万页项目不能在每步 guard（10 s）里做全量枚举（大项目计划设计 4.1）。
+- 观察（原因未查）：同一 EPLAN 中打开多个项目并经 Bridge 读写后，`eplan_project_list` 报告的当前项目会变成另一个打开的项目（两次都是 LargeWrite）；需要固定当前项目的测试应只打开该项目。
+
 ### A42. 通用 Project/Page 属性读取（P3b，2026-10-25）
 
 - 实机：EPLAN 2026.0.3（Electric P8），只读的 sample fixture，2026-10-25 跑 `PropertyReadTests`、`PropertyReadLifetimeTests`。`UniversalPropertyList.Property(AnyPropertyId[, index])` 在 C# 中写作 `list[id]` / `list[id, index]`；数字 ID 隐式转换成可释放的 `AnyPropertyId`。对象只取得一次 Properties，所有 ID、父值/索引值、定义、边界和多语言值分别释放；finder 返回的 Project/Page 是借用对象，不释放（A36/A39）。
