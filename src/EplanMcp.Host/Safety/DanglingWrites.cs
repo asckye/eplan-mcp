@@ -96,6 +96,13 @@ internal sealed partial class DanglingWrites(IBridgeClient bridge, SuspensionSto
             ["project"] = started["project"]?.DeepClone(),
             ["eplan"] = started["eplan"]?.DeepClone(),
         };
+        foreach (string key in new[] { "planId", "step" })
+        {
+            if (started[key] is { } value)
+            {
+                record[key] = value.DeepClone();
+            }
+        }
         if (started["masterData"] is { } masterData)
         {
             record["masterData"] = masterData.DeepClone();

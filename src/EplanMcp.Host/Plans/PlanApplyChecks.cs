@@ -12,7 +12,10 @@ namespace EplanMcp.Host.Plans;
 /// <summary>Rechecks the compiler's stored whole-project baseline (design 4.3), rather than accepting new evidence.</summary>
 internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust)
 {
-    public async Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, CancellationToken cancellationToken)
+    public Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, CancellationToken cancellationToken) =>
+        CheckAsync(record, false, cancellationToken);
+
+    internal async Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, bool stepOnly, CancellationToken cancellationToken)
     {
         PlanDefinition definition = record.Definition;
         if (!trust.Matches(definition, definition.Owner, record.PlanHash) || packs.Clock.GetUtcNow() >= definition.ExpiresAt)
@@ -69,6 +72,11 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
             }
         }
 
+        if (stepOnly)
+        {
+            return (handshake.Eplan, [], status.Instances.FirstOrDefault(e => e.ProcessId == handshake.Eplan.ProcessId)?.PipeName ?? throw Stale());
+        }
+
         PlanBaselineRead read = await new PlanBaselineReader(bridge).ReadAsync(definition.Project, null, cancellationToken).ConfigureAwait(false);
         if (read.Baseline is not { } baseline || baseline.Snapshot.ComposedHash != definition.Digests.Pages
             || baseline.Snapshot.MembersHash != definition.Digests.Objects || baseline.NamesHash != definition.Digests.Names)
@@ -93,6 +101,12 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
 
         return (handshake.Eplan, [.. fingerprints], status.Instances.FirstOrDefault(e => e.ProcessId == handshake.Eplan.ProcessId)?.PipeName ?? throw Stale());
     }
+
+    internal static bool Matches(PlanDefinition definition, PlanStep step, WritePlan fresh) =>
+        fresh.MasterData is null && fresh.Project == definition.Project.Name && Path.IsPathFullyQualified(fresh.ProjectPath)
+        && PlanSnapshotHashes.ProjectKey(fresh.ProjectPath) == definition.Project.Path
+        && fresh.Changes.Select(c => new PlanChange(c.Action, c.Kind, c.Name, c.Property, c.OldValue, c.NewValue)).SequenceEqual(step.PlannedChanges)
+        && step.Details.All(d => fresh.Details?.GetValueOrDefault(d.Key) == d.Value);
 
     internal static BridgeCallException Stale() => new(new BridgeError
     {
