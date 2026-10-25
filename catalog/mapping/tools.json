@@ -8302,6 +8302,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowProtocolTests.cs"
           },
           {
+            "name": "PlanOrchestratorTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanOrchestratorTests.cs"
+          },
+          {
             "name": "WorkflowPlanTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WorkflowPlanTests.cs"
