@@ -7,7 +7,7 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-/// <summary>One main-thread list per target per invoke; borrowed projects/pages are never disposed (A36/A39).</summary>
+/// <summary>One main-thread list per target per invoke; borrowed objects are never disposed (A36/A39).</summary>
 internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
 {
     public IPropertyReadScope Open(string projectPath, PropertyTarget target)
@@ -37,7 +37,34 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         Check();
         if (target.ProjectObject == true)
         {
-            return new Scope(project.Properties, language, Check);
+            return new Scope(project.Properties, "Project", language, Check);
+        }
+
+        using var objects = new DMObjectsFinder(project);
+        if (target.DeviceTag is not null)
+        {
+            Function main = PropertyReadTargets.Main(projectPath, target, Functions(objects, Check), Describe);
+            Check();
+            return new Scope(main.Properties, main.GetType().Name, language, Check);
+        }
+
+        if (target.Locator is { } locator)
+        {
+            StorableObject found = locator.Kind switch
+            {
+                "page" => PropertyReadTargets.Located(projectPath, locator, Pages(objects, Check), Describe),
+                "function" => PropertyReadTargets.Located(projectPath, locator, Functions(objects, Check), Describe),
+                _ => PropertyReadTargets.Located(projectPath, locator, Connections(objects, Check), Describe),
+            };
+            Check();
+            UniversalPropertyList list = found switch
+            {
+                Page p => p.Properties,
+                Function f => f.Properties,
+                Connection c => c.Properties,
+                _ => throw new BridgeErrorException(ErrorReason.CapabilityMissing, "This locator kind has no property adapter."),
+            };
+            return new Scope(list, found.GetType().Name, language, Check);
         }
 
         Page page;
@@ -50,11 +77,95 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         }
 
         Check();
-        return new Scope(page.Properties, language, Check);
+        return new Scope(page.Properties, "Page", language, Check);
     }
 
-    private sealed class Scope(UniversalPropertyList list, string language, Action check) : IPropertyReadScope
+    // As EplanPlanFunctionReader: A12's unfiltered finder omits some representations; include placements and
+    // page-less functions. Selection deduplicates by type/oid. These identity getters never acquire Properties.
+    private static IEnumerable<Function> Functions(DMObjectsFinder finder, Action check)
     {
+        check();
+        foreach (Function function in finder.GetFunctions(null))
+        {
+            check();
+            yield return function;
+        }
+
+        foreach (Page page in Pages(finder, check))
+        {
+            check();
+            foreach (Function function in page.AllPlacements.OfType<Function>())
+            {
+                check();
+                yield return function;
+            }
+        }
+    }
+
+    private static IEnumerable<Page> Pages(DMObjectsFinder finder, Action check)
+    {
+        check();
+        foreach (Page page in finder.GetPages(null))
+        {
+            check();
+            yield return page;
+        }
+    }
+
+    private static IEnumerable<Connection> Connections(DMObjectsFinder finder, Action check)
+    {
+        check();
+        foreach (Connection connection in finder.GetConnections(null))
+        {
+            check();
+            yield return connection;
+        }
+    }
+
+    private static SnapshotObject Describe(StorableObject obj)
+    {
+        var identity = new SnapshotObject
+        {
+            Type = SnapshotCanonical.TypeOf(obj.ToStringIdentifier()),
+            Oid = obj.ObjectIdentifier,
+        };
+        switch (obj)
+        {
+            case Page page:
+                identity.Kind = "page";
+                identity.Name = page.Name;
+                break;
+            case Function function:
+                identity.Kind = "function";
+                identity.Name = function.Name;
+                identity.Page = function.Page?.Name;
+                identity.Main = function.IsMainFunction;
+                identity.Category = function.FunctionCategory.ToString();
+                PointD position = function.Location;
+                identity.Pos = SnapshotValues.Position(position.X, position.Y);
+                break;
+            case Connection connection:
+                identity.Kind = "connection";
+                identity.Page = EplanConnectionReader.PageOf(connection)?.Name;
+                // Connection3D's pin getters are unsupported (S6); never probe them.
+                identity.Name = connection is global::Eplan.EplApi.DataModel.E3D.Connection3D ? null
+                    : SnapshotCanonical.ConnectionName(End(connection.StartPin), End(connection.EndPin));
+                break;
+        }
+
+        return identity;
+    }
+
+    private static SnapshotEnd? End(Pin? pin) => pin?.ParentFunction is not { } function ? null : new SnapshotEnd
+    {
+        Type = SnapshotCanonical.TypeOf(function.ToStringIdentifier()),
+        Oid = function.ObjectIdentifier,
+        Pin = pin.Name is { } name ? SnapshotValues.Text(name) : null,
+    };
+
+    private sealed class Scope(UniversalPropertyList list, string objectType, string language, Action check) : IPropertyReadScope
+    {
+        public string ObjectType => objectType;
         public string DefaultLanguage => language;
 
         public IPropertyReadHandle? OpenProperty(int propertyId)

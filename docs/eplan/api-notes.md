@@ -186,6 +186,16 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A44. 通用 Function/Connection 属性读取（P4，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，只读 sample fixture）
+
+- 设备标识按精确全名选主功能（可加页限定）；功能来源是 finder 加各页放置（A12），按 type/oid 去重。同一全名有多个主功能时报 AMBIGUOUS_NAME 并给出最多 20 个候选 locator，不默认取第一个。locator 读取复用 A32/A34 的项目/type/oid/名称/页/类别/位置核对，名称变化报 PLAN_STALE（metadata `check=name`），不按名称重新解析。
+- 读取权限按对象实际类型判断（`ReadRefusal(scope.ObjectType, id)`），被拒绝的 ID（3010–3013、2000、目录外、另一对象类型的 ID）不返回值、定义、显示、译文或语言。
+- 样例中带两种语言 FUNC_TEXT（20011，运行时 MultilangString）的 26 个唯一主功能与带 FUNC_TECHNICAL_CHARACTERISTIC（20027）的 63 个是不同的设备，没有一个两者都有。20011 的全部存储译文、显式语言读取与独立快照一致。
+- **20027 的运行时类型既不是 String 也不是 MultilangString**（是 Point/Time/Variable/ValueWithUnit 之一，未细分），按 4.3 返回 `opaque`：没有类型化值，只有安全显示文本，等于快照的 ToString 读数。它进入任何写入批次之前，必须先确定确切类型与格式。
+- 连接 locator 可读 31002（截面）、31004（颜色/编号）、31011（标识）的实例定义与值/显示。
+- 按对象定位要枚举全项目的功能与放置（与 `EplanObjectFinder` 相同；`StorableObject.FromStringIdentifier` 未经验证）；按 S37 的枚举耗时推算 3,000 页约 2–4 s/次（未单独测），是已知的性能余量项。
+- A36 门：Function（设备标识与 locator）和 Connection 同批预热 10 轮、重复 100 轮结果一致，EPLAN 工作集回落到基线容差内，设计数据 SHA-256 不变。
+
 ### A43. 用 Page.CopyTo 放大示例项目、全项目名称枚举的规模（spike S37，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 
 - `Page.CopyTo(Project, PagePropertyList, PageMacro.Enums.NumerationMode, bOverwrite: false, bDontUseProgressBar: true)` 在同一项目内复制整页内容，热身后约 80 ms/页（首次约 0.6 s）。新页名用源页 `NameParts` 复制出的 `PagePropertyList`，再改写 `DESIGNATION_PLANT` 与 `DESIGNATION_LOCATION` 得到；只改 `=` 时，按位置命名的设备（如 `+A1-WE1`）保持原名，会与源页设备同名合并。5 种 NumerationMode（Ignore、None、Number、NumberWithQuestionMark、NumberPreferPrefix）都不改这些名称；同时改 `+` 后只剩无名称的 `+` / `=+` 功能和显式定位的电缆共用名称。已有功能从未被改变。

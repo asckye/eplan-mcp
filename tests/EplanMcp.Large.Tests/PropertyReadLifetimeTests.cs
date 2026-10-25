@@ -57,6 +57,56 @@ public sealed class PropertyReadLifetimeTests(LiveEplan eplan)
         }
     }
 
+    [Fact]
+    public async Task FunctionAndConnection_100Rounds_WorkingSetRecoversAndDesignFilesStayUnchanged()
+    {
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        await LiveProperties.DescribeEnvironmentAsync(bridge, eplan.ProcessId);
+        LiveSnapshots.Snapshot snapshot = await LivePropertyObjects.SnapshotAsync(bridge, eplan);
+        SnapshotObject device = LivePropertyObjects.Device(snapshot);
+        SnapshotObject connection = LivePropertyObjects.Connection(snapshot);
+        Dictionary<string, string> before = DesignFiles();
+        PropertyReadArgs function = LivePropertyObjects.Args(eplan, new PropertyTarget(deviceTag: device.Name), 20011, 20027, 3010);
+        PropertyReadArgs located = LivePropertyObjects.Args(eplan, new PropertyTarget(locator: LivePropertyObjects.Locator(eplan, device)), 20011, 20027);
+        PropertyReadArgs wire = LivePropertyObjects.Args(eplan, new PropertyTarget(locator: LivePropertyObjects.Locator(eplan, connection)), 31002, 31004, 31011, 3012);
+        string expected = await BatchAsync();
+        for (int i = 0; i < 10; i++)
+        {
+            Assert.Equal(expected, await BatchAsync());
+        }
+
+        using Process process = Process.GetProcessById(eplan.ProcessId);
+        long baseline = await SettledWorkingSetAsync(process);
+        long peak = baseline;
+        var clock = Stopwatch.StartNew();
+        for (int round = 0; round < 100; round++)
+        {
+            Assert.Equal(expected, await BatchAsync());
+            process.Refresh();
+            peak = Math.Max(peak, process.WorkingSet64);
+        }
+
+        long recovered = await SettledWorkingSetAsync(process);
+        long allowance = Math.Max(32L * 1024 * 1024, baseline / 20);
+        TestContext.Current.TestOutputHelper?.WriteLine($"100 rounds in {clock.Elapsed}; baseline {baseline} bytes; peak {peak}; "
+            + $"recovered {recovered}; allowed retained growth {allowance}.");
+        Assert.True(recovered <= baseline + allowance, $"A36 working set did not recover: {baseline} -> {recovered} bytes (peak {peak}).");
+        Assert.Equal(before, DesignFiles());
+
+        async Task<string> BatchAsync()
+        {
+            List<PropertyReadRow> functions = await LiveProperties.ReadAsync(bridge, function);
+            List<PropertyReadRow> locators = await LiveProperties.ReadAsync(bridge, located);
+            List<PropertyReadRow> connections = await LiveProperties.ReadAsync(bridge, wire);
+            Assert.Equal("value", functions[0].Status);
+            Assert.Equal(functions.Take(2).Select(r => (r.Status, r.Value?.Text)), locators.Select(r => (r.Status, r.Value?.Text)));
+            Assert.Equal("value", connections[0].Status);
+            Assert.Equal("read_refused", functions[^1].Status);
+            Assert.Equal("read_refused", connections[^1].Status);
+            return JsonSerializer.Serialize(new[] { functions, locators, connections }, HostJson.Options);
+        }
+    }
+
     private static async Task<long> SettledWorkingSetAsync(Process process)
     {
         long minimum = long.MaxValue;
