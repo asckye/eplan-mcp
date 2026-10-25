@@ -11,8 +11,8 @@ using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Plans;
 
-/// <summary>Admission through initial backup only. P23 must pass a worker token, never a request's wait token.</summary>
-internal sealed class PlanOrchestrator(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust,
+/// <summary>P23 must pass a worker token, never a request's wait token.</summary>
+internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust,
     TaskRegistry tasks, SuspensionStore suspensions, DanglingWrites dangling, ApprovalService approvals, AuditLog audit,
     BackupFolders folders, PlanProjectBackup backup)
 {
