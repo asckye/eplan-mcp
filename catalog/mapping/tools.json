@@ -8412,6 +8412,7 @@
         "T:Eplan.EplApi.DataModel.ProjectPropertyList",
         "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
         "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.StorableObject",
         "T:Eplan.EplApi.DataModel.UniversalPropertyList",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],

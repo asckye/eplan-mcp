@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-25",
-  "scannedSources": "2dd824d8",
-  "sourceHash": "sha256:93f17a963c9e33a628f700c1b6c1bf6b66408cb6acc0ea3a6de106853118a1e3",
+  "scannedSources": "0e3d11cb",
+  "sourceHash": "sha256:33728b277aaee9dea9aeda26d5f7964340b8e0d0dd016dae2b4210534609d475",
   "operations": [
     {
       "name": "action.execute",
@@ -343,6 +343,10 @@
     {
       "name": "plan.macro.inspect",
       "class": "PlanMacroInspectOperation"
+    },
+    {
+      "name": "plan.names",
+      "class": "PlanNamesOperation"
     },
     {
       "name": "plan.step.execute",
@@ -3780,13 +3784,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "new"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -4401,13 +4406,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "call"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -4692,13 +4698,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "call"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -5554,6 +5561,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -6034,6 +6042,19 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
         ]
       },
       {
@@ -6565,13 +6586,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "call"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -7554,6 +7576,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -7653,6 +7676,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -9737,13 +9761,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -10282,13 +10307,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -11605,13 +11631,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -12041,13 +12068,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -13081,13 +13109,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -13256,6 +13285,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13383,6 +13413,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13477,6 +13508,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13655,6 +13687,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13688,6 +13721,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Project.Properties": [
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
       {
         "adapter": "EplanProjectFactory",
         "member": "Create",
@@ -13838,6 +13884,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13960,6 +14007,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -13981,6 +14029,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID": [
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
       {
         "adapter": "EplanProjectFactory",
         "member": "Create",
@@ -14288,6 +14349,19 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
+      {
         "adapter": "EplanProjectFactory",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs",
@@ -14458,13 +14532,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "get"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -17940,13 +18015,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "type"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -18979,13 +19055,14 @@
       },
       {
         "adapter": "EplanPlanFunctionReader",
-        "member": "Read",
+        "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
         "access": [
           "type"
         ],
         "operations": [
           "plan.functions",
+          "plan.names",
           "plan.step.guard"
         ]
       },
@@ -19966,6 +20043,19 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
+      {
         "adapter": "EplanProjectMessageReader",
         "member": "Target",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectMessageReader.cs",
@@ -20533,6 +20623,19 @@
         ]
       },
       {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
+      {
         "adapter": "EplanProjectBackup",
         "member": "Copy",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectBackup.cs",
@@ -20760,6 +20863,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -20855,6 +20959,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -21127,6 +21232,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
@@ -21232,6 +21338,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.ProjectPropertyList": [
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
+        ]
+      },
       {
         "adapter": "EplanProjectFactory",
         "member": "Create",
@@ -21446,6 +21565,19 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
         ]
       },
       {
@@ -21712,6 +21844,19 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlanFunctionReader",
+        "member": "Enumerate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "plan.functions",
+          "plan.names",
+          "plan.step.guard"
         ]
       },
       {
@@ -22500,6 +22645,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.names",
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",

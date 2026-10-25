@@ -20,6 +20,11 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new PlanNamesArgs { Project = "Line1" },
+        new PlanNameEntry { Kind = "function", Name = "=F+A1-电机😀" },
+        new PlanNamesData { Project = "Line1", ProjectPath = @"D:\Projects\Line1", ProjectGuid = "Line1@123", Complete = true,
+            Names = [new() { Kind = "page", Name = "+A/1" }, new() { Kind = "function", Name = "+A-K1" }], NamesHash = new string('a', 64) },
+        new PlanNamesData(),
         new PlanGuardScope { Pages = ["+A1/1"], Structures = ["+A1"], Locators = [new() { Project = @"D:\Projects\Line1", Kind = "function", Type = 17, Oid = 2, Name = "+A1-K1" }] },
         new PlanGuardCondition { Tag = "members", Scope = new() { Pages = ["+A1/1"] }, Hash = new string('a', 64), Count = 5 },
         new PlanStepGuardArgs { Project = "Line1", Preconditions = [new() { Tag = "binding", Revision = 3, LockDigest = new string('a', 64) }], BindingRevision = 3, LockDigest = new string('a', 64), ResourceHashes = [new string('b', 64)] },
