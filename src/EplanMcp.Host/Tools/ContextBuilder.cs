@@ -310,7 +310,7 @@ internal static class ContextBuilder
 
     private static string Digest(JsonNode value) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(PlanCanonical.Serialize(JsonSerializer.SerializeToElement(value, HostJson.Options)))));
 
-    private static JsonNode Clean(JsonNode node) => node switch
+    internal static JsonNode Clean(JsonNode node) => node switch
     {
         JsonObject obj => new JsonObject(obj.Select(p => KeyValuePair.Create(p.Key, p.Value is null ? null : Clean(p.Value)))),
         JsonArray array => new JsonArray([.. array.Select(v => v is null ? null : Clean(v))]),

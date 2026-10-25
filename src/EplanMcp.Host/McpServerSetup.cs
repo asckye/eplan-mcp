@@ -29,6 +29,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<TaskRegistry>();
+        services.TryAddSingleton<PlanTrust>();
 
         // serve registers the configuration it loaded; tests get the defaults, never a developer's own file.
         services.TryAddSingleton(provider => HostConfig.Defaults(provider.GetRequiredService<HostDataLocations>()));
@@ -57,6 +58,7 @@ internal static class McpServerSetup
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
@@ -120,6 +122,7 @@ internal static class McpServerSetup
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)
+            .WithTools<WorkflowTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithResources<PackResources>()
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));

@@ -9,7 +9,7 @@ namespace EplanMcp.Host.Plans;
 /// <summary>Pure input compilation. Defaults are supplied from resolved compilation context, never the later UI state.</summary>
 internal static class PlanArguments
 {
-    public static PlanArgumentCheck Check(JsonElement request, string defaultLanguage, string defaultDeviceScheme)
+    public static PlanArgumentCheck Check(JsonElement request, string? defaultLanguage, string defaultDeviceScheme)
     {
         var errors = new List<PlanViolation>();
         var steps = new List<PlanArgumentStep>();
