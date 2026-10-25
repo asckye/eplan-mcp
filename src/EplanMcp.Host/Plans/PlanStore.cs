@@ -57,6 +57,7 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
             ["planId"] = definition.PlanId,
             ["planHash"] = record.PlanHash,
             ["owner"] = JsonSerializer.SerializeToNode(definition.Owner, PlanJson.Options),
+            ["host"] = Safety.DanglingWrites.ThisHost(),
             ["sources"] = JsonSerializer.SerializeToNode(definition.Sources, PlanJson.Options),
         }, cancellationToken).ConfigureAwait(false);
         Checkpoint?.Invoke("audited");

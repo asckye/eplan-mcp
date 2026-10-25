@@ -112,7 +112,7 @@ internal sealed partial class DanglingWrites(IBridgeClient bridge, SuspensionSto
     }
 
     /// <summary>Whether the Host that wrote a record still runs; a record without a readable identity counts as exited.</summary>
-    private static bool IsRunning(JsonNode? host) =>
+    internal static bool IsRunning(JsonNode? host) =>
         host?["processId"] is JsonValue id && id.TryGetValue(out int processId)
         && Time(host["start"]) is { } start
         && SuspensionStore.StartOf(processId) == start;

@@ -41,6 +41,8 @@ internal static class McpServerSetup
             LifetimeHours = provider.GetRequiredService<HostConfig>().PlanLifetimeHours,
         });
         services.AddHostedService<PlanStoreCleanup>();
+        services.TryAddSingleton<PlanSettlement>();
+        services.AddHostedService(provider => provider.GetRequiredService<PlanSettlement>());
 
         // Approval channels are registered in the order they are tried (ADR-0011), which no setting changes: the Workbench
         // while it runs, then EPLAN's dialog (ADR-0014 decision 4). With none, approvals are refused.

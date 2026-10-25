@@ -170,6 +170,34 @@ internal sealed class AuditLog(string directory, TimeProvider clock, HttpCaller?
         return [.. started.Where(r => !finished.Contains(r["requestId"]!.GetValue<string>()))];
     }
 
+    /// <summary>A complete snapshot for plan settlement; unreadable or incomplete audit means no settlement.</summary>
+    internal async Task<IReadOnlyList<JsonObject>> ReadAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using FileStream turn = await TakeTurnAsync(cancellationToken).ConfigureAwait(false);
+            string current = Path.Combine(directory, clock.GetUtcNow().ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) + ".jsonl");
+            if (File.Exists(current))
+            {
+                // Even a previously published plan_result cannot advance state while the audit is unavailable.
+                using var writable = new FileStream(current, FileMode.Open, FileAccess.Write, FileShare.Read);
+            }
+            var records = new List<JsonObject>();
+            foreach (string file in Directory.EnumerateFiles(directory, FilePattern).Order(StringComparer.Ordinal))
+            {
+                foreach (string line in ReadLines(file, withIncompleteLast: true).Where(l => l.Length > 0))
+                {
+                    records.Add(JsonNode.Parse(line) as JsonObject ?? throw new JsonException("An audit record must be an object."));
+                }
+            }
+            return records;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            throw new AuditUnavailableException("The audit snapshot is unavailable; plan settlement must wait.", ex);
+        }
+    }
+
     /// <summary>
     /// The lines of <paramref name="file"/> that another Host process may be appending to, in order. The appender holds
     /// the file with <c>FileShare.Read</c>, so it is opened sharing write and delete: a reader that shares only reading

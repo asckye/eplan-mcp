@@ -35,6 +35,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
             return new(record, null, [], null, null, null, deadline, null, null);
         }
 
+        await new PlanSettlement(store, audit, packs.Locations, packs.Clock, dangling).SettleAsync(cancellationToken).ConfigureAwait(false);
         RequireUnused(record.State);
         TaskRecord task = tasks.Create(server, planId, record.Definition.Project.Path, record.Definition.Steps.Count(s => s.Effective));
         FileStream? held = null;
@@ -70,6 +71,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
                 return await FinishAsync(null).ConfigureAwait(false);
             }
 
+            // Plan settlement above tolerates an unavailable audit; a new write does not (ADR-0010 section 2).
             await dangling.SettleOnceAsync(cancellationToken).ConfigureAwait(false);
             ToolTier tier = record.Definition.Steps.Max(s => s.Tier);
             PolicyDecision policy = PolicyEngine.Decide(tier, ScratchPaths.IsInside(record.Definition.Project.Path, packs.Config.ScratchRoots), packs.Config);
@@ -151,6 +153,13 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
                 copy = await backup.RunAsync(record.Definition.Project.Path, cancellationToken).ConfigureAwait(false);
             }
 
+            await audit.AppendAsync(new JsonObject
+            {
+                ["kind"] = "plan_backup",
+                ["planId"] = planId,
+                ["backup"] = JsonSerializer.SerializeToNode(copy.Backup, PlanJson.Options),
+            }, CancellationToken.None).ConfigureAwait(false);
+
             if (copy.Error is not null)
             {
                 throw new BridgeCallException(BackupFolders.Failure());
@@ -167,6 +176,8 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
                     ["kind"] = kind,
                     ["requestId"] = requestId,
                     ["planId"] = planId,
+                    ["ownerHost"] = record.State.OwnerHost,
+                    ["host"] = DanglingWrites.ThisHost(),
                     ["planHash"] = record.PlanHash,
                     ["tier"] = tier.ToString(),
                     ["steps"] = JsonSerializer.SerializeToNode(record.Definition.Steps.Select(s => new { s.Index, s.Op, s.PlannedChanges }), PlanJson.Options),

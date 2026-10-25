@@ -111,7 +111,10 @@ public sealed class PlanOrchestratorTests : IAsyncDisposable
         Assert.Equal("Allow", approval["policy"]!.GetValue<string>());
         Assert.Equal("eplan_plan_apply", new PlanApprovalView(_ready.Record, _store.ChangesPath(_definition.PlanId), "folder")
             .Question(_ready.Fingerprints, _ready.Instance!, _ready.Deadline).Tool);
-        Assert.Equal((2, null), AuditVerifier.Verify(_locations.Audit));
+        Assert.Equal((3, null), AuditVerifier.Verify(_locations.Audit));
+        Assert.Equal(_ready.Record.State.OwnerHost, approval["ownerHost"]!.GetValue<string>());
+        Assert.True(DanglingWrites.IsRunning(approval["host"]));
+        Assert.Equal(_ready.Backup, Assert.Single(Records(), r => Kind(r) == "plan_backup")["backup"]!.Deserialize<PlanBackup>(PlanJson.Options));
         Assert.DoesNotContain(_fresh.Fingerprint, await File.ReadAllTextAsync(RecordFile, Token), StringComparison.Ordinal);
     }
 
