@@ -243,6 +243,7 @@ eplan_device_place
 - 详见 [ADR-0005](../adr/0005-safety-model.md)。
 - 例外（[ADR-0012](../adr/0012-export-tier.md)）：Read 级工具如果会在项目之外新建文件（目前只有导出工具），`readOnlyHint`、`idempotentHint` 为 false，`destructiveHint` 仍为 false，不需要审批；文件只写进 Host 每次新建的导出目录（[security.md](security.md) SEC-20）。
 - 例外（[ADR-0021 第 6 节](../adr/0021-action-run-whitelist.md#6-与已有决策的关系)）：`eplan_action_run` 是“每个工具一个级别”的唯一例外，每次调用按白名单条目的级别执行；工具注解固定按 Destructive 设置：`readOnlyHint` false、`destructiveHint` true、`idempotentHint` false、`openWorldHint` false，CI 注解一致性检查也按 Destructive。审批、备份和事务包装仍按条目的实际级别，详见[工具规格](../tools/eplan_action_run.md)。
+- 计划例外（[ADR-0023](../adr/0023-plan-approval-and-backup.md)）：`eplan_plan_apply` 的静态注解同 Destructive，运行时按服务端步骤的最高级别判策略；终态使用计划五值，失败同时保留计划结果和标准 error。`eplan_task_get` 查询失败任务仍是查询成功，仅查询自身失败设置 isError。
 - 例外（[M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.5.1）：**本地数据**工具（`eplan_pack_import`、`eplan_pack_build`、`eplan_asset_update`）只写 EplanMcp 自己的数据目录、不碰 EPLAN 项目，注解同上一条（`readOnlyHint`、`destructiveHint` 为 false），不需要审批，没有 `dry_run` 和 `execution`，改动写审计（`pack_change`），审计写不进去就不改；安装别人的工程包要工程师经审批渠道确认（ADR-0024）。
 - 例外（[ADR-0025](../adr/0025-code-plugin-worker.md)）：算法插件按 Code 级默认关闭，在 `config.json` 中按 SHA-256 列入允许列表后，每次运行不再单独审批；它产出的计划照常审批。
 

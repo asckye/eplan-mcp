@@ -17,6 +17,12 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
+            if (tool?.ProtocolTool.Name is PlanApplyTools.ApplyTool or PlanApplyTools.TaskTool)
+            {
+                CallToolResult? invalid = PlanToolResults.Validate(tool.ProtocolTool.InputSchema, context.Params?.Arguments,
+                    tool.ProtocolTool.Name == PlanApplyTools.ApplyTool);
+                return invalid is null ? next(context, cancellationToken) : ValueTask.FromResult(invalid);
+            }
             if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments) is { Count: > 0 } violations)
             {
                 return ValueTask.FromResult(ToolResults.InvalidArguments(violations));

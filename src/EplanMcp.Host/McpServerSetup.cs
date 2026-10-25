@@ -50,6 +50,8 @@ internal static class McpServerSetup
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IApprovalChannel, EplanDialogChannel>());
         services.TryAddSingleton<ApprovalService>();
         services.TryAddSingleton<BackupFolders>();
+        services.TryAddSingleton<PlanProjectBackup>();
+        services.TryAddSingleton<PlanOrchestrator>();
         services.TryAddSingleton<WritePipeline>();
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
@@ -62,6 +64,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
@@ -127,9 +130,12 @@ internal static class McpServerSetup
             .WithTools<ContextTools>(HostJson.Options)
             .WithTools<WorkflowTools>(HostJson.Options)
             .WithTools<PlanTools>(HostJson.Options)
+            .WithTools<PlanApplyTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithResources<PackResources>()
             .WithResources<PlanTools>()
+            .WithResources<PlanApplyTools>()
+            .WithMessageFilters(filters => filters.AddIncomingFilter(PlanApplyTools.CancelApply))
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
 }

@@ -4938,6 +4938,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "PlanApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
             "name": "PlanStepGuardWriteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanStepGuardWriteTests.cs"
@@ -6383,6 +6388,92 @@
       ]
     },
     {
+      "name": "eplan_plan_apply",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PlanApplyTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_plan_apply.md",
+        "specStatus": "In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D04–D07 为准）",
+        "apiNotes": [
+          "A14",
+          "A17",
+          "A39"
+        ],
+        "tests": [
+          {
+            "name": "PackCapabilitiesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PackCapabilitiesTests.cs"
+          },
+          {
+            "name": "PlanApplyToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "DanglingWritesTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/DanglingWritesTests.cs"
+          },
+          {
+            "name": "PlanApplyProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
+          },
+          {
+            "name": "PlanApprovalFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalFileTests.cs"
+          },
+          {
+            "name": "PlanApprovalTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
+          },
+          {
+            "name": "PlanOrchestratorTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanOrchestratorTests.cs"
+          },
+          {
+            "name": "PlanSettlementTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanSettlementTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "WorkflowHttpTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowHttpTests.cs"
+          },
+          {
+            "name": "PlanApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanSettlementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_plan_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PlanTools.cs",
@@ -6430,6 +6521,11 @@
             "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
           },
           {
+            "name": "PlanApplyProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
+          },
+          {
             "name": "PlanApprovalTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
@@ -6448,6 +6544,11 @@
             "name": "WorkflowProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowProtocolTests.cs"
+          },
+          {
+            "name": "PlanApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
           }
         ],
         "operationTests": []
@@ -7609,6 +7710,53 @@
       "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作"
     },
     {
+      "name": "eplan_task_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PlanApplyTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_task_get.md",
+        "specStatus": "In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D10–D13 为准）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PlanApplyToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PlanApplyProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "WorkflowHttpTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowHttpTests.cs"
+          },
+          {
+            "name": "PlanApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_terminal_renumber",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/TerminalDestructiveTools.cs",
@@ -8292,6 +8440,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
+            "name": "PlanApplyProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -8305,6 +8458,11 @@
             "name": "WorkflowProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowProtocolTests.cs"
+          },
+          {
+            "name": "PlanApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
           },
           {
             "name": "PlanOrchestratorTests",
