@@ -69,6 +69,15 @@ public sealed class LiveEplan : IAsyncLifetime
         // The offline host has only its copy open, which need not be EPLAN's current project.
         JsonElement current = (await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray()
             .FirstOrDefault(p => _offline is null ? p.GetProperty("current").GetBoolean() : string.Equals(p.GetProperty("path").GetString(), _offline.ProjectPath, StringComparison.OrdinalIgnoreCase));
+        if (Environment.GetEnvironmentVariable(PlanSettlementTests.AttendVariable) == "1")
+        {
+            // The attended interruption test follows S8: only LargeWrite may be open, so no read fixture is needed.
+            JsonElement only = Assert.Single((await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray());
+            ProjectPath = only.GetProperty("path").GetString()!;
+            Assert.Equal(WriteHost.WritableName, Path.GetFileName(ProjectPath));
+            Assert.True(Host.Safety.ScratchPaths.IsInside(ProjectPath, [WriteHost.ScratchFolder]));
+            return;
+        }
         string path = current.ValueKind == JsonValueKind.Object ? current.GetProperty("path").GetString()! : string.Empty;
         string fixtures = (_offline is null ? Path.Combine(ScratchRoot(), "fixtures") : Path.GetDirectoryName(_offline.ProjectPath)!) + Path.DirectorySeparatorChar;
         if (!path.StartsWith(fixtures, StringComparison.OrdinalIgnoreCase) || !string.Equals(Path.GetFileName(path), ProjectName, StringComparison.Ordinal))
