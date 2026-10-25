@@ -72,6 +72,7 @@
 - 标准动作：`list`（分页列出）、`get`（按业务名称或不透明标识取单个，例如任务的 `task_id`）、`search`（按条件查找）、`create`、`update`、`delete`。
 - 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。API 能力覆盖第一期加入 `apply`（应用一组预先定义的值，如 `eplan_placeholder_apply` 应用值集）。M6 中 `import` 也用于把工程师的材料导入工程包（`eplan_pack_import`），另加入 `build`（把开发包冻结为版本，`eplan_pack_build`），以后还有 `migrate`、`bind`、`trace`、`diff` 和只用于规则的 `check`；`apply` 在 M6 中也用于执行计划（`eplan_plan_apply`，M6 设计 4.5.1）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
+- `schema` 表示描述属性定义及读写限制，用于 `eplan_property_schema`，不读取项目属性值。
 - M6 的 `task.get` 在未知或已过期时使用 `RESOURCE_NOT_FOUND`（M6 设计 4.5.1）；`project.create`、`task.get` 沿用标准动作，无需新增领域动作。
 - M6 第 2 阶段加入 `plan`（将内联任务编译为有前置条件、预期结果和差异预览的计划；不执行写入），并将已有 `apply` 用于执行已编译计划（ADR-0023 的整体审批和备份）。`plan` 同时是资源词，含义由其在名称中的位置区分。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
