@@ -6410,6 +6410,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanReadModelTests.cs"
           },
           {
+            "name": "PlanToolResultTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanToolResultTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
