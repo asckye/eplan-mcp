@@ -6,5 +6,7 @@ namespace EplanMcp.Host.Plans;
 internal sealed record PlanPreparation(PlanRecord Record, TaskRecord? Task, IReadOnlyList<string> Fingerprints,
     EplanInstanceInfo? Instance, string? Pipe, DateTimeOffset? InstanceStart, DateTimeOffset Deadline, PlanBackup? Backup, FileStream? ProjectLock) : IDisposable
 {
+    private int _executing;
+    internal bool TryExecute() => Interlocked.Exchange(ref _executing, 1) == 0;
     public void Dispose() => ProjectLock?.Dispose();
 }
