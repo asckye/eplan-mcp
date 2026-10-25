@@ -30,8 +30,13 @@ internal sealed class PlanTools
                 return Missing();
             }
             PlanRecord? record = await store.ReadAsync(plan_id!, cancellationToken).ConfigureAwait(false);
-            return record is not null && trust.Matches(record.Definition, owner, record.PlanHash)
-                ? PlanReadModel.Page(record, response_format, limit, cursor) : Missing();
+            if (record is null || !trust.Matches(record.Definition, owner, record.PlanHash))
+            {
+                return Missing();
+            }
+            var coverage = response_format == "detailed" && record.Definition.CompilerVersion == "2"
+                ? await PlanCoverage.ReadAsync(store, record, cancellationToken).ConfigureAwait(false) : [];
+            return PlanReadModel.Page(record, response_format, limit, cursor, coverage: coverage);
         }
         catch (TaskRegistryException ex)
         {

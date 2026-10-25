@@ -23,7 +23,7 @@ public sealed partial class PlanExecutionTests
         Assert.Equal(6, _bridge.Calls.Count(c => c.Operation == OperationNames.PlanNames));
         Assert.DoesNotContain(_bridge.Calls, c => c.Operation == OperationNames.DeviceList);
         JsonElement references = result.Coverage!.Value.GetProperty("evidence");
-        Assert.Equal(21, references.EnumerateObject().Count());
+        Assert.Equal(27, references.EnumerateObject().Count());
         Assert.Equal(references.GetProperty("1:after").GetString(), references.GetProperty("2:before").GetString());
         Assert.Equal(references.GetProperty("1:after:names").GetString(), references.GetProperty("2:after:names").GetString());
         Assert.Equal(references.GetProperty("1:before:expectedNames").GetString(), references.GetProperty("1:after:names").GetString());
@@ -36,7 +36,7 @@ public sealed partial class PlanExecutionTests
                 Assert.False(parsed.RootElement.GetProperty("wholeProject").GetBoolean());
                 Assert.Equal(JsonValueKind.Null, parsed.RootElement.GetProperty("snapshot").GetProperty("snapshotHash").ValueKind);
             }
-            else
+            else if (!reference.Name.EndsWith(":coverage", StringComparison.Ordinal))
             {
                 Assert.Equal(4, parsed.RootElement.EnumerateObject().Count());
                 Assert.Equal(64, parsed.RootElement.GetProperty("names").GetString()!.Length);

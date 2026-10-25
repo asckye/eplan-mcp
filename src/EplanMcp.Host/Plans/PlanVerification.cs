@@ -8,6 +8,10 @@ internal sealed record PlanEvidence(PlanSnapshot Snapshot, bool WholeProject = f
 {
     // Transient approved absence, reconstructed from the plan and page-name evidence; no persisted member is added.
     internal ImmutableArray<string> AbsentPages { get; init; } = [];
+    internal ImmutableArray<PlanOccupiedName> Names { get; init; } = [];
+    internal ImmutableArray<PlanOccupiedName> ExpectedNames { get; init; } = [];
+    internal string? NamesHash { get; init; }
+    internal string? ExpectedNamesHash { get; init; }
 
     public bool Covers(string? page) => WholeProject || Snapshot.SnapshotHash is not null
         || Snapshot.Pages.Any(p => p.Name == page) || page is not null && AbsentPages.Contains(page, StringComparer.Ordinal);
@@ -15,7 +19,10 @@ internal sealed record PlanEvidence(PlanSnapshot Snapshot, bool WholeProject = f
 
 /// <summary>NoWriteSincePrevious must be established by the caller, never inferred from an execution outcome.</summary>
 internal sealed record PlanStepEvidence(int Index, string Execution, PlanEvidence? Before, PlanEvidence? After,
-    bool NoWriteSincePrevious = false);
+    bool NoWriteSincePrevious = false)
+{
+    internal ImmutableArray<PlanDiffEntry> NameDiff { get; init; } = [];
+}
 internal sealed record PlanValidation(int Step, JsonElement Locator, string Check, string Status, string Reason);
 internal sealed record PlanDiffEntry(int Step, string Class, JsonElement Locator, string Property,
     string Status, string Reason, string Attribution, string? Before, string? After, string? Expected = null);

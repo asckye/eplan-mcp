@@ -14,14 +14,15 @@ internal static class PlanReadModel
 {
     private sealed record Cursor(string PlanId, string PlanHash, long Revision, string ResponseFormat, int Offset);
 
-    internal static CallToolResult Page(PlanRecord record, string format, int limit, string? cursor, int? tokenBudget = null)
+    internal static CallToolResult Page(PlanRecord record, string format, int limit, string? cursor, int? tokenBudget = null,
+        IReadOnlyList<PlanVerificationCoverage>? coverage = null)
     {
         if (format is not ("concise" or "detailed") || limit is < 1 or > 200 || (format == "concise" && cursor is not null))
         {
             return Invalid("Use concise or detailed, limit 1 to 200, and cursors only with detailed.");
         }
         bool detailed = format == "detailed";
-        List<JsonObject> all = PlanEntries.Build(record, detailed);
+        List<JsonObject> all = PlanEntries.Build(record, detailed, coverage);
         int offset = 0;
         if (cursor is not null)
         {

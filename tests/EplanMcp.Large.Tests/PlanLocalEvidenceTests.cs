@@ -16,7 +16,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>LP-7 direct orchestration; compiler version 2 is test-shaped until LP-9 enables compilation.</summary>
 [Trait("Size", "Large")]
-public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
+public sealed partial class PlanLocalEvidenceTests(LiveEplan eplan)
 {
     [Fact]
     public async Task LP7_LargeWrite_TwoStepPlan_ReadsOnlyE_PrintsTimings()
@@ -43,8 +43,13 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
         await RunAsync(only.Path, 3000);
     }
 
-    private async Task RunAsync(string project, int? expectedPages)
+    private async Task RunAsync(string project, int? expectedPages, string? boundary = null)
     {
+        if (boundary is not null)
+        {
+            Assert.Equal(WriteHost.WritableName, Path.GetFileName(project));
+            Assert.True(ScratchPaths.IsInside(project, [WriteHost.ScratchFolder]));
+        }
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
         PlanNamesData inventory = await new PlanNamesReader(bridge).ReadAsync(project, Token);
         int pageCount = inventory.Names.Count(n => n.Kind == "page");
@@ -55,6 +60,7 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
         int next = inventory.Names.Where(n => n.Kind == "page" && n.Name.StartsWith(DestructiveHost.Prefix, StringComparison.Ordinal))
             .Select(n => DestructiveHost.Number(n.Name)).DefaultIfEmpty().Max() + 100;
         string page = DestructiveHost.Prefix + next.ToString(CultureInfo.InvariantCulture);
+        string far = DestructiveHost.Prefix + (next + 1).ToString(CultureInfo.InvariantCulture);
         var client = new RecordingBridge(bridge, page);
         var locations = new HostDataLocations(Directory.CreateTempSubdirectory("eplanmcp-lp7-large-").FullName);
         HostConfig config = HostConfig.Defaults(locations) with { ScratchRoots = [LiveEplan.ScratchRoot()] };
@@ -77,6 +83,16 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
             new(client, folders, TimeProvider.System, NullLogger<PlanProjectBackup>.Instance));
         try
         {
+            if (boundary == "description")
+            {
+                await CreateBoundaryPageAsync(bridge, project, far);
+                pageCount++;
+            }
+            if (boundary is not null)
+            {
+                client.BetweenSteps = () => boundary == "names"
+                    ? CreateBoundaryPageAsync(bridge, project, far) : UpdateBoundaryPageAsync(bridge, project, far);
+            }
             var clock = Stopwatch.StartNew();
             JsonElement createArgs = JsonSerializer.SerializeToElement(new
             {
@@ -126,11 +142,22 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
             clock.Restart();
             PlanResult result = (await orchestrator.ExecuteAsync(server, prepared, null, Token)).State.Result!;
             Print($"execute={clock.Elapsed.TotalSeconds:F3}s; evidence={Directory.EnumerateFiles(Path.Combine(locations.State, "plans", definition.PlanId, "evidence")).Sum(f => new FileInfo(f).Length)} bytes");
-            Assert.Equal(PlanExecution.Committed, result.Execution);
-            Assert.Equal("passed", result.Verification);
-            Assert.All(result.Steps, s => Assert.Equal(ExecutionState.Committed, s.Execution));
-            Assert.Equal(2, client.StepWrites);
-            Assert.Equal(3, client.Snapshots.Count);
+            Assert.Equal(boundary == "names" ? PlanExecution.PartiallyCommitted : PlanExecution.Committed, result.Execution);
+            if (boundary == "names")
+            {
+                Assert.Equal(ErrorReason.PlanStale, result.Error!.Reason);
+                Assert.Equal(ExecutionState.Committed, result.Steps[0].Execution);
+                Assert.Equal(ExecutionState.NotStarted, result.Steps[1].Execution);
+                Assert.Contains(result.Diff!.Value.EnumerateArray(), d => d.GetProperty("class").GetString() == "external_between_steps"
+                    && d.GetProperty("locator").GetProperty("name").GetString() == far);
+            }
+            else
+            {
+                Assert.Equal("passed", result.Verification);
+                Assert.All(result.Steps, s => Assert.Equal(ExecutionState.Committed, s.Execution));
+            }
+            Assert.Equal(boundary == "names" ? 1 : 2, client.StepWrites);
+            Assert.Equal(boundary == "names" ? 2 : 3, client.Snapshots.Count);
             Assert.All(client.Snapshots, requested => Assert.Equal([page], requested));
             PlanBackup backup = Assert.Single(result.Backups);
             Assert.True(backup.Usable);
@@ -138,22 +165,31 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
             Assert.True(File.Exists(backup.Path));
             JsonElement refs = result.Coverage!.Value.GetProperty("evidence");
             Assert.Equal(refs.GetProperty("1:after").GetString(), refs.GetProperty("2:before").GetString());
-            byte[] observed = await store.ReadEvidenceAsync(definition.PlanId, refs.GetProperty("2:after").GetString()!, Token);
+            byte[] observed = await store.ReadEvidenceAsync(definition.PlanId, refs.GetProperty("1:after").GetString()!, Token);
             using JsonDocument parsed = JsonDocument.Parse(observed);
             Assert.False(parsed.RootElement.GetProperty("wholeProject").GetBoolean());
+            if (boundary is not null)
+            {
+                PlanRecord completed = (await store.ReadAsync(definition.PlanId, Token))!;
+                var coverage = await PlanCoverage.ReadAsync(store, completed, Token);
+                Assert.Contains(coverage, c => c.UnobservedPages.Contains(far, StringComparer.Ordinal));
+                Assert.True(JsonSerializer.SerializeToUtf8Bytes(completed.State, PlanJson.Options).Length < PlanCapacity.MiB);
+            }
             Print($"{result.Execution}; verification={result.Verification}; retained backup={backup.Path}");
         }
         finally
         {
             PlanNamesData names = await new PlanNamesReader(bridge).ReadAsync(project, Token);
-            if (names.Names.Any(n => n.Kind == "page" && n.Name == page))
+            string[] cleanup = [.. new[] { page, far }.Where(candidate => names.Names.Any(n => n.Kind == "page" && n.Name == candidate))];
+            if (cleanup.Length > 0)
             {
-                var args = new PageDeleteArgs { Project = project, Pages = [page] };
+                var args = new PageDeleteArgs { Project = project, Pages = [.. cleanup] };
                 args.Fingerprint = (await bridge.InvokeAsync<PageDeleteArgs, WritePlan>(OperationNames.PageDeletePlan, args, Token)).Fingerprint;
                 args.Backup = new() { Path = folders.Create(project), MaxSeconds = 60 };
                 await bridge.InvokeWriteAsync<PageDeleteArgs, JsonElement>(OperationNames.PageDeleteExecute, args, Guid.NewGuid().ToString("N"),
                     TimeSpan.FromSeconds(120), null, Token);
-                Assert.DoesNotContain((await new PlanNamesReader(bridge).ReadAsync(project, Token)).Names, n => n.Kind == "page" && n.Name == page);
+                Assert.DoesNotContain((await new PlanNamesReader(bridge).ReadAsync(project, Token)).Names,
+                    n => n.Kind == "page" && cleanup.Contains(n.Name, StringComparer.Ordinal));
             }
         }
     }
@@ -163,10 +199,21 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
 
     private sealed class RecordingBridge(IBridgeClient inner, string page) : IBridgeClient
     {
+        private bool _intervened;
+        private bool _firstAfterRead;
         public List<string[]> Snapshots { get; } = [];
         public int StepWrites { get; private set; }
+        public Func<Task>? BetweenSteps { get; set; }
 
-        public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => inner.GetStatusAsync(cancellationToken);
+        public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
+        {
+            if (StepWrites == 1 && _firstAfterRead && !_intervened && BetweenSteps is not null)
+            {
+                _intervened = true;
+                await BetweenSteps();
+            }
+            return await inner.GetStatusAsync(cancellationToken);
+        }
         public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken) => inner.SelectAsync(processId, cancellationToken);
         public Task<OutcomeGetData?> FetchOutcomeAsync(int processId, string requestId, CancellationToken cancellationToken) => inner.FetchOutcomeAsync(processId, requestId, cancellationToken);
 
@@ -184,6 +231,10 @@ public sealed class PlanLocalEvidenceTests(LiveEplan eplan)
             }
             var clock = Stopwatch.StartNew();
             TData result = await inner.InvokeAsync<TArgs, TData>(operation, args, timeout, progress, cancellationToken);
+            if (StepWrites == 1 && args is ProjectSnapshotArgs)
+            {
+                _firstAfterRead = true;
+            }
             Print($"{operation}={clock.Elapsed.TotalSeconds:F3}s");
             return result;
         }
