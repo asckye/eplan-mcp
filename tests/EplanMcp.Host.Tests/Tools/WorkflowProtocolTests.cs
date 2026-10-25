@@ -31,10 +31,25 @@ public sealed class WorkflowProtocolTests : IDisposable
         _bridge.Status = new([], new()
         {
             Eplan = new() { Version = "2026.0.3", Variant = "Pro Panel" },
-            Operations = [OperationNames.ProjectSnapshot, OperationNames.DeviceList, OperationNames.PlanFunctions, OperationNames.ProjectBackup,
+            Operations = [OperationNames.ProjectList, OperationNames.PlanNames, OperationNames.ProjectSnapshot, OperationNames.DeviceList, OperationNames.PlanFunctions, OperationNames.ProjectBackup,
                 OperationNames.PageCreatePlan, OperationNames.PageCreateExecute, OperationNames.PageUpdatePlan, OperationNames.PageUpdateExecute,
                 OperationNames.MacroInsertPlan, OperationNames.MacroInsertExecute, OperationNames.PlanMacroInspect],
         }, null);
+        _bridge.Projects.Add(new() { Name = "Line1", Path = ContextTestSnapshot.ProjectPath });
+        _bridge.Handlers[OperationNames.PlanNames] = _ =>
+        {
+            PlanOccupiedName[] names = [.. ContextTestSnapshot.Data(new()).Pages.SelectMany(p => p.Objects)
+                .Select(o => new PlanOccupiedName(o.Kind, o.Name!)).Distinct(), .. _changed ? new[] { new PlanOccupiedName("function", "+REMOTE-K9") } : []];
+            return new PlanNamesData
+            {
+                Project = "Line1",
+                ProjectPath = ContextTestSnapshot.ProjectPath,
+                ProjectGuid = "sample@1",
+                Complete = true,
+                Names = [.. names.Select(n => new PlanNameEntry { Kind = n.Kind, Name = n.Name })],
+                NamesHash = PlanSnapshotHashes.Names(ContextTestSnapshot.ProjectPath, names),
+            };
+        };
         _bridge.Handlers[OperationNames.ProjectSnapshot] = args => ContextTestSnapshot.Data((ProjectSnapshotArgs)args!, changed: _changed);
         _bridge.Handlers[OperationNames.DeviceList] = _ => new ListData<DeviceListItem> { Project = "Line1", Total = 0 };
         _bridge.Handlers[OperationNames.PageCreatePlan] = _ =>
@@ -72,6 +87,8 @@ public sealed class WorkflowProtocolTests : IDisposable
             Assert.False(provider.GetRequiredService<PlanTrust>().Matches(record.Definition, new("other", "session"), record.PlanHash));
             string changes = await store.ReadChangesAsync(id, Token);
             Assert.Equal(PlanStore.Hash(Encoding.UTF8.GetBytes(changes)), record.Definition.Digests.ChangesDigest);
+            Assert.Equal("2", record.Definition.CompilerVersion);
+            Assert.Equal(PlanDiffPreview.For(record.Definition.Steps, local: true), changes);
             string evidenceHash = record.Definition.ContextRef![7..];
             Assert.NotEmpty(await store.ReadEvidenceAsync(id, evidenceHash, Token));
             // Sources are only the objects a step checks or writes (and resources); the snapshot is the evidence above.
@@ -208,7 +225,8 @@ public sealed class WorkflowProtocolTests : IDisposable
     {
         _changeDuringCompile = true;
         await AssertError(ErrorReason.PlanStale, error => Assert.NotEmpty(error.GetProperty("metadata").GetProperty("conflicts").EnumerateArray()));
-        Assert.Equal(3, _bridge.Calls.Count(c => c.Operation == OperationNames.ProjectSnapshot));
+        Assert.DoesNotContain(_bridge.Calls, c => c.Operation == OperationNames.ProjectSnapshot);
+        Assert.Equal(3, _bridge.Calls.Count(c => c.Operation == OperationNames.PlanNames));
     }
 
     [Fact]

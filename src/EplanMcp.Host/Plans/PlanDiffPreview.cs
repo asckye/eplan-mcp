@@ -9,9 +9,13 @@ namespace EplanMcp.Host.Plans;
 /// <summary>Complete deterministic text, grouped by original step number and affected page.</summary>
 internal static class PlanDiffPreview
 {
-    public static string For(IEnumerable<PlanStep> steps)
+    public static string For(IEnumerable<PlanStep> steps, bool local = false)
     {
         var lines = new List<string>();
+        if (local)
+        {
+            lines.Add("Verification: local standard content plus project-wide name screening; other content is unobserved.");
+        }
         foreach (PlanStep step in steps.OrderBy(s => s.Index))
         {
             lines.Add($"Step {step.Index.ToString(CultureInfo.InvariantCulture)}: {step.Op} [{step.Tier.ToString().ToLowerInvariant()}]");
@@ -23,7 +27,8 @@ internal static class PlanDiffPreview
             {
                 lines.Add("  " + detail.Key + ": " + Escape(detail.Value));
             }
-            foreach (string page in step.ModifyScope.Pages.Order(StringComparer.Ordinal))
+            foreach (string page in step.ModifyScope.Pages.Concat(local ? step.ModifyScope.Locators.Select(l => l.Page).OfType<string>() : [])
+                .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
             {
                 lines.Add("  Page " + Escape(page));
                 var changes = step.PlannedChanges.Where(c => c.Kind is not ("page" or "macro") || c.Name == page)

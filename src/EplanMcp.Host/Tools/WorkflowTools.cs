@@ -49,7 +49,7 @@ internal sealed class WorkflowTools
             }
             using BridgeProgress? reporting = BridgeProgress.Start(CallProgress.For(progress), "Compiling workflow plan", packs.Clock, cancellationToken);
             (PlanDefinition definition, Dictionary<string, byte[]> evidence) = await WorkflowCompilation.CompileAsync(bridge, packs, input, project, owner, cancellationToken).ConfigureAwait(false);
-            string changes = PlanDiffPreview.For(definition.Steps);
+            string changes = PlanDiffPreview.For(definition.Steps, local: true);
             definition = definition with
             {
                 Digests = definition.Digests with

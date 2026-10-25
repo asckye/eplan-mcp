@@ -1293,7 +1293,7 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 4,
       "medium": 4,
-      "large": 9,
+      "large": 10,
       "apiNotes": [
         "A11",
         "A12"
@@ -1610,7 +1610,7 @@
       "spec": "docs/tools/eplan_plan_apply.md",
       "small": 3,
       "medium": 8,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A14",
         "A17",
@@ -1629,7 +1629,7 @@
       "spec": "docs/tools/eplan_plan_get.md",
       "small": 6,
       "medium": 6,
-      "large": 1,
+      "large": 2,
       "apiNotes": []
     },
     {
@@ -1725,7 +1725,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 4,
-      "large": 5,
+      "large": 6,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -1888,7 +1888,7 @@
       "spec": "docs/tools/eplan_task_get.md",
       "small": 2,
       "medium": 3,
-      "large": 1,
+      "large": 2,
       "apiNotes": []
     },
     {
@@ -2015,7 +2015,7 @@
       "spec": "docs/tools/eplan_workflow_plan.md",
       "small": 2,
       "medium": 4,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A14",
         "A17",

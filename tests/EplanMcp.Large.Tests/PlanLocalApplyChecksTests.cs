@@ -93,7 +93,7 @@ public sealed class PlanLocalApplyChecksTests(LiveEplan eplan)
             byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(stable, PlanJson.Options);
             string hash = PlanStore.Hash(bytes);
             DateTimeOffset now = TimeProvider.System.GetUtcNow();
-            string changes = PlanDiffPreview.For([step!]);
+            string changes = PlanDiffPreview.For([step!], local: true);
             var definition = new PlanDefinition(Guid.NewGuid().ToString("N"), stable.Snapshot.Project, "default", tasks.OwnerFor(server),
                 now, now.AddHours(24), 1, "2", 1, status.Handshake!.Eplan.Version, status.Handshake.Eplan.Variant!,
                 [OperationNames.ProjectList, OperationNames.PlanNames, OperationNames.PlanFunctions, OperationNames.ProjectSnapshot,

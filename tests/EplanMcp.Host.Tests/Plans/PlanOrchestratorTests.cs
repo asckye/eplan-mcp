@@ -506,7 +506,7 @@ public sealed partial class PlanOrchestratorTests : IAsyncDisposable
     {
         PlanDefinition definition = _definition with { Steps = [_definition.Steps[0] with { Tier = tier }] };
         definition = modify?.Invoke(definition) ?? definition;
-        string changes = PlanDiffPreview.For(definition.Steps);
+        string changes = PlanDiffPreview.For(definition.Steps, definition.CompilerVersion == "2");
         definition = definition with { Digests = definition.Digests with { ChangesDigest = PlanStore.Hash(Encoding.UTF8.GetBytes(changes)) } };
         await _store.PublishAsync(definition, changes, evidence ?? [], Token);
         _trust.Register(definition);

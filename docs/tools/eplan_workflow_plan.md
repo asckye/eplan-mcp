@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `workflow`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read（保存 Host 计划记录，不执行 EPLAN 写入） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented（P11；Small/Medium 覆盖编译与拒绝路径，Large 已编写、未实跑；计划 Resource 由 P12 注册） |
+| 状态 | Implemented（LP-9 新计划统一 compilerVersion="2"；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具） |
 
 ## 1. 这个工具解决什么任务
 “先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤，供 `eplan_plan_apply` 整体审批和执行。第 2 阶段只用覆盖全部结构的默认柜；包内工作流、配置分层、规则解释器留第 3 阶段。
@@ -37,8 +37,8 @@ P11 中省略语言时与页工具一致，使用 EPLAN 界面语言，实际语
 | `placeholder.apply` / Write | [`eplan_placeholder_apply`](eplan_placeholder_apply.md)；`placeholder.apply.plan/execute`（已有） | 唯一匹配的占位符及已有值集；同页同名同值集不能区分；A33 |
 | `module.insert` / Write | 无独立 MCP 工具；`module.insert.plan/execute`（**新增**） | 已安装包的窗口宏加预定义值集；见第 5 节，A33、A37 |
 | `page.delete` / Destructive | [`eplan_page_delete`](eplan_page_delete.md)；`page.delete.plan/execute`（已有） | 明确页集合及受影响设备；A18 |
-| `page.renumber` / Destructive | [`eplan_page_renumber`](eplan_page_renumber.md)；`page.renumber.plan/execute`（已有） | 沿用工具范围和编号模式，不扩大范围；A18 |
-| `device.renumber` / Destructive | [`eplan_device_renumber`](eplan_device_renumber.md)；`device.renumber.plan/execute`（已有） | 沿用工具范围；编号未必消除所有 `?`，不得承诺精确新名称；A18 |
+| `page.renumber` / Destructive | [`eplan_page_renumber`](eplan_page_renumber.md)；`page.renumber.plan/execute`（已有） | 显式目标 1–50 页；readScope/modifyScope 全项目且整个项目≤50 页/10,000 对象，最后有效步；A18 |
+| `device.renumber` / Destructive | [`eplan_device_renumber`](eplan_device_renumber.md)；`device.renumber.plan/execute`（已有） | 同上，须显式方案；编号未必消除所有 `?`，不承诺精确新名称；A18 |
 
 其他操作不在本版 `enum`：包括 `project.create`、`project.restore`、`device.place`、`connection.generate`、`report.update`、系统主数据写入和 `eplan_action_run`。未登记的操作为 `INVALID_ARGUMENT`，已登记但 Bridge 未声明或缺授权的操作为 `CAPABILITY_MISSING`。
 
@@ -76,6 +76,11 @@ P11 中省略语言时与页工具一致，使用 EPLAN 界面语言，实际语
 Read 结果/错误不带 `execution`。`RESOURCE_NOT_FOUND`、`CAPABILITY_MISSING` 已登记；扩展用途及新增 RESOURCE_EXHAUSTED 按实施设计 4.8 同步标准/Contracts。
 
 ## 5. 实现要点
+- **版本与局部基准**：新计划均为 `compilerVersion="2"`，记录 schema、六种前置条件 tag、canonical 和哈希算法不变。通过 `project.list`/`plan.names` 固定身份，双读所需现有页并集 S、完整名称集合 N 和同名功能闭包；S 为空时不发送 standard 快照。未过期的旧版本 1 记录不迁移、不重写哈希，仍走原 apply 路径。
+- **三个常用 Write 的范围**：page.create 的 readScope 是空集、modifyScope 为新页；device.update 读取全部同名功能所在页，modifyScope 仅含完整功能定位符（pages/structures 为空）；macro.insert 只读写目标页。完整名称清单包含辅助、额外表达和无页功能；不能用局部内容推断全项目名称未占用。含无页功能的设备改名仍为 `CAPABILITY_MISSING`，missing=`object.resolve:functions_without_page`。
+- **预测与限额**：仍只开放 page.create→page.update/macro.insert；前序申请的新名称参与后续碰撞检查。每步≤50 个影响/观察页、10,000 个 standard 明细对象、200 个显式定位符；S 可由多个独立步骤合并并分批读取。名称清单独立限制为 250,000 个不同占用名、8 MiB UTF-8 JSON，不计入明细对象上限。
+- **重编号**：两种重编号仍全项目读写且为最后有效步，整个项目≤50 页、10,000 个 standard 对象；先从名称清单按页数提前拒绝，超限 missing=`plan.renumber:whole_project_guard`，提示使用对应单次重编号工具。单次工具保留自己的审批、备份和预算。
+- **容量与覆盖**：v0.3.0 面向数千页项目，按负责人决定列出的核验规模为 300/1,000/3,000 页；10,000 页尚不支持，不承诺任意规模。局部 standard 内容加全项目名称筛查不等于全项目内容验证；未观察页、属性和时间窗口在 apply 的 coverage 中列出。guard 10 s、初备份 60 s、总墙钟 15 min 和证据 13 MiB 预算不放宽。
 - **编译**：校验全部输入 → 解析并固定已有项目和默认柜 → 读取上下文、资源及快照 → 独立步骤调用真实 `*.plan` → 依赖步骤由 Host 预测 → 检查范围与预期 → 保存计划。默认值（含语言）编译时显式固定；已有多柜绑定报缺能力，不用默认柜合并。预测只针对明确依赖，例如前步新建的页；不能可靠预测时拒绝或报告缺能力。
 - **快照与解析**：按已合入 [ProjectSnapshotArgs/Data](../../src/EplanMcp.Contracts/ProjectSnapshotArgs.cs) 分块，以 `complete`/`nextAfterPage` 续读，检查 `missingPages`；仅整项目单块才有 Bridge `snapshotHash`，多块按 [Bridge 设计 4.4](../design/2026-10-21-m6-bridge-snapshot.md) 合成，记录覆盖范围，不能把部分页哈希冒充整项目。`object.resolve` 每批 1–200 项，只对已打开项目；`stale` 或哈希不符即冲突，不按描述换目标。
 - **身份**：项目键按规范化路径区分副本；定位符 `project` 使用快照的无扩展名 `projectPath`。oid 只在项目内唯一，`PROJ_GUID` 仅提示同源（[api-notes A32、A34](../eplan/api-notes.md)）。跨调用不保存 `ToStringIdentifier`、`DatabaseIdentifier` 或依赖它们的会话指纹；apply 重新规划生成临时指纹。范围哈希包括对象集合，能发现新增、删除和名称占用，不只比已有对象。

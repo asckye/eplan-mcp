@@ -34,26 +34,28 @@ public sealed partial class PlanApplyProtocolTests : IDisposable
     {
         _current = PlanVerificationTestData.Copy(PlanScopeTestData.Baseline([], ["+A1/1"], Path.Combine(_locations.DefaultScratch, "Line1")).Snapshot, _ => { });
         _bridge = new(_fake);
+        _fake.Projects.Add(new() { Name = _current.Project.Name, Path = _current.Project.Path });
         _fake.Status = new([new("fake-p23", Environment.ProcessId)], new()
         {
             ProtocolVersion = BridgeProtocol.CurrentVersion,
             Eplan = new() { ProcessId = Environment.ProcessId, Version = "2026", Variant = "Pro Panel" },
-            Operations = [OperationNames.PlanStepExecute, OperationNames.OutcomeGet, OperationNames.ProjectSnapshot, OperationNames.PlanFunctions,
+            Operations = [OperationNames.PlanStepExecute, OperationNames.OutcomeGet, OperationNames.ProjectList, OperationNames.PlanNames, OperationNames.ProjectSnapshot, OperationNames.PlanFunctions,
                 OperationNames.DeviceList, OperationNames.ProjectBackup, OperationNames.PageCreatePlan, OperationNames.PageUpdatePlan,
                 OperationNames.PageCreateExecute, OperationNames.PageUpdateExecute],
         }, null);
-        _fake.Handlers[OperationNames.ProjectSnapshot] = _ => new ProjectSnapshotData
+        _fake.Handlers[OperationNames.ProjectSnapshot] = a => new ProjectSnapshotData
         {
             Project = _current.Project.Name,
             ProjectPath = _current.Project.Path,
             ProjectGuid = _current.Project.Guid,
             Profile = _current.Profile,
             Format = _current.Format,
-            Pages = [.. _current.Pages],
-            PageCount = _current.Pages.Length,
-            SnapshotHash = _current.ComposedHash,
+            Pages = [.. _current.Pages.Where(p => ((ProjectSnapshotArgs)a!).Pages is not { } pages || pages.Contains(p.Name, StringComparer.Ordinal))],
+            PageCount = ((ProjectSnapshotArgs)a!).Pages?.Count ?? _current.Pages.Length,
+            SnapshotHash = ((ProjectSnapshotArgs)a!).Pages is null ? _current.ComposedHash : null,
             Complete = true,
         };
+        _fake.Handlers[OperationNames.PlanNames] = _ => Names();
         _fake.Handlers[OperationNames.DeviceList] = _ => new ListData<DeviceListItem> { Project = "Line1" };
         _fake.Handlers[OperationNames.PlanFunctions] = _ => new PlanFunctionsData();
         _fake.Handlers[OperationNames.PageCreatePlan] = _ => Fresh("page.create", "+A1/3", "Power");
@@ -178,6 +180,21 @@ public sealed partial class PlanApplyProtocolTests : IDisposable
         return ContextToolTests.Data(await Call(client, WorkflowTools.PlanTool, args)).GetProperty("planId").GetString()!;
     }
     private static Task<CallToolResult> Call(McpClient client, string name, Dictionary<string, object?> args) => client.CallToolAsync(name, args, cancellationToken: Token).AsTask();
+
+    private PlanNamesData Names()
+    {
+        PlanOccupiedName[] names = [.. _current.Pages.SelectMany(p => p.Objects).Where(o => !string.IsNullOrEmpty(o.Name))
+            .Select(o => new PlanOccupiedName(o.Kind, o.Name!)).Concat(_additionalNames).Distinct()];
+        return new()
+        {
+            Project = _current.Project.Name,
+            ProjectPath = _current.Project.Path,
+            ProjectGuid = _current.Project.Guid,
+            Complete = true,
+            Names = [.. names.Select(n => new PlanNameEntry { Kind = n.Kind, Name = n.Name })],
+            NamesHash = PlanSnapshotHashes.Names(_current.Project.Path, names),
+        };
+    }
 
     private WritePlan Fresh(string op, string name, string? description)
     {

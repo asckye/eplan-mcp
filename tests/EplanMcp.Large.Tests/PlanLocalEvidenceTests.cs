@@ -128,7 +128,7 @@ public sealed partial class PlanLocalEvidenceTests(LiveEplan eplan)
                     OperationNames.ProjectBackup, OperationNames.PageCreatePlan, OperationNames.PageUpdatePlan],
                 new([new("page.create", createArgs), new("page.update", updateArgs)]), null, null, "sha256:" + hash, [], [],
                 new(baseline.Snapshot.ComposedHash, baseline.Snapshot.MembersHash, baseline.NamesHash, null), [create!, update!]);
-            string changes = PlanDiffPreview.For(definition.Steps);
+            string changes = PlanDiffPreview.For(definition.Steps, local: true);
             definition = definition with { Digests = definition.Digests with { ChangesDigest = PlanStore.Hash(Encoding.UTF8.GetBytes(changes)) } };
             await store.PublishAsync(definition, changes, new Dictionary<string, byte[]> { [hash] = bytes }, Token);
             trust.Register(definition);

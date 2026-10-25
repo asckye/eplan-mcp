@@ -4958,6 +4958,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlanStepGuardWriteTests.cs"
           },
           {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
+          },
+          {
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
@@ -6416,7 +6421,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plan_apply.md",
-        "specStatus": "In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D04–D07 为准）",
+        "specStatus": "Implemented（LP-9 按 compilerVersion 分流；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具）",
         "apiNotes": [
           "A14",
           "A17",
@@ -6487,6 +6492,11 @@
             "name": "PlanSettlementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
+          },
+          {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           }
         ],
         "operationTests": []
@@ -6569,6 +6579,11 @@
             "name": "PlanApplyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           }
         ],
         "operationTests": []
@@ -7105,6 +7120,11 @@
             "name": "ImportPxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportPxfTests.cs"
+          },
+          {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           },
           {
             "name": "ProjectCreateTests",
@@ -7807,6 +7827,11 @@
             "name": "PlanApplyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           }
         ],
         "operationTests": []
@@ -8476,7 +8501,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_workflow_plan.md",
-        "specStatus": "Implemented（P11；Small/Medium 覆盖编译与拒绝路径，Large 已编写、未实跑；计划 Resource 由 P12 注册）",
+        "specStatus": "Implemented（LP-9 新计划统一 compilerVersion=\"2\"；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具）",
         "apiNotes": [
           "A14",
           "A17",
@@ -8531,6 +8556,11 @@
             "name": "PlanSettlementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
+          },
+          {
+            "name": "PlanVersion2Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           },
           {
             "name": "WorkflowPlanTests",

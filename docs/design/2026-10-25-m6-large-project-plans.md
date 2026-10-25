@@ -121,7 +121,7 @@ A18 证明回滚/撤销及 PostNumerate 跳过已占名，不证明重编号的�
 | 现有字段/算法 | 修订后的值与兼容规则 |
 |---|---|
 | 外层 schemaVersion、definition.schemaVersion | 仍为 1；definition/state/步骤字段、六种 tag、canonical、planHash 输入规则均不变 |
-| compilerVersion | 从既有字符串 `"1"` 改成 `"2"`，apply 明确拒绝不支持版本；旧记录可查询，重新编译后才按新语义执行 |
+| compilerVersion | 新编译从既有字符串 `"1"` 改成 `"2"`，apply 明确拒绝不支持版本；未过期旧记录继续走版本 1 原路径，不迁移、不重写 hash（负责人 2026-10-25 决定） |
 | snapshotFormatVersion/profile/format | 不变；standard 属性与对象/页哈希规则不变 |
 | baseline.Snapshot / Digests.Pages | 仅 S 的完整页证据/ComposedHash；局部 SnapshotHash=null；不冒充全项目哈希 |
 | Snapshot.Members / MembersHash / Digests.Objects | 只散列实际 S 内对象的既有 key+内容 hash；各步 members 对其精确 readScope 计算，空集也有确定 hash/count=0 |
@@ -256,7 +256,7 @@ LP-2–8 中间态保留旧可执行路径，新编译语义尚不发布；新�
 
 v0.3.0 的核心是三个常用Write解除全项目内容依赖、正确的局部验证与名称guard、保留原审批/备份/预算。达到该组合的实机门槛即可发布，无需等待重编号扩容、全项目内容筛查优化或20步极限压力优化。10,000页guard/初备份若未达预算，发布说明必须列实测容量和缺能力/超时限制，不能宣称已支持任意万页项目；预算本身不放宽。
 
-旧compilerVersion=1计划不迁移、不重写hash；按既有保留策略可查询，执行要求重新编译。回退实现时不接受version=2执行，保留记录、审计和备份。没有进程拓扑、审批渠道、安全权限或落盘迁移的L3变更。
+旧compilerVersion=1计划不迁移、不重写hash；按既有保留策略可查询，未过期时仍按原 apply 路径执行。负责人 2026-10-25 决定 v0.3.0 面向数千页项目，核验规模为300/1,000/3,000页，10,000页及以上留后续工作；发布说明不得宣称任意规模。回退实现时不接受version=2执行，保留记录、审计和备份。没有进程拓扑、审批渠道、安全权限或落盘迁移的L3变更。
 
 ## 9. 待定问题与责任
 

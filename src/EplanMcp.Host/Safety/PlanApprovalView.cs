@@ -96,6 +96,9 @@ internal sealed record PlanApprovalView(PlanRecord Record, string ChangesPath, s
             (zh ? "最高级别：" : "Highest tier: ") + Tier,
             .. Chunks((zh ? "备份位置：" : "Backup location: ") + PlanDiffPreview.Escape(BackupFolder)),
             .. Chunks(Limits(zh)),
+            .. definition.CompilerVersion == "2"
+                ? [zh ? "校验：局部 standard 内容与全项目名称筛查；其他内容未观察。" : "Verification: local standard content plus project-wide name screening; other content is unobserved."]
+                : Array.Empty<string>(),
             .. definition.Steps.Any(s => s.Prediction is not null)
                 ? [zh ? "预测步骤按批准模式匹配；完整模式见清单。" : "Predicted steps match approved patterns; see the list for the complete patterns."]
                 : Array.Empty<string>(),
@@ -117,8 +120,10 @@ internal sealed record PlanApprovalView(PlanRecord Record, string ChangesPath, s
     {
         foreach (PlanStep step in Record.Definition.Steps.OrderBy(s => s.Index))
         {
-            yield return Short(FormattableString.Invariant($"Step {step.Index}: {step.Op} [{step.Tier}] — {step.ModifyScope.Pages.Length} pages, {step.PlannedChanges.Length} changes; effective={step.Effective}"));
-            yield return Short("  Pages: " + string.Join(", ", step.ModifyScope.Pages.Order(StringComparer.Ordinal).Select(PlanDiffPreview.Escape)));
+            string[] pages = [.. step.ModifyScope.Pages.Concat(step.ModifyScope.Locators.Select(l => l.Page).OfType<string>())
+                .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)];
+            yield return Short(FormattableString.Invariant($"Step {step.Index}: {step.Op} [{step.Tier}] — {pages.Length} pages, {step.PlannedChanges.Length} changes; effective={step.Effective}"));
+            yield return Short("  Pages: " + string.Join(", ", pages.Select(PlanDiffPreview.Escape)));
             if (step.Prediction is not null)
             {
                 yield return Short("Prediction: match approved patterns: " + PlanDiffPreview.Escape(JsonSerializer.Serialize(step.Expected, PlanJson.Options)));
@@ -126,7 +131,7 @@ internal sealed record PlanApprovalView(PlanRecord Record, string ChangesPath, s
         }
     }
 
-    private string[] FullLines() => PlanDiffPreview.For(Record.Definition.Steps).TrimEnd('\n').Split('\n');
+    private string[] FullLines() => PlanDiffPreview.For(Record.Definition.Steps, Record.Definition.CompilerVersion == "2").TrimEnd('\n').Split('\n');
 
     private static string Short(string line)
     {
