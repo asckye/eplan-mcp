@@ -81,7 +81,7 @@ internal sealed class PlanStepCompiler(IBridgeClient bridge)
         return PlanStepSemantics.Build(baseline, input, impact, plan);
     }
 
-    private Task<WritePlan> PlanAsync(string project, PlanArgumentStep input, CancellationToken cancellationToken)
+    internal Task<WritePlan> PlanAsync(string project, PlanArgumentStep input, CancellationToken cancellationToken)
     {
         JsonElement a = input.Args;
         string S(string name) => a.GetProperty(name).GetString()!;

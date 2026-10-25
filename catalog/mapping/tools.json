@@ -6395,6 +6395,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "PlanAdmissionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanAdmissionTests.cs"
+          },
+          {
             "name": "PlanApprovalViewTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalViewTests.cs"
@@ -6423,6 +6428,11 @@
             "name": "PlanApprovalTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
+          },
+          {
+            "name": "PlanOrchestratorTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanOrchestratorTests.cs"
           },
           {
             "name": "StdioEndToEndTests",

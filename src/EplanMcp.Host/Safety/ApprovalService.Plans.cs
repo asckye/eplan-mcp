@@ -12,7 +12,12 @@ internal sealed partial class ApprovalService
     /// <summary>One plan question with fresh binding; no v1 outcome can describe a plan's five execution states.</summary>
     public async Task<ApprovalResult> AskPlanAsync(PlanStore store, PlanRecord record, string backupFolder,
         IReadOnlyList<string> independentFingerprints, EplanInstanceInfo eplan,
-        IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
+        IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        await AskPlanAsync(store, record, backupFolder, independentFingerprints, eplan, progress, null, cancellationToken).ConfigureAwait(false);
+
+    internal async Task<ApprovalResult> AskPlanAsync(PlanStore store, PlanRecord record, string backupFolder,
+        IReadOnlyList<string> independentFingerprints, EplanInstanceInfo eplan, IProgress<ProgressNotificationValue>? progress,
+        Func<ApprovalQuestion, ApprovalResult, Task>? recordDecision, CancellationToken cancellationToken)
     {
         await CheckChangesAsync(store, record, cancellationToken).ConfigureAwait(false);
         var view = new PlanApprovalView(record, store.ChangesPath(record.Definition.PlanId), backupFolder);
@@ -24,7 +29,14 @@ internal sealed partial class ApprovalService
 
         // Validate the required review text even if the first available channel will be the EPLAN dialog.
         _ = view.WorkbenchChanges(System.Globalization.CultureInfo.CurrentUICulture);
-        ApprovalResult result = await AskAsync(view.Question(independentFingerprints, eplan, deadline), progress, cancellationToken).ConfigureAwait(false);
+        ApprovalQuestion question = view.Question(independentFingerprints, eplan, deadline);
+        ApprovalResult result = await AskAsync(question, progress, cancellationToken).ConfigureAwait(false);
+        // Record the actual decision before the post-approval file check can reject the plan.
+        if (recordDecision is not null)
+        {
+            await recordDecision(question, result).ConfigureAwait(false);
+        }
+
         if (result.Decision == ApprovalDecision.Granted)
         {
             await CheckChangesAsync(store, record, cancellationToken).ConfigureAwait(false);

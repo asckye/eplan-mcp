@@ -77,6 +77,22 @@ internal sealed class TaskRegistry : IDisposable
         }
     }
 
+    /// <summary>Rolls back a capacity reservation only while it is still unclaimed and unlinked to an admitted plan.</summary>
+    internal void Withdraw(McpServer server, string taskId)
+    {
+        lock (_lock)
+        {
+            Entry entry = Find(server, taskId);
+            if (entry.Record.Status != TaskStatus.Queued)
+            {
+                throw new InvalidOperationException("An admitted task cannot be withdrawn.");
+            }
+
+            entry.Session.Tasks.Remove(taskId);
+            _entries.Remove(entry);
+        }
+    }
+
     /// <summary>Claims a project's executor once. Other producers leave their records queued and try again later.</summary>
     public bool TryStart(McpServer server, string taskId)
     {
