@@ -6,6 +6,9 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>One resolved project/page property block; P3a is not registered in the production Bridge.</summary>
+    public const string PropertyRead = "property.read";
+
     /// <summary>One guarded typed plan step with one write outcome. Arguments: PlanStepExecuteArgs.</summary>
     public const string PlanStepExecute = "plan.step.execute";
 

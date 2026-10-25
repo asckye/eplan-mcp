@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-25",
-  "scannedSources": "cf59e5d8",
-  "sourceHash": "sha256:b78bbbe8e166282bfdd066d487d62ee516aad27f1a5b642a5997b22cb3abcae6",
+  "scannedSources": "cf59e5d8 + uncommitted changes",
+  "sourceHash": "sha256:d8f0dd9fbad247669c79bad0d55fc8ec7ed4221037bc811004cae461c1f050d3",
   "operations": [
     {
       "name": "action.execute",
@@ -403,6 +403,10 @@
     {
       "name": "project.translate.plan",
       "class": "ProjectTranslatePlanOperation"
+    },
+    {
+      "name": "property.read",
+      "class": "PropertyReadOperation"
     },
     {
       "name": "report.update.execute",
