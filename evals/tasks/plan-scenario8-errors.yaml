@@ -1,0 +1,48 @@
+id: plan-scenario8-errors
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 中验证计划编译的三种失败，不执行任何工程修改：
+  页描述更新的 pages 为空；在拟新建的 =GAA+A1&EFS1/90 页插入不存在的 P25_missing_resource.ema；
+  对 /1 页请求设备重编号但不提供方案。报告每次实际错误码、第一种错误的 JSON Pointer、
+  第三种错误的 missing 列表，并说明是否执行过写入。缺资源或能力时停止，不自行替代意图。
+answer:
+  type: object
+  required: [invalid, pointers, resource, capability, missing, wrote]
+  properties:
+    invalid: { type: string }
+    pointers: { type: array, items: { type: string } }
+    resource: { type: string }
+    capability: { type: string }
+    missing: { type: array, items: { type: string } }
+    wrote: { type: boolean }
+# Static after calls independently check the error contract; trace review checks the agent's actual calls.
+after:
+  invalid:
+    tool: eplan_workflow_plan
+    args: { steps: [{ op: page.update, args: { pages: [] } }] }
+    pick: $.error.reason
+  resource:
+    tool: eplan_workflow_plan
+    args:
+      steps:
+        - { op: page.create, args: { pages: [{ name: "=GAA+A1&EFS1/90" }], language: en_US } }
+        - { op: macro.insert, args: { page: { from_step: 1, page: "=GAA+A1&EFS1/90" }, macro: P25_missing_resource.ema, x: 40, y: 280 } }
+    pick: $.error.reason
+  capability:
+    tool: eplan_workflow_plan
+    args: { steps: [{ op: device.renumber, args: { pages: ["=GAA+A1&EFS1/1"] } }] }
+    pick: $.error.reason
+  unchanged: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/90" }, pick: $.error.reason }
+checks:
+  - { answer: $.invalid, equals: after.invalid }
+  - { after: invalid, equals: INVALID_ARGUMENT }
+  - { answer: $.pointers, contains: /steps/0/args/pages }
+  - { answer: $.resource, equals: after.resource }
+  - { after: resource, equals: RESOURCE_NOT_FOUND }
+  - { answer: $.capability, equals: after.capability }
+  - { after: capability, equals: CAPABILITY_MISSING }
+  - { answer: $.missing, contains: "plan:default_device_scheme" }
+  - { answer: $.wrote, equals: false }
+  - { after: unchanged, equals: PAGE_NOT_FOUND }
+budget: { max_tool_calls: 12, max_minutes: 5 }

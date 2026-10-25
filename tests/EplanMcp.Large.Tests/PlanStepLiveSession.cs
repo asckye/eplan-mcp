@@ -279,7 +279,7 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
         Path = Path.Combine(Directory.CreateDirectory(Path.Combine(_backups, Guid.NewGuid().ToString("N"))).FullName, "LargeWrite.elk"),
         MaxSeconds = 60,
     };
-    private static async Task ActionAsync(string action)
+    internal static async Task ActionAsync(string action)
     {
         string remote = Environment.GetEnvironmentVariable("EPLANMCP_EPLREMOTE") ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", ".local", "tools", "eplremote", "bin", "Release", "net481", "eplremote.exe"));
         var start = new ProcessStartInfo(remote)

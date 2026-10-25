@@ -4963,6 +4963,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlanStepGuardWriteTests.cs"
           },
           {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanTaskAcceptanceScenariosTests.cs"
+          },
+          {
             "name": "PlanVersion2Tests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
@@ -6479,6 +6484,11 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanSettlementTests.cs"
           },
           {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -6497,6 +6507,11 @@
             "name": "PlanSettlementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
+          },
+          {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanTaskAcceptanceScenariosTests.cs"
           },
           {
             "name": "PlanVersion2Tests",
@@ -6571,6 +6586,11 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanOrchestratorTests.cs"
           },
           {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -6584,6 +6604,11 @@
             "name": "PlanApplyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanTaskAcceptanceScenariosTests.cs"
           },
           {
             "name": "PlanVersion2Tests",
@@ -8015,6 +8040,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
           },
           {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -8028,6 +8058,11 @@
             "name": "PlanApplyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanTaskAcceptanceScenariosTests.cs"
           },
           {
             "name": "PlanVersion2Tests",
@@ -8724,9 +8759,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
-            "name": "PlanApplyProtocolTests",
+            "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -8757,6 +8792,11 @@
             "name": "PlanSettlementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
+          },
+          {
+            "name": "PlanTaskAcceptanceScenariosTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanTaskAcceptanceScenariosTests.cs"
           },
           {
             "name": "PlanVersion2Tests",

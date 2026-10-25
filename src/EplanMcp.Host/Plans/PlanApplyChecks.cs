@@ -81,6 +81,12 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
         PlanBaselineRead read = local
             ? await ReadLocalAsync(definition, cancellationToken).ConfigureAwait(false)
             : await new PlanBaselineReader(bridge).ReadAsync(definition.Project, null, cancellationToken).ConfigureAwait(false);
+        if (local && read.Baseline is null && !read.Conflicts.IsEmpty)
+        {
+            BridgeCallException stale = Stale();
+            stale.Error.Metadata!["conflicts"] = JsonSerializer.Serialize(read.Conflicts, HostJson.Options);
+            throw stale;
+        }
         if (read.Baseline is not { } baseline || baseline.Snapshot.ComposedHash != definition.Digests.Pages
             || baseline.Snapshot.MembersHash != definition.Digests.Objects || baseline.NamesHash != definition.Digests.Names)
         {

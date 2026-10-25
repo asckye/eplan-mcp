@@ -4,6 +4,16 @@
 
 这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**（只读测试也可以改用离线宿主，见下文"离线宿主"）：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[测试规范第 4 节](../../docs/standards/testing.md#4-large-测试实机)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
 
+## P25 完整任务验收
+
+`PlanTaskAcceptanceScenariosTests` 经真实 stdio Host 从基本项目新建、打开独立 scratch 项目，验证建页→改描述（有设备时还改名）、初备份、范围冲突、选择变化、审批等待和缺能力。2026-10-25 已在 EPLAN 2026.0.3（Electric P8）实跑 5/5 通过，审批用例的批准和到期两种结果都出现过。
+
+准备兼容的示例 `.zw9`，可用 `EPLANMCP_LARGE_BASIC_PROJECT` 指定；默认依次查找唯一 IEC、GB 基本项目。导航复用 `PlanStepLiveSession` 的本机 Remote Client 辅助程序，只用 `ProjectOpen /Quiet` 打开已确认关闭的项目，用 `XPrjActionProjectClose` 关闭已核对的当前项目，见 [A46](../../docs/eplan/api-notes.md#a46-项目打开当前选择与导航器顺序p252026-10-25eplan-20260325421electric-p8)。从 worktree 运行时，`EPLANMCP_EPLREMOTE` 必须指向**主 checkout** 的 `.local/tools/eplremote/bin/Release/net481/eplremote.exe`；另设 `EPLREMOTE_HOST`，端口可用 `EPLREMOTE_PORT` 指定。
+
+运行：`dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filter-class EplanMcp.Large.Tests.PlanTaskAcceptanceScenariosTests`。使用界面中的标准 Large 夹具；自建项目使用排在已知副本之后的唯一名称 `P25t_<8 hex>`、`P25o_<8 hex>`，打开后核对选择未变。普通用例直到清理才关闭已知副本。场景 5 在夹具当前时显式为 T 编译，再逐个核对并关闭当前的已知副本，记录关闭集合，直到 O 当前；核对只有 T 被修改，O 和重开的全部副本设计文件不变（关闭过的副本排除关闭时改写的 `ProjectInfo.xml`，页内容另行核对）。审批用例只观察 `waiting_approval`，让工程师处理或按测试配置 60 秒到期，测试绝不点击或关闭审批窗口；工程师批准时核对批准审计和初备份，拒绝或到期时核对项目未变。
+
+清理先核对并关闭当前的已知副本，直到首个自建项目当前；然后只关闭当前自建项目，直到自建项目全部关闭，再按夹具、`LargeOutside`、`LargeWrite` 的顺序重开本例关闭的副本。每次打开前确认目标未打开，夹具重开后立即核对它当前；失败时停止并保留现场。最终核对打开集合与开始时完全相同、夹具当前后，才删除本例目录和页面。未知项目或写入未结算时保留全部项目、审计和备份；审计与初备份保留在测试输出的数据目录中。
+
 ## 准备
 1. 构建 Release 版插件，并在要用的 EPLAN 变体中注册（`CLAUDE.md` 常用命令）。
 2. 用夹具启动 EPLAN：

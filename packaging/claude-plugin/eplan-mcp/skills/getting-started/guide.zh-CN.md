@@ -98,6 +98,8 @@ Claude Code 不用插件时，把上述客户端名换成 `claude-code`；已装
 
 核对工具、实例、项目、变更清单后自己批准或拒绝。默认 120 秒无人批准就拒绝，不执行。安全配置只能由工程师编辑数据根目录的 `config.json`，工具不能修改；不要为了让调用成功而关闭保护。
 
+需要编译、审阅并执行多步修改时，见[计划使用指南](https://github.com/asckye/eplan-mcp/blob/main/docs/guides/plans.zh-CN.md)，包括任务轮询、初始备份、冲突处理和 v2 校验范围。
+
 ## 8. 常见问题、日志与审计
 
 | 现象或 doctor 项 | 怎么处理 |
