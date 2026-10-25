@@ -7326,6 +7326,43 @@
       "live": []
     },
     {
+      "name": "eplan_property_schema",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PropertySchemaTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_property_schema.md",
+        "specStatus": "Implemented（P2：仅发布目录）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PropertySchemaToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PropertySchemaToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_report_update",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ReportWriteTools.cs",

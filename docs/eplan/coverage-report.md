@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-25 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 034641c2 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-25 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 cf59e5d8）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -85,7 +85,7 @@ Bridge 共用到 503 个 ID（方法 165，属性 156，类型 121，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 70（41.4%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 71（40.8%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -198,6 +198,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_project_get | read | project.get | 55 | 30 | 0 | 25 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/4/5 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 70 | 31 | 2 | 37 | 0 | 1/2/1 | A11 A14 A25 A28 | — |
+| eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 47 | 21 | 0 | 26 | 0 | 1/2/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 45 | 21 | 2 | 16 | 0 | 2/1/1 | A28 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/3/1 | — | 2026-10-19 pass（api-notes A12） |

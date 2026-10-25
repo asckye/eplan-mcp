@@ -28,6 +28,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(_ => HostDataLocations.FromEnvironment());
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<PropertySchemaPaging>();
         services.TryAddSingleton<TaskRegistry>();
         services.TryAddSingleton<PlanTrust>();
 
@@ -61,6 +62,7 @@ internal static class McpServerSetup
         services.TryAddSingleton<PackInstaller>();
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => PropertySchemaContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
@@ -104,6 +106,7 @@ internal static class McpServerSetup
             .WithTools<TerminalDestructiveTools>(HostJson.Options)
             .WithTools<PlcTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)
+            .WithTools<PropertySchemaTools>(HostJson.Options)
             .WithTools<PartMasterDataTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
             .WithTools<CheckTools>(HostJson.Options)

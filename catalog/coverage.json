@@ -1762,6 +1762,21 @@
       ]
     },
     {
+      "name": "eplan_property_schema",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_property_schema.md",
+      "small": 3,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_report_update",
       "safety": "write",
       "operations": [
