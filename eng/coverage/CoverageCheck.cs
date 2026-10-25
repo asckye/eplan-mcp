@@ -20,6 +20,7 @@ internal static class CoverageCheck
     /// <summary>Repository-relative path and content of each derived file.</summary>
     public static IEnumerable<(string Path, Func<string, string> Content)> Generated =>
     [
+        (PropertyDictionaryGenerator.RelativePath, PropertyDictionaryGenerator.Render),
         (ToolMapping.RelativePath, root => CoverageJson.Serialize(ToolMapping.Build(root))),
         (CoverageReport.RelativePath, root => CoverageJson.Serialize(CoverageReport.Build(root))),
         (CoverageMarkdown.RelativePath, CoverageMarkdown.Render),
