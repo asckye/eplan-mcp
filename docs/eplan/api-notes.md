@@ -186,6 +186,13 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A45. 设备改名的连带变化（LP-9，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本）
+
+- `device.update` 把 `=F+A2-KF1` 改名后，同页数据随之改变：接在它各功能上的连接的 `start`/`end` 中 function 全名（type/oid/pin 不变）、其他设备功能的 20403 `FUNC_PLCSYMBOLICADDRESS_CALCULATED`（如 `=F+A2-KF1:A1` → `=F+A2-<新>:A1`）、被改名功能自身的可见名 `shown`。
+- 可见名会省略与页结构相同的段：`=F+A2-KF1` 的 `shown` 是 `=F-KF1`，不是全名的后缀。
+- 计划校验只把“旧全名精确替换为新全名”和“可见名仅末段设备标识替换（结构不变）”算作改名的派生变化，其他变化仍按范围分类。
+— 经 Host 的 `eplan_workflow_plan`/`eplan_plan_apply` 实跑，读取改名前后 standard 快照比对。
+
 ### A44. 通用 Function/Connection 属性读取（P4，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，只读 sample fixture）
 
 - 设备标识按精确全名选主功能（可加页限定）；功能来源是 finder 加各页放置（A12），按 type/oid 去重。同一全名有多个主功能时报 AMBIGUOUS_NAME 并给出最多 20 个候选 locator，不默认取第一个。locator 读取复用 A32/A34 的项目/type/oid/名称/页/类别/位置核对，名称变化报 PLAN_STALE（metadata `check=name`），不按名称重新解析。

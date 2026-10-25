@@ -141,9 +141,16 @@ internal static class PlanVerifier
                     }
                     bool allowed = facts.Any(f => Targets(f.Locator, obj) && f.Property == property && f.Status == "passed" && f.Actual == to);
                     allowed |= a is null && property == "name" && facts.Any(f => Targets(f.Locator, obj) && f.Property == "exists" && f.Status == "passed");
-                    allowed |= step.Op == "device.update" && property == "shown" && a?.Shown is { Length: > 0 } && b?.Shown is { Length: > 0 }
+                    allowed |= step.Op == "device.update" && property == "shown" && (a?.Shown is { Length: > 0 } && b?.Shown is { Length: > 0 }
                         && a.Name?.EndsWith(a.Shown, StringComparison.Ordinal) == true && b.Name?.EndsWith(b.Shown, StringComparison.Ordinal) == true
+                        || PlanDerivedRename.Visible(step, from, to))
                         && facts.Any(f => Targets(f.Locator, obj) && f.Property == "name" && f.Status == "passed");
+                    // References to the renamed functions change with them, also on objects outside the modify scope.
+                    if (!between && PlanDerivedRename.Reference(step, property, from, to))
+                    {
+                        inside = true;
+                        allowed = true;
+                    }
                     if (step.Op is "page.renumber" or "device.renumber")
                     {
                         allowed |= a is not null && b is not null && (property == "name" && (step.Op == "page.renumber" ? obj.Kind == "page" : obj.Kind is not ("page" or "connection"))
