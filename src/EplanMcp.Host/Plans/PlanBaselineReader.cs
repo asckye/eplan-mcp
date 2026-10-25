@@ -109,7 +109,7 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
         return new(scope, occupied, PlanSnapshotHashes.Names(project.Path, occupied));
     }
 
-    private async Task<PlanSnapshot?> AssembleAsync(PlanProject project, string[]? wanted, List<PlanSnapshotConflict> conflicts, CancellationToken cancellationToken, ProjectSnapshotData? initial = null)
+    internal async Task<PlanSnapshot?> AssembleAsync(PlanProject project, string[]? wanted, List<PlanSnapshotConflict> conflicts, CancellationToken cancellationToken, ProjectSnapshotData? initial = null)
     {
         List<SnapshotPage> pages = [];
         var members = new Dictionary<string, string>(StringComparer.Ordinal);
