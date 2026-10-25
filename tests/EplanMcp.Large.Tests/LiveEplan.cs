@@ -1,6 +1,7 @@
 using System.Text.Json;
 using EplanMcp.Host;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Plans;
 using EplanMcp.Large.Tests;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -64,6 +65,16 @@ public sealed class LiveEplan : IAsyncLifetime
         if (_offline is not null && ProcessId != _offline.ProcessId)
         {
             throw new InvalidOperationException($"eplanmcp reached EPLAN process {ProcessId}, not the offline host {_offline.ProcessId}.");
+        }
+
+        if (Environment.GetEnvironmentVariable("EPLANMCP_LARGE_FIXTURE") is { Length: > 0 } largeFixture)
+        {
+            JsonElement only = Assert.Single((await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray());
+            ProjectPath = only.GetProperty("path").GetString()!;
+            Assert.True(Path.IsPathFullyQualified(largeFixture));
+            Assert.Equal(PlanSnapshotHashes.ProjectKey(largeFixture), PlanSnapshotHashes.ProjectKey(ProjectPath));
+            Assert.True(Host.Safety.ScratchPaths.IsInside(ProjectPath, [ScratchRoot()]));
+            return;
         }
 
         // The offline host has only its copy open, which need not be EPLAN's current project.
