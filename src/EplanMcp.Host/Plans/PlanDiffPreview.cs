@@ -47,12 +47,14 @@ internal static class PlanDiffPreview
         return string.Join('\n', lines) + "\n";
     }
 
-    private static string Escape(string text)
+    internal static string Escape(string text)
     {
         var result = new StringBuilder();
         foreach (char c in text)
         {
-            if (char.IsControl(c) || CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Format)
+            if (char.IsControl(c) || CharUnicodeInfo.GetUnicodeCategory(c) is UnicodeCategory.Format
+                or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator
+                || c != ' ' && CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.SpaceSeparator)
             {
                 result.Append("\\u").Append(((int)c).ToString("x4", CultureInfo.InvariantCulture));
             }

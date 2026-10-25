@@ -80,7 +80,8 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
             return new ApprovalResult(null, ApprovalDecision.Unavailable);
         }
 
-        using ApprovalProgress? waiting = ApprovalProgress.Start(progress, question, Timeout, clock);
+        TimeSpan timeout = question.PlanApproval is null ? Timeout : question.Deadline - clock.GetUtcNow();
+        using ApprovalProgress? waiting = ApprovalProgress.Start(progress, question, timeout, clock);
         foreach (IApprovalChannel channel in _channels)
         {
             waiting?.AskingIn(channel.Where);
@@ -90,7 +91,7 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
                 LogDecided(requestId, tool, channel.Name, decision);
 
                 // Only a write that may now run has an outcome to show; a confirmation is followed by its own approval.
-                bool shows = decision == ApprovalDecision.Granted && question.Release is null && question.PackInstall is null;
+                bool shows = decision == ApprovalDecision.Granted && question.Release is null && question.PackInstall is null && question.PlanApproval is null;
                 if (!shows)
                 {
                     answer.Outcome?.Dispose();

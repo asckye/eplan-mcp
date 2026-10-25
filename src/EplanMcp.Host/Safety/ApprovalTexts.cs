@@ -29,6 +29,11 @@ internal static class ApprovalTexts
             return PackInstall(question.Tool, install, zh);
         }
 
+        if (question.PlanApproval is { } planApproval)
+        {
+            return planApproval.Dialog(culture);
+        }
+
         WritePlan plan = question.Plan;
         string count = plan.Changes.Count.ToString(CultureInfo.InvariantCulture);
         string project = plan.ProjectPath.Length == 0

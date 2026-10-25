@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-25 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 580f4720）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-25 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 bc3260e0）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -183,7 +183,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_get | read | page.get | 65 | 36 | 1 | 28 | 0 | 4/4/8 | A11 A12 | — |
 | eplan_page_list | read | page.list | 40 | 19 | 1 | 20 | 0 | 15/4/6 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 59 | 23 | 0 | 36 | 0 | 1/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
-| eplan_page_update | write | page.update.execute<br>page.update.plan | 58 | 27 | 1 | 30 | 0 | 3/2/4 | A7 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_update | write | page.update.execute<br>page.update.plan | 58 | 27 | 1 | 30 | 0 | 3/4/4 | A7 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-22 pass（Large 测试 README） |
 | eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 39 | 11 | 0 | 26 | 1 | 2/6/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 43 | 23 | 1 | 18 | 0 | 2/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
