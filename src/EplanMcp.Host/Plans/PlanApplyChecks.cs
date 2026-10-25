@@ -112,6 +112,10 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
     {
         Reason = ErrorReason.PlanStale,
         Message = "The plan's identity, lifetime or approved evidence changed. Compile a new plan; inspect eplan_plan_get first.",
+        Metadata = new()
+        {
+            ["conflicts"] = """[{"step":null,"scope":"plan","reason":"identity_lifetime_or_evidence_changed","expected":"compiled","actual":"changed"}]""",
+        },
         Execution = ExecutionState.NotStarted,
     });
 }

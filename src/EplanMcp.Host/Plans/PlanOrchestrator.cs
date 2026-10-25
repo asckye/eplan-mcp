@@ -17,7 +17,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
     BackupFolders folders, PlanProjectBackup backup)
 {
     public async Task<PlanPreparation> PrepareAsync(McpServer server, string planId, bool dryRun,
-        CallProgress? progress, CancellationToken cancellationToken)
+        CallProgress? progress, CancellationToken cancellationToken, Action<TaskRecord>? admittedTask = null)
     {
         PlanOwner owner = tasks.OwnerFor(server);
         if (!trust.Owns(planId, owner))
@@ -63,6 +63,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
             {
                 throw new PlanCapacityException("tasks.project", 1, 1);
             }
+            admittedTask?.Invoke(tasks.Get(server, task.TaskId));
 
             (EplanInstanceInfo instance, string[] fingerprints, string pipe) = await checks.CheckAsync(record, cancellationToken).ConfigureAwait(false);
             DateTimeOffset start = SuspensionStore.StartOf(instance.ProcessId) ?? throw PlanApplyChecks.Stale();
@@ -162,7 +163,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
 
             if (copy.Error is not null)
             {
-                throw new BridgeCallException(BackupFolders.Failure());
+                throw new BridgeCallException(copy.Error.Reason == ErrorReason.Cancelled ? copy.Error : BackupFolders.Failure());
             }
 
             var ready = new PlanPreparation(record, tasks.Get(server, task.TaskId), fingerprints, instance, pipe, start, deadline, copy.Backup, held);
@@ -205,7 +206,8 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
                 : ex is PlanCapacityException capacity ? new() { Reason = capacity.Reason, Message = capacity.Message }
                 : ex is IOException or UnauthorizedAccessException or JsonException or PackFormatException ? PlanApplyChecks.Stale().Error
                 : new() { Reason = ErrorReason.Internal, Message = "The plan stopped before its first step because of an internal error; nothing was changed. Compile a new plan." };
-            return await FinishAsync(new(error.Reason, error.Message, false)).ConfigureAwait(false);
+            return await FinishAsync(new(error.Reason, error.Message, false,
+                error.Metadata is null ? null : JsonSerializer.SerializeToElement(error.Metadata, HostJson.Options))).ConfigureAwait(false);
         }
         finally
         {
@@ -231,7 +233,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
             }
 
             record = await ChangeAsync(s => s.Complete(result, packs.Clock.GetUtcNow())).ConfigureAwait(false);
-            tasks.Complete(server, task.TaskId, result, record.State.Revision);
+            tasks.Complete(server, task.TaskId, result, record.State.Revision, cancelled: error?.Reason == ErrorReason.Cancelled);
             return new(record, tasks.Get(server, task.TaskId), [], null, null, null, deadline, copy?.Backup, null);
         }
     }
