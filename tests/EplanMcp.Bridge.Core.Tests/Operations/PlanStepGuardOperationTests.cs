@@ -197,7 +197,7 @@ public sealed class PlanStepGuardOperationTests : IDisposable
                 args.Preconditions[0].Count = 10_001;
                 break;
             case "pages":
-                args.ReadScope.Pages = [.. Enumerable.Range(1, 51).Select(i => "+A1/" + i)];
+                args.ReadScope.Pages = [.. Enumerable.Range(1, 10_001).Select(i => "+A1/" + i)];
                 break;
             case "locators":
                 args.ReadScope.Locators = [.. Enumerable.Range(1, 201).Select(i => new ObjectLocator { Project = PlanGuardReader.Project, Kind = "function", Type = 17, Oid = i })];

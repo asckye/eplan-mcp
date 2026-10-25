@@ -24,10 +24,11 @@ public sealed class PlanStepGuardBoundsTests
     }
 
     [Fact]
-    public void Guard_FiftyPagesPass_FiftyFirstLivePageInStructureIsRejected()
+    public void Guard_ReadScopeOverFiftyPages_IsReadInFull()
     {
+        // Collision domains name every page of the project (design 4.3); only modify scopes are limited to 50 pages.
         using var reader = new PlanGuardReader();
-        for (int i = 2; i <= 50; i++)
+        for (int i = 2; i <= 120; i++)
         {
             reader.Content[i] = [new() { Kind = "page", Identifier = $"28/4/{i}/0", Oid = i, Name = "+A1/" + i }];
         }
@@ -36,10 +37,7 @@ public sealed class PlanStepGuardBoundsTests
         args.ReadScope.Structures = ["+A1"];
         var operation = new PlanStepGuardOperation(reader, reader, reader, reader, () => 0);
         Assert.Equal("ok", operation.Execute(args));
-        reader.Content[51] = [new() { Kind = "page", Identifier = "28/4/51/0", Oid = 51, Name = "+A1/51" }];
-        BridgeError failure = Assert.Throws<BridgeErrorException>(() => operation.Execute(args)).Error;
-        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (failure.Reason, failure.Execution));
-        Assert.Equal(50, reader.Reads);
+        Assert.Equal(120, reader.Reads);
     }
 
     [Fact]
