@@ -28,7 +28,7 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
             .Select(l => JsonNode.Parse(l)).Any(r => r?["kind"]?.GetValue<string>() == "plan_compiled"
                 && r["planId"]?.GetValue<string>() == definition.PlanId && r["planHash"]?.GetValue<string>() == record.PlanHash
                 && r["owner"]?.ToJsonString() == JsonSerializer.Serialize(definition.Owner, PlanJson.Options));
-        if (!compiled || await store.ReadChangesAsync(definition.PlanId, cancellationToken).ConfigureAwait(false) != PlanDiffPreview.For(definition.Steps))
+        if (!compiled || await store.ReadChangesAsync(definition.PlanId, cancellationToken).ConfigureAwait(false) != PlanDiffPreview.For(definition.Steps, local))
         {
             throw Stale();
         }

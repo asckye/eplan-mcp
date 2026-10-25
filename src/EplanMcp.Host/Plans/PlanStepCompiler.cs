@@ -8,8 +8,11 @@ namespace EplanMcp.Host.Plans;
 /// <summary>Compiles validated steps through real planning or the two closed dependency predictors.</summary>
 internal sealed class PlanStepCompiler(IBridgeClient bridge)
 {
+    public Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, IReadOnlyList<PlanStep> previous,
+        CancellationToken cancellationToken) => CompileAsync(baseline, input, previous, null, cancellationToken);
+
     public async Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, IReadOnlyList<PlanStep> previous,
-        CancellationToken cancellationToken)
+        PlanLocalImpact? local, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (previous.Any(s => s.Index >= input.Index) || input.DependsOn.Any(i => !previous.Any(s => s.Index == i)))
@@ -17,22 +20,37 @@ internal sealed class PlanStepCompiler(IBridgeClient bridge)
             throw PlanDependencyPredictor.Refused(input, "Dependencies must reference earlier compiled steps.");
         }
         string[] targets = PlanDependencyPredictor.Targets(input);
+        if (local is not null)
+        {
+            baseline = baseline with
+            {
+                Names = [.. baseline.Names, .. previous.Where(s => s.Effective)
+                    .SelectMany(s => s.Preconditions.OfType<PlanAbsent>()).Select(p => new PlanOccupiedName(p.Kind, p.Name))],
+            };
+        }
         PlanStep[] creators = [.. previous.Where(s => s.Effective && s.Op == "page.create"
             && s.ModifyScope.Pages.Intersect(targets, StringComparer.Ordinal).Any())];
         PlanStep step;
         if (creators.Length == 0)
         {
-            step = await CompileIndependentAsync(baseline, input, cancellationToken).ConfigureAwait(false);
+            step = await CompileIndependentAsync(baseline, input, local, cancellationToken).ConfigureAwait(false);
         }
         else if (creators.Length == 1)
         {
-            step = await new PlanDependencyPredictor(bridge).PredictAsync(baseline, input, creators[0], cancellationToken).ConfigureAwait(false);
+            try
+            {
+                step = await new PlanDependencyPredictor(bridge).PredictAsync(baseline, input, creators[0], local is not null, cancellationToken).ConfigureAwait(false);
+            }
+            catch (ArgumentException)
+            {
+                throw PlanDependencyPredictor.Refused(input, "A predicted name is occupied; choose a unique name and compile again.");
+            }
         }
         else
         {
             throw PlanDependencyPredictor.Refused(input, "Read/modify overlap has no predictor spanning multiple page.create steps.");
         }
-        if (input.Op is "page.create" or "macro.insert" or "device.update" or "page.renumber" or "device.renumber")
+        if (local is null && input.Op is ("page.create" or "macro.insert" or "device.update" or "page.renumber" or "device.renumber"))
         {
             // The collision domain also includes pages introduced earlier in this plan, outside the original snapshot.
             step = step with
@@ -55,7 +73,7 @@ internal sealed class PlanStepCompiler(IBridgeClient bridge)
     public Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, CancellationToken cancellationToken) =>
         CompileAsync(baseline, input, [], cancellationToken);
 
-    private async Task<PlanStep> CompileIndependentAsync(PlanBaseline baseline, PlanArgumentStep input, CancellationToken cancellationToken)
+    private async Task<PlanStep> CompileIndependentAsync(PlanBaseline baseline, PlanArgumentStep input, PlanLocalImpact? local, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         WritePlan plan = await PlanAsync(baseline.Snapshot.Project.Path, input, cancellationToken).ConfigureAwait(false);
@@ -67,6 +85,23 @@ internal sealed class PlanStepCompiler(IBridgeClient bridge)
 
         string[] pages = Pages(baseline, input, plan);
         string? device = input.Op == "device.update" ? plan.Changes.Single().Name : null;
+        if (local is not null && input.Op is not ("page.update" or "page.delete"))
+        {
+            PlanMacroInspectData? macro = input.Op == "macro.insert"
+                ? await bridge.InvokeAsync<PlanMacroInspectArgs, PlanMacroInspectData>(OperationNames.PlanMacroInspect,
+                    new()
+                    {
+                        Macro = input.Args.GetProperty("macro").GetString(),
+                    }, cancellationToken).ConfigureAwait(false) : null;
+            try
+            {
+                return PlanStepSemantics.Build(baseline, input, PlanLocalScopeRules.Build(baseline, local, plan, macro), plan);
+            }
+            catch (ArgumentException)
+            {
+                throw PlanDependencyPredictor.Refused(input, "A requested name is already occupied; choose a unique name and compile again.");
+            }
+        }
         PlanImpactRead read = await new PlanImpactReader(bridge).ReadAsync(baseline,
             new(input.Op, PlanScopeRules.Pages(pages), device), cancellationToken).ConfigureAwait(false);
         if (read.Impact is not { } impact)

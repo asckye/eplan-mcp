@@ -445,7 +445,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
             ContextRef = "sha256:" + hash,
             Digests = new(_baseline.Snapshot.ComposedHash, _baseline.Snapshot.MembersHash, storedBaseline.NamesHash, null),
         };
-        string changes = PlanDiffPreview.For(plan.Steps);
+        string changes = PlanDiffPreview.For(plan.Steps, local);
         plan = plan with { Digests = plan.Digests with { ChangesDigest = PlanStore.Hash(Encoding.UTF8.GetBytes(changes)) } };
         await _store.PublishAsync(plan, changes, new Dictionary<string, byte[]> { [hash] = bytes }, Token);
         _trust.Register(plan);

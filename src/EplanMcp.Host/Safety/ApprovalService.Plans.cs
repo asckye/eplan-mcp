@@ -52,7 +52,7 @@ internal sealed partial class ApprovalService
             string text = await store.ReadChangesAsync(record.Definition.PlanId, cancellationToken).ConfigureAwait(false);
             if (clock.GetUtcNow() >= record.Definition.ExpiresAt
                 || PlanStore.Hash(Encoding.UTF8.GetBytes(text)) != record.Definition.Digests.ChangesDigest
-                || text != PlanDiffPreview.For(record.Definition.Steps))
+                || text != PlanDiffPreview.For(record.Definition.Steps, record.Definition.CompilerVersion == "2"))
             {
                 throw new JsonException("The approved plan text or lifetime has changed.");
             }

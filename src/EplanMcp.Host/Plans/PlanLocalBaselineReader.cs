@@ -5,7 +5,7 @@ using EplanMcp.Host.Bridge;
 
 namespace EplanMcp.Host.Plans;
 
-/// <summary>LP-3 discovery and two local reads; no retries, caching or version 1 compiler registration.</summary>
+/// <summary>Version 2 discovery and two local reads; no retries or caching.</summary>
 internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
 {
     public Task<PlanBaselineRead> ReadAsync(string project, IReadOnlyList<PlanImpactRequest> requests, CancellationToken cancellationToken) =>
@@ -182,31 +182,55 @@ internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
         foreach (PlanImpactRequest request in requests)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            PlanFunctionsData? functions = null;
-            if (request.Op == "device.update")
+            PlanImpactRequest resolved = request with
             {
-                functions = await bridge.InvokeAsync<PlanFunctionsArgs, PlanFunctionsData>(OperationNames.PlanFunctions,
+                Targets = PlanScopeRules.Pages(request.Targets.Pages.Select(p => request.Op == "page.create" ? p
+                    : names.Names.FirstOrDefault(n => n.Kind == "page" && string.Equals(n.Name, p, StringComparison.OrdinalIgnoreCase))?.Name ?? p)),
+            };
+            PlanFunctionsData? functions = null;
+            string[] selected = request.Op == "device.update" ? [request.DeviceName!] : [];
+            if (request.Op == "page.delete")
+            {
+                var gaps = new List<PlanSnapshotConflict>();
+                PlanSnapshot snapshot = await ReadSnapshotAsync(project, [.. resolved.Targets.Pages], gaps, cancellationToken).ConfigureAwait(false)
+                    ?? throw PlanLocalScopeRules.Stale("A deletion page is missing; compile again.");
+                selected = [.. snapshot.Pages.SelectMany(p => p.Objects).Where(o => o.Kind == "function")
+                    .Select(o => o.Name).OfType<string>().Where(n => n.Length > 0).Distinct(StringComparer.Ordinal)];
+            }
+            foreach (string[] batch in selected.Chunk(200))
+            {
+                PlanFunctionsData part = await bridge.InvokeAsync<PlanFunctionsArgs, PlanFunctionsData>(OperationNames.PlanFunctions,
                     new()
                     {
                         Project = project.Path,
-                        Names = [request.DeviceName!],
+                        Names = [.. batch],
+                        Pages = request.Op == "page.delete" ? [.. resolved.Targets.Pages] : null,
                     }, cancellationToken).ConfigureAwait(false);
-                bool wrongProject = functions.Project != project.Name || !Path.IsPathFullyQualified(functions.ProjectPath)
-                    || PlanSnapshotHashes.ProjectKey(functions.ProjectPath) != project.Path;
-                if (!functions.Complete || functions.Limit != 10_000 || functions.Functions.Count > 10_000
+                bool wrongProject = part.Project != project.Name || !Path.IsPathFullyQualified(part.ProjectPath)
+                    || PlanSnapshotHashes.ProjectKey(part.ProjectPath) != project.Path;
+                if (!part.Complete || part.Limit != 10_000 || part.Functions.Count > 10_000
                     || wrongProject)
                 {
                     throw expected is not null && wrongProject
                         ? PlanLocalScopeRules.Stale("The function inventory project changed between reads; compile again.")
                         : PlanLocalScopeRules.Missing("plan.functions:complete");
                 }
-                if (expected is not null && JsonSerializer.Serialize(Sorted(functions.Functions))
-                    != JsonSerializer.Serialize(Sorted(expected[result.Count].Functions)))
+                if (request.Op == "device.update")
                 {
-                    throw PlanLocalScopeRules.Stale("The same-name function closure changed between reads; compile again.");
+                    functions = part;
+                }
+                else
+                {
+                    functions ??= new();
+                    functions.Functions = [.. functions.Functions.Concat(part.Functions).DistinctBy(f => (f.Kind, f.Type, f.Oid, f.Name, f.IsMain, f.Page))];
                 }
             }
-            PlanLocalImpact impact = PlanLocalScopeRules.Resolve(project, request, names.Names.Where(n => n.Kind == "page").Select(n => n.Name), functions?.Functions);
+            if (expected is not null && JsonSerializer.Serialize(Sorted(functions?.Functions ?? []))
+                != JsonSerializer.Serialize(Sorted(expected[result.Count].Functions)))
+            {
+                throw PlanLocalScopeRules.Stale("The same-name function closure changed between reads; compile again.");
+            }
+            PlanLocalImpact impact = PlanLocalScopeRules.Resolve(project, resolved, names.Names.Where(n => n.Kind == "page").Select(n => n.Name), functions?.Functions);
             if (impact.Functions.Any(f => f.Page is null or ""))
             {
                 throw PlanLocalScopeRules.Missing("object.resolve:functions_without_page");

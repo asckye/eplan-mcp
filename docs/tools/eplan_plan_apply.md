@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | 计划中最高步骤级别（Write / Destructive），由服务端判定 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false；静态注解覆盖目录内的 Destructive 计划，不代替运行时 tier |
-| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D04–D07 为准） |
+| 状态 | Implemented（LP-9 按 compilerVersion 分流；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具） |
 
 ## 1. 这个工具解决什么任务
 “执行刚才审阅的完整计划，并报告做到了哪里”。以 [ADR-0023](../adr/0023-plan-approval-and-backup.md) 为审批、备份及计划级结果的权威；不是逐次调用 MCP 写工具，也不是一个覆盖全计划的事务。只执行 [`eplan_workflow_plan`](eplan_workflow_plan.md) 的第 2 阶段目录。
@@ -52,6 +52,7 @@ schema 为对象，`additionalProperties: false`，范围/默认值写入 schema
 | `unknown` | 任一步 OUTCOME_UNKNOWN；计划不可重试，按项目及当时实例暂停写入 |
 
 - `verification` 为 passed/failed/skipped，仅汇总本期对象数据要求：全部必需项可证且通过才为 passed；有失败为 failed，其余未完成/未知为 skipped 并附原因。逐项为 passed/failed/unknown，未覆盖项不得算通过。提交后发现校验差异仍为 `committed`、`verification: failed`，附警报供审查，不自动修复；其他两层 skipped 不冒充已验证。
+- 版本 2 的 passed 仅表示所声明局部必需检查及全项目名称集合筛查通过。每步读取 readScope、modifyScope 页投影和已知关联页的前后 standard 内容；其他页列入 `coverage.UnobservedPages`，属性缺口和未观察窗口明确列出，不能声称它们未变。远页只改描述/部件、同名实例移动可能不改变名称集合；除显式闭包外不保证发现。完整 coverage 按既有内容寻址证据引用保存，经 plan_get 分页读取。
 - 等待未完返回 `{taskId,status,planId}`（受理回执，不是最终 execution）；90/110 秒窗口与 [`eplan_task_get`](eplan_task_get.md) 一致。任务引用同一计划；不能用回执推断未写入。状态映射按实施设计 4.5：部分完成或 verification 失败/跳过为 failed，仍保留 committed 等工程事实。
 - structuredContent、同内容 JSON 文本和一行计数摘要，如 `Plan stopped: 1 step committed, 1 rolled back; inspect the diff and backup.`；默认约 5k、硬上限 20k token，含双份 JSON。超限保留计划级结果、失败位置、完成计数、备份/结果引用及 `truncated/hint`，完整步骤和差异用 `eplan_plan_get` 分页取。
 
@@ -70,18 +71,20 @@ schema 为对象，`additionalProperties: false`，范围/默认值写入 schema
 始终满足：retryable 为 true 只允许 not_started/rolled_back；unknown 当且仅当某一步 reason=OUTCOME_UNKNOWN。错误不泄露本机路径；备份路径放计划结果的数据字段，审计保留实际路径。M6 新错误登记随实现补齐。
 
 ## 5. 实现要点
-1. **重核对**：权限与归属先于存在性；核对期限、planHash、规范化项目身份、绑定修订/锁摘要、资源 SHA-256 和能力。独立步骤由 `project.snapshot`/`object.resolve` 核对定位符、内容和范围集合哈希；任何冲突列全后 `PLAN_STALE`。无配置/代次的 null 不作为“状态未变”的证据。
+1. **重核对**：权限与归属先于存在性；核对期限、planHash、规范化项目身份、绑定修订/锁摘要、资源 SHA-256 和能力。版本 2 的 dry-run、审批前/后均重读已批准 S、完整 N 和同名功能闭包，不扩展内容范围；逐步 guard 在同一次主线程调用内核对局部内容、名称缺席和完整闭包。空 scope 不触发全项目快照；双读及多调用名称筛查仍有时间窗口。旧版本 1 计划在到期前保持原有全项目 apply 路径，不迁移或重写哈希；未知版本拒绝执行。
 2. **一次使用与审批**：一个 planId 只能有一个执行者/任务，完成或失败的计划不能原样再执行。按最高 tier 判策略：仅 Write 且 scratch 自动允许，外部按 writesOutsideScratch，含 Destructive 始终审批；系统主数据不得进计划。暂停确认仍按 ADR-0010 单独处理，不并入计划批准。
-3. **审批与备份**：按第 6 节整体批准，批准后再次核对内容和独立前置条件，随后已有目标在**第一步之前**用 `Eplan.EplApi.DataModel.ProjectManager.CopyProject(..., CopyMode.Snapshot)` 备份、核对页数。副本目录由 Host 新建，遵循 ADR-0013，不自动删除。A18/S12 验证打开项目可复制约 0.6–0.7 秒；独立 Bridge 入口与预算未实现，见 Q1。
+3. **审批与备份**：按第 6 节整体批准，批准后再次核对内容和独立前置条件，随后已有目标在**第一步之前**经 `project.backup` 用 `Eplan.EplApi.DataModel.ProjectManager.CopyProject(..., CopyMode.Snapshot)` 备份、核对页数。副本目录由 Host 新建，遵循 ADR-0013，不自动删除；Bridge 预算 60 s，Host 等待 75 s。A18/S12 的小夹具约 0.6–0.7 秒不能代表所有项目规模。
 4. **逐步执行**：每步先真实规划；独立变更必须与批准一致，依赖步骤按获批预测模式匹配且不扩大修改范围。执行侧还须在同一次主线程调用内重规划/比对并核对临时指纹，不能只依赖 Host 先后两次调用。随后各步各自 `LockingStep → SafetyPoint → UndoStep → QuietModeStep`，读回、提交；每步之间释放主线程，第一次失败/取消即停，不撤回前面步骤。名称为 `AI: plan <ID前8位> <k>/<n> <op>`，一次 Ctrl+Z 撤销一步（页/改标识 A17，宏 A14，删页/重编号 A18；模块/占位符仍未验证）。
 5. **Destructive 步骤备份**：每个 Destructive 步之前另按 ADR-0013 备份，不能以计划初始备份抵扣。
 6. **结果核实**：发出 execute 前写 execution_started；超时/断开按原请求 ID、原 Bridge 的 `outcome.get` 核实，不重发、不在上步未确定时发下步（ADR-0010）。取回 committed 标 recovered 并另读实际；取不回就 unknown/暂停。A15/S8 说明进程死亡仍可能留下未提交修改且撤销历史丢失；不能声称崩溃自动回滚。Host 重启只保留已有 DanglingWrites 的核实/暂停义务，不自动继续整份计划。
 7. **对象数据层校验与差异**：第 2 阶段仅比较执行前、预期、执行后的规范快照（修改范围及邻页），逐项检查对象存在/登记属性和范围外变化；快照能力见 workflow 规格。差异五类：按计划完成、计划未出现、计划外但范围内、范围之外、执行期间外部修改。每步前后取证，不能可靠归因的写 unknown，不把它武断归为外部修改；未取到的范围外数据不声称没变化。失败也保存已知快照/差异与覆盖范围；电气关系和图纸层均 skipped，留第 4 阶段（M6 4.9/4.16）。
 
+版本 2 保留每步≤50 页/10,000 明细对象/200 定位符、guard 10 s、初备份 60 s、总墙钟 15 min 及 13 MiB 证据预算。两种重编号仅允许全项目≤50 页且≤10,000 对象，超过页数先拒绝再读内容；含无页功能的设备改名不支持（`object.resolve:functions_without_page`）。v0.3.0 的核验规模按负责人决定为 300/1,000/3,000 页，10,000 页尚不支持。证据不足保留已提交事实并标 skipped，不自动重发。
+
 ## 6. 写操作专项
 - **dry-run**：只读重核对，返回计划预览和 `execution: not_started`；不推进状态、不启动审批任务，不能将未验证能力显示为可执行。
 - **审批内容/绑定**：按 ADR-0023 展示计划 ID、项目、默认柜、最高级别、备份位置、按步/页的清单、Destructive 醒目标记、预测模式及撤销限制。Workbench 展示完整清单，EPLAN 对话框每步摘要及前 50 条，完整文本在 `state\plans\<planId>\changes.txt`。绑定请求 ID、planHash、独立步骤临时指纹组合、参数摘要，一次性、期限沿用既有渠道；不经 MCP elicitation。
-- **现有实现与新增工作**：[WritePipeline](../../src/EplanMcp.Host/Safety/WritePipeline.cs) 当前一次 plan/execute、按步审批；[ApprovalTexts](../../src/EplanMcp.Host/Safety/ApprovalTexts.cs) 及 [AuditLog](../../src/EplanMcp.Host/Audit/AuditLog.cs) 已有清洗/绑定/哈希链。需计划外层编排及受控的逐步执行入口，不能循环 RunAsync 造成多次审批，也不能让 MCP 参数关闭审批。现有 `ProjectBackups.Make` 仅被 Destructive execute 内部使用，无独立计划初始备份操作。
+- **执行入口**：计划使用独立 `PlanOrchestrator`、`project.backup` 和类型化 `plan.step.execute`，复用既有审批、审计与各步事务；不循环 [WritePipeline.RunAsync](../../src/EplanMcp.Host/Safety/WritePipeline.cs)，也不提供关闭审批的 MCP 参数。Destructive 原有步骤备份独立保留。
 - **审计**：新增 plan_approval、plan_result（ID、hash、tier、步骤摘要、批准渠道/决定、备份、校验/差异摘要）；每步 execution_started/result 带 planId、step、请求 ID、参数摘要、指纹、范围、来源版本/哈希、execution、reason、recovered；结果记录失败不把已提交改成回滚，按既有悬空写入规则处理。
 - **等待/取消**：任务仅 Host 内存，按 task_get 的归属与保留限制；每 5 秒执行心跳、审批 15 秒，数值单调。等待窗口用尽不取消，取消 get 只结束等待；显式取消 apply 在安全点停止后续步骤并核实当前步。MCP 被取消请求不回复，终态仍写审计/计划；不增加 task_cancel。
 - **API 纪律**：复用现有 Bridge 操作，不在 Host 调 EPLAN；A36 要求一次取/释放属性列表和释放 PropertyValue，A39 禁止 Dispose 返回的 StorableObject。`module.insert` 的 ApplyRecord 重载、提交和撤销待验收，不假设嵌套 SafetyPoint 可行。

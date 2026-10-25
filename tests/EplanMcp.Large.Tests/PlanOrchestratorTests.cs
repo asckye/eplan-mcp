@@ -115,18 +115,20 @@ public sealed class PlanOrchestratorTests(LiveEplan eplan)
     }
 
     /// <summary>
-    /// Test-only intervention between the steps: on step 2's first status check, after step 1's after-evidence was taken,
+    /// Test-only intervention between the steps: on the first status check after step 1's after-content read,
     /// so the change is external to both writes and step 2's guard must refuse it.
     /// </summary>
     private sealed class InterveningBridge(IBridgeClient inner, Func<Task>? intervene) : IBridgeClient
     {
         private bool _intervened;
+        private bool _afterRead;
 
         public int StepWrites { get; private set; }
 
         public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
         {
-            if (StepWrites == 1 && intervene is not null && !_intervened)
+            // Version 2 after-evidence also checks status while reading names, so wait for the content read first.
+            if (StepWrites == 1 && _afterRead && intervene is not null && !_intervened)
             {
                 _intervened = true;
                 await intervene();
@@ -135,8 +137,21 @@ public sealed class PlanOrchestratorTests(LiveEplan eplan)
         }
 
         public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken) => inner.SelectAsync(processId, cancellationToken);
-        public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken) => inner.InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
-        public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken) => inner.InvokeAsync<TArgs, TData>(operation, args, timeout, progress, cancellationToken);
+        public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken) =>
+            Observe(args, inner.InvokeAsync<TArgs, TData>(operation, args, cancellationToken));
+
+        public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken) =>
+            Observe(args, inner.InvokeAsync<TArgs, TData>(operation, args, timeout, progress, cancellationToken));
+
+        private async Task<TData> Observe<TArgs, TData>(TArgs args, Task<TData> call)
+        {
+            TData result = await call;
+            if (StepWrites == 1 && args is ProjectSnapshotArgs)
+            {
+                _afterRead = true;
+            }
+            return result;
+        }
         public Task<OutcomeGetData?> FetchOutcomeAsync(int processId, string requestId, CancellationToken cancellationToken) => inner.FetchOutcomeAsync(processId, requestId, cancellationToken);
         public async Task<WriteResult<TData>> InvokeWriteAsync<TArgs, TData>(string operation, TArgs args, string requestId, TimeSpan limit, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken)
         {

@@ -11,8 +11,11 @@ internal sealed class PlanDependencyPredictor(IBridgeClient bridge)
 {
     private static readonly string[] _unknown = ["graphics", "texts", "placeholders", "connections.withoutPage"];
 
+    public Task<PlanStep> PredictAsync(PlanBaseline baseline, PlanArgumentStep input, PlanStep creation,
+        CancellationToken cancellationToken) => PredictAsync(baseline, input, creation, false, cancellationToken);
+
     public async Task<PlanStep> PredictAsync(PlanBaseline baseline, PlanArgumentStep input, PlanStep creation,
-        CancellationToken cancellationToken)
+        bool local, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         JsonElement args = input.Args;
@@ -66,7 +69,7 @@ internal sealed class PlanDependencyPredictor(IBridgeClient bridge)
             }
             else
             {
-                if (baseline.Names.Any(n => n.Kind == "page" && !baseline.Snapshot.Pages.Any(p => p.Name == n.Name)))
+                if (!local && baseline.Names.Any(n => n.Kind == "page" && !baseline.Snapshot.Pages.Any(p => p.Name == n.Name)))
                 {
                     throw new BridgeCallException(new BridgeError
                     {
@@ -92,7 +95,7 @@ internal sealed class PlanDependencyPredictor(IBridgeClient bridge)
                     }, cancellationToken).ConfigureAwait(false);
                 if (macro.Sha256.Length != 64 || macro.Sha256.Any(c => c is not (>= '0' and <= '9' or >= 'a' and <= 'f'))
                     || macro.ObjectCount < macro.Functions.Count || macro.Functions.Count > 10_000
-                    || baseline.Snapshot.Pages.Sum(p => p.Objects.Count) + 1 > 10_000)
+                    || !local && baseline.Snapshot.Pages.Sum(p => p.Objects.Count) + 1 > 10_000)
                 {
                     throw Refused(input, "Macro inspection does not prove a bounded complete prediction.");
                 }
@@ -115,8 +118,10 @@ internal sealed class PlanDependencyPredictor(IBridgeClient bridge)
                         throw Refused(input, "A macro function name is occupied in the project; choose a conflict-free macro.");
                     }
                 }
-                read = PlanScopeRules.Pages(baseline.Snapshot.Pages.Select(p => p.Name).Concat(pages));
-                conditions.AddRange(PlanPreconditions.Build(baseline, PlanScopeRules.Whole(baseline.Snapshot), detail: PlanScopeRules.Pages(pages)));
+                read = local ? PlanScopeRules.Pages(pages) : PlanScopeRules.Pages(baseline.Snapshot.Pages.Select(p => p.Name).Concat(pages));
+                conditions.AddRange(PlanPreconditions.Build(baseline, local ? PlanScopeRules.Pages([]) : PlanScopeRules.Whole(baseline.Snapshot),
+                    local ? PlanLocalScopeRules.Candidates(page, macro).Select(n => new PlanOccupiedName("function", n)) : null,
+                    detail: PlanScopeRules.Pages(pages)));
                 conditions.Add(new PlanResourceHash(macro.Sha256));
                 expected.Add(Expected("macro", page, new
                 {

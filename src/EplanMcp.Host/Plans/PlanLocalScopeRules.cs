@@ -4,7 +4,7 @@ using EplanMcp.Host.Bridge;
 
 namespace EplanMcp.Host.Plans;
 
-/// <summary>LP-3 scope semantics, kept separate from the version 1 executable compiler until LP-9.</summary>
+/// <summary>Version 2 content scopes, separate from the complete project name domain.</summary>
 internal static class PlanLocalScopeRules
 {
     public static PlanLocalImpact Resolve(PlanProject project, PlanImpactRequest request, IEnumerable<string> projectPages,
@@ -38,6 +38,12 @@ internal static class PlanLocalScopeRules
                 read = PlanScopeRules.Pages(targets.Pages);
                 modify = read;
                 break;
+            case "page.update":
+            case "page.delete":
+                Require(targets.Pages.Length is >= 1 and <= 50, "/args/pages");
+                read = PlanScopeRules.Pages(targets.Pages.Concat(functions.Select(f => f.Page).OfType<string>()));
+                modify = targets;
+                break;
             case "page.renumber":
             case "device.renumber":
                 Require(targets.Pages.Length is >= 1 and <= 50, "/args/pages");
@@ -46,7 +52,7 @@ internal static class PlanLocalScopeRules
                 modify = read;
                 break;
             default:
-                throw new ArgumentException("This local reader supports the three Write steps and renumber steps.", nameof(request));
+                throw new ArgumentException("Operation is not in the plan step catalog.", nameof(request));
         }
         Require(read.Pages.Length <= 50, "/readScope/pages");
         return new(request, read, modify, [.. functions]);
