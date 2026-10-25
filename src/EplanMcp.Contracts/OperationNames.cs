@@ -538,6 +538,9 @@ public static class OperationNames
     /// <summary>Complete function membership for plan impact closure. Arguments: <see cref="PlanFunctionsArgs"/>; data: <see cref="PlanFunctionsData"/>.</summary>
     public const string PlanFunctions = "plan.functions";
 
+    /// <summary>Complete occupied names. Arguments: <see cref="PlanNamesArgs"/>; data: <see cref="PlanNamesData"/>.</summary>
+    public const string PlanNames = "plan.names";
+
     /// <summary>
     /// A project file's database version and compatibility, read without opening or upgrading the project (api-notes
     /// A31). Reads only. Arguments: <see cref="ProjectCompatibilityArgs"/>; data: <see cref="ProjectCompatibilityData"/>.

@@ -1992,10 +1992,10 @@
         "plan.macro.inspect",
         "project.snapshot"
       ],
-      "apiIds": 142,
+      "apiIds": 143,
       "operationGroups": 64,
       "dataDictionary": 4,
-      "dependencies": 49,
+      "dependencies": 50,
       "actions": 0,
       "spec": "docs/tools/eplan_workflow_plan.md",
       "small": 2,

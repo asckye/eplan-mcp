@@ -117,6 +117,7 @@ internal static class BridgeHost
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new PlanFunctionsOperation(catalog, new EplanPlanFunctionReader()),
+            new PlanNamesOperation(catalog, new EplanPlanFunctionReader()),
             stepGuard,
             new PlanStepExecuteOperation(stepGuard, catalog, pages, pageWriter, descriptions, devices, renamer,
                 remover, pageRenumberer, renumberer, macros, inserter, backup, transactions),
