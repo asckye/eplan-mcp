@@ -4580,6 +4580,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageCreateOperationTests.cs"
           },
           {
+            "name": "PlanStepExecuteOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanStepExecuteOperationTests.cs"
+          },
+          {
             "name": "PageCreateInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PageCreateInteropTests.cs"

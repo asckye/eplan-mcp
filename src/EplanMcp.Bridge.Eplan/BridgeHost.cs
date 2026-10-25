@@ -103,6 +103,7 @@ internal static class BridgeHost
         var factory = new EplanProjectFactory(log);
         var actions = new EplanActionRunner();
         int actionMajor = System.Version.TryParse(eplan.Version, out System.Version? actionVersion) ? actionVersion.Major : 0;
+        var stepGuard = new PlanStepGuardOperation(catalog, new EplanSnapshotReader(), new EplanObjectFinder(), new EplanPlanFunctionReader());
         IOperation[] operations =
         [
             new ActionRunPlanOperation(actionMajor, catalog, actions),
@@ -116,7 +117,9 @@ internal static class BridgeHost
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new PlanFunctionsOperation(catalog, new EplanPlanFunctionReader()),
-            new PlanStepGuardOperation(catalog, new EplanSnapshotReader(), new EplanObjectFinder(), new EplanPlanFunctionReader()),
+            stepGuard,
+            new PlanStepExecuteOperation(stepGuard, catalog, pages, pageWriter, descriptions, devices, renamer,
+                remover, pageRenumberer, renumberer, macros, inserter, backup, transactions),
             new ConnectionListOperation(catalog, devices, new EplanConnectionReader()),
             new CableGetOperation(catalog, devices, new EplanCableReader()),
             new TerminalStripListOperation(catalog, terminals),
