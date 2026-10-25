@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 
@@ -20,7 +21,8 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
             || target.Properties().Any(p => p.Name is not ("projectObject" or "page" or "deviceTag" or "locator"))
             || target["projectObject"] is { Type: not (JTokenType.Boolean or JTokenType.Null) }
             || target["page"] is { Type: not (JTokenType.String or JTokenType.Null) }
-            || target["deviceTag"] is { Type: not JTokenType.Null } || target["locator"] is { Type: not JTokenType.Null }
+            || target["deviceTag"] is { Type: not (JTokenType.String or JTokenType.Null) }
+            || target["locator"] is { Type: not (JTokenType.Object or JTokenType.Null) } || !ValidTarget(target)
             || input["properties"] is not JArray selectors || selectors.Count is < 1 or > 20
             || selectors.Any(s => s is not JObject item || item.Properties().Any(p => p.Name is not ("propertyId" or "propertyName" or "index"))
                 || item["propertyId"]?.Type != JTokenType.Integer || item["propertyName"] is { Type: not JTokenType.Null }
@@ -35,13 +37,12 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
     protected override PropertyReadData Execute(PropertyReadArgs args)
     {
         if (string.IsNullOrWhiteSpace(args.ProjectPath) || args.Target is null
-            || args.Target.DeviceTag is not null || args.Target.Locator is not null
-            || args.Target.ProjectObject != true && string.IsNullOrWhiteSpace(args.Target.Page)
+            || !ValidTarget((JObject)BridgeJson.FromObject(args.Target))
             || args.Properties is null || args.Properties.Count is < 1 or > 20
             || args.Properties.Any(p => p is null || p.PropertyId is null or <= 0 || p.PropertyName is not null)
             || args.SelectorOffset < 0 || args.SelectorOffset >= args.Properties.Count || args.IndexOffset < 0)
         {
-            throw InvalidArgument("Supply a resolved project, a project/page target and 1..20 numeric selectors with valid continuation positions.");
+            throw InvalidArgument("Supply a resolved project, one valid property target and 1..20 numeric selectors with valid continuation positions.");
         }
 
         var watch = Stopwatch.StartNew();
@@ -69,7 +70,7 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
             PropertySelector property = args.Properties[selector];
             int id = property.PropertyId!.Value;
             int offset = selector == args.SelectorOffset ? args.IndexOffset : 0;
-            string? refusal = PropertyCatalog.ReadRefusal(args.Target.ProjectObject == true ? "Project" : "Page", id);
+            string? refusal = PropertyCatalog.ReadRefusal(scope.ObjectType, id);
             using IPropertyReadHandle? handle = refusal is null ? scope.OpenProperty(id) : null;
             Checkpoint();
             using IPropertyReadDefinition? definition = handle?.OpenDefinition();
@@ -151,5 +152,21 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
             result.NextIndexOffset = offset;
             return result;
         }
+    }
+
+    private static bool ValidTarget(JObject target)
+    {
+        var address = new JObject();
+        foreach (JProperty field in target.Properties().Where(p => p.Value.Type != JTokenType.Null))
+        {
+            string key = field.Name == "projectObject" ? "project_object" : field.Name == "deviceTag" ? "device_tag" : field.Name;
+            address[key] = field.Value.DeepClone();
+        }
+
+        var violations = new List<PropertyViolation>();
+        // Shape validation only; a cross-project identity is refused as PLAN_STALE during resolution.
+        JToken? project = (address["locator"] as JObject)?["project"];
+        PropertyAddressValidation.Target(address, project?.Type == JTokenType.String ? project.Value<string>()! : string.Empty, "/target", violations);
+        return violations.Count == 0;
     }
 }

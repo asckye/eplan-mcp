@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-25",
-  "scannedSources": "3d26b931",
-  "sourceHash": "sha256:5f6555852145af03c44e26d2bbe0dd24d87ca17a8377d5d27ec3b4ea244963c7",
+  "scannedSources": "08f627d2",
+  "sourceHash": "sha256:5ce5b278d99933552dbd682b5367bd550d37f737a7e10bef39b9b1f5acee2621",
   "operations": [
     {
       "name": "action.execute",
@@ -4478,6 +4478,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -4754,6 +4765,17 @@
         ],
         "operations": [
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -5075,6 +5097,17 @@
       {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Pages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
         "access": [
           "call"
@@ -7088,6 +7121,28 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanReportUpdater",
         "member": "ReportPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReportUpdater.cs",
@@ -8855,6 +8910,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -8900,6 +8966,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -9332,6 +9409,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "ConnectionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -9388,7 +9476,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
-          "project.snapshot"
+          "project.snapshot",
+          "property.read"
         ]
       }
     ],
@@ -9443,6 +9532,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "ConnectionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -9493,6 +9593,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -10117,6 +10228,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -10337,6 +10459,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -10454,6 +10587,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -10518,6 +10662,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionBase.Location": [
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
       {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
@@ -10931,6 +11086,17 @@
         ],
         "operations": [
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -12206,6 +12372,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -12689,6 +12866,17 @@
           "check.list",
           "check.run.execute",
           "check.run.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -13505,6 +13693,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "End",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -13566,6 +13765,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -13762,6 +13972,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -15387,6 +15608,28 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -16798,7 +17041,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
-          "project.snapshot"
+          "project.snapshot",
+          "property.read"
         ]
       },
       {
@@ -17834,6 +18078,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -18138,7 +18393,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
-          "project.snapshot"
+          "project.snapshot",
+          "property.read"
         ]
       },
       {
@@ -18201,6 +18457,39 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -19128,7 +19417,40 @@
       },
       {
         "adapter": "EplanPropertyReadAdapter",
+        "member": "Connections",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Pages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
         "access": [
           "type"
@@ -19358,7 +19680,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
-          "project.snapshot"
+          "project.snapshot",
+          "property.read"
         ]
       },
       {
@@ -19384,6 +19707,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -20119,6 +20453,39 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -20696,7 +21063,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
-          "project.snapshot"
+          "project.snapshot",
+          "property.read"
         ]
       },
       {
@@ -21134,7 +21502,40 @@
       },
       {
         "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Pages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
         "access": [
           "type"
@@ -21348,6 +21749,17 @@
         ],
         "operations": [
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -23077,6 +23489,28 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.UndoManager": [
@@ -23165,6 +23599,17 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {

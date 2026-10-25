@@ -12,6 +12,7 @@ internal sealed class FakePropertyReadAdapter : IPropertyReadAdapter
     public List<(int Id, int? Index)> ValueRequests { get; } = [];
     public Action<string>? OnAccess { get; set; }
     public string DefaultLanguage { get; set; } = "zh_CN";
+    public string? ObjectType { get; set; }
     public int Opens { get; private set; }
     public int PropertyOpens { get; private set; }
     public int StoredReads { get; private set; }
@@ -85,6 +86,8 @@ internal sealed class FakePropertyReadAdapter : IPropertyReadAdapter
 
     private sealed class Scope(FakePropertyReadAdapter owner) : Lease(owner, "list"), IPropertyReadScope
     {
+        public string ObjectType => Owner.ObjectType ?? (Owner.Target!.ProjectObject == true ? "Project" : "Page");
+
         public string DefaultLanguage
         {
             get

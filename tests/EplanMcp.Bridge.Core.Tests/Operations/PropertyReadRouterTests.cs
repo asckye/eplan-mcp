@@ -93,7 +93,7 @@ public sealed class PropertyReadRouterTests
         JObject args = (JObject)BridgeJson.FromObject(PropertyReadOperationTests.Args());
         if (field.StartsWith("target.", StringComparison.Ordinal))
         {
-            args["target"]![field[7..]] = field == "target.deviceTag" ? new JValue("-K1") : new JValue(17);
+            args["target"]![field[7..]] = new JValue(17);
         }
         else if (field.StartsWith("selector.", StringComparison.Ordinal))
         {
@@ -113,5 +113,110 @@ public sealed class PropertyReadRouterTests
         Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
         Assert.Equal(0, dispatcher.Calls);
         Assert.Equal(0, adapter.Opens);
+    }
+
+    [Theory]
+    [InlineData("device")]
+    [InlineData("function")]
+    [InlineData("connection")]
+    [InlineData("page")]
+    public void Invoke_NewTargetContracts_RoundTripThroughBothSerializers(string kind)
+    {
+        bool connection = kind == "connection";
+        int id = connection ? 31002 : kind == "page" ? 11011 : 20011;
+        var adapter = new FakePropertyReadAdapter { ObjectType = connection ? "Connection" : kind == "page" ? "Page" : "Function" };
+        adapter.Properties.Add(id, new FakeProperty());
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        ObjectLocator locator = PropertyReadTargetTests.Locator(PropertyReadTargetTests.Function());
+        locator.Kind = kind;
+        PropertyReadArgs args = PropertyReadOperationTests.Args(id, 3012);
+        args.Target = kind == "device" ? new PropertyTarget(deviceTag: "=AP-K1", page: "=AP/1") : new PropertyTarget(locator: locator);
+        var dispatcher = new InlineDispatcher();
+        var router = new OperationRouter([new PropertyReadOperation(adapter)], dispatcher, null, new ListLog(), TimeSpan.FromSeconds(30));
+
+        JToken json = router.Invoke(OperationNames.PropertyRead, JToken.Parse(JsonSerializer.Serialize(args, options)), "new-target");
+        PropertyReadData result = JsonSerializer.Deserialize<PropertyReadData>(json.ToString(), options)!;
+
+        Assert.Equal(1, dispatcher.Calls);
+        Assert.Equal("value", result.Items[0].Status);
+        Assert.Equal("read_refused", result.Items[1].Status);
+        Assert.Equal(JsonSerializer.Serialize(args.Target, options), JsonSerializer.Serialize(result.Items[0].Target, options));
+        Assert.Equal(json, BridgeJson.FromObject(result));
+        Assert.Equal(1, adapter.PropertyOpens);
+        adapter.AssertDisposed();
+    }
+
+    [Theory]
+    [InlineData("unknown", true)]
+    [InlineData("oid", "1")]
+    [InlineData("type", 1.5)]
+    [InlineData("name", 17)]
+    [InlineData("kind", "device")]
+    [InlineData("project", 17)]
+    [InlineData("pos", "NaN,20")]
+    public void Invoke_MalformedLocator_IsRejectedBeforeDispatch(string field, object value)
+    {
+        var adapter = new FakePropertyReadAdapter();
+        var dispatcher = new InlineDispatcher();
+        var router = new OperationRouter([new PropertyReadOperation(adapter)], dispatcher, null, new ListLog(), TimeSpan.FromSeconds(30));
+        PropertyReadArgs input = PropertyReadOperationTests.Args(20011);
+        input.Target = new PropertyTarget(locator: PropertyReadTargetTests.Locator(PropertyReadTargetTests.Function()));
+        JObject args = (JObject)BridgeJson.FromObject(input);
+        args["target"]!["locator"]![field] = JToken.FromObject(value);
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => router.Invoke(OperationNames.PropertyRead, args, "bad-locator"));
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
+        Assert.Equal(0, dispatcher.Calls);
+        Assert.Equal(0, adapter.Opens);
+    }
+
+    [Theory]
+    [InlineData("ambiguous", ErrorReason.AmbiguousName)]
+    [InlineData("absent", ErrorReason.DeviceNotFound)]
+    [InlineData("stale", ErrorReason.PlanStale)]
+    public void Invoke_ResolutionRefusal_PreservesReadErrorAndNeverOpensPropertyScope(string scenario, string reason)
+    {
+        var adapter = new ResolvingAdapter();
+        var router = new OperationRouter([new PropertyReadOperation(adapter)], new InlineDispatcher(), null, new ListLog(), TimeSpan.FromSeconds(30));
+        PropertyReadArgs args = PropertyReadOperationTests.Args(20011);
+        ObjectLocator stale = PropertyReadTargetTests.Locator(PropertyReadTargetTests.Function());
+        stale.Name += "-changed";
+        args.Target = scenario == "stale" ? new PropertyTarget(locator: stale)
+            : new PropertyTarget(deviceTag: scenario == "absent" ? "=AP-missing" : "=AP-K1");
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => router.Invoke(OperationNames.PropertyRead,
+            JToken.Parse(JsonSerializer.Serialize(args, options)), "refusal"));
+        BridgeError copy = JsonSerializer.Deserialize<BridgeError>(BridgeJson.FromObject(error.Error).ToString(), options)!;
+
+        Assert.Equal(reason, copy.Reason);
+        Assert.Null(copy.Execution);
+        Assert.Equal(0, adapter.Values.Opens);
+        if (scenario == "ambiguous")
+        {
+            ObjectLocator[] candidates = JsonSerializer.Deserialize<ObjectLocator[]>(copy.Metadata!["candidates"], options)!;
+            Assert.Equal([1L, 2L], candidates.Select(c => c.Oid));
+        }
+    }
+
+    private sealed class ResolvingAdapter : IPropertyReadAdapter
+    {
+        public FakePropertyReadAdapter Values { get; } = new();
+
+        public IPropertyReadScope Open(string projectPath, PropertyTarget target)
+        {
+            SnapshotObject[] objects = [PropertyReadTargetTests.Function(), PropertyReadTargetTests.Function(2)];
+            if (target.Locator is { } locator)
+            {
+                PropertyReadTargets.Located(projectPath, locator, objects, o => o);
+            }
+            else
+            {
+                PropertyReadTargets.Main(projectPath, target, objects, o => o);
+            }
+
+            return Values.Open(projectPath, target);
+        }
     }
 }
