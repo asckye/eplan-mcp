@@ -94,7 +94,7 @@ public sealed class WriteHost : IAsyncLifetime
     {
         CallToolResult result = await _client!.CallToolAsync(tool, args, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result.IsError, $"{tool} succeeded where it should fail: {Text(result)}");
-        return JsonDocument.Parse(Text(result)).RootElement.GetProperty("error");
+        return (result.StructuredContent ?? JsonDocument.Parse(Text(result)).RootElement).GetProperty("error");
     }
 
     /// <summary>Every record of this eplanmcp's audit log, oldest first.</summary>

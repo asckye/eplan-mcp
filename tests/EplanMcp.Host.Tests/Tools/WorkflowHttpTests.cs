@@ -20,9 +20,13 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class WorkflowHttpTests
 {
     [Theory]
-    [InlineData("2025-11-25")]
-    [InlineData("2026-07-28")]
-    public async Task StatelessHttp_WorkflowPlan_RefusesBeforeAnyBridgeReadOrPublication(string protocol)
+    [InlineData("2025-11-25", WorkflowTools.PlanTool)]
+    [InlineData("2026-07-28", WorkflowTools.PlanTool)]
+    [InlineData("2025-11-25", PlanApplyTools.ApplyTool)]
+    [InlineData("2026-07-28", PlanApplyTools.ApplyTool)]
+    [InlineData("2025-11-25", PlanApplyTools.TaskTool)]
+    [InlineData("2026-07-28", PlanApplyTools.TaskTool)]
+    public async Task StatelessHttp_WorkflowTools_RefuseBeforeAnyBridgeReadOrPublication(string protocol, string tool)
     {
         CancellationToken token = TestContext.Current.CancellationToken;
         string root = Directory.CreateTempSubdirectory("eplanmcp-workflow-http-").FullName;
@@ -44,11 +48,12 @@ public sealed class WorkflowHttpTests
             using var http = new HttpClient(handler) { BaseAddress = new Uri(app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single()) };
             using var request = new HttpRequestMessage(HttpMethod.Post, "/mcp");
             string metadata = protocol == "2026-07-28" ? ",\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\",\"io.modelcontextprotocol/clientInfo\":{\"name\":\"workflow-test\",\"version\":\"1\"},\"io.modelcontextprotocol/clientCapabilities\":{}}" : string.Empty;
-            string args = JsonSerializer.Serialize(WorkflowProtocolTests.Request());
-            request.Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"eplan_workflow_plan\",\"arguments\":" + args + metadata + "}}", Encoding.UTF8, "application/json");
+            string args = JsonSerializer.Serialize(tool == WorkflowTools.PlanTool ? WorkflowProtocolTests.Request()
+                : new Dictionary<string, object?> { [tool == PlanApplyTools.TaskTool ? "task_id" : "plan_id"] = "untrusted-id" });
+            request.Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"" + tool + "\",\"arguments\":" + args + metadata + "}}", Encoding.UTF8, "application/json");
             request.Headers.Add("Mcp-Protocol-Version", protocol);
             request.Headers.Add("Mcp-Method", "tools/call");
-            request.Headers.Add("Mcp-Name", WorkflowTools.PlanTool);
+            request.Headers.Add("Mcp-Name", tool);
             request.Headers.Add("Accept", "application/json, text/event-stream");
             using HttpResponseMessage response = await http.SendAsync(request, token);
             string body = await response.Content.ReadAsStringAsync(token);

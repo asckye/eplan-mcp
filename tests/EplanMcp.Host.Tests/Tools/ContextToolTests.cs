@@ -121,7 +121,7 @@ public sealed class ContextToolTests : IDisposable
     internal static JsonElement Error(CallToolResult call)
     {
         Assert.True(call.IsError);
-        return Parse(((TextContentBlock)call.Content[0]).Text).GetProperty("error");
+        return (call.StructuredContent ?? Parse(((TextContentBlock)call.Content[0]).Text)).GetProperty("error");
     }
 
     internal static void AssertSources(JsonElement result) => ContextBuilderReadTests.AssertSources(result);

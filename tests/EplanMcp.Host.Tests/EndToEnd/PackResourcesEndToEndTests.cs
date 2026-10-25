@@ -59,7 +59,7 @@ public sealed class PackResourcesEndToEndTests : IAsyncLifetime
         IList<McpClientResourceTemplate> templates = await _client!.ListResourceTemplatesAsync(cancellationToken: Cancel);
 
         Assert.Equal(
-            new[] { PackResources.ManifestTemplate, PackResources.PreviewTemplate, PackResources.AssetTemplate, PlanTools.Template }.Order(StringComparer.Ordinal),
+            new[] { PackResources.ManifestTemplate, PackResources.PreviewTemplate, PackResources.AssetTemplate, PlanTools.Template, PlanApplyTools.Template }.Order(StringComparer.Ordinal),
             templates.Select(t => t.UriTemplate).Order(StringComparer.Ordinal));
     }
 
