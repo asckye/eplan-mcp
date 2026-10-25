@@ -23,6 +23,7 @@ public sealed class WorkflowProtocolTests : IDisposable
     private readonly FakeBridgeClient _bridge = new();
     private bool _changed;
     private bool _changeDuringCompile;
+    private readonly List<ModelContextProtocol.Server.McpServer> _servers = [];
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     public WorkflowProtocolTests()
@@ -92,6 +93,113 @@ public sealed class WorkflowProtocolTests : IDisposable
             Assert.Equal("eplanmcp://plans/" + id, Assert.IsType<ResourceLinkBlock>(call.Content[2]).Uri);
             Assert.Empty(_bridge.Writes);
             Assert.DoesNotContain(_bridge.Calls, c => c.Operation.EndsWith(".execute", StringComparison.Ordinal));
+        });
+    }
+
+    [Fact]
+    public async Task PlanGet_OfflineExpiredRevisionAndResources_ShareOwnedSnapshotWithoutBridgeCalls()
+    {
+        var clock = TaskTestData.Clock();
+        await WithClient(async (client, provider) =>
+        {
+            JsonElement compiled = ContextToolTests.Data(await client.CallToolAsync(WorkflowTools.PlanTool, Request(), cancellationToken: Token));
+            string id = compiled.GetProperty("planId").GetString()!;
+            PlanStore store = provider.GetRequiredService<PlanStore>();
+            int calls = _bridge.Invocations;
+            PlanRecord saved = (await store.ReadAsync(id, Token))!;
+            Assert.Equal(saved.Definition.Owner, provider.GetRequiredService<TaskRegistry>().OwnerFor(_servers[^1]));
+            _ = ContextToolTests.Data(PlanReadModel.Page(saved, "concise", 50, null));
+            _bridge.Failure = new() { Reason = ErrorReason.EplanNotConnected, Message = "Offline." };
+            clock.Advance(TimeSpan.FromHours(25));
+            var args = new Dictionary<string, object?> { ["plan_id"] = id };
+            CallToolResult queried = await client.CallToolAsync(PlanTools.GetTool, args, cancellationToken: Token);
+            Assert.NotSame(_servers[^2], _servers[^1]); // SDK request facades differ, their connection owner must not.
+            Assert.Equal(saved.Definition.Owner, provider.GetRequiredService<TaskRegistry>().OwnerFor(_servers[^1]));
+            JsonElement concise = ContextToolTests.Data(queried);
+            Assert.Equal("compiled", concise.GetProperty("status").GetString());
+            Assert.Equal(compiled.GetProperty("planHash").GetString(), concise.GetProperty("plan").GetProperty("planHash").GetString());
+            ReadResourceResult read = await client.ReadResourceAsync("eplanmcp://plans/" + id, cancellationToken: Token);
+            Assert.True(JsonElement.DeepEquals(concise, ContextToolTests.Parse(Assert.IsType<TextResourceContents>(Assert.Single(read.Contents)).Text)));
+            Assert.Contains(await client.ListResourceTemplatesAsync(cancellationToken: Token), t => t.UriTemplate == PlanTools.Template);
+            args["response_format"] = "detailed";
+            args["limit"] = 1;
+            JsonElement first = ContextToolTests.Data(await client.CallToolAsync(PlanTools.GetTool, args, cancellationToken: Token));
+            string cursor = first.GetProperty("nextCursor").GetString()!;
+            await store.UpdateAsync(id, 0, s => s.Admit("attempt", "task", "host"), Token);
+            args["cursor"] = cursor;
+            JsonElement stale = ContextToolTests.Error(await client.CallToolAsync(PlanTools.GetTool, args, cancellationToken: Token));
+            Assert.Equal(ErrorReason.InvalidArgument, stale.GetProperty("reason").GetString());
+            Assert.Contains("first page", stale.GetProperty("message").GetString(), StringComparison.Ordinal);
+            await WithClient(async (other, _) =>
+            {
+                JsonElement hidden = ContextToolTests.Error(await other.CallToolAsync(PlanTools.GetTool, args, cancellationToken: Token));
+                Assert.Equal(ErrorReason.ResourceNotFound, hidden.GetProperty("reason").GetString());
+                args["plan_id"] = new string('f', 32);
+                JsonElement absent = ContextToolTests.Error(await other.CallToolAsync(PlanTools.GetTool, args, cancellationToken: Token));
+                Assert.Equal(hidden.GetProperty("message").GetString(), absent.GetProperty("message").GetString());
+                ReadResourceResult resource = await other.ReadResourceAsync("eplanmcp://plans/" + id, cancellationToken: Token);
+                Assert.Equal(ErrorReason.ResourceNotFound, ContextToolTests.Parse(((TextResourceContents)resource.Contents[0]).Text).GetProperty("error").GetProperty("reason").GetString());
+            }, services =>
+            {
+                services.AddSingleton(provider.GetRequiredService<TaskRegistry>());
+                services.AddSingleton(provider.GetRequiredService<PlanTrust>());
+                services.AddSingleton(store);
+            });
+            Assert.Equal(calls, _bridge.Invocations);
+            Assert.Empty(_bridge.Writes);
+        }, services => services.AddSingleton<TimeProvider>(clock));
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("corrupt")]
+    [InlineData("replaced")]
+    public async Task PlanGet_MissingCorruptOrUntrustedRecord_IsIndistinguishable(string condition)
+    {
+        await WithClient(async (client, provider) =>
+        {
+            string id = ContextToolTests.Data(await client.CallToolAsync(WorkflowTools.PlanTool, Request(), cancellationToken: Token)).GetProperty("planId").GetString()!;
+            string file = Path.Combine(_locations.State, "plans", id + ".json");
+            if (condition == "missing")
+            {
+                File.Delete(file);
+            }
+            else if (condition == "corrupt")
+            {
+                await File.WriteAllTextAsync(file, "{", Token);
+            }
+            else
+            {
+                PlanRecord record = (await provider.GetRequiredService<PlanStore>().ReadAsync(id, Token))!;
+                PlanDefinition changed = record.Definition with { Project = record.Definition.Project with { Name = "Replaced" } };
+                await File.WriteAllTextAsync(file, JsonSerializer.Serialize(record with { Definition = changed, PlanHash = PlanCanonical.Hash(changed) }, PlanJson.Options), Token);
+            }
+            CallToolResult call = await client.CallToolAsync(PlanTools.GetTool, new Dictionary<string, object?> { ["plan_id"] = id }, cancellationToken: Token);
+            Assert.Equal(ErrorReason.ResourceNotFound, ContextToolTests.Error(call).GetProperty("reason").GetString());
+            Assert.False(call.StructuredContent!.Value.TryGetProperty("execution", out _));
+        });
+    }
+
+    [Theory]
+    [InlineData(ExecutionState.Unknown, ErrorReason.OutcomeUnknown)]
+    [InlineData(ExecutionState.RolledBack, ErrorReason.Cancelled)]
+    public async Task PlanGet_FailedOrUnknownPlan_IsSuccessfulData(string execution, string reason)
+    {
+        await WithClient(async (client, provider) =>
+        {
+            string id = ContextToolTests.Data(await client.CallToolAsync(WorkflowTools.PlanTool, Request(), cancellationToken: Token)).GetProperty("planId").GetString()!;
+            PlanStore store = provider.GetRequiredService<PlanStore>();
+            await store.UpdateAsync(id, 0, s => s.Admit("attempt", "task", "host"), Token);
+            await store.UpdateAsync(id, 1, s => s.Start(PlanTestData.Created, EplanMcp.Host.Safety.PolicyVerdict.Allow), Token);
+            PlanResult result = TaskTestData.Result(execution, "skipped", reason);
+            await store.UpdateAsync(id, 2, s => s.Complete(result, PlanTestData.Created.AddMinutes(1)), Token);
+            int calls = _bridge.Invocations;
+            CallToolResult call = await client.CallToolAsync(PlanTools.GetTool, new Dictionary<string, object?> { ["plan_id"] = id }, cancellationToken: Token);
+            JsonElement data = ContextToolTests.Data(call);
+            Assert.False(data.TryGetProperty("execution", out _));
+            Assert.Equal(execution, data.GetProperty("result").GetProperty("execution").GetString());
+            Assert.Equal(reason, data.GetProperty("result").GetProperty("error").GetProperty("reason").GetString());
+            Assert.Equal(calls, _bridge.Invocations);
         });
     }
 
@@ -228,15 +336,21 @@ public sealed class WorkflowProtocolTests : IDisposable
         };
     }
 
-    private async Task WithClient(Func<McpClient, IServiceProvider, Task> check)
+    private async Task WithClient(Func<McpClient, IServiceProvider, Task> check, Action<IServiceCollection>? configure = null)
     {
         var toServer = new Pipe();
         var toClient = new Pipe();
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton(_locations);
-        builder.Services.AddEplanMcp().WithStreamServerTransport(toServer.Reader.AsStream(), toClient.Writer.AsStream());
+        builder.Services.AddEplanMcp().WithStreamServerTransport(toServer.Reader.AsStream(), toClient.Writer.AsStream())
+            .WithRequestFilters(filters => filters.AddCallToolFilter(next => (context, cancellationToken) =>
+            {
+                _servers.Add(context.Server);
+                return next(context, cancellationToken);
+            }));
         builder.Services.AddSingleton<IBridgeClient>(_bridge);
+        configure?.Invoke(builder.Services);
         using IHost host = builder.Build();
         await host.StartAsync(Token);
         try

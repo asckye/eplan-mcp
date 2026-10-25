@@ -59,6 +59,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
@@ -123,8 +124,10 @@ internal static class McpServerSetup
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)
             .WithTools<WorkflowTools>(HostJson.Options)
+            .WithTools<PlanTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
             .WithResources<PackResources>()
+            .WithResources<PlanTools>()
             .WithRequestFilters(filters => filters.AddCallToolFilter(UnknownArgumentFilter.Apply));
     }
 }

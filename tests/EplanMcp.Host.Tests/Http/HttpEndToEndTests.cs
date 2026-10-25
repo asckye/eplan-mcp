@@ -14,6 +14,7 @@ using EplanMcp.Host.Http;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Bridge;
 using EplanMcp.Host.Tests.Tools;
+using EplanMcp.Host.Tools;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -92,6 +93,7 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
     {
         JsonNode list = await RpcAsync("tools/list", new JsonObject(), protocol);
         Assert.Contains(list["result"]!["tools"]!.AsArray(), t => t!["name"]!.GetValue<string>() == "eplan_project_list");
+        Assert.Contains(list["result"]!["tools"]!.AsArray(), t => t!["name"]!.GetValue<string>() == PlanTools.GetTool);
         JsonNode read = await RpcAsync("tools/call", new JsonObject { ["name"] = "eplan_project_list", ["arguments"] = new JsonObject() }, protocol);
         Assert.False(read["result"]?["isError"]?.GetValue<bool>() ?? false, read.ToJsonString());
         Assert.Equal("Line1", read["result"]!["structuredContent"]!["projects"]![0]!["name"]!.GetValue<string>());
@@ -100,6 +102,28 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
         Assert.All(audit, line => Assert.Equal("127.0.0.1", JsonNode.Parse(line)!["sourceAddress"]!.GetValue<string>()));
         Assert.DoesNotContain(_key, string.Join('\n', audit), StringComparison.Ordinal);
         Assert.Null(AuditVerifier.Verify(_locations.Audit).Break);
+    }
+
+    [Theory]
+    [InlineData("2025-11-25")]
+    [InlineData("2026-07-28")]
+    public async Task PlanGetAndResource_StatelessHttpRefusesStableSessionCapability(string protocol)
+    {
+        string id = new('a', 32);
+        JsonNode tool = await RpcAsync("tools/call", new JsonObject
+        {
+            ["name"] = PlanTools.GetTool,
+            ["arguments"] = new JsonObject { ["plan_id"] = id },
+        }, protocol);
+        Assert.True(tool["result"]!["isError"]!.GetValue<bool>());
+        JsonNode error = tool["result"]!["structuredContent"]!["error"]!;
+        Assert.Equal(ErrorReason.CapabilityMissing, error["reason"]!.GetValue<string>());
+        Assert.Equal("transport:stable_session", error["metadata"]!["missing"]![0]!.GetValue<string>());
+        Assert.Null(tool["result"]!["structuredContent"]!["execution"]);
+        JsonNode resource = await RpcAsync("resources/read", new JsonObject { ["uri"] = "eplanmcp://plans/" + id }, protocol);
+        JsonNode view = JsonNode.Parse(resource["result"]!["contents"]![0]!["text"]!.GetValue<string>())!;
+        Assert.Equal(ErrorReason.CapabilityMissing, view["error"]!["reason"]!.GetValue<string>());
+        Assert.False(Directory.Exists(Path.Combine(_locations.State, "plans")));
     }
 
     [Theory]
@@ -254,7 +278,7 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
             };
         }
         string body = new JsonObject { ["jsonrpc"] = "2.0", ["id"] = 1, ["method"] = method, ["params"] = parameters }.ToJsonString();
-        using HttpResponseMessage response = await SendAsync(body, _key, origin, protocol: protocol, method: method, name: parameters["name"]?.GetValue<string>());
+        using HttpResponseMessage response = await SendAsync(body, _key, origin, protocol: protocol, method: method, name: (parameters["name"] ?? parameters["uri"])?.GetValue<string>());
         string text = await response.Content.ReadAsStringAsync(Token);
         Assert.True(response.IsSuccessStatusCode, text);
         Assert.False(response.Headers.Contains("Mcp-Session-Id"));

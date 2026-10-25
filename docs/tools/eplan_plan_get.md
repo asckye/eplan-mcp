@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准） |
+| 状态 | Implemented（P12：工具、只读 Resource、Small/Medium；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准） |
 
 ## 1. 这个工具解决什么任务
 “查看这个计划准备做什么、已经做了什么、校验及差异是什么”。读取已保存计划，不重新规划、不触发审批/执行。与 task_get 的等待进度不同，本工具提供工程审查内容；按 [M6 4.9](../design/2026-10-21-m6-engineering-packs.md) 默认只给摘要，详细条目按需读取。
@@ -16,10 +16,10 @@
 |---|---|---|---|---|
 | `plan_id` | string，非空 | 是 | — | 编译/执行返回的 ID，不是文件路径 |
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | 摘要或逐项计划、结果、校验和差异 |
-| `limit` | integer，1–200 | 否 | 50 | detailed 每页条目上限（提议）；预算可能提前截页 |
+| `limit` | integer，1–200 | 否 | 50 | 每页条目上限；预算可能提前截页 |
 | `cursor` | string | 否 | — | 前页的不透明游标，只用于同一计划/格式/结果修订 |
 
-schema 为对象、`additionalProperties: false`，默认值、枚举和边界写入 schema。concise 不接受 cursor；项目由计划回显，不使用当前项目。分页参数定稿见 Q1。
+schema 为对象、`additionalProperties: false`，默认值、枚举和边界写入 schema。concise 不接受 cursor；项目由计划回显，不使用当前项目。分页合同见 Q1。
 
 ## 3. 输出
 ```json
@@ -36,16 +36,18 @@ schema 为对象、`additionalProperties: false`，默认值、枚举和边界�
 - `plan` 保留 workflow_plan 的 planHash、tier、期限、来源及 contextRef；concise 另给各步序号/op/目标/依赖和计数，超预算提示切 detailed。detailed 的完整步骤放 entries 分页，不每页重复大数组。`result` 未执行时为 null；否则保留 apply 的 execution、失败原因、完成计数、备份、verification、validation 和 diff 摘要/关联 taskId，完整步骤结果也由 entries 续取。**顶层不加 execution**，嵌套原样保留 partially_committed/unknown，不把任务完成等同于校验通过。
 - detailed 的 `entries` 为带 `section`（step/validation/diff）及步骤号/定位符的完整条目流；step 包含 args、范围、前置条件、预期、预测模式与执行结果/撤销名称，从所有页拼回完整计划与结果。差异保留“按计划、未出现、计划外范围内、范围外、外部修改”五类、前/预期/后值、覆盖范围和来源；未知/未覆盖如实标记。总数 `total` 为该条目流条数，不是项目对象数。
 - 输出 structuredContent、同内容 JSON 文本、一行摘要 `Plan has 1 of 3 steps committed; verification was skipped.` 和 resource_link。预算含双份 JSON，默认约 5k、硬上限 20k token；达到预算在条目间停止，`nextCursor`/`truncated`/`hint` 指示续读，不能截断定位符、哈希或错误。摘要保留失败及范围外警报。
-- Resource `eplanmcp://plans/{planId}` 提供同一计划/结果的数据视图与同样的预算/访问边界，详细内容可经工具游标完整取回；无 Resources 客户端照样用本工具。资源读取不执行计划。TTL/cacheScope、资源更新通知的 SDK 接入未核实，不承诺订阅（Q2）。
+- Resource `eplanmcp://plans/{planId}` 提供同一计划/结果的数据视图与同样的预算/访问边界，详细内容可经工具游标完整取回；无 Resources 客户端照样用本工具。资源读取不执行计划。沿用 PackResources 注册模板，协议测试验证可读；不设置 TTL/cacheScope，不提供订阅或通知（Q2）。
+
+详细 step 固定拆为 summary 与 args/readScope/modifyScope/preconditions/expected/plannedChanges/result。片段按 section/index/key 分组、fragmentIndex（从 0 开始）排序，拼接 value 字符串后解析一次 JSON；fragmentCount 为所需片段总数。清洗只剥控制符，不截短详细值，不重算 planHash。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
 | `INVALID_ARGUMENT` | 空 ID、格式/分页不合法；游标不符或结果修订已变化 | `metadata.violations`；游标过期时提示从第一页重读，不重新执行 |
 | `RESOURCE_NOT_FOUND` | ID 不存在、已清理或不可见 | 提示检查原编译/执行结果；查询记录丢失不代表工程未修改，不重放写入 |
-| `INTERNAL` | Host 读取缺陷/计划损坏 | 附关联 ID；保留原件供工程师检查，不自动修补或执行 |
+| `CAPABILITY_MISSING` | stateless HTTP 无稳定会话归属 | metadata.missing=["transport:stable_session"]；改用创建计划的 stdio 会话 |
 
-查询错误不带 execution；计划执行失败、结果未知或前置条件过期是查询成功的数据，不因此置 isError。RESOURCE_NOT_FOUND 的标准/Contracts 登记随 M6 实现补齐。
+查询错误不带 execution；计划执行失败、结果未知或前置条件过期是查询成功的数据，不因此置 isError。隐藏、缺失、损坏、摘要不可信均返回 RESOURCE_NOT_FOUND；stateless HTTP 返回 CAPABILITY_MISSING，metadata.missing=["transport:stable_session"]。
 
 ## 5. 实现要点
 - Host 读取一致的计划/结果快照，不调用 Bridge 或 EPLAN，无 SafetyPoint/LockingStep/QuietModeStep；EPLAN 离线仍可查。游标绑定 planId、格式、结果修订，不能在执行更新时拼接两个版本。

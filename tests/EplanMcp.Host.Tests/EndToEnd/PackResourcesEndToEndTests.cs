@@ -54,12 +54,12 @@ public sealed class PackResourcesEndToEndTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Templates_AreTheThreeOfTheDesign()
+    public async Task Templates_IncludePacksAndOwnedPlans()
     {
         IList<McpClientResourceTemplate> templates = await _client!.ListResourceTemplatesAsync(cancellationToken: Cancel);
 
         Assert.Equal(
-            [PackResources.ManifestTemplate, PackResources.PreviewTemplate, PackResources.AssetTemplate],
+            new[] { PackResources.ManifestTemplate, PackResources.PreviewTemplate, PackResources.AssetTemplate, PlanTools.Template }.Order(StringComparer.Ordinal),
             templates.Select(t => t.UriTemplate).Order(StringComparer.Ordinal));
     }
 

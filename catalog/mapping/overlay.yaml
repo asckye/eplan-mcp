@@ -96,7 +96,8 @@ live:
 
 # tools: what a tool's code cannot say about it: a note, and Bridge operations it reaches outside its own code.
 tools:
-  eplan_workflow_plan: { note: P11 双读之间编译并审计后发布；仅返回计划链接，Resource 由 P12 注册。Large 已编写、未实跑。, operations: [project.snapshot, device.list, plan.functions, plan.macro.inspect, page.create.plan, page.update.plan, device.update.plan, macro.insert.plan, page.delete.plan, page.renumber.plan, device.renumber.plan] }
+  eplan_plan_get: { note: P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。 }
+  eplan_workflow_plan: { note: P11 双读之间编译并审计后发布；返回计划链接，Resource 已由 P12 注册。Large 已编写、未实跑。, operations: [project.snapshot, device.list, plan.functions, plan.macro.inspect, page.create.plan, page.update.plan, device.update.plan, macro.insert.plan, page.delete.plan, page.renumber.plan, device.renumber.plan] }
   eplan_context_get: { note: P24 通过 PlanBaselineReader 每次读取新快照；只读包索引与真实绑定，不运行规则。Large 待实跑。, operations: [project.snapshot] }
   eplan_project_create:
     operations: [project.create.plan, project.create.execute, project.restore.plan, project.restore.execute]

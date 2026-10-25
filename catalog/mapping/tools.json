@@ -6383,6 +6383,64 @@
       ]
     },
     {
+      "name": "eplan_plan_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PlanTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_plan_get.md",
+        "specStatus": "Implemented（P12：工具、只读 Resource、Small/Medium；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准）",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PlanApprovalViewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalViewTests.cs"
+          },
+          {
+            "name": "PlanReadModelTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlanReadModelTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
+          },
+          {
+            "name": "PlanApprovalTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "WorkflowProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowProtocolTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "note": "P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。"
+    },
+    {
       "name": "eplan_plc_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PlcTools.cs",
@@ -8338,7 +8396,7 @@
         ]
       },
       "live": [],
-      "note": "P11 双读之间编译并审计后发布；仅返回计划链接，Resource 由 P12 注册。Large 已编写、未实跑。"
+      "note": "P11 双读之间编译并审计后发布；返回计划链接，Resource 已由 P12 注册。Large 已编写、未实跑。"
     }
   ],
   "infrastructure": [
