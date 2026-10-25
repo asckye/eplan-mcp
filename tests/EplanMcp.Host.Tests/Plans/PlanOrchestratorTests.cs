@@ -16,7 +16,7 @@ using TaskStatus = EplanMcp.Host.Plans.TaskStatus;
 namespace EplanMcp.Host.Tests.Plans;
 
 [Trait("Size", "Medium")]
-public sealed class PlanOrchestratorTests : IAsyncDisposable
+public sealed partial class PlanOrchestratorTests : IAsyncDisposable
 {
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-orchestrator-").FullName);
     private readonly ManualTime _clock = TaskTestData.Clock();
@@ -502,13 +502,13 @@ public sealed class PlanOrchestratorTests : IAsyncDisposable
         Assert.DoesNotContain(_bridge.Calls, c => c.Operation == OperationNames.ProjectBackup);
     }
 
-    private async Task Publish(ToolTier tier = ToolTier.Write, Func<PlanDefinition, PlanDefinition>? modify = null)
+    private async Task Publish(ToolTier tier = ToolTier.Write, Func<PlanDefinition, PlanDefinition>? modify = null, Dictionary<string, byte[]>? evidence = null)
     {
         PlanDefinition definition = _definition with { Steps = [_definition.Steps[0] with { Tier = tier }] };
         definition = modify?.Invoke(definition) ?? definition;
         string changes = PlanDiffPreview.For(definition.Steps);
         definition = definition with { Digests = definition.Digests with { ChangesDigest = PlanStore.Hash(Encoding.UTF8.GetBytes(changes)) } };
-        await _store.PublishAsync(definition, changes, new Dictionary<string, byte[]>(), Token);
+        await _store.PublishAsync(definition, changes, evidence ?? [], Token);
         _trust.Register(definition);
     }
 

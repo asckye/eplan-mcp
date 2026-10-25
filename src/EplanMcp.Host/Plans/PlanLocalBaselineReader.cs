@@ -48,17 +48,10 @@ internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
         async Task<(PlanBaseline? Baseline, PlanLocalImpact[] Impacts)> ReadOnceAsync(PlanLocalImpact[]? expected)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var readPages = new List<SnapshotPage>();
-            int skipped = 0;
-            foreach (string[] batch in pages.Chunk(1000))
+            PlanSnapshot? snapshot = await ReadSnapshotAsync(identity, pages, conflicts, cancellationToken).ConfigureAwait(false);
+            if (snapshot is null)
             {
-                PlanSnapshot? part = await new PlanBaselineReader(bridge).AssembleAsync(identity, batch, conflicts, cancellationToken).ConfigureAwait(false);
-                if (part is null)
-                {
-                    return (null, []);
-                }
-                readPages.AddRange(part.Pages);
-                skipped = Math.Max(skipped, part.SkippedConnections);
+                return (null, []);
             }
             PlanNamesData names = await new PlanNamesReader(bridge).ReadAsync(identity.Path, cancellationToken).ConfigureAwait(false);
             Check("project", identity, new PlanProject(names.Project, PlanSnapshotHashes.ProjectKey(names.ProjectPath), names.ProjectGuid));
@@ -73,10 +66,6 @@ internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
             {
                 conflicts.Add(new("closure", "expanded", null, null));
             }
-            var members = readPages.SelectMany(p => p.Objects).ToImmutableDictionary(o => PlanSnapshotHashes.Key(o.Kind, o.Type, o.Oid), o => o.Hash, StringComparer.Ordinal);
-            var snapshot = new PlanSnapshot(identity, SnapshotProfiles.StandardName, SnapshotProfiles.Format, [.. readPages], null,
-                PlanSnapshotHashes.Compose(readPages), readPages.ToImmutableDictionary(p => PlanSnapshotHashes.Key("page", p.Type, p.Oid), p => p.Hash, StringComparer.Ordinal),
-                members, PlanSnapshotHashes.Members(identity.Path, members), skipped);
             var baseline = new PlanBaseline(snapshot, [.. names.Names.Select(n => new PlanOccupiedName(n.Kind, n.Name))], names.NamesHash!);
             if (conflicts.Count == 0)
             {
@@ -97,6 +86,93 @@ internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
                 conflicts.Add(new(scope, "changed", before, after));
             }
         }
+    }
+
+    /// <summary>Apply reads the approved S, never rediscovering or expanding its content scope.</summary>
+    internal async Task<PlanBaselineRead> RecheckAsync(PlanBaseline expected, IReadOnlyList<PlanStep> steps, CancellationToken cancellationToken)
+    {
+        PlanProject project = expected.Snapshot.Project;
+        PlanNamesData names = await new PlanNamesReader(bridge).ReadAsync(project.Path, cancellationToken).ConfigureAwait(false);
+        if (new PlanProject(names.Project, PlanSnapshotHashes.ProjectKey(names.ProjectPath), names.ProjectGuid) != project)
+        {
+            throw PlanApplyChecks.Stale();
+        }
+        bool renumber = steps.Any(s => s.Op is "page.renumber" or "device.renumber");
+        int pageCount = names.Names.Count(n => n.Kind == "page");
+        if (renumber)
+        {
+            PlanLocalScopeRules.RenumberLimit(pageCount, expected.Snapshot.Members.Count);
+        }
+        if (names.NamesHash != expected.NamesHash)
+        {
+            throw PlanApplyChecks.Stale();
+        }
+
+        var closures = new List<PlanLocalImpact>();
+        var objects = expected.Snapshot.Pages.SelectMany(p => p.Objects).ToDictionary(o => (o.Kind, o.Type, o.Oid));
+        foreach (PlanStep step in steps.Where(s => s.Op == "device.update"))
+        {
+            var functions = new List<PlanFunction>();
+            foreach (PlanLocator locator in step.ModifyScope.Locators)
+            {
+                if (locator.Page is null or "")
+                {
+                    throw PlanLocalScopeRules.Missing("object.resolve:functions_without_page");
+                }
+                if (!objects.TryGetValue((locator.Kind, locator.Type, locator.Oid), out SnapshotObject? obj)
+                    || obj.Name != locator.Name || obj.Page != locator.Page || obj.Main is null)
+                {
+                    throw PlanApplyChecks.Stale();
+                }
+                functions.Add(new()
+                {
+                    Kind = obj.Kind,
+                    Type = obj.Type,
+                    Oid = obj.Oid,
+                    Name = obj.Name!,
+                    Page = obj.Page,
+                    IsMain = obj.Main.Value,
+                });
+            }
+            string name = functions.Select(f => f.Name).Distinct(StringComparer.Ordinal).SingleOrDefault() ?? throw PlanApplyChecks.Stale();
+            closures.Add(new(new(step.Op, step.ReadScope, name), step.ReadScope, step.ModifyScope, [.. functions]));
+        }
+        _ = await DiscoverAsync(project, names, closures.Select(i => i.Request).ToArray(), cancellationToken, [.. closures]).ConfigureAwait(false);
+        var conflicts = new List<PlanSnapshotConflict>();
+        PlanSnapshot? snapshot = await ReadSnapshotAsync(project, expected.Snapshot.Pages.Select(p => p.Name).Order(StringComparer.Ordinal).ToArray(), conflicts, cancellationToken).ConfigureAwait(false);
+        if (snapshot is null)
+        {
+            return new(null, [.. conflicts]);
+        }
+        if (renumber)
+        {
+            PlanLocalScopeRules.RenumberLimit(pageCount, snapshot.Members.Count);
+        }
+        if (snapshot.SkippedConnections != expected.Snapshot.SkippedConnections)
+        {
+            throw PlanApplyChecks.Stale();
+        }
+        return new(new(snapshot, [.. names.Names.Select(n => new PlanOccupiedName(n.Kind, n.Name))], names.NamesHash!), []);
+    }
+
+    private async Task<PlanSnapshot?> ReadSnapshotAsync(PlanProject project, string[] pages, List<PlanSnapshotConflict> conflicts, CancellationToken cancellationToken)
+    {
+        var readPages = new List<SnapshotPage>();
+        int skipped = 0;
+        foreach (string[] batch in pages.Chunk(1000))
+        {
+            PlanSnapshot? part = await new PlanBaselineReader(bridge).AssembleAsync(project, batch, conflicts, cancellationToken).ConfigureAwait(false);
+            if (part is null)
+            {
+                return null;
+            }
+            readPages.AddRange(part.Pages);
+            skipped = Math.Max(skipped, part.SkippedConnections);
+        }
+        var members = readPages.SelectMany(p => p.Objects).ToImmutableDictionary(o => PlanSnapshotHashes.Key(o.Kind, o.Type, o.Oid), o => o.Hash, StringComparer.Ordinal);
+        return new(project, SnapshotProfiles.StandardName, SnapshotProfiles.Format, [.. readPages], null,
+            PlanSnapshotHashes.Compose(readPages), readPages.ToImmutableDictionary(p => PlanSnapshotHashes.Key("page", p.Type, p.Oid), p => p.Hash, StringComparer.Ordinal),
+            members, PlanSnapshotHashes.Members(project.Path, members), skipped);
     }
 
     private async Task<PlanLocalImpact[]> DiscoverAsync(PlanProject project, PlanNamesData names, IReadOnlyList<PlanImpactRequest> requests,
