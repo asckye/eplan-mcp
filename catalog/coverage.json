@@ -1608,8 +1608,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_plan_get.md",
-      "small": 4,
-      "medium": 4,
+      "small": 5,
+      "medium": 5,
       "large": 0,
       "apiNotes": []
     },
