@@ -747,7 +747,7 @@
       "dependencies": 38,
       "actions": 0,
       "spec": "docs/tools/eplan_device_renumber.md",
-      "small": 1,
+      "small": 2,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -1341,7 +1341,7 @@
       "dependencies": 36,
       "actions": 0,
       "spec": "docs/tools/eplan_page_renumber.md",
-      "small": 1,
+      "small": 2,
       "medium": 2,
       "large": 2,
       "apiNotes": [
