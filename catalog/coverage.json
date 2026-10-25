@@ -1107,7 +1107,7 @@
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 4,
       "medium": 2,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A12",
         "A13",
@@ -1138,7 +1138,7 @@
       "spec": "docs/tools/eplan_macro_list.md",
       "small": 2,
       "medium": 1,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A4"
       ]
@@ -1240,7 +1240,7 @@
       "spec": "docs/tools/eplan_page_create.md",
       "small": 10,
       "medium": 17,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A7",
         "A9",

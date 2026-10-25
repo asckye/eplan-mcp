@@ -59,4 +59,5 @@ internal sealed record PlanStep(
 /// <summary>All three collections are exact sets; multiple filters intersect (design 4.3).</summary>
 internal sealed record PlanScope(ImmutableArray<string> Pages, ImmutableArray<string> Structures, ImmutableArray<PlanLocator> Locators);
 internal sealed record PlanLocator(string Project, string Kind, int Type, long Oid, string? Name, string? Page, string? Category, string? Pos);
-internal sealed record PlanChange(string Action, string Kind, string Name, string? Property, string? OldValue, string? NewValue);
+internal sealed record PlanChange(string Action, string Kind, string Name, string? Property, string? OldValue, string? NewValue,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] bool Prediction = false);

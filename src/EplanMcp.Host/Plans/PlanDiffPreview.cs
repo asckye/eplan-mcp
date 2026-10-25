@@ -15,6 +15,10 @@ internal static class PlanDiffPreview
         foreach (PlanStep step in steps.OrderBy(s => s.Index))
         {
             lines.Add($"Step {step.Index.ToString(CultureInfo.InvariantCulture)}: {step.Op} [{step.Tier.ToString().ToLowerInvariant()}]");
+            if (step.Prediction is not null)
+            {
+                lines.Add("  Prediction: " + Escape(JsonSerializer.Serialize(step.Expected, PlanJson.Options)));
+            }
             foreach (var detail in step.Details.OrderBy(p => p.Key, StringComparer.Ordinal))
             {
                 lines.Add("  " + detail.Key + ": " + Escape(detail.Value));

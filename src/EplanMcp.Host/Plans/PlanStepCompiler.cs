@@ -5,15 +5,58 @@ using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Host.Plans;
 
-/// <summary>Compiles one validated independent step through the existing read-only planning operations.</summary>
+/// <summary>Compiles validated steps through real planning or the two closed dependency predictors.</summary>
 internal sealed class PlanStepCompiler(IBridgeClient bridge)
 {
-    public async Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, CancellationToken cancellationToken)
+    public async Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, IReadOnlyList<PlanStep> previous,
+        CancellationToken cancellationToken)
     {
-        if (!input.DependsOn.IsEmpty)
+        cancellationToken.ThrowIfCancellationRequested();
+        if (previous.Any(s => s.Index >= input.Index) || input.DependsOn.Any(i => !previous.Any(s => s.Index == i)))
         {
-            throw new ArgumentException("Dependent steps require a predictor.", nameof(input));
+            throw PlanDependencyPredictor.Refused(input, "Dependencies must reference earlier compiled steps.");
         }
+        string[] targets = PlanDependencyPredictor.Targets(input);
+        PlanStep[] creators = [.. previous.Where(s => s.Effective && s.Op == "page.create"
+            && s.ModifyScope.Pages.Intersect(targets, StringComparer.Ordinal).Any())];
+        PlanStep step;
+        if (creators.Length == 0)
+        {
+            step = await CompileIndependentAsync(baseline, input, cancellationToken).ConfigureAwait(false);
+        }
+        else if (creators.Length == 1)
+        {
+            step = await new PlanDependencyPredictor(bridge).PredictAsync(baseline, input, creators[0], cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            throw PlanDependencyPredictor.Refused(input, "Read/modify overlap has no predictor spanning multiple page.create steps.");
+        }
+        if (input.Op is "page.create" or "macro.insert" or "device.update" or "page.renumber" or "device.renumber")
+        {
+            // The collision domain also includes pages introduced earlier in this plan, outside the original snapshot.
+            step = step with
+            {
+                ReadScope = PlanScopeRules.Pages(step.ReadScope.Pages.Concat(previous.Where(s => s.Op == "page.create").SelectMany(s => s.ModifyScope.Pages))),
+            };
+        }
+        foreach (PlanStep earlier in previous.Where(s => s.Effective))
+        {
+            if (earlier.Op is "page.renumber" or "device.renumber"
+                || ((PlanDependencies.Overlap(earlier.ModifyScope, step.ReadScope) || PlanDependencies.Overlap(earlier.ModifyScope, step.ModifyScope))
+                    && !(step.Prediction is not null && earlier.Op == "page.create" && creators.Contains(earlier))))
+            {
+                throw PlanDependencyPredictor.Refused(input, "Read/modify overlap has no predictor for " + earlier.Op + " -> " + input.Op + ".");
+            }
+        }
+        return step;
+    }
+
+    public Task<PlanStep> CompileAsync(PlanBaseline baseline, PlanArgumentStep input, CancellationToken cancellationToken) =>
+        CompileAsync(baseline, input, [], cancellationToken);
+
+    private async Task<PlanStep> CompileIndependentAsync(PlanBaseline baseline, PlanArgumentStep input, CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         WritePlan plan = await PlanAsync(baseline.Snapshot.Project.Path, input, cancellationToken).ConfigureAwait(false);
         if (plan.Project != baseline.Snapshot.Project.Name || !Path.IsPathFullyQualified(plan.ProjectPath)

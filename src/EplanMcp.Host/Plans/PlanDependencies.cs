@@ -45,7 +45,7 @@ internal static class PlanDependencies
         return [.. errors];
     }
 
-    private static bool Overlap(PlanScope left, PlanScope right) => !left.Locators.IsEmpty
+    internal static bool Overlap(PlanScope left, PlanScope right) => !left.Locators.IsEmpty
         ? left.Locators.Any(l => PlanScopeRules.Contains(right, l))
         : !right.Locators.IsEmpty ? right.Locators.Any(l => PlanScopeRules.Contains(left, l))
         : left.Pages.Intersect(right.Pages, StringComparer.Ordinal).Any();

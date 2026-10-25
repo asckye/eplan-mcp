@@ -160,12 +160,13 @@ public sealed class PlanStepCompilerTests
     }
 
     [Fact]
-    public async Task Compile_ExplicitDependency_IsLeftToPredictorWithoutBridgeCall()
+    public async Task Compile_MissingCompiledDependency_IsInvalidArgumentWithoutBridgeCall()
     {
         PlanBaseline baseline = PlanScopeTestData.Baseline();
         await using var fake = new CompilationBridge(baseline);
         PlanArgumentStep input = PlanStepCompilationData.Input("page.update") with { Index = 2, DependsOn = [1] };
-        await Assert.ThrowsAsync<ArgumentException>(() => new PlanStepCompiler(fake.Client).CompileAsync(baseline, input, Token));
+        BridgeCallException failure = await Assert.ThrowsAsync<BridgeCallException>(() => new PlanStepCompiler(fake.Client).CompileAsync(baseline, input, Token));
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
         Assert.Empty(fake.Calls);
     }
 
