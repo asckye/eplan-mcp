@@ -17,6 +17,11 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
+            if (tool?.ProtocolTool.Name == PropertyGetTools.Tool)
+            {
+                // The raw-argument handler runs P5a validation before SDK coercion, with JSON Pointer violations.
+                return next(context, cancellationToken);
+            }
             if (tool?.ProtocolTool.Name is PlanApplyTools.ApplyTool or PlanApplyTools.TaskTool)
             {
                 CallToolResult? invalid = PlanToolResults.Validate(tool.ProtocolTool.InputSchema, context.Params?.Arguments,

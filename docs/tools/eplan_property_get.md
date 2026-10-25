@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `property` / `full`；沿用 ADR-0022 的 Profile 过渡规则，不加入 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true，`destructiveHint` = false，`idempotentHint` = true，`openWorldHint` = false |
-| 状态 | Proposed（P5a：Host 校验、名称解析、行映射及 schema；P5b 接入续读、游标、预算和注册） |
+| 状态 | Implemented（P5a 校验与映射；P5b 续读、游标、预算及 full/property 注册） |
 
 ## 1. 这个工具解决什么任务
 
@@ -45,12 +45,12 @@ concise 每行含 `query`（原请求的零基序号）、`target`、`property_i
 status 枚举为 `value|empty|not_applicable|read_refused`；value 为类型对应的 JSON 原始值，非 value 行为 null，不能把空值当成不适用。
 detailed 增加 `value_type`、`read_only`、`computed`、`observed_at`、`display`、`texts`、`unit`、`format`、`source` 及必要的原长度信息；未知事实为 null。
 opaque 不伪造数值；例如 A44 的 Function 20027 在 concise 也保留安全 display，value 为 null。多语言 texts 分语言返回，包括 `??_??`，不返回 EPLAN 编码串供写回。
-按对象、ID、index、language 稳定排序，保留 query 序号以关联请求；属性请求不得因空值、拒绝或预算静默丢失。
+按规范化对象地址排序 query，同地址以原 query 序号定序；query 内按数字 ID、index 排序，展开已有索引升序，保留原 query 序号及错误 selector Pointer；属性请求不得因空值、拒绝或预算静默丢失。
 total 仅表示本次明确选择集的结果行数；索引尚未枚举完时为 null，不代表全项目总数。
-cursor 不透明、带有效期，绑定查询、MCP 会话、EPLAN 实例、解析项目身份及已读内容指纹；内容变化、过期或绑定不符返回 INVALID_ARGUMENT，提示去掉 cursor 重读，不宣称跨页原子快照。
+cursor 不透明、十分钟有效，绑定名称解析后的查询、language、response_format、stdio 连接、EPLAN 管道实例、解析项目路径及已返回行的 SHA-256 指纹；JSON 成员顺序与空白不影响绑定，limit 可调整。续页重读前缀核对内容，computed 的 observed_at 不参与指纹；内容变化、过期或绑定不符返回 INVALID_ARGUMENT，提示去掉 cursor 重读，不宣称跨页原子快照。
 Host 尊重 Bridge 的 NextSelector/NextIndexOffset，按结果行分页；预算切页后未返回行必须仍可通过 cursor 取回，不能跳过块内剩余行。
 structuredContent 与兼容 JSON 文本块内容相同，附一行仅含数量的英文摘要；两个 JSON 副本与摘要共同计入 concise 约 5k / detailed 20k token 预算。
-预算截断时设置 `truncated: true`、cursor 和英文 hint；单行仍超限时明确说明并保留续读位置，不能无限返回无进展的空页或超出硬上限。
+预算截断时设置 `truncated: true`、cursor 和英文 hint；单行仍超限时返回明确的 INVALID_ARGUMENT，提示缩小请求或使用 concise、移除 cursor 从原选择集重读，不返回无进展空页或超出硬上限。
 Bridge 在返回 DTO 前清洗属性文本、display/texts/unit/format，单视图超过 500 字符标原长度；Host 保留这些视图及原长度，既有 ResultShaper 规则用于原因和地址文字，预算约束由 P5b 接入。
 敏感分类及无法可靠清洗的路径、联系人文本由 Bridge 在取值或返回 DTO 前拒绝；Host 不重复引入分类器。项目路径仅用于既有寻址身份；Bridge read_refused 行保持原状态与原因。
 
@@ -70,7 +70,8 @@ Bridge 在返回 DTO 前清洗属性文本、display/texts/unit/format，单视�
 
 ## 5. 实现要点
 
-P5a 只提供未注册的 Host 组件及 Small 测试，依赖 System.Text.Json 和 Contracts，不引用 Bridge.Core 或 Newtonsoft.Json；P5b 经 IBridgeClient 调用 property.read 并接入错误映射，每 query 使用解析后的项目和数字 ID，不打开项目或生成数据。
+Host 使用 System.Text.Json 和 Contracts，不引用 Bridge.Core、Newtonsoft.Json 或任何 Bridge 项目。入口在 SDK 参数转换前执行 P5a 全批次校验，经 project.get 复用 Bridge 的 ProjectResolver，再经 IBridgeClient 对每个 query 调用 property.read 和错误映射；每 query 使用解析后的项目路径和数字 ID，不打开项目或生成数据。
+分页只保留本页与一个 Bridge 块；后续调用重读并核对已返回前缀，不缓存 native 对象或无限展开索引。拒绝超过 200 行、1 MiB 或续读位置不前进的块；最终块已知时 total 精确，否则为 null。
 Bridge 主线程使用 `Eplan.EplApi.DataModel.UniversalPropertyList` 的公开访问器，遵守 A36 每对象一次 Properties、逐项释放；Project/Page/Function/Connection 的已验证事实见 api-notes A42/A44。
 Read 由 Bridge 的 LockingStep 保护，不建立写事务；Bridge 块同时受 200 行、1 MiB 和 2 秒软预算约束，单次执行硬时限 20 秒，Host 等待 30 秒；安全点检查取消并按现有机制报告进度。
 游标只保存复制的数据与指纹，不保存 EPLAN 对象或延迟枚举；错误、日志及摘要不得携带属性自由文本或本机路径。

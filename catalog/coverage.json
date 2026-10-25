@@ -67,9 +67,9 @@
       },
       "denominator": 4014,
       "implemented": 233,
-      "byTools": 214,
+      "byTools": 226,
       "partial": 40,
-      "automatedTest": 214,
+      "automatedTest": 226,
       "liveVerified": 149,
       "envBlocked": 122,
       "undocumented": 134
@@ -85,9 +85,9 @@
       },
       "denominator": 1799,
       "implemented": 110,
-      "byTools": 100,
+      "byTools": 103,
       "partial": 39,
-      "automatedTest": 100,
+      "automatedTest": 103,
       "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
@@ -103,9 +103,9 @@
       },
       "denominator": 2215,
       "implemented": 123,
-      "byTools": 114,
+      "byTools": 123,
       "partial": 1,
-      "automatedTest": 114,
+      "automatedTest": 123,
       "liveVerified": 81,
       "envBlocked": 77,
       "undocumented": 68
@@ -645,7 +645,7 @@
       "spec": "docs/tools/eplan_context_get.md",
       "small": 2,
       "medium": 4,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A20",
         "A33",
@@ -1762,6 +1762,27 @@
       ]
     },
     {
+      "name": "eplan_property_get",
+      "safety": "read",
+      "operations": [
+        "project.get",
+        "property.read"
+      ],
+      "apiIds": 111,
+      "operationGroups": 65,
+      "dataDictionary": 0,
+      "dependencies": 45,
+      "actions": 0,
+      "spec": "docs/tools/eplan_property_get.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A36",
+        "A44"
+      ]
+    },
+    {
       "name": "eplan_property_schema",
       "safety": "read",
       "operations": [],
@@ -2345,6 +2366,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -2357,6 +2379,7 @@
       "tools": [
         "eplan_export_labels",
         "eplan_page_update",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2385,6 +2408,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -2392,9 +2416,11 @@
     {
       "unit": "O:Eplan.EplApi.Base.LanguageList.Language",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.Base.Languages.GuiLanguage",
@@ -2421,6 +2447,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -2478,9 +2505,11 @@
     {
       "unit": "O:Eplan.EplApi.Base.MultiLangString.GetLanguageList",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.Base.MultiLangString.GetString",
@@ -2489,6 +2518,7 @@
       "partial": false,
       "tools": [
         "eplan_page_update",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2515,6 +2545,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list"
       ]
     },
@@ -2544,6 +2575,7 @@
         "eplan_import_dxf",
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2558,6 +2590,7 @@
         "eplan_import_dxf",
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2671,7 +2704,8 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
@@ -2779,6 +2813,7 @@
         "eplan_connection_list",
         "eplan_context_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -2796,6 +2831,7 @@
         "eplan_connection_number",
         "eplan_context_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2811,6 +2847,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_context_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2826,6 +2863,7 @@
         "eplan_connection_list",
         "eplan_context_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -2860,7 +2898,8 @@
         "eplan_import_plc",
         "eplan_part_list",
         "eplan_part_sync",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
@@ -2877,6 +2916,7 @@
         "eplan_context_get",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2905,6 +2945,7 @@
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -2955,6 +2996,7 @@
         "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -3166,6 +3208,7 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3191,6 +3234,7 @@
         "eplan_page_get",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3219,6 +3263,7 @@
         "eplan_language_remove",
         "eplan_plc_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3243,6 +3288,7 @@
       "partial": false,
       "tools": [
         "eplan_context_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3277,6 +3323,7 @@
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -3597,6 +3644,7 @@
         "eplan_import_dxf",
         "eplan_macro_insert",
         "eplan_page_delete",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3648,6 +3696,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -3670,6 +3719,7 @@
         "eplan_page_get",
         "eplan_page_list",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3695,6 +3745,7 @@
         "eplan_page_list",
         "eplan_page_update",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -3760,6 +3811,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_workflow_plan"
       ]
@@ -3787,6 +3839,7 @@
         "eplan_page_renumber",
         "eplan_page_update",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_workflow_plan"
       ]
@@ -3805,6 +3858,7 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -3821,6 +3875,7 @@
         "eplan_connection_list",
         "eplan_context_get",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -3851,6 +3906,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_plc_get",
+        "eplan_property_get",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
@@ -3941,6 +3997,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -4007,6 +4064,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -4086,6 +4144,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -4103,6 +4162,7 @@
         "eplan_context_get",
         "eplan_project_create",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -4207,6 +4267,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -4287,6 +4348,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
@@ -4337,7 +4399,8 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
@@ -4349,43 +4412,54 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsNamePart",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsPropertyLicensed",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsReadOnly",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.LowerBound",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.MaxIndex",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.Name",
@@ -4396,22 +4470,27 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.Type",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.UpperBound",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.Definition",
@@ -4422,7 +4501,8 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
@@ -4436,6 +4516,7 @@
         "eplan_device_get",
         "eplan_page_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -4467,6 +4548,7 @@
         "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -4482,6 +4564,7 @@
         "eplan_device_get",
         "eplan_page_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -4493,22 +4576,27 @@
       "partial": false,
       "tools": [
         "eplan_cable_generate",
+        "eplan_property_get",
         "eplan_revision_list"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToDouble",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToInt",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
@@ -4532,6 +4620,7 @@
         "eplan_placeholder_list",
         "eplan_plc_get",
         "eplan_project_get",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -4564,6 +4653,7 @@
         "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
       ]
@@ -4673,6 +4763,7 @@
         "eplan_context_get",
         "eplan_import_list",
         "eplan_import_plc",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -4698,6 +4789,7 @@
         "eplan_page_delete",
         "eplan_page_renumber",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
@@ -4808,7 +4900,8 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
@@ -4820,15 +4913,18 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
-        "eplan_project_get"
+        "eplan_project_get",
+        "eplan_property_get"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": true,
-      "tools": []
+      "tools": [
+        "eplan_property_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetCategory",
@@ -5137,6 +5233,7 @@
         "eplan_project_get",
         "eplan_project_list",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_report_update",
         "eplan_revision_list",
         "eplan_terminal_renumber",
