@@ -11,7 +11,7 @@ public abstract class Operation<TArgs, TData> : IOperation
 {
     public abstract string Name { get; }
 
-    public object ParseArgs(JToken? args)
+    public virtual object ParseArgs(JToken? args)
     {
         if (args is null || args.Type == JTokenType.Null)
         {

@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-25",
-  "scannedSources": "61450c2b",
-  "sourceHash": "sha256:0842c57f4d818a57d55ae67a4c11cbf1e00b18b16b6d72ecdf8c15cae5b42142",
+  "scannedSources": "61450c2b + uncommitted changes",
+  "sourceHash": "sha256:5af4112bd5f46b932da223843003ab2f5e2321c5b71facdf0cbb38715a0bbf94",
   "operations": [
     {
       "name": "action.execute",
@@ -343,6 +343,10 @@
     {
       "name": "plan.macro.inspect",
       "class": "PlanMacroInspectOperation"
+    },
+    {
+      "name": "plan.step.guard",
+      "class": "PlanStepGuardOperation"
     },
     {
       "name": "plc.get",
@@ -863,6 +867,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -888,6 +893,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -3581,7 +3587,8 @@
           "new"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -3772,7 +3779,8 @@
           "new"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -3908,6 +3916,7 @@
           "new"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -4127,7 +4136,8 @@
           "call"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -4149,6 +4159,7 @@
           "call"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -4389,7 +4400,8 @@
           "call"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -4581,7 +4593,8 @@
           "call"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -4677,7 +4690,8 @@
           "call"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -4756,6 +4770,7 @@
           "call"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -5525,6 +5540,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -6035,6 +6051,7 @@
           "call"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -6047,6 +6064,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -6489,7 +6507,8 @@
           "call"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -6536,7 +6555,8 @@
           "call"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -6560,6 +6580,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -6572,6 +6593,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -6584,6 +6606,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -6596,6 +6619,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -7514,6 +7538,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -7611,6 +7636,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -8264,6 +8290,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -8308,6 +8335,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -8642,6 +8670,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -8733,6 +8762,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -8776,6 +8806,7 @@
           "connection.number.execute",
           "connection.number.plan",
           "object.resolve",
+          "plan.step.guard",
           "plc.get",
           "project.snapshot"
         ]
@@ -8840,6 +8871,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -8891,6 +8923,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -8951,6 +8984,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -8991,6 +9025,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9031,6 +9066,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9360,6 +9396,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9501,6 +9538,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9681,7 +9719,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -9715,6 +9754,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9830,6 +9870,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -9893,6 +9934,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10221,7 +10263,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -10302,6 +10345,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -10314,6 +10358,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -10567,6 +10612,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10618,6 +10664,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10655,6 +10702,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10692,6 +10740,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10729,6 +10778,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10768,6 +10818,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10793,6 +10844,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10818,6 +10870,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10843,6 +10896,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10868,6 +10922,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10893,6 +10948,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10907,6 +10963,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -10959,6 +11016,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -11497,7 +11555,8 @@
           "get"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -11520,7 +11579,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -11531,6 +11591,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -11785,7 +11846,8 @@
           "get"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -11951,7 +12013,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -12031,6 +12094,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -12042,6 +12106,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -12054,6 +12119,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -12163,6 +12229,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12272,6 +12339,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12370,6 +12438,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12397,6 +12466,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12411,6 +12481,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12486,6 +12557,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -12756,6 +12828,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -12818,6 +12891,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -12975,7 +13049,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -13143,6 +13218,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13268,6 +13344,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13360,6 +13437,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.get",
@@ -13383,6 +13461,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -13535,6 +13614,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13560,6 +13640,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -13606,6 +13687,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -13714,6 +13796,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13834,6 +13917,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -13872,6 +13956,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -13885,6 +13970,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -13898,6 +13984,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -14074,6 +14161,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -14196,6 +14284,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14209,6 +14298,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14280,6 +14370,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -14305,7 +14396,8 @@
           "get"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -14316,7 +14408,8 @@
           "get"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -14327,7 +14420,8 @@
           "get"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -14350,6 +14444,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14361,6 +14456,7 @@
           "get"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14373,6 +14469,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14385,6 +14482,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14397,6 +14495,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -14409,6 +14508,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -15702,6 +15802,7 @@
           "connection.number.execute",
           "connection.number.plan",
           "object.resolve",
+          "plan.step.guard",
           "plc.get",
           "project.snapshot"
         ]
@@ -16111,6 +16212,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -16650,6 +16752,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -16930,6 +17033,7 @@
           "connection.number.execute",
           "connection.number.plan",
           "object.resolve",
+          "plan.step.guard",
           "plc.get",
           "project.snapshot"
         ]
@@ -16967,7 +17071,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -17002,6 +17107,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -17013,6 +17119,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -17025,6 +17132,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -17062,6 +17170,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -17595,7 +17704,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -17786,7 +17896,8 @@
           "type"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -17945,6 +18056,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -18119,6 +18231,7 @@
           "connection.number.execute",
           "connection.number.plan",
           "object.resolve",
+          "plan.step.guard",
           "plc.get",
           "project.snapshot"
         ]
@@ -18218,6 +18331,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -18279,6 +18393,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -18340,6 +18455,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -18756,7 +18872,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -18767,7 +18884,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -18778,7 +18896,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -18787,7 +18906,8 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
         "access": [],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -18811,7 +18931,8 @@
           "type"
         ],
         "operations": [
-          "plan.functions"
+          "plan.functions",
+          "plan.step.guard"
         ]
       },
       {
@@ -18867,6 +18988,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -18879,6 +19001,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -18931,6 +19054,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -19197,6 +19321,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -19410,6 +19535,7 @@
           "connection.number.execute",
           "connection.number.plan",
           "object.resolve",
+          "plan.step.guard",
           "plc.get",
           "project.snapshot"
         ]
@@ -19662,7 +19788,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -19673,7 +19800,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -19684,7 +19812,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -19693,7 +19822,8 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
         "access": [],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -19830,6 +19960,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -19842,6 +19973,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -19867,6 +19999,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -20020,6 +20153,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -20562,6 +20696,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.get",
@@ -20655,6 +20790,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -20702,6 +20838,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -20924,6 +21061,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",
@@ -20949,6 +21087,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -21056,6 +21195,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -21173,6 +21313,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -21300,6 +21441,7 @@
           "type"
         ],
         "operations": [
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -21312,6 +21454,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -21324,6 +21467,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       },
@@ -21474,7 +21618,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -21485,7 +21630,8 @@
           "type"
         ],
         "operations": [
-          "object.resolve"
+          "object.resolve",
+          "plan.step.guard"
         ]
       },
       {
@@ -21623,6 +21769,7 @@
         ],
         "operations": [
           "object.resolve",
+          "plan.step.guard",
           "project.snapshot"
         ]
       }
@@ -22286,6 +22433,7 @@
           "placeholder.list",
           "plan.functions",
           "plan.macro.inspect",
+          "plan.step.guard",
           "plc.get",
           "project.backup",
           "project.compatibility",

@@ -20,6 +20,9 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new PlanGuardScope { Pages = ["+A1/1"], Structures = ["+A1"], Locators = [new() { Project = @"D:\Projects\Line1", Kind = "function", Type = 17, Oid = 2, Name = "+A1-K1" }] },
+        new PlanGuardCondition { Tag = "members", Scope = new() { Pages = ["+A1/1"] }, Hash = new string('a', 64), Count = 5 },
+        new PlanStepGuardArgs { Project = "Line1", Preconditions = [new() { Tag = "binding", Revision = 3, LockDigest = new string('a', 64) }], BindingRevision = 3, LockDigest = new string('a', 64), ResourceHashes = [new string('b', 64)] },
         new PlanMacroInspectArgs { Macro = "Samples/Starter.ema" },
         new PlanMacroInspectData { Sha256 = new string('a', 64), ObjectCount = 4, Frame = new() { Right = 52, Bottom = -268 },
             Functions = [new() { Kind = "terminal", Category = "Terminal", Name = "=+A1-X1:?", VisibleName = "-X1", Main = true, StructureSegments = ["=", "+A1"] }] },

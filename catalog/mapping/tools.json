@@ -4933,6 +4933,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "PlanStepGuardWriteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanStepGuardWriteTests.cs"
+          },
+          {
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
@@ -5424,6 +5429,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PlanStepGuardWriteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanStepGuardWriteTests.cs"
           },
           {
             "name": "ProjectTranslateTests",
