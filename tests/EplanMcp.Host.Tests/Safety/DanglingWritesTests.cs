@@ -46,6 +46,32 @@ public sealed class DanglingWritesTests : IDisposable
     }
 
     [Fact]
+    public async Task PlanStepCorrelation_SurvivesOutcomeSettlementAndSuspension()
+    {
+        await _audit.AppendAsync(new JsonObject
+        {
+            ["kind"] = "execution_started",
+            ["requestId"] = "plan-step-request",
+            ["tool"] = "eplan_plan_apply",
+            ["project"] = _project,
+            ["planId"] = "0123456789abcdef0123456789abcdef",
+            ["step"] = 2,
+            ["host"] = new JsonObject { ["processId"] = Environment.ProcessId, ["start"] = _longAgo },
+            ["eplan"] = new JsonObject { ["processId"] = Environment.ProcessId, ["start"] = _now },
+        }, TestContext.Current.CancellationToken);
+
+        await Settle();
+
+        JsonObject[] settled = [.. Records().Where(r => Kind(r) is "execution_result" or "writes_suspended")];
+        Assert.Equal(2, settled.Length);
+        Assert.All(settled, r =>
+        {
+            Assert.Equal("0123456789abcdef0123456789abcdef", r["planId"]!.GetValue<string>());
+            Assert.Equal(2, r["step"]!.GetValue<int>());
+        });
+    }
+
+    [Fact]
     public async Task AnOutcomeNobodyCanTell_SuspendsTheProject()
     {
         await Started("r1", hostStart: _longAgo, eplanStart: _now); // the Bridge has no answer
