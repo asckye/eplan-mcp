@@ -5,12 +5,21 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>Same unfiltered enumeration as EplanPageRemover.Functions (A18), with persistent IDs (A32/A34).</summary>
-internal sealed class EplanPlanFunctionReader : IPlanNameReader
+internal sealed class EplanPlanFunctionReader : IPlanNameReader, IPlanGuardFunctionReader
 {
     public IReadOnlyList<PlanFunction> Read(string projectPath) =>
         Enumerate(projectPath, OperationContext.Current.ThrowIfCancellationRequested, identity: false).Functions;
 
     public PlanNameInventory ReadNames(string projectPath, Action checkpoint) => Enumerate(projectPath, checkpoint, identity: true);
+
+    public IReadOnlyList<PlanFunction> ReadForGuard(string projectPath, IReadOnlyList<string> candidates, Action checkpoint)
+    {
+        // A12 and S37: Name is a case-sensitive full-designation prefix, not VisibleName; ExactNameMatching is unverified.
+        // Neither filtered finder completeness for extra representations nor a designation-to-page restriction is proven.
+        // AllPlacements on every page plus the unfiltered finder is the safe fallback, charged to the guard's checkpoint.
+        // This is the single replacement seam for a later measured, equivalently complete targeted lookup.
+        return Enumerate(projectPath, checkpoint, identity: false).Functions;
+    }
 
     private static PlanNameInventory Enumerate(string projectPath, Action checkpoint, bool identity)
     {

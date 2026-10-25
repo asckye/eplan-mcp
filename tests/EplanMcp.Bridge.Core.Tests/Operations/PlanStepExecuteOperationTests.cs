@@ -10,6 +10,59 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PlanStepExecuteOperationTests
 {
     [Theory]
+    [InlineData("added")]
+    [InlineData("replaced")]
+    [InlineData("moved")]
+    [InlineData("removed")]
+    public void Step_LocalRenameChangedClosureOutsideReadPages_IsStaleBeforeTransaction(string change)
+    {
+        using var h = new PlanStepHarness();
+        PlanStepExecuteArgs args = h.Step("device.update");
+        args.Guard = h.GuardReader.Args(all: true);
+        if (change != "removed")
+        {
+            h.GuardReader.Names.Add(new()
+            {
+                Name = "+A1-K1",
+                Type = 17,
+                Oid = change == "replaced" ? 99 : 2,
+                Page = change == "moved" ? "+A9/9" : PlanStepHarness.Page,
+                IsMain = true,
+            });
+        }
+        if (change == "added")
+        {
+            h.GuardReader.Names.Add(new() { Name = "+A1-K1", Type = 17, Oid = 99, Page = null });
+        }
+
+        BridgeError failure = Assert.Throws<BridgeErrorException>(() => h.Run(args)).Error;
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (failure.Reason, failure.Execution));
+        Assert.Equal("closure", (string?)Assert.Single(JArray.Parse(failure.Metadata!["conflicts"]))["reason"]);
+        Assert.Equal(1, h.GuardReader.NameReads);
+        Assert.Empty(h.Transactions.Calls);
+        Assert.Equal(OutcomeStatus.NotStarted, h.Outcome());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Step_LocalRenameStableClosure_UsesApprovedFullNameAndOneEnumerationAndCommits(bool shortTag)
+    {
+        using var h = new PlanStepHarness();
+        PlanStepExecuteArgs args = h.Step("device.update");
+        if (shortTag)
+        {
+            h.Devices.Functions[0].VisibleName = "-K1";
+            args.DeviceUpdate!.Tag = "-K1";
+        }
+        args.Guard = h.GuardReader.Args(all: true);
+        h.GuardReader.Names.Add(new() { Name = "+A1-K1", Type = 17, Oid = 2, Page = PlanStepHarness.Page, IsMain = true });
+        h.Run(args);
+        Assert.Equal(1, h.GuardReader.NameReads);
+        Assert.Equal(OutcomeStatus.Committed, h.Outcome());
+    }
+
+    [Theory]
     [InlineData("page.create")]
     [InlineData("page.update")]
     [InlineData("device.update")]

@@ -8,7 +8,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Tests;
 
 /// <summary>Mutable live project, independent member-hash oracle, no filesystem or EPLAN.</summary>
-internal sealed class PlanGuardReader : IProjectCatalog, ISnapshotReader, ISnapshotSource, IObjectFinder, IPlanFunctionReader
+internal sealed class PlanGuardReader : IProjectCatalog, ISnapshotReader, ISnapshotSource, IObjectFinder, IPlanGuardFunctionReader
 {
     public const string Project = @"D:\Projects\Line1";
     public string Path { get; set; } = Project;
@@ -22,6 +22,10 @@ internal sealed class PlanGuardReader : IProjectCatalog, ISnapshotReader, ISnaps
     public int Reads { get; private set; }
     public long Milliseconds { get; set; }
     public long PerRead { get; set; }
+    public int NameReads { get; private set; }
+    public int Finds { get; private set; }
+    public IReadOnlyList<string> GuardCandidates { get; private set; } = [];
+    public Action<Action>? GuardScan { get; set; }
     public List<PlanFunction> Names { get; } = [];
     public Dictionary<long, List<SnapshotSourceObject>> Content { get; } = new()
     {
@@ -47,9 +51,21 @@ internal sealed class PlanGuardReader : IProjectCatalog, ISnapshotReader, ISnaps
         Milliseconds += PerRead;
         return Content[pageOid];
     }
-    public IReadOnlyList<SnapshotSourceObject?> Find(string projectPath, IReadOnlyList<ObjectLocator> locators, string profile) =>
-        [.. locators.Select(l => Content.Values.SelectMany(p => p).FirstOrDefault(o => o.Kind == l.Kind && o.Oid == l.Oid))];
+    public IReadOnlyList<SnapshotSourceObject?> Find(string projectPath, IReadOnlyList<ObjectLocator> locators, string profile)
+    {
+        Finds++;
+        return [.. locators.Select(l => Content.Values.SelectMany(p => p).FirstOrDefault(o => o.Kind == l.Kind && o.Oid == l.Oid))];
+    }
     public IReadOnlyList<PlanFunction> Read(string projectPath) => Names;
+    public IReadOnlyList<PlanFunction> ReadForGuard(string projectPath, IReadOnlyList<string> candidates, Action checkpoint)
+    {
+        NameReads++;
+        GuardCandidates = candidates;
+        checkpoint();
+        GuardScan?.Invoke(checkpoint);
+        checkpoint();
+        return Names;
+    }
     public void Dispose() => Disposals++;
 
     public SnapshotObject[] Objects() => [.. Content.Values.SelectMany(p => p)
