@@ -26,7 +26,9 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
         return parsed;
     }
 
-    protected override string Execute(PlanStepGuardArgs args)
+    protected override string Execute(PlanStepGuardArgs args) => Check(args, null);
+
+    internal string Check(PlanStepGuardArgs args, string? deviceName)
     {
         var clock = Stopwatch.StartNew();
         Func<long> now = milliseconds ?? (() => clock.ElapsedMilliseconds);
@@ -45,11 +47,13 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
         CheckTime();
         using ISnapshotSource source = reader.Open(project.Path);
+        IReadOnlyList<KeyValuePair<long, string>> currentPages = source.Pages;
+        CheckTime();
         PlanGuardScope[] scopes = [args.ReadScope, .. args.Preconditions.Where(p => p.Scope is not null).Select(p => p.Scope!)];
         ObjectLocator[] locators = [.. scopes.SelectMany(s => s.Locators).Concat(args.Preconditions.Where(p => p.Locator is not null).Select(p => p.Locator!))];
         // A read scope may name every page of the project (collision domains, design 4.3); the 10,000-object bound below
         // limits it. The 50-page limit applies to modify scopes, which the Host checks when it compiles the plan.
-        var pages = source.Pages.Where(p => scopes.Any(s => PlanGuardScopeRules.Page(s, p.Value))
+        var pages = currentPages.Where(p => scopes.Any(s => PlanGuardScopeRules.Page(s, p.Value))
             || locators.Any(l => (l.Kind == "page" ? l.Name : l.Page) == p.Value)).ToArray();
 
         var objects = new List<SnapshotObject>();
@@ -111,11 +115,15 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
             }
         }
 
-        IReadOnlyList<PlanFunction> names = args.Preconditions.Any(p => p.Tag == "absent" && p.Kind == "function") ? functions.Read(project.Path) : [];
+        // Version 1 device plans have no function absent condition and retain their existing execution path until LP-9.
+        bool localRename = deviceName is not null && args.Preconditions.Any(p => p.Tag == "absent" && p.Kind == "function");
+        IEnumerable<string> candidates = args.Preconditions.Where(p => p.Tag == "absent" && p.Kind == "function").Select(p => p.Name!);
+        PlanGuardNameChecks names = PlanGuardNameChecks.Read(functions, project,
+            candidates.Concat(localRename ? [deviceName!] : []), currentPages, CheckTime);
         CheckTime();
-        if (objects.Count + names.Select(f => (f.Kind, f.Type, f.Oid)).Distinct().Count(k => !indexed.ContainsKey(k)) > 10_000)
+        if (localRename && !names.ClosureMatches(args, deviceName!))
         {
-            throw Invalid("A guard's name domain may cover at most 10,000 functions.");
+            Conflict(new { kind = "function", name = deviceName }, false, "closure", "approved identity/page set", "changed");
         }
 
         foreach (PlanGuardCondition condition in args.Preconditions)
@@ -141,9 +149,9 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
             else if (condition.Tag == "absent")
             {
                 expected = false;
-                IEnumerable<string> occupied = condition.Kind == "page" ? source.Pages.Select(p => p.Value) : names.Select(f => f.Name);
-                actual = occupied.Any(n => string.Equals(n, condition.Name, StringComparison.OrdinalIgnoreCase)
-                    || (condition.Kind == "function" && n.StartsWith(condition.Name + ":", StringComparison.OrdinalIgnoreCase)));
+                actual = condition.Kind == "page"
+                    ? currentPages.Any(p => string.Equals(p.Value, condition.Name, StringComparison.OrdinalIgnoreCase))
+                    : names.Occupied(condition.Name!);
             }
             else if (condition.Tag == "resource")
             {

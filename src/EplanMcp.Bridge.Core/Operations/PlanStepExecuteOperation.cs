@@ -71,7 +71,10 @@ public sealed class PlanStepExecuteOperation(
                 throw InvalidArgument("The typed project must equal the guard project; supply fingerprint and backup only on the step envelope.");
             }
 
-            guard.Execute(args.Guard);
+            // The approved change carries the resolved full name, even when DeviceUpdate.Tag is a shown/short tag.
+            // The replan's exact Changes comparison below binds that full name back to the typed arguments before writing.
+            string? deviceName = args.DeviceUpdate is null ? null : args.ApprovedChanges.Single().Name;
+            guard.Check(args.Guard, deviceName);
             if (args.MacroInsert is { } macro)
             {
                 string root = macros.MacroRoot() is { } resolved && Directory.Exists(resolved)
