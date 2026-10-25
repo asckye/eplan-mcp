@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>Read-only P3a core, deliberately unregistered until the P3b adapter passes its Large gates.</summary>
+/// <summary>Read-only property blocks, mapped and disposed entirely within one main-thread invoke.</summary>
 public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<TimeSpan>? elapsed = null,
     Func<DateTimeOffset>? utcNow = null) : Operation<PropertyReadArgs, PropertyReadData>
 {
@@ -76,7 +76,12 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
             Checkpoint();
             PropertyDefinitionMetadata? metadata = definition?.Metadata;
             Checkpoint();
-            refusal ??= metadata?.IsInternal == true ? "internal" : metadata is { IsIndexed: null } ? "unknown_indexedness" : null;
+            if (handle is not null)
+            {
+                refusal ??= metadata?.IsInternal == true ? "internal" : metadata?.IsInternal is null ? "unknown_internal"
+                    : metadata.IsIndexed is null ? "unknown_indexedness" : null;
+            }
+
             if (refusal is not null || handle is null)
             {
                 Add(new PropertyReadRow(refusal is null ? "not_applicable" : "read_refused")
@@ -130,6 +135,7 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
 
             void Add(PropertyReadRow row, int? index)
             {
+                row.Definition = args.Detailed && row.Status != "read_refused" ? metadata : null;
                 row.Target = args.Target;
                 row.PropertyId = id;
                 row.Index = index;

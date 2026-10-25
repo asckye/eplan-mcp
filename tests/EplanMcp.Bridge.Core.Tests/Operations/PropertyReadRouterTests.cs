@@ -37,7 +37,10 @@ public sealed class PropertyReadRouterTests
         Assert.Equal("German text", data.Items[0].Value!.Text);
         Assert.Equal("de_DE", data.Items[0].Language);
         Assert.False(data.Items[0].Fallback);
+        Assert.Equal("multi_language", data.Items[0].Definition!.ValueType);
+        Assert.False(data.Items[0].Definition!.IsInternal);
         Assert.Equal("read_refused", data.Items[1].Status);
+        Assert.Null(data.Items[1].Definition);
         Assert.Equal(1, adapter.PropertyOpens);
         Assert.Contains(OperationNames.PropertyRead, router.SupportedOperations);
         Assert.Null(data.NextSelector);

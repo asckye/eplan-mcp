@@ -81,6 +81,26 @@ public sealed class PropertyReadOperationTests
         adapter.AssertDisposed();
     }
 
+    [Fact]
+    public void Read_UnknownInternalFact_RefusesEvenWithKnownIndexedness()
+    {
+        var property = new FakeProperty();
+        property.Metadata.IsInternal = null;
+        property.Metadata.IsIndexed = false;
+        FakePropertyReadAdapter adapter = Adapter(property);
+        PropertyReadArgs args = Args();
+        args.Detailed = true;
+
+        PropertyReadRow row = Assert.Single(Read(adapter, args).Items);
+
+        Assert.Equal("read_refused", row.Status);
+        Assert.Equal("unknown_internal", row.Reason);
+        Assert.Null(row.Definition);
+        Assert.Empty(adapter.ValueRequests);
+        Assert.DoesNotContain("is_empty", adapter.Events);
+        adapter.AssertDisposed();
+    }
+
     public static TheoryData<string, object> TypedValues => new()
     {
         { "text", "1,5" },

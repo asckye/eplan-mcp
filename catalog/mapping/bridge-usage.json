@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-25",
-  "scannedSources": "cf59e5d8 + uncommitted changes",
-  "sourceHash": "sha256:d8f0dd9fbad247669c79bad0d55fc8ec7ed4221037bc811004cae461c1f050d3",
+  "scannedSources": "bc9faaee",
+  "sourceHash": "sha256:b1f3e4921f1340ec5a9aa08be1c8d882133c6c03dc3564c19cade3392d1cf4ef",
   "operations": [
     {
       "name": "action.execute",
@@ -922,6 +922,17 @@
           "page.update.execute",
           "page.update.plan"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Undefined": [
@@ -1062,6 +1073,139 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Bool": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Coord": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Double": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Long": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.MultilangString": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.String": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -2284,6 +2428,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.Base.ISOCode.#ctor(Eplan.EplApi.Base.ISOCode.Language)": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)": [
       {
         "adapter": "EplanPageDescriptions",
@@ -2331,6 +2488,17 @@
         "operations": [
           "export.labels.plan",
           "export.labels.run"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -2413,6 +2581,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -2507,6 +2686,28 @@
         "operations": [
           "export.labels.plan",
           "export.labels.run"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -2628,6 +2829,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.Base.LanguageList.#ctor": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.Base.Languages.#ctor": [
       {
         "adapter": "EplanPageDescriptions",
@@ -2651,6 +2865,17 @@
         "operations": [
           "export.labels.plan",
           "export.labels.run"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -2793,6 +3018,30 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.Base.MultiLangString.Dispose": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      }
+    ],
+    "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.Base.MultiLangString.GetString(Eplan.EplApi.Base.ISOCode.Language)": [
       {
         "adapter": "EplanPageDescriptions",
@@ -2804,6 +3053,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -3234,6 +3494,39 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId": [
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -3888,6 +4181,17 @@
         ],
         "operations": [
           "project.translate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -4759,6 +5063,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanReportUpdater",
         "member": "ReportPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReportUpdater.cs",
@@ -5357,6 +5672,17 @@
         "operations": [
           "page.get"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.Project.Close": [
@@ -5576,6 +5902,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -5897,6 +6224,17 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.PropertyDefinition.Dispose": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      }
+    ],
     "M:Eplan.EplApi.DataModel.PropertyValue.Dispose": [
       {
         "adapter": "EplanProperties",
@@ -5912,6 +6250,35 @@
           "page.get",
           "project.get"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToBool": [
@@ -5928,6 +6295,28 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -5936,6 +6325,54 @@
         ],
         "operations": [
           "revision.list"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.ToDouble": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.ToInt": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -5950,6 +6387,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "OpenTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -6070,6 +6518,28 @@
         ],
         "operations": [
           "project.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "Display",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -6865,6 +7335,17 @@
           "report.update.execute",
           "terminal.renumber.execute"
         ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.UniversalPropertyList.Dispose": [
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
       }
     ],
     "M:Eplan.EplApi.EServices.PrjMessagesCollection.#ctor(Eplan.EplApi.DataModel.Project)": [
@@ -8236,6 +8717,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.Base.LanguageList.Language(System.Int32)": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.Base.Languages.GuiLanguage": [
       {
         "adapter": "EplanPageDescriptions",
@@ -8259,6 +8753,17 @@
         "operations": [
           "export.labels.plan",
           "export.labels.run"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -12130,6 +12635,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanReportUpdater",
         "member": "ReportPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReportUpdater.cs",
@@ -12384,6 +12900,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -12733,6 +13260,17 @@
         "operations": [
           "page.get"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.PagesFilter.Name": [
@@ -12835,6 +13373,17 @@
         ],
         "operations": [
           "page.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -13521,6 +14070,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -13761,6 +14311,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -13899,6 +14460,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -14022,6 +14584,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -14192,6 +14755,17 @@
           "page.get",
           "project.get"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.PropertyDefinition.IsInternal": [
@@ -14208,6 +14782,82 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.IsNamePart": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.IsPropertyLicensed": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.IsReadOnly": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.LowerBound": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.MaxIndex": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -14228,6 +14878,43 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.Type": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PropertyDefinition.UpperBound": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.PropertyValue.Definition": [
       {
         "adapter": "EplanProperties",
@@ -14242,6 +14929,28 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "OpenDefinition",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -14259,6 +14968,17 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "ReadIndexes",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -14374,6 +15094,28 @@
         ],
         "operations": [
           "project.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "IsEmpty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -14667,6 +15409,43 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.UniversalPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "OpenValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.UniversalPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)": [
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "OpenValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -16196,6 +16975,28 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Fact",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanReportUpdater",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReportUpdater.cs",
@@ -16391,6 +17192,39 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanText",
         "member": "Display",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
@@ -16507,6 +17341,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "GetText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "TextLanguage",
         "member": "Number",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
@@ -16541,6 +17386,19 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.Base.LanguageList": [
+      {
+        "adapter": "EplanPropertyReadValue.Texts",
+        "member": "Languages",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.Base.Languages": [
       {
         "adapter": "EplanPageDescriptions",
@@ -16564,6 +17422,17 @@
         "operations": [
           "export.labels.plan",
           "export.labels.run"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -17004,6 +17873,17 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -18142,6 +19022,17 @@
         ],
         "operations": [
           "project.translate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -19461,6 +20352,19 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.InvalidIndexException": [
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "OpenValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.LockingStep": [
       {
         "adapter": "EplanDispatcher",
@@ -20107,6 +21011,17 @@
         ]
       },
       {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -20258,6 +21173,17 @@
         ],
         "operations": [
           "page.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       }
     ],
@@ -20876,6 +21802,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -20974,6 +21901,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -20981,6 +21909,17 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -21247,6 +22186,7 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "property.read",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -21476,6 +22416,74 @@
           "page.get",
           "project.get"
         ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "ValueType",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadValue",
+        "member": "ReadStoredValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.PropertyNotFoundException": [
@@ -21492,6 +22500,28 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Handle",
+        "member": "OpenValue",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {
@@ -21623,6 +22653,28 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadAdapter.Scope",
+        "member": "OpenProperty",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
+        ]
+      },
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Bound",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read"
         ]
       },
       {

@@ -66,9 +66,9 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 221,
+      "implemented": 233,
       "byTools": 214,
-      "partial": 39,
+      "partial": 40,
       "automatedTest": 214,
       "liveVerified": 149,
       "envBlocked": 122,
@@ -84,7 +84,7 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 107,
+      "implemented": 110,
       "byTools": 100,
       "partial": 39,
       "automatedTest": 100,
@@ -102,9 +102,9 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 114,
+      "implemented": 123,
       "byTools": 114,
-      "partial": 0,
+      "partial": 1,
       "automatedTest": 114,
       "liveVerified": 81,
       "envBlocked": 77,
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 215,
+    "used": 229,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -133,13 +133,13 @@
     {
       "scope": "Eplan.EplApi.Base",
       "denominator": 268,
-      "implemented": 24,
+      "implemented": 26,
       "liveVerified": 17
     },
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 90,
+      "implemented": 100,
       "liveVerified": 75
     },
     {
@@ -2390,6 +2390,13 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.Base.LanguageList.Language",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.Base.Languages.GuiLanguage",
       "layer": "operation",
       "status": "live_verified",
@@ -2467,6 +2474,13 @@
         "eplan_page_create",
         "eplan_page_update"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.MultiLangString.GetLanguageList",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.Base.MultiLangString.GetString",
@@ -4339,6 +4353,41 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsNamePart",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsPropertyLicensed",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.IsReadOnly",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.LowerBound",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.MaxIndex",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.Name",
       "layer": "operation",
       "status": "live_verified",
@@ -4349,6 +4398,20 @@
         "eplan_page_get",
         "eplan_project_get"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.Type",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyDefinition.UpperBound",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.Definition",
@@ -4432,6 +4495,20 @@
         "eplan_cable_generate",
         "eplan_revision_list"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToDouble",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToInt",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
@@ -4745,6 +4822,13 @@
         "eplan_page_get",
         "eplan_project_get"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": true,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetCategory",

@@ -50,6 +50,9 @@ public sealed class PropertyReadRow
     /// <summary>The definition type, including opaque; null means unknown.</summary>
     public string? ValueType { get; set; }
 
+    /// <summary>Copied runtime facts in detailed output; null when classified as refused or unavailable.</summary>
+    public PropertyDefinitionMetadata? Definition { get; set; }
+
     /// <summary>Runtime read-only status; null means unknown.</summary>
     public bool? ReadOnly { get; set; }
 
