@@ -56,9 +56,99 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_action_run", "eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_schema", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_workflow_plan"],
+            ["eplan_action_run", "eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_get", "eplan_property_schema", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_workflow_plan"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task WithBridge_PropertyGet_UsesThePublicContractAndPreservesLanguageAndRefusals()
+    {
+        StartBridge();
+        McpClientTool tool = Assert.Single(await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken), t => t.Name == PropertyGetTools.Tool);
+        Assert.Equal((true, false, true, false), (tool.ProtocolTool.Annotations!.ReadOnlyHint,
+            tool.ProtocolTool.Annotations.DestructiveHint, tool.ProtocolTool.Annotations.IdempotentHint, tool.ProtocolTool.Annotations.OpenWorldHint));
+        Assert.True(JsonElement.DeepEquals(PropertyGetContract.Input, tool.ProtocolTool.InputSchema));
+        Assert.True(JsonElement.DeepEquals(PropertyGetContract.Output, tool.ProtocolTool.OutputSchema!.Value));
+        JsonElement data = PropertyGetToolTests.Data(await Call(PropertyGetTools.Tool, new()
+        {
+            ["queries"] = JsonSerializer.Deserialize<JsonElement>("""
+                [{"target":{"project_object":true},"properties":[{"property_id":3010},{"property_id":10014},{"property_name":"PROJ_DRAWINGNUMBER"}]},
+                 {"target":{"device_tag":"K1"},"properties":[{"property_name":"FUNC_TEXT"}]}]
+                """),
+            ["language"] = "zh_CN",
+            ["response_format"] = "detailed",
+        }));
+        Assert.Equal("Line1", data.GetProperty("project").GetString());
+        Assert.Equal(4, data.GetProperty("total").GetInt32());
+        JsonElement[] rows = [.. data.GetProperty("items").EnumerateArray()];
+        JsonElement text = Assert.Single(rows, r => r.GetProperty("query").GetInt32() == 1);
+        Assert.Equal(("zh_CN", "explicit text", false), (text.GetProperty("language").GetString(), text.GetProperty("value").GetString(), text.GetProperty("fallback").GetBoolean()));
+        Assert.Equal([3010, 10013, 10014], rows.Where(r => r.GetProperty("query").GetInt32() == 0).Select(r => r.GetProperty("property_id").GetInt32()));
+        Assert.Equal(PropertyCatalog.ReadRefusal("Project", 3010), Assert.Single(rows, r => r.GetProperty("property_id").GetInt32() == 3010).GetProperty("reason").GetString());
+        Assert.Equal("sensitive_text", Assert.Single(rows, r => r.GetProperty("property_id").GetInt32() == 10014).GetProperty("reason").GetString());
+        Assert.DoesNotContain("private", data.GetRawText(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task WithBridge_PropertyGet_PagesAcrossRealBridgeContinuationBlocksWithoutLoss()
+    {
+        StartBridge();
+        var args = new Dictionary<string, object?>
+        {
+            ["queries"] = JsonSerializer.Deserialize<JsonElement>("""
+                [{"target":{"project_object":true},"properties":[{"property_id":10901},{"property_id":10013}]}]
+                """),
+            ["limit"] = 200,
+            ["response_format"] = "detailed",
+        };
+        var rows = new List<JsonElement>();
+        int pages = 0;
+        do
+        {
+            CallToolResult call = await Call(PropertyGetTools.Tool, args);
+            JsonElement data = PropertyGetToolTests.Data(call);
+            Assert.InRange(ResultShaper.EstimateTokens(data.GetRawText()) + call.Content.Cast<TextContentBlock>().Sum(b => ResultShaper.EstimateTokens(b.Text)), 1, 20000);
+            rows.AddRange(data.GetProperty("items").EnumerateArray());
+            Assert.NotEmpty(data.GetProperty("items").EnumerateArray());
+            args["cursor"] = data.GetProperty("cursor").GetString();
+            if (args["cursor"] is null)
+            {
+                Assert.Equal(206, data.GetProperty("total").GetInt32());
+            }
+            Assert.InRange(++pages, 1, 20);
+        }
+        while (args["cursor"] is not null);
+        Assert.True(pages > 1);
+        Assert.Equal(206, rows.Count);
+        Assert.Equal(10013, rows[0].GetProperty("property_id").GetInt32());
+        Assert.Equal(Enumerable.Range(0, 205).Select(i => 10 + 2 * i), rows.Skip(1).Select(r => r.GetProperty("index").GetInt32()));
+    }
+
+    [Fact]
+    public async Task PropertyGet_ValidationPrecedesConnectionAndBridgeShapeErrorsKeepPointers()
+    {
+        CallToolResult invalid = await Call(PropertyGetTools.Tool, new() { ["queries"] = Array.Empty<object>(), ["limit"] = "bad", ["extra"] = true });
+        JsonElement error = PropertyGetRequestTests.Error(invalid);
+        Assert.Equal(["/extra", "/limit", "/queries"], PropertyGetRequestTests.Violations(error).Select(v => v.Path));
+        Assert.Null(_bridge);
+        StartBridge();
+        foreach (string target in new[] { "{\"project_object\":false}", "{\"projectObject\":true}", "{\"project_object\":true,\"unknown\":true}" })
+        {
+            JsonElement rejected = PropertyGetRequestTests.Error(await Call(PropertyGetTools.Tool, new()
+            {
+                ["queries"] = JsonSerializer.Deserialize<JsonElement>("[{\"target\":" + target + ",\"properties\":[{\"property_id\":10013}]}]"),
+            }));
+            Assert.Equal(ErrorReason.InvalidArgument, rejected.GetProperty("reason").GetString());
+            Assert.Equal("/queries/0", rejected.GetProperty("metadata").GetProperty("pointer").GetString());
+        }
+        JsonElement ambiguous = PropertyGetRequestTests.Error(await Call(PropertyGetTools.Tool, new()
+        {
+            ["queries"] = JsonSerializer.Deserialize<JsonElement>("""[{"target":{"device_tag":"ambiguous"},"properties":[{"property_id":20011}]}]"""),
+        }));
+        Assert.Equal(ErrorReason.AmbiguousName, ambiguous.GetProperty("reason").GetString());
+        Assert.Equal("/queries/0/target", ambiguous.GetProperty("metadata").GetProperty("pointer").GetString());
+        Assert.Single(JsonSerializer.Deserialize<ObjectLocator[]>(ambiguous.GetProperty("metadata").GetProperty("candidates").GetString()!, HostJson.Options)!);
     }
 
     [Fact]
@@ -380,6 +470,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new ProjectReader()),
+            new PropertyReadOperation(new PropertyTestAdapter()),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
             new DeviceListOperation(catalog, devices),

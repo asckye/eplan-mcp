@@ -8,7 +8,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Preserves Bridge reasons and candidates while rebasing per-query violations to the original tool input.</summary>
 internal static class PropertyGetErrors
 {
-    internal static CallToolResult FromBridge(BridgeError error, int query)
+    internal static CallToolResult FromBridge(BridgeError error, int query, IReadOnlyList<int>? selectorOrder = null)
     {
         string root = "/queries/" + query.ToString(CultureInfo.InvariantCulture);
         var metadata = error.Metadata is null ? new Dictionary<string, string>() : new Dictionary<string, string>(error.Metadata, StringComparer.Ordinal);
@@ -27,6 +27,14 @@ internal static class PropertyGetErrors
         }
         foreach (PropertyViolation violation in violations)
         {
+            string[] path = violation.Path?.Split('/') ?? [];
+            if (selectorOrder is not null && path.Length >= 3 && path[1] == "properties"
+                && int.TryParse(path[2], NumberStyles.None, CultureInfo.InvariantCulture, out int selector)
+                && selector >= 0 && selector < selectorOrder.Count)
+            {
+                path[2] = selectorOrder[selector].ToString(CultureInfo.InvariantCulture);
+                violation.Path = string.Join('/', path);
+            }
             violation.Path = Pointer(violation.Path, root);
         }
         metadata["pointer"] = error.Reason is ErrorReason.AmbiguousName or ErrorReason.DeviceNotFound or ErrorReason.PageNotFound or ErrorReason.PlanStale ? root + "/target" : root;

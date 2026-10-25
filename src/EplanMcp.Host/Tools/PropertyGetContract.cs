@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace EplanMcp.Host.Tools;
 
-/// <summary>Unregistered get schemas; P5b attaches these to the public tool after paging is implemented.</summary>
+/// <summary>Closed public get schemas, attached after SDK tool discovery.</summary>
 internal static class PropertyGetContract
 {
     internal static JsonElement Input { get; } = JsonSerializer.Deserialize<JsonElement>("""
