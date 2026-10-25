@@ -152,6 +152,18 @@ internal sealed class PlanLocalBaselineReader(IBridgeClient bridge)
         {
             throw PlanApplyChecks.Stale();
         }
+        foreach (SnapshotPage page in expected.Snapshot.Pages)
+        {
+            string? actual = snapshot.PageHashes.GetValueOrDefault(PlanSnapshotHashes.Key("page", page.Type, page.Oid));
+            if (page.Hash != actual)
+            {
+                conflicts.Add(new("page:" + page.Name, actual is null ? "removed" : "changed", page.Hash, actual));
+            }
+        }
+        if (conflicts.Count > 0)
+        {
+            return new(null, [.. conflicts]);
+        }
         return new(new(snapshot, [.. names.Names.Select(n => new PlanOccupiedName(n.Kind, n.Name))], names.NamesHash!), []);
     }
 

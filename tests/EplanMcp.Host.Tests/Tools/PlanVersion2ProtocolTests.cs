@@ -10,8 +10,6 @@ namespace EplanMcp.Host.Tests.Tools;
 
 public sealed partial class PlanApplyProtocolTests
 {
-    private PlanOccupiedName[] _additionalNames = [];
-
     [Theory]
     [InlineData("page.create", 0)]
     [InlineData("device.update", 2)]

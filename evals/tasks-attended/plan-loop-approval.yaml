@@ -1,0 +1,32 @@
+id: plan-loop-approval
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 中，先新建一个待删除的空白页 =GAA+A1&EFS1/90。
+  然后把以下修改放进同一份可审阅的计划：新建 =GAA+A1&EFS1/91，
+  再把它的英文页描述设为 Plan loop verified，最后删除刚才的空白页 /90。
+  审阅完整计划后执行，立即取得任务回执，查询并报告等待审批状态，等待工程师批准后跟踪到结束。
+  报告计划和任务 ID、执行结果、校验结果及初始备份位置；不要代答审批或重发执行。
+answer:
+  type: object
+  required: [planId, taskId, waitingApproval, execution, verification, backup]
+  properties:
+    planId: { type: string }
+    taskId: { type: string }
+    waitingApproval: { type: boolean }
+    execution: { type: string }
+    verification: { type: string }
+    backup: { type: string }
+# Attended only: the engineer waits for the agent to observe waiting_approval before approving.
+# This is the stage-2 real-modification loop; module generation remains outside this task.
+after:
+  description: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/91", language: en_US }, pick: $.page.description }
+  removed: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/90" }, pick: $.error.reason }
+checks:
+  - { answer: $.waitingApproval, equals: true }
+  - { answer: $.execution, equals: committed }
+  - { answer: $.verification, equals: passed }
+  - { answer: $.backup, contains: backups }
+  - { after: description, equals: Plan loop verified }
+  - { after: removed, equals: PAGE_NOT_FOUND }
+budget: { max_tool_calls: 25, max_minutes: 8, max_usd: 2 }

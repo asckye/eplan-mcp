@@ -186,6 +186,17 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A46. 项目打开、当前选择与导航器顺序（P25，2026-10-25，EPLAN 2026.0.3.25421，Electric P8）
+
+- 打开名称排在当前项目**之后**的关闭项目，当前项目不变（夹具 `EPLAN_Sample_Project` 当前时，`LargeWrite`、`LargeOutside`、`P25Acceptance`、`P25o_*`、`P25t_*` 都如此）；带不带 `/Quiet` 相同。
+- 名称排在当前项目之前的 `0P25t_<hex>` 被打开后成为当前项目。只是一次观察，不作为通用规则。
+- `XPrjActionProjectClose` 关闭当前项目，随后页导航器的第一个项目成为当前项目。导航器按项目名排序（不区分大小写），同名项目按打开顺序。`eplan_project_list` 按路径排序，只能用它的 `current` 判断当前项目。
+- 没有项目打开时，打开一个项目会使它成为当前项目。
+- 对已经打开的项目再执行 `ProjectOpen` 会弹出“项目已经打开”模态对话框并阻塞 EPLAN；打开前先确认目标已关闭。
+- 关闭项目会改写该项目的 `ProjectInfo.xml`，页内容不变；比较关闭过的项目的设计文件时要排除它。
+- `ExecuteScript` 的脚本不能引用 `Eplan.EplApi.DataModel`、`Eplan.EplApi.HEServices`（CS0234）；EPLAN 自动加入 `System` 和 `Eplan.EplApi.Scripting`，重复 using 报 CS0105。编译失败时 eplremote 返回 1。
+— 协调人经 `eplremote` 和 `eplan_project_list` 实测，P25 Large 的导航按此实现（见 tests/EplanMcp.Large.Tests/README.md）。
+
 ### A45. 设备改名的连带变化（LP-9，2026-10-25，EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本）
 
 - `device.update` 把 `=F+A2-KF1` 改名后，同页数据随之改变：接在它各功能上的连接的 `start`/`end` 中 function 全名（type/oid/pin 不变）、其他设备功能的 20403 `FUNC_PLCSYMBOLICADDRESS_CALCULATED`（如 `=F+A2-KF1:A1` → `=F+A2-<新>:A1`）、被改名功能自身的可见名 `shown`。

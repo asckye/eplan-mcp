@@ -67,6 +67,10 @@ internal sealed class WorkflowTools
         }
         catch (BridgeCallException ex)
         {
+            if (ex.Error.Reason == ErrorReason.MacroNotFound)
+            {
+                return WorkflowResults.Error(ErrorReason.ResourceNotFound, ex.Error.Message, ex.Error.Metadata);
+            }
             return WorkflowResults.BridgeError(ex.Error);
         }
         catch (WorkflowCompilationException ex)

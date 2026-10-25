@@ -98,6 +98,8 @@ Open `workbench\EplanMcp.Workbench.exe` in your program folder yourself, or enab
 
 Check the tool, instance, project, and change list, then approve or reject it yourself. By default, if nobody approves within 120 seconds, the request is denied and nothing runs. Only the engineer can edit safety settings in `config.json` in the data root; tools cannot change them. Do not turn off protection just to make a call succeed.
 
+For compiling, reviewing and applying dependent changes, see the [plans guide](https://github.com/asckye/eplan-mcp/blob/main/docs/guides/plans.en.md), including task polling, initial backups, stale plans and v2 verification coverage.
+
 ## 8. Troubleshooting, Logs, and Audit
 
 | Symptom or doctor item | What to do |
