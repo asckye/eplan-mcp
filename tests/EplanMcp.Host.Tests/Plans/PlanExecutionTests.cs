@@ -17,7 +17,7 @@ using TaskStatus = EplanMcp.Host.Plans.TaskStatus;
 namespace EplanMcp.Host.Tests.Plans;
 
 [Trait("Size", "Medium")]
-public sealed class PlanExecutionTests : IAsyncDisposable
+public sealed partial class PlanExecutionTests : IAsyncDisposable
 {
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-p20-").FullName);
     private readonly ManualTime _clock = TaskTestData.Clock();
@@ -388,13 +388,21 @@ public sealed class PlanExecutionTests : IAsyncDisposable
         return await _service.ExecuteAsync(_server, _prepared!, null, cancellationToken);
     }
 
-    private async Task Prepare(bool destructive = false, bool noOp = false)
+    private async Task Prepare(bool destructive = false, bool noOp = false, bool local = false)
     {
         PlanScope scope = PlanScopeRules.Pages(["+A1/1"]);
         JsonElement createArgs = PlanTestData.Json("""{"pages":[{"name":"+A1/3","page_type":"Circuit","description":"Power"}],"language":"en_US"}""");
         var input = new PlanArgumentStep(1, "page.create", createArgs, ToolTier.Write, []);
         PlanStep first = PlanStepSemantics.Build(_baseline, input, new(scope, PlanScopeRules.Pages(["+A1/3"]),
             PlanPreconditions.Build(_baseline, scope, [new("page", "+A1/3")]), _baseline.NamesHash, []), Fresh("page.create", "+A1/3", "Power"));
+        if (local)
+        {
+            first = first with
+            {
+                ReadScope = PlanScopeRules.Pages([]),
+                Preconditions = PlanPreconditions.Build(_baseline, PlanScopeRules.Pages([]), [new("page", "+A1/3")]),
+            };
+        }
         JsonElement updateArgs = PlanTestData.Json("""{"pages":[{"name":"+A1/3","description":"New"}],"language":"en_US"}""");
         PlanStep second = await new PlanDependencyPredictor(_bridge).PredictAsync(_baseline, new(2, "page.update", updateArgs, ToolTier.Write, [1]), first, Token);
         JsonElement thirdArgs = PlanTestData.Json("""{"pages":[{"name":"+A1/1","description":"Last"}],"language":"en_US"}""");
@@ -422,6 +430,7 @@ public sealed class PlanExecutionTests : IAsyncDisposable
         string hash = PlanStore.Hash(bytes);
         PlanDefinition plan = PlanTestData.Definition() with
         {
+            CompilerVersion = local ? "2" : "1",
             Owner = _tasks.OwnerFor(_server),
             Project = _baseline.Snapshot.Project,
             Steps = destructive ? [first] : [first, second, third],

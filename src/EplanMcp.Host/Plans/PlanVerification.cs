@@ -6,8 +6,11 @@ namespace EplanMcp.Host.Plans;
 /// <summary>WholeProject also covers complete multi-chunk reads whose SnapshotHash is null.</summary>
 internal sealed record PlanEvidence(PlanSnapshot Snapshot, bool WholeProject = false)
 {
+    // Transient approved absence, reconstructed from the plan and page-name evidence; no persisted member is added.
+    internal ImmutableArray<string> AbsentPages { get; init; } = [];
+
     public bool Covers(string? page) => WholeProject || Snapshot.SnapshotHash is not null
-        || Snapshot.Pages.Any(p => p.Name == page);
+        || Snapshot.Pages.Any(p => p.Name == page) || page is not null && AbsentPages.Contains(page, StringComparer.Ordinal);
 }
 
 /// <summary>NoWriteSincePrevious must be established by the caller, never inferred from an execution outcome.</summary>

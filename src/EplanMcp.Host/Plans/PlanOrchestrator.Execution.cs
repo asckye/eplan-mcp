@@ -41,6 +41,10 @@ internal sealed partial class PlanOrchestrator
             PlanEvidence? baseline = null;
             PlanFailure? error = null;
             PlanVerification? verification = null;
+            bool local = plan.CompilerVersion == "2";
+            var observedPages = new Dictionary<int, string[]>();
+            string? collecting = null;
+            int currentStep = -1;
             try
             {
                 PlanRecord? stored = await store.ReadAsync(plan.PlanId, cancellationToken).ConfigureAwait(false);
@@ -50,9 +54,11 @@ internal sealed partial class PlanOrchestrator
                     throw PlanApplyChecks.Stale();
                 }
                 byte[] bytes = await store.ReadEvidenceAsync(plan.PlanId, plan.ContextRef!["sha256:".Length..], cancellationToken).ConfigureAwait(false);
-                baseline = new(JsonSerializer.Deserialize<PlanBaseline>(bytes, PlanJson.Options)!.Snapshot, true);
+                PlanSnapshot approved = JsonSerializer.Deserialize<PlanBaseline>(bytes, PlanJson.Options)!.Snapshot;
+                baseline = new(local ? approved with { SnapshotHash = null } : approved, !local);
                 foreach ((PlanStep step, int position) in plan.Steps.Select((s, i) => (s, i)))
                 {
+                    currentStep = step.Index;
                     if (!step.Effective)
                     {
                         PlanEvidence unchanged = evidence.LastOrDefault()?.After ?? baseline;
@@ -214,7 +220,7 @@ internal sealed partial class PlanOrchestrator
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
                 error = ToFailure(ex);
-                int stopped = Array.FindIndex(steps, s => s.Index == evidence.LastOrDefault()?.Index);
+                int stopped = Array.FindIndex(steps, s => s.Index == currentStep);
                 if (stopped >= 0 && steps[stopped].Execution == ExecutionState.NotStarted)
                 {
                     steps[stopped] = steps[stopped] with { Error = error };
@@ -241,6 +247,13 @@ internal sealed partial class PlanOrchestrator
             if (error?.Reason == ErrorReason.ResourceExhausted)
             {
                 result = result with { Verification = "skipped" };
+                if (local && collecting is not null)
+                {
+                    JsonArray coverage = result.Coverage is { } existing ? JsonNode.Parse(existing.GetRawText())!.AsArray() : [];
+                    coverage.Add(JsonSerializer.SerializeToNode(new PlanVerificationCoverage(currentStep, collecting,
+                        [.. observedPages.GetValueOrDefault(currentStep) ?? []], 0, ["evidence.uncollected"]), PlanJson.Options));
+                    result = result with { Coverage = JsonSerializer.SerializeToElement(coverage, PlanJson.Options) };
+                }
             }
             result = result with { Coverage = JsonSerializer.SerializeToElement(new { entries = result.Coverage, evidence = references }, PlanJson.Options) };
             try
@@ -280,6 +293,19 @@ internal sealed partial class PlanOrchestrator
 
             async Task<PlanEvidence> ObserveAsync(PlanStep step, string window, CancellationToken token)
             {
+                if (local)
+                {
+                    collecting = window + ":uncollected";
+                    if (!observedPages.TryGetValue(step.Index, out string[]? pages))
+                    {
+                        pages = PlanLocalEvidenceReader.Pages(step, baseline!.Snapshot);
+                        observedPages.Add(step.Index, pages);
+                    }
+                    PlanEvidence observed = await new PlanLocalEvidenceReader(bridge, store).ReadAsync(plan, step, window, pages,
+                        evidence.LastOrDefault(e => e.Index == step.Index)?.Before, references, token).ConfigureAwait(false);
+                    collecting = null;
+                    return observed;
+                }
                 // Observe all known pages as well as the scopes, so related-page alerts can stop the next write.
                 var observation = new PlanEvidence(await new PlanBaselineReader(bridge).SnapshotAsync(plan.Project.Path, null, token).ConfigureAwait(false), true);
                 references[step.Index.ToString(CultureInfo.InvariantCulture) + ":" + window] = await store.PutEvidenceAsync(plan.PlanId,
