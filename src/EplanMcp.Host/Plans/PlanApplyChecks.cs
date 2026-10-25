@@ -9,7 +9,7 @@ using EplanMcp.Packs;
 
 namespace EplanMcp.Host.Plans;
 
-/// <summary>Rechecks the compiler's stored whole-project baseline (design 4.3), rather than accepting new evidence.</summary>
+/// <summary>Rechecks the compiler's stored baseline, using its version's content and name scope.</summary>
 internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust)
 {
     public Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, CancellationToken cancellationToken) =>
@@ -18,6 +18,7 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
     internal async Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, bool stepOnly, CancellationToken cancellationToken)
     {
         PlanDefinition definition = record.Definition;
+        bool local = UsesLocalBaseline(definition.CompilerVersion);
         if (!trust.Matches(definition, definition.Owner, record.PlanHash) || packs.Clock.GetUtcNow() >= definition.ExpiresAt)
         {
             throw Stale();
@@ -77,7 +78,9 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
             return (handshake.Eplan, [], status.Instances.FirstOrDefault(e => e.ProcessId == handshake.Eplan.ProcessId)?.PipeName ?? throw Stale());
         }
 
-        PlanBaselineRead read = await new PlanBaselineReader(bridge).ReadAsync(definition.Project, null, cancellationToken).ConfigureAwait(false);
+        PlanBaselineRead read = local
+            ? await ReadLocalAsync(definition, cancellationToken).ConfigureAwait(false)
+            : await new PlanBaselineReader(bridge).ReadAsync(definition.Project, null, cancellationToken).ConfigureAwait(false);
         if (read.Baseline is not { } baseline || baseline.Snapshot.ComposedHash != definition.Digests.Pages
             || baseline.Snapshot.MembersHash != definition.Digests.Objects || baseline.NamesHash != definition.Digests.Names)
         {
@@ -100,6 +103,41 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
         }
 
         return (handshake.Eplan, [.. fingerprints], status.Instances.FirstOrDefault(e => e.ProcessId == handshake.Eplan.ProcessId)?.PipeName ?? throw Stale());
+    }
+
+    internal static bool UsesLocalBaseline(string compilerVersion) => compilerVersion switch
+    {
+        "1" => false,
+        "2" => true,
+        _ => throw Stale(),
+    };
+
+    private async Task<PlanBaselineRead> ReadLocalAsync(PlanDefinition definition, CancellationToken cancellationToken)
+    {
+        if (definition.ContextRef is not { } reference || !reference.StartsWith("sha256:", StringComparison.Ordinal))
+        {
+            throw Stale();
+        }
+        try
+        {
+            byte[] bytes = await store.ReadEvidenceAsync(definition.PlanId, reference["sha256:".Length..], cancellationToken).ConfigureAwait(false);
+            PlanBaseline expected = PlanJson.Read<PlanBaseline>(System.Text.Encoding.UTF8.GetString(bytes));
+            if (expected.Snapshot.Project != definition.Project || expected.Snapshot.ComposedHash != definition.Digests.Pages
+                || expected.Snapshot.MembersHash != definition.Digests.Objects || expected.NamesHash != definition.Digests.Names)
+            {
+                throw Stale();
+            }
+            return await new PlanLocalBaselineReader(bridge).RecheckAsync(expected, definition.Steps, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+        {
+            throw Stale();
+        }
+        catch (BridgeCallException ex)
+        {
+            ex.Error.Execution = ExecutionState.NotStarted;
+            throw;
+        }
     }
 
     internal static bool Matches(PlanDefinition definition, PlanStep step, WritePlan fresh) =>

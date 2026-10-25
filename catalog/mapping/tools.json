@@ -2195,6 +2195,11 @@
         ],
         "tests": [
           {
+            "name": "PlanApplyChecksTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanApplyChecksTests.cs"
+          },
+          {
             "name": "PlanLocalScopeRulesTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanLocalScopeRulesTests.cs"
@@ -5296,6 +5301,11 @@
           "A20"
         ],
         "tests": [
+          {
+            "name": "PlanApplyChecksTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Plans/PlanApplyChecksTests.cs"
+          },
           {
             "name": "PlanLocalScopeRulesTests",
             "size": "Small",
