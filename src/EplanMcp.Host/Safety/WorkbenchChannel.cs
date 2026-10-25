@@ -79,10 +79,12 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
             return null; // version 1 cannot show it
         }
 
+        // A plan that exceeds v1 must be refused before discovery, without falling back to another review window.
+        byte[]? planAsk = question.PlanApproval is null ? null : Ask(question, tier.Value, eplan);
         NamedPipeClientStream? pipe = await ConnectAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            if (pipe is null || !await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false) || Ask(question, tier.Value, eplan) is not { } ask
+            if (pipe is null || !await AgreeAsync(pipe, cancellationToken).ConfigureAwait(false) || (planAsk ?? Ask(question, tier.Value, eplan)) is not { } ask
                 || await DeliverAsync(pipe, question, ask, cancellationToken).ConfigureAwait(false) is not { } answer)
             {
                 return null;
@@ -156,7 +158,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
     }
 
     /// <summary>The question as an approval.ask request; null, logged, when this protocol version cannot carry it.</summary>
-    private byte[]? Ask(ApprovalQuestion question, QuestionTier tier, EplanInstanceInfo eplan)
+    internal byte[]? Ask(ApprovalQuestion question, QuestionTier tier, EplanInstanceInfo eplan)
     {
         WritePlan plan = question.Plan;
         Suspension? suspension = question.Release;
@@ -171,7 +173,7 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
                 new ProjectInfo(plan.Project, plan.ProjectPath),
                 new EplanInstance(eplan.Version, eplan.Variant, eplan.ProcessId),
                 _clientName(),
-                ApprovalTexts.For(question, CultureInfo.CurrentUICulture).Changes,
+                question.PlanApproval?.WorkbenchChanges(CultureInfo.CurrentUICulture) ?? ApprovalTexts.For(question, CultureInfo.CurrentUICulture).Changes,
                 question.BackupFolder,
                 suspension is null ? null : new SuspensionRecord(
                     suspension.RequestId,
@@ -185,12 +187,22 @@ internal sealed partial class WorkbenchChannel : IApprovalChannel
         }
         catch (JsonException ex)
         {
+            if (question.PlanApproval is not null)
+            {
+                throw PlanApprovalView.Invalid("The plan approval cannot be carried by Workbench protocol v1.");
+            }
+
             LogNotAsked(ex.Message); // a null where version 1 allows none
             return null;
         }
 
         if (ask.Length > WorkbenchProtocol.MaxFrameBytes)
         {
+            if (question.PlanApproval is not null)
+            {
+                throw PlanApprovalView.Invalid("The plan approval exceeds the Workbench frame limit.");
+            }
+
             LogNotAsked($"{ask.Length.ToString(CultureInfo.InvariantCulture)} bytes, over the frame limit");
             return null;
         }

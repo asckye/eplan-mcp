@@ -45,6 +45,8 @@ internal sealed record ApprovalQuestion(string RequestId, string Tool, string Ar
     /// the engineer confirms; <see cref="Plan"/> then lists no changes and its fingerprint is the pack digest.
     /// </summary>
     public Packs.PackInstallInfo? PackInstall { get; init; }
+
+    public PlanApprovalView? PlanApproval { get; init; }
 }
 
 /// <summary>What a channel got back: the decision and the binding it was given for.</summary>

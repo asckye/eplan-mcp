@@ -129,6 +129,8 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
         return bytes;
     }
 
+    public string ChangesPath(string planId) => _paths.Check(Path.Combine(_paths.Assets(planId), "changes.txt"));
+
     public async Task<string> ReadChangesAsync(string planId, CancellationToken cancellationToken)
     {
         PlanRecord record = await ReadAsync(planId, cancellationToken).ConfigureAwait(false) ?? throw new FileNotFoundException("The plan does not exist.");

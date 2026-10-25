@@ -5431,6 +5431,16 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageUpdateToolTests.cs"
           },
           {
+            "name": "PlanApprovalFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalFileTests.cs"
+          },
+          {
+            "name": "PlanApprovalTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
