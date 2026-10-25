@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <!-- Bridge.Core compiles against Newtonsoft.Json without its runtime asset (EPLAN supplies it); tests must bring it. -->
     <PackageReference Include="Newtonsoft.Json" />

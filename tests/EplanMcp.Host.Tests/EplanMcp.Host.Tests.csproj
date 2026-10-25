@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
     <!-- Medium tests run the real Bridge.Core server (with fake EPLAN adapters) on a real pipe. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />

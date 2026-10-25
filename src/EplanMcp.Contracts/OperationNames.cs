@@ -6,6 +6,9 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Read-only, complete step precondition check in one main-thread call.</summary>
+    public const string PlanStepGuard = "plan.step.guard";
+
     /// <summary>Read-only complete macro prediction input. Arguments: PlanMacroInspectArgs; data: PlanMacroInspectData.</summary>
     public const string PlanMacroInspect = "plan.macro.inspect";
 
