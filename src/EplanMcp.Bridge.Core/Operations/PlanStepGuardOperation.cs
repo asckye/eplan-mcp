@@ -47,13 +47,10 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
         using ISnapshotSource source = reader.Open(project.Path);
         PlanGuardScope[] scopes = [args.ReadScope, .. args.Preconditions.Where(p => p.Scope is not null).Select(p => p.Scope!)];
         ObjectLocator[] locators = [.. scopes.SelectMany(s => s.Locators).Concat(args.Preconditions.Where(p => p.Locator is not null).Select(p => p.Locator!))];
+        // A read scope may name every page of the project (collision domains, design 4.3); the 10,000-object bound below
+        // limits it. The 50-page limit applies to modify scopes, which the Host checks when it compiles the plan.
         var pages = source.Pages.Where(p => scopes.Any(s => PlanGuardScopeRules.Page(s, p.Value))
             || locators.Any(l => (l.Kind == "page" ? l.Name : l.Page) == p.Value)).ToArray();
-        if (pages.Length > 50 || scopes.SelectMany(s => s.Pages).Concat(locators.Select(l => l.Kind == "page" ? l.Name : l.Page)
-            .OfType<string>()).Distinct(StringComparer.Ordinal).Count() > 50)
-        {
-            throw Invalid("A guard may cover at most 50 pages.");
-        }
 
         var objects = new List<SnapshotObject>();
         var hashes = new Dictionary<long, string>();
@@ -213,7 +210,7 @@ public sealed class PlanStepGuardOperation(IProjectCatalog catalog, ISnapshotRea
 
         PlanGuardScope[] scopes = [args.ReadScope, .. args.Preconditions.Where(p => p.Scope is not null).Select(p => p.Scope!)];
         ObjectLocator[] locators = [.. scopes.SelectMany(s => s.Locators ?? []).Concat(args.Preconditions.Where(p => p.Locator is not null).Select(p => p.Locator!))];
-        if (scopes.Any(s => s.Pages is null or { Count: > 50 } || s.Structures is null or { Count: > 50 } || s.Locators is null
+        if (scopes.Any(s => s.Pages is null or { Count: > 10_000 } || s.Structures is null or { Count: > 50 } || s.Locators is null
             || s.Pages.Any(string.IsNullOrWhiteSpace) || s.Structures.Any(p => p is null || !Regex.IsMatch(p, @"\A(?:[=+&#][^=+&#/\s*?]+)+\z")))
             || scopes.SelectMany(s => s.Locators).Select(l => PlanGuardScopeRules.Canonical(l).ToString(Formatting.None)).Distinct(StringComparer.Ordinal).Count() > 200
             || locators.Any(l => l is null || string.IsNullOrWhiteSpace(l.Project) || !System.IO.Path.IsPathRooted(l.Project)
