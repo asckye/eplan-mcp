@@ -11,6 +11,7 @@ internal static class FakeRepository
     public static TempRepository Create()
     {
         var repository = new TempRepository()
+            .Write(PropertyDictionaryGenerator.SourcePath, string.Empty)
             .Write("src/EplanMcp.Bridge.Eplan/Adapters/A.cs", "class A { }")
             .Write("src/EplanMcp.Bridge.Core/B.cs", "class B { }")
             .Write("src/EplanMcp.Contracts/OperationNames.cs", """
