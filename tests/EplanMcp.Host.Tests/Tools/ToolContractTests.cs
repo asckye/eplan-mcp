@@ -35,6 +35,25 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
+    public void PlanGet_HasReadAnnotationsPagingDefaultsAndNoExecutionEnvelope()
+    {
+        Tool tool = Tools.Single(t => t.Name == PlanTools.GetTool);
+        Assert.Equal("Get plan", tool.Title);
+        Assert.True(tool.Annotations!.ReadOnlyHint);
+        Assert.False(tool.Annotations.DestructiveHint);
+        Assert.True(tool.Annotations.IdempotentHint);
+        Assert.False(tool.Annotations.OpenWorldHint);
+        Assert.Equal(["plan_id"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement input = tool.InputSchema.GetProperty("properties");
+        Assert.Equal("concise", input.GetProperty("response_format").GetProperty("default").GetString());
+        Assert.Equal(50, input.GetProperty("limit").GetProperty("default").GetInt32());
+        Assert.Equal(200, input.GetProperty("limit").GetProperty("maximum").GetInt32());
+        JsonElement success = tool.OutputSchema!.Value.GetProperty("anyOf")[0].GetProperty("properties");
+        Assert.False(success.TryGetProperty("execution", out _));
+        Assert.Equal(["step", "validation", "diff"], Enum(success.GetProperty("entries").GetProperty("items").GetProperty("properties").GetProperty("section")));
+    }
+
+    [Fact]
     public void WorkflowPlan_HasClosedStepSchemaAndReadAnnotations()
     {
         Tool tool = Tools.Single(t => t.Name == WorkflowTools.PlanTool);
@@ -81,7 +100,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool, WorkflowTools.PlanTool],
+            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlanTools.GetTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool, WorkflowTools.PlanTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 

@@ -48,7 +48,7 @@ internal static class ResultShaper
             return null;
         }
 
-        string clean = text.AsSpan().ContainsAny(_controls) ? RemoveControls(text) : text;
+        string clean = CleanFullText(text);
         if (clean.Length <= MaxTextLength)
         {
             return clean;
@@ -182,8 +182,12 @@ internal static class ResultShaper
     /// </summary>
     internal static int ResultTokens(string json) => 2 * EstimateTokens(json);
 
-    private static string RemoveControls(string text)
+    internal static string CleanFullText(string text)
     {
+        if (!text.AsSpan().ContainsAny(_controls))
+        {
+            return text;
+        }
         var builder = new StringBuilder(text.Length);
         ReadOnlySpan<char> rest = text;
         int i;

@@ -34,7 +34,7 @@ internal sealed class TaskRegistry : IDisposable
         _cleanup = clock.CreateTimer(_ => Cleanup(), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
     }
 
-    // STDIO has no SDK SessionId. The server object represents its connection; both keys below are Host-generated.
+    // STDIO has no SDK SessionId. The DI server represents its connection; request facades do not.
     public PlanOwner OwnerFor(McpServer server) => SessionFor(server).Owner;
 
     /// <summary>Project is the canonical extensionless path used by the plan and WorkspaceStore (design 4.3).</summary>
@@ -230,7 +230,8 @@ internal sealed class TaskRegistry : IDisposable
             throw Failure(ErrorReason.CapabilityMissing, "This transport has no stable session. Use STDIO for plan tasks.", new { missing = _missingStableSession });
         }
 
-        return _sessions.GetValue(server, _ => new(new(_runId, Guid.NewGuid().ToString("N"))));
+        McpServer connection = server.Services?.GetService(typeof(McpServer)) as McpServer ?? server;
+        return _sessions.GetValue(connection, _ => new(new(_runId, Guid.NewGuid().ToString("N"))));
     }
 
     private Entry Find(McpServer server, string taskId)

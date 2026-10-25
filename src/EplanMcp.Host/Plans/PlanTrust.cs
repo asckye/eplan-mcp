@@ -8,6 +8,9 @@ internal sealed class PlanTrust
     private sealed record Entry(PlanOwner Owner, string Hash);
     private readonly ConcurrentDictionary<string, Entry> _compiled = new(StringComparer.Ordinal);
 
+    public bool Owns(string planId, PlanOwner owner) =>
+        _compiled.TryGetValue(planId, out Entry? trusted) && trusted.Owner == owner;
+
     public string Register(PlanDefinition definition)
     {
         string hash = PlanCanonical.Hash(definition);

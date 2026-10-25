@@ -1599,6 +1599,21 @@
       }
     },
     {
+      "name": "eplan_plan_get",
+      "safety": "read",
+      "operations": [],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_plan_get.md",
+      "small": 4,
+      "medium": 4,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_plc_get",
       "safety": "read",
       "operations": [

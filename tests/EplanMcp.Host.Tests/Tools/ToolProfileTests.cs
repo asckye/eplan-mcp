@@ -38,7 +38,9 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(67, Tools(ToolProfile.Full).Length);
+        Assert.Equal(68, Tools(ToolProfile.Full).Length);
+        Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PlanTools.GetTool);
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PlanTools.GetTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ProjectCreateTools.CreateTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ContextTools.GetTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == WorkflowTools.PlanTool);
@@ -58,7 +60,7 @@ public sealed class ToolProfileTests
     }
 
     [Theory]
-    [InlineData(true, 3)]
+    [InlineData(true, 4)]
     [InlineData(false, 0)]
     public void PackResourceTemplates_AreInTheFullProfileOnly(bool full, int count)
     {
