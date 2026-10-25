@@ -12,6 +12,7 @@ internal static class PlanVerifier
         var validation = new List<PlanValidation>();
         var diff = new List<PlanDiffEntry>();
         var coverage = new List<PlanVerificationCoverage>();
+        bool local = plan.CompilerVersion == "2";
         if (Compatible(baseline) is null)
         {
             throw new ArgumentException("Baseline must be standard evidence for the compiled project.", nameof(baseline));
@@ -20,9 +21,20 @@ internal static class PlanVerifier
         foreach (PlanStep step in plan.Steps)
         {
             PlanStepEvidence? input = evidence.SingleOrDefault(e => e.Index == step.Index);
+            if (local && input is not null)
+            {
+                diff.AddRange(input.NameDiff);
+            }
             PlanEvidence? before = Compatible(input?.Before), after = Compatible(input?.After);
             bool unsent = step.Effective && (input is null || input.Execution == ExecutionState.NotStarted);
             List<Fact> facts = Check(step, baseline, step.Effective ? after : after ?? before);
+            if (local && step.Effective && (before?.NamesHash is not null || after?.NamesHash is not null))
+            {
+                string? expected = before?.ExpectedNamesHash;
+                string status = expected is null || after?.NamesHash is null ? "unknown" : expected == after.NamesHash ? "passed" : "failed";
+                facts.Add(new(JsonSerializer.SerializeToElement(step.ModifyScope, PlanJson.Options), "names", expected, after?.NamesHash,
+                    status, expected is null ? "expected_names_unavailable" : status == "unknown" ? "unobserved" : status == "passed" ? "proven" : "name_set_mismatch"));
+            }
             if (facts.Count == 0)
             {
                 facts.Add(new(JsonSerializer.SerializeToElement(step.ModifyScope, PlanJson.Options), "expected", null, null, "unknown", "no_checks"));
@@ -65,7 +77,8 @@ internal static class PlanVerifier
             && Path.IsPathFullyQualified(observation.Snapshot.Project.Path)
             && PlanSnapshotHashes.ProjectKey(observation.Snapshot.Project.Path) == PlanSnapshotHashes.ProjectKey(plan.Project.Path)
             && observation.Snapshot.Profile == SnapshotProfiles.StandardName && observation.Snapshot.Format == SnapshotProfiles.Format
-            && (plan.Project.Guid is null || observation.Snapshot.Project.Guid == plan.Project.Guid) ? observation : null;
+            && (plan.Project.Guid is null || observation.Snapshot.Project.Guid == plan.Project.Guid)
+                ? local ? observation with { WholeProject = false, Snapshot = observation.Snapshot with { SnapshotHash = null } } : observation : null;
 
         void Cover(PlanStep step, PlanEvidence? left, PlanEvidence? right, string window, bool unobserved)
         {
@@ -73,8 +86,26 @@ internal static class PlanVerifier
                 .Concat(left?.Snapshot.Pages.Select(p => p.Name) ?? []).Concat(right?.Snapshot.Pages.Select(p => p.Name) ?? []).Distinct(StringComparer.Ordinal)];
             string[] gaps = ["graphics", "texts", "placeholders", "connections.withoutPage", .. validation.Where(v => v.Step == step.Index && v.Status == "unknown").Select(v => v.Check),
                 .. step.Coverage is { } c && c.TryGetProperty("unknown", out JsonElement unknown) ? unknown.EnumerateArray().Select(p => p.GetString()!) : []];
+            if (local)
+            {
+                pages = [.. pages.Concat(baseline.Names.Concat(left?.Names ?? []).Concat(right?.Names ?? []).Where(n => n.Kind == "page").Select(n => n.Name))
+                    .Distinct(StringComparer.Ordinal)];
+                gaps = [.. gaps, "properties.outsideScope", "functions.sameNameInstancesOutsideClosure", "objects.withoutPage.unreadProperties", "connections.3d"];
+                if (unobserved)
+                {
+                    gaps = [.. gaps, "interval.unobserved"];
+                }
+            }
             coverage.Add(new(step.Index, window, [.. pages.Where(p => unobserved || left?.Covers(p) != true || right?.Covers(p) != true).Order(StringComparer.Ordinal)],
                 Math.Max(left?.Snapshot.SkippedConnections ?? 0, right?.Snapshot.SkippedConnections ?? 0), [.. gaps.Distinct(StringComparer.Ordinal)]));
+            if (local)
+            {
+                coverage[^1] = coverage[^1] with
+                {
+                    UnobservedPages = [.. pages.Where(p => unobserved || left?.Snapshot.Pages.Any(a => a.Name == p) != true
+                        || right?.Snapshot.Pages.Any(a => a.Name == p) != true).Order(StringComparer.Ordinal)],
+                };
+            }
         }
 
         void Compare(PlanStep step, PlanEvidence? left, PlanEvidence? right, bool between, List<Fact> facts)

@@ -108,12 +108,19 @@ internal sealed class PlanLocalEvidenceReader(IBridgeClient bridge, PlanStore st
         var snapshot = new PlanSnapshot(plan.Project, SnapshotProfiles.StandardName, SnapshotProfiles.Format, [.. read], null,
             PlanSnapshotHashes.Compose(read), read.ToImmutableDictionary(p => PlanSnapshotHashes.Key("page", p.Type, p.Oid), p => p.Hash, StringComparer.Ordinal),
             members, PlanSnapshotHashes.Members(plan.Project.Path, members), skipped);
-        var observation = new PlanEvidence(snapshot) { AbsentPages = [.. missing] };
+        var observation = new PlanEvidence(snapshot)
+        {
+            AbsentPages = [.. missing],
+            Names = [.. occupied],
+            NamesHash = names.NamesHash,
+        };
         await PutAsync(key, observation).ConfigureAwait(false);
         if (window == "before" && step.Op is not ("page.renumber" or "device.renumber"))
         {
             PlanOccupiedName[] expected = ExpectedNames(step, occupied, snapshot);
-            await PutAsync(key + ":expectedNames", new PlanDigests(null, null, PlanSnapshotHashes.Names(plan.Project.Path, expected), null)).ConfigureAwait(false);
+            string expectedHash = PlanSnapshotHashes.Names(plan.Project.Path, expected);
+            observation = observation with { ExpectedNames = [.. expected], ExpectedNamesHash = expectedHash };
+            await PutAsync(key + ":expectedNames", new PlanDigests(null, null, expectedHash, null)).ConfigureAwait(false);
         }
         return observation;
 

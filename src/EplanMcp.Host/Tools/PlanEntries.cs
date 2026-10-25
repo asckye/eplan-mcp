@@ -33,7 +33,7 @@ internal static class PlanEntries
         return summary;
     }
 
-    internal static List<JsonObject> Build(PlanRecord record, bool detailed)
+    internal static List<JsonObject> Build(PlanRecord record, bool detailed, IReadOnlyList<PlanVerificationCoverage>? coverage = null)
     {
         var entries = new List<JsonObject>();
         foreach (PlanStep step in record.Definition.Steps.OrderBy(s => s.Index))
@@ -79,6 +79,13 @@ internal static class PlanEntries
                     Add(section, item["step"]?.GetValue<int>() ?? -1, ordinal.ToString(CultureInfo.InvariantCulture), item);
                 }
                 ordinal++;
+            }
+        }
+        if (detailed && coverage is not null)
+        {
+            foreach (PlanVerificationCoverage window in coverage)
+            {
+                Add("validation", window.Step, "coverage:" + window.Window, JsonSerializer.SerializeToNode(window, PlanJson.Options));
             }
         }
         return entries;

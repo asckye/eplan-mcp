@@ -40,7 +40,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
     {
         _tasks = new(_clock);
         _audit = new(_locations.Audit, _clock) { LockWait = TimeSpan.Zero };
-        _store = new(_locations, _audit) { Clock = _clock };
+        _store = new(_locations, _audit) { Clock = _clock, Checkpoint = point => _coverageFault?.Invoke(point) };
         _suspensions = SuspensionStore.For(_locations);
         _baseline = PlanScopeTestData.Baseline([], ["+A1/1"], Path.Combine(_locations.DefaultScratch, "Line1"));
         _current = PlanVerificationTestData.Copy(_baseline.Snapshot, _ => { });
@@ -388,7 +388,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
         return await _service.ExecuteAsync(_server, _prepared!, null, cancellationToken);
     }
 
-    private async Task Prepare(bool destructive = false, bool noOp = false, bool local = false)
+    private async Task Prepare(bool destructive = false, bool noOp = false, bool local = false, PlanOccupiedName[]? baselineNames = null)
     {
         PlanScope scope = PlanScopeRules.Pages(["+A1/1"]);
         JsonElement createArgs = PlanTestData.Json("""{"pages":[{"name":"+A1/3","page_type":"Circuit","description":"Power"}],"language":"en_US"}""");
@@ -426,7 +426,12 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
             first = PlanStepSemantics.Build(_baseline, new(1, "page.delete", deleteArgs, ToolTier.Destructive, []),
                 new(scope, scope, PlanPreconditions.Build(_baseline, scope), _baseline.NamesHash, []), Fresh("page.delete", "+A1/1", ""));
         }
-        byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(_baseline, PlanJson.Options);
+        PlanBaseline storedBaseline = baselineNames is null ? _baseline : _baseline with
+        {
+            Names = [.. baselineNames],
+            NamesHash = PlanSnapshotHashes.Names(_baseline.Snapshot.Project.Path, baselineNames),
+        };
+        byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(storedBaseline, PlanJson.Options);
         string hash = PlanStore.Hash(bytes);
         PlanDefinition plan = PlanTestData.Definition() with
         {
@@ -438,7 +443,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
             Sources = [],
             RequiredOperations = [.. _bridge.Status.Handshake!.Operations!],
             ContextRef = "sha256:" + hash,
-            Digests = new(_baseline.Snapshot.ComposedHash, _baseline.Snapshot.MembersHash, _baseline.NamesHash, null),
+            Digests = new(_baseline.Snapshot.ComposedHash, _baseline.Snapshot.MembersHash, storedBaseline.NamesHash, null),
         };
         string changes = PlanDiffPreview.For(plan.Steps);
         plan = plan with { Digests = plan.Digests with { ChangesDigest = PlanStore.Hash(Encoding.UTF8.GetBytes(changes)) } };

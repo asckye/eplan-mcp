@@ -54,8 +54,9 @@ internal sealed partial class PlanOrchestrator
                     throw PlanApplyChecks.Stale();
                 }
                 byte[] bytes = await store.ReadEvidenceAsync(plan.PlanId, plan.ContextRef!["sha256:".Length..], cancellationToken).ConfigureAwait(false);
-                PlanSnapshot approved = JsonSerializer.Deserialize<PlanBaseline>(bytes, PlanJson.Options)!.Snapshot;
-                baseline = new(local ? approved with { SnapshotHash = null } : approved, !local);
+                PlanBaseline approvedBaseline = JsonSerializer.Deserialize<PlanBaseline>(bytes, PlanJson.Options)!;
+                PlanSnapshot approved = approvedBaseline.Snapshot;
+                baseline = new(local ? approved with { SnapshotHash = null } : approved, !local) { Names = approvedBaseline.Names };
                 foreach ((PlanStep step, int position) in plan.Steps.Select((s, i) => (s, i)))
                 {
                     currentStep = step.Index;
@@ -87,7 +88,16 @@ internal sealed partial class PlanOrchestrator
                         }
 
                         PlanEvidence before = await ObserveAsync(step, "before", cancellationToken).ConfigureAwait(false);
+                        PlanEvidence? previous = evidence.LastOrDefault()?.After;
                         evidence.Add(new(step.Index, ExecutionState.NotStarted, before, null, true));
+                        if (local && previous is not null)
+                        {
+                            await ScreenAsync(step, previous, before, true, cancellationToken).ConfigureAwait(false);
+                            if (!evidence[^1].NameDiff.IsEmpty)
+                            {
+                                throw PlanApplyChecks.Stale();
+                            }
+                        }
                         WritePlan fresh = await new PlanStepCompiler(bridge).PlanAsync(plan.Project.Path,
                             new(step.Index, step.Op, step.Args, step.Tier, step.DependsOn), cancellationToken).ConfigureAwait(false);
                         PlanMacroInspectData? macro = step.Op == "macro.insert"
@@ -208,7 +218,15 @@ internal sealed partial class PlanOrchestrator
                         await audit.AppendAsync(entry, CancellationToken.None).ConfigureAwait(false);
                         tasks.Update(server, preparation.Task.TaskId, new("Step settled", steps.Count(s => s.Execution == ExecutionState.Committed), preparation.Task.Progress.TotalSteps));
                         evidence[^1] = evidence[^1] with { After = await ObserveAsync(step, "after", CancellationToken.None).ConfigureAwait(false) };
+                        if (local)
+                        {
+                            await ScreenAsync(step, before, evidence[^1].After!, false, CancellationToken.None).ConfigureAwait(false);
+                        }
                         verification = PlanVerifier.Verify(plan, baseline, evidence);
+                        if (local)
+                        {
+                            _ = await PlanCoverage.StoreAsync(store, plan.PlanId, verification, references, CancellationToken.None).ConfigureAwait(false);
+                        }
                         if (settled.Error is not null || settled.Recovered || verification.OutsideScope)
                         {
                             error = settled.Error ?? (verification.OutsideScope ? new(ErrorReason.PlanStale, "Changes outside the approved scope were observed. Inspect eplan_plan_get before compiling again.", false) : null);
@@ -237,7 +255,28 @@ internal sealed partial class PlanOrchestrator
                 }
                 try
                 {
-                    result = PlanVerifier.Verify(plan, baseline, evidence).ApplyTo(result);
+                    verification = PlanVerifier.Verify(plan, baseline, evidence);
+                    if (local)
+                    {
+                        try
+                        {
+                            verification = await PlanCoverage.StoreAsync(store, plan.PlanId, verification, references, CancellationToken.None).ConfigureAwait(false);
+                        }
+                        catch (Exception ex) when (ex is PlanCapacityException or IOException or UnauthorizedAccessException or JsonException)
+                        {
+                            error = ToFailure(ex);
+                            verification = verification with
+                            {
+                                Verification = "skipped",
+                                Coverage = [.. verification.Coverage.Select(c => PlanCoverage.Summary(c) with
+                                {
+                                    PropertyGaps = [.. c.PropertyGaps, "evidence.uncollected"],
+                                })],
+                            };
+                            result = result with { Error = result.Execution == PlanExecution.Unknown ? result.Error : error };
+                        }
+                    }
+                    result = verification.ApplyTo(result);
                 }
                 catch (ArgumentException)
                 {
@@ -288,6 +327,16 @@ internal sealed partial class PlanOrchestrator
                 if (packs.Clock.GetUtcNow() + limit > preparation.Deadline)
                 {
                     throw Failure(ErrorReason.Timeout, "The plan's time budget is exhausted. Inspect eplan_plan_get and compile a new plan.");
+                }
+            }
+
+            async Task ScreenAsync(PlanStep step, PlanEvidence left, PlanEvidence right, bool between, CancellationToken token)
+            {
+                if (PlanNameScreen.Mismatch(left, right, between))
+                {
+                    evidence[^1] = evidence[^1] with { NameDiff = PlanNameScreen.Compare(step, left, right, right.Names, between) };
+                    var changes = await PlanNameScreen.ReadAsync(bridge, plan, step, left, right, between, token).ConfigureAwait(false);
+                    evidence[^1] = evidence[^1] with { NameDiff = changes };
                 }
             }
 
