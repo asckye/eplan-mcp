@@ -35,6 +35,20 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
+    public void WorkflowPlan_HasClosedStepSchemaAndReadAnnotations()
+    {
+        Tool tool = Tools.Single(t => t.Name == WorkflowTools.PlanTool);
+        Assert.Equal("Compile workflow plan", tool.Title);
+        Assert.True(tool.Annotations!.ReadOnlyHint);
+        Assert.False(tool.Annotations.DestructiveHint);
+        Assert.True(tool.Annotations.IdempotentHint);
+        Assert.False(tool.Annotations.OpenWorldHint);
+        Assert.Equal(["project", "steps"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+        Assert.Equal(7, tool.InputSchema.GetProperty("properties").GetProperty("steps").GetProperty("items").GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(2, tool.OutputSchema!.Value.GetProperty("anyOf").GetArrayLength());
+    }
+
+    [Fact]
     public void ProjectCreate_HasTheModeEnumNewDestinationAndOutputContract()
     {
         Tool tool = Tools.Single(t => t.Name == ProjectCreateTools.CreateTool);
@@ -67,7 +81,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool],
+            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.SearchTool, AssetTools.UpdateTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageDestructiveTools.RenumberTool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool, WorkflowTools.PlanTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 
@@ -182,7 +196,8 @@ public sealed class ToolContractTests : IDisposable
         // ~250 tokens for description plus parameters (mcp-tool-design 4.2); 4 characters per token is a fair English estimate.
         // eplan_tool_usage's list of tool names grows with every tool, so it is not counted (4.2).
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
-        Assert.All(Tools, t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == ContextTools.GetTool ? 2000 : 1000));
+        // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
+        Assert.All(Tools, t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
     }
 
     private static int ToolNames(Tool tool) =>

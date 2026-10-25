@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `workflow`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read（保存 Host 计划记录，不执行 EPLAN 写入） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D01–D03 为准） |
+| 状态 | Implemented（P11；Small/Medium 覆盖编译与拒绝路径，Large 已编写、未实跑；计划 Resource 由 P12 注册） |
 
 ## 1. 这个工具解决什么任务
 “先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤，供 `eplan_plan_apply` 整体审批和执行。第 2 阶段只用覆盖全部结构的默认柜；包内工作流、配置分层、规则解释器留第 3 阶段。
@@ -23,6 +23,8 @@
 | `steps[].depends_on` | integer array | 否 | `[]` | 依赖的先前步骤序号（从 1 开始）；只能指向前面的步骤，不并行执行 |
 
 schema 使用 JSON Schema 2020-12、`additionalProperties: false`，`steps` 至少一项，按 `op` 用 `oneOf` 选择参数 schema。不提供 `workflow`/包工作流参数或动态 `selection` 选择器；任务涉及选中对象时先给明确页名/设备全名，编译器解析为定位符并写死，执行不重读选择。重复编译可以生成不同 `planId`，Read 幂等提示只指不修改工程数据。
+
+P11 中省略语言时与页工具一致，使用 EPLAN 界面语言，实际语言写在计划变更里（`description (zh_CN)`），执行时界面语言不同则该步 `PLAN_STALE`；Bridge 未暴露默认设备编号方案，`device.renumber` 省略方案时报 `CAPABILITY_MISSING`，要求明确指定。`contextRef` 引用落盘基准证据的 SHA-256；返回 `counts` 保留完整步骤和变更计数。
 
 **候选目录**如下；第 2 阶段实际启用七项及其收窄限制以实施设计 4.2 为准，placeholder/module 延后。所有既有参数限制继续有效；Bridge 已有不代表计划编排已实现。
 

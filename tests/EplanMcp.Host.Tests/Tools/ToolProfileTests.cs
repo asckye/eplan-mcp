@@ -38,9 +38,11 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(66, Tools(ToolProfile.Full).Length);
+        Assert.Equal(67, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ProjectCreateTools.CreateTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ContextTools.GetTool);
+        Assert.Contains(Tools(ToolProfile.Full), t => t.Name == WorkflowTools.PlanTool);
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == WorkflowTools.PlanTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == ContextTools.GetTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == ProjectCreateTools.CreateTool);
         Assert.Equal(ToolProfiles.Core.Order(StringComparer.Ordinal), Tools(ToolProfile.Core).Select(t => t.Name).Order(StringComparer.Ordinal));

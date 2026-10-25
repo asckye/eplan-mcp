@@ -116,7 +116,7 @@ internal sealed class PlanDependencyPredictor(IBridgeClient bridge)
                     }
                 }
                 read = PlanScopeRules.Pages(baseline.Snapshot.Pages.Select(p => p.Name).Concat(pages));
-                conditions.AddRange(PlanPreconditions.Build(baseline, PlanScopeRules.Whole(baseline.Snapshot)));
+                conditions.AddRange(PlanPreconditions.Build(baseline, PlanScopeRules.Whole(baseline.Snapshot), detail: PlanScopeRules.Pages(pages)));
                 conditions.Add(new PlanResourceHash(macro.Sha256));
                 expected.Add(Expected("macro", page, new
                 {

@@ -153,7 +153,7 @@ internal sealed class PlanImpactReader(IBridgeClient bridge)
             return new(null, [.. missing.Order(StringComparer.Ordinal)], [.. violations], orphans);
         }
         ImmutableArray<PlanPrecondition> preconditions = PlanPreconditions.Build(baseline, read,
-            op == "page.create" ? pages.Select(p => new PlanOccupiedName("page", p)) : null);
+            op == "page.create" ? pages.Select(p => new PlanOccupiedName("page", p)) : null, detail: modify);
         return new(new(read, modify, preconditions, baseline.NamesHash, orphans), [], [], orphans);
     }
 

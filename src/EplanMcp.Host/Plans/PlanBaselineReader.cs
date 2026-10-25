@@ -36,7 +36,11 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
             });
     }
 
-    public async Task<PlanBaselineRead> ReadAsync(PlanProject project, IReadOnlyList<string>? pages, CancellationToken cancellationToken)
+    public Task<PlanBaselineRead> ReadAsync(PlanProject project, IReadOnlyList<string>? pages, CancellationToken cancellationToken) =>
+        ReadAsync(project, pages, _ => Task.CompletedTask, cancellationToken);
+
+    public async Task<PlanBaselineRead> ReadAsync(PlanProject project, IReadOnlyList<string>? pages,
+        Func<PlanBaseline, Task> compile, CancellationToken cancellationToken)
     {
         string[]? wanted = pages?.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
         if (wanted is { Length: 0 })
@@ -51,6 +55,7 @@ internal sealed class PlanBaselineReader(IBridgeClient bridge)
             return new(null, [.. conflicts]);
         }
 
+        await compile(first).ConfigureAwait(false);
         PlanBaseline? second = await ReadOnceAsync(project, wanted, conflicts, cancellationToken).ConfigureAwait(false);
         if (second is not null)
         {

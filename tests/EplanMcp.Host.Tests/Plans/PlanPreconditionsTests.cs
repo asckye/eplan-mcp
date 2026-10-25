@@ -25,6 +25,23 @@ public sealed class PlanPreconditionsTests
     }
 
     [Fact]
+    public void Build_WithADetailScope_HashesOnlyTheWrittenObjects_AndTheMembersStillCoverTheReadScope()
+    {
+        PlanBaseline baseline = PlanScopeTestData.Baseline();
+        PlanScope read = PlanScopeRules.Whole(baseline.Snapshot);
+        PlanPrecondition[] all = [.. PlanPreconditions.Build(baseline, read)];
+        PlanPrecondition[] some = [.. PlanPreconditions.Build(baseline, read, detail: PlanScopeRules.Pages(["+A1/1"]))];
+        PlanPrecondition[] none = [.. PlanPreconditions.Build(baseline, read, detail: PlanScopeRules.Pages(["+A1/99"]))];
+
+        Assert.True(some.OfType<PlanObjectHash>().Count() < all.OfType<PlanObjectHash>().Count());
+        Assert.All(some.OfType<PlanObjectHash>(), c => Assert.Equal("+A1/1", c.Locator.Kind == "page" ? c.Locator.Name : c.Locator.Page));
+        Assert.Empty(none.OfType<PlanObjectHash>());
+        PlanMembers members = Assert.Single(all.OfType<PlanMembers>());
+        Assert.Equal((members.Hash, members.Count), (Assert.Single(some.OfType<PlanMembers>()).Hash, Assert.Single(some.OfType<PlanMembers>()).Count));
+        Assert.Equal((members.Hash, members.Count), (Assert.Single(none.OfType<PlanMembers>()).Hash, Assert.Single(none.OfType<PlanMembers>()).Count));
+    }
+
+    [Fact]
     public void Members_IncludeAdditionsDeletionsAndChanges_ButNotUnrelatedPages()
     {
         PlanScope scope = PlanScopeRules.Pages(["+A1/1"]);
