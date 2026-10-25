@@ -56,7 +56,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
             run.ProcessId = status.GetProperty("eplan").GetProperty("processId").GetInt32();
             Assert.Equal(eplan.ProcessId, run.ProcessId);
             await run.CaptureInitialAsync(eplan.ProjectPath);
-            run.Project = await run.CreateProjectAsync("P25t_" + run._suffix);
+            run.Project = await run.CreateProjectAsync("LargeP25t_" + run._suffix);
             await run.OpenClosedAsync(run.Project);
             await run.AssertCurrentAsync(run._fixture!);
             return run;
@@ -135,7 +135,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
     public async Task<string> ChangeSelectionToOtherProjectAsync()
     {
         await AssertCurrentAsync(_fixture!);
-        string other = await CreateProjectAsync("P25o_" + _suffix);
+        string other = await CreateProjectAsync("LargeP25o_" + _suffix);
         await OpenClosedAsync(other);
         await ReachCreatedAsync(other);
         await AssertCurrentAsync(other);
@@ -171,6 +171,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
             {
                 string current = Current(open).Path;
                 Assert.Contains(_initial, p => IsProject(p, current));
+                Assert.False(IsWritable(current), "LargeWrite stays open; created projects sort before it.");
                 await CloseCurrentAsync(current);
                 open = await ProjectsAsync();
                 AssertKnownOpenSet(open);
@@ -186,6 +187,9 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
             throw;
         }
     }
+
+    private static bool IsWritable(string path) =>
+        PlanSnapshotHashes.ProjectKey(path) == PlanSnapshotHashes.ProjectKey(Path.Combine(WriteHost.ScratchFolder, WriteHost.WritableName));
 
     public void BeginExternalWrite() => _safeToClean = false;
     public void ExternalWriteSettled() => _safeToClean = true;
@@ -251,7 +255,11 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
     {
         RequireNavigation();
         Assert.Null(ImportTools.ProjectNameProblem(name));
-        Assert.All(_initial, p => Assert.True(StringComparer.OrdinalIgnoreCase.Compare(name, p.Name) > 0));
+        // A46: sort after the fixture and LargeOutside, which may be closed, but before LargeWrite. Other Large tests change
+        // LargeWrite, and reopening it can show a modal dialog (for example a language missing from the dictionary).
+        Assert.All(_initial, p => Assert.True(IsWritable(p.Path)
+            ? StringComparer.OrdinalIgnoreCase.Compare(name, p.Name) < 0
+            : StringComparer.OrdinalIgnoreCase.Compare(name, p.Name) > 0));
         string destination = Path.Combine(_folder, name);
         string project = Path.Combine(destination, name);
         _created.Add(project);
