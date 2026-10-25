@@ -186,6 +186,16 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A42. 通用 Project/Page 属性读取（P3b，2026-10-25）
+
+- 实机：EPLAN 2026.0.3（Electric P8），只读的 sample fixture，2026-10-25 跑 `PropertyReadTests`、`PropertyReadLifetimeTests`。`UniversalPropertyList.Property(AnyPropertyId[, index])` 在 C# 中写作 `list[id]` / `list[id, index]`；数字 ID 隐式转换成可释放的 `AnyPropertyId`。对象只取得一次 Properties，所有 ID、父值/索引值、定义、边界和多语言值分别释放；finder 返回的 Project/Page 是借用对象，不释放（A36/A39）。
+- `PropertyDefinition` 的 Type、IsReadOnly、IsIndexed、MaxIndex、IsNamePart、IsInternal、IsPropertyLicensed 在实例上可读。样例页的定义：11005 Bool、11006 Long、11015/11071/25101 String、11031/11032 MultilangString、11049 Bool 且 IsReadOnly、11051 Double、25020 String 且 IsReadOnly；均 IsInternal=false、IsPropertyLicensed=true。IsComputed、长度、单位/格式没有可读的定义事实，保持 unknown；不能由只读性推断 computed。
+- 编译核对 `ToBool`、`ToInt`、`ToDouble`、`ToString`。Time 的时区、ValueWithUnit 的单位/格式、枚举解释未核实，返回 opaque 的安全 display，不猜测或按区域解析。
+- 空与不适用：上面 10 个页属性在样例页上都存在（有值或为空），读不到“运行时不适用”的样本；`not_applicable` 只在 `list[id]` 抛 PropertyNotFoundException 时出现，不把空值说成不适用。目录外或被分类排除的 ID 在读取前就是 `read_refused`，不到达 EPLAN。
+- 索引：项目 10901（PROJ_SUPPLEMENTARYFIELD）在样例上有已存索引，枚举结果与逐个显式读回一致。页 11901（PAGE_SUPPLEMENTARYFIELD）IsIndexed=true、MultilangString，样例页上没有任何已存索引，读作一行 `empty`、不带索引号。
+- 多语言：`MultiLangString.GetLanguageList(ref LanguageList)`、`LanguageList.get_Language(int)`、`GetString` 可用；LanguageList 继承 ArrayList，不需释放，转换用的 ISOCode 逐个释放。指定语言只返回该语言（缺失不借用其他译文）；省略语言时按 GUI 语言并报告实际回退（样例中能找到回退样本）。
+- A36 门：同一批 Project/Page 属性预热 10 轮后重复 200 轮，结果逐轮相同，EPLAN 工作集回落到基线容差内（max(32 MiB, 5%)），`.elk` 与 `.edb` 设计数据 SHA-256 不变（按 A17/A35 排除 User.* 与 .lck）。
+
 ### A41. 提交后的撤销粒度、备份副作用、宏读句柄（spike S35 第 1 部分，2026-10-23，EPLAN 2026.0.3.25421，Electric P8，经 Host 的真实工具）
 详细数据见 [spike S35](../../spikes/S35-plan-step-undo/README.md#结果)。全部写入在 scratch 副本中。
 
