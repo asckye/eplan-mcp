@@ -6,6 +6,9 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>One guarded typed plan step with one write outcome. Arguments: PlanStepExecuteArgs.</summary>
+    public const string PlanStepExecute = "plan.step.execute";
+
     /// <summary>Read-only, complete step precondition check in one main-thread call.</summary>
     public const string PlanStepGuard = "plan.step.guard";
 
