@@ -299,6 +299,50 @@ public sealed class PlanVerifierTests
         Assert.Contains(report.Diff, d => d.Class == "planned_applied" && d.Property == "shown");
     }
 
+    [Theory]
+    [InlineData("+A1-K9", "planned_applied", "passed")]
+    [InlineData("+A1-K7", "outside_scope", "failed")]
+    public void DeviceRename_DerivedReferencesOutsideModifyScope_AreAppliedOnlyForTheExactSubstitution(string reference, string expected, string verification)
+    {
+        // A45: renaming =F+A2-KF1 rewrote connection ends, 20403 texts and a visible name that omits the location.
+        PlanStep step = Compile("device.update");
+        PlanSnapshot before = Copy(Baseline().Snapshot, pages =>
+        {
+            foreach (SnapshotObject obj in pages.SelectMany(p => p.Objects).Where(o => o.Name == "+A1-K1"))
+            {
+                obj.Shown = "=X-K1";
+            }
+            SnapshotPage far = pages.Single(p => p.Name == "+A10/1");
+            far.Objects.Single(o => o.Name == "+A10-K2").Values.Add(new() { Id = 20403, Name = "FUNC_PLCSYMBOLICADDRESS_CALCULATED", Value = "+A1-K1:A1" });
+            far.Objects.Add(new()
+            {
+                Kind = "connection",
+                Type = 18,
+                Oid = 30,
+                Name = "17/13:>17/11:A1",
+                Page = "+A10/1",
+                End = new() { Type = 17, Oid = 11, Function = "+A1-K1", Pin = "A1" },
+                Hash = "connection-30",
+            });
+        });
+        PlanSnapshot after = Copy(After(step.Op, before), pages =>
+        {
+            foreach (SnapshotObject obj in pages.SelectMany(p => p.Objects).Where(o => o.Name == "+A1-K9"))
+            {
+                obj.Shown = "=X-K9";
+            }
+            SnapshotPage far = pages.Single(p => p.Name == "+A10/1");
+            far.Objects.Single(o => o.Name == "+A10-K2").Values.Single(v => v.Id == 20403).Value = reference + ":A1";
+            far.Objects.Single(o => o.Kind == "connection").End!.Function = reference;
+        });
+        PlanVerification report = Verify(step, after, before: before);
+        Assert.Equal(verification, report.Verification);
+        Assert.Contains(report.Diff, d => d.Class == "planned_applied" && d.Property == "shown");
+        Assert.Contains(report.Diff, d => d.Class == expected && d.Property == "end");
+        Assert.Contains(report.Diff, d => d.Class == expected && d.Property == "values/20403");
+        Assert.Equal(expected == "outside_scope", report.OutsideScope);
+    }
+
     [Fact]
     public void EscapedText_ComparedAsValuesRatherThanJsonSpellings()
     {

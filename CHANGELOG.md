@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Fixed
+- 设备改名计划（`eplan_workflow_plan` 的 `device.update` 步骤）的校验，不再把改名带来的连带变化（连接端点中的功能名、其他功能的 20403 计算地址、省略结构段的可见名）误报为计划外或范围外变化；只认旧全名到新全名的精确替换（api-notes A45）。
 - `eplan_macro_get` 遇到没有 2D 外框的宏（例如 3D 宏）时不再报内部错误，`size` 返回 null，摘要写"no 2D outline"。
 
 ## [0.2.0] - 2026-10-23
