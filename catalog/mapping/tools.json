@@ -3996,6 +3996,11 @@
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
+          },
+          {
+            "name": "PlanDependencyPredictionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
           }
         ],
         "operationTests": [
@@ -4072,6 +4077,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PlanDependencyPredictionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
           },
           {
             "name": "PlanMacroInspectTests",
@@ -4551,6 +4561,11 @@
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
+          },
+          {
+            "name": "PlanDependencyPredictionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
           },
           {
             "name": "WriteSafetyTests",

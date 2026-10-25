@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-23 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 2c40c9f3 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-25 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 61450c2b）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -171,14 +171,14 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 63 | 29 | 2 | 32 | 0 | 2/2/1 | A28 | — |
 | eplan_language_set | write | language.set.execute<br>language.set.plan | 40 | 17 | 0 | 23 | 0 | 3/2/3 | A28 | — |
 | eplan_macro_get | read | macro.get | 39 | 20 | 0 | 17 | 0 | 2/1/3 | A14 | — |
-| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 84 | 37 | 0 | 45 | 0 | 4/2/1 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 2/1/3 | A4 | — |
+| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 84 | 37 | 0 | 45 | 0 | 4/2/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 2/1/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 2/2/2 | A1 A11 | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A35 | — |
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_page_create | write | page.create.execute<br>page.create.plan | 66 | 26 | 1 | 32 | 0 | 10/17/4 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_create | write | page.create.execute<br>page.create.plan | 66 | 26 | 1 | 32 | 0 | 10/17/5 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 58 | 29 | 0 | 29 | 0 | 4/10/1 | A15 A18 A24 | — |
 | eplan_page_get | read | page.get | 65 | 36 | 1 | 28 | 0 | 4/4/7 | A11 A12 | — |
 | eplan_page_list | read | page.list | 40 | 19 | 1 | 20 | 0 | 15/4/6 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
