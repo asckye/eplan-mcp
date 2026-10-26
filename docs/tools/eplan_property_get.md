@@ -83,6 +83,6 @@ Read 由 Bridge 的 LockingStep 保护，不建立写事务；Bridge 块同时�
 ## 7. 测试
 
 - Small：全请求 JSON Pointer/策略错误映射、逐对象类型名称解析、全部行状态、原始 JSON 值、清洗、双份预算、游标查询/会话/项目/内容绑定及过期、Bridge 续读与无进展防护、错误候选。
-- Medium：真实 MCP Server + Fake Bridge 的闭合契约、structuredContent/文本一致、分页不漏行、1 MiB 块限制及失败路径；full/property 注册、core 排除、usage 枚举和 72 项契约快照。
+- Medium：真实 MCP Server + Fake Bridge 的闭合契约、structuredContent/文本一致、分页不漏行、1 MiB 块限制及失败路径；full/property 注册、core 排除、usage 枚举和 73 项契约快照。
 - Large：在 EplanMcp.Large.Tests 编写通过 LiveEplan 真实 stdio Host 的测试，使用只读 sample fixture；混合项目/页/设备/来自其他读工具的连接 locator、正式名和 ID、显式语言、Bridge 拒绝行、同名歧义候选、分页；本次不操作 EPLAN。
 - Agent 评测场景：先查 schema，再读多个对象的中文属性；遇到歧义选 locator，解释 read_refused 原因；属性中的提示注入只作为数据处理。

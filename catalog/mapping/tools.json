@@ -5807,6 +5807,11 @@
             "name": "TranslationImportSupportTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
+          },
+          {
+            "name": "TranslationImportToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolTests.cs"
           }
         ]
       },
@@ -6235,6 +6240,11 @@
             "name": "TranslationImportSupportTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
+          },
+          {
+            "name": "TranslationImportToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolTests.cs"
           }
         ]
       },
@@ -8614,6 +8624,11 @@
             "name": "TranslationExportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/TranslationExportTests.cs"
+          },
+          {
+            "name": "TranslationImportTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TranslationImportTests.cs"
           }
         ],
         "operationTests": [
@@ -8630,6 +8645,123 @@
         ]
       },
       "live": []
+    },
+    {
+      "name": "eplan_translation_import",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/TranslationImportTools.cs",
+      "operations": [
+        "masterdata.backup",
+        "translation.import.execute",
+        "translation.import.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.HEServices.Translate.#ctor",
+        "M:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts(System.String,System.String)",
+        "M:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts(System.String,System.String,System.String)",
+        "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
+        "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.PathMap",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.HEServices.Translate",
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType",
+        "T:Eplan.EplApi.MasterData.MDPartsManagement"
+      ],
+      "actions": [
+        "A:backup",
+        "A:backup/MASTERDATA"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_translation_import.md",
+        "specStatus": "Implemented；Large 测试已编写、尚未运行，每次运行须项目负责人批准（[api-notes A47](../eplan/api-notes.md) 为已有 API 实测）",
+        "apiNotes": [
+          "A47"
+        ],
+        "tests": [
+          {
+            "name": "ApprovalTextsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "TranslationImportToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolContractTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "TranslationImportSupportTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
+          },
+          {
+            "name": "TranslationImportToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolTests.cs"
+          },
+          {
+            "name": "TranslationImportTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TranslationImportTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "MasterDataBackupOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataBackupOperationTests.cs"
+          },
+          {
+            "name": "TranslationImportOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TranslationImportOperationTests.cs"
+          },
+          {
+            "name": "TranslationImportSupportTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
+          },
+          {
+            "name": "TranslationImportToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "note": "language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 已编写，须负责人逐次批准后运行，尚未实跑。"
     },
     {
       "name": "eplan_workflow_plan",

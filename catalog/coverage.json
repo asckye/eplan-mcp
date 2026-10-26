@@ -67,9 +67,9 @@
       },
       "denominator": 4014,
       "implemented": 237,
-      "byTools": 229,
+      "byTools": 230,
       "partial": 40,
-      "automatedTest": 229,
+      "automatedTest": 230,
       "liveVerified": 151,
       "envBlocked": 122,
       "undocumented": 134
@@ -85,9 +85,9 @@
       },
       "denominator": 1799,
       "implemented": 111,
-      "byTools": 103,
+      "byTools": 104,
       "partial": 39,
-      "automatedTest": 103,
+      "automatedTest": 104,
       "liveVerified": 68,
       "envBlocked": 45,
       "undocumented": 66
@@ -2013,9 +2013,30 @@
       "spec": "docs/tools/eplan_translation_export.md",
       "small": 2,
       "medium": 3,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A30"
+      ]
+    },
+    {
+      "name": "eplan_translation_import",
+      "safety": "destructive",
+      "operations": [
+        "masterdata.backup",
+        "translation.import.execute",
+        "translation.import.plan"
+      ],
+      "apiIds": 30,
+      "operationGroups": 10,
+      "dataDictionary": 0,
+      "dependencies": 18,
+      "actions": 1,
+      "spec": "docs/tools/eplan_translation_import.md",
+      "small": 4,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A47"
       ]
     },
     {
@@ -2064,7 +2085,8 @@
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_sync",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -2220,7 +2242,8 @@
         "eplan_part_import",
         "eplan_part_sync",
         "eplan_project_create",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -2237,7 +2260,8 @@
         "eplan_part_import",
         "eplan_part_sync",
         "eplan_project_create",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -2355,7 +2379,8 @@
         "eplan_part_import",
         "eplan_part_sync",
         "eplan_project_create",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -2505,7 +2530,8 @@
         "eplan_project_translate",
         "eplan_report_update",
         "eplan_terminal_renumber",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -2577,6 +2603,7 @@
         "eplan_macro_list",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_translation_import",
         "eplan_workflow_plan"
       ]
     },
@@ -5312,7 +5339,8 @@
         "eplan_action_run",
         "eplan_part_import",
         "eplan_part_sync",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -5330,7 +5358,8 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -5345,9 +5374,11 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_translation_import"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage",
@@ -5376,7 +5407,8 @@
         "eplan_action_run",
         "eplan_part_import",
         "eplan_part_sync",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {
@@ -5609,7 +5641,8 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
-        "eplan_translation_export"
+        "eplan_translation_export",
+        "eplan_translation_import"
       ]
     },
     {

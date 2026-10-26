@@ -104,6 +104,7 @@ tools:
     note: Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。
   eplan_part_import: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
   eplan_part_sync: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
+  eplan_translation_import: { note: language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 已编写，须负责人逐次批准后运行，尚未实跑。, operations: [masterdata.backup] }
   eplan_session_status: { note: 只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作 }
   eplan_session_select: { note: 只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作 }
   eplan_tool_usage: { note: 只在 Host 中运行：返回工具用法文本，不接触 EPLAN }
