@@ -127,7 +127,7 @@ public sealed class PropertyGetContractTests
     }
 
     // Covers only the keywords in the component schemas, including their reference and union constraints.
-    private static bool Accepts(JsonElement schema, JsonElement value, JsonElement root)
+    internal static bool Accepts(JsonElement schema, JsonElement value, JsonElement root)
     {
         if (schema.TryGetProperty("$ref", out JsonElement reference))
         {

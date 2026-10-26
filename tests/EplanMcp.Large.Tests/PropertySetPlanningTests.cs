@@ -112,7 +112,7 @@ public sealed class PropertySetPlanningTests(LiveEplan eplan)
         Assert.Equal(ErrorReason.PolicyDenied, opaqueError.Error.Reason);
         AssertPointer(opaqueError, "/changes/0/property");
         Assert.Equal(opens, adapter.Opens);
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
     }
 

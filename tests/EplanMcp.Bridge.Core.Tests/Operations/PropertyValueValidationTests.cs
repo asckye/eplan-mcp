@@ -478,24 +478,33 @@ public sealed class PropertyValueValidationTests
     [InlineData(2026, "Connection", 31002, "")]
     [InlineData(2026, "Page", 3010, "")]
     [InlineData(2026, "StorableObject", 2000, "")]
-    public void ShippedEntry_EmptyWhitelist_DeniesEveryVersionTypeCategoryAndCandidate(int version, string type, int id, string category)
+    public void ShippedEntry_OutsideB1Keys_DeniesEveryOtherVersionTypeCategoryAndCandidate(int version, string type, int id, string category)
     {
         var violations = new List<PropertyViolation>();
         Assert.Null(PropertyValueValidation.ShippedEntry(version, type, id, category, At + "/property", violations));
         PropertyViolation error = Assert.Single(violations);
         Assert.Equal(ErrorReason.PolicyDenied, error.Reason);
         Assert.Equal(At + "/property", error.Path);
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
     }
 
     [Fact]
-    public void ShippedEntry_EveryCatalogProperty_IsDenied()
+    public void ShippedEntry_OnlyB1CatalogProperties_AreAllowed()
     {
         foreach (PropertyDictionaryEntry entry in PropertyCatalog.Entries.Where(e => e.PropertyId.HasValue))
         {
             var violations = new List<PropertyViolation>();
-            Assert.Null(PropertyValueValidation.ShippedEntry(2026, entry.ObjectType, entry.PropertyId!.Value, "", "/property", violations));
-            Assert.Equal(ErrorReason.PolicyDenied, Assert.Single(violations).Reason);
+            PropertyWriteEntry? allowed = PropertyValueValidation.ShippedEntry(2026, entry.ObjectType, entry.PropertyId!.Value, "", "/property", violations);
+            if (entry.ObjectType == "Function" && entry.PropertyId is 20011 or 20027)
+            {
+                Assert.NotNull(allowed);
+                Assert.Empty(violations);
+            }
+            else
+            {
+                Assert.Null(allowed);
+                Assert.Equal(ErrorReason.PolicyDenied, Assert.Single(violations).Reason);
+            }
         }
     }
 }

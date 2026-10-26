@@ -3,7 +3,7 @@ using EplanMcp.Host.Bridge;
 
 namespace EplanMcp.Large.Tests;
 
-/// <summary>Calls the real add-in's B1 operations through the Host client, before a property.set Host tool exists.</summary>
+/// <summary>Calls the real add-in's B1 operations directly for planner, undo and rollback verification.</summary>
 internal sealed class PropertyWriteBridge(BridgeClient client) : IAsyncDisposable
 {
     public BridgeClient Client => client;

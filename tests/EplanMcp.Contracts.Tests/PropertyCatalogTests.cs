@@ -30,7 +30,7 @@ public sealed class PropertyCatalogTests
         Assert.Null(entry.ReadRefusal);
         Assert.Null(PropertyCatalog.Find("Page", 20011));
         Assert.Null(PropertyCatalog.Find("function", "FUNC_TEXT"));
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
     }
 
     [Theory]

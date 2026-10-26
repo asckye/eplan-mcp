@@ -30,9 +30,9 @@ Bridge 共用到 559 个 ID（方法 175，属性 181，类型 134，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 246 / 4014（6.1%） | 236 | 41 | 236 / 4014（5.9%） | 151 / 4014（3.8%） | 122 | 134 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 246 / 4014（6.1%） | 237 | 41 | 237 / 4014（5.9%） | 151 / 4014（3.8%） | 122 | 134 |
 | 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 111 / 1799（6.2%） | 104 | 39 | 104 / 1799（5.8%） | 68 / 1799（3.8%） | 45 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 135 / 2215（6.1%） | 132 | 2 | 132 / 2215（6.0%） | 83 / 2215（3.7%） | 77 | 68 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 135 / 2215（6.1%） | 133 | 2 | 133 / 2215（6.0%） | 83 / 2215（3.7%） | 77 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 7 / 68（10.3%） | 7 | 0 | 7 / 68（10.3%） | 5 / 68（7.4%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 6 / 137（4.4%） | 6 | 0 | 6 / 137（4.4%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 6 / 97（6.2%） | 6 | 0 | 6 / 97（6.2%） | 1 / 97（1.0%） | 0 | 0 |
@@ -86,7 +86,7 @@ Bridge 共用到 559 个 ID（方法 175，属性 181，类型 134，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 74（39.2%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 75（38.7%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -200,8 +200,9 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_project_get | read | project.get | 55 | 30 | 0 | 25 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/4/6 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 70 | 31 | 2 | 37 | 0 | 1/2/1 | A11 A14 A25 A28 | — |
-| eplan_property_get | read | project.get<br>property.read | 113 | 65 | 1 | 46 | 0 | 2/2/1 | A36 A44 | — |
+| eplan_property_get | read | project.get<br>property.read | 113 | 65 | 1 | 46 | 0 | 2/2/2 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
+| eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 143 | 78 | 1 | 62 | 0 | 2/2/1 | A36 A44 A48 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 47 | 21 | 0 | 26 | 0 | 1/2/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 45 | 21 | 2 | 16 | 0 | 2/1/1 | A28 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/3/1 | — | 2026-10-19 pass（api-notes A12） |

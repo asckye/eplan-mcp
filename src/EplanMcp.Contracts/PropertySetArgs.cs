@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Internal B1 planning/execution request; not a registered Host tool.</summary>
+/// <summary>B1 Bridge request; the Host validates published permissions before constructing it.</summary>
 public sealed class PropertySetArgs
 {
     /// <summary>Explicit resolved project path.</summary>
