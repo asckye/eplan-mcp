@@ -9,7 +9,6 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>P6 B1 planning only, using existing Bridge reads on writes/LargeWrite; no write operation is invoked.</summary>
 [Trait("Size", "Large")]
-[Trait("Host", "Offline")]
 public sealed class PropertySetPlanningTests(LiveEplan eplan)
 {
     [Fact]
