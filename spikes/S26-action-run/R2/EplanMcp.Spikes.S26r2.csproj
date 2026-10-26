@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>EplanMcp.Spikes.S26r2</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S26</RootNamespace>
+    <DefineConstants>$(DefineConstants);S26_R2</DefineConstants>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Spike*.cs" Link="%(Filename)%(Extension)" />
+    <Compile Include="*.cs" />
+    <Reference Include="Eplan.EplApi.AFu;Eplan.EplApi.Baseu;Eplan.EplApi.DataModelu;Eplan.EplApi.HEServicesu;Eplan.EplApi.MasterDatau;Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>

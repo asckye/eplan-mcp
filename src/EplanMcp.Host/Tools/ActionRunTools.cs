@@ -157,7 +157,7 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
         return result;
     }
     private static string Display(ActionParameter p, string project, HostDataLocations locations) => p.Name is "PROJECTNAME" or "Project" ? project
-        : p.Name == "SOURCEPATH" ? "." : p.Name is "EXPORTFILE" or "XMLFile" or "FILENAME" or "DESTINATIONFILE" or "DESTINATIONPATH" && Path.IsPathFullyQualified(p.Value) ? Path.GetRelativePath(locations.Root, p.Value) : ResultShaper.CleanText(p.Value) ?? string.Empty;
+        : p.Name == "SOURCEPATH" ? "." : p.Name is "EXPORTFILE" or "XMLFile" or "FILENAME" or "DESTINATIONFILE" or "DESTINATIONPATH" or "DESTINATION" && Path.IsPathFullyQualified(p.Value) ? Path.GetRelativePath(locations.Root, p.Value) : ResultShaper.CleanText(p.Value) ?? string.Empty;
     private static JsonObject Fingerprint(Dictionary<string, string> state)
     {
         var files = state.Where(p => p.Key.StartsWith("file:", StringComparison.Ordinal)).OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();

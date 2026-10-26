@@ -64,6 +64,11 @@ public sealed partial class SpikeS26Action : IEplAction
             ["engineerDialogObservation"] = JValue.CreateNull(),
             ["undoEntries"] = new JObject { ["unavailable"] = "2026 public UndoManager/UndoStep catalog exposes no history enumeration. No internal API or undo action is called." },
         };
+#if S26_R3
+        report["revision"] = "r3";
+#elif S26_R2
+        report["revision"] = "r2";
+#endif
         try
         {
             Thread.Sleep(300); // S34: let the scheduling action return before entering the dispatcher.
@@ -94,6 +99,10 @@ public sealed partial class SpikeS26Action : IEplAction
     {
         string[] paths = OpenProjectPaths(); // Refuse if ANY open project is outside scratch.
         if (!paths.Contains(p.Project, StringComparer.OrdinalIgnoreCase)) { throw new InvalidOperationException("Open the target scratch copy first."); }
+#if S26_R2
+        if (p.Mode.StartsWith("r2-", StringComparison.Ordinal) && paths.Length < 2)
+        { throw new InvalidOperationException("Open a second scratch copy for the r2 isolation comparison."); }
+#endif
         report["openProjects"] = new JArray(paths);
         report["currentProjectBefore"] = CurrentProjectPath();
         var baseline = paths.ToDictionary(path => path, ProjectFiles, StringComparer.OrdinalIgnoreCase);
@@ -114,6 +123,9 @@ public sealed partial class SpikeS26Action : IEplAction
                     candidates.Add(Export(p, "user-properties", "XEsUserPropertiesExportAction", null, "XMLFile", "properties.xml", "Project"));
                     break;
                 case "external": External(candidates, report, p); break;
+#if S26_R2
+                default: R2Candidates(candidates, report, project, p); break;
+#endif
             }
         }
 
@@ -146,6 +158,13 @@ public sealed partial class SpikeS26Action : IEplAction
             ["dialogAppeared"] = JValue.CreateNull(), ["engineerDialogObservation"] = JValue.CreateNull(),
             ["undoWrapped"] = c.WithUndo, ["note"] = c.Note,
         };
+#if S26_R2
+        if (c.SourceRow != 0) { result["sourceRow"] = c.SourceRow; }
+#endif
+#if S26_R3
+        result["actionAttempted"] = false;
+        result["transactionStarted"] = false;
+#endif
         if (c.Skip is not null) { result["notRun"] = c.Skip; return result; }
         int bookmark = -1;
         try
@@ -163,12 +182,19 @@ public sealed partial class SpikeS26Action : IEplAction
             if (c.ExpectedRelative?.Contains('/') == true) { Directory.CreateDirectory(Path.Combine(c.Folder, "slash 子目录")); }
             Capture(result, "currentProjectBefore", () => new JValue(CurrentProjectPath()));
             Capture(result, "before", () => Stage(paths, baseline, c.LayerName, c.PartsDatabase));
+#if S26_R2
+            R2Capture(result, "before", c, p, paths);
+            R2RequireReadable(result, paths);
+#endif
             // A11/S34: retain only the integer bookmark, never an old collection/message.
             Capture(result, "systemMessageBookmark", () => { bookmark = new SysMessagesCollection().Count; return new JValue(bookmark); });
             try
             {
                 using (SafetyPoint safety = SafetyPoint.Create())
                 {
+#if S26_R3
+                    result["transactionStarted"] = true;
+#endif
                     try
                     {
                         if (c.WithUndo)
@@ -180,6 +206,9 @@ public sealed partial class SpikeS26Action : IEplAction
                             finally
                             {
                                 Capture(result, "after", () => Stage(paths, baseline, c.LayerName, c.PartsDatabase));
+#if S26_R2
+                                R2Capture(result, "after", c, p, paths);
+#endif
                                 try { undo.CloseUndo(); result["closeUndoReturned"] = true; }
                                 catch (Exception ex) { result["closeUndoException"] = Describe(ex); }
                             }
@@ -195,6 +224,9 @@ public sealed partial class SpikeS26Action : IEplAction
                     {
                         Capture(result, "mainWindowDisabledImmediatelyAfterAction", () => new JValue(MainWindowDisabled()));
                         Capture(result, "afterUndoStepDisposed", () => Stage(paths, baseline, c.LayerName, c.PartsDatabase));
+#if S26_R2
+                        R2Capture(result, "afterUndoStepDisposed", c, p, paths);
+#endif
                         var rollbackClock = Stopwatch.StartNew();
                         try { safety.Rollback(); result["rollbackReturned"] = true; }
                         catch (Exception ex) { result["rollbackException"] = Describe(ex); }
@@ -202,6 +234,9 @@ public sealed partial class SpikeS26Action : IEplAction
                         {
                             result["rollbackMs"] = rollbackClock.Elapsed.TotalMilliseconds;
                             Capture(result, "afterRollback", () => Stage(paths, baseline, c.LayerName, c.PartsDatabase));
+#if S26_R2
+                            R2Capture(result, "afterRollback", c, p, paths);
+#endif
                         }
                     }
                 }
@@ -212,6 +247,9 @@ public sealed partial class SpikeS26Action : IEplAction
         finally
         {
             Capture(result, "afterSafetyPointDisposed", () => Stage(paths, baseline, c.LayerName, c.PartsDatabase));
+#if S26_R2
+            R2Capture(result, "afterSafetyPointDisposed", c, p, paths);
+#endif
             Capture(result, "files", () => OutputFiles(c.Folder));
             if (bookmark >= 0) { Capture(result, "systemMessages", () => MessagesSince(bookmark)); }
             Capture(result, "mainWindowDisabledAfter", () => new JValue(MainWindowDisabled()));
@@ -224,13 +262,20 @@ public sealed partial class SpikeS26Action : IEplAction
                 result["unsafeToContinue"] = result.Value<bool?>("mainWindowDisabledAfter") != false ||
                     result.Value<bool?>("mainWindowDisabledImmediatelyAfterAction") == true ||
                     result["scopeException"] is not null || result["closeUndoException"] is not null ||
+#if S26_R3
+                    (result.Value<bool?>("transactionStarted") == true && result.Value<bool?>("rollbackReturned") != true) ||
+#else
                     (bookmark >= 0 && result.Value<bool?>("rollbackReturned") != true) ||
+#endif
                     !new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase).SetEquals(now) ||
                     (result["fingerprintAssessment"]?["afterSafetyPointDisposed"] as JArray)?.OfType<JObject>()
                         .Any(row => row.Value<bool?>("countsChanged") == true || row.Value<bool?>("layerChanged") == true) == true ||
                     result["fingerprintAssessment"]?["partsDatabase"]?["afterSafetyPointDisposed"]?.Value<bool?>("configurationChanged") == true;
             }
             catch (Exception ex) { result["safetyCheckException"] = Describe(ex); result["unsafeToContinue"] = true; }
+#if S26_R2
+            R2Finish(result, c, p, paths);
+#endif
         }
 
         return result;
@@ -254,6 +299,9 @@ public sealed partial class SpikeS26Action : IEplAction
         var action = new ActionManager().FindAction(c.Action) ?? throw new InvalidOperationException("Action not found: " + c.Action);
         using var watch = new WindowWatch();
         var clock = Stopwatch.StartNew();
+#if S26_R3
+        result["actionAttempted"] = true; // Set immediately before the native call, including calls that throw.
+#endif
         try { result["returned"] = action.Execute(context); }
         finally
         {
@@ -288,6 +336,16 @@ public sealed partial class SpikeS26Action : IEplAction
             if (!Directory.Exists(Folder)) { throw new DirectoryNotFoundException("The driver must create the new run folder first."); }
             CommonSchemeNode = value.Value<string>("commonSchemeNode") ?? "";
             ArticleSchemeNode = value.Value<string>("articleSchemeNode") ?? "";
+#if S26_R2
+            R2 = value["r2"] as JObject ?? new JObject();
+#if S26_R3
+            const string suffix = "r3";
+#else
+            const string suffix = "r2";
+#endif
+            if (Mode.StartsWith("r2-", StringComparison.Ordinal) && !typeof(SpikeS26Action).Assembly.GetName().Name!.EndsWith(suffix, StringComparison.Ordinal))
+            { throw new ArgumentException("Build and register the S26" + suffix + " assembly for r2 modes."); }
+#endif
         }
 
         internal string Mode { get; }
@@ -296,6 +354,9 @@ public sealed partial class SpikeS26Action : IEplAction
         internal string Report => SpikeS26Paths.Report(Folder, Mode);
         internal string CommonSchemeNode { get; }
         internal string ArticleSchemeNode { get; }
+#if S26_R2
+        internal JObject R2 { get; }
+#endif
     }
 
     private sealed class Candidate(string id, string action, string folder, Dictionary<string, string> options)
@@ -311,5 +372,10 @@ public sealed partial class SpikeS26Action : IEplAction
         internal bool CurrentOnly { get; set; }
         internal bool PartsDatabase { get; set; }
         internal bool WithUndo { get; set; } = true;
+#if S26_R2
+        internal int SourceRow { get; set; }
+        internal string? ExpectedToken { get; set; }
+        internal string? ExpectedType { get; set; }
+#endif
     }
 }

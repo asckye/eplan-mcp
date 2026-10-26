@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <DefineConstants>$(DefineConstants);S26_R2;S26_R3</DefineConstants>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Driver\Program.cs" Link="Program.cs" />
+    <Compile Include="..\..\SpikeS26Paths.cs" Link="SpikeS26Paths.cs" />
+    <AssemblyMetadata Include="EplanBinPath" Value="$(EplanBinPath)" />
+    <Reference Include="Eplan.EplApi.RemoteClientu;Eplan.EplApi.Remotingu;Grpc.Core.Api;Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+</Project>
