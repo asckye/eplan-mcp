@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "067c4d0d + uncommitted changes",
-  "sourceHash": "sha256:df1f1aa364fec1be9e739f53006ef2ff615bf7b9bcc62619409ae67852ee6b67",
+  "scannedSources": "268c56d8 + uncommitted changes",
+  "sourceHash": "sha256:d3245789f0474d2efabfa3e787730d761ac99468e7c5e4381562daf05b831be3",
   "operations": [
     {
       "name": "action.execute",
@@ -281,6 +281,10 @@
     {
       "name": "page.renumber.plan",
       "class": "PageRenumberPlanOperation"
+    },
+    {
+      "name": "page.text.replace.execute",
+      "class": "PageTextReplaceExecuteOperation"
     },
     {
       "name": "page.text.replace.plan",
@@ -816,6 +820,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -927,6 +932,17 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Number",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "page.text.replace.execute"
         ]
       },
       {
@@ -2280,6 +2296,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -2316,6 +2333,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -2447,6 +2465,18 @@
     ],
     "M:Eplan.EplApi.Base.ISOCode.#ctor(Eplan.EplApi.Base.ISOCode.Language)": [
       {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -2481,6 +2511,29 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "LanguageCode",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Number",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute"
         ]
       },
       {
@@ -2601,6 +2654,17 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Number",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -2694,6 +2758,30 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "LanguageCode",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanProjectExporter",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectExporter.cs",
@@ -2751,6 +2839,18 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "LanguageCode",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -2847,6 +2947,18 @@
       }
     ],
     "M:Eplan.EplApi.Base.LanguageList.#ctor": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
@@ -3000,6 +3112,17 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -3021,6 +3144,17 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute"
         ]
       },
       {
@@ -3048,6 +3182,18 @@
     ],
     "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)": [
       {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -3070,6 +3216,18 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -4058,6 +4216,18 @@
         ],
         "operations": [
           "page.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -5051,6 +5221,18 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -5733,6 +5915,18 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -5940,6 +6134,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -6750,6 +6945,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -6786,6 +6982,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -6822,6 +7019,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -6867,6 +7065,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -7123,6 +7322,53 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -7266,6 +7512,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -7302,6 +7549,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -7338,6 +7586,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -7383,6 +7632,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -7419,6 +7669,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -8142,6 +8393,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -8243,6 +8495,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -8822,6 +9075,18 @@
       }
     ],
     "P:Eplan.EplApi.Base.LanguageList.Language(System.Int32)": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
@@ -12223,6 +12488,59 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.Text.Contents": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Group.SubPlacements": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects": [
       {
         "adapter": "EplanMacroReader",
@@ -12384,6 +12702,18 @@
         "operations": [
           "page.delete.execute",
           "page.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -12803,6 +13133,30 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -13105,6 +13459,20 @@
         ],
         "operations": [
           "page.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Page.PlotFrame": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       }
     ],
@@ -13545,6 +13913,18 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -13656,6 +14036,18 @@
         ],
         "operations": [
           "page.get"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -14147,6 +14539,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -14276,6 +14669,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -14372,6 +14766,8 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
+          "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
           "part.list",
@@ -14553,6 +14949,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -14765,6 +15162,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -14890,6 +15288,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -15613,6 +16012,29 @@
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.replace.execute"
         ]
       },
       {
@@ -16823,6 +17245,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -17025,6 +17448,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -17561,6 +17985,41 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "LanguageCode",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Number",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "KnowsLanguage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -17734,6 +18193,29 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Number",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -17780,6 +18262,18 @@
       }
     ],
     "T:Eplan.EplApi.Base.LanguageList": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
@@ -17955,6 +18449,29 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute"
         ]
       },
       {
@@ -19304,6 +19821,18 @@
         ],
         "operations": [
           "page.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       },
       {
@@ -20847,6 +21376,57 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.Text": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "ReadText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Group": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.IFunctionBase": [
       {
         "adapter": "EplanDeviceRenumberer",
@@ -21485,6 +22065,53 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -21758,6 +22385,18 @@
         ]
       },
       {
+        "adapter": "EplanPageTexts",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -21858,6 +22497,18 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "FreeTexts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.replace.execute",
+          "page.text.replace.plan"
         ]
       }
     ],
@@ -22378,6 +23029,8 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
+          "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
           "part.list",
@@ -22475,6 +23128,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -22762,6 +23416,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",
@@ -23428,6 +24083,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -23598,6 +24254,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -23634,6 +24291,7 @@
           "page.create.execute",
           "page.delete.execute",
           "page.renumber.execute",
+          "page.text.replace.execute",
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
@@ -24334,6 +24992,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
           "page.update.plan",

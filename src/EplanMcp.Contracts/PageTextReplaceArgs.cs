@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Arguments of <see cref="OperationNames.PageTextReplacePlan"/>; literal replacement in page free texts.</summary>
+/// <summary>Arguments of page.text.replace.plan and page.text.replace.execute; literal replacement in page free texts.</summary>
 public sealed class PageTextReplaceArgs
 {
     /// <summary>Explicit project name or path from eplan_project_list.</summary>
@@ -23,4 +23,7 @@ public sealed class PageTextReplaceArgs
 
     /// <summary>Maximum changed object-language entries, from 1 to 500; exceeding it refuses the whole plan.</summary>
     public int MaxChanges { get; set; } = 500;
+
+    /// <summary>Required for execute: the fingerprint returned by the plan operation; null when planning.</summary>
+    public string? Fingerprint { get; set; }
 }

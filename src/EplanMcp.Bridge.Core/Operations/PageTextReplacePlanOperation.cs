@@ -9,7 +9,9 @@ public sealed class PageTextReplacePlanOperation(IProjectCatalog catalog, IPageT
 {
     public override string Name => OperationNames.PageTextReplacePlan;
 
-    protected override WritePlan Execute(PageTextReplaceArgs args)
+    protected override WritePlan Execute(PageTextReplaceArgs args) => Build(args, null, out _);
+
+    internal WritePlan Build(PageTextReplaceArgs args, string? expectedFingerprint, out IReadOnlyList<PageTextSnapshot> snapshots)
     {
         string language = Check(args);
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
@@ -30,9 +32,20 @@ public sealed class PageTextReplacePlanOperation(IProjectCatalog catalog, IPageT
 
         if (missing.Count > 0)
         {
+            if (expectedFingerprint is not null)
+            {
+                throw Stale();
+            }
+
             throw new BridgeErrorException(ErrorReason.PageNotFound,
                 "Some exact page names were not found. Use eplan_page_list to check them; nothing was changed.",
                 metadata: new Dictionary<string, string> { ["missing"] = string.Join("\n", missing) });
+        }
+
+        string fingerprint = StateFingerprint(project, pages);
+        if (expectedFingerprint is not null && !string.Equals(fingerprint, expectedFingerprint, StringComparison.Ordinal))
+        {
+            throw Stale();
         }
 
         var changes = new List<PageTextChange>();
@@ -82,6 +95,7 @@ public sealed class PageTextReplacePlanOperation(IProjectCatalog catalog, IPageT
             throw InvalidArgument("No stored text would change. Check 'find', 'language' and exact page names, then call again.");
         }
 
+        snapshots = pages;
         return new WritePlan
         {
             Project = project.Name,
@@ -96,9 +110,12 @@ public sealed class PageTextReplacePlanOperation(IProjectCatalog catalog, IPageT
                 OldValue = c.Before,
                 NewValue = c.After,
             })],
-            Fingerprint = StateFingerprint(project, pages),
+            Fingerprint = fingerprint,
         };
     }
+
+    private static BridgeErrorException Stale() => new(ErrorReason.PlanStale,
+        "The page free texts changed after planning; nothing was changed. Call eplan_page_text_replace again for a new plan.");
 
     // JSON escapes separators in raw text; each page, including empty ones, remains a distinct hash input.
     internal static string StateFingerprint(OpenProject project, IEnumerable<PageTextSnapshot> pages) =>

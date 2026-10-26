@@ -155,6 +155,9 @@ public static class OperationNames
     /// <summary>Plans literal page free-text replacements. Arguments: <see cref="PageTextReplaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
     public const string PageTextReplacePlan = "page.text.replace.plan";
 
+    /// <summary>Executes <see cref="PageTextReplaceArgs"/> after checking its fingerprint; data: <see cref="PageTextReplaceData"/>.</summary>
+    public const string PageTextReplaceExecute = "page.text.replace.execute";
+
     /// <summary>
     /// Changes the planned descriptions in one language in one transaction, keeping the other languages. Arguments:
     /// <see cref="PageUpdateArgs"/> with the fingerprint; data: <see cref="PageUpdateData"/>.

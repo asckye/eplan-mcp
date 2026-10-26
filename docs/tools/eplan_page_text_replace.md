@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full`，不加入 `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false，`destructiveHint` = false，`idempotentHint` = false，`openWorldHint` = false |
-| 状态 | Proposed（v0.4.0；第 1 步的 Contracts、纯匹配和规划已实现，尚未注册） |
+| 状态 | Proposed（v0.4.0；第 1、2 步已实现，plan / execute 已注册到 Bridge，尚无 Host 工具） |
 
 ## 1. 这个工具解决什么任务
 
@@ -78,7 +78,7 @@
 
 - 依据 [api-notes A49](../eplan/api-notes.md) 和 [S38](../../spikes/S38-drawing-texts-frames/README.md) 的 Texts / Probes：先递归遍历 `PlotFrame.SubPlacements` 记录排除集合，再遍历 `Page.AllPlacements` 和组的 `SubPlacements`，按对象身份去重；仅选择页面来源的精确 `Graphics.Text` 类型。遍历失败整体拒绝。
 - `Text.Contents` 读取 `MultiLangString`，通过 `GetLanguageList` 和 `GetString` 取得准确存储语言及内容，不解析 `@` / `;` 分隔的显示串。写入重建全部语言，保留不修改的条目、空文本与 `??_??`；适配器释放 API 返回的可释放值，不跨请求持有 EPLAN 对象。
-- 新增 `page.text.replace.plan` / `page.text.replace.execute`、Contracts DTO、可注入的文字适配接口和纯匹配逻辑。Bridge 规划生成完整 WritePlan，每个对象语言一条 PlannedChange；定位信息和 occurrences 保存在 `WritePlan.PageTextChanges` 的结构化条目中，不从拼接的显示字符串反解析。第 1 步仅实现未注册的 plan 操作和只读接口，不含 EPLAN 适配器、execute 或 Host。
+- 新增 `page.text.replace.plan` / `page.text.replace.execute`、Contracts DTO、可注入的文字适配接口和纯匹配逻辑。Bridge 规划生成完整 WritePlan，每个对象语言一条 PlannedChange；定位信息和 occurrences 保存在 `WritePlan.PageTextChanges` 的结构化条目中，不从拼接的显示字符串反解析。第 2 步加入 `EplanPageTexts` 和 execute，通过同一次主线程调用重新规划；先核对清单指纹，再生成变更，即使匹配已消失或超过上限也按 PLAN_STALE 拒绝。Host 留给第 3 步。
 - 指纹覆盖项目和页身份、选定页上全部合格自由文本的身份及其全部存储语言原文，包含无匹配文本和空页，固定排序后用无歧义的结构编码计算 SHA-256；不对清洗或截断后的文字取哈希。参数摘要沿用流水线绑定，审批后 execute 在同一锁定作用域内重新读取并核对指纹，再执行原定范围；新增、删除或修改文字都使计划过期。
 - 执行走 `TransactionRunner` / `TransactionScope`，整次调用只有一个事务和一个 UndoStep。顺序为 LockingStep → SafetyPoint → UndoStep → QuietModeStep(ShowNoDialogs)，逐对象一次重建 Contents，核对该对象所有语言，再提交、关闭撤销步骤。读取、遍历及每对象写入检查取消；默认执行上限 60 秒，Host 提供等待进度。
 
