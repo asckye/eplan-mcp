@@ -10,7 +10,7 @@
   <ItemGroup>
     <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
-    <!-- P6 has no registered planning endpoint; feed checked Bridge evidence into the actual pure planner. -->
+    <!-- P6 planning tests also replay detached Bridge evidence through the pure planner. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <Compile Include="..\EplanMcp.Bridge.Core.Tests\FakePropertyReadAdapter.cs" Link="FakePropertyReadAdapter.cs" />
     <PackageReference Include="Newtonsoft.Json" />

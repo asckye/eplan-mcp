@@ -18,6 +18,7 @@ internal sealed class EplanPropertyReadDefinition(PropertyDefinition definition,
             return new PropertyDefinitionMetadata
             {
                 ValueType = valueType,
+                Format = type == PropertyDefinition.PropertyType.ValueWithUnit ? "ValueWithUnit" : null,
                 IsInternal = internalProperty,
                 IsReadOnly = Fact(() => definition.IsReadOnly),
                 IsIndexed = Fact(() => definition.IsIndexed),

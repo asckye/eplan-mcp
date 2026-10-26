@@ -6,6 +6,12 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>B1 planning without a Host tool. Arguments: PropertySetArgs; data: PropertySetPlan.</summary>
+    public const string PropertySetPlan = "property.set.plan";
+
+    /// <summary>B1 transaction executor without a Host tool. Arguments: PropertySetArgs; data: PropertySetData.</summary>
+    public const string PropertySetExecute = "property.set.execute";
+
     /// <summary>Read-only resolved project/page property block. Arguments: PropertyReadArgs; data: PropertyReadData.</summary>
     public const string PropertyRead = "property.read";
 

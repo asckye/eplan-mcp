@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Verified definition facts shared by schema and whitelist entries; null means unknown, never unrestricted.</summary>
 public sealed class PropertyDefinitionMetadata
 {
-    /// <summary>The value type from design 4.3; opaque is display-only and cannot be written.</summary>
+    /// <summary>The read type from design 4.3; a verified per-ID write candidate may separately accept text (A48).</summary>
     public string? ValueType { get; set; }
 
     /// <summary>Runtime read-only status; setter availability alone does not establish writability.</summary>
