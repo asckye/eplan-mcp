@@ -70,7 +70,7 @@
       "byTools": 226,
       "partial": 40,
       "automatedTest": 226,
-      "liveVerified": 149,
+      "liveVerified": 151,
       "envBlocked": 122,
       "undocumented": 134
     },
@@ -106,7 +106,7 @@
       "byTools": 123,
       "partial": 1,
       "automatedTest": 123,
-      "liveVerified": 81,
+      "liveVerified": 83,
       "envBlocked": 77,
       "undocumented": 68
     }
@@ -206,7 +206,7 @@
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
       "implemented": 32,
-      "liveVerified": 13
+      "liveVerified": 15
     },
     {
       "scope": "Eplan.EplApi.HEServices.Exceptions",
@@ -1428,10 +1428,10 @@
         "part.import.execute",
         "part.import.plan"
       ],
-      "apiIds": 39,
-      "operationGroups": 11,
+      "apiIds": 45,
+      "operationGroups": 13,
       "dataDictionary": 0,
-      "dependencies": 26,
+      "dependencies": 30,
       "actions": 1,
       "spec": "docs/tools/eplan_part_import.md",
       "small": 2,
@@ -1513,10 +1513,10 @@
         "part.sync.execute",
         "part.sync.plan"
       ],
-      "apiIds": 102,
-      "operationGroups": 46,
+      "apiIds": 108,
+      "operationGroups": 48,
       "dataDictionary": 1,
-      "dependencies": 52,
+      "dependencies": 56,
       "actions": 1,
       "spec": "docs/tools/eplan_part_sync.md",
       "small": 2,
@@ -5254,10 +5254,12 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_part_import",
+        "eplan_part_sync",
         "eplan_translation_export"
       ]
     },
@@ -5309,10 +5311,12 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_part_import",
+        "eplan_part_sync",
         "eplan_translation_export"
       ]
     },

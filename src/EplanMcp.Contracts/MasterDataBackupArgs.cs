@@ -7,7 +7,7 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class MasterDataBackupArgs
 {
-    /// <summary>Which database: <see cref="MasterDataKinds.Parts"/>.</summary>
+    /// <summary>Which database: <see cref="MasterDataKinds.Parts"/> or <see cref="MasterDataKinds.Translations"/>.</summary>
     public string Kind { get; set; } = string.Empty;
 
     /// <summary>
@@ -19,7 +19,7 @@ public sealed class MasterDataBackupArgs
     /// <summary>The full path of the Host's new, empty folder: <c>&lt;data root&gt;\backups\masterdata\&lt;UTC time&gt;</c>.</summary>
     public string Folder { get; set; } = string.Empty;
 
-    /// <summary>The archive's file name without extension; EPLAN adds <c>.zw6</c> for a parts database (S24).</summary>
+    /// <summary>The archive's file name without extension; EPLAN adds <c>.zw6</c> for parts or <c>.zw7</c> for translations (S24).</summary>
     public string ArchiveName { get; set; } = string.Empty;
 
     /// <summary>The longest the backup and its check may take, in seconds.</summary>

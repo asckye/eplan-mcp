@@ -16,5 +16,6 @@ public static class MasterDatabases
     public static bool IsServer(string database) => database.IndexOf('|') >= 0;
 
     /// <summary>POLICY_DENIED for a SQL Server database: nothing has run (ADR-0019).</summary>
-    public static BridgeErrorException Denied() => WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PolicyDenied, ServerDenied));
+    public static BridgeErrorException Denied(string kind = "parts") => WriteArguments.NotStarted(new BridgeErrorException(
+        ErrorReason.PolicyDenied, ServerDenied.Replace("parts database", kind + " database")));
 }

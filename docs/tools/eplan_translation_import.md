@@ -8,6 +8,14 @@
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
 | 状态 | Proposed（M4c 第四批）；`ImportDatabaseTexts` 已于 2026-10-26 实测（[api-notes A47](../eplan/api-notes.md)），可以实现 |
 
+TI-1 已实现基础支持，工具尚未注册（仍为 72 个）；TI-2 接入计划、执行和 Host 后再改为 Implemented。
+
+- 纯函数要求 UTF-16 BOM（支持大小端），导入表头为语言代码，导出表头另允许 `COMMENT`。
+- 文件内行号放在错误说明中，JSON Pointer 只指向工具参数 `/file` 或 `/reference_language`。
+- 按参考原文去重计新增、按已有词条的语言单元格计补空和保留；缺失读回单独标记，由 TI-2 转为 `OUTCOME_UNKNOWN`。
+- 计划详情约定 `file`、`bytes`、`sha256`、`entries`、`referenceLanguage`、`languages`（其他语言）及 `preview`（语言代码到文本的对象数组）。
+- `WriteOutcome.AuditId` 对应审计中的 `requestId`，dry-run 无审计，值为空；恢复结果没有读回数据时不编造计数。
+
 ## 1. 这个工具解决什么任务
 "翻译公司把校对好的词表发回来了，导入翻译库""把这些新词条的英文和中文加进翻译库"。代理把一个制表符分隔的词表导入 EPLAN 配置的**系统翻译库**。翻译库被所有项目共用，所以每次都要工程师审批。
 
