@@ -71,7 +71,7 @@
 - 装有 EPLAN（版本与支持矩阵一致）、具备 API 扩展授权的开发机；不使用自托管 runner（[ADR-0020](../adr/0020-no-self-hosted-runner.md)）。
 - 测试只操作 **scratch 根目录**（默认 `%USERPROFILE%\EplanMcp\scratch\`，见 ADR-0008）下的项目，测试结束后删除。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
 - Large 测试在开发机上手动运行，见 [tests/EplanMcp.Large.Tests](../../tests/EplanMcp.Large.Tests/README.md)：合并写入类工具或 Bridge 的改动之前、每次发布之前（ADR-0020）。只读测试共用夹具脚本复制的示例项目，不自建、也不删除它；M3 的写测试按下文的要求自建夹具。
-- 能在离线宿主上运行的 Large 测试类另标 `[Trait("Host", "Offline")]`（[M5 设计](../design/2026-10-20-m5-operability.md) 4.9），按 `--filter-trait "Host=Offline"` 运行，方法见上面的 README。
+- 能在离线宿主上运行的 Large 测试类另标 `[Trait("Host", "Offline")]`（[M5 设计](../design/2026-10-20-m5-operability.md) 4.9），按 `--filter-trait "Host=Offline"` 运行，方法见上面的 README。这些类中需要打开规模夹具（`EPLANMCP_LARGE_FIXTURE`）的方法另标 `[Trait("Fixture", "Scale")]`，离线运行（包括 `release-addin.ps1`）用 `--filter-not-trait "Fixture=Scale"` 排除，否则它们只能跳过，而发布脚本不接受跳过。
 
 ### 测试夹具项目
 - **不把 EPLAN 自带的示例项目提交进仓库**，因为它的再分发许可不明确。

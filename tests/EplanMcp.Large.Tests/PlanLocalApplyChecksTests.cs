@@ -23,7 +23,9 @@ public sealed class PlanLocalApplyChecksTests(LiveEplan eplan)
     [Fact]
     public Task LP6_Sample_Version2LocalCompilationAndApplyDryRun_ReadOnlyWithTimings() => RunAsync(eplan.ProjectPath, false);
 
+    // Needs an open S37 scale fixture (EPLANMCP_LARGE_FIXTURE); offline runs exclude it with --filter-not-trait "Fixture=Scale".
     [Fact]
+    [Trait("Fixture", "Scale")]
     public async Task LP6_3000PageFixture_Version2LocalCompilationAndApplyDryRun_ReadOnlyWithTimings()
     {
         string? fixture = Environment.GetEnvironmentVariable("EPLANMCP_LARGE_FIXTURE");

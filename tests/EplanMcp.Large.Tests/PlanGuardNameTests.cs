@@ -55,7 +55,9 @@ public sealed class PlanGuardNameTests(LiveEplan eplan)
         Assert.Equal(files, LiveSnapshots.DesignFiles(eplan.ProjectPath));
     }
 
+    // Needs an open S37 scale fixture (EPLANMCP_LARGE_FIXTURE); offline runs exclude it with --filter-not-trait "Fixture=Scale".
     [Fact]
+    [Trait("Fixture", "Scale")]
     public async Task GuardNames_ScratchScaleFixture_EnforcesTenSecondBudgetAndPrintsPartTimings()
     {
         string? fixture = Environment.GetEnvironmentVariable("EPLANMCP_LARGE_FIXTURE");
