@@ -15,6 +15,7 @@ public sealed class ActionRunOperationTests
         "partsmanagementapi/EXPORTMANUFACTURERS", "partsmanagementapi/EXPORTCONSTRUCTIONS", "partsmanagementapi/EXPORTCONNECTIONPATTERNS",
         "partsmanagementapi/EXPORTACCESSORYLISTS", "partsmanagementapi/EXPORTACCESSORYPLACEMENTS", "plcservice/BUSDATAEXPORT",
         "projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS", "XEsUserPropertiesExportAction",
+        "SwitchProjectType", "synchronize/MULTILINE", "synchronize/OVERVIEW",
     ];
     private readonly FakeCatalog _catalog = new(new OpenProject { Name = "Line1", Path = @"D:\Scratch\Line1", Current = false });
     private readonly Runner _runner = new();
@@ -31,14 +32,14 @@ public sealed class ActionRunOperationTests
     public void PendingR2Rules_KeepOfficialRowsAndCannotPlanExportOrWrite()
     {
         JObject[] pending = [.. ActionRunRequest.Document()["pendingVerification"]!.OfType<JObject>()];
-        Assert.Equal([75, 76, 117, 118, 119, 120, 133, 155], pending.Select(rule => (int)rule["source"]!));
+        Assert.Equal([75, 76, 119, 133, 155], pending.Select(rule => (int)rule["source"]!));
         foreach (JObject rule in pending)
         {
             string entry = (string)rule["entry"]!;
             Assert.Equal("pending_verification", (string?)rule["status"]);
             Assert.Equal("project", (string?)rule["scope"]);
             Assert.Equal("PROJECTNAME", (string?)rule["projectParameter"]);
-            Assert.Contains("Pending S26 r2", (string)rule["effects"]!, StringComparison.Ordinal);
+            Assert.Contains("Pending S26", (string)rule["effects"]!, StringComparison.Ordinal);
             Assert.InRange((int)rule["seconds"]!, 1, 300);
             var args = new ActionRunArgs { Entry = entry, Project = "Line1", Fingerprint = "untrusted", Directory = @"D:\exports\fresh" };
             Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
@@ -60,7 +61,7 @@ public sealed class ActionRunOperationTests
     }
 
     [Fact]
-    public void EmbeddedWhitelist_HasExactlyTheTwelveEntriesAndEvidence()
+    public void EmbeddedWhitelist_HasExactlyTheFifteenEntriesAndEvidence()
     {
         JObject document = ActionRunRequest.Document();
         Assert.Equal(_entries, document["entries"]!.Select(e => (string)e["entry"]!));
@@ -72,7 +73,49 @@ public sealed class ActionRunOperationTests
             Assert.NotNull(entry["source"]);
             Assert.True((string?)entry["tier"] is "write" or "export");
         }
-        Assert.Single(document["entries"]!, e => (string?)e["tier"] == "write");
+        Assert.Equal(4, document["entries"]!.Count(e => (string?)e["tier"] == "write"));
+    }
+
+    [Theory]
+    [InlineData("Schematic", "1")]
+    [InlineData("Macro", "2")]
+    public void SwitchProjectType_NoOpIsRefusedBeforePlanningOrWriting(string current, string target)
+    {
+        _runner.ProjectType = current;
+        var args = new ActionRunArgs { Entry = "SwitchProjectType", Project = "Line1", Parameters = [new() { Name = "PROJECTTYPE", Value = target }] };
+        BridgeError planError = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, planError.Reason);
+        Assert.Contains("PROJECTTYPE", planError.Metadata!["violations"], StringComparison.Ordinal);
+        args.Fingerprint = "earlier plan";
+        BridgeError executeError = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (executeError.Reason, executeError.Execution));
+        Assert.Empty(_transactions.Calls);
+        Assert.Equal(0, _runner.Runs);
+    }
+
+    [Theory]
+    [InlineData("SwitchProjectType", "2", "Macro")]
+    [InlineData("SwitchProjectType", "1", "Schematic")]
+    [InlineData("synchronize/MULTILINE", null, null)]
+    [InlineData("synchronize/OVERVIEW", null, null)]
+    public void PromotedEntry_UsesWriteTransactionAndReadsBackAfterTheAction(string entry, string? target, string? expected)
+    {
+        _runner.ProjectType = target == "1" ? "Macro" : "Schematic";
+        var args = new ActionRunArgs { Entry = entry, Project = "Line1" };
+        if (target is not null)
+        {
+            args.Parameters.Add(new() { Name = "PROJECTTYPE", Value = target });
+        }
+        args.Fingerprint = Plan(args).Fingerprint;
+        ActionRunData result = Execute(args);
+        Assert.NotNull(result.After);
+        Assert.Equal(expected ?? "Schematic", result.After["project:type"]);
+        Assert.Equal(["Begin AI: eplan_action_run", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Equal(@"D:\Scratch\Line1", Get(result, "PROJECTNAME"));
+        if (target is null)
+        {
+            Assert.Equal(entry.Split('/')[1], Get(result, "TYPE"));
+        }
     }
 
     [Fact]
@@ -454,8 +497,8 @@ public sealed class ActionRunOperationTests
         ActionRunData result = (ActionRunData)ExportOperation().Execute(Export())!;
         Assert.Equal(25, result.EplanMessageCount);
         Assert.Equal(20, result.EplanMessages.Count);
-        Assert.Equal(32, result.Before.Count);
-        Assert.Equal(32, result.After!.Count);
+        Assert.Equal(33, result.Before.Count);
+        Assert.Equal(33, result.After!.Count);
     }
 
     [Fact]
@@ -531,6 +574,7 @@ public sealed class ActionRunOperationTests
 
     private sealed class Runner : IActionRunner
     {
+        public string ProjectType { get; set; } = "Schematic";
         public bool Visible { get; set; } = true;
         public bool Done { get; set; } = true;
         public bool FailInspection { get; set; }
@@ -544,6 +588,7 @@ public sealed class ActionRunOperationTests
             if (FailInspection)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Readback failed."); }
             var state = Enumerable.Range(0, 30).ToDictionary(i => "file:" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), _ => "1\t2026-10-22T00:00:00Z");
+            state["project:type"] = ProjectType;
             state["count:functions"] = "2876";
             state["layer:visible"] = Visible ? "1" : "0";
             return new ActionRunData { Target = projectPath ?? "configured-file-library", Before = state, Parameters = Pairs(parameters) };
@@ -555,6 +600,10 @@ public sealed class ActionRunOperationTests
             LastAction = action;
             if (action == "changelayer")
             { Visible = parameters["VISIBLE1"] == "1"; }
+            if (action == "SwitchProjectType")
+            {
+                ProjectType = parameters["PROJECTTYPE"] == "1" ? "Schematic" : "Macro";
+            }
             OnRun?.Invoke();
             return Done;
         }

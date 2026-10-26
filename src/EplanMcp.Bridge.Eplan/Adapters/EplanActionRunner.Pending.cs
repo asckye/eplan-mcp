@@ -11,12 +11,10 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 internal sealed partial class EplanActionRunner
 {
     // PENDING VERIFICATION: unreachable until an entry is promoted from pendingVerification.
-    // Installed 2026 XML/API catalog supplies members; S26 r2 has NOT been run. No change to the active twelve rules.
+    // Remaining rules still need effect samples or export prerequisites after S26 r3/A50.
     private static void InspectPending(string entry, Project project, IReadOnlyDictionary<string, string> parameters, ActionRunData data)
     {
-        if (entry == "SwitchProjectType")
-        { data.Before["project:type"] = project.TypeOfProject.ToString(); }
-        else if (entry == "preparemacros")
+        if (entry == "preparemacros")
         {
             if (project.TypeOfProject != Project.ProjectType.Macro)
             { throw Invalid("This entry requires an existing macro project."); }
@@ -34,16 +32,6 @@ internal sealed partial class EplanActionRunner
                 data.Before["segment:fill:" + segment.ObjectIdentifier] = value.IsEmpty ? "<unset>" : value.ToString();
             }
         }
-        else if (entry.StartsWith("synchronize/", StringComparison.Ordinal))
-        {
-            using var finder = new DMObjectsFinder(project);
-            foreach (Function function in finder.GetFunctions(null))
-            {
-                using var properties = function.Properties;
-                using var value = properties.FUNC_TEXT;
-                data.Before["function:text:" + function.ObjectIdentifier] = value.IsEmpty ? "<unset>" : value.ToString();
-            }
-        }
         else if (entry == "plcservice/EXPORTADDRESSOVERVIEW")
         {
             using var finder = new DMObjectsFinder(project);
@@ -59,7 +47,8 @@ internal sealed partial class EplanActionRunner
                 return !configured.IsEmpty && !located.IsEmpty && !cpus.IsEmpty && configured.ToString() == configuration && located.ToString() == station
                     && cpus.ToString().Split(';').Contains(cpu, StringComparer.Ordinal);
             });
-            if (!found) { throw Invalid("The configuration project, station and CPU must be an existing complete PLC tuple."); }
+            if (!found)
+            { throw Invalid("The configuration project, station and CPU must be an existing complete PLC tuple."); }
         }
         else if (entry == "XMActionDCCommonExport")
         {
@@ -74,7 +63,8 @@ internal sealed partial class EplanActionRunner
             { throw Invalid("CONFIGSCHEME is not a verified XML scheme."); }
             using var scheme = new SchemeSetting();
             scheme.Init(node);
-            if (!scheme.CheckIfSchemeExists(parameters["CONFIGSCHEME"])) { throw Invalid("CONFIGSCHEME must name an existing scheme in the verified scope."); }
+            if (!scheme.CheckIfSchemeExists(parameters["CONFIGSCHEME"]))
+            { throw Invalid("CONFIGSCHEME must name an existing scheme in the verified scope."); }
             data.Before["scheme:lastUsed"] = scheme.GetLastUsed() ?? string.Empty;
         }
     }

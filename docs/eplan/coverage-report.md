@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-26 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 3cfdbca9）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-26 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 93b252f0 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -140,7 +140,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 
 | 工具 | 级别 | Bridge 操作 | API ID | 操作层 | 数据字典 | 依赖 | action | 测试 S/M/L | api-notes | 最近一次实机 |
 |---|---|---|---:|---:|---:|---:|---:|---|---|---|
-| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 122 | 64 | 2 | 51 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
+| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 123 | 65 | 2 | 51 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A33 | — |
 | eplan_asset_update | write | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |

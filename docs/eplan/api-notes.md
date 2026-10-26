@@ -191,7 +191,7 @@
 - `synchronize` 的 `TYPE=MULTILINE`、`SINGLELINE`、`OVERVIEW` 在 `SafetyPoint → UndoStep → QuietModeStep` 中均返回 true、不弹对话框，回滚后业务快照和文件指纹恢复；示例项目上 SINGLELINE 看不到业务变化，需另备有表示差异的样本才能证明效果。
 - `SwitchProjectType PROJECTTYPE=…` 把 `Project.TypeOfProject` 从 Schematic 改为 Macro，`UndoStep` 释放后仍保持，`SafetyPoint` 回滚后恢复 Schematic，其他打开的项目不受影响。
 - `GetAll<Group>()` 返回的基类包装不能直接 `Cast<Group>()`（`InvalidCastException`）；读取组要经类型化的 `Placement.Group`，无法解析的句柄记为已知缺口而不是空组。
-- 只验证了回滚；提交后一次撤销、最终级别和启用尚未验证，这些 action 仍不在开放的白名单中。
+- 经产品工具提交后，当前项目一次 `XEsUndoAction` 即恢复：MULTILINE、OVERVIEW 的功能文本指纹回到提交前，`SwitchProjectType` 的类型回到 Schematic，另一打开的 scratch 副本类型不变；之前创建的哨兵页仍在，再撤销一次即移除，说明 action 只占一个撤销步骤。三项据此以 Write 级别开放；SINGLELINE 因示例上无可观察变化仍待验证（Large `ActionRunTests`，2026-10-26）。
 — 协调人经 spike S26 r3（`r2-sync`、`r2-type` 模式）实测，原始报告在 scratch 中，不提交。
 
 ### A49. 页面文字、标题栏与图框（S38 r3，2026-10-26，EPLAN 2026.0.3.25421，Electric P8，只打开 scratch 示例副本）

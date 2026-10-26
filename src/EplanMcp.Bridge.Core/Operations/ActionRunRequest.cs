@@ -82,6 +82,11 @@ internal sealed class ActionRunRequest(JObject entry, OpenProject? project, Acti
         if (project is not null)
         { parameters.Add((string)entry["projectParameter"]!, project.Path); }
         ActionRunData data = runner.Inspect(args.Entry, project?.Path, parameters);
+        if (args.Entry == "SwitchProjectType" && data.Before.TryGetValue("project:type", out string? current)
+            && current == (parameters["PROJECTTYPE"] == "1" ? "Schematic" : "Macro"))
+        {
+            throw WriteArguments.Invalid(["PROJECTTYPE already matches the current project type; choose the other type."]);
+        }
         return new ActionRunRequest(entry, project, data);
     }
 

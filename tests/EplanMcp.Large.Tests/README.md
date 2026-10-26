@@ -190,3 +190,7 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 已知数据来自 EPLAN 2026.0.3 自带的示例项目（[api-notes A12](../../docs/eplan/api-notes.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)、A17）。换了 EPLAN 版本，示例项目可能不同，这时先核对数据，再改测试。
 
 待补：按 eplan_cable_generate spec 第 7 节，由工程师准备能实际新增自动电缆的 scratch 夹具，再编写正向生成、更新与恢复测试；形成条件、完整选型/连接字段及提交后一次 Ctrl+Z 均未验证，本步不编写正向夹具测试。
+
+### Action whitelist batch 2 (v0.4.0)
+
+`ActionRunTests` 的三项晋升测试只写 `scratch\writes\LargeWrite`，通过 `PlanStepLiveSession` 按 A41/A46 选择当前项目并执行 `XEsUndoAction`。同步测试需要保留 S26 r3 的表示文本差异（请用新鲜示例副本）；断言提交有可观察文本变化，随后一次撤销恢复文本与业务快照、哨兵页仍存在，再一次撤销移除哨兵页。`SwitchProjectType` 测试还要求另有一个已打开的 scratch writes 副本，名称排在 `LargeWrite` 之后（例如 S26 的 `S26Type`），使选择助手不会将它关闭，确保类型隔离断言有实际比较对象；测试只读该副本，finally 必要时经产品工具恢复 LargeWrite 为 Schematic。2026-10-26 在 EPLAN 2026.0.3 上三项全部通过，结论见 api-notes A50。
