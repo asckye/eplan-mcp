@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "067c4d0d",
-  "sourceHash": "sha256:ad13e6ceeac1b5356c1a15332e034ad115f37b6f6801a0b3f7d4aa484abfd312",
+  "scannedSources": "067c4d0d + uncommitted changes",
+  "sourceHash": "sha256:0df5e2329c6e12ea080f0fe5c6b54967c248001799cfcac8e1ade775a04132aa",
   "operations": [
     {
       "name": "action.execute",
@@ -1014,6 +1014,21 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Project.ProjectType.Macro": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -3187,6 +3202,19 @@
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.#ctor": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -3228,6 +3256,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.CheckIfSchemeExists(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "SchemeExists",
@@ -3294,6 +3335,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.GetLastUsed": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "LastUsedScheme",
@@ -3372,6 +3426,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.Init(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
@@ -3558,6 +3625,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -4316,6 +4396,19 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll``1(System.Boolean)": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanListImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
@@ -4514,6 +4607,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -4791,6 +4897,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -6488,6 +6607,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToString": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
@@ -9883,6 +10015,19 @@
     ],
     "P:Eplan.EplApi.DataModel.EObjects.PLC.Properties": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "ReadPlc",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -10533,6 +10678,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.Properties": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -11617,6 +11775,36 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCCONFIGURATIONPROJECT": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCCPU": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCDATATYPE": [
       {
         "adapter": "EplanPlcReader",
@@ -11700,6 +11888,19 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSTATIONNAME": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "ReadPlc",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -11769,6 +11970,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanDeviceReader",
         "member": "Detail",
@@ -13826,6 +14040,21 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Placement.Group": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Placement.IsPlaced": [
       {
         "adapter": "EplanDevicePlacer",
@@ -14661,6 +14890,21 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Project.TypeOfProject": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault": [
       {
         "adapter": "EplanProjectBackup",
@@ -15318,6 +15562,20 @@
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -15566,6 +15824,19 @@
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanListImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
@@ -15731,6 +16002,36 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Topology.Segment.Properties": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.CABLINGSEGMENT_FILLING": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -18149,6 +18450,19 @@
     ],
     "T:Eplan.EplApi.Base.SchemeSetting": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -18631,6 +18945,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DMObjectsFinder": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -20094,6 +20421,19 @@
     ],
     "T:Eplan.EplApi.DataModel.Function": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -20585,6 +20925,19 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionPropertyList": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -20901,6 +21254,21 @@
           "type"
         ],
         "operations": []
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro": [
@@ -21852,6 +22220,19 @@
     "T:Eplan.EplApi.DataModel.Project": [
       {
         "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
@@ -22552,6 +22933,21 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Project.ProjectType": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.ProjectLockingException": [
       {
         "adapter": "EplanExceptionMapper",
@@ -23128,6 +23524,19 @@
     ],
     "T:Eplan.EplApi.DataModel.PropertyValue": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -23554,6 +23963,36 @@
         ],
         "operations": [
           "property.read"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Topology.Segment": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Topology.SegmentPropertyList": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],

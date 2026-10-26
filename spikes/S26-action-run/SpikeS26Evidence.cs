@@ -287,14 +287,24 @@ public sealed partial class SpikeS26Action
         var messages = new SysMessagesCollection();
         var entries = new JArray();
         int index = 0;
+#if S26_R2
+        int errors = 0;
+#endif
         foreach (object item in messages)
         {
+#if S26_R2
+            if (index >= before && item is BaseException added && (int)added.MessageLevel is 4 or 5) { errors++; }
+#endif
             if (index++ >= before && entries.Count < 6 && item is BaseException message)
             {
                 entries.Add(new JObject { ["level"] = (int)message.MessageLevel, ["text"] = Cut(message.GetMessageText() ?? string.Empty, 500) });
             }
         }
-        return new JObject { ["beforeCount"] = before, ["afterCount"] = messages.Count, ["collectionReset"] = messages.Count < before, ["entries"] = entries, ["entriesOmitted"] = Math.Max(0, messages.Count - before - entries.Count) };
+        var result = new JObject { ["beforeCount"] = before, ["afterCount"] = messages.Count, ["collectionReset"] = messages.Count < before, ["entries"] = entries, ["entriesOmitted"] = Math.Max(0, messages.Count - before - entries.Count) };
+#if S26_R2
+        result["errorCount"] = errors;
+#endif
+        return result;
     }
 
     private static void Capture(JObject target, string name, Func<JToken> probe)

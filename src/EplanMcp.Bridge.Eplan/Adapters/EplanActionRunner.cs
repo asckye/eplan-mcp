@@ -12,7 +12,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>S26/A40 and S24/A30 parameters. Main thread under LockingStep; Write caller owns TransactionScope.</summary>
-internal sealed class EplanActionRunner : IActionRunner
+internal sealed partial class EplanActionRunner : IActionRunner
 {
     public ActionRunData Inspect(string entry, string? projectPath, IReadOnlyDictionary<string, string> parameters)
     {
@@ -25,6 +25,7 @@ internal sealed class EplanActionRunner : IActionRunner
                 // A39: projects, layers and finder results are borrowed, never disposed. No property lists needed.
                 Project project = EplanProjects.ByPath(projectPath);
                 data.Target = project.ProjectFullName;
+                InspectPending(entry, project, parameters, data); // Pending rules stay unreachable through both whitelist checks.
                 using var finder = new DMObjectsFinder(project);
                 using var cables = new FunctionsFilter { FunctionCategory = FunctionCategory.Cable };
                 string[] kinds = ["pages", "functions", "connections", "cables", "terminals", "plc_boxes", "part_references"];

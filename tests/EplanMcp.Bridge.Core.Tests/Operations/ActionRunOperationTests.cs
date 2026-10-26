@@ -28,6 +28,38 @@ public sealed class ActionRunOperationTests
     };
 
     [Fact]
+    public void PendingR2Rules_KeepOfficialRowsAndCannotPlanExportOrWrite()
+    {
+        JObject[] pending = [.. ActionRunRequest.Document()["pendingVerification"]!.OfType<JObject>()];
+        Assert.Equal([75, 76, 117, 118, 119, 120, 133, 155], pending.Select(rule => (int)rule["source"]!));
+        foreach (JObject rule in pending)
+        {
+            string entry = (string)rule["entry"]!;
+            Assert.Equal("pending_verification", (string?)rule["status"]);
+            Assert.Equal("project", (string?)rule["scope"]);
+            Assert.Equal("PROJECTNAME", (string?)rule["projectParameter"]);
+            Assert.Contains("Pending S26 r2", (string)rule["effects"]!, StringComparison.Ordinal);
+            Assert.InRange((int)rule["seconds"]!, 1, 300);
+            var args = new ActionRunArgs { Entry = entry, Project = "Line1", Fingerprint = "untrusted", Directory = @"D:\exports\fresh" };
+            Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+            Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => ExportOperation().Execute(args)).Error.Reason);
+            BridgeError denied = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+            Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (denied.Reason, denied.Execution));
+        }
+        Assert.Empty(_runner.Calls);
+        Assert.Empty(_messages.Events);
+        Assert.Empty(_transactions.Calls);
+        JObject common = pending.Single(rule => (int)rule["source"]! == 155);
+        Assert.Equal("0", (string?)common["fixed"]?["EXECUTIONMODE"]);
+        Assert.Equal("0", (string?)common["fixed"]?["IMMEDIATEIMPORT"]);
+        Assert.Equal("1", (string?)common["fixed"]?["COMPLETEPROJECT"]);
+        Assert.Equal(JTokenType.Null, common["schemeNode"]!.Type);
+        Assert.Empty(common["verifiedXmlSchemes"]!);
+        Assert.Equal(".xml", (string?)common["extension"]);
+        Assert.Null(pending.Single(rule => (int)rule["source"]! == 75)["fixed"]?["OVERWRITE"]);
+    }
+
+    [Fact]
     public void EmbeddedWhitelist_HasExactlyTheTwelveEntriesAndEvidence()
     {
         JObject document = ActionRunRequest.Document();

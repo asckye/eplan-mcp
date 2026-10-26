@@ -10,6 +10,8 @@
   <!-- The driver is its own project in Driver\, run outside EPLAN. -->
   <ItemGroup>
     <Compile Remove="Driver\**" />
+    <Compile Remove="R2\**" />
+    <Compile Remove="R3\**" />
     <None Remove="Driver\**" />
   </ItemGroup>
 

@@ -16,6 +16,35 @@ namespace EplanMcp.Host.Tests.Tools;
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class ActionRunContractTests
 {
+    [Fact]
+    public void PendingR2Entries_AreAbsentFromSchemasUsageAndHostExecution()
+    {
+        JsonObject[] pending = [.. ActionRunCatalog.Document["pendingVerification"]!.AsArray().Select(item => item!.AsObject())];
+        Assert.Equal(8, pending.Length);
+        Assert.Contains("PENDING VERIFICATION", ActionRunCatalog.Document["pendingVerificationNote"]!.GetValue<string>(), StringComparison.Ordinal);
+        using ServiceProvider services = Services(true, false);
+        var tool = services.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Single(t => t.ProtocolTool.Name == ActionRunTools.Tool).ProtocolTool;
+        string[] exposed = [.. tool.InputSchema.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(item => item.GetString()!)];
+        string[] output = [.. tool.OutputSchema!.Value.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(item => item.GetString()!)];
+        Assert.Equal(12, exposed.Length);
+        var catalog = new ActionRunCatalog();
+        foreach (JsonObject rule in pending)
+        {
+            string name = rule["entry"]!.GetValue<string>();
+            Assert.Equal("pending_verification", rule["status"]!.GetValue<string>());
+            Assert.DoesNotContain(name, exposed);
+            Assert.DoesNotContain(name, output);
+            Assert.False(ActionRunCatalog.Entries.ContainsKey(name));
+            Assert.True(ActionRunUsage.For(name).IsError);
+            JsonObject example = ActionRunUsage.Example(rule);
+            foreach (string entry in new[] { name, name.ToLowerInvariant(), name.ToUpperInvariant() }.Distinct(StringComparer.Ordinal))
+            {
+                Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeCallException>(() =>
+                    catalog.Check(entry, "Line1", JsonSerializer.SerializeToElement(example["arguments"]))).Error.Reason);
+            }
+        }
+    }
+
     [Theory]
     [InlineData("{}", "Off")]
     [InlineData("{\"actionRun\":\"off\"}", "Off")]

@@ -12,6 +12,10 @@ internal static class SpikeS26Paths
     {
         ["runner"] = 300, ["layers"] = 180, ["parts"] = 1200,
         ["plc"] = 600, ["properties"] = 300, ["external"] = 600,
+#if S26_R2
+        ["r2-sync"] = 600, ["r2-type"] = 180, ["r2-macros"] = 300,
+        ["r2-filling"] = 300, ["r2-exports"] = 600,
+#endif
     };
 
     internal static string Below(string path, string root)

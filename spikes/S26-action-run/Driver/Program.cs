@@ -35,8 +35,17 @@ internal static class Program
     {
         if (args.Contains("--help", StringComparer.Ordinal))
         {
+#if S26_R3
+            Console.WriteLine("S26r3 --project <open scratch .elk> --revision r3 [--modes r2-sync,r2-type,r2-macros,r2-filling,r2-exports] [--output <existing s26/UTC-id>] [--host host] [--port 49152]");
+#elif S26_R2
+            Console.WriteLine("S26r2 --project <open scratch .elk> --revision r2 [--modes r2-sync,r2-type,r2-macros,r2-filling,r2-exports] [--output <existing s26/UTC-id>] [--host host] [--port 49152]");
+#else
             Console.WriteLine("S26 --project <open scratch .elk> [--modes runner,layers,parts,plc,properties,external] [--output <existing s26/UTC-id>] [--revision rN] [--host host] [--port 49152] [--common-scheme-node <verified USER node>] [--article-scheme-node <verified USER node>]");
+#endif
             Console.WriteLine("Each mode has a watchdog including connect/register/schedule/unregister. No mode can run twice in one output folder. The driver never starts/closes EPLAN or opens/closes projects.");
+#if S26_R2
+            Console.WriteLine("Batch r2 modes: r2-sync,r2-type,r2-macros,r2-filling,r2-exports. Exports: --common-scheme-node <verified USER node> --common-scheme <existing XML scheme> --export-token <existing full object name> --address-token <existing PLC address>.");
+#endif
             return 0;
         }
         if (args.Length == 2 && args[0] == "--worker") { return Worker(args[1]); }
@@ -46,6 +55,9 @@ internal static class Program
     private static JObject Parse(string[] args)
     {
         string[] allowed = ["--project", "--modes", "--output", "--revision", "--host", "--port", "--common-scheme-node", "--article-scheme-node"];
+#if S26_R2
+        allowed = [.. allowed, "--common-scheme", "--export-token", "--address-token"];
+#endif
         var options = new Dictionary<string, string>(StringComparer.Ordinal);
         for (int i = 0; i < args.Length; i += 2)
         {
@@ -56,11 +68,26 @@ internal static class Program
         string project = SpikeS26Paths.Project(Get("--project", ""));
         string revision = Get("--revision", "");
         if (!Regex.IsMatch(revision, @"\A(?:r[1-9][0-9]*)?\z", RegexOptions.CultureInvariant)) { throw new ArgumentException("Use --revision rN matching the built assembly suffix."); }
-        string[] modes = Get("--modes", string.Join(",", SpikeS26Paths.Timeouts.Keys)).Split(',').Select(SpikeS26Paths.Mode).ToArray();
+#if S26_R2
+#if S26_R3
+        if (revision != "r3") { throw new ArgumentException("The r3 driver requires --revision r3."); }
+#else
+        if (revision != "r2") { throw new ArgumentException("The r2 driver requires --revision r2."); }
+#endif
+        string defaults = string.Join(",", SpikeS26Paths.Timeouts.Keys.Where(mode => mode.StartsWith("r2-", StringComparison.Ordinal)));
+#else
+        string defaults = string.Join(",", SpikeS26Paths.Timeouts.Keys);
+#endif
+        string[] modes = Get("--modes", defaults).Split(',').Select(SpikeS26Paths.Mode).ToArray();
         if (modes.Distinct(StringComparer.Ordinal).Count() != modes.Length) { throw new ArgumentException("A mode may occur only once."); }
         string folder = options.TryGetValue("--output", out string? output) ? SpikeS26Paths.RunFolder(output) : SpikeS26Paths.NewRunFolder();
         string title = "EplanMcp.Spikes.S26" + revision;
         string addIn = Path.Combine(Repository(), "spikes", "S26-action-run", "bin", "Release", "net481", title + ".dll");
+#if S26_R3
+        addIn = Path.Combine(Repository(), "spikes", "S26-action-run", "R3", "bin", "Release", "net481", title + ".dll");
+#elif S26_R2
+        addIn = Path.Combine(Repository(), "spikes", "S26-action-run", "R2", "bin", "Release", "net481", title + ".dll");
+#endif
         if (!File.Exists(addIn)) { throw new FileNotFoundException("Build this add-in revision first.", addIn); }
         if (addIn.IndexOfAny(['"', '\r', '\n']) >= 0) { throw new ArgumentException("The registration path contains unsupported text-command characters."); }
         foreach (string mode in modes)
@@ -75,13 +102,17 @@ internal static class Program
         if (!int.TryParse(port, NumberStyles.None, CultureInfo.InvariantCulture, out int number) || number < 1 || number > 65535) { throw new ArgumentException("Invalid port."); }
         Directory.CreateDirectory(folder);
         SpikeS26Paths.RunFolder(folder); // Check again after creation.
-        return new JObject
+        var request = new JObject
         {
             ["project"] = project, ["folder"] = folder, ["revision"] = revision, ["title"] = title,
             ["action"] = "EplanMcpSpikeS26" + revision, ["addIn"] = addIn,
             ["host"] = Get("--host", Environment.MachineName), ["port"] = port, ["modes"] = new JArray(modes),
             ["commonSchemeNode"] = Get("--common-scheme-node", ""), ["articleSchemeNode"] = Get("--article-scheme-node", ""),
         };
+#if S26_R2
+        request["r2"] = new JObject { ["commonScheme"] = Get("--common-scheme", ""), ["exportToken"] = Get("--export-token", ""), ["addressToken"] = Get("--address-token", "") };
+#endif
+        return request;
     }
 
     private static int Coordinate(JObject request)
@@ -158,6 +189,10 @@ internal static class Program
                 (attempt.Value<bool?>("returned") != true || attempt["exception"] is not null || attempt["setupException"] is not null));
             if (session.Value<int>("failedActions") > 0 || session.Value<int>("notRun") > 0) { code = Math.Max(1, code); }
             if (attempts.OfType<JObject>().Any(attempt => attempt.Value<bool?>("unsafeToContinue") == true)) { code = 2; }
+#if S26_R2
+            session["unverifiedCandidates"] = attempts.OfType<JObject>().Count(attempt => attempt["r2Assessment"] is JObject assessment && assessment.Value<string>("status") != "evidence_ready_for_review");
+            if (session.Value<int>("unverifiedCandidates") > 0) { code = Math.Max(1, code); }
+#endif
         }
         catch (Exception ex) { session["error"] = ex.GetType().Name + ": " + ex.Message; code = 2; }
         finally

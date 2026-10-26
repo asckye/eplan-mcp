@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 6,
-      "byTools": 6,
+      "implemented": 7,
+      "byTools": 7,
       "partial": 0,
-      "automatedTest": 6,
+      "automatedTest": 7,
       "liveVerified": 5,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 233,
-      "byTools": 226,
+      "implemented": 236,
+      "byTools": 229,
       "partial": 40,
-      "automatedTest": 226,
+      "automatedTest": 229,
       "liveVerified": 151,
       "envBlocked": 122,
       "undocumented": 134
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 123,
-      "byTools": 123,
+      "implemented": 126,
+      "byTools": 126,
       "partial": 1,
-      "automatedTest": 123,
+      "automatedTest": 126,
       "liveVerified": 83,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 229,
+    "used": 233,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 42,
+    "used": 45,
     "registered": 8585
   },
   "actionNames": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 100,
+      "implemented": 102,
       "liveVerified": 75
     },
     {
@@ -187,7 +187,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Topology",
       "denominator": 17,
-      "implemented": 0,
+      "implemented": 1,
       "liveVerified": 0
     },
     {
@@ -343,6 +343,12 @@
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 0
+    },
+    {
+      "scope": "Segment",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
     }
   ],
   "tools": [
@@ -354,10 +360,10 @@
         "action.plan",
         "action.run"
       ],
-      "apiIds": 95,
-      "operationGroups": 52,
-      "dataDictionary": 0,
-      "dependencies": 43,
+      "apiIds": 122,
+      "operationGroups": 64,
+      "dataDictionary": 2,
+      "dependencies": 51,
       "actions": 0,
       "spec": "docs/tools/eplan_action_run.md",
       "small": 2,
@@ -2139,6 +2145,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -2188,6 +2195,15 @@
         "eplan_project_create",
         "eplan_revision_list",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "D:Segment",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
       ]
     },
     {
@@ -2600,6 +2616,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_export_dxf",
         "eplan_export_image",
         "eplan_export_pdf"
@@ -2627,6 +2644,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_export_dxf",
         "eplan_export_pdf"
       ]
@@ -2662,6 +2680,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_export_dxf",
         "eplan_export_image",
         "eplan_export_labels",
@@ -2884,6 +2903,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_import_list"
       ]
     },
@@ -3095,6 +3115,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_plc_get"
       ]
     },
@@ -3255,6 +3276,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_context_get",
@@ -3881,6 +3903,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Placement.Group",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Placement.IsPlaced",
       "layer": "operation",
       "status": "automated_test",
@@ -4165,6 +4196,15 @@
         "eplan_property_get",
         "eplan_revision_list",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.TypeOfProject",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
       ]
     },
     {
@@ -4526,6 +4566,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4631,6 +4672,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4760,6 +4802,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_context_get",
         "eplan_import_list",
         "eplan_import_plc",
@@ -4793,6 +4836,15 @@
         "eplan_report_update",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Topology.Segment.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_action_run"
       ]
     },
     {

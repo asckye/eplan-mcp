@@ -139,3 +139,124 @@ PLC 总线导出均为 `CONFIGURATIONPROJECT=Phoenix1, OVERWRITE=0, LANGUAGE=de_
 - `plcservice EXPORTADDRESSOVERVIEW`：配置项目发现只有 Phoenix1，但 PLC 发现记录的 cpus 均为空、tuples=[]。需取得可从样本读取且能匹配的配置项目、站和 CPU 元组；r1 未调用该 action，不能重述为导出失败。
 - `XMActionDCCommonExport`、`XMExportDCArticleDataAction`：两个 scheme discovery 的 node 均为空，读方案记录为缺少已核实 USER 节点的异常，候选均为 needs a scheme。r2 需提供各自已核实、能读出已有名称的数据交换方案节点；仍固定 EXECUTIONMODE=0、IMMEDIATEIMPORT=0。缺 CONFIGSCHEME 会弹窗是 api-actions 7.3 的既有文档约束，本轮没有故意触发验证。
 - 另需核实四个执行期窗口禁用采样对应的界面行为、两个 AML 导出的文件变化，以及 changelayer 提交后一步撤销；双引号文件名受 Windows 限制，仍不能宣布端到端验证通过。报告中 parts 有 additionalListTruncation=true，详细文件列表有省略，保留完整摘要和比较结果；不从省略内容补造结论。
+
+## r2：下一批 8 行（首轮被基线读取挡住，action 未运行）
+
+本节不改变上面的 r1 结果。候选来自 api-actions 的 137 行有效范围，机器目录均为 `registered`，coverage-report 没有这些 action 行的实机状态；#75、#155 在 r1 因样本/方案缺失未运行。兼容旧导出 #158、#160–164 已排除，不纳入本批。也不重复任务工具已有的图片、DXF、PXF、标签导出，不操作部件库、设置、打印、安装或授权。
+
+下表的项目参数都显式填 scratch `.elk` 完整路径；“风险”是待验证假设，不是已标定级别。六个写候选只在 `SafetyPoint → UndoStep → QuietModeStep` 内执行，显式回滚，永不 Commit；两个导出也保留 r1 的事务包装以观测潜在写入。r2 是独立程序集，`S26_R2` 条件编译不进入 r1 构建，原六模式和默认运行集合保持不变。
+
+| 行 / 候选 | 参数（除 PROJECTNAME） | 预期效果 | 风险 | spike 如何验证 |
+|---|---|---|---|---|
+| 75 `plcservice/EXPORTADDRESSOVERVIEW` | `TYPE=EXPORTADDRESSOVERVIEW, CONFIGURATIONPROJECT, PLCSTATION, PLCCPU, DESTINATIONFILE=<候选目录>\addresses.csv` | 导出已存在 CPU 的地址 | r1 缺 CPU；A25 空元组只生成空行；格式/授权未验证 | 从 API 读取唯一完整元组，要求 `--address-token` 是已有 PLC 地址；精确单文件、非空、字段含样本地址、SHA-256；两项目语义和设计文件摘要不变 |
+| 76 `preparemacros` | `GroupMacroBoxes=1, GroupPageMacros=0, SetHandleActive=0`；不传 PAGENAMEn，按完整宏项目 | 为已有宏框建立分组 | 分组可能改变对象；不推广到页宏或激活抓点 | 仅已有 scratch 宏项目且含宏框；逐个记录宏框名称/组/抓点、组成员；必须观察到变化且回滚恢复，不生成宏文件 |
+| 117 `SwitchProjectType` | `PROJECTTYPE=1` 或 `2`，与当前原理图/宏类型相反 | 切换项目类型 | **较高**：安装目录 XML 说明 TypeOfProject 可能临时独占重开，可能使对象/事务失效 | 独立模式和一次性副本；按路径重新找项目，读回目标类型、页面和业务状态；回滚未恢复或项目集合改变即停止，不用反向切换“修复” |
+| 118 `synchronize/MULTILINE` | `TYPE=MULTILINE` | 从多线表示同步项目数据 | 跨表示改写；属性覆盖和回滚未验证 | 全量记录功能 ID/名称/页面/功能文本、计数和文件哈希；需含不同表示且功能文本不一致的样本；比较变化与回滚，不同步系统部件 |
+| 119 `synchronize/SINGLELINE` | `TYPE=SINGLELINE` | 从单线表示同步项目数据 | 同上，方向不同，单独取证 | 与上一行相同，单独候选/基线/报告；没有功能文本变化记 `needs_effect_sample` |
+| 120 `synchronize/OVERVIEW` | `TYPE=OVERVIEW` | 从总览表示同步项目数据 | 同上，不能用其他 TYPE 的结果替代 | 与上一行相同，核对总览源样本的业务变化及回滚；不把计数相等算成功 |
+| 133 `UpdateSegmentsFilling` | 无其他参数，不加 TYPE | 重算已有布线段填充率 | 拓扑样本/授权依赖，可能无效果 | 有已有路由的 scratch 拓扑项目；逐段读 `Segment.Properties.CABLINGSEGMENT_FILLING`（#20332），要求值有变化且回滚恢复；不创建路由、不锁授权 |
+| 155 `XMActionDCCommonExport` | `COMPLETEPROJECT=1, EXECUTIONMODE=0, IMMEDIATEIMPORT=0, CONFIGSCHEME=<已核实 XML 方案>, DESTINATION=<候选目录>\external.xml` | 纯导出项目数据 | 缺方案会弹窗；方案格式/默认目录、最近使用值和项目副作用待验 | `--common-scheme-node` + `--common-scheme` 精确查已有方案；`--export-token` 必须为已有完整页名/功能名；精确单文件、XML 禁 DTD、元素/属性含样本值、哈希；比较项目及最近使用方案前后值 |
+
+成员依据：仓库 action catalog 和本机 2026 XML；项目类型用 `Project.TypeOfProject`，**不是**业务分类属性 `PROJ_TYPE`。#75 延用 A40 的配置/站/CPU 发现，不猜站名或空 CPU；当前仅接受发现恰好一个元组的样本。#155 的格式必须由工程师先核实为 XML，spike 只读检查已有节点和名字，不创建或修改方案。
+
+### 证据与判读
+
+- `r2-sync`（600 秒）、`r2-type`（180 秒）、`r2-macros`（300 秒）、`r2-filling`（300 秒）、`r2-exports`（600 秒）。前四模式分别含 3/1/1/1 个候选，导出模式含 2 个。时限仍覆盖驱动连接、注册、调度、等待和注销；超时不再排下个模式。
+- 沿用 r1 的全部 scratch、链接/联接点、独占标记、主线程、静默、系统消息和回滚检查。任意打开的项目在 scratch 外就拒绝。每个候选开始前必须能完整读取业务快照、计数和稳定文件指纹；不能读的项不当作 0。
+- 主报告在 `<run>\` 下，文件名为 `s26-r2-sync.json`、`s26-r2-type.json`、`s26-r2-macros.json`、`s26-r2-filling.json`、`s26-r2-exports.json`，另有 `.progress.json`、驱动报告和 session。每候选输出在 `<mode>-<candidate>\`；完整证据另放同级 `<mode>-<candidate>-evidence\`，避免把证据误算导出。
+- 完整证据的 `before.json`、`after.json`、`afterUndoStepDisposed.json`、`afterRollback.json`、`afterSafetyPointDisposed.json` 保存每个项目的选定业务字段、`.edb` 全部文件（除 `.lck`）和 `.elk` 指纹；输出的完整绝对/相对路径、大小、时间及 SHA-256 见 `output-manifest.json`。这些 sidecar 不截断，主报告引用各自路径/哈希；主报告仍遵守 r1 的 290 KiB 上限。JSON 都先写 `.partial` 再移动，不覆盖已有证据。
+- `r2Assessment.status=evidence_ready_for_review` 只表示自动检查证据齐备，**不是 verified**。false/异常、Error/Fatal 系统消息（包括显示的前 6 条之后）、context 不精确、空文件/空表头、错误路径、缺样本、无可见效果分别保留失败或待输入状态。导出内容最大 64 MiB；超限不解析、不通过。
+- 其他项目的业务字段/设计文件/`.elk` 变化、导出的设计文件/`.elk` 变化、语义回滚不完整、`Settings.xdb` 回滚未恢复、读回/文件哈希失败、最近使用方案变化、窗口收尾禁用都会停止后续候选。目标写操作回滚后其他文件字节不同仍如实保留，不自动复制文件恢复。语义快照只覆盖所列字段，不能证明全部属性未变；采样窗口禁用仍需工程师观察，未采到也不能证明无弹窗。
+- 本轮不运行 EPLAN，不改 api-notes 的验证结论，不改 catalog/coverage 的状态。没有提交、提交后一步 Ctrl+Z、撤销历史或产品导出包装去掉事务的证据；它们仍是启用前的验证条件。类型切换不能回滚、宏/拓扑不可用、同步无效果均可成为本批的明确失败/环境缺口，不能为凑白名单数量降级通过。
+
+### 待验证的产品准备
+
+`ActionRunWhitelist.json` 的 `pendingVerification` 存放这 8 个条目，标记 `pending_verification`；Host/Bridge **只读取 `entries`，仍为 12 项**。两个导出固定单文件格式，六个写项的 `write` 仅是待验证建议，不能据此跳过最终分级。新增的 `EplanActionRunner.Pending.cs` 预置项目类型/宏组/功能文本/填充率读回、PLC 元组校验和方案约束，现有白名单无法到达这些分支。
+
+启用某行时应先审视完整实机证据、确定级别并补 api-notes，再把该行移入 `entries`、去掉 pending 状态并更新枚举/契约快照与测试。#155 还必须填写实测 `schemeNode` 和 `verifiedXmlSchemes`；保持空值时 Bridge 拒绝。若最终需要 Destructive，不可直接套用这份 Write 草案，须另接审批/备份流水线。本次准备的产品改动小于 400 行；未启用任何候选。
+
+### r2 历史构建与运行命令（后续使用下方 r3）
+
+以下在仓库根目录执行。构建不启动 EPLAN；r1、r2 均单独构建，Driver 只在 `--help` 以外才可能连接。不要用 r1 的 `--modes` 默认集合来运行本批。
+
+```powershell
+dotnet build EplanMcp.slnx -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+dotnet build spikes/S26-action-run -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+dotnet build spikes/S26-action-run/Driver -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+dotnet build spikes/S26-action-run/R2 -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+dotnet build spikes/S26-action-run/R2/Driver -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+```
+
+工程师准备并手工打开相应的一次性副本，保留另一打开的 scratch 副本作隔离对照；所有模式均不代为打开、关闭或选择项目。同步样本需要不同表示间有功能文本差异；宏样本预先就是宏项目；拓扑样本已有路由且填充率待重算；类型切换只用专用副本。缺条件可以运行并获得 `notRun` / `needs_effect_sample`，不补造数据。
+
+```powershell
+$driver = '.\spikes\S26-action-run\R2\Driver\bin\Release\net481\EplanMcp.Spikes.S26r2.Driver.exe'
+$copies = Join-Path $env:USERPROFILE 'EplanMcp\scratch\writes'
+& $driver --help
+& $driver --revision r2 --project (Join-Path $copies 'S26Sync.elk') --modes r2-sync
+& $driver --revision r2 --project (Join-Path $copies 'S26Type.elk') --modes r2-type
+& $driver --revision r2 --project (Join-Path $copies 'S26Macro.elk') --modes r2-macros
+& $driver --revision r2 --project (Join-Path $copies 'S26Topology.elk') --modes r2-filling
+
+$commonNode = Read-Host '已核实的 USER 项目数据导出方案节点'
+$commonScheme = Read-Host '该节点已有 XML 方案的内部名称'
+$exportToken = Read-Host '方案会导出的已有完整页名或功能名'
+$addressToken = Read-Host '样本 CPU 的已有 PLC 地址'
+& $driver --revision r2 --project (Join-Path $copies 'S26Exports.elk') --modes r2-exports --common-scheme-node $commonNode --common-scheme $commonScheme --export-token $exportToken --address-token $addressToken
+```
+
+可选 `--host <机器名> --port 49152` 与 r1 一致。r2 的默认模式集合只含这五个新模式；上述命令分开使用夹具和新运行目录。若任一模式报停止/超时，应先检查 EPLAN，不能继续执行后面的命令。两项导出未提供参数时会记缺输入，不尝试默认方案。r1 的其他未运行项、AML 指纹、一步撤销缺口没有被本批取代。
+
+## r3：修正组读取与执行前拒绝（2026-10-26 已实机运行，结果见下）
+
+### r2 首轮的实际原因
+
+工程师于 2026-10-26 在 EPLAN 2026.0.3 运行 `r2-sync`。证据目录为 `%USERPROFILE%\EplanMcp\scratch\spikes\s26\20261026T1533329577501Z-468f099106c84fe69cce2ae8fe4ed16a\`。已读取最终/进度/驱动报告和候选的完整 sidecar：`before.json`、`afterSafetyPointDisposed.json` 及空的 `output-manifest.json`。
+
+四个项目 `fixtures\EPLAN_Sample_Project`、`writes\LargeWrite`、`writes\S26Sync`、`writes\S26Type` **全部**在 `projects[项目路径].groups.error` 记录 `System.InvalidCastException`：不能把 `Eplan.EplApi.DataModel.StorableObject` 转成 `Group`。每项目的其他快照字段均读出；并非 fixture 独有，也不是文件哈希不稳定。故障来自探针 `.Cast<Group>()` 的类型假设，不能解释为样本组成员不可读。安装目录 XML 明确 `GetAll<T>(bool)` 返回 `StorableObject[]`，没有保证每个托管包装可强转为 T。
+
+第一候选没有 `contextReadBack`、执行耗时、消息书签、CloseUndo 或 Rollback 记录；安全点也未创建。两份 sidecar 中四个项目的选定业务状态及各自 221 项文件记录（220 个 `.edb` 文件及 `.elk`）前后相同，输出文件为 0。r2 将“尚未进入事务”误按“需要确认回滚”处理，才导致 `rollback_unconfirmed` 和后续两项停止。该结果不是同步 action 执行失败或回滚失败，也不增加任何白名单验证状态。
+
+### r3 改动及边界
+
+- 组成员改由 `DMObjectsFinder.GetPlacements(null)` 返回的类型化 Placement 的 `Group` 属性获取，并遍历父组，按 ObjectIdentifier 对应回 `GetAll<Group>` 的完整句柄集合；不强转基类包装、不释放借用对象、不用 `OfType<Group>()` 静默漏掉记录。
+- 如某句柄仍无法经该公开属性解析，保留 ID、runtimeType 和明确的 `knownGap`，不当作空组、不列为已完整验证。同步等候选可以保留缺口继续取证，但结果只能是 `needs_gap_review`；依赖完整组成员读回的 `preparemacros` 仍在执行前拒绝。其他未预期的读取异常继续保留为 `readErrors`，原因另列在主报告的 `readFailures` 中，不做通用豁免。
+- 新增独立的 `actionAttempted`（紧贴原生 Execute 前设 true）和 `transactionStarted`（成功创建 SafetyPoint 后设 true）。前者为 false 的拒绝归为 `r2Assessment.status=not_run`，同时保留 `notRun`/`reason`；不要求一个从未开始的事务提供回滚记录，因此本次这种拒绝不再停掉后续候选。
+- 仍检查窗口、scratch/链接边界、打开项目集合、可读计数/语义/文件/设置的变化、事务和 UndoStep 清理。已进入事务却未确认回滚、scope/cleanup 异常、窗口禁用、项目/状态变化仍停止；实际调用或尝试状态不明时，继续使用 r2 的全部执行后判定，不能凭 `notRun` 标签绕过安全检查。未执行不等于验证通过。
+- r1/r2 的程序集和既有结果保留；修复仅由 `S26_R3` 编译进入新程序集 `EplanMcp.Spikes.S26r3`。批次模式仍叫 `r2-sync` 等，报告字段沿用 `r2Readbacks` / `r2Assessment`，顶层 `revision=r3`。r3 的组读取替代路径尚未实机验证，不能据构建成功宣布运行结果。
+
+### r3 构建与重跑命令
+
+在仓库根目录构建新程序集和驱动：
+
+```powershell
+dotnet build spikes/S26-action-run/R3 -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+dotnet build spikes/S26-action-run/R3/Driver -c Release -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v q
+```
+
+工程师已打开的四个 scratch 项目满足项目范围和隔离对照要求。保持 EPLAN 空闲、关闭对话框，用新驱动重跑本次同步模式：
+
+```powershell
+$driver = '.\spikes\S26-action-run\R3\Driver\bin\Release\net481\EplanMcp.Spikes.S26r3.Driver.exe'
+$copies = Join-Path $env:USERPROFILE 'EplanMcp\scratch\writes'
+& $driver --help
+& $driver --revision r3 --project (Join-Path $copies 'S26Sync.elk') --modes r2-sync
+```
+
+不传 `--output`，驱动自动新建运行目录；不要删除 r2 原目录的标记或覆盖原证据。结果在新目录 `s26-r2-sync.json`，用顶层 revision/assembly 区分版本。缺少可观察的功能文本变化时仍记 `needs_effect_sample`。其他四模式继续使用上一节各自夹具/导出参数，只将 `$driver` 换为 R3 路径、`--revision r2` 换为 `--revision r3`；不默认运行不适用的宏/拓扑样本。
+
+### r3 实机结果（2026-10-26，EPLAN 2026.0.3.25421，Electric P8）
+
+打开的项目全部在 scratch 内：夹具 `EPLAN_Sample_Project`（当前）、`writes\LargeWrite`、`writes\S26Sync`、`writes\S26Type`（后两者是示例项目的一次性副本）。每个候选都在 `SafetyPoint → UndoStep → QuietModeStep` 中执行后回滚，从不提交。
+
+| 行 / 候选 | 返回 | 观察 | 判读 |
+|---|---|---|---|
+| 118 `synchronize/MULTILINE` | true | 不弹对话框；回滚后业务快照与文件指纹恢复 | `needs_gap_review`：组成员读取仍有已知缺口，需人工复核证据 |
+| 119 `synchronize/SINGLELINE` | true | 示例副本上观察不到业务变化 | `needs_effect_sample`：需要有单线/多线功能文本差异的样本 |
+| 120 `synchronize/OVERVIEW` | true | 不弹对话框；回滚后恢复 | `needs_gap_review` |
+| 117 `SwitchProjectType` | true（135 ms） | `Project.TypeOfProject` 由 Schematic 变为 Macro；UndoStep 释放后仍为 Macro；回滚后恢复 Schematic，业务快照哈希恢复；其他三个项目计数、文件哈希不变 | `needs_gap_review`；类型切换可在事务中回滚 |
+
+未运行：76 `preparemacros`（需要宏项目样本）、133 `UpdateSegmentsFilling`（需要带布线路由的拓扑样本）、75/155 两项导出（需要工程师核实的方案节点、XML 方案和 PLC 地址）。
+
+本轮只做了回滚验证；**提交后一次撤销、最终级别和白名单启用均未做**，8 个候选继续留在 `pendingVerification`，开放的白名单仍为 12 项。结论见 api-notes A50。
+
