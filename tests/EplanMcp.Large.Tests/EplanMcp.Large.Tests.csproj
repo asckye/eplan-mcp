@@ -10,6 +10,10 @@
   <ItemGroup>
     <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
+    <!-- P6 has no registered planning endpoint; feed checked Bridge evidence into the actual pure planner. -->
+    <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
+    <Compile Include="..\EplanMcp.Bridge.Core.Tests\FakePropertyReadAdapter.cs" Link="FakePropertyReadAdapter.cs" />
+    <PackageReference Include="Newtonsoft.Json" />
     <!-- Input files the import tests copy below the imports root (S34's device list exports of the sample project). -->
     <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
