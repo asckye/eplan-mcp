@@ -66,6 +66,8 @@ $target = Join-Path (Join-Path $scratch 'fixtures') (Split-Path $sourceBase -Lea
 Copy-Project $target
 if ($WriteCopies) {
     Copy-Project (Join-Path (Join-Path $scratch 'writes') 'LargeWrite')
+    # Only opened by the SwitchProjectType Large test, to prove that other open projects keep their type.
+    Copy-Project (Join-Path (Join-Path $scratch 'writes') 'LargeWriteType')
     Copy-Project (Join-Path (Join-Path (Join-Path $dataRoot 'not-scratch') 'writes') 'LargeOutside')
     Write-Output 'Open LargeWrite and LargeOutside in EPLAN, then select the fixture in the page navigator again so that it is the current project.'
 }
