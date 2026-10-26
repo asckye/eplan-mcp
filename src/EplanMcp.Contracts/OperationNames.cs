@@ -152,6 +152,9 @@ public static class OperationNames
     /// </summary>
     public const string PageUpdatePlan = "page.update.plan";
 
+    /// <summary>Independent page identity, raw 11016 and effective frame readback; ProjectSnapshotArgs to a page/state dictionary.</summary>
+    public const string PagePlotFrameInspect = "page.plotframe.inspect";
+
     /// <summary>Plans literal page free-text replacements. Arguments: <see cref="PageTextReplaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
     public const string PageTextReplacePlan = "page.text.replace.plan";
 

@@ -69,7 +69,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
         _bridge.Handlers[OperationNames.PageUpdatePlan] = args =>
         {
             PageUpdateArgs update = Assert.IsType<PageUpdateArgs>(args);
-            return Fresh("page.update", update.Pages[0].Name, update.Pages[0].Description);
+            return Fresh("page.update", update.Pages[0].Name, Assert.IsType<string>(update.Pages[0].Description));
         };
         _bridge.Handlers[OperationNames.ProjectBackup] = args =>
         {

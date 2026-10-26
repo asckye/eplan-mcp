@@ -109,9 +109,8 @@ internal sealed class PageWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageUpdateResult))]
     [Description(
-        "Changes the descriptions of pages in one language and keeps the other languages; one Ctrl+Z in EPLAN undoes it. " +
-        "Pages that already read so are left alone. Outside scratch it needs the engineer's approval. Example: " +
-        "{\"project\": \"Line1\", \"pages\": [{\"name\": \"=GAA+A1&EFS1/3\", \"description\": \"Main circuit\"}], \"language\": \"en_US\"}.")]
+        "Updates page descriptions or existing plot frames; one Ctrl+Z undoes it. Outside scratch needs approval. " +
+        "Example: {\"project\":\"Line1\",\"pages\":[{\"name\":\"=F/1\",\"plot_frame\":\"FN1_015\"}]}.")]
     public static async Task<CallToolResult> PageUpdateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
@@ -129,7 +128,7 @@ internal sealed class PageWriteTools
         var args = new PageUpdateArgs
         {
             Project = project,
-            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = p.Description ?? string.Empty })],
+            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = p.Description, PlotFrame = p.PlotFrame })],
             Language = ToolArguments.Optional(language),
         };
         var request = new WriteRequest<PageUpdateArgs, PageUpdateArgs>(
@@ -160,9 +159,14 @@ internal sealed class PageWriteTools
             DryRun = dry_run,
             Language = outcome.Data?.Language ?? LanguageOf(outcome.Plan) ?? args.Language,
             Pages = outcome.Data is { } data
-                ? [.. data.Pages.Select(p => Change(p.Name, p.Description, p.Previous))]
-                : [.. outcome.Plan.Changes.Select(c => Change(c.Name, c.NewValue, c.OldValue))],
-            Unchanged = outcome.Data?.Unchanged ?? (args.Pages.Count - outcome.Plan.Changes.Count),
+                ? [.. data.Pages.Select(p => Change(p.Name, p.Description, p.Previous, p.PlotFrame, p.PreviousPlotFrame))]
+                : [.. outcome.Plan.Changes.GroupBy(c => c.Name).Select(group =>
+                {
+                    PlannedChange? description = group.FirstOrDefault(c => c.Property != "plot_frame");
+                    PlannedChange? frame = group.FirstOrDefault(c => c.Property == "plot_frame");
+                    return Change(group.Key, description?.NewValue, description?.OldValue, frame?.NewValue, frame?.OldValue);
+                })],
+            Unchanged = outcome.Data?.Unchanged ?? (args.Pages.Count - outcome.Plan.Changes.Select(c => c.Name).Distinct(StringComparer.Ordinal).Count()),
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,
             Hint = outcome.Recovered
@@ -173,6 +177,13 @@ internal sealed class PageWriteTools
         string summary = committed ? $"Updated the descriptions of {count}; Ctrl+Z in EPLAN undoes this step."
             : result.Pages.Count == 0 ? $"Nothing to change: the {ToolResults.Count(result.Unchanged, "page")} already have these descriptions."
             : $"Dry run: would update {count}. Nothing was changed.";
+        if (args.Pages.Any(p => p.PlotFrame is not null))
+        {
+            summary = committed ? $"Updated {count}; Ctrl+Z in EPLAN undoes this step."
+                : result.Pages.Count == 0 ? $"Nothing to change: requested values already match on {ToolResults.Count(result.Unchanged, "page")}."
+                : $"Dry run: would update {count}. Nothing was changed.";
+        }
+
         return ToolResults.Success(summary, result);
     }
 
@@ -208,11 +219,13 @@ internal sealed class PageWriteTools
         return open >= 0 && property!.EndsWith(')') ? property[(open + 1)..^1] : null;
     }
 
-    private static PageUpdateResult.PageEntry Change(string name, string? description, string? previous) => new()
+    private static PageUpdateResult.PageEntry Change(string name, string? description, string? previous, string? frame = null, string? previousFrame = null) => new()
     {
         Name = ResultShaper.CleanText(name),
         Description = ResultShaper.CleanText(description),
         Previous = ResultShaper.CleanText(previous),
+        PlotFrame = ResultShaper.CleanText(frame),
+        PreviousPlotFrame = ResultShaper.CleanText(previousFrame),
     };
 
     /// <summary>A known page type in its exact spelling; anything else as given, for the Bridge to report.</summary>
@@ -252,8 +265,11 @@ internal sealed class PageWriteTools
         public string Name { get; set; } = string.Empty;
 
         [Description("New text, max 500 chars; empty clears it")]
-        [Required]
         [JsonPropertyName("description")]
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; }
+
+        [Description("Existing frame name")]
+        [JsonPropertyName("plot_frame")]
+        public string? PlotFrame { get; set; }
     }
 }

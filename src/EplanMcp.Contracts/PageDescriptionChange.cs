@@ -11,4 +11,10 @@ public sealed class PageDescriptionChange
 
     /// <summary>The description before, in the same language; null when there was none.</summary>
     public string? Previous { get; set; }
+
+    /// <summary>Effective plot frame after writing; null when no frame was requested.</summary>
+    public string? PlotFrame { get; set; }
+
+    /// <summary>Effective plot frame before writing; null when absent or no frame was requested.</summary>
+    public string? PreviousPlotFrame { get; set; }
 }

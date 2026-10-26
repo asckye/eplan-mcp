@@ -18,6 +18,14 @@ public sealed class PlanArgumentsTests
     internal static object[] Pages(int count) => [.. Enumerable.Range(1, count).Select(i => (object)new { name = "+A/" + i, description = "Power" })];
 
     [Fact]
+    public void WorkflowPageUpdate_RejectsFrameRequestsUntilPredictionsSupportThem()
+    {
+        PlanArgumentCheck result = Check(Step("page.update", new { pages = new[] { new { name = "+A/1", description = "Power", plot_frame = "Frame_B" } } }));
+        Assert.Equal(ErrorReason.InvalidArgument, result.Reason);
+        Assert.Contains(result.Violations, v => v.Pointer.EndsWith("/plot_frame", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Catalog_OffersExactlySevenOperationsWithServerTiers()
     {
         string[] ops = ["page.create", "page.update", "device.update", "macro.insert", "page.delete", "page.renumber", "device.renumber"];
