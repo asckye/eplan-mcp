@@ -5406,6 +5406,142 @@
       ]
     },
     {
+      "name": "eplan_page_text_replace",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PageTextReplaceTools.cs",
+      "operations": [
+        "page.text.replace.execute",
+        "page.text.replace.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.ISOCode.Language.L___",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.GetString",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.LanguageList.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.AddString(Eplan.EplApi.Base.ISOCode.Language,System.String)",
+        "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)",
+        "M:Eplan.EplApi.Base.MultiLangString.GetString(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.LanguageList.Language(System.Int32)",
+        "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.Text.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.TextBase.Contents",
+        "P:Eplan.EplApi.DataModel.Group.SubPlacements",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Page.PlotFrame",
+        "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
+        "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.LanguageList",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement",
+        "T:Eplan.EplApi.DataModel.Graphics.Text",
+        "T:Eplan.EplApi.DataModel.Graphics.TextBase",
+        "T:Eplan.EplApi.DataModel.Group",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.PagesFilter",
+        "T:Eplan.EplApi.DataModel.Placement",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_page_text_replace.md",
+        "specStatus": "Implemented（v0.4.0；Host、Bridge、Small / Medium 与 Large 测试代码已实现，实机测试另行运行）",
+        "apiNotes": [
+          "A41"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "PageTextReplaceProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageTextReplaceProtocolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PageTextReplaceTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageTextReplaceTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "PageTextReplaceExecuteOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageTextReplaceExecuteOperationTests.cs"
+          },
+          {
+            "name": "PageTextReplacePlanOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageTextReplacePlanOperationTests.cs"
+          },
+          {
+            "name": "PageTextReplaceBridgeTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PageTextReplaceBridgeTests.cs"
+          },
+          {
+            "name": "PageTextReplaceProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageTextReplaceProtocolTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_page_update",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/PageWriteTools.cs",

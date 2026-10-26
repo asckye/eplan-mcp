@@ -158,6 +158,9 @@ public static class OperationNames
     /// <summary>Executes <see cref="PageTextReplaceArgs"/> after checking its fingerprint; data: <see cref="PageTextReplaceData"/>.</summary>
     public const string PageTextReplaceExecute = "page.text.replace.execute";
 
+    /// <summary>Read-only text evidence: <see cref="ProjectSnapshotArgs"/> with explicit pages to a list of <see cref="PageTextInspection"/>.</summary>
+    public const string PageTextInspect = "page.text.inspect";
+
     /// <summary>
     /// Changes the planned descriptions in one language in one transaction, keeping the other languages. Arguments:
     /// <see cref="PageUpdateArgs"/> with the fingerprint; data: <see cref="PageUpdateData"/>.

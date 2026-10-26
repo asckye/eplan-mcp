@@ -24,6 +24,14 @@ public sealed class SerializerCompatibilityTests
         new TranslationImportArgs { File = "glossary.txt", FilePath = @"D:\Imports\glossary.txt", Sha256 = new string('a', 64), ReferenceLanguage = "zh_CN", Fingerprint = new string('a', 64), Database = @"$(md_translate)\Translate.db" },
         new TranslationImportData(),
         new TranslationImportData { Database = @"$(md_translate)\Translate.db", Entries = 12, ReferenceLanguage = "en_US", Added = 3, Filled = 2, Kept = 1 },
+        new PageTextInspection(),
+        new PageTextInspection
+        {
+            Page = "=F+A2&EFA1/2",
+            Texts = new() { [117036] = new() { ["en_US"] = "Motor@;\n😀", ["??_??"] = string.Empty } },
+            FrameTextCount = 13,
+            ProtectedHash = new string('a', 64),
+        },
         new PageTextReplaceArgs(),
         new PageTextReplaceArgs { Project = "Line1", Pages = ["=F+A2&EFA1/2"], Find = "Motor@;\n😀", Replace = string.Empty, Language = "all", CaseSensitive = false, MaxChanges = 1, Fingerprint = "hash" },
         new PageTextReplaceData(),

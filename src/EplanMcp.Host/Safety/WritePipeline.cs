@@ -179,6 +179,14 @@ internal sealed partial class WritePipeline(
         record["policy"] = decision.Verdict.ToString();
         record["arguments"] = JsonSerializer.SerializeToNode(request.Args, HostJson.Options);
         record["changes"] = new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+        if (plan.PageTextChanges is { } textChanges)
+        {
+            record["fingerprint"] = plan.Fingerprint;
+            record["textChanges"] = JsonSerializer.SerializeToNode(textChanges, HostJson.Options);
+            record["totalChanges"] = textChanges.Count;
+            record["totalOccurrences"] = textChanges.Sum(c => (long)c.Occurrences);
+        }
+
         if (backup is not null)
         {
             record["backup"] = backup.Path;

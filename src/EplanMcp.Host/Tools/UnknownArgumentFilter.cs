@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EplanMcp.Contracts;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -30,6 +31,13 @@ internal static class UnknownArgumentFilter
             }
             if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments) is { Count: > 0 } violations)
             {
+                if (tool.ProtocolTool.Name == PageTextReplaceTools.Tool)
+                {
+                    BridgeError error = ToolResults.InvalidArgumentError(violations);
+                    error.Execution = ExecutionState.NotStarted;
+                    return ValueTask.FromResult(ToolResults.Error(error));
+                }
+
                 return ValueTask.FromResult(ToolResults.InvalidArguments(violations));
             }
 

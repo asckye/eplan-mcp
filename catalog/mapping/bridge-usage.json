@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "268c56d8 + uncommitted changes",
-  "sourceHash": "sha256:d3245789f0474d2efabfa3e787730d761ac99468e7c5e4381562daf05b831be3",
+  "scannedSources": "3cfdbca9",
+  "sourceHash": "sha256:2ac55adeb02e2d3e4ddaf8cb32a6621bc8943a7864be32651dc1f82cab300cd9",
   "operations": [
     {
       "name": "action.execute",
@@ -283,6 +283,10 @@
       "class": "PageRenumberPlanOperation"
     },
     {
+      "name": "page.text.inspect",
+      "class": "PageTextInspectOperation"
+    },
+    {
       "name": "page.text.replace.execute",
       "class": "PageTextReplaceExecuteOperation"
     },
@@ -417,6 +421,14 @@
       "class": "PropertyReadOperation"
     },
     {
+      "name": "property.set.execute",
+      "class": "PropertySetExecuteOperation"
+    },
+    {
+      "name": "property.set.plan",
+      "class": "PropertySetPlanOperation"
+    },
+    {
       "name": "report.update.execute",
       "class": "ReportUpdateExecuteOperation"
     },
@@ -453,6 +465,14 @@
       "name": "translation.export.run",
       "class": "MasterDataExportRunOperation",
       "kind": "MasterDataExportKind.Translations"
+    },
+    {
+      "name": "translation.import.execute",
+      "class": "TranslationImportExecuteOperation"
+    },
+    {
+      "name": "translation.import.plan",
+      "class": "TranslationImportPlanOperation"
     }
   ],
   "usages": {
@@ -687,7 +707,8 @@
           "read"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -795,6 +816,17 @@
         ]
       },
       {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -825,6 +857,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -953,7 +986,20 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -1037,6 +1083,21 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.DataModel.Project.ProjectType.Macro": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.DataModel.ProjectManager.CopyMode.Snapshot": [
       {
         "adapter": "EplanProjectBackup",
@@ -1107,7 +1168,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1131,7 +1194,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1155,7 +1220,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1179,7 +1246,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1203,7 +1272,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -1216,7 +1287,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1228,6 +1301,21 @@
         ],
         "operations": [
           "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.ValueWithUnit": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -1591,7 +1679,9 @@
           "read"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -2163,7 +2253,8 @@
           "new"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -2271,6 +2362,17 @@
         ]
       },
       {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -2301,6 +2403,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -2338,6 +2441,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -2466,12 +2570,13 @@
     "M:Eplan.EplApi.Base.ISOCode.#ctor(Eplan.EplApi.Base.ISOCode.Language)": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "new"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -2484,7 +2589,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2568,7 +2675,20 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -2672,7 +2792,20 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -2759,19 +2892,20 @@
       },
       {
         "adapter": "EplanPageTexts",
-        "member": "LanguageCode",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
       },
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "call"
@@ -2801,7 +2935,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -2812,7 +2948,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2949,12 +3087,13 @@
     "M:Eplan.EplApi.Base.LanguageList.#ctor": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "new"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -2967,7 +3106,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3004,7 +3145,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -3092,10 +3235,13 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -3132,6 +3278,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.AddString(Eplan.EplApi.Base.ISOCode.Language,System.String)": [
@@ -3167,6 +3324,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.Dispose": [
@@ -3183,12 +3351,13 @@
     "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -3201,7 +3370,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3220,12 +3391,13 @@
       },
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -3238,7 +3410,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3321,6 +3495,18 @@
           "part.sync.execute",
           "part.sync.plan"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Configured",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "translation.import.execute",
+          "translation.import.plan"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.PointD.#ctor(System.Double,System.Double)": [
@@ -3348,6 +3534,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.#ctor": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
@@ -3390,6 +3589,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.CheckIfSchemeExists(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "SchemeExists",
@@ -3456,6 +3668,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.GetLastUsed": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "LastUsedScheme",
@@ -3534,6 +3759,19 @@
       }
     ],
     "M:Eplan.EplApi.Base.SchemeSetting.Init(System.String)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
@@ -3688,7 +3926,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3701,7 +3941,20 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -3720,6 +3973,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -4226,6 +4492,7 @@
           "new"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -4380,7 +4647,21 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -4489,6 +4770,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll``1(System.Boolean)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanListImporter",
         "member": "Read",
@@ -4670,7 +4964,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -4688,6 +4984,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -4960,11 +5269,26 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -5228,6 +5552,7 @@
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -5299,7 +5624,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -5310,7 +5637,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -5922,6 +6251,7 @@
           "new"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -5934,7 +6264,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -6134,6 +6466,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -6158,6 +6491,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -6385,7 +6720,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6438,7 +6775,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6523,7 +6862,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6557,7 +6898,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6592,7 +6935,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6616,7 +6961,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6652,7 +6999,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6688,6 +7037,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToString": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
@@ -6784,7 +7146,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6890,6 +7254,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.PropertyValue": [
@@ -6915,6 +7290,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -6950,6 +7336,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -6987,6 +7374,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7024,6 +7412,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7070,6 +7459,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7329,8 +7719,20 @@
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -7390,7 +7792,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7401,7 +7805,22 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7517,6 +7936,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7554,6 +7974,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7591,6 +8012,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7637,6 +8059,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7674,6 +8097,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7684,6 +8108,15 @@
         "adapter": "EplanPropertyReadAdapter.Scope",
         "member": "Dispose",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
         "access": [
           "call"
         ],
@@ -8393,6 +8826,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -8495,6 +8929,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -8587,7 +9022,9 @@
           "new"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -8598,7 +9035,8 @@
           "new"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -8659,6 +9097,17 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.HEServices.Translate.AddProjectLanguage(Eplan.EplApi.DataModel.Project,System.String)": [
@@ -8683,7 +9132,8 @@
           "call"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -8697,6 +9147,19 @@
         ],
         "operations": [
           "export.untranslated.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts(System.String,System.String,System.String)": [
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       }
     ],
@@ -9077,12 +9540,13 @@
     "P:Eplan.EplApi.Base.LanguageList.Language(System.Int32)": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "call"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -9095,7 +9559,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -9132,7 +9598,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9211,7 +9679,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9270,7 +9740,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9610,6 +10082,18 @@
         ]
       },
       {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -9710,7 +10194,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9771,7 +10257,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -9833,7 +10321,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9897,7 +10387,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10155,6 +10647,19 @@
     ],
     "P:Eplan.EplApi.DataModel.EObjects.PLC.Properties": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "ReadPlc",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -10378,6 +10883,18 @@
         ]
       },
       {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -10529,7 +11046,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10760,7 +11279,21 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10805,6 +11338,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.Properties": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -10888,7 +11434,22 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10964,7 +11525,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -11390,7 +11953,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -11889,6 +12454,36 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCCONFIGURATIONPROJECT": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCCPU": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCDATATYPE": [
       {
         "adapter": "EplanPlcReader",
@@ -11972,6 +12567,19 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSTATIONNAME": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "ReadPlc",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -12042,6 +12650,19 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Detail",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -12091,6 +12712,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -12488,15 +13122,31 @@
         ]
       }
     ],
-    "P:Eplan.EplApi.DataModel.Graphics.Text.Contents": [
+    "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Contents": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "get"
         ],
         "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Text.Contents": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -12513,6 +13163,21 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextBase.Contents": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Group.SubPlacements": [
       {
         "adapter": "EplanPageTexts",
@@ -12522,8 +13187,33 @@
           "get"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
@@ -12536,8 +13226,20 @@
           "get"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
@@ -12712,8 +13414,20 @@
           "get"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -12738,7 +13452,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13140,8 +13856,20 @@
           "get"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -13259,7 +13987,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13270,7 +14000,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13471,8 +14203,20 @@
           "get"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
@@ -13556,7 +14300,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13920,6 +14666,7 @@
           "set"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -13932,7 +14679,9 @@
           "set"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -14046,6 +14795,7 @@
           "set"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -14058,7 +14808,9 @@
           "set"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -14121,7 +14873,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14196,7 +14950,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14222,6 +14978,21 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Placement.Group": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -14403,7 +15174,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14539,6 +15312,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -14669,6 +15443,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -14766,6 +15541,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -14788,6 +15564,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -14949,6 +15727,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -15040,7 +15819,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15065,6 +15846,21 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Project.TypeOfProject": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -15162,6 +15958,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -15186,6 +15983,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -15288,6 +16087,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -15312,6 +16112,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -15495,7 +16297,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15523,7 +16327,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15536,7 +16342,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15549,7 +16357,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15562,7 +16372,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15575,7 +16387,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15588,7 +16402,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15618,7 +16434,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15642,7 +16460,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15670,7 +16490,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15728,6 +16550,20 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
@@ -15837,7 +16673,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15848,7 +16686,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15977,6 +16817,19 @@
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanListImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanListImporter.cs",
@@ -16012,6 +16865,17 @@
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -16071,7 +16935,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -16082,7 +16948,22 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -16168,6 +17049,49 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.text.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Topology.Segment.Properties": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.CABLINGSEGMENT_FILLING": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds": [
       {
         "adapter": "EplanProperties",
@@ -16211,7 +17135,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -16222,7 +17148,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -16235,7 +17163,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -16248,7 +17178,9 @@
           "get"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -16276,7 +17208,9 @@
           "get"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -17112,7 +18046,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -17220,6 +18155,17 @@
         ]
       },
       {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -17250,6 +18196,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -17315,7 +18262,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -17423,6 +18371,17 @@
         ]
       },
       {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -17453,6 +18412,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -17522,7 +18482,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17636,7 +18598,8 @@
           "part.export.plan",
           "part.export.run",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -17763,7 +18726,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17798,7 +18763,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17809,7 +18776,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17986,6 +18955,19 @@
       },
       {
         "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
@@ -18005,18 +18987,6 @@
         ],
         "operations": [
           "page.text.replace.execute"
-        ]
-      },
-      {
-        "adapter": "EplanPageTexts",
-        "member": "ReadText",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "page.text.replace.execute",
-          "page.text.replace.plan"
         ]
       },
       {
@@ -18051,7 +19021,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18062,7 +19034,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18073,7 +19047,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18194,6 +19181,19 @@
       },
       {
         "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
         "member": "Number",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
@@ -18204,18 +19204,6 @@
         ]
       },
       {
-        "adapter": "EplanPageTexts",
-        "member": "ReadText",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "page.text.replace.execute",
-          "page.text.replace.plan"
-        ]
-      },
-      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -18223,7 +19211,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18264,12 +19265,13 @@
     "T:Eplan.EplApi.Base.LanguageList": [
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -18282,7 +19284,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -18319,7 +19323,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18407,10 +19413,13 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -18453,12 +19462,13 @@
       },
       {
         "adapter": "EplanPageTexts",
-        "member": "ReadText",
+        "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
         "access": [
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -18483,6 +19493,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18576,6 +19597,18 @@
           "part.sync.execute",
           "part.sync.plan"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Configured",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute",
+          "translation.import.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.Base.PointD": [
@@ -18658,7 +19691,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18677,6 +19712,19 @@
       }
     ],
     "T:Eplan.EplApi.Base.SchemeSetting": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "WithSchemes",
@@ -18805,7 +19853,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -18967,7 +20028,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19040,7 +20103,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19051,7 +20116,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19062,7 +20129,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19160,6 +20229,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DMObjectsFinder": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -19831,6 +20913,7 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -20008,7 +21091,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20019,7 +21104,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20030,7 +21117,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20041,7 +21130,21 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20266,7 +21369,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20302,7 +21407,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20634,6 +21741,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Function": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -21045,7 +22165,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -21056,7 +22178,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -21067,7 +22191,35 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -21126,6 +22278,19 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionPropertyList": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -21135,6 +22300,39 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -21376,7 +22574,35 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Graphics.Text": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
@@ -21385,8 +22611,20 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -21413,6 +22651,32 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.TextBase": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Entries",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect",
+          "page.text.replace.execute",
+          "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Group": [
       {
         "adapter": "EplanPageTexts",
@@ -21422,8 +22686,20 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
@@ -21437,6 +22713,19 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.IPropertyPlacementsContainer": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
@@ -21480,7 +22769,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -21493,6 +22784,21 @@
           "type"
         ],
         "operations": []
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro": [
@@ -21700,7 +23006,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22072,6 +23380,7 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -22084,8 +23393,20 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       },
       {
@@ -22191,7 +23512,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22202,7 +23525,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22213,7 +23538,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22224,7 +23551,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22392,6 +23721,7 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
         ]
@@ -22404,7 +23734,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -22454,7 +23786,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22507,12 +23841,37 @@
           "type"
         ],
         "operations": [
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
         ]
       }
     ],
     "T:Eplan.EplApi.DataModel.Project": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -22892,7 +24251,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23029,6 +24390,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -23051,6 +24413,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -23128,6 +24492,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -23152,6 +24517,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -23169,7 +24536,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23216,6 +24585,21 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Project.ProjectType": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -23269,10 +24653,13 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -23416,6 +24803,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -23440,6 +24828,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -23630,7 +25020,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23681,7 +25073,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23692,7 +25086,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23716,7 +25112,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23727,7 +25125,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23766,7 +25166,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23777,7 +25179,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23796,6 +25200,19 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
@@ -23921,7 +25338,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23932,7 +25351,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -24088,6 +25520,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24212,7 +25645,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -24223,7 +25658,52 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.SymbolReference": [
+      {
+        "adapter": "EplanPageTexts",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.text.inspect"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Topology.Segment": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Topology.SegmentPropertyList": [
+      {
+        "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
         ]
       }
     ],
@@ -24259,6 +25739,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24296,6 +25777,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24325,7 +25807,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -24992,6 +26476,7 @@
           "page.list",
           "page.renumber.execute",
           "page.renumber.plan",
+          "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan",
           "page.update.execute",
@@ -25110,7 +26595,9 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -25121,7 +26608,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -25182,6 +26670,17 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.HEServices.Translate.DatabaseType": [
@@ -25193,7 +26692,9 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
