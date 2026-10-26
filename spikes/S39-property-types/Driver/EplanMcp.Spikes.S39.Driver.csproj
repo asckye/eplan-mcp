@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.RemoteClientu;Eplan.EplApi.Remotingu;Grpc.Core.Api;Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+</Project>
