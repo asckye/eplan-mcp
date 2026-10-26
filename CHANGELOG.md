@@ -5,6 +5,19 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-26
+第四个预览版：属性写入、图纸文字与图框、翻译库导入和第 2 批白名单动作，共 75 个工具。支持矩阵不变：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 程序不签名，随附 SHA-256、SBOM 和构建来源证明。
+
+### Added
+- `eplan_property_set`（full）：设置白名单中的功能属性，首批只有 20011 功能文本（只改给定语言，其他语言保留）和 20027 技术参数（与语言无关的文本）。先校验同标识功能、身份、其他语言和部件不变，支持 dry run；scratch 外按策略审批；一次调用是一个撤销步骤，失败整体回滚。
+- `eplan_page_text_replace`（full）：按字面替换页面上的自由文本（包括组内文字和多语言文字），不改图框、属性放置、功能文本和路径文本；先预览再执行，一次 Ctrl+Z 撤销。
+- `eplan_page_update` 新增 `plot_frame`：把页切换为项目中其他页已在使用的图框（写页属性 11016），分别读回设置值和实际图框；与描述修改同属一个撤销步骤。
+- `eplan_translation_import`（full）：把 UTF-16 制表符分隔的词汇表导入 EPLAN 配置的翻译库。每次都须工程师审批，导入前备份为 `.zw7`；只新增条目和补全空译文，不改已有译文（api-notes A47）。
+- `eplan_action_run` 新增 3 个写入条目：`synchronize/MULTILINE`、`synchronize/OVERVIEW`、`SwitchProjectType`（拒绝与当前相同的类型，结果显示类型变化），共 15 个条目。均经实机验证提交后一次撤销即恢复；`synchronize/SINGLELINE` 在示例项目上看不到效果，仍未开放。
+
+### Changed
+- `eplan_property_schema` 对 20011、20027 报告可写（属性写入白名单不再为空）。
+
 ## [0.3.0] - 2026-10-26
 第三个预览版：多步工作流计划（M6 第 2 阶段）和通用属性读取，共 72 个工具。支持矩阵不变：EPLAN 2026（Electric P8、Pro Panel），需要 API 扩展授权；0.x 程序不签名，随附 SHA-256、SBOM 和构建来源证明。
 
