@@ -3793,6 +3793,11 @@
             "name": "LanguageSetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LanguageSetOperationTests.cs"
+          },
+          {
+            "name": "PropertySetPlanningTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PropertySetPlanningTests.cs"
           }
         ]
       },
@@ -7610,6 +7615,11 @@
             "name": "PropertyReadOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PropertyReadOperationTests.cs"
+          },
+          {
+            "name": "PropertySetPlannerTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PropertySetPlannerTests.cs"
           },
           {
             "name": "ChineseRoundTripTests",

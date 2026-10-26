@@ -3,6 +3,24 @@ namespace EplanMcp.Contracts.Tests;
 [Trait("Size", "Small")]
 public sealed class PropertyWriteWhitelistTests
 {
+    [Theory]
+    [InlineData(2026, "Function", 20011, true)]
+    [InlineData(2026, "Function", 20027, false)]
+    [InlineData(2026, "Terminal", 20011, false)]
+    [InlineData(2027, "Function", 20011, false)]
+    public void PlanningCandidate_OnlyFunctionText_IsAvailableWithoutExecutionPermission(int version, string objectType, int id, bool allowed)
+    {
+        PropertyWriteEntry? entry = PropertyWriteWhitelist.PlanningCandidate(version, objectType, id);
+        Assert.Equal(allowed, entry is not null);
+        Assert.Empty(PropertyWriteWhitelist.Entries);
+        if (entry is not null)
+        {
+            Assert.Equal("multi_language", entry.Definition.ValueType);
+            entry.Definition.MaximumLength = 1;
+            Assert.Equal(500, PropertyWriteWhitelist.PlanningCandidate(version, objectType, id)!.Definition.MaximumLength);
+        }
+    }
+
     [Fact]
     public void ShippedWhitelist_NoVerifiedBatch_IsEmptyAndCannotBeExtended()
     {
