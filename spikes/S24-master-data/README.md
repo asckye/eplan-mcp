@@ -86,7 +86,8 @@ spikes\S24-master-data\Driver\bin\Release\net481\EplanMcp.Spikes.S24.Driver.exe 
   - 不在 `LockingStep` 中时抛出 `NoLockingStepException`（`S063110`）；
   - 0.45 秒；部件库仍是 465 个（夹具项目的部件库中都已有）；
   - 🔴 **项目也被改了**：`project.Articles` 从 293 变为 341，被引用但没有存进项目的部件被存入项目（与 XML 文档一致）；系统消息记一条 `S328014`"写存取前没有加锁该对象"。
-- 往翻译库导入一条测试词条（`Translate.ImportDatabaseTexts`）**没有做**：项目负责人批准了，但 Claude Code 自动模式的安全分类器拒绝了这条命令，没有绕过。翻译库前后逐字节相同。
+- 往翻译库导入一条测试词条（`Translate.ImportDatabaseTexts`）在 r12 **没有做**：项目负责人批准了，但 Claude Code 自动模式的安全分类器拒绝了这条命令，没有绕过。翻译库前后逐字节相同。
+- r19（2026-10-26，项目负责人指示执行）补做：`--modes importtranslation --destination <词表> --contains en_US`（`/Contains` 传参考语言）。结论见 api-notes A47：第三个参数是单个参考语言；只新增词条、补空缺译文，不改写已有译文；返回值不可靠，以导入前后的导出比较为准。测试后关闭 EPLAN、用文件副本恢复 `Translate.db`，四个文件与测试前逐字节相同。
 - 恢复：关闭 EPLAN，从文件副本复制回 4 个数据文件和 9 个 `.lck`，两个库的全部文件与 r12 之前逐字节相同。
 
 **导入与导出**（r11，`copyio`，副本为还原出的原样库）：
