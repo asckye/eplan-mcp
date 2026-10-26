@@ -46,7 +46,7 @@ public sealed class PropertySetExecuteTests
         Assert.Equal("旧文本", session.Objects[2].Properties[20011].Texts["zh_CN"]);
         Assert.Equal(["Begin AI: eplan_property_set", "Commit", "CloseUndo", "Dispose"], transactions.Calls);
         Assert.All(session.Objects.Values, obj => Assert.Equal(4, obj.ValueRequests.Count));
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         session.AssertDisposed();
     }
 
@@ -286,7 +286,7 @@ public sealed class PropertySetExecuteTests
         Assert.Equal("opaque", plan.Guards[0].Definition.ValueType);
         Assert.Equal(40, plan.Guards[0].Definition.MaximumLength);
         Assert.All(session.Objects.Values, obj => Assert.Equal(0, obj.StoredReads));
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
     }
 
     [Fact]

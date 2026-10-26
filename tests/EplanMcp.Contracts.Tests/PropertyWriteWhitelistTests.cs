@@ -8,28 +8,33 @@ public sealed class PropertyWriteWhitelistTests
     [InlineData(2026, "Function", 20027, true)]
     [InlineData(2026, "Terminal", 20011, false)]
     [InlineData(2027, "Function", 20011, false)]
-    public void PlanningCandidate_B1BridgeScope_DoesNotGrantHostPermission(int version, string objectType, int id, bool allowed)
+    public void PlanningCandidate_B1BridgeScope_MatchesPublishedConstraints(int version, string objectType, int id, bool allowed)
     {
         PropertyWriteEntry? entry = PropertyWriteWhitelist.PlanningCandidate(version, objectType, id);
         Assert.Equal(allowed, entry is not null);
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal(allowed, PropertyWriteWhitelist.Entries.ContainsKey((version, objectType, id, "")));
         if (entry is not null)
         {
             Assert.Equal(id == 20011 ? "multi_language" : "text", entry.Definition.ValueType);
             Assert.Equal(id == 20011 ? "explicit_merge_preserve" : "none", entry.Definition.LanguageMode);
+            PropertyWriteEntry shipped = PropertyWriteWhitelist.Entries[(version, objectType, id, "")];
+            Assert.Equal(entry.PropertyName, shipped.PropertyName);
+            Assert.Equal(entry.Definition.ValueType, shipped.Definition.ValueType);
+            Assert.Equal(entry.Definition.LanguageMode, shipped.Definition.LanguageMode);
+            Assert.Equal(entry.SideEffectGuards, shipped.SideEffectGuards);
             entry.Definition.MaximumLength = 1;
             Assert.Equal(500, PropertyWriteWhitelist.PlanningCandidate(version, objectType, id)!.Definition.MaximumLength);
         }
     }
 
     [Fact]
-    public void ShippedWhitelist_NoVerifiedBatch_IsEmptyAndCannotBeExtended()
+    public void ShippedWhitelist_OnlyVerifiedB1Keys_CannotBeExtended()
     {
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         var dictionary = Assert.IsAssignableFrom<IDictionary<(int, string, int, string), PropertyWriteEntry>>(PropertyWriteWhitelist.Entries);
         Assert.True(dictionary.IsReadOnly);
         Assert.Throws<NotSupportedException>(() => dictionary.Add((2026, "Function", 20011, "Terminal"), new()));
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal(2, PropertyWriteWhitelist.Entries.Count);
     }
 
     [Theory]

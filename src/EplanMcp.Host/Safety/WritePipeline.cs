@@ -26,6 +26,9 @@ internal sealed record WriteRequest<TArgs, TExecuteArgs>(
     TimeSpan Limit,
     string Activity = "Waiting for EPLAN")
 {
+    internal WritePlan? PreparedPlan { get; init; }
+    internal object? AuditArguments { get; init; }
+
     /// <summary>A write whose execute arguments need no backup target; named like the record's own parameters.</summary>
     public WriteRequest(string Tool, ToolTier Tier, string PlanOperation, string ExecuteOperation, TArgs Args, Func<WritePlan, TExecuteArgs> ExecuteArgs, bool DryRun, TimeSpan Limit, string Activity = "Waiting for EPLAN")
         : this(Tool, Tier, PlanOperation, ExecuteOperation, Args, (plan, _) => ExecuteArgs(plan), DryRun, Limit, Activity)
@@ -74,7 +77,7 @@ internal sealed partial class WritePipeline(
         WritePlan plan;
         try
         {
-            plan = await bridge.InvokeAsync<TArgs, WritePlan>(request.PlanOperation, request.Args, cancellationToken).ConfigureAwait(false);
+            plan = request.PreparedPlan ?? await bridge.InvokeAsync<TArgs, WritePlan>(request.PlanOperation, request.Args, cancellationToken).ConfigureAwait(false);
         }
         catch (BridgeCallException ex)
         {
@@ -177,8 +180,8 @@ internal sealed partial class WritePipeline(
         record["host"] = DanglingWrites.ThisHost();
         record["tier"] = request.Tier.ToString();
         record["policy"] = decision.Verdict.ToString();
-        record["arguments"] = JsonSerializer.SerializeToNode(request.Args, HostJson.Options);
-        record["changes"] = new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+        record["arguments"] = JsonSerializer.SerializeToNode(request.AuditArguments ?? (object?)request.Args, HostJson.Options);
+        record["changes"] = AuditChanges(plan);
         if (plan.PageTextChanges is { } textChanges)
         {
             record["fingerprint"] = plan.Fingerprint;
@@ -406,6 +409,9 @@ internal sealed partial class WritePipeline(
     /// <summary>The change list as one line per change, for the audit, the suspension and the approval form.</summary>
     internal static IEnumerable<string> ChangeLines(WritePlan plan) => WriteChangeLines.For(plan);
 
+    private static JsonArray AuditChanges(WritePlan plan) => plan.Details?.GetValueOrDefault("property_keys") is { } keys
+        ? JsonNode.Parse(keys)!.AsArray() : new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+
     private static BridgeError Suspended(WritePlan plan) => new()
     {
         Reason = ErrorReason.WritesSuspended,
@@ -434,6 +440,11 @@ internal sealed partial class WritePipeline(
                 ["processId"] = eplan.Eplan.ProcessId,
             },
         };
+        if (plan.Details?.ContainsKey("property_keys") == true)
+        {
+            record["fingerprint"] = plan.Fingerprint;
+            record["changedCount"] = plan.Changes.Count;
+        }
         if (plan.MasterData is { } target)
         {
             record["masterData"] = new JsonObject
@@ -489,7 +500,7 @@ internal sealed partial class WritePipeline(
     {
         JsonObject record = Record("approval", tool, requestId, plan, eplan);
         record["fingerprint"] = plan.Fingerprint;
-        record["changes"] = new JsonArray([.. ChangeLines(plan).Select(line => (JsonNode?)line)]);
+        record["changes"] = AuditChanges(plan);
         return RecordDecisionAsync(record, approval);
     }
 

@@ -2,13 +2,13 @@ using System.Collections.ObjectModel;
 
 namespace EplanMcp.Contracts;
 
-/// <summary>Host authorization data; B1 Bridge candidates stay absent from Entries until every scratch gate passes.</summary>
+/// <summary>Host authorization data; only the P7 Large-verified B1 batch is published.</summary>
 public static class PropertyWriteWhitelist
 {
     /// <summary>Version of the planning rules; included in every property plan fingerprint.</summary>
     public const string PlanningVersion = "b1-text/2";
 
-    /// <summary>B1 Bridge planning/execution candidates (A44/A48); no candidate grants Host tool permission.</summary>
+    /// <summary>B1 planning/execution constraints (A44/A48), shared with the published Host whitelist.</summary>
     public static PropertyWriteEntry? PlanningCandidate(int version, string objectType, int id) =>
         version == 2026 && objectType == "Function" && id is 20011 or 20027 ? new PropertyWriteEntry
         {
@@ -38,5 +38,6 @@ public static class PropertyWriteWhitelist
         get;
     } =
         new ReadOnlyDictionary<(int, string, int, string), PropertyWriteEntry>(
-            new Dictionary<(int, string, int, string), PropertyWriteEntry>());
+            new[] { 20011, 20027 }.Select(id => PlanningCandidate(2026, "Function", id)!)
+                .ToDictionary(e => (e.EplanMajorVersion, e.ObjectType, e.PropertyId, e.ApplicableCategory)));
 }

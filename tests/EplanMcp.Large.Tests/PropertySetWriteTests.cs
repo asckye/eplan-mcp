@@ -16,7 +16,7 @@ public sealed class PropertySetWriteTests(LiveEplan eplan)
         HandshakeResult product = await reader.SelectAsync(eplan.ProcessId, TestContext.Current.CancellationToken);
         Assert.Contains(OperationNames.PropertySetPlan, product.Operations!);
         Assert.Contains(OperationNames.PropertySetExecute, product.Operations!);
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         ProjectListData opened = await reader.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), TestContext.Current.CancellationToken);
         string project = await eplan.WriteProjectAsync();
         Assert.Equal(Path.GetFullPath(Path.Combine(WriteHost.ScratchFolder, WriteHost.WritableName)), Path.GetFullPath(project), ignoreCase: true);
@@ -107,7 +107,7 @@ public sealed class PropertySetWriteTests(LiveEplan eplan)
         Assert.Equal(before.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
     }
 
-    private static async Task<PropertySetArgs> CandidatesAsync(PropertyWriteBridge writer, BridgeClient reader, string project, LiveSnapshots.Snapshot snapshot)
+    internal static async Task<PropertySetArgs> CandidatesAsync(PropertyWriteBridge writer, BridgeClient reader, string project, LiveSnapshots.Snapshot snapshot)
     {
         var chosen = new List<PropertySetChange>();
         foreach (int id in new[] { 20011, 20027 })
@@ -167,7 +167,7 @@ public sealed class PropertySetWriteTests(LiveEplan eplan)
         }
     }
 
-    private static List<PropertySetChange> RestoreChanges(PropertySetArgs baseline) => baseline.Changes.Select(change =>
+    internal static List<PropertySetChange> RestoreChanges(PropertySetArgs baseline) => baseline.Changes.Select(change =>
     {
         PropertySetGuard guard = baseline.Approved.Guards.Single(g => g.Target.Type == change.Target.Locator!.Type
             && g.Target.Oid == change.Target.Locator.Oid && g.PropertyId == change.Property.PropertyId);

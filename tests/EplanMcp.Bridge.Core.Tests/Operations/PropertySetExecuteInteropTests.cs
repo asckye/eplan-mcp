@@ -9,7 +9,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PropertySetExecuteInteropTests
 {
     [Fact]
-    public void Invoke_RegisteredB1Pair_RoundTripsPlanAndExecutesWithoutHostWhitelistPermission()
+    public void Invoke_RegisteredB1Pair_RoundTripsPlanAndExecutesWithPublishedB1Keys()
     {
         var sessions = new List<FakePropertySetSession>();
         IPropertySetSession Open(string project)
@@ -40,7 +40,7 @@ public sealed class PropertySetExecuteInteropTests
         Assert.Equal(ExecutionState.NotStarted, args.Approved.Execution);
         Assert.Equal(ExecutionState.Committed, data.Execution);
         Assert.Equal(2, data.Plan.Changes.Count);
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         Assert.All(sessions, session => session.AssertDisposed());
     }
 

@@ -130,9 +130,9 @@ public sealed class PropertySchemaToolTests
 
     [Theory]
     [MemberData(nameof(ObjectTypes))]
-    public void Catalog_EmptyShippedWhitelist_NeverAllowsWritesOrInfersApiWritability(string type)
+    public void Catalog_OnlyB1ShippedWhitelist_AllowsWritesWithoutInferringApiWritability(string type)
     {
-        Assert.Empty(PropertyWriteWhitelist.Entries);
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
         PropertySchemaPaging paging = Paging;
         foreach (PropertyDictionaryEntry[] batch in PropertyCatalog.Entries.Where(e => e.ObjectType == type).Chunk(200))
         {
@@ -144,9 +144,11 @@ public sealed class PropertySchemaToolTests
                 Assert.NotEmpty(Items(data));
                 Assert.All(Items(data), item =>
                 {
-                    Assert.False(item.GetProperty("write").GetProperty("write_allowed").GetBoolean());
+                    bool allowed = type == "Function" && item.GetProperty("property_id").ValueKind == JsonValueKind.Number
+                        && item.GetProperty("property_id").GetInt32() is 20011 or 20027;
+                    Assert.Equal(allowed, item.GetProperty("write").GetProperty("write_allowed").GetBoolean());
                     Assert.Equal(JsonValueKind.Null, item.GetProperty("write").GetProperty("api_writable").ValueKind);
-                    Assert.Equal("not_in_shipped_whitelist", item.GetProperty("write").GetProperty("reason").GetString());
+                    Assert.Equal(allowed ? null : "not_in_shipped_whitelist", item.GetProperty("write").GetProperty("reason").GetString());
                 });
                 cursor = data.GetProperty("cursor").GetString();
             }

@@ -30,7 +30,7 @@ P2 不接受 `target` 或 `project`，未知参数返回 `INVALID_ARGUMENT`：�
 ## 3. 输出
 `outputSchema` 声明 `{catalog_version, object_type, items, total, cursor, truncated}`，字段名使用 snake_case。
 每项包含 `property_id`（无公开 ID 时 null）、`property_name`、`read`（readable 或发布的拒绝分类）、`write`（`write_allowed`、`api_writable`、`reason`）。
-`write_allowed` 只查询发布白名单的版本/对象/ID；当前名单为空，全部 false；`api_writable` 始终 null。
+`write_allowed` 只查询发布白名单的版本/对象/ID；仅 EPLAN 2026 Function 的 20011、20027 为 true（`B1`，P7 Large 已验证），其余 false；`api_writable` 始终 null。
 detailed 增加 `obsolete`、`definition`、`source`、`version`、`runtime_differences`；definition 使用既有元数据 DTO，所有未知类型、边界、索引、单位、语言、许可等字段显式为 null。
 来源为 `catalog/eplan-2026.0.3/data-dictionary.jsonl`，版本为 2026.0.3；没有运行时比较，`runtime_differences` 为 null。
 按 numeric ID 升序、null ID 最后、正式名称 Ordinal 排序；`total` 是筛选后的定义行数，不是实例值或全项目总数。
@@ -54,7 +54,7 @@ structuredContent 与 JSON 文本相同，两个副本加摘要一起预算：co
 不适用（Read 级）。
 
 ## 7. 测试
-- Small：稳定排序、筛选、分页/签名/绑定/过期、拒绝分类、未知字段为 null、空白名单、预算和注解。
+- Small：稳定排序、筛选、分页/签名/绑定/过期、拒绝分类、未知字段为 null、`B1` 白名单一致性、预算和注解。
 - Medium：真实 MCP Server 的发现/调用/未知参数/输出 schema，以及契约快照；不连接 EPLAN。
 - Large：本 PR 不运行；实例元数据与读取证据属于 P3/P4。
 - Agent 评测场景：查 Function 的 FUNC_TEXT，再查 PROPUSER_* 的拒绝原因，解释为什么未知 API 可写性不能授予写权限；不执行写入。
