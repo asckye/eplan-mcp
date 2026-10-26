@@ -18,6 +18,9 @@ public sealed class WritePlan
     /// <summary>Every change, in the order it would be made. Empty when there is nothing to do.</summary>
     public List<PlannedChange> Changes { get; set; } = [];
 
+    /// <summary>Structured free-text locators and matches for page.text.replace.plan; null for other writes.</summary>
+    public List<PageTextChange>? PageTextChanges { get; set; }
+
     /// <summary>SHA-256 of the planned objects' state, hex; opaque to the Host.</summary>
     public string Fingerprint { get; set; } = string.Empty;
 
