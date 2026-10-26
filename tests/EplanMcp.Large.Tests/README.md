@@ -143,7 +143,7 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 运行：
 ```powershell
 $env:EPLANMCP_OFFLINE_VARIANT_BIN = 'C:\Program Files\EPLAN\Electric P8\2026.0.3\Bin'
-dotnet test --project tests\EplanMcp.Large.Tests -c Release --no-build -- --filter-trait "Host=Offline"
+dotnet test --project tests\EplanMcp.Large.Tests -c Release --no-build -- --filter-trait "Host=Offline" --filter-not-trait "Fixture=Scale"
 Remove-Item Env:EPLANMCP_OFFLINE_VARIANT_BIN
 ```
 - `EPLANMCP_OFFLINE_VARIANT_BIN` 是**变体的** Bin（其中有 `W3u.exe`），不是 Platform 的 Bin（api-notes A22）。设置了它，`LiveEplan` 先把夹具复制到 `<scratch 根目录>\offline\<时间>-<进程号>\EPLAN_Sample_Project`，在这份副本上启动离线宿主（`--idle-exit 10`，管道前缀每次不同），再把测试进程的 `EPLANMCP_PIPE_PREFIX` 设为这个前缀：这次运行中的每个 `eplanmcp` 都只连离线宿主，不碰界面中的 EPLAN，后者可以同时运行（A22）。

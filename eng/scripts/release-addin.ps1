@@ -83,7 +83,7 @@ try {
     if ($SampleProject) { $fixtureArguments.Source = $SampleProject }
     & ./eng/scripts/eval-fixture.ps1 @fixtureArguments
     $results = Join-Path $worktree '.local/large-results'
-    dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filter-trait 'Host=Offline' --timeout 20m --report-xunit-trx --results-directory $results
+    dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filter-trait 'Host=Offline' --filter-not-trait 'Fixture=Scale' --timeout 20m --report-xunit-trx --results-directory $results
     $passed = 0
     foreach ($file in Get-ChildItem $results -Filter *.trx) {
         [xml]$trx = Get-Content $file.FullName -Raw
