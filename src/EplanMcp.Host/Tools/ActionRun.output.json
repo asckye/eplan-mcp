@@ -3,7 +3,7 @@
   "type": "object", "additionalProperties": false,
   "required": ["entry","tier","project","target","action","type","parameters","dryRun","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
   "properties": {
-    "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction"]},
+    "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction","SwitchProjectType","synchronize/MULTILINE","synchronize/OVERVIEW"]},
     "tier": {"enum":["export","write"]},
     "project": {"type":["string","null"]},
     "target": {"type":"string"},
@@ -27,7 +27,9 @@
     "fingerprint": {
       "type":"object","additionalProperties":false,"required":["counts","dataFiles","fileCount","truncated"],
       "properties": {
-        "counts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["kind","count"],"properties":{"kind":{"enum":["pages","functions","connections","cables","terminals","plc_boxes","part_references","parts","manufacturers","constructions","connection_patterns","accessory_lists","accessory_placements","records"]},"count":{"type":["integer","null"],"minimum":0}}}},
+        "projectType":{"type":"string"},
+        "functionTextHash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+        "counts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["kind","count"],"properties":{"kind":{"enum":["pages","functions","connections","cables","terminals","plc_boxes","part_references","function_texts","project_parts","parts","manufacturers","constructions","connection_patterns","accessory_lists","accessory_placements","records"]},"count":{"type":["integer","null"],"minimum":0}}}},
         "dataFiles":{"type":"array","maxItems":20,"items":{"type":"object","additionalProperties":false,"required":["path","bytes","modifiedUtc"],"properties":{"path":{"type":"string"},"bytes":{"type":"integer","minimum":0},"modifiedUtc":{"type":"string","format":"date-time"}}}},
         "fileCount":{"type":"integer","minimum":0},"truncated":{"type":"boolean"}
       }

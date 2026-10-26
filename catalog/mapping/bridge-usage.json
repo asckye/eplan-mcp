@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "3cfdbca9",
-  "sourceHash": "sha256:2ac55adeb02e2d3e4ddaf8cb32a6621bc8943a7864be32651dc1f82cab300cd9",
+  "scannedSources": "93b252f0 + uncommitted changes",
+  "sourceHash": "sha256:7cff12691dccb359edb3265bdaabeac0bf882beb0db3cdb6d9ba1ea3aab1dafe",
   "operations": [
     {
       "name": "action.execute",
@@ -4986,19 +4986,6 @@
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
-        "adapter": "EplanActionRunner",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
@@ -7041,6 +7028,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "call"
         ],
@@ -11340,8 +11340,8 @@
     "P:Eplan.EplApi.DataModel.Function.Properties": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -12651,8 +12651,8 @@
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -15205,6 +15205,19 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.Articles": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Parts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -15854,6 +15867,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -16565,6 +16591,20 @@
         ]
       },
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -16820,6 +16860,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -21743,8 +21796,8 @@
     "T:Eplan.EplApi.DataModel.Function": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "type"
         ],
@@ -22281,6 +22334,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "type"
         ],
@@ -25204,6 +25270,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "type"
         ],

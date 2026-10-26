@@ -360,8 +360,8 @@
         "action.plan",
         "action.run"
       ],
-      "apiIds": 122,
-      "operationGroups": 64,
+      "apiIds": 123,
+      "operationGroups": 65,
       "dataDictionary": 2,
       "dependencies": 51,
       "actions": 0,
@@ -4077,6 +4077,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_import_list",

@@ -184,6 +184,43 @@ public sealed class ActionRunToolTests : IDisposable
         Assert.Equal(JsonValueKind.Null, data.GetProperty("directory").ValueKind);
     }
 
+    [Fact]
+    public async Task SwitchProjectType_NoOpPlanFailureIsNotStartedAndNeverWritten()
+    {
+        _harness.Bridge.Handlers[OperationNames.ActionRunPlan] = _ => throw new BridgeCallException(new BridgeError
+        {
+            Reason = ErrorReason.InvalidArgument,
+            Message = "PROJECTTYPE already matches the current project type; choose the other type.",
+        });
+        JsonElement error = WriteToolHarness.Error(await Run("SwitchProjectType", "{\"PROJECTTYPE\":\"1\"}"));
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Empty(_harness.Bridge.Writes);
+        Assert.Empty(_dialog.Questions);
+    }
+
+    [Theory]
+    [InlineData("SwitchProjectType", "{\"PROJECTTYPE\":\"2\"}", 60)]
+    [InlineData("synchronize/MULTILINE", "{}", 120)]
+    [InlineData("synchronize/OVERVIEW", "{}", 120)]
+    public async Task PromotedWrite_ReturnsBusinessEvidenceAndUsesTheEntryBudget(string entry, string arguments, int seconds)
+    {
+        JsonElement data = WriteToolHarness.Structured(await Run(entry, arguments));
+        Assert.Equal("committed", data.GetProperty("execution").GetString());
+        Assert.Single(_harness.Bridge.Writes);
+        Assert.Equal(TimeSpan.FromSeconds(seconds), Assert.Single(_harness.Bridge.Writes).Limit);
+        if (entry == "SwitchProjectType")
+        {
+            Assert.Equal("Schematic", data.GetProperty("before").GetProperty("projectType").GetString());
+            Assert.Equal("Macro", data.GetProperty("after").GetProperty("projectType").GetString());
+            Assert.Contains("Project type: Schematic -> Macro", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        }
+        else
+        {
+            Assert.NotEqual(data.GetProperty("before").GetProperty("functionTextHash").GetString(), data.GetProperty("after").GetProperty("functionTextHash").GetString());
+            Assert.Contains(data.GetProperty("after").GetProperty("counts").EnumerateArray(), c => c.GetProperty("kind").GetString() == "function_texts" && c.GetProperty("count").GetInt32() == 60);
+        }
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -258,6 +295,18 @@ public sealed class ActionRunToolTests : IDisposable
         { last["file:Layer.eod"] = "101\t2026-10-22T00:00:01Z"; }
         if (args.Entry == "changelayer")
         { state["layer:visible"] = "1"; last["layer:visible"] = "0"; }
+        if (args.Entry == "SwitchProjectType")
+        {
+            state["project:type"] = "Schematic";
+            last["project:type"] = "Macro";
+        }
+        if (args.Entry.StartsWith("synchronize/", StringComparison.Ordinal))
+        {
+            state["count:function_texts"] = "0";
+            last["count:function_texts"] = "60";
+            state["synchronize:functionTextHash"] = new string('a', 64);
+            last["synchronize:functionTextHash"] = new string('b', 64);
+        }
         return new ActionRunData { Target = _harness.ProjectPath, Parameters = args.Parameters, Before = state, After = after ? last : null, Warning = "Undo after commit unverified." };
     }
 }

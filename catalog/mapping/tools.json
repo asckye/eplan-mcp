@@ -74,6 +74,7 @@
         "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isVisible",
         "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Layers",
         "P:Eplan.EplApi.DataModel.Placement.Group",
+        "P:Eplan.EplApi.DataModel.Project.Articles",
         "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
         "P:Eplan.EplApi.DataModel.Project.LayerTable",
         "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
@@ -137,7 +138,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_run.md",
-        "specStatus": "Proposed（仅规格，未实现；产品流水线未验证；按 Q5 在 M4c 完成后与 M5 第 10 步规划）",
+        "specStatus": "v0.4.0 第 2 批已实现并经 Large 实测：提交、一次撤销恢复、更早的撤销历史保留（[A50][a50]）",
         "apiNotes": [
           "A11",
           "A25",

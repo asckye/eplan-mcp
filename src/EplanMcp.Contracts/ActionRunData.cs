@@ -7,7 +7,7 @@ public sealed class ActionRunData
     public string Target { get; set; } = string.Empty;
     /// <summary>The complete actual typed-context parameters; the Host renders paths relative to their roots.</summary>
     public List<ActionParameter> Parameters { get; set; } = [];
-    /// <summary>Full fingerprint: count:kind maps to integer/null text; file:relative to bytes, tab, UTC; target/layer:* guard state.</summary>
+    /// <summary>Full fingerprint: count:kind maps to integer/null text; file:relative to bytes, tab, UTC; target/layer:*/project:type guard state; function:text:* evidence and synchronize:functionTextHash.</summary>
     public Dictionary<string, string> Before { get; set; } = [];
     /// <summary>Full post-execution fingerprint; null for a plan.</summary>
     public Dictionary<string, string>? After { get; set; }

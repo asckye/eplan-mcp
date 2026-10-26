@@ -20,13 +20,15 @@ public sealed class ActionRunContractTests
     public void PendingR2Entries_AreAbsentFromSchemasUsageAndHostExecution()
     {
         JsonObject[] pending = [.. ActionRunCatalog.Document["pendingVerification"]!.AsArray().Select(item => item!.AsObject())];
-        Assert.Equal(8, pending.Length);
+        Assert.Equal(5, pending.Length);
         Assert.Contains("PENDING VERIFICATION", ActionRunCatalog.Document["pendingVerificationNote"]!.GetValue<string>(), StringComparison.Ordinal);
         using ServiceProvider services = Services(true, false);
         var tool = services.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Single(t => t.ProtocolTool.Name == ActionRunTools.Tool).ProtocolTool;
         string[] exposed = [.. tool.InputSchema.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(item => item.GetString()!)];
         string[] output = [.. tool.OutputSchema!.Value.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(item => item.GetString()!)];
-        Assert.Equal(12, exposed.Length);
+        Assert.Equal(ActionRunCatalog.Entries.Keys, exposed);
+        Assert.Equal(exposed, output);
+        Assert.Equal(15, exposed.Length);
         var catalog = new ActionRunCatalog();
         foreach (JsonObject rule in pending)
         {
@@ -84,7 +86,7 @@ public sealed class ActionRunContractTests
         var tool = services.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Single(t => t.ProtocolTool.Name == ActionRunTools.Tool).ProtocolTool;
         Assert.Equal((false, true, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.Equal(ActionRunCatalog.Entries.Keys, tool.InputSchema.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
-        Assert.Equal(12, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("entry").GetProperty("enum").GetArrayLength());
+        Assert.Equal(15, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("entry").GetProperty("enum").GetArrayLength());
         Assert.Equal(["entry", "project", "arguments", "dry_run"], tool.InputSchema.GetProperty("properties").EnumerateObject().Select(p => p.Name));
         Assert.Equal("string", tool.InputSchema.GetProperty("properties").GetProperty("arguments").GetProperty("additionalProperties").GetProperty("type").GetString());
         Assert.False(tool.InputSchema.TryGetProperty("oneOf", out _));

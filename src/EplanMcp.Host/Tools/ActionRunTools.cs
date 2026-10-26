@@ -20,7 +20,7 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
 {
     public const string Tool = "eplan_action_run";
     [McpServerTool(Name = Tool, Title = "Run a whitelisted EPLAN action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
-    [Description("Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. Write supports dry_run; approval outside scratch; denial: APPROVAL_DENIED.\nfull + actionRun:on only.\nParameters/effects: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"project\":\"Line1\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}")]
+    [Description("Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. dry_run; approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}")]
     public async Task<CallToolResult> RunAsync(IProgress<ProgressNotificationValue> progress, string entry, JsonElement arguments, string? project = null, bool dry_run = false, CancellationToken cancellationToken = default)
     {
         ActionRunData? data = null;
@@ -103,7 +103,15 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             }
             return ToolResults.Error(new BridgeError { Reason = ErrorReason.AuditUnavailable, Message = "The action audit could not be written; ask the engineer to check the audit directory." });
         }
-        catch (BridgeCallException ex) { failure = ex.Error.Reason; if (entry == "changelayer") { ex.Error.Execution ??= ExecutionState.NotStarted; } return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex)
+        {
+            failure = ex.Error.Reason;
+            if (ActionRunCatalog.Entries.TryGetValue(entry, out JsonObject? failedRule) && ActionRunCatalog.Text(failedRule, "tier") == "write")
+            {
+                ex.Error.Execution ??= ExecutionState.NotStarted;
+            }
+            return ToolResults.Error(ex.Error);
+        }
         catch (OperationCanceledException) { failure = ErrorReason.Cancelled; throw; }
         finally
         {
@@ -146,6 +154,8 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             ["truncated"] = truncated,
             ["hint"] = "Changes have not been checked item by item; use read tools to verify objects you care about. " + ActionRunCatalog.Text(rule, "effects") + " " + ResultShaper.CleanText(data.Warning)
                 + (data.After is not null && data.Before.TryGetValue("layer:visible", out string? visible) ? $" Layer visibility: {visible} -> {data.After.GetValueOrDefault("layer:visible")}." : string.Empty)
+                + (data.After is not null && data.Before.TryGetValue("project:type", out string? type) && args.Entry == "SwitchProjectType"
+                    ? $" Project type: {type} -> {data.After.GetValueOrDefault("project:type")}." : string.Empty)
                 + (recovered ? " Execution was recovered; unreadable post-action state is not inferred." : string.Empty) + (disabled ? " Entry disabled; ask the engineer to reverify it." : string.Empty),
         };
         if (execution is not null)
@@ -161,12 +171,21 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
     private static JsonObject Fingerprint(Dictionary<string, string> state)
     {
         var files = state.Where(p => p.Key.StartsWith("file:", StringComparison.Ordinal)).OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
-        return new JsonObject
+        var result = new JsonObject
         {
             ["counts"] = new JsonArray([.. state.Where(p => p.Key.StartsWith("count:", StringComparison.Ordinal)).Select(p => (JsonNode)new JsonObject { ["kind"] = p.Key[6..], ["count"] = p.Value == "null" ? null : int.Parse(p.Value, CultureInfo.InvariantCulture) })]),
             ["dataFiles"] = new JsonArray([.. files.Take(20).Select(p => (JsonNode)new JsonObject { ["path"] = p.Key[5..], ["bytes"] = long.Parse(p.Value.Split('\t')[0], CultureInfo.InvariantCulture), ["modifiedUtc"] = p.Value.Split('\t')[1] })]),
             ["fileCount"] = files.Length,
             ["truncated"] = files.Length > 20,
         };
+        if (state.TryGetValue("project:type", out string? type))
+        {
+            result["projectType"] = type;
+        }
+        if (state.TryGetValue("synchronize:functionTextHash", out string? hash))
+        {
+            result["functionTextHash"] = hash;
+        }
+        return result;
     }
 }

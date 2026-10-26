@@ -4,9 +4,9 @@
 |---|---|
 | 工具名 / title | `eplan_action_run` / `Run a whitelisted EPLAN action` |
 | 所属分组 / Profile | `action` / 仅 `full`，另须 `actionRun: on`（[ADR §5][adr5]） |
-| 安全级别 | 按条目：首批 Read（导出级）11 种、Write 1 种（[ADR §8][adr8]） |
+| 安全级别 | 按条目：Read（导出级）11 种、Write 4 种（[ADR §8][adr8]） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false（[ADR §6][adr6]） |
-| 状态 | Proposed（仅规格，未实现；产品流水线未验证；按 Q5 在 M4c 完成后与 M5 第 10 步规划） |
+| 状态 | v0.4.0 第 2 批已实现并经 Large 实测：提交、一次撤销恢复、更早的撤销历史保留（[A50][a50]） |
 
 依据为 Accepted 的 [ADR-0021][adr]，不重新决定 Q1–Q5。本规格的首批范围沿用其第 8 节；“已验证”仅限 [S26 r1][s26] / [A40][a40] 或 S24 / [A30][a30] 明确记录的行为。输入限制、输出结构、产品流水线及预算是待实现契约，**未验证**；不得把规格或构建通过当成实机验证。首批仍须满足 ADR §2 的加入条件，尤其不能把 AML 导出已成功解释为只读条件已经全部满足。
 
@@ -14,13 +14,12 @@
 
 “导出项目图层表”“导出制造商 ABB 的记录”“隐藏 scratch 项目的某个图层”。代理运行随产品发布、经验证的长尾 action 条目，得到处理后的调用、前后指纹及导出文件清单。有任务工具时用任务工具：它们在审批前列出每一项变化、执行后逐项核对；本工具只比较指纹，不逐项核对（[ADR §1][adr1]、[§4][adr4]）。项目部件清单用 `eplan_export_parts`，系统部件导出用 `eplan_part_export`。
 
-工具描述的英文草案如下；描述加参数说明遵守约 250 token 的预算，12 项枚举也计入预算。每条的参数表、副作用、示例移入 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")`；无 TYPE 的 topic 就是 action 名。不增加对任意 action 的发现或执行入口（[ADR §1][adr1]）。这是 usage 的专用 topic 扩展，产品实现及预算检查**未验证**，不改变其他工具的四种 topic。
+工具描述的英文草案如下；描述加参数说明遵守约 250 token 的预算，15 项枚举也计入预算。每条的参数表、副作用、示例移入 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")`；无 TYPE 的 topic 就是 action 名。不增加对任意 action 的发现或执行入口（[ADR §1][adr1]）。这是 usage 的专用 topic 扩展，产品实现及预算检查**未验证**，不改变其他工具的四种 topic。
 
 ```text
-Run a whitelisted EPLAN task; fingerprint checks only.
-Prefer task tools. Write supports dry_run; approval outside scratch; denial: APPROVAL_DENIED.
-full + actionRun:on only.
-Parameters/effects: eplan_tool_usage.
+Run action; fingerprints.
+Prefer task tools. Write: dry_run, approval outside scratch; APPROVAL_DENIED.
+full/actionRun:on. eplan_tool_usage.
 Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"EXPORTFILE":"layers.elc"}}
 ```
 
@@ -28,12 +27,12 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `entry` | string，`enum` 为下表精确的 12 个值 | 是 | — | ADR §8 的 action/TYPE 名称；无 TYPE 时只写 action 名，区分大小写 |
+| `entry` | string，`enum` 为下表精确的 15 个值 | 是 | — | ADR §8 的 action/TYPE 名称；无 TYPE 时只写 action 名，区分大小写 |
 | `project` | string，非空 | 项目条目是；系统条目不给 | — | 项目名或 `eplan_project_list` 返回的 `path`，不隐式采用当前项目 |
 | `arguments` | object，值均为 string，按 `entry` 校验 | 是 | — | 只允许相应条目表中的参数；参数名保持 EPLAN 大小写 |
 | `dry_run` | boolean | 否 | false | 所有条目可用，Write 必须支持；true 只返回处理后的调用、级别和已知副作用，不审批、不执行、不创建输出目录 |
 
-按本规格的输入形态，`entry` 封装 [ADR §1][adr1] 的 `action` + `type` 组合，`arguments` 对应其 `parameters`；不接受独立的 `action`、`type` 或命令行。公开 schema 只含上述四个参数及完整的 12 项枚举；`arguments.additionalProperties` 为 string，不生成逐条 `oneOf` 或条件分支。Host 按嵌入白名单校验全部逐条规则，包括必填、允许的参数名、单值数量及格式；`INVALID_ARGUMENT` 一次列出全部问题、该条允许的参数名，并提示调用 `eplan_tool_usage` 的相应 topic。每条的参数表、副作用及示例由 usage 提供。Bridge 的大小写敏感参数名作为 `ActionParameter` 列表的 `Name` 数据传输，不改变共享 IPC 序列化规则。
+按本规格的输入形态，`entry` 封装 [ADR §1][adr1] 的 `action` + `type` 组合，`arguments` 对应其 `parameters`；不接受独立的 `action`、`type` 或命令行。公开 schema 只含上述四个参数及完整的 15 项枚举；`arguments.additionalProperties` 为 string，不生成逐条 `oneOf` 或条件分支。Host 按嵌入白名单校验全部逐条规则，包括必填、允许的参数名、单值数量及格式；`INVALID_ARGUMENT` 一次列出全部问题、该条允许的参数名，并提示调用 `eplan_tool_usage` 的相应 topic。每条的参数表、副作用及示例由 usage 提供。Bridge 的大小写敏感参数名作为 `ActionParameter` 列表的 `Name` 数据传输，不改变共享 IPC 序列化规则。
 
 ### 2.1 首批枚举、固定参数与作用范围
 
@@ -53,6 +52,11 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 | `plcservice/BUSDATAEXPORT` | 导出级 / 项目 | `TYPE=BUSDATAEXPORT`、`PROJECTNAME`、`OVERWRITE=0`、`LANGUAGE=de_DE`；`DESTINATIONFILE` 拼入本次目录 | `CONFIGURATIONPROJECT`、`CONVERTERID`、`DESTINATIONFILE`；可选 `FORMAT`，仅下述三种组合；一个 `.pbf` / `.aml` |
 | `projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS` | 导出级 / 项目 | 对应 TYPE、`PROJECTNAME`；`FILENAME` 拼入本次目录 | `FILENAME`：文件名；一个 `.xml` |
 | `XEsUserPropertiesExportAction` | 导出级 / 项目 | `Project` 为解析的目标项目；`XMLFile` 拼入本次目录；无 TYPE | `XMLFile`：文件名；一个 `.xml` |
+| `SwitchProjectType` | Write / 项目 | `PROJECTNAME`；无 TYPE | `PROJECTTYPE`：字符串 `1`（Schematic）或 `2`（Macro）；拒绝与当前类型相同的请求 |
+| `synchronize/MULTILINE` | Write / 项目 | `PROJECTNAME`、`TYPE=MULTILINE` | `{}`；从多线表示同步项目数据，不同步系统部件库 |
+| `synchronize/OVERVIEW` | Write / 项目 | `PROJECTNAME`、`TYPE=OVERVIEW` | `{}`；从总览表示同步项目数据，不同步系统部件库 |
+
+第 2 批依据 [A50](../eplan/api-notes.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上) / S26 r3 的回滚证据开放这三项候选；产品提交、一次当前项目 `XEsUndoAction` 及早期撤销历史保留，仍须 Large 验证。`synchronize/SINGLELINE` 留在 pending：示例上没有可观察业务效果，需要有表示差异的样本。其余 pending 条目仍不开放。
 
 ### 2.2 逐条校验
 
@@ -61,6 +65,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 - 文本名称、过滤值：1–100 字符，保留大小写、空格和中文，不裁剪或改写合法值；不含控制字符或引号、不以 `/` 开头。S26 的 context 全部 exact=true 不放宽这些限制。
 - 文件名参数：1–100 字符，只是文件名；不含分隔符、绝对路径、UNC、驱动器号、`.` / `..` 路径段、`<>:"|?*`、控制字符或引号，不以点或空格结尾，不是 Windows 保留名。限定为该条目的扩展名；未带时由 Host 补上，已有正确扩展名时不重复补。归档 `ARCHIVENAME` 只接受 ASCII 字母、数字、`-`、`_` 的无扩展名主体（沿用 `eplan_part_export` 的备份名约束），扩展名由 EPLAN 生成。没有目录参数。
 - `changelayer`：`LAYER`、`VISIBLE` 均为单个字符串，每个参数名恰好出现一次；不接受数组或第二个图层。图层名须为目标项目已有、可读且未锁定的图层。Host 展开成 `LAYER1`、`VISIBLE1`，可见性只允许字符串 `0` / `1`。模型不传展开后的键。S26 只测了 `EPLAN100` 的可见性翻转及回滚；设置其他图层、直接设 true、多图层以及 `PRINTED`、`TEXTHEIGHT`、`COLORID`、`TRANSPARENCY` 均**未验证**；多图层与这四类其他属性不在本规格开放范围（[ADR §2、§8][adr8]）。
+- `SwitchProjectType`：`PROJECTTYPE=1` 是 Schematic，`2` 是 Macro（api-actions #117）；规划和执行前均读取当前类型，相同时以 `INVALID_ARGUMENT` 拒绝，不创建空撤销步骤。执行后重新按路径获取项目并读回类型，不在读回阶段应用无操作拒绝。
 - 六种部件导出：`PROPERTYID` 为下表对应属性号的精确十进制字符串；`PROPERTYVALUE` 为单个字符串。每个参数名恰好出现一次，数组被拒绝。二者必填，Host 展开成 **`PROPERTYID1` / `PROPERTYVALUE1`**，不允许空过滤、第二组过滤或通配符用法。过滤值取已有记录的精确名称；未知记录的行为、多属性组合及其他 FORMAT **未验证**。不得把省略过滤解释为“导出全部”（[ADR §8][adr8]，A40）。
 
 | TYPE | `PROPERTYID` 唯一允许值 | 属性 / S26 的 `PROPERTYVALUE` 样本 |
@@ -105,7 +110,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
   "type": "object", "additionalProperties": false,
   "required": ["entry","tier","project","target","action","type","parameters","dryRun","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
   "properties": {
-    "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction"]},
+    "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction","SwitchProjectType","synchronize/MULTILINE","synchronize/OVERVIEW"]},
     "tier": {"enum":["export","write"]},
     "project": {"type":["string","null"]},
     "target": {"type":"string"},
@@ -129,7 +134,9 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
     "fingerprint": {
       "type":"object","additionalProperties":false,"required":["counts","dataFiles","fileCount","truncated"],
       "properties": {
-        "counts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["kind","count"],"properties":{"kind":{"enum":["pages","functions","connections","cables","terminals","plc_boxes","part_references","parts","manufacturers","constructions","connection_patterns","accessory_lists","accessory_placements","records"]},"count":{"type":["integer","null"],"minimum":0}}}},
+        "projectType":{"type":"string"},
+        "functionTextHash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+        "counts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["kind","count"],"properties":{"kind":{"enum":["pages","functions","connections","cables","terminals","plc_boxes","part_references","function_texts","project_parts","parts","manufacturers","constructions","connection_patterns","accessory_lists","accessory_placements","records"]},"count":{"type":["integer","null"],"minimum":0}}}},
         "dataFiles":{"type":"array","maxItems":20,"items":{"type":"object","additionalProperties":false,"required":["path","bytes","modifiedUtc"],"properties":{"path":{"type":"string"},"bytes":{"type":"integer","minimum":0},"modifiedUtc":{"type":"string","format":"date-time"}}}},
         "fileCount":{"type":"integer","minimum":0},"truncated":{"type":"boolean"}
       }
@@ -140,6 +147,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 - `action`、`type`、`parameters`：回显 Host 处理后的真实调用，路径按相应根目录显示为相对路径，不把本机源库路径塞进错误或普通日志；`target` 为实际项目或配置库标识，系统条目的 `project=null`（[ADR §3][adr3]，SEC-10、SEC-12）。
 - `before` / `after`：项目页数，以及功能、连接、电缆、端子、PLC 盒、部件引用数；项目 `.edb` 文件大小和修改时间，排除 `User.eod`、`User.eox`。系统条目报告库文件大小、修改时间及记录数；部件库另按 A30 排除 `*.lck`、`User.eod`、`User.eox`，不扩大到其他文件。S26 的完整内容 SHA-256 是补充证据，不能把 ADR 要求的大小/时间指纹说成逐项属性比较（[ADR §4][adr4]）。计数相同不等于没有修改；读数不可得用 null 和提示，不能当作 0 或完整验证通过。
+- 项目指纹另含 `projectType`；同步保留 Bridge 内完整的功能文本证据，结果公开 `functionTextHash` 和非空文本数 `function_texts`、项目部件数 `project_parts`（另含 `part_references`）。A50 的计数可不变而文本改变；摘要用于观察效果，不作为逐项正确性保证。类型切换的 hint 追加 `Project type: Schematic -> Macro.`。
 - `readback="fingerprint"` 时固定提示：`Changes have not been checked item by item; use read tools to verify objects you care about.` 已知副作用与未验证项也写入 `hint`。Write 提交时 `execution=committed`，dry-run 为 `not_started`、`after=null`、`readback=not_executed`。`undo=null`，提示“提交后一步 Ctrl+Z 未验证”，验证通过前不承诺撤销记录（[ADR §1、§4、§8][adr8]）。
 - 导出结果的 `directory` 是本次目录完整路径，`files` 递归列出文件相对路径、字节数和 **SHA-256**；`fileCount`、`totalBytes` 是完整合计。Write 无文件，`directory=null`、`files=[]`、合计为 0；dry-run 同样不产文件（[ADR §2–4][adr3]，导出清单增加哈希的产品行为**未验证**）。
 - 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[工具设计规范 §7](../standards/mcp-tool-design.md#7-输出)，[ADR §4][adr4]；此产品整形**未验证**）。
@@ -188,7 +196,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再核对指纹 → `LockingStep` → `SafetyPoint` → `UndoStep` → `QuietModeStep(ShowNoDialogs)` → action → 指纹 → 提交或回滚。真实项目按 writesOutsideScratch 逐次审批，scratch 自动；不是“仅允许 scratch”的新策略（[ADR §3][adr3]、Q4）。
 
-工具注解始终按 ADR 指定的最高级别 **Destructive**，CI 注解检查也如此，不能因首批只有一个 Write 而调低；每次的审批、备份、事务仍按条目级别，导出级不因此变成 Destructive。未来 Destructive 必须每次审批并做 Snapshot 备份，系统主数据写按 ADR-0019 审批和备份；首批没有这两类写入（[ADR §3、§6][adr6]；产品路由**未验证**）。
+工具注解始终按 ADR 指定的最高级别 **Destructive**，CI 注解检查也如此，不能因当前有四个 Write 而调低；每次的审批、备份、事务仍按条目级别，导出级不因此变成 Destructive。未来 Destructive 必须每次审批并做 Snapshot 备份，系统主数据写按 ADR-0019 审批和备份；首批没有这两类写入（[ADR §3、§6][adr6]；产品路由**未验证**）。
 
 ### 5.3 耗时、进度与取消
 
@@ -202,6 +210,8 @@ Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再�
 | 六种 `partsmanagementapi EXPORT*` | 有过滤 16.12–216.16 ms，均低于 1 秒 | 每条 30 秒 |
 | `plcservice/BUSDATAEXPORT` | 按三组合顺序 3,990.10 / 2,956.56 / 3,151.14 ms，约 3–4 秒 | 60 秒 |
 | 两种属性导出 | 93.24 / 112.14 ms | 每条 30 秒 |
+| `SwitchProjectType` | S26 r3：135 ms，Schematic → Macro 并回滚 | 60 秒 |
+| `synchronize/MULTILINE`、`synchronize/OVERVIEW` | S26 r3：功能文本有变化并回滚；Large：提交后一次撤销恢复 | 每条 120 秒 |
 
 预计超过 2 秒的 PLC 导出支持进度和取消；共用等待 Bridge 的 5 秒心跳、等待审批 15 秒心跳，提供 progressToken 时发送，数值单调递增，不虚构 action 内部百分比。取消在安全点检查，原生 Execute 中途能否打断**未验证**，不强杀 EPLAN；返回后才完成取消/清理。Write 发出执行请求后中断，先 `outcome.get`，从不重发（[ADR §3、§6][adr6]，工具设计规范 §9）。
 
@@ -221,7 +231,8 @@ Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再�
 
 ### 7.1 Small
 
-- 12 项枚举精确一致；三个“以后”条目、任意名称、大小写变体、ProjectAction 均 POLICY_DENIED。每个分支的 project、数组、整数 enum、布尔、格式组合、固定键/未知键、空串/空过滤一次校验；缺任一 PROPERTYID / PROPERTYVALUE 在发给 Bridge 前 INVALID_ARGUMENT。无过滤调用不得伪装成功导出全部（[ADR §1–2、§8][adr8]）。
+- 第 2 批 Large：三项均经产品工具提交，核对类型或文本指纹变化；预先创建哨兵页，一次当前项目 undo 恢复业务状态且保留哨兵，再一次 undo 移除哨兵。类型切换另核对其他打开项目类型；finally 在需要时经工具恢复 Schematic。不得据此文档声称实测已通过。
+- 15 项枚举精确一致；剩余 pending 条目、任意名称、大小写变体、ProjectAction 均 POLICY_DENIED。每个分支的 project、数组、整数 enum、布尔、格式组合、固定键/未知键、空串/空过滤一次校验；缺任一 PROPERTYID / PROPERTYVALUE 在发给 Bridge 前 INVALID_ARGUMENT。无过滤调用不得伪装成功导出全部（[ADR §1–2、§8][adr8]）。
 - 注入及路径形式：以 `/` 开头、单双引号、控制字符、绝对/UNC/驱动器路径、`..`、保留名、路径前缀碰撞；typed context 原值保持不等于放宽 SEC-33。编号只展开单项数组，拒绝模型直接给 LAYER1、PROPERTYID1 等旁路（[ADR §7][adr7]）。
 - 主版本不符拒绝；Write 的 execution/retryable 不变式；注解固定 Destructive，不按首批条目降级。描述连同 entry enum 计预算，详细用法按 topic 分条，示例可通过各自 schema；契约快照由 Medium 生成（[ADR §2、§6][adr6]）。
 
@@ -263,7 +274,7 @@ Q1 默认关闭、Q2 不通过移到以后、Q3 按验证主版本、Q4 与任�
 | changelayer 提交后一次 Ctrl+Z 及历史？ | **未验证**：S26 从未 Commit；须按产品包装提交后验一步撤销及历史，不将回滚等同撤销（ADR §2、§8） |
 | 当前项目与包装差异？ | **未验证**：省略 PROJECTNAME 的隔离探针；去掉 S26 导出探针事务包装后的真实行为；其他主版本、变体/补丁及更大数据预算均需相应证据（ADR §2、§3、§6） |
 | 三个“以后”用法何时补齐？ | **未验证**：EXPORTADDRESSOVERVIEW 需可读且匹配的配置项目/站/CPU 元组；两个外部编辑导出需各自已核实节点和可读方案名；A25 空值地址输出不算验证通过（ADR §8、Q2） |
-| 完整 schema 如何符合描述预算？ | **未验证**：12 个长 entry 名及逐条 arguments 分支须在实现时按 `Descriptions_StayWithinTheBudget` 实测并压缩；不能套用仅属于 usage 工具名枚举的预算豁免。若无法同时满足，先报告契约约束冲突，不自行删 enum、放宽校验或新增预算例外（ADR §1–2，工具设计规范 §4.2） |
+| 完整 schema 如何符合描述预算？ | **未验证**：15 个长 entry 名及逐条 arguments 分支须在实现时按 `Descriptions_StayWithinTheBudget` 实测并压缩；不能套用仅属于 usage 工具名枚举的预算豁免。若无法同时满足，先报告契约约束冲突，不自行删 enum、放宽校验或新增预算例外（ADR §1–2，工具设计规范 §4.2） |
 
 `plcservice/EXPORTADDRESSOVERVIEW`、`XMActionDCCommonExport`、`XMExportDCArticleDataAction` **不在 enum**。以后每个条目都按 [ADR §2][adr2]、[§8][adr8] 单独 spike，在 scratch 示例副本/复制测试库中验证参数、级别、副作用、指纹、回滚/撤销和 ShowNoDialogs，写入 api-notes，提交引用证据的 PR 经负责人审批后随产品发布；文档之外的 action 还必须由负责人明确提出需要，并在 PR 明确批准。不能在 config.json、本地 JSON 或工具调用中临时加条目。任务工具后来覆盖了某条用途，在同一个 PR 删除条目并按契约变更记录 CHANGELOG（[ADR §1–2][adr1]）。
 
@@ -279,4 +290,5 @@ Q1 默认关闭、Q2 不通过移到以后、Q3 按验证主版本、Q4 与任�
 [decisions]: ../adr/0021-action-run-whitelist.md#项目负责人的决定
 [s26]: ../../spikes/S26-action-run/README.md#结果
 [a40]: ../eplan/api-notes.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中
+[a50]: ../eplan/api-notes.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上
 [a30]: ../eplan/api-notes.md#a30-主数据的备份还原与部件库写入spike-s24-写入部分2026-10-21eplan-20260325421electric-p8在调度器中

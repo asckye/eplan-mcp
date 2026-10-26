@@ -175,7 +175,7 @@ public sealed class ActionRunValidationTests
         if (violation is not null)
         { Assert.Contains(violation, error.Metadata!["violations"], StringComparison.Ordinal); }
         Assert.Contains(entry, error.Metadata!["hint"], StringComparison.Ordinal);
-        Assert.NotEmpty(error.Metadata["allowedArguments"]);
+        Assert.Equal(string.Join(", ", ActionRunCatalog.Entries[entry]["parameters"]!.AsObject().Select(p => p.Key.EndsWith('1') ? p.Key[..^1] : p.Key.TrimEnd('?'))), error.Metadata["allowedArguments"]);
         return error;
     }
 }

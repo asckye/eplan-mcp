@@ -22,16 +22,37 @@ internal sealed partial class EplanActionRunner : IActionRunner
             var data = new ActionRunData { Parameters = parameters.Select(p => new ActionParameter { Name = p.Key, Value = p.Value }).ToList() };
             if (projectPath is not null)
             {
-                // A39: projects, layers and finder results are borrowed, never disposed. No property lists needed.
+                // A39: projects, layers and finder results are borrowed; only property wrappers are owned.
                 Project project = EplanProjects.ByPath(projectPath);
                 data.Target = project.ProjectFullName;
+                data.Before["project:type"] = project.TypeOfProject.ToString();
                 InspectPending(entry, project, parameters, data); // Pending rules stay unreachable through both whitelist checks.
                 using var finder = new DMObjectsFinder(project);
                 using var cables = new FunctionsFilter { FunctionCategory = FunctionCategory.Cable };
                 string[] kinds = ["pages", "functions", "connections", "cables", "terminals", "plc_boxes", "part_references"];
                 int[] counts = [finder.GetPages(null).Length, finder.GetFunctions(null).Length, finder.GetConnections(null).Length,
                     finder.GetFunctions(cables).Length, finder.GetTerminals(null).Length, finder.GetPLCs(null).Length, finder.GetArticleReferences(null).Length];
-                for (int i = 0; i < kinds.Length; i++) { data.Before["count:" + kinds[i]] = counts[i].ToString(CultureInfo.InvariantCulture); }
+                for (int i = 0; i < kinds.Length; i++)
+                { data.Before["count:" + kinds[i]] = counts[i].ToString(CultureInfo.InvariantCulture); }
+                if (entry is "synchronize/MULTILINE" or "synchronize/OVERVIEW")
+                {
+                    // A50: function texts change while object counts can stay equal. Keep full guard evidence.
+                    int texts = 0;
+                    foreach (Function function in finder.GetFunctions(null))
+                    {
+                        using var properties = function.Properties;
+                        using var value = properties.FUNC_TEXT;
+                        data.Before["function:text:" + function.ObjectIdentifier] = value.IsEmpty ? "<unset>" : value.ToString();
+                        if (!value.IsEmpty)
+                        {
+                            texts++;
+                        }
+                    }
+                    data.Before["count:function_texts"] = texts.ToString(CultureInfo.InvariantCulture);
+                    data.Before["count:project_parts"] = project.Articles.Length.ToString(CultureInfo.InvariantCulture);
+                    data.Before["synchronize:functionTextHash"] = Fingerprint.Of(data.Before
+                        .Where(p => p.Key.StartsWith("function:text:", StringComparison.Ordinal)).Select(p => Newtonsoft.Json.JsonConvert.SerializeObject(p)));
+                }
                 if (entry == "changelayer")
                 {
                     var layer = project.LayerTable.Layers.SingleOrDefault(l => l.isValid && !l.isLocked && l.Name == parameters["LAYER1"])
@@ -62,7 +83,8 @@ internal sealed partial class EplanActionRunner : IActionRunner
                     data.Parameters.Add(new ActionParameter { Name = "FILENAME", Value = Path.GetFileName(configured) });
                 }
                 Files(path, Path.GetFileName(path), data.Before);
-                if (languages) { data.Before["count:records"] = "null"; data.Warning = "Translation record count is unavailable. "; }
+                if (languages)
+                { data.Before["count:records"] = "null"; data.Warning = "Translation record count is unavailable. "; }
                 else
                 {
                     var database = new MDPartsManagement().OpenDatabase();
@@ -95,7 +117,8 @@ internal sealed partial class EplanActionRunner : IActionRunner
     {
         MainThread.Assert();
         using var context = new ActionCallingContext();
-        foreach (KeyValuePair<string, string> parameter in parameters) { context.AddParameter(parameter.Key, parameter.Value); }
+        foreach (KeyValuePair<string, string> parameter in parameters)
+        { context.AddParameter(parameter.Key, parameter.Value); }
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
 #pragma warning disable RS0030 // ADR-0021: only shipped whitelist entries, rechecked by Bridge.Core, into the Host's folder or Write transaction.
         var action = new ActionManager().FindAction(actionName) ?? throw new InvalidOperationException("EPLAN has no action for this whitelist entry.");
@@ -106,7 +129,8 @@ internal sealed partial class EplanActionRunner : IActionRunner
     private static void Files(string path, string relative, Dictionary<string, string> state)
     {
         FileAttributes attributes = File.GetAttributes(path);
-        if ((attributes & FileAttributes.ReparsePoint) != 0) { throw new IOException("Fingerprint contains a link."); }
+        if ((attributes & FileAttributes.ReparsePoint) != 0)
+        { throw new IOException("Fingerprint contains a link."); }
         if ((attributes & FileAttributes.Directory) != 0)
         {
             foreach (string child in Directory.EnumerateFileSystemEntries(path).OrderBy(p => p, StringComparer.Ordinal))

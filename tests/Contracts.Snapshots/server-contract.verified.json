@@ -4,7 +4,7 @@
     {
       "name": "eplan_action_run",
       "title": "Run a whitelisted EPLAN action",
-      "description": "Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. Write supports dry_run; approval outside scratch; denial: APPROVAL_DENIED.\nfull + actionRun:on only.\nParameters/effects: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"project\":\"Line1\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}",
+      "description": "Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. dry_run; approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -21,7 +21,10 @@
               "partsmanagementapi/EXPORTACCESSORYPLACEMENTS",
               "plcservice/BUSDATAEXPORT",
               "projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS",
-              "XEsUserPropertiesExportAction"
+              "XEsUserPropertiesExportAction",
+              "SwitchProjectType",
+              "synchronize/MULTILINE",
+              "synchronize/OVERVIEW"
             ]
           },
           "project": {
@@ -83,7 +86,10 @@
               "partsmanagementapi/EXPORTACCESSORYPLACEMENTS",
               "plcservice/BUSDATAEXPORT",
               "projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS",
-              "XEsUserPropertiesExportAction"
+              "XEsUserPropertiesExportAction",
+              "SwitchProjectType",
+              "synchronize/MULTILINE",
+              "synchronize/OVERVIEW"
             ]
           },
           "tier": {
@@ -266,6 +272,13 @@
               "truncated"
             ],
             "properties": {
+              "projectType": {
+                "type": "string"
+              },
+              "functionTextHash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
               "counts": {
                 "type": "array",
                 "items": {
@@ -285,6 +298,8 @@
                         "terminals",
                         "plc_boxes",
                         "part_references",
+                        "function_texts",
+                        "project_parts",
                         "parts",
                         "manufacturers",
                         "constructions",
