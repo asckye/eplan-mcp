@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full`，不加入 `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false，`destructiveHint` = false，`idempotentHint` = false，`openWorldHint` = false |
-| 状态 | Proposed（v0.4.0；第 1、2 步已实现，plan / execute 已注册到 Bridge，尚无 Host 工具） |
+| 状态 | Implemented（v0.4.0；Host、Bridge、Small / Medium 与 Large 测试代码已实现，实机测试另行运行） |
 
 ## 1. 这个工具解决什么任务
 
@@ -78,7 +78,7 @@
 
 - 依据 [api-notes A49](../eplan/api-notes.md) 和 [S38](../../spikes/S38-drawing-texts-frames/README.md) 的 Texts / Probes：先递归遍历 `PlotFrame.SubPlacements` 记录排除集合，再遍历 `Page.AllPlacements` 和组的 `SubPlacements`，按对象身份去重；仅选择页面来源的精确 `Graphics.Text` 类型。遍历失败整体拒绝。
 - `Text.Contents` 读取 `MultiLangString`，通过 `GetLanguageList` 和 `GetString` 取得准确存储语言及内容，不解析 `@` / `;` 分隔的显示串。写入重建全部语言，保留不修改的条目、空文本与 `??_??`；适配器释放 API 返回的可释放值，不跨请求持有 EPLAN 对象。
-- 新增 `page.text.replace.plan` / `page.text.replace.execute`、Contracts DTO、可注入的文字适配接口和纯匹配逻辑。Bridge 规划生成完整 WritePlan，每个对象语言一条 PlannedChange；定位信息和 occurrences 保存在 `WritePlan.PageTextChanges` 的结构化条目中，不从拼接的显示字符串反解析。第 2 步加入 `EplanPageTexts` 和 execute，通过同一次主线程调用重新规划；先核对清单指纹，再生成变更，即使匹配已消失或超过上限也按 PLAN_STALE 拒绝。Host 留给第 3 步。
+- Host 通过 WritePipeline 调用 `page.text.replace.plan` / `page.text.replace.execute`。Bridge 每个对象语言一条 PlannedChange，定位信息和 occurrences 保存在 `WritePlan.PageTextChanges`，不反解析显示字符串；执行在同次主线程调用内先核对指纹再生成变更。只读 `page.text.inspect` 按显式页名读取自由文本及图框等受保护文字的哈希，供独立读回与 Large 测试核对，不增加 MCP 工具。
 - 指纹覆盖项目和页身份、选定页上全部合格自由文本的身份及其全部存储语言原文，包含无匹配文本和空页，固定排序后用无歧义的结构编码计算 SHA-256；不对清洗或截断后的文字取哈希。参数摘要沿用流水线绑定，审批后 execute 在同一锁定作用域内重新读取并核对指纹，再执行原定范围；新增、删除或修改文字都使计划过期。
 - 执行走 `TransactionRunner` / `TransactionScope`，整次调用只有一个事务和一个 UndoStep。顺序为 LockingStep → SafetyPoint → UndoStep → QuietModeStep(ShowNoDialogs)，逐对象一次重建 Contents，核对该对象所有语言，再提交、关闭撤销步骤。读取、遍历及每对象写入检查取消；默认执行上限 60 秒，Host 提供等待进度。
 
@@ -87,7 +87,7 @@
 - Host 必须经过 WritePipeline：dry run、策略、审批、审计、执行及结果恢复。scratch 自动允许，scratch 之外按现有配置拒绝或请求工程师批准；不改变策略模型。
 - dry run 列出第 3 节的完整计数及预算内明细，`execution=not_started`，不写审计执行记录。零匹配和超限在规划阶段报错。
 - 审批显示工具、项目、页面、oid、语言、before → after 和次数，并说明一次 Ctrl+Z 可撤销；审批与审计保留完整计划，不复用面向模型的裁减结果。项目文字按现有审批清洗规则显示。
-- 审计沿用 requestId、参数摘要、指纹、变更清单、execution_started / execution_result 和审批记录；项目内容不进入普通日志。
+- 审计沿用 requestId、参数摘要、execution_started / execution_result 和审批记录；执行开始记录还保存 fingerprint、完整 textChanges、totalChanges 和 totalOccurrences，模型响应的截断不裁减审计内容；项目内容不进入普通日志。
 - 事务前失败为 not_started；事务内异常、取消或读回失败整体回滚，返回 rolled_back；提交成功为 committed，提交后的问题作为 warning。执行超时或断连先查询 outcome，不自动重发；无法取回时 OUTCOME_UNKNOWN / unknown 并暂停写入，沿用 ADR-0010。
 - 注册只增加一个 full 工具，当前基线 72 → 73；若合入前已有 `eplan_translation_import`，则 73 → 74。不增加 core 工具，不扩展 workflow 计划步骤目录。同时维护 usage、工具列表与计数、契约快照，以及覆盖映射和生成报告。
 

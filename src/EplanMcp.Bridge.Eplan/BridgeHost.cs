@@ -146,6 +146,7 @@ internal static class BridgeHost
             new PageUpdateExecuteOperation(catalog, pages, descriptions, transactions),
             new PageTextReplacePlanOperation(catalog, pageTexts),
             new PageTextReplaceExecuteOperation(catalog, pageTexts, transactions),
+            new PageTextInspectOperation(catalog, pageTexts),
             new DeviceUpdatePlanOperation(catalog, devices, renamer),
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions),
             new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer),

@@ -4,11 +4,12 @@ using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
+using Newtonsoft.Json;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>S38/A49: exact page-origin Graphics.Text, including groups; frame descendants are excluded first.</summary>
-internal sealed class EplanPageTexts : IPageTextWriter
+internal sealed class EplanPageTexts : IPageTextWriter, IPageTextInspector
 {
     public string? LanguageCode(string language)
     {
@@ -85,9 +86,77 @@ internal sealed class EplanPageTexts : IPageTextWriter
         return result;
     }
 
-    private static PageFreeText ReadText(Text text)
+    public IReadOnlyList<PageTextInspection> Inspect(string projectPath, IReadOnlyList<string> pages)
     {
-        using MultiLangString content = text.Contents;
+        MainThread.Assert();
+        var result = new List<PageTextInspection>();
+        foreach (string name in pages)
+        {
+            OperationContext.Current.ThrowIfCancellationRequested();
+            Page page = Find(projectPath, name) ?? throw new BridgeErrorException(ErrorReason.PageNotFound,
+                "A page to inspect no longer exists. Use eplan_page_list to check its exact name.");
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var protectedTexts = new List<string>();
+            int frameTextCount = 0;
+            void Walk(IEnumerable<Placement> placements, bool frame)
+            {
+                foreach (Placement placement in placements)
+                {
+                    OperationContext.Current.ThrowIfCancellationRequested();
+                    string id = placement.ToStringIdentifier();
+                    if (!seen.Add(id))
+                    {
+                        continue;
+                    }
+
+                    if (placement is TextBase text && (frame || placement.GetType() != typeof(Text)))
+                    {
+                        protectedTexts.Add(JsonConvert.SerializeObject(new { id, frame, Entries = Entries(text).OrderBy(e => e.Language, StringComparer.Ordinal) }));
+                        if (frame)
+                        {
+                            frameTextCount++;
+                        }
+                    }
+
+                    if (placement is Group group)
+                    {
+                        Walk(group.SubPlacements, frame);
+                    }
+
+                    if (placement is IPropertyPlacementsContainer container)
+                    {
+                        Walk(container.PropertyPlacements, frame);
+                    }
+                    else if (placement is SymbolReference symbol)
+                    {
+                        Walk(symbol.PropertyPlacements, frame);
+                    }
+                }
+            }
+
+            if (page.PlotFrame is { } plotFrame)
+            {
+                Walk(plotFrame.SubPlacements, frame: true);
+            }
+
+            Walk(page.AllPlacements, frame: false);
+            result.Add(new PageTextInspection
+            {
+                Page = page.Name,
+                Texts = FreeTexts(page).ToDictionary(t => t.ObjectIdentifier, t => Entries(t).ToDictionary(e => e.Language, e => e.Text, StringComparer.Ordinal)),
+                ProtectedHash = Fingerprint.Of(protectedTexts),
+                FrameTextCount = frameTextCount,
+            });
+        }
+
+        return result;
+    }
+
+    private static PageFreeText ReadText(Text text) => new(text.ObjectIdentifier, text.ToStringIdentifier(), Entries(text));
+
+    private static List<TextEntry> Entries(TextBase text)
+    {
+        using MultiLangString content = text switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => text.Contents };
         var languages = new LanguageList();
         int count = content.GetLanguageList(ref languages);
         var entries = new List<TextEntry>();
@@ -98,7 +167,7 @@ internal sealed class EplanPageTexts : IPageTextWriter
             entries.Add(new TextEntry(code.GetString(), content.GetString(language)));
         }
 
-        return new PageFreeText(text.ObjectIdentifier, text.ToStringIdentifier(), entries);
+        return entries;
     }
 
     private static ISOCode.Language Number(string language)
