@@ -20,6 +20,10 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new TranslationImportArgs(),
+        new TranslationImportArgs { File = "glossary.txt", FilePath = @"D:\Imports\glossary.txt", Sha256 = new string('a', 64), ReferenceLanguage = "zh_CN", Fingerprint = new string('a', 64), Database = @"$(md_translate)\Translate.db" },
+        new TranslationImportData(),
+        new TranslationImportData { Database = @"$(md_translate)\Translate.db", Entries = 12, ReferenceLanguage = "en_US", Added = 3, Filled = 2, Kept = 1 },
         new PlanNamesArgs { Project = "Line1" },
         new PlanNameEntry { Kind = "function", Name = "=F+A1-电机😀" },
         new PlanNamesData { Project = "Line1", ProjectPath = @"D:\Projects\Line1", ProjectGuid = "Line1@123", Complete = true,

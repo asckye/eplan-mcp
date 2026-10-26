@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "ab510957 + uncommitted changes",
-  "sourceHash": "sha256:e755ce9f642ff23673d1002f9d50edaeaa435070916c7ebdf03a4ad5bccc7401",
+  "scannedSources": "54c88e8b + uncommitted changes",
+  "sourceHash": "sha256:ed06d292c3933d3a3208eeefbb89bfcb521170d85c9e9bc9d401bd6d2e0de7f2",
   "operations": [
     {
       "name": "action.execute",
@@ -445,6 +445,14 @@
       "name": "translation.export.run",
       "class": "MasterDataExportRunOperation",
       "kind": "MasterDataExportKind.Translations"
+    },
+    {
+      "name": "translation.import.execute",
+      "class": "TranslationImportExecuteOperation"
+    },
+    {
+      "name": "translation.import.plan",
+      "class": "TranslationImportPlanOperation"
     }
   ],
   "usages": {
@@ -679,7 +687,8 @@
           "read"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -784,6 +793,17 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       },
       {
@@ -1586,7 +1606,9 @@
           "read"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -2158,7 +2180,8 @@
           "new"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -2263,6 +2286,17 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       },
       {
@@ -2994,7 +3028,8 @@
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -3173,6 +3208,18 @@
           "part.import.plan",
           "part.sync.execute",
           "part.sync.plan"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Configured",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       }
     ],
@@ -8459,7 +8506,9 @@
           "new"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -8470,7 +8519,8 @@
           "new"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -8531,6 +8581,17 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.HEServices.Translate.AddProjectLanguage(Eplan.EplApi.DataModel.Project,System.String)": [
@@ -8555,7 +8616,8 @@
           "call"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -8569,6 +8631,19 @@
         ],
         "operations": [
           "export.untranslated.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts(System.String,System.String,System.String)": [
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       }
     ],
@@ -16115,7 +16190,9 @@
           "get"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -16143,7 +16220,9 @@
           "get"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -16979,7 +17058,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -17084,6 +17164,17 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       },
       {
@@ -17181,7 +17272,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -17286,6 +17378,17 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
         ]
       },
       {
@@ -17501,7 +17604,8 @@
           "part.export.plan",
           "part.export.run",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -18205,7 +18309,8 @@
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -18347,6 +18452,18 @@
           "part.import.plan",
           "part.sync.execute",
           "part.sync.plan"
+        ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Configured",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       }
     ],
@@ -23001,7 +23118,8 @@
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       }
     ],
@@ -24875,7 +24993,9 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {
@@ -24886,7 +25006,8 @@
           "type"
         ],
         "operations": [
-          "translation.export.run"
+          "translation.export.run",
+          "translation.import.execute"
         ]
       },
       {
@@ -24947,6 +25068,17 @@
         "operations": [
           "project.translate.execute"
         ]
+      },
+      {
+        "adapter": "EplanTranslationDatabaseWriter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "translation.import.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.HEServices.Translate.DatabaseType": [
@@ -24958,7 +25090,9 @@
           "type"
         ],
         "operations": [
-          "masterdata.backup"
+          "masterdata.backup",
+          "translation.import.execute",
+          "translation.import.plan"
         ]
       },
       {

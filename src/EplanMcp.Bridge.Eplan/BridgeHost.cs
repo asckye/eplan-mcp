@@ -220,12 +220,15 @@ internal static class BridgeHost
     private static IOperation[] MasterDataOperations(IProjectCatalog catalog, IPageReader pages, IProjectBackup backup, ITransactionScopeFactory transactions)
     {
         var parts = new EplanPartsDatabaseWriter();
+        var translations = new EplanTranslationDatabaseWriter();
         var reader = new EplanPartReader();
         return
         [
             new MasterDataBackupOperation(new EplanMasterDataBackup()),
             new PartImportPlanOperation(parts),
             new PartImportExecuteOperation(parts),
+            new TranslationImportPlanOperation(translations),
+            new TranslationImportExecuteOperation(translations),
             new PartSyncPlanOperation(catalog, reader, parts),
             new PartSyncExecuteOperation(catalog, pages, reader, parts, backup, transactions),
         ];

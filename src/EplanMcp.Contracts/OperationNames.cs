@@ -364,6 +364,12 @@ public static class OperationNames
     /// </summary>
     public const string TranslationExportRun = "translation.export.run";
 
+    /// <summary>Validates the translation file and previews its first ten rows; args: TranslationImportArgs; data: WritePlan.</summary>
+    public const string TranslationImportPlan = "translation.import.plan";
+
+    /// <summary>Imports into the backed-up translation database; args: TranslationImportArgs; data: TranslationImportData.</summary>
+    public const string TranslationImportExecute = "translation.import.execute";
+
     /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.

@@ -1,6 +1,6 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>The parts database EPLAN is configured with: its setting, and for a file database the path EPLAN expands it to.</summary>
+/// <summary>A system database EPLAN is configured with: its setting, and for a file database the path EPLAN expands it to.</summary>
 public sealed class ConfiguredDatabase
 {
     /// <summary>The setting as EPLAN has it: a file with path variables, or a SQL Server connection string.</summary>
