@@ -186,6 +186,15 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A47. 翻译库导入 `Translate.ImportDatabaseTexts`（S24 r19，2026-10-26，EPLAN 2026.0.3.25421，Electric P8，项目负责人指示在正在用的翻译库上执行）
+
+- 签名是 `ImportDatabaseTexts(strFilename, strConverter, strReferenceLanguage)`：第三个参数是**一个参考语言**。传 `"en_US;zh_CN"` 时返回 true、耗时 0.02–0.04 秒，翻译库逐字节不变。
+- 用转换器 `XTrLanguageDbXml2TabConverterImpl`、参考语言 `en_US`、表头与导出完全相同（UTF-16LE 带 BOM，21 列，最后一列 `COMMENT`）的文件导入：新词条被新增；参考原文已存在的词条，空缺的语言被补上，**已有译文不被改写**（`Motor terminals` 的 `zh_CN` 仍为“电机端子”）；同一参考原文再导入不产生重复。0.02–0.07 秒，不弹对话框，系统消息中没有记录。
+- **返回值不可靠**：没有写入任何东西时也返回 true；只能用导入前后的 `ExportDatabaseTexts`（制表符约 0.7 秒、2.2 MB）比较结果。
+- 只改 `$(md_translate)\Translate.db`（修改时间随写入更新）；同目录的 `translate.etd`、`TranslateReports.etd`、`TranslateTemplate.db` 不变，不产生锁文件或其他文件。关闭 EPLAN 后用文件副本替换 `Translate.db`，四个文件与测试前逐字节相同。
+- 只含两列（`en_US`、`zh_CN`）表头的文件只在错误的第三个参数下试过，结果不能说明部分列文件是否可用。
+— 协调人经 S24 spike（`importtranslation`、`exporttranslation` 模式）实测：先文件副本加 SHA-256、再 `backup MASTERDATA` 备份，导入测试词条，导出比较，最后关闭 EPLAN 恢复并核对哈希。
+
 ### A46. 项目打开、当前选择与导航器顺序（P25，2026-10-25，EPLAN 2026.0.3.25421，Electric P8）
 
 - 打开名称排在当前项目**之后**的关闭项目，当前项目不变（夹具 `EPLAN_Sample_Project` 当前时，`LargeWrite`、`LargeOutside`、`P25Acceptance`、`P25o_*`、`P25t_*` 都如此）；带不带 `/Quiet` 相同。
