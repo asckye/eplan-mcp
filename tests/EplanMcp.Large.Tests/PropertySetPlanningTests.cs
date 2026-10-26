@@ -80,7 +80,7 @@ public sealed class PropertySetPlanningTests(LiveEplan eplan)
     }
 
     [Fact]
-    public async Task B1_LargeWrite_StaleLocatorAndOpaque20027_AreRefusedWithoutWriting()
+    public async Task B1_LargeWrite_StaleLocatorAndUnreviewedProperty_AreRefusedWithoutWriting()
     {
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
         await LiveProperties.DescribeEnvironmentAsync(bridge, eplan.ProcessId);
@@ -104,8 +104,8 @@ public sealed class PropertySetPlanningTests(LiveEplan eplan)
         PropertyReadRow technical = await ReadAsync(bridge, project, rated, 20027);
         Assert.Equal("opaque", technical.ValueType); // A44 is not narrowed by planning.
         Assert.Null(technical.Value);
-        PropertySetChange unknown = Change(rated, "opaque must stay refused");
-        unknown.Property = new PropertySelector(propertyId: 20027);
+        PropertySetChange unknown = Change(rated, "unreviewed property must stay refused");
+        unknown.Property = new PropertySelector(propertyId: 20024);
         int opens = adapter.Opens;
         BridgeErrorException opaqueError = Assert.Throws<BridgeErrorException>(() => new PropertySetPlanner(adapter).Plan(
             project, 2026, [unknown], [rated], languages, TestContext.Current.CancellationToken));

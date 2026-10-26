@@ -66,9 +66,9 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 237,
+      "implemented": 238,
       "byTools": 230,
-      "partial": 40,
+      "partial": 41,
       "automatedTest": 230,
       "liveVerified": 151,
       "envBlocked": 122,
@@ -102,9 +102,9 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 126,
+      "implemented": 127,
       "byTools": 126,
-      "partial": 1,
+      "partial": 2,
       "automatedTest": 126,
       "liveVerified": 83,
       "envBlocked": 77,
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 233,
+    "used": 234,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 102,
+      "implemented": 103,
       "liveVerified": 75
     },
     {
@@ -1774,10 +1774,10 @@
         "project.get",
         "property.read"
       ],
-      "apiIds": 111,
+      "apiIds": 113,
       "operationGroups": 65,
-      "dataDictionary": 0,
-      "dependencies": 45,
+      "dataDictionary": 1,
+      "dependencies": 46,
       "actions": 0,
       "spec": "docs/tools/eplan_property_get.md",
       "small": 2,
@@ -2177,6 +2177,7 @@
         "eplan_language_remove",
         "eplan_plc_get",
         "eplan_project_translate",
+        "eplan_property_get",
         "eplan_workflow_plan"
       ]
     },
@@ -3400,6 +3401,13 @@
         "eplan_plc_get",
         "eplan_workflow_plan"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": true,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",

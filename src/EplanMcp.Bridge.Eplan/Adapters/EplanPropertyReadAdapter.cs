@@ -82,7 +82,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
 
     // As EplanPlanFunctionReader: A12's unfiltered finder omits some representations; include placements and
     // page-less functions. Selection deduplicates by type/oid. These identity getters never acquire Properties.
-    private static IEnumerable<Function> Functions(DMObjectsFinder finder, Action check)
+    internal static IEnumerable<Function> Functions(DMObjectsFinder finder, Action check)
     {
         check();
         foreach (Function function in finder.GetFunctions(null))
@@ -122,7 +122,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         }
     }
 
-    private static SnapshotObject Describe(StorableObject obj)
+    internal static SnapshotObject Describe(StorableObject obj)
     {
         var identity = new SnapshotObject
         {
@@ -163,7 +163,8 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         Pin = pin.Name is { } name ? SnapshotValues.Text(name) : null,
     };
 
-    private sealed class Scope(UniversalPropertyList list, string objectType, string language, Action check) : IPropertyReadScope
+    internal sealed class Scope(UniversalPropertyList list, string objectType, string language, Action check,
+        bool ownsList = true) : IPropertyReadScope
     {
         public string ObjectType => objectType;
         public string DefaultLanguage => language;
@@ -202,7 +203,13 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
             }
         }
 
-        public void Dispose() => list.Dispose();
+        public void Dispose()
+        {
+            if (ownsList)
+            {
+                list.Dispose();
+            }
+        }
     }
 
     private sealed class Handle(UniversalPropertyList list, AnyPropertyId id, PropertyValue parent, Action check) : IPropertyReadHandle

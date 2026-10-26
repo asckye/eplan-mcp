@@ -5,17 +5,18 @@ public sealed class PropertyWriteWhitelistTests
 {
     [Theory]
     [InlineData(2026, "Function", 20011, true)]
-    [InlineData(2026, "Function", 20027, false)]
+    [InlineData(2026, "Function", 20027, true)]
     [InlineData(2026, "Terminal", 20011, false)]
     [InlineData(2027, "Function", 20011, false)]
-    public void PlanningCandidate_OnlyFunctionText_IsAvailableWithoutExecutionPermission(int version, string objectType, int id, bool allowed)
+    public void PlanningCandidate_B1BridgeScope_DoesNotGrantHostPermission(int version, string objectType, int id, bool allowed)
     {
         PropertyWriteEntry? entry = PropertyWriteWhitelist.PlanningCandidate(version, objectType, id);
         Assert.Equal(allowed, entry is not null);
         Assert.Empty(PropertyWriteWhitelist.Entries);
         if (entry is not null)
         {
-            Assert.Equal("multi_language", entry.Definition.ValueType);
+            Assert.Equal(id == 20011 ? "multi_language" : "text", entry.Definition.ValueType);
+            Assert.Equal(id == 20011 ? "explicit_merge_preserve" : "none", entry.Definition.LanguageMode);
             entry.Definition.MaximumLength = 1;
             Assert.Equal(500, PropertyWriteWhitelist.PlanningCandidate(version, objectType, id)!.Definition.MaximumLength);
         }

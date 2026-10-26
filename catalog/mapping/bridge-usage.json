@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "48c604bc",
-  "sourceHash": "sha256:ed06d292c3933d3a3208eeefbb89bfcb521170d85c9e9bc9d401bd6d2e0de7f2",
+  "scannedSources": "891c70ee",
+  "sourceHash": "sha256:fa9b584530d388d33ba05295ea04840bbe8c9e8c08a475f736fe5779b2a1fd89",
   "operations": [
     {
       "name": "action.execute",
@@ -407,6 +407,14 @@
     {
       "name": "property.read",
       "class": "PropertyReadOperation"
+    },
+    {
+      "name": "property.set.execute",
+      "class": "PropertySetExecuteOperation"
+    },
+    {
+      "name": "property.set.plan",
+      "class": "PropertySetPlanOperation"
     },
     {
       "name": "report.update.execute",
@@ -836,6 +844,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -953,7 +962,20 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -1122,7 +1144,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1146,7 +1170,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1170,7 +1196,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1194,7 +1222,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1218,7 +1248,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -1231,7 +1263,9 @@
           "read"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -1243,6 +1277,21 @@
         ],
         "operations": [
           "property.read"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.ValueWithUnit": [
+      {
+        "adapter": "EplanPropertyReadDefinition",
+        "member": "Metadata",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2329,6 +2378,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -2365,6 +2415,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -2499,7 +2550,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2560,7 +2613,20 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -2653,7 +2719,20 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -2758,7 +2837,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -2769,7 +2850,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2900,7 +2983,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -2937,7 +3022,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -3025,6 +3112,8 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
@@ -3055,6 +3144,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.AddString(Eplan.EplApi.Base.ISOCode.Language,System.String)": [
@@ -3079,6 +3179,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.Dispose": [
@@ -3101,7 +3212,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3126,7 +3239,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3640,7 +3755,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -3653,7 +3770,20 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -4333,7 +4463,21 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -4636,7 +4780,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -4939,7 +5085,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -5279,7 +5427,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -5290,7 +5440,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -5902,7 +6054,9 @@
           "new"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -6124,6 +6278,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -6351,7 +6507,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6404,7 +6562,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6489,7 +6649,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6523,7 +6685,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6558,7 +6722,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6582,7 +6748,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6618,7 +6786,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6763,7 +6933,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6869,6 +7041,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.PropertyValue": [
@@ -6894,6 +7077,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -6928,6 +7122,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -6964,6 +7159,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7000,6 +7196,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7045,6 +7242,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7318,7 +7516,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7329,7 +7529,22 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7444,6 +7659,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7480,6 +7696,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7516,6 +7733,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7561,6 +7779,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7597,6 +7816,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -7607,6 +7827,15 @@
         "adapter": "EplanPropertyReadAdapter.Scope",
         "member": "Dispose",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
         "access": [
           "call"
         ],
@@ -9030,7 +9259,9 @@
           "call"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -9067,7 +9298,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9146,7 +9379,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9205,7 +9440,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9545,6 +9782,18 @@
         ]
       },
       {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -9645,7 +9894,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9706,7 +9957,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -9768,7 +10021,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -9832,7 +10087,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10326,6 +10583,18 @@
         ]
       },
       {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -10477,7 +10746,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10708,7 +10979,21 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10849,7 +11134,22 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -10925,7 +11225,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -11351,7 +11653,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -12111,6 +12415,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "property.set.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching": [
       {
         "adapter": "EplanDeviceReader",
@@ -12690,7 +13007,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13187,7 +13506,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13198,7 +13519,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13470,7 +13793,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13834,7 +14159,9 @@
           "set"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -13948,7 +14275,9 @@
           "set"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -14011,7 +14340,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14086,7 +14417,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14308,7 +14641,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14687,6 +15022,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -14937,7 +15274,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15096,6 +15435,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -15220,6 +15561,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -15403,7 +15746,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15431,7 +15776,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15444,7 +15791,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15457,7 +15806,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15470,7 +15821,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15483,7 +15836,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15496,7 +15851,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15526,7 +15883,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15550,7 +15909,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15578,7 +15939,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15759,7 +16122,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15770,7 +16135,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15983,7 +16350,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -15994,7 +16363,22 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -16153,7 +16537,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -16164,7 +16550,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -16177,7 +16565,9 @@
           "get"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -17207,6 +17597,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -17421,6 +17812,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -17490,7 +17882,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17732,7 +18126,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17767,7 +18163,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17778,7 +18176,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17985,7 +18385,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -17996,7 +18398,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18007,7 +18411,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18134,7 +18551,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18181,7 +18611,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -18218,7 +18650,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18306,6 +18740,8 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
@@ -18360,6 +18796,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -18547,7 +18994,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18707,7 +19156,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       }
     ],
@@ -18869,7 +19331,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18942,7 +19406,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18953,7 +19419,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18964,7 +19432,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19911,7 +20381,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19922,7 +20394,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19933,7 +20407,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -19944,7 +20420,21 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20169,7 +20659,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20205,7 +20697,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20961,7 +21455,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20972,7 +21468,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -20983,7 +21481,35 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -21064,6 +21590,39 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -21358,7 +21917,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -21593,7 +22154,9 @@
           "plan.step.guard",
           "plc.get",
           "project.snapshot",
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22037,7 +22600,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22048,7 +22613,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22059,7 +22626,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22070,7 +22639,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22238,7 +22809,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -22288,7 +22861,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22727,7 +23302,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22884,6 +23461,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -22983,6 +23562,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -23000,7 +23581,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23115,6 +23698,8 @@
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "terminal.renumber.execute",
           "translation.export.plan",
@@ -23285,6 +23870,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.read",
+          "property.set.execute",
+          "property.set.plan",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -23475,7 +24062,9 @@
           "language.set.execute",
           "language.set.plan",
           "project.translate.execute",
-          "project.translate.plan"
+          "project.translate.plan",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23526,7 +24115,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23537,7 +24128,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23561,7 +24154,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23572,7 +24167,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23611,7 +24208,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23622,7 +24221,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23779,7 +24380,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -23790,7 +24393,20 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPropertySetSession",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "property.set.execute"
         ]
       },
       {
@@ -23945,6 +24561,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24069,7 +24686,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -24080,7 +24699,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -24145,6 +24766,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24181,6 +24803,7 @@
           "part.sync.execute",
           "placeholder.apply.execute",
           "project.translate.execute",
+          "property.set.execute",
           "report.update.execute",
           "terminal.renumber.execute"
         ]
@@ -24210,7 +24833,9 @@
           "type"
         ],
         "operations": [
-          "property.read"
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {

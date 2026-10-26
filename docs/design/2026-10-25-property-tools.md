@@ -219,7 +219,7 @@ standard 快照之外的属性通过本步骤显式的前置条件和校验证�
 
 | 批次 | 对象、ID / 正式名称 | 拟定值约束及专项验证 |
 |---|---|---|
-| B1 功能文本/技术数据 | Function：20011 `FUNC_TEXT`；20027 `FUNC_TECHNICAL_CHARACTERISTIC` | 文本≤500 字符及定义上限；20011 按语言修改；20027 是否多语言需核实。测中文、空值、`;`/`@`、未改译文、辅助功能保持原值 |
+| B1 功能文本/技术数据 | Function：20011 `FUNC_TEXT`；20027 `FUNC_TECHNICAL_CHARACTERISTIC` | 文本≤500 字符及各自定义上限；20011 按语言合并；20027 为 ValueWithUnit（26）的独立文本，按字符串原样读写（A48），不作数值转换。测中文、空值、`;`/`@`、未改译文、辅助功能保持原值 |
 | B2 安装位置 | Function：20024 `FUNC_MOUNTINGLOCATION` | 文本/多语言性、长度和命名规则待核实；核对其与结构安装位置的差别、继承来源、跨页主辅功能、交叉引用；意外改名则不开放裸 setter |
 | B3 连接工程字段 | Connection：31002 `CONNECTION_WIRECROSSSECTION`、31059 `CONNECTION_WIRECROSSSECTION_UNIT`；31004 `CONNECTION_WIRENUMBER`；31011 `CONNECTION_DESIGNATION` | 截面用有单位的正值候选，单位枚举、逗号小数及存储类型实测；31004 的颜色/编号语义按界面对照，不凭现有 Colour 字段认定。测定义点继承、两端及相关连接传播，拒绝超范围 |
 | B4 页属性 | Page：11011 `PAGE_NOMINATIOMN`；11901 `PAGE_SUPPLEMENTARYFIELD` | 前者多语言合并，对照现有 page_update；后者文本/索引及 MaxIndex 先核实。测其他语言/索引、页名和幅面不变；11016 幅面先只读，避免外部路径/格式副作用 |
@@ -296,7 +296,7 @@ standard 快照之外的属性通过本步骤显式的前置条件和校验证�
 | P4 | Bridge Function/Connection 读适配器及 get 操作 | 320 | S/M；L 歧义/locator/计算/许可/A36 门 |
 | P5 | get 规格、Host 工具、预算/分页及发布注册 | 300 | S/M 契约、脱敏；L/Agent 读任务，依赖 P3/P4 |
 | P6 | set 规划、值比较、依赖/副作用守卫 | 320 | S/M stale/范围/语言；L B1 规划不写 |
-| P7 | 事务执行、统一列表生命周期和逐项读回 | 300 | S/M 失败路径；L B1 写/撤销/回滚全门，入口仍未注册 |
+| P7 | 事务执行、统一列表生命周期和逐项读回 | 300 | S/M 失败路径；L B1 写/撤销/回滚全门；Bridge 注册 plan/execute，Host 工具入口留待 P8 |
 | P8 | set 规格、Host 流水线及已验证 B1 发布 | 300 | S/M 审批/审计/恢复、契约；L/Agent 完整调用 |
 | P9a / P9b | 覆盖输入/动态 ID 映射；方向报告与文档 | 各 280 | S/M 多类型同号、缺证据、确定性、generate/check；逐 ID 引用 Large 证据 |
 | P10a / P10b | B2 安装位置；B3 连接字段白名单 | 各 280 | 各自 S/M + L 全门；未查明传播不开放 |

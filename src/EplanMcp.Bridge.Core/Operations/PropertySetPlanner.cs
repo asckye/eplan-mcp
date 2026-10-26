@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>Unregistered B1 planner. Call on the main thread with a complete property-free function inventory (A44).</summary>
+/// <summary>B1 planning rules. Call on the main thread with a complete property-free function inventory (A44).</summary>
 public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
 {
     /// <summary>Inventory and project languages are copied in the same read work unit; no native resource escapes.</summary>
@@ -112,9 +112,13 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
         result.Plan.ProjectPath = projectPath;
         result.Plan.Project = Path.GetFileName(projectPath);
         var names = new HashSet<string?>(resolved.Select(r => r.Object.Name), StringComparer.Ordinal);
-        foreach (SnapshotObject obj in functions.Where(f => names.Contains(f.Name))
-            .GroupBy(Key).Select(g => g.First()).OrderBy(Key, StringComparer.Ordinal))
+        foreach (var item in functions.Where(f => names.Contains(f.Name))
+            .GroupBy(Key).Select(g => g.First()).OrderBy(Key, StringComparer.Ordinal)
+            .SelectMany(obj => resolved.Where(r => r.Object.Name == obj.Name).Select(r => r.Id).Distinct().OrderBy(id => id)
+                .Select(id => (Object: obj, PropertyId: id))))
         {
+            SnapshotObject obj = item.Object;
+            int propertyId = item.PropertyId;
             Checkpoint();
             var guard = new PropertySetGuard
             {
@@ -131,15 +135,17 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 },
                 Main = obj.Main == true,
                 Parts = obj.Parts is null ? null : [.. obj.Parts],
-                PropertyId = 20011,
+                PropertyId = propertyId,
             };
             using IPropertyReadScope scope = reader.Open(projectPath, new PropertyTarget(locator: guard.Target));
             guard.ObjectType = scope.ObjectType;
-            using IPropertyReadHandle? handle = scope.ObjectType == "Function" && PropertyCatalog.ReadRefusal(scope.ObjectType, 20011) is null
-                ? scope.OpenProperty(20011) : null;
+            using IPropertyReadHandle? handle = scope.ObjectType == "Function" && PropertyCatalog.ReadRefusal(scope.ObjectType, propertyId) is null
+                ? scope.OpenProperty(propertyId) : null;
             using IPropertyReadDefinition? definition = handle?.OpenDefinition();
             PropertyDefinitionMetadata? metadata = definition?.Metadata;
-            if (metadata?.ValueType != "multi_language" || metadata.IsIndexed != false || metadata.IsInternal != false
+            if (metadata is null || (propertyId == 20011 ? metadata.ValueType != "multi_language"
+                : metadata.ValueType != "opaque" || metadata.Format != "ValueWithUnit")
+                || metadata.IsIndexed != false || metadata.IsInternal != false
                 || metadata.IsReadOnly != false || metadata.IsNamePart != false || metadata.IsComputed == true)
             {
                 Add("/changes", "The runtime definition or related-object scope differs from B1.", ErrorReason.PolicyDenied);
@@ -163,15 +169,22 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             guard.WasEmpty = value!.IsEmpty;
             if (!guard.WasEmpty)
             {
-                using IPropertyReadTexts texts = value.OpenTexts();
-                foreach (string language in texts.Languages.OrderBy(l => l, StringComparer.Ordinal))
+                if (propertyId == 20027)
                 {
-                    Checkpoint();
-                    guard.Before.Add(new SnapshotText
+                    guard.Before.Add(new SnapshotText { Language = TextLanguages.Independent, Text = value.Display! });
+                }
+                else
+                {
+                    using IPropertyReadTexts texts = value.OpenTexts();
+                    foreach (string language in texts.Languages.OrderBy(l => l, StringComparer.Ordinal))
                     {
-                        Language = language,
-                        Text = texts.GetText(language),
-                    });
+                        Checkpoint();
+                        guard.Before.Add(new SnapshotText
+                        {
+                            Language = language,
+                            Text = texts.GetText(language),
+                        });
+                    }
                 }
             }
 
@@ -180,7 +193,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 Language = t.Language,
                 Text = t.Text,
             }).ToList();
-            foreach (var assignment in resolved.Where(r => Key(r.Object) == Key(obj)))
+            foreach (var assignment in resolved.Where(r => Key(r.Object) == Key(obj) && r.Id == propertyId))
             {
                 if (metadata.MaximumLength is { } maximum && assignment.Change.Value.Text!.Length > maximum)
                 {
@@ -189,7 +202,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                     Refuse(violations);
                 }
 
-                string language = assignment.Change.Language!;
+                string language = assignment.Change.Language ?? TextLanguages.Independent;
                 string before = PropertyValueComparison.TextIn(guard.Before, language);
                 string after = assignment.Change.Value.Text!;
                 if (string.Equals(before, after, StringComparison.Ordinal))
@@ -208,7 +221,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                     Action = "update",
                     Kind = "function",
                     Name = obj.Name!,
-                    Property = "20011 (" + language + ")",
+                    Property = propertyId.ToString(CultureInfo.InvariantCulture) + " (" + language + ")",
                     OldValue = before,
                     NewValue = after,
                 });
@@ -247,6 +260,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
         void Checkpoint()
         {
             cancellationToken.ThrowIfCancellationRequested();
+            OperationContext.Current.ThrowIfCancellationRequested();
             if (watch.Elapsed >= TimeSpan.FromSeconds(30))
             {
                 throw new BridgeErrorException(ErrorReason.Timeout, "Property planning exceeded 30 seconds. Reduce changes.");
@@ -257,7 +271,8 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
     /// <summary>Execution must freshly re-plan under its own list lifetime before comparing the approved fingerprint.</summary>
     public static void RequireCurrent(PropertySetPlan approved, PropertySetPlan current)
     {
-        if (!string.Equals(approved.Plan.Fingerprint, current.Plan.Fingerprint, StringComparison.Ordinal))
+        if (!string.Equals(approved.Plan.Fingerprint, current.Plan.Fingerprint, StringComparison.Ordinal)
+            || !JToken.DeepEquals(BridgeJson.FromObject(approved.Guards), BridgeJson.FromObject(current.Guards)))
         {
             Refuse([new PropertyViolation
             {

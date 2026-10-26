@@ -112,6 +112,8 @@ internal static class BridgeHost
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new EplanProjectReader()),
             new PropertyReadOperation(new EplanPropertyReadAdapter()),
+            new PropertySetPlanOperation(path => new EplanPropertySetSession(path), actionMajor),
+            new PropertySetExecuteOperation(path => new EplanPropertySetSession(path), transactions, actionMajor),
             new ProjectBackupOperation(catalog, pages, backup),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),

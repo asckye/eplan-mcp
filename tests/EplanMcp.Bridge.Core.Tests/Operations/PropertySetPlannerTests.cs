@@ -119,11 +119,10 @@ public sealed class PropertySetPlannerTests
     }
 
     [Theory]
-    [InlineData(20027)]
     [InlineData(20024)]
     [InlineData(3012)]
     [InlineData(2000)]
-    public void Plan_OpaqueOrOutOfWhitelistProperty_IsRefusedBeforeReading(int id)
+    public void Plan_OutOfWhitelistProperty_IsRefusedBeforeReading(int id)
     {
         FakePropertyReadAdapter adapter = Adapter();
         PropertySetChange change = Change();
@@ -424,7 +423,7 @@ public sealed class PropertySetPlannerTests
     {
         FakePropertyReadAdapter adapter = Adapter();
         PropertySetChange change = Change();
-        change.Property = new PropertySelector(propertyId: 20027);
+        change.Property = new PropertySelector(propertyId: 20024);
         AssertViolation(Assert.Throws<BridgeErrorException>(() => Plan(adapter, change, [])),
             ErrorReason.PolicyDenied, "/changes/0/property");
         Assert.Equal(0, adapter.Opens);

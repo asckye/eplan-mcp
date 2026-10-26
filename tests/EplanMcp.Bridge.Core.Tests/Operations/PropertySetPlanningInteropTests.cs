@@ -69,7 +69,7 @@ public sealed class PropertySetPlanningInteropTests
         Assert.Equal(0, adapter.Opens);
     }
 
-    // Only the test router exposes property-set planning; the product registry's tool list stays unchanged.
+    // P6's captured-reader seam; the registered B1 pair is covered by PropertySetExecuteInteropTests.
     private sealed class TestPlanOperation(FakePropertyReadAdapter adapter) : Operation<TestPlanArgs, PropertySetPlan>
     {
         public override string Name => "test.property.plan";
