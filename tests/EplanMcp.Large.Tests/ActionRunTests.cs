@@ -131,6 +131,7 @@ public sealed class ActionRunTests(LiveEplan eplan) : IAsyncLifetime
     public async Task SwitchProjectType_CommittedThenOneUndoRestoresTypeAndEarlierHistoryWithoutChangingOtherProjects()
     {
         string project = await eplan.WriteProjectAsync();
+        await OpenIsolationCopyAsync();
         Dictionary<string, string> others = await OtherProjectTypesAsync(project);
         try
         {
@@ -154,9 +155,7 @@ public sealed class ActionRunTests(LiveEplan eplan) : IAsyncLifetime
         string inspection = switchType ? "graphicallayertable/EXPORT" : entry;
         if (switchType)
         {
-            Assert.True((await OtherProjectTypesAsync(project)).Keys.Any(
-                p => p.StartsWith(Path.Combine(LiveEplan.ScratchRoot(), "writes") + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)),
-                "Open another scratch writes copy sorting after LargeWrite, such as S26Type, to verify isolation while switching type.");
+            Assert.Contains(Path.Combine(WriteHost.ScratchFolder, IsolationName), (await OtherProjectTypesAsync(project)).Keys, StringComparer.OrdinalIgnoreCase);
         }
         string[] sentinel = await selection.CreatePagesAsync(1);
         ActionRunData before = await InspectAsync(inspection, project);
@@ -221,6 +220,21 @@ public sealed class ActionRunTests(LiveEplan eplan) : IAsyncLifetime
                 }
                 Assert.Equal("Schematic", (await InspectAsync(inspection, project)).Before["project:type"]);
             }
+        }
+    }
+
+    /// <summary>The copy eval-fixture -WriteCopies makes for the type switch; it sorts after LargeWrite, so opening it keeps the selection (A46).</summary>
+    private const string IsolationName = "LargeWriteType";
+
+    private async Task OpenIsolationCopyAsync()
+    {
+        string copy = Path.Combine(WriteHost.ScratchFolder, IsolationName);
+        Assert.True(File.Exists(copy + ".elk"), $"Run eng\\scripts\\eval-fixture.ps1 -WriteCopies to create {copy}.elk.");
+        ProjectListData open = await _services!.GetRequiredService<IBridgeClient>().InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), TestContext.Current.CancellationToken);
+        // ProjectOpen on a project that is already open shows a modal dialog (A46), so open it only once.
+        if (!open.Projects.Any(p => string.Equals(p.Path, copy, StringComparison.OrdinalIgnoreCase)))
+        {
+            await PlanStepLiveSession.ActionAsync("ProjectOpen /Project:\"" + copy + ".elk\" /Quiet");
         }
     }
 

@@ -242,6 +242,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
             Assert.True(IsProject(Current(_initial), fixture));
             Assert.All(_initial, p => Assert.True(IsProject(p, fixture)
                 || IsProject(p, Path.Combine(WriteHost.ScratchFolder, WriteHost.WritableName))
+                || IsProject(p, Path.Combine(WriteHost.ScratchFolder, "LargeWriteType"))
                 || IsProject(p, Path.Combine(WriteHost.OutsideFolder, "LargeOutside")), "Only the known Large fixture copies may be open."));
         }
         catch
@@ -257,7 +258,8 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
         Assert.Null(ImportTools.ProjectNameProblem(name));
         // A46: sort after the fixture and LargeOutside, which may be closed, but before LargeWrite. Other Large tests change
         // LargeWrite, and reopening it can show a modal dialog (for example a language missing from the dictionary).
-        Assert.All(_initial, p => Assert.True(IsWritable(p.Path)
+        // The type switch test's isolation copy also sorts after LargeWrite and stays open.
+        Assert.All(_initial, p => Assert.True(IsWritable(p.Path) || IsProject(p, Path.Combine(WriteHost.ScratchFolder, "LargeWriteType"))
             ? StringComparer.OrdinalIgnoreCase.Compare(name, p.Name) < 0
             : StringComparer.OrdinalIgnoreCase.Compare(name, p.Name) > 0));
         string destination = Path.Combine(_folder, name);

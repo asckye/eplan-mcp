@@ -75,8 +75,10 @@ public sealed class LanguageRemoveTests : IClassFixture<DestructiveHost>
         Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["languages"] = DestructiveHost.Json(_swedish) };
         int texts = (await _host.CallAsync(Tool, new(args) { ["dry_run"] = true })).GetProperty("textsAffected").GetInt32();
 
-        // S23 counted 460 on the sample project; macros other write tests insert may add texts for a while.
-        Assert.InRange(texts, 460, int.MaxValue);
+        // S23 counted 460 on the sample project. Other write tests change the count: inserted macros add texts, and
+        // CheckAndReportTests regenerates reports, which drops the Swedish description of the two topology report
+        // pages &EFA4/2 and &EFA4/2.1 and adds one parts list page (459 after it, 2026-10-26).
+        Assert.InRange(texts, 450, int.MaxValue);
         _host.Approvals.Approve(Tool, _host.Writable, [$"delete language sv_SE ({texts} translations)"]);
         var clock = Stopwatch.StartNew();
         JsonElement removed = await _host.CallAsync(Tool, args);
