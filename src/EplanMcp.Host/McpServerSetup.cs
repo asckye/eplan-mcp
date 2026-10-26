@@ -111,6 +111,7 @@ internal static class McpServerSetup
             .WithTools<PropertySchemaTools>(HostJson.Options)
             .WithTools<PropertyGetTools>(HostJson.Options)
             .WithTools<PartMasterDataTools>(HostJson.Options)
+            .WithTools<TranslationImportTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
             .WithTools<CheckTools>(HostJson.Options)
             .WithTools<CheckWriteTools>(HostJson.Options)

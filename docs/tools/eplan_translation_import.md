@@ -6,9 +6,9 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)）：每次审批，执行前备份主数据 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批）；`ImportDatabaseTexts` 已于 2026-10-26 实测（[api-notes A47](../eplan/api-notes.md)），可以实现 |
+| 状态 | Implemented；Large 测试已编写、尚未运行，每次运行须项目负责人批准（[api-notes A47](../eplan/api-notes.md) 为已有 API 实测） |
 
-TI-1 已实现基础支持；TI-2a 已接入 Contracts、Bridge 计划、执行及适配器，工具尚未注册（仍为 72 个）。TI-2b 接入 Host 并编写 Large 测试后再改为 Implemented。
+TI-1、TI-2a、TI-2b 已接通基础支持、Bridge 和 Host；`full` 共 73 个工具，本工具归 `language` 分组，不在 `core` 中。
 
 - TI-2a 执行参数需带计划的 `fingerprint`（文件 SHA-256）与 `database`（`plan.masterData.database`），防止审批、备份后切换库；Host 流水线负责先备份并在 unknown 错误中附加 `metadata.backup`。
 
@@ -41,6 +41,8 @@ TI-1 已实现基础支持；TI-2a 已接入 Contracts、Bridge 计划、执行�
 - `backup`：本次主数据备份的路径；
 - `execution`、`auditId`。
 
+dry-run 另有 `languages`、`preview`；`dryRun`、`recovered` 标记规划或恢复响应。没有读回时三个计数为空，不用零代替未知。
+
 一行摘要：`Imported 120 entries (by en_US) into the translation database ($(md_translate)\Translate.db): 12 added, 3 filled, 2 kept. Backup: …`
 
 - 三个计数来自导入前后各导出一次（每次约 0.7 秒）的比较，不依赖 API 的返回值（A47：返回 true 不代表写入了任何东西）。
@@ -66,5 +68,5 @@ TI-1 已实现基础支持；TI-2a 已接入 Contracts、Bridge 计划、执行�
 ## 7. 测试
 - Small：路径规则、`reference_language` 校验、文件第一行的解析（UTF-16、BOM、制表符）。
 - Medium：假 Bridge 上的审批、备份失败、返回 false 时 `unknown` 与暂停。
-- Large：写正在用的翻译库，只在项目负责人每次批准后运行，做法同 `eplan_part_import` 第 7 节，测试词条为 `EplanMcpLargeTest`。
+- Large：`TranslationImportTests` 默认跳过，只在项目负责人每次批准且设置 `EPLANMCP_LARGE_MASTERDATA=1` 后运行。先对配置的翻译文件夹全部文件计算 SHA-256、复制并核对，副本和清单保留在 Host 临时目录之外；导入 `EplanMcpLargeTest` 得到 `added=1`，再审批、备份并重导得到 `added=0`。结束后由操作员关闭 EPLAN，用副本恢复并核对全部哈希，见 Large 测试 README；本轮未运行。
 - Agent 评测："把 imports 里的 glossary.txt 的英文和中文导入翻译库"。

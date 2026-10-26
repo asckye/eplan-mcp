@@ -104,6 +104,17 @@ Q6 的流水线部分（审批之后用计划的指纹执行、`PLAN_STALE` 映�
 
 M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整个项目，测试无法只在新页上验证，也不能按 Ctrl+Z（开着两个项目时撤销可能落在夹具上，A14），所以**它们会永久改变 `writes\LargeWrite`**：端子名、电缆名、线号按方案重排。其他写测试不依赖这些名称：`WriteSafetyTests` 和 `PageDeleteTests` 用到的 `+A1-WE1` 等设备不在 S21 改名的电缆中（`+A1-WE1` 的类别是 `BusBarDefText`，不是电缆，2026-10-21 实测）。这些测试第一次在新副本上运行时核对 S21 的改动，之后的运行核对"没有可改的"；要重新验证第一次的结果，按上文重新复制副本。
 
+### 系统主数据（翻译库）
+`TranslationImportTests` 写正在用的翻译库，默认跳过。每次运行须先取得项目负责人批准，再由维护者设置 `EPLANMCP_LARGE_MASTERDATA=1`，只运行这个类；结束后移除该环境变量。本轮仅编写测试，尚未运行。
+
+- 测试在连接前检查 opt-in，经 `DestructiveHost` 和只读计划取得配置的库的实际路径。导入前先对整个翻译文件夹（含子文件夹）的所有文件计算 SHA-256，复制到系统临时目录中独立的 `eplanmcp-translation-backup-*\files\`，逐个核对副本及源文件，`manifest.json` 记录原库、原目录和相对文件名到哈希的映射；副本在 Host 数据目录之外，不随测试结束删除。
+- 先导出确认库里没有 `EplanMcpLargeTest`；再导入一个 `en_US`/`zh_CN` 测试词条，`added=1`，重导 `added=0`，两次均须独立审批并先生成非空 `.zw7`，均为 `committed`。
+- 运行后由操作员关闭 EPLAN，将 `files\` 中的文件复制回清单所记原目录，核对文件集合及所有 SHA-256 与清单完全一致；核对成功后才清理恢复副本。测试不会自动恢复。`.zw7` 在 Host 临时目录中，随 Host 结束删除，不能替代保留的文件副本。
+
+```powershell
+dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.TranslationImportTests"
+```
+
 ### 系统主数据（部件库）
 🔴 **这些测试写 EPLAN 配置的那个部件库**，也就是工程师正在用的库：S24 证实副本隔离不了导入（结论 8），所以没有"测试库"可用（[ADR-0019](../../docs/adr/0019-master-data-writes.md)）。它们默认跳过，只有环境变量 `EPLANMCP_LARGE_MASTERDATA` 为 `1` 时才运行，跳过的判断在连接 EPLAN 之前。**每次运行都要项目负责人事先批准**，并由维护者按下面的步骤做：
 1. 运行前：确认部件库在本机文件中（不是 SQL Server；在 SQL Server 上时测试会得到 `POLICY_DENIED`），对库的全部文件（`.alk` 和 `.adb\` 中的文件）计算 SHA-256，再把它们复制一份到 scratch 之外的地方；
