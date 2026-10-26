@@ -73,6 +73,7 @@ internal static class BridgeHost
         var pageWriter = new EplanPageWriter();
         var transactions = new EplanTransactions();
         var descriptions = new EplanPageDescriptions();
+        var pageTexts = new EplanPageTexts();
         var renamer = new EplanDeviceRenamer();
         var generator = new EplanConnectionGenerator();
         var inserter = new EplanMacroInserter();
@@ -143,6 +144,8 @@ internal static class BridgeHost
             new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions),
             new PageUpdatePlanOperation(catalog, pages, descriptions),
             new PageUpdateExecuteOperation(catalog, pages, descriptions, transactions),
+            new PageTextReplacePlanOperation(catalog, pageTexts),
+            new PageTextReplaceExecuteOperation(catalog, pageTexts, transactions),
             new DeviceUpdatePlanOperation(catalog, devices, renamer),
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions),
             new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer),
