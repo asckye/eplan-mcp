@@ -35,4 +35,4 @@
 | [0026](0026-eplan-events-and-push.md) | Bridge 订阅经验证的 EPLAN 事件，在单独的订阅连接上把带序号的失效通知推给 Host；通知只用于缓存失效，从不作为写入的依据 | Accepted | 双向门（协议有能力声明） |
 | [0027](0027-workbench-plan-review.md) | Workbench 的计划审阅与计划结果通知扩展为版本化协议（M6 第 2 阶段不依赖） | Proposed | 单向门（改变 Workbench IPC 合同） |
 | [0028](0028-plan-record-format.md) | 计划以版本化的不可变定义加原子替换的状态记录落盘（`state\plans\`），规范 SHA-256，可执行 24 小时、保留 30 天 | Accepted | 单向门（新增落盘格式） |
-| [0029](0029-phase3-engineering-records.md) | 提议采用版本化的配置、模块、规则与工程计划证据格式 | Proposed | 单向门（新增落盘格式） |
+| [0029](0029-phase3-engineering-records.md) | 采用版本化的配置、模块、规则与工程计划证据格式 | Accepted | 单向门（新增落盘格式） |

@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 状态 | In Review（实施设计；本次只写文档，未运行 EPLAN） |
-| 级别 | L2；新增落盘合同单列为 [ADR-0029](../adr/0029-phase3-engineering-records.md)（Proposed），接受前不实施该部分 |
+| 级别 | L2；新增落盘合同单列为 [ADR-0029](../adr/0029-phase3-engineering-records.md)（Accepted，项目负责人 2026-10-26） |
 | 关联 Issue | — |
 | 相关依据 | [M6](2026-10-21-m6-engineering-packs.md) 4.1–4.3、4.10–4.11、4.16–4.18；[阶段 2](2026-10-23-m6-phase2-plans.md)；[大项目计划](2026-10-25-m6-large-project-plans.md) |
 | 相关 ADR | [0023](../adr/0023-plan-approval-and-backup.md)、[0024](../adr/0024-pack-trust-and-container.md)、[0025](../adr/0025-code-plugin-worker.md)、[0026](../adr/0026-eplan-events-and-push.md)、[0028](../adr/0028-plan-record-format.md)（均 Accepted） |
@@ -279,7 +279,7 @@ Large材料只来自EPLAN示例/自带宏/基本项目；项目和生成宏不�
 
 | 事项 | 风险、建议及负责人/时点 |
 |---|---|
-| O1 L3落盘 | 项目负责人在F1/F2前审ADR-0029；本设计不代为接受。若要求改IPC/进程/支持版本或审批权限，再单独Proposed ADR；ADR-0027富界面仍可延期 |
+| O1 L3落盘 | 项目负责人已于 2026-10-26 接受 ADR-0029。若要求改IPC/进程/支持版本或审批权限，再单独Proposed ADR；ADR-0027富界面仍可延期 |
 | O2 首批公司材料 | 负责人在C1/M1前指定非客户示例的配置键、单位、两套部件映射及正式来源；建议以电机起动方式/功率验证差异，不声称通用选型算法 |
 | O3 提取语义 | 负责人在M4前确认“显式选定三个回路→审阅参数→补五个实例”作为本期验收；全项目自动找同构回路留阶段4 |
 | O4 原生来源路径 | 维护者先验证SourceProject清除API；负责人在E1前决定带Gap的原生宏是否允许对外交换。清单/输出从不含本机路径；未决定时仅本地候选，不对外导出该宏 |
