@@ -15,6 +15,9 @@ internal static class ApprovalTexts
 {
     public const int MaxValueLength = 120;
 
+    private static readonly string[] _translationFileDetails = ["file", "bytes", "sha256"];
+    private static readonly string[] _translationLanguageDetails = ["entries", "referenceLanguage", "languages"];
+
     /// <summary>The dialog for <paramref name="question"/>, without its binding and deadline.</summary>
     public static ApprovalAskArgs For(ApprovalQuestion question, CultureInfo culture)
     {
@@ -45,8 +48,10 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. ValueSet(plan, zh), .. CableGeneration(plan, zh)],
-            Note = Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. TranslationImport(plan, zh), .. ValueSet(plan, zh), .. CableGeneration(plan, zh)],
+            Note = plan.MasterData?.Kind == MasterDataKinds.Translations
+                ? zh ? "导入撤不回，执行前会备份翻译库。" : "An import cannot be undone, the translation database is backed up first."
+                : Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
                 + (plan.MasterData is null ? Undo(question.Tool, plan, zh) : MasterDataUndo(plan, zh)),
             ApproveLabel = zh ? "批准" : "Approve",
             RejectLabel = zh ? "拒绝" : "Reject",
@@ -62,13 +67,14 @@ internal static class ApprovalTexts
     {
         string time = suspension.Time == DateTimeOffset.MinValue ? "?" : suspension.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         string pid = suspension.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?";
+        bool translations = suspension.Tool == "eplan_translation_import";
         string scope = suspension.Database is { } database
-            ? (zh ? "部件库：" : "Parts database: ") + Value(database, zh)
+            ? (translations ? (zh ? "翻译库：" : "Translation database: ") : (zh ? "部件库：" : "Parts database: ")) + Value(database, zh)
             : suspension.Project is { } project
             ? (zh ? "项目：" : "Project: ") + Value(project, zh)
             : zh ? $"范围：这个 EPLAN 实例（进程 {pid}）中的所有项目" : $"Scope: every project in this EPLAN instance (process {pid})";
         bool parts = suspension.Database is not null;
-        string where = parts ? (zh ? "部件库" : "the parts database") : (zh ? "项目" : "the project");
+        string where = translations ? (zh ? "翻译库" : "the translation database") : parts ? (zh ? "部件库" : "the parts database") : (zh ? "项目" : "the project");
         return new ApprovalAskArgs
         {
             Title = zh ? "上次 AI 修改的结果未知" : "The outcome of the last AI change is unknown",
@@ -78,7 +84,11 @@ internal static class ApprovalTexts
             Changes = suspension.Changes.Count == 0
                 ? [zh ? "（暂停记录中没有变更清单）" : "(the suspension record lists no changes)"]
                 : [.. suspension.Changes.Select(c => Value(c, zh))],
-            Note = parts
+            Note = translations
+                ? zh
+                    ? "请先在 EPLAN 中核实翻译库；需要时关闭 EPLAN，按执行前的备份恢复 Translate.db。核实之后再继续，否则请保持暂停。"
+                    : "Check the translation database in EPLAN first; if needed, close EPLAN and restore Translate.db from the backup made before the import. Continue only after that; otherwise keep writes suspended."
+                : parts
                 ? zh
                     ? "请先在 EPLAN 的部件管理中核实部件库；需要时关闭 EPLAN，按执行前的备份恢复部件库。核实之后再继续，否则请保持暂停。"
                     : "Check the parts database in EPLAN's parts management first; if needed, close EPLAN and restore the database from the backup made before the change. Continue only after that; otherwise keep writes suspended."
@@ -364,7 +374,7 @@ internal static class ApprovalTexts
     /// </summary>
     private static IEnumerable<string> PartLists(WritePlan plan, bool zh)
     {
-        if (plan.MasterData is null || plan.Changes.Count == 0 || plan.Details is not { } details)
+        if (plan.MasterData?.Kind != MasterDataKinds.Parts || plan.Changes.Count == 0 || plan.Details is not { } details)
         {
             yield break;
         }
@@ -415,9 +425,31 @@ internal static class ApprovalTexts
         yield return zh ? $"不变的部件：{skipped} 个（方式 {mode}，按 {matchBy} 判断是否已有）" : $"Parts left as they are: {skipped} (mode {mode}, matched by {matchBy})";
     }
 
+    private static IEnumerable<string> TranslationImport(WritePlan plan, bool zh)
+    {
+        if (plan.MasterData?.Kind != MasterDataKinds.Translations || plan.Details is not { } details)
+        {
+            yield break;
+        }
+
+        yield return (zh ? "文件、字节数、SHA-256：" : "File, bytes, SHA-256: ") + string.Join("; ", _translationFileDetails.Select(k => Value(details.GetValueOrDefault(k) ?? "?", zh)));
+        yield return (zh ? "词条数、参考语言、其他语言：" : "Entries, reference language, other languages: ") + string.Join("; ", _translationLanguageDetails.Select(k => Value(details.GetValueOrDefault(k) ?? "?", zh)));
+        yield return zh ? "只新增词条、补上空缺译文，已有译文不会被改写。" : "This import adds entries and fills empty translations; existing translations are never rewritten.";
+        using JsonDocument preview = JsonDocument.Parse(details.GetValueOrDefault("preview") ?? "[]");
+        foreach (JsonElement row in preview.RootElement.EnumerateArray().Take(10))
+        {
+            yield return string.Join("; ", row.EnumerateObject().Select(p =>
+            {
+                string text = p.Value.GetString() ?? string.Empty;
+                return Value(p.Name, zh) + ": " + Value(text[..Math.Min(text.Length, 40)], zh);
+            }));
+        }
+    }
+
     private static string Title(WritePlan plan, bool zh) => (plan.MasterData, plan.ProjectPath.Length > 0) switch
     {
         (null, _) => zh ? "批准 AI 修改 EPLAN 项目？" : "Approve AI changes to the EPLAN project?",
+        ({ Kind: MasterDataKinds.Translations }, _) => zh ? "批准 AI 修改 EPLAN 翻译库？" : "Approve AI changes to EPLAN's translation database?",
         (_, true) => zh ? "批准 AI 修改 EPLAN 部件库和项目？" : "Approve AI changes to EPLAN's parts database and the project?",
         _ => zh ? "批准 AI 修改 EPLAN 部件库？" : "Approve AI changes to EPLAN's parts database?",
     };
@@ -435,6 +467,13 @@ internal static class ApprovalTexts
 
         string type = target.Server ? "SQL Server" : zh ? "文件型" : "file database";
         string path = target.Path.Length == 0 || target.Path == target.Database ? string.Empty : (zh ? "，" : ", ") + Value(target.Path, zh);
+        if (target.Kind == MasterDataKinds.Translations)
+        {
+            return zh
+                ? $"翻译库：{Value(target.Database, zh)}（{type}{path}）\n修改影响使用这个库的所有项目。\n"
+                : $"Translation database: {Value(target.Database, zh)} ({type}{path})\nEvery project that uses this translation database is affected.\n";
+        }
+
         return zh
             ? $"部件库：{Value(target.Database, zh)}（{type}{path}）\n这个部件库被所有项目共用：修改影响使用它的所有项目。\n"
             : $"Parts database: {Value(target.Database, zh)} ({type}{path})\nEvery project that uses this parts database is affected.\n";

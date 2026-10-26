@@ -16,4 +16,10 @@ public interface IMasterDataBackup
     /// checks what lies in the folder afterwards.
     /// </summary>
     public void BackupParts(string database, string folder, string archiveName);
+
+    /// <summary>The configured translation database; rejects SQL Server without exposing its connection string.</summary>
+    public string TranslationDatabase();
+
+    /// <summary>Runs backup MASTERDATA with MDTYPE:LANGUAGES (A30); the caller validates the .zw7 archive.</summary>
+    public void BackupTranslations(string database, string folder, string archiveName);
 }

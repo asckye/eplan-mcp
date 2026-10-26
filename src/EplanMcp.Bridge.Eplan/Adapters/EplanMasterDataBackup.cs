@@ -1,4 +1,5 @@
 using Eplan.EplApi.ApplicationFramework;
+using Eplan.EplApi.HEServices;
 using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Eplan.Adapters.Generated;
@@ -24,13 +25,28 @@ internal sealed class EplanMasterDataBackup : IMasterDataBackup
     }
 
     public void BackupParts(string database, string folder, string archiveName)
+        => Backup("ARTICLES", database, folder, archiveName);
+
+    public string TranslationDatabase()
+    {
+        MainThread.Assert();
+        using var translate = new Translate();
+        return translate.ActiveTranslateDatabase == Translate.DatabaseType.SQL
+            ? throw MasterDatabases.Denied("translation")
+            : translate.TranslateDatabase ?? string.Empty;
+    }
+
+    public void BackupTranslations(string database, string folder, string archiveName)
+        => Backup("LANGUAGES", database, folder, archiveName);
+
+    private static void Backup(string masterDataType, string database, string folder, string archiveName)
     {
         MainThread.Assert();
         // The parameters as the generated class has them from the action catalog (catalog/wrappers.yaml), in the same
         // order as before; TYPE and the action's name are written here, so the coverage scan sees A:backup/MASTERDATA.
         var parameters = new BackupMasterDataParameters
         {
-            MDTYPE = "ARTICLES",
+            MDTYPE = masterDataType,
             SOURCEPATH = Path.GetDirectoryName(database) ?? string.Empty,
             FILENAME = Path.GetFileName(database),
             DESTINATIONPATH = folder,

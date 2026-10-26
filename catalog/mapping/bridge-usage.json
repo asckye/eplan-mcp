@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
-  "scannedSources": "a4215f9b",
-  "sourceHash": "sha256:5ce5b278d99933552dbd682b5367bd550d37f737a7e10bef39b9b1f5acee2621",
+  "scannedSources": "a4215f9b + uncommitted changes",
+  "sourceHash": "sha256:ad13e6ceeac1b5356c1a15332e034ad115f37b6f6801a0b3f7d4aa484abfd312",
   "operations": [
     {
       "name": "action.execute",
@@ -451,7 +451,7 @@
     "A:backup": [
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "action"
@@ -466,7 +466,7 @@
     "A:backup/MASTERDATA": [
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "action"
@@ -647,7 +647,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "read"
@@ -1564,6 +1564,17 @@
     ],
     "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL": [
       {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "masterdata.backup"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataExporter",
         "member": "TranslationDatabase",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataExporter.cs",
@@ -1737,7 +1748,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "call"
@@ -1808,7 +1819,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "new"
@@ -1879,7 +1890,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "new"
@@ -1950,7 +1961,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "call"
@@ -2100,7 +2111,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "new"
@@ -2383,7 +2394,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "call"
@@ -8306,6 +8317,17 @@
         ],
         "operations": [
           "language.remove.execute"
+        ]
+      },
+      {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "masterdata.backup"
         ]
       },
       {
@@ -15785,6 +15807,17 @@
     ],
     "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase": [
       {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "masterdata.backup"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataExporter",
         "member": "TranslationDatabase",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataExporter.cs",
@@ -15801,6 +15834,17 @@
       }
     ],
     "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase": [
+      {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "masterdata.backup"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "TranslationDatabase",
@@ -16328,7 +16372,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "type"
@@ -16399,7 +16443,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "type"
@@ -16496,7 +16540,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "type"
@@ -16602,7 +16646,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "type"
@@ -16804,7 +16848,7 @@
       },
       {
         "adapter": "EplanMasterDataBackup",
-        "member": "BackupParts",
+        "member": "Backup",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
         "access": [
           "type"
@@ -24385,6 +24429,17 @@
         ]
       },
       {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "masterdata.backup"
+        ]
+      },
+      {
         "adapter": "EplanMasterDataExporter",
         "member": "ExportTranslations",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataExporter.cs",
@@ -24456,6 +24511,17 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.Translate.DatabaseType": [
+      {
+        "adapter": "EplanMasterDataBackup",
+        "member": "TranslationDatabase",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMasterDataBackup.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "masterdata.backup"
+        ]
+      },
       {
         "adapter": "EplanMasterDataExporter",
         "member": "TranslationDatabase",

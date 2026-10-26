@@ -11,6 +11,67 @@ namespace EplanMcp.Host.Tests.Safety;
 [Trait("Size", "Small")]
 public sealed class ApprovalTextsTests
 {
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void TranslationSuspension_RequiresCheckingAndRestoringTheTranslationDatabase(bool zh, bool database)
+    {
+        var suspension = new Suspension(null, null, null, "eplan_translation_import", "r", DateTimeOffset.UnixEpoch,
+            SuspensionReason.OutcomeUnknown, [], database ? @"$(md_translate)\Translate.db" : null);
+
+        ApprovalAskArgs dialog = ApprovalTexts.For(_question with { Release = suspension }, CultureInfo.GetCultureInfo(zh ? "zh-CN" : "en-US"));
+
+        Assert.Contains(zh ? "翻译库" : "translation database", dialog.Summary, StringComparison.Ordinal);
+        Assert.Contains("Translate.db", dialog.Note, StringComparison.Ordinal);
+        Assert.Contains(zh ? "关闭 EPLAN" : "close EPLAN", dialog.Note, StringComparison.Ordinal);
+        Assert.DoesNotContain(zh ? "部件" : "parts", dialog.Summary + dialog.Note, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TranslationImport_NamesTheDatabaseAndAdditiveEffect_WithTenTruncatedEntries(bool zh)
+    {
+        var plan = new WritePlan
+        {
+            MasterData = new MasterDataTarget { Kind = MasterDataKinds.Translations, Database = @"$(md_translate)\Translate.db", Path = @"C:\Translations\Translate.db" },
+            Changes = [new PlannedChange { Action = "update", Kind = "translation", Name = "glossary.txt" }],
+            Details = new Dictionary<string, string>
+            {
+                ["file"] = "glossary.txt",
+                ["bytes"] = "1234",
+                ["sha256"] = "0123456789abcdef",
+                ["entries"] = "11",
+                ["referenceLanguage"] = "en_US",
+                ["languages"] = "zh_CN",
+                ["preview"] = System.Text.Json.JsonSerializer.Serialize(Enumerable.Range(0, 11).Select(i => new Dictionary<string, string>
+                {
+                    ["en_US"] = new string('x', 41) + i,
+                    ["zh_CN"] = "电机\n\u202e批准",
+                })),
+            },
+        };
+
+        ApprovalAskArgs dialog = ApprovalTexts.For(_question with { Plan = plan, Tool = "eplan_translation_import" }, CultureInfo.GetCultureInfo(zh ? "zh-CN" : "en-US"));
+
+        Assert.Contains(zh ? "翻译库" : "translation database", dialog.Title, StringComparison.Ordinal);
+        Assert.Contains(plan.MasterData.Database, dialog.Summary, StringComparison.Ordinal);
+        Assert.Contains(plan.MasterData.Path, dialog.Summary, StringComparison.Ordinal);
+        Assert.Contains(zh ? "影响使用这个库的所有项目" : "Every project that uses this translation database is affected", dialog.Summary, StringComparison.Ordinal);
+        string changes = string.Join("\n", dialog.Changes);
+        Assert.Contains("glossary.txt; 1234; 0123456789abcdef", changes, StringComparison.Ordinal);
+        Assert.Contains("11; en_US; zh_CN", changes, StringComparison.Ordinal);
+        Assert.Contains(zh ? "只新增词条、补上空缺译文，已有译文不会被改写" : "adds entries and fills empty translations; existing translations are never rewritten", changes, StringComparison.Ordinal);
+        Assert.Equal(10, dialog.Changes.Count(c => c.StartsWith("en_US: ", StringComparison.Ordinal)));
+        Assert.Contains(new string('x', 40), changes, StringComparison.Ordinal);
+        Assert.DoesNotContain(new string('x', 41), changes, StringComparison.Ordinal);
+        Assert.DoesNotContain('\u202e', changes);
+        Assert.Contains(zh ? "导入撤不回，执行前会备份翻译库" : "cannot be undone, the translation database is backed up first", dialog.Note, StringComparison.Ordinal);
+        Assert.DoesNotContain(zh ? "部件" : "parts", changes + dialog.Note, StringComparison.Ordinal);
+    }
+
     private static readonly WritePlan _plan = new()
     {
         Project = "Line1",

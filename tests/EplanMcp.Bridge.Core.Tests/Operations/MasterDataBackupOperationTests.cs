@@ -133,6 +133,22 @@ public sealed class MasterDataBackupOperationTests : IDisposable
     }
 
     [Fact]
+    public void ATranslationBackupOverItsLimit_IsNotStarted()
+    {
+        _backup.Database = @"$(md_translate)\Translate.db";
+        _backup.Write = (folder, name) => File.WriteAllBytes(Path.Combine(folder, name + ".zw7"), FakeMasterDataBackup.SevenZip);
+        _backup.Delay = TimeSpan.FromSeconds(1.1);
+        MasterDataBackupArgs args = Args(maxSeconds: 1, database: _backup.Database);
+        args.Kind = MasterDataKinds.Translations;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(args)).Error;
+
+        Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Contains("translation database", error.Message, StringComparison.Ordinal);
+        Assert.StartsWith("The backup took 1 s, more than the 1 s", error.Metadata!["problem"], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AnErrorTheAdapterNames_StaysButIsNotStarted()
     {
         _backup.Failure = new BridgeErrorException(ErrorReason.EplanBusy, "busy", retryable: true);

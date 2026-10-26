@@ -5655,6 +5655,7 @@
       ],
       "api": [
         "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.PartNumber",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.UniqueId",
         "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.UniqueIdOptPartNumber",
@@ -5670,10 +5671,13 @@
         "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
         "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
         "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.HEServices.Translate.#ctor",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts(System.String,System.String,Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode,System.Boolean,Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier,System.String)",
         "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor",
         "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
         "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
@@ -5686,6 +5690,8 @@
         "T:Eplan.EplApi.Base.LockingException",
         "T:Eplan.EplApi.Base.PathMap",
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.HEServices.Translate",
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType",
         "T:Eplan.EplApi.MasterData.MDPart",
         "T:Eplan.EplApi.MasterData.MDPartsDatabase",
         "T:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier",
@@ -5764,6 +5770,11 @@
             "name": "PartSyncOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
+          },
+          {
+            "name": "TranslationImportSupportTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
           }
         ]
       },
@@ -6039,6 +6050,7 @@
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.AppendNew",
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExisting",
         "F:Eplan.EplApi.HEServices.Synchronize.StoreMode.OverwriteExistingAndAppendNew",
+        "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
         "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
         "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
         "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
@@ -6075,6 +6087,7 @@
         "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
         "M:Eplan.EplApi.HEServices.Synchronize.#ctor",
         "M:Eplan.EplApi.HEServices.Synchronize.Parts(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.Synchronize.StoreMode)",
+        "M:Eplan.EplApi.HEServices.Translate.#ctor",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
         "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor",
         "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
@@ -6098,6 +6111,8 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
         "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
@@ -6130,6 +6145,8 @@
         "T:Eplan.EplApi.HEServices.SelectionSet",
         "T:Eplan.EplApi.HEServices.Synchronize",
         "T:Eplan.EplApi.HEServices.Synchronize.StoreMode",
+        "T:Eplan.EplApi.HEServices.Translate",
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType",
         "T:Eplan.EplApi.MasterData.MDPart",
         "T:Eplan.EplApi.MasterData.MDPartsDatabase",
         "T:Eplan.EplApi.MasterData.MDPartsManagement"
@@ -6181,6 +6198,11 @@
             "name": "PartSyncOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
+          },
+          {
+            "name": "TranslationImportSupportTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
           }
         ]
       },

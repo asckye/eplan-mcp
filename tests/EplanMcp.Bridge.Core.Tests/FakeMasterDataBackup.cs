@@ -27,6 +27,10 @@ internal sealed class FakeMasterDataBackup : IMasterDataBackup
 
     public string PartsDatabase() => Database;
 
+    public string TranslationDatabase() => Database;
+
+    public void BackupTranslations(string database, string folder, string archiveName) => BackupParts(database, folder, archiveName);
+
     /// <summary>A stopwatch that has just started and reads how long the backups since then have taken.</summary>
     public Func<TimeSpan> StartClock()
     {

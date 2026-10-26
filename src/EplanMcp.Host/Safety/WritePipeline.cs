@@ -37,8 +37,9 @@ internal sealed record WriteRequest<TArgs, TExecuteArgs>(
 /// What a write call did: its plan, the execution state, the data of a commit that answered in time, for a committed
 /// Destructive write the path of its backup copy, and for a committed write to system master data the path of the
 /// database's backup archive (ADR-0019).
+/// AuditId is the requestId shared by its audit records; null when no write was audited (for example, a dry run).
 /// </summary>
-internal sealed record WriteOutcome<TData>(WritePlan Plan, string Execution, TData? Data, bool Recovered, string? Backup = null, string? MasterDataBackup = null);
+internal sealed record WriteOutcome<TData>(WritePlan Plan, string Execution, TData? Data, bool Recovered, string? Backup = null, string? MasterDataBackup = null, string? AuditId = null);
 
 /// <summary>
 /// The steps every write tool goes through (M3 design 3, ADR-0005, ADR-0010): plan, dry run, policy, the confirmation
@@ -227,9 +228,9 @@ internal sealed partial class WritePipeline(
         try
         {
             WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
-            await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered, backup, masterDataBackup).ConfigureAwait(false);
+            await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
             await Show(shown, ExecutionState.Committed, null).ConfigureAwait(false);
-            return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered, backup?.Path, masterDataBackup);
+            return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered, backup?.Path, masterDataBackup, requestId);
         }
         catch (BridgeCallException ex)
         {
@@ -510,12 +511,21 @@ internal sealed partial class WritePipeline(
     /// The result record; for a Destructive write also whether its backup copy was made (ADR-0013), and for a write to
     /// system master data the database's backup archive, once made (ADR-0019).
     /// </summary>
-    private Task RecordResultAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, string execution, string? reason, bool recovered, BackupTarget? backup, string? masterDataBackup)
+    private Task RecordResultAsync(string tool, string requestId, WritePlan plan, HandshakeResult eplan, string execution, string? reason, bool recovered, BackupTarget? backup, string? masterDataBackup, object? data = null)
     {
         JsonObject record = Record("execution_result", tool, requestId, plan, eplan);
         record["execution"] = execution;
         record["reason"] = reason;
         record["recovered"] = recovered;
+        if (plan.MasterData?.Kind == MasterDataKinds.Translations && data is not null)
+        {
+            JsonNode? result = JsonSerializer.SerializeToNode(data, HostJson.Options);
+            foreach (string field in new[] { "referenceLanguage", "entries", "added", "filled", "kept" })
+            {
+                record[field] = result?[field]?.DeepClone();
+            }
+        }
+
         if (backup is not null)
         {
             // The Bridge changes nothing before the copy exists, so a write that ran had its backup.

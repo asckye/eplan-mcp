@@ -9,6 +9,23 @@ namespace EplanMcp.Host.Tests.Safety;
 public sealed class PolicyEngineTests
 {
     [Theory]
+    [InlineData("Write", true, "Approve", false, "NeedsApproval")]
+    [InlineData("Write", false, "Approve", false, "NeedsApproval")]
+    [InlineData("Destructive", true, "Approve", false, "NeedsApproval")]
+    [InlineData("Destructive", false, "Approve", false, "NeedsApproval")]
+    [InlineData("Destructive", true, "Deny", false, "Deny")]
+    [InlineData("Destructive", false, "Deny", false, "Deny")]
+    [InlineData("Destructive", true, "Approve", true, "Deny")]
+    [InlineData("Destructive", false, "Approve", true, "Deny")]
+    public void TranslationWrites_AreNeverAutomaticallyAllowed(string tier, bool inScratch, string writes, bool server, string expected)
+    {
+        var config = new HostConfig(["C:\\Scratch"], OutsideScratchWrites.Approve) { MasterDataWrites = Enum.Parse<MasterDataWrites>(writes) };
+        var target = new MasterDataTarget { Kind = MasterDataKinds.Translations, Database = @"$(md_translate)\Translate.db", Server = server };
+
+        Assert.Equal(expected, PolicyEngine.Decide(Enum.Parse<ToolTier>(tier), inScratch, config, target).Verdict.ToString());
+    }
+
+    [Theory]
     [InlineData("Read", true, "Deny", "Allow")]
     [InlineData("Read", false, "Deny", "Allow")]
     [InlineData("Read", false, "Approve", "Allow")]

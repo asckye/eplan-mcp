@@ -20,6 +20,8 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
     /// <summary>The extension of a parts database archive (S24).</summary>
     public const string PartsExtension = ".zw6";
 
+    public const string TranslationsExtension = ".zw7";
+
     // The first bytes of every 7z archive; S24 found EPLAN's master-data backups are 7z archives.
     private static readonly byte[] _sevenZip = [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C];
 
@@ -42,29 +44,40 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
 
     protected override MasterDataBackupData Execute(MasterDataBackupArgs args)
     {
-        if (args.Kind != MasterDataKinds.Parts)
+        if (args.Kind is not (MasterDataKinds.Parts or MasterDataKinds.Translations))
         {
-            throw WriteArguments.NotStarted(InvalidArgument($"'kind' must be '{MasterDataKinds.Parts}'."));
+            throw WriteArguments.NotStarted(InvalidArgument("'kind' must be 'parts' or 'translations'."));
         }
 
         string folder = Checked(args);
-        string configured = _backup.PartsDatabase() ?? string.Empty;
+        bool translations = args.Kind == MasterDataKinds.Translations;
+        string configured = (translations ? _backup.TranslationDatabase() : _backup.PartsDatabase()) ?? string.Empty;
         if (MasterDatabases.IsServer(configured))
         {
-            throw MasterDatabases.Denied();
+            throw MasterDatabases.Denied(translations ? "translation" : "parts");
         }
 
         if (configured.Length == 0 || !string.Equals(configured, args.Database, StringComparison.Ordinal))
         {
             throw WriteArguments.NotStarted(new BridgeErrorException(
                 ErrorReason.PlanStale,
-                "EPLAN is configured with another parts database than the one the change was planned and approved for, so nothing was backed up or changed. Call the tool again for a new plan."));
+                $"EPLAN is configured with another {(translations ? "translation" : "parts")} database than the one the change was planned and approved for, so nothing was backed up or changed. Call the tool again for a new plan."));
         }
 
         Func<TimeSpan> elapsed = _startClock();
+        string archive;
         try
         {
-            _backup.BackupParts(configured, folder, args.ArchiveName);
+            if (translations)
+            {
+                _backup.BackupTranslations(configured, folder, args.ArchiveName);
+            }
+            else
+            {
+                _backup.BackupParts(configured, folder, args.ArchiveName);
+            }
+
+            archive = Archive(folder, translations ? TranslationsExtension : PartsExtension, translations);
         }
         catch (BridgeErrorException known)
         {
@@ -72,14 +85,13 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
         }
         catch (Exception ex)
         {
-            throw Failed("EPLAN could not back the parts database up.", ex);
+            throw Failed($"EPLAN could not back the {(translations ? "translation" : "parts")} database up.", ex, translations);
         }
 
-        string archive = Archive(folder);
         TimeSpan took = elapsed();
         if (took.TotalSeconds > args.MaxSeconds)
         {
-            throw Failed($"The backup took {Number((long)took.TotalSeconds)} s, more than the {Number(args.MaxSeconds)} s it may take.");
+            throw Failed($"The backup took {Number((long)took.TotalSeconds)} s, more than the {Number(args.MaxSeconds)} s it may take.", translations: translations);
         }
 
         return new MasterDataBackupData { Database = configured, Archive = archive, Bytes = new FileInfo(archive).Length };
@@ -96,7 +108,7 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
         bool local = folder.Length > 3 && char.IsLetter(folder[0]) && folder[1] == ':' && folder[2] == '\\' && folder.IndexOf("..", StringComparison.Ordinal) < 0;
         return args.MaxSeconds > 0 && local && IsPlainName(name) && Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any()
             ? folder
-            : throw Failed("The write came without a new, empty backup folder.");
+            : throw Failed("The write came without a new, empty backup folder.", translations: args.Kind == MasterDataKinds.Translations);
     }
 
     /// <summary>An archive name as S24 used it: 1 to 64 ASCII letters, digits, <c>-</c> and <c>_</c>.</summary>
@@ -105,14 +117,14 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
 
     /// <summary>
     /// What is wrong with <paramref name="folder"/> after a backup, or null when its only entry is a non-empty 7z archive
-    /// with the parts extension; eplan_part_export's backup format checks its folder the same way.
+    /// with the requested extension (parts by default); eplan_part_export checks its folder the same way.
     /// </summary>
-    public static string? ArchiveProblem(string folder)
+    public static string? ArchiveProblem(string folder, string extension = PartsExtension)
     {
         string[] entries = Directory.GetFileSystemEntries(folder);
-        if (entries.Length != 1 || !File.Exists(entries[0]) || !entries[0].EndsWith(PartsExtension, StringComparison.OrdinalIgnoreCase))
+        if (entries.Length != 1 || !File.Exists(entries[0]) || !entries[0].EndsWith(extension, StringComparison.OrdinalIgnoreCase))
         {
-            return $"The backup folder holds {Number(entries.Length)} entries instead of one {PartsExtension} archive.";
+            return $"The backup folder holds {Number(entries.Length)} entries instead of one {extension} archive.";
         }
 
         byte[] head = new byte[_sevenZip.Length];
@@ -125,14 +137,15 @@ public sealed class MasterDataBackupOperation : Operation<MasterDataBackupArgs, 
         return read == head.Length && head.SequenceEqual(_sevenZip) ? null : "The backup archive is empty or not an archive.";
     }
 
-    /// <summary>The only entry of <paramref name="folder"/>, which must be a non-empty 7z archive with the parts extension.</summary>
-    private static string Archive(string folder) =>
-        ArchiveProblem(folder) is { } problem ? throw Failed(problem) : Directory.GetFileSystemEntries(folder)[0];
+    /// <summary>The only entry of <paramref name="folder"/>, a non-empty 7z archive with the requested extension.</summary>
+    private static string Archive(string folder, string extension, bool translations) =>
+        ArchiveProblem(folder, extension) is { } problem ? throw Failed(problem, translations: translations) : Directory.GetFileSystemEntries(folder)[0];
 
     /// <summary>BACKUP_FAILED with the problem in <c>metadata.problem</c>; the router logs the cause, or the problem itself.</summary>
-    private static BridgeErrorException Failed(string problem, Exception? cause = null)
+    private static BridgeErrorException Failed(string problem, Exception? cause = null, bool translations = false)
     {
-        var error = new BridgeErrorException(ErrorReason.BackupFailed, FailedMessage, cause ?? new InvalidOperationException(problem));
+        string message = translations ? FailedMessage.Replace("parts database", "translation database") : FailedMessage;
+        var error = new BridgeErrorException(ErrorReason.BackupFailed, message, cause ?? new InvalidOperationException(problem));
         error.Error.Metadata = new Dictionary<string, string> { ["problem"] = problem };
         return WriteArguments.NotStarted(error);
     }
