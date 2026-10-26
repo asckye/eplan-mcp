@@ -66,7 +66,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 236,
+      "implemented": 237,
       "byTools": 229,
       "partial": 40,
       "automatedTest": 229,
@@ -84,7 +84,7 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 110,
+      "implemented": 111,
       "byTools": 103,
       "partial": 39,
       "automatedTest": 103,
@@ -205,7 +205,7 @@
     {
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
-      "implemented": 32,
+      "implemented": 33,
       "liveVerified": 15
     },
     {
@@ -5341,6 +5341,13 @@
       "tools": [
         "eplan_export_untranslated"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage",
