@@ -186,6 +186,13 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A48. FUNC_TECHNICAL_CHARACTERISTIC 20027 的运行时类型（S39 r1，2026-10-26，EPLAN 2026.0.3.25421，Electric P8，只读 sample 夹具）
+
+- 50 个非空样本的 `PropertyDefinition.Type` 都是 `ValueWithUnit`（数值 26），都不建索引；20011 `FUNC_TEXT` 对照为 `MultilangString`。A44 的“未细分”到此确定。
+- 存的是自由文本，不一定带单位：`14 W`、`16 A`、`DC 24V`、`3`、`I/O Board`、`Inverter`。`ToString()` 等于显示文本；`ToMultiLangString()` 只有一条与语言无关的值（`??_??@14 W;`）。
+- **不能按数值读**：`ToDouble()`/`ToInt()` 对 `14 W`、`16 A` 返回 0，只有纯数字正确；`ToBool()`、`ToPointD()`、`ToTime()` 不抛异常但无意义。读取适配器继续只给显示文本（`opaque`），写入时按与语言无关的文本处理，写入行为留给属性写入 P7 的 Large 验证。
+— 协调人经 spike S39（`PropertyDefinition.Type` 与各转换成员逐项调用，A36 生命周期纪律）实测。
+
 ### A47. 翻译库导入 `Translate.ImportDatabaseTexts`（S24 r19，2026-10-26，EPLAN 2026.0.3.25421，Electric P8，项目负责人指示在正在用的翻译库上执行）
 
 - 签名是 `ImportDatabaseTexts(strFilename, strConverter, strReferenceLanguage)`：第三个参数是**一个参考语言**。传 `"en_US;zh_CN"` 时返回 true、耗时 0.02–0.04 秒，翻译库逐字节不变。

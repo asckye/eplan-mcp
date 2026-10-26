@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>EplanMcp.Spikes.S39</AssemblyName>
+    <RootNamespace>EplanMcp.Spikes.S39</RootNamespace>
+    <AssemblyTitle>EplanMcp.Spikes.S39</AssemblyTitle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Driver\**" />
+    <None Remove="Driver\**" />
+    <Reference Include="Eplan.EplApi.AFu;Eplan.EplApi.Baseu;Eplan.EplApi.DataModelu;Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>
