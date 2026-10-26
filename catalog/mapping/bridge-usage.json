@@ -2,7 +2,7 @@
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-26",
   "scannedSources": "93b252f0 + uncommitted changes",
-  "sourceHash": "sha256:7cff12691dccb359edb3265bdaabeac0bf882beb0db3cdb6d9ba1ea3aab1dafe",
+  "sourceHash": "sha256:be5d8c075927224fa7fd12f6d842dccdd664302372fb1984d8966f3c09cd6372",
   "operations": [
     {
       "name": "action.execute",
@@ -273,6 +273,10 @@
     {
       "name": "page.list",
       "class": "PageListOperation"
+    },
+    {
+      "name": "page.plotframe.inspect",
+      "class": "PagePlotFrameInspectOperation"
     },
     {
       "name": "page.renumber.execute",
@@ -3934,6 +3938,30 @@
     ],
     "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId": [
       {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter.Scope",
         "member": "OpenProperty",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -4349,6 +4377,7 @@
           "new"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -4986,6 +5015,19 @@
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
         "adapter": "EplanActionRunner",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
@@ -5454,6 +5496,7 @@
           "call"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -6204,6 +6247,7 @@
           "new"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -6451,6 +6495,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -6816,6 +6861,19 @@
         "operations": []
       }
     ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.#ctor": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.PropertyValue.Dispose": [
       {
         "adapter": "EplanProperties",
@@ -6862,6 +6920,19 @@
           "call"
         ],
         "operations": []
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.Set(System.String)": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToBool": [
@@ -7038,19 +7109,6 @@
         ]
       },
       {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -7096,6 +7154,19 @@
           "call"
         ],
         "operations": [
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -7676,6 +7747,19 @@
         ]
       },
       {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -8104,6 +8188,15 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.UniversalPropertyList.Dispose": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
       {
         "adapter": "EplanPropertyReadAdapter.Scope",
         "member": "Dispose",
@@ -8824,6 +8917,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -8927,6 +9021,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -11340,8 +11435,8 @@
     "P:Eplan.EplApi.DataModel.Function.Properties": [
       {
         "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
         "access": [
           "get"
         ],
@@ -12651,8 +12746,8 @@
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
       {
         "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
         "access": [
           "get"
         ],
@@ -13217,6 +13312,33 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Name": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Available",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements": [
       {
         "adapter": "EplanPageTexts",
@@ -13736,6 +13858,7 @@
           "get"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -14196,6 +14319,31 @@
     ],
     "P:Eplan.EplApi.DataModel.Page.PlotFrame": [
       {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Available",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -14256,6 +14404,19 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
         ]
       },
       {
@@ -14554,6 +14715,32 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.PagePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.PagesFilter.DocumentType": [
       {
         "adapter": "EplanPageReader",
@@ -14643,6 +14830,7 @@
           "set"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -14761,6 +14949,7 @@
           "set"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -15205,19 +15394,6 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.Articles": [
       {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
         "adapter": "EplanDeviceReader",
         "member": "Parts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -15323,6 +15499,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -15371,6 +15548,20 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Project.Pages": [
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Available",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.update.execute",
+          "page.update.plan"
         ]
       }
     ],
@@ -15454,6 +15645,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -15552,6 +15744,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -15738,6 +15931,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -15875,19 +16069,6 @@
           "action.plan",
           "action.run"
         ]
-      },
-      {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault": [
@@ -15982,6 +16163,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -16111,6 +16293,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -16591,20 +16774,6 @@
         ]
       },
       {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
-        "access": [
-          "get",
-          "set"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -16663,6 +16832,19 @@
           "get"
         ],
         "operations": [
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -16860,19 +17042,6 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -19869,6 +20038,30 @@
     ],
     "T:Eplan.EplApi.DataModel.AnyPropertyId": [
       {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -20823,6 +21016,7 @@
           "type"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -21796,8 +21990,8 @@
     "T:Eplan.EplApi.DataModel.Function": [
       {
         "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "member": "InspectPending",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
         "access": [
           "type"
         ],
@@ -22334,19 +22528,6 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "type"
         ],
@@ -23378,6 +23559,32 @@
           "type"
         ],
         "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Available",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -23652,6 +23859,52 @@
     ],
     "T:Eplan.EplApi.DataModel.PagePropertyList": [
       {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -23753,6 +24006,7 @@
           "type"
         ],
         "operations": [
+          "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
         ]
@@ -24454,6 +24708,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -24556,6 +24811,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -24867,6 +25123,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",
@@ -25280,19 +25537,6 @@
         ]
       },
       {
-        "adapter": "EplanActionRunner",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
-      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -25352,6 +25596,30 @@
         "operations": [
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.plotframe.inspect",
+          "page.update.execute",
+          "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPagePlotFrames",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.update.execute"
         ]
       },
       {
@@ -26553,6 +26821,7 @@
           "page.delete.plan",
           "page.get",
           "page.list",
+          "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
           "page.text.inspect",

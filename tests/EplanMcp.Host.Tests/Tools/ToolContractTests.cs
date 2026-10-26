@@ -32,6 +32,18 @@ public sealed class ToolContractTests : IDisposable
 
     public void Dispose() => _services.Dispose();
 
+    [Fact]
+    public void PageUpdate_OffersOptionalDescriptionAndFrame_WithUnchangedWriteAnnotations()
+    {
+        Tool tool = Tools.Single(t => t.Name == PageWriteTools.UpdateTool);
+        JsonElement item = tool.InputSchema.GetProperty("properties").GetProperty("pages").GetProperty("items");
+        Assert.Equal(["name"], item.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["name", "description", "plot_frame"], item.GetProperty("properties").EnumerateObject().Select(p => p.Name));
+        Assert.Equal(2, item.GetProperty("anyOf").GetArrayLength());
+        Assert.False(item.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal((false, false, true, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
+    }
+
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]

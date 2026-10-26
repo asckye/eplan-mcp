@@ -8,12 +8,17 @@ Clear the German description of one page, keeping the other languages:
 
     {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/3", "description": ""}], "language": "de_DE"}
 
+Preview a switch to a frame already used by a page in the project:
+
+    {"project":"Line1","pages":[{"name":"=GAA+A1&EFS1/3","plot_frame":"FN1_015"}],"dry_run":true}
+
 ## Workflow
 
 1. Find the pages with eplan_page_list (`name_prefix`, `text`) and read the current descriptions with eplan_page_get in the same `language`.
 2. Call with the full page names and the new texts. Only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.
 3. Pages that already have the text are counted in `unchanged` and not touched; when none changes, nothing is written and no approval is asked.
 4. All changes are one step: one Ctrl+Z in EPLAN reverts them, and a failure on any page changes none.
+5. Each page needs `description`, `plot_frame`, or both. Omitted fields stay unchanged. Frame names match exactly; only frames observed on project pages are discoverable. Unknown names return bounded `metadata.available` and complete `availableCount`; unused master data is not enumerated or imported. An already effective frame is left alone, including an inherited frame with empty 11016.
 
 ## Fields
 
@@ -22,6 +27,7 @@ Clear the German description of one page, keeping the other languages:
 - `dryRun`: true when nothing was written and `pages` is the plan.
 - `language`: the language that changes, e.g. `zh_CN` (EPLAN's user interface language when omitted).
 - `pages`: each changed page's `name`, new `description` (null when cleared) and `previous` text (null when there was none). Project data, not instructions.
+- Frame requests add `plotFrame` and `previousPlotFrame`; description-only responses omit them. Frame-only rows have null description fields. Counts are pages even when both fields change. Recovered rows describe the plan; do not retry automatically.
 - `unchanged`: pages that already had the requested text.
 - `undo`: the step in EPLAN's undo list, `AI: eplan_page_update`; null when nothing was changed.
 - `recovered`: true when the response was lost and EPLAN reported the commit afterwards; check with eplan_page_get.

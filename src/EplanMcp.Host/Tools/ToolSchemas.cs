@@ -35,6 +35,11 @@ internal static class ToolSchemas
                     {
                         items["additionalProperties"] = false;
                     }
+
+                    if (tool.ProtocolTool.Name == PageWriteTools.UpdateTool)
+                    {
+                        items["anyOf"] = JsonNode.Parse("""[{"required":["description"]},{"required":["plot_frame"]}]""");
+                    }
                 }
 
                 tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);

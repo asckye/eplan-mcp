@@ -13,7 +13,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// observed (A13). The language-independent entry <c>??_??</c> is <c>ISOCode.Language.L___</c>, which EPLAN's API
 /// documentation names for language-independent strings. Main thread; writes inside the write's TransactionScope.
 /// </summary>
-internal sealed class EplanPageDescriptions : IPageDescriptions
+internal sealed class EplanPageDescriptions(Func<string, string, PagePropertyList>? properties = null) : IPageDescriptions
 {
     public string? LanguageCode(string? language)
     {
@@ -30,7 +30,7 @@ internal sealed class EplanPageDescriptions : IPageDescriptions
     public PageDescription Read(string projectPath, string pageName)
     {
         MainThread.Assert();
-        PropertyValue value = Find(projectPath, pageName).Properties.PAGE_NOMINATIOMN;
+        using PropertyValue value = (properties?.Invoke(projectPath, pageName) ?? Find(projectPath, pageName).Properties).PAGE_NOMINATIOMN;
         if (value.IsEmpty)
         {
             return new PageDescription(null, []);
@@ -59,7 +59,7 @@ internal sealed class EplanPageDescriptions : IPageDescriptions
             text.AddString(Number(entry.Language) ?? throw new InvalidOperationException("Unknown language " + entry.Language), entry.Text);
         }
 
-        Find(projectPath, pageName).Properties.PAGE_NOMINATIOMN = text;
+        (properties?.Invoke(projectPath, pageName) ?? Find(projectPath, pageName).Properties).PAGE_NOMINATIOMN = text;
         return Read(projectPath, pageName);
     }
 
@@ -76,7 +76,7 @@ internal sealed class EplanPageDescriptions : IPageDescriptions
     }
 
     /// <summary>The page with exactly this name, as page.get finds it (S6: the exact name filter, checked ordinally).</summary>
-    private static Page Find(string projectPath, string pageName)
+    internal static Page Find(string projectPath, string pageName)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };

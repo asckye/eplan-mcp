@@ -2,6 +2,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\Shared\PageTextStore.cs" Link="PageTextStore.cs" />
+    <Compile Include="..\Shared\PageFrameStore.cs" Link="PageFrameStore.cs" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
     <!-- Medium tests run the real Bridge.Core server (with fake EPLAN adapters) on a real pipe. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />

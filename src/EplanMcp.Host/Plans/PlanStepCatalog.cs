@@ -29,6 +29,15 @@ internal static class PlanStepCatalog
         schema["properties"]!.AsObject().Remove("project");
         schema["properties"]!.AsObject().Remove("dry_run");
         schema["required"]!.AsArray().Remove(schema["required"]!.AsArray().Single(n => n!.GetValue<string>() == "project"));
+        if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.
+        {
+            JsonObject item = schema["properties"]!["pages"]!["items"]!.AsObject();
+            item["properties"]!.AsObject().Remove("plot_frame");
+            item["properties"]!["description"]!["type"] = "string";
+            item["required"] = new JsonArray("name", "description");
+            item.Remove("anyOf");
+        }
+
         return schema;
     }, StringComparer.Ordinal);
 

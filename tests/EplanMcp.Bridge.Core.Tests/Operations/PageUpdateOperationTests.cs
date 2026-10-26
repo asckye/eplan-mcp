@@ -124,6 +124,7 @@ public sealed class PageUpdateOperationTests
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
 
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal("These page descriptions changed after the plan was made, so nothing was changed. Call eplan_page_update again for a new plan.", error.Message);
         Assert.Empty(_descriptions.Writes);
         Assert.Empty(_transactions.Calls);
     }
