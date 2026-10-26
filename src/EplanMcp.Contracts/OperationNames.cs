@@ -152,6 +152,9 @@ public static class OperationNames
     /// </summary>
     public const string PageUpdatePlan = "page.update.plan";
 
+    /// <summary>Plans literal page free-text replacements. Arguments: <see cref="PageTextReplaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string PageTextReplacePlan = "page.text.replace.plan";
+
     /// <summary>
     /// Changes the planned descriptions in one language in one transaction, keeping the other languages. Arguments:
     /// <see cref="PageUpdateArgs"/> with the fingerprint; data: <see cref="PageUpdateData"/>.
