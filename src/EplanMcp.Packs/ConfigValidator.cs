@@ -83,7 +83,7 @@ public static class ConfigValidator
         Object(spec, "/spec", "layer schema settings", "");
         JsonElement source = spec.GetProperty("schema");
         string reference = source.ValueKind == JsonValueKind.String ? source.GetString()! : string.Empty;
-        // Pack checking has no dependency resource resolver yet; cross-pack lock resolution belongs to C2.
+        // Pack checking has no dependency resource resolver yet; cross-pack lock resolution belongs to C4.
         Require(reference.StartsWith("config_schema/", StringComparison.Ordinal) && PackManifestValidator.IsId(reference[14..]), "/spec/schema", "must name a local config_schema/name");
         JsonElement? schema = resolve(reference);
         Require(schema.HasValue, "/spec/schema", "must reference an existing config_schema resource");
