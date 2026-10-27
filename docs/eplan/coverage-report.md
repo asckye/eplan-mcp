@@ -32,8 +32,8 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 250 / 4014（6.2%） | 241 | 43 | 241 / 4014（6.0%） | 156 / 4014（3.9%） | 122 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 112 / 1799（6.2%） | 105 | 40 | 105 / 1799（5.8%） | 69 / 1799（3.8%） | 45 | 66 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 250 / 4014（6.2%） | 241 | 43 | 241 / 4014（6.0%） | 158 / 4014（3.9%） | 122 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 112 / 1799（6.2%） | 105 | 40 | 105 / 1799（5.8%） | 71 / 1799（3.9%） | 45 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 138 / 2215（6.2%） | 136 | 3 | 136 / 2215（6.1%） | 87 / 2215（3.9%） | 77 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 7 / 68（10.3%） | 7 | 0 | 7 / 68（10.3%） | 5 / 68（7.4%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 6 / 137（4.4%） | 6 | 0 | 6 / 137（4.4%） | 1 / 137（0.7%） | 0 | 0 |
@@ -41,7 +41,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 250 / 4342（5.8%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 112 / 1799（6.2%），live_verified 69 / 1799（3.8%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 112 / 1799（6.2%），live_verified 71 / 1799（3.9%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 45 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 241 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 6 个，没有整个排除的 action 共 64 个。
@@ -62,7 +62,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.DataModel.Topology` | 17 | 1 / 17（5.9%） | 0 |
 | `Eplan.EplApi.EServices` | 127 | 6 / 127（4.7%） | 6 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 0 / 90（0.0%） | 0 |
-| `Eplan.EplApi.HEServices` | 417 | 33 / 417（7.9%） | 15 |
+| `Eplan.EplApi.HEServices` | 417 | 33 / 417（7.9%） | 17 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 |
 | `Eplan.EplApi.MasterData` | 592 | 24 / 592（4.1%） | 14 |
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 |
@@ -88,7 +88,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：29 / 75（38.7%），共 36 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 75（40.0%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -123,6 +123,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | eplan_page_update | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass | api-notes A17 | 一次写入一个撤销步骤；只改一种语言时其他语言不变 |
 | eplan_part_export | 2026-10-21 | 未注明 | 未注明 | pass_with_findings | docs/tools/eplan_part_export.md | 部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读 |
 | eplan_part_export | 2026-10-22 | 2026.0.3.25421 | Electric P8 | pass | Large 测试 README | format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变 |
+| eplan_part_export | 2026-10-27 | 2026.0.3.25421 | Electric P8 | pass | Large 测试 README | format: edz：经批准的 PartExportTests 全部 6 个通过（含 EDZ），部件库的 SHA-256 不变 |
 | eplan_part_import | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass | api-notes A30；Large 测试 README | 经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过 |
 | eplan_part_list | 2026-10-19 | 2026.0.3.25421 | Electric P8 | pass_with_findings | api-notes A12 | 部件没有中文描述时为空，之后按语言回退设计实现 |
 | eplan_part_search | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass | api-notes A30 | 部件导入的 Large 测试中找到新导入的部件，变体 1 |
@@ -136,6 +137,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | eplan_session_select | 2026-10-19 | 2026.0.3.25421 | Electric P8 | pass | api-notes A12 | 选中当前进程 |
 | eplan_session_status | 2026-10-18 | 2026.0.3.25421 | Pro Panel 和 Electric P8 | pass | api-notes A10 | 变体读取正确；对话框打开时仍显示已连接 |
 | eplan_terminal_renumber | 2026-10-21 | 2026.0.3.25421 | Electric P8 | pass_with_findings | api-notes A24 | 只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子 |
+| eplan_translation_import | 2026-10-27 | 2026.0.3.25421 | Electric P8 | pass | Large 测试 README | 经负责人批准的 TranslationImportTests：导入一个测试词条 added=1，重导 added=0，两次都先备份 .zw7；关闭 EPLAN 后用文件副本恢复，翻译文件夹的 SHA-256 与运行前相同 |
 
 ## 5. 工程任务视图（按工具）
 API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典、action 列是对应的目录单元数（目录未提交时为 0）；测试是提到这个工具的测试类数。
@@ -188,7 +190,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 59 | 23 | 0 | 36 | 0 | 3/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 67 | 32 | 0 | 35 | 0 | 2/2/1 | A41 | — |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 68 | 34 | 1 | 32 | 0 | 3/5/5 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
-| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-22 pass（Large 测试 README） |
+| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-27 pass（Large 测试 README） |
 | eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 45 | 13 | 0 | 30 | 1 | 2/6/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 43 | 23 | 1 | 18 | 0 | 2/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
 | eplan_part_search | read | part.search | 35 | 16 | 1 | 14 | 0 | 3/3/3 | — | 2026-10-21 pass（api-notes A30） |
@@ -215,7 +217,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_terminal_strip_list | read | terminal.strip.list | 18 | 10 | 0 | 8 | 0 | 3/2/2 | — | — |
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 8/2/0 | — | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 2/3/2 | A30 | — |
-| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 4/3/1 | A47 | — |
+| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 4/3/1 | A47 | 2026-10-27 pass（Large 测试 README） |
 | eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 2/4/6 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性
