@@ -6,7 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Driver\**" />
+    <Compile Remove="Part2\**" />
     <None Remove="Driver\**" />
+    <None Remove="Part2\**" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Eplan.EplApi.AFu">
