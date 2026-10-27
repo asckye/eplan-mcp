@@ -3385,8 +3385,8 @@
     },
     {
       "name": "eplan_device_place",
-      "title": "Place a part's device on an EPLAN page",
-      "description": "Places one device by part number on a circuit page, as the engineer would, and gives it the tag; one Ctrl+Z in EPLAN undoes it. Several devices: eplan_macro_insert. x, y: mm from the page's bottom left, y up. Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.",
+      "title": "Place a device on an EPLAN page",
+      "description": "Places a part device; Ctrl+Z undoes it. Or plans a library symbol without a part (dry_run only). Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3396,10 +3396,6 @@
           },
           "page": {
             "description": "Full circuit page name",
-            "type": "string"
-          },
-          "part": {
-            "description": "From eplan_part_search",
             "type": "string"
           },
           "x": {
@@ -3414,6 +3410,14 @@
             "description": "-KF20 (page structure) or full tag",
             "type": "string"
           },
+          "part": {
+            "description": "From eplan_part_search",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
           "variant": {
             "description": "Default: 1",
             "type": [
@@ -3426,17 +3430,147 @@
             "description": "Only return the plan",
             "type": "boolean",
             "default": false
+          },
+          "library": {
+            "description": "Project library; excludes part/variant",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "symbol": {
+            "description": "Exact name from eplan_symbol_search",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "symbol_variant": {
+            "description": "Native variant number",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null,
+            "minimum": 0
+          },
+          "display_properties": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "property_id",
+                "offset_x_mm",
+                "offset_y_mm"
+              ],
+              "properties": {
+                "property_id": {
+                  "type": "integer",
+                  "enum": [
+                    20214,
+                    20213,
+                    20211,
+                    20215,
+                    20058,
+                    20011,
+                    20027
+                  ]
+                },
+                "offset_x_mm": {
+                  "type": "number"
+                },
+                "offset_y_mm": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "connection_designations": {
+            "description": "One designation per pin, in search order",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "default": null
           }
         },
         "required": [
           "project",
           "page",
-          "part",
           "x",
           "y",
           "tag"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "part"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "library"
+                  ]
+                },
+                {
+                  "required": [
+                    "symbol"
+                  ]
+                },
+                {
+                  "required": [
+                    "symbol_variant"
+                  ]
+                },
+                {
+                  "required": [
+                    "display_properties"
+                  ]
+                },
+                {
+                  "required": [
+                    "connection_designations"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "required": [
+              "library",
+              "symbol",
+              "symbol_variant"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "part"
+                  ]
+                },
+                {
+                  "required": [
+                    "variant"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
       },
       "outputSchema": {
         "type": "object",
@@ -3465,6 +3599,86 @@
             "description": "The part's variant that was placed, or would be.",
             "type": "string"
           },
+          "symbol": {
+            "description": "Resolved symbol and local pins; present only for symbol plans.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "library": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "variant": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "connectionPoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "direction": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "changes": {
+            "description": "Predicted function, relative property placements and pin designations; symbol plans only.",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
           "device": {
             "description": "The device as EPLAN read it back; for a dry run or when 'recovered', as planned.",
             "type": "object",
@@ -3490,14 +3704,14 @@
             }
           },
           "functions": {
-            "description": "All functions of the device, placed or not; null for a dry run or when 'recovered'.",
+            "description": "All functions; symbol dry runs predict 1, part dry runs and recovered results give null.",
             "type": [
               "integer",
               "null"
             ]
           },
           "unplaced": {
-            "description": "Functions on no page yet, such as a contactor's contacts; null for a dry run or when 'recovered'.",
+            "description": "Unplaced functions; symbol dry runs predict 0, part dry runs and recovered results give null.",
             "type": [
               "integer",
               "null"
@@ -3524,7 +3738,7 @@
         }
       },
       "annotations": {
-        "title": "Place a part's device on an EPLAN page",
+        "title": "Place a device on an EPLAN page",
         "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false,

@@ -20,6 +20,8 @@ internal static class ToolSchemas
             {
                 schema["additionalProperties"] = false;
                 schema["properties"] ??= new JsonObject();
+                if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
+                { DevicePlaceInputs.Configure(schema); }
                 if (tool.ProtocolTool.Name == ListImportTools.ImportTool)
                 {
                     schema["allOf"] = JsonNode.Parse("""[{"if":{"properties":{"kind":{"const":"parts"}}},"then":{"properties":{"format":{"const":"xml"}}}}]""");

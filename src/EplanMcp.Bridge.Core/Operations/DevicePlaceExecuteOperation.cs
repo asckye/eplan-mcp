@@ -28,6 +28,8 @@ public sealed class DevicePlaceExecuteOperation(
         DevicePlaceRequest request;
         try
         {
+            if (args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null)
+            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol placement execution is unavailable; use dry_run to preview.", metadata: new Dictionary<string, string> { ["missing"] = "device.place.symbol.execute" }); }
             if (string.IsNullOrEmpty(args.Fingerprint))
             {
                 throw InvalidArgument("'fingerprint' is required: the one device.place.plan returned.");

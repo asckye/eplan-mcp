@@ -56,7 +56,7 @@ internal sealed class DevicePlaceRequest
         string tag = args.Tag?.Trim() ?? string.Empty;
         string part = args.Part?.Trim() ?? string.Empty;
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full circuit page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
-        AddIf(violations, part.Length == 0 || part.Any(char.IsControl), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
+        AddIf(violations, args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
         if (violations.Count > 0)
@@ -71,7 +71,7 @@ internal sealed class DevicePlaceRequest
                 "No page has this name, so nothing was placed. Use eplan_page_list with name_prefix to find the exact page name.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = project.Name, ["page"] = args.Page });
-        PartSearchItem? chosen = ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
+        PartSearchItem? chosen = args.Library is not null ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
         violations.AddRange(PageProblems(page, args.X, args.Y));
         if (violations.Count > 0)
         {

@@ -153,7 +153,7 @@ internal static class BridgeHost
             new PageTextInspectOperation(catalog, pageTexts),
             new DeviceUpdatePlanOperation(catalog, devices, renamer),
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions),
-            new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer),
+            new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer, new EplanSymbolReader()),
             new DevicePlaceExecuteOperation(catalog, pages, renamer, partsDatabase, placer, transactions),
             new ConnectionGeneratePlanOperation(catalog, pages, generator),
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),

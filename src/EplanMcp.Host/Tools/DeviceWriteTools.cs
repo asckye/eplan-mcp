@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
@@ -90,7 +91,7 @@ internal sealed class DeviceWriteTools
 
     [McpServerTool(
         Name = PlaceTool,
-        Title = "Place a part's device on an EPLAN page",
+        Title = "Place a device on an EPLAN page",
         ReadOnly = false,
         Destructive = false,
         Idempotent = false,
@@ -98,30 +99,50 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places one device by part number on a circuit page, as the engineer would, and gives it the tag; one " +
-        "Ctrl+Z in EPLAN undoes it. Several devices: eplan_macro_insert. x, y: mm from the page's bottom left, y up. " +
-        "Outside scratch it needs approval. Example: " +
+        "Places a part device; Ctrl+Z undoes it. Or plans a library symbol without a part (dry_run only). " +
+        "Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
         [Description("From eplan_project_list")] string project,
         [Description("Full circuit page name")] string page,
-        [Description("From eplan_part_search")] string part,
         [Description("mm")] double x,
         [Description("mm")] double y,
         [Description("-KF20 (page structure) or full tag")] string tag,
+        [Description("From eplan_part_search")] string? part = null,
         [Description("Default: 1")] string? variant = null,
         [Description("Only return the plan")] bool dry_run = false,
+        [Description("Project library; excludes part/variant")] string? library = null,
+        [Description("Exact name from eplan_symbol_search")] string? symbol = null,
+        [Description("Native variant number")] int? symbol_variant = null,
+        [Description("Up to 8 {property_id,offset_x_mm,offset_y_mm}; see usage")] JsonElement[]? display_properties = null,
+        [Description("One designation per pin, in search order")] string[]? connection_designations = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        // The page, the part, the point and the tag are checked by the Bridge, all at once (device.place.plan).
-        if (string.IsNullOrWhiteSpace(project))
+        var args = new DevicePlaceArgs
         {
-            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+            Project = project,
+            Page = page ?? string.Empty,
+            Part = part,
+            Variant = ToolArguments.Optional(variant),
+            X = x,
+            Y = y,
+            Tag = tag,
+            Library = library?.Trim(),
+            Symbol = symbol?.Trim(),
+            SymbolVariant = symbol_variant,
+            ConnectionDesignations = connection_designations
+        };
+        List<string> violations = DevicePlaceInputs.Check(args, display_properties);
+        if (violations.Count > 0)
+        {
+            BridgeError error = ToolResults.InvalidArgumentError(violations);
+            error.Execution = ExecutionState.NotStarted;
+            return ToolResults.Error(error);
         }
-
-        var args = new DevicePlaceArgs { Project = project, Page = page ?? string.Empty, Part = part, Variant = ToolArguments.Optional(variant), X = x, Y = y, Tag = tag };
+        if (args.Library is not null && !dry_run)
+        { return ToolResults.Error(new BridgeError { Reason = ErrorReason.CapabilityMissing, Execution = ExecutionState.NotStarted, Message = "Symbol placement execution is unavailable; use dry_run to preview.", Metadata = new() { ["missing"] = "device.place.symbol.execute" } }); }
         var request = new WriteRequest<DevicePlaceArgs, DevicePlaceArgs>(
             PlaceTool,
             ToolTier.Write,
@@ -151,7 +172,7 @@ internal sealed class DeviceWriteTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
-            Part = ResultShaper.CleanText(data?.Part ?? details.GetValueOrDefault("part") ?? part),
+            Part = ResultShaper.CleanText(data?.Part ?? details.GetValueOrDefault("part") ?? part ?? string.Empty),
             Variant = ResultShaper.CleanText(data?.Variant ?? details.GetValueOrDefault("variant") ?? string.Empty),
             Device = new DevicePlaceResult.DeviceEntry
             {
@@ -159,12 +180,19 @@ internal sealed class DeviceWriteTools
                 VisibleTag = ResultShaper.CleanText(data?.VisibleTag),
                 Category = ResultShaper.CleanText(data?.Category),
             },
-            Functions = data?.Functions,
-            Unplaced = data?.Unplaced,
+            Functions = data?.Functions ?? (args.Library is not null ? 1 : null),
+            Unplaced = data?.Unplaced ?? (args.Library is not null ? 0 : null),
+            Symbol = details.TryGetValue("symbol", out string? resolved) ? JsonSerializer.Deserialize<SymbolSearchItem>(resolved, HostJson.Options) : null,
+            Changes = args.Library is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             Undo = committed ? "AI: " + PlaceTool : null,
             Recovered = outcome.Recovered,
             Hint = PlaceHint(outcome, details),
         };
+        if (result.Symbol is { } plannedSymbol)
+        {
+            plannedSymbol.Library = ResultShaper.CleanText(plannedSymbol.Library);
+            plannedSymbol.Name = ResultShaper.CleanText(plannedSymbol.Name);
+        }
         string summary = !committed ? "Dry run: would place one device. Nothing was changed."
             : data is null ? "Placed a device; Ctrl+Z in EPLAN undoes this step."
             : $"Placed a device with {ToolResults.Count(data.Functions, "function")}; Ctrl+Z in EPLAN undoes this step.";

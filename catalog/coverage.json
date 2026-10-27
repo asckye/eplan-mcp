@@ -777,19 +777,20 @@
         "device.place.execute",
         "device.place.plan"
       ],
-      "apiIds": 93,
-      "operationGroups": 46,
-      "dataDictionary": 1,
-      "dependencies": 42,
+      "apiIds": 116,
+      "operationGroups": 61,
+      "dataDictionary": 2,
+      "dependencies": 49,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 1,
-      "medium": 2,
+      "small": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": [
         "A13",
         "A14",
-        "A26"
+        "A26",
+        "A53"
       ]
     },
     {
@@ -2035,7 +2036,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_symbol_search.md",
       "small": 3,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A52",
@@ -2404,6 +2405,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4055,6 +4057,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4064,6 +4067,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4073,6 +4077,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4082,6 +4087,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4091,6 +4097,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4100,6 +4107,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4109,6 +4117,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4118,6 +4127,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4127,6 +4137,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4136,6 +4147,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4519,6 +4531,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4528,6 +4541,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -4886,6 +4900,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_symbol_search"
       ]
     },
@@ -5303,6 +5318,7 @@
         "eplan_connection_number",
         "eplan_context_get",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_import_pdf_comments",
         "eplan_language_remove",
@@ -5433,6 +5449,7 @@
         "eplan_connection_number",
         "eplan_context_get",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_import_pdf_comments",
         "eplan_language_remove",

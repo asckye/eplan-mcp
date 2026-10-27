@@ -30,6 +30,9 @@ public static class ErrorReason
     /// <summary>EPLAN's parts database has no part with the given number; eplan_part_search finds part numbers.</summary>
     public const string PartNotFound = "PART_NOT_FOUND";
 
+    /// <summary>No project library symbol has the requested name and variant; use eplan_symbol_search.</summary>
+    public const string SymbolNotFound = "SYMBOL_NOT_FOUND";
+
     /// <summary>No file has the given path below the import folder (SEC-31); <c>metadata.file</c> repeats it.</summary>
     public const string FileNotFound = "FILE_NOT_FOUND";
 

@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-27",
-  "scannedSources": "2a28e78c + uncommitted changes",
-  "sourceHash": "sha256:2720a9a1ee5a648123d316c357b0990fea3532e33dcd50142b7304151eb74e1e",
+  "scannedSources": "eccc16a0",
+  "sourceHash": "sha256:dafa2624b6b6d2cdd7fbeb0afa13c47cc4d321c3c3e3edc8ea6e427c1c8bc235",
   "operations": [
     {
       "name": "action.execute",
@@ -6385,6 +6385,7 @@
           "call"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -7780,6 +7781,7 @@
           "call"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       },
@@ -10392,6 +10394,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -10486,6 +10489,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14232,6 +14236,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14245,6 +14250,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14258,6 +14264,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14271,6 +14278,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14284,6 +14292,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14297,6 +14306,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14310,6 +14320,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14323,6 +14334,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -14336,6 +14348,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -16244,6 +16257,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -16257,6 +16271,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -17261,6 +17276,7 @@
           "get"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -18254,6 +18270,7 @@
           "set"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       },
@@ -20617,6 +20634,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -24808,6 +24826,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       },
@@ -24819,6 +24838,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -24832,6 +24852,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -24845,6 +24866,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -24858,6 +24880,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -27311,6 +27334,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -27324,6 +27348,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       }
@@ -27754,6 +27779,7 @@
           "type"
         ],
         "operations": [
+          "device.place.plan",
           "symbol.search"
         ]
       },

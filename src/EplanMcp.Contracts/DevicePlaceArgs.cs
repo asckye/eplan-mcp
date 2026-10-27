@@ -15,6 +15,17 @@ public sealed class DevicePlaceArgs
     /// <summary>The part's variant; null for variant 1, or for the part's only variant.</summary>
     public string? Variant { get; set; }
 
+    /// <summary>Project symbol library; mutually exclusive with Part and Variant.</summary>
+    public string? Library { get; set; }
+    /// <summary>Exact symbol name from the project library.</summary>
+    public string? Symbol { get; set; }
+    /// <summary>Native variant number, required for a symbol source.</summary>
+    public int? SymbolVariant { get; set; }
+    /// <summary>Requested property placements relative to the symbol (A53/A54).</summary>
+    public List<DeviceDisplayProperty>? DisplayProperties { get; set; }
+    /// <summary>One designation per connection point in native array order (A55).</summary>
+    public string[]? ConnectionDesignations { get; set; }
+
     /// <summary>The insertion point's x, in millimetres from the page's left edge.</summary>
     public double X { get; set; }
 

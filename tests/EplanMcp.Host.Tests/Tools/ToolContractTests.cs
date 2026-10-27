@@ -47,6 +47,23 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
+    public void DevicePlace_OffersExclusiveSourcesAndClosedDisplayProperties()
+    {
+        Tool tool = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
+        JsonElement input = tool.InputSchema;
+        Assert.Equal(["project", "page", "x", "y", "tag"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(2, input.GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(["library", "symbol", "symbol_variant"], input.GetProperty("oneOf")[1].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement displays = input.GetProperty("properties").GetProperty("display_properties");
+        Assert.Equal(8, displays.GetProperty("maxItems").GetInt32());
+        JsonElement item = displays.GetProperty("items");
+        Assert.False(item.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["property_id", "offset_x_mm", "offset_y_mm"], item.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Contains(20214, item.GetProperty("properties").GetProperty("property_id").GetProperty("enum").EnumerateArray().Select(v => v.GetInt32()));
+        Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
+    }
+
+    [Fact]
     public void PdfCommentsImport_IsAnIdempotentWrite_WithOnlyProjectFileAndDryRun()
     {
         Tool tool = Tools.Single(t => t.Name == PdfCommentsImportTools.Tool);
@@ -301,7 +318,10 @@ public sealed class ToolContractTests : IDisposable
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
         // Property tools share closed target/selector schemas; budget their prose and structural schema separately.
-        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or CabinetTools.BindTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Tool place = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
+        Assert.InRange(place.Description!.Length + Descriptions(place.InputSchema), 1, 1000);
+        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3500);
         Tool bind = Tools.Single(t => t.Name == CabinetTools.BindTool);
         Assert.InRange(bind.Description!.Length + Descriptions(bind.InputSchema), 1, 1000);
         Assert.InRange(bind.InputSchema.GetRawText().Length, 1, 4000);
