@@ -119,11 +119,21 @@ try {
     }
     $mergeStep = $root.Children['jobs'].Children['package'].Children['steps'].Children |
         Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('name')) -and $_.Children['name'].Value -eq 'Stage full offline payload and merge CycloneDX SBOM' }
+    $publishStep = $root.Children['jobs'].Children['build'].Children['steps'].Children |
+        Where-Object { $_.Children.ContainsKey([YamlDotNet.RepresentationModel.YamlScalarNode]::new('name')) -and $_.Children['name'].Value -eq 'Publish self-contained programs and SBOM inputs' }
+    $readmeCopy = @([scriptblock]::Create($publishStep.Children['run'].Value).Ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'Copy-Item' -and
+            $node.CommandElements[1].Value -ceq 'packaging/zip/README.md'
+    }, $true))
+    if ($readmeCopy.Count -ne 1) { throw 'Publish must copy the ZIP README source exactly once.' }
     Push-Location (New-Item -ItemType Directory (Join-Path $testRoot 'merge'))
     try {
-        foreach ($directory in 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts', 'stage/app/docs/getting-started') {
+        foreach ($directory in 'packaging/zip', 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts', 'stage/app/docs/getting-started') {
             New-Item -ItemType Directory $directory -Force | Out-Null
         }
+        Copy-Item "$repositoryRoot/packaging/zip/README.md" packaging/zip/README.md
+        & ([scriptblock]::Create($readmeCopy[0].Extent.Text))
         '{}' | Set-Content packaging/claude-plugin/.claude-plugin/marketplace.json
         '{"version":"0.1.0"}' | Set-Content packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json
         '{}' | Set-Content packaging/claude-plugin/eplan-mcp/.mcp.json
@@ -145,6 +155,18 @@ try {
                 dependencies = @(@{ ref = $name; dependsOn = @('shared') }, @{ ref = 'shared'; dependsOn = @($name) }) }
             $path = if ($name -eq 'Addin') { 'addin/payload/addin.cdx.json' } else { "stage/boms/$name.json" }
             $bom | ConvertTo-Json -Depth 10 | Set-Content $path
+        }
+        foreach ($required in 'packaging/zip/README.md', 'stage/app/README.md') {
+            $savedReadme = [IO.File]::ReadAllBytes((Resolve-Path $required).Path)
+            Remove-Item -LiteralPath $required
+            try {
+                $failure = $null
+                try { & ([scriptblock]::Create($mergeStep.Children['run'].Value)) } catch { $failure = $_.Exception.Message }
+                if (-not $failure -or -not $failure.Contains("Missing release input: $required")) {
+                    throw "Packaging must refuse a missing README: $required; got '$failure'."
+                }
+            } finally { [IO.File]::WriteAllBytes((Join-Path $PWD $required), $savedReadme) }
+            Write-Output "PASS missing release input $required"
         }
         & ([scriptblock]::Create($mergeStep.Children['run'].Value))
         $merged = Get-Content dist/EplanMcp-v0.1.0.cdx.json -Raw | ConvertFrom-Json
@@ -169,10 +191,15 @@ try {
             foreach ($entry in $archive.Entries) {
                 if (-not $entry.FullName.StartsWith('EplanMcp-0.1.0/', [StringComparison]::Ordinal)) { throw 'Unexpected ZIP root.' }
             }
-            foreach ($required in 'eplanmcp.exe', 'workbench/EplanMcp.Workbench.exe', 'bridge/net481/EplanMcp.Bridge.Eplan.dll',
+            foreach ($required in 'README.md', 'eplanmcp.exe', 'workbench/EplanMcp.Workbench.exe', 'bridge/net481/EplanMcp.Bridge.Eplan.dll',
                 'claude-plugin/.claude-plugin/marketplace.json', 'claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
                 if (-not $archive.GetEntry("EplanMcp-0.1.0/$required")) { throw "Missing ZIP payload: $required" }
             }
+            $readmeReader = [IO.StreamReader]::new($archive.GetEntry('EplanMcp-0.1.0/README.md').Open())
+            try {
+                if ($readmeReader.ReadToEnd() -cne (Get-Content packaging/zip/README.md -Raw)) { throw 'ZIP root README differs from its source.' }
+            } finally { $readmeReader.Dispose() }
+            Write-Output 'PASS ZIP README publish copy and archived content'
             $archiveLines = @(foreach ($entry in $entries) {
                 $stream = $entry.Open()
                 try { "$((Get-FileHash -InputStream $stream -Algorithm SHA256).Hash.ToLowerInvariant())  $($entry.FullName)" }
