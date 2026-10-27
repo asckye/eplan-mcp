@@ -163,6 +163,10 @@ R1 静态合同：`RuleValidator` 返回带类型、单位及子节点的 AST；
 
 scope/check 根节点计第 1 层，操作数节点也计深度；另设静态上限 1,024（整条规则的节点加集合元素，含 fix 输入），区别于运行时访问预算。config 由随包 config_schema 提供类型/单位，choice 按 text；独立规则没有 parameter 声明上下文，未知配置/参数拒绝。fix.inputs 只接纳显式 AST 节点或 `{"object":true}`；来源真实性、工作流解析与正式规则门禁仍由 R3/R4/W1 实现。旧裸规则资料保持可查询，不成为此合同的可执行规则。
 
+R2 实现：`RuleInterpreter.EvaluateAsync` 接收已验证的 `RuleDefinition`、柜内不可变内存快照 `IRuleFactSnapshot`、类型化配置和参数；Host 的快照适配留待后续接入。证据记录 JSON Pointer、locator、原值、覆盖及来源说明，任一已使用来源为推断则 basis=inference。覆盖完整且确定无值时 exists=false、empty=true，其他比较为 unknown；覆盖不完整或缺值的 exists/empty 仍为 unknown；关系覆盖不完整时 some/every/count 均为 unknown，完整空关系分别为 false/true/0。单位转换溢出或损失 decimal 精度为 unknown。
+
+节点访问（含集合元素）与 1 秒预算按整条规则、跨全部对象累计，超限撤销该规则此前的确定结果；30 秒超限使整次结果为 unknown，附覆盖说明，后续不再执行谓词。超过 500 条时整批返回 unknown，不截断规则。`TimeProvider` 与内部访问限额/正则替身支持确定性测试；生产正则固定使用 R1 的选项与 20 ms 超时。取消抛出取消异常；本 PR 不注册工具或 Bridge 操作。
+
 阶段 3 只启用已覆盖的对象属性、归属和快照直接连接端点关系；一般电位延续/跨页追踪等仍待阶段 4。未知关系在构建时报 CAPABILITY_MISSING，资料仍可索引为不可用；不得把“电机必有热继电器”的推断搜索当完整事实检查。fix 引用精确锁定 Workflow，仅 fail 且依据足够时生成计划；冲突修复、unknown 目标不合并、不自动应用。
 
 `eplan_asset_update` 继续不能写 FactSet/Rule 或设置 accepted/official。新增 `eplan_asset_review` 经既有审批渠道接受/拒绝候选、关闭缺口或将候选提升为新 Rule；保留原候选内容和事实，仅更新审核状态，审计关联新旧摘要。模块接口/映射审核同样绑定候选及目标内容摘要；materialize的review_digest必须匹配本机已确认审计记录，客户端自报hash不是确认。无来源 mandatory 在 build 报 PACK_INVALID；未经确认的 Rule 草稿保留为 Candidate，不靠手工改 standing 生效。
