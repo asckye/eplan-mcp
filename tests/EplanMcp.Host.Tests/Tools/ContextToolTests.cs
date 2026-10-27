@@ -21,10 +21,10 @@ public sealed class ContextToolTests : IDisposable
     public ContextToolTests() => _bridge.Handlers[OperationNames.ProjectSnapshot] = args => ContextTestSnapshot.Data((ProjectSnapshotArgs)args!);
 
     [Fact]
-    public async Task ExplicitNonDefaultCabinet_IsCapabilityMissingBeforeBridge()
+    public async Task UnknownCabinet_IsInvalidArgument()
     {
-        Assert.Equal(ErrorReason.CapabilityMissing, Error(await ContextTools.GetAsync(_bridge, Packs, Parse("{}"), cabinet: "panel", cancellationToken: Token)).GetProperty("reason").GetString());
-        Assert.Empty(_bridge.Calls);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(await ContextTools.GetAsync(_bridge, Packs, Parse("{}"), project: "Line1", cabinet: "panel", cancellationToken: Token)).GetProperty("reason").GetString());
+        Assert.Single(_bridge.Calls);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public sealed class ContextToolTests : IDisposable
     }
 
     private Task<CallToolResult> Get(string scope = "{}", string? include = null, int budget = 20000) =>
-        ContextTools.GetAsync(_bridge, Packs, Parse(scope), include: include is null ? (JsonElement?)null : Parse(include), max_tokens: budget, cancellationToken: Token);
+        ContextTools.GetAsync(_bridge, Packs, Parse(scope), project: "Line1", include: include is null ? (JsonElement?)null : Parse(include), max_tokens: budget, cancellationToken: Token);
 
     internal static JsonElement Parse(string json) => JsonDocument.Parse(json).RootElement.Clone();
 

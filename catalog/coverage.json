@@ -437,6 +437,40 @@
       "apiNotes": []
     },
     {
+      "name": "eplan_cabinet_bind",
+      "safety": "write",
+      "operations": [
+        "project.get"
+      ],
+      "apiIds": 55,
+      "operationGroups": 30,
+      "dataDictionary": 0,
+      "dependencies": 25,
+      "actions": 0,
+      "spec": "docs/tools/eplan_cabinet_bind.md",
+      "small": 2,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_cabinet_list",
+      "safety": "read",
+      "operations": [
+        "project.get"
+      ],
+      "apiIds": 55,
+      "operationGroups": 30,
+      "dataDictionary": 0,
+      "dependencies": 25,
+      "actions": 0,
+      "spec": "docs/tools/eplan_cabinet_list.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_cable_generate",
       "safety": "destructive",
       "operations": [
@@ -662,8 +696,8 @@
       "actions": 0,
       "spec": "docs/tools/eplan_context_get.md",
       "small": 2,
-      "medium": 4,
-      "large": 2,
+      "medium": 5,
+      "large": 3,
       "apiNotes": [
         "A20",
         "A33",
@@ -2512,6 +2546,8 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_generate",
@@ -2557,6 +2593,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_generate",
@@ -2600,6 +2638,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_generate",
@@ -2710,6 +2750,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_generate",
@@ -2890,6 +2932,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -3091,6 +3135,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_import_list",
         "eplan_import_plc",
         "eplan_part_list",
@@ -3107,6 +3153,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_connection_generate",
         "eplan_connection_list",
@@ -3126,6 +3174,8 @@
       "partial": true,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3166,6 +3216,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_check_run",
@@ -3423,6 +3475,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -3507,6 +3561,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4041,6 +4097,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
@@ -4327,6 +4385,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4407,6 +4467,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4490,6 +4552,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4550,6 +4614,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_context_get",
         "eplan_project_create",
         "eplan_project_get",
@@ -4626,6 +4692,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4709,6 +4777,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4804,6 +4874,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -4818,6 +4890,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -4882,6 +4956,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -4916,6 +4992,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -4930,6 +5008,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_context_get",
         "eplan_device_get",
@@ -4947,6 +5027,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -4982,6 +5064,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_context_get",
         "eplan_device_get",
@@ -5040,6 +5124,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
         "eplan_connection_generate",
@@ -5070,6 +5156,8 @@
       "partial": true,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -5379,6 +5467,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -5393,6 +5483,8 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
@@ -5676,6 +5768,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_cabinet_bind",
+        "eplan_cabinet_list",
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",

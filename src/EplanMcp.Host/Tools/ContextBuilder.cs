@@ -16,9 +16,9 @@ internal static class ContextBuilder
 {
     internal static readonly string[] Sections = ["objects", "facts", "modules", "rules", "config", "capabilities"];
     internal static readonly string[] Defaults = ["objects", "facts", "modules", "config", "capabilities"];
-    private static readonly string[] _gaps = ["snapshot:graphics_text_placeholders", "config:layer_merge", "config:values", "modules:insert_and_value_sets", "rules:execution"];
+    private static readonly string[] _gaps = ["snapshot:graphics_text_placeholders", "modules:insert_and_value_sets", "rules:execution"];
 
-    public static async Task<JsonObject> ReadAsync(IBridgeClient bridge, PackLibrary packs, string? project, JsonElement scope, string[] include, int tokens, CancellationToken cancellationToken)
+    public static async Task<JsonObject> ReadAsync(IBridgeClient bridge, PackLibrary packs, string? project, JsonElement scope, string[] include, int tokens, string? cabinet, CancellationToken cancellationToken)
     {
         string[]? Strings(string key) => scope.TryGetProperty(key, out JsonElement value) ? value.Deserialize<string[]>() : null;
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -33,18 +33,14 @@ internal static class ContextBuilder
         }
 
         PlanSnapshot snapshot = await new PlanBaselineReader(bridge).SnapshotAsync(project, scope.TryGetProperty("locators", out _) ? null : Strings("pages"), cancellationToken).ConfigureAwait(false);
-        ProjectBinding? binding = await packs.Workspaces.ReadAsync(snapshot.Project.Path, cancellationToken).ConfigureAwait(false);
-        if (binding is not null && (!Path.IsPathFullyQualified(binding.Project) || PlanSnapshotHashes.ProjectKey(binding.Project) != snapshot.Project.Path))
-        {
-            throw Missing("workspace:project_identity");
-        }
-
-        if (binding is not null && (binding.Cabinets.Count > 1 || binding.Cabinets.Any(c => c.Id != "default")))
-        {
-            throw Missing("cabinet:single_default_binding");
-        }
-
-        if (binding?.Cabinets.Count == 0)
+        ProjectBinding? binding = await ContextBuilder.ReadBindingAsync(packs, snapshot.Project.Path, cancellationToken).ConfigureAwait(false);
+        if (binding?.BindingVersion == 1 && (binding.Cabinets.Count > 1 || binding.Cabinets.Any(c => c.Id != "default")))
+        { throw Missing("cabinet:v2_structure_mapping"); }
+        CabinetBinding selected = ContextBuilder.SelectCabinet(binding, cabinet);
+        (JsonArray config, IReadOnlyList<PackReference> pins) = await ContextBuilder.CabinetConfigAsync(packs, binding, selected, cancellationToken).ConfigureAwait(false);
+        var resolver = new CabinetScopeResolver(binding?.BindingVersion == 2 && binding.Cabinets.Count > 0 ? binding.Cabinets : [ContextBuilder.VirtualCabinet]);
+        bool Owns(string? name) => binding?.BindingVersion != 2 || resolver.CabinetOf(name).SequenceEqual([selected.Id]);
+        if (binding?.BindingVersion == 1 && binding.Cabinets.Count == 0)
         {
             binding = null;
         }
@@ -62,16 +58,16 @@ internal static class ContextBuilder
             });
         }
 
-        List<SnapshotPage> pages = [.. snapshot.Pages.Where(p => filter.Pages.Contains(p.Name, StringComparer.Ordinal)
+        List<SnapshotPage> pages = [.. snapshot.Pages.Where(p => Owns(p.Name) && filter.Pages.Contains(p.Name, StringComparer.Ordinal)
             && (filter.Structures.IsEmpty || filter.Structures.Any(s => PlanScopeRules.StructurePrefix(p.Name, s)))
             && (filter.Locators.IsEmpty || p.Objects.Any(o => filter.Locators.Any(l => PlanScopeRules.Same(l, PlanScopeRules.Locator(snapshot.Project.Path, o))))))
             .OrderBy(p => p.Name, StringComparer.Ordinal)];
         var result = new JsonObject
         {
             ["project"] = Node(new { snapshot.Project.Name, snapshot.Project.Path }),
-            ["cabinet"] = "default",
+            ["cabinet"] = selected.Id,
             ["scope"] = JsonNode.Parse(scope.GetRawText()),
-            ["contextRef"] = Reference(scope.EnumerateObject().Any() ? null : snapshot.ComposedHash, binding),
+            ["contextRef"] = Reference(scope.EnumerateObject().Any() || binding?.BindingVersion == 2 ? null : snapshot.ComposedHash, binding),
             ["sources"] = new JsonArray(),
             ["coverage"] = Node(new
             {
@@ -83,9 +79,16 @@ internal static class ContextBuilder
             }),
         };
         var items = Sections.ToDictionary(s => s, _ => new List<(JsonObject Item, JsonObject Source)>(), StringComparer.Ordinal);
+        foreach (JsonObject value in config.OfType<JsonObject>())
+        {
+            JsonObject source = Node(new { snapshot.Project.Path, BindingRevision = binding!.Revision, Cabinet = selected.Id });
+            source["id"] = "s-" + Digest(source);
+            items["config"].Add((value, source));
+        }
         DateTimeOffset extractedAt = packs.Clock.GetUtcNow();
         string[]? kinds = Strings("kinds");
-        foreach (SnapshotObject obj in PlanScopeRules.Select(snapshot, filter).Where(o => kinds is null || kinds.Contains(o.Kind, StringComparer.Ordinal))
+        foreach (SnapshotObject obj in PlanScopeRules.Select(snapshot, filter).Where(o => pages.Any(p => p.Name == (o.Kind == "page" ? o.Name : o.Page))
+            && Owns(o.Kind == "connection" ? o.Page : o.Name) && (kinds is null || kinds.Contains(o.Kind, StringComparer.Ordinal)))
             .OrderBy(o => o.Kind == "page" ? o.Name : o.Page, StringComparer.Ordinal).ThenBy(o => o.Kind, StringComparer.Ordinal).ThenBy(o => o.Type).ThenBy(o => o.Oid))
         {
             var locator = PlanScopeRules.Locator(snapshot.Project.Path, obj);
@@ -128,7 +131,7 @@ internal static class ContextBuilder
             }
         }
 
-        foreach (PackReference pin in (binding?.Locks ?? []).OrderBy(l => l.Id, StringComparer.Ordinal).ThenBy(l => l.Version, StringComparer.Ordinal))
+        foreach (PackReference pin in pins.OrderBy(l => l.Id, StringComparer.Ordinal).ThenBy(l => l.Version, StringComparer.Ordinal))
         {
             if (!include.Any(s => s is "modules" or "rules"))
             {
@@ -324,4 +327,46 @@ internal static class ContextBuilder
         Message = "This context needs an unavailable capability. Use the default cabinet with existing exact locks and a compatible Bridge.",
         Metadata = new() { ["missing"] = capability },
     });
+
+    internal static CabinetBinding VirtualCabinet => new() { Id = "default", Layers = [], Values = new(), Structure = new() { ["all"] = true } };
+    internal static CabinetBinding SelectCabinet(ProjectBinding? binding, string? cabinet)
+    {
+        IReadOnlyList<CabinetBinding> cabinets = binding?.Cabinets.Count > 0 ? binding.Cabinets : [VirtualCabinet];
+        return cabinets.SingleOrDefault(c => c.Id == (cabinet ?? (cabinets.Count == 1 ? cabinets[0].Id : null)))
+            ?? throw new BridgeCallException(ToolResults.InvalidArgumentError(["/cabinet: select an existing cabinet; required for multiple cabinets. Use eplan_cabinet_list."]));
+    }
+    internal static async Task<ProjectBinding?> ReadBindingAsync(PackLibrary packs, string project, CancellationToken cancellationToken)
+    {
+        _ = new PlanPaths(packs.Locations.Root).Check(Path.Combine(packs.Workspaces.FolderOf(project), ProjectBinding.FileName));
+        ProjectBinding? binding = await packs.Workspaces.ReadAsync(project, cancellationToken).ConfigureAwait(false);
+        return binding is null || Path.IsPathFullyQualified(binding.Project) && PlanSnapshotHashes.ProjectKey(binding.Project) == project
+            ? binding : throw Missing("workspace:project_identity");
+    }
+    internal static async Task<(JsonArray Values, IReadOnlyList<PackReference> Pins)> CabinetConfigAsync(PackLibrary packs, ProjectBinding? binding, CabinetBinding cabinet, CancellationToken cancellationToken)
+    {
+        if (binding?.BindingVersion != 2)
+        { return ([], binding?.Locks ?? []); }
+        var documents = new Dictionary<string, ConfigDocument>(StringComparer.Ordinal);
+        IReadOnlyList<PackReference> pins = await BindingLocks.ResolveAsync(binding with { Cabinets = [cabinet] }, async (id, version, token) =>
+        {
+            string folder = new PlanPaths(packs.Locations.Root).Check(packs.Installed.FolderOf(id, version));
+            PackCheckResult check = await PackVerifier.CheckDirectoryAsync(folder, token).ConfigureAwait(false);
+            if (!check.Ok || check.Manifest is not { } manifest || check.Lock is not { } frozen || !binding.Locks.Contains(frozen.Pack))
+            { throw CabinetFailure(Directory.Exists(folder) ? ErrorReason.PackInvalid : ErrorReason.ResourceNotFound, "/locks", "Verify the exact installed pack and binding locks."); }
+            foreach (AssetEntry entry in (await AssetIndex.ReadAsync(folder, manifest, token).ConfigureAwait(false))
+                .Where(e => e.Resource.Kind == ResourceKind.ConfigSchema || cabinet.Layers!.Contains(e.Id, StringComparer.Ordinal)))
+            {
+                if (entry.Document is not { } document || await PackVerifier.ResourceProblemAsync(folder, entry.Resource, packs.Config.PackSources, token).ConfigureAwait(false) is not null)
+                { throw CabinetFailure(ErrorReason.PackInvalid, "/locks", "Configuration content changed; check the locked pack."); }
+                documents.Add(entry.Id, new(entry.Id, entry.Resource.Sha256, JsonSerializer.SerializeToElement(document.Spec, PackJson.Options)));
+            }
+            return (manifest, frozen);
+        }, cancellationToken).ConfigureAwait(false);
+        ConfigMergeResult merged = ConfigMerger.Merge([.. documents.Values.Where(d => d.Resource.Contains(":config_schema/", StringComparison.Ordinal))],
+            [.. cabinet.Layers!.Select(id => documents[id])], binding.Cabinets.Count == 0 ? binding with { Cabinets = [cabinet] } : binding, Math.Max(0, binding.Cabinets.ToList().IndexOf(cabinet)));
+        if (!merged.Ok)
+        { throw CabinetFailure(merged.Reason!, merged.Location!, merged.Message!, merged.Trace.GetRawText()); }
+        return (JsonNode.Parse(merged.Values.GetRawText())!.AsArray(), pins);
+    }
+    internal static BridgeCallException CabinetFailure(string reason, string pointer, string message, string? trace = null) => new(new BridgeError { Reason = reason, Message = message, Metadata = new() { ["pointer"] = pointer, ["trace"] = trace ?? "[]" } });
 }

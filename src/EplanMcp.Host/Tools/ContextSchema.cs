@@ -26,14 +26,14 @@ internal static class ContextSchema
         McpServerTool tool = tools.Single(t => t.ProtocolTool.Name == ContextTools.GetTool);
         var input = JsonNode.Parse("""
             {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","additionalProperties":false,"required":["scope"],"properties":{
-              "project":{"type":"string"},"cabinet":{"type":"string","enum":["default"],"default":"default"},"scope":{},"include":{},"max_tokens":{"type":"integer","minimum":1,"maximum":20000,"default":5000}}}
+              "project":{"type":["string","null"]},"cabinet":{"type":"string","minLength":1},"scope":{},"include":{},"max_tokens":{"type":"integer","minimum":1,"maximum":20000,"default":5000}}}
             """)!;
         input["properties"]!["scope"] = JsonNode.Parse(_scopeSchema.GetRawText());
         input["properties"]!["include"] = JsonNode.Parse(_includeSchema.GetRawText());
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
         tool.ProtocolTool.OutputSchema = JsonDocument.Parse("""
             {"type":"object","additionalProperties":false,"required":["project","cabinet","scope","contextRef","sources","coverage","budget","truncated","hint"],"properties":{
-              "project":{"type":"object","required":["name","path"],"properties":{"name":{"type":"string"},"path":{"type":"string"}}},"cabinet":{"type":"string","const":"default"},"scope":{"type":"object"},
+              "project":{"type":"object","required":["name","path"],"properties":{"name":{"type":"string"},"path":{"type":"string"}}},"cabinet":{"type":"string"},"scope":{"type":"object"},
               "contextRef":{"type":"object","required":["snapshotHash","generation","bindingRevision","lockDigest"],"properties":{"snapshotHash":{"type":["string","null"]},"generation":{"type":"null"},"bindingRevision":{"type":["integer","null"],"minimum":0},"lockDigest":{"type":["string","null"]}}},
               "objects":{"type":"array","items":{"type":"object"}},"facts":{"type":"array","items":{"type":"object"}},"modules":{"type":"array","items":{"type":"object"}},"rules":{"type":"array","items":{"type":"object"}},"config":{"type":"array","items":{"type":"object"}},"capabilities":{"type":"array","items":{"type":"object"}},"sources":{"type":"array","items":{"type":"object"}},
               "coverage":{"type":"object","required":["profile","format","pages","missing"],"properties":{"profile":{"type":"string"},"format":{"type":"string"},"pages":{"type":"array","items":{"type":"object","required":["name","type","oid","hash"],"properties":{"name":{"type":"string"},"type":{"type":"integer"},"oid":{"type":"integer"},"hash":{"type":"string"}}}},"missing":{"type":"array","items":{"type":"string"}}}},

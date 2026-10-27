@@ -144,7 +144,7 @@ public sealed class ContextBuilderReadTests : IDisposable
     [Fact]
     public async Task CancellationBeforeExtraction_DoesNotReadOrWrite()
     {
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ContextBuilder.ReadAsync(_bridge, Packs, null, Parse("{}"), ContextBuilder.Defaults, 5000, new CancellationToken(canceled: true)));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ContextBuilder.ReadAsync(_bridge, Packs, null, Parse("{}"), ContextBuilder.Defaults, 5000, null, new CancellationToken(canceled: true)));
         Assert.Empty(_bridge.Calls);
         Assert.Empty(Directory.EnumerateFileSystemEntries(_locations.Root));
     }
@@ -201,7 +201,7 @@ public sealed class ContextBuilderReadTests : IDisposable
     }
 
     private Task<JsonObject> Get(string scope = "{}", string? include = null, int budget = 20000) =>
-        ContextBuilder.ReadAsync(_bridge, Packs, null, Parse(scope), include is null ? ContextBuilder.Defaults : JsonSerializer.Deserialize<string[]>(include)!, budget, Token);
+        ContextBuilder.ReadAsync(_bridge, Packs, null, Parse(scope), include is null ? ContextBuilder.Defaults : JsonSerializer.Deserialize<string[]>(include)!, budget, null, Token);
     private string BindingFile => Path.Combine(Packs.Workspaces.FolderOf(Key), ProjectBinding.FileName);
     private async Task WriteBinding(ProjectBinding binding)
     {

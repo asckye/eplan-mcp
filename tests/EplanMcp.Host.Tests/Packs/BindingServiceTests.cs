@@ -80,7 +80,7 @@ public sealed class BindingServiceTests : IDisposable
     [InlineData("staged")]
     public async Task Write_FailsDuringWriteOrBeforeReplace_PreservesOldFileAndCleansTemporary(string failure)
     {
-        Seed(Proposal() with { Revision = 4 });
+        Seed(Proposal() with { Revision = 4, Cabinets = [Proposal().Cabinets[0] with { Title = "original" }] });
         byte[] old = File.ReadAllBytes(BindingFile);
         BindingService service = Service(checkpoint: point =>
         {
@@ -97,7 +97,7 @@ public sealed class BindingServiceTests : IDisposable
     [Fact]
     public async Task Write_AtomicReplace_ReadersKeepTheOldSnapshotWhileNewReadersSeeCompleteNewFile()
     {
-        Seed(Proposal() with { Revision = 4 });
+        Seed(Proposal() with { Revision = 4, Cabinets = [Proposal().Cabinets[0] with { Title = "original" }] });
         byte[] before = File.ReadAllBytes(BindingFile);
         using var reader = new FileStream(BindingFile, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
         BindingService service = Service(checkpoint: point =>
@@ -185,6 +185,7 @@ public sealed class BindingServiceTests : IDisposable
             Wait = () =>
             {
                 using var projectLock = new FileStream(new PlanPaths(_locations.Root).ProjectLock(Project), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                Directory.CreateDirectory(Path.GetDirectoryName(BindingFile)!);
                 using var bindingLock = new FileStream(Path.Combine(Path.GetDirectoryName(BindingFile)!, ".binding.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             },
         };
@@ -215,7 +216,7 @@ public sealed class BindingServiceTests : IDisposable
     [Fact]
     public async Task Write_AuditUnavailable_PreservesOldFile()
     {
-        Seed(Proposal() with { Revision = 4 });
+        Seed(Proposal() with { Revision = 4, Cabinets = [Proposal().Cabinets[0] with { Title = "original" }] });
         byte[] before = File.ReadAllBytes(BindingFile);
         Directory.CreateDirectory(_locations.Audit);
         File.WriteAllText(Path.Combine(_locations.Audit, "2026-10-27.jsonl"), "damaged\n");

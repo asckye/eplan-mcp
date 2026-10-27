@@ -60,6 +60,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(ActionRunCatalog.Process);
         services.TryAddSingleton<ImportFiles>();
         services.TryAddSingleton<PackLibrary>();
+        services.TryAddSingleton<BindingService>();
         services.TryAddSingleton<PackInstaller>();
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
@@ -67,6 +68,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PropertyGetTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertySetContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => CabinetTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
@@ -138,6 +140,7 @@ internal static class McpServerSetup
             .WithTools<ActionRunTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
+            .WithTools<CabinetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)
             .WithTools<WorkflowTools>(HostJson.Options)
             .WithTools<PlanTools>(HostJson.Options)

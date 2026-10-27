@@ -277,6 +277,243 @@
       "live": []
     },
     {
+      "name": "eplan_cabinet_bind",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/CabinetTools.cs",
+      "operations": [
+        "project.get"
+      ],
+      "api": [
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.Dispose",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
+        "P:Eplan.EplApi.DataModel.Function.IsMainFunction",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.Page.PageType",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.IsIndexed",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.IsInternal",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.Name",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Definition",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Indexes",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
+        "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
+        "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.AnyPropertyId",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.EmptyPropertyException",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.IndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.NotIndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.PropertyDefinition",
+        "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.UniversalPropertyList",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_cabinet_bind.md",
+        "specStatus": "已实现；pack / full / 本地数据；四注解 false/false/true/false",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "CabinetContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetContractTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "CabinetToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ProjectGetOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectGetOperationTests.cs"
+          },
+          {
+            "name": "ChineseRoundTripTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/ChineseRoundTripTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
+      "name": "eplan_cabinet_list",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/CabinetTools.cs",
+      "operations": [
+        "project.get"
+      ],
+      "api": [
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.Dispose",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
+        "P:Eplan.EplApi.DataModel.Function.IsMainFunction",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.Page.PageType",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.IsIndexed",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.IsInternal",
+        "P:Eplan.EplApi.DataModel.PropertyDefinition.Name",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Definition",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Indexes",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
+        "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
+        "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.AnyPropertyId",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.EmptyPropertyException",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.IndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.NotIndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.PropertyDefinition",
+        "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.UniversalPropertyList",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_cabinet_list.md",
+        "specStatus": "已实现；pack / full / Read；四注解 true/false/true/false",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "CabinetContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetContractTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "CabinetToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CabinetContextTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CabinetContextTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ProjectGetOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectGetOperationTests.cs"
+          },
+          {
+            "name": "ChineseRoundTripTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/ChineseRoundTripTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_cable_generate",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/CableGenerateTools.cs",
@@ -1572,6 +1809,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
+            "name": "CabinetToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetToolTests.cs"
+          },
+          {
             "name": "ContextProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ContextProtocolTests.cs"
@@ -1590,6 +1832,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CabinetContextTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CabinetContextTests.cs"
           },
           {
             "name": "ContextGetTests",

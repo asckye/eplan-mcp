@@ -9,14 +9,14 @@
 | 状态 | 已实现最小只读聚合（P24）；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准；Large 待实跑 |
 
 ## 1. 这个工具解决什么任务
-“针对这些页/对象，给我编译任务需要的紧凑上下文，并说明来源”。按 [M6 4.3/4.7/4.16](../design/2026-10-21-m6-engineering-packs.md)，本期仅覆盖全部结构的默认柜；公司/柜型/项目/柜配置层、绑定管理、规则强制检查留第 3 阶段，关系图邻域和依赖缓存失效留第 4 阶段。
+“针对这些页/对象，给我编译任务需要的紧凑上下文，并说明来源”。按 [M6 4.3/4.7/4.16](../design/2026-10-21-m6-engineering-packs.md)，支持 v2 多柜结构映射及五层配置；规则强制检查留后续 PR，关系图邻域和依赖缓存失效留第 4 阶段。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `project` | string | 否 | 当前或唯一打开项目 | 结果必须回显实际名称和路径；不明确时沿用 AMBIGUOUS_NAME |
-| `cabinet` | enum `default` | 否 | `default` | 本期唯一柜，不能用它访问/合并多个柜的绑定 |
-| `scope` | object | 是 | — | `{pages?,structures?,kinds?,locators?}`；空对象表示默认柜全部范围，各过滤条件取交集 |
+| `project` | string | 是 | — | 结果必须回显实际名称和路径；不明确时沿用 AMBIGUOUS_NAME |
+| `cabinet` | string | 多柜时是 | 单柜自动选择 | 只返回所选柜的对象、配置及精确依赖资源 |
+| `scope` | object | 是 | — | `{pages?,structures?,kinds?,locators?}`；空对象表示所选柜全部范围，各过滤条件取交集 |
 | `include` | array of enum | 否 | `[objects,facts,modules,config,capabilities]` | 可选 objects/facts/modules/rules/config/capabilities；只取需要的数据，不执行规则 |
 | `max_tokens` | integer，1–20000 | 否 | 5000 | 整个工具结果预算，含 structuredContent、JSON 文本和摘要；实际为估算 token 数，过小放不下必要元数据则报参数错误 |
 
@@ -35,7 +35,7 @@ schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 sche
 ```
 
 - `outputSchema` 声明全部字段；路径/柜/哈希/格式为 string，各集合为 array，预算计数为非负 integer，truncated 为 boolean，hint 为 string 或 null。未 include 的集合不返回；请求了但无材料的集合为空并在 coverage.missing 说明，不编造配置、规则或模块。
-- `objects` 仅范围内页/功能/连接的名称、类型、定位符、登记属性和内容哈希；`facts` 给事实值与源对象；`modules` 给窗口宏/预定义值集的候选摘要、版本/哈希及缺能力；`rules` 只读已有材料并保留事实/候选/正式规则的类别和证据，不把推断升级为强制规则。`config` 只回已知的本期默认值及来源，未配置明确空缺，不实现五层合并。
+- `objects` 仅范围内页/功能/连接的名称、类型、定位符、登记属性和内容哈希；`facts` 给事实值与源对象；`modules` 给窗口宏/预定义值集的候选摘要、版本/哈希及缺能力；`rules` 只读已有材料并保留事实/候选/正式规则的类别和证据，不把推断升级为强制规则。`config` 经 ConfigMerger 返回所选柜的生效值、约束及 trace，来源包含精确资源 ID/哈希或 binding revision；无绑定不创建文件。
 - 每项关联 `sources`：快照事实带项目键、定位符、页/对象哈希、提取格式/版本和时间；包材料带包 ID、精确版本、资源路径/URI、清单 SHA-256、origin 和原参考对象定位符；配置带来源与 JSON Pointer。参考副本与原件的同源依据为 A32/A34，不能仅凭 oid/PROJ_GUID 把不同路径混为一个项目。
 - `contextRef` 记录本次实际可取得的依据；Bridge 当前无 generation 字段则为 null，无绑定/锁为 null。完整 snapshotHash 按快照合同取得/合成，局部范围未取得整项目快照时为 null、另在 coverage.pages 给页哈希，不能冒称整项目哈希。这些字段不是 EPLAN 数据库修订号，也不能代替 apply 的重新核对。
 - structuredContent、同内容 JSON 文本及一行摘要 `Returned context for 2 pages; 3 items omitted by the token budget.`。优先保留信封、来源/哈希；超预算在完整条目间停止，置 truncated/计数/hint，不切断定位符。默认约 5k、硬上限 20k；估算、稳定排序及去重按实施设计 D14、4.7。
@@ -45,7 +45,7 @@ schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 sche
 |---|---|---|
 | `INVALID_ARGUMENT` | 范围/预算/include 非法，或无法容纳必要信封 | `metadata.violations` 列全部字段位置；信封超限给 minimumEstimatedTokens；提示收窄范围/调整预算，不暗中扩大预算 |
 | `RESOURCE_NOT_FOUND` | 明确引用的源资源/定位符不存在或失效 | 列范围/定位符，重新读取，不按相似描述换目标；未绑定可选配置只是缺口 |
-| `CAPABILITY_MISSING` | 缺快照等必要读能力；非默认柜或已有多柜绑定超出本期能力 | `metadata.missing` 列缺项；不以默认柜合并多柜 |
+| `CAPABILITY_MISSING` | 缺快照等必要读能力；旧绑定缺少可证明的结构映射 | `metadata.missing` 列缺项；先显式 bind 转换旧绑定 |
 | 项目解析、连接/授权、`TIMEOUT`、`INTERNAL` | 同 project_get / project.snapshot | 查询错误不带 execution；不声称返回了完整上下文 |
 
 M6 新码的标准/Contracts 登记随实现补齐；缺可选模块能力可在条目中标不可用，缺本次必需的读取能力才使调用失败。

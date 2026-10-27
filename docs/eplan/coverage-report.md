@@ -88,7 +88,7 @@ Bridge 共用到 574 个 ID（方法 177，属性 190，类型 136，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 76（39.5%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 78（38.5%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -149,6 +149,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A33 | — |
 | eplan_asset_update | write | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
+| eplan_cabinet_bind | write | project.get | 55 | 30 | 0 | 25 | 0 | 2/2/0 | — | — |
+| eplan_cabinet_list | read | project.get | 55 | 30 | 0 | 25 | 0 | 2/2/1 | — | — |
 | eplan_cable_generate | destructive | cable.generate.execute<br>cable.generate.plan | 109 | 52 | 2 | 45 | 1 | 3/2/1 | A24 A30 A31 | — |
 | eplan_cable_get | read | cable.get | 66 | 33 | 2 | 26 | 0 | 2/2/2 | A24 | — |
 | eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 119 | 62 | 2 | 54 | 0 | 1/2/1 | A24 | 2026-10-21 pass（api-notes A24） |
@@ -157,7 +159,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 73 | 35 | 1 | 36 | 0 | 1/2/0 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 61 | 33 | 1 | 26 | 0 | 2/3/2 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 81 | 35 | 1 | 45 | 0 | 1/2/1 | A24 | — |
-| eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/4/2 | A20 A33 A34 A35 A36 A39 | — |
+| eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 74 | 43 | 2 | 28 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 7/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
 | eplan_device_place | write | device.place.execute<br>device.place.plan | 93 | 46 | 1 | 42 | 0 | 1/2/1 | A13 A14 A26 | — |
