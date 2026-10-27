@@ -300,7 +300,9 @@ internal static class ApprovalTexts
     /// How the engineer takes the change back: Ctrl+Z on the write's undo step, except for language settings, which no
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
-    private static string Undo(string tool, WritePlan plan, bool zh) => plan.Changes.Any(c => c.Kind == "binding")
+    private static string Undo(string tool, WritePlan plan, bool zh) => plan.Changes.Any(c => c.Kind == "knowledge review")
+        ? zh ? "仅记录本地知识审核；EPLAN 的 Ctrl+Z 不能撤销。" : "Records only a local knowledge review; Ctrl+Z in EPLAN cannot undo it."
+        : plan.Changes.Any(c => c.Kind == "binding")
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
           : tool == ActionRunTools.Tool
         ? zh ? "执行后只比较指纹，不逐项核对；提交后一步 Ctrl+Z 尚未验证。" : "Fingerprint readback only; changes are not checked item by item. Single-step Ctrl+Z after commit is unverified."
