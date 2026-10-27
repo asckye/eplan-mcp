@@ -125,7 +125,7 @@ EPLAN 2026.0.3.25421，Electric P8，只在新复制的 `writes\LargeWrite` 上�
 - 选用的符号（IEC_symbol，无部件）：线圈 `K`（20，变体 0，类别 Coil）、常开触点 `O_EL`（1262，NoContact）、两端符号 `AS`（1687，DataRecorder）。按 A13/A52 走 `LockAllObjects → UndoStep → Transaction`，一次提交放置 3 个功能，`ArticleReferences` 都为 0。
 - 名称 `=GAA+A1-S41K1` 等按请求设置；`VisibleName` 读回为空。功能文本 20011 只写 en_US，原有 de_DE 保留；技术参数 20027 写入。
 - `Function.Create` 自带的默认属性放置只有 20029（索引 2）一个，显示为空。
-- 用 `PropertyPlacement.Create(function, id)` 新建、设 `Location` 为"父对象位置 + 偏移"后，读回位置与请求完全一致（例如偏移 (16,16)），`Justification` 为 BaseLineLeft、字高 2.5：
+- 用 `PropertyPlacement.Create(function, id)` 新建、设 `Location` 为"父对象位置 + 偏移"后，读回位置与请求完全一致——**但这是错误用法**：S42 的截图和绝对外框证实 `Location` 是相对父符号的偏移，按此设置时文字被画到页外。正确做法是只设偏移（S42 r5 截图中 `-S42K1` 显示在线圈旁并随线圈移动）（例如偏移 (16,16)），`Justification` 为 BaseLineLeft、字高 2.5：
 
 | 属性 | 显示 |
 |---|---|
@@ -137,4 +137,4 @@ EPLAN 2026.0.3.25421，Electric P8，只在新复制的 `writes\LargeWrite` 上�
 - 持久性：放置提交后关闭再打开项目，读回逐字段相同。
 - 未做画面核对（`visualVerified=false`）：显示串来自 `GetDisplayString()`，画面位置与字形由 M8 的 S42/整页验收确认。
 
-结论：无部件符号可以放置，标识用 **20214**（`FUNC_DEVICETAG_FULLNAME_WITHSEPARATOR`）显示即带 `-` 前缀，位置按"父对象位置 + 偏移"精确设置；S20 遗留的"缺 `-`、压在插入点"问题有解。`eplan_device_place` 的符号来源分支可按此实现（M8 设计 D03）。
+结论：无部件符号可以放置，标识用 **20214**（`FUNC_DEVICETAG_FULLNAME_WITHSEPARATOR`）显示即带 `-` 前缀，位置用相对父符号的偏移设置（S42 更正）；S20 遗留的"缺 `-`、压在插入点"问题有解。`eplan_device_place` 的符号来源分支可按此实现（M8 设计 D03）。
