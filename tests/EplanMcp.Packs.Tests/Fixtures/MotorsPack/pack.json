@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 2,
+  "id": "sample.motors",
+  "name": "Motor configuration sample",
+  "version": "1.0.0",
+  "compatibility": {},
+  "resources": [
+    {
+      "path": "knowledge/config_layer/cabinet-type.json",
+      "kind": "config_layer",
+      "sha256": "9e16f0af558458d753ee5334fc0b49b473a0da2931eb78b0c9e311bfa082fa73",
+      "bytes": 683,
+      "files": 1,
+      "storage": "bundled"
+    },
+    {
+      "path": "knowledge/config_layer/company.json",
+      "kind": "config_layer",
+      "sha256": "1d67e3f8de073dfcbb4ea440384a024cc7e9d53284da1c59a41e65aa2c7a78b4",
+      "bytes": 671,
+      "files": 1,
+      "storage": "bundled"
+    },
+    {
+      "path": "knowledge/config_schema/motors.json",
+      "kind": "config_schema",
+      "sha256": "555955073a58366fbc6e25680fb92bddb419cf0a912297f5dfb52ef330bfc135",
+      "bytes": 983,
+      "files": 1,
+      "storage": "bundled"
+    }
+  ],
+  "configuration": {
+    "company": {
+      "id": "company",
+      "resources": [
+        "knowledge/config_layer/company.json"
+      ]
+    },
+    "cabinetTypes": [
+      {
+        "id": "motor-cabinet",
+        "resources": [
+          "knowledge/config_layer/cabinet-type.json"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "createdBy": "fixture",
+    "createdAt": "2026-10-26T00:00:00Z"
+  }
+}

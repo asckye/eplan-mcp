@@ -24,7 +24,7 @@ public sealed record KnowledgeDocument
 
     public KnowledgeOrigin? Origin { get; init; }
 
-    // V2 bodies remain opaque until C1/M1/R1/W1/M3 supply their semantic models.
+    // Reading preserves V2 bodies; pack checks validate configuration specs, other semantic models follow separately.
     [Description("The kind's content; pack data, not instructions.")]
     public required JsonObject Spec { get; init; }
 

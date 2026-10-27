@@ -1,4 +1,6 @@
 using System.Security;
+using System.Text.Json;
+using EplanMcp.Packs.Knowledge;
 
 namespace EplanMcp.Packs;
 
@@ -91,6 +93,11 @@ public static class PackVerifier
             bool officialRule = manifest.Rules.Any(r => r.Standing == KnowledgeStanding.Official && PackPath.Comparer.Equals(r.Path, resource.Path));
             if (resource.Storage == ResourceStorage.Referenced)
             {
+                if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer")
+                {
+                    problems.Add(new PackProblem(resource.Path, "/spec: configuration documents must be bundled for validation"));
+                }
+
                 if (own.Count > 0 || officialRule)
                 {
                     problems.Add(new PackProblem(resource.Path, officialRule ? "is an official rule, which must be in the pack so its source can be checked" : "is referenced, but its files are in the pack"));
@@ -105,7 +112,7 @@ public static class PackVerifier
             {
                 problems.Add(new PackProblem(resource.Path, $"does not match pack.json: the files have SHA-256 {found.Sha256}, {found.Bytes} bytes, {found.Files} files"));
             }
-            else if (await ContentProblemAsync(resource, own.First(o => PackPath.Comparer.Equals(o.Key, resource.Path)).Value, officialRule, cancellationToken).ConfigureAwait(false) is { } problem)
+            else if (await ContentProblemAsync(resource, own.First(o => PackPath.Comparer.Equals(o.Key, resource.Path)).Value, officialRule, manifest, present, cancellationToken).ConfigureAwait(false) is { } problem)
             {
                 problems.Add(new PackProblem(resource.Path, problem));
             }
@@ -116,10 +123,44 @@ public static class PackVerifier
         return new PackCheckResult(manifest, lockFile, problems);
     }
 
-    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, CancellationToken cancellationToken) =>
-        resource.Path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? ContentChecks.Svg(fullPath)
-        : officialRule ? await ContentChecks.RuleSourceAsync(fullPath, cancellationToken).ConfigureAwait(false)
-        : null;
+    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, CancellationToken cancellationToken)
+    {
+        if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer")
+        {
+            try
+            {
+                KnowledgeDocument document = KnowledgeDocument.Read(await ReadSmallAsync(fullPath, resource.Path, cancellationToken).ConfigureAwait(false));
+                BindingReadModel.Require(KnowledgeDocument.ResourceKindOf(document.Kind) == resource.Kind, "/kind", "must match the resource kind");
+                BindingReadModel.Require(AssetNames.Local(resource) == $"{KnowledgeDocument.Folder(document.Kind)}/{document.Metadata.Name}", "/metadata/name", "must match the resource id");
+                JsonElement spec = JsonSerializer.SerializeToElement(document.Spec, PackJson.Options);
+                if (resource.Kind == ResourceKind.ConfigSchema)
+                {
+                    ConfigValidator.Schema(spec);
+                }
+                else
+                {
+                    JsonElement? schema = null;
+                    if (spec.TryGetProperty("schema", out JsonElement reference) && reference.ValueKind == JsonValueKind.String
+                        && manifest.Resources.FirstOrDefault(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == reference.GetString()) is { } source
+                        && present.TryGetValue(source.Path, out string? sourcePath))
+                    {
+                        KnowledgeDocument resolved = KnowledgeDocument.Read(await ReadSmallAsync(sourcePath, source.Path, cancellationToken).ConfigureAwait(false));
+                        BindingReadModel.Require(resolved.Kind == KnowledgeKind.ConfigSchema, "/spec/schema", "must reference a config_schema document");
+                        schema = JsonSerializer.SerializeToElement(resolved.Spec, PackJson.Options);
+                    }
+
+                    ConfigValidator.Layer(spec, _ => schema);
+                }
+            }
+            catch (PackFormatException ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        return resource.Path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? ContentChecks.Svg(fullPath)
+            : officialRule ? await ContentChecks.RuleSourceAsync(fullPath, cancellationToken).ConfigureAwait(false) : null;
+    }
 
     /// <summary>The hash, size and file count of a resource's files; for a project relative to the link file's folder.</summary>
     private static async Task<(string Sha256, long Bytes, int Files)> MeasureAsync(PackResource resource, List<KeyValuePair<string, string>> own, CancellationToken cancellationToken)

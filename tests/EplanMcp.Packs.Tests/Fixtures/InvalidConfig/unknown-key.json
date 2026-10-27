@@ -1,0 +1,40 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "config_layer",
+  "metadata": {
+    "name": "company"
+  },
+  "spec": {
+    "layer": "company",
+    "schema": "config_schema/motors",
+    "settings": {
+      "motor.starter": {
+        "default": "dol",
+        "constraint": {
+          "allowed": [
+            "dol",
+            "star_delta"
+          ]
+        }
+      },
+      "motor.power": {
+        "default": 7.5,
+        "constraint": {
+          "allowed": {
+            "min": 0.06,
+            "max": 110
+          }
+        }
+      },
+      "motor.voltage": {
+        "default": 400,
+        "constraint": {
+          "fixed": 400
+        }
+      },
+      "motor.unknown": {
+        "default": 1
+      }
+    }
+  }
+}

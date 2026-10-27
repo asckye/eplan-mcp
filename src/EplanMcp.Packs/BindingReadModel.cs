@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace EplanMcp.Packs;
 
-/// <summary>Shape checks only; configuration resolution and cabinet intersections belong to C1/C3.</summary>
+/// <summary>Shape checks only; schema resolution and cabinet intersections belong to C2/C3.</summary>
 internal static class BindingReadModel
 {
     internal static void Validate(JsonElement root)
@@ -63,7 +63,7 @@ internal static class BindingReadModel
         Require(!digest || (Text(pin.GetProperty("digest")) && PackManifestValidator.IsSha256(pin.GetProperty("digest").GetString()!)), at + "/digest", "must be a SHA-256");
     }
 
-    private static void Settings(JsonElement values, string at)
+    internal static void Settings(JsonElement values, string at)
     {
         Require(values.ValueKind == JsonValueKind.Object, at, "must be settings keyed by configuration name");
         foreach (JsonProperty value in values.EnumerateObject())
@@ -104,7 +104,7 @@ internal static class BindingReadModel
         }
     }
 
-    private static void Object(JsonElement node, string at, string required, string optional)
+    internal static void Object(JsonElement node, string at, string required, string optional)
     {
         Require(node.ValueKind == JsonValueKind.Object, at, "must be an object");
         string[] names = required.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -144,7 +144,7 @@ internal static class BindingReadModel
 
     private static bool Scalar(JsonElement node) => node.ValueKind is JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False;
 
-    private static string Child(string at, string name) => at + "/" + name.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+    internal static string Child(string at, string name) => at + "/" + name.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
 
     internal static void Require(bool valid, string at, string message)
     {
