@@ -195,3 +195,7 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 ### Action whitelist batch 2 (v0.4.0)
 
 `ActionRunTests` 的三项晋升测试只写 `scratch\writes\LargeWrite`，通过 `PlanStepLiveSession` 按 A41/A46 选择当前项目并执行 `XEsUndoAction`。同步测试需要保留 S26 r3 的表示文本差异（请用新鲜示例副本）；断言提交有可观察文本变化，随后一次撤销恢复文本与业务快照、哨兵页仍存在，再一次撤销移除哨兵页。`SwitchProjectType` 测试会打开 `eval-fixture.ps1 -WriteCopies` 生成的 `scratch\writes\LargeWriteType`（名称排在 `LargeWrite` 之后，打开它不改变当前项目，A46），用来确认切换类型不影响其他打开的项目；它之后保持打开，P25 也把它当作已知副本。finally 必要时经产品工具恢复 LargeWrite 为 Schematic。2026-10-26 在 EPLAN 2026.0.3 上三项全部通过，结论见 api-notes A50。
+
+## 绘图几何（T0a）
+
+`DrawingGeometryTests` 标为 Large，本次不运行。先用 `dotnet build tests/EplanMcp.Large.DrawingHelper -c Release` 构建，设置 `EPLANMCP_DRAWING_VARIANT_BIN` 为变体 Bin，再按本文件的夹具流程运行。测试在独立 scratch 副本上通过仅测试使用的离线辅助程序调用生产读取器，读取 Circuit 页的栅格、页/图框尺寸及放置外框；不新增工具或 Bridge 操作。无图框空页、未知外框及属性相对位置由假 Bridge 的 Medium 覆盖，实际空页/图框几何仍须维护者补验。
