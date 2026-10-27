@@ -26,9 +26,7 @@ public sealed class WorkspaceStore(string root, PackStore packs)
     {
         string file = Path.Combine(FolderOf(projectKey), ProjectBinding.FileName);
         return File.Exists(file)
-            ? PackJson.Read<ProjectBinding>(
-                await PackVerifier.ReadSmallAsync(file, ProjectBinding.FileName, cancellationToken).ConfigureAwait(false),
-                ProjectBinding.FileName, "bindingVersion", ProjectBinding.CurrentBindingVersion)
+            ? PackJson.ReadBinding(await PackVerifier.ReadSmallAsync(file, ProjectBinding.FileName, cancellationToken).ConfigureAwait(false))
             : null;
     }
 
@@ -41,6 +39,11 @@ public sealed class WorkspaceStore(string root, PackStore packs)
             ?? throw new PackFormatException("The project's binding is being changed by another EplanMcp; try again when it is done.");
         ProjectBinding binding = await ReadAsync(projectKey, cancellationToken).ConfigureAwait(false)
             ?? new ProjectBinding { BindingVersion = ProjectBinding.CurrentBindingVersion, Project = projectKey, Revision = 0 };
+        if (binding.BindingVersion != ProjectBinding.CurrentBindingVersion)
+        {
+            throw new PackFormatException("/bindingVersion: v2 bindings are read-only here; use explicit bind/migrate when available.");
+        }
+
         var pin = new PackReference { Id = id, Version = version, Digest = digest };
         binding = binding with
         {
@@ -64,7 +67,7 @@ public sealed class WorkspaceStore(string root, PackStore packs)
             try
             {
                 byte[] bytes = await PackVerifier.ReadSmallAsync(file, ProjectBinding.FileName, cancellationToken).ConfigureAwait(false);
-                bindings.Add(PackJson.Read<ProjectBinding>(bytes, ProjectBinding.FileName, "bindingVersion", ProjectBinding.CurrentBindingVersion));
+                bindings.Add(PackJson.ReadBinding(bytes));
             }
             catch (Exception ex) when (ex is PackFormatException or IOException or UnauthorizedAccessException)
             {

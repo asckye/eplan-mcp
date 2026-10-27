@@ -13,6 +13,7 @@ namespace EplanMcp.Packs.Knowledge;
 public sealed record KnowledgeDocument
 {
     public const string CurrentApiVersion = "eplanmcp.pack/v1";
+    public const string V2ApiVersion = "eplanmcp.pack/v2";
 
     [Description("The envelope format. A reader refuses one it does not know.")]
     public required string ApiVersion { get; init; }
@@ -23,6 +24,7 @@ public sealed record KnowledgeDocument
 
     public KnowledgeOrigin? Origin { get; init; }
 
+    // V2 bodies remain opaque until C1/M1/R1/W1/M3 supply their semantic models.
     [Description("The kind's content; pack data, not instructions.")]
     public required JsonObject Spec { get; init; }
 
@@ -33,25 +35,35 @@ public sealed record KnowledgeDocument
     public static string PathOf(KnowledgeKind kind, string name) => $"knowledge/{Folder(kind)}/{name}.json";
 
     /// <summary>The resource kind the manifest lists a document of <paramref name="kind"/> as.</summary>
-    public static ResourceKind ResourceKindOf(KnowledgeKind kind) => kind switch
-    {
-        KnowledgeKind.Candidate => ResourceKind.Rule,
-        KnowledgeKind.Module => ResourceKind.Module,
-        KnowledgeKind.MaterialMapping => ResourceKind.MaterialMapping,
-        _ => ResourceKind.Gap,
-    };
+    public static ResourceKind ResourceKindOf(KnowledgeKind kind) =>
+        kind == KnowledgeKind.Candidate ? ResourceKind.Rule : Enum.Parse<ResourceKind>(kind.ToString());
 
     /// <summary>Reads a document strictly, as <see cref="PackJson"/> reads manifests; throws <see cref="PackFormatException"/>.</summary>
     public static KnowledgeDocument Read(byte[] utf8)
     {
         try
         {
-            using JsonDocument document = JsonDocument.Parse(utf8.AsMemory(utf8.AsSpan().StartsWith((ReadOnlySpan<byte>)[0xEF, 0xBB, 0xBF]) ? 3 : 0));
+            using JsonDocument document = PackJson.Parse(utf8.AsMemory(utf8.AsSpan().StartsWith((ReadOnlySpan<byte>)[0xEF, 0xBB, 0xBF]) ? 3 : 0), "knowledge document");
             string? given = document.RootElement is { ValueKind: JsonValueKind.Object } root && root.TryGetProperty("apiVersion", out JsonElement version)
                 && version.ValueKind == JsonValueKind.String ? version.GetString() : null;
-            return given == CurrentApiVersion
-                ? document.Deserialize<KnowledgeDocument>(PackJson.Options)!
-                : throw new PackFormatException($"The document has apiVersion '{given}'; this EplanMcp reads {CurrentApiVersion} only.");
+            if (given is not CurrentApiVersion and not V2ApiVersion)
+            {
+                throw new PackFormatException($"/apiVersion: '{given}' is unsupported; this EplanMcp reads {CurrentApiVersion} or {V2ApiVersion} only.");
+            }
+
+            KnowledgeDocument result = document.Deserialize<KnowledgeDocument>(PackJson.Options)!;
+            if (given == CurrentApiVersion && result.Kind > KnowledgeKind.Gap)
+            {
+                throw new PackFormatException("/kind: this kind requires eplanmcp.pack/v2.");
+            }
+
+            if (given == V2ApiVersion)
+            {
+                BindingReadModel.Require(PackManifestValidator.IsId(result.Metadata.Name) && result.Metadata.Tags.All(t => t is not null && PackManifestValidator.IsId(t)), "/metadata", "name and tags must be pack identifiers");
+                BindingReadModel.FiniteNumbers(document.RootElement, string.Empty);
+            }
+
+            return result;
         }
         catch (JsonException ex)
         {

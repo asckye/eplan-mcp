@@ -18,9 +18,9 @@ public static partial class PackManifestValidator
         var problems = new List<PackProblem>();
         void Add(string location, string message) => problems.Add(new PackProblem(location, message));
 
-        if (manifest.SchemaVersion != PackManifest.CurrentSchemaVersion)
+        if (manifest.SchemaVersion is not 1 and not 2)
         {
-            Add("schemaVersion", $"must be {PackManifest.CurrentSchemaVersion}");
+            Add("schemaVersion", "must be 1 or 2");
         }
 
         CheckId("id", manifest.Id, Add);

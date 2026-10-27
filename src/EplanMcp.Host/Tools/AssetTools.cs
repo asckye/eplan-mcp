@@ -266,7 +266,7 @@ internal sealed class AssetTools
     {
         var violations = new List<string>();
         PackTools.CheckId(pack, violations);
-        KnowledgeKind? known = Enum.GetValues<KnowledgeKind>().Cast<KnowledgeKind?>().FirstOrDefault(k => KnowledgeDocument.Folder(k!.Value) == kind);
+        KnowledgeKind? known = Enum.GetValues<KnowledgeKind>().Where(k => k <= KnowledgeKind.Gap).Cast<KnowledgeKind?>().FirstOrDefault(k => KnowledgeDocument.Folder(k!.Value) == kind);
         if (known is null)
         {
             violations.Add(kind is "rule" or "fact_set"

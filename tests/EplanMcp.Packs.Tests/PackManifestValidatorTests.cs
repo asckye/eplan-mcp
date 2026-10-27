@@ -11,7 +11,7 @@ public sealed class PackManifestValidatorTests
 
     public static TheoryData<string, Func<PackManifest, PackManifest>> Broken => new()
     {
-        { "schemaVersion", m => m with { SchemaVersion = 2 } },
+        { "schemaVersion", m => m with { SchemaVersion = 3 } },
         { "id", m => m with { Id = "ACME" } },
         { "id", m => m with { Id = "acme..base" } },
         { "id", m => m with { Id = new string('a', 65) } },

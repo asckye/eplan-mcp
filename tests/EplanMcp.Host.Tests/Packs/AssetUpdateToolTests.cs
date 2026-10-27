@@ -73,6 +73,10 @@ public sealed class AssetUpdateToolTests : IDisposable
     [Theory]
     [InlineData("rule", "only the engineer makes a rule official")]
     [InlineData("fact_set", "facts come only from extraction")]
+    [InlineData("config_schema", "must be candidate, module, material_mapping or gap")]
+    [InlineData("config_layer", "must be candidate, module, material_mapping or gap")]
+    [InlineData("workflow", "must be candidate, module, material_mapping or gap")]
+    [InlineData("sample", "must be candidate, module, material_mapping or gap")]
     public async Task Update_FactsAndRules_AreNeverWritten(string kind, string reason)
     {
         await ImportAsync();
