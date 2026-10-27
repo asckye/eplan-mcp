@@ -5346,6 +5346,11 @@
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
           },
           {
+            "name": "DrawingGeometryTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DrawingGeometryTests.cs"
+          },
+          {
             "name": "ImportDxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportDxfTests.cs"

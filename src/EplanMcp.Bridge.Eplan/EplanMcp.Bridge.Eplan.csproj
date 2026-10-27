@@ -26,6 +26,7 @@
     <AdditionalFiles Include="BannedSymbols.txt" />
     <!-- The offline host composes the same Bridge through BridgeHost (M5 design 4.9). -->
     <InternalsVisibleTo Include="EplanMcp.Bridge.Offline" />
+    <InternalsVisibleTo Include="EplanMcp.Large.DrawingHelper" />
   </ItemGroup>
 
   <!-- EPLAN assemblies come from the local installation and are never copied or shipped (Private=false). -->

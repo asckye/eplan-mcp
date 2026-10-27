@@ -55,6 +55,9 @@
     <Project Path="tests/EplanMcp.Host.Tests/EplanMcp.Host.Tests.csproj">
       <Platform Project="x64" />
     </Project>
+    <Project Path="tests/EplanMcp.Large.DrawingHelper/EplanMcp.Large.DrawingHelper.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="tests/EplanMcp.Large.RevisionHelper/EplanMcp.Large.RevisionHelper.csproj">
       <Platform Project="x64" />
     </Project>
