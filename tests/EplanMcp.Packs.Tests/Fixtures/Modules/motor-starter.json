@@ -1,0 +1,195 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "module",
+  "metadata": {
+    "name": "motor-starter"
+  },
+  "spec": {
+    "macro": {
+      "asset": "macro/Motor.ema",
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "representation": "multi_line",
+      "variant": 0,
+      "numbering": "keep"
+    },
+    "parameters": {
+      "power": {
+        "type": "number",
+        "unit": "kW",
+        "min": 0.06,
+        "max": 250,
+        "required": true,
+        "binding": {
+          "placeholder": "starter",
+          "variable": "power",
+          "propertyId": 20011
+        }
+      },
+      "starter": {
+        "type": "choice",
+        "enum": [
+          "dol",
+          "star_delta"
+        ],
+        "required": true,
+        "binding": {
+          "placeholder": "starter",
+          "variable": "starter",
+          "propertyId": 20012
+        }
+      }
+    },
+    "valueSets": [
+      {
+        "name": "dol-7.5",
+        "values": {
+          "power": 7.5,
+          "starter": "dol"
+        }
+      },
+      {
+        "name": "star-delta-7.5",
+        "values": {
+          "power": 7.5,
+          "starter": "star_delta"
+        }
+      }
+    ],
+    "interface": {
+      "ports": [
+        {
+          "name": "supply",
+          "kind": "terminal",
+          "object": "q1",
+          "direction": "in",
+          "connectionPoint": "1"
+        },
+        {
+          "name": "motor",
+          "kind": "cable_end",
+          "object": "x1",
+          "direction": "out",
+          "connectionPoint": "1"
+        }
+      ]
+    },
+    "partMapping": {
+      "asset": "material_mapping/company-a"
+    },
+    "applicability": {
+      "all": [
+        {
+          "ge": [
+            {
+              "parameter": "power"
+            },
+            {
+              "literal": 0.06,
+              "unit": "kW"
+            }
+          ]
+        },
+        {
+          "in": [
+            {
+              "config": "motor.starter"
+            },
+            {
+              "literal": [
+                "dol",
+                "star_delta"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "acceptance": {
+      "checks": [
+        {
+          "kind": "object",
+          "object": "q1",
+          "source": {
+            "asset": "document/guide.md",
+            "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "location": "O2/starter-table"
+          },
+          "coverage": [
+            "snapshot.name"
+          ]
+        },
+        {
+          "kind": "property",
+          "object": "q1",
+          "propertyId": 20011,
+          "expected": 7.5,
+          "source": {
+            "asset": "document/guide.md",
+            "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "location": "O2/starter-table"
+          },
+          "coverage": [
+            "actual.property"
+          ]
+        },
+        {
+          "kind": "port",
+          "port": "supply",
+          "source": {
+            "asset": "document/guide.md",
+            "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "location": "O2/starter-table"
+          },
+          "coverage": [
+            "macro.port"
+          ]
+        },
+        {
+          "kind": "unchanged_outside",
+          "source": {
+            "asset": "document/guide.md",
+            "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "location": "O2/starter-table"
+          },
+          "coverage": [
+            "cabinet.boundary"
+          ]
+        }
+      ],
+      "samples": [
+        "sample/motor-acceptance"
+      ]
+    },
+    "extraction": {
+      "source": {
+        "asset": "document/guide.md",
+        "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "location": "O2/starter-table"
+      },
+      "sourceVersion": "2026.0",
+      "snapshotHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "extractorVersion": "fixture-1",
+      "pages": [
+        "=AP+A1/1"
+      ],
+      "locators": [
+        "=AP+A1-Q1",
+        "=AP+A1-X1"
+      ],
+      "objects": {
+        "q1": "=AP+A1-Q1",
+        "x1": "=AP+A1-X1"
+      },
+      "observations": [
+        {
+          "power": 7.5,
+          "starter": "dol"
+        },
+        {
+          "power": 7.5,
+          "starter": "star_delta"
+        }
+      ]
+    }
+  }
+}
