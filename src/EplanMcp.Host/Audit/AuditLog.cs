@@ -170,11 +170,12 @@ internal sealed class AuditLog(string directory, TimeProvider clock, HttpCaller?
         return [.. started.Where(r => !finished.Contains(r["requestId"]!.GetValue<string>()))];
     }
 
-    /// <summary>A complete snapshot for plan settlement; unreadable or incomplete audit means no settlement.</summary>
+    /// <summary>A complete snapshot for reviews and plan settlement; unreadable or incomplete audit authorizes neither.</summary>
     internal async Task<IReadOnlyList<JsonObject>> ReadAsync(CancellationToken cancellationToken)
     {
         try
         {
+            Directory.CreateDirectory(directory);
             using FileStream turn = await TakeTurnAsync(cancellationToken).ConfigureAwait(false);
             string current = Path.Combine(directory, clock.GetUtcNow().ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) + ".jsonl");
             if (File.Exists(current))

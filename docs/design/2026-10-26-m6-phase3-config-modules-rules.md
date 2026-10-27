@@ -173,6 +173,10 @@ R2 实现：`RuleInterpreter.EvaluateAsync` 接收已验证的 `RuleDefinition`�
 
 `eplan_asset_update` 继续不能写 FactSet/Rule 或设置 accepted/official。新增 `eplan_asset_review` 经既有审批渠道接受/拒绝候选、关闭缺口或将候选提升为新 Rule；保留原候选内容和事实，仅更新审核状态，审计关联新旧摘要。模块接口/映射审核同样绑定候选及目标内容摘要；materialize的review_digest必须匹配本机已确认审计记录，客户端自报hash不是确认。无来源 mandatory 在 build 报 PACK_INVALID；未经确认的 Rule 草稿保留为 Candidate，不靠手工改 standing 生效。
 
+R3 实现：`KnowledgeReviewService` 通过既有 `ApprovalService` 确认 accept/reject/close_gap/promote，确认前后重新读取资源与来源文件并核验原始字节摘要；来源严格为 `{asset,location,hash}`，本包引用规范化为精确资源 ID。提升绑定同包新 v2 Rule 的 ID/原始字节摘要，检查 R1 AST 与相同来源；配置类型由调用方提供解析器。候选接受不授予 official，审核不改包、候选正文或事实；新 Rule 发布和构建门禁由 R4 接入。
+
+确认仅在本机 `knowledge_review` 审计刷盘后成立，记录资源 ID/摘要、来源、决定、提升目标摘要和确认渠道，返回该审计记录的哈希作为 `review_digest`。`VerifyAsync` 重新核验内容与来源，检查完整本机审计链及期望决定/目标；同资源的后续审核取代旧审核。导入包中的历史状态、standing、确认字符串和哈希均不提供本机授权，安装确认也不替代知识审核。审核被拒绝、确认绑定不符或审计写入失败时不记录审核决定；本次不注册工具或 Bridge 操作。
+
 ### 4.5 包内工作流、验收与导出
 
 `Workflow.spec={parameters,requiredCapabilities,applicability,steps,acceptance}`。parameters 用与模块相同的有界类型；step `{op,args,dependsOn}` 只允许阶段 2 目录与通过 U2 的模块操作。参数/配置替换仅在 args schema 指定位置，以类型化 `{parameter:"power"}` / `{config:"motor.starter"}` 节点表达；不能替换 op、project、cabinet、tier、审批或路径。禁止 include/extends/嵌套 workflow/循环；批量生成由 Host 有限展开，总计仍≤20步、256 KiB，不自动拆成多个已批准计划。

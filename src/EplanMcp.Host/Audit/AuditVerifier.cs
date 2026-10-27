@@ -76,7 +76,7 @@ internal static class AuditVerifier
         return (records, null);
     }
 
-    private static AuditProblem? Check(string text, string prev, out string hash)
+    internal static AuditProblem? Check(string text, string prev, out string hash)
     {
         hash = string.Empty;
         JsonObject? record;
