@@ -87,7 +87,7 @@ PackJson 的严格成员/重复键/版本检查、UTF-8/LF 格式及 16 MiB 文�
 
 C1 实现：schema 项可选 `default` 按 base 层验证，须获 `allowedLayers` 许可；包内 config_layer 只能是 company 或 cabinet_type，project/cabinet 值只来自绑定。`ConfigValidator` 统一验证层设置与绑定的 project/cabinet values；`required` 的缺值、约束交集和最终默认值留给 C2。单位登记为 W/kW、V/kV、A/mA、mm/m，保存量纲和换算系数；设置值使用 schema 声明的单位，不能重定义。
 
-pack check/build 校验配置正文和本包 `config_schema/name` 来源；配置文档须随包携带。当前目录检查没有依赖资源解析上下文，跨包来源暂拒绝，锁定依赖解析留给 C2。测试材料见 `tests/EplanMcp.Packs.Tests/Fixtures/README.md`，仅验证电机示例配置格式，不代表通用选型算法。
+pack check/build 校验配置正文和本包 `config_schema/name` 来源；配置文档须随包携带。当前目录检查没有依赖资源解析上下文，跨包来源暂拒绝，锁定依赖解析留给 C4。测试材料见 `tests/EplanMcp.Packs.Tests/Fixtures/README.md`，仅验证电机示例配置格式，不代表通用选型算法。
 
 ```json
 {"apiVersion":"eplanmcp.pack/v2","kind":"config_layer","metadata":{"name":"company"},
@@ -98,6 +98,10 @@ pack check/build 校验配置正文和本包 `config_schema/name` 来源；配�
 schema 默认值视为 base 层；键名、单位和类型不能被下层重定义；数值先按登记单位换算后比较，不支持的单位拒绝。一个柜每个包层至多一个，链顺序显式，不靠文件名/安装次序决定优先级。同一 schema 键来自不同包且定义不同即 CONFIG_CONFLICT。空交集、下层扩大集合/区间、最终默认值不合约束、required 无值均报错，不自动选集合首项；相同值也保留各层 trace。
 
 生效项返回 `{key,value,unit,constraints,trace:[{layer,source,pointer,kind,value}]}`；source 是精确资源 ID+文件哈希或 binding revision。例：base default=dol、company allowed=[dol,star_delta]、柜型 default=star_delta、柜 default=dol，结果 dol，四项来源全部可见。
+
+C2 实现：`ConfigMerger.Merge` 接收已解析的 `ConfigDocument`（精确资源 ID、原文件 SHA-256、spec）、显式有序的包层、v2 绑定及柜索引；返回 `ConfigMergeResult`，成功的 `Values` 可映射到 `PlanConfigValue`，失败只返回首个问题的错误码、JSON Pointer、说明及 trace，不暴露部分生效值。资源来源为 `{resource,sha256}`，绑定来源为 `{project,bindingRevision}`；默认值与约束分别留痕，base 的 schema 边界另留 `kind=schema`，所有 trace 值保留原始单位下的内容。
+
+等价单位的数值定义先换算到首个 schema 的单位再比对；其余定义差异、换算溢出或精度损失报 `CONFIG_CONFLICT`。下层约束必须为上层的子集，因此通过检查的下层约束即为交集；fixed 只限制取值，不能替代缺失的 default，单元素集合亦不自动选值。项目/柜值经合并 schema 的 `ConfigValidator.ValidateSettings` 检查；最终才检查默认值和 required。跨包锁解析及资源哈希复核仍由 C4 调用方负责，本接口不接磁盘或 EPLAN。
 
 ```json
 {"bindingVersion":2,"project":"<项目键>","revision":7,"projectValues":{},"packRoots":[{"id":"acme.panels","version":"1.2.0"}],
