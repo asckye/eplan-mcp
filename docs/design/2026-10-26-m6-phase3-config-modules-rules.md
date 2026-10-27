@@ -181,6 +181,8 @@ R3 实现：`KnowledgeReviewService` 通过既有 `ApprovalService` 确认 accep
 
 `Workflow.spec={parameters,requiredCapabilities,applicability,steps,acceptance}`。parameters 用与模块相同的有界类型；step `{op,args,dependsOn}` 只允许阶段 2 目录与通过 U2 的模块操作。参数/配置替换仅在 args schema 指定位置，以类型化 `{parameter:"power"}` / `{config:"motor.starter"}` 节点表达；不能替换 op、project、cabinet、tier、审批或路径。禁止 include/extends/嵌套 workflow/循环；批量生成由 Host 有限展开，总计仍≤20步、256 KiB，不自动拆成多个已批准计划。
 
+W1 实现：`WorkflowValidator.Validate` 返回独立的 `WorkflowDefinition`，`Expand` 纯函数返回 `WorkflowStep` 列表。parameters 按名称定义 `{type,required,unit?,enum?,min?,max?,default?}`，最多50项，复用配置类型及单位；仅替换标量，坐标参数须用 mm，宏保持字面资源引用（本包 `macro/name.ema` 或精确依赖 ID）。可选 `branches={starter:{parameter:"mode"}}`（也可用 config）只声明 choice/boolean 选择器；步骤以 `branch:"starter",case:"dol"` 归属互斥值，禁止跨分支依赖；展开按原顺序保留命中项，重排 dependsOn 的一基索引，空结果、缺值或超限均拒绝（全部备选≤20步、200定位符、替换后参数≤256 KiB）。pack check 校验全部分支及资源闭包；跨包检查须提供原始依赖清单字节，逐项匹配 pack.lock 的版本和摘要，缺上下文即拒绝。applicability 复用类型化谓词；requiredCapabilities 与 acceptance（rule/sample 引用）、依赖文件哈希复核、柜范围及适用性/验收执行由 W2 接入，本次不注册工具或操作。
+
 `Sample.spec={workflow,inputs,configFixture,expectedChecks,expectedObjects}`，只引用包资源与示例派生夹具；输入期望先经过 schema，再在 scratch 副本执行编译/必要生成及验收。未执行的样例或缺关系证据必须 skipped/unknown，不能用“能编译”代替生成验收。
 
 导出采用 `eplan_pack_export`，细化M6原拟build可选导出的入口：保留已发布build的幂等合同，只导出构建成功的安装版本到Host新建导出目录，返回相对路径/字节/文件SHA-256/包摘要；不接收任意输出路径，不覆盖、不解开`.zw1/.zw9`。复用PackArchive的排序/固定ZIP时间和容器限制；导出后重新校验并做导入往返测试。导出失败不撤销已构建版本。
