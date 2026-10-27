@@ -186,6 +186,17 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A51. 插入宏并应用占位符值集的提交、撤销与回滚（spike S36 第 1 部分，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
+详细数据见 [spike S36](../../spikes/S36-module-commit/README.md)。
+
+- 在一个 `SafetyPoint → UndoStep → QuietModeStep(ShowNoDialogs)` 中新建页、插入 `24VDC_Supply.ema`、新建占位符并 `ApplyRecord`，提交后关闭再打开项目，全部对象、占位符值表和属性实际值逐字节不变；整个过程没有对话框。— S36 dp/fp。
+- 这样的提交正好是一个撤销步骤：当前项目一次 `XEsUndoAction` 恢复写入前的全部状态（含页和项目属性），之前独立提交的哨兵页仍在，再撤销一次才删除；`ApplyRecord` 之后回滚不留撤销步骤，也不留改变。— S36 du/fu/dr/fr。
+- `ApplyRecord(name)` 同时写对象、页和项目属性；`ApplyRecord(name, false)` 只写对象属性，页属性 11011 和项目属性 10901[1000] 不变。— S36。
+- 布尔（20093）、普通文本（20027）、部件编号（20100[1]）都按值集生效；写部件编号后功能的部件引用随之改为新部件（数量 1）。— S36。
+- 🔴 多语言属性（20011）按整体替换：值集只给 en_US 时，原有的 de_DE 被清除。生成时值集必须含全部要保留的语言，或先读出再合并。— S36。
+- 🔴 对同一对象反复取得并释放属性列表后，EPLAN 在之后的终结器（`Page.Dispose(Boolean)` → `StorableObject.!StorableObject()`，`NullReferenceException`）中崩溃（0xc0000005）；每个对象只取一次属性列表、读写完后释放一次（A36）。— S36 r1。
+— 协调人经 spike S36 第 1 部分实测，原始日志在 `.local` 中，不提交。
+
 ### A50. action 白名单第 2 批的回滚验证（spike S26 r3，2026-10-26，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 
 - `synchronize` 的 `TYPE=MULTILINE`、`SINGLELINE`、`OVERVIEW` 在 `SafetyPoint → UndoStep → QuietModeStep` 中均返回 true、不弹对话框，回滚后业务快照和文件指纹恢复；示例项目上 SINGLELINE 看不到业务变化，需另备有表示差异的样本才能证明效果。
