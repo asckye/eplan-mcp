@@ -9,7 +9,7 @@ using ModelContextProtocol;
 
 namespace EplanMcp.Host.Packs;
 
-/// <summary>Stateless v2 writes: confirm without locks, then project lock, binding lock, CAS, audit and atomic publication.</summary>
+/// <summary>Stateless v2 writes: confirm without locks, then project/store/binding locks, CAS, audit and atomic publication.</summary>
 internal sealed class BindingService(PackLibrary packs, AuditLog audit, ApprovalService approvals, IBridgeClient bridge)
 {
     internal Action<string>? Checkpoint { get; init; }
@@ -75,6 +75,8 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
         }
         using FileStream projectLock = await FileLock.AcquireAsync(paths.ProjectLock(project), TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false)
             ?? throw new PlanCapacityException("plans.project", 1, 1);
+        using FileStream storeLock = await FileLock.AcquireAsync(paths.Check(Path.Combine(packs.Installed.Root, PackStore.LockFileName)), packs.Installed.LockWait, cancellationToken).ConfigureAwait(false)
+            ?? throw Failure(ErrorReason.Timeout, "The pack store is busy; bind again when the other change finishes.");
         _ = paths.DirectoryAt(folder);
         using FileStream bindingLock = await FileLock.AcquireAsync(paths.Check(Path.Combine(folder, ".binding.lock")), packs.Workspaces.LockWait, cancellationToken).ConfigureAwait(false)
             ?? throw Failure(ErrorReason.Timeout, "The binding is busy; read it again when the other change finishes.");

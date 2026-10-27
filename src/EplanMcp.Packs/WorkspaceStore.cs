@@ -7,7 +7,7 @@ namespace EplanMcp.Packs;
 /// The project bindings, <c>&lt;data root&gt;\workspaces\</c> (M6 design 3.3, 4.1.5): one folder per project, named by
 /// the first 32 hex digits of the SHA-256 of its project key in upper case, because a key is a path, which cannot be a
 /// folder name, and Windows paths ignore case; <c>binding.json</c> in it records the key itself. A change holds the
-/// workspace's lock file and raises the revision. Installing a newer pack version changes no lock.
+/// store's lock then the workspace's lock file and raises the revision. Installing a newer pack version changes no lock.
 /// </summary>
 public sealed class WorkspaceStore(string root, PackStore packs)
 {
@@ -33,6 +33,8 @@ public sealed class WorkspaceStore(string root, PackStore packs)
     /// <summary>Locks the project to the installed <paramref name="version"/> of <paramref name="id"/>, replacing its lock of that id.</summary>
     public async Task<ProjectBinding> LockPackAsync(string projectKey, string id, string version, CancellationToken cancellationToken)
     {
+        using FileStream storeLock = await FileLock.AcquireAsync(Path.Combine(packs.Root, PackStore.LockFileName), packs.LockWait, cancellationToken).ConfigureAwait(false)
+            ?? throw new PackFormatException("/locks: the pack store is busy; try again when it is done.");
         string digest = packs.InstalledDigest(id, version) ?? throw new PackFormatException($"{id} {version} is not installed; install it before locking a project to it.");
         string folder = FolderOf(projectKey);
         using FileStream held = await FileLock.AcquireAsync(Path.Combine(folder, LockFileName), LockWait, cancellationToken).ConfigureAwait(false)

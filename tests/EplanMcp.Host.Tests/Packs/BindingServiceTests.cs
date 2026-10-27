@@ -30,6 +30,20 @@ public sealed class BindingServiceTests : IDisposable
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task Write_StoreMaintenanceInProgress_WaitsBeforePublishingBinding()
+    {
+        WritePack("root");
+        using var held = new FileStream(Path.Combine(_locations.Packs, PackStore.LockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+
+        Task<ProjectBinding> write = WriteAsync(Proposal("root"), 0);
+
+        Assert.False(write.IsCompleted);
+        Assert.False(File.Exists(BindingFile));
+        held.Dispose();
+        Assert.Equal("root", Assert.Single((await write).Locks).Id);
+    }
+
+    [Fact]
     public async Task Write_TwoWritersWithSameRevision_OnlyOneCommitsWithCas()
     {
         var firstRead = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
