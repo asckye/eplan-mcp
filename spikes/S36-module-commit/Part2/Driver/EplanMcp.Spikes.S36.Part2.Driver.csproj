@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Evidence.cs" Link="Evidence.cs" />
+    <Compile Include="..\Steps.cs" Link="Steps.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.RemoteClientu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.RemoteClientu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Remotingu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.Remotingu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Grpc.Core.Api">
+      <HintPath>$(EplanBinPath)\Grpc.Core.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+</Project>
