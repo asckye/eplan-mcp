@@ -1,5 +1,6 @@
 using System.Security;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using EplanMcp.Packs.Knowledge;
 
 namespace EplanMcp.Packs;
@@ -12,7 +13,8 @@ namespace EplanMcp.Packs;
 /// </summary>
 public static class PackVerifier
 {
-    public static async Task<PackCheckResult> CheckDirectoryAsync(string directory, CancellationToken cancellationToken)
+    public static Task<PackCheckResult> CheckDirectoryAsync(string directory, CancellationToken cancellationToken) => CheckDirectoryWithDependenciesAsync(directory, [], cancellationToken);
+    public static async Task<PackCheckResult> CheckDirectoryWithDependenciesAsync(string directory, IReadOnlyList<byte[]> dependencyManifests, CancellationToken cancellationToken)
     {
         var root = new DirectoryInfo(directory);
         var files = new List<(string Relative, string FullPath)>();
@@ -52,7 +54,7 @@ public static class PackVerifier
             IReadOnlyList<PackProblem> problems = PackManifestValidator.Validate(manifest);
             return problems.Count > 0
                 ? new PackCheckResult(manifest, null, problems)
-                : await CheckContentAsync(manifest, PackDigest.Compute(manifestBytes), present, cancellationToken).ConfigureAwait(false);
+                : await CheckContentAsync(manifest, PackDigest.Compute(manifestBytes), present, dependencyManifests, cancellationToken).ConfigureAwait(false);
         }
         catch (PackFormatException ex)
         {
@@ -60,7 +62,7 @@ public static class PackVerifier
         }
     }
 
-    private static async Task<PackCheckResult> CheckContentAsync(PackManifest manifest, string manifestSha256, Dictionary<string, string> present, CancellationToken cancellationToken)
+    private static async Task<PackCheckResult> CheckContentAsync(PackManifest manifest, string manifestSha256, Dictionary<string, string> present, IReadOnlyList<byte[]>? dependencyManifests, CancellationToken cancellationToken)
     {
         var problems = new List<PackProblem>();
         var listed = new HashSet<string>(PackPath.Comparer) { PackManifest.FileName };
@@ -93,9 +95,9 @@ public static class PackVerifier
             bool officialRule = manifest.Rules.Any(r => r.Standing == KnowledgeStanding.Official && PackPath.Comparer.Equals(r.Path, resource.Path));
             if (resource.Storage == ResourceStorage.Referenced)
             {
-                if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer" || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal))
+                if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer or ResourceKind.Workflow || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer" or "workflow" || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal))
                 {
-                    problems.Add(new PackProblem(resource.Path, "/spec: configuration and rule knowledge documents must be bundled for validation"));
+                    problems.Add(new PackProblem(resource.Path, "/spec: configuration, rule and workflow knowledge documents must be bundled for validation"));
                 }
 
                 if (own.Count > 0 || officialRule)
@@ -112,7 +114,7 @@ public static class PackVerifier
             {
                 problems.Add(new PackProblem(resource.Path, $"does not match pack.json: the files have SHA-256 {found.Sha256}, {found.Bytes} bytes, {found.Files} files"));
             }
-            else if (await ContentProblemAsync(resource, own.First(o => PackPath.Comparer.Equals(o.Key, resource.Path)).Value, officialRule, manifest, present, cancellationToken).ConfigureAwait(false) is { } problem)
+            else if (await ContentProblemAsync(resource, own.First(o => PackPath.Comparer.Equals(o.Key, resource.Path)).Value, officialRule, manifest, present, Resolve, cancellationToken).ConfigureAwait(false) is { } problem)
             {
                 problems.Add(new PackProblem(resource.Path, problem));
             }
@@ -121,24 +123,36 @@ public static class PackVerifier
         problems.AddRange(present.Keys.Where(k => !listed.Contains(k)).Order(StringComparer.Ordinal)
             .Select(k => new PackProblem(k, ResourceTypes.Forbidden(k) ?? "is in the pack but not in pack.json")));
         return new PackCheckResult(manifest, lockFile, problems);
+
+        bool Resolve(string reference, ResourceKind kind)
+        {
+            bool exact = AssetNames.TryParse(reference, out string? id, out string? version, out string? local);
+            PackManifest? owner = !exact || id == manifest.Id && version == manifest.Version ? manifest : (dependencyManifests ?? [])
+                .Select(bytes => (Manifest: PackJson.ReadManifest(bytes), Digest: PackDigest.Compute(bytes)))
+                .Where(p => p.Manifest.Id == id && p.Manifest.Version == version && lockFile?.Dependencies.Any(d => d.Id == id && d.Version == version && d.Digest == p.Digest) == true
+                    && PackManifestValidator.Validate(p.Manifest).Count == 0).Select(p => p.Manifest).FirstOrDefault();
+            return owner?.Resources.Any(r => r.Kind == kind && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == (exact ? local : reference)
+                && (kind != ResourceKind.Macro || r.Path.EndsWith(".ema", StringComparison.OrdinalIgnoreCase))) == true;
+        }
     }
 
-    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, CancellationToken cancellationToken)
+    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, Func<string, ResourceKind, bool> resolve, CancellationToken cancellationToken)
     {
-        if (resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || resource.Kind == ResourceKind.Rule && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || resource.Kind == ResourceKind.Rule && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
             try
             {
                 byte[] bytes = await ReadSmallAsync(fullPath, resource.Path, cancellationToken).ConfigureAwait(false);
                 using JsonDocument envelope = PackJson.Parse(bytes, resource.Path);
-                if (resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
+                if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
                     && envelope.RootElement.TryGetProperty("apiVersion", out JsonElement version) && version.ValueKind == JsonValueKind.String && version.GetString() != KnowledgeDocument.CurrentApiVersion
                     && envelope.RootElement.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() == "rule")
                 {
                     KnowledgeDocument rule = KnowledgeDocument.Read(bytes);
-                    BindingReadModel.Require(rule.Kind == KnowledgeKind.Rule && resource.Kind == ResourceKind.Rule, "/kind", "must be a rule resource and document");
-                    BindingReadModel.Require(AssetNames.Local(resource) == "rule/" + rule.Metadata.Name, "/metadata/name", "must match the resource id");
+                    BindingReadModel.Require(rule.Kind is KnowledgeKind.Rule or KnowledgeKind.Workflow && KnowledgeDocument.ResourceKindOf(rule.Kind) == resource.Kind, "/kind", "must match the rule or workflow resource kind");
+                    BindingReadModel.Require(AssetNames.Local(resource) == KnowledgeDocument.Folder(rule.Kind) + "/" + rule.Metadata.Name, "/metadata/name", "must match the resource id");
                     var types = new Dictionary<string, RuleValueType>(StringComparer.Ordinal);
+                    var items = new JsonObject();
                     foreach (PackResource source in manifest.Resources.Where(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && present.ContainsKey(r.Path)))
                     {
                         KnowledgeDocument schema = KnowledgeDocument.Read(await ReadSmallAsync(present[source.Path], source.Path, cancellationToken).ConfigureAwait(false));
@@ -151,10 +165,19 @@ public static class PackVerifier
                             var declared = new RuleValueType(type == "choice" ? "text" : type, item.Value.TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null);
                             BindingReadModel.Require(!types.TryGetValue(item.Name, out RuleValueType previous) || previous == declared, "/spec", "configuration operand types are ambiguous");
                             types[item.Name] = declared;
+                            BindingReadModel.Require(rule.Kind != KnowledgeKind.Workflow || !items.TryGetPropertyValue(item.Name, out JsonNode? existing) || JsonElement.DeepEquals(JsonSerializer.SerializeToElement(existing), item.Value), "/spec", "configuration definitions are ambiguous");
+                            items[item.Name] = JsonNode.Parse(item.Value.GetRawText());
                         }
                     }
 
-                    RuleValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), name => types.TryGetValue(name, out RuleValueType type) ? type : null);
+                    if (rule.Kind == KnowledgeKind.Workflow)
+                    {
+                        WorkflowValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), JsonSerializer.SerializeToElement(new { items }), resolve);
+                    }
+                    else
+                    {
+                        RuleValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), name => types.TryGetValue(name, out RuleValueType type) ? type : null);
+                    }
                 }
             }
             catch (PackFormatException ex)

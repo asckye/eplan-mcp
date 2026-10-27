@@ -140,7 +140,7 @@ public static class ConfigValidator
 
     private static bool Name(string name) => PackManifestValidator.IsId(name.Replace('_', '-'));
 
-    private static void Value(JsonElement item, JsonElement value, string at, bool checkEnum = true)
+    internal static void Value(JsonElement item, JsonElement value, string at, bool checkEnum = true)
     {
         string type = item.GetProperty("type").GetString()!;
         Require(type switch
