@@ -32,7 +32,9 @@ internal static class PlanCanonical
             Sources = Objects(definition.Sources),
             Steps = [.. definition.Steps.Select(s => s with { ReadScope = Scope(s.ReadScope), ModifyScope = Scope(s.ModifyScope) })],
         };
-        return Serialize(JsonSerializer.SerializeToElement(normalized, _json));
+        JsonElement value = JsonSerializer.SerializeToElement(normalized, _json);
+        PlanDefinitionReadModel.Definition(value);
+        return Serialize(value);
     }
 
     private static PlanScope Scope(PlanScope scope) => new(Strings(scope.Pages), Strings(scope.Structures), Objects(scope.Locators));

@@ -19,7 +19,7 @@ internal static class PlanStorageRules
 
     private static void ValidateCore(PlanRecord record, string id)
     {
-        if (record.SchemaVersion != 1 || record.Definition.SchemaVersion != 1)
+        if (record.SchemaVersion is not (1 or 2) || record.Definition.SchemaVersion != record.SchemaVersion)
         {
             throw new NotSupportedException("Unknown plan schema; keep the record and refuse execution.");
         }

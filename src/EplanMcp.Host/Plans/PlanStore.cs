@@ -19,7 +19,7 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
         {
             throw new ArgumentException("The changes digest does not match the complete text.", nameof(changes));
         }
-        var record = new PlanRecord(1, PlanCanonical.Hash(definition), definition, new());
+        var record = new PlanRecord(definition.SchemaVersion, PlanCanonical.Hash(definition), definition, new());
         PlanStorageRules.Validate(record, definition.PlanId);
         byte[] json = Encode(record);
         Dictionary<string, byte[]> copies = evidence.ToDictionary(e => e.Key, e => e.Value.ToArray(), StringComparer.Ordinal);
@@ -77,11 +77,6 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
             using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             using var reader = new StreamReader(stream, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: false);
             string json = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-            using JsonDocument parsed = JsonDocument.Parse(json, new JsonDocumentOptions { AllowDuplicateProperties = false });
-            if (parsed.RootElement.GetProperty("schemaVersion").GetInt32() != 1)
-            {
-                throw new NotSupportedException("Unknown plan schema; keep the record and refuse execution.");
-            }
             PlanRecord record = PlanJson.Read<PlanRecord>(json);
             PlanStorageRules.Validate(record, planId);
             _ = _paths.Files(_paths.Assets(planId)).Count();

@@ -6,6 +6,36 @@ namespace EplanMcp.Host.Tests.Plans;
 
 public sealed partial class PlanExecutionTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Schema1_FileReload_PreservesStoredHashAndExecutesOriginalCompilerPath(bool local)
+    {
+        if (local)
+        {
+            ConfigureLocal();
+        }
+        await Prepare(local: local);
+        string file = Path.Combine(_locations.State, "plans", _prepared!.Record.Definition.PlanId + ".json");
+        string before = await File.ReadAllTextAsync(file, Token);
+        PlanRecord read = Assert.IsType<PlanRecord>(await _store.ReadAsync(_prepared.Record.Definition.PlanId, Token));
+        Assert.Equal(before, await File.ReadAllTextAsync(file, Token));
+        Assert.Equal(1, read.SchemaVersion);
+        Assert.Equal(local ? "2" : "1", read.Definition.CompilerVersion);
+        Assert.Null(read.Definition.Engineering);
+        Assert.DoesNotContain("engineering", before, StringComparison.Ordinal);
+        _bridge.Calls.Clear();
+
+        PlanRecord executed = await _service.ExecuteAsync(_server, _prepared with { Record = read }, null, Token);
+
+        Assert.Equal(PlanExecution.Committed, executed.State.Result!.Execution);
+        Assert.Equal(read.PlanHash, executed.PlanHash);
+        Assert.Equal(PlanCanonical.Serialize(read.Definition), PlanCanonical.Serialize(executed.Definition));
+        Assert.Equal(3, _bridge.Writes.Count);
+        Assert.Equal(local ? 0 : 6, _bridge.Calls.Count(c => c.Args is ProjectSnapshotArgs { Pages: null }));
+        Assert.Equal(local ? 6 : 0, _bridge.Calls.Count(c => c.Operation == OperationNames.PlanNames));
+    }
+
     [Fact]
     public async Task Version2_Execution_OnlyReadsEachFixedE_StoresBoundedDigestsAndReusesContents()
     {
