@@ -66,7 +66,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 278,
+      "implemented": 279,
       "byTools": 271,
       "partial": 46,
       "automatedTest": 271,
@@ -102,7 +102,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 161,
+      "implemented": 162,
       "byTools": 161,
       "partial": 5,
       "automatedTest": 161,
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 116,
+      "implemented": 117,
       "liveVerified": 79
     },
     {
@@ -5559,6 +5559,13 @@
         "eplan_report_update",
         "eplan_terminal_renumber"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",

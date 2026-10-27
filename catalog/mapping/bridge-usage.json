@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-27",
-  "scannedSources": "8f915d35",
-  "sourceHash": "sha256:3a474e00ffa77c080ae8b418956f1842bafb4251cb5dd263639282d112c2b457",
+  "scannedSources": "2a28e78c + uncommitted changes",
+  "sourceHash": "sha256:2720a9a1ee5a648123d316c357b0990fea3532e33dcd50142b7304151eb74e1e",
   "operations": [
     {
       "name": "action.execute",
@@ -445,6 +445,14 @@
       "class": "PropertySetPlanOperation"
     },
     {
+      "name": "reference.close",
+      "class": "ReferenceCloseOperation"
+    },
+    {
+      "name": "reference.prepare",
+      "class": "ReferencePrepareOperation"
+    },
+    {
       "name": "report.update.execute",
       "class": "ReportUpdateExecuteOperation"
     },
@@ -665,7 +673,8 @@
           "action"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -678,7 +687,8 @@
           "action"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -847,7 +857,41 @@
           "read"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -1179,6 +1223,17 @@
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
       }
     ],
     "F:Eplan.EplApi.DataModel.ProjectManager.OpenMode.ReadOnly": [
@@ -1203,6 +1258,17 @@
           "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -1957,7 +2023,8 @@
           "call"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -2039,7 +2106,8 @@
           "new"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -2121,7 +2189,8 @@
           "new"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -2203,7 +2272,8 @@
           "call"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -2449,7 +2519,41 @@
           "new"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -2667,7 +2771,8 @@
           "call"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       },
       {
@@ -6633,6 +6738,17 @@
         ]
       },
       {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader.Source",
         "member": "Dispose",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -6722,7 +6838,8 @@
           "project.compatibility",
           "project.create.execute",
           "project.restore.execute",
-          "project.snapshot"
+          "project.snapshot",
+          "reference.prepare"
         ]
       },
       {
@@ -6824,6 +6941,8 @@
           "property.read",
           "property.set.execute",
           "property.set.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -6832,6 +6951,28 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -6869,6 +7010,17 @@
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.ProjectManager.CreateProject(System.String,System.String)": [
@@ -6896,7 +7048,8 @@
           "project.compatibility",
           "project.create.execute",
           "project.restore.execute",
-          "project.snapshot"
+          "project.snapshot",
+          "reference.prepare"
         ]
       }
     ],
@@ -6934,7 +7087,8 @@
           "project.compatibility",
           "project.create.execute",
           "project.restore.execute",
-          "project.snapshot"
+          "project.snapshot",
+          "reference.prepare"
         ]
       }
     ],
@@ -6950,7 +7104,8 @@
           "project.compatibility",
           "project.create.execute",
           "project.restore.execute",
-          "project.snapshot"
+          "project.snapshot",
+          "reference.prepare"
         ]
       }
     ],
@@ -6976,6 +7131,17 @@
           "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -9336,6 +9502,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -9444,6 +9612,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -16487,6 +16657,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -16495,6 +16667,30 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       }
     ],
@@ -16637,6 +16833,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -16823,6 +17021,28 @@
         ]
       },
       {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
         "adapter": "EplanRevisionReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanRevisionReader.cs",
@@ -16931,6 +17151,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -17196,6 +17418,8 @@
           "property.read",
           "property.set.execute",
           "property.set.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -17204,6 +17428,18 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -17330,6 +17566,8 @@
           "property.read",
           "property.set.execute",
           "property.set.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -17338,6 +17576,17 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       }
     ],
@@ -18079,6 +18328,30 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier": [
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       }
     ],
@@ -19072,7 +19345,8 @@
           "type"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -19154,7 +19428,8 @@
           "type"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       },
       {
@@ -19262,7 +19537,8 @@
           "type"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
         ]
       }
     ],
@@ -19464,7 +19740,41 @@
           "type"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -19681,7 +19991,41 @@
           "type"
         ],
         "operations": [
-          "project.restore.execute"
+          "project.restore.execute",
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -26351,6 +26695,8 @@
           "property.read",
           "property.set.execute",
           "property.set.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -26372,6 +26718,28 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Close",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.close"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -26565,7 +26933,8 @@
           "project.compatibility",
           "project.create.execute",
           "project.restore.execute",
-          "project.snapshot"
+          "project.snapshot",
+          "reference.prepare"
         ]
       },
       {
@@ -26667,6 +27036,8 @@
           "property.read",
           "property.set.execute",
           "property.set.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",
@@ -26675,6 +27046,28 @@
           "terminal.renumber.plan",
           "terminal.strip.get",
           "terminal.strip.list"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -26725,6 +27118,17 @@
           "project.translate.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "Copy",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.ProjectManager.OpenMode": [
@@ -26749,6 +27153,17 @@
           "project.backup",
           "project.translate.execute",
           "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanReferenceProjects",
+        "member": "OpenReadOnly",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanReferenceProjects.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "reference.prepare"
         ]
       },
       {
@@ -28441,6 +28856,8 @@
           "project.snapshot",
           "project.translate.execute",
           "project.translate.plan",
+          "reference.close",
+          "reference.prepare",
           "report.update.execute",
           "report.update.plan",
           "revision.list",

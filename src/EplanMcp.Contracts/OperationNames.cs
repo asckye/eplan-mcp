@@ -6,6 +6,10 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Unregistered reference-copy preparation; arguments: ReferencePrepareArgs; data: ReferenceCopyData.</summary>
+    public const string ReferencePrepare = "reference.prepare";
+    /// <summary>Unregistered owned-copy close; arguments: ReferenceCloseArgs; data: ProjectListData.</summary>
+    public const string ReferenceClose = "reference.close";
     /// <summary>B1 planning without a Host tool. Arguments: PropertySetArgs; data: PropertySetPlan.</summary>
     public const string PropertySetPlan = "property.set.plan";
 

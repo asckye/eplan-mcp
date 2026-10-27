@@ -145,6 +145,8 @@ acceptance.checks 支持 object/property/port/unchanged_outside，逐项要求 s
 
 参考材料准备补齐现有GapOnly接缝：固定的invoke内reference.prepare/close操作只接受经核验资源和Host新建scratch目标，不开放任意项目open/close；版本检测后复制/还原到新空目录，再只打开该副本，最后关闭本次副本。缺User.eod/eox、版本较新或源哈希变化即拒绝；不得关闭工程师已打开的项目。授权由模块inspect的类型化结果实时核验，不改握手信封；unknown不能视为满足。
 
+M0a 实现 `ReferenceCopyService` 与未注册的 `ReferencePrepareOperation/ReferenceCloseOperation`；本次不接入 GapOnly 或工具。仅接纳 packSources 中本地、无链接的 referenced project/project_backup，源项目必须关闭；Host 前后按包资源摘要复核，Bridge 只用 Snapshot/原生 restore 写入全新空 scratch 目录。关闭凭据绑定副本路径及打开时的数据库身份，重开或伪造句柄拒绝关闭，记录打开前后当前项目而不依赖其选择。Large 测试已编写，本次不运行 EPLAN；异常残留副本保留供排查，不自动重试或覆盖。
+
 “3 个回路扩到 8 个”先保留三个原实例的测得值，差异仅作为参数候选；新增五个实例的参数、标识和页/坐标须显式给出，不从前三个样本宣布公司规则。S36 未通过前允许查看提取候选，不注册 materialize 或生成步骤；不能以 `device.update`（只改标识）冒充通用属性写入。
 
 ### 4.4 规则、事实与确认
