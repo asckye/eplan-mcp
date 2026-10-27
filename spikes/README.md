@@ -41,6 +41,7 @@
 | [S40](S40-connection-symbols/README.md) | 连接符号与 autoconnect：项目库发现、对齐/错位/转角/T-node/电位点、生成前后端点及组合事务（M8） | **完成** 2026-10-27 | 对齐即有图形自动连线；角连接、T 节点、电位点用 SymbolReference.Create 放置；逻辑连接须提交后单独 Generate.Connections，同一事务内生成无效；放置与生成各一步撤销，Abort 无空步，重开持久（A52） |
 | [S44](S44-pdf-comments/README.md) | Acrobat Reader PDF 批注的导入类型、内容与页映射、提交、一步撤销、回滚、重开持久性及重复导入 | **完成** 2026-10-27 | |
 | [S41](S41-symbols-without-part/README.md) | 无部件库符号：线圈/常开触点/两端符号发现、完整标识与前缀显示、属性偏移及多语言、Transaction/Abort（M8） | **完成** 2026-10-27 | 无部件线圈/触点/两端符号可放置并持久；20214 显示带 - 的标识；放置位置是相对父符号的偏移（S42 更正）；Abort 无空步（A53） |
+| [S42](S42-graphics-move-view/README.md) | 文本/线/矩形创建与绝对移动、Function 的 20214 文字跟随、Group.Move、编辑器打开/刷新及只读撤销验证（M8） | **完成** 2026-10-27 | 文字/线/矩形可创建、移动、一步撤销并持久；文字须含显示语言；属性放置位置是相对偏移；OpenPageWithName 只读打开页，编辑器提交后自动刷新（A54） |
 | [S25](S25-exports/README.md) | M4c 第一批的导出：PXF、部件清单、设备清单、标签、PLC 地址、缺失词表 | **完成** 2026-10-21 | PXF 可行但很大（840 MB / 598 MB）；部件清单 60–90 秒，CSV 导出之后 EPLAN 发生过一次访问冲突（未复现），只用 XML；标签（文本、xlsx）2 秒内、不需要 Excel；设备清单是预规划清单；PLC 地址总览要给配置项目或站 |
 
 ## 约定
