@@ -8,6 +8,7 @@
 ### Added
 - 工程包格式第 2 版（M6 第 3 阶段，ADR-0029）：能读取 `schemaVersion` 2 的 `pack.json`、`eplanmcp.pack/v2` 的知识文档（新增配置项定义、配置层、事实集、规则、工作流、样例等种类）和第 2 版项目绑定；旧格式照常读取，不改写已安装的包。第 2 版绑定在 bind/migrate 之前只读。
 - `eplan_pack_build` 和包检查校验配置项定义（`config_schema`：类型、登记单位、枚举、上下限、允许的层）和配置层（`config_layer`：来源、层权限、默认值与约束、未知键），问题带 JSON Pointer。包内配置层只能是 `company` 或 `cabinet_type`；配置合并在后续版本加入。
+- 包检查校验规则知识文档（`rule`）：受限的类型化 JSON 表达式，只能读登记的属性和关系，限制层数、关系跳数和节点数，正则只接受字面模式；旧版裸规则资料照常可查询。规则求值在后续版本加入。
 
 ### Changed
 - 发布 ZIP 根目录新增 `README.md`，随包说明运行要求、EPLAN 授权条件与支持矩阵。

@@ -1,0 +1,12 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": { "name": "starter-allowed" },
+  "spec": {
+    "severity": "mandatory",
+    "source": { "asset": "document/guide", "location": "4.2", "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+    "scope": { "kind": "function", "where": { "eq": [{ "property": "function.category" }, { "literal": "Motor" }] } },
+    "check": { "some": { "relation": "same_potential", "where": { "literal": true } } },
+    "message": { "en": "Unsupported inferred relation" }
+  }
+}

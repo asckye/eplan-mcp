@@ -1,0 +1,18 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": { "name": "starter-allowed" },
+  "spec": {
+    "severity": "mandatory",
+    "source": { "asset": "document/guide", "location": "4.2", "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+    "scope": { "kind": "function", "where": { "eq": [{ "property": "function.category" }, { "literal": "Motor" }] } },
+    "check": {
+      "all": [
+        { "in": [{ "config": "motor.starter" }, { "literal": ["dol", "star_delta"] }] },
+        { "ge": [{ "config": "motor.power" }, { "literal": 60, "unit": "W" }] }
+      ]
+    },
+    "message": { "en": "Starter or power violates the example rule" },
+    "fix": { "workflow": "workflow/change-starter", "inputs": { "target": { "object": true }, "starter": { "literal": "dol" } } }
+  }
+}
