@@ -1,0 +1,56 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "material_mapping",
+  "metadata": {
+    "name": "company-b"
+  },
+  "spec": {
+    "parameters": {
+      "power": {
+        "type": "number",
+        "unit": "kW",
+        "min": 0.06,
+        "max": 250,
+        "required": true
+      },
+      "starter": {
+        "type": "choice",
+        "enum": [
+          "dol",
+          "star_delta"
+        ],
+        "required": true
+      }
+    },
+    "entries": [
+      {
+        "when": {
+          "power": 7.5,
+          "starter": "dol"
+        },
+        "part": "O2.TEST-DOL-075",
+        "variant": 0,
+        "quantity": 1,
+        "source": {
+          "asset": "document/guide.md",
+          "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "location": "O2/starter-table"
+        }
+      },
+      {
+        "when": {
+          "power": 7.5,
+          "starter": "star_delta"
+        },
+        "part": "O2.TEST-SD-075",
+        "variant": 1,
+        "quantity": 3,
+        "source": {
+          "asset": "document/guide.md",
+          "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "location": "O2/starter-table"
+        }
+      }
+    ]
+  }
+}

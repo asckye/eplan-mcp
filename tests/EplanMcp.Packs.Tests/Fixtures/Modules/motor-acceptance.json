@@ -1,0 +1,29 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "sample",
+  "metadata": {
+    "name": "motor-acceptance"
+  },
+  "spec": {
+    "workflow": "workflow/motor",
+    "inputs": {
+      "power": 7.5,
+      "starter": "dol"
+    },
+    "configFixture": "config_layer/company",
+    "expectedChecks": [
+      "rule/starter-allowed"
+    ],
+    "expectedObjects": [
+      "q1",
+      "x1"
+    ],
+    "sources": [
+      {
+        "asset": "document/guide.md",
+        "hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "location": "O2/starter-table"
+      }
+    ]
+  }
+}

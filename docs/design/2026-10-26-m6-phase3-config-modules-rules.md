@@ -135,6 +135,10 @@ C4 实现：`BindingLocks` 只沿已安装包的精确锁校验闭包、版本�
 
 MaterialMapping 只选择已存在部件，不修改系统库；候选映射可供预览，生成前须工程师按已有“设正式”流程确认其精确内容。参数到值集的转换逐类型/语言登记；拒绝未绑定变量、超范围值、值集名歧义与不能定位的端口。不能静默把部件号文本当成已成功分配的部件引用。
 
+M1 实现：`ModuleValidator` 返回保留原始正文的 Module/MaterialMapping/Sample 模型；parameters 按名称索引，复用 ConfigValidator 的类型、单位、枚举与边界，模块另带 binding。valueSets 显式列出命名参数值，端口以 object 相对标识及 connectionPoint 定位；原生定位和变量引用闭包仍由 M2 验证。映射 when 为类型化精确值的子集，潜在重叠在构建时即报 CONFIG_CONFLICT；Select 对零匹配报 RESOURCE_NOT_FOUND，不按顺序兜底。
+
+acceptance.checks 支持 object/property/port/unchanged_outside，逐项要求 source（asset/hash/location）与 coverage；samples 引用 Sample，Sample 的 sources 不能为空，workflow/configFixture/expectedChecks 引用本包或精确锁定依赖中的相应资源。样例输入的工作流 schema 校验留 W1，执行覆盖留 V2；来源哈希只证明引用一致，正式确认仍留 R3/R4。extraction 保存源版本、快照摘要、提取器版本、选定页/locator、相对对象映射及测得参数；不接收机器路径。pack check 接入 v2 校验，v1 module/mapping 继续原样查询，不自动成为可生成模块。
+
 提取分两步：`eplan_module_extract` 在参考项目的 scratch 副本读取显式范围，提取器写不可变 FactSet，生成 Module 草稿及参数候选/Gap；工程师审阅实例差异与接口后，再请求 materialize。已有占位符优先保留；无占位符时在新 scratch 副本中用 `Eplan.EplApi.DataModel.Graphics.PlaceHolder.Create/AddReference/SetPropertyEntry` 建立变量和值集，用 `Eplan.EplApi.MasterData.WindowMacro.Create` 写出。内部临时写入仍经既有scratch Write策略、审计和事务；临时修改回滚，输出宏经重新打开/再插入核对后进入开发包，来源原件前后哈希必须一致。
 
 参考材料准备补齐现有GapOnly接缝：固定的invoke内reference.prepare/close操作只接受经核验资源和Host新建scratch目标，不开放任意项目open/close；版本检测后复制/还原到新空目录，再只打开该副本，最后关闭本次副本。缺User.eod/eox、版本较新或源哈希变化即拒绝；不得关闭工程师已打开的项目。授权由模块inspect的类型化结果实时核验，不改握手信封；unknown不能视为满足。

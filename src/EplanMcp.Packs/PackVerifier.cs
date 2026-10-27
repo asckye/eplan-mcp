@@ -124,32 +124,37 @@ public static class PackVerifier
             .Select(k => new PackProblem(k, ResourceTypes.Forbidden(k) ?? "is in the pack but not in pack.json")));
         return new PackCheckResult(manifest, lockFile, problems);
 
-        bool Resolve(string reference, ResourceKind kind)
+        PackResource? Resolve(string reference, ResourceKind kind)
         {
             bool exact = AssetNames.TryParse(reference, out string? id, out string? version, out string? local);
             PackManifest? owner = !exact || id == manifest.Id && version == manifest.Version ? manifest : (dependencyManifests ?? [])
                 .Select(bytes => (Manifest: PackJson.ReadManifest(bytes), Digest: PackDigest.Compute(bytes)))
                 .Where(p => p.Manifest.Id == id && p.Manifest.Version == version && lockFile?.Dependencies.Any(d => d.Id == id && d.Version == version && d.Digest == p.Digest) == true
                     && PackManifestValidator.Validate(p.Manifest).Count == 0).Select(p => p.Manifest).FirstOrDefault();
-            return owner?.Resources.Any(r => r.Kind == kind && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == (exact ? local : reference)
-                && (kind != ResourceKind.Macro || r.Path.EndsWith(".ema", StringComparison.OrdinalIgnoreCase))) == true;
+            return owner?.Resources.FirstOrDefault(r => r.Kind == kind && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == (exact ? local : reference)
+                && (kind != ResourceKind.Macro || r.Path.EndsWith(".ema", StringComparison.OrdinalIgnoreCase)));
         }
     }
 
-    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, Func<string, ResourceKind, bool> resolve, CancellationToken cancellationToken)
+    private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, Func<string, ResourceKind, PackResource?> resolve, CancellationToken cancellationToken)
     {
-        if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || resource.Kind == ResourceKind.Rule && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        bool module = resource.Kind is ResourceKind.Module or ResourceKind.MaterialMapping or ResourceKind.Sample || AssetNames.KindOf(AssetNames.Local(resource)) is "module" or "material_mapping" or "sample";
+        if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || (module || resource.Kind == ResourceKind.Rule) && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
             try
             {
                 byte[] bytes = await ReadSmallAsync(fullPath, resource.Path, cancellationToken).ConfigureAwait(false);
+                if (module && AssetNames.KindOf(AssetNames.Local(resource)) is "module" or "material_mapping" && resource.Path.StartsWith("knowledge/", StringComparison.Ordinal) && KnowledgeDocument.Read(bytes).ApiVersion == KnowledgeDocument.CurrentApiVersion)
+                {
+                    return null;
+                }
                 using JsonDocument envelope = PackJson.Parse(bytes, resource.Path);
-                if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
+                if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || module && resource.Path.StartsWith("knowledge/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
                     && envelope.RootElement.TryGetProperty("apiVersion", out JsonElement version) && version.ValueKind == JsonValueKind.String && version.GetString() != KnowledgeDocument.CurrentApiVersion
-                    && envelope.RootElement.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() == "rule")
+                    && (module || envelope.RootElement.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() is "rule" or "workflow" or "module" or "material_mapping" or "sample"))
                 {
                     KnowledgeDocument rule = KnowledgeDocument.Read(bytes);
-                    BindingReadModel.Require(rule.Kind is KnowledgeKind.Rule or KnowledgeKind.Workflow && KnowledgeDocument.ResourceKindOf(rule.Kind) == resource.Kind, "/kind", "must match the rule or workflow resource kind");
+                    BindingReadModel.Require(KnowledgeDocument.ResourceKindOf(rule.Kind) == resource.Kind && (module ? rule.Kind is KnowledgeKind.Module or KnowledgeKind.MaterialMapping or KnowledgeKind.Sample : rule.Kind is KnowledgeKind.Rule or KnowledgeKind.Workflow), "/kind", "must match the resource kind");
                     BindingReadModel.Require(AssetNames.Local(resource) == KnowledgeDocument.Folder(rule.Kind) + "/" + rule.Metadata.Name, "/metadata/name", "must match the resource id");
                     var types = new Dictionary<string, RuleValueType>(StringComparer.Ordinal);
                     var items = new JsonObject();
@@ -172,11 +177,21 @@ public static class PackVerifier
 
                     if (rule.Kind == KnowledgeKind.Workflow)
                     {
-                        WorkflowValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), JsonSerializer.SerializeToElement(new { items }), resolve);
+                        WorkflowValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), JsonSerializer.SerializeToElement(new { items }), (reference, kind) => resolve(reference, kind) is not null);
                     }
                     else
                     {
-                        RuleValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), name => types.TryGetValue(name, out RuleValueType type) ? type : null);
+                        JsonElement spec = JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options);
+                        PackResource? ResolveResource(string reference) => Enum.GetValues<ResourceKind>()
+                            .Where(kind => (AssetNames.TryParse(reference, out _, out _, out string? local) ? local : reference).StartsWith(JsonNamingPolicy.SnakeCaseLower.ConvertName(kind.ToString()) + "/", StringComparison.Ordinal))
+                            .Select(kind => resolve(reference, kind)).FirstOrDefault();
+                        _ = rule.Kind switch
+                        {
+                            KnowledgeKind.Module => (object)ModuleValidator.Module(spec, ResolveResource, name => types.TryGetValue(name, out RuleValueType type) ? type : null),
+                            KnowledgeKind.MaterialMapping => ModuleValidator.Mapping(spec, ResolveResource),
+                            KnowledgeKind.Sample => ModuleValidator.Sample(spec, ResolveResource),
+                            _ => RuleValidator.Validate(spec, name => types.TryGetValue(name, out RuleValueType type) ? type : null),
+                        };
                     }
                 }
             }
