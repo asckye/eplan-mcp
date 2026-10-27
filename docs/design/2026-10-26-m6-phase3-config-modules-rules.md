@@ -119,6 +119,8 @@ C3 实现：`CabinetScopeResolver` 快照柜映射，`ParseDesignation` 按 `= +
 
 锁是显式packRoots、全部柜配置链及其传递依赖的并集；不含配置层的模块/工作流包也通过packRoots固定。构建只解析一次依赖，绑定复用已核验的精确pack.lock闭包，不重新选择latest；版本要求不相容即CONFIG_CONFLICT。首次锁定、换锁、删锁均走M6已批准的确认例外；仅改柜映射/值且锁不变，按本地数据审计。未绑定项目维持阶段2的default无配置模式，不隐式建立锁。
 
+C4 实现：`BindingLocks` 只沿已安装包的精确锁校验闭包、版本要求与摘要；`BindingService` 复用现有 `ApprovalService` 渠道确认锁变化，确认前后复核原始绑定与包内容，先取计划共用的项目锁、再取绑定锁，以 `PLAN_STALE` 拒绝 revision 冲突。v2 临时文件刷盘后原子替换，写前/写后记录 `workspace_change` 的前后 SHA-256、来源及确认决定；显式转换 v1 时保留原字节证据。计划等待人工时释放文件锁，确认后重新取锁并核验；本次不注册工具，配置合并及多柜入口由 C5 接入。
+
 ### 4.3 模块、映射与提取证据
 
 `Module.spec` 保留 macro/parameters 并补以下合同；同一份宏仍是原生 `.ema`，首批仅 MultiLine、variant=0、numbering=keep、空 Circuit 页。页宏写出成功（S32）不证明产品已支持页宏插入。

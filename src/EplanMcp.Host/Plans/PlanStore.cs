@@ -181,7 +181,7 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
         }
     }
 
-    private async Task WriteAsync(string file, byte[] bytes, CancellationToken cancellationToken)
+    internal async Task WriteAsync(string file, byte[] bytes, CancellationToken cancellationToken)
     {
         using var stream = new FileStream(_paths.Check(file), FileMode.CreateNew, FileAccess.Write, FileShare.None);
         await stream.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
@@ -189,7 +189,7 @@ internal sealed partial class PlanStore(HostDataLocations locations, AuditLog au
         Checkpoint?.Invoke("flushed");
     }
 
-    private async Task ReplaceAsync(string temporary, string file, CancellationToken cancellationToken)
+    internal async Task ReplaceAsync(string temporary, string file, CancellationToken cancellationToken)
     {
         long deadline = Environment.TickCount64 + 5000;
         while (true)

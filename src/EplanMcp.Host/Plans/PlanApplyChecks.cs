@@ -43,7 +43,7 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
         }
 
         ProjectBinding? binding = await packs.Workspaces.ReadAsync(definition.Project.Path, cancellationToken).ConfigureAwait(false);
-        binding = binding?.Cabinets.Count == 0 ? null : binding;
+        binding = binding is { BindingVersion: 1, Cabinets.Count: 0 } ? null : binding;
         if (binding?.Revision != definition.BindingRevision || ContextBuilder.Reference(null, binding)["lockDigest"]?.GetValue<string>() != definition.LockDigest
             || binding is not null && (PlanSnapshotHashes.ProjectKey(binding.Project) != definition.Project.Path
                 || binding.Cabinets.Count > 1 || binding.Cabinets.Any(c => c.Id != "default")))

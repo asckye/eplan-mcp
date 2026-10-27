@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace EplanMcp.Packs;
 
 /// <summary>An exclusive lock file shared between EplanMcp processes: the pack store's, a workspace's.</summary>
-internal static class FileLock
+public static class FileLock
 {
     /// <summary>
     /// The lock file at <paramref name="path"/> opened without sharing, or null when another holder keeps it longer than
@@ -16,6 +16,7 @@ internal static class FileLock
         var waited = Stopwatch.StartNew();
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
