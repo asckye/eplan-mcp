@@ -66,6 +66,7 @@ jobs:
           dotnet publish src/EplanMcp.Workbench -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json -p:DebugType=None -p:Version=$version -o stage/app/workbench
           New-Item -ItemType Directory stage/boms -Force | Out-Null
           Copy-Item .local/host/eplanmcp.exe stage/app
+          Copy-Item packaging/zip/README.md stage/app/README.md
           Copy-Item docs stage/app/docs -Recurse
           Copy-Item LICENSE,THIRD-PARTY-NOTICES.md stage/app/docs
           $packagePaths = @(); $packageRoot = $null
@@ -168,8 +169,8 @@ jobs:
       - name: Stage full offline payload and merge CycloneDX SBOM
         run: |
           $ErrorActionPreference = 'Stop'
-          # M5 step 10 supplies these sources. Fail closed until that change is merged into the release tag.
-          foreach ($path in 'packaging/claude-plugin/.claude-plugin/marketplace.json', 'packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'packaging/claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
+          # Require all release inputs, including the README staged by the build job.
+          foreach ($path in 'packaging/zip/README.md', 'stage/app/README.md', 'packaging/claude-plugin/.claude-plugin/marketplace.json', 'packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'packaging/claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
             if (-not (Test-Path $path)) { throw "Missing release input: $path (M5 step 10)" }
           }
           $plugin = Get-Content packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json -Raw | ConvertFrom-Json

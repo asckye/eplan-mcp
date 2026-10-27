@@ -5,6 +5,7 @@
 ## 发布前
 
 - 将 CHANGELOG 的 Unreleased 整理为目标版本，确认 main 的常规 CI 通过。
+- 打标签前核对 `packaging/zip/README.md`：它会复制到 ZIP 根目录 `README.md`，必须与发布说明携带同一份支持矩阵，逐项检查下面的清单。
 - ZIP 改造分两次审阅：Part A 为流水线与文档；Part B 的 Workbench 注册/撤销、任意程序目录 Host 定位及本地市场生成必须合并后才发布。`packaging/claude-plugin/` 提供模板和技能，`client-config` 在数据根目录生成含实际 Host 绝对路径的市场；中英文指南同步到技能副本。插件版本须与标签一致，缺少输入时打包失败。
 - 维护者准备 PowerShell 7.4+、global.json 指定的 SDK、git、已登录的 gh、本机 EPLAN 2026 引用程序集和授权；关闭示例夹具，供脚本复制。脚本默认使用 2026.0.3 的 Platform 与 Electric P8 Bin，可用参数覆盖这两个目录，但引用程序集仍须属于 2026。
 - 另行完成界面中的 Large 测试、Agent 评测、Workbench 冒烟检查（讲述人、高对比度、200% 缩放、中英文和键盘），并记录结果；离线宿主测试不能证明插件注册、审批窗口或 Ctrl+Z 正确。
@@ -33,7 +34,15 @@ eng/scripts/release-addin.ps1 -Tag v0.1.0
 Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.1.0.zip
 ```
 
-发布说明还须写明“插件由维护者在开发机上从标签 v0.1.0 构建”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，以及支持矩阵（EPLAN 版本、Electric P8 / Pro Panel、所需 API 与未签名插件授权）。支持 2024–2027 的边界与实际验证过的版本应分开列出，参见 [支持矩阵](../eplan/eplan-versions.md)。
+发布说明还须写明“插件由维护者在开发机上从标签 v0.1.0 构建”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，并按以下清单列出“支持矩阵”（版本边界见 [ADR-0009](../adr/0009-supported-eplan-versions.md) 和[版本兼容性](../eplan/eplan-versions.md)）：
+
+- [ ] 已验证 EPLAN 年份、完整构建号与变体：2026，实测 2026.0.3.25421，Electric P8、Pro Panel。
+- [ ] 尚未验证：2024、2025、2027，留待 M7；与已验证版本分开列出。
+- [ ] 暂不支持：2022、2023。
+- [ ] 授权须包含 API Extension（API 扩展）。
+- [ ] 授权须允许加载未签名 API 插件；0.x 插件未签名（[ADR-0007](../adr/0007-licensing-and-distribution.md)）。
+- [ ] Windows 10/11 x64；本机安装与连接无需管理员权限，虚拟机网络权限需管理员授权。
+- [ ] 客户端：Claude Code 与其他 stdio MCP 客户端；虚拟机连接须支持 Streamable HTTP 和自定义请求头，Claude 桌面版不适用，仅限宿主机与虚拟机私有网络、HTTP 不加密；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 待验收，见[虚拟机部署](../getting-started/zh-CN.md#10-虚拟机部署)。
 
 标签 push 会立即触发 workflow；此时草稿或附件尚未就绪，addin 作业会明确失败。这是有意的交接关卡，不轮询开发机，也不使用自托管 runner。补齐上述附件和发布说明后，重跑该标签的整次执行：
 
