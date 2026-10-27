@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Added
+- 新增 `eplan_symbol_search`（full，只读）：查询项目已有符号库、符号变体、类型及连接点，按封闭种类过滤并分页；不导入库或修改设置。
 - 新增 `eplan_cabinet_list` / `eplan_cabinet_bind`（full）：多柜映射、五层配置溯源、预览及换锁确认；`eplan_context_get` 按所选柜隔离配置与对象。
 - `eplan_import_pdf_comments`（full，Write）：导入本项目经 EPLAN 导出、Acrobat/Reader 批注的 PDF，只导入便笺 Text，忽略插入标记和下划线等。文件沿用 imports 接收校验；dry run 只校验并统计现有注释，新增数执行后才知道；scratch 外按策略审批，一次 Ctrl+Z 撤销，失败或重复导入新增 0 时回滚且不留空步。结果按不可信数据清洗、限量返回页名、文字、作者和时间。M4c 工具实现完成，实机依据 S44；新增工具的 Large 测试待运行。
 - 工程包格式第 2 版（M6 第 3 阶段，ADR-0029）：能读取 `schemaVersion` 2 的 `pack.json`、`eplanmcp.pack/v2` 的知识文档（新增配置项定义、配置层、事实集、规则、工作流、样例等种类）和第 2 版项目绑定；旧格式照常读取，不改写已安装的包。第 2 版绑定在 bind/migrate 之前只读。

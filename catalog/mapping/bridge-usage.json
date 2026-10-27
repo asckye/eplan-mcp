@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-27",
-  "scannedSources": "dbb11924 + uncommitted changes",
-  "sourceHash": "sha256:a61aa0997a4c2985be2f395d14168ab69909cae6c950805008c4cf2c25d106b4",
+  "scannedSources": "8f915d35",
+  "sourceHash": "sha256:3a474e00ffa77c080ae8b418956f1842bafb4251cb5dd263639282d112c2b457",
   "operations": [
     {
       "name": "action.execute",
@@ -455,6 +455,10 @@
     {
       "name": "revision.list",
       "class": "RevisionListOperation"
+    },
+    {
+      "name": "symbol.search",
+      "class": "SymbolSearchOperation"
     },
     {
       "name": "terminal.renumber.execute",
@@ -6267,6 +6271,19 @@
         "operations": []
       }
     ],
+    "M:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists(Eplan.EplApi.DataModel.Properties.Symbol)": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.#ctor": [
       {
         "adapter": "EplanMacroInserter",
@@ -6810,6 +6827,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -7586,6 +7604,17 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       },
       {
@@ -9310,6 +9339,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -9417,6 +9447,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -10182,6 +10213,17 @@
           "plan.step.guard",
           "project.snapshot"
         ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
       }
     ],
     "P:Eplan.EplApi.Base.PointD.Y": [
@@ -10264,6 +10306,17 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       }
     ],
@@ -14000,6 +14053,123 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.MasterData.Symbol.Name": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.Symbol.Properties": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.Symbol.Type": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Property(Eplan.EplApi.DataModel.Properties.Symbol)": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.ConnectionPoints": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects": [
       {
         "adapter": "EplanMacroReader",
@@ -15895,6 +16065,32 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.PinBase.Direction": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PinBase.Location": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Placement.Group": [
       {
         "adapter": "EplanActionRunner",
@@ -16294,6 +16490,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -16443,6 +16640,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -16546,6 +16744,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -16735,6 +16934,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -16827,6 +17027,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Project.SymbolLibraries": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       }
     ],
@@ -16986,6 +17199,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -17119,6 +17333,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -17779,6 +17994,18 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       },
       {
@@ -20036,6 +20263,17 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       }
     ],
@@ -24217,6 +24455,69 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.MasterData.Symbol": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.SymbolLibrary": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.SymbolVariant": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro": [
       {
         "adapter": "EplanMacroInserter",
@@ -25944,6 +26245,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -26052,6 +26354,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -26367,6 +26670,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",
@@ -26580,6 +26884,32 @@
         "operations": [
           "language.remove.execute",
           "language.set.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Properties": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Properties.Symbol": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       }
     ],
@@ -26999,6 +27329,17 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "symbol.search"
         ]
       },
       {
@@ -28103,6 +28444,7 @@
           "report.update.execute",
           "report.update.plan",
           "revision.list",
+          "symbol.search",
           "terminal.renumber.execute",
           "terminal.renumber.plan",
           "terminal.strip.get",

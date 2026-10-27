@@ -94,6 +94,9 @@ public static class OperationNames
     /// </summary>
     public const string RevisionList = "revision.list";
 
+    /// <summary>Read project symbol libraries and variant geometry.</summary>
+    public const string SymbolSearch = "symbol.search";
+
     /// <summary>
     /// The placeholder objects of a project, or of one page, with their value sets, variables, values and current
     /// values, sorted and sliced in the Bridge; never applies a value set. Arguments: <see cref="PlaceholderListArgs"/>;

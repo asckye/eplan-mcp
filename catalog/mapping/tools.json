@@ -8961,6 +8961,102 @@
       "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作"
     },
     {
+      "name": "eplan_symbol_search",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/SymbolTools.cs",
+      "operations": [
+        "symbol.search"
+      ],
+      "api": [
+        "M:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists(Eplan.EplApi.DataModel.Properties.Symbol)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.PointD.X",
+        "P:Eplan.EplApi.Base.PointD.Y",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Properties",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Type",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Property(Eplan.EplApi.DataModel.Properties.Symbol)",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.ConnectionPoints",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr",
+        "P:Eplan.EplApi.DataModel.PinBase.Direction",
+        "P:Eplan.EplApi.DataModel.PinBase.Location",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.SymbolLibraries",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.DataModel.MasterData.Symbol",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolLibrary",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolVariant",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.Properties",
+        "T:Eplan.EplApi.DataModel.Properties.Symbol",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_symbol_search.md",
+        "specStatus": "Implemented；新增 Large 测试待运行",
+        "apiNotes": [
+          "A52",
+          "A53",
+          "A55"
+        ],
+        "tests": [
+          {
+            "name": "SymbolToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SymbolToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "SymbolSearchTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SymbolSearchTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "SymbolSearchOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/SymbolSearchOperationTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_task_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PlanApplyTools.cs",
