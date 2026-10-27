@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace EplanMcp.Packs;
 
-/// <summary>Shape checks only; schema resolution and cabinet intersections belong to C2/C3.</summary>
+/// <summary>Strict binding shape and potential cabinet intersections; configuration resolution stays separate.</summary>
 internal static class BindingReadModel
 {
     internal static void Validate(JsonElement root)
@@ -45,7 +45,7 @@ internal static class BindingReadModel
                 Require(prefix.EnumerateObject().Any(), pointer, "must contain a full structure segment");
                 foreach (JsonProperty segment in prefix.EnumerateObject())
                 {
-                    string marker = segment.Name switch { "installation" => "=", "location" => "+", "documentType" => "&", "functionalAssignment" => "==", "installationNumber" => "++", _ => "#" };
+                    string marker = CabinetScopeResolver.Marker(segment.Name);
                     string text = Text(segment.Value) ? segment.Value.GetString()! : string.Empty;
                     Require(text.StartsWith(marker, StringComparison.Ordinal) && text.Length > marker.Length
                         && !text[marker.Length..].Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || "=+&#/*?[](){}|\\^$".Contains(c, StringComparison.Ordinal)),
@@ -53,6 +53,15 @@ internal static class BindingReadModel
                 }
             });
         }, required: true);
+        CabinetBinding[] cabinets = root.GetProperty("cabinets").Deserialize<CabinetBinding[]>(PackJson.Options)!;
+        for (int i = 0; i < cabinets.Length; i++)
+        {
+            for (int j = i + 1; j < cabinets.Length; j++)
+            {
+                Require(!CabinetScopeResolver.Overlaps(cabinets[i], cabinets[j]), $"/cabinets/{j}/structure",
+                    $"overlaps /cabinets/{i}/structure; use disjoint literal structure prefixes");
+            }
+        }
     }
 
     private static void Pin(JsonElement pin, string at, bool digest)
