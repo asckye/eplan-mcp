@@ -148,6 +148,11 @@ internal sealed partial class BridgeClient
                 case OutcomeStatus.NotStarted:
                     LogOutcomeFetched(requestId, OutcomeStatus.NotStarted);
 
+                    if (outcome.Operation is not null && outcome.Reason is null)
+                    {
+                        return new WriteResult<TData>(default, Recovered: true, ExecutionState.NotStarted);
+                    }
+
                     // No operation recorded: the request never arrived, so the interruption itself is the error.
                     throw Stamped(
                         outcome.Operation is null ? interruption

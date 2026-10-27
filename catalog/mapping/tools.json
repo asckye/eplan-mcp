@@ -74,6 +74,7 @@
         "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.isVisible",
         "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Layers",
         "P:Eplan.EplApi.DataModel.Placement.Group",
+        "P:Eplan.EplApi.DataModel.Project.Articles",
         "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
         "P:Eplan.EplApi.DataModel.Project.LayerTable",
         "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
@@ -3387,6 +3388,142 @@
         ]
       },
       "live": []
+    },
+    {
+      "name": "eplan_import_pdf_comments",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PdfCommentsImportTools.cs",
+      "operations": [
+        "import.pdf_comments.execute",
+        "import.pdf_comments.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.ISOCode.Language.L___",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageIndex",
+        "M:Eplan.EplApi.Base.BaseException.GetMessageText",
+        "M:Eplan.EplApi.Base.Context.AddParameter(System.String,System.String)",
+        "M:Eplan.EplApi.Base.MultiLangString.GetString(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.Base.SysMessagesCollection.#ctor",
+        "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll``1(System.Boolean)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.BaseException.MessageLevel",
+        "P:Eplan.EplApi.Base.BaseException.NumberOfOccurrences",
+        "P:Eplan.EplApi.DataModel.Graphics.Comment.Author",
+        "P:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate",
+        "P:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate",
+        "P:Eplan.EplApi.DataModel.Graphics.Comment.Properties",
+        "P:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)",
+        "P:Eplan.EplApi.DataModel.Graphics.TextPropertyList.TEXT_CONTENTS",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Placement.Page",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "T:Eplan.EplApi.ApplicationFramework.Action",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.Base.SysMessagesCollection",
+        "T:Eplan.EplApi.DataModel.AnyPropertyId",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Graphics.Comment",
+        "T:Eplan.EplApi.DataModel.Graphics.CommentPropertyList",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [
+        "A:import",
+        "A:import/PDFCOMMENTS"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_import_pdf_comments.md",
+        "specStatus": "Implemented（M4c 第三批；实机依据 A39/S34 r4、S44）",
+        "apiNotes": [
+          "A39"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "ImportPdfCommentsToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ImportPdfCommentsToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ImportPdfCommentsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ImportPdfCommentsTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ImportPdfCommentsOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPdfCommentsOperationTests.cs"
+          }
+        ]
+      },
+      "live": [
+        {
+          "date": "2026-10-27",
+          "eplan": "2026.0.3.25421",
+          "variant": "Electric P8",
+          "result": "pass_with_findings",
+          "basis": "inferred",
+          "source": "spikes/S44-pdf-comments/README.md",
+          "note": "S44 action 与类型读回验证：只导入便笺 Text；重复导入零新增且无撤销步；提交一步撤销、失败回滚、重开持久；新 Host 工具的 Large 测试尚未运行",
+          "verifies": false
+        }
+      ]
     },
     {
       "name": "eplan_import_plc",

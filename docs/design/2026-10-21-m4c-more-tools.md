@@ -85,7 +85,7 @@ flowchart LR
 | 2 | `eplan_language_remove` | Destructive | 从项目中删除一种语言（主语言不能删）。S23：回滚只撤回译文、不撤回语言设置，失败时还要写回设置；它会改显示语言，结果中列出 |
 | 2 | 修订的写工具 | ? | S23 之后单独设计（Q9） |
 | 3 | `eplan_import_dxf` | Write | DXF/DWG 插入页面。S22：只新增图形，能被 `SafetyPoint` 回滚、一步撤销 |
-| 3 | `eplan_import_pdf_comments` | Write? | 导入审图人在 PDF 上的注释，之后可以读取和处理 |
+| 3 | `eplan_import_pdf_comments` | Write | 已实现：只导入 EPLAN 导出、Acrobat/Reader 批注的 PDF 便笺 Text；其他类型忽略，重复导入为空操作，提交一步撤销、失败回滚（A39/S44，[规格](../tools/eplan_import_pdf_comments.md)）；工具 Large 测试待运行 |
 | 3 | `eplan_import_list` | Destructive | `kind`：`parts`（仅 XML，导入项目，禁止 `IMPORTTOSYSTEM`）、`devices`（XML/CSV 设备清单条目）；S34：可回滚，部件导入约 1–1.5 分钟，执行时限 300 秒（[规格](../tools/eplan_import_list.md)） |
 | 3 | `eplan_import_plc` | Destructive | PLC 总线数据，标准 `.pbf` / 通用 `.aml`；禁止 `IMPORTMATCH:1`。S34：可按对象编号读回新增及重名并回滚；事务内发现新增对原有或新增之间重名即 `ALREADY_EXISTS/rolled_back`。文件名称预检尽力而为，不完整仍可执行；发布前验证事务内重复保护 Large 测试及无冲突目标正向导入（[规格](../tools/eplan_import_plc.md)） |
 | 3 | `eplan_import_pxf` | Write | 把 EPJ（PXF）导入为新项目；新项目只建在 scratch 根目录中（Q5）。S22：`PXFProject` 的第二个参数是新项目的路径（不带扩展名）；约 1 分钟；失败时删除本次新建的 `.elk`、`.edb` |

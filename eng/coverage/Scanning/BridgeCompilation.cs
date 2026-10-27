@@ -50,7 +50,7 @@ internal static class BridgeCompilation
     {
         // MSBuild reports its errors on stdout; stderr goes straight to the console.
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, UseShellExecute = false };
-        string[] args = ["msbuild", project, "-nologo", "-restore", "-t:Compile", "-getItem:CscCommandLineArgs", "-p:Configuration=Release",
+        string[] args = ["msbuild", project, "-nologo", "-m:1", "-nr:false", "-restore", "-t:Compile", "-getItem:CscCommandLineArgs", "-p:Configuration=Release",
             "-p:SkipCompilerExecution=true", "-p:ProvideCommandLineArgs=true", "-p:BuildProjectReferences=false",
             "-p:NonExistentFile=__NonExistentSubDir__\\__NonExistentFile__", .. eplanBinPath is null ? [] : new[] { "-p:EplanBinPath=" + eplanBinPath }];
         args.ToList().ForEach(start.ArgumentList.Add);

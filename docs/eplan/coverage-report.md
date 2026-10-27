@@ -1,9 +1,7 @@
 # EPLAN API 覆盖报告
 
-> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-26 按 Bridge 源码 93b252f0 + uncommitted changes 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
-
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-26 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 93b252f0 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-27 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 78fa476d）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -11,7 +9,7 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和枚举值 57，action 12），其中 544 个能被某个 Bridge 操作到达，19 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
+Bridge 共用到 574 个 ID（方法 177，属性 190，类型 136，字段和枚举值 57，action 14），其中 554 个能被某个 Bridge 操作到达，19 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
@@ -20,31 +18,31 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.DataModel` | 237 |
 | `Eplan.EplApi.DataModel.E3D` | 1 |
 | `Eplan.EplApi.DataModel.EObjects` | 20 |
-| `Eplan.EplApi.DataModel.Graphics` | 24 |
+| `Eplan.EplApi.DataModel.Graphics` | 32 |
 | `Eplan.EplApi.DataModel.MasterData` | 19 |
 | `Eplan.EplApi.DataModel.Topology` | 4 |
 | `Eplan.EplApi.EServices` | 9 |
 | `Eplan.EplApi.HEServices` | 115 |
 | `Eplan.EplApi.HEServices.Exceptions` | 1 |
 | `Eplan.EplApi.MasterData` | 47 |
-| `（action）` | 12 |
+| `（action）` | 14 |
 
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 250 / 4014（6.2%） | 241 | 43 | 241 / 4014（6.0%） | 158 / 4014（3.9%） | 122 | 134 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 255 / 4014（6.4%） | 246 | 44 | 246 / 4014（6.1%） | 158 / 4014（3.9%） | 122 | 134 |
 | 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 112 / 1799（6.2%） | 105 | 40 | 105 / 1799（5.8%） | 71 / 1799（3.9%） | 45 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 138 / 2215（6.2%） | 136 | 3 | 136 / 2215（6.1%） | 87 / 2215（3.9%） | 77 | 68 |
-| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 7 / 68（10.3%） | 7 | 0 | 7 / 68（10.3%） | 5 / 68（7.4%） | 0 | 0 |
-| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 6 / 137（4.4%） | 6 | 0 | 6 / 137（4.4%） | 1 / 137（0.7%） | 0 | 0 |
-| 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 6 / 97（6.2%） | 6 | 0 | 6 / 97（6.2%） | 1 / 97（1.0%） | 0 | 0 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 143 / 2215（6.5%） | 141 | 4 | 141 / 2215（6.4%） | 87 / 2215（3.9%） | 77 | 68 |
+| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 9 / 68（13.2%） | 9 | 0 | 9 / 68（13.2%） | 5 / 68（7.4%） | 0 | 0 |
+| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
+| 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 250 / 4342（5.8%）。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 255 / 4342（5.9%）。
 - 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 112 / 1799（6.2%），live_verified 71 / 1799（3.9%）。
-- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 45 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 241 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
-- action 名称：Bridge 用到 6 个，没有整个排除的 action 共 64 个。
+- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 46 个，未过时的共 8585 个。
+- 依赖层：Bridge 用到 242 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- action 名称：Bridge 用到 7 个，没有整个排除的 action 共 64 个。
 
 ## 3. 按命名空间（操作层）与按对象类型（数据字典）
 | 命名空间（overlay 排除后） | 分母 | implemented | live_verified |
@@ -54,7 +52,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.DataModel` | 1247 | 110 / 1247（8.8%） | 79 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 0 / 368（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 14 / 83（16.9%） | 5 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 18 / 414（4.3%） | 10 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 23 / 414（5.6%） | 10 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 9 / 121（7.4%） | 8 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 0 / 122（0.0%） | 0 |
@@ -68,7 +66,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 |
 | `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 |
 
-数据字典中已实现的对象类型（7 个）：Article（live_verified）、Connection（live_verified）、Function（live_verified）、MDPartsDatabaseItem（live_verified）、Page（live_verified）、Project（automated_test）、Segment（automated_test）。
+数据字典中已实现的对象类型（9 个）：Article（live_verified）、Comment（automated_test）、Connection（live_verified）、Function（live_verified）、MDPartsDatabaseItem（live_verified）、Page（live_verified）、Project（automated_test）、Segment（automated_test）、Text（automated_test）。
 
 无文档的重载组（不在 IntelliSense 中，仍在分母里，Q2）：共 134 组，按命名空间：
 
@@ -88,7 +86,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 75（40.0%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 76（39.5%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -111,6 +109,7 @@ Bridge 共用到 564 个 ID（方法 177，属性 184，类型 134，字段和�
 | eplan_export_image | 2026-10-20 | 未注明 | 未注明 | pass | api-notes A21 | inline 的 PNG 交给了模型，模型读出了图上的标识和文字 |
 | eplan_export_labels | 2026-10-21 | 未注明 | 未注明 | partial | docs/tools/eplan_export_labels.md | 第一次 Large 测试发现方案设置的相对路径从 Data 节点算起 |
 | eplan_export_pdf | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass（推断，不计入） | api-notes A20 | 文件名不重复 .pdf；整个项目 322 页约 13 秒 |
+| eplan_import_pdf_comments | 2026-10-27 | 2026.0.3.25421 | Electric P8 | pass_with_findings（推断，不计入） | spikes/S44-pdf-comments/README.md | S44 action 与类型读回验证：只导入便笺 Text；重复导入零新增且无撤销步；提交一步撤销、失败回滚、重开持久；新 Host 工具的 Large 测试尚未运行 |
 | eplan_macro_insert | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass_with_findings | api-notes A19 | 同一位置再插入被拒绝并回滚；keep 与已有设备冲突时 ALREADY_EXISTS |
 | eplan_macro_insert | 2026-10-20 | 2026.0.3.25421 | Electric P8 | pass | api-notes A20 | 在用 eplan_page_create 新建的页上按幅面检查外框 |
 | eplan_message_list | 2026-10-19 | 2026.0.3.25421 | Electric P8 | pass（推断，不计入） | api-notes A12 | M2 的 13 个只读工具全部成功（A12 没有逐个列出） |
@@ -144,7 +143,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 
 | 工具 | 级别 | Bridge 操作 | API ID | 操作层 | 数据字典 | 依赖 | action | 测试 S/M/L | api-notes | 最近一次实机 |
 |---|---|---|---:|---:|---:|---:|---:|---|---|---|
-| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 122 | 64 | 2 | 51 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
+| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 123 | 65 | 2 | 51 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A33 | — |
 | eplan_asset_update | write | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
@@ -171,6 +170,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 25 | 9 | 0 | 16 | 0 | 2/3/1 | A25 B9 | — |
 | eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 59 | 24 | 0 | 35 | 0 | 1/2/1 | A29 | — |
 | eplan_import_list | destructive | import.list.execute<br>import.list.plan | 79 | 40 | 0 | 35 | 2 | 4/2/1 | A30 A31 | — |
+| eplan_import_pdf_comments | write | import.pdf_comments.execute<br>import.pdf_comments.plan | 70 | 33 | 2 | 33 | 1 | 2/2/1 | A39 | — |
 | eplan_import_plc | destructive | import.plc.execute<br>import.plc.plan | 67 | 32 | 0 | 33 | 1 | 2/2/1 | A30 | — |
 | eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 7 | 2 | 0 | 5 | 0 | 1/2/1 | A28 A29 | — |
 | eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 63 | 29 | 2 | 32 | 0 | 2/2/1 | A28 | — |

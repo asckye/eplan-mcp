@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：真实项目写入逐次审批，操作可审计。
 
-> **状态：v0.4.0 预览版，75 个工具**。已于 2026-10-26 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)，供测试使用。M0–M4 已完成；M4c 的 PDF 注释导入待有效样本，翻译库导入已实现；M5 的 ZIP 交付和虚拟机连接已实现，干净机器验收和跨机器实测待完成；M6 第 1 阶段（工程包与资源）和第 2 阶段（多步工作流计划，见[计划使用指南](docs/guides/plans.zh-CN.md)，核验到 3,000 页）已完成，第 3–5 阶段未开始；通用属性读取已实现，属性写入首批（20011、20027）已实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **状态：v0.4.0 预览版，76 个工具（当前开发版）**。已于 2026-10-26 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)，供测试使用。M0–M4 已完成；M4c 已完成（PDF 便笺与翻译库导入均已实现，PDF 工具 Large 测试待运行）；M5 的 ZIP 交付和虚拟机连接已实现，干净机器验收和跨机器实测待完成；M6 第 1 阶段（工程包与资源）和第 2 阶段（多步工作流计划，见[计划使用指南](docs/guides/plans.zh-CN.md)，核验到 3,000 页）已完成，第 3–5 阶段未开始；通用属性读取已实现，属性写入首批（20011、20027）已实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
 
 ## 工作方式
 

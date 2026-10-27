@@ -78,7 +78,7 @@
 - M6 的 `task.get` 在未知或已过期时使用 `RESOURCE_NOT_FOUND`（M6 设计 4.5.1）；`project.create`、`task.get` 沿用标准动作，无需新增领域动作。
 - M6 第 2 阶段加入 `plan`（将内联任务编译为有前置条件、预期结果和差异预览的计划；不执行写入），并将已有 `apply` 用于执行已编译计划（ADR-0023 的整体审批和备份）。`plan` 同时是资源词，含义由其在名称中的位置区分。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
-- 例外：项目导入以 `import` 为资源，动作的位置放格式或交换数据类别：`dxf`、`pxf`、`list`（设备清单或项目部件清单，不是分页查询）、`plc`（PLC 总线数据）。这里的 `list` / `plc` 是导入类别；写系统部件库仍用 `eplan_part_import`。`cable` 和 `generate` 已在词表中，`eplan_cable_generate` 仅生成/更新自动电缆，已有电缆重编号用 `eplan_cable_renumber`。
+- 例外：项目导入以 `import` 为资源，动作的位置放格式或交换数据类别：`dxf`、`pdf_comments`（PDF 审图便笺）、`pxf`、`list`（设备清单或项目部件清单，不是分页查询）、`plc`（PLC 总线数据）。这里的 `list` / `plc` 是导入类别；写系统部件库仍用 `eplan_part_import`。`cable` 和 `generate` 已在词表中，`eplan_cable_generate` 仅生成/更新自动电缆，已有电缆重编号用 `eplan_cable_renumber`。
 
 ---
 

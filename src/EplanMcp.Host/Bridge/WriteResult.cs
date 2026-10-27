@@ -3,10 +3,13 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Host.Bridge;
 
 /// <summary>
-/// A committed write. <see cref="Recovered"/>: the response was lost and <c>outcome.get</c> reported the commit, so
+/// A successful write, including a no-op. <see cref="Recovered"/>: the response was lost and <c>outcome.get</c> reported its state, so
 /// there is no <see cref="Data"/>; the caller reports the plan's changes instead (ADR-0010 section 2).
 /// </summary>
-internal sealed record WriteResult<TData>(TData? Data, bool Recovered);
+internal sealed record WriteResult<TData>(TData? Data, bool Recovered, string RecoveredExecution = ExecutionState.Committed)
+{
+    public string Execution => Data is IWriteExecution data ? data.Execution : RecoveredExecution;
+}
 
 /// <summary>ADR-0010's two invariants for the errors of writes, checked wherever the Host stamps one.</summary>
 internal static class ExecutionInvariants

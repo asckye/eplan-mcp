@@ -130,6 +130,7 @@ internal static class McpServerSetup
             .WithTools<ImageExportTools>(HostJson.Options)
             .WithTools<ProjectExportTools>(HostJson.Options)
             .WithTools<ImportTools>(HostJson.Options)
+            .WithTools<PdfCommentsImportTools>(HostJson.Options)
             .WithTools<ProjectCreateTools>(HostJson.Options)
             .WithTools<ListImportTools>(HostJson.Options)
             .WithTools<PlcImportTools>(HostJson.Options)

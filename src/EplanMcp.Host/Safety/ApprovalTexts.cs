@@ -159,6 +159,7 @@ internal static class ApprovalTexts
             "create" when change.Kind == "device" => zh ? $"在页 {name} 上放置设备：{Value(change.NewValue ?? string.Empty, zh)}" : $"Place a device on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             // An import names the file, its size and SHA-256 (import.dxf.plan; M4c design 4.5).
             "create" when change.Kind == "drawing" => zh ? $"在页 {name} 上导入图形：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import a drawing on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+            "create" when change.Kind == "PDF comments" => zh ? $"向项目 {name} 导入 PDF 便笺（其他批注忽略，新增数执行后才知道）：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import PDF sticky notes into project {name} (other annotations ignored; new count unknown until import): {Value(change.NewValue ?? string.Empty, zh)}",
             "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
             "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),

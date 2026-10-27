@@ -90,6 +90,8 @@ internal sealed class FakeBridgeClient : IBridgeClient
     /// <summary>When true, writes come back as committed but recovered after an interruption, without data.</summary>
     public bool WriteRecovered { get; set; }
 
+    public string RecoveredExecution { get; set; } = ExecutionState.Committed;
+
     /// <summary>Runs first in every write, given where the Bridge's progress reports go, as EPLAN works.</summary>
     public Action<IProgress<ProgressNotification>?>? DuringWrite { get; set; }
 
@@ -107,7 +109,7 @@ internal sealed class FakeBridgeClient : IBridgeClient
         if (WriteRecovered)
         {
             Calls.Add((operation, args));
-            return new WriteResult<TData>(default, Recovered: true);
+            return new WriteResult<TData>(default, Recovered: true, RecoveredExecution);
         }
 
         return new WriteResult<TData>(await InvokeAsync<TArgs, TData>(operation, args, cancellationToken), Recovered: false);
