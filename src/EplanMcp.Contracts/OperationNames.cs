@@ -230,6 +230,12 @@ public static class OperationNames
     /// </summary>
     public const string ImportDxfExecute = "import.dxf.execute";
 
+    /// <summary>Validates a PDF and counts existing comments. Arguments: ImportPdfCommentsArgs; data: WritePlan.</summary>
+    public const string ImportPdfCommentsPlan = "import.pdf_comments.plan";
+
+    /// <summary>Imports sticky notes in one undo step, or rolls back a no-op. Data: ImportPdfCommentsData.</summary>
+    public const string ImportPdfCommentsExecute = "import.pdf_comments.execute";
+
     /// <summary>Read-only project list import plan. Arguments: <see cref="ImportListArgs"/>; data: <see cref="WritePlan"/> with counts and converter details.</summary>
     public const string ImportListPlan = "import.list.plan";
 

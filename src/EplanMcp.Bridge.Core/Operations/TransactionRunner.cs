@@ -15,10 +15,11 @@ public static class TransactionRunner
     /// <summary>The prefix of the undo step EPLAN lists for every write (M3 design 4.6).</summary>
     public const string UndoPrefix = "AI: ";
 
-    public static Committed<T> Run<T>(ITransactionScopeFactory transactions, string tool, Func<T> change)
+    public static Committed<T> Run<T>(ITransactionScopeFactory transactions, string tool, Func<T> change, Func<T, bool>? shouldCommit = null)
     {
         ITransactionScope scope = transactions.Begin(UndoPrefix + tool);
         T result;
+        bool commit;
         try
         {
             result = change();
@@ -26,16 +27,24 @@ public static class TransactionRunner
             // The last safe point (M4 design 4.3): a cancel that came during the change rolls it back instead of
             // committing it. After the commit a cancel changes nothing.
             OperationContext.Current.ThrowIfCancellationRequested();
+            commit = shouldCommit is null || shouldCommit(result);
         }
         catch (Exception failure)
         {
-            Abandon(scope, tool);
+            Abandon(scope, tool, closeUndo: shouldCommit is null);
             if (failure is BridgeErrorException known)
             {
                 known.Error.Execution = ExecutionState.RolledBack;
             }
 
             throw;
+        }
+
+        // S44: even a successful import may add nothing; roll it back without leaving an empty undo step.
+        if (!commit)
+        {
+            Abandon(scope, tool, closeUndo: false);
+            return new Committed<T>(result, null);
         }
 
         try
@@ -72,14 +81,17 @@ public static class TransactionRunner
     }
 
     /// <summary>
-    /// Closes the undo step, then rolls back (S1, S2: an UndoStep inside the SafetyPoint does not stop the rollback).
+    /// Rolls back; legacy writes close first (S1/S2), PDF imports leave the step unclosed as verified in S44.
     /// A failed close leaves the data alone; a failed rollback or release leaves the project in an unknown state.
     /// </summary>
-    private static void Abandon(ITransactionScope scope, string tool)
+    private static void Abandon(ITransactionScope scope, string tool, bool closeUndo)
     {
         try
         {
-            scope.CloseUndo();
+            if (closeUndo)
+            {
+                scope.CloseUndo();
+            }
         }
         catch (Exception)
         {

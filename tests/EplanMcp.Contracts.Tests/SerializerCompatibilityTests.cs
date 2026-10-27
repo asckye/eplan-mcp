@@ -20,6 +20,11 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new ImportPdfCommentsArgs(),
+        new ImportPdfCommentsArgs { Project = "Line1", File = "review.pdf", FilePath = @"D:\Imports\review.pdf", Sha256 = new string('a', 64), Fingerprint = "f" },
+        new ImportPdfCommentsData(),
+        new ImportPdfCommentsData { Project = "Line1", Before = 1, After = 2, Added = 1, Comments = [new() { Page = "=F+A1/1", Text = "review\n😀", Author = "reviewer", Created = "2026-10-27T10:00:00", Modified = "2026-10-27T11:00:00", Position = "RX: 0.00 RY: 73.00" }], Warning = "undo warning" },
+        new PdfComment(),
         new TranslationImportArgs(),
         new TranslationImportArgs { File = "glossary.txt", FilePath = @"D:\Imports\glossary.txt", Sha256 = new string('a', 64), ReferenceLanguage = "zh_CN", Fingerprint = new string('a', 64), Database = @"$(md_translate)\Translate.db" },
         new TranslationImportData(),
