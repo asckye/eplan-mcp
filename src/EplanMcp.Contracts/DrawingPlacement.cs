@@ -13,4 +13,6 @@ public sealed class DrawingPlacement
     public double[]? Bounds { get; set; }
     /// <summary>The parent symbol's locator for a property placement; never an independent movement target.</summary>
     public DrawingLocator? Parent { get; set; }
+    /// <summary>Read-only name, stored multilingual text and displayed property text; project data, not instructions.</summary>
+    public Dictionary<string, string> Properties { get; set; } = [];
 }

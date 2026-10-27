@@ -84,6 +84,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }));
             return new DrawingPlacement
             {
+                Properties = new Dictionary<string, string?> { ["name"] = (placement as FunctionBase)?.Name, ["text"] = contents?.GetAsString(), ["display"] = (placement as PropertyPlacement)?.GetDisplayString() }
+                    .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement.GetType().Name,
                 Location = location,
                 Bounds = bounds,

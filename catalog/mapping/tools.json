@@ -5230,27 +5230,39 @@
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PageTools.cs",
       "operations": [
-        "page.get"
+        "page.drawing.get",
+        "page.get",
+        "project.get"
       ],
       "api": [
         "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
         "M:Eplan.EplApi.Base.ISOCode.GetNumber",
         "M:Eplan.EplApi.Base.ISOCode.IsValid",
         "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetAsString",
         "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.Base.PointD.#ctor(System.Double,System.Double)",
         "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox(System.Boolean)",
+        "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetDisplayString",
         "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.Placement.GetBoundingBox",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
         "M:Eplan.EplApi.DataModel.PropertyValue.Dispose",
         "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
         "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
         "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
         "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
         "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.Base.PointD.X",
+        "P:Eplan.EplApi.Base.PointD.Y",
         "P:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
         "P:Eplan.EplApi.DataModel.Function.ArticleReferences",
         "P:Eplan.EplApi.DataModel.Function.FunctionCategory",
@@ -5258,16 +5270,31 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.Name",
         "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
+        "P:Eplan.EplApi.DataModel.Graphics.Line.EndPoint",
+        "P:Eplan.EplApi.DataModel.Graphics.Line.StartPoint",
+        "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent",
+        "P:Eplan.EplApi.DataModel.Graphics.Text.Contents",
+        "P:Eplan.EplApi.DataModel.Group.SubPlacements",
+        "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.GridSize",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Page.PageType",
         "P:Eplan.EplApi.DataModel.Page.PageTypeName",
+        "P:Eplan.EplApi.DataModel.Page.PlotFrame",
         "P:Eplan.EplApi.DataModel.Page.Properties",
+        "P:Eplan.EplApi.DataModel.Page.Size",
         "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_NOMINATIOMN",
         "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.Placement.Location",
         "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
         "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
         "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
         "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.PropertyDefinition.IsIndexed",
@@ -5277,25 +5304,38 @@
         "P:Eplan.EplApi.DataModel.PropertyValue.Indexes",
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
+        "P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
+        "T:Eplan.EplApi.Base.BaseException",
         "T:Eplan.EplApi.Base.ISOCode",
         "T:Eplan.EplApi.Base.ISOCode.Language",
         "T:Eplan.EplApi.Base.Languages",
         "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.Base.PointD",
         "T:Eplan.EplApi.DataModel.AnyPropertyId",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.EmptyPropertyException",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.FunctionBase",
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
+        "T:Eplan.EplApi.DataModel.Graphics.Line",
+        "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement",
+        "T:Eplan.EplApi.DataModel.Graphics.Rectangle",
+        "T:Eplan.EplApi.DataModel.Graphics.Text",
+        "T:Eplan.EplApi.DataModel.Group",
+        "T:Eplan.EplApi.DataModel.IPropertyPlacementsContainer",
         "T:Eplan.EplApi.DataModel.IndexedPropertyException",
         "T:Eplan.EplApi.DataModel.NotIndexedPropertyException",
         "T:Eplan.EplApi.DataModel.Page",
         "T:Eplan.EplApi.DataModel.PagesFilter",
+        "T:Eplan.EplApi.DataModel.Placement",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectManager",
         "T:Eplan.EplApi.DataModel.PropertyDefinition",
         "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
         "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.SymbolReference",
         "T:Eplan.EplApi.DataModel.UniversalPropertyList",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
@@ -5319,6 +5359,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ModelTextTests.cs"
           },
           {
+            "name": "PageDrawingToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDrawingToolTests.cs"
+          },
+          {
             "name": "PageGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageGetToolTests.cs"
@@ -5332,6 +5377,11 @@
             "name": "MacroInsertToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroInsertToolTests.cs"
+          },
+          {
+            "name": "PageDrawingContractTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDrawingContractTests.cs"
           },
           {
             "name": "PageUpdateToolTests",
@@ -5367,6 +5417,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PageDrawingDiscoveryTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageDrawingDiscoveryTests.cs"
           },
           {
             "name": "PlanApplyTests",
@@ -5406,9 +5461,24 @@
         ],
         "operationTests": [
           {
+            "name": "PageDrawingGetOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDrawingGetOperationTests.cs"
+          },
+          {
             "name": "PageGetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGetOperationTests.cs"
+          },
+          {
+            "name": "ProjectGetOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectGetOperationTests.cs"
+          },
+          {
+            "name": "ChineseRoundTripTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/ChineseRoundTripTests.cs"
           },
           {
             "name": "ProjectPageInteropTests",
@@ -5531,6 +5601,11 @@
             "name": "PageDeleteOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteOperationTests.cs"
+          },
+          {
+            "name": "PageDrawingGetOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDrawingGetOperationTests.cs"
           },
           {
             "name": "PageListToolTests",
