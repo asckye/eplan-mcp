@@ -53,12 +53,12 @@ public sealed class ContextProtocolTests : IDisposable
             JsonElement properties = tool.ProtocolTool.InputSchema.GetProperty("properties");
             Assert.Equal(["project", "cabinet", "scope", "include", "max_tokens"], properties.EnumerateObject().Select(p => p.Name));
             Assert.Equal(5000, properties.GetProperty("max_tokens").GetProperty("default").GetInt32());
-            CallToolResult call = await client.CallToolAsync(ContextTools.GetTool, new Dictionary<string, object?> { ["scope"] = new { } }, cancellationToken: Token);
+            CallToolResult call = await client.CallToolAsync(ContextTools.GetTool, new Dictionary<string, object?> { ["project"] = "Line1", ["scope"] = new { } }, cancellationToken: Token);
             JsonElement data = ContextToolTests.Data(call);
             Assert.False(data.TryGetProperty("rules", out _));
             Assert.Equal(5000, data.GetProperty("budget").GetProperty("requestedTokens").GetInt32());
             AssertShape(call);
-            CallToolResult invalid = await client.CallToolAsync(ContextTools.GetTool, new Dictionary<string, object?> { ["scope"] = new { depth = 2 }, ["include"] = new List<string> { "objects", "objects" } }, cancellationToken: Token);
+            CallToolResult invalid = await client.CallToolAsync(ContextTools.GetTool, new Dictionary<string, object?> { ["project"] = "Line1", ["scope"] = new { depth = 2 }, ["include"] = new List<string> { "objects", "objects" } }, cancellationToken: Token);
             string message = ContextToolTests.Error(invalid).GetProperty("metadata").GetProperty("violations").GetString()!;
             Assert.Contains("/scope/depth", message, StringComparison.Ordinal);
             Assert.Contains("/include", message, StringComparison.Ordinal);
@@ -87,7 +87,7 @@ public sealed class ContextProtocolTests : IDisposable
             using var http = new HttpClient(handler) { BaseAddress = new Uri(app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single()) };
             using var request = new HttpRequestMessage(HttpMethod.Post, "/mcp");
             string metadata = protocol == "2026-07-28" ? ",\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\",\"io.modelcontextprotocol/clientInfo\":{\"name\":\"context-test\",\"version\":\"1\"},\"io.modelcontextprotocol/clientCapabilities\":{}}" : string.Empty;
-            request.Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"eplan_context_get\",\"arguments\":{\"scope\":{}}" + metadata + "}}", Encoding.UTF8, "application/json");
+            request.Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"eplan_context_get\",\"arguments\":{\"project\":\"Line1\",\"scope\":{}}" + metadata + "}}", Encoding.UTF8, "application/json");
             request.Headers.Add("Mcp-Protocol-Version", protocol);
             request.Headers.Add("Mcp-Method", "tools/call");
             request.Headers.Add("Mcp-Name", ContextTools.GetTool);

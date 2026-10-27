@@ -15,6 +15,7 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
     internal Action<string>? Checkpoint { get; init; }
 
     public async Task<ProjectBinding> WriteAsync(ProjectBinding proposed, int expectedRevision, string source, string tool,
+        bool dryRun, Func<ProjectBinding, CancellationToken, Task>? validate,
         IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(expectedRevision);
@@ -26,7 +27,7 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
         var paths = new PlanPaths(packs.Locations.Root);
         string project = PlanSnapshotHashes.ProjectKey(proposed.Project);
         ProjectBinding next = PackJson.ReadBinding(PackJson.Serialize(proposed with { Project = project, Revision = checked(expectedRevision + 1), Locks = [] }));
-        string folder = paths.DirectoryAt(packs.Workspaces.FolderOf(project));
+        string folder = paths.Check(packs.Workspaces.FolderOf(project));
         string file = paths.Check(Path.Combine(folder, ProjectBinding.FileName));
         byte[] before = await ReadAsync(file, cancellationToken).ConfigureAwait(false);
         ProjectBinding? old = before.Length == 0 ? null : PackJson.ReadBinding(before);
@@ -42,6 +43,11 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
         }
         byte[] after = PackJson.Serialize(next);
         _ = PackJson.ReadBinding(after);
+        if (validate is not null)
+        { await validate(next, cancellationToken).ConfigureAwait(false); }
+        bool unchanged = old is not null && PackJson.Serialize(old).AsSpan().SequenceEqual(PackJson.Serialize(next with { Revision = old.Revision }));
+        if (dryRun || unchanged)
+        { return unchanged ? old! : next; }
         string beforeDigest = PlanStore.Hash(before), afterDigest = PlanStore.Hash(after);
         string requestId = Guid.NewGuid().ToString("N");
         ApprovalResult? decision = null;
@@ -69,6 +75,7 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
         }
         using FileStream projectLock = await FileLock.AcquireAsync(paths.ProjectLock(project), TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false)
             ?? throw new PlanCapacityException("plans.project", 1, 1);
+        _ = paths.DirectoryAt(folder);
         using FileStream bindingLock = await FileLock.AcquireAsync(paths.Check(Path.Combine(folder, ".binding.lock")), packs.Workspaces.LockWait, cancellationToken).ConfigureAwait(false)
             ?? throw Failure(ErrorReason.Timeout, "The binding is busy; read it again when the other change finishes.");
         byte[] current = await ReadAsync(file, cancellationToken).ConfigureAwait(false);
@@ -148,6 +155,9 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
             }
         }
     }
+
+    public Task<ProjectBinding> WriteAsync(ProjectBinding proposed, int expectedRevision, string source, string tool,
+        IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) => WriteAsync(proposed, expectedRevision, source, tool, false, null, progress, cancellationToken);
 
     private static async Task<byte[]> ReadAsync(string file, CancellationToken cancellationToken)
     {

@@ -38,7 +38,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(76, Tools(ToolProfile.Full).Length);
+        Assert.Equal(78, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PdfCommentsImportTools.Tool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PdfCommentsImportTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PropertySetTools.Tool);
