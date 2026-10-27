@@ -190,7 +190,7 @@
 详细数据见 [spike S41](../../spikes/S41-symbols-without-part/README.md)。
 
 - IEC_symbol 的线圈 `K`、常开触点 `O_EL`、两端符号 `AS` 不分配部件即可经 `Function.Create` 放置（只能走 `Transaction`，A13），`ArticleReferences` 为 0；设置 `Name` 后结构按请求，`VisibleName` 为空。功能文本只写一种语言时保留其他语言。— S41。
-- `Function.Create` 默认只带一个空的属性放置（20029 索引 2）。`PropertyPlacement.Create(function, id)` 后设 `Location` = 父对象位置 + 偏移，读回精确；`GetDisplayString()`：**20214/20213/20211/20215 显示带 `-` 的标识**（与页结构相同的段不显示），20058 不带 `-`（与 A26 相同），20212、20010 为空。画面效果待 S42 核对。— S41。
+- `Function.Create` 默认只带一个空的属性放置（20029 索引 2）。`PropertyPlacement.Create(function, id)` 后的 `Location` **是相对父符号的偏移**（S42 截图与绝对外框 = 父位置 + Location 证实）：S41 按"父对象位置 + 偏移"设置时读回虽与请求一致，但文字实际画在页外；只设偏移才显示在符号旁，父符号移动时随之移动；`GetDisplayString()`：**20214/20213/20211/20215 显示带 `-` 的标识**（与页结构相同的段不显示），20058 不带 `-`（与 A26 相同），20212、20010 为空。画面效果待 S42 核对。— S41。
 - `Transaction.Abort` 完全恢复且不留空撤销步；提交后关闭重开逐字段相同。— S41。
 
 ### A52. 连接符号、自动连线与生成连接（spike S40，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
