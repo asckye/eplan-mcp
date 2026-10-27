@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -45,10 +44,9 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
         {
             await store.CheckAdmissionAsync(planId, cancellationToken).ConfigureAwait(false);
             var paths = new PlanPaths(packs.Locations.Root);
-            string key = PlanStore.Hash(Encoding.UTF8.GetBytes(PlanSnapshotHashes.ProjectKey(record.Definition.Project.Path)));
             try
             {
-                held = new FileStream(paths.Check(Path.Combine(paths.Root, ".project-" + key + ".lock")), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                held = new FileStream(paths.ProjectLock(record.Definition.Project.Path), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             }
             catch (IOException ex) when (ex.HResult == unchecked((int)0x80070020))
             {
@@ -83,6 +81,8 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
 
             var view = new PlanApprovalView(record, store.ChangesPath(planId), folders.ProjectFolder(new WritePlan { ProjectPath = record.Definition.Project.Path }));
             ApprovalQuestion binding = view.Question(fingerprints, instance, deadline);
+            held.Dispose();
+            held = null; // Human decisions never hold project or binding file locks.
             IReadOnlyList<Suspension> blocking = suspensions.Blocking(record.Definition.Project.Path, instance.ProcessId, start);
             foreach (Suspension suspension in blocking.DistinctBy(s => s.RequestId))
             {
@@ -134,6 +134,16 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
                 }
 
                 record = await ChangeAsync(s => s.Approve(new(approval.Decision, approval.Channel, binding.Plan.Fingerprint))).ConfigureAwait(false);
+            }
+
+            try
+            {
+                held = new FileStream(paths.ProjectLock(record.Definition.Project.Path), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException ex) when (ex.HResult == unchecked((int)0x80070020))
+            {
+                // Another plan or bind took the project while the engineer decided; the approval no longer holds.
+                throw PlanApplyChecks.Stale();
             }
 
             (EplanInstanceInfo current, string[] after, string currentPipe) = await checks.CheckAsync(record, cancellationToken).ConfigureAwait(false);

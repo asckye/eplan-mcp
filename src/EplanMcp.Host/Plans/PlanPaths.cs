@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace EplanMcp.Host.Plans;
 
 /// <summary>The data root may be a link; every descendant must be an ordinary file or directory (SEC-19).</summary>
@@ -5,6 +7,8 @@ internal sealed class PlanPaths(string dataRoot)
 {
     private readonly string _root = Path.GetFullPath(dataRoot);
     public string Root => Check(Path.Combine(_root, "state", "plans"));
+
+    public string ProjectLock(string project) => Check(Path.Combine(DirectoryAt(Root), ".project-" + PlanStore.Hash(Encoding.UTF8.GetBytes(PlanSnapshotHashes.ProjectKey(project))) + ".lock"));
 
     public string Check(string path)
     {
