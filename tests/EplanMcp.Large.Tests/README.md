@@ -1,5 +1,7 @@
 # Large 测试：工具的实机测试
 
+`ReferenceCopyTests` 覆盖示例项目关闭源的原生 Snapshot 复制、可选 `.zw1` 还原（`EPLANMCP_LARGE_ZW1`）、只读打开、版本/会话文件、仅副本关闭及源摘要不变。M0a 保持两个操作未注册，测试明确跳过，待后续接入启用；本次仅编写，未运行 EPLAN。
+
 `ProjectCreateToolTests` 验收 `eplan_project_create` 的两种模式：自动寻找唯一 `GB_bas001.zw9`（或 `EPLANMCP_LARGE_BASIC_PROJECT`），备份用 `EPLANMCP_LARGE_ZW1` 指定非客户示例文件；材料缺失跳过。源复制进测试 Host 的 imports，核对源 SHA-256 不变、兼容性 `IsCompatible/18.0`、结束后关闭、重复目标及已有空目录拒绝、审计；保留 `User.eod/eox`。尚未运行，不代表跨版本兼容性验证。
 
 这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**（只读测试也可以改用离线宿主，见下文"离线宿主"）：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[测试规范第 4 节](../../docs/standards/testing.md#4-large-测试实机)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
