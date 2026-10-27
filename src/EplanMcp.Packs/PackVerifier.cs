@@ -13,6 +13,17 @@ namespace EplanMcp.Packs;
 /// </summary>
 public static class PackVerifier
 {
+    private static readonly Dictionary<KnowledgeKind, Func<JsonElement, ContentValidationContext, ValueTask>> _contentValidators = new()
+    {
+        [KnowledgeKind.ConfigSchema] = (spec, _) => { ConfigValidator.Schema(spec); return ValueTask.CompletedTask; },
+        [KnowledgeKind.ConfigLayer] = (spec, context) => context.ValidateLayerAsync(spec),
+        [KnowledgeKind.Rule] = (spec, context) => { RuleValidator.Validate(spec, context.ConfigType); return ValueTask.CompletedTask; },
+        [KnowledgeKind.Workflow] = (spec, context) => { WorkflowValidator.Validate(spec, JsonSerializer.SerializeToElement(new { items = context.Items }), (reference, kind) => context.Resolve(reference, kind) is not null); return ValueTask.CompletedTask; },
+        [KnowledgeKind.Module] = (spec, context) => { ModuleValidator.Module(spec, context.ResolveResource, context.ConfigType); return ValueTask.CompletedTask; },
+        [KnowledgeKind.MaterialMapping] = (spec, context) => { ModuleValidator.Mapping(spec, context.ResolveResource); return ValueTask.CompletedTask; },
+        [KnowledgeKind.Sample] = (spec, context) => { ModuleValidator.Sample(spec, context.ResolveResource); return ValueTask.CompletedTask; },
+    };
+
     public static Task<PackCheckResult> CheckDirectoryAsync(string directory, CancellationToken cancellationToken) => CheckDirectoryWithDependenciesAsync(directory, [], cancellationToken);
     public static async Task<PackCheckResult> CheckDirectoryWithDependenciesAsync(string directory, IReadOnlyList<byte[]> dependencyManifests, CancellationToken cancellationToken)
     {
@@ -138,6 +149,7 @@ public static class PackVerifier
 
     private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, Func<string, ResourceKind, PackResource?> resolve, CancellationToken cancellationToken)
     {
+        var context = new ContentValidationContext(manifest, present, resolve, cancellationToken);
         bool module = resource.Kind is ResourceKind.Module or ResourceKind.MaterialMapping or ResourceKind.Sample || AssetNames.KindOf(AssetNames.Local(resource)) is "module" or "material_mapping" or "sample";
         if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || (module || resource.Kind == ResourceKind.Rule) && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
@@ -156,43 +168,9 @@ public static class PackVerifier
                     KnowledgeDocument rule = KnowledgeDocument.Read(bytes);
                     BindingReadModel.Require(KnowledgeDocument.ResourceKindOf(rule.Kind) == resource.Kind && (module ? rule.Kind is KnowledgeKind.Module or KnowledgeKind.MaterialMapping or KnowledgeKind.Sample : rule.Kind is KnowledgeKind.Rule or KnowledgeKind.Workflow), "/kind", "must match the resource kind");
                     BindingReadModel.Require(AssetNames.Local(resource) == KnowledgeDocument.Folder(rule.Kind) + "/" + rule.Metadata.Name, "/metadata/name", "must match the resource id");
-                    var types = new Dictionary<string, RuleValueType>(StringComparer.Ordinal);
-                    var items = new JsonObject();
-                    foreach (PackResource source in manifest.Resources.Where(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && present.ContainsKey(r.Path)))
-                    {
-                        KnowledgeDocument schema = KnowledgeDocument.Read(await ReadSmallAsync(present[source.Path], source.Path, cancellationToken).ConfigureAwait(false));
-                        BindingReadModel.Require(schema.Kind == KnowledgeKind.ConfigSchema, "/spec", "configuration types require config_schema documents");
-                        JsonElement schemaSpec = JsonSerializer.SerializeToElement(schema.Spec, PackJson.Options);
-                        ConfigValidator.Schema(schemaSpec);
-                        foreach (JsonProperty item in schemaSpec.GetProperty("items").EnumerateObject())
-                        {
-                            string type = item.Value.GetProperty("type").GetString()!;
-                            var declared = new RuleValueType(type == "choice" ? "text" : type, item.Value.TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null);
-                            BindingReadModel.Require(!types.TryGetValue(item.Name, out RuleValueType previous) || previous == declared, "/spec", "configuration operand types are ambiguous");
-                            types[item.Name] = declared;
-                            BindingReadModel.Require(rule.Kind != KnowledgeKind.Workflow || !items.TryGetPropertyValue(item.Name, out JsonNode? existing) || JsonElement.DeepEquals(JsonSerializer.SerializeToElement(existing), item.Value), "/spec", "configuration definitions are ambiguous");
-                            items[item.Name] = JsonNode.Parse(item.Value.GetRawText());
-                        }
-                    }
-
-                    if (rule.Kind == KnowledgeKind.Workflow)
-                    {
-                        WorkflowValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), JsonSerializer.SerializeToElement(new { items }), (reference, kind) => resolve(reference, kind) is not null);
-                    }
-                    else
-                    {
-                        JsonElement spec = JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options);
-                        PackResource? ResolveResource(string reference) => Enum.GetValues<ResourceKind>()
-                            .Where(kind => (AssetNames.TryParse(reference, out _, out _, out string? local) ? local : reference).StartsWith(JsonNamingPolicy.SnakeCaseLower.ConvertName(kind.ToString()) + "/", StringComparison.Ordinal))
-                            .Select(kind => resolve(reference, kind)).FirstOrDefault();
-                        _ = rule.Kind switch
-                        {
-                            KnowledgeKind.Module => (object)ModuleValidator.Module(spec, ResolveResource, name => types.TryGetValue(name, out RuleValueType type) ? type : null),
-                            KnowledgeKind.MaterialMapping => ModuleValidator.Mapping(spec, ResolveResource),
-                            KnowledgeKind.Sample => ModuleValidator.Sample(spec, ResolveResource),
-                            _ => RuleValidator.Validate(spec, name => types.TryGetValue(name, out RuleValueType type) ? type : null),
-                        };
-                    }
+                    await context.ReadConfigTypesAsync(rule.Kind).ConfigureAwait(false);
+                    JsonElement spec = JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options);
+                    await _contentValidators[rule.Kind](spec, context).ConfigureAwait(false);
                 }
             }
             catch (PackFormatException ex)
@@ -209,24 +187,7 @@ public static class PackVerifier
                 BindingReadModel.Require(KnowledgeDocument.ResourceKindOf(document.Kind) == resource.Kind, "/kind", "must match the resource kind");
                 BindingReadModel.Require(AssetNames.Local(resource) == $"{KnowledgeDocument.Folder(document.Kind)}/{document.Metadata.Name}", "/metadata/name", "must match the resource id");
                 JsonElement spec = JsonSerializer.SerializeToElement(document.Spec, PackJson.Options);
-                if (resource.Kind == ResourceKind.ConfigSchema)
-                {
-                    ConfigValidator.Schema(spec);
-                }
-                else
-                {
-                    JsonElement? schema = null;
-                    if (spec.TryGetProperty("schema", out JsonElement reference) && reference.ValueKind == JsonValueKind.String
-                        && manifest.Resources.FirstOrDefault(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == reference.GetString()) is { } source
-                        && present.TryGetValue(source.Path, out string? sourcePath))
-                    {
-                        KnowledgeDocument resolved = KnowledgeDocument.Read(await ReadSmallAsync(sourcePath, source.Path, cancellationToken).ConfigureAwait(false));
-                        BindingReadModel.Require(resolved.Kind == KnowledgeKind.ConfigSchema, "/spec/schema", "must reference a config_schema document");
-                        schema = JsonSerializer.SerializeToElement(resolved.Spec, PackJson.Options);
-                    }
-
-                    ConfigValidator.Layer(spec, _ => schema);
-                }
+                await _contentValidators[resource.Kind == ResourceKind.ConfigSchema ? KnowledgeKind.ConfigSchema : KnowledgeKind.ConfigLayer](spec, context).ConfigureAwait(false);
             }
             catch (PackFormatException ex)
             {
@@ -236,6 +197,54 @@ public static class PackVerifier
 
         return resource.Path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? ContentChecks.Svg(fullPath)
             : officialRule ? await ContentChecks.RuleSourceAsync(fullPath, cancellationToken).ConfigureAwait(false) : null;
+    }
+
+    private sealed record ContentValidationContext(PackManifest Manifest, Dictionary<string, string> Present, Func<string, ResourceKind, PackResource?> Resolve, CancellationToken CancellationToken)
+    {
+        public Dictionary<string, RuleValueType> Types { get; } = new(StringComparer.Ordinal);
+        public JsonObject Items { get; } = new();
+
+        public RuleValueType? ConfigType(string name) => Types.TryGetValue(name, out RuleValueType type) ? type : null;
+
+        public PackResource? ResolveResource(string reference) => Enum.GetValues<ResourceKind>()
+            .Where(kind => (AssetNames.TryParse(reference, out _, out _, out string? local) ? local : reference).StartsWith(JsonNamingPolicy.SnakeCaseLower.ConvertName(kind.ToString()) + "/", StringComparison.Ordinal))
+            .Select(kind => Resolve(reference, kind)).FirstOrDefault();
+
+        // Read per document so schema failures keep their original position in manifest order.
+        public async Task ReadConfigTypesAsync(KnowledgeKind kind)
+        {
+            foreach (PackResource source in Manifest.Resources.Where(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && Present.ContainsKey(r.Path)))
+            {
+                KnowledgeDocument schema = KnowledgeDocument.Read(await ReadSmallAsync(Present[source.Path], source.Path, CancellationToken).ConfigureAwait(false));
+                BindingReadModel.Require(schema.Kind == KnowledgeKind.ConfigSchema, "/spec", "configuration types require config_schema documents");
+                JsonElement schemaSpec = JsonSerializer.SerializeToElement(schema.Spec, PackJson.Options);
+                ConfigValidator.Schema(schemaSpec);
+                foreach (JsonProperty item in schemaSpec.GetProperty("items").EnumerateObject())
+                {
+                    string type = item.Value.GetProperty("type").GetString()!;
+                    var declared = new RuleValueType(type == "choice" ? "text" : type, item.Value.TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null);
+                    BindingReadModel.Require(!Types.TryGetValue(item.Name, out RuleValueType previous) || previous == declared, "/spec", "configuration operand types are ambiguous");
+                    Types[item.Name] = declared;
+                    BindingReadModel.Require(kind != KnowledgeKind.Workflow || !Items.TryGetPropertyValue(item.Name, out JsonNode? existing) || JsonElement.DeepEquals(JsonSerializer.SerializeToElement(existing), item.Value), "/spec", "configuration definitions are ambiguous");
+                    Items[item.Name] = JsonNode.Parse(item.Value.GetRawText());
+                }
+            }
+        }
+
+        public async ValueTask ValidateLayerAsync(JsonElement spec)
+        {
+            JsonElement? schema = null;
+            if (spec.TryGetProperty("schema", out JsonElement reference) && reference.ValueKind == JsonValueKind.String
+                && Manifest.Resources.FirstOrDefault(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && AssetNames.Local(r) == reference.GetString()) is { } source
+                && Present.TryGetValue(source.Path, out string? sourcePath))
+            {
+                KnowledgeDocument resolved = KnowledgeDocument.Read(await ReadSmallAsync(sourcePath, source.Path, CancellationToken).ConfigureAwait(false));
+                BindingReadModel.Require(resolved.Kind == KnowledgeKind.ConfigSchema, "/spec/schema", "must reference a config_schema document");
+                schema = JsonSerializer.SerializeToElement(resolved.Spec, PackJson.Options);
+            }
+
+            ConfigValidator.Layer(spec, _ => schema);
+        }
     }
 
     /// <summary>The hash, size and file count of a resource's files; for a project relative to the link file's folder.</summary>
