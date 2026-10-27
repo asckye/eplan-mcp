@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <EmbeddedResource Include="Fixtures\**\*.json" />
     <ProjectReference Include="..\..\src\EplanMcp.Packs\EplanMcp.Packs.csproj" />
     <!-- Reviewed snapshots of the pack file formats in tests/Contracts.Snapshots (testing.md 3). -->
     <PackageReference Include="Verify.XunitV3" />

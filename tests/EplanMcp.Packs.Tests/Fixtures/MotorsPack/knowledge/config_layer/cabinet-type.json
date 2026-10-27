@@ -1,0 +1,37 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "config_layer",
+  "metadata": {
+    "name": "cabinet-type"
+  },
+  "spec": {
+    "layer": "cabinet_type",
+    "schema": "config_schema/motors",
+    "settings": {
+      "motor.starter": {
+        "default": "star_delta",
+        "constraint": {
+          "fixed": "star_delta"
+        }
+      },
+      "motor.power": {
+        "default": 11,
+        "constraint": {
+          "allowed": {
+            "min": 7.5,
+            "max": 75
+          }
+        }
+      },
+      "motor.voltage": {
+        "default": 400,
+        "constraint": {
+          "allowed": [
+            380,
+            400
+          ]
+        }
+      }
+    }
+  }
+}

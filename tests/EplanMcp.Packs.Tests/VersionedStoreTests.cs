@@ -21,13 +21,20 @@ public sealed class VersionedStoreTests
             ApiVersion = version == 1 ? KnowledgeDocument.CurrentApiVersion : KnowledgeDocument.V2ApiVersion,
             Kind = kind,
             Metadata = new KnowledgeMetadata { Name = "motor" },
-            Spec = JsonNode.Parse(version == 1 ? """{"macro":"macro/motor","parameters":[]}""" : """{"settings":{"motor.power":{"default":7.5}}}""")!.AsObject(),
+            Spec = JsonNode.Parse(version == 1 ? """{"macro":"macro/motor","parameters":[]}""" : """{"layer":"company","schema":"config_schema/motors","settings":{"motor.power":{"default":7.5}}}""")!.AsObject(),
         };
         string path = KnowledgeDocument.PathOf(kind, "motor");
         byte[] documentBytes = PackJson.Serialize(knowledge);
         source.Write(path, documentBytes);
         PackResource resource = await PackFolders.ResourceAsync(source, path, KnowledgeDocument.ResourceKindOf(kind));
-        PackManifest manifest = await PackFolders.WriteAsync(source, m => m with { SchemaVersion = version, Resources = [resource, .. m.Resources] });
+        var resources = new List<PackResource> { resource };
+        if (version == 2)
+        {
+            source.Write(ConfigFixtures.SchemaPath, ConfigFixtures.Read("MotorsPack/" + ConfigFixtures.SchemaPath));
+            resources.Add(await PackFolders.ResourceAsync(source, ConfigFixtures.SchemaPath, ResourceKind.ConfigSchema));
+        }
+
+        PackManifest manifest = await PackFolders.WriteAsync(source, m => m with { SchemaVersion = version, Resources = [.. resources.Concat(m.Resources).OrderBy(r => r.Path, StringComparer.Ordinal)] });
         byte[] manifestBytes = File.ReadAllBytes(source.PathOf(PackManifest.FileName));
         string digest = PackDigest.Compute(manifestBytes);
         byte[] lockBytes = PackJson.Serialize(PackLock.Create(new PackReference { Id = manifest.Id, Version = manifest.Version, Digest = digest }, []));

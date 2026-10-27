@@ -85,6 +85,10 @@ PackJson 的严格成员/重复键/版本检查、UTF-8/LF 格式及 16 MiB 文�
 
 `ConfigSchema.spec.items` 按键定义 `{type,unit?,enum?,min?,max?,allowedLayers,required}`，类型为 text/number/boolean/choice，禁止任意对象和隐式字符串转数字。`ConfigLayer.spec={layer,schema,settings}`，每项 settings 为 `{default? ,constraint?}`；constraint 是 fixed 或 allowed 集合/闭区间。项目/柜 values 使用同一设置结构。
 
+C1 实现：schema 项可选 `default` 按 base 层验证，须获 `allowedLayers` 许可；包内 config_layer 只能是 company 或 cabinet_type，project/cabinet 值只来自绑定。`ConfigValidator` 统一验证层设置与绑定的 project/cabinet values；`required` 的缺值、约束交集和最终默认值留给 C2。单位登记为 W/kW、V/kV、A/mA、mm/m，保存量纲和换算系数；设置值使用 schema 声明的单位，不能重定义。
+
+pack check/build 校验配置正文和本包 `config_schema/name` 来源；配置文档须随包携带。当前目录检查没有依赖资源解析上下文，跨包来源暂拒绝，锁定依赖解析留给 C2。测试材料见 `tests/EplanMcp.Packs.Tests/Fixtures/README.md`，仅验证电机示例配置格式，不代表通用选型算法。
+
 ```json
 {"apiVersion":"eplanmcp.pack/v2","kind":"config_layer","metadata":{"name":"company"},
  "spec":{"layer":"company","schema":"config_schema/motors","settings":{

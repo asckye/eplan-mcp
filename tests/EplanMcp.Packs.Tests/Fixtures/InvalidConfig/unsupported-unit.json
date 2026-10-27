@@ -1,0 +1,52 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "config_schema",
+  "metadata": {
+    "name": "motors"
+  },
+  "spec": {
+    "items": {
+      "motor.starter": {
+        "type": "choice",
+        "enum": [
+          "dol",
+          "star_delta"
+        ],
+        "allowedLayers": [
+          "base",
+          "company",
+          "cabinet_type",
+          "project",
+          "cabinet"
+        ],
+        "required": true
+      },
+      "motor.power": {
+        "type": "number",
+        "unit": "hp",
+        "min": 0.06,
+        "max": 250,
+        "allowedLayers": [
+          "base",
+          "company",
+          "cabinet_type",
+          "project",
+          "cabinet"
+        ],
+        "required": true
+      },
+      "motor.voltage": {
+        "type": "number",
+        "unit": "V",
+        "allowedLayers": [
+          "base",
+          "company",
+          "cabinet_type",
+          "project",
+          "cabinet"
+        ],
+        "required": true
+      }
+    }
+  }
+}
