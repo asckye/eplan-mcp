@@ -93,9 +93,9 @@ public static class PackVerifier
             bool officialRule = manifest.Rules.Any(r => r.Standing == KnowledgeStanding.Official && PackPath.Comparer.Equals(r.Path, resource.Path));
             if (resource.Storage == ResourceStorage.Referenced)
             {
-                if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer")
+                if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer" || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal))
                 {
-                    problems.Add(new PackProblem(resource.Path, "/spec: configuration documents must be bundled for validation"));
+                    problems.Add(new PackProblem(resource.Path, "/spec: configuration and rule knowledge documents must be bundled for validation"));
                 }
 
                 if (own.Count > 0 || officialRule)
@@ -125,6 +125,44 @@ public static class PackVerifier
 
     private static async Task<string?> ContentProblemAsync(PackResource resource, string fullPath, bool officialRule, PackManifest manifest, Dictionary<string, string> present, CancellationToken cancellationToken)
     {
+        if (resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || resource.Kind == ResourceKind.Rule && resource.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                byte[] bytes = await ReadSmallAsync(fullPath, resource.Path, cancellationToken).ConfigureAwait(false);
+                using JsonDocument envelope = PackJson.Parse(bytes, resource.Path);
+                if (resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
+                    && envelope.RootElement.TryGetProperty("apiVersion", out JsonElement version) && version.ValueKind == JsonValueKind.String && version.GetString() != KnowledgeDocument.CurrentApiVersion
+                    && envelope.RootElement.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() == "rule")
+                {
+                    KnowledgeDocument rule = KnowledgeDocument.Read(bytes);
+                    BindingReadModel.Require(rule.Kind == KnowledgeKind.Rule && resource.Kind == ResourceKind.Rule, "/kind", "must be a rule resource and document");
+                    BindingReadModel.Require(AssetNames.Local(resource) == "rule/" + rule.Metadata.Name, "/metadata/name", "must match the resource id");
+                    var types = new Dictionary<string, RuleValueType>(StringComparer.Ordinal);
+                    foreach (PackResource source in manifest.Resources.Where(r => r.Kind == ResourceKind.ConfigSchema && r.Storage == ResourceStorage.Bundled && present.ContainsKey(r.Path)))
+                    {
+                        KnowledgeDocument schema = KnowledgeDocument.Read(await ReadSmallAsync(present[source.Path], source.Path, cancellationToken).ConfigureAwait(false));
+                        BindingReadModel.Require(schema.Kind == KnowledgeKind.ConfigSchema, "/spec", "configuration types require config_schema documents");
+                        JsonElement schemaSpec = JsonSerializer.SerializeToElement(schema.Spec, PackJson.Options);
+                        ConfigValidator.Schema(schemaSpec);
+                        foreach (JsonProperty item in schemaSpec.GetProperty("items").EnumerateObject())
+                        {
+                            string type = item.Value.GetProperty("type").GetString()!;
+                            var declared = new RuleValueType(type == "choice" ? "text" : type, item.Value.TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null);
+                            BindingReadModel.Require(!types.TryGetValue(item.Name, out RuleValueType previous) || previous == declared, "/spec", "configuration operand types are ambiguous");
+                            types[item.Name] = declared;
+                        }
+                    }
+
+                    RuleValidator.Validate(JsonSerializer.SerializeToElement(rule.Spec, PackJson.Options), name => types.TryGetValue(name, out RuleValueType type) ? type : null);
+                }
+            }
+            catch (PackFormatException ex)
+            {
+                return ex.Message;
+            }
+        }
+
         if (resource.Kind is ResourceKind.ConfigSchema or ResourceKind.ConfigLayer || AssetNames.KindOf(AssetNames.Local(resource)) is "config_schema" or "config_layer")
         {
             try

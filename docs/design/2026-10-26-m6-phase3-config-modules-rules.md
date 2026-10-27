@@ -153,6 +153,12 @@ MaterialMapping 只选择已存在部件，不修改系统库；候选映射可�
 
 AST 最深 8 层、关系最多 3 跳；每柜最多 500 规则、每规则 100,000 次节点访问/1 s、整次求值 30 s，确定性计数+墙钟双限；超限列 unknown 和 coverage，不当作 pass。`false AND unknown=false`、`true OR unknown=true`，其余保留 unknown；scope=false 为 not_applicable，scope=unknown 为 unknown。结果为 `{rule,version,locator,status:pass|fail|not_applicable|unknown,evidence,basis:fact|inference}`；mandatory unknown 阻止依赖它的生成/迁移生效，recommended 只提示。
 
+R1 静态合同：`RuleValidator` 返回带类型、单位及子节点的 AST；`RuleStatus` 经 PackJson 序列化为上述四值。属性首批仅登记快照的 function.name/category/main、page.name/type、connection.name；除 main 为 boolean 外均为 text，无单位，缺失值或读取覆盖不完整均为 unknown。关系仅 connection.start/end（connection→function）及 function.connections（按直接端点反查 connection），不包含电位推断。
+
+运算符均使用显式操作数数组；exists/empty/not 为一元，all/any 为非空谓词数组，其余比较为二元。some/every/count 使用 `{relation,where}`，where 是目标种类的谓词，count 返回无单位 number。顺序比较只接纳 number；集合成员比较要求同类型、同量纲的非空字面集合。数字单位写作 `{"literal":7.5,"unit":"kW"}`，集合共用一个 unit；不自动给无单位数补单位。matches 的模式必须是字面文本，构建时检查 NonBacktracking 语法，动态输入的 2,000 字符限制及 20 ms 超时由 R2 执行。
+
+scope/check 根节点计第 1 层，操作数节点也计深度；另设静态上限 1,024（整条规则的节点加集合元素，含 fix 输入），区别于运行时访问预算。config 由随包 config_schema 提供类型/单位，choice 按 text；独立规则没有 parameter 声明上下文，未知配置/参数拒绝。fix.inputs 只接纳显式 AST 节点或 `{"object":true}`；来源真实性、工作流解析与正式规则门禁仍由 R3/R4/W1 实现。旧裸规则资料保持可查询，不成为此合同的可执行规则。
+
 阶段 3 只启用已覆盖的对象属性、归属和快照直接连接端点关系；一般电位延续/跨页追踪等仍待阶段 4。未知关系在构建时报 CAPABILITY_MISSING，资料仍可索引为不可用；不得把“电机必有热继电器”的推断搜索当完整事实检查。fix 引用精确锁定 Workflow，仅 fail 且依据足够时生成计划；冲突修复、unknown 目标不合并、不自动应用。
 
 `eplan_asset_update` 继续不能写 FactSet/Rule 或设置 accepted/official。新增 `eplan_asset_review` 经既有审批渠道接受/拒绝候选、关闭缺口或将候选提升为新 Rule；保留原候选内容和事实，仅更新审核状态，审计关联新旧摘要。模块接口/映射审核同样绑定候选及目标内容摘要；materialize的review_digest必须匹配本机已确认审计记录，客户端自报hash不是确认。无来源 mandatory 在 build 报 PACK_INVALID；未经确认的 Rule 草稿保留为 Candidate，不靠手工改 standing 生效。
