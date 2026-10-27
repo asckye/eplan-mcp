@@ -186,6 +186,15 @@
   - 工作站设置 `Setting.eod` 中 `AssemblyPath` 的值经 zlib 压缩（`78 DA`）后分页保存，不是文本，按文本找不到路径；不要解析这个文件。
   — 实机核对（按 #287 的核对步骤，两轮）。
 
+### A55. 中断点、端子、触点代号、电缆芯线、PLC 连接点与位置盒（spike S43，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
+详细数据见 [spike S43](../../spikes/S43-engineering-elements/README.md)。
+
+- 🔴 **写入失败、`Transaction.Abort` 之后，不要再读取或释放事务内新建对象的属性列表**：r2 在 Abort 后释放这些缓存时 EPLAN 原生堆损坏（`0xc0000374`）并崩溃，随后以 `/RestartOnCrash` 自行重启、只打开启动时的项目。须在 Abort 之前释放缓存，Abort 后不碰新建对象（同 A36/A39）。— S43。
+- 中断点（SPECIAL `BPF`）用 `SymbolReference.Create` 放置，名称写完整标识，读回一致；端子（IEC_symbol `X`）先建端子排再建端子，名称 `<排>:<号>`；提交后单独生成连接（A52）。— S43。
+- 连接点代号写**带索引的 20022（FUNC_CONNECTIONDESIGNATION）**，按引脚生效；20038（全部代号）是汇总，写入无效；`Pin.Designation` 是内部编号，实际代号读 `Pin.Name`。— S43。
+- 电缆芯线：导线 → 生成 → 电缆定义线 → 生成 → 单独提交的绑定 → 生成 → 芯线，电缆读回 3 个成员并精确分配，未用全项目重分配。— S43。
+- PLC 盒（SPECIAL `PLCC`）下的 DI 连接点地址、符号地址、通道读回正确；**每个连接点另有一个同名、无父对象的 PLCTerminal**，计数与核对须考虑。— S43。
+- 位置盒（SPECIAL `SC`）可放置并改为虚线，但盒内符号的结构没有继承盒的位置（读回 `=+`），条件未查明。— S43。
 ### A54. 文字、图形、移动与打开页（spike S42，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S42](../../spikes/S42-graphics-move-view/README.md)。
 
