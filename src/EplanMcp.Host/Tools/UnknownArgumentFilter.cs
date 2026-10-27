@@ -29,9 +29,10 @@ internal static class UnknownArgumentFilter
                     tool.ProtocolTool.Name == PlanApplyTools.ApplyTool);
                 return invalid is null ? next(context, cancellationToken) : ValueTask.FromResult(invalid);
             }
-            if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments) is { Count: > 0 } violations)
+            // Device placement checks raw display objects itself, preserving duplicate members for pointer errors.
+            if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments, nestedMembers: tool.ProtocolTool.Name != DeviceWriteTools.PlaceTool) is { Count: > 0 } violations)
             {
-                if (tool.ProtocolTool.Name == PageTextReplaceTools.Tool)
+                if (tool.ProtocolTool.Name is PageTextReplaceTools.Tool or DeviceWriteTools.PlaceTool)
                 {
                     BridgeError error = ToolResults.InvalidArgumentError(violations);
                     error.Execution = ExecutionState.NotStarted;
@@ -49,7 +50,7 @@ internal static class UnknownArgumentFilter
     /// each element of an array argument whose items are objects, named like <c>pages[1].page_type</c>, and an element
     /// that is not an object at all (the tool would get null for it).
     /// </summary>
-    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "")
+    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "", bool nestedMembers = true)
     {
         HashSet<string> allowed = Names(schema, "properties");
         IEnumerable<string> unknown = (arguments?.Keys ?? [])
@@ -61,7 +62,7 @@ internal static class UnknownArgumentFilter
             .Order(StringComparer.Ordinal)
             .Select(name => $"Missing required argument '{prefix}{name}'.");
         IEnumerable<string> nested = (arguments ?? new Dictionary<string, JsonElement>())
-            .Where(a => a.Value.ValueKind == JsonValueKind.Array && allowed.Contains(a.Key))
+            .Where(a => nestedMembers && a.Value.ValueKind == JsonValueKind.Array && allowed.Contains(a.Key))
             .OrderBy(a => a.Key, StringComparer.Ordinal)
             .SelectMany(a => schema.GetProperty("properties").GetProperty(a.Key) is { ValueKind: JsonValueKind.Object } property
                 && property.TryGetProperty("items", out JsonElement items) && items.ValueKind == JsonValueKind.Object && Names(items, "properties").Count > 0

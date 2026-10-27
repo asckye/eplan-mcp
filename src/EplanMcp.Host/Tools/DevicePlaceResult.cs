@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 
@@ -23,13 +25,21 @@ internal sealed class DevicePlaceResult
     [Description("The part's variant that was placed, or would be.")]
     public string Variant { get; set; } = string.Empty;
 
+    [Description("Resolved symbol and local pins; present only for symbol plans.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SymbolSearchItem? Symbol { get; set; }
+
+    [Description("Predicted function, relative property placements and pin designations; symbol plans only.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<PlannedChange>? Changes { get; set; }
+
     [Description("The device as EPLAN read it back; for a dry run or when 'recovered', as planned.")]
     public DeviceEntry Device { get; set; } = new();
 
-    [Description("All functions of the device, placed or not; null for a dry run or when 'recovered'.")]
+    [Description("All functions; symbol dry runs predict 1, part dry runs and recovered results give null.")]
     public int? Functions { get; set; }
 
-    [Description("Functions on no page yet, such as a contactor's contacts; null for a dry run or when 'recovered'.")]
+    [Description("Unplaced functions; symbol dry runs predict 0, part dry runs and recovered results give null.")]
     public int? Unplaced { get; set; }
 
     [Description("The step in EPLAN's undo list (Ctrl+Z) that removes the device; null for a dry run.")]

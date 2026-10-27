@@ -2267,8 +2267,10 @@
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists(Eplan.EplApi.DataModel.Properties.Symbol)",
         "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
         "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
         "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
         "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
@@ -2296,18 +2298,31 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.Name",
         "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Properties",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Type",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Property(Eplan.EplApi.DataModel.Properties.Symbol)",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.ConnectionPoints",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr",
         "P:Eplan.EplApi.DataModel.Page.AllPlacements",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Page.PageType",
         "P:Eplan.EplApi.DataModel.Page.Size",
         "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.PinBase.Direction",
+        "P:Eplan.EplApi.DataModel.PinBase.Location",
         "P:Eplan.EplApi.DataModel.Placement.IsPlaced",
         "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
         "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
         "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.SymbolLibraries",
         "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.MasterData.MDPart.PartNr",
         "P:Eplan.EplApi.MasterData.MDPart.ProductGroup",
         "P:Eplan.EplApi.MasterData.MDPart.Variant",
@@ -2323,6 +2338,7 @@
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
         "T:Eplan.EplApi.Base.ISOCode",
         "T:Eplan.EplApi.Base.ISOCode.Language",
         "T:Eplan.EplApi.Base.Languages",
@@ -2332,11 +2348,18 @@
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.Function",
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
+        "T:Eplan.EplApi.DataModel.MasterData.Symbol",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolLibrary",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolVariant",
         "T:Eplan.EplApi.DataModel.Page",
         "T:Eplan.EplApi.DataModel.PagesFilter",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
         "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.Properties",
+        "T:Eplan.EplApi.DataModel.Properties.Symbol",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
         "T:Eplan.EplApi.DataModel.SafetyPoint",
         "T:Eplan.EplApi.DataModel.UndoManager",
         "T:Eplan.EplApi.DataModel.UndoStep",
@@ -2354,9 +2377,15 @@
         "apiNotes": [
           "A13",
           "A14",
-          "A26"
+          "A26",
+          "A53"
         ],
         "tests": [
+          {
+            "name": "DevicePlaceInputTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceInputTests.cs"
+          },
           {
             "name": "ToolContractTests",
             "size": "Small",
@@ -2366,6 +2395,11 @@
             "name": "DevicePlaceToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceToolTests.cs"
+          },
+          {
+            "name": "DeviceSymbolPlanTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSymbolPlanTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -2383,6 +2417,11 @@
             "name": "DevicePlaceOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
+          },
+          {
+            "name": "DeviceSymbolPlanTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSymbolPlanTests.cs"
           }
         ]
       },
@@ -9029,6 +9068,11 @@
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "DeviceSymbolPlanTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSymbolPlanTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
