@@ -96,6 +96,7 @@ internal static class BridgeHost
         var partsDatabase = new EplanPartsDatabase();
         var placer = new EplanDevicePlacer();
         var drawings = new EplanDrawingImporter();
+        var pdfComments = new EplanPdfCommentsImporter();
         var lists = new EplanListImporter();
         var plcImporter = new EplanPlcImporter();
         var translator = new EplanProjectTranslator();
@@ -160,6 +161,8 @@ internal static class BridgeHost
             new PlaceholderApplyExecuteOperation(catalog, pages, placeholders, new EplanPlaceholderWriter(), transactions),
             new ImportDxfPlanOperation(catalog, pages, drawings),
             new ImportDxfExecuteOperation(catalog, pages, drawings, transactions),
+            new ImportPdfCommentsPlanOperation(catalog, pdfComments),
+            new ImportPdfCommentsExecuteOperation(catalog, pdfComments, transactions, new EplanSystemMessageReader()),
             new ImportListPlanOperation(catalog, lists),
             new ImportListExecuteOperation(catalog, pages, lists, backup, transactions, new EplanSystemMessageReader()),
             new ImportPlcPlanOperation(catalog, plcImporter),

@@ -13,6 +13,20 @@ public sealed class WriteInvokeTests
 
     private readonly ListLog _log = new();
 
+    [Theory]
+    [InlineData(0, OutcomeStatus.NotStarted)]
+    [InlineData(1, OutcomeStatus.Committed)]
+    public void AWrite_DiscoveringANoOp_RecordsItsActualStateBeforeResponding(int added, string expected)
+    {
+        OperationRouter router = Router(new InlineDispatcher(), new FakeWrite(() => new ImportPdfCommentsData { Added = added }));
+
+        JToken data = router.Invoke(ExecuteOperation, null, "r1");
+
+        Assert.Equal(expected, data["execution"]!.ToString());
+        Assert.Equal(expected, Outcome(router, "r1")["status"]!.ToString());
+        Assert.Null((string?)Outcome(router, "r1")["reason"]);
+    }
+
     [Fact]
     public void AWrite_ThatCompletes_IsCommitted()
     {

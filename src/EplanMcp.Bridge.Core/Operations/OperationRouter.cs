@@ -133,7 +133,7 @@ public sealed class OperationRouter
         switch (outcome.Status)
         {
             case DispatchStatus.Completed:
-                _outcomes.Update(requestId, OutcomeStatus.Committed);
+                _outcomes.Update(requestId, outcome.Value is IWriteExecution data ? data.Execution : OutcomeStatus.Committed);
                 return BridgeJson.FromObject(outcome.Value);
             case DispatchStatus.Busy:
                 // An abandoned dispatch never runs later (api-notes A9), so nothing was changed.
