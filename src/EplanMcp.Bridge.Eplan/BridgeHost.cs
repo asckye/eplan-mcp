@@ -119,6 +119,7 @@ internal static class BridgeHost
             new ProjectBackupOperation(catalog, pages, backup),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
+            new PageDrawingGetOperation(catalog, new EplanDrawingReader()),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new PlanFunctionsOperation(catalog, new EplanPlanFunctionReader()),

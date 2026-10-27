@@ -25,6 +25,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
     private readonly Catalog _catalog = new();
     private readonly BridgeServer _server;
     private readonly BridgeClient _client;
+    private readonly DrawingReader _drawings = new();
 
     public ProjectPageInteropTests()
     {
@@ -35,6 +36,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
             new ProjectGetOperation(_catalog, new ProjectReader()),
             new PageListOperation(_catalog, pages),
             new PageGetOperation(_catalog, pages),
+            new PageDrawingGetOperation(_catalog, _drawings),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
         _server = new BridgeServer(
@@ -59,7 +61,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
         BridgeStatus status = await _client.GetStatusAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            [OperationNames.OperationCancel, OperationNames.OutcomeGet, OperationNames.PageGet, OperationNames.PageList, OperationNames.ProjectGet, OperationNames.ProjectList],
+            [OperationNames.OperationCancel, OperationNames.OutcomeGet, OperationNames.PageDrawingGet, OperationNames.PageGet, OperationNames.PageList, OperationNames.ProjectGet, OperationNames.ProjectList],
             status.Handshake!.Operations);
     }
 
@@ -82,9 +84,9 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
     {
         CallToolResult[] results =
         [
-            await ProjectTools.ProjectGetAsync(_client, null, ToolArguments.Concise, null, Token),
+            await ProjectTools.ProjectGetAsync(_client, null, ToolArguments.Concise, null, cancellationToken: Token),
             await PageTools.PageListAsync(_client, null, null, null, null, null, 50, null, Token),
-            await PageTools.PageGetAsync(_client, "=A/1", null, ToolArguments.Concise, null, Token),
+            await PageTools.PageGetAsync(_client, "=A/1", null, ToolArguments.Concise, null, cancellationToken: Token),
         ];
 
         Assert.All(results, r => Assert.Equal(ErrorReason.ProjectNotOpen, Error(r).GetProperty("reason").GetString()));
@@ -135,7 +137,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
     {
         _catalog.Projects = [_line1];
 
-        CallToolResult result = await PageTools.PageGetAsync(_client, "=gaa+a1&efs1/1", null, ToolArguments.Concise, null, Token);
+        CallToolResult result = await PageTools.PageGetAsync(_client, "=gaa+a1&efs1/1", null, ToolArguments.Concise, null, cancellationToken: Token);
 
         JsonElement data = Structured(result);
         Assert.Equal("=GAA+A1&EFS1/1", data.GetProperty("page").GetProperty("name").GetString());
@@ -149,10 +151,47 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
     {
         _catalog.Projects = [_line1];
 
-        JsonElement error = Error(await PageTools.PageGetAsync(_client, "=GAA+A9&EFS1/1", null, ToolArguments.Concise, null, Token));
+        JsonElement error = Error(await PageTools.PageGetAsync(_client, "=GAA+A9&EFS1/1", null, ToolArguments.Concise, null, cancellationToken: Token));
 
         Assert.Equal(ErrorReason.PageNotFound, error.GetProperty("reason").GetString());
         Assert.Equal("=GAA+A9&EFS1/1", error.GetProperty("metadata").GetProperty("page").GetString());
+    }
+
+    [Fact]
+    public async Task Drawings_ThroughPipe_RejectsChangedEvidenceAndOtherHostCursors()
+    {
+        _catalog.Projects = [_line1];
+        async Task<CallToolResult> Read(BridgeClient client, string? cursor = null) => await PageTools.PageGetAsync(client,
+            "=gaa+a1&efs1/1", include_drawings: true, drawing_limit: 1, drawing_cursor: cursor, cancellationToken: Token);
+        JsonElement first = Structured(await Read(_client));
+        JsonElement drawings = first.GetProperty("drawings");
+        Assert.Equal("Page.Size", drawings.GetProperty("boundarySource").GetString());
+        string cursor = drawings.GetProperty("nextCursor").GetString()!;
+        Assert.Equal(2, Structured(await Read(_client, cursor)).GetProperty("drawings").GetProperty("items")[0].GetProperty("locator").GetProperty("oid").GetInt64());
+        _drawings.Geometry.Placements[0].Locator.Digest = new string('b', 64);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(await Read(_client, cursor)).GetProperty("reason").GetString());
+        _drawings.Geometry.Placements[0].Locator.Digest = new string('a', 64);
+        await using var other = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(await Read(other, cursor)).GetProperty("reason").GetString());
+    }
+
+    private sealed class DrawingReader : IPageDrawingReader
+    {
+        public PageDrawingGeometry Geometry { get; } = new()
+        {
+            Page = "=GAA+A1&EFS1/1",
+            GridSize = 4,
+            PageSize = [420, 297],
+            Placements = [.. Enumerable.Range(1, 2).Select(i => new DrawingPlacement
+            {
+                Kind = "Line", Location = [0, 0], Locator = new() { Project = _line1.Path, Page = "=GAA+A1&EFS1/1", Type = 4, Oid = i, Digest = new string('a', 64) },
+            })],
+        };
+        public PageDrawingGeometry? Read(string projectPath, string pageName)
+        {
+            Assert.Equal((_line1.Path, Geometry.Page), (projectPath, pageName));
+            return Geometry;
+        }
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;

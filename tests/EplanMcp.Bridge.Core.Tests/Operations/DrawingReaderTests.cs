@@ -33,6 +33,9 @@ public sealed class DrawingReaderTests
         Assert.Equal(5, result.Placements.Count);
         DrawingPlacement shown = Assert.Single(result.Placements, p => p.Kind == "PropertyPlacement");
         Assert.Equal([104, 106], shown.Location);
+        Assert.NotNull(shown.Properties["text"]);
+        Assert.NotNull(shown.Properties["display"]);
+        Assert.Equal("+A1-K1", Assert.Single(result.Placements, p => p.Kind == "Function").Properties["name"]);
         Assert.Equal([104, 106, 130, 110], shown.Bounds!);
         Assert.Same(Assert.Single(result.Placements, p => p.Kind == "Function").Locator, shown.Parent);
         Assert.True(freeText.Contents.Disposed);

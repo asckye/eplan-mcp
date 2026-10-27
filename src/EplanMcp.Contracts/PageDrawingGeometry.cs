@@ -3,6 +3,8 @@ namespace EplanMcp.Contracts;
 /// <summary>Read-only page geometry (A3/A14/A52/A54); unknown geometry is not an unbounded drawing area.</summary>
 public sealed class PageDrawingGeometry
 {
+    /// <summary>The resolved project path; used to bind drawing discovery to one project.</summary>
+    public string Project { get; set; } = string.Empty;
     /// <summary>The exact full page name.</summary>
     public string Page { get; set; } = string.Empty;
     /// <summary>The page's grid spacing in millimetres; 1 API unit = 1 mm (A3).</summary>

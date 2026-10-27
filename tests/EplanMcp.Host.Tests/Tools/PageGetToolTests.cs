@@ -185,7 +185,7 @@ public sealed class PageGetToolTests
     }
 
     private Task<CallToolResult> Get(string page, string? project = null, string? responseFormat = ToolArguments.Concise, string? language = null) =>
-        PageTools.PageGetAsync(_bridge, page, project, responseFormat!, language, TestContext.Current.CancellationToken);
+        PageTools.PageGetAsync(_bridge, page, project, responseFormat!, language, cancellationToken: TestContext.Current.CancellationToken);
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 

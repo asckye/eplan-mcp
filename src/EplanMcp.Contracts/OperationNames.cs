@@ -45,6 +45,9 @@ public static class OperationNames
     /// <summary>One page by its full name: type, description, devices, optionally its properties. Arguments: <see cref="PageGetArgs"/>; data: <see cref="PageGetData"/>.</summary>
     public const string PageGet = "page.get";
 
+    /// <summary>Read-only drawing discovery for an exact page. Arguments: <see cref="PageGetArgs"/>; data: <see cref="PageDrawingGeometry"/>.</summary>
+    public const string PageDrawingGet = "page.drawing.get";
+
     /// <summary>
     /// Lists the devices of a project, filtered and sliced in the Bridge. Arguments: <see cref="DeviceListArgs"/>;
     /// data: <see cref="ListData{TItem}"/> of <see cref="DeviceListItem"/>.

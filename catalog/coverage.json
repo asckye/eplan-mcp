@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 255,
-      "byTools": 246,
-      "partial": 44,
-      "automatedTest": 246,
+      "implemented": 265,
+      "byTools": 258,
+      "partial": 45,
+      "automatedTest": 258,
       "liveVerified": 158,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 112,
-      "byTools": 105,
-      "partial": 40,
-      "automatedTest": 105,
+      "implemented": 116,
+      "byTools": 109,
+      "partial": 41,
+      "automatedTest": 109,
       "liveVerified": 71,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 143,
-      "byTools": 141,
+      "implemented": 149,
+      "byTools": 149,
       "partial": 4,
-      "automatedTest": 141,
+      "automatedTest": 149,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 242,
+    "used": 244,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -133,13 +133,13 @@
     {
       "scope": "Eplan.EplApi.Base",
       "denominator": 268,
-      "implemented": 26,
+      "implemented": 27,
       "liveVerified": 17
     },
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 110,
+      "implemented": 113,
       "liveVerified": 79
     },
     {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 23,
+      "implemented": 28,
       "liveVerified": 10
     },
     {
@@ -169,7 +169,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 9,
+      "implemented": 10,
       "liveVerified": 8
     },
     {
@@ -1355,17 +1355,19 @@
       "name": "eplan_page_get",
       "safety": "read",
       "operations": [
-        "page.get"
+        "page.drawing.get",
+        "page.get",
+        "project.get"
       ],
-      "apiIds": 65,
-      "operationGroups": 36,
+      "apiIds": 103,
+      "operationGroups": 61,
       "dataDictionary": 1,
-      "dependencies": 28,
+      "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
-      "small": 4,
-      "medium": 4,
-      "large": 11,
+      "small": 5,
+      "medium": 5,
+      "large": 12,
       "apiNotes": [
         "A11",
         "A12"
@@ -1383,7 +1385,7 @@
       "dependencies": 20,
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
-      "small": 15,
+      "small": 16,
       "medium": 4,
       "large": 7,
       "apiNotes": [
@@ -2720,6 +2722,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.Base.MultiLangString.GetAsString",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.Base.MultiLangString.GetLanguageList",
       "layer": "operation",
       "status": "automated_test",
@@ -2801,6 +2812,7 @@
         "eplan_import_dxf",
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_workflow_plan"
@@ -2817,6 +2829,7 @@
         "eplan_import_dxf",
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_workflow_plan"
@@ -3139,6 +3152,7 @@
         "eplan_cabinet_list",
         "eplan_import_list",
         "eplan_import_plc",
+        "eplan_page_get",
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_project_get",
@@ -3160,6 +3174,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_context_get",
+        "eplan_page_get",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -3776,6 +3791,24 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.EndPoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.StartPoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord",
       "layer": "operation",
       "status": "live_verified",
@@ -3880,7 +3913,35 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_page_get",
         "eplan_page_text_replace"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetDisplayString",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
       ]
     },
     {
@@ -3889,6 +3950,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_page_get",
         "eplan_page_text_replace"
       ]
     },
@@ -3907,15 +3969,18 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_page_get",
         "eplan_page_text_replace"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_page_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.Name",
@@ -3928,11 +3993,21 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_page_get",
         "eplan_page_text_replace"
       ]
     },
@@ -4026,6 +4101,7 @@
         "eplan_import_dxf",
         "eplan_macro_insert",
         "eplan_page_delete",
+        "eplan_page_get",
         "eplan_page_text_replace",
         "eplan_property_get",
         "eplan_property_set",
@@ -4039,6 +4115,15 @@
       "partial": false,
       "tools": [
         "eplan_page_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.GridSize",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
       ]
     },
     {
@@ -4128,6 +4213,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_page_get",
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_workflow_plan"
@@ -4179,6 +4265,7 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_page_get",
         "eplan_workflow_plan"
       ]
     },
@@ -4299,6 +4386,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Placement.GetBoundingBox",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Placement.Group",
       "layer": "operation",
       "status": "automated_test",
@@ -4314,6 +4410,15 @@
       "partial": false,
       "tools": [
         "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Placement.Location",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_get"
       ]
     },
     {
@@ -4617,6 +4722,7 @@
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
         "eplan_context_get",
+        "eplan_page_get",
         "eplan_project_create",
         "eplan_project_get",
         "eplan_property_get",
@@ -5329,6 +5435,7 @@
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_delete",
+        "eplan_page_get",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -5343,9 +5450,11 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": false,
-      "tools": []
+      "tools": [
+        "eplan_page_get"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Topology.Segment.Properties",

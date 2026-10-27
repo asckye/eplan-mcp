@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-27",
-  "scannedSources": "78fa476d",
-  "sourceHash": "sha256:0afb363ae56a20bcd75b7e058d7d155cf1f9195092284b6431b4847603451878",
+  "scannedSources": "dbb11924 + uncommitted changes",
+  "sourceHash": "sha256:a61aa0997a4c2985be2f395d14168ab69909cae6c950805008c4cf2c25d106b4",
   "operations": [
     {
       "name": "action.execute",
@@ -273,6 +273,10 @@
     {
       "name": "page.delete.plan",
       "class": "PageDeletePlanOperation"
+    },
+    {
+      "name": "page.drawing.get",
+      "class": "PageDrawingGetOperation"
     },
     {
       "name": "page.get",
@@ -3457,6 +3461,28 @@
         "operations": []
       }
     ],
+    "M:Eplan.EplApi.Base.MultiLangString.GetAsString": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "content",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)": [
       {
         "adapter": "EplanPageTexts",
@@ -3639,6 +3665,17 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -4417,6 +4454,17 @@
         ],
         "operations": [
           "import.dxf.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -5594,6 +5642,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "All",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -6162,6 +6221,41 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox(System.Boolean)": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetDisplayString": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "display",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.LockingStep.#ctor": [
       {
         "adapter": "EplanDispatcher",
@@ -6384,6 +6478,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -6459,6 +6564,19 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Placement.GetBoundingBox": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       }
     ],
@@ -6656,6 +6774,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -7879,6 +7998,17 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -9147,6 +9277,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -9253,6 +9384,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -9971,6 +10103,28 @@
     ],
     "P:Eplan.EplApi.Base.PointD.X": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "XY",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -10031,6 +10185,28 @@
       }
     ],
     "P:Eplan.EplApi.Base.PointD.Y": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "XY",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanMacroInserter",
         "member": "ReadPage",
@@ -12106,6 +12282,26 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -13380,6 +13576,50 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.Line.EndPoint": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "end",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Line.StartPoint": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "start",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects": [
       {
         "adapter": "EplanPlaceholderReader",
@@ -13520,6 +13760,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Contents": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -13533,7 +13784,31 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.Text.Contents": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Entries",
@@ -13589,6 +13864,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Group.SubPlacements": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -13614,6 +13900,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Inspect",
@@ -13653,7 +13950,31 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
@@ -13801,6 +14122,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -13904,6 +14236,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Page.GridSize": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       }
     ],
@@ -14089,6 +14434,17 @@
         ],
         "operations": [
           "import.dxf.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -14644,6 +15000,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Page.PlotFrame": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPagePlotFrames",
         "member": "Available",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
@@ -14832,6 +15199,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Page.Size": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanMacroInserter",
         "member": "Size",
@@ -15131,6 +15509,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -15247,6 +15636,17 @@
         ],
         "operations": [
           "import.dxf.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -15521,6 +15921,19 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Placement.Location": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       }
     ],
@@ -15848,6 +16261,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -15996,6 +16410,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -16097,6 +16512,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -16286,6 +16702,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -16533,6 +16950,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -16665,6 +17083,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -17684,6 +18103,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Inspect",
@@ -19190,6 +19620,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Optional",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -20130,6 +20571,17 @@
     ],
     "T:Eplan.EplApi.Base.MultiLangString": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -20324,6 +20776,28 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "XY",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -21383,6 +21857,17 @@
         ],
         "operations": [
           "import.dxf.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -23026,6 +23511,26 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionBase": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanProjectMessageReader",
         "member": "Target",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectMessageReader.cs",
@@ -23314,6 +23819,37 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.Line": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "end",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "start",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
       {
         "adapter": "EplanPlaceholderReader",
@@ -23390,6 +23926,26 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "display",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -23403,7 +23959,31 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.Rectangle": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Graphics.Text": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Entries",
@@ -23493,6 +24073,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Group": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -23531,6 +24122,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.IPropertyPlacementsContainer": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Inspect",
@@ -23928,6 +24530,17 @@
         ],
         "operations": [
           "import.dxf.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       },
       {
@@ -24549,6 +25162,17 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -24705,6 +25329,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Placement": [
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanMacroReader",
         "member": "ReadMacro",
@@ -25275,6 +25910,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -25380,6 +26016,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -25694,6 +26331,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
@@ -26611,6 +27249,17 @@
     ],
     "T:Eplan.EplApi.DataModel.SymbolReference": [
       {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -27421,6 +28070,7 @@
           "page.create.plan",
           "page.delete.execute",
           "page.delete.plan",
+          "page.drawing.get",
           "page.get",
           "page.list",
           "page.plotframe.inspect",
