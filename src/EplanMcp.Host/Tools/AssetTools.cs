@@ -8,6 +8,7 @@ using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Packs;
 using EplanMcp.Packs;
 using EplanMcp.Packs.Knowledge;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -28,6 +29,7 @@ internal sealed class AssetTools
     public const string GetTool = "eplan_asset_get";
 
     public const string UpdateTool = "eplan_asset_update";
+    public const string ReviewTool = "eplan_asset_review";
 
     internal const string PreviewNote = "A page preview needs EPLAN to export the page, which comes with M6 phase 2.";
 
@@ -382,6 +384,44 @@ internal sealed class AssetTools
         {
             return ToolResults.Error(ex.Error);
         }
+    }
+
+    [McpServerTool(Name = ReviewTool, Title = "Review engineering knowledge", ReadOnly = false, Destructive = false,
+        Idempotent = true, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(AssetReviewResult))]
+    [Description("Reviews a candidate/gap or promotes a new Rule through the engineer's window. " +
+        "Acceptance grants no official standing; denial: APPROVAL_DENIED. Local data only. " +
+        "Example: {\"pack\":\"acme.panels\",\"asset\":\"candidate/motor\",\"expected_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"decision\":\"accept\",\"source\":{\"asset\":\"document/guide.md\",\"location\":\"4.2\",\"hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}}.")]
+    public static async Task<CallToolResult> AssetReviewAsync(
+        PackLibrary packs, KnowledgeReviewService reviews,
+        [Description("Development pack id")] string pack,
+        [Description("Local candidate/name or gap/name")] string asset,
+        [Description("Asset's exact SHA-256")] string expected_digest,
+        [AllowedValues("accept", "reject", "close_gap", "promote")] string decision,
+        [Description("asset, location, hash")] JsonElement source,
+        [Description("Promotion only: full v2 Rule envelope")] JsonElement? rule = null,
+        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+    {
+        var violations = new List<string>();
+        PackTools.CheckId(pack, violations);
+        if (!AssetNames.TryParse(AssetNames.Id(pack, AssetNames.Dev, asset), out _, out _, out string? local) || local != asset)
+        { violations.Add("/asset: use a local candidate/name or gap/name."); }
+        if (violations.Count > 0)
+        { return ToolResults.InvalidArguments(violations); }
+        try
+        {
+            KnowledgeDocument? target = rule is { ValueKind: not JsonValueKind.Null } body ? KnowledgeDocument.Read(System.Text.Encoding.UTF8.GetBytes(body.GetRawText())) : null;
+            var review = new KnowledgeReview(AssetNames.Id(pack, AssetNames.Dev, asset), expected_digest, decision, source,
+                target is null ? null : AssetNames.Id(pack, AssetNames.Dev, "rule/" + target.Metadata.Name), target is null ? null : PackJson.Serialize(target));
+            string digest = await reviews.ReviewAsync(review, ReviewTool, progress, cancellationToken).ConfigureAwait(false);
+            await reviews.PublishAsync(pack, review, digest, cancellationToken).ConfigureAwait(false);
+            return ToolResults.Success("Recorded knowledge review: " + decision + ".", new AssetReviewResult(review.Resource, decision, digest, review.TargetResource));
+        }
+        catch (BridgeCallException ex)
+        { return ToolResults.Error(ex.Error); }
+        catch (DevPackException ex)
+        { return ToolResults.Error(PackLibrary.Error(ex, pack)); }
+        catch (PackFormatException ex)
+        { return ToolResults.Error(new BridgeError { Reason = ErrorReason.PackInvalid, Message = ResultShaper.CleanText(ex.Message)! }); }
     }
 
     /// <summary>The index of another pack version, empty when it is not there.</summary>

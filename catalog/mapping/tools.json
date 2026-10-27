@@ -206,6 +206,43 @@
       "live": []
     },
     {
+      "name": "eplan_asset_review",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_asset_review.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "AssetReviewToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/AssetReviewToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_asset_search",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
@@ -4672,6 +4709,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AssetReviewToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/AssetReviewToolTests.cs"
           },
           {
             "name": "AssetSearchToolTests",

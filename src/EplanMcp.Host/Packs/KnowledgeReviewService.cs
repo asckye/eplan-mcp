@@ -12,7 +12,7 @@ using ModelContextProtocol;
 namespace EplanMcp.Host.Packs;
 
 /// <summary>Stateless reviews: only the local, flushed audit grants confirmation; packs and standing strings grant none.</summary>
-internal sealed class KnowledgeReviewService(PackLibrary packs, AuditLog audit, ApprovalService approvals, IBridgeClient bridge)
+internal sealed partial class KnowledgeReviewService(PackLibrary packs, AuditLog audit, ApprovalService approvals, IBridgeClient bridge)
 {
     internal Func<string, RuleValueType?>? Configuration { get; init; }
 
@@ -20,6 +20,17 @@ internal sealed class KnowledgeReviewService(PackLibrary packs, AuditLog audit, 
     {
         review = review with { Source = review.Source.Clone(), TargetContent = review.TargetContent?.ToArray() };
         JsonObject binding = await PrepareAsync(review, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<JsonObject> history;
+        try
+        { history = await audit.ReadAsync(cancellationToken).ConfigureAwait(false); }
+        catch (AuditUnavailableException)
+        { throw Failure(ErrorReason.AuditUnavailable, "/review: audit unavailable; verify the audit log and review again."); }
+        foreach (JsonObject record in history.Reverse())
+        {
+            if ((string?)record["kind"] == "knowledge_review" && binding.All(m => JsonNode.DeepEquals(m.Value, record[m.Key]))
+                && (string?)record["hash"] is { } digest && await VerifyAsync(digest, review, cancellationToken).ConfigureAwait(false))
+            { return digest; }
+        }
         string fingerprint = PlanStore.Hash(PackJson.Serialize(binding));
         EplanInstanceInfo? eplan = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake?.Eplan;
         if (eplan is null)
@@ -88,7 +99,28 @@ internal sealed class KnowledgeReviewService(PackLibrary packs, AuditLog audit, 
         AssetEntry origin = await ReadAsync(source["asset"]!.GetValue<string>(), "/source/asset", cancellationToken).ConfigureAwait(false);
         JsonObject binding = Bind(review, resource, origin);
         if (review.TargetContent is { } bytes)
-        { _ = RuleValidator.Validate(JsonSerializer.SerializeToElement(KnowledgeDocument.Read(bytes).Spec), Configuration); }
+        {
+            var types = new Dictionary<string, RuleValueType>(StringComparer.Ordinal);
+            string folder = packs.Locate(resource.Pack, resource.Version)!.Value.Folder;
+            PackManifest manifest = PackJson.ReadManifest(await File.ReadAllBytesAsync(Path.Combine(folder, PackManifest.FileName), cancellationToken).ConfigureAwait(false));
+            foreach (PackResource schema in manifest.Resources.Where(r => r.Kind == ResourceKind.ConfigSchema))
+            {
+                AssetEntry resolved = await ReadAsync(AssetNames.Id(resource.Pack, resource.Version, AssetNames.Local(schema)), "/spec", cancellationToken).ConfigureAwait(false);
+                if (resolved.Document is not { Kind: KnowledgeKind.ConfigSchema } schemaDocument)
+                { throw Failure(ErrorReason.PackInvalid, "/spec: configuration types require bundled config_schema documents."); }
+                JsonElement spec = JsonSerializer.SerializeToElement(schemaDocument.Spec);
+                ConfigValidator.Schema(spec);
+                foreach (JsonProperty item in spec.GetProperty("items").EnumerateObject())
+                {
+                    string type = item.Value.GetProperty("type").GetString()!;
+                    var declared = new RuleValueType(type == "choice" ? "text" : type, item.Value.TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null);
+                    if (types.TryGetValue(item.Name, out RuleValueType prior) && prior != declared)
+                    { throw Failure(ErrorReason.PackInvalid, "/spec: configuration operand types are ambiguous."); }
+                    types[item.Name] = declared;
+                }
+            }
+            _ = RuleValidator.Validate(JsonSerializer.SerializeToElement(KnowledgeDocument.Read(bytes).Spec), Configuration ?? (name => types.TryGetValue(name, out RuleValueType type) ? type : null));
+        }
         return binding;
     }
 

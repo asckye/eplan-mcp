@@ -60,6 +60,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(ActionRunCatalog.Process);
         services.TryAddSingleton<ImportFiles>();
         services.TryAddSingleton<PackLibrary>();
+        services.TryAddSingleton<KnowledgeReviewService>();
         services.TryAddSingleton<BindingService>();
         services.TryAddSingleton<PackInstaller>();
         services.TryAddSingleton<IReferenceProjectSteps, GapOnlyReferenceProjectSteps>();

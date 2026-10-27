@@ -161,6 +161,11 @@ public static class PackVerifier
                     return null;
                 }
                 using JsonDocument envelope = PackJson.Parse(bytes, resource.Path);
+                if (resource.Kind == ResourceKind.Rule && envelope.RootElement.ValueKind == JsonValueKind.Object && envelope.RootElement.TryGetProperty("spec", out JsonElement body) && body.ValueKind == JsonValueKind.Object
+                    && body.TryGetProperty("severity", out JsonElement severity) && severity.ValueKind == JsonValueKind.String && severity.GetString() == "mandatory"
+                    && (!body.TryGetProperty("source", out JsonElement sourceValue) || sourceValue.ValueKind is not (JsonValueKind.Object or JsonValueKind.String) || sourceValue.ValueKind == JsonValueKind.Object && !sourceValue.EnumerateObject().Any()
+                        || sourceValue.ValueKind == JsonValueKind.String && string.IsNullOrWhiteSpace(sourceValue.GetString())))
+                { return "/spec/source: mandatory rules need a source; keep an unconfirmed draft as a candidate"; }
                 if (resource.Kind == ResourceKind.Workflow || resource.Path.StartsWith("knowledge/workflow/", StringComparison.Ordinal) || module && resource.Path.StartsWith("knowledge/", StringComparison.Ordinal) || resource.Path.StartsWith("knowledge/rule/", StringComparison.Ordinal) || envelope.RootElement.ValueKind == JsonValueKind.Object
                     && envelope.RootElement.TryGetProperty("apiVersion", out JsonElement version) && version.ValueKind == JsonValueKind.String && version.GetString() != KnowledgeDocument.CurrentApiVersion
                     && (module || envelope.RootElement.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() is "rule" or "workflow" or "module" or "material_mapping" or "sample"))

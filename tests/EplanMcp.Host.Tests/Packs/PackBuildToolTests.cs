@@ -84,7 +84,7 @@ public sealed class PackBuildToolTests : IDisposable
         Write("in/guide.md", "# Guide");
         await ImportAsync(new ScanInput(Path.Combine(_locations.Root, "in")));
 
-        Assert.Equal(reason, Reason(await PackTools.PackBuildAsync(Packs, pack, version, Cancel)));
+        Assert.Equal(reason, Reason(await PackTools.PackBuildAsync(Packs, ReviewFixtures.Service(Packs), pack, version, Cancel)));
     }
 
     public void Dispose()
@@ -97,7 +97,7 @@ public sealed class PackBuildToolTests : IDisposable
         Directory.Delete(_locations.Root, recursive: true);
     }
 
-    private Task<CallToolResult> BuildAsync(string version) => PackTools.PackBuildAsync(Packs, "acme.panels", version, Cancel);
+    private Task<CallToolResult> BuildAsync(string version) => PackTools.PackBuildAsync(Packs, ReviewFixtures.Service(Packs), "acme.panels", version, Cancel);
 
     private static string? Reason(CallToolResult result) =>
         result.IsError == true ? JsonDocument.Parse(((TextContentBlock)result.Content[0]).Text).RootElement.GetProperty("error").GetProperty("reason").GetString() : null;
