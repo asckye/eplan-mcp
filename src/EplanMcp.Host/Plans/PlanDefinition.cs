@@ -25,7 +25,11 @@ internal sealed record PlanDefinition(
     ImmutableArray<PlanResource> Resources,
     ImmutableArray<PlanSource> Sources,
     PlanDigests Digests,
-    ImmutableArray<PlanStep> Steps);
+    ImmutableArray<PlanStep> Steps)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public PlanEngineering? Engineering { get; init; }
+}
 
 internal sealed record PlanProject(string Name, string Path, string? Guid);
 internal sealed record PlanOwner(string RunId, string SessionId);

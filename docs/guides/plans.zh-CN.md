@@ -66,6 +66,8 @@ scratch 内普通 Write 自动允许；Destructive 步骤即使在 scratch 中�
 
 新计划的 `compilerVersion` 均为 `"2"`：编译取得影响页的 standard 内容、完整名称集合及同名功能闭包；执行前重核，执行中读取局部前后内容，并作全项目页名/功能名筛查。
 
+计划仓库同时严格读取 schema 1/compiler 1、2 与 schema 2/compiler 3，拒绝未知版本或不匹配的组合。schema 2 的 `definition.engineering` 固定柜、配置值与 trace、配置摘要、工作流输入、模块绑定、规则摘要及验收证据，全部参与既有 canonical/planHash；schema 1 禁止携带此字段，旧定义和哈希不迁移。当前编译器仍输出 schema 1/compiler 2，compiler 3 执行须等待阶段 3 后续接入。
+
 `execution:committed` 说明提交事实；`verification:passed` 只说明声明的局部必需检查通过。电气关系和图纸校验仍为 skipped。全项目名称筛查通过不能证明其他页的描述、部件或同名对象位置没有变化。
 
 coverage 列明实际观察的页、属性缺口、时间窗口及 `unobservedPages`，详细清单可经 plan_get 分页取得。未观察页是明确列出的未知范围，不能报告为“全项目未变”；`skipped` 或 `failed` 也不会把已提交事实改成回滚。

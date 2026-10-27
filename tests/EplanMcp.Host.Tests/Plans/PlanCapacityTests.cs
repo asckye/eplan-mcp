@@ -63,7 +63,7 @@ public sealed class PlanCapacityTests
         PlanCapacity.Parts(definition, definitionBytes + PlanCapacity.MiB, 13 * PlanCapacity.MiB);
         Assert.Throws<PlanCapacityException>(() => PlanCapacity.Parts(definition, definitionBytes + PlanCapacity.MiB + 1, 0));
         Assert.Throws<PlanCapacityException>(() => PlanCapacity.Parts(definition, definitionBytes, 13 * PlanCapacity.MiB + 1));
-        PlanDefinition large = definition with { CompilerVersion = new string('a', (int)(2 * PlanCapacity.MiB)) };
+        PlanDefinition large = definition with { EplanVersion = new string('a', (int)(2 * PlanCapacity.MiB)) };
         Assert.Throws<PlanCapacityException>(() => PlanCapacity.Parts(large, 0, 0));
     }
 }

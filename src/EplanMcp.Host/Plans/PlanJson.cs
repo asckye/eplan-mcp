@@ -21,6 +21,14 @@ internal static class PlanJson
     {
         // Parsing first also rejects duplicate members inside operation-specific JsonElement payloads.
         using JsonDocument document = JsonDocument.Parse(json, new JsonDocumentOptions { AllowDuplicateProperties = false });
+        if (typeof(T) == typeof(PlanRecord))
+        {
+            PlanDefinitionReadModel.Record(document.RootElement);
+        }
+        else if (typeof(T) == typeof(PlanDefinition))
+        {
+            PlanDefinitionReadModel.Definition(document.RootElement);
+        }
         return document.Deserialize<T>(Options) ?? throw new JsonException("A plan record cannot be null.");
     }
 }
