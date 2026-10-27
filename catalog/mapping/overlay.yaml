@@ -64,6 +64,7 @@ live:
   eplan_part_export:
     - { date: 2026-10-21, result: pass_with_findings, basis: stated, source: docs/tools/eplan_part_export.md, note: 部件数据不变；文件按部件号计数，数据库按变体计数，partCount 改为从文件读 }
     - { date: 2026-10-22, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: Large 测试 README, note: "format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变" }
+    - { date: 2026-10-27, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: Large 测试 README, note: "format: edz：经批准的 PartExportTests 全部 6 个通过（含 EDZ），部件库的 SHA-256 不变" }
   eplan_part_import:
     - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A30；Large 测试 README, note: 经批准的 Large 测试：导入只有部件号、描述和部件类型的最小 XML；再导入一次被归为跳过 }
   eplan_part_list:
@@ -90,6 +91,8 @@ live:
     - { date: 2026-10-18, eplan: 2026.0.3.25421, variant: Pro Panel 和 Electric P8, result: pass, basis: stated, source: api-notes A10, note: 变体读取正确；对话框打开时仍显示已连接 }
   eplan_terminal_renumber:
     - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: stated, source: api-notes A24, note: 只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子 }
+  eplan_translation_import:
+    - { date: 2026-10-27, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: Large 测试 README, note: 经负责人批准的 TranslationImportTests：导入一个测试词条 added=1，重导 added=0，两次都先备份 .zw7；关闭 EPLAN 后用文件副本恢复，翻译文件夹的 SHA-256 与运行前相同 }
 
   # Still to check by hand (2026-10-22): eplan_placeholder_apply - one Ctrl+Z after an apply; eplan_placeholder_list - the
   # values against EPLAN's placeholder dialog.
@@ -104,7 +107,7 @@ tools:
     note: Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。
   eplan_part_import: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
   eplan_part_sync: { note: 写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）, operations: [masterdata.backup] }
-  eplan_translation_import: { note: language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 已编写，须负责人逐次批准后运行，尚未实跑。, operations: [masterdata.backup] }
+  eplan_translation_import: { note: language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 须负责人逐次批准后运行，2026-10-27 通过。, operations: [masterdata.backup] }
   eplan_session_status: { note: 只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作 }
   eplan_session_select: { note: 只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作 }
   eplan_tool_usage: { note: 只在 Host 中运行：返回工具用法文本，不接触 EPLAN }

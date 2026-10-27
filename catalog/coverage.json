@@ -70,7 +70,7 @@
       "byTools": 241,
       "partial": 43,
       "automatedTest": 241,
-      "liveVerified": 156,
+      "liveVerified": 158,
       "envBlocked": 122,
       "undocumented": 134
     },
@@ -88,7 +88,7 @@
       "byTools": 105,
       "partial": 40,
       "automatedTest": 105,
-      "liveVerified": 69,
+      "liveVerified": 71,
       "envBlocked": 45,
       "undocumented": 66
     },
@@ -206,7 +206,7 @@
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
       "implemented": 33,
-      "liveVerified": 15
+      "liveVerified": 17
     },
     {
       "scope": "Eplan.EplApi.HEServices.Exceptions",
@@ -1438,13 +1438,13 @@
         "A30"
       ],
       "latestLive": {
-        "date": "2026-10-22",
+        "date": "2026-10-27",
         "eplan": "2026.0.3.25421",
         "variant": "Electric P8",
         "result": "pass",
         "basis": "stated",
         "source": "Large 测试 README",
-        "note": "format: backup：PartExportTests 的两个 Backup_* 通过，得到 7z 头的 .zw6，部件库的 SHA-256 不变",
+        "note": "format: edz：经批准的 PartExportTests 全部 6 个通过（含 EDZ），部件库的 SHA-256 不变",
         "verifies": true
       }
     },
@@ -2082,7 +2082,17 @@
       "large": 1,
       "apiNotes": [
         "A47"
-      ]
+      ],
+      "latestLive": {
+        "date": "2026-10-27",
+        "eplan": "2026.0.3.25421",
+        "variant": "Electric P8",
+        "result": "pass",
+        "basis": "stated",
+        "source": "Large 测试 README",
+        "note": "经负责人批准的 TranslationImportTests：导入一个测试词条 added=1，重导 added=0，两次都先备份 .zw7；关闭 EPLAN 后用文件副本恢复，翻译文件夹的 SHA-256 与运行前相同",
+        "verifies": true
+      }
     },
     {
       "name": "eplan_workflow_plan",
@@ -5622,7 +5632,7 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_translation_export",
@@ -5641,7 +5651,7 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_translation_import"
