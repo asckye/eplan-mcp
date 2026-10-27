@@ -12,6 +12,20 @@ public sealed class WorkspaceStoreTests : IDisposable
     private WorkspaceStore Workspaces => new(_data.PathOf("workspaces"), Packs);
 
     [Fact]
+    public async Task Lock_StoreMaintenanceInProgress_WaitsBeforePublishingBinding()
+    {
+        await InstallAsync("acme.base", "1.0.0");
+        using var held = new FileStream(Path.Combine(Packs.Root, PackStore.LockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+
+        Task<ProjectBinding> write = Workspaces.LockPackAsync(Plant, "acme.base", "1.0.0", Cancel);
+
+        Assert.False(write.IsCompleted);
+        Assert.Null(await Workspaces.ReadAsync(Plant, Cancel));
+        held.Dispose();
+        Assert.Equal("acme.base", Assert.Single((await write).Locks).Id);
+    }
+
+    [Fact]
     public async Task Lock_SurvivesInstallingANewerVersion()
     {
         await InstallAsync("acme.base", "1.0.0");

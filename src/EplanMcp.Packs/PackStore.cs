@@ -13,11 +13,11 @@ public sealed class PackStore(string root)
 {
     public const string LockFileName = ".store.lock";
 
-    private const string Busy = "is being changed by another EplanMcp installing a pack; try again when it is done";
+    private const string Busy = "is being changed by another EplanMcp; try again when it is done";
 
     public string Root { get; } = root;
 
-    /// <summary>How long an install waits for another one to release the store's lock before it gives up.</summary>
+    /// <summary>How long a change waits for installation, binding publication or cleanup to release the store's lock.</summary>
     public TimeSpan LockWait { get; init; } = TimeSpan.FromSeconds(30);
 
     public string FolderOf(string id, string version) => Path.Combine(Root, id, version);

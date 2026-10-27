@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Plans;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using EplanMcp.Packs;
@@ -29,6 +30,47 @@ internal sealed class PackLibrary(HostDataLocations locations, HostConfig config
 
     /// <summary>The project bindings and their locks (M6 design 4.1.5).</summary>
     public WorkspaceStore Workspaces => new(locations.Workspaces, Installed);
+
+    /// <summary>Internal maintenance only: unreadable bindings or frozen closures block every deletion.</summary>
+    internal async Task RemoveUnusedVersionAsync(string id, string version, CancellationToken cancellationToken)
+    {
+        if (!PackManifestValidator.IsId(id) || !SemanticVersion.TryParse(version, out _))
+        { throw new PackFormatException("/packs: cleanup requires a pack id and exact version."); }
+        var paths = new PlanPaths(locations.Root);
+        string folder = paths.Check(Installed.FolderOf(id, version));
+        using FileStream held = await FileLock.AcquireAsync(paths.Check(Path.Combine(Installed.Root, PackStore.LockFileName)), Installed.LockWait, cancellationToken).ConfigureAwait(false)
+            ?? throw new PackFormatException("/packs: the pack store is busy; cleanup is blocked.");
+        // Validate the complete traversal before AllAsync, which reports individual unreadable binding files.
+        _ = paths.Files(locations.Workspaces).ToArray();
+        (IReadOnlyList<ProjectBinding> bindings, int unreadable) = await Workspaces.AllAsync(cancellationToken).ConfigureAwait(false);
+        if (unreadable != 0)
+        { throw new PackFormatException("/bindings: at least one binding is unreadable; repair it before cleanup."); }
+        IReadOnlySet<(string Id, string Version)> occupied = await PackOccupancy.ResolveAsync(bindings, ReadAsync, cancellationToken).ConfigureAwait(false);
+        if (occupied.Contains((id, version)))
+        { throw new PackFormatException("/locks: this version is locked by a project or its dependencies; cleanup is blocked."); }
+        if (!Directory.Exists(folder))
+        { return; }
+        string[] files = paths.Files(folder).ToArray();
+        cancellationToken.ThrowIfCancellationRequested();
+        string requestId = Guid.NewGuid().ToString("N");
+        var details = new JsonObject { ["action"] = "cleanup", ["pack"] = id, ["version"] = version };
+        await AuditAsync(requestId, "pack_cleanup", "started", details, changed: false, cancellationToken).ConfigureAwait(false);
+        foreach (string file in files)
+        { File.SetAttributes(file, FileAttributes.Normal); }
+        Directory.Delete(paths.Check(folder), recursive: true);
+        await AuditAsync(requestId, "pack_cleanup", "committed", details, changed: true, CancellationToken.None).ConfigureAwait(false);
+
+        async Task<(PackManifest, PackLock)> ReadAsync(string pack, string exact, CancellationToken token)
+        {
+            PackCheckResult check = await PackVerifier.CheckDirectoryAsync(paths.Check(Installed.FolderOf(pack, exact)), token).ConfigureAwait(false);
+            if (!check.Ok || check.Manifest is not { } manifest)
+            { throw new PackFormatException("/locks: an installed pack is unreadable or invalid; cleanup is blocked."); }
+            PackLock? frozen = check.Lock;
+            if (frozen is null && manifest.Dependencies.Count == 0)
+            { frozen = PackLock.Create(new() { Id = pack, Version = exact, Digest = Installed.InstalledDigest(pack, exact)! }, []); }
+            return (manifest, frozen ?? throw new PackFormatException("/locks: a dependency lock is missing; cleanup is blocked."));
+        }
+    }
 
     /// <summary>
     /// The folder and shown version of pack <paramref name="id"/> at <paramref name="version"/>: <c>dev</c>, a SemVer
