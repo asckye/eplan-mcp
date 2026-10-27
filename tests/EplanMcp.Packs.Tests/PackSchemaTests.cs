@@ -12,7 +12,7 @@ public sealed class PackSchemaTests
         JsonObject properties = schema["properties"]!.AsObject();
 
         Assert.Equal("https://json-schema.org/draft/2020-12/schema", (string?)schema["$schema"]);
-        Assert.Equal(1, (int?)properties["schemaVersion"]!["const"]);
+        Assert.Equal([1, 2], properties["schemaVersion"]!["enum"]!.AsArray().Select(n => (int)n!));
         Assert.Equal(PackPatterns.Id, (string?)properties["id"]!["pattern"]);
         Assert.Equal(PackPatterns.SemVer, (string?)properties["version"]!["pattern"]);
         Assert.False((bool?)schema["additionalProperties"]);

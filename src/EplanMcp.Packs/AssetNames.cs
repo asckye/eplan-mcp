@@ -45,7 +45,7 @@ public static partial class AssetNames
         return match.Success;
     }
 
-    [GeneratedRegex(@"^knowledge/(candidate|module|material_mapping|gap)/([^/]+)\.json$", RegexOptions.ECMAScript)]
+    [GeneratedRegex(@"^knowledge/(candidate|module|material_mapping|gap|config_schema|config_layer|fact_set|rule|workflow|sample)/([^/]+)\.json$", RegexOptions.ECMAScript)]
     private static partial Regex KnowledgePath();
 
     [GeneratedRegex(@"^([a-z0-9]+(?:[.-][a-z0-9]+)*)@([^:@/]+):([a-z_]+/.+)$", RegexOptions.ECMAScript)]

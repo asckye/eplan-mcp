@@ -5,7 +5,7 @@ namespace EplanMcp.Packs;
 [Description("The manifest of an EplanMcp engineering pack (pack.json at the pack's root). EplanMcp generates it; nobody writes it by hand.")]
 public sealed record PackManifest
 {
-    /// <summary>The only <see cref="SchemaVersion"/> this code reads and writes; a reader refuses any other.</summary>
+    /// <summary>The default write version; readers also accept schemaVersion 2 (ADR-0029).</summary>
     public const int CurrentSchemaVersion = 1;
 
     public const string FileName = "pack.json";

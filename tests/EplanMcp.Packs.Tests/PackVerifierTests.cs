@@ -107,11 +107,11 @@ public sealed class PackVerifierTests : IDisposable
     [Fact]
     public async Task Check_NewerSchemaVersion_IsRefused()
     {
-        _folder.Write(PackManifest.FileName, """{ "schemaVersion": 2 }""");
+        _folder.Write(PackManifest.FileName, """{ "schemaVersion": 3 }""");
 
         PackProblem problem = Assert.Single((await CheckAsync()).Problems);
 
-        Assert.StartsWith("pack.json has schemaVersion 2; this EplanMcp reads schemaVersion 1 only.", problem.Message, StringComparison.Ordinal);
+        Assert.StartsWith("pack.json has schemaVersion 3; this EplanMcp reads schemaVersion 1 or 2 only.", problem.Message, StringComparison.Ordinal);
     }
 
     [Fact]

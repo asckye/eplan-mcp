@@ -29,8 +29,8 @@ public sealed class PackJsonTests
     }
 
     [Theory]
-    [InlineData(2, "pack.json has schemaVersion 2; this EplanMcp reads schemaVersion 1 only.")]
-    [InlineData(0, "pack.json has schemaVersion 0; this EplanMcp reads schemaVersion 1 only.")]
+    [InlineData(3, "pack.json has schemaVersion 3; this EplanMcp reads schemaVersion 1 or 2 only.")]
+    [InlineData(0, "pack.json has schemaVersion 0; this EplanMcp reads schemaVersion 1 or 2 only.")]
     public void ReadManifest_UnknownSchemaVersion_IsRefusedByItsVersion(int version, string message)
     {
         // A future version may add properties; the reader names the version, not the first unknown property.

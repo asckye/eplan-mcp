@@ -16,13 +16,30 @@ public static class PackSchema
 
     public const string LockId = "https://github.com/asckye/eplan-mcp/schemas/pack-lock.schema.json";
 
-    public static JsonObject Manifest() => Generate(typeof(PackManifest), ManifestId, "EplanMcp pack manifest (pack.json), schemaVersion 1");
+    public static JsonObject Manifest()
+    {
+        JsonObject schema = Generate(typeof(PackManifest), ManifestId, "EplanMcp pack manifest (pack.json), schemaVersion 1 or 2");
+        schema["properties"]!["schemaVersion"]!.AsObject().Remove("const");
+        schema["properties"]!["schemaVersion"]!["enum"] = new JsonArray(1, 2);
+        return schema;
+    }
 
     public static JsonObject Lock() => Generate(typeof(PackLock), LockId, "EplanMcp pack lock (pack.lock.json), lockVersion 1");
 
     public const string BindingId = "https://github.com/asckye/eplan-mcp/schemas/project-binding.schema.json";
 
-    public static JsonObject Binding() => Generate(typeof(ProjectBinding), BindingId, "EplanMcp project binding (binding.json in a project workspace), bindingVersion 1");
+    public static JsonObject Binding()
+    {
+        JsonObject schema = Generate(typeof(ProjectBinding), BindingId, "EplanMcp project binding (binding.json in a project workspace), bindingVersion 1");
+        JsonObject properties = schema["properties"]!.AsObject();
+        JsonObject cabinet = properties["cabinets"]!["items"]!["properties"]!.AsObject();
+        foreach (string name in new[] { "projectValues", "packRoots", "layers", "values", "structure" })
+        {
+            (name is "projectValues" or "packRoots" ? properties : cabinet).Remove(name);
+        }
+
+        return schema;
+    }
 
     /// <summary>A schema as the committed file holds it: the bytes <see cref="PackJson.Serialize"/> writes.</summary>
     public static string Text(JsonObject schema) => schema.ToJsonString(PackJson.Options) + "\n";

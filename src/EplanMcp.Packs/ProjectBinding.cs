@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text.Json.Nodes;
 
 namespace EplanMcp.Packs;
 
@@ -29,4 +30,8 @@ public sealed record ProjectBinding
 
     [Description("The pack versions the project uses, dependencies included, by pack digest; sorted by id, one version per id. Installing a newer version changes none.")]
     public IReadOnlyList<PackReference> Locks { get; init; } = [];
+
+    public JsonObject? ProjectValues { get; init; }
+
+    public IReadOnlyList<PackDependency>? PackRoots { get; init; }
 }

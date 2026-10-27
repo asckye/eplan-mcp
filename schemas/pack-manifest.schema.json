@@ -1,13 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/asckye/eplan-mcp/schemas/pack-manifest.schema.json",
-  "title": "EplanMcp pack manifest (pack.json), schemaVersion 1",
+  "title": "EplanMcp pack manifest (pack.json), schemaVersion 1 or 2",
   "type": "object",
   "properties": {
     "schemaVersion": {
       "type": "integer",
       "description": "The manifest format. A reader refuses a version it does not know instead of guessing.",
-      "const": 1
+      "enum": [
+        1,
+        2
+      ]
     },
     "id": {
       "type": "string",
