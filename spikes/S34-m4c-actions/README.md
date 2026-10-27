@@ -167,6 +167,7 @@ dotnet build spikes/S34-m4c-actions/Driver -c Release -m:1 -nodeReuse:false -p:U
 - 未修改的 EPLAN 自导出 PDF 导入返回 `true`；注释计数保持 0，没有可导入的批注。
 - 用 pypdf 添加注释后，无论全量重写，还是保留原字节、trailer `/ID`、EPLAN Info 键（`/ProjectId`、`/PageOffset` 等）的增量更新，均返回 `false`，系统消息为“PDF 文件无法由 Eplan 生成并因此不能导入.”。注释计数仍为 0，没有对话框。
 - 尚未试过 Adobe Reader / Acrobat 添加批注的 PDF，等待项目负责人提供；不能据此断言 EPLAN 不支持 PDF 批注导入，也不能宣称批注内容已成功往返。
+- 2026-10-27 r4（构建名 `S34r4`，代码同 r3）：工程师在 Adobe Acrobat Reader 中给同一份自导出 PDF 加 3 条批注（第 1 页便笺；第 2 页带文字的插入标记和下划线），Reader 增量保存。导入返回 `true`（约 0.3 秒），无对话框和系统消息；`Comment` 计数 0 → 1，其他计数不变，回滚后回到 0。只导入 1 条，具体是哪一条及提交后的行为见后续探针（api-notes A39）。
 
 ### r2 原生崩溃与 r3 修正
 
