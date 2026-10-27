@@ -56,9 +56,50 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_action_run", "eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cabinet_bind", "eplan_cabinet_list", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_pdf_comments", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_text_replace", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_get", "eplan_property_schema", "eplan_property_set", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_translation_import", "eplan_workflow_plan"],
+            ["eplan_action_run", "eplan_asset_get", "eplan_asset_search", "eplan_asset_update", "eplan_cabinet_bind", "eplan_cabinet_list", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_pdf_comments", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_text_replace", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_get", "eplan_property_schema", "eplan_property_set", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_symbol_search", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_translation_import", "eplan_workflow_plan"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SymbolSearch_HasClosedReadContract()
+    {
+        McpClientTool tool = Assert.Single(await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken), t => t.Name == SymbolTools.Tool);
+        Tool contract = tool.ProtocolTool;
+        Assert.Equal((true, false, true, false), (contract.Annotations!.ReadOnlyHint, contract.Annotations.DestructiveHint, contract.Annotations.IdempotentHint, contract.Annotations.OpenWorldHint));
+        Assert.False(contract.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["project"], contract.InputSchema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(SymbolKinds.All, contract.InputSchema.GetProperty("properties").GetProperty("kind").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(50, contract.InputSchema.GetProperty("properties").GetProperty("limit").GetProperty("default").GetInt32());
+        Assert.Equal(200, contract.InputSchema.GetProperty("properties").GetProperty("limit").GetProperty("maximum").GetInt32());
+        Assert.NotNull(contract.OutputSchema);
+    }
+
+    [Fact]
+    public async Task WithBridge_SymbolSearch_PagesTypedVariantsAndRejectsInvalidArguments()
+    {
+        StartBridge();
+        var args = new Dictionary<string, object?> { ["project"] = "Line1", ["library"] = "special", ["kind"] = "routing", ["limit"] = 1 };
+        CallToolResult response = await Call(SymbolTools.Tool, args);
+        Assert.True(response.IsError is not true, Text(response));
+        JsonElement first = response.StructuredContent!.Value;
+        Assert.Equal("Line1", first.GetProperty("project").GetString());
+        Assert.Equal(2, first.GetProperty("total").GetInt32());
+        Assert.Equal(0, Assert.Single(first.GetProperty("symbols").EnumerateArray()).GetProperty("variant").GetInt32());
+        args["cursor"] = first.GetProperty("nextCursor").GetString();
+        response = await Call(SymbolTools.Tool, args);
+        Assert.True(response.IsError is not true, Text(response));
+        JsonElement second = response.StructuredContent!.Value;
+        JsonElement symbol = Assert.Single(second.GetProperty("symbols").EnumerateArray());
+        Assert.Equal(("CO", "Routing", 1), (symbol.GetProperty("name").GetString(), symbol.GetProperty("type").GetString(), symbol.GetProperty("variant").GetInt32()));
+        Assert.Equal("Up", symbol.GetProperty("connectionPoints")[0].GetProperty("direction").GetString());
+        Assert.Equal(JsonValueKind.Null, second.GetProperty("nextCursor").ValueKind);
+        Assert.False(second.TryGetProperty("execution", out _));
+
+        args["initialize"] = true;
+        Assert.True((await Call(SymbolTools.Tool, args)).IsError);
+        Assert.Contains("'project'", Text(await Call(SymbolTools.Tool)), StringComparison.Ordinal);
+        Assert.Contains(ErrorReason.ProjectNotOpen, Text(await Call(SymbolTools.Tool, new() { ["project"] = "missing" })), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -470,6 +511,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         [
             new ProjectListOperation(catalog),
             new ProjectGetOperation(catalog, new ProjectReader()),
+            new SymbolSearchOperation(catalog, new SymbolReader()),
             new PropertyReadOperation(new PropertyTestAdapter()),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
@@ -509,6 +551,14 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             Devices = 1,
             Properties = includeProperties && language == "zh_CN" ? [new PropertyEntry { Id = 10000, Value = "项目 一" }] : null,
         };
+    }
+
+    private sealed class SymbolReader : ISymbolReader
+    {
+        public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) =>
+            SymbolKinds.Matches(args, "SPECIAL", "CO", "routing")
+                ? [.. Enumerable.Range(0, 2).Reverse().Select(i => new SymbolSearchItem { Library = "SPECIAL", Name = "CO", Kind = "routing", Type = "Routing", Variant = i, ConnectionPoints = [new() { Location = [0, 0], Direction = "Up" }] })]
+                : [];
     }
 
     private sealed class PageReader : IPageReader

@@ -65,8 +65,8 @@ public sealed class ActionRunContractTests
     public void Config_InvalidSwitchIsRejected(string value) => Assert.Null(HostConfig.Parse("{\"actionRun\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-    [InlineData(false, false, 77)]
-    [InlineData(true, false, 78)]
+    [InlineData(false, false, 78)]
+    [InlineData(true, false, 79)]
     [InlineData(false, true, 25)]
     [InlineData(true, true, 25)]
     public void ToolAndUsage_AreRegisteredOnlyInFullWithSwitchOn(bool enabled, bool core, int count)

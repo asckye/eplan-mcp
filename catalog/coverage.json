@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 9,
-      "byTools": 9,
+      "implemented": 10,
+      "byTools": 10,
       "partial": 0,
-      "automatedTest": 9,
+      "automatedTest": 10,
       "liveVerified": 5,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 265,
-      "byTools": 258,
-      "partial": 45,
-      "automatedTest": 258,
+      "implemented": 278,
+      "byTools": 271,
+      "partial": 46,
+      "automatedTest": 271,
       "liveVerified": 158,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 116,
-      "byTools": 109,
+      "implemented": 117,
+      "byTools": 110,
       "partial": 41,
-      "automatedTest": 109,
+      "automatedTest": 110,
       "liveVerified": 71,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 149,
-      "byTools": 149,
-      "partial": 4,
-      "automatedTest": 149,
+      "implemented": 161,
+      "byTools": 161,
+      "partial": 5,
+      "automatedTest": 161,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 244,
+    "used": 249,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 113,
+      "implemented": 116,
       "liveVerified": 79
     },
     {
@@ -169,7 +169,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 10,
+      "implemented": 20,
       "liveVerified": 8
     },
     {
@@ -352,6 +352,12 @@
     },
     {
       "scope": "Segment",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    },
+    {
+      "scope": "Symbol",
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 0
@@ -2017,6 +2023,27 @@
       }
     },
     {
+      "name": "eplan_symbol_search",
+      "safety": "read",
+      "operations": [
+        "symbol.search"
+      ],
+      "apiIds": 36,
+      "operationGroups": 23,
+      "dataDictionary": 1,
+      "dependencies": 12,
+      "actions": 0,
+      "spec": "docs/tools/eplan_symbol_search.md",
+      "small": 3,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A52",
+        "A53",
+        "A55"
+      ]
+    },
+    {
       "name": "eplan_task_get",
       "safety": "read",
       "operations": [],
@@ -2369,6 +2396,15 @@
       "partial": false,
       "tools": [
         "eplan_action_run"
+      ]
+    },
+    {
+      "unit": "D:Symbol",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
       ]
     },
     {
@@ -2815,6 +2851,7 @@
         "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
     },
@@ -2832,6 +2869,7 @@
         "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
     },
@@ -4012,6 +4050,96 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Type",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Variants",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariant.ConnectionPoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants",
       "layer": "operation",
       "status": "live_verified",
@@ -4386,6 +4514,24 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PinBase.Direction",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PinBase.Location",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Placement.GetBoundingBox",
       "layer": "operation",
       "status": "automated_test",
@@ -4540,6 +4686,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -4622,6 +4769,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -4707,6 +4855,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -4729,6 +4878,15 @@
         "eplan_property_set",
         "eplan_revision_list",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.SymbolLibraries",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_symbol_search"
       ]
     },
     {
@@ -4848,6 +5006,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -4934,6 +5093,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -5161,6 +5321,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
     },
@@ -5290,6 +5451,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
     },
@@ -5927,6 +6089,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
