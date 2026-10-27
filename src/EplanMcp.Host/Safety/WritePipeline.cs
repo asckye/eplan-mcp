@@ -239,9 +239,9 @@ internal sealed partial class WritePipeline(
         try
         {
             WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
-            await RecordResultAsync(request.Tool, requestId, plan, eplan, ExecutionState.Committed, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
-            await Show(shown, ExecutionState.Committed, null).ConfigureAwait(false);
-            return new WriteOutcome<TData>(plan, ExecutionState.Committed, result.Data, result.Recovered, backup?.Path, masterDataBackup, requestId);
+            await RecordResultAsync(request.Tool, requestId, plan, eplan, result.Execution, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
+            await Show(shown, result.Execution, null).ConfigureAwait(false);
+            return new WriteOutcome<TData>(plan, result.Execution, result.Data, result.Recovered, backup?.Path, masterDataBackup, requestId);
         }
         catch (BridgeCallException ex)
         {

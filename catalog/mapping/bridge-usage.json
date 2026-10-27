@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-10-26",
-  "scannedSources": "93b252f0 + uncommitted changes",
-  "sourceHash": "sha256:be5d8c075927224fa7fd12f6d842dccdd664302372fb1984d8966f3c09cd6372",
+  "scannedOn": "2026-10-27",
+  "scannedSources": "78fa476d",
+  "sourceHash": "sha256:0afb363ae56a20bcd75b7e058d7d155cf1f9195092284b6431b4847603451878",
   "operations": [
     {
       "name": "action.execute",
@@ -189,6 +189,14 @@
     {
       "name": "import.list.plan",
       "class": "ImportListPlanOperation"
+    },
+    {
+      "name": "import.pdf_comments.execute",
+      "class": "ImportPdfCommentsExecuteOperation"
+    },
+    {
+      "name": "import.pdf_comments.plan",
+      "class": "ImportPdfCommentsPlanOperation"
     },
     {
       "name": "import.plc.execute",
@@ -562,6 +570,32 @@
         ]
       }
     ],
+    "A:import": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "A:import/PDFCOMMENTS": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "action"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
     "A:partslist": [
       {
         "adapter": "EplanListImporter",
@@ -849,6 +883,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -980,6 +1015,17 @@
         ],
         "operations": [
           "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -1874,6 +1920,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Import",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -1942,6 +1999,17 @@
           "masterdata.backup",
           "part.export.run",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -2016,6 +2084,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Import",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -2084,6 +2163,17 @@
           "masterdata.backup",
           "part.export.run",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -2395,6 +2485,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -2433,6 +2524,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -2464,6 +2556,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -2482,6 +2575,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -2533,6 +2627,17 @@
           "masterdata.backup",
           "part.export.run",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -3407,6 +3512,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -3892,6 +4008,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -3959,6 +4076,17 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -4540,6 +4668,29 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Identifiers",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -4823,6 +4974,29 @@
           "import.list.execute",
           "import.list.plan"
         ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Identifiers",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetArticleReferences(Eplan.EplApi.DataModel.ArticleReferencesFilter)": [
@@ -5013,19 +5187,6 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)": [
-      {
-        "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "action.execute",
-          "action.plan",
-          "action.run"
-        ]
-      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -6479,6 +6640,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -7050,6 +7213,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue",
         "member": "OpenTexts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -7099,6 +7273,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "call"
         ],
@@ -7169,6 +7356,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -7395,6 +7593,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -7433,6 +7632,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -7471,6 +7671,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -7518,6 +7719,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -7855,6 +8057,29 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Identifiers",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -8008,6 +8233,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -8046,6 +8272,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -8084,6 +8311,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -8131,6 +8359,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -8169,6 +8398,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -8901,6 +9131,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -9005,6 +9237,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -9609,6 +9843,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -9627,6 +9862,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -11435,8 +11671,8 @@
     "P:Eplan.EplApi.DataModel.Function.Properties": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -12746,8 +12982,8 @@
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -13000,6 +13236,71 @@
         ],
         "operations": [
           "page.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Comment.Author": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Comment.Properties": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       }
     ],
@@ -13270,6 +13571,19 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextPropertyList.TEXT_CONTENTS": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       }
     ],
@@ -14016,6 +14330,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -15296,6 +15621,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -15394,6 +15730,19 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.Articles": [
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Parts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -15483,6 +15832,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -15629,6 +15980,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -15728,6 +16081,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -15915,6 +16270,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -16069,6 +16426,19 @@
           "action.plan",
           "action.run"
         ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault": [
@@ -16147,6 +16517,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -16277,6 +16649,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -16774,6 +17148,20 @@
         ]
       },
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -16847,6 +17235,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -17042,6 +17441,19 @@
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "get"
         ],
@@ -17974,6 +18386,17 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcImporter",
         "member": "Import",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcImporter.cs",
@@ -18042,6 +18465,17 @@
           "masterdata.backup",
           "part.export.run",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -18139,6 +18573,17 @@
           "masterdata.backup",
           "part.export.run",
           "translation.export.run"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Import",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -18406,6 +18851,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -18622,6 +19068,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -19026,6 +19473,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -19221,6 +19669,17 @@
         "operations": [
           "page.create.execute",
           "page.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -19423,6 +19882,17 @@
         ],
         "operations": [
           "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -19715,6 +20185,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -20031,6 +20512,7 @@
           "action.run",
           "cable.generate.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "message.list"
         ]
@@ -20059,6 +20541,17 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -21179,6 +21672,29 @@
         ]
       },
       {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Identifiers",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -21990,8 +22506,8 @@
     "T:Eplan.EplApi.DataModel.Function": [
       {
         "adapter": "EplanActionRunner",
-        "member": "InspectPending",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
         "access": [
           "type"
         ],
@@ -22538,6 +23054,19 @@
         ]
       },
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -22729,6 +23258,44 @@
         ],
         "operations": [
           "page.get"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.Comment": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Identifiers",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.CommentPropertyList": [
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       }
     ],
@@ -24692,6 +25259,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -24795,6 +25364,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -25107,6 +25678,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",
@@ -25537,6 +26110,19 @@
         ]
       },
       {
+        "adapter": "EplanActionRunner",
+        "member": "Inspect",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "action.plan",
+          "action.run"
+        ]
+      },
+      {
         "adapter": "EplanCableGenerator",
         "member": "Raw",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
@@ -25620,6 +26206,17 @@
         ],
         "operations": [
           "page.update.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPdfCommentsImporter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "import.pdf_comments.execute"
         ]
       },
       {
@@ -25855,6 +26452,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -26074,6 +26672,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -26112,6 +26711,7 @@
           "device.update.execute",
           "import.dxf.execute",
           "import.list.execute",
+          "import.pdf_comments.execute",
           "import.plc.execute",
           "language.remove.execute",
           "language.set.execute",
@@ -26805,6 +27405,8 @@
           "import.dxf.plan",
           "import.list.execute",
           "import.list.plan",
+          "import.pdf_comments.execute",
+          "import.pdf_comments.plan",
           "import.plc.execute",
           "import.plc.plan",
           "language.remove.execute",

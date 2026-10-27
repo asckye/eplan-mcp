@@ -25,6 +25,25 @@ public sealed class WriteInvokeTests
 
     public WriteInvokeTests() => _discovery.Endpoints.Add(_bridge);
 
+    [Fact]
+    public async Task ARecordedSuccessfulNoOp_IsRecoveredWithoutRepeatingTheWrite()
+    {
+        _execute = Lost;
+        _outcomes.Enqueue(Outcome(OutcomeStatus.NotStarted));
+
+        WriteResult<JsonObject> result = await Write();
+
+        Assert.Equal((ExecutionState.NotStarted, true, null), (result.Execution, result.Recovered, result.Data));
+        Assert.Equal((1, 1), (Executes, OutcomeQuestions));
+    }
+
+    [Fact]
+    public void ADirectTypedNoOp_HasTheSameExecutionAsItsData()
+    {
+        var result = new WriteResult<ImportPdfCommentsData>(new ImportPdfCommentsData { Added = 0 }, Recovered: false);
+        Assert.Equal(ExecutionState.NotStarted, result.Execution);
+    }
+
     private int Executes { get; set; }
 
     private int OutcomeQuestions { get; set; }

@@ -17,10 +17,10 @@
         "settings_write_disabled": 6
       },
       "denominator": 137,
-      "implemented": 6,
-      "byTools": 6,
+      "implemented": 7,
+      "byTools": 7,
       "partial": 0,
-      "automatedTest": 6,
+      "automatedTest": 7,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -33,10 +33,10 @@
         "settings_write_disabled": 1
       },
       "denominator": 97,
-      "implemented": 6,
-      "byTools": 6,
+      "implemented": 7,
+      "byTools": 7,
       "partial": 0,
-      "automatedTest": 6,
+      "automatedTest": 7,
       "liveVerified": 1,
       "envBlocked": 0,
       "undocumented": 0
@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 7,
-      "byTools": 7,
+      "implemented": 9,
+      "byTools": 9,
       "partial": 0,
-      "automatedTest": 7,
+      "automatedTest": 9,
       "liveVerified": 5,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 250,
-      "byTools": 241,
-      "partial": 43,
-      "automatedTest": 241,
+      "implemented": 255,
+      "byTools": 246,
+      "partial": 44,
+      "automatedTest": 246,
       "liveVerified": 158,
       "envBlocked": 122,
       "undocumented": 134
@@ -102,25 +102,25 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 138,
-      "byTools": 136,
-      "partial": 3,
-      "automatedTest": 136,
+      "implemented": 143,
+      "byTools": 141,
+      "partial": 4,
+      "automatedTest": 141,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 241,
+    "used": 242,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 45,
+    "used": 46,
     "registered": 8585
   },
   "actionNames": {
-    "used": 6,
+    "used": 7,
     "registered": 64
   },
   "operationsByNamespace": [
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 18,
+      "implemented": 23,
       "liveVerified": 10
     },
     {
@@ -315,6 +315,12 @@
       "liveVerified": 1
     },
     {
+      "scope": "Comment",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    },
+    {
       "scope": "Connection",
       "denominator": 1,
       "implemented": 1,
@@ -349,6 +355,12 @@
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 0
+    },
+    {
+      "scope": "Text",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
     }
   ],
   "tools": [
@@ -360,8 +372,8 @@
         "action.plan",
         "action.run"
       ],
-      "apiIds": 122,
-      "operationGroups": 64,
+      "apiIds": 123,
+      "operationGroups": 65,
       "dataDictionary": 2,
       "dependencies": 51,
       "actions": 0,
@@ -996,6 +1008,26 @@
       "apiNotes": [
         "A30",
         "A31"
+      ]
+    },
+    {
+      "name": "eplan_import_pdf_comments",
+      "safety": "write",
+      "operations": [
+        "import.pdf_comments.execute",
+        "import.pdf_comments.plan"
+      ],
+      "apiIds": 70,
+      "operationGroups": 33,
+      "dataDictionary": 2,
+      "dependencies": 33,
+      "actions": 1,
+      "spec": "docs/tools/eplan_import_pdf_comments.md",
+      "small": 2,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A39"
       ]
     },
     {
@@ -2163,6 +2195,15 @@
       ]
     },
     {
+      "unit": "A:import/PDFCOMMENTS",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
       "unit": "A:partslist/IMPORT",
       "layer": "action",
       "status": "automated_test",
@@ -2199,6 +2240,15 @@
         "eplan_device_get",
         "eplan_part_list",
         "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "D:Comment",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
       ]
     },
     {
@@ -2286,6 +2336,15 @@
       ]
     },
     {
+      "unit": "D:Text",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.ApplicationFramework.Action.Execute",
       "layer": "operation",
       "status": "live_verified",
@@ -2294,6 +2353,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_part_export",
         "eplan_part_import",
@@ -2312,6 +2372,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_part_export",
         "eplan_part_import",
@@ -2379,6 +2440,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_message_list"
       ]
@@ -2392,6 +2454,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_message_list"
       ]
@@ -2405,6 +2468,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_message_list"
       ]
@@ -2418,6 +2482,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_message_list"
       ]
@@ -2431,6 +2496,7 @@
         "eplan_action_run",
         "eplan_cable_generate",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_part_export",
         "eplan_part_import",
@@ -2630,6 +2696,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_import_pdf_comments",
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_property_get",
@@ -3013,7 +3080,8 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
-        "eplan_import_list"
+        "eplan_import_list",
+        "eplan_import_pdf_comments"
       ]
     },
     {
@@ -3562,6 +3630,51 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Comment.Author",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Comment.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_import_pdf_comments"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Name",
       "layer": "operation",
       "status": "automated_test",
@@ -3897,6 +4010,7 @@
         "eplan_export_pdf",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_macro_insert",
@@ -4157,6 +4271,7 @@
         "eplan_device_list",
         "eplan_device_renumber",
         "eplan_device_update",
+        "eplan_import_pdf_comments",
         "eplan_page_delete",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
@@ -4174,6 +4289,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_action_run",
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_import_list",
@@ -4234,6 +4350,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -4313,6 +4430,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -4395,6 +4513,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -4530,6 +4649,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -4612,6 +4732,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -4835,6 +4956,7 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
+        "eplan_import_pdf_comments",
         "eplan_language_remove",
         "eplan_page_create",
         "eplan_page_get",
@@ -4924,6 +5046,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_device_get",
+        "eplan_import_pdf_comments",
         "eplan_page_create",
         "eplan_page_get",
         "eplan_page_list",
@@ -4956,6 +5079,7 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_update",
+        "eplan_import_pdf_comments",
         "eplan_language_remove",
         "eplan_page_create",
         "eplan_page_get",
@@ -4992,6 +5116,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5026,6 +5151,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5060,6 +5186,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5110,6 +5237,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_language_remove",
         "eplan_macro_insert",
         "eplan_page_delete",
@@ -5157,6 +5285,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5191,6 +5320,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5225,6 +5355,7 @@
         "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",
@@ -5568,6 +5699,7 @@
         "eplan_export_untranslated",
         "eplan_import_dxf",
         "eplan_import_list",
+        "eplan_import_pdf_comments",
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_language_set",

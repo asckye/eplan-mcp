@@ -10,6 +10,8 @@
 #                      verification.
 #   eplan / variant: as the source states them; left out when it does not.
 live:
+  eplan_import_pdf_comments:
+    - { date: 2026-10-27, eplan: 2026.0.3.25421, variant: Electric P8, result: pass_with_findings, basis: inferred, source: spikes/S44-pdf-comments/README.md, note: S44 action 与类型读回验证：只导入便笺 Text；重复导入零新增且无撤销步；提交一步撤销、失败回滚、重开持久；新 Host 工具的 Large 测试尚未运行 }
   eplan_cable_renumber:
     - { date: 2026-10-21, eplan: 2026.0.3.25421, variant: Electric P8, result: pass, basis: stated, source: api-notes A24, note: Large：按 Standard 给全部电缆编号，复现 S21 的两对互换 }
   eplan_check_list:
