@@ -129,6 +129,8 @@ public sealed class KnowledgeReviewTests
 
 internal static class ReviewFixtures
 {
+    internal static KnowledgeReviewService Service(PackLibrary packs) => new(packs, new Host.Audit.AuditLog(packs.Locations.Audit, packs.Clock),
+        new Host.Safety.ApprovalService([], packs.Config, packs.Clock, Microsoft.Extensions.Logging.Abstractions.NullLogger<Host.Safety.ApprovalService>.Instance), new Host.Tests.Tools.FakeBridgeClient());
     internal static readonly byte[] GuideBytes = Encoding.UTF8.GetBytes("# Engineering guide\n4.2 Motor starter requirements\n");
     internal static AssetEntry Guide => new("acme.panels", "dev", new PackResource
     {

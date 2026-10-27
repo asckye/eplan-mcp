@@ -214,7 +214,12 @@ public sealed class DevPackStore(string root)
     /// <see cref="DevPackException"/>: Invalid, or Conflict when the version is installed with other content.
     /// </summary>
     public async Task<(PackInstallResult Result, string Digest)> BuildAsync(
-        string id, string version, PackStore installed, IReadOnlyDictionary<string, string> roots, string createdBy, DateTimeOffset now, CancellationToken cancellationToken)
+        string id, string version, PackStore installed, IReadOnlyDictionary<string, string> roots, string createdBy, DateTimeOffset now, CancellationToken cancellationToken) =>
+        await BuildAsync(id, version, installed, roots, createdBy, now, null, cancellationToken).ConfigureAwait(false);
+
+    public async Task<(PackInstallResult Result, string Digest)> BuildAsync(
+        string id, string version, PackStore installed, IReadOnlyDictionary<string, string> roots, string createdBy, DateTimeOffset now,
+        Func<string, PackManifest, CancellationToken, Task>? validate, CancellationToken cancellationToken)
     {
         using FileStream held = await FileLock.AcquireAsync(Path.Combine(Root, $".{id}.lock"), LockWait, cancellationToken).ConfigureAwait(false)
             ?? throw new DevPackException(DevPackError.Busy, [new PackProblem(id, "is being changed by another EplanMcp; try again when it is done")]);
@@ -238,6 +243,8 @@ public sealed class DevPackStore(string root)
         {
             Directory.CreateDirectory(staging);
             CopyTree(FolderOf(id), staging);
+            if (validate is not null)
+            { await validate(staging, manifest, cancellationToken).ConfigureAwait(false); }
             // A version built before keeps its maker and time, so building it again from the same pack is no change.
             PackProvenance made = installed.InstalledDigest(id, version) is null ? manifest.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() }
                 : PackJson.ReadManifest(await File.ReadAllBytesAsync(Path.Combine(installed.FolderOf(id, version), PackManifest.FileName), cancellationToken).ConfigureAwait(false)).Provenance;
@@ -260,6 +267,26 @@ public sealed class DevPackStore(string root)
         {
             DeleteTree(staging);
         }
+    }
+
+    /// <summary>Publishes only a new, confirmed Rule; the caller rechecks its local review under the pack lock.</summary>
+    public async Task PromoteAsync(string id, KnowledgeDocument rule, Func<Task> confirm, string createdBy, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        _ = await ChangeAsync(id, id, createdBy, now, async (current, staging) =>
+        {
+            await confirm().ConfigureAwait(false);
+            string path = KnowledgeDocument.PathOf(rule.Kind, rule.Metadata.Name);
+            if (rule.Kind != KnowledgeKind.Rule || current.Resources.Any(r => r.Path == path))
+            {
+                if (current.Resources.Any(r => r.Path == path && r.Sha256 == Convert.ToHexStringLower(SHA256.HashData(PackJson.Serialize(rule))))
+                    && current.Rules.Any(s => s.Path == path && s.Standing == KnowledgeStanding.Official))
+                { return null; }
+                throw new DevPackException(DevPackError.Invalid, [new PackProblem(path, "promotion needs a new Rule name; existing content cannot be overwritten")]);
+            }
+            PackResource written = await WriteDocumentAsync(staging, rule, cancellationToken).ConfigureAwait(false);
+            PackManifest next = Assemble(current, [.. current.Resources, written], current.Facts, [], new HashSet<string>([path], PackPath.Comparer));
+            return next with { SchemaVersion = 2, Rules = [.. next.Rules.Select(s => s.Path == path ? s with { Standing = KnowledgeStanding.Official } : s)] };
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     private static PackManifest Fresh(string id, string name, string createdBy, DateTimeOffset now) => new()

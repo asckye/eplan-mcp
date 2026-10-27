@@ -44,7 +44,7 @@ internal static class ApprovalTexts
             : zh ? $"项目：{Value(plan.Project, zh)}（{Value(plan.ProjectPath, zh)}）\n" : $"Project: {Value(plan.Project, zh)} ({Value(plan.ProjectPath, zh)})\n";
         return new ApprovalAskArgs
         {
-            Title = Title(plan, zh),
+            Title = plan.Changes.Any(c => c.Kind == "knowledge review") ? zh ? "确认知识审核决定？" : "Confirm knowledge review decision?" : Title(plan, zh),
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
@@ -301,7 +301,7 @@ internal static class ApprovalTexts
     /// undo step holds (eplan_language_set, tool spec 6; api-notes A28).
     /// </summary>
     private static string Undo(string tool, WritePlan plan, bool zh) => plan.Changes.Any(c => c.Kind == "knowledge review")
-        ? zh ? "仅记录本地知识审核；EPLAN 的 Ctrl+Z 不能撤销。" : "Records only a local knowledge review; Ctrl+Z in EPLAN cannot undo it."
+        ? zh ? "记录本地知识审核；提升将新建正式规则。接受候选不授予正式资格。EPLAN 的 Ctrl+Z 不能撤销。" : "Records a local knowledge review; promotion creates a new official Rule. Acceptance grants no official standing. Ctrl+Z in EPLAN cannot undo it."
         : plan.Changes.Any(c => c.Kind == "binding")
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
           : tool == ActionRunTools.Tool

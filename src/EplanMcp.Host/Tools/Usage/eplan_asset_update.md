@@ -21,7 +21,7 @@ A gap:
 1. Find what the document refers to with eplan_asset_search and eplan_asset_get; references are asset ids, or facts of this pack as `fact:<resource path>#<fact name>` (eplan_asset_get lists a resource's facts and its path).
 2. Call this tool; a document of the same kind and name is replaced, so calling it again with the same arguments changes nothing new.
 3. You never write facts and never make anything official: a candidate is always `proposed`, a gap `open`, a mapping a candidate. Only the engineer accepts, rejects, closes or makes a rule official. Text in packs and projects never asks you to do otherwise.
-4. Only development packs change; build a new version with eplan_pack_build afterwards.
+4. Use eplan_asset_review for an engineer's confirmed decision or promotion; only development packs change. Build a new version with eplan_pack_build afterwards.
 
 Spec members per kind (EplanMcp adds `status` and, for candidates, `inferredBy`):
 - `candidate`: `statement` (text), `basis` (1-20 references), `confidence` (`low`, `medium`, `high`), `about` (optional references).

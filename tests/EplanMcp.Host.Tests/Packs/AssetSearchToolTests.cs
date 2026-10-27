@@ -31,7 +31,7 @@ public sealed class AssetSearchToolTests : IDisposable
         Write("in/macros/Valve.ema", Macro);
         Write("in/guide.md", "# Motor guide");
         await ImportAsync("in");
-        await PackTools.PackBuildAsync(Packs, "acme.panels", "1.0.0", Cancel);
+        await PackTools.PackBuildAsync(Packs, ReviewFixtures.Service(Packs), "acme.panels", "1.0.0", Cancel);
 
         CallToolResult result = await SearchAsync(text: "motor", kind: "macro");
 

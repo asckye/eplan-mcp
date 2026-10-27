@@ -346,6 +346,7 @@ internal sealed class PackTools
         "only EplanMcp's data. Example: {\"pack\": \"acme.panels\", \"version\": \"1.0.0\"}.")]
     public static async Task<CallToolResult> PackBuildAsync(
         PackLibrary packs,
+        KnowledgeReviewService reviews,
         [Description("Development pack id")] string pack,
         [Description("SemVer, e.g. 1.0.0")] string version,
         CancellationToken cancellationToken = default)
@@ -374,7 +375,7 @@ internal sealed class PackTools
             (PackInstallResult installed, string digest) built;
             try
             {
-                built = await packs.Dev.BuildAsync(pack, version, packs.Installed, packs.Config.PackSources, PackLibrary.CreatedBy, packs.Clock.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+                built = await packs.Dev.BuildAsync(pack, version, packs.Installed, packs.Config.PackSources, PackLibrary.CreatedBy, packs.Clock.GetUtcNow(), reviews.CheckBuildAsync, cancellationToken).ConfigureAwait(false);
             }
             catch (DevPackException ex)
             {
