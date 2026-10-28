@@ -65,6 +65,16 @@ public sealed class TerminalPlacementTests : IDisposable
     }
 
     [Fact]
+    public void Create_PendingRelation_IsReturnedAsNullUntilCommit()
+    {
+        Terminal.OnCreate = terminal => terminal.ClearOwner();
+        DevicePlaceData data = _adapter.PlaceTerminal(Args(), "=F+A1-X6:1");
+        Assert.Null(data.Terminal!.Owner);
+        Assert.Equal("=F+A1-X6", data.Terminal.Strip);
+        Assert.True(Assert.IsType<Terminal>(_page.AllPlacements[1]).Properties.Disposed);
+    }
+
+    [Fact]
     public void Create_Cancellation_ReleasesListsAndAbortsWithoutEmptyUndo()
     {
         var context = new OperationContext("terminal", write: true, null);

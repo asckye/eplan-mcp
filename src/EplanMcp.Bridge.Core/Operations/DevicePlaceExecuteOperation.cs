@@ -18,7 +18,8 @@ public sealed class DevicePlaceExecuteOperation(
     IDevicePlacer placer,
     ITransactionScopeFactory transactions,
     ISymbolReader? symbols = null,
-    Func<string, string, SymbolSearchItem, IDeviceSymbolPlacement>? openSymbol = null)
+    Func<string, string, SymbolSearchItem, IDeviceSymbolPlacement>? openSymbol = null,
+    IPlcReader? plc = null)
     : Operation<DevicePlaceArgs, DevicePlaceData>, IWriteOperation
 {
     /// <summary>The tool whose undo step this is: EPLAN lists it as "AI: eplan_device_place".</summary>
@@ -37,7 +38,7 @@ public sealed class DevicePlaceExecuteOperation(
                 throw InvalidArgument("'fingerprint' is required: the one device.place.plan returned.");
             }
 
-            request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
+            request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer, plc);
             WritePlan? symbolPlan = args.Library is null && args.LocationBox is null && args.TerminalStrip is null ? null : DeviceSymbolPlan.Create(args, request, symbols);
             if (!string.Equals(symbolPlan?.Fingerprint ?? request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
@@ -91,6 +92,11 @@ public sealed class DevicePlaceExecuteOperation(
     private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag, string page)
     {
         DevicePlaceData data = session.Place(args, tag);
+        if (args.PlcConnectionPoint is { } point && (data.Plc is not { } channel || !DevicePlaceRequest.SameName(tag, channel.Name)
+            || data.Page != page || !DevicePlaceRequest.SameName(tag, data.Tag) || channel.Page != page || data.Category != "PLCTerminal"
+            || channel.Owner is not null && !DevicePlaceRequest.SameName(tag.Substring(0, tag.Length - point.Length - 1), channel.Owner)
+            || channel.Address != args.PlcAddress || channel.ManualSymbolicAddress != args.PlcSymbolicAddress || channel.Text != args.PlcText))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "PLC point identity, owner, address or text readback differs; nothing was committed."); }
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Location box structure, outline or unaffected-device readback differs; nothing was committed."); }

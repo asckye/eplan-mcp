@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
@@ -42,14 +43,14 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     private DevicePlaceData Create(DevicePlaceArgs args, string tag)
     {
         MainThread.Assert();
-#pragma warning disable CA2000 // New persistent objects belong to EPLAN, including on Abort (A39/A55).
-        var function = new Function();
+#pragma warning disable CA2000 // A39/A55: returned persistent functions belong to EPLAN, including on Abort.
+        Function function = CreateFunction(args, tag);
 #pragma warning restore CA2000
-        function.Create(_page, _variant);
         function.Name = tag;
         function.Location = new PointD(DrawingCoordinates.MillimetresToApi(args.X), DrawingCoordinates.MillimetresToApi(args.Y));
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;
+        WritePlcPoint(properties, args);
         string[]? requested = args.ConnectionDesignations;
         for (int i = 0; i < (requested?.Length ?? 0); i++)
         { properties[(Properties.Function)20022, i + 1] = requested![i]; }
@@ -80,7 +81,8 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
 
         // A13: finder cannot see uncommitted functions. Check the returned function and its pins directly.
         Pin[] pins = function.Pins;
-        Require(function.IsPlaced && function.Page.Name == _page.Name && function.Name == tag && function.ArticleReferences.Length == 0
+        Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory);
+        Require(function.IsPlaced && function.Page.Name == _page.Name && DevicePlaceRequest.SameName(tag, function.Name) && function.ArticleReferences.Length == 0
             && function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
             && function.SymbolVariant.SymbolLibraryName == _symbol.Library && function.SymbolVariant.SymbolName == _symbol.Name
             && function.SymbolVariant.VariantNr == _symbol.Variant);
@@ -89,7 +91,8 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             using PropertyValue value = properties[(Properties.Function)20022, i + 1];
             Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i]);
         }
-        return new DevicePlaceData { Page = _page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0 };
+        PlcChannel? plc = args.PlcConnectionPoint is null ? null : EplanPlcReader.Channel((Terminal)function, new TextLanguage(ISOCode.Language.L___, false), properties);
+        return new DevicePlaceData { Page = _page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
     }
 
     private static void Require(bool matches)

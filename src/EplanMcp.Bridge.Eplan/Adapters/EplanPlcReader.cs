@@ -45,6 +45,11 @@ internal sealed class EplanPlcReader : IPlcReader
         };
         Terminal[] channels = plc.PLCTerminals ?? [];
         record.Channels = [.. channels.Select(terminal => Channel(terminal, textLanguage))];
+        // A55: preserve same-name representations; the extra objects have no PLC relation.
+        ILookup<string, Terminal> parentless = finder.GetFunctions(null).OfType<Terminal>()
+            .Where(t => t.FunctionCategory == FunctionCategory.PLCTerminal && t.PLC is null).ToLookup(t => t.Name, StringComparer.Ordinal);
+        foreach (PlcChannel channel in record.Channels)
+        { channel.ParentlessRepresentations = parentless[channel.Name].Count(); }
         record.Connections = Connections(finder, plc, channels);
         return record;
     }
@@ -54,15 +59,24 @@ internal sealed class EplanPlcReader : IPlcReader
 
     private static PlcChannel Channel(Terminal terminal, TextLanguage language)
     {
-        (string? text, string? textLanguage) = EplanText.ReadWithLanguage(terminal.Properties.FUNC_TEXT, language);
+        using FunctionPropertyList properties = terminal.Properties;
+        return Channel(terminal, language, properties);
+    }
+
+    internal static PlcChannel Channel(Terminal terminal, TextLanguage language, FunctionPropertyList properties)
+    {
+        (string? text, string? textLanguage) = EplanText.ReadWithLanguage(properties.FUNC_TEXT, language);
         return new PlcChannel
         {
             Name = terminal.Name ?? string.Empty,
             Page = terminal.Page?.Name,
             Main = terminal.IsMainFunction,
-            Address = EplanText.Read(terminal.Properties.FUNC_PLCADDRESS, language),
-            SymbolicAddress = EplanText.Read(terminal.Properties.FUNC_PLCSYMBOLICADDRESS_CALCULATED, language),
-            DataType = EplanText.Read(terminal.Properties.FUNC_PLCDATATYPE, language),
+            Owner = terminal.PLC?.Name,
+            CardReference = EplanText.Read(properties.FUNC_PLCPAIRCROSSREFERENCE, language),
+            ManualSymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_MANUAL, language),
+            Address = EplanText.Read(properties.FUNC_PLCADDRESS, language),
+            SymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_CALCULATED, language),
+            DataType = EplanText.Read(properties.FUNC_PLCDATATYPE, language),
             Text = text,
             TextLanguage = textLanguage,
         };

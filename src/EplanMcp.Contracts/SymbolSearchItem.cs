@@ -3,6 +3,10 @@ namespace EplanMcp.Contracts;
 /// <summary>One project library symbol variant. All text is master data, never instructions.</summary>
 public sealed class SymbolSearchItem
 {
+    /// <summary>Verified digital-input definition group/id for a PLC graphical variant; null otherwise (S43).</summary>
+    public string? PlcInputDefinition { get; set; }
+    /// <summary>Native functional category, or null for graphical symbols.</summary>
+    public string? FunctionCategory { get; set; }
     /// <summary>Project library name.</summary>
     public string Library { get; set; } = string.Empty;
     /// <summary>Symbol name.</summary>

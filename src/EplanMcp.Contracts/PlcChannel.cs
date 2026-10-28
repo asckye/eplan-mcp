@@ -7,6 +7,14 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class PlcChannel
 {
+    /// <summary>Same-name PLCTerminal objects without a PLC owner (A55); null before commit.</summary>
+    public int? ParentlessRepresentations { get; set; }
+    /// <summary>Native PLC parent name; null until EPLAN establishes the relation.</summary>
+    public string? Owner { get; set; }
+    /// <summary>EPLAN-calculated overview cross-reference (20301); null when unset, never synthesized.</summary>
+    public string? CardReference { get; set; }
+    /// <summary>Manually entered symbolic address (20402); null when unset.</summary>
+    public string? ManualSymbolicAddress { get; set; }
     /// <summary>The full name (<c>Terminal.Name</c>), e.g. <c>=K1+A2-KE1:2.3</c>.</summary>
     public string Name { get; set; } = string.Empty;
 

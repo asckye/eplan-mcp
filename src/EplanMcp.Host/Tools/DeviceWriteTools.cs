@@ -99,7 +99,7 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places a part device, a library symbol without a part, a terminal with its parent strip, or a dashed location box; Ctrl+Z undoes it. " +
+        "Places a part device, library symbol (including NO/NC contacts or PLC), terminal with its strip, or dashed location box; Ctrl+Z undoes it. " +
         "Devices inside a location box keep their own structure; no devices are renamed. Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
@@ -123,6 +123,10 @@ internal sealed class DeviceWriteTools
         [Description("Strip tag, e.g. -X6")] string? terminal_strip = null,
         [Description("Terminal number")] string? terminal_number = null,
         [Description("New strip text (??_??) only")] string? terminal_strip_text = null,
+        [Description("PLC point suffix; tag is existing card")] string? plc_connection_point = null,
+        [Description("PLC I/O address, e.g. I0.0")] string? plc_address = null,
+        [Description("PLC manual symbolic address")] string? plc_symbolic_address = null,
+        [Description("PLC function text (??_??)")] string? plc_text = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -144,7 +148,11 @@ internal sealed class DeviceWriteTools
             CornerY = corner_y,
             TerminalStrip = terminal_strip,
             TerminalNumber = terminal_number,
-            TerminalStripText = terminal_strip_text
+            TerminalStripText = terminal_strip_text,
+            PlcConnectionPoint = plc_connection_point,
+            PlcAddress = plc_address,
+            PlcSymbolicAddress = plc_symbolic_address,
+            PlcText = plc_text
         };
         List<string> violations = DevicePlaceInputs.Check(args, display_properties);
         if (violations.Count > 0)
@@ -179,6 +187,10 @@ internal sealed class DeviceWriteTools
                 TerminalStrip = args.TerminalStrip,
                 TerminalNumber = args.TerminalNumber,
                 TerminalStripText = args.TerminalStripText,
+                PlcConnectionPoint = args.PlcConnectionPoint,
+                PlcAddress = args.PlcAddress,
+                PlcSymbolicAddress = args.PlcSymbolicAddress,
+                PlcText = args.PlcText,
                 Fingerprint = plan.Fingerprint
             },
             dry_run,
@@ -213,6 +225,7 @@ internal sealed class DeviceWriteTools
                 Category = ResultShaper.CleanText(data?.Category),
             },
             Terminal = terminalData,
+            Plc = data?.Plc,
             LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
             Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : terminalData is not null ? (terminalData.StripCreated ? 2 : 1) : args.Library is not null ? 1 : null),
             Unplaced = data?.Unplaced ?? (args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? 0 : null),
@@ -229,9 +242,28 @@ internal sealed class DeviceWriteTools
         }
         if (result.Terminal is { } placedTerminal)
         { placedTerminal.Strip = ResultShaper.CleanText(placedTerminal.Strip); placedTerminal.Owner = ResultShaper.CleanText(placedTerminal.Owner); placedTerminal.Number = ResultShaper.CleanText(placedTerminal.Number); placedTerminal.SortCode = ResultShaper.CleanText(placedTerminal.SortCode); }
+        if (args.PlcConnectionPoint is not null)
+        {
+            result.Functions = null;
+            result.Unplaced = null; // A55: implicit representations are verified after commit.
+            result.Hint = "Verify committed PLC membership, calculated symbolic address and cardReference with eplan_plc_get; null references are not synthesized. " + result.Hint;
+        }
+        if (result.Plc is { } plc)
+        {
+            plc.Name = ResultShaper.CleanText(plc.Name);
+            plc.Page = ResultShaper.CleanText(plc.Page);
+            plc.Owner = ResultShaper.CleanText(plc.Owner);
+            plc.Address = ResultShaper.CleanText(plc.Address);
+            plc.ManualSymbolicAddress = ResultShaper.CleanText(plc.ManualSymbolicAddress);
+            plc.SymbolicAddress = ResultShaper.CleanText(plc.SymbolicAddress);
+            plc.Text = ResultShaper.CleanText(plc.Text);
+            plc.CardReference = ResultShaper.CleanText(plc.CardReference);
+            plc.DataType = ResultShaper.CleanText(plc.DataType);
+        }
         if (result.LocationBox is { } location)
         { location.Structure = ResultShaper.CleanText(location.Structure); result.Hint = "Devices inside keep their own structure; affected devices: none. " + result.Hint; }
         string summary = args.LocationBox is not null ? (committed ? "Placed one dashed location box; affected devices: none. Ctrl+Z undoes this step." : "Dry run: would place one dashed location box; affected devices: none. Nothing was changed.") : !committed ? "Dry run: would place one device. Nothing was changed."
+            : args.PlcConnectionPoint is not null ? "Placed one PLC point; verify its additional representation with eplan_plc_get. Ctrl+Z undoes this step."
             : data is null ? "Placed a device; Ctrl+Z in EPLAN undoes this step."
             : $"Placed a device with {ToolResults.Count(data.Functions, "function")}; Ctrl+Z in EPLAN undoes this step.";
         return ToolResults.Success(summary, result);

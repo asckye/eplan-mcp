@@ -1,4 +1,5 @@
 using System.Globalization;
+using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.MasterData;
@@ -21,7 +22,8 @@ internal sealed class EplanSymbolReader : ISymbolReader
             foreach (Symbol symbol in library.Symbols)
             {
                 string type = symbol.Type.ToString();
-                string kind = SymbolKinds.From(type, type is "Function" or "BoxFunction" ? Category(symbol) : null);
+                string? category = type is "Function" or "BoxFunction" ? Category(symbol) : null;
+                string kind = SymbolKinds.From(type, category);
                 if (!SymbolKinds.Matches(args, library.Name, symbol.Name, kind))
                 { continue; }
                 foreach (SymbolVariant variant in symbol.Variants)
@@ -32,6 +34,8 @@ internal sealed class EplanSymbolReader : ISymbolReader
                         Name = symbol.Name,
                         Type = type,
                         Kind = kind,
+                        FunctionCategory = category,
+                        PlcInputDefinition = type == "Function" && category == "PLCTerminal" ? InputDefinition(EplanProjects.ByPath(projectPath), variant.ConnectionPoints.Length) : null,
                         Variant = variant.VariantNr,
                         ConnectionPoints = [.. variant.ConnectionPoints.Select(p => new SymbolConnectionPoint { Location = [p.Location.X, p.Location.Y], Direction = p.Direction.ToString() })],
                     });
@@ -52,5 +56,19 @@ internal sealed class EplanSymbolReader : ISymbolReader
         using PropertyValue value = properties[id];
         return !value.IsEmpty && int.TryParse(value.ToString().Split('/')[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int category)
             ? ((FunctionCategory)category).ToString() : null;
+    }
+
+    private static string? InputDefinition(Project project, int pins)
+    {
+        // S43: generic PLC graphics need a real DI definition with the same pin count.
+        foreach (FunctionDefinition definition in project.FunctionDefinitionLibrary.FunctionDefinitions.Where(d => d.FunctionCategory == FunctionCategory.PLCTerminal && d.ConnectionPoints.Length == pins))
+        {
+            using var name = definition.Name;
+            using var group = definition.GroupName;
+            string text = group.GetStringToDisplay(ISOCode.Language.L_en_US) + " " + name.GetStringToDisplay(ISOCode.Language.L_en_US);
+            if (System.Text.RegularExpressions.Regex.IsMatch(text, @"\bDI\b|digital\s+input|input.*digital", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant))
+            { return FormattableString.Invariant($"{definition.Group}/{definition.Id}"); }
+        }
+        return null;
     }
 }

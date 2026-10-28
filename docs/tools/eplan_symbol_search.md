@@ -1,5 +1,7 @@
 # 工具规格：`eplan_symbol_search`
 
+T7d 兼容输出增加 `functionCategory`（原生功能类别）与 `plcInputDefinition`（匹配图形引脚数的数字输入定义 group/id，未发现时为 null）；PLC 连接点放置使用该发现结果，不能仅按图形外观推断数字输入。
+
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_symbol_search` |
