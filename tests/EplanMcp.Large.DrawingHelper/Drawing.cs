@@ -9,7 +9,7 @@ namespace EplanMcp.Large.DrawingHelper;
 internal static class Drawing
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static string Read(string variantBin, string projectFile, string pageName, bool textRollback)
+    public static string Read(string variantBin, string projectFile, string pageName, string? rollback)
     {
         var application = new EplApplication { EplanBinFolder = variantBin };
         application.Init(string.Empty, false, false);
@@ -22,8 +22,8 @@ internal static class Drawing
                 Project project = manager.OpenProject(projectFile);
                 try
                 {
-                    if (textRollback)
-                    { return TextCreation.Run(project.ProjectFullName, pageName); }
+                    if (rollback is not null)
+                    { return TextCreation.Run(project.ProjectFullName, pageName, rollback == "mixed-rollback"); }
                     return JsonConvert.SerializeObject(new EplanDrawingReader().Read(project.ProjectFullName, pageName)
                         ?? throw new InvalidOperationException("The fixture page was not found."));
                 }

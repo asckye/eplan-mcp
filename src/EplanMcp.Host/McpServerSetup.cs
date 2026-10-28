@@ -68,6 +68,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PropertySchemaContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertyGetTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertySetContract.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => PlacementCreateContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => CabinetTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => RuleTools.Configure(options.ToolCollection ?? []));
@@ -102,6 +103,7 @@ internal static class McpServerSetup
             .WithTools<PageOpenTools>(HostJson.Options)
             .WithTools<PageWriteTools>(HostJson.Options)
             .WithTools<PageTextReplaceTools>(HostJson.Options)
+            .WithTools<PlacementCreateTools>(HostJson.Options)
             .WithTools<PropertySetTools>(HostJson.Options)
             .WithTools<PageDestructiveTools>(HostJson.Options)
             .WithTools<DeviceTools>(HostJson.Options)

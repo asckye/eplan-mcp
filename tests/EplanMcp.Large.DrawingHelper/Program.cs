@@ -8,9 +8,9 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        if (args.Length is not (3 or 4) || args.Length == 4 && args[3] != "text-rollback" || !File.Exists(Path.Combine(args[0], "W3u.exe")) || !File.Exists(args[1]))
+        if (args.Length is not (3 or 4) || args.Length == 4 && args[3] is not ("text-rollback" or "mixed-rollback") || !File.Exists(Path.Combine(args[0], "W3u.exe")) || !File.Exists(args[1]))
         {
-            Console.Error.WriteLine("Usage: EplanMcp.Large.DrawingHelper <variant Bin> <scratch fixture copy.elk> <page> [text-rollback]");
+            Console.Error.WriteLine("Usage: EplanMcp.Large.DrawingHelper <variant Bin> <scratch fixture copy.elk> <page> [text-rollback|mixed-rollback]");
             return 2;
         }
 
@@ -32,7 +32,7 @@ internal static class Program
                 string candidate = Path.Combine(platformBin, new AssemblyName(request.Name).Name + ".dll");
                 return File.Exists(candidate) ? Assembly.LoadFrom(candidate) : null;
             };
-            Console.Out.WriteLine(Drawing.Read(args[0], args[1], args[2], args.Length == 4));
+            Console.Out.WriteLine(Drawing.Read(args[0], args[1], args[2], args.Length == 4 ? args[3] : null));
             return 0;
         }
         catch (Exception ex)

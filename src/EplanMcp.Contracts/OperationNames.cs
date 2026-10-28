@@ -6,11 +6,15 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+<<<<<<< HEAD
     /// <summary>Complete-page connection creation preview; JSON arguments, WritePlan result.</summary>
     public const string ConnectionCreatePlan = "connection.create.plan";
     /// <summary>Two-commit connection creation; approved request/fingerprint, JSON result.</summary>
     public const string ConnectionCreateExecute = "connection.create.execute";
     /// <summary>Internal TEXT creation, before the unified Host entry. Arguments: <see cref="PlacementTextCreateArgs"/>; data: <see cref="PlacementTextCreateData"/>.</summary>
+=======
+    /// <summary>Unified primitive creation, retaining the staged operation name. Arguments: <see cref="PlacementTextCreateArgs"/>; data: <see cref="PlacementTextCreateData"/>.</summary>
+>>>>>>> b4fd63bf (feat(tools): create texts, lines and boxes with eplan_placement_create)
     public const string PlacementTextCreateExecute = "placement.text.create.execute";
 
     /// <summary>Unregistered reference-copy preparation; arguments: ReferencePrepareArgs; data: ReferenceCopyData.</summary>

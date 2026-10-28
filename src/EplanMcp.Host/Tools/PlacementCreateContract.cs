@@ -3,7 +3,7 @@ using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tools;
 
-/// <summary>Staged full-profile contract; registration waits for T4b/T4c execution verification.</summary>
+/// <summary>Full-profile creation contract; raw validation enforces the closed item branches.</summary>
 internal static class PlacementCreateContract
 {
     internal static readonly JsonElement Input = JsonDocument.Parse("""
@@ -25,25 +25,35 @@ internal static class PlacementCreateContract
 
     internal static readonly JsonElement Output = JsonDocument.Parse("""
         {"type":"object","additionalProperties":false,"required":["project","page","execution","dryRun","gridSize","boundarySource","items","changes","connectionChanges"],"properties":{
-          "project":{"type":"string"},"page":{"type":"string"},"execution":{"const":"not_started"},"dryRun":{"const":true},
-          "gridSize":{"type":"number","exclusiveMinimum":0},"boundarySource":{"const":"Page.Size"},
+          "project":{"type":"string"},"page":{"type":"string"},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},
+          "gridSize":{"type":"number","exclusiveMinimum":0},"boundarySource":{"enum":["Page.Size","unverified"]},
           "items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["requested","actual","bounds","snapped"],"properties":{
-            "requested":{"$ref":"#/$defs/item"},"actual":{"$ref":"#/$defs/item"},"bounds":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"number"}},"snapped":{"type":"boolean"}}}},
-          "changes":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"string"}},"connectionChanges":{"type":"array","maxItems":0}}}
+            "requested":{"$ref":"#/$defs/item"},"actual":{"$ref":"#/$defs/item"},"bounds":{"type":["array","null"],"minItems":4,"maxItems":4,"items":{"type":"number"}},"snapped":{"type":"boolean"}}}},
+          "changes":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"string"}},"connectionChanges":{"type":"array","maxItems":0},"warning":{"type":["string","null"]},"recovered":{"type":"boolean"}}}
         """).RootElement.Clone();
 
     internal static Tool Definition => new()
     {
         Name = "eplan_placement_create",
         Title = "Create text and graphics on an EPLAN page",
-        Description = "Plans 1-50 text, line or rectangle items on one Circuit page (dry_run only). Lines are graphics. " +
-            "Coordinates: mm, bottom left, y up; snaps to grid and checks full outlines. Text needs ??_?? or the project display language; otherwise EPLAN does not show it (A54). " +
-            "Execution returns CAPABILITY_MISSING until available; outside scratch will need approval. " +
-            "Example: {\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"line\",\"points\":[[10,10],[20,20]]}],\"dry_run\":true}.",
+        Description = "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. One undo; approval outside scratch. " +
+            "Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). " +
+            "Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
         InputSchema = Input,
         OutputSchema = WithDefinitions(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = false, OpenWorldHint = false },
     };
+
+    internal static void Configure(IEnumerable<ModelContextProtocol.Server.McpServerTool> tools)
+    {
+        Tool tool = tools.Single(t => t.ProtocolTool.Name == PlacementCreateTools.Tool).ProtocolTool;
+        tool.Title = Definition.Title;
+        tool.Description = Definition.Description;
+        tool.InputSchema = JsonDocument.Parse("""
+            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"contents":{"type":"object","additionalProperties":{"type":"string"}},"height_mm":{"type":"number"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":false},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
+            """).RootElement.Clone();
+        tool.OutputSchema = Definition.OutputSchema;
+    }
 
     private static JsonElement WithDefinitions()
     {

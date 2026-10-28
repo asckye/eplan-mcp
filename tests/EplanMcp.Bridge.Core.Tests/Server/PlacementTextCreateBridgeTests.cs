@@ -13,11 +13,11 @@ public sealed class PlacementTextCreateBridgeTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task Pipe_TextCreate_VerifiedCommitOrMismatchRollbackAndRecoverableOutcome(bool mismatch)
+    public async Task Pipe_MixedBatch_VerifiedCommitOrMidBatchMismatchRollbackAndRecoverableOutcome(bool mismatch)
     {
         var store = new PlacementTextStore();
         if (mismatch)
-        { store.Readback = t => { t.Contents.Remove("de_DE"); return t; }; }
+        { store.AfterWrite = () => { if (store.Writes == 2) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Forced mid-batch failure."); } }; }
         var log = new ListLog();
         var dispatcher = new InlineDispatcher();
         var router = new OperationRouter([store.Operation], dispatcher, null, log, TimeSpan.FromSeconds(1));
@@ -29,7 +29,7 @@ public sealed class PlacementTextCreateBridgeTests
         await client.ConnectAsync(5000, TestContext.Current.CancellationToken);
         JObject handshake = await Call(client, new JObject { ["jsonrpc"] = "2.0", ["id"] = 1, ["method"] = "handshake", ["params"] = new JObject { ["protocolVersion"] = 1, ["minProtocolVersion"] = 1 } });
         Assert.Contains(OperationNames.PlacementTextCreateExecute, handshake["result"]!["operations"]!.Values<string>());
-        JObject request = Invoke(2, OperationNames.PlacementTextCreateExecute, "write", BridgeJson.FromObject(PlacementTextStore.Args()));
+        JObject request = Invoke(2, OperationNames.PlacementTextCreateExecute, "write", BridgeJson.FromObject(PlacementTextStore.Mixed()));
         JObject reply = await Call(client, request);
         if (mismatch)
         {
@@ -41,16 +41,18 @@ public sealed class PlacementTextCreateBridgeTests
         else
         {
             PlacementTextCreateData result = reply["result"]!["data"]!.ToObject<PlacementTextCreateData>(BridgeJson.Serializer)!;
-            Assert.Equal(PlacementTextStore.Args().Text.Contents, result.Text.Contents);
-            Assert.Equal([12.5, 22.5], result.Text.Position);
-            Assert.Equal(3.5, result.Text.HeightMm);
+            Assert.Equal(PlacementTextStore.Args().Text.Contents, result.Items[0].Contents);
+            Assert.Equal([12.5, 22.5], result.Items[0].Position);
+            Assert.Equal(3.5, result.Items[0].HeightMm);
+            Assert.Equal(["text", "line", "rectangle"], result.Items.Select(i => i.Kind));
+            Assert.Equal(3, store.Texts.Count);
             Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], store.Transactions.Calls);
         }
         JObject outcome = await Call(client, Invoke(3, OperationNames.OutcomeGet, "query", new JObject { ["requestId"] = "write" }));
         Assert.Equal(mismatch ? OutcomeStatus.RolledBack : OutcomeStatus.Committed, (string?)outcome["result"]!["data"]!["status"]);
         JObject duplicate = await Call(client, request);
         Assert.Equal(ErrorReason.InvalidArgument, (string?)duplicate["error"]!["data"]!["reason"]);
-        Assert.Equal(1, store.Writes);
+        Assert.Equal(mismatch ? 2 : 3, store.Writes);
         Assert.Equal(1, dispatcher.Calls);
     }
 

@@ -15,6 +15,8 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         MainThread.Assert();
         if (Find(projectPath, page).PageType != DocumentTypeManager.DocumentType.Circuit)
         { throw WriteArguments.Invalid(["/page must be an exact Circuit page from eplan_page_list."]); }
+        if (text.Kind != "text")
+        { return; }
         foreach (string language in text.Contents.Keys)
         {
             using var code = new ISOCode(language);
@@ -25,9 +27,35 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         { throw WriteArguments.Invalid(["/text/contents must include the project display language or ??_?? so the text is visible (A54)."]); }
     }
 
-    public PlacementText Create(string projectPath, string page, PlacementText text)
+    public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items)
+    {
+        Func<PlacementText>[] reads = items.Select(item => Place(projectPath, page, item)).ToArray();
+        return reads.Select(read => read()).ToList();
+    }
+
+    public PlacementText Create(string projectPath, string page, PlacementText text) => Place(projectPath, page, text)();
+
+    private static Func<PlacementText> Place(string projectPath, string page, PlacementText text)
     {
         MainThread.Assert();
+        OperationContext.Current.ThrowIfCancellationRequested();
+        PointD Point(double[] xy) => new(DrawingCoordinates.MillimetresToApi(xy[0]), DrawingCoordinates.MillimetresToApi(xy[1]));
+        double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
+        if (text.Kind != "text")
+        {
+#pragma warning disable CA2000 // A39/A54/A55: placements belong to the project, including on rollback.
+            if (text.Kind == "line")
+            {
+                var line = new Line();
+                line.Create(Find(projectPath, page), Point(text.Position), Point(text.EndPosition));
+                return () => new() { Kind = text.Kind, Position = XY(line.StartPoint), EndPosition = XY(line.EndPoint) };
+            }
+            var rectangle = new Rectangle();
+#pragma warning restore CA2000
+            rectangle.Create(Find(projectPath, page));
+            rectangle.SetArea(Point(text.Position), Point(text.EndPosition)); // S42 r3/A54: Create then SetArea.
+            return () => new() { Kind = text.Kind, Position = XY(rectangle.LowerLeftCorner), EndPosition = XY(rectangle.UpperRightCorner) };
+        }
         using var content = new MultiLangString();
         foreach (KeyValuePair<string, string> entry in text.Contents)
         {
@@ -39,6 +67,11 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
 #pragma warning restore CA2000
         created.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm));
         created.Location = new PointD(DrawingCoordinates.MillimetresToApi(text.Position[0]), DrawingCoordinates.MillimetresToApi(text.Position[1]));
+        return () => Read(created);
+    }
+
+    private static PlacementText Read(Text created)
+    {
         using MultiLangString stored = created.Contents;
         var languages = new LanguageList();
         int count = stored.GetLanguageList(ref languages);

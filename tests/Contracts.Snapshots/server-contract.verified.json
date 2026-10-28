@@ -9638,6 +9638,281 @@
       }
     },
     {
+      "name": "eplan_placement_create",
+      "title": "Create text and graphics on an EPLAN page",
+      "description": "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "text",
+                    "line",
+                    "rectangle"
+                  ]
+                },
+                "position": {
+                  "type": "array"
+                },
+                "points": {
+                  "type": "array"
+                },
+                "corners": {
+                  "type": "array"
+                },
+                "contents": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "height_mm": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "snap_to_grid": {
+            "type": "boolean",
+            "default": true
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false
+          },
+          "response_format": {
+            "enum": [
+              "concise",
+              "detailed"
+            ],
+            "default": "concise"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "execution",
+          "dryRun",
+          "gridSize",
+          "boundarySource",
+          "items",
+          "changes",
+          "connectionChanges"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "execution": {
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "gridSize": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "boundarySource": {
+            "enum": [
+              "Page.Size",
+              "unverified"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "requested",
+                "actual",
+                "bounds",
+                "snapped"
+              ],
+              "properties": {
+                "requested": {
+                  "$ref": "#/$defs/item"
+                },
+                "actual": {
+                  "$ref": "#/$defs/item"
+                },
+                "bounds": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "minItems": 4,
+                  "maxItems": 4,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "snapped": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "changes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "string"
+            }
+          },
+          "connectionChanges": {
+            "type": "array",
+            "maxItems": 0
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovered": {
+            "type": "boolean"
+          }
+        },
+        "$defs": {
+          "point": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "pair": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "item": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "position",
+                  "contents",
+                  "height_mm"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "text"
+                  },
+                  "position": {
+                    "$ref": "#/$defs/point"
+                  },
+                  "height_mm": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 100
+                  },
+                  "contents": {
+                    "type": "object",
+                    "minProperties": 1,
+                    "propertyNames": {
+                      "minLength": 5,
+                      "maxLength": 5,
+                      "pattern": "^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "points"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "line"
+                  },
+                  "points": {
+                    "$ref": "#/$defs/pair"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "corners"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "rectangle"
+                  },
+                  "corners": {
+                    "$ref": "#/$defs/pair"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_plan_apply",
       "title": "Apply plan",
       "description": "Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. Dry-run rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.",
@@ -13940,6 +14215,7 @@
               "eplan_page_create",
               "eplan_page_update",
               "eplan_page_text_replace",
+              "eplan_placement_create",
               "eplan_page_delete",
               "eplan_page_renumber",
               "eplan_device_list",
