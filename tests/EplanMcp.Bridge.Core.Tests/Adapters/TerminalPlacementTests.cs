@@ -43,8 +43,8 @@ public sealed class TerminalPlacementTests : IDisposable
             created = terminal;
             switch (mismatch)
             {
-                case "owner":
-                    terminal.ClearOwner();
+                case "owner": // a null owner is a relation pending commit (S43, live T7c)
+                    terminal.ForeignOwner();
                     break;
                 case "category":
                     terminal.FunctionCategory = "PLCTerminal";
