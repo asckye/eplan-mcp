@@ -1,7 +1,7 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "4c83009c + uncommitted changes",
+  "scannedSources": "5e59b792",
   "sourceHash": "sha256:921afc81c13fcb76d2d038428f8a8fbe768adc9e7ad390fc1cbba2d8619a8708",
   "operations": [
     {

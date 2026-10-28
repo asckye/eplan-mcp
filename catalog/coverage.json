@@ -2029,6 +2029,33 @@
       ]
     },
     {
+      "name": "eplan_rule_check",
+      "safety": "read",
+      "operations": [
+        "device.renumber.plan",
+        "device.update.plan",
+        "macro.insert.plan",
+        "page.create.plan",
+        "page.delete.plan",
+        "page.renumber.plan",
+        "page.update.plan",
+        "plan.functions",
+        "plan.macro.inspect",
+        "plan.names",
+        "project.snapshot"
+      ],
+      "apiIds": 148,
+      "operationGroups": 68,
+      "dataDictionary": 4,
+      "dependencies": 51,
+      "actions": 0,
+      "spec": "docs/tools/eplan_rule_check.md",
+      "small": 2,
+      "medium": 2,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_session_select",
       "safety": "read",
       "operations": [],
@@ -2382,6 +2409,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_context_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2404,6 +2432,7 @@
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2431,6 +2460,7 @@
         "eplan_page_update",
         "eplan_project_translate",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2443,6 +2473,7 @@
         "eplan_context_get",
         "eplan_project_create",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2669,6 +2700,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2683,6 +2715,7 @@
         "eplan_page_update",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2717,6 +2750,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2761,6 +2795,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2851,6 +2886,7 @@
         "eplan_page_update",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -2896,6 +2932,7 @@
         "eplan_macro_list",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_rule_check",
         "eplan_translation_import",
         "eplan_workflow_plan"
       ]
@@ -2915,6 +2952,7 @@
         "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
@@ -2934,6 +2972,7 @@
         "eplan_page_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
@@ -3147,6 +3186,7 @@
         "eplan_part_sync",
         "eplan_plc_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3178,6 +3218,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -3198,6 +3239,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3215,6 +3257,7 @@
         "eplan_context_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3233,6 +3276,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -3297,6 +3341,7 @@
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3329,6 +3374,7 @@
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3388,6 +3434,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
       ]
@@ -3580,6 +3627,7 @@
         "eplan_page_get",
         "eplan_plc_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3611,6 +3659,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3640,6 +3689,7 @@
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3673,6 +3723,7 @@
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3687,6 +3738,7 @@
         "eplan_device_get",
         "eplan_device_update",
         "eplan_plc_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3709,6 +3761,7 @@
         "eplan_device_place",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3748,6 +3801,7 @@
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list",
@@ -3773,6 +3827,7 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_plc_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3798,6 +3853,7 @@
         "eplan_device_get",
         "eplan_device_update",
         "eplan_plc_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3826,6 +3882,7 @@
         "eplan_device_get",
         "eplan_device_update",
         "eplan_plc_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -3841,6 +3898,7 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_project_translate",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4218,6 +4276,7 @@
       "partial": false,
       "tools": [
         "eplan_page_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4379,6 +4438,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4390,6 +4450,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4401,6 +4462,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4412,6 +4474,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4423,6 +4486,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4434,6 +4498,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4445,6 +4510,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4466,6 +4532,7 @@
         "eplan_page_text_replace",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4535,6 +4602,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
@@ -4560,6 +4628,7 @@
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4582,6 +4651,7 @@
         "eplan_page_get",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4601,6 +4671,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4633,6 +4704,7 @@
         "eplan_import_dxf",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4643,6 +4715,7 @@
       "partial": true,
       "tools": [
         "eplan_page_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4683,6 +4756,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_report_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4715,6 +4789,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_report_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -4735,6 +4810,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -4754,6 +4830,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
       ]
@@ -4848,6 +4925,7 @@
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
@@ -4886,6 +4964,7 @@
         "eplan_part_sync",
         "eplan_project_create",
         "eplan_project_translate",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
       ]
@@ -4949,6 +5028,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
@@ -5008,6 +5088,7 @@
       "partial": false,
       "tools": [
         "eplan_page_update",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5070,6 +5151,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
@@ -5159,6 +5241,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
@@ -5181,6 +5264,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5241,6 +5325,7 @@
       "tools": [
         "eplan_context_get",
         "eplan_project_create",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5252,6 +5337,7 @@
       "tools": [
         "eplan_context_get",
         "eplan_project_create",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5314,6 +5400,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
@@ -5339,6 +5426,7 @@
         "eplan_page_renumber",
         "eplan_part_sync",
         "eplan_project_translate",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
       ]
@@ -5403,6 +5491,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
@@ -5593,6 +5682,7 @@
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5633,6 +5723,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
@@ -5653,6 +5744,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5725,6 +5817,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5765,6 +5858,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
       ]
@@ -5899,6 +5993,7 @@
         "eplan_page_text_replace",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_workflow_plan"
       ]
     },
@@ -5941,6 +6036,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_report_update",
+        "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
       ]
@@ -6630,6 +6726,7 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_revision_list",
+        "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",

@@ -76,7 +76,7 @@ internal sealed class ContextTools
         }
     }
 
-    private static void CheckScope(JsonElement scope, List<string> violations)
+    internal static void CheckScope(JsonElement scope, List<string> violations)
     {
         if (scope.ValueKind != JsonValueKind.Object)
         {

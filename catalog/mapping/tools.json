@@ -9450,6 +9450,305 @@
       "live": []
     },
     {
+      "name": "eplan_rule_check",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/RuleTools.cs",
+      "operations": [
+        "device.renumber.plan",
+        "device.update.plan",
+        "macro.insert.plan",
+        "page.create.plan",
+        "page.delete.plan",
+        "page.renumber.plan",
+        "page.update.plan",
+        "plan.functions",
+        "plan.macro.inspect",
+        "plan.names",
+        "project.snapshot"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable",
+        "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCBox",
+        "F:Eplan.EplApi.Base.ISOCode.Language.L___",
+        "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.MultiLine",
+        "F:Eplan.EplApi.DataModel.ProjectManager.OpenMode.ReadOnly",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.GetString",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.MultiLangString.GetString(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.#ctor",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.GetVariants(Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,System.Boolean)",
+        "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.Open(System.String,Eplan.EplApi.DataModel.Project,System.Boolean)",
+        "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.Project.Close",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.DatabaseVersion.ToString",
+        "M:Eplan.EplApi.DataModel.ProjectManager.Dispose",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDataCompatibility(System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.GetProjectDatabaseVersion(System.String)",
+        "M:Eplan.EplApi.DataModel.ProjectManager.OpenProject(System.String,Eplan.EplApi.DataModel.ProjectManager.OpenMode)",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.Base.PointD.X",
+        "P:Eplan.EplApi.Base.PointD.Y",
+        "P:Eplan.EplApi.DataModel.ArticleReference.PartNr",
+        "P:Eplan.EplApi.DataModel.Connection.EndPin",
+        "P:Eplan.EplApi.DataModel.Connection.Page",
+        "P:Eplan.EplApi.DataModel.Connection.Properties",
+        "P:Eplan.EplApi.DataModel.Connection.StartPin",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_DESIGNATION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRENUMBER",
+        "P:Eplan.EplApi.DataModel.Function.ArticleReferences",
+        "P:Eplan.EplApi.DataModel.Function.FunctionCategory",
+        "P:Eplan.EplApi.DataModel.Function.IsMainFunction",
+        "P:Eplan.EplApi.DataModel.Function.Properties",
+        "P:Eplan.EplApi.DataModel.Function.SubFunctions",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Location",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLELENGTH_FULL",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLETYPE",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECOUNT",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_DEVICETAG_FULLNAME",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCADDRESS",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCDATATYPE",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCRACK",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSOCKET",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSTATIONNAME",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCSYMBOLICADDRESS_CALCULATED",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TECHNICAL_CHARACTERISTIC",
+        "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationType",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.RepresentationTypes",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Size",
+        "P:Eplan.EplApi.DataModel.MasterData.WindowMacro.Variant",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Page.PageType",
+        "P:Eplan.EplApi.DataModel.Page.PlotFrame",
+        "P:Eplan.EplApi.DataModel.Page.Properties",
+        "P:Eplan.EplApi.DataModel.Page.Size",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_FORMPLOT",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONDATE",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_LASTAUTOMODIFICATIONTIME",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.PAGE_NOMINATIOMN",
+        "P:Eplan.EplApi.DataModel.PagePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)",
+        "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
+        "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.Pin.Name",
+        "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
+        "P:Eplan.EplApi.DataModel.Placement.Page",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.Pages",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.Properties",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_GUID",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONDATE",
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.PROJ_LASTMODIFICATIONTIME",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Indexes",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.Base.PathMap",
+        "T:Eplan.EplApi.Base.PointD",
+        "T:Eplan.EplApi.DataModel.AnyPropertyId",
+        "T:Eplan.EplApi.DataModel.Connection",
+        "T:Eplan.EplApi.DataModel.ConnectionPropertyList",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.E3D.Connection3D",
+        "T:Eplan.EplApi.DataModel.EObjects.Cable",
+        "T:Eplan.EplApi.DataModel.EObjects.PLC",
+        "T:Eplan.EplApi.DataModel.EObjects.Terminal",
+        "T:Eplan.EplApi.DataModel.Function",
+        "T:Eplan.EplApi.DataModel.FunctionPropertyList",
+        "T:Eplan.EplApi.DataModel.FunctionsFilter",
+        "T:Eplan.EplApi.DataModel.IndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.MasterData.WindowMacro",
+        "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums",
+        "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.PagePropertyList",
+        "T:Eplan.EplApi.DataModel.PagesFilter",
+        "T:Eplan.EplApi.DataModel.Pin",
+        "T:Eplan.EplApi.DataModel.Placement",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.ProjectManager.OpenMode",
+        "T:Eplan.EplApi.DataModel.ProjectPropertyList",
+        "T:Eplan.EplApi.DataModel.PropertyNotFoundException",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.StorableObject",
+        "T:Eplan.EplApi.DataModel.UniversalPropertyList",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_rule_check.md",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "CabinetContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CabinetContractTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "WorkflowHttpTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowHttpTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "DeviceUpdateOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceUpdateOperationTests.cs"
+          },
+          {
+            "name": "PageCreateOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageCreateOperationTests.cs"
+          },
+          {
+            "name": "PageDeleteOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteOperationTests.cs"
+          },
+          {
+            "name": "PageUpdateFrameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageUpdateFrameTests.cs"
+          },
+          {
+            "name": "PageUpdateOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageUpdateOperationTests.cs"
+          },
+          {
+            "name": "PlanFunctionsOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanFunctionsOperationTests.cs"
+          },
+          {
+            "name": "PlanMacroDescriptionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanMacroDescriptionTests.cs"
+          },
+          {
+            "name": "PlanNamesOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanNamesOperationTests.cs"
+          },
+          {
+            "name": "PlanStepExecuteOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanStepExecuteOperationTests.cs"
+          },
+          {
+            "name": "DeviceRenumberOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceRenumberOperationTests.cs"
+          },
+          {
+            "name": "MacroInsertOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroInsertOperationTests.cs"
+          },
+          {
+            "name": "PageCreateInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PageCreateInteropTests.cs"
+          },
+          {
+            "name": "PageDeleteExecuteTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteExecuteTests.cs"
+          },
+          {
+            "name": "PageRenumberOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageRenumberOperationTests.cs"
+          },
+          {
+            "name": "PageUpdateFrameProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageUpdateFrameProtocolTests.cs"
+          },
+          {
+            "name": "PlanMacroInspectOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanMacroInspectOperationTests.cs"
+          },
+          {
+            "name": "PlanNamesInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PlanNamesInteropTests.cs"
+          },
+          {
+            "name": "PlanStepExecuteFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanStepExecuteFileTests.cs"
+          },
+          {
+            "name": "ProjectSnapshotOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectSnapshotOperationTests.cs"
+          },
+          {
+            "name": "SnapshotInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/SnapshotInteropTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "note": "R5 柜内正式规则四值查询；修复仅编译计划，unknown 或范围冲突拒绝。未运行实机。"
+    },
+    {
       "name": "eplan_session_select",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/SessionTools.cs",
