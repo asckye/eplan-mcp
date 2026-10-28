@@ -217,6 +217,7 @@
 - 打开页会让该项目成为当前项目；编辑器开着时，关闭再重新打开其他项目（ProjectOpen），当前项目仍是编辑器所在的项目。要切换当前项目，就在目标项目里再打开一页。`XEsUndoAction` 作用于当前项目，撤销前必须核对（A41）。— `eplan_page_open` Large 实测，2026-10-27。
 - `ExistingIds` 会返回索引为 0 的带索引属性（如 1122），按普通属性读抛 `IndexedPropertyException`（S063172）。— S42。
 
+- T4b Large 2/2（2026-10-27，2026.0.3.25421，Electric P8，LargeWrite 副本）：示例项目未设置显示语言，此时只有语言无关 `??_??` 文字可见；`??_??` 与具体语言同时写入一个 `MultiLangString` 时 EPLAN 只保留具体语言，读回缺 `??_??`，因此两者不得混用。字高 3.5 mm、位置读回与请求相同；一次撤销恢复；强制读回不符时回滚且不留撤销步。
 ### A53. 无部件符号与标识显示（spike S41，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S41](../../spikes/S41-symbols-without-part/README.md)。
 

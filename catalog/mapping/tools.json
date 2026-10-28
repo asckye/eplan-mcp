@@ -1386,6 +1386,7 @@
         "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.DisplayedProperty",
         "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent",
         "P:Eplan.EplApi.DataModel.Graphics.Text.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.TextBase.Height",
         "P:Eplan.EplApi.DataModel.Group.SubPlacements",
         "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
         "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
@@ -4621,6 +4622,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LanguageSetOperationTests.cs"
           },
           {
+            "name": "PlacementTextCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
+          },
+          {
             "name": "PropertySetPlanningTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PropertySetPlanningTests.cs"
@@ -5748,6 +5754,7 @@
         "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.DisplayedProperty",
         "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent",
         "P:Eplan.EplApi.DataModel.Graphics.Text.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.TextBase.Height",
         "P:Eplan.EplApi.DataModel.Group.SubPlacements",
         "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
         "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
@@ -5900,6 +5907,11 @@
             "name": "PageDrawingDiscoveryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageDrawingDiscoveryTests.cs"
+          },
+          {
+            "name": "PlacementTextCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
           },
           {
             "name": "PlanApplyTests",
@@ -6169,6 +6181,11 @@
             "name": "PageOpenTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
+          },
+          {
+            "name": "PlacementTextCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
           },
           {
             "name": "ProjectAndPageTests",
