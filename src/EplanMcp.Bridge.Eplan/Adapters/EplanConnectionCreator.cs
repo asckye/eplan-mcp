@@ -1,9 +1,11 @@
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 
@@ -22,7 +24,7 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
     private static string Key(SymbolReference owner, int index) => FormattableString.Invariant($"{SnapshotCanonical.TypeOf(owner.ToStringIdentifier())}/{owner.ObjectIdentifier}/{index}");
     private static double[] XY(PointD point) => [point.X, point.Y];
     private static IEnumerable<SymbolVariant> Variants(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL")
-        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP").SelectMany(s => s.Variants);
+        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "BPF").SelectMany(s => s.Variants);
     public ConnectionCreatePlanner.Scene Read(string project, string page)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
@@ -58,7 +60,27 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
             foreach (var item in selected)
             {
                 SymbolReference placed = SymbolReference.Create(item.Variant, target);
+                if (item.Row["interruption"] is { } interruption)
+                {
+                    if (placed is not InterruptionPoint point)
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "BPF did not create an interruption point."); }
+                    point.Name = (string)interruption["name"]!;
+                    if (point.Name != (string)interruption["name"]!)
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
+                }
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
+                if (placed is InterruptionPoint)
+                {
+                    using AnyPropertyId id = 24300;
+#pragma warning disable CA2000 // A39/A55: EPLAN owns the native property placement, also on Abort.
+                    var display = new PropertyPlacement();
+#pragma warning restore CA2000
+                    display.Create(placed, id);
+                    display.Location = new PointD(4 * target.GridSize, 0);
+                    display.IsVisible = true;
+                    display.Height = 2.5;
+                    display.Justification = TextBase.JustificationType.BaseLineLeft;
+                }
                 double[][] pins = placed.GraphicalConnectionPoints.Select(p => XY(p.Location)).ToArray();
                 SymbolConnectionPoint[] expected = item.Row["symbol"]!["connectionPoints"]!.ToObject<SymbolConnectionPoint[]>()!;
                 if (!XY(placed.Location).SequenceEqual(item.Row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != item.Variant.SymbolName
@@ -72,6 +94,47 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                 }
             }
         };
+    }
+    private sealed class PlacementFactory(string project) : ITransactionScopeFactory
+    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription); }
+    public ITransactionScopeFactory PlacementTransactions(string project) => new PlacementFactory(project);
+
+    public JObject Interruptions(string project, IReadOnlyList<string> pages)
+    {
+        var snapshots = new JArray();
+        var points = new JArray();
+        foreach (string page in pages)
+        {
+            Page native = Page(project, page);
+            ConnectionCreatePlanner.Scene scene = Read(project, page);
+            if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.PageSize is null || scene.Page.Placements.Count > 10000)
+            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Read a complete Circuit counterpart page within 10000 placements."); }
+            scene.Pins.Clear();
+            foreach (Function function in native.AllPlacements.OfType<Function>())
+            { foreach (PinBase pin in function.GraphicalConnectionPoints) { scene.Pins.Add(Key(function, pin.Index), new() { Location = [function.Location.X + pin.Location.X, function.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); } }
+            snapshots.Add(new JObject { ["page"] = page, ["drawing"] = BridgeJson.FromObject(scene.Page), ["pins"] = BridgeJson.FromObject(scene.Pins), ["graphical"] = JArray.FromObject(scene.Graphical), ["logical"] = BridgeJson.FromObject(scene.Logical) });
+            foreach (InterruptionPoint point in native.AllPlacements.OfType<InterruptionPoint>())
+            {
+                // A55: acquire once, release before returning; no wrapper survives into Abort or compensation.
+                using InterruptionPointPropertyList properties = point.Properties;
+                using PropertyValue reference = properties[(Properties.InterruptionPoint)24300];
+                PinBase pin = point.GraphicalConnectionPoints.Single();
+                points.Add(new JObject
+                {
+                    ["page"] = page,
+                    ["name"] = point.Name,
+                    ["oid"] = point.ObjectIdentifier,
+                    ["position"] = new JArray(XY(point.Location)),
+                    ["pin"] = new JArray(point.Location.X + pin.Location.X, point.Location.Y + pin.Location.Y),
+                    ["direction"] = pin.Direction.ToString(),
+                    ["crossReference"] = reference.IsEmpty ? null : reference.ToString(),
+                    ["counterparts"] = new JArray(point.CrossReferencedObjectsAll.Select(peer => peer is InterruptionPoint other
+                        ? new JObject { ["page"] = other.Page.Name, ["name"] = other.Name, ["oid"] = other.ObjectIdentifier }
+                        : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Unexpected native interruption counterpart type.")))
+                });
+            }
+        }
+        return new JObject { ["pages"] = snapshots, ["points"] = points };
     }
     /// <summary>
     /// A planned point outline means the library variant had none (Outline); the placed connection symbol must then be

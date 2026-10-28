@@ -61,6 +61,7 @@ public static class ConnectionCreatePlanner
         var nodes = new Dictionary<string, (double[] Point, string[] Directions, string Kind)>(StringComparer.Ordinal);
         var requested = new JArray();
         var resolved = new JArray();
+        var interruptions = new Dictionary<string, JObject>(StringComparer.Ordinal);
         string Key(double[] p) => FormattableString.Invariant($"{p[0]},{p[1]}");
         double[] Point(JToken? token, string at)
         {
@@ -92,7 +93,7 @@ public static class ConnectionCreatePlanner
         void Node(double[] point, string[] directions, string kind, string at)
         {
             Require(directions.Distinct(StringComparer.Ordinal).Count() == directions.Length && directions.All(d => d is "Up" or "Down" or "Left" or "Right"), at, "Supply distinct cardinal directions.");
-            Require(kind switch { "corner" => directions.Length == 2 && directions[0] != Opposite(directions[1]), "t_node" => directions.Length == 3, "potential_point" => directions.Length == 1, _ => false }, at, "Directions must match the node kind.");
+            Require(kind switch { "corner" => directions.Length == 2 && directions[0] != Opposite(directions[1]), "t_node" => directions.Length == 3, "potential_point" or "interruption_point" => directions.Length == 1, _ => false }, at, "Directions must match the node kind.");
             Require(!nodes.ContainsKey(Key(point)), at, "Duplicate nodes are not allowed.");
             nodes.Add(Key(point), (point, directions, kind));
         }
@@ -100,8 +101,21 @@ public static class ConnectionCreatePlanner
         foreach (JToken item in (JArray)input["items"]!)
         {
             string at = "/items/" + (index++).ToString(CultureInfo.InvariantCulture);
-            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node or potential_point.");
+            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point or interruption_point.");
             bool wire = (string?)item["kind"] == "wire";
+            if ((string?)item["kind"] == "interruption_point")
+            {
+                Members(item, at, "kind name direction position counterpart_pages", "");
+                Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
+                    && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the exact shared full business name (1..200 characters).");
+                Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
+                Require(item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
+                    && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
+                double[] point = Point(item["position"], at + "/position");
+                Node(point, [(string)item["direction"]!], "interruption_point", at);
+                interruptions.Add(Key(point), (JObject)item.DeepClone());
+                continue;
+            }
             Members(item, at, wire ? "kind from to points" : "kind position directions", "");
             if (!wire)
             {
@@ -136,13 +150,14 @@ public static class ConnectionCreatePlanner
             {
                 "corner" => s.Name == "CO" && s.Type == "Routing",
                 "t_node" => s.Type == (s.Name switch { "TLRO" => "TNodeUp", "TLRU" => "TNodeDown", "TOUL" => "TNodeLeft", "TOUR" => "TNodeRight", _ => "" }),
+                "interruption_point" => s.Name == "BPF" && s.Type == "InterruptionPoint",
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
             }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.Length == 2
                 && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && Math.Abs(v) <= 2 * grid)
-                && (node.Kind == "potential_point" || p.Location.All(v => v == 0)))
+                && (node.Kind is "potential_point" or "interruption_point" || p.Location.All(v => v == 0)))
                 && s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))).OrderBy(s => s.Variant).ToArray();
             // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
-            if (node.Kind == "potential_point" && matches.Length > 0)
+            if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
             { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
             SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
             double[] offset = symbol.ConnectionPoints[0].Location;
@@ -153,6 +168,8 @@ public static class ConnectionCreatePlanner
             Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
             Require(!scene.Page.Placements.Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
             resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(symbol), ["bounds"] = new JArray(outline) });
+            if (interruptions.TryGetValue(Key(node.Point), out JObject? interruption))
+            { resolved.Last!["interruption"] = interruption; }
         }
         var segments = paths.SelectMany(p => p.Zip(p.Skip(1), (a, b) => new[] { a, b })).ToList();
         var ports = scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray();
@@ -220,9 +237,11 @@ public static class ConnectionCreatePlanner
             ["generation"] = "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
             ["undoSteps"] = 2
         };
+        if (interruptions.Count > 0)
+        { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete }).ToString(Formatting.None), resolved.ToString(Formatting.None),
             .. scene.Page.Placements.Select(p => "placement:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Pins.Select(p => "pin:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
-            .. scene.Graphical.Select(p => "graphical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Logical.Select(p => "logical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.SymbolBounds.Select(p => "outline:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None))]);
+            .. scene.Graphical.Select(p => "graphical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Logical.Select(p => "logical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.SymbolBounds.Select(p => "outline:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)), .. result["interruptionScope"] is { } evidence ? new[] { evidence.ToString(Formatting.None) } : []]);
         result["fingerprint"] = fingerprint;
         return expectedFingerprint is null || expectedFingerprint == fingerprint ? result : throw new BridgeErrorException(ErrorReason.PlanStale, "Page, pins or library geometry changed; create a new dry-run plan.");
     }

@@ -2263,7 +2263,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes and orthogonal wires, then verifies generated endpoints. 2 undo steps; failure undoes placement. Outside scratch needs approval. See usage for fields. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
+      "description": "Creates SPECIAL nodes, interruption points with explicit counterpart pages, and orthogonal wires; verifies native pairing, computed references and generated endpoints. 2 undo steps; failure undoes placement. Outside scratch needs approval. See usage for fields. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {

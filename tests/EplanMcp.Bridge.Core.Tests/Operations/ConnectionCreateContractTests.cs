@@ -15,6 +15,10 @@ public sealed class ConnectionCreateContractTests
         JObject plan = fixture.Plan();
         Validate(InputSchema(), fixture.Request);
         Validate(OutputSchema(), plan);
+        var interruptions = new InterruptionPointFixture();
+        Validate(InputSchema(), interruptions.Request);
+        JObject interruptionPreview = interruptions.Plan();
+        Validate(OutputSchema(), interruptionPreview);
         JObject contract = new()
         {
             ["name"] = "eplan_connection_create",
@@ -27,6 +31,9 @@ public sealed class ConnectionCreateContractTests
             ["outputSchema"] = OutputSchema(),
             ["example"] = fixture.Request,
             ["dryRunExample"] = plan,
+            ["interruptionExample"] = interruptions.Request,
+            ["interruptionPreview"] = interruptionPreview,
+            ["interruptionReadback"] = interruptions.Execute()["interruptionPoints"],
         };
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
@@ -57,11 +64,20 @@ public sealed class ConnectionCreateContractTests
                 ["items"] = new JObject { ["type"] = "string", ["enum"] = new JArray("Up", "Down", "Left", "Right") },
             },
         });
+        JObject interruption = Object(new()
+        {
+            ["kind"] = Constant("interruption_point"),
+            ["name"] = new JObject { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = 200 },
+            ["position"] = Point(),
+            ["direction"] = new JObject { ["type"] = "string", ["enum"] = new JArray("Up", "Down", "Left", "Right") },
+            ["counterpart_pages"] = Array(Text(), 1, 20),
+        });
+        interruption["properties"]!["counterpart_pages"]!["uniqueItems"] = true;
         JObject schema = Object(new()
         {
             ["project"] = Text(),
             ["page"] = Text(),
-            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), Node("t_node", 3), Node("potential_point", 1)) }, 1, 50),
+            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), Node("t_node", 3), Node("potential_point", 1), interruption) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = false },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
@@ -75,11 +91,31 @@ public sealed class ConnectionCreateContractTests
         JObject symbol = Object(new()
         {
             ["library"] = Constant("SPECIAL"),
-            ["name"] = new JObject { ["type"] = "string", ["enum"] = new JArray("CO", "TLRO", "TLRU", "TOUL", "TOUR", "PCP") },
+            ["name"] = new JObject { ["type"] = "string", ["enum"] = new JArray("CO", "TLRO", "TLRU", "TOUL", "TOUR", "PCP", "BPF") },
             ["variant"] = Integer(0),
             ["type"] = Text(),
             ["kind"] = Text(),
             ["connectionPoints"] = Array(Object(new() { ["location"] = Point(signed: true), ["direction"] = Text() }), 1, 3),
+        });
+        JObject optionalInterruption = (JObject)InputSchema()["properties"]!["items"]!["items"]!["oneOf"]!.Last!.DeepClone();
+        JObject placedSymbol = Object(new() { ["position"] = Point(), ["symbol"] = symbol, ["bounds"] = Array(new() { ["type"] = "number", ["minimum"] = 0 }, 4, 4), ["interruption"] = optionalInterruption }, "position symbol bounds");
+        JObject counterpart = Object(new() { ["page"] = Text(), ["name"] = Text(), ["oid"] = Integer(1) });
+        JObject point = Object(new()
+        {
+            ["page"] = Text(),
+            ["name"] = Text(),
+            ["oid"] = Integer(1),
+            ["position"] = Point(),
+            ["pin"] = Point(),
+            ["direction"] = Text(),
+            ["crossReference"] = new JObject { ["type"] = new JArray("string", "null") },
+            ["counterparts"] = Array(counterpart, 0, 1),
+        });
+        JObject scope = Object(new()
+        {
+            ["pages"] = Array(new() { ["type"] = "object", ["additionalProperties"] = true }, 1, 21),
+            ["points"] = Array(point, 0, 1000),
+            ["preservedEndpoints"] = Array(Array(new(), 2, 2), 0, 10000),
         });
         return Object(new()
         {
@@ -88,7 +124,7 @@ public sealed class ConnectionCreateContractTests
             ["execution"] = Constant("not_started"),
             ["dryRun"] = new JObject { ["const"] = true },
             ["coordinates"] = Array(Object(new() { ["pointer"] = Text(), ["requested"] = Point(), ["actual"] = Point() }), 1, 1600),
-            ["symbols"] = Array(Object(new() { ["position"] = Point(), ["symbol"] = symbol, ["bounds"] = Array(new() { ["type"] = "number", ["minimum"] = 0 }, 4, 4) }), 0, 1500),
+            ["symbols"] = Array(placedSymbol, 0, 1500),
             ["graphicalAutoconnect"] = Array(Array(Point(), 2, 2), 0, 10000),
             ["logicalAfterGenerate"] = Array(Object(new() { ["pins"] = Array(Text(), 1, 10000), ["potentialStartIsNull"] = new JObject { ["type"] = "boolean" } }), 0, 10000),
             ["gridSize"] = new JObject { ["type"] = "number", ["exclusiveMinimum"] = 0 },
@@ -98,7 +134,10 @@ public sealed class ConnectionCreateContractTests
             ["generation"] = Text(),
             ["undoSteps"] = new JObject { ["const"] = 2 },
             ["fingerprint"] = new JObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" },
-        });
+            ["affectedPages"] = Array(Text(), 1, 21),
+            ["interruptionScope"] = scope,
+            ["interruptionPoints"] = Array(point, 0, 100),
+        }, "project page execution dryRun coordinates symbols graphicalAutoconnect logicalAfterGenerate gridSize pageSize coverage logicalDuringPlacement generation undoSteps fingerprint");
     }
 
     private static JObject Object(JObject properties, string? required = null) => new()
@@ -117,6 +156,11 @@ public sealed class ConnectionCreateContractTests
 
     private static void Validate(JObject schema, JToken value)
     {
+        if (schema["type"] is JArray allowed)
+        {
+            Assert.Contains(value.Type == JTokenType.Null || value.Value<string>() is null ? "null" : "string", allowed.Values<string>());
+            return;
+        }
         if (schema["const"] is { } constant)
         { Assert.True(JToken.DeepEquals(constant, value)); }
         if (schema["enum"] is JArray options)
@@ -131,6 +175,8 @@ public sealed class ConnectionCreateContractTests
         {
             case "object":
                 JObject obj = Assert.IsType<JObject>(value);
+                if ((bool?)schema["additionalProperties"] == true)
+                { break; }
                 foreach (string? name in schema["required"]!.Values<string>())
                 { Assert.NotNull(obj[name!]); }
                 foreach (JProperty member in obj.Properties())
