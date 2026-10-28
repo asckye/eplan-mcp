@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-10-28",
-  "scannedSources": "5968c2d2",
-  "sourceHash": "sha256:e6921a8ac82542dec0fe76a06d152654f5466aa4bbb35fa19acb5cc62a74d4f0",
+  "scannedOn": "2026-10-30",
+  "scannedSources": "8aeb9ad4",
+  "sourceHash": "sha256:a341e45e6f87d5b1cefb76feec70ff61ffb9b6efe50c1c4c78747ed320520037",
   "operations": [
     {
       "name": "action.execute",
@@ -19854,6 +19854,32 @@
           "action.plan",
           "action.run"
         ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "group",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Placement.IsPlaced": [
@@ -22248,6 +22274,32 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "group",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {

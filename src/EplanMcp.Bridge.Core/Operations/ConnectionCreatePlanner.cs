@@ -274,7 +274,7 @@ public static class ConnectionCreatePlanner
     private static double[] Box(double[][] s) => [Math.Min(s[0][0], s[1][0]), Math.Min(s[0][1], s[1][1]), Math.Max(s[0][0], s[1][0]), Math.Max(s[0][1], s[1][1])];
     private static bool On(double[] p, double[][] s) => p[0] >= Box(s)[0] && p[0] <= Box(s)[2] && p[1] >= Box(s)[1] && p[1] <= Box(s)[3];
     private static bool Overlaps(double[] a, double[] b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
-    private static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
+    internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
     private static BridgeErrorException Missing(string message) => new(ErrorReason.CapabilityMissing, message, metadata: new Dictionary<string, string> { ["missing"] = "connection.create.execute" });
     internal static void Members(JToken? token, string at, string required, string optional)
@@ -286,7 +286,7 @@ public static class ConnectionCreatePlanner
         foreach (JProperty p in ((JObject)token!).Properties())
         { Require(names.Concat(optional.Split([' '], StringSplitOptions.RemoveEmptyEntries)).Contains(p.Name, StringComparer.Ordinal), at + "/" + p.Name.Replace("~", "~0").Replace("/", "~1"), "Omit unknown members."); }
     }
-    private static void FiniteNumbers(JToken token, string at)
+    internal static void FiniteNumbers(JToken token, string at)
     {
         Require(token.Type is not (JTokenType.Float or JTokenType.Integer) || double.TryParse(token.ToString(Formatting.None), NumberStyles.Float, CultureInfo.InvariantCulture, out double number) && !double.IsInfinity(number) && !double.IsNaN(number), at, "Supply a finite number.");
         if (token is JObject obj)

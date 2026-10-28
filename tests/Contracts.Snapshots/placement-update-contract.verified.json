@@ -1,0 +1,339 @@
+﻿{
+  "registered": false,
+  "tool": {
+    "name": "eplan_placement_update",
+    "title": "Plan absolute placement moves on an EPLAN page",
+    "description": "Plans same-page moves from eplan_page_get include_drawings locators. Absolute x_mm/y_mm or delta_mm; deltas resolve to absolute positions. Property text follows its parent. Groups are unsupported. Dry run only until T5b; zero delta is a no-op.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "page",
+        "moves"
+      ],
+      "properties": {
+        "project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page": {
+          "type": "string",
+          "minLength": 1
+        },
+        "moves": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "locator",
+                  "x_mm",
+                  "y_mm"
+                ],
+                "properties": {
+                  "locator": {
+                    "$ref": "#/$defs/locator"
+                  },
+                  "x_mm": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "y_mm": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "locator",
+                  "delta_mm"
+                ],
+                "properties": {
+                  "locator": {
+                    "$ref": "#/$defs/locator"
+                  },
+                  "delta_mm": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "snap_to_grid": {
+          "type": "boolean",
+          "default": true
+        },
+        "response_format": {
+          "enum": [
+            "concise",
+            "detailed"
+          ],
+          "default": "concise"
+        }
+      },
+      "$defs": {
+        "locator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "project",
+            "page",
+            "type",
+            "oid",
+            "digest"
+          ],
+          "properties": {
+            "project": {
+              "type": "string",
+              "minLength": 1
+            },
+            "page": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "oid": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "page",
+        "execution",
+        "dryRun",
+        "noOp",
+        "gridSize",
+        "boundarySource",
+        "moves",
+        "fingerprint",
+        "graphicalChanges",
+        "connectionChanges",
+        "generation"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "page": {
+          "type": "string"
+        },
+        "execution": {
+          "const": "not_started"
+        },
+        "dryRun": {
+          "const": true
+        },
+        "noOp": {
+          "type": "boolean"
+        },
+        "gridSize": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "boundarySource": {
+          "const": "Page.Size"
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "string"
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "locator",
+              "parent",
+              "before",
+              "requested",
+              "after",
+              "snapped",
+              "bounds"
+            ],
+            "properties": {
+              "locator": {
+                "$ref": "#/$defs/locator"
+              },
+              "parent": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/locator"
+                  }
+                ]
+              },
+              "before": {
+                "$ref": "#/$defs/point"
+              },
+              "requested": {
+                "$ref": "#/$defs/point"
+              },
+              "after": {
+                "$ref": "#/$defs/point"
+              },
+              "snapped": {
+                "type": "boolean"
+              },
+              "bounds": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "graphicalChanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "pins",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "pins": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "before": {
+                "$ref": "#/$defs/segment"
+              },
+              "after": {
+                "$ref": "#/$defs/segment"
+              }
+            }
+          }
+        },
+        "connectionChanges": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "$defs": {
+        "locator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "project",
+            "page",
+            "type",
+            "oid",
+            "digest"
+          ],
+          "properties": {
+            "project": {
+              "type": "string",
+              "minLength": 1
+            },
+            "page": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "oid": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "point": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "segment": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"moves\":[{\"locator\":{\"project\":\"scratch-project\",\"page\":\"P\",\"type\":4,\"oid\":1,\"digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"},\"x_mm\":30,\"y_mm\":30}],\"dry_run\":true}\n```\nUse a complete locator returned by eplan_page_get with include_drawings=true. In a move, supply locator and absolute x_mm/y_mm, or locator and delta_mm:[dx,dy]. Set dry_run=true. This contract is not registered until T5b.\n## Workflow\nRead the complete page, preview, review every following property text and connection change. Execution is unavailable. Zero delta is a no-op.\n## Fields\nExplicit project/page; moves has 1-50 items. Millimetres, bottom left, y up; default snap_to_grid=true. Deltas resolve to absolute targets before snapping. Do not replay a delta as an absolute plan.\n## Errors\nProperty text follows its parent; never target it independently or alongside its parent. Groups, macro groups and unverified types are refused. Refresh stale locators. Unknown bounds or incomplete connection evidence fail closed.\nWrite, idempotent absolute plans, full profile. No write, approval or transaction is performed by this preview. Execution remains CAPABILITY_MISSING until T5b.\n"
+}

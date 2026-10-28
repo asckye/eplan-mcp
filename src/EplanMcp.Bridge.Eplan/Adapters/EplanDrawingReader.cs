@@ -82,6 +82,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 parentType = parent?.Type,
                 parentOid = parent?.Oid,
                 slot, // property placements share their parent's identifier
+                group = placement.Group?.ObjectIdentifier,
                 location,
                 bounds,
                 content = contents?.GetAsString(),
@@ -95,6 +96,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 Properties = new Dictionary<string, string?>
                 {
+                    ["grouped"] = (placement.Group is not null).ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant(),
                     ["name"] = (placement as FunctionBase)?.Name,
                     ["text"] = contents?.GetAsString(),
                     ["display"] = (placement as PropertyPlacement)?.GetDisplayString(),

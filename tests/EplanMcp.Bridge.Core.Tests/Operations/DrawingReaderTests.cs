@@ -118,6 +118,21 @@ public sealed class DrawingReaderTests
     }
 
     [Fact]
+    public void FakeBridge_GroupMembership_IsObservedAndChangesDigest()
+    {
+        var text = new Text(4);
+        var bridge = new FakeDrawingBridge(new Page { AllPlacements = [text] });
+        DrawingPlacement before = Assert.Single(bridge.Read("+A1/1")!.Placements);
+        text.Group = new Group(9, text);
+        DrawingPlacement after = Assert.Single(bridge.Read("+A1/1")!.Placements);
+        Assert.Equal("false", before.Properties["grouped"]);
+        Assert.Equal("true", after.Properties["grouped"]);
+        Assert.NotEqual(before.Locator.Digest, after.Locator.Digest);
+        text.Group.Prefix = "84";
+        Assert.Equal(after.Locator.Digest, Assert.Single(bridge.Read("+A1/1")!.Placements).Locator.Digest);
+    }
+
+    [Fact]
     public void FakeBridge_TextHeight_ChangesDiscoveryAndDigest()
     {
         var text = new Text(4) { Height = 3.5 };
