@@ -107,8 +107,7 @@ public sealed class InterruptionPointTests
     [Theory]
     [InlineData("generate", 1)]
     [InlineData("cancel", 1)]
-    [InlineData("pair", 1)]
-    [InlineData("empty_reference", 1)]
+    [InlineData("pair", 2)] // live T7b: pairing is read only after the generation commit
     [InlineData("postcommit", 2)]
     public void GenerationOrReferenceFailure_CompensatesAndVerifiesScope(string failure, int undos)
     {
@@ -128,6 +127,15 @@ public sealed class InterruptionPointTests
         Assert.Equal(2, fake.ScopeReads.Count); // planning and preflight only
         Assert.DoesNotContain("CloseUndo", fake.Placement.Calls);
         Assert.Empty(fake.Generates);
+    }
+
+    [Fact]
+    public void EmptyNativeReferenceText_StillCommits_WhenPairingIsCorrect()
+    {
+        // Live T7b: property 24300 stays empty after the commit; the native pairing is the proof.
+        var fake = new InterruptionPointFixture { Failure = "empty_reference" };
+        fake.Execute();
+        Assert.Equal(0, fake.Undos);
     }
 
     [Fact]

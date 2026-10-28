@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "15cea9cf",
-  "sourceHash": "sha256:055dad02c739f57eb57933e777704f3750cd19ae306f1ee53360cdc88242c69a",
+  "scannedSources": "34278b09",
+  "sourceHash": "sha256:f3f25846fadfbbdac679c80066ecf53dbdc411e3f0de546808467ea17b78d80b",
   "operations": [
     {
       "name": "action.execute",
@@ -1237,6 +1237,17 @@
       }
     ],
     "F:Eplan.EplApi.DataModel.Graphics.TextBase.JustificationType.BaseLineLeft": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -4640,6 +4651,17 @@
     ],
     "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -6922,6 +6944,17 @@
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.#ctor": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -6934,6 +6967,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create(Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -8436,6 +8480,18 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -11714,6 +11770,18 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -11874,6 +11942,18 @@
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
@@ -13934,6 +14014,18 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionBase.Location": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -14041,6 +14133,30 @@
         ],
         "operations": [
           "cable.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -15592,6 +15708,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -15969,6 +16096,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.TextBase.Height": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -16018,6 +16156,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.TextBase.Justification": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -16031,6 +16180,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.TextBase.Location": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -16142,6 +16302,34 @@
         ],
         "operations": [
           "page.text.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.InterruptionPoint.Properties": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property(Eplan.EplApi.DataModel.Properties.InterruptionPoint)": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       }
     ],
@@ -16700,6 +16888,18 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -16867,6 +17067,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Page.GridSize": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -16931,6 +17142,18 @@
       {
         "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
@@ -18681,6 +18904,18 @@
     "P:Eplan.EplApi.DataModel.PinBase.Direction": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -18733,6 +18968,18 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -18748,6 +18995,18 @@
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
@@ -18885,6 +19144,18 @@
         "operations": [
           "cable.renumber.execute",
           "cable.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -20719,6 +20990,18 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
         "adapter": "EplanDevicePlacer",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
@@ -21020,6 +21303,20 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier": [
       {
         "adapter": "EplanReferenceProjects",
@@ -21069,6 +21366,18 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -21396,6 +21705,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnectionPoints": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Prepare",
@@ -24763,6 +25084,17 @@
     ],
     "T:Eplan.EplApi.DataModel.AnyPropertyId": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -26956,6 +27288,18 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
         "adapter": "EplanConnectionReader",
         "member": "FunctionConnections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
@@ -27916,6 +28260,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -28091,6 +28446,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.TextBase": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -28127,6 +28493,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Graphics.TextBase.JustificationType": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -28256,6 +28633,45 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.InterruptionPoint": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.InterruptionPointPropertyList": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       }
     ],
@@ -28616,6 +29032,18 @@
         "operations": [
           "check.run.execute",
           "check.run.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -29674,6 +30102,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.PinBase": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Read",
@@ -31110,6 +31550,18 @@
     ],
     "T:Eplan.EplApi.DataModel.Properties": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -31146,6 +31598,20 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Properties.InterruptionPoint": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       }
     ],
@@ -31365,6 +31831,18 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Interruptions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {

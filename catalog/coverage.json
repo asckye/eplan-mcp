@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 11,
-      "byTools": 11,
+      "implemented": 12,
+      "byTools": 12,
       "partial": 0,
-      "automatedTest": 11,
+      "automatedTest": 12,
       "liveVerified": 5,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 316,
-      "byTools": 307,
-      "partial": 50,
-      "automatedTest": 307,
+      "implemented": 319,
+      "byTools": 310,
+      "partial": 51,
+      "automatedTest": 310,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 186,
-      "byTools": 185,
-      "partial": 5,
-      "automatedTest": 185,
+      "implemented": 189,
+      "byTools": 188,
+      "partial": 6,
+      "automatedTest": 188,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 268,
+    "used": 270,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 140,
+      "implemented": 143,
       "liveVerified": 83
     },
     {
@@ -334,6 +334,12 @@
     },
     {
       "scope": "FunctionBase",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    },
+    {
+      "scope": "InterruptionPoint",
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 0
@@ -636,14 +642,14 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 144,
-      "operationGroups": 84,
-      "dataDictionary": 1,
-      "dependencies": 58,
+      "apiIds": 162,
+      "operationGroups": 94,
+      "dataDictionary": 2,
+      "dependencies": 65,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 1,
-      "medium": 3,
+      "medium": 4,
       "large": 1,
       "apiNotes": [
         "A52",
@@ -2453,6 +2459,15 @@
       ]
     },
     {
+      "unit": "D:InterruptionPoint",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create"
+      ]
+    },
+    {
       "unit": "D:MDPartsDatabaseItem",
       "layer": "data_dictionary",
       "status": "live_verified",
@@ -3791,6 +3806,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_context_get",
         "eplan_device_place",
         "eplan_property_get",
@@ -4041,6 +4057,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place"
       ]
     },
@@ -4198,6 +4215,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place"
       ]
     },
@@ -4288,6 +4306,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place"
       ]
     },
@@ -4297,6 +4316,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place"
       ]
     },
@@ -4329,6 +4349,24 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.InterruptionPoint.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_connection_create"
       ]
     },
     {
@@ -4985,6 +5023,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
@@ -6041,6 +6080,15 @@
         "eplan_property_set",
         "eplan_report_update",
         "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create"
       ]
     },
     {
