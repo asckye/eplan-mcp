@@ -10,7 +10,8 @@ using EplanMcp.Packs;
 namespace EplanMcp.Host.Plans;
 
 /// <summary>Rechecks the compiler's stored baseline, using its version's content and name scope.</summary>
-internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust)
+internal sealed partial class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust,
+    KnowledgeReviewService? reviews = null)
 {
     public Task<(EplanInstanceInfo Instance, string[] Fingerprints, string Pipe)> CheckAsync(PlanRecord record, CancellationToken cancellationToken) =>
         CheckAsync(record, false, cancellationToken);
@@ -42,14 +43,17 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
             throw Stale();
         }
 
-        ProjectBinding? binding = await packs.Workspaces.ReadAsync(definition.Project.Path, cancellationToken).ConfigureAwait(false);
+        ProjectBinding? binding = await ReadBindingAsync(definition, cancellationToken).ConfigureAwait(false);
         binding = binding is { BindingVersion: 1, Cabinets.Count: 0 } ? null : binding;
         if (binding?.Revision != definition.BindingRevision || ContextBuilder.Reference(null, binding)["lockDigest"]?.GetValue<string>() != definition.LockDigest
             || binding is not null && (PlanSnapshotHashes.ProjectKey(binding.Project) != definition.Project.Path
-                || binding.Cabinets.Count > 1 || binding.Cabinets.Any(c => c.Id != "default")))
+                || definition.CompilerVersion != "3" && (binding.Cabinets.Count > 1 || binding.Cabinets.Any(c => c.Id != "default"))))
         {
             throw Stale();
         }
+
+        WorkflowEngineering? engineering = definition.CompilerVersion == "3"
+            ? await EngineeringAsync(definition, binding, cancellationToken).ConfigureAwait(false) : null;
 
         foreach (PlanResource resource in definition.Resources)
         {
@@ -92,6 +96,10 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
         {
             throw Stale();
         }
+        if (engineering is not null)
+        {
+            GuardCabinet(engineering, binding!, baseline.Snapshot, definition.Steps);
+        }
 
         var fingerprints = new List<string>();
         foreach (PlanStep step in definition.Steps.Where(s => s.Prediction is null))
@@ -114,7 +122,7 @@ internal sealed class PlanApplyChecks(IBridgeClient bridge, PackLibrary packs, P
     internal static bool UsesLocalBaseline(string compilerVersion) => compilerVersion switch
     {
         "1" => false,
-        "2" => true,
+        "2" or "3" => true,
         _ => throw Stale(),
     };
 

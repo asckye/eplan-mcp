@@ -7515,6 +7515,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
           },
           {
+            "name": "PlanEngineeringApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanEngineeringApplyTests.cs"
+          },
+          {
             "name": "PlanSettlementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanSettlementTests.cs"
@@ -10317,6 +10322,11 @@
             "name": "PlanApplyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanApplyTests.cs"
+          },
+          {
+            "name": "PlanEngineeringApplyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlanEngineeringApplyTests.cs"
           },
           {
             "name": "PlanOrchestratorTests",

@@ -21,7 +21,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class WorkflowCabinetTests : IDisposable
+public sealed partial class WorkflowCabinetTests : IDisposable
 {
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-workflow-cabinet-").FullName);
     private readonly FakeBridgeClient _bridge = new();
@@ -94,7 +94,7 @@ public sealed class WorkflowCabinetTests : IDisposable
             Assert.Equal("acme.panels@1.0.0:workflow/create", a.Definition.Engineering.WorkflowRefAndInputs.GetProperty("workflow").GetString());
             Assert.All(a.Definition.Resources, r => Assert.Contains(a.Definition.Sources, s => s.ResourcePath == r.ResourcePath && s.ExactVersion == "1.0.0" && s.FileHash == r.FileHash && s.ManifestDigest == r.ManifestDigest));
             Assert.Equal(PlanCanonical.Hash(a.Definition), a.PlanHash);
-            Assert.Throws<BridgeCallException>(() => PlanApplyChecks.UsesLocalBaseline("3"));
+            Assert.True(PlanApplyChecks.UsesLocalBaseline("3"));
         });
         Assert.Empty(_bridge.Writes);
         Assert.DoesNotContain(_bridge.Calls, c => c.Operation.EndsWith(".execute", StringComparison.Ordinal));
@@ -312,7 +312,7 @@ public sealed class WorkflowCabinetTests : IDisposable
         Values = JsonNode.Parse(JsonSerializer.Serialize(new { mode = new { @default = mode }, target = new { @default = location + "/3" } }))!.AsObject(),
         Structure = new() { ["prefixes"] = new JsonArray(new JsonObject { ["location"] = location }) }
     };
-    private async Task WithClient(Func<McpClient, PlanStore, Task> check)
+    private async Task WithClient(Func<McpClient, PlanStore, Task> check, Action<IServiceCollection>? configure = null)
     {
         var incoming = new Pipe();
         var outgoing = new Pipe();
@@ -321,6 +321,7 @@ public sealed class WorkflowCabinetTests : IDisposable
         builder.Services.AddSingleton(_locations);
         builder.Services.AddEplanMcp().WithStreamServerTransport(incoming.Reader.AsStream(), outgoing.Writer.AsStream());
         builder.Services.AddSingleton<IBridgeClient>(_bridge);
+        configure?.Invoke(builder.Services);
         using IHost host = builder.Build();
         await host.StartAsync(Token);
         try

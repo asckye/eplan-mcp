@@ -51,6 +51,20 @@ public sealed class WorkflowEngineeringScopeTests
         Assert.Equal(["+A1/1"], step.ModifyScope.Pages);
     }
 
+    [Theory]
+    [InlineData("macro.insert")]
+    [InlineData("page.renumber")]
+    [InlineData("device.renumber")]
+    public void CabinetScope_SevenStepCatalogRequiresCompleteCabinetForUnboundedPredictions(string op)
+    {
+        (WorkflowEngineering context, ProjectBinding binding) = Context();
+        PlanStep step = PlanTestData.Definition().Steps[0] with { Op = op, ReadScope = PlanScopeRules.Pages([]), ModifyScope = PlanScopeRules.Pages([]), Preconditions = [] };
+        Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeCallException>(() => context.Guard(binding, PlanScopeTestData.Baseline(), [step])).Error.Reason);
+
+        CabinetBinding cabinet = context.Cabinet with { Id = "default", Structure = new JsonObject { ["all"] = true } };
+        (context with { Cabinet = cabinet }).Guard(binding with { Cabinets = [cabinet] }, PlanScopeTestData.Baseline(), [step]);
+    }
+
     [Fact]
     public void WorkflowContract_HasExclusiveInputsOptionalEngineeringAndCompactDescriptions()
     {

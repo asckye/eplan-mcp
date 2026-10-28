@@ -14,6 +14,7 @@ public sealed class PlanApplyChecksTests
     [Theory]
     [InlineData("1", false)]
     [InlineData("2", true)]
+    [InlineData("3", true)]
     public void CompilerVersion_DispatchesApprovedBaselineSemantics(string version, bool local)
     {
         Assert.Equal(local, PlanApplyChecks.UsesLocalBaseline(version));
@@ -21,7 +22,7 @@ public sealed class PlanApplyChecksTests
 
     [Theory]
     [InlineData("")]
-    [InlineData("3")]
+    [InlineData("4")]
     [InlineData("02")]
     public void UnknownCompilerVersion_IsStaleNotStarted(string version)
     {

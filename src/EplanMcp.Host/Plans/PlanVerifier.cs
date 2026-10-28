@@ -12,7 +12,7 @@ internal static class PlanVerifier
         var validation = new List<PlanValidation>();
         var diff = new List<PlanDiffEntry>();
         var coverage = new List<PlanVerificationCoverage>();
-        bool local = plan.CompilerVersion == "2";
+        bool local = PlanApplyChecks.UsesLocalBaseline(plan.CompilerVersion);
         if (Compatible(baseline) is null)
         {
             throw new ArgumentException("Baseline must be standard evidence for the compiled project.", nameof(baseline));
