@@ -5953,6 +5953,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "PageOpenTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
+          },
+          {
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
@@ -8259,6 +8264,11 @@
             "name": "ImportPxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportPxfTests.cs"
+          },
+          {
+            "name": "PageOpenTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
           },
           {
             "name": "PlanVersion2Tests",

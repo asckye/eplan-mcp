@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "31c59985",
-  "sourceHash": "sha256:ea446098702e3550e86a5367aded77ef4229f427dd2ef49677354ebda30ce9b3",
+  "scannedSources": "7484a703",
+  "sourceHash": "sha256:ec0249f3e52460898544a7f1de3f4fb64723b525df116d86c613c0aebdca6ac9",
   "operations": [
     {
       "name": "action.execute",
@@ -285,6 +285,10 @@
     {
       "name": "page.list",
       "class": "PageListOperation"
+    },
+    {
+      "name": "page.open",
+      "class": "PageOpenOperation"
     },
     {
       "name": "page.plotframe.inspect",
@@ -4814,6 +4818,17 @@
         ]
       },
       {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      },
+      {
         "adapter": "EplanPageReader",
         "member": "ListPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReader.cs",
@@ -5878,6 +5893,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -6840,6 +6856,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -7209,6 +7226,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -9665,6 +9683,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Edit.#ctor": [
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Edit.OpenPageWithName(System.String,System.String)": [
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export.#ctor": [
       {
         "adapter": "EplanExporter",
@@ -10147,6 +10191,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -10257,6 +10302,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -15731,6 +15777,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -15899,6 +15946,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.open"
         ]
       },
       {
@@ -16858,6 +16916,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -16988,6 +17047,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -17695,6 +17755,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -17812,6 +17873,17 @@
         ]
       },
       {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      },
+      {
         "adapter": "EplanProjectCatalog",
         "member": "ListOpenProjects",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectCatalog.cs",
@@ -17880,6 +17952,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -17985,6 +18058,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -18047,6 +18121,17 @@
         ],
         "operations": [
           "cable.generate.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.open"
         ]
       },
       {
@@ -18198,6 +18283,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -18473,6 +18559,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -18621,6 +18708,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -19709,6 +19797,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.StorableObject.Project": [
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.open"
         ]
       }
     ],
@@ -23525,6 +23626,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -23809,6 +23911,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.open"
         ]
       },
       {
@@ -26445,6 +26558,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -26695,6 +26809,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.open"
         ]
       },
       {
@@ -27096,6 +27221,7 @@
           "export.pdf.run",
           "page.delete.execute",
           "page.delete.plan",
+          "page.open",
           "page.renumber.execute",
           "page.renumber.plan",
           "project.translate.execute",
@@ -27584,6 +27710,17 @@
         ]
       },
       {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -27877,6 +28014,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -27984,6 +28122,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -28362,6 +28501,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
@@ -29812,6 +29952,19 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.HEServices.Edit": [
+      {
+        "adapter": "EplanPageEditor",
+        "member": "Open",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageEditor.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.open"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme": [
       {
         "adapter": "EplanCableRenumberer",
@@ -30341,6 +30494,7 @@
           "page.drawing.get",
           "page.get",
           "page.list",
+          "page.open",
           "page.plotframe.inspect",
           "page.renumber.execute",
           "page.renumber.plan",
