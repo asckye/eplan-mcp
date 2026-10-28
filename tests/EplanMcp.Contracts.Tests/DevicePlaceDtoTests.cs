@@ -7,6 +7,21 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DevicePlaceDtoTests
 {
     [Fact]
+    public void LocationBox_RoundTripsAcrossBothPipeSerializers()
+    {
+        var args = new DevicePlaceArgs { Project = "Line1", Page = "/1", LocationBox = "+P1", X = 60, Y = 140, CornerX = 100, CornerY = 180 };
+        DevicePlaceArgs bridge = JsonConvert.DeserializeObject<DevicePlaceArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
+        Assert.Equal(("+P1", 100d, 180d), (bridge.LocationBox, bridge.CornerX, bridge.CornerY));
+        Assert.Null(bridge.Tag);
+        var data = new DevicePlaceData { LocationBox = new() { Structure = "+P1", Bounds = [60, 140, 100, 180] } };
+        DevicePlaceData host = System.Text.Json.JsonSerializer.Deserialize<DevicePlaceData>(JsonConvert.SerializeObject(data))!;
+        Assert.Equal("+P1", host.LocationBox!.Structure);
+        Assert.Equal([60d, 140d, 100d, 180d], host.LocationBox.Bounds);
+        Assert.Equal("dashed", host.LocationBox.Outline);
+        Assert.Empty(host.LocationBox.AffectedDevices);
+    }
+
+    [Fact]
     public void SymbolSource_RoundTripsAcrossBothPipeSerializers()
     {
         var args = new DevicePlaceArgs

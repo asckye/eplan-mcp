@@ -28,6 +28,7 @@ internal interface IPropertyPlacementsContainer
 internal class SymbolReference(long oid) : Placement(oid, 17)
 {
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
+    public static SymbolReference Create(object variant, Page page) => LocationBox.CreateBox(variant, page);
 }
 
 internal class FunctionBase(long oid) : SymbolReference(oid)
@@ -69,6 +70,7 @@ internal static class DocumentTypeManager
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable
 {
+    public Function[] GetFunctions(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>()];
     public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];
     public void Dispose() { }
 }

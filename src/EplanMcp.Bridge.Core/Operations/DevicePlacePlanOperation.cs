@@ -16,7 +16,7 @@ public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReade
     {
         var request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
         request.CheckFree();
-        if (args.Library is not null)
+        if (args.Library is not null || args.LocationBox is not null)
         { return DeviceSymbolPlan.Create(args, request, symbols); }
         return new WritePlan
         {

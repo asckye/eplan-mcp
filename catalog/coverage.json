@@ -819,14 +819,15 @@
       "dependencies": 62,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 2,
+      "small": 3,
       "medium": 3,
       "large": 1,
       "apiNotes": [
         "A13",
         "A14",
         "A26",
-        "A53"
+        "A53",
+        "A55"
       ]
     },
     {

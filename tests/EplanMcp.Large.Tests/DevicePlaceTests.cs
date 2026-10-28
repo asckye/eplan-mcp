@@ -18,6 +18,57 @@ public sealed class DevicePlaceTests(LiveEplan eplan, WriteHost host) : IClassFi
     private const string Prefix = "=GAA+A1&EFS1/";
 
     [Fact]
+    public async Task ALocationBoxAroundAnExistingCoil_ReadsBackDashedWithoutRenaming_OneUndoRestores()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string project = await eplan.WriteProjectAsync();
+        string page = await NewPageAsync(project);
+        string tag = "=GAA+A1-KB" + page[Prefix.Length..];
+        await eplan.CallAsync("eplan_device_place", new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "K",
+            ["symbol_variant"] = 0,
+            ["x"] = 80,
+            ["y"] = 160,
+            ["tag"] = tag
+        });
+        JsonElement coilBefore = (await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag })).GetProperty("device");
+        LiveSnapshots.Snapshot before = await selection.SnapshotAsync();
+        Dictionary<string, object?> args = new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["location_box"] = "+P" + page[Prefix.Length..],
+            ["x"] = 60,
+            ["y"] = 140,
+            ["corner_x"] = 100,
+            ["corner_y"] = 180
+        };
+        async Task<JsonElement> Drawings() => (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true })).GetProperty("drawings").GetProperty("items");
+        JsonElement drawingsBefore = await Drawings();
+        JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
+        Assert.Equal(drawingsBefore.GetRawText(), (await Drawings()).GetRawText());
+        JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+        Assert.Equal(("committed", "AI: eplan_device_place"), (placed.GetProperty("execution").GetString(), placed.GetProperty("undo").GetString()));
+        JsonElement box = placed.GetProperty("locationBox");
+        Assert.Equal(args["location_box"], box.GetProperty("structure").GetString());
+        Assert.Equal("dashed", box.GetProperty("outline").GetString());
+        Assert.Equal([60d, 140d, 100d, 180d], box.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Empty(box.GetProperty("affectedDevices").EnumerateArray());
+        Assert.Equal(preview.GetProperty("locationBox").GetRawText(), box.GetRawText());
+        Assert.Single((await Drawings()).EnumerateArray(), p => p.GetProperty("kind").GetString() == "LocationBox");
+        JsonElement coilAfter = (await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag })).GetProperty("device");
+        Assert.Equal(coilBefore.GetRawText(), coilAfter.GetRawText());
+        await selection.UndoAsync();
+        Assert.Equal(drawingsBefore.GetRawText(), (await Drawings()).GetRawText());
+        Assert.Equal(before.Hash, (await selection.SnapshotAsync()).Hash);
+        Assert.Equal(1, await DevicesOnAsync(project, page));
+    }
+
+    [Fact]
     public async Task ASymbolCoilWithoutPart_DisplaysPrefixedTagAndDesignations_AndRejectsRepeatAndConflict()
     {
         await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);

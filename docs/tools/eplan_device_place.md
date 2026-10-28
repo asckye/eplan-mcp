@@ -11,6 +11,8 @@
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。代理知道部件号，不必先找窗口宏：工具放置部件自带的宏，图上与工程师手工放置的设备相同（标识、技术参数、连接点、触点镜像，S20），再给它目标标识。需要一组预先设计好的电路时用 `eplan_macro_insert`。
 
+M8 T7a 增加原生位置框：框内设备保留自己的结构，不继承框的结构（A55）；工具不重命名任何既有设备，受影响设备恒为空。仅支持 `+` 位置标识，固定 SPECIAL/SC 变体 0 与虚线，不提供装置段或任意外观配置。Large 验收代码已补，尚未运行。
+
 M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿既有写入策略、审批和审计，按部件调用保持兼容。产品 Large 验收代码已补，尚未运行。
 
 ## 2. 输入参数
@@ -18,16 +20,18 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `page` | string | 是 | — | 完整页名，必须是电路图页（`Circuit`） |
-| `part` | string | 来源二选一 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中并且有宏。部件号先精确匹配，没有时再不区分大小写匹配 |
+| `part` | string | 来源三选一 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中并且有宏。部件号先精确匹配，没有时再不区分大小写匹配 |
 | `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
 | `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 与 `part,variant` 互斥；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；首批限普通 `Function`，专用元素留后续任务 |
 | `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
+| `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
+| `corner_x`、`corner_y` | number | 位置框必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；其余来源禁止 |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
-| `tag` | string | 是 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页（页的结构去掉 `&` 文档类型：`=GAA+A1&EFS1/60` 得到 `=GAA+A1`）；或者完整标识（如 `=GAA+A1-KF20`） |
+| `tag` | string | 设备来源必填 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页（页的结构去掉 `&` 文档类型：`=GAA+A1&EFS1/60` 得到 `=GAA+A1`）；或者完整标识（如 `=GAA+A1-KF20`） |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的放置，不请求审批，也不修改项目 |
 
-- `tag` 必填：`CreateDevice` 放置的设备标识不带页的结构、也不编号（S20：`=+-Q1`），工具总是给它一个确定的标识。规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。
+- 设备来源 `tag` 必填：`CreateDevice` 放置的设备标识不带页的结构、也不编号（S20：`=+-Q1`），工具总是给它一个确定的标识。规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
 
@@ -52,6 +56,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - `hint`：有未放置的功能时说明它们要在 EPLAN 中放置（实现时改：`eplan_macro_insert` 会新建设备，放不了已有设备的功能）；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
 - 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，`part,variant` 为空。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
+
+- 位置框来源返回 `locationBox={structure,bounds:[minX,minY,maxX,maxY],outline:"dashed",affectedDevices:[]}`：dry-run 和 recovered 为预测，正常提交后为实际读回；`functions=0,unplaced=0`，兼容字段 `device.tag/category` 为位置标识/LocationBox（dry-run category 为空），不作为 `eplan_device_get` 的设备键；`symbol` 为解析后的 SPECIAL/SC。框内设备保持原结构，工具不重命名设备。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
@@ -89,6 +95,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
   - 改名与 `CreateDevice` 在同一个 `SafetyPoint` 中一起回滚、一起撤销；
   - 插入点与图上位置的关系（S20 的线圈在 (80, 160) 附近）。
 
+- **位置框规划/执行（A55/S43）**：同页同位置标识（忽略大小写）返回 `ALREADY_EXISTS`；允许包围既有器件。页面边界未知、非有限或两角越界则拒绝。指纹覆盖两角、虚线、库变体、页对象/尺寸、同页框结构和全项目设备名称；审批后变化返回 `PLAN_STALE`。沿同一 `FunctionTransactionScope` 用 `SymbolReference.Create` 取得真实 `LocationBox`，`SetLogicalArea` 后通过 `NameParts.DESIGNATION_LOCATION` 设置位置。递归设置 `GetGraphics` 的笔型 `StyleId=1`，核对实际外框不越页、逻辑两角、结构和变体，并逐对象核对全项目既有功能名称完全不变；不是通过重命名实现结构。缺图形、读回不符或取消即 Abort，缓存列表先释放，不关闭空撤销步；成功只 Commit/CloseUndo 一次。模型说明和审批均明确受影响设备为零。
+
 ## 6. 写操作专项
 - **dry-run**：返回第 3 节的结果，`execution = not_started`，`functions` 为 null。
 - **审批**：项目在 scratch 之外时请求审批，表单为一行变更（第 5 节），注明可以按 Ctrl+Z 撤销"AI: eplan_device_place"。
@@ -101,3 +109,5 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - **T2a/T2b**：Small 覆盖互斥、封闭 ID、有限数/溢出和变更指纹；Medium 用假 Bridge 走真实规划/执行与 Host 流水线，覆盖提交、重复/冲突、中途失败、读回不符、释放后回滚、审批拒绝/批准后几何变化。LargeWrite 新增无部件线圈、20214 前缀/相对位置、引脚代号及重复/冲突检查；本次只编写，尚未运行。
 - **Large**（示例项目的 scratch 副本）：新建页上放置 `SIE.3RH2122-1HB40`，`tag = "-KF20"`：读回 `=GAA+A1-KF20`，导出页面图片看到 `-KF20`；Ctrl+Z 一步撤销；scratch 之外的副本需要审批。
 - **Agent 评测**："在新页 `=GAA+A1&EFS1/60` 上放一个 SIE.3RH2122-1HB40，标识 -KF20"，作答后用 `eplan_device_get` 核对。
+
+- **T7a**：Small 覆盖来源互斥、标识、有限两角、原生适配器的结构/图形/虚线读回和取消；Medium 假 Bridge 覆盖 dry-run 零写入、审批、陈旧计划、读回不符和回滚无空步。LargeWrite 新页先放线圈，再围框，核对结构/虚线及线圈不变，一次撤销恢复到放框前；仅编写，未运行。

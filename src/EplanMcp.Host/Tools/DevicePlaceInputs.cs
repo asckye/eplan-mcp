@@ -9,9 +9,11 @@ internal static class DevicePlaceInputs
 {
     internal static void Configure(JsonObject schema)
     {
+        ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part"],"not":{"anyOf":[{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}},
-             {"required":["library","symbol","symbol_variant"],"not":{"anyOf":[{"required":["part"]},{"required":["variant"]}]}}]
+            [{"required":["part","tag"],"not":{"anyOf":[{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
+             {"required":["library","symbol","symbol_variant","tag"],"not":{"anyOf":[{"required":["part"]},{"required":["variant"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
+             {"required":["location_box","corner_x","corner_y"],"not":{"anyOf":[{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}}]
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
@@ -24,6 +26,19 @@ internal static class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.LocationBox is { } structure)
+        {
+            if (structure.Length is < 2 or > 65 || structure[0] != '+' || structure.Skip(1).Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.'))
+                || args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null
+                || args.Tag is not null || display is not null || args.ConnectionDesignations is not null)
+            { problems.Add("/location_box: use an exclusive +location identifier (1-64 letters, digits, '_' or '.'); no tag or symbol options."); }
+            if (!double.IsFinite(args.X) || !double.IsFinite(args.Y) || args.X < 0 || args.Y < 0
+                || args.CornerX is not { } x || args.CornerY is not { } y || !double.IsFinite(x) || !double.IsFinite(y) || x <= args.X || y <= args.Y)
+            { problems.Add("/corner_x: require finite lower-left x/y and upper-right corner_x/corner_y, with positive width and height."); }
+            return problems;
+        }
+        if (args.CornerX is not null || args.CornerY is not null)
+        { problems.Add("/location_box: corner_x and corner_y require a location_box source."); }
         bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null;
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))

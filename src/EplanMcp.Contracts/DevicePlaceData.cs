@@ -3,6 +3,8 @@ namespace EplanMcp.Contracts;
 /// <summary>Result of <see cref="OperationNames.DevicePlaceExecute"/>: the placed device as read back. Tags are project data.</summary>
 public sealed class DevicePlaceData
 {
+    /// <summary>Location-box readback, or null for device sources.</summary>
+    public LocationBoxData? LocationBox { get; set; }
     /// <summary>The name of the project the device was placed in.</summary>
     public string Project { get; set; } = string.Empty;
 

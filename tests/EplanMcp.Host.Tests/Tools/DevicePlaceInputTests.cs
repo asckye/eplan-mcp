@@ -106,6 +106,93 @@ public sealed class DevicePlaceInputTests
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }
 
+    [Theory]
+    [InlineData("+P1", true)]
+    [InlineData("+P_1.2", true)]
+    [InlineData("+", false)]
+    [InlineData("P1", false)]
+    [InlineData("=F+P1", false)]
+    [InlineData("+P 1", false)]
+    [InlineData("+P*", false)]
+    [InlineData("+P1-K1", false)]
+    [InlineData("+P1/1", false)]
+    [InlineData("+P1\\x", false)]
+    [InlineData("+P\n1", false)]
+    public void LocationBox_UsesALiteralLocationIdentifier(string structure, bool valid)
+    {
+        var args = Box();
+        args.LocationBox = structure;
+        Assert.Equal(valid, DevicePlaceInputs.Check(args, null).Count == 0);
+    }
+
+    [Theory]
+    [InlineData("part")]
+    [InlineData("variant")]
+    [InlineData("library")]
+    [InlineData("symbol")]
+    [InlineData("symbolVariant")]
+    [InlineData("tag")]
+    [InlineData("display")]
+    [InlineData("pins")]
+    [InlineData("length")]
+    public void LocationBox_RejectsOtherSourceOptionsAndOversizedIdentifiers(string field)
+    {
+        var args = Box();
+        switch (field)
+        {
+            case "part":
+                args.Part = "";
+                break;
+            case "variant":
+                args.Variant = "1";
+                break;
+            case "library":
+                args.Library = "SPECIAL";
+                break;
+            case "symbol":
+                args.Symbol = "SC";
+                break;
+            case "symbolVariant":
+                args.SymbolVariant = 0;
+                break;
+            case "tag":
+                args.Tag = "-K1";
+                break;
+            case "pins":
+                args.ConnectionDesignations = [];
+                break;
+            case "length":
+                args.LocationBox = "+" + new string('a', 65);
+                break;
+        }
+        Assert.StartsWith("/location_box:", Assert.Single(DevicePlaceInputs.Check(args, field == "display" ? [] : null)), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(null, 180d)]
+    [InlineData(100d, null)]
+    [InlineData(double.NaN, 180d)]
+    [InlineData(100d, double.PositiveInfinity)]
+    [InlineData(60d, 180d)]
+    [InlineData(100d, 140d)]
+    [InlineData(50d, 130d)]
+    public void LocationBox_RequiresFiniteOppositeCornersWithPositiveArea(double? x, double? y)
+    {
+        var args = Box();
+        args.CornerX = x;
+        args.CornerY = y;
+        Assert.StartsWith("/corner_x:", Assert.Single(DevicePlaceInputs.Check(args, null)), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LocationBox_RejectsExtraCornersOnOtherSources()
+    {
+        var args = Symbol();
+        args.CornerX = 100;
+        Assert.StartsWith("/location_box:", Assert.Single(DevicePlaceInputs.Check(args, null)), StringComparison.Ordinal);
+    }
+
+    private static DevicePlaceArgs Box() => new() { Project = "Line1", LocationBox = "+P1", X = 60, Y = 140, CornerX = 100, CornerY = 180 };
     private static DevicePlaceArgs Symbol() => new() { Project = "Line1", Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0 };
     private static JsonElement Json(string json) { using JsonDocument document = JsonDocument.Parse(json); return document.RootElement.Clone(); }
 }

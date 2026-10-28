@@ -9,7 +9,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A13/A52-A55: resolve before writing, read returned objects inside Transaction; never dispose owned objects.</summary>
-internal sealed class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement
+internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement
 {
     private readonly Project _project;
     private readonly Page _page;
@@ -31,7 +31,7 @@ internal sealed class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {
         try
-        { return Create(args, tag); }
+        { return args.LocationBox is null ? Create(args, tag) : CreateLocationBox(args); }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed,
