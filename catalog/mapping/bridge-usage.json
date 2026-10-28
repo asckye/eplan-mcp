@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "d9ad92cb",
-  "sourceHash": "sha256:d712e5dd98865a31f5e4641ef05b8431dd56ff75dc40f34144576fa60d438658",
+  "scannedSources": "4c83009c + uncommitted changes",
+  "sourceHash": "sha256:921afc81c13fcb76d2d038428f8a8fbe768adc9e7ad390fc1cbba2d8619a8708",
   "operations": [
     {
       "name": "action.execute",
@@ -375,6 +375,10 @@
     {
       "name": "placeholder.list",
       "class": "PlaceholderListOperation"
+    },
+    {
+      "name": "placement.text.create.execute",
+      "class": "PlacementTextCreateExecuteOperation"
     },
     {
       "name": "plan.functions",
@@ -984,6 +988,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -1022,6 +1027,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -1156,6 +1162,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -1177,6 +1194,19 @@
         ],
         "operations": [
           "property.set.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Circuit": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -2753,6 +2783,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -2791,6 +2822,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -2831,6 +2863,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -2869,6 +2902,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -3025,6 +3059,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -3096,6 +3141,28 @@
         "operations": [
           "page.create.execute",
           "page.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3225,6 +3292,17 @@
         ],
         "operations": [
           "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3359,6 +3437,28 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectExporter",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectExporter.cs",
@@ -3444,6 +3544,17 @@
         "operations": [
           "page.create.execute",
           "page.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3539,6 +3650,17 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3676,6 +3798,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "placement.text.create.execute",
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
@@ -3724,6 +3847,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertySetSession",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
@@ -3767,6 +3901,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3833,6 +3978,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -3881,6 +4037,17 @@
         ],
         "operations": [
           "import.pdf_comments.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -4046,6 +4213,17 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -5171,6 +5349,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -6233,6 +6422,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -6750,6 +6950,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.Text.#ctor": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.Text.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.MultiLangString,System.Double)": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Group.GetBoundingBox": [
       {
         "adapter": "EplanConnectionCreator",
@@ -6797,6 +7023,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -7133,6 +7360,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -7272,6 +7510,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -7438,6 +7677,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -7730,6 +7970,7 @@
           "language.remove.plan",
           "language.set.execute",
           "language.set.plan",
+          "placement.text.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
@@ -7785,6 +8026,7 @@
           "language.remove.plan",
           "language.set.execute",
           "language.set.plan",
+          "placement.text.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
@@ -8459,6 +8701,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -8499,6 +8742,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -8539,6 +8783,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -8588,6 +8833,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9153,6 +9399,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9193,6 +9440,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9233,6 +9481,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9273,6 +9522,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9313,6 +9563,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9351,6 +9602,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9391,6 +9643,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9429,6 +9682,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9469,6 +9723,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9516,6 +9771,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9565,6 +9821,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9603,6 +9860,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9643,6 +9901,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -9681,6 +9940,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -10466,6 +10726,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -10579,6 +10840,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -11196,6 +11458,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "Languages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -11389,6 +11662,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Describe",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -11535,6 +11819,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -15361,6 +15656,17 @@
         "operations": [
           "page.text.replace.execute"
         ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.TextBase.Contents": [
@@ -15390,6 +15696,41 @@
         "operations": [
           "device.place.execute"
         ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "",
+        "member": "height",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.TextBase.Justification": [
@@ -15417,6 +15758,18 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -16708,6 +17061,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -16953,6 +17317,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -17579,6 +17954,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Open",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -17722,6 +18108,17 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -18456,6 +18853,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -18655,6 +19053,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -18763,6 +19162,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -18990,6 +19390,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -19282,6 +19683,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -19433,6 +19835,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -21959,6 +22362,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -21997,6 +22401,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -22260,6 +22665,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -22298,6 +22704,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -22651,6 +23058,7 @@
           "language.remove.plan",
           "language.set.execute",
           "language.set.plan",
+          "placement.text.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
@@ -22955,6 +23363,28 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanProjectExporter",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectExporter.cs",
@@ -23168,6 +23598,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadValue.Texts",
         "member": "GetText",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadValue.cs",
@@ -23238,6 +23679,17 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -23375,6 +23827,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "placement.text.create.execute",
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
@@ -23482,6 +23935,17 @@
         ],
         "operations": [
           "import.pdf_comments.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -23730,6 +24194,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -25156,6 +25631,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -25500,6 +25986,17 @@
         "operations": [
           "page.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType": [
@@ -25534,6 +26031,17 @@
         ],
         "operations": [
           "page.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Validate",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -27003,6 +27511,17 @@
         ]
       },
       {
+        "adapter": "",
+        "member": "height",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -27060,6 +27579,17 @@
         ],
         "operations": [
           "page.text.replace.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -28128,6 +28658,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -28471,6 +29012,17 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       },
       {
@@ -29070,6 +29622,7 @@
           "language.remove.plan",
           "language.set.execute",
           "language.set.plan",
+          "placement.text.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
@@ -29228,6 +29781,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -29338,6 +29892,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -29479,6 +30034,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -29549,6 +30105,7 @@
           "part.search",
           "part.sync.execute",
           "part.sync.plan",
+          "placement.text.create.execute",
           "project.create.execute",
           "project.translate.execute",
           "project.translate.plan",
@@ -29721,6 +30278,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",
@@ -29973,6 +30531,7 @@
           "language.remove.plan",
           "language.set.execute",
           "language.set.plan",
+          "placement.text.create.execute",
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
@@ -30607,6 +31166,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -30888,6 +31448,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -30928,6 +31489,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -30968,6 +31530,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -31006,6 +31569,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -31046,6 +31610,7 @@
           "page.update.execute",
           "part.sync.execute",
           "placeholder.apply.execute",
+          "placement.text.create.execute",
           "project.translate.execute",
           "property.set.execute",
           "report.update.execute",
@@ -31778,6 +32343,7 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list",
+          "placement.text.create.execute",
           "plan.functions",
           "plan.macro.inspect",
           "plan.names",

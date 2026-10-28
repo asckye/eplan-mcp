@@ -20,7 +20,8 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         string page = Assert.Single(await selection.CreatePagesAsync(1));
         WritePlan languages = await bridge.InvokeAsync<LanguageSetArgs, WritePlan>(OperationNames.LanguageSetPlan,
             new() { Project = host.Writable, Add = ["en_US"] }, TestContext.Current.CancellationToken);
-        string display = languages.Details![LanguageSetPlanOperation.DisplayBefore].Split('\n').First(LanguageCodes.IsCode);
+        // The copy may leave the display languages unset; then only a language-independent text is visible (A54).
+        string display = languages.Details![LanguageSetPlanOperation.DisplayBefore].Split('\n').FirstOrDefault(LanguageCodes.IsCode) ?? "??_??";
         string other = display == "en_US" ? "de_DE" : "en_US";
         LiveSnapshots.Snapshot before = await LiveSnapshots.TakeAsync(bridge, new() { Project = host.Writable });
         string drawingBefore = await DrawingHash(bridge, page);
@@ -28,7 +29,7 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         {
             Project = host.Writable,
             Page = page,
-            Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = new() { [display] = "Visible panel", [other] = "Other language" } },
+            Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = display == "??_??" ? new() { [display] = "Visible panel" } : new() { [display] = "Visible panel", [other] = "Other language" } },
         };
 
         // Direct staged Bridge primitive: the Host tool intentionally remains unregistered until T4c.

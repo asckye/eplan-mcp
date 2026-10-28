@@ -25,12 +25,12 @@ internal static class TextCreation
         create.Fingerprint = ((WritePlan)new PageCreatePlanOperation(catalog, pages, writer).Execute(create)!).Fingerprint;
         new PageCreateExecuteOperation(catalog, pages, writer, transactions).Execute(create);
         string before = State(project, sentinel);
-        string display = LanguageCodes.Split(new EplanProjectLanguages().Read(project).Display).First(LanguageCodes.IsCode);
+        string display = LanguageCodes.Split(new EplanProjectLanguages().Read(project).Display).FirstOrDefault(LanguageCodes.IsCode) ?? "??_??"; // unset display: language-independent text (A54)
         var args = new PlacementTextCreateArgs
         {
             Project = project,
             Page = sentinel,
-            Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = new() { [display] = "Visible panel", [display == "en_US" ? "de_DE" : "en_US"] = "Other language" } },
+            Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = display == "??_??" ? new() { [display] = "Visible panel" } : new() { [display] = "Visible panel", [display == "en_US" ? "de_DE" : "en_US"] = "Other language" } },
         };
         BridgeError error;
         try

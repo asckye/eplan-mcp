@@ -55,6 +55,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
                 || text.Contents.Any(p => (p.Key != "??_??" && (p.Key.Length != 5 || !LanguageCodes.IsCode(p.Key))) || string.IsNullOrWhiteSpace(p.Value))
                 || text.Contents.Sum(p => (long)p.Value.Length) > 500)
             { throw InvalidArgument("/text requires two finite 0..10000 mm coordinates, /text/heightMm in 0.5..100 and /text/contents of 1..500 characters with explicit languages."); }
+            if (text.Contents.ContainsKey("??_??") && text.Contents.Count > 1)
+            { throw InvalidArgument("/text/contents: ??_?? (language-independent) cannot be combined with languages; EPLAN keeps only the languages (live T4b)."); }
             project = WriteArguments.Writable(catalog, args.Project);
             writer.Validate(project.Path, args.Page, text);
         }
@@ -65,7 +67,11 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             PlacementText actual = writer.Create(project.Path, args.Page, text);
             if (actual.HeightMm != text.HeightMm || !actual.Position.SequenceEqual(text.Position) || actual.Contents.Count != text.Contents.Count
                 || text.Contents.Any(p => !actual.Contents.TryGetValue(p.Key, out string? value) || !string.Equals(value, p.Value, StringComparison.Ordinal)))
-            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Text languages, height or position did not read back as requested; all changes were rolled back. Ask the engineer to check the page."); }
+            {
+                throw new BridgeErrorException(ErrorReason.EplanOperationFailed, string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    "Text languages, height or position did not read back as requested (read {0} mm at {1}, languages {2}); all changes were rolled back. Ask the engineer to check the page.",
+                    actual.HeightMm, string.Join(",", actual.Position), string.Join(",", actual.Contents.Keys)));
+            }
             return actual;
         }, shouldCommit: _ => true); // A54: rollback without closing the failed creation's undo step.
         return new PlacementTextCreateData { Text = committed.Result, Warning = committed.Warning };

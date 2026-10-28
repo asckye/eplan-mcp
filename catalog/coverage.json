@@ -66,9 +66,9 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 307,
+      "implemented": 308,
       "byTools": 299,
-      "partial": 49,
+      "partial": 50,
       "automatedTest": 299,
       "liveVerified": 162,
       "envBlocked": 122,
@@ -84,9 +84,9 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 126,
+      "implemented": 127,
       "byTools": 119,
-      "partial": 44,
+      "partial": 45,
       "automatedTest": 119,
       "liveVerified": 75,
       "envBlocked": 45,
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 261,
+    "used": 263,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 34,
+      "implemented": 35,
       "liveVerified": 10
     },
     {
@@ -630,8 +630,8 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 143,
-      "operationGroups": 83,
+      "apiIds": 144,
+      "operationGroups": 84,
       "dataDictionary": 1,
       "dependencies": 58,
       "actions": 0,
@@ -1402,15 +1402,15 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 105,
-      "operationGroups": 63,
+      "apiIds": 106,
+      "operationGroups": 64,
       "dataDictionary": 1,
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
       "small": 5,
       "medium": 5,
-      "large": 13,
+      "large": 14,
       "apiNotes": [
         "A11",
         "A12"
@@ -1430,7 +1430,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 4,
-      "large": 8,
+      "large": 9,
       "apiNotes": [
         "A11"
       ],
@@ -4137,6 +4137,13 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Text.Create",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": true,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBase.Contents",
       "layer": "operation",
       "status": "automated_test",
@@ -4151,7 +4158,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_page_get"
       ]
     },
     {
