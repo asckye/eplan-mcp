@@ -28,3 +28,17 @@ internal sealed class EplanProjectLanguages
         return new() { Display = _project.Display };
     }
 }
+
+internal sealed class EplanConnectionCreator(bool readSymbolBounds = true)
+{
+    public ConnectionCreatePlanner.Scene Read(string project, string page) => throw new NotSupportedException(readSymbolBounds.ToString(System.Globalization.CultureInfo.InvariantCulture));
+}
+
+internal static class EplanDeviceReader
+{
+    public static Page? FindPage(DMObjectsFinder finder, string page)
+    {
+        using var filter = new PagesFilter { Name = page, ExactNameMatching = true };
+        return finder.GetPages(filter).SingleOrDefault(p => p.Name == page);
+    }
+}

@@ -60,8 +60,6 @@ public static class PlacementMovePlanner
             { throw Missing("Read the full placement location."); }
             targets.Add((row, coordinates.Select((n, j) => (double)n + (delta ? row.Location[j] : 0)).ToArray()));
         }
-        if ((bool?)input["dry_run"] != true)
-        { throw Missing("Execution is unavailable until T5b; use dry_run=true."); }
         PageDrawingGeometry page = scene.Page;
         if (!scene.Complete || scene.PageType != "Circuit" || page.Project != scene.Project.Path || (string?)input["page"] != page.Page
             || ((string?)input["project"] != scene.Project.Name && !ProjectResolver.SamePath((string)input["project"]!, page.Project))
@@ -154,10 +152,10 @@ public static class PlacementMovePlanner
             ["fingerprint"] = fingerprint,
             ["graphicalChanges"] = new JArray(changed.Select(k => new JObject { ["pins"] = new JArray(k.Split('|')), ["before"] = before.TryGetValue(k, out double[][]? b) ? JArray.FromObject(b) : null, ["after"] = after.TryGetValue(k, out double[][]? a) ? JArray.FromObject(a) : null })),
             ["connectionChanges"] = JArray.FromObject(noOp ? [] : scene.Logical.Where(c => affected.Contains(c.StartDevice ?? "") || affected.Contains(c.EndDevice ?? "")).Select(c => new[] { c.StartDevice, c.EndDevice })),
-            ["generation"] = "Affected logical connections require regeneration and endpoint verification in T5b."
+            ["generation"] = "Logical endpoints are preserved; use eplan_connection_generate after moving to regenerate connections."
         };
         string encoded = result.ToString(Formatting.None);
-        Require((encoded.Count(c => c <= 127) + 3) / 4 + encoded.Count(c => c > 127) <= ((string?)input["response_format"] == "detailed" ? 20000 : 5000), "/response_format", "Use detailed or fewer moves; complete impact cannot be truncated.");
+        Require((encoded.Count(c => c <= 127) + 3) / 4 + encoded.Count(c => c > 127) <= ((string?)input["response_format"] == "detailed" ? 20000 : 5000) - 256, "/response_format", "Use detailed or fewer moves; complete impact cannot be truncated.");
         return result;
     }
 

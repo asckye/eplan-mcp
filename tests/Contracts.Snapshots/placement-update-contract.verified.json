@@ -1,9 +1,9 @@
 ﻿{
-  "registered": false,
+  "registered": true,
   "tool": {
     "name": "eplan_placement_update",
-    "title": "Plan absolute placement moves on an EPLAN page",
-    "description": "Plans same-page moves from eplan_page_get include_drawings locators. Absolute x_mm/y_mm or delta_mm; deltas resolve to absolute positions. Property text follows its parent. Groups are unsupported. Dry run only until T5b; zero delta is a no-op.",
+    "title": "Move placements on an EPLAN page",
+    "description": "Moves same-page symbols and text/line/rectangle from eplan_page_get include_drawings locators. mm, bottom left, y up; x_mm/y_mm or delta_mm. Property text follows its parent; groups refused. One undo; no-op leaves none. Approval outside scratch; denial returns APPROVAL_DENIED. Use eplan_connection_generate afterwards.",
     "inputSchema": {
       "type": "object",
       "additionalProperties": false,
@@ -156,10 +156,13 @@
           "type": "string"
         },
         "execution": {
-          "const": "not_started"
+          "enum": [
+            "not_started",
+            "committed"
+          ]
         },
         "dryRun": {
-          "const": true
+          "type": "boolean"
         },
         "noOp": {
           "type": "boolean"
@@ -176,6 +179,15 @@
         },
         "generation": {
           "type": "string"
+        },
+        "warning": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "recovered": {
+          "type": "boolean"
         },
         "moves": {
           "type": "array",
@@ -335,5 +347,5 @@
       "readOnlyHint": false
     }
   },
-  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"moves\":[{\"locator\":{\"project\":\"scratch-project\",\"page\":\"P\",\"type\":4,\"oid\":1,\"digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"},\"x_mm\":30,\"y_mm\":30}],\"dry_run\":true}\n```\nUse a complete locator returned by eplan_page_get with include_drawings=true. In a move, supply locator and absolute x_mm/y_mm, or locator and delta_mm:[dx,dy]. Set dry_run=true. This contract is not registered until T5b.\n## Workflow\nRead the complete page, preview, review every following property text and connection change. Execution is unavailable. Zero delta is a no-op.\n## Fields\nExplicit project/page; moves has 1-50 items. Millimetres, bottom left, y up; default snap_to_grid=true. Deltas resolve to absolute targets before snapping. Do not replay a delta as an absolute plan.\n## Errors\nProperty text follows its parent; never target it independently or alongside its parent. Groups, macro groups and unverified types are refused. Refresh stale locators. Unknown bounds or incomplete connection evidence fail closed.\nWrite, idempotent absolute plans, full profile. No write, approval or transaction is performed by this preview. Execution remains CAPABILITY_MISSING until T5b.\n"
+  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"moves\":[{\"locator\":{\"project\":\"scratch-project\",\"page\":\"P\",\"type\":4,\"oid\":1,\"digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"},\"x_mm\":30,\"y_mm\":30}],\"dry_run\":true}\n```\nUse a complete locator returned by eplan_page_get with include_drawings=true. In a move, supply locator and absolute x_mm/y_mm, or locator and delta_mm:[dx,dy]. Use dry_run=true to preview; omit it to execute the approved absolute plan.\n## Workflow\nRead the complete page, preview, review every following property text and connection change. Zero delta is a no-op. Outside scratch, approval is required; denial returns APPROVAL_DENIED. One Ctrl+Z restores a successful move. Use eplan_connection_generate afterwards to regenerate logical connections; its changes have their own undo step.\n## Fields\nExplicit project/page; moves has 1-50 items. Millimetres, bottom left, y up; default snap_to_grid=true. Deltas resolve to absolute targets before snapping. Do not replay a delta as an absolute plan.\n## Errors\nProperty text follows its parent; never target it independently or alongside its parent. Groups, macro groups and unverified types are refused. Refresh stale locators. Unknown bounds or incomplete connection evidence fail closed.\nWrite, idempotent absolute plans, full profile. Dry run performs no write or approval. Mid-batch/readback failures roll back the closure without closing an undo step; unprovable restoration returns OUTCOME_UNKNOWN. Logical endpoints are preserved and graphical changes are verified after commit.\n"
 }

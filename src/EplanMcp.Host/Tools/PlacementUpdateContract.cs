@@ -4,7 +4,7 @@ using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tools;
 
-/// <summary>T5a contract only; registration and execution require T5b.</summary>
+/// <summary>Full-profile moves use complete locators and closed absolute/delta branches.</summary>
 internal static class PlacementUpdateContract
 {
     internal static readonly JsonElement Input = JsonDocument.Parse("""
@@ -20,18 +20,27 @@ internal static class PlacementUpdateContract
     internal static Tool Definition => new()
     {
         Name = "eplan_placement_update",
-        Title = "Plan absolute placement moves on an EPLAN page",
-        Description = "Plans same-page moves from eplan_page_get include_drawings locators. Absolute x_mm/y_mm or delta_mm; deltas resolve to absolute positions. Property text follows its parent. Groups are unsupported. Dry run only until T5b; zero delta is a no-op.",
+        Title = "Move placements on an EPLAN page",
+        Description = "Moves same-page symbols and text/line/rectangle from eplan_page_get include_drawings locators. mm, bottom left, y up; x_mm/y_mm or delta_mm. Property text follows its parent; groups refused. One undo; no-op leaves none. Approval outside scratch; denial returns APPROVAL_DENIED. Use eplan_connection_generate afterwards.",
         InputSchema = Input,
         OutputSchema = Output(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = true, OpenWorldHint = false },
     };
 
+    internal static void Configure(IEnumerable<ModelContextProtocol.Server.McpServerTool> tools)
+    {
+        Tool tool = tools.Single(t => t.ProtocolTool.Name == "eplan_placement_update").ProtocolTool;
+        tool.Title = Definition.Title;
+        tool.Description = Definition.Description;
+        tool.InputSchema = Input;
+        tool.OutputSchema = Definition.OutputSchema;
+    }
+
     private static JsonElement Output()
     {
         JsonNode schema = JsonNode.Parse("""
             {"type":"object","additionalProperties":false,"required":["project","page","execution","dryRun","noOp","gridSize","boundarySource","moves","fingerprint","graphicalChanges","connectionChanges","generation"],"properties":{
-              "project":{"type":"string"},"page":{"type":"string"},"execution":{"const":"not_started"},"dryRun":{"const":true},"noOp":{"type":"boolean"},"gridSize":{"type":"number","exclusiveMinimum":0},"boundarySource":{"const":"Page.Size"},"fingerprint":{"type":"string"},"generation":{"type":"string"},
+              "project":{"type":"string"},"page":{"type":"string"},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},"noOp":{"type":"boolean"},"gridSize":{"type":"number","exclusiveMinimum":0},"boundarySource":{"const":"Page.Size"},"fingerprint":{"type":"string"},"generation":{"type":"string"},"warning":{"type":["string","null"]},"recovered":{"type":"boolean"},
               "moves":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["locator","parent","before","requested","after","snapped","bounds"],"properties":{"locator":{"$ref":"#/$defs/locator"},"parent":{"oneOf":[{"type":"null"},{"$ref":"#/$defs/locator"}]},"before":{"$ref":"#/$defs/point"},"requested":{"$ref":"#/$defs/point"},"after":{"$ref":"#/$defs/point"},"snapped":{"type":"boolean"},"bounds":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"number"}}}}},
               "graphicalChanges":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["pins","before","after"],"properties":{"pins":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string"}},"before":{"$ref":"#/$defs/segment"},"after":{"$ref":"#/$defs/segment"}}}},
               "connectionChanges":{"type":"array","items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":["string","null"]}}}}}

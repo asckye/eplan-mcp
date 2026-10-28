@@ -20,6 +20,7 @@ internal sealed class TransactionScope : ITransactionScope
     private readonly UndoStep _undoStep;
     private QuietModeStep? _quietMode;
     private bool _disposed;
+    private bool _committed;
 
     public TransactionScope(string undoDescription)
     {
@@ -49,6 +50,7 @@ internal sealed class TransactionScope : ITransactionScope
     {
         EndQuietMode();
         _safetyPoint.Commit();
+        _committed = true;
     }
 
     public void CloseUndo() => _undoStep.CloseUndo();
@@ -56,7 +58,15 @@ internal sealed class TransactionScope : ITransactionScope
     public void Rollback()
     {
         EndQuietMode();
-        _safetyPoint.Rollback();
+        if (_committed)
+        {
+            // A7/S2: only the still-open step can reverse a committed change; verify restoration before releasing it.
+            using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
+            _undoStep.DoUndo();
+            _safetyPoint.Commit();
+        }
+        else
+        { _safetyPoint.Rollback(); }
     }
 
     public void Dispose()

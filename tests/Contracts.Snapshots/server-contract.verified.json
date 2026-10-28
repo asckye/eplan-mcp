@@ -10544,6 +10544,353 @@
       }
     },
     {
+      "name": "eplan_placement_update",
+      "title": "Move placements on an EPLAN page",
+      "description": "Moves same-page symbols and text/line/rectangle from eplan_page_get include_drawings locators. mm, bottom left, y up; x_mm/y_mm or delta_mm. Property text follows its parent; groups refused. One undo; no-op leaves none. Approval outside scratch; denial returns APPROVAL_DENIED. Use eplan_connection_generate afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "moves"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          },
+          "moves": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "locator",
+                    "x_mm",
+                    "y_mm"
+                  ],
+                  "properties": {
+                    "locator": {
+                      "$ref": "#/$defs/locator"
+                    },
+                    "x_mm": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "y_mm": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "locator",
+                    "delta_mm"
+                  ],
+                  "properties": {
+                    "locator": {
+                      "$ref": "#/$defs/locator"
+                    },
+                    "delta_mm": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "number",
+                        "minimum": -10000,
+                        "maximum": 10000
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false
+          },
+          "snap_to_grid": {
+            "type": "boolean",
+            "default": true
+          },
+          "response_format": {
+            "enum": [
+              "concise",
+              "detailed"
+            ],
+            "default": "concise"
+          }
+        },
+        "$defs": {
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "oid": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "execution",
+          "dryRun",
+          "noOp",
+          "gridSize",
+          "boundarySource",
+          "moves",
+          "fingerprint",
+          "graphicalChanges",
+          "connectionChanges",
+          "generation"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "execution": {
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "noOp": {
+            "type": "boolean"
+          },
+          "gridSize": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "boundarySource": {
+            "const": "Page.Size"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovered": {
+            "type": "boolean"
+          },
+          "moves": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "locator",
+                "parent",
+                "before",
+                "requested",
+                "after",
+                "snapped",
+                "bounds"
+              ],
+              "properties": {
+                "locator": {
+                  "$ref": "#/$defs/locator"
+                },
+                "parent": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/$defs/locator"
+                    }
+                  ]
+                },
+                "before": {
+                  "$ref": "#/$defs/point"
+                },
+                "requested": {
+                  "$ref": "#/$defs/point"
+                },
+                "after": {
+                  "$ref": "#/$defs/point"
+                },
+                "snapped": {
+                  "type": "boolean"
+                },
+                "bounds": {
+                  "type": "array",
+                  "minItems": 4,
+                  "maxItems": 4,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "graphicalChanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "pins",
+                "before",
+                "after"
+              ],
+              "properties": {
+                "pins": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "before": {
+                  "$ref": "#/$defs/segment"
+                },
+                "after": {
+                  "$ref": "#/$defs/segment"
+                }
+              }
+            }
+          },
+          "connectionChanges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "$defs": {
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "oid": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "point": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "segment": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          }
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_plan_apply",
       "title": "Apply plan",
       "description": "Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. Dry-run rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.",
@@ -14847,6 +15194,7 @@
               "eplan_page_update",
               "eplan_page_text_replace",
               "eplan_placement_create",
+              "eplan_placement_update",
               "eplan_page_delete",
               "eplan_page_renumber",
               "eplan_device_list",

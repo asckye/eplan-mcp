@@ -256,12 +256,12 @@ public sealed class PlacementMovePlannerTests
     }
 
     [Fact]
-    public void Execution_IsCapabilityMissingEvenForZeroDelta()
+    public void ExecutionRequest_ZeroDelta_IsNoOp()
     {
         var f = new MoveFixture();
         f.Request["dry_run"] = false;
         f.Request["moves"]![0]!["delta_mm"] = new JArray(0, 0);
-        AssertError(f, ErrorReason.CapabilityMissing);
+        Assert.True((bool)f.Plan()["noOp"]!);
     }
 
     internal static void AssertError(MoveFixture f, string reason, string? pointer = null)

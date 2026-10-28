@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A52/S40: borrowed objects stay inside one main-thread request; discovery precedes the write wrapper.</summary>
-internal sealed class EplanConnectionCreator : IConnectionCreator
+internal sealed class EplanConnectionCreator(bool readSymbolBounds = true) : IConnectionCreator
 {
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => new EplanSymbolReader().Read(projectPath, args);
     private static Page Page(string project, string page)
@@ -44,7 +44,7 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                 { scene.Pins.Add(Key(reference, pin.Index), new() { Location = [reference.Location.X + pin.Location.X, reference.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); }
             }
         }
-        foreach (SymbolVariant variant in Variants(target.Path))
+        foreach (SymbolVariant variant in readSymbolBounds ? Variants(target.Path) : [])
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
         scene.ReadCables = () => ReadCables(target.Path, page, scene);
