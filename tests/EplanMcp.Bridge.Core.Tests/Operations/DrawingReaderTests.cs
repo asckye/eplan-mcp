@@ -117,6 +117,19 @@ public sealed class DrawingReaderTests
         Assert.Throws<BridgeErrorException>(() => bridge.Read("+A1/1"));
     }
 
+    [Fact]
+    public void FakeBridge_TextHeight_ChangesDiscoveryAndDigest()
+    {
+        var text = new Text(4) { Height = 3.5 };
+        var bridge = new FakeDrawingBridge(new Page { AllPlacements = [text] });
+        DrawingPlacement before = Assert.Single(bridge.Read("+A1/1")!.Placements);
+        Assert.Equal("3.5", before.Properties["height_mm"]);
+        text.Height = 4;
+        DrawingPlacement after = Assert.Single(bridge.Read("+A1/1")!.Placements);
+        Assert.Equal("4", after.Properties["height_mm"]);
+        Assert.NotEqual(before.Locator.Digest, after.Locator.Digest);
+    }
+
     private sealed class FakeDrawingBridge(params Page[] pages)
     {
         private readonly InlineDispatcher _dispatcher = new();

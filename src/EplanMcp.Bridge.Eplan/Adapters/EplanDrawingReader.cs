@@ -85,6 +85,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 location,
                 bounds,
                 content = contents?.GetAsString(),
+                height = placement is Text text ? DrawingCoordinates.ApiToMillimetres(text.Height) : (double?)null,
                 name = (placement as FunctionBase)?.Name,
                 display = (placement as PropertyPlacement)?.GetDisplayString(),
                 start = placement is Line line ? XY(line.StartPoint) : null,
@@ -92,7 +93,13 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }));
             return new DrawingPlacement
             {
-                Properties = new Dictionary<string, string?> { ["name"] = (placement as FunctionBase)?.Name, ["text"] = contents?.GetAsString(), ["display"] = (placement as PropertyPlacement)?.GetDisplayString() }
+                Properties = new Dictionary<string, string?>
+                {
+                    ["name"] = (placement as FunctionBase)?.Name,
+                    ["text"] = contents?.GetAsString(),
+                    ["display"] = (placement as PropertyPlacement)?.GetDisplayString(),
+                    ["height_mm"] = placement is Text heightText ? DrawingCoordinates.ApiToMillimetres(heightText.Height).ToString("R", System.Globalization.CultureInfo.InvariantCulture) : null
+                }
                     .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too
                 Location = location,

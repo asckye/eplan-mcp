@@ -10,6 +10,9 @@ public static class OperationNames
     public const string ConnectionCreatePlan = "connection.create.plan";
     /// <summary>Two-commit connection creation; approved request/fingerprint, JSON result.</summary>
     public const string ConnectionCreateExecute = "connection.create.execute";
+    /// <summary>Internal TEXT creation, before the unified Host entry. Arguments: <see cref="PlacementTextCreateArgs"/>; data: <see cref="PlacementTextCreateData"/>.</summary>
+    public const string PlacementTextCreateExecute = "placement.text.create.execute";
+
     /// <summary>Unregistered reference-copy preparation; arguments: ReferencePrepareArgs; data: ReferenceCopyData.</summary>
     public const string ReferencePrepare = "reference.prepare";
     /// <summary>Unregistered owned-copy close; arguments: ReferenceCloseArgs; data: ProjectListData.</summary>

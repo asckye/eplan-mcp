@@ -3,7 +3,7 @@
 |---|---|
 | 分组 / Profile / 安全级别 | `placement` / `full` / Write |
 | 标题 / 四注解 | `Create text and graphics on an EPLAN page`；readOnly/destructive/idempotent/openWorld 均 false |
-| 状态 | T4a 只读规划；不注册 MCP 工具或 Bridge 操作，执行返回 `CAPABILITY_MISSING`，T4b/T4c 验证后统一接入 |
+| 状态 | T4a 只读规划、T4b 内部 TEXT 创建已接 Bridge；MCP 工具仍不注册，Host 执行返回 `CAPABILITY_MISSING`，T4c 验证后统一接入 |
 ## 1. 这个工具解决什么任务
 在指定电路图页添加说明文字、图形直线和矩形；图形线不承担导线功能。契约见 `PlacementCreateContract`，英文用法草案见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
 ## 2. 输入参数
@@ -16,7 +16,7 @@ dry-run 回显实际 `project,page`、`execution=not_started,dryRun=true`、`gri
 ## 4. 错误
 `INVALID_ARGUMENT`：schema、语言、字高、坐标或完整外框越界，`metadata.violations` 汇总 JSON Pointer；`PAGE_NOT_FOUND` 等读取错误沿用原码。缺页界/栅格、显示语言证据、文字完整外框或执行能力返回 `CAPABILITY_MISSING`，列 `metadata.missing`。全部 `execution=not_started`。
 ## 5. 实现要点
-只读复用 `project.get → page.get → page.drawing.get`，不新增操作；文字测量与显示语言为内部可信依赖，T4b 补适配。依据 [A54](../eplan/api-notes.md)：`Graphics.Text.Create`、`Graphics.Line.Create`、`Graphics.Rectangle.Create/SetArea`；规划不调用这些写 API。默认 60 s；未来超过 2 s 支持进度、每 5 s 心跳和安全点取消。
+只读规划复用 `project.get → page.get → page.drawing.get`。T4b 内部 `placement.text.create.execute` 验证精确 Circuit 页、显示语言及 ISO 代码，在既有事务中创建并核对全部语言、字高和坐标，不符即回滚且不关闭失败撤销步；只返回 DTO，不在 Abort 后访问新建对象或属性列表（A54/A55）。文字完整外框测量、统一规划/执行与混合批量留 T4c。默认 60 s；未来超过 2 s 支持进度、每 5 s 心跳和安全点取消。
 ## 6. 写操作专项
 T4a 不审批、不审计写入、不建事务或撤销步。未来执行走既有 WritePipeline、scratch/外部审批和指纹重核；审批及审计覆盖全部语言、实际几何/外框、吸附与影响，单次 `LockingStep → SafetyPoint → UndoStep → QuietModeStep`，逐项读回一致才提交，一次撤销；失败整批回滚，不自动拆批或重发。ADR-0010 的恢复/unknown 暂停保持，留 T4b/T4c 验证。
 ## 7. 测试

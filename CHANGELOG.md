@@ -9,6 +9,7 @@
 - 模块只读检查增加供 M3 使用的内部服务：保留跨页引用、占位符值集、实际属性与模块声明，未解析引用明确列为缺口；缺 Bridge 能力或授权时拒绝，不注册新工具或写操作，实机闭包对照待验证。
 - 新增 `eplan_page_open`（full，Read）：按显式项目与精确页名打开或聚焦编辑器，重复调用只重新聚焦；不保存或修改工程数据，不留撤销步。离线宿主明确拒绝；新增 Large 测试待运行。
 - 新增 `eplan_asset_review`（full，本地数据）：经工程师独立窗口审核候选、关闭缺口或提升新正式规则；`eplan_pack_build` 拒绝无来源的 mandatory 规则与缺少匹配本机确认的 official，手改 standing 无效。
+- M8 T4b：增加 Bridge 内部 TEXT 创建适配，要求显示语言或语言无关文字，在事务内核对语言、字高与位置后才提交，失败回滚无空撤销步；绘图发现增加字高。Host 执行仍为 `CAPABILITY_MISSING`，尚未注册工具；Large 已编写，未运行。
 - M8 T4a：新增 `placement` 词表及 `eplan_placement_create` 的契约/只读规划，校验显式语言、完整外框并报告栅格吸附；工具尚未注册，执行留 T4b/T4c。
 - `eplan_connection_create`（full / Write）：显式正交路径及角/T/电位连接符号，一次调用放置、生成两次提交（2 undo steps）；生成失败自动撤销放置，端点读回不符整体补偿。
 - M8 T3a：新增 `eplan_connection_create` 的规格、未注册契约与 dry-run 路径/符号规划器，预测单页 SPECIAL 角/T/电位节点、吸附坐标、图形自动线和生成后的逻辑端点；执行仍返回 `CAPABILITY_MISSING`。A52 的独立连接生成及两个撤销步骤明确列入预览，未开放原子执行。

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Test-only offline reader: no Bridge operation is registered before T0b. EPLAN libraries are not shipped. -->
+  <!-- Test-only reader and rollback probe; no fault injection is exposed through production operations. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net481</TargetFramework>
@@ -10,6 +10,10 @@
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Eplan\EplanMcp.Bridge.Eplan.csproj" />
     <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
     <Reference Include="WindowsBase" />
+    <Reference Include="Eplan.EplApi.AFu">
+      <HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Eplan.EplApi.Starteru">
       <HintPath>$(EplanBinPath)\Eplan.EplApi.Starteru.dll</HintPath>
     </Reference>
