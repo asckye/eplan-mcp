@@ -64,14 +64,23 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             Assert.NotEmpty(connections.GetProperty("connections").EnumerateArray());
             JsonElement image = await eplan.CallAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = JsonSerializer.SerializeToElement(new[] { page }) });
             TestContext.Current.TestOutputHelper!.WriteLine($"{kind} {directions}: actual StartPin/EndPin={result.GetProperty("actualEndpoints")}; image={image.GetProperty("directory")}");
+            // The business snapshot holds functions and connections, not bare connection symbols, so count those
+            // on the page: the first undo removes only the generated connections, the second the placed symbols.
+            int placed = await SymbolsAsync(session.Project, page);
             await session.UndoAsync();
-            Assert.NotEqual(before, (await session.SnapshotAsync()).Hash);
+            Assert.Empty((await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page })).GetProperty("connections").EnumerateArray());
+            Assert.Equal(placed, await SymbolsAsync(session.Project, page));
             await session.UndoAsync();
+            Assert.Equal(placed - items.Count, await SymbolsAsync(session.Project, page));
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
             // S40 has no reproducible native generation failure; fake Bridge/core tests inject it before commit.
         }
         finally { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
     }
+
+    private async Task<int> SymbolsAsync(string project, string page) =>
+        (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200 }))
+            .GetProperty("drawings").GetProperty("items").EnumerateArray().Count(p => p.GetProperty("kind").GetString() is not ("Function" or "PropertyPlacement")); // fixture devices are Functions
 
     private static async Task<string> NewPageAsync(PlanStepLiveSession session) => Assert.Single(await session.CreatePagesAsync(1));
 }
