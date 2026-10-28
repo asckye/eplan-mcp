@@ -1,9 +1,9 @@
 ﻿{
   "name": "eplan_connection_create",
   "title": "Create connection symbols and explicit wire paths",
-  "status": "proposed_unregistered_dry_run_only",
+  "status": "registered_preview_contract",
   "profile": "full",
-  "description": "Plan 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Logical connections require a separately committed eplan_connection_generate. Execution is unavailable until atomic placement and generation are supported. Future writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. One call commits placement then generation: 2 undo steps. Generation failure undoes placement. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
   "annotations": {
     "readOnlyHint": false,
     "destructiveHint": false,
@@ -720,7 +720,7 @@
     ],
     "coverage": "complete_page_predicted_endpoints",
     "logicalDuringPlacement": 0,
-    "generation": "Separate committed eplan_connection_generate; placement and generation each have their own undo step. Atomic execution remains unavailable.",
+    "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
     "undoSteps": 2,
     "fingerprint": "11b3bfc291213be5456ccef5d3d3ec63b10efb6153a79b374d2d03633a7d75d9"
   }

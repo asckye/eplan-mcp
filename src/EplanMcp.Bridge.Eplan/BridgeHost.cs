@@ -77,6 +77,7 @@ internal static class BridgeHost
         var pageTexts = new EplanPageTexts();
         var renamer = new EplanDeviceRenamer();
         var generator = new EplanConnectionGenerator();
+        var connectionCreator = new EplanConnectionCreator();
         var inserter = new EplanMacroInserter();
         var messages = new EplanProjectMessageReader();
         var checker = new EplanCheckRunner();
@@ -159,6 +160,8 @@ internal static class BridgeHost
             new DevicePlaceExecuteOperation(catalog, pages, renamer, partsDatabase, placer, transactions, new EplanSymbolReader(),
                 (path, page, symbol) => new EplanDeviceSymbolPlacement(path, page, symbol)),
             new ConnectionGeneratePlanOperation(catalog, pages, generator),
+            new ConnectionCreatePlanOperation(connectionCreator),
+            new ConnectionCreateExecuteOperation(connectionCreator, generator, transactions),
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),

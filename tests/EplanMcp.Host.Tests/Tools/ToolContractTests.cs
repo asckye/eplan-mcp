@@ -58,6 +58,20 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
+    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithBoundedDescriptionAndTwoUndoSteps()
+    {
+        Tool tool = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
+        Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
+        Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
+        Assert.InRange(tool.Description!.Length + tool.InputSchema.GetRawText().Length, 1, 1000);
+        Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
+        Assert.Equal(2, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("const").GetInt32());
+        Assert.Contains("2 undo steps", tool.Description, StringComparison.Ordinal);
+        Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualEndpoints", out _));
+    }
+
+    [Fact]
     public void DevicePlace_OffersExclusiveSourcesAndClosedDisplayProperties()
     {
         Tool tool = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
@@ -225,7 +239,7 @@ public sealed class ToolContractTests : IDisposable
     public void ToolNames_AreTheImplementedSet()
     {
         Assert.Equal(
-            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.ReviewTool, AssetTools.SearchTool, AssetTools.UpdateTool, CabinetTools.BindTool, CabinetTools.ListTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PdfCommentsImportTools.Tool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageOpenTools.Tool, PageDestructiveTools.RenumberTool, PageTextReplaceTools.Tool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlanApplyTools.ApplyTool, PlanTools.GetTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, PropertyGetTools.Tool, PropertySchemaTools.Tool, PropertySetTools.Tool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, SymbolTools.Tool, PlanApplyTools.TaskTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool, TranslationImportTools.Tool, WorkflowTools.PlanTool],
+            [ActionRunTools.Tool, AssetTools.GetTool, AssetTools.ReviewTool, AssetTools.SearchTool, AssetTools.UpdateTool, CabinetTools.BindTool, CabinetTools.ListTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, CheckTools.ListTool, CheckWriteTools.RunTool, ConnectionCreateTools.Tool, ConnectionWriteTools.GenerateTool, ConnectionTools.ListTool, ConnectionDestructiveTools.NumberTool, ContextTools.GetTool, DeviceTools.GetTool, DeviceTools.ListTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, DeviceWriteTools.UpdateTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.LabelsTool, ProjectExportTools.PartsTool, ExportTools.PdfTool, ProjectExportTools.PxfTool, ProjectExportTools.UntranslatedTool, ImportTools.DxfTool, ListImportTools.ImportTool, PdfCommentsImportTools.Tool, PlcImportTools.Tool, ImportTools.PxfTool, LanguageDestructiveTools.RemoveTool, LanguageWriteTools.SetTool, MacroTools.GetTool, MacroWriteTools.InsertTool, MacroTools.ListTool, MessageTools.ListTool, PackTools.BuildTool, PackTools.GetTool, PackTools.ImportTool, PackTools.ListTool, PageWriteTools.CreateTool, PageDestructiveTools.DeleteTool, PageTools.GetTool, PageTools.ListTool, PageOpenTools.Tool, PageDestructiveTools.RenumberTool, PageTextReplaceTools.Tool, PageWriteTools.UpdateTool, MasterDataExportTools.PartTool, PartMasterDataTools.ImportTool, PartTools.ListTool, PartTools.SearchTool, PartMasterDataTools.SyncTool, PlaceholderWriteTools.ApplyTool, PlaceholderTools.ListTool, PlanApplyTools.ApplyTool, PlanTools.GetTool, PlcTools.GetTool, ProjectCreateTools.CreateTool, ProjectTools.GetTool, ProjectTools.ListTool, ProjectDestructiveTools.TranslateTool, PropertyGetTools.Tool, PropertySchemaTools.Tool, PropertySetTools.Tool, ReportWriteTools.UpdateTool, RevisionTools.ListTool, SessionTools.SelectTool, SessionTools.StatusTool, SymbolTools.Tool, PlanApplyTools.TaskTool, TerminalDestructiveTools.RenumberTool, TerminalTools.GetTool, TerminalTools.ListTool, UsageTools.UsageTool, MasterDataExportTools.TranslationTool, TranslationImportTools.Tool, WorkflowTools.PlanTool],
             Tools.Select(t => t.Name).Order(StringComparer.Ordinal));
     }
 

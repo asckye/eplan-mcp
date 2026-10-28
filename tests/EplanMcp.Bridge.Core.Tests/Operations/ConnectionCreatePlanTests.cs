@@ -28,7 +28,7 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         Assert.Equal("complete_page_predicted_endpoints", (string?)plan["coverage"]);
         Assert.Equal([100d, 100d], plan["pageSize"]!.Values<double>());
         Assert.Equal("CO", (string?)plan["symbols"]![0]!["symbol"]!["name"]);
-        Assert.Contains("Separate committed eplan_connection_generate", (string?)plan["generation"], StringComparison.Ordinal);
+        Assert.Contains("2 undo steps", (string?)plan["generation"], StringComparison.Ordinal);
         string fingerprint = (string)plan["fingerprint"]!;
         _fixture.Symbols[0].Variant = 1;
         _fixture.Scene.SymbolBounds["CO/1"] = [-1, -1, 1, 1];

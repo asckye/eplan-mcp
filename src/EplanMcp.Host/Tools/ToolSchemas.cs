@@ -20,6 +20,11 @@ internal static class ToolSchemas
             {
                 schema["additionalProperties"] = false;
                 schema["properties"] ??= new JsonObject();
+                if (tool.ProtocolTool.Name == ConnectionCreateTools.Tool)
+                {
+                    schema["properties"]!["items"] = JsonNode.Parse("""{"type":"array","minItems":1,"maxItems":50,"items":{}}""");
+                    tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","execution","dryRun","undoSteps","recovered"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},"undoSteps":{"const":2},"recovered":{"type":"boolean"},"truncated":{"type":"boolean"},"coordinates":{"type":"array"},"symbols":{"type":"array"},"graphicalAutoconnect":{"type":"array"},"logicalAfterGenerate":{"type":"array"},"actualEndpoints":{"type":"array"},"gridSize":{"type":"number"},"pageSize":{"type":"array"},"coverage":{"type":"string"},"logicalDuringPlacement":{"const":0},"generation":{"type":"string"},"fingerprint":{"type":"string"}}}"""));
+                }
                 if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
                 { DevicePlaceInputs.Configure(schema); }
                 if (tool.ProtocolTool.Name == ListImportTools.ImportTool)

@@ -1323,6 +1323,193 @@
       ]
     },
     {
+      "name": "eplan_connection_create",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ConnectionCreateTools.cs",
+      "operations": [
+        "connection.create.execute",
+        "connection.create.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "M:Eplan.EplApi.ApplicationFramework.Action.Execute(Eplan.EplApi.ApplicationFramework.ActionCallingContext)",
+        "M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.#ctor",
+        "M:Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(System.String)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.MultiLangString.GetAsString",
+        "M:Eplan.EplApi.Base.PointD.#ctor(System.Double,System.Double)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox(System.Boolean)",
+        "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetDisplayString",
+        "M:Eplan.EplApi.DataModel.Group.GetBoundingBox",
+        "M:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists(Eplan.EplApi.DataModel.Properties.Symbol)",
+        "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.Placement.GetBoundingBox",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.DataModel.PropertyValue.ToString",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Commit",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Create",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Dispose",
+        "M:Eplan.EplApi.DataModel.SafetyPoint.Rollback",
+        "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
+        "M:Eplan.EplApi.DataModel.SymbolReference.Create(Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.DataModel.Page)",
+        "M:Eplan.EplApi.DataModel.UndoManager.#ctor",
+        "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep",
+        "M:Eplan.EplApi.DataModel.UndoManager.Dispose",
+        "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo",
+        "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)",
+        "M:Eplan.EplApi.HEServices.Generate.#ctor",
+        "M:Eplan.EplApi.HEServices.Generate.Connections(Eplan.EplApi.DataModel.Page[],System.Boolean)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.Base.PointD.X",
+        "P:Eplan.EplApi.Base.PointD.Y",
+        "P:Eplan.EplApi.DataModel.Connection.EndPin",
+        "P:Eplan.EplApi.DataModel.Connection.Page",
+        "P:Eplan.EplApi.DataModel.Connection.StartPin",
+        "P:Eplan.EplApi.DataModel.FunctionBase.Name",
+        "P:Eplan.EplApi.DataModel.Graphics.Line.EndPoint",
+        "P:Eplan.EplApi.DataModel.Graphics.Line.StartPoint",
+        "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Contents",
+        "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent",
+        "P:Eplan.EplApi.DataModel.Graphics.Text.Contents",
+        "P:Eplan.EplApi.DataModel.Group.SubPlacements",
+        "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Properties",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Type",
+        "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Property(Eplan.EplApi.DataModel.Properties.Symbol)",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.ConnectionPoints",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.SymbolName",
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr",
+        "P:Eplan.EplApi.DataModel.Page.AllPlacements",
+        "P:Eplan.EplApi.DataModel.Page.GridSize",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.Page.PageType",
+        "P:Eplan.EplApi.DataModel.Page.PlotFrame",
+        "P:Eplan.EplApi.DataModel.Page.Size",
+        "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
+        "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
+        "P:Eplan.EplApi.DataModel.PinBase.Direction",
+        "P:Eplan.EplApi.DataModel.PinBase.Index",
+        "P:Eplan.EplApi.DataModel.PinBase.Location",
+        "P:Eplan.EplApi.DataModel.Placement.Location",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.Project.SymbolLibraries",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.EndConnectionPoint",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.EndSymbolRef",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.StartConnectionPoint",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.StartSymbolRef",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnectionPoints",
+        "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnections",
+        "P:Eplan.EplApi.DataModel.SymbolReference.Location",
+        "P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements",
+        "P:Eplan.EplApi.DataModel.SymbolReference.SymbolVariant",
+        "T:Eplan.EplApi.ApplicationFramework.ActionCallingContext",
+        "T:Eplan.EplApi.ApplicationFramework.ActionManager",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.Enums.FunctionCategory",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.Base.PointD",
+        "T:Eplan.EplApi.DataModel.Connection",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.E3D.Connection3D",
+        "T:Eplan.EplApi.DataModel.FunctionBase",
+        "T:Eplan.EplApi.DataModel.Graphics.Line",
+        "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement",
+        "T:Eplan.EplApi.DataModel.Graphics.Rectangle",
+        "T:Eplan.EplApi.DataModel.Graphics.Text",
+        "T:Eplan.EplApi.DataModel.Group",
+        "T:Eplan.EplApi.DataModel.IPropertyPlacementsContainer",
+        "T:Eplan.EplApi.DataModel.MasterData.Symbol",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolLibrary",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList",
+        "T:Eplan.EplApi.DataModel.MasterData.SymbolVariant",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.PagesFilter",
+        "T:Eplan.EplApi.DataModel.Pin",
+        "T:Eplan.EplApi.DataModel.PinBase",
+        "T:Eplan.EplApi.DataModel.Placement",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.DataModel.Properties",
+        "T:Eplan.EplApi.DataModel.Properties.Symbol",
+        "T:Eplan.EplApi.DataModel.PropertyValue",
+        "T:Eplan.EplApi.DataModel.SafetyPoint",
+        "T:Eplan.EplApi.DataModel.SymbolReference",
+        "T:Eplan.EplApi.DataModel.UndoManager",
+        "T:Eplan.EplApi.DataModel.UndoStep",
+        "T:Eplan.EplApi.HEServices.Generate",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [
+        "A:XEsUndoAction"
+      ],
+      "evidence": {
+        "spec": "docs/tools/eplan_connection_create.md",
+        "apiNotes": [
+          "A52",
+          "A55"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ConnectionCreateContractTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateContractTests.cs"
+          },
+          {
+            "name": "ConnectionCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionCreateToolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "ConnectionCreateExecutionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_connection_generate",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ConnectionWriteTools.cs",
@@ -1562,6 +1749,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "DeviceAndConnectionTests",
@@ -3024,6 +3216,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -5667,6 +5864,11 @@
             "name": "CheckAndReportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CheckAndReportTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "DevicePlaceTests",

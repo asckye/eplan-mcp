@@ -6,6 +6,10 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Complete-page connection creation preview; JSON arguments, WritePlan result.</summary>
+    public const string ConnectionCreatePlan = "connection.create.plan";
+    /// <summary>Two-commit connection creation; approved request/fingerprint, JSON result.</summary>
+    public const string ConnectionCreateExecute = "connection.create.execute";
     /// <summary>Unregistered reference-copy preparation; arguments: ReferencePrepareArgs; data: ReferenceCopyData.</summary>
     public const string ReferencePrepare = "reference.prepare";
     /// <summary>Unregistered owned-copy close; arguments: ReferenceCloseArgs; data: ProjectListData.</summary>

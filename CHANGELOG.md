@@ -10,6 +10,7 @@
 - 新增 `eplan_page_open`（full，Read）：按显式项目与精确页名打开或聚焦编辑器，重复调用只重新聚焦；不保存或修改工程数据，不留撤销步。离线宿主明确拒绝；新增 Large 测试待运行。
 - 新增 `eplan_asset_review`（full，本地数据）：经工程师独立窗口审核候选、关闭缺口或提升新正式规则；`eplan_pack_build` 拒绝无来源的 mandatory 规则与缺少匹配本机确认的 official，手改 standing 无效。
 - M8 T4a：新增 `placement` 词表及 `eplan_placement_create` 的契约/只读规划，校验显式语言、完整外框并报告栅格吸附；工具尚未注册，执行留 T4b/T4c。
+- `eplan_connection_create`（full / Write）：显式正交路径及角/T/电位连接符号，一次调用放置、生成两次提交（2 undo steps）；生成失败自动撤销放置，端点读回不符整体补偿。
 - M8 T3a：新增 `eplan_connection_create` 的规格、未注册契约与 dry-run 路径/符号规划器，预测单页 SPECIAL 角/T/电位节点、吸附坐标、图形自动线和生成后的逻辑端点；执行仍返回 `CAPABILITY_MISSING`。A52 的独立连接生成及两个撤销步骤明确列入预览，未开放原子执行。
 - 新增 `eplan_symbol_search`（full，只读）：查询项目已有符号库、符号变体、类型及连接点，按封闭种类过滤并分页；不导入库或修改设置。
 - 新增 `eplan_cabinet_list` / `eplan_cabinet_bind`（full）：多柜映射、五层配置溯源、预览及换锁确认；`eplan_context_get` 按所选柜隔离配置与对象。

@@ -173,7 +173,7 @@ public sealed class ConnectionCreatePlannerTests
     }
 
     [Fact]
-    public void Execution_DefaultOrFalse_IsCapabilityMissingBeforeAnyReaderCall()
+    public void Execution_DefaultOrFalse_UsesTheSameReadOnlyPredictor()
     {
         var fixture = new ConnectionCreateFixture();
         foreach (bool omit in new[] { false, true })
@@ -182,11 +182,9 @@ public sealed class ConnectionCreatePlannerTests
             { fixture.Request.Remove("dry_run"); }
             else
             { fixture.Request["dry_run"] = false; }
-            BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => fixture.Plan());
-            Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (ex.Error.Reason, ex.Error.Execution));
-            Assert.Equal("connection.create.execute", ex.Error.Metadata!["missing"]);
+            Assert.Equal(ExecutionState.NotStarted, (string?)fixture.Plan()["execution"]);
         }
-        Assert.Equal(0, fixture.Reads);
+        Assert.Equal(2, fixture.Reads);
     }
 
     [Theory]

@@ -1,4 +1,3 @@
-using EplanMcp.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +9,7 @@ public sealed class ConnectionCreateContractTests
     static ConnectionCreateContractTests() => DiffEngine.DiffRunner.Disabled = true;
 
     [Fact]
-    public async Task ProposedContract_MatchesReviewedSnapshot_WithoutRegisteringAnEntry()
+    public async Task PreviewContract_MatchesReviewedSnapshot()
     {
         var fixture = new ConnectionCreateFixture();
         JObject plan = fixture.Plan();
@@ -20,16 +19,15 @@ public sealed class ConnectionCreateContractTests
         {
             ["name"] = "eplan_connection_create",
             ["title"] = "Create connection symbols and explicit wire paths",
-            ["status"] = "proposed_unregistered_dry_run_only",
+            ["status"] = "registered_preview_contract",
             ["profile"] = "full",
-            ["description"] = "Plan 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Logical connections require a separately committed eplan_connection_generate. Execution is unavailable until atomic placement and generation are supported. Future writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. One call commits placement then generation: 2 undo steps. Generation failure undoes placement. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
             ["annotations"] = new JObject { ["readOnlyHint"] = false, ["destructiveHint"] = false, ["idempotentHint"] = false, ["openWorldHint"] = false },
             ["inputSchema"] = InputSchema(),
             ["outputSchema"] = OutputSchema(),
             ["example"] = fixture.Request,
             ["dryRunExample"] = plan,
         };
-        Assert.DoesNotContain(typeof(OperationNames).GetFields().Select(f => f.GetRawConstantValue()), name => name is string text && text.StartsWith("connection.create", StringComparison.Ordinal));
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
