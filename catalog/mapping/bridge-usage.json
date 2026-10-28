@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "5e59b792",
-  "sourceHash": "sha256:921afc81c13fcb76d2d038428f8a8fbe768adc9e7ad390fc1cbba2d8619a8708",
+  "scannedSources": "15cea9cf",
+  "sourceHash": "sha256:055dad02c739f57eb57933e777704f3750cd19ae306f1ee53360cdc88242c69a",
   "operations": [
     {
       "name": "action.execute",
@@ -4182,6 +4182,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -4900,7 +4911,8 @@
           "new"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -5016,6 +5028,17 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -6000,6 +6023,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "All",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -6208,7 +6242,8 @@
           "call"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -6683,6 +6718,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.FunctionBasePropertyList.#ctor": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor": [
       {
         "adapter": "EplanActionRunner",
@@ -7040,6 +7088,19 @@
         "operations": []
       }
     ],
+    "M:Eplan.EplApi.DataModel.LocationBox.GetGraphics": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.LockingStep.#ctor": [
       {
         "adapter": "EplanDispatcher",
@@ -7236,7 +7297,8 @@
           "new"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -7394,6 +7456,17 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -8366,6 +8439,18 @@
         ]
       },
       {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceRenamer.cs",
@@ -8375,6 +8460,17 @@
         "operations": [
           "device.update.execute",
           "device.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -8634,6 +8730,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.String)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -9363,6 +9470,43 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.SymbolReference.GetLogicalArea": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.SymbolReference.SetLogicalArea(Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -11594,6 +11738,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -11754,6 +11909,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -11872,6 +12038,32 @@
           "device.place.execute",
           "device.place.plan",
           "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.Base.RectangleD.LowerLeft": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.Base.RectangleD.UpperRight": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -14012,6 +14204,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -14350,6 +14553,32 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionBase.NameParts": [
+      {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName": [
       {
         "adapter": "EplanCableGenerator",
@@ -14512,6 +14741,32 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionBasePropertyList.DESIGNATION_LOCATION": [
+      {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -15349,6 +15604,20 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Pen": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.Line.EndPoint": [
       {
         "adapter": "EplanDrawingReader",
@@ -15398,6 +15667,20 @@
           "connection.create.execute",
           "connection.create.plan",
           "page.drawing.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Pen.StyleId": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -15788,6 +16071,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Group.SubPlacements": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "BoxGraphics",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -16155,6 +16449,17 @@
     "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.SymbolLibraryName": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -16191,6 +16496,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -16223,6 +16539,17 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -16393,6 +16720,18 @@
         "operations": [
           "connection.generate.execute",
           "connection.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -16647,7 +16986,8 @@
           "get"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -16727,6 +17067,17 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -17841,7 +18192,8 @@
           "set"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -17987,7 +18339,8 @@
           "set"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -18580,6 +18933,17 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -20355,6 +20719,18 @@
         ]
       },
       {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceRenamer.cs",
@@ -20364,6 +20740,17 @@
         "operations": [
           "device.update.execute",
           "device.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -21121,6 +21508,17 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -24101,6 +24499,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -24232,6 +24641,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.Base.RectangleD": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -25073,7 +25495,8 @@
           "type"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -25260,6 +25683,17 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -27021,6 +27455,31 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.FunctionBasePropertyList": [
+      {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.FunctionPropertyList": [
       {
         "adapter": "EplanActionRunner",
@@ -27307,6 +27766,30 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "BoxGraphics",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Graphics.Line": [
       {
         "adapter": "EplanDrawingReader",
@@ -27341,6 +27824,19 @@
           "connection.create.execute",
           "connection.create.plan",
           "page.drawing.get"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.Pen": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -27645,6 +28141,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Group": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "BoxGraphics",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -27764,6 +28271,31 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.LocationBox": [
+      {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -28191,7 +28723,8 @@
           "type"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -28891,7 +29424,8 @@
           "type"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -29167,6 +29701,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "BoxGraphics",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -29277,7 +29822,8 @@
           "type"
         ],
         "operations": [
-          "device.place.execute"
+          "device.place.execute",
+          "device.place.plan"
         ]
       },
       {
@@ -30822,6 +31368,18 @@
         ]
       },
       {
+        "adapter": "EplanDevicePlacer",
+        "member": "ReadPage",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.place.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceRenamer",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceRenamer.cs",
@@ -30831,6 +31389,17 @@
         "operations": [
           "device.update.execute",
           "device.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -31358,6 +31927,17 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateLocationBox",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {

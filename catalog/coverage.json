@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 10,
-      "byTools": 10,
+      "implemented": 11,
+      "byTools": 11,
       "partial": 0,
-      "automatedTest": 10,
+      "automatedTest": 11,
       "liveVerified": 5,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 308,
-      "byTools": 299,
+      "implemented": 316,
+      "byTools": 307,
       "partial": 50,
-      "automatedTest": 299,
+      "automatedTest": 307,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 127,
-      "byTools": 119,
+      "implemented": 130,
+      "byTools": 122,
       "partial": 45,
-      "automatedTest": 119,
+      "automatedTest": 122,
       "liveVerified": 75,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 181,
-      "byTools": 180,
+      "implemented": 186,
+      "byTools": 185,
       "partial": 5,
-      "automatedTest": 180,
+      "automatedTest": 185,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 263,
+    "used": 268,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 46,
+    "used": 47,
     "registered": 8585
   },
   "actionNames": {
@@ -133,13 +133,13 @@
     {
       "scope": "Eplan.EplApi.Base",
       "denominator": 268,
-      "implemented": 27,
+      "implemented": 29,
       "liveVerified": 17
     },
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 136,
+      "implemented": 140,
       "liveVerified": 83
     },
     {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 35,
+      "implemented": 37,
       "liveVerified": 10
     },
     {
@@ -331,6 +331,12 @@
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 1
+    },
+    {
+      "scope": "FunctionBase",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
     },
     {
       "scope": "MDPartsDatabaseItem",
@@ -813,10 +819,10 @@
         "device.place.execute",
         "device.place.plan"
       ],
-      "apiIds": 157,
-      "operationGroups": 88,
-      "dataDictionary": 3,
-      "dependencies": 62,
+      "apiIds": 179,
+      "operationGroups": 100,
+      "dataDictionary": 4,
+      "dependencies": 70,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
       "small": 3,
@@ -2438,6 +2444,15 @@
       ]
     },
     {
+      "unit": "D:FunctionBase",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "D:MDPartsDatabaseItem",
       "layer": "data_dictionary",
       "status": "live_verified",
@@ -2976,6 +2991,24 @@
         "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.RectangleD.LowerLeft",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.RectangleD.UpperRight",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
       ]
     },
     {
@@ -3810,6 +3843,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionBase.NameParts",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
       "layer": "operation",
       "status": "live_verified",
@@ -4003,6 +4045,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Pen",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.EndPoint",
       "layer": "operation",
       "status": "automated_test",
@@ -4020,6 +4071,15 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleId",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
       ]
     },
     {
@@ -4256,6 +4316,7 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
+        "eplan_device_place",
         "eplan_page_get",
         "eplan_page_text_replace"
       ]
@@ -4268,6 +4329,15 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.LocationBox.GetGraphics",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
       ]
     },
     {
@@ -4874,6 +4944,7 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
+        "eplan_device_place",
         "eplan_page_get"
       ]
     },
@@ -6048,7 +6119,17 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_connection_create"
+        "eplan_connection_create",
+        "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.GetLogicalArea",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
       ]
     },
     {
@@ -6125,12 +6206,22 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.SetLogicalArea",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReference.SymbolVariant",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_connection_create"
+        "eplan_connection_create",
+        "eplan_device_place"
       ]
     },
     {
