@@ -200,7 +200,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 116 | 52 | 1 | 60 | 1 | 2/2/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 68 | 37 | 0 | 31 | 0 | 1/2/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 42 | 26 | 0 | 16 | 0 | 2/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
-| eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 3/9/4 | A14 A17 A39 | — |
+| eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 3/9/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/7/3 | — | — |
 | eplan_plc_get | read | plc.get | 72 | 37 | 1 | 28 | 0 | 2/2/2 | — | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
@@ -222,7 +222,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 8/2/0 | — | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 2/3/2 | A30 | — |
 | eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 4/3/1 | A47 | 2026-10-27 pass（Large 测试 README） |
-| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 3/5/6 | A14 A17 A32 A33 A36 A37 A39 | — |
+| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 3/5/7 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性
 | 范围 | 状态 | 说明 | 来源 |

@@ -58,6 +58,9 @@ internal sealed record WorkflowEngineering(CabinetBinding Cabinet, JsonArray Con
 
     internal void Guard(ProjectBinding binding, PlanBaseline baseline, IEnumerable<PlanStep> steps)
     {
+        // A validated all-project default binding has no cabinet boundary; retain the catalog's original impact guards.
+        if (Cabinet.Structure?["all"]?.GetValue<bool>() == true)
+        { return; }
         var resolver = new CabinetScopeResolver(binding.Cabinets.Count > 0 ? binding.Cabinets : [Cabinet]);
         void Require(string? name)
         {

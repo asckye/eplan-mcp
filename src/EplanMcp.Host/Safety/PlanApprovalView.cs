@@ -96,7 +96,7 @@ internal sealed record PlanApprovalView(PlanRecord Record, string ChangesPath, s
             (zh ? "最高级别：" : "Highest tier: ") + Tier,
             .. Chunks((zh ? "备份位置：" : "Backup location: ") + PlanDiffPreview.Escape(BackupFolder)),
             .. Chunks(Limits(zh)),
-            .. definition.CompilerVersion == "2"
+            .. PlanApplyChecks.UsesLocalBaseline(definition.CompilerVersion)
                 ? [zh ? "校验：局部 standard 内容与全项目名称筛查；其他内容未观察。" : "Verification: local standard content plus project-wide name screening; other content is unobserved."]
                 : Array.Empty<string>(),
             .. definition.Steps.Any(s => s.Prediction is not null)
@@ -131,7 +131,7 @@ internal sealed record PlanApprovalView(PlanRecord Record, string ChangesPath, s
         }
     }
 
-    private string[] FullLines() => PlanDiffPreview.For(Record.Definition.Steps, Record.Definition.CompilerVersion == "2").TrimEnd('\n').Split('\n');
+    private string[] FullLines() => PlanDiffPreview.For(Record.Definition.Steps, PlanApplyChecks.UsesLocalBaseline(Record.Definition.CompilerVersion)).TrimEnd('\n').Split('\n');
 
     private static string Short(string line)
     {

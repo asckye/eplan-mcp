@@ -41,7 +41,7 @@ internal sealed partial class PlanOrchestrator
             PlanEvidence? baseline = null;
             PlanFailure? error = null;
             PlanVerification? verification = null;
-            bool local = plan.CompilerVersion == "2";
+            bool local = PlanApplyChecks.UsesLocalBaseline(plan.CompilerVersion);
             var observedPages = new Dictionary<int, string[]>();
             string? collecting = null;
             int currentStep = -1;
@@ -73,7 +73,8 @@ internal sealed partial class PlanOrchestrator
                     using (var binding = new FileStream(Path.Combine(folder, ".binding.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
 #pragma warning restore CA2000
                     {
-                        _ = await new PlanApplyChecks(bridge, packs, store, trust).CheckAsync(record, true, cancellationToken).ConfigureAwait(false);
+                        var checks = new PlanApplyChecks(bridge, packs, store, trust, new(packs, audit, approvals, bridge));
+                        _ = await checks.CheckAsync(record, true, cancellationToken).ConfigureAwait(false);
                         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
                         if (status.Handshake?.Eplan.ProcessId != preparation.Instance!.ProcessId
                             || !status.Instances.Any(i => i.PipeName == preparation.Pipe && i.ProcessId == preparation.Instance.ProcessId)
@@ -90,6 +91,7 @@ internal sealed partial class PlanOrchestrator
                         PlanEvidence before = await ObserveAsync(step, "before", cancellationToken).ConfigureAwait(false);
                         PlanEvidence? previous = evidence.LastOrDefault()?.After;
                         evidence.Add(new(step.Index, ExecutionState.NotStarted, before, null, true));
+                        await checks.CheckCabinetAsync(plan, before.Snapshot, step, cancellationToken).ConfigureAwait(false);
                         if (local && previous is not null)
                         {
                             await ScreenAsync(step, previous, before, true, cancellationToken).ConfigureAwait(false);

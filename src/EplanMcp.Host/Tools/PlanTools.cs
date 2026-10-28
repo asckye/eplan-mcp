@@ -34,7 +34,7 @@ internal sealed class PlanTools
             {
                 return Missing();
             }
-            var coverage = response_format == "detailed" && record.Definition.CompilerVersion == "2"
+            var coverage = response_format == "detailed" && PlanApplyChecks.UsesLocalBaseline(record.Definition.CompilerVersion)
                 ? await PlanCoverage.ReadAsync(store, record, cancellationToken).ConfigureAwait(false) : [];
             return PlanReadModel.Page(record, response_format, limit, cursor, coverage: coverage);
         }

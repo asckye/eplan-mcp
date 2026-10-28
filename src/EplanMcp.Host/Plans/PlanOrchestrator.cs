@@ -27,7 +27,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
         PlanRecord record = await store.ReadAsync(PlanPaths.Id(planId), cancellationToken).ConfigureAwait(false)
             ?? throw Failure(ErrorReason.ResourceNotFound, "This plan is unavailable in this Host session.");
         DateTimeOffset deadline = packs.Clock.GetUtcNow().AddMinutes(15);
-        var checks = new PlanApplyChecks(bridge, packs, store, trust);
+        var checks = new PlanApplyChecks(bridge, packs, store, trust, new(packs, audit, approvals, bridge));
         if (dryRun)
         {
             _ = await checks.CheckAsync(record, cancellationToken).ConfigureAwait(false);
