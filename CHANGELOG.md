@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Added
+- 模块只读检查增加供 M3 使用的内部服务：保留跨页引用、占位符值集、实际属性与模块声明，未解析引用明确列为缺口；缺 Bridge 能力或授权时拒绝，不注册新工具或写操作，实机闭包对照待验证。
 - 新增 `eplan_asset_review`（full，本地数据）：经工程师独立窗口审核候选、关闭缺口或提升新正式规则；`eplan_pack_build` 拒绝无来源的 mandatory 规则与缺少匹配本机确认的 official，手改 standing 无效。
 - 新增 `eplan_symbol_search`（full，只读）：查询项目已有符号库、符号变体、类型及连接点，按封闭种类过滤并分页；不导入库或修改设置。
 - 新增 `eplan_cabinet_list` / `eplan_cabinet_bind`（full）：多柜映射、五层配置溯源、预览及换锁确认；`eplan_context_get` 按所选柜隔离配置与对象。
