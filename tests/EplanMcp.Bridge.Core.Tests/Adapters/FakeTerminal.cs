@@ -27,5 +27,5 @@ internal sealed class Terminal() : Function(3)
         page.AllPlacements = [.. page.AllPlacements, this];
         OnCreate?.Invoke(this);
     }
-    public void ClearOwner() => _owner = null;
+    public void ForeignOwner() => _owner = new TerminalStrip { Name = "+A1-XOTHER" };
 }
