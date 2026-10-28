@@ -19,13 +19,20 @@ public static class ConnectionCreatePlanner
         public List<double[][]> Graphical { get; set; } = [];
         public List<ConnectionRecord> Logical { get; set; } = [];
         public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
+        public Func<CableDefinitionPlanner.Inventory>? ReadCables { get; set; }
     }
 
     public static JObject Plan(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint = null)
     {
         try
         { return Predict(json, scene, reader, expectedFingerprint); }
-        catch (BridgeErrorException ex) { ex.Error.Execution = ExecutionState.NotStarted; throw; }
+        catch (BridgeErrorException ex)
+        {
+            if (expectedFingerprint is not null && json.IndexOf("\"cable_definition\"", StringComparison.Ordinal) >= 0 && ex.Error.Reason != ErrorReason.PlanStale)
+            { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PlanStale, "Planning evidence changed; create a new dry-run plan.")); }
+            ex.Error.Execution = ExecutionState.NotStarted;
+            throw;
+        }
     }
 
     private static JObject Predict(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint)
@@ -101,7 +108,9 @@ public static class ConnectionCreatePlanner
         foreach (JToken item in (JArray)input["items"]!)
         {
             string at = "/items/" + (index++).ToString(CultureInfo.InvariantCulture);
-            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point or interruption_point.");
+            if (item is JObject && (string?)item["kind"] == "cable_definition")
+            { continue; }
+            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point or cable_definition.");
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
@@ -239,7 +248,8 @@ public static class ConnectionCreatePlanner
         };
         if (interruptions.Count > 0)
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
-        string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete }).ToString(Formatting.None), resolved.ToString(Formatting.None),
+        string cableFingerprint = CableDefinitionPlanner.Add(input, scene, result, Point);
+        string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), .. (cableFingerprint == "" ? Array.Empty<string>() : new[] { cableFingerprint }), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete }).ToString(Formatting.None), resolved.ToString(Formatting.None),
             .. scene.Page.Placements.Select(p => "placement:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Pins.Select(p => "pin:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
             .. scene.Graphical.Select(p => "graphical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Logical.Select(p => "logical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.SymbolBounds.Select(p => "outline:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)), .. result["interruptionScope"] is { } evidence ? new[] { evidence.ToString(Formatting.None) } : []]);
         result["fingerprint"] = fingerprint;
@@ -265,16 +275,16 @@ public static class ConnectionCreatePlanner
     private static bool On(double[] p, double[][] s) => p[0] >= Box(s)[0] && p[0] <= Box(s)[2] && p[1] >= Box(s)[1] && p[1] <= Box(s)[3];
     private static bool Overlaps(double[] a, double[] b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
     private static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
-    private static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
+    internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
     private static BridgeErrorException Missing(string message) => new(ErrorReason.CapabilityMissing, message, metadata: new Dictionary<string, string> { ["missing"] = "connection.create.execute" });
-    private static void Members(JToken? token, string at, string required, string optional)
+    internal static void Members(JToken? token, string at, string required, string optional)
     {
         Require(token is JObject, at, "Supply an object.");
-        string[] names = required.Split(' ');
+        string[] names = required.Split([' '], StringSplitOptions.RemoveEmptyEntries);
         foreach (string name in names)
         { Require(token![name] is not null && token[name]!.Type != JTokenType.Null, at + "/" + name, "Supply this required member."); }
         foreach (JProperty p in ((JObject)token!).Properties())
-        { Require(names.Concat(optional.Split(' ')).Contains(p.Name, StringComparer.Ordinal), at + "/" + p.Name.Replace("~", "~0").Replace("/", "~1"), "Omit unknown members."); }
+        { Require(names.Concat(optional.Split([' '], StringSplitOptions.RemoveEmptyEntries)).Contains(p.Name, StringComparer.Ordinal), at + "/" + p.Name.Replace("~", "~0").Replace("/", "~1"), "Omit unknown members."); }
     }
     private static void FiniteNumbers(JToken token, string at)
     {

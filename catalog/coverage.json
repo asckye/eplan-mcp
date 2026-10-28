@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 324,
-      "byTools": 316,
-      "partial": 53,
-      "automatedTest": 316,
+      "implemented": 326,
+      "byTools": 318,
+      "partial": 54,
+      "automatedTest": 318,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -102,10 +102,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 191,
-      "byTools": 190,
-      "partial": 6,
-      "automatedTest": 190,
+      "implemented": 193,
+      "byTools": 192,
+      "partial": 7,
+      "automatedTest": 192,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 143,
+      "implemented": 145,
       "liveVerified": 83
     },
     {
@@ -642,10 +642,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 162,
-      "operationGroups": 94,
-      "dataDictionary": 2,
-      "dependencies": 65,
+      "apiIds": 177,
+      "operationGroups": 103,
+      "dataDictionary": 3,
+      "dependencies": 70,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 1,
@@ -2440,6 +2440,7 @@
       "tools": [
         "eplan_cable_generate",
         "eplan_cable_get",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -2734,6 +2735,7 @@
         "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -2785,6 +2787,7 @@
         "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -2833,6 +2836,7 @@
         "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -2964,6 +2968,7 @@
         "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -3291,6 +3296,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.ConnectionDefPoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Connection.EndPin",
       "layer": "operation",
       "status": "live_verified",
@@ -3338,6 +3352,7 @@
       "tools": [
         "eplan_cable_generate",
         "eplan_cable_get",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
@@ -3366,6 +3381,15 @@
         "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_connection_create"
       ]
     },
     {
@@ -3446,6 +3470,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_list",
         "eplan_device_get",
         "eplan_device_list",
@@ -6046,6 +6071,7 @@
         "eplan_cabinet_list",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",

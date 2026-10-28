@@ -58,15 +58,32 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
-    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithBoundedDescriptionAndTwoUndoSteps()
+    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithClosedCablePreviewBranch()
     {
         Tool tool = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
-        Assert.InRange(tool.Description!.Length + tool.InputSchema.GetRawText().Length, 1, 1000);
+        Assert.InRange(tool.Description!.Length, 1, 600);
+        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5000);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
-        Assert.Equal(2, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("const").GetInt32());
+        JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
+        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition"],
+            itemBranches.EnumerateArray().Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
+        foreach (JsonElement branch in itemBranches.EnumerateArray())
+        { Assert.False(branch.GetProperty("additionalProperties").GetBoolean()); }
+        JsonElement interruption = itemBranches.EnumerateArray().Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "interruption_point");
+        Assert.Equal(["kind", "name", "position", "direction", "counterpart_pages"], interruption.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.True(interruption.GetProperty("properties").GetProperty("counterpart_pages").GetProperty("uniqueItems").GetBoolean());
+        Assert.Equal(20, interruption.GetProperty("properties").GetProperty("counterpart_pages").GetProperty("maxItems").GetInt32());
+        JsonElement cable = itemBranches.EnumerateArray().Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "cable_definition");
+        Assert.Equal(["kind", "points", "designation", "type_text", "core_count", "cross_section_mm2", "cores"], cable.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement cores = cable.GetProperty("properties").GetProperty("cores");
+        Assert.Equal(50, cores.GetProperty("maxItems").GetInt32());
+        Assert.False(cores.GetProperty("items").GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["2", "null"], tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("enum").EnumerateArray().Select(v => v.GetRawText()));
+        Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("coreImpact", out _));
+        Assert.Contains("CAPABILITY_MISSING", tool.Description, StringComparison.Ordinal);
         Assert.Contains("2 undo steps", tool.Description, StringComparison.Ordinal);
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualEndpoints", out _));
     }
@@ -360,7 +377,10 @@ public sealed class ToolContractTests : IDisposable
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
         // Property tools share closed target/selector schemas; budget their prose and structural schema separately.
-        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Tool connection = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
+        Assert.InRange(connection.Description!.Length + Descriptions(connection.InputSchema), 1, 1000);
+        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5000);
         Tool place = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         Assert.InRange(place.Description!.Length + Descriptions(place.InputSchema), 1, 1000);
         Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3500);

@@ -3,7 +3,7 @@
   "title": "Create connection symbols and explicit wire paths",
   "status": "registered_preview_contract",
   "profile": "full",
-  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. One call commits placement then generation: 2 undo steps. Generation failure undoes placement. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes commit placement then generation: 2 undo steps; failure undoes placement. cable_definition is planning only; execution returns CAPABILITY_MISSING. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
   "annotations": {
     "readOnlyHint": false,
     "destructiveHint": false,
@@ -320,6 +320,155 @@
                 "position",
                 "direction",
                 "counterpart_pages"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "cable_definition"
+                },
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "designation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type_text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "core_count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "cross_section_mm2": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "cores": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "connection": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "locator": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "project": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "page": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "type": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "oid": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "digest": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  }
+                                },
+                                "required": [
+                                  "project",
+                                  "page",
+                                  "type",
+                                  "oid",
+                                  "digest"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "locator"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "item_index": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 49
+                              }
+                            },
+                            "required": [
+                              "item_index"
+                            ]
+                          }
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "colour": {
+                        "type": "string",
+                        "enum": [
+                          "BK",
+                          "BN",
+                          "RD",
+                          "OG",
+                          "YE",
+                          "GN",
+                          "BU",
+                          "VT",
+                          "GY",
+                          "WH",
+                          "PK",
+                          "TQ",
+                          "GNYE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "connection",
+                      "label",
+                      "colour"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 50
+                }
+              },
+              "required": [
+                "kind",
+                "points",
+                "designation",
+                "type_text",
+                "core_count",
+                "cross_section_mm2",
+                "cores"
               ]
             }
           ]
@@ -1488,5 +1637,809 @@
         }
       ]
     }
-  ]
+  ],
+  "cablePlanningExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "wire",
+        "from": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 1,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "to": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 2,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "points": [
+          [
+            8.0,
+            8.0
+          ],
+          [
+            24.0,
+            8.0
+          ],
+          [
+            24.0,
+            24.0
+          ]
+        ]
+      },
+      {
+        "kind": "cable_definition",
+        "points": [
+          [
+            16.0,
+            4.0
+          ],
+          [
+            16.0,
+            12.0
+          ]
+        ],
+        "designation": "-W3",
+        "type_text": "ÖLFLEX CLASSIC 100 300/500V",
+        "core_count": 3,
+        "cross_section_mm2": 1.5,
+        "cores": [
+          {
+            "connection": {
+              "item_index": 0
+            },
+            "label": "1",
+            "colour": "BK"
+          }
+        ]
+      }
+    ]
+  },
+  "cableOutputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project": {
+        "type": "string",
+        "minLength": 1
+      },
+      "page": {
+        "type": "string",
+        "minLength": 1
+      },
+      "execution": {
+        "type": "string",
+        "const": "not_started"
+      },
+      "dryRun": {
+        "const": true
+      },
+      "coordinates": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requested": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "actual": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "pointer",
+            "requested",
+            "actual"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 1600
+      },
+      "symbols": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "symbol": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "library": {
+                  "type": "string",
+                  "const": "SPECIAL"
+                },
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "CO",
+                    "TLRO",
+                    "TLRU",
+                    "TOUL",
+                    "TOUR",
+                    "PCP",
+                    "BPF"
+                  ]
+                },
+                "variant": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "connectionPoints": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "location": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": -10000,
+                          "maximum": 10000
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      },
+                      "direction": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "location",
+                      "direction"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "library",
+                "name",
+                "variant",
+                "type",
+                "kind",
+                "connectionPoints"
+              ]
+            },
+            "bounds": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "interruption": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "interruption_point"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "Up",
+                    "Down",
+                    "Left",
+                    "Right"
+                  ]
+                },
+                "counterpart_pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "position",
+                "direction",
+                "counterpart_pages"
+              ]
+            }
+          },
+          "required": [
+            "position",
+            "symbol",
+            "bounds"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 1500
+      },
+      "graphicalAutoconnect": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "minItems": 0,
+        "maxItems": 10000
+      },
+      "logicalAfterGenerate": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pins": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "maxItems": 10000
+            },
+            "potentialStartIsNull": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pins",
+            "potentialStartIsNull"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 10000
+      },
+      "gridSize": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "pageSize": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "coverage": {
+        "type": "string",
+        "const": "complete_page_predicted_endpoints"
+      },
+      "logicalDuringPlacement": {
+        "const": 0
+      },
+      "generation": {
+        "type": "string",
+        "minLength": 1
+      },
+      "undoSteps": {
+        "type": "null"
+      },
+      "fingerprint": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "affectedPages": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "maxItems": 21
+      },
+      "interruptionScope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "minItems": 1,
+            "maxItems": 21
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "direction": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "crossReference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "counterparts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "page": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "oid": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "page",
+                      "name",
+                      "oid"
+                    ]
+                  },
+                  "minItems": 0,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "page",
+                "name",
+                "oid",
+                "position",
+                "pin",
+                "direction",
+                "crossReference",
+                "counterparts"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 1000
+          },
+          "preservedEndpoints": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {},
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 0,
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "pages",
+          "points",
+          "preservedEndpoints"
+        ]
+      },
+      "interruptionPoints": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "oid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "pin": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "direction": {
+              "type": "string",
+              "minLength": 1
+            },
+            "crossReference": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "counterparts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "page": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "oid": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "page",
+                  "name",
+                  "oid"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 1
+            }
+          },
+          "required": [
+            "page",
+            "name",
+            "oid",
+            "position",
+            "pin",
+            "direction",
+            "crossReference",
+            "counterparts"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 100
+      },
+      "cableDefinitions": {
+        "type": "array",
+        "items": {},
+        "minItems": 1,
+        "maxItems": 50
+      },
+      "coreImpact": {
+        "type": "array",
+        "items": {},
+        "minItems": 1,
+        "maxItems": 50
+      },
+      "executionCapability": {
+        "type": "string",
+        "const": "CAPABILITY_MISSING"
+      }
+    },
+    "required": [
+      "project",
+      "page",
+      "execution",
+      "dryRun",
+      "coordinates",
+      "symbols",
+      "graphicalAutoconnect",
+      "logicalAfterGenerate",
+      "gridSize",
+      "pageSize",
+      "coverage",
+      "logicalDuringPlacement",
+      "generation",
+      "undoSteps",
+      "fingerprint",
+      "coreImpact"
+    ]
+  },
+  "cableDryRunExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/points/0",
+        "requested": [
+          8.0,
+          8.0
+        ],
+        "actual": [
+          8.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/1",
+        "requested": [
+          24.0,
+          8.0
+        ],
+        "actual": [
+          24.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/2",
+        "requested": [
+          24.0,
+          24.0
+        ],
+        "actual": [
+          24.0,
+          24.0
+        ]
+      },
+      {
+        "pointer": "/items/1/points/0",
+        "requested": [
+          16.0,
+          4.0
+        ],
+        "actual": [
+          16.0,
+          4.0
+        ]
+      },
+      {
+        "pointer": "/items/1/points/1",
+        "requested": [
+          16.0,
+          12.0
+        ],
+        "actual": [
+          16.0,
+          12.0
+        ]
+      }
+    ],
+    "symbols": [
+      {
+        "position": [
+          24.0,
+          8.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "CO",
+          "variant": 0,
+          "type": "Routing",
+          "kind": "routing",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Left"
+            },
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          23.0,
+          7.0,
+          25.0,
+          9.0
+        ]
+      }
+    ],
+    "graphicalAutoconnect": [
+      [
+        [
+          8.0,
+          8.0
+        ],
+        [
+          24.0,
+          8.0
+        ]
+      ],
+      [
+        [
+          24.0,
+          8.0
+        ],
+        [
+          24.0,
+          24.0
+        ]
+      ]
+    ],
+    "logicalAfterGenerate": [
+      {
+        "pins": [
+          "17/1/0",
+          "17/2/0"
+        ],
+        "potentialStartIsNull": false
+      }
+    ],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "complete_page_predicted_endpoints",
+    "logicalDuringPlacement": 0,
+    "generation": "A55: wires -> generate -> definition line -> generate -> bind -> generate -> cores. Execution requires T8b.",
+    "undoSteps": null,
+    "cableDefinitions": [
+      {
+        "kind": "cable_definition",
+        "points": [
+          [
+            16.0,
+            4.0
+          ],
+          [
+            16.0,
+            12.0
+          ]
+        ],
+        "designation": "-W3",
+        "type_text": "ÖLFLEX CLASSIC 100 300/500V",
+        "core_count": 3,
+        "cross_section_mm2": 1.5,
+        "cores": [
+          {
+            "connection": {
+              "item_index": 0
+            },
+            "label": "1",
+            "colour": "BK"
+          }
+        ]
+      }
+    ],
+    "coreImpact": [
+      {
+        "connection": {
+          "item_index": 0
+        },
+        "designation": "-W3",
+        "label": "1",
+        "colour": "BK",
+        "crossSectionMm2": 1.5,
+        "before": null
+      }
+    ],
+    "executionCapability": "CAPABILITY_MISSING",
+    "fingerprint": "f7fdd6dcfc40ea4170679b53e327d09b212b292f0db8c1f2611e3f7a0669b9db"
+  }
 }
