@@ -20,7 +20,7 @@ internal sealed class ClaudeAttempts(ClaudeSetup setup, string runDirectory, str
         try
         {
             IReadOnlyList<ExportedFile> before = ExportedFiles.List(exportRoot);
-            AgentAttempt run = await ClaudeRunner.RunAsync(setup, task, work, output, cancellationToken).ConfigureAwait(false);
+            AgentAttempt run = await ClaudeRunner.RunAsync(setup, task, work, output, TimeProvider.System, cancellationToken).ConfigureAwait(false);
             return run with { Exports = ExportedFiles.Since(before, ExportedFiles.List(exportRoot)) };
         }
         finally
