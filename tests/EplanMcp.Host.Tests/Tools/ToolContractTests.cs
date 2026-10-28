@@ -76,9 +76,13 @@ public sealed class ToolContractTests : IDisposable
     {
         Tool tool = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         JsonElement input = tool.InputSchema;
-        Assert.Equal(["project", "page", "x", "y", "tag"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
-        Assert.Equal(2, input.GetProperty("oneOf").GetArrayLength());
-        Assert.Equal(["library", "symbol", "symbol_variant"], input.GetProperty("oneOf")[1].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["project", "page", "x", "y"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(3, input.GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(["library", "symbol", "symbol_variant", "tag"], input.GetProperty("oneOf")[1].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["location_box", "corner_x", "corner_y"], input.GetProperty("oneOf")[2].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.False(input.GetProperty("additionalProperties").GetBoolean());
+        Assert.Contains("keep their own structure", tool.Description, StringComparison.Ordinal);
+        Assert.True(tool.OutputSchema!.Value.GetProperty("properties").TryGetProperty("locationBox", out _));
         JsonElement displays = input.GetProperty("properties").GetProperty("display_properties");
         Assert.Equal(8, displays.GetProperty("maxItems").GetInt32());
         JsonElement item = displays.GetProperty("items");

@@ -25,6 +25,12 @@ public sealed class DevicePlaceArgs
     public List<DeviceDisplayProperty>? DisplayProperties { get; set; }
     /// <summary>One designation per connection point in native array order (A55).</summary>
     public string[]? ConnectionDesignations { get; set; }
+    /// <summary>Exclusive location-box source: a literal location identifier such as +P1 (A55).</summary>
+    public string? LocationBox { get; set; }
+    /// <summary>Opposite corner x in millimetres; required only for LocationBox.</summary>
+    public double? CornerX { get; set; }
+    /// <summary>Opposite corner y in millimetres; required only for LocationBox.</summary>
+    public double? CornerY { get; set; }
 
     /// <summary>The insertion point's x, in millimetres from the page's left edge.</summary>
     public double X { get; set; }

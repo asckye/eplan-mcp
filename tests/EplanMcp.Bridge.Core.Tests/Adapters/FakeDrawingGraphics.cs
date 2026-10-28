@@ -39,3 +39,20 @@ internal sealed class Line(long oid) : Placement(oid)
 }
 
 internal sealed class Rectangle(long oid) : Placement(oid);
+
+internal struct Pen
+{
+    public int StyleId { get; set; }
+}
+
+internal sealed class GraphicalPlacement(long oid) : Placement(oid)
+{
+    private Pen _pen;
+    public bool RejectStyle { get; set; }
+    public Action? OnSet { get; set; }
+    public Pen Pen
+    {
+        get => _pen;
+        set { if (!RejectStyle) { _pen = value; } OnSet?.Invoke(); }
+    }
+}

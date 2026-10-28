@@ -34,3 +34,5 @@ internal sealed class LanguageList
     public ISOCode.Language[] Values { get; set; } = [];
     public ISOCode.Language get_Language(int index) => Values[index];
 }
+
+internal readonly record struct RectangleD(PointD LowerLeft, PointD UpperRight);

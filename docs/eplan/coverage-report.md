@@ -1,5 +1,7 @@
 # EPLAN API 覆盖报告
 
+> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-28 按 Bridge 源码 4223f780 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
+
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-28 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 5e59b792）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
@@ -164,7 +166,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 74 | 43 | 2 | 28 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 7/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan | 157 | 88 | 3 | 62 | 0 | 2/3/1 | A13 A14 A26 A53 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan | 157 | 88 | 3 | 62 | 0 | 3/3/1 | A13 A14 A26 A53 A55 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 74 | 32 | 0 | 42 | 0 | 3/2/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 56 | 29 | 1 | 26 | 0 | 3/2/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 2/2/0 | A16 | — |

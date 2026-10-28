@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" Link="Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />

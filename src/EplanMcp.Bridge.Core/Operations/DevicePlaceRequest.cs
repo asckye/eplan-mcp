@@ -16,7 +16,7 @@ internal sealed class DevicePlaceRequest
 
     private const string Circuit = "Circuit";
 
-    private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken)
+    private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
         Project = project;
         Page = page;
@@ -26,6 +26,7 @@ internal sealed class DevicePlaceRequest
         Y = args.Y;
         Tag = tag;
         Taken = taken;
+        Existing = existing;
     }
 
     public OpenProject Project { get; }
@@ -48,19 +49,23 @@ internal sealed class DevicePlaceRequest
     /// <summary>Functions that already carry the tag (any case), alone or with a suffix.</summary>
     public IReadOnlyList<string> Taken { get; }
 
+    private string[] Existing { get; }
+
     /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer)
     {
-        if (args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null))
+        bool box = args.LocationBox is not null;
+        DeviceSymbolPlan.CheckBox(args);
+        if (!box && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null))
         { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations require a complete symbol source."]); }
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
         string tag = args.Tag?.Trim() ?? string.Empty;
         string part = args.Part?.Trim() ?? string.Empty;
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full circuit page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
-        AddIf(violations, args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
+        AddIf(violations, !box && args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
-        AddIf(violations, TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
+        AddIf(violations, !box && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
@@ -73,21 +78,28 @@ internal sealed class DevicePlaceRequest
                 "No page has this name, so nothing was placed. Use eplan_page_list with name_prefix to find the exact page name.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = project.Name, ["page"] = args.Page });
-        PartSearchItem? chosen = args.Library is not null ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
+        PartSearchItem? chosen = box || args.Library is not null ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
         violations.AddRange(PageProblems(page, args.X, args.Y));
+        if (box)
+        {
+            if (page.Width is not { } w || page.Height is not { } h || !Finite(w) || !Finite(h) || w <= 0 || h <= 0)
+            { violations.Add("/location_box: page bounds are unknown; select a page with readable bounds."); }
+            violations.AddRange(PageProblems(page, args.CornerX!.Value, args.CornerY!.Value));
+        }
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
         }
 
-        string full = tag[0] == '-' ? DeviceStructureOf(page.Name) + tag : tag;
+        string full = box ? args.LocationBox! : tag[0] == '-' ? DeviceStructureOf(page.Name) + tag : tag;
+        string[] existing = box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
         string[] taken =
         [
-            .. names.FunctionNames(project.Path)
+            .. (box ? page.LocationBoxStructures : names.FunctionNames(project.Path))
                 .Where(n => string.Equals(n, full, StringComparison.OrdinalIgnoreCase) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.Ordinal),
         ];
-        return new DevicePlaceRequest(project, page, chosen!, args, full, taken);
+        return new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
     }
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
@@ -105,7 +117,7 @@ internal sealed class DevicePlaceRequest
 
     /// <summary>The plan's state (tool spec 5): the objects on the page, and how many functions carry the tag.</summary>
     public string StateFingerprint() =>
-        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)));
+        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)));
 
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()
@@ -114,7 +126,7 @@ internal sealed class DevicePlaceRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                Tag.StartsWith("+", StringComparison.Ordinal) ? "A location box already uses this structure on the page; choose another location_box identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
         }

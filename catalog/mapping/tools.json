@@ -2708,13 +2708,19 @@
           "A13",
           "A14",
           "A26",
-          "A53"
+          "A53",
+          "A55"
         ],
         "tests": [
           {
             "name": "DevicePlaceInputTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceInputTests.cs"
+          },
+          {
+            "name": "LocationBoxPlacementTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/LocationBoxPlacementTests.cs"
           },
           {
             "name": "ToolContractTests",

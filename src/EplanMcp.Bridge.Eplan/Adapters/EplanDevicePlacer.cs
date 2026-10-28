@@ -18,7 +18,20 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanDevicePlacer : IDevicePlacer
 {
-    public MacroTargetPage? ReadPage(string projectPath, string pageName) => new EplanMacroInserter().ReadPage(projectPath, pageName);
+    public MacroTargetPage? ReadPage(string projectPath, string pageName)
+    {
+        MacroTargetPage? result = new EplanMacroInserter().ReadPage(projectPath, pageName);
+        if (result is not null)
+        {
+            foreach (LocationBox box in Find(EplanProjects.ByPath(projectPath), pageName)!.AllPlacements.OfType<LocationBox>())
+            {
+                using FunctionBasePropertyList parts = box.NameParts;
+                using PropertyValue location = parts.DESIGNATION_LOCATION;
+                result.LocationBoxStructures.Add(location.IsEmpty ? string.Empty : "+" + location.ToString());
+            }
+        }
+        return result;
+    }
 
     public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag)
     {

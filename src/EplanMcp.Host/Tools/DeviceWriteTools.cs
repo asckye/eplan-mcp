@@ -99,8 +99,8 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places a part device or a library symbol without a part; Ctrl+Z undoes it. " +
-        "Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
+        "Places a part device, a library symbol without a part, or a dashed location box; Ctrl+Z undoes it. " +
+        "Devices inside a location box keep their own structure; no devices are renamed. Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
@@ -108,7 +108,7 @@ internal sealed class DeviceWriteTools
         [Description("Full circuit page name")] string page,
         [Description("mm")] double x,
         [Description("mm")] double y,
-        [Description("-KF20 (page structure) or full tag")] string tag,
+        [Description("Device tag; omit for location_box")] string? tag = null,
         [Description("From eplan_part_search")] string? part = null,
         [Description("Default: 1")] string? variant = null,
         [Description("Only return the plan")] bool dry_run = false,
@@ -117,6 +117,9 @@ internal sealed class DeviceWriteTools
         [Description("Native variant number")] int? symbol_variant = null,
         [Description("Up to 8 {property_id,offset_x_mm,offset_y_mm}; see usage")] JsonElement[]? display_properties = null,
         [Description("One designation per pin, in search order")] string[]? connection_designations = null,
+        [Description("Exclusive source: +location, e.g. +P1; fixed dashed outline")] string? location_box = null,
+        [Description("Location box upper-right x, mm; x/y are lower-left")] double? corner_x = null,
+        [Description("Location box upper-right y, mm")] double? corner_y = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -132,7 +135,10 @@ internal sealed class DeviceWriteTools
             Library = library?.Trim(),
             Symbol = symbol?.Trim(),
             SymbolVariant = symbol_variant,
-            ConnectionDesignations = connection_designations
+            ConnectionDesignations = connection_designations,
+            LocationBox = location_box,
+            CornerX = corner_x,
+            CornerY = corner_y
         };
         List<string> violations = DevicePlaceInputs.Check(args, display_properties);
         if (violations.Count > 0)
@@ -161,6 +167,9 @@ internal sealed class DeviceWriteTools
                 SymbolVariant = args.SymbolVariant,
                 DisplayProperties = args.DisplayProperties,
                 ConnectionDesignations = args.ConnectionDesignations,
+                LocationBox = args.LocationBox,
+                CornerX = args.CornerX,
+                CornerY = args.CornerY,
                 Fingerprint = plan.Fingerprint
             },
             dry_run,
@@ -193,10 +202,11 @@ internal sealed class DeviceWriteTools
                 VisibleTag = ResultShaper.CleanText(data?.VisibleTag),
                 Category = ResultShaper.CleanText(data?.Category),
             },
-            Functions = data?.Functions ?? (args.Library is not null ? 1 : null),
-            Unplaced = data?.Unplaced ?? (args.Library is not null ? 0 : null),
+            LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
+            Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : args.Library is not null ? 1 : null),
+            Unplaced = data?.Unplaced ?? (args.Library is not null || args.LocationBox is not null ? 0 : null),
             Symbol = details.TryGetValue("symbol", out string? resolved) ? JsonSerializer.Deserialize<SymbolSearchItem>(resolved, HostJson.Options) : null,
-            Changes = args.Library is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
+            Changes = args.Library is not null || args.LocationBox is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             Undo = committed ? "AI: " + PlaceTool : null,
             Recovered = outcome.Recovered,
             Hint = PlaceHint(outcome, details),
@@ -206,7 +216,9 @@ internal sealed class DeviceWriteTools
             plannedSymbol.Library = ResultShaper.CleanText(plannedSymbol.Library);
             plannedSymbol.Name = ResultShaper.CleanText(plannedSymbol.Name);
         }
-        string summary = !committed ? "Dry run: would place one device. Nothing was changed."
+        if (result.LocationBox is { } location)
+        { location.Structure = ResultShaper.CleanText(location.Structure); result.Hint = "Devices inside keep their own structure; affected devices: none. " + result.Hint; }
+        string summary = args.LocationBox is not null ? (committed ? "Placed one dashed location box; affected devices: none. Ctrl+Z undoes this step." : "Dry run: would place one dashed location box; affected devices: none. Nothing was changed.") : !committed ? "Dry run: would place one device. Nothing was changed."
             : data is null ? "Placed a device; Ctrl+Z in EPLAN undoes this step."
             : $"Placed a device with {ToolResults.Count(data.Functions, "function")}; Ctrl+Z in EPLAN undoes this step.";
         return ToolResults.Success(summary, result);
@@ -219,7 +231,7 @@ internal sealed class DeviceWriteTools
         var hints = new List<string>();
         if (outcome.Recovered)
         {
-            hints.Add("The response was lost, but EPLAN reported the device as placed; check it with eplan_device_get.");
+            hints.Add(details.ContainsKey("locationBox") ? "The response was lost, but EPLAN reported the box as placed; verify it with eplan_page_get and include_drawings." : "The response was lost, but EPLAN reported the device as placed; check it with eplan_device_get.");
         }
         else if (data is { Unplaced: > 0 } placed)
         {

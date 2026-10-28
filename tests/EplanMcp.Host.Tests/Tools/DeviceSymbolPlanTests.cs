@@ -17,7 +17,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class DeviceSymbolPlanTests : IDisposable
+public sealed partial class DeviceSymbolPlanTests : IDisposable
 {
     private const string Page = "=F+A1&EFS1/1";
     private readonly WriteToolHarness _harness = new();
@@ -27,6 +27,7 @@ public sealed class DeviceSymbolPlanTests : IDisposable
     public DeviceSymbolPlanTests()
     {
         _placement = new Placement(_store);
+        _store.Symbols.Add(new() { Library = "SPECIAL", Name = "SC", Variant = 0, Type = "LocationBox", Kind = "location_box" });
         Bind(_harness);
     }
 
@@ -289,12 +290,15 @@ public sealed class DeviceSymbolPlanTests : IDisposable
         {
             Assert.Equal("AI: eplan_device_place", undoDescription);
             Calls.Add("Begin");
-            return new Scope(this, store, [.. store.Names], [.. store.Page.Objects]);
+            return new Scope(this, store, [.. store.Names], [.. store.Page.Objects], [.. store.Page.LocationBoxStructures]);
         }
         public DevicePlaceData Place(DevicePlaceArgs args, string tag)
         {
             Args = args;
-            store.Names.Add(tag);
+            if (args.LocationBox is null)
+            { store.Names.Add(tag); }
+            else
+            { store.Page.LocationBoxStructures.Add(args.LocationBox); }
             store.Page.Objects.Add("created");
             try
             {
@@ -304,11 +308,31 @@ public sealed class DeviceSymbolPlanTests : IDisposable
                     if (FailAt == stage)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol readback differs; nothing was committed."); }
                 }
+                if (args.LocationBox is { } structure)
+                {
+                    var box = new LocationBoxData { Structure = structure, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] };
+                    switch (FailAt)
+                    {
+                        case "Structure":
+                            box.Structure = "+WRONG";
+                            break;
+                        case "Outline":
+                            box.Outline = "solid";
+                            break;
+                        case "Bounds":
+                            box.Bounds[2]++;
+                            break;
+                        case "Affected":
+                            box.AffectedDevices = ["=F+A1-K1"];
+                            break;
+                    }
+                    return new() { Tag = structure, Page = args.Page, Category = "LocationBox", LocationBox = box };
+                }
                 return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = "Coil" };
             }
             finally { Calls.Add("ReleaseLists"); }
         }
-        private sealed class Scope(Placement owner, Store store, string[] names, string[] objects) : ITransactionScope
+        private sealed class Scope(Placement owner, Store store, string[] names, string[] objects, string[] boxes) : ITransactionScope
         {
             public void Commit() => owner.Calls.Add("Commit");
             public void CloseUndo() => owner.Calls.Add("CloseUndo");
@@ -319,6 +343,7 @@ public sealed class DeviceSymbolPlanTests : IDisposable
                 store.Names.Clear();
                 store.Names.AddRange(names);
                 store.Page.Objects = [.. objects];
+                store.Page.LocationBoxStructures = [.. boxes];
             }
             public void Dispose() => owner.Calls.Add("Dispose");
         }
