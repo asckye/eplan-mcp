@@ -5,8 +5,8 @@ using EplanMcp.Bridge.Core.Operations;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
-/// The only place that creates SafetyPoint and UndoStep, and QuietModeStep for a write (coding standards 9.3, rule 7;
-/// exports, which change no design data, are quiet without the other two in EplanExporter). Inside the
+/// The SafetyPoint scope for writes; Function.Create uses FunctionTransactionScope (A13/A52/A53). Rule 7 applies here;
+/// exports use quiet mode alone in EplanExporter, changing no design data. Inside the
 /// dispatcher's LockingStep: the SafetyPoint first, then the UndoStep inside it, described for EPLAN's undo list, then
 /// QuietModeStep(ShowNoDialogs). The UndoStep must never be created outside the SafetyPoint, which silently stops the
 /// rollback (api-notes A7, spike S2). The order of the calls is <see cref="TransactionRunner"/>'s; this class follows

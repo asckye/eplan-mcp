@@ -72,3 +72,9 @@ internal sealed class PagesFilter : IDisposable
     public bool ExactNameMatching { get; set; }
     public void Dispose() { }
 }
+
+internal sealed class AnyPropertyId(int id) : IDisposable
+{
+    public int AsInt { get; } = id;
+    public void Dispose() { }
+}

@@ -25,11 +25,11 @@ internal sealed class DevicePlaceResult
     [Description("The part's variant that was placed, or would be.")]
     public string Variant { get; set; } = string.Empty;
 
-    [Description("Resolved symbol and local pins; present only for symbol plans.")]
+    [Description("Resolved symbol and local pins; present only for symbol sources, verified on commit.")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public SymbolSearchItem? Symbol { get; set; }
 
-    [Description("Predicted function, relative property placements and pin designations; symbol plans only.")]
+    [Description("Planned function, relative property placements and pin designations; symbol sources only.")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<PlannedChange>? Changes { get; set; }
 

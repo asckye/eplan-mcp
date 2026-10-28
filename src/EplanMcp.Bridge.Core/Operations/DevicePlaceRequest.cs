@@ -51,6 +51,8 @@ internal sealed class DevicePlaceRequest
     /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer)
     {
+        if (args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null))
+        { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations require a complete symbol source."]); }
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
         string tag = args.Tag?.Trim() ?? string.Empty;

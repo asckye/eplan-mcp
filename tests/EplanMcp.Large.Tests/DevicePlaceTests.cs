@@ -18,6 +18,52 @@ public sealed class DevicePlaceTests(LiveEplan eplan, WriteHost host) : IClassFi
     private const string Prefix = "=GAA+A1&EFS1/";
 
     [Fact]
+    public async Task ASymbolCoilWithoutPart_DisplaysPrefixedTagAndDesignations_AndRejectsRepeatAndConflict()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string project = await eplan.WriteProjectAsync();
+        string page = await NewPageAsync(project);
+        LiveSnapshots.Snapshot before = await selection.SnapshotAsync();
+        string tag = "-KS" + page[Prefix.Length..];
+        Dictionary<string, object?> args = new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "K",
+            ["symbol_variant"] = 0,
+            ["x"] = 80,
+            ["y"] = 160,
+            ["tag"] = tag,
+            ["display_properties"] = JsonSerializer.SerializeToElement(new[] { new { property_id = 20214, offset_x_mm = 4, offset_y_mm = -4 } }),
+            ["connection_designations"] = new[] { "A1", "A2" },
+        };
+        JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
+        Assert.Equal(0, await DevicesOnAsync(project, page));
+        JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+        Assert.Equal(("committed", 1, 0, ""), (placed.GetProperty("execution").GetString(), placed.GetProperty("functions").GetInt32(), placed.GetProperty("unplaced").GetInt32(), placed.GetProperty("part").GetString()));
+        Assert.Equal(("=GAA+A1" + tag, tag, "Coil"), (placed.GetProperty("device").GetProperty("tag").GetString(), placed.GetProperty("device").GetProperty("visibleTag").GetString(), placed.GetProperty("device").GetProperty("category").GetString()));
+        Assert.Equal(preview.GetProperty("symbol").GetRawText(), placed.GetProperty("symbol").GetRawText());
+        JsonElement read = await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = "=GAA+A1" + tag });
+        Assert.Empty(read.GetProperty("parts").EnumerateArray());
+        Assert.Equal(["A1", "A2"], read.GetProperty("device").GetProperty("pins").EnumerateArray().Select(p => p.GetString()));
+        JsonElement drawing = (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true })).GetProperty("drawings");
+        JsonElement label = Assert.Single(drawing.GetProperty("items").EnumerateArray(), p => p.GetProperty("kind").GetString() == "PropertyPlacement" && p.GetProperty("properties").TryGetProperty("display", out JsonElement text) && text.GetString() == tag);
+        Assert.Equal([84.0, 156.0], label.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()));
+        foreach (string duplicate in new[] { tag, ("=GAA+A1" + tag).ToLowerInvariant() })
+        {
+            JsonElement error = await eplan.ErrorAsync("eplan_device_place", new(args) { ["tag"] = duplicate });
+            Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        }
+        Assert.Equal(1, await DevicesOnAsync(project, page));
+        JsonElement image = await eplan.CallAsync("eplan_export_image", new() { ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(new[] { page }) });
+        TestContext.Current.TestOutputHelper?.WriteLine($"Check {image.GetProperty("directory").GetString()}: {tag} at (84, 156), coil at (80, 160).");
+        await selection.UndoAsync();
+        Assert.Equal(0, await DevicesOnAsync(project, page));
+        Assert.Equal(before.Hash, (await selection.SnapshotAsync()).Hash);
+    }
+
+    [Fact]
     public async Task AContactor_OnANewPage_IsPlacedWithItsTagInThePagesStructure_AndTheTagOnlyOnce()
     {
         string project = await eplan.WriteProjectAsync();

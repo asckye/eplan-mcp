@@ -13,6 +13,8 @@ internal sealed class PropertyPlacement(long oid, Placement parent) : TextBase(o
 {
     public Placement Parent { get; } = parent;
     public string Display { get; set; } = "-K1";
+    public int DisplayedId { get; set; } = 20214;
+    public AnyPropertyId DisplayedProperty => new(DisplayedId);
     public string GetDisplayString() => Display;
     public PointD[] GetBoundingBox(bool relative)
     {

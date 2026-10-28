@@ -109,6 +109,8 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 9. 只有执行后的读回校验通过，才调用 `SafetyPoint.Commit()`；其他任何路径（异常、校验失败、取消）都要让它回滚。
 10. 所有实现了 `IDisposable` 的 EPLAN 对象一律用 `using` 包装。
 
+`Function.Create` 是第 7–9 条的已验证例外（A13/A52/A53，S40/S41/S43）：统一经 `FunctionTransactionScope`，在调度器的 `LockingStep` 内严格按 `LockAllObjects → UndoStep → Transaction → QuietModeStep` 创建；读回通过才 Commit/CloseUndo，失败 Abort 且不 CloseUndo，不留空步。A39/A55 的对象归属优先于第 10 条：不释放 EPLAN 所有的功能、引脚、属性放置或库对象；缓存属性列表必须在 Abort 前释放，Abort 后不再访问或释放新对象的列表。
+
 ### 9.4 界面与授权（B8、A2）
 11. 除了审批对话框，Bridge **不显示任何界面**：不调用 `MessageBox`，不打开 EPLAN 对话框；执行期间始终处于 `QuietModeStep(ShowNoDialogs)` 之下。
 12. 只用 `License.HasOption` 检查授权，**不调用 `LockOption`**（它会占用一个授权直到 EPLAN 退出）。
