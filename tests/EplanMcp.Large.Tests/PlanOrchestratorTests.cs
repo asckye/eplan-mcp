@@ -124,6 +124,7 @@ public sealed class PlanOrchestratorTests(LiveEplan eplan)
         private bool _afterRead;
 
         public int StepWrites { get; private set; }
+        public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => inner.GetStatusAsync(refresh, cancellationToken);
 
         public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
         {

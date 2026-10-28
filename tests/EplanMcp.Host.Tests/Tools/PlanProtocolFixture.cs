@@ -170,6 +170,7 @@ public abstract class PlanProtocolFixture : IDisposable
         public TaskCompletionSource? StepGate { get; set; }
         public TaskCompletionSource StepEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public CancellationToken WorkerToken { get; private set; }
+        public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => inner.GetStatusAsync(refresh, cancellationToken);
         public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
         {
             WorkerToken = cancellationToken;

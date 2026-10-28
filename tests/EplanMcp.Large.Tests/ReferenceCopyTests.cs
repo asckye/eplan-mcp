@@ -13,7 +13,7 @@ public sealed class ReferenceCopyTests(LiveEplan eplan)
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task Sample_PrepareReadOnlyAndClose_LeavesSourceHashAndOtherOpenProjectsUnchanged(bool backup)
+    public async Task Sample_PrepareExtractReadOnlyAndClose_LeavesSourceHashAndOtherOpenProjectsUnchanged(bool backup)
     {
         CancellationToken token = TestContext.Current.CancellationToken;
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
@@ -59,6 +59,16 @@ public sealed class ReferenceCopyTests(LiveEplan eplan)
             Assert.All(_sessionFiles, name => Assert.True(File.Exists(Path.Combine(Path.ChangeExtension(copy.Path, ".edb"), name))));
             LiveSnapshots.Snapshot snapshot = await LiveSnapshots.TakeAsync(bridge, new ProjectSnapshotArgs { Project = copy.Path });
             Assert.NotEmpty(snapshot.Pages);
+            string[] pages = [snapshot.Pages[0].Name];
+            Dictionary<string, string> copyFiles = LiveSnapshots.DesignFiles(copy.Path[..^4]);
+            ReferenceExtractionResult gap = await service.ExtractAsync(copy.Handle, pages, new GapOnlyReferenceExtractor(), token);
+            Assert.Empty(gap.Facts);
+            Assert.Equal(ErrorReason.CapabilityMissing, gap.Problem!.Reason);
+            ReferenceExtractionResult extracted = await service.ExtractAsync(copy.Handle, pages, new SnapshotExtractor(bridge), token);
+            Assert.Null(extracted.Problem);
+            Assert.Equal(snapshot.Pages[0].Hash, Assert.Single(extracted.Facts).Value);
+            Assert.Equal(copyFiles.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(copy.Path[..^4]).OrderBy(p => p.Key, StringComparer.Ordinal));
+            Assert.True((await bridge.GetStatusAsync(true, token)).Handshake!.Eplan.ApiExtensionLicence);
         }
         finally
         {
@@ -71,6 +81,18 @@ public sealed class ReferenceCopyTests(LiveEplan eplan)
         }
         Assert.Null(await PackVerifier.ReferenceProblemAsync(resource, new Dictionary<string, string> { ["sample"] = Path.GetDirectoryName(source)! }, token));
         ProjectCreateTests.Delete(root);
+    }
+
+    private sealed class SnapshotExtractor(BridgeClient bridge) : IReferenceExtractor
+    {
+        public IReadOnlyList<string> RequiredOperations => [OperationNames.ProjectSnapshot];
+        public async Task<ReferenceExtractionResult> ExtractAsync(string project, string resource, IReadOnlyList<string> pages, CancellationToken cancellationToken)
+        {
+            ProjectSnapshotData snapshot = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot, new() { Project = project, Pages = [.. pages] }, cancellationToken);
+            Assert.True(snapshot.Complete);
+            SnapshotPage page = Assert.Single(snapshot.Pages);
+            return new([new PackFact { Resource = resource, Name = "page_hash", Value = page.Hash, Evidence = page.Name }], []);
+        }
     }
 
     private static bool Same(string path, string link) => string.Equals(path.EndsWith(".elk", StringComparison.OrdinalIgnoreCase) ? path : path + ".elk", link, StringComparison.OrdinalIgnoreCase);

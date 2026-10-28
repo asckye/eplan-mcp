@@ -2,12 +2,15 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Server;
 
-/// <summary>Static facts the Bridge reports in <c>handshake</c>; captured once on the main thread at start-up.</summary>
+/// <summary>Facts the Bridge reports in <c>handshake</c>; the licence callback refreshes the start-up information.</summary>
 public sealed class BridgeServerOptions
 {
     public string BridgeVersion { get; set; } = "0.0.0";
 
     public EplanInstanceInfo Eplan { get; set; } = new();
+
+    /// <summary>Checks without holding a licence, through the main-thread dispatcher on every handshake; null means unknown.</summary>
+    public Func<bool?>? ApiExtensionLicence { get; set; }
 
     /// <summary>The add-in's target framework (<c>TargetFrameworkAttribute</c>); null when unknown.</summary>
     public string? BuildTarget { get; set; }

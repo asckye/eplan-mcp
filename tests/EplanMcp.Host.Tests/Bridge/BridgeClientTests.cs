@@ -77,6 +77,31 @@ public sealed class BridgeClientTests
     }
 
     [Fact]
+    public async Task RefreshStatus_RehandshakesAndObservesLicenceLossInsteadOfTheCachedValue()
+    {
+        _discovery.Endpoints.Add(_eplanA);
+        bool? licence = true;
+        _connector = new FakeConnector(e => new FakeChannel(e)
+        {
+            Handshake = (_, _, _) =>
+            {
+                JsonNode? answer = FakeChannel.CompatibleHandshake(e.ProcessId);
+                answer!["eplan"]!["apiExtensionLicence"] = JsonValue.Create(licence);
+                return Task.FromResult<JsonNode?>(answer);
+            }
+        });
+        await using BridgeClient client = Client();
+        Assert.True((await client.GetStatusAsync(Token)).Handshake!.Eplan.ApiExtensionLicence);
+        licence = false;
+        Assert.True((await client.GetStatusAsync(Token)).Handshake!.Eplan.ApiExtensionLicence);
+        Assert.False((await client.GetStatusAsync(true, Token)).Handshake!.Eplan.ApiExtensionLicence);
+        Assert.Equal(2, _connector.Opened.Count);
+        Assert.True(_connector.Opened[0].Disposed);
+        licence = null;
+        Assert.Null((await client.GetStatusAsync(true, Token)).Handshake!.Eplan.ApiExtensionLicence);
+    }
+
+    [Fact]
     public async Task EplanRestarted_NewPipeIsUsedAndTheOldChannelDisposed()
     {
         _discovery.Endpoints.Add(_eplanA);

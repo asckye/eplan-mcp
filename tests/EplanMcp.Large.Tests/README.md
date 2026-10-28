@@ -1,6 +1,6 @@
 # Large 测试：工具的实机测试
 
-`ReferenceCopyTests` 覆盖示例项目关闭源的原生 Snapshot 复制、可选 `.zw1` 还原（`EPLANMCP_LARGE_ZW1`）、只读打开、版本/会话文件、仅副本关闭及源摘要不变。M0a 保持两个操作未注册，测试明确跳过，待后续接入启用；本次仅编写，未运行 EPLAN。
+`ReferenceCopyTests` 覆盖示例项目关闭源的原生 Snapshot 复制、可选 `.zw1` 还原（`EPLANMCP_LARGE_ZW1`）、只读打开、版本/会话文件、GapOnly 替换后的只读提取、授权刷新、仅副本关闭及源摘要/副本设计文件不变。M0a 保持两个操作未注册，测试明确跳过，待后续接入启用；本次仅编写，未运行 EPLAN。
 
 `ProjectCreateToolTests` 验收 `eplan_project_create` 的两种模式：自动寻找唯一 `GB_bas001.zw9`（或 `EPLANMCP_LARGE_BASIC_PROJECT`），备份用 `EPLANMCP_LARGE_ZW1` 指定非客户示例文件；材料缺失跳过。源复制进测试 Host 的 imports，核对源 SHA-256 不变、兼容性 `IsCompatible/18.0`、结束后关闭、重复目标及已有空目录拒绝、审计；保留 `User.eod/eox`。尚未运行，不代表跨版本兼容性验证。
 

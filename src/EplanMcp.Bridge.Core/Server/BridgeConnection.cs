@@ -187,7 +187,14 @@ internal sealed class BridgeConnection
         {
             ProtocolVersion = BridgeProtocol.CurrentVersion,
             BridgeVersion = _options.BridgeVersion,
-            Eplan = _options.Eplan,
+            Eplan = new EplanInstanceInfo
+            {
+                ProcessId = _options.Eplan.ProcessId,
+                Version = _options.Eplan.Version,
+                Variant = _options.Eplan.Variant,
+                Offline = _options.Eplan.Offline,
+                ApiExtensionLicence = _options.ApiExtensionLicence is { } check ? check() : _options.Eplan.ApiExtensionLicence,
+            },
             Operations = [.. _router.SupportedOperations],
             BuildTarget = _options.BuildTarget,
             AddinPath = _options.AddinPath,

@@ -30,6 +30,14 @@ internal sealed class FakeBridgeClient : IBridgeClient
 
     public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => Task.FromResult(Status);
 
+    public int StatusRefreshes { get; private set; }
+    public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken)
+    {
+        if (refresh)
+        { StatusRefreshes++; }
+        return GetStatusAsync(cancellationToken);
+    }
+
     public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken)
     {
         Selections.Add(processId);

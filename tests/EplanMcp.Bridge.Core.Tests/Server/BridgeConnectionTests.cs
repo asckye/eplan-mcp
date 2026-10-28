@@ -29,6 +29,30 @@ public sealed class BridgeConnectionTests
     }
 
     [Fact]
+    public void Handshake_LiveLicenceChanges_ReplaceStartupValueWithoutMutatingSharedFacts()
+    {
+        bool? licence = true;
+        int checks = 0;
+        var options = new BridgeServerOptions
+        {
+            Eplan = new() { ProcessId = 42, Version = "2026", Variant = "Pro Panel", ApiExtensionLicence = true, Offline = true },
+            ApiExtensionLicence = () => { checks++; return licence; },
+        };
+        var router = new OperationRouter([], _dispatcher, null, _log, TimeSpan.FromSeconds(10));
+        var connection = new BridgeConnection(options, router, _log);
+        Assert.True((bool?)Send(connection, Handshake)!["result"]!["eplan"]!["apiExtensionLicence"]);
+        licence = false;
+        Assert.False((bool?)Send(connection, Handshake)!["result"]!["eplan"]!["apiExtensionLicence"]);
+        licence = null;
+        JToken eplan = Send(connection, Handshake)!["result"]!["eplan"]!;
+        Assert.Null((bool?)eplan["apiExtensionLicence"]);
+        Assert.Equal(42, (int)eplan["processId"]!);
+        Assert.True((bool)eplan["offline"]!);
+        Assert.Equal(3, checks);
+        Assert.True(options.Eplan.ApiExtensionLicence);
+    }
+
+    [Fact]
     public void Handshake_AnnouncesTheRegisteredOperationsOutcomeGetAndCancelSorted()
     {
         JObject response = Send(Connection(new DelegateOperation("device.list", () => null), new DelegateOperation("a.first", () => null)), Handshake)!;
