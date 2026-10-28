@@ -1,14 +1,16 @@
-using System.Diagnostics;
 using System.Text;
 using EplanMcp.Evals.Agent;
 using EplanMcp.Evals.Scoring;
 using EplanMcp.Evals.Tasks;
+using EplanMcp.Host.Tests.Safety;
 
 namespace EplanMcp.Evals.Tests.Agent;
 
 /// <summary>
-/// Runs the real process handling against a stand-in for claude: a batch file that saves its stdin, prints a canned
-/// stream and, when asked to, keeps running the way a long model turn does.
+/// Runs the real process handling against a stand-in for claude: a batch file that saves its stdin and starts a child,
+/// as claude starts eplanmcp, which prints a canned stream and, when asked to, keeps running the way a long model turn
+/// does. The child leaves <c>silent</c> when it goes quiet and <c>finished</c> only if its wait ran to the end, so the
+/// tests prove that the whole tree was stopped by that file, not by how long the run took.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class ClaudeRunnerTests : IDisposable
@@ -32,14 +34,25 @@ public sealed class ClaudeRunnerTests : IDisposable
         File.WriteAllText(Fake, """
             @echo off
             findstr "^" > "%~dp0prompt.txt"
+            cmd /c "%~dp0turn.cmd"
+            """.Replace("\n", "\r\n", StringComparison.Ordinal));
+
+        // A stop can end claude's conhost before the child; a ping started in between fails at once (0xC0000142), so
+        // only a wait that ran to its end may leave the marker.
+        File.WriteAllText(Path.Combine(_directory.FullName, "turn.cmd"), """
+            @echo off
             type "%~dp0stream.jsonl"
-            if exist "%~dp0hang" ping -n 30 127.0.0.1 > nul
+            if not exist "%~dp0hang" exit /b
+            type nul > "%~dp0silent"
+            ping -n 30 127.0.0.1 > nul && type nul > "%~dp0finished"
             """.Replace("\n", "\r\n", StringComparison.Ordinal));
         Directory.CreateDirectory(Work);
         Directory.CreateDirectory(Output);
     }
 
     private string Fake => Path.Combine(_directory.FullName, "claude.cmd");
+
+    private bool Finished => File.Exists(Path.Combine(_directory.FullName, "finished"));
 
     private string Work => Path.Combine(_directory.FullName, "work");
 
@@ -77,25 +90,30 @@ public sealed class ClaudeRunnerTests : IDisposable
     public async Task Run_MoreToolCallsThanTheBudget_StopsClaudeAtOnce()
     {
         Stream([Init, Call("a"), Call("b"), Call("c"), Answer], hang: true);
-        var clock = Stopwatch.StartNew();
 
-        AgentAttempt attempt = await Run(_task, TestContext.Current.CancellationToken);
+        // Nothing fires on a clock that never moves, so neither the time limit nor the exit grace can end claude.
+        AgentAttempt attempt = await Run(_task, new ManualTime(DateTimeOffset.UnixEpoch), TestContext.Current.CancellationToken);
 
         Assert.Equal((AttemptStatus.Failed, "more than 2 tool calls"), (attempt.Status, attempt.Reason));
         Assert.Equal(3, attempt.Trace.Calls.Count);
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"took {clock.Elapsed}");
+        Assert.False(Finished, "claude ran to its end instead of being stopped");
     }
 
     [Fact]
     public async Task Run_PastTheTimeLimit_StopsClaude()
     {
         Stream([Init, Call("a")], hang: true);
-        var clock = Stopwatch.StartNew();
+        var clock = new ManualTime(DateTimeOffset.UnixEpoch);
+        Task<AgentAttempt> run = Run(_task with { Budget = _task.Budget with { MaxDuration = TimeSpan.FromSeconds(1) } }, clock, TestContext.Current.CancellationToken);
 
-        AgentAttempt attempt = await Run(_task with { Budget = _task.Budget with { MaxDuration = TimeSpan.FromSeconds(1) } }, TestContext.Current.CancellationToken);
+        // claude has read its prompt, so the runner has started the time limit; it now says nothing, like a long turn.
+        await UntilSilentAsync(run, TestContext.Current.CancellationToken);
+        clock.Advance(TimeSpan.FromSeconds(1));
+        AgentAttempt attempt = await run;
 
         Assert.Equal((AttemptStatus.Failed, "over the time limit of 0.02 minutes"), (attempt.Status, attempt.Reason));
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"took {clock.Elapsed}");
+        Assert.Single(attempt.Trace.Calls);
+        Assert.False(Finished, "claude ran to its end instead of being stopped");
     }
 
     [Fact]
@@ -131,6 +149,17 @@ public sealed class ClaudeRunnerTests : IDisposable
         }
     }
 
-    private Task<AgentAttempt> Run(EvalTask task, CancellationToken cancellationToken) =>
-        ClaudeRunner.RunAsync(new ClaudeSetup(Fake, ClaudeCommand.DefaultModel, Path.Combine(_directory.FullName, "mcp.json")), task, Work, Output, cancellationToken);
+    /// <summary>Waits for the stand-in to go quiet, or for a run that ended before that.</summary>
+    private async Task UntilSilentAsync(Task run, CancellationToken cancellationToken)
+    {
+        while (!File.Exists(Path.Combine(_directory.FullName, "silent")) && !run.IsCompleted)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationToken);
+        }
+    }
+
+    private Task<AgentAttempt> Run(EvalTask task, CancellationToken cancellationToken) => Run(task, TimeProvider.System, cancellationToken);
+
+    private Task<AgentAttempt> Run(EvalTask task, TimeProvider clock, CancellationToken cancellationToken) =>
+        ClaudeRunner.RunAsync(new ClaudeSetup(Fake, ClaudeCommand.DefaultModel, Path.Combine(_directory.FullName, "mcp.json")), task, Work, Output, clock, cancellationToken);
 }

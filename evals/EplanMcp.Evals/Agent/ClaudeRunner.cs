@@ -26,9 +26,10 @@ internal static class ClaudeRunner
 
     /// <summary>
     /// <paramref name="workDirectory"/> must be an empty directory outside the repository, so that no CLAUDE.md is found
-    /// above it; the files go to <paramref name="outputDirectory"/>.
+    /// above it; the files go to <paramref name="outputDirectory"/>. The time limit, the exit grace and the elapsed time
+    /// all run on <paramref name="clock"/>.
     /// </summary>
-    public static async Task<AgentAttempt> RunAsync(ClaudeSetup setup, EvalTask task, string workDirectory, string outputDirectory, CancellationToken cancellationToken)
+    public static async Task<AgentAttempt> RunAsync(ClaudeSetup setup, EvalTask task, string workDirectory, string outputDirectory, TimeProvider clock, CancellationToken cancellationToken)
     {
         var start = new ProcessStartInfo(setup.Claude)
         {
@@ -47,7 +48,7 @@ internal static class ClaudeRunner
             start.ArgumentList.Add(argument);
         }
 
-        long started = Stopwatch.GetTimestamp();
+        long started = clock.GetTimestamp();
         using Process process = Start(start);
         Task<string> stderr = process.StandardError.ReadToEndAsync(CancellationToken.None);
         var trace = new AgentTrace();
@@ -55,7 +56,7 @@ internal static class ClaudeRunner
 
         // A silent claude (a long model turn) blocks the read, so the time limit kills the process instead of
         // cancelling the read; the read then ends with the closed pipe.
-        using var timeLimit = new CancellationTokenSource(task.Budget.MaxDuration);
+        using var timeLimit = new CancellationTokenSource(task.Budget.MaxDuration, clock);
         using (CancellationTokenRegistration onTime = timeLimit.Token.Register(() => Kill(process)))
         using (CancellationTokenRegistration onCancel = cancellationToken.Register(() => Kill(process)))
         {
@@ -91,12 +92,12 @@ internal static class ClaudeRunner
             stop = new AgentStop(AttemptStatus.Failed, $"over the time limit of {task.Budget.MaxDuration.TotalMinutes.ToString("0.##", CultureInfo.InvariantCulture)} minutes");
         }
 
-        await ExitAsync(process).ConfigureAwait(false);
-        TimeSpan elapsed = Stopwatch.GetElapsedTime(started);
+        await ExitAsync(process, clock).ConfigureAwait(false);
+        TimeSpan elapsed = clock.GetElapsedTime(started);
         string errors;
         try
         {
-            errors = await stderr.WaitAsync(_exitGrace, CancellationToken.None).ConfigureAwait(false);
+            errors = await stderr.WaitAsync(_exitGrace, clock, CancellationToken.None).ConfigureAwait(false);
         }
         catch (TimeoutException)
         {
@@ -131,9 +132,9 @@ internal static class ClaudeRunner
         }
     }
 
-    private static async Task ExitAsync(Process process)
+    private static async Task ExitAsync(Process process, TimeProvider clock)
     {
-        using var grace = new CancellationTokenSource(_exitGrace);
+        using var grace = new CancellationTokenSource(_exitGrace, clock);
         try
         {
             await process.WaitForExitAsync(grace.Token).ConfigureAwait(false);
