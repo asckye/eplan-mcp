@@ -6000,6 +6000,99 @@
       ]
     },
     {
+      "name": "eplan_page_open",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PageOpenTools.cs",
+      "operations": [
+        "page.open"
+      ],
+      "api": [
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
+        "M:Eplan.EplApi.DataModel.PagesFilter.#ctor",
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.HEServices.Edit.#ctor",
+        "M:Eplan.EplApi.HEServices.Edit.OpenPageWithName(System.String,System.String)",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.DataModel.Page.Name",
+        "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
+        "P:Eplan.EplApi.DataModel.PagesFilter.Name",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "P:Eplan.EplApi.DataModel.StorableObject.Project",
+        "T:Eplan.EplApi.DataModel.DMObjectsFinder",
+        "T:Eplan.EplApi.DataModel.Page",
+        "T:Eplan.EplApi.DataModel.PagesFilter",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.HEServices.Edit",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_page_open.md",
+        "specStatus": "Implemented；新增 Large 测试待运行",
+        "apiNotes": [
+          "A54"
+        ],
+        "tests": [
+          {
+            "name": "PageOpenToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageOpenToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PageOpenTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "PageOpenOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageOpenOperationTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          }
+        ]
+      },
+      "live": []
+    },
+    {
       "name": "eplan_page_renumber",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/PageDestructiveTools.cs",

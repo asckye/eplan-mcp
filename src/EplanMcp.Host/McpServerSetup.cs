@@ -98,6 +98,7 @@ internal static class McpServerSetup
             .WithTools<RevisionTools>(HostJson.Options)
             .WithTools<SymbolTools>(HostJson.Options)
             .WithTools<PageTools>(HostJson.Options)
+            .WithTools<PageOpenTools>(HostJson.Options)
             .WithTools<PageWriteTools>(HostJson.Options)
             .WithTools<PageTextReplaceTools>(HostJson.Options)
             .WithTools<PropertySetTools>(HostJson.Options)
