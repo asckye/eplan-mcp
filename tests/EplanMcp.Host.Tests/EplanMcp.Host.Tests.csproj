@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\Shared\ModuleInspectionEvidence.cs" Link="ModuleInspectionEvidence.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\Shared\PageTextStore.cs" Link="PageTextStore.cs" />
     <Compile Include="..\Shared\PageFrameStore.cs" Link="PageFrameStore.cs" />
