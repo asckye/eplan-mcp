@@ -220,6 +220,7 @@
 - `ExistingIds` 会返回索引为 0 的带索引属性（如 1122），按普通属性读抛 `IndexedPropertyException`（S063172）。— S42。
 
 - T4b Large 2/2（2026-10-27，2026.0.3.25421，Electric P8，LargeWrite 副本）：示例项目未设置显示语言，此时只有语言无关 `??_??` 文字可见；`??_??` 与具体语言同时写入一个 `MultiLangString` 时 EPLAN 只保留具体语言，读回缺 `??_??`，因此两者不得混用。字高 3.5 mm、位置读回与请求相同；一次撤销恢复；强制读回不符时回滚且不留撤销步。
+- T4c Large 2/2（2026-10-27，同上）：文字、直线、矩形在一个 `SafetyPoint` 事务中批量创建并逐项读回后提交，一次撤销恢复；中途失败整批回滚不留撤销步。`eplan_page_get` 报告的直线/矩形外框含线宽，比几何端点各向外约 0.5 mm。— `eplan_placement_create`。
 ### A53. 无部件符号与标识显示（spike S41，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S41](../../spikes/S41-symbols-without-part/README.md)。
 
