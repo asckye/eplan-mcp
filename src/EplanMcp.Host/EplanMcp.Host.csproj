@@ -20,6 +20,7 @@
   <ItemGroup>
     <!-- Detailed usage per tool, served by eplan_tool_usage (mcp-tool-design 10); the file name is the tool name. -->
     <EmbeddedResource Include="Tools\Usage\*.md" LogicalName="EplanMcp.Host.Tools.Usage.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Tools\PlacementCreate.usage.md" LogicalName="EplanMcp.Host.Tools.Usage.eplan_placement_create.md" />
     <EmbeddedResource Include="Tools\ActionRun.output.json" />
   </ItemGroup>
 

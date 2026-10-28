@@ -40,7 +40,13 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
+<<<<<<< HEAD
         Assert.Equal(83, Tools(ToolProfile.Full).Length);
+=======
+        Assert.Equal(82, Tools(ToolProfile.Full).Length);
+        Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PlacementCreateTools.Tool);
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PlacementCreateTools.Tool);
+>>>>>>> b4fd63bf (feat(tools): create texts, lines and boxes with eplan_placement_create)
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == AssetTools.ReviewTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == AssetTools.ReviewTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == SymbolTools.Tool);

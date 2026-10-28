@@ -3,7 +3,7 @@
   "tool": {
     "name": "eplan_placement_create",
     "title": "Create text and graphics on an EPLAN page",
-    "description": "Plans 1-50 text, line or rectangle items on one Circuit page (dry_run only). Lines are graphics. Coordinates: mm, bottom left, y up; snaps to grid and checks full outlines. Text needs ??_?? or the project display language; otherwise EPLAN does not show it (A54). Execution returns CAPABILITY_MISSING until available; outside scratch will need approval. Example: {\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"line\",\"points\":[[10,10],[20,20]]}],\"dry_run\":true}.",
+    "description": "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
     "inputSchema": {
       "type": "object",
       "additionalProperties": false,
@@ -14,19 +14,48 @@
       ],
       "properties": {
         "project": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "page": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "items": {
           "type": "array",
           "minItems": 1,
           "maxItems": 50,
           "items": {
-            "$ref": "#/$defs/item"
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "text",
+                  "line",
+                  "rectangle"
+                ]
+              },
+              "position": {
+                "type": "array"
+              },
+              "points": {
+                "type": "array"
+              },
+              "corners": {
+                "type": "array"
+              },
+              "contents": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "height_mm": {
+                "type": "number"
+              }
+            }
           }
         },
         "snap_to_grid": {
@@ -38,105 +67,11 @@
           "default": false
         },
         "response_format": {
-          "type": "string",
           "enum": [
             "concise",
             "detailed"
           ],
           "default": "concise"
-        }
-      },
-      "$defs": {
-        "point": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 10000
-          }
-        },
-        "pair": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": {
-            "$ref": "#/$defs/point"
-          }
-        },
-        "item": {
-          "oneOf": [
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "kind",
-                "position",
-                "contents",
-                "height_mm"
-              ],
-              "properties": {
-                "kind": {
-                  "const": "text"
-                },
-                "position": {
-                  "$ref": "#/$defs/point"
-                },
-                "height_mm": {
-                  "type": "number",
-                  "minimum": 0.5,
-                  "maximum": 100
-                },
-                "contents": {
-                  "type": "object",
-                  "minProperties": 1,
-                  "propertyNames": {
-                    "minLength": 5,
-                    "maxLength": 5,
-                    "pattern": "^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"
-                  },
-                  "additionalProperties": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 500
-                  }
-                }
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "kind",
-                "points"
-              ],
-              "properties": {
-                "kind": {
-                  "const": "line"
-                },
-                "points": {
-                  "$ref": "#/$defs/pair"
-                }
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "kind",
-                "corners"
-              ],
-              "properties": {
-                "kind": {
-                  "const": "rectangle"
-                },
-                "corners": {
-                  "$ref": "#/$defs/pair"
-                }
-              }
-            }
-          ]
         }
       }
     },
@@ -162,17 +97,23 @@
           "type": "string"
         },
         "execution": {
-          "const": "not_started"
+          "enum": [
+            "not_started",
+            "committed"
+          ]
         },
         "dryRun": {
-          "const": true
+          "type": "boolean"
         },
         "gridSize": {
           "type": "number",
           "exclusiveMinimum": 0
         },
         "boundarySource": {
-          "const": "Page.Size"
+          "enum": [
+            "Page.Size",
+            "unverified"
+          ]
         },
         "items": {
           "type": "array",
@@ -195,7 +136,10 @@
                 "$ref": "#/$defs/item"
               },
               "bounds": {
-                "type": "array",
+                "type": [
+                  "array",
+                  "null"
+                ],
                 "minItems": 4,
                 "maxItems": 4,
                 "items": {
@@ -219,6 +163,15 @@
         "connectionChanges": {
           "type": "array",
           "maxItems": 0
+        },
+        "warning": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "recovered": {
+          "type": "boolean"
         }
       },
       "$defs": {
@@ -322,5 +275,5 @@
       "readOnlyHint": false
     }
   },
-  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}],\"dry_run\":true}\n```\n## Workflow\nStaged full-profile contract; not registered yet. Preview only, without approval or writes. Execution returns CAPABILITY_MISSING until T4b/T4c. Future execution needs approval outside scratch and supports one-step undo.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry, display language, text outline or execution. All failures and previews report execution=not_started. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\n"
+  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}]}\n```\n## Workflow\nFull profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry, display language, or text outline. Preflight failures and previews report execution=not_started; failed writes report rolled_back or unknown. Execution reports boundarySource=unverified and bounds=null: coordinates and grid are checked, but page containment is not proven. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\n"
 }

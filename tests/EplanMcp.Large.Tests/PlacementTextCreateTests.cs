@@ -11,7 +11,7 @@ namespace EplanMcp.Large.Tests;
 public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Fact]
-    public async Task Create_DisplayAndOtherLanguageOnNewWritePage_PageGetReadsGeometryAndOneUndoRestoresHash()
+    public async Task Create_MixedBatchOnNewWritePage_PageGetReadsGeometryAndOneUndoRestoresHash()
     {
         Assert.Equal(eplan.ProcessId, host.ProcessId);
         await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
@@ -32,15 +32,21 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
             Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = display == "??_??" ? new() { [display] = "Visible panel" } : new() { [display] = "Visible panel", [other] = "Other language" } },
         };
 
-        // Direct staged Bridge primitive: the Host tool intentionally remains unregistered until T4c.
-        WriteResult<PlacementTextCreateData> result = await bridge.InvokeWriteAsync<PlacementTextCreateArgs, PlacementTextCreateData>(
-            OperationNames.PlacementTextCreateExecute, args, Guid.NewGuid().ToString("N"), TimeSpan.FromSeconds(30), null, TestContext.Current.CancellationToken);
-        Assert.False(result.Recovered);
-        Assert.NotNull(result.Data);
-        Assert.Null(result.Data.Warning);
-        Assert.Equal(args.Text.Contents, result.Data.Text.Contents);
-        Assert.Equal(args.Text.Position, result.Data.Text.Position);
-        Assert.Equal(args.Text.HeightMm, result.Data.Text.HeightMm);
+        JsonElement result = await host.CallAsync("eplan_placement_create", new()
+        {
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["snap_to_grid"] = false,
+            ["items"] = new object[]
+            {
+                new { kind = "text", position = args.Text.Position, contents = args.Text.Contents, height_mm = args.Text.HeightMm },
+                new { kind = "line", points = (double[][])[[10, 20], [30, 40]] },
+                new { kind = "rectangle", corners = (double[][])[[60, 80], [20, 30]] },
+            },
+        });
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        Assert.False(result.GetProperty("recovered").GetBoolean());
+        Assert.Equal(3, result.GetProperty("items").GetArrayLength());
         JsonElement discovery = await host.CallAsync("eplan_page_get", new()
         {
             ["project"] = host.Writable,
@@ -59,6 +65,11 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         Assert.Equal(args.Text.Contents.Count, stored.Split(';', StringSplitOptions.RemoveEmptyEntries).Length);
         foreach ((string language, string text) in args.Text.Contents)
         { Assert.Contains(language + "@" + text + ";", stored, StringComparison.Ordinal); }
+        JsonElement line = Assert.Single(drawings.GetProperty("items").EnumerateArray(), r => r.GetProperty("kind").GetString() == "Line");
+        Assert.Equal([10d, 20d], line.GetProperty("location").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Equal([10d, 20d, 30d, 40d], line.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()));
+        JsonElement rectangle = Assert.Single(drawings.GetProperty("items").EnumerateArray(), r => r.GetProperty("kind").GetString() == "Rectangle");
+        Assert.Equal([20d, 30d, 60d, 80d], rectangle.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()));
         Assert.NotEqual(drawingBefore, await DrawingHash(bridge, page));
 
         await selection.UndoAsync();
@@ -67,19 +78,19 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
     }
 
     [Fact]
-    public async Task ForcedReadbackMismatch_OnFreshScratchCopy_RollsBackAndLeavesNoUndoStep()
+    public async Task ForcedMidBatchFailure_OnFreshScratchCopy_RollsBackAndLeavesNoUndoStep()
     {
         string? variantBin = Environment.GetEnvironmentVariable("EPLANMCP_DRAWING_VARIANT_BIN");
         Assert.SkipWhen(string.IsNullOrWhiteSpace(variantBin), "Set EPLANMCP_DRAWING_VARIANT_BIN and build tests/EplanMcp.Large.DrawingHelper; see README.md.");
         string page = (await eplan.CallAsync("eplan_page_list", new() { ["page_type"] = "Circuit" }))
             .GetProperty("pages").EnumerateArray().First().GetProperty("name").GetString()!;
-        string folder = OfflineHost.NewFolder(LiveEplan.ScratchRoot(), "text-rollback");
+        string folder = OfflineHost.NewFolder(LiveEplan.ScratchRoot(), "mixed-rollback");
         string copy = Path.Combine(folder, LiveEplan.ProjectName);
         OfflineHost.CopyFixture(LiveEplan.ScratchRoot(), copy);
         string exe = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.DrawingHelper", "EplanMcp.Large.DrawingHelper.exe");
         Assert.True(File.Exists(exe), "Build tests/EplanMcp.Large.DrawingHelper in the configuration of these tests.");
         var start = new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (string argument in new[] { variantBin!, copy + ".elk", page, "text-rollback" })
+        foreach (string argument in new[] { variantBin!, copy + ".elk", page, "mixed-rollback" })
         { start.ArgumentList.Add(argument); }
         using Process process = Process.Start(start)!;
         Task<string> stdout = process.StandardOutput.ReadToEndAsync(TestContext.Current.CancellationToken);

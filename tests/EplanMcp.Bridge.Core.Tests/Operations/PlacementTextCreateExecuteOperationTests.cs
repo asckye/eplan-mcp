@@ -10,6 +10,69 @@ public sealed class PlacementTextCreateExecuteOperationTests
 {
     private readonly PlacementTextStore _store = new();
 
+    [Theory]
+    [InlineData("line")]
+    [InlineData("rectangle")]
+    public void Mixed_ReadbackOfEitherGeometryDiffers_RestoresExistingStateAndLeavesNoUndo(string kind)
+    {
+        _store.Texts.Add(PlacementTextStore.Args().Text);
+        _store.Readback = item => { if (item.Kind == kind) { item.EndPosition[0] += 0.5; } return item; };
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(PlacementTextStore.Mixed())).Error;
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal(PlacementTextStore.Args().Text.Contents, Assert.Single(_store.Texts).Contents);
+        Assert.Equal(["Begin AI: eplan_placement_create", "Rollback", "Dispose"], _store.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(-1)]
+    [InlineData(10001)]
+    public void Mixed_InvalidEndpoint_IsRejectedBeforeAnyWrite(double coordinate)
+    {
+        PlacementTextCreateArgs args = PlacementTextStore.Mixed();
+        args.Items![1].EndPosition[1] = coordinate;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal(0, _store.Writes);
+        Assert.Empty(_store.Transactions.Calls);
+    }
+
+    [Fact]
+    public void Mixed_MidBatchNativeFailure_RestoresAllItems()
+    {
+        _store.AfterWrite = () => { if (_store.Writes == 2) { throw new InvalidOperationException("Forced second-item failure."); } };
+        Assert.Throws<InvalidOperationException>(() => Execute(PlacementTextStore.Mixed()));
+        Assert.Equal(2, _store.Writes);
+        Assert.Empty(_store.Texts);
+        Assert.Equal(["Begin AI: eplan_placement_create", "Rollback", "Dispose"], _store.Transactions.Calls);
+    }
+
+    [Fact]
+    public void Mixed_PageEvidenceChanged_RefusesBeforeTransaction()
+    {
+        PlacementTextCreateArgs args = PlacementTextStore.Mixed();
+        args.Fingerprint = "changed";
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Empty(_store.Transactions.Calls);
+    }
+
+    [Fact]
+    public void Mixed_OneAndFiftyItems_CommitExactlyOneUndoStep()
+    {
+        foreach (int count in new[] { 1, 50 })
+        {
+            var store = new PlacementTextStore();
+            PlacementTextCreateArgs args = PlacementTextStore.Mixed();
+            args.Items = Enumerable.Repeat(args.Items![1], count).ToList();
+            var data = (PlacementTextCreateData)store.Operation.Execute(args)!;
+            Assert.Equal(count, data.Items.Count);
+            Assert.Equal(count, store.Texts.Count);
+            Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], store.Transactions.Calls);
+        }
+    }
+
     [Fact]
     public void Create_MultilingualText_VerifiesAndCommitsOneUndoStep()
     {

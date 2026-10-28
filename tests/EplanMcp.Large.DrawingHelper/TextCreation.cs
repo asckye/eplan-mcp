@@ -11,7 +11,7 @@ namespace EplanMcp.Large.DrawingHelper;
 /// <summary>Native rollback probe on the helper's private copy; only detached DTOs are accessed after rollback (A55).</summary>
 internal static class TextCreation
 {
-    public static string Run(string project, string sourcePage)
+    public static string Run(string project, string sourcePage, bool mixed)
     {
         var catalog = new EplanProjectCatalog();
         var pages = new EplanPageReader();
@@ -32,6 +32,11 @@ internal static class TextCreation
             Page = sentinel,
             Text = new() { Position = [50, 50], HeightMm = 3.5, Contents = display == "??_??" ? new() { [display] = "Visible panel" } : new() { [display] = "Visible panel", [display == "en_US" ? "de_DE" : "en_US"] = "Other language" } },
         };
+        if (mixed)
+        {
+            args.Items = [args.Text, new() { Kind = "line", Position = [10, 20], EndPosition = [30, 40] },
+                new() { Kind = "rectangle", Position = [20, 30], EndPosition = [60, 80] }];
+        }
         BridgeError error;
         try
         {
@@ -76,6 +81,13 @@ internal static class TextCreation
     {
         private readonly EplanPlacementTextWriter _native = new();
         public void Validate(string projectPath, string page, PlacementText text) => _native.Validate(projectPath, page, text);
+        public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items)
+        {
+            if (items.Count == 1)
+            { return [Create(projectPath, page, items[0])]; }
+            _native.CreateBatch(projectPath, page, items.Take(2).ToList());
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Forced failure after creating the text and line, before the rectangle.");
+        }
         public PlacementText Create(string projectPath, string page, PlacementText text)
         {
             PlacementText read = _native.Create(projectPath, page, text);

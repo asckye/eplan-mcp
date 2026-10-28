@@ -15,4 +15,14 @@ public sealed class PageDrawingGeometry
     public double[]? PlotFrameSize { get; set; }
     /// <summary>Supported placements and property children; excludes plot-frame descendants and part references.</summary>
     public List<DrawingPlacement> Placements { get; set; } = [];
+
+    /// <summary>Serializer-independent page evidence for approval rechecks, including grid and observed bounds.</summary>
+    public string Fingerprint()
+    {
+        string value = string.Join("|", new[] { GridSize.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+        string.Join(",", (PageSize ?? []).Select(n => n.ToString("R", System.Globalization.CultureInfo.InvariantCulture))) }
+            .Concat(Placements.Select(p => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}", p.Locator.Type, p.Locator.Oid, p.Locator.Digest)).OrderBy(d => d, StringComparer.Ordinal)));
+        using var hash = System.Security.Cryptography.SHA256.Create();
+        return BitConverter.ToString(hash.ComputeHash(System.Text.Encoding.UTF8.GetBytes(value))).Replace("-", string.Empty).ToLowerInvariant();
+    }
 }

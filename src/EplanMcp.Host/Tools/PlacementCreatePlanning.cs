@@ -100,6 +100,7 @@ internal static class PlacementCreatePlanning
                     length += text.Value.ValueKind == JsonValueKind.String ? text.Value.GetString()!.Length : 0;
                 }
                 Check(length is >= 1 and <= 500, at + "/contents", "requires 1..500 characters in total.");
+                Check(!languages.Contains("??_??") || languages.Count == 1, at + "/contents", "??_?? cannot be mixed with languages (A54/live T4b).");
             }
             else if (item.TryGetProperty(kind == "line" ? "points" : "corners", out JsonElement pair))
             {

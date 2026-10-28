@@ -54,6 +54,7 @@ internal sealed class Page : IDisposable
     public PointD Size => SizeError is { } error ? throw error : StoredSize;
     public PlotFrame? PlotFrame { get; set; }
     public Placement[] AllPlacements { get; set; } = [];
+    public Action? AfterGraphicCreate { get; set; }
     public void Dispose() => throw new InvalidOperationException("Borrowed page must never be disposed.");
 }
 

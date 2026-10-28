@@ -32,13 +32,31 @@ internal sealed class PropertyPlacement(long oid, Placement parent) : TextBase(o
     }
 }
 
-internal sealed class Line(long oid) : Placement(oid)
+internal sealed class Line(long oid = 100) : Placement(oid)
 {
     public PointD StartPoint { get; set; }
     public PointD EndPoint { get; set; }
+    public void Create(Page page, PointD start, PointD end)
+    {
+        StartPoint = start;
+        EndPoint = end;
+        page.AllPlacements = [.. page.AllPlacements, this];
+        page.AfterGraphicCreate?.Invoke();
+    }
 }
 
-internal sealed class Rectangle(long oid) : Placement(oid);
+internal sealed class Rectangle(long oid = 101) : Placement(oid)
+{
+    public PointD LowerLeftCorner { get; private set; }
+    public PointD UpperRightCorner { get; private set; }
+    public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
+    public void SetArea(PointD lower, PointD upper)
+    {
+        Assert.True(LowerLeftCorner == default && UpperRightCorner == default);
+        LowerLeftCorner = lower;
+        UpperRightCorner = upper;
+    }
+}
 
 internal struct Pen
 {

@@ -46,11 +46,21 @@ internal sealed class PlacementTextStore : IPlacementTextWriter
         return Readback(Clone(text));
     }
 
+    public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items) => items.Select(item => Create(projectPath, page, item)).ToList();
+
     public static PlacementTextCreateArgs Args() => new()
     {
         Project = "Line1",
         Page = "P",
         Text = new() { Position = [12.5, 22.5], HeightMm = 3.5, Contents = new(StringComparer.Ordinal) { ["en_US"] = "Panel", ["de_DE"] = "Feld" } },
+    };
+
+    public static PlacementTextCreateArgs Mixed() => new()
+    {
+        Project = "Line1",
+        Page = "P",
+        Items = [Args().Text, new() { Kind = "line", Position = [10, 20], EndPosition = [30, 40] },
+            new() { Kind = "rectangle", Position = [10, 20], EndPosition = [30, 40] }],
     };
 
     public static PlacementText Clone(PlacementText text) => BridgeJson.FromObject(text).ToObject<PlacementText>(BridgeJson.Serializer)!;

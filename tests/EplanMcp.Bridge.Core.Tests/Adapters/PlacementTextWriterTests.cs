@@ -11,6 +11,35 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 [Trait("Size", "Small")]
 public sealed class PlacementTextWriterTests
 {
+    [Fact]
+    public void Mixed_ReadsEarlierTextOnlyAfterAllPlacementsHaveBeenCreated()
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        page.AfterGraphicCreate = () => Assert.IsType<Text>(page.AllPlacements[0]).Height = 9;
+        PlacementTextCreateArgs args = PlacementTextStore.Mixed();
+        List<PlacementText> actual = new EplanPlacementTextWriter().CreateBatch("project", "+A1/1", args.Items!);
+        Assert.Equal(3, page.AllPlacements.Length);
+        Assert.Equal(9, actual[0].HeightMm);
+        Assert.Equal(3.5, args.Items![0].HeightMm);
+    }
+    [Theory]
+    [InlineData("line")]
+    [InlineData("rectangle")]
+    public void Graphics_CreateAndReadBackBothPointsWithoutTextLanguageRequirement(string kind)
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        var requested = new PlacementText { Kind = kind, Position = [12.5, 22.5], EndPosition = [35, 48] };
+        var writer = new EplanPlacementTextWriter();
+        writer.Validate("project", "+A1/1", requested);
+        PlacementText actual = writer.Create("project", "+A1/1", requested);
+        Assert.Equal(kind, actual.Kind);
+        Assert.Equal(requested.Position, actual.Position);
+        Assert.Equal(requested.EndPosition, actual.EndPosition);
+        Assert.Empty(actual.Contents);
+        Assert.IsType(kind == "line" ? typeof(Line) : typeof(Rectangle), Assert.Single(page.AllPlacements));
+    }
     [Theory]
     [InlineData("zh_CN", true)]
     [InlineData("??_??", true)]

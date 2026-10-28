@@ -23,7 +23,7 @@ public sealed class PlacementCreatePreviewTests
     };
 
     [Fact]
-    public async Task StagedContractAndUsage_MatchReviewedSnapshotWithoutRegistration()
+    public async Task ContractAndUsage_MatchReviewedSnapshotWithFullRegistration()
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
@@ -31,8 +31,8 @@ public sealed class PlacementCreatePreviewTests
         services.AddEplanMcp();
         await using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;
-        Assert.DoesNotContain(options.ToolCollection!, t => t.ProtocolTool.Name == PlacementCreateContract.Definition.Name);
-        Assert.DoesNotContain(PlacementCreateContract.Definition.Name, ToolUsageCatalog.Usage.Keys);
+        Assert.Contains(options.ToolCollection!, t => t.ProtocolTool.Name == PlacementCreateContract.Definition.Name);
+        Assert.Contains(PlacementCreateContract.Definition.Name, ToolUsageCatalog.Usage.Keys);
         DirectoryInfo root = new(AppContext.BaseDirectory);
         while (!File.Exists(Path.Combine(root.FullName, "EplanMcp.Ci.slnf")))
         { root = root.Parent!; }
@@ -43,7 +43,7 @@ public sealed class PlacementCreatePreviewTests
         Assert.Empty(PlacementCreatePlanning.Validate(example));
         Assert.True(PropertyGetContractTests.Accepts(PlacementCreateContract.Input, example, PlacementCreateContract.Input));
         Assert.Empty(PlacementCreatePlanning.Validate(PlacementCreateTests.Input(PlacementCreateTests.Text + "," + PlacementCreateTests.Line + "," + PlacementCreateTests.Rectangle)));
-        await Verify(JsonSerializer.Serialize(new { profile = "full", tool = PlacementCreateContract.Definition, usage = usage.ReplaceLineEndings("\n") }, _json) + "\n", "json")
+        await Verify(JsonSerializer.Serialize(new { profile = "full", tool = options.ToolCollection!.Single(t => t.ProtocolTool.Name == PlacementCreateTools.Tool).ProtocolTool, usage = usage.ReplaceLineEndings("\n") }, _json) + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("placement-create-contract");
     }
 
