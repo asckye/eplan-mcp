@@ -97,12 +97,12 @@ internal sealed class DevicePlaceRequest
         if (terminal)
         { full += ":" + args.TerminalNumber; }
         string[] existing = terminal ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
-        if (terminal && existing.FirstOrDefault(n => string.Equals(n, full.Substring(0, full.LastIndexOf(':')), StringComparison.OrdinalIgnoreCase)) is { } canonical)
+        if (terminal && existing.FirstOrDefault(n => SameName(full.Substring(0, full.LastIndexOf(':')), n, ignoreCase: true)) is { } canonical)
         { full = canonical + ":" + args.TerminalNumber; }
         string[] taken =
         [
             .. (box ? page.LocationBoxStructures : names.FunctionNames(project.Path))
-                .Where(n => string.Equals(n, full, StringComparison.OrdinalIgnoreCase) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
+                .Where(n => SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.Ordinal),
         ];
         return new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
@@ -228,5 +228,19 @@ internal sealed class DevicePlaceRequest
         {
             violations.Add(violation);
         }
+    }
+
+    /// <summary>
+    /// Live T7c: the project's structure settings can drop the higher-level function from strip and terminal names
+    /// (=GAA+A1-XT3 is stored as +A1-XT3). Only that leading segment may be missing.
+    /// </summary>
+    internal static bool SameName(string requested, string? actual, bool ignoreCase = false)
+    {
+        if (actual is null)
+        { return false; }
+        StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return string.Equals(requested, actual, comparison)
+            || (requested.Length > 0 && requested[0] == '=' && actual.Length > 0 && actual[0] is '+' or '-'
+                && requested.EndsWith(actual, comparison) && requested.Substring(0, requested.Length - actual.Length).IndexOfAny(['+', '-', ':', '&']) < 0);
     }
 }

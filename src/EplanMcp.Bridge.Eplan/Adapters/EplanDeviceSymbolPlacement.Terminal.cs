@@ -1,6 +1,7 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 
@@ -13,10 +14,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         MainThread.Assert();
         string name = tag.Substring(0, tag.LastIndexOf(':'));
         using var finder = new DMObjectsFinder(_project);
-        TerminalStrip[] matches = [.. finder.GetTerminalStrips(null).Where(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase))];
-        Require(matches.Length <= 1);
+        TerminalStrip[] matches = [.. finder.GetTerminalStrips(null).Where(s => Same(name.ToUpperInvariant(), s.Name.ToUpperInvariant()))];
+        CheckTerminal(matches.Length <= 1, "several strips share this name");
         bool create = matches.Length == 0;
-        Require(!create || !finder.GetFunctions(null).Any(f => string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)));
+        CheckTerminal(!create || !finder.GetFunctions(null).Any(f => Same(name.ToUpperInvariant(), f.Name.ToUpperInvariant())), "another function already has the strip name");
 #pragma warning disable CA2000 // A39/A55: persistent strips and terminals belong to EPLAN, also after Abort.
         TerminalStrip strip = create ? new TerminalStrip() : matches[0];
         if (create)
@@ -27,19 +28,19 @@ internal sealed partial class EplanDeviceSymbolPlacement
         }
         if (args.TerminalStripText is { } text)
         {
-            Require(create);
+            CheckTerminal(create, "strip text is only set on a new strip");
             using TerminalStripPropertyListComplete properties = strip.Properties;
             using var multilingual = new MultiLangString();
             multilingual.AddString(ISOCode.Language.L___, text);
             properties.FUNC_TEXT = multilingual;
             using PropertyValue value = properties.FUNC_TEXT;
-            Require(!value.IsEmpty);
+            CheckTerminal(!value.IsEmpty, "strip text is empty after writing");
             using MultiLangString actual = value.ToMultiLangString();
-            Require(actual.GetStringToDisplay(ISOCode.Language.L___) == text);
+            CheckTerminal(actual.GetStringToDisplay(ISOCode.Language.L___) == text, "strip text reads back as '" + actual.GetStringToDisplay(ISOCode.Language.L___) + "'");
         }
         var terminal = new Terminal();
 #pragma warning restore CA2000
-        Require(!strip.Terminals.Any(t => string.Equals(t.Name, tag, StringComparison.OrdinalIgnoreCase)));
+        CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
         terminal.Create(strip, _page, _variant);
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
@@ -49,11 +50,18 @@ internal sealed partial class EplanDeviceSymbolPlacement
         using PropertyValue number = values.FUNC_PINORTERMINALNUMBER;
         using PropertyValue sort = values.FUNC_TERMINALSORTCODE;
         TerminalStrip? owner = terminal.TerminalStrip;
-        Require(strip.Name == name && strip.IsMainFunction && terminal.Name == tag && !number.IsEmpty && number.ToString() == args.TerminalNumber
-            && owner is not null && owner.ObjectIdentifier == strip.ObjectIdentifier && owner.Name == name
-            && terminal.FunctionCategory.ToString() == "Terminal" && terminal.IsPlaced && terminal.Page.Name == _page.Name
-            && terminal.Location.X == args.X && terminal.Location.Y == args.Y && terminal.ArticleReferences.Length == 0
-            && terminal.SymbolVariant.SymbolLibraryName == _symbol.Library && terminal.SymbolVariant.SymbolName == _symbol.Name && terminal.SymbolVariant.VariantNr == _symbol.Variant);
+        CheckTerminal(Same(name, strip.Name) && strip.IsMainFunction, $"strip reads back as '{strip.Name}', main function {strip.IsMainFunction}");
+        CheckTerminal(Same(tag, terminal.Name), $"terminal name reads back as '{terminal.Name}'");
+        CheckTerminal(!number.IsEmpty && number.ToString() == args.TerminalNumber, $"terminal number reads back as '{(number.IsEmpty ? "" : number.ToString())}'");
+        // S43/live T7c: the strip relation can stay null until the commit; eplan_terminal_strip_get confirms it afterwards.
+        // Live T7c: an existing strip's owner object differs from the finder's strip (other OID, same name); strips are identified by name.
+        CheckTerminal(owner is null || Same(name, owner.Name), $"terminal owner reads back as '{owner?.Name}'");
+        CheckTerminal(terminal.FunctionCategory.ToString() == "Terminal", $"category reads back as {terminal.FunctionCategory}");
+        CheckTerminal(terminal.IsPlaced && terminal.Page.Name == _page.Name, "terminal is not placed on the page");
+        CheckTerminal(terminal.Location.X == args.X && terminal.Location.Y == args.Y, FormattableString.Invariant($"position reads back as {terminal.Location.X},{terminal.Location.Y}"));
+        CheckTerminal(terminal.ArticleReferences.Length == 0, "terminal has parts");
+        CheckTerminal(terminal.SymbolVariant.SymbolLibraryName == _symbol.Library && terminal.SymbolVariant.SymbolName == _symbol.Name && terminal.SymbolVariant.VariantNr == _symbol.Variant,
+            $"symbol reads back as {terminal.SymbolVariant.SymbolLibraryName}/{terminal.SymbolVariant.SymbolName}/{terminal.SymbolVariant.VariantNr}");
         OperationContext.Current.ThrowIfCancellationRequested();
         return new()
         {
@@ -65,11 +73,25 @@ internal sealed partial class EplanDeviceSymbolPlacement
             {
                 Strip = strip.Name,
                 Number = number.ToString(),
-                Owner = owner!.Name,
+                Owner = owner?.Name,
                 Position = [terminal.Location.X, terminal.Location.Y],
                 SortCode = sort.IsEmpty ? null : sort.ToString(),
                 StripCreated = create
             }
         };
+    }
+
+    /// <summary>
+    /// Live T7c: the sample project's structure settings leave the higher-level function out of terminal strip and
+    /// terminal names (=GAA+A1-XT4 reads back as +A1-XT4). Only that leading segment may be missing.
+    /// </summary>
+    private static bool Same(string requested, string actual) =>
+        requested == actual || (requested.Length > 0 && requested[0] == '=' && requested.EndsWith(actual, StringComparison.Ordinal)
+            && actual.Length > 0 && actual[0] is '+' or '-' && requested.Substring(0, requested.Length - actual.Length).IndexOfAny(['+', '-', ':', '&']) < 0);
+
+    private static void CheckTerminal(bool matches, string what)
+    {
+        if (!matches)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal readback differs (" + what + "). Nothing was committed; read the page and re-plan."); }
     }
 }

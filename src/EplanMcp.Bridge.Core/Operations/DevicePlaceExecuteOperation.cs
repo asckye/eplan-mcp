@@ -94,8 +94,10 @@ public sealed class DevicePlaceExecuteOperation(
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Location box structure, outline or unaffected-device readback differs; nothing was committed."); }
-        if (args.TerminalStrip is not null && (data.Terminal is not { } terminal || data.Tag != tag || data.Page != page
-            || terminal.Strip != tag.Substring(0, tag.LastIndexOf(':')) || terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
+        // Live T7c: names may lose the leading higher-level function (project structure settings); the strip
+        // relation can stay null until the commit (S43), and eplan_terminal_strip_get confirms it afterwards.
+        if (args.TerminalStrip is not null && (data.Terminal is not { } terminal || !DevicePlaceRequest.SameName(tag, data.Tag) || data.Page != page
+            || !DevicePlaceRequest.SameName(tag.Substring(0, tag.LastIndexOf(':')), terminal.Strip) || terminal.Owner is not null && terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
             || !terminal.Position.SequenceEqual(new[] { args.X, args.Y })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal identity, ownership or position differs; nothing was committed."); }
         return data;
@@ -127,4 +129,5 @@ public sealed class DevicePlaceExecuteOperation(
 
         return placed;
     }
+
 }
