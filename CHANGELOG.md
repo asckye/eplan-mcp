@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Added
+- 新增 `eplan_rule_check`（full，Read）：按柜检查本机已提升的锁定规则，分页返回四值和证据；`fix_plan` 仅编译声明的修复计划，unknown 或修复冲突时拒绝，不执行工程修改。
 - 模块只读检查增加供 M3 使用的内部服务：保留跨页引用、占位符值集、实际属性与模块声明，未解析引用明确列为缺口；缺 Bridge 能力或授权时拒绝，不注册新工具或写操作，实机闭包对照待验证。
 - 新增 `eplan_page_open`（full，Read）：按显式项目与精确页名打开或聚焦编辑器，重复调用只重新聚焦；不保存或修改工程数据，不留撤销步。离线宿主明确拒绝；新增 Large 测试待运行。
 - 新增 `eplan_asset_review`（full，本地数据）：经工程师独立窗口审核候选、关闭缺口或提升新正式规则；`eplan_pack_build` 拒绝无来源的 mandatory 规则与缺少匹配本机确认的 official，手改 standing 无效。

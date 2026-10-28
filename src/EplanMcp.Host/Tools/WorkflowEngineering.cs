@@ -92,7 +92,7 @@ internal sealed record WorkflowEngineering(CabinetBinding Cabinet, JsonArray Con
         }
     }
 
-    public async Task<PlanEngineering> CompleteAsync(KnowledgeReviewService reviews, PlanBaseline baseline, CancellationToken cancellationToken)
+    public async Task<PlanEngineering> CompleteAsync(KnowledgeReviewService reviews, PlanBaseline baseline, CancellationToken cancellationToken, bool query = false, IReadOnlyList<RuleResult>? repairs = null)
     {
         var values = Config.Deserialize<ImmutableArray<PlanConfigValue>>(PlanJson.Options);
         var config = values.ToDictionary(v => v.Key, v => new RuleValue(new(v.Value.ValueKind == JsonValueKind.String ? "text" : v.Value.ValueKind == JsonValueKind.Number ? "number" : "boolean", v.Unit), v.Value), StringComparer.Ordinal);
@@ -104,12 +104,12 @@ internal sealed record WorkflowEngineering(CabinetBinding Cabinet, JsonArray Con
             if (Inputs.TryGetProperty(p.Key, out JsonElement supplied) || type.TryGetProperty("default", out supplied))
             { parameters[p.Key] = new(TypeOf(JsonSerializer.SerializeToElement(Workflow!.Document!.Spec["parameters"]), p.Key)!.Value, supplied); }
         }
-        var facts = new Facts(baseline.Snapshot);
+        var facts = new Facts(baseline.Snapshot, Cabinet);
         var digests = new JsonObject();
         var rules = new List<RuleDefinition>();
         var mandatoryRules = new HashSet<string>(StringComparer.Ordinal);
         var uncovered = new List<string>();
-        foreach (AssetEntry entry in Assets.Where(a => a.Document?.Kind == KnowledgeKind.Rule))
+        foreach (AssetEntry entry in Assets.Where(a => a.Document?.Kind == KnowledgeKind.Rule && (!query || a.Standing == KnowledgeStanding.Official)))
         {
             string confirmation = await reviews.CheckPlanAsync(entry, Assets, cancellationToken).ConfigureAwait(false);
             JsonElement spec = JsonSerializer.SerializeToElement(entry.Document!.Spec);
@@ -119,7 +119,7 @@ internal sealed record WorkflowEngineering(CabinetBinding Cabinet, JsonArray Con
             bool incomplete = baseline.Names.Any(n => (n.Kind == kind || n.Kind == "page") && new CabinetScopeResolver([Cabinet]).CabinetOf(n.Name).Count > 0 && !facts.Has(n.Kind, n.Name)) || kind == "connection" && baseline.Snapshot.SkippedConnections > 0;
             if (incomplete)
             { uncovered.Add(entry.Id); }
-            if (mandatory && incomplete)
+            if (!query && mandatory && incomplete)
             { throw new WorkflowCompilationException(ErrorReason.CapabilityMissing, "A mandatory rule lacks complete cabinet evidence; resolve it before compiling.", new { pointer = "/rules", missing = new[] { entry.Id } }); }
             digests[entry.Id] = JsonSerializer.SerializeToNode(new { sha256 = entry.Resource.Sha256, reviewDigest = confirmation });
             rules.Add(new(entry.Id, entry.Resource.Sha256, kind, scope, check));
@@ -133,19 +133,28 @@ internal sealed record WorkflowEngineering(CabinetBinding Cabinet, JsonArray Con
             rules.Add(new(Workflow.Id, Workflow.Resource.Sha256, "workflow", validated.Scope, validated.Check));
             mandatoryRules.Add(Workflow.Id);
         }
-        if (rules.Count > RuleInterpreter.MaxRules)
+        if (!query && rules.Count > RuleInterpreter.MaxRules)
         { throw PlanLocalScopeRules.Missing("rules:cabinet_limit"); }
         IReadOnlyList<RuleResult> results = await new RuleInterpreter().EvaluateAsync(rules, facts, config, parameters, cancellationToken).ConfigureAwait(false);
-        if (results.Any(r => mandatoryRules.Contains(r.Rule) && r.Status is RuleStatus.Fail or RuleStatus.Unknown))
+        if (query)
+        { results = [.. results.Select(r => uncovered.Contains(r.Rule) ? r with { Status = RuleStatus.Unknown, Evidence = [.. r.Evidence, new("/scope", r.Locator, null, false, "Cabinet snapshot coverage is incomplete.")] } : r), .. rules.Where(r => uncovered.Contains(r.Rule) && !results.Any(v => v.Rule == r.Rule)).Select(r => new RuleResult(r.Rule, r.Version, "", RuleStatus.Unknown, [new("/scope", "", null, false, "Cabinet snapshot coverage is incomplete.")], "fact"))]; }
+        bool Repaired(RuleResult r) => repairs?.Any(p => JsonSerializer.Serialize(p, PlanJson.Options) == JsonSerializer.Serialize(r, PlanJson.Options)) == true;
+        if (!query && (results.Any(r => mandatoryRules.Contains(r.Rule) && (r.Status == RuleStatus.Unknown || r.Status == RuleStatus.Fail && !Repaired(r)))
+            || repairs?.Any(p => !results.Any(r => Repaired(r) && r.Rule == p.Rule && r.Locator == p.Locator)) == true))
         { throw new WorkflowCompilationException(ErrorReason.CapabilityMissing, "A mandatory rule or applicability failed or is unknown; resolve its evidence before compiling.", new { pointer = "/rules", missing = results.Where(r => mandatoryRules.Contains(r.Rule) && r.Status is RuleStatus.Fail or RuleStatus.Unknown).Select(r => r.Rule).Distinct(StringComparer.Ordinal) }); }
         return new(Cabinet.Id, values, PlanStore.Hash(System.Text.Encoding.UTF8.GetBytes(PlanCanonical.Serialize(JsonSerializer.SerializeToElement(Config)))),
             JsonSerializer.SerializeToElement(new { workflow = Workflow?.Id, inputs = Inputs }), [], JsonSerializer.SerializeToElement(digests),
-            JsonSerializer.SerializeToElement(new { cabinetScope = Cabinet.Structure, rules = results, uncovered }, PlanJson.Options));
+            JsonSerializer.SerializeToElement(new { cabinetScope = Cabinet.Structure, rules = results, uncovered, repairs }, PlanJson.Options));
     }
 
-    private sealed class Facts(PlanSnapshot snapshot) : IRuleFactSnapshot
+    internal sealed class Facts(PlanSnapshot snapshot, CabinetBinding cabinet) : IRuleFactSnapshot
     {
-        private readonly Dictionary<string, SnapshotObject> _objects = snapshot.Pages.SelectMany(p => p.Objects).ToDictionary(o => o.Hash, StringComparer.Ordinal);
+        private readonly Dictionary<string, SnapshotObject> _objects = Select(snapshot, cabinet);
+        private static Dictionary<string, SnapshotObject> Select(PlanSnapshot snapshot, CabinetBinding cabinet)
+        {
+            var resolver = new CabinetScopeResolver([cabinet]);
+            return snapshot.Pages.SelectMany(p => p.Objects).Where(o => resolver.CabinetOf(o.Kind == "connection" ? o.Page : o.Name).SequenceEqual([cabinet.Id])).ToDictionary(o => o.Hash, StringComparer.Ordinal);
+        }
         private readonly HashSet<(string Kind, string? Name)> _names = [.. snapshot.Pages.SelectMany(p => p.Objects).Select(o => (o.Kind, o.Name))];
         public bool Has(string kind, string name) => _names.Contains((kind, name));
         public IReadOnlyList<string> Objects(string kind) => kind == "workflow" ? ["workflow"] : [.. _objects.Where(o => o.Value.Kind == kind).Select(o => o.Key)];

@@ -13,7 +13,7 @@ internal static class WorkflowCompilation
     internal const string CompilerVersion = "2";
 
     public static async Task<(PlanDefinition Definition, Dictionary<string, byte[]> Evidence)> CompileAsync(IBridgeClient bridge, PackLibrary packs, PlanArgumentCheck input,
-        string project, PlanOwner owner, KnowledgeReviewService? reviews, string? cabinet, string? workflow, JsonElement inputs, CancellationToken cancellationToken)
+        string project, PlanOwner owner, KnowledgeReviewService? reviews, string? cabinet, string? workflow, JsonElement inputs, CancellationToken cancellationToken, IReadOnlyList<RuleResult>? repairs = null)
     {
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
         if (status.Problem is not null)
@@ -103,7 +103,7 @@ internal static class WorkflowCompilation
             if (engineering is not null)
             {
                 engineering.Guard(binding!, baseline, compiled);
-                provenance = await engineering.CompleteAsync(reviews!, baseline, cancellationToken).ConfigureAwait(false);
+                provenance = await engineering.CompleteAsync(reviews!, baseline, cancellationToken, repairs: repairs).ConfigureAwait(false);
             }
         }, cancellationToken).ConfigureAwait(false);
         ProjectBinding? after = identity is null ? null : await BindingAsync().ConfigureAwait(false);

@@ -1,0 +1,10 @@
+id: rule-fix-plan
+set: dev
+fixture: copy
+prompt: 先将项目 {project} 绑定到工程师准备的已安装示例包 acme.panels@1.0.0，使用唯一 default 柜及 all:true 映射。检查正式规则，只为失败且声明修复的规则生成计划，报告 planId，不执行工程修改或代答审批。
+# The engineer installs the promoted sample page rule and its page.update fix before this attended task.
+answer: { type: object, required: [planId], properties: { planId: { type: string, minLength: 1 } } }
+oracle: { objects: { tool: eplan_context_get, args: { scope: {}, include: [objects] }, pick: $.objects } }
+after: { objects: { tool: eplan_context_get, args: { scope: {}, include: [objects] }, pick: $.objects } }
+checks: [{ after: objects, equals: oracle.objects }]
+budget: { max_tool_calls: 8, max_minutes: 3 }

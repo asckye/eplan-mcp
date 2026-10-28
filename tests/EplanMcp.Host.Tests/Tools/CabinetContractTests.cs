@@ -12,6 +12,25 @@ namespace EplanMcp.Host.Tests.Tools;
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class CabinetContractTests
 {
+    [Fact]
+    public void RuleCheck_IsFullReadWithBoundedSelectorsAndNoExecutionControl()
+    {
+        Tool tool = Tools(ToolProfile.Full).Single(t => t.Name == RuleTools.CheckTool);
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == RuleTools.CheckTool);
+        Assert.Equal((true, false, true, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
+        Assert.Equal(["project", "scope"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
+        JsonElement input = tool.InputSchema.GetProperty("properties");
+        Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        Assert.False(input.GetProperty("scope").GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(50, input.GetProperty("limit").GetProperty("default").GetInt32());
+        Assert.Equal(200, input.GetProperty("limit").GetProperty("maximum").GetInt32());
+        Assert.Equal(5000, input.GetProperty("max_tokens").GetProperty("default").GetInt32());
+        Assert.Equal(20000, input.GetProperty("max_tokens").GetProperty("maximum").GetInt32());
+        Assert.False(input.GetProperty("fix_plan").GetProperty("default").GetBoolean());
+        Assert.DoesNotContain("execution", tool.OutputSchema!.Value.GetRawText(), StringComparison.Ordinal);
+        Assert.InRange(tool.Description!.Length, 1, 1000);
+    }
+
     [Theory]
     [InlineData(CabinetTools.ListTool, true)]
     [InlineData(CabinetTools.BindTool, false)]

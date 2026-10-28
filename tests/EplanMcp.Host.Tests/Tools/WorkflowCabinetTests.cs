@@ -233,12 +233,14 @@ public sealed partial class WorkflowCabinetTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(BindingFile)!);
         File.WriteAllBytes(BindingFile, PackJson.Serialize(binding));
     }
-    private async Task<string> Seed(string? rule = null)
+    private async Task<string> Seed(string? rule = null, string? fix = null)
     {
         var resources = new List<PackResource>();
         Add(KnowledgeKind.ConfigSchema, "settings", """{"items":{"mode":{"type":"text","default":"base","required":true,"allowedLayers":["base","company","project","cabinet"]},"target":{"type":"text","required":true,"allowedLayers":["cabinet"]}}}""");
         Add(KnowledgeKind.ConfigLayer, "company", """{"layer":"company","schema":"config_schema/settings","settings":{"mode":{"default":"company"}}}""");
         Add(KnowledgeKind.Workflow, "create", """{"parameters":{"power":{"type":"number","required":false,"default":1}},"requiredCapabilities":["op:page.create.execute"],"steps":[{"op":"page.create","args":{"pages":[{"name":{"config":"target"},"description":{"config":"mode"}}]}}]}""");
+        if (fix is not null)
+        { Add(KnowledgeKind.Workflow, "repair", """{"parameters":{"target":{"type":"text","required":true}},"requiredCapabilities":["op:page.update.execute"],"steps":[{"op":"page.update","args":{"pages":[{"name":{"parameter":"target"},"description":"Repaired"}]}}]}"""); }
         string reviewDigest = "";
         if (rule is not null)
         {
@@ -248,6 +250,10 @@ public sealed partial class WorkflowCabinetTests : IDisposable
             KnowledgeReview review = ReviewFixtures.Review(candidate, "promote");
             KnowledgeDocument document = KnowledgeDocument.Read(review.TargetContent!);
             document.Spec["scope"]!["kind"] = "page";
+            if (fix is not null)
+            { document.Spec["fix"] = JsonNode.Parse(fix); }
+            if (rule == "not_applicable")
+            { document.Spec["scope"]!["where"] = JsonNode.Parse("""{"literal":false}"""); }
             document.Spec["check"] = JsonNode.Parse(rule == "fail" ? """{"literal":false}""" : rule == "unknown" ? """{"some":{"relation":"connection.start","where":{"literal":true}}}""" : """{"eq":[{"config":"mode"},{"literal":"dol"}]}""");
             if (rule == "unknown")
             {

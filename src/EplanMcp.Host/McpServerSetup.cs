@@ -70,6 +70,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PropertySetContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => CabinetTools.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => RuleTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
@@ -147,6 +148,7 @@ internal static class McpServerSetup
             .WithTools<CabinetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)
             .WithTools<WorkflowTools>(HostJson.Options)
+            .WithTools<RuleTools>(HostJson.Options)
             .WithTools<PlanTools>(HostJson.Options)
             .WithTools<PlanApplyTools>(HostJson.Options)
             .WithTools<UsageTools>(HostJson.Options)
