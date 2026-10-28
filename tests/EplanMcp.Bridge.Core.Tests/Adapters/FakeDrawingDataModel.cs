@@ -45,6 +45,7 @@ internal sealed class PlotFrame(params Placement[] children)
 
 internal sealed class Page : IDisposable
 {
+    public DocumentTypeManager.DocumentType PageType { get; set; } = DocumentTypeManager.DocumentType.Circuit;
     public string Name { get; set; } = "+A1/1";
     public double GridSize { get; set; } = 4;
     public PointD StoredSize { get; set; } = new(420, 297);
@@ -58,6 +59,12 @@ internal sealed class Page : IDisposable
 internal sealed class Project(params Page[] pages)
 {
     public Page[] Pages { get; } = pages;
+    public string Display { get; set; } = "zh_CN;";
+}
+
+internal static class DocumentTypeManager
+{
+    public enum DocumentType { Circuit, Graphics }
 }
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable

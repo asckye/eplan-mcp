@@ -2,6 +2,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R2\SpikeS26R2Assessment.cs" Link="Spikes\SpikeS26R2Assessment.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R3\SpikeS26R3Assessment.cs" Link="Spikes\SpikeS26R3Assessment.cs" />

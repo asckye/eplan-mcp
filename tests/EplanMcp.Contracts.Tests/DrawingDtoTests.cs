@@ -8,6 +8,30 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DrawingDtoTests
 {
     [Fact]
+    public void TextCreation_BothSerializers_PreserveGeometryAndExactLanguageKeys()
+    {
+        var request = new PlacementTextCreateArgs
+        {
+            Project = "Line1",
+            Page = "P",
+            Text = new() { Position = [12.5, 22.5], HeightMm = 3.5, Contents = new() { ["??_??"] = "Panel", ["de_DE"] = "Feld" } },
+        };
+        var host = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var bridge = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+        string json = System.Text.Json.JsonSerializer.Serialize(request, host);
+        PlacementTextCreateArgs fromHost = JsonConvert.DeserializeObject<PlacementTextCreateArgs>(json, bridge)!;
+        string bridgeJson = JsonConvert.SerializeObject(fromHost, bridge);
+        PlacementTextCreateArgs fromBridge = System.Text.Json.JsonSerializer.Deserialize<PlacementTextCreateArgs>(bridgeJson, host)!;
+        Assert.Equal(json, System.Text.Json.JsonSerializer.Serialize(fromBridge, host));
+        var result = new PlacementTextCreateData { Text = fromBridge.Text, Warning = "Undo warning" };
+        PlacementTextCreateData returned = System.Text.Json.JsonSerializer.Deserialize<PlacementTextCreateData>(JsonConvert.SerializeObject(result, bridge), host)!;
+        Assert.Equal("Undo warning", returned.Warning);
+        Assert.Equal(request.Text.Contents, returned.Text.Contents);
+        Assert.Equal(request.Text.Position, returned.Text.Position);
+        Assert.Equal(request.Text.HeightMm, returned.Text.HeightMm);
+    }
+
+    [Fact]
     public void DrawingGeometry_BothSerializers_PreserveNullableBoundsAndStableIdentity()
     {
         var locator = new DrawingLocator { Project = "project", Page = "+A1/1", Type = 17, Oid = long.MaxValue, Digest = new string('a', 64) };

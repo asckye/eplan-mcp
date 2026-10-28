@@ -123,6 +123,7 @@ internal static class BridgeHost
             new PageGetOperation(catalog, pages),
             new PageOpenOperation(catalog, eplan.Offline ? null : new EplanPageEditor()),
             new PageDrawingGetOperation(catalog, new EplanDrawingReader()),
+            new PlacementTextCreateExecuteOperation(catalog, new EplanPlacementTextWriter(), transactions),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new PlanFunctionsOperation(catalog, new EplanPlanFunctionReader()),
