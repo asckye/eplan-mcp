@@ -146,6 +146,8 @@ public sealed class ConnectionCreateExecutionTests
             if (Failure == "restore")
             { Fixture.Scene.Page.GridSize = 2; }
         }
+        public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new NotSupportedException();
+        public ITransactionScopeFactory PlacementTransactions(string project) => Transactions;
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => throw new NotSupportedException();
         public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages) => throw new NotSupportedException();
         private static BridgeErrorException Failed() => new(ErrorReason.EplanOperationFailed, "Injected failure.");

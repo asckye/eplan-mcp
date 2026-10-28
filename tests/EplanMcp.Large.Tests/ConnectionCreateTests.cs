@@ -84,5 +84,72 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200 }))
             .GetProperty("drawings").GetProperty("items").EnumerateArray().Count(p => p.GetProperty("kind").GetString() is not ("Function" or "PropertyPlacement")); // fixture devices are Functions
 
+    [Fact]
+    public async Task InterruptionPair_TwoNewLargeWritePages_NativeReferencesBothWays_UndosRestore()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string[] pages = await session.CreatePagesAsync(2);
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        Assert.True(File.Exists(helper), "Build the connection helper before running T7b Large tests.");
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            foreach (string page in pages)
+            { await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Up"); }
+            await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+            var requests = new List<Dictionary<string, object?>>();
+            foreach (string page in pages)
+            {
+                PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                    new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+                var layout = new ConnectionCreateLayout(geometry.GridSize, ["Up"]);
+                requests.Add(new()
+                {
+                    ["project"] = session.Project,
+                    ["page"] = page,
+                    ["response_format"] = "detailed",
+                    // PCP independently ensures generation adds a real connection and a second undo step on each call.
+                    ["items"] = JsonSerializer.SerializeToElement(new object[]
+                    {
+                        new { kind = "potential_point", position = layout.Position, directions = (string[])["Up"] },
+                        new { kind = "interruption_point", name = "=F+A1-T7BLINK", position = (double[])[50 * geometry.GridSize, 30 * geometry.GridSize], direction = "Up", counterpart_pages = pages.Where(p => p != page).ToArray() },
+                    }),
+                });
+            }
+            string before = (await session.SnapshotAsync()).Hash;
+            int[] counts = [await SymbolsAsync(session.Project, pages[0]), await SymbolsAsync(session.Project, pages[1])];
+            JsonElement firstPreview = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = true });
+            JsonElement first = await eplan.CallAsync("eplan_connection_create", requests[0]);
+            Assert.Equal(2, first.GetProperty("undoSteps").GetInt32());
+            Assert.Empty(Assert.Single(first.GetProperty("interruptionPoints").EnumerateArray()).GetProperty("counterparts").EnumerateArray());
+            JsonElement secondPreview = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = true });
+            JsonElement second = await eplan.CallAsync("eplan_connection_create", requests[1]);
+            Assert.Equal(ExecutionState.Committed, second.GetProperty("execution").GetString());
+            JsonElement[] pair = second.GetProperty("interruptionPoints").EnumerateArray().ToArray();
+            Assert.Equal(2, pair.Length);
+            foreach (JsonElement point in pair)
+            {
+                Assert.Equal("=F+A1-T7BLINK", point.GetProperty("name").GetString());
+                Assert.False(string.IsNullOrWhiteSpace(point.GetProperty("crossReference").GetString()));
+                JsonElement peer = Assert.Single(point.GetProperty("counterparts").EnumerateArray());
+                Assert.NotEqual(point.GetProperty("page").GetString(), peer.GetProperty("page").GetString());
+                Assert.Contains(pair, p => p.GetProperty("oid").GetInt64() == peer.GetProperty("oid").GetInt64());
+                TestContext.Current.TestOutputHelper!.WriteLine($"T7b native reference {point.GetProperty("page")}: {point.GetProperty("crossReference")}");
+            }
+            await session.UndoAsync();
+            await session.UndoAsync();
+            JsonElement restoredSecond = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = true });
+            Assert.Equal(secondPreview.GetProperty("fingerprint").GetString(), restoredSecond.GetProperty("fingerprint").GetString());
+            await session.UndoAsync();
+            await session.UndoAsync();
+            JsonElement restoredFirst = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = true });
+            Assert.Equal(firstPreview.GetProperty("fingerprint").GetString(), restoredFirst.GetProperty("fingerprint").GetString());
+            Assert.Equal(counts, new[] { await SymbolsAsync(session.Project, pages[0]), await SymbolsAsync(session.Project, pages[1]) });
+            Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+        }
+        finally { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
+    }
+
     private static async Task<string> NewPageAsync(PlanStepLiveSession session) => Assert.Single(await session.CreatePagesAsync(1));
 }

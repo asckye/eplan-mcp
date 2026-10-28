@@ -270,6 +270,57 @@
                 "position",
                 "directions"
               ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "interruption_point"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "Up",
+                    "Down",
+                    "Left",
+                    "Right"
+                  ]
+                },
+                "counterpart_pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "position",
+                "direction",
+                "counterpart_pages"
+              ]
             }
           ]
         },
@@ -391,7 +442,8 @@
                     "TLRU",
                     "TOUL",
                     "TOUR",
-                    "PCP"
+                    "PCP",
+                    "BPF"
                   ]
                 },
                 "variant": {
@@ -453,6 +505,57 @@
               },
               "minItems": 4,
               "maxItems": 4
+            },
+            "interruption": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "interruption_point"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "Up",
+                    "Down",
+                    "Left",
+                    "Right"
+                  ]
+                },
+                "counterpart_pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "position",
+                "direction",
+                "counterpart_pages"
+              ]
             }
           },
           "required": [
@@ -541,6 +644,228 @@
       "fingerprint": {
         "type": "string",
         "pattern": "^[0-9a-f]{64}$"
+      },
+      "affectedPages": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "maxItems": 21
+      },
+      "interruptionScope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "minItems": 1,
+            "maxItems": 21
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "direction": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "crossReference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "counterparts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "page": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "oid": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "page",
+                      "name",
+                      "oid"
+                    ]
+                  },
+                  "minItems": 0,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "page",
+                "name",
+                "oid",
+                "position",
+                "pin",
+                "direction",
+                "crossReference",
+                "counterparts"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 1000
+          },
+          "preservedEndpoints": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {},
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 0,
+            "maxItems": 10000
+          }
+        },
+        "required": [
+          "pages",
+          "points",
+          "preservedEndpoints"
+        ]
+      },
+      "interruptionPoints": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "oid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "pin": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "direction": {
+              "type": "string",
+              "minLength": 1
+            },
+            "crossReference": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "counterparts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "page": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "oid": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "page",
+                  "name",
+                  "oid"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 1
+            }
+          },
+          "required": [
+            "page",
+            "name",
+            "oid",
+            "position",
+            "pin",
+            "direction",
+            "crossReference",
+            "counterparts"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 100
       }
     },
     "required": [
@@ -723,5 +1048,445 @@
     "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
     "undoSteps": 2,
     "fingerprint": "11b3bfc291213be5456ccef5d3d3ec63b10efb6153a79b374d2d03633a7d75d9"
-  }
+  },
+  "interruptionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "wire",
+        "from": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 1,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "to": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 2,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "points": [
+          [
+            8.0,
+            8.0
+          ],
+          [
+            24.0,
+            8.0
+          ],
+          [
+            24.0,
+            24.0
+          ]
+        ]
+      },
+      {
+        "kind": "interruption_point",
+        "name": "=F+A1-LINK",
+        "direction": "Up",
+        "position": [
+          60,
+          60
+        ],
+        "counterpart_pages": [
+          "=F+A1&EFS1/2"
+        ]
+      }
+    ]
+  },
+  "interruptionPreview": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/points/0",
+        "requested": [
+          8.0,
+          8.0
+        ],
+        "actual": [
+          8.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/1",
+        "requested": [
+          24.0,
+          8.0
+        ],
+        "actual": [
+          24.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/2",
+        "requested": [
+          24.0,
+          24.0
+        ],
+        "actual": [
+          24.0,
+          24.0
+        ]
+      },
+      {
+        "pointer": "/items/1/position",
+        "requested": [
+          60,
+          60
+        ],
+        "actual": [
+          60.0,
+          60.0
+        ]
+      }
+    ],
+    "symbols": [
+      {
+        "position": [
+          60.0,
+          60.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "BPF",
+          "variant": 0,
+          "type": "InterruptionPoint",
+          "kind": "t_node",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          59.0,
+          59.0,
+          61.0,
+          61.0
+        ],
+        "interruption": {
+          "kind": "interruption_point",
+          "name": "=F+A1-LINK",
+          "direction": "Up",
+          "position": [
+            60,
+            60
+          ],
+          "counterpart_pages": [
+            "=F+A1&EFS1/2"
+          ]
+        }
+      },
+      {
+        "position": [
+          24.0,
+          8.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "CO",
+          "variant": 0,
+          "type": "Routing",
+          "kind": "routing",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Left"
+            },
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          23.0,
+          7.0,
+          25.0,
+          9.0
+        ]
+      }
+    ],
+    "graphicalAutoconnect": [
+      [
+        [
+          8.0,
+          8.0
+        ],
+        [
+          24.0,
+          8.0
+        ]
+      ],
+      [
+        [
+          24.0,
+          8.0
+        ],
+        [
+          24.0,
+          24.0
+        ]
+      ]
+    ],
+    "logicalAfterGenerate": [
+      {
+        "pins": [
+          "17/1/0",
+          "17/2/0"
+        ],
+        "potentialStartIsNull": false
+      }
+    ],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "complete_page_predicted_endpoints",
+    "logicalDuringPlacement": 0,
+    "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
+    "undoSteps": 2,
+    "affectedPages": [
+      "=F+A1&EFS1/1",
+      "=F+A1&EFS1/2"
+    ],
+    "interruptionScope": {
+      "points": [
+        {
+          "page": "=F+A1&EFS1/2",
+          "name": "=F+A1-LINK",
+          "oid": 90,
+          "position": [
+            80.0,
+            80.0
+          ],
+          "pin": [
+            80.0,
+            80.0
+          ],
+          "direction": "Down",
+          "crossReference": null,
+          "counterparts": []
+        }
+      ],
+      "pages": [
+        {
+          "page": "=F+A1&EFS1/1",
+          "drawing": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "gridSize": 4.0,
+            "pageSize": [
+              100.0,
+              100.0
+            ],
+            "plotFrameSize": null,
+            "placements": [
+              {
+                "locator": {
+                  "project": "scratch-project",
+                  "page": "=F+A1&EFS1/1",
+                  "type": 17,
+                  "oid": 1,
+                  "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "kind": "Function",
+                "location": [
+                  8.0,
+                  8.0
+                ],
+                "bounds": [
+                  4.0,
+                  6.0,
+                  8.0,
+                  10.0
+                ],
+                "parent": null,
+                "properties": {}
+              },
+              {
+                "locator": {
+                  "project": "scratch-project",
+                  "page": "=F+A1&EFS1/1",
+                  "type": 17,
+                  "oid": 2,
+                  "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "kind": "Function",
+                "location": [
+                  24.0,
+                  24.0
+                ],
+                "bounds": [
+                  22.0,
+                  24.0,
+                  26.0,
+                  28.0
+                ],
+                "parent": null,
+                "properties": {}
+              }
+            ]
+          },
+          "revision": "initial",
+          "pins": {
+            "17/1/0": {
+              "location": [
+                8.0,
+                8.0
+              ],
+              "direction": "Right"
+            },
+            "17/2/0": {
+              "location": [
+                24.0,
+                24.0
+              ],
+              "direction": "Down"
+            }
+          },
+          "graphical": [],
+          "logical": []
+        },
+        {
+          "page": "=F+A1&EFS1/2",
+          "drawing": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "gridSize": 4.0,
+            "pageSize": [
+              100.0,
+              100.0
+            ],
+            "plotFrameSize": null,
+            "placements": [
+              {
+                "locator": {
+                  "project": "scratch-project",
+                  "page": "=F+A1&EFS1/1",
+                  "type": 17,
+                  "oid": 1,
+                  "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "kind": "Function",
+                "location": [
+                  8.0,
+                  8.0
+                ],
+                "bounds": [
+                  4.0,
+                  6.0,
+                  8.0,
+                  10.0
+                ],
+                "parent": null,
+                "properties": {}
+              },
+              {
+                "locator": {
+                  "project": "scratch-project",
+                  "page": "=F+A1&EFS1/1",
+                  "type": 17,
+                  "oid": 2,
+                  "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "kind": "Function",
+                "location": [
+                  24.0,
+                  24.0
+                ],
+                "bounds": [
+                  22.0,
+                  24.0,
+                  26.0,
+                  28.0
+                ],
+                "parent": null,
+                "properties": {}
+              }
+            ]
+          },
+          "revision": "initial",
+          "pins": {},
+          "graphical": [],
+          "logical": []
+        }
+      ],
+      "preservedEndpoints": []
+    },
+    "fingerprint": "a57e91585739f8c4b9f272a6927b59e30f0cfbeff9aba142d91e5c1452e16668"
+  },
+  "interruptionReadback": [
+    {
+      "page": "=F+A1&EFS1/2",
+      "name": "=F+A1-LINK",
+      "oid": 90,
+      "position": [
+        80.0,
+        80.0
+      ],
+      "pin": [
+        80.0,
+        80.0
+      ],
+      "direction": "Down",
+      "crossReference": "native:=F+A1&EFS1/1",
+      "counterparts": [
+        {
+          "page": "=F+A1&EFS1/1",
+          "oid": 91,
+          "name": "=F+A1-LINK"
+        }
+      ]
+    },
+    {
+      "page": "=F+A1&EFS1/1",
+      "name": "=F+A1-LINK",
+      "oid": 91,
+      "position": [
+        60.0,
+        60.0
+      ],
+      "pin": [
+        60.0,
+        60.0
+      ],
+      "direction": "Up",
+      "crossReference": "native:=F+A1&EFS1/2",
+      "counterparts": [
+        {
+          "page": "=F+A1&EFS1/2",
+          "oid": 90,
+          "name": "=F+A1-LINK"
+        }
+      ]
+    }
+  ]
 }

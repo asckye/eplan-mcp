@@ -16,10 +16,10 @@ internal sealed class ConnectionCreateTools
 {
     public const string Tool = "eplan_connection_create";
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Creates SPECIAL nodes and orthogonal wires, then verifies generated endpoints. 2 undo steps; failure undoes placement. Outside scratch needs approval. See usage for fields. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
+    [Description("Creates SPECIAL nodes, interruption points with explicit counterpart pages, and orthogonal wires; verifies native pairing, computed references and generated endpoints. 2 undo steps; failure undoes placement. Outside scratch needs approval. See usage for fields. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline,
         [Description("Project name/path")] string project, [Description("Exact Circuit page")] string page,
-        [Description("1-50 wire/corner/t_node/potential_point; see usage")] JsonElement[] items,
+        [Description("1-50 wire/corner/t_node/potential_point/interruption_point; interruption: name, direction, position, counterpart_pages; see usage")] JsonElement[] items,
         bool dry_run = false, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -40,7 +40,7 @@ internal sealed class ConnectionCreateTools
             }
             Clean(result);
             int budget = response_format == "detailed" ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
-            foreach (string field in new[] { "coordinates", "symbols", "graphicalAutoconnect", "logicalAfterGenerate", "actualEndpoints" })
+            foreach (string field in new[] { "interruptionScope", "coordinates", "symbols", "graphicalAutoconnect", "logicalAfterGenerate", "actualEndpoints", "interruptionPoints" })
             {
                 if (ResultShaper.EstimateTokens(result.ToJsonString()) > budget)
                 { result.Remove(field); result["truncated"] = true; }

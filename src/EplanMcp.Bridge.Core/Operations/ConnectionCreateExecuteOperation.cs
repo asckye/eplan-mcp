@@ -20,13 +20,15 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
-            if (!plan["symbols"]!.Any() || !plan["logicalAfterGenerate"]!.Any())
+            if (!plan["symbols"]!.Any() || !plan["logicalAfterGenerate"]!.Any() || plan["interruptionScope"] is not null && !plan["graphicalAutoconnect"]!.Any())
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
             place = creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         string project = scene.Project.Path, page = scene.Page.Page;
-        Committed<bool> placed = TransactionRunner.Run(transactions, "eplan_connection_create", () => { place(); return true; }, _ => true);
+        bool interruptions = plan["interruptionScope"] is not null, generationCommitted = false;
+        string[] pages = interruptions ? InterruptionPointPlanning.Pages(plan) : [page];
+        Committed<bool> placed = TransactionRunner.Run(interruptions ? creator.PlacementTransactions(project) : transactions, "eplan_connection_create", () => { place(); return true; }, _ => true);
         if (placed.Warning is not null)
         { throw Unknown(); }
         try
@@ -36,10 +38,12 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             { throw Mismatch(); }
             Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", () =>
             {
-                generator.Generate(project, [page]);
-                List<string?[]> actual = creator.Endpoints(project, page);
+                generator.Generate(project, pages);
+                List<string?[]> actual = pages.SelectMany(p => creator.Endpoints(project, p)).ToList();
+                if (interruptions && plan["interruptionScope"]!["preservedEndpoints"]!.Any(p => !actual.Any(a => a[0] == (string?)p[0] && a[1] == (string?)p[1])))
+                { throw Mismatch(); }
                 var added = actual.Select(p => p.ToArray()).ToList();
-                foreach (ConnectionRecord before in scene.Logical)
+                foreach (ConnectionRecord before in interruptions ? [] : scene.Logical)
                 {
                     int index = added.FindIndex(p => p[0] == before.StartDevice && p[1] == before.EndDevice);
                     if (index < 0)
@@ -60,12 +64,17 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     if (!reached.SetEquals(group))
                     { throw Mismatch(); }
                 }
-                if (added.Count == 0)
+                if (added.Count == 0 && !interruptions)
                 { throw Mismatch(); }
+                if (interruptions)
+                { InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages)); }
                 return actual;
             }, _ => true);
             if (generated.Warning is not null)
             { throw Unknown(); }
+            generationCommitted = true;
+            if (interruptions)
+            { plan["interruptionPoints"] = InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages)); }
             plan["execution"] = ExecutionState.Committed;
             plan["dryRun"] = false;
             plan["actualEndpoints"] = JArray.FromObject(generated.Result);
@@ -76,7 +85,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             try
             {
                 new OperationContext(OperationContext.Current.RequestId, write: true, progress: null).Run(() =>
-                { creator.Undo(project); return ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint); });
+                { if (generationCommitted) { creator.Undo(project); } creator.Undo(project); return ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint); });
             }
             catch (Exception) { throw Unknown(); }
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying.", failure)

@@ -11,6 +11,7 @@ M8 T4a：[`eplan_placement_create`](../tools/eplan_placement_create.md) 已有�
 M8 T4b：Bridge 内部已接 `placement.text.create.execute`：TEXT 语言、字高和坐标在事务内逐项读回，相等才提交；失败回滚不留空撤销步（A54/A55）。绘图发现附带字高及其摘要；Host 仍未注册，执行保持 `CAPABILITY_MISSING`，统一入口、文字测量及混合创建留 T4c；Large 已编写，未运行。
 
 M8 T3a：`eplan_connection_create` 的[规格与单页路径/连接符号预测](../tools/eplan_connection_create.md)已实现为未注册的 dry-run 规划器；尚无 MCP/Bridge 入口或执行能力。图形与生成后逻辑端点分别预测；A52 要求单独提交生成，原子执行门槛留 T3b。
+M8 T7b：在 T3b 已注册入口扩展 `interruption_point`，按 A55/S43 创建 SPECIAL BPF；规划绑定显式对端页完整证据，拒绝歧义/越界配对，提交后返回双向原生对端及计算引用，保持两次提交与失败补偿。不新增工具或 Bridge 操作；Large 测试已编写，本次未运行 EPLAN，产品路径实机验收待完成。
 M6 第 3 阶段 M2：已增加 [模块只读检查内部服务](../design/2026-10-27-m6-module-inspect.md) 与闭包证据校验，供 M3 使用；原生 `module.inspect` 尚未注册，缺能力明确拒绝，Large 实机对照未运行，不计入已开放的工具覆盖。
 
 ---
