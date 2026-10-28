@@ -50,6 +50,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             };
             JsonElement preview = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = true, ["response_format"] = "detailed" });
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+            int initial = await SymbolsAsync(session.Project, page);
             JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["response_format"] = "detailed" });
             Assert.Equal((ExecutionState.Committed, 2), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
             string[] expected = preview.GetProperty("logicalAfterGenerate").EnumerateArray().SelectMany(g => g.GetProperty("pins").EnumerateArray().Select(p => p.GetString()!)).Order(StringComparer.Ordinal).ToArray();
@@ -67,11 +68,12 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             // The business snapshot holds functions and connections, not bare connection symbols, so count those
             // on the page: the first undo removes only the generated connections, the second the placed symbols.
             int placed = await SymbolsAsync(session.Project, page);
+            Assert.True(placed > initial);
             await session.UndoAsync();
             Assert.Empty((await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page })).GetProperty("connections").EnumerateArray());
             Assert.Equal(placed, await SymbolsAsync(session.Project, page));
             await session.UndoAsync();
-            Assert.Equal(placed - items.Count, await SymbolsAsync(session.Project, page));
+            Assert.Equal(initial, await SymbolsAsync(session.Project, page)); // a potential point adds two drawing objects
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
             // S40 has no reproducible native generation failure; fake Bridge/core tests inject it before commit.
         }
