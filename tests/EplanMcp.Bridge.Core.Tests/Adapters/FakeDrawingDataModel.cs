@@ -36,7 +36,7 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
     public string Name { get; set; } = "+A1-K1";
 }
 
-internal sealed class Function(long oid) : FunctionBase(oid);
+internal class Function(long oid) : FunctionBase(oid);
 
 internal sealed class PlotFrame(params Placement[] children)
 {
@@ -71,6 +71,7 @@ internal static class DocumentTypeManager
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable
 {
+    public EObjects.TerminalStrip[] GetTerminalStrips(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<EObjects.TerminalStrip>()];
     public Function[] GetFunctions(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>()];
     public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];
     public void Dispose() { }

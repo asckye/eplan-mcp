@@ -12,7 +12,7 @@ namespace EplanMcp.Large.Tests;
 /// the point puts the device, and an image of the page to look at.
 /// </summary>
 [Trait("Size", "Large")]
-public sealed class DevicePlaceTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
+public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     private const string Part = "SIE.3RH2122-1HB40";
     private const string Prefix = "=GAA+A1&EFS1/";

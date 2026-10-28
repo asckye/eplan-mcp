@@ -31,6 +31,12 @@ public sealed class DevicePlaceArgs
     public double? CornerX { get; set; }
     /// <summary>Opposite corner y in millimetres; required only for LocationBox.</summary>
     public double? CornerY { get; set; }
+    /// <summary>Exclusive terminal source: parent strip designation, short or full (A55).</summary>
+    public string? TerminalStrip { get; set; }
+    /// <summary>Single terminal designation, appended to the strip with ':'.</summary>
+    public string? TerminalNumber { get; set; }
+    /// <summary>Optional language-independent function text, only when creating the parent strip.</summary>
+    public string? TerminalStripText { get; set; }
 
     /// <summary>The insertion point's x, in millimetres from the page's left edge.</summary>
     public double X { get; set; }

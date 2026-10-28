@@ -111,3 +111,12 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - **Agent 评测**："在新页 `=GAA+A1&EFS1/60` 上放一个 SIE.3RH2122-1HB40，标识 -KF20"，作答后用 `eplan_device_get` 核对。
 
 - **T7a**：Small 覆盖来源互斥、标识、有限两角、原生适配器的结构/图形/虚线读回和取消；Medium 假 Bridge 覆盖 dry-run 零写入、审批、陈旧计划、读回不符和回滚无空步。LargeWrite 新页先放线圈，再围框，核对结构/虚线及线圈不变，一次撤销恢复到放框前；仅编写，未运行。
+
+### T7c：单端子与父端子排
+
+- 新增互斥来源 `terminal_strip`（短标识如 `-X6` 或完整标识）和 `terminal_number`（1–64 个字母、数字、下划线或点）；省略 `tag/part/variant/library/symbol/location_box` 和显示/引脚选项。固定 IEC_symbol/X，`symbol_variant` 默认 0。坐标沿既有页类型、有限数与页界检查。
+- `terminal_strip_text` 为可选的 1–256 字符无控制符功能文本，按语言无关 `??_??` 写入并读回；仅新建父排时允许，追加端子须省略，不覆盖已有排文本。示例：`{"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","terminal_strip_text":"操作控制盒","symbol_variant":0,"x":80,"y":160,"dry_run":true}`。
+- 父排按完整名称复用（忽略大小写，沿用已有拼写），不存在时先 `TerminalStrip.Create(page)` 并设主功能，再 `Terminal.Create(strip,page,variant)`、命名 `<排>:<号>`、设置 20030。全项目同复合键忽略大小写拒绝；普通器件占用父排名也不能冒充端子排。审批逐项列父排/文本和端子；指纹覆盖全项目名称、页对象、实际库变体、坐标与全部变更。
+- 沿 `FunctionTransactionScope` 一次提交；事务内核对实际排名、主功能、20030、原生 owner 对象及名称、位置、页和库变体。父关系为空也回滚，不推测已归属；属性列表只取一次并在 Abort 前释放，Abort 后不碰新对象。成功一步撤销；不生成连接（A52/A55）。允许 LockAllObjects，负责人已确认无多用户编辑。
+- 新增 `terminal={strip,number,owner,position:[x,y],sortCode,stripCreated}`；sortCode 原样返回 EPLAN 的 20809（空为 null），不写入或重编号；dry-run/recovered 的 owner/sortCode 为 null。`functions` 为本次新增功能数（含新父排），`unplaced=0`；段连接需后续独立生成，不能把创建成功当作连接分段已验证。
+- Small 覆盖互斥/有限数/复合键与原生读回失败；Medium 假对象覆盖预览、复用、审批、stale、读回不符/取消后回滚及无空步。LargeWrite 新页创建 1..3、读回排成员/顺序、重复拒绝与逐调用一步撤销；另验独立生成后的连接分段。本次只编写，未运行。

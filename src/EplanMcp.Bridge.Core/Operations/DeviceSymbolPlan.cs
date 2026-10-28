@@ -13,9 +13,10 @@ internal static class DeviceSymbolPlan
         if (reader is null)
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol discovery is unavailable; use a Bridge with symbol search.", metadata: new Dictionary<string, string> { ["missing"] = "symbol.search" }); }
         bool box = args.LocationBox is not null;
-        string? library = box ? "SPECIAL" : args.Library, name = box ? "SC" : args.Symbol;
-        int? variant = box ? 0 : args.SymbolVariant;
-        if (!box && (!string.IsNullOrWhiteSpace(args.Part) || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+        bool terminal = args.TerminalStrip is not null;
+        string? library = box ? "SPECIAL" : terminal ? "IEC_symbol" : args.Library, name = box ? "SC" : terminal ? "X" : args.Symbol;
+        int? variant = box ? 0 : terminal ? args.SymbolVariant ?? 0 : args.SymbolVariant;
+        if (!box && !terminal && (!string.IsNullOrWhiteSpace(args.Part) || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
         if (args.DisplayProperties is { } displays && (displays.Count > 8 || displays.Any(p => p is null
@@ -36,8 +37,8 @@ internal static class DeviceSymbolPlan
         SymbolSearchItem symbol = found[0];
         if (symbol.ConnectionPoints.Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v))))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The symbol has invalid pin geometry; select another symbol with eplan_symbol_search."); }
-        if (box ? symbol.Type != "LocationBox" : symbol.Kind != "function" || symbol.Type != "Function")
-        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The source must be an ordinary function or the verified SPECIAL/SC location box; select a supported source.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : "device.place.symbol.function" }); }
+        if (box ? symbol.Type != "LocationBox" : terminal ? symbol.Kind != "terminal" || symbol.Type != "Function" : symbol.Kind != "function" || symbol.Type != "Function")
+        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select an ordinary function, verified SPECIAL/SC location box or IEC_symbol/X terminal.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : terminal ? "device.place.terminal" : "device.place.symbol.function" }); }
         if (args.ConnectionDesignations is { } pins && pins.Length != symbol.ConnectionPoints.Count)
         { throw WriteArguments.Invalid(["/connection_designations: supply exactly one designation per symbol connection point."]); }
         var changes = new List<PlannedChange>
@@ -58,10 +59,13 @@ internal static class DeviceSymbolPlan
         }
         for (int i = 0; i < (args.ConnectionDesignations?.Length ?? 0); i++)
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20022[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDesignations![i] }); }
+        TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
         string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
         if (box)
         { details["locationBox"] = BridgeJson.FromObject(new LocationBoxData { Structure = request.Tag, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] }).ToString(Formatting.None); }
+        if (terminalData is not null)
+        { details["terminal"] = BridgeJson.FromObject(terminalData).ToString(Formatting.None); }
         return new WritePlan
         {
             Project = request.Project.Name,

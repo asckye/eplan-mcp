@@ -295,6 +295,9 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public DevicePlaceData Place(DevicePlaceArgs args, string tag)
         {
             Args = args;
+            bool createStrip = args.TerminalStrip is not null && !store.Names.Contains(tag[..tag.LastIndexOf(':')], StringComparer.OrdinalIgnoreCase);
+            if (createStrip)
+            { store.Names.Add(tag[..tag.LastIndexOf(':')]); }
             if (args.LocationBox is null)
             { store.Names.Add(tag); }
             else
@@ -327,6 +330,26 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                             break;
                     }
                     return new() { Tag = structure, Page = args.Page, Category = "LocationBox", LocationBox = box };
+                }
+                if (args.TerminalStrip is not null)
+                {
+                    string strip = tag[..tag.LastIndexOf(':')];
+                    return new()
+                    {
+                        Tag = tag,
+                        Page = args.Page,
+                        Functions = createStrip ? 2 : 1,
+                        Category = "Terminal",
+                        Terminal = new()
+                        {
+                            Strip = strip,
+                            Owner = FailAt == "Owner" ? null : strip,
+                            Number = FailAt == "Number" ? "99" : args.TerminalNumber!,
+                            Position = FailAt == "Position" ? [0, 0] : [args.X, args.Y],
+                            StripCreated = createStrip,
+                            SortCode = "17"
+                        }
+                    };
                 }
                 return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = "Coil" };
             }
