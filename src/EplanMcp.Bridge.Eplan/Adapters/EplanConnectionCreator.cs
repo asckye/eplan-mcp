@@ -65,7 +65,7 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                     || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != expected.Length
                     || pins.Where((p, i) => !p.SequenceEqual(expected[i].Location)).Any()
                     || placed.GraphicalConnectionPoints.Where((p, i) => p.Direction.ToString() != expected[i].Direction).Any()
-                    || !placed.GetBoundingBox().SelectMany(XY).SequenceEqual(item.Row["bounds"]!.Values<double>()))
+                    || !OutlineMatches(placed.GetBoundingBox().SelectMany(XY).ToArray(), item.Row["bounds"]!.Values<double>().ToArray(), XY(placed.Location)))
                 {
                     throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
                         $"Placed symbol geometry differs from the plan: {item.Variant.SymbolName}/{item.Variant.VariantNr} outline {string.Join(",", placed.GetBoundingBox().SelectMany(XY))}, pins {string.Join(";", pins.Select(p => string.Join(",", p)))}."));
@@ -73,6 +73,15 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
             }
         };
     }
+    /// <summary>
+    /// A planned point outline means the library variant had none (Outline); the placed connection symbol must then be
+    /// small (≤ 10 mm, live T3b: CO 2.5, T-node 3 × 4.5, PCP 2 × 5.25) and contain its insertion point.
+    /// </summary>
+    private static bool OutlineMatches(double[] actual, double[] planned, double[] position) =>
+        planned[0] == planned[2] && planned[1] == planned[3]
+            ? actual[0] <= position[0] && position[0] <= actual[2] && actual[1] <= position[1] && position[1] <= actual[3]
+                && actual[2] - actual[0] <= 10 && actual[3] - actual[1] <= 10
+            : actual.SequenceEqual(planned);
     /// <summary>Unplaced library variants have no outline (BaseException); the point is checked against the placed outline.</summary>
     private static double[] Outline(SymbolVariant variant)
     {
