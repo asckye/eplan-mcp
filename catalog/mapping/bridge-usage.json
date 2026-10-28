@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "34278b09",
-  "sourceHash": "sha256:f3f25846fadfbbdac679c80066ecf53dbdc411e3f0de546808467ea17b78d80b",
+  "scannedSources": "dd3e63af",
+  "sourceHash": "sha256:805e81e6c383ebeb6b6d5be617029400ff8ac7aeccd9f7a793f142768c4882a7",
   "operations": [
     {
       "name": "action.execute",
@@ -1163,7 +1163,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "read"
@@ -3071,7 +3071,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -3156,7 +3156,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -3307,7 +3307,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -3449,7 +3449,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -3665,7 +3665,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -3859,7 +3859,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -3916,7 +3916,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -3959,7 +3959,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -3970,7 +3971,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -3990,7 +3992,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -4052,7 +4054,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -4223,7 +4225,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -4239,7 +4242,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -5084,7 +5087,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -6320,7 +6324,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -6888,6 +6893,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.Line.#ctor": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.Line.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String)": [
       {
         "adapter": "PlaceHolderApi",
@@ -7001,7 +7032,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -7027,7 +7059,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -7038,14 +7071,54 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.Rectangle.#ctor": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.Rectangle.Create(Eplan.EplApi.DataModel.Page)": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.Rectangle.SetArea(Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
     "M:Eplan.EplApi.DataModel.Graphics.Text.#ctor": [
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "new"
@@ -7058,7 +7131,7 @@
     "M:Eplan.EplApi.DataModel.Graphics.Text.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.MultiLangString,System.Double)": [
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -7397,7 +7470,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -7523,7 +7597,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -9181,7 +9256,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -11659,7 +11735,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "call"
@@ -11836,7 +11912,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -11849,7 +11926,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -11886,7 +11964,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "get"
@@ -12019,7 +12108,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -12032,7 +12122,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -12069,7 +12160,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "get"
@@ -12169,7 +12271,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -14351,7 +14454,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -14362,7 +14466,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -15756,7 +15861,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -15767,7 +15873,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -15782,7 +15900,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -15793,7 +15912,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -15960,7 +16091,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -15999,7 +16131,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -16025,7 +16158,34 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Rectangle.LowerLeftCorner": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Rectangle.UpperRightCorner": [
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -16040,7 +16200,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -16069,7 +16230,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "get"
@@ -16128,7 +16289,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -16139,12 +16301,13 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "get"
@@ -16205,11 +16368,21 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
-          "get",
           "set"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "placement.text.create.execute"
@@ -16251,7 +16424,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -16290,7 +16464,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -16371,7 +16546,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -16386,7 +16562,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -16955,7 +17132,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -17087,7 +17265,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -17344,7 +17523,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -17954,7 +18134,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -18156,7 +18337,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -18471,7 +18653,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -18618,7 +18801,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -19106,7 +19290,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -21804,7 +21989,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -23569,7 +23755,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -24083,7 +24270,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -24318,7 +24516,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -24402,7 +24611,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -24584,7 +24793,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -24658,7 +24868,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -24850,7 +25071,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -24863,7 +25085,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -24928,7 +25151,7 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -25115,7 +25338,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -26049,7 +26273,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -27771,7 +27996,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -27782,7 +28008,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28145,7 +28372,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28156,7 +28384,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28167,7 +28396,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -28291,7 +28532,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28304,7 +28546,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28315,7 +28558,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28343,7 +28587,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
         ]
       }
     ],
@@ -28358,7 +28614,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28369,7 +28626,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28434,7 +28692,18 @@
       },
       {
         "adapter": "EplanPlacementTextWriter",
-        "member": "Create",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementTextWriter",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
         "access": [
           "type"
@@ -28538,7 +28807,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -28590,7 +28860,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -29251,7 +29522,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -29908,7 +30180,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -30161,7 +30434,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {
@@ -32428,7 +32702,8 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan",
-          "page.drawing.get"
+          "page.drawing.get",
+          "placement.text.create.execute"
         ]
       },
       {

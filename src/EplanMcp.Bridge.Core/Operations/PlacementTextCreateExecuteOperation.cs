@@ -106,27 +106,11 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
     }
 
-<<<<<<< HEAD
-        Committed<PlacementText> committed = TransactionRunner.Run(transactions, "eplan_placement_create", () =>
-        {
-            PlacementText actual = writer.Create(project.Path, args.Page, text);
-            if (actual.HeightMm != text.HeightMm || !actual.Position.SequenceEqual(text.Position) || actual.Contents.Count != text.Contents.Count
-                || text.Contents.Any(p => !actual.Contents.TryGetValue(p.Key, out string? value) || !string.Equals(value, p.Value, StringComparison.Ordinal)))
-            {
-                throw new BridgeErrorException(ErrorReason.EplanOperationFailed, string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                    "Text languages, height or position did not read back as requested (read {0} mm at {1}, languages {2}); all changes were rolled back. Ask the engineer to check the page.",
-                    actual.HeightMm, string.Join(",", actual.Position), string.Join(",", actual.Contents.Keys)));
-            }
-            return actual;
-        }, shouldCommit: _ => true); // A54: rollback without closing the failed creation's undo step.
-        return new PlacementTextCreateData { Text = committed.Result, Warning = committed.Warning };
-=======
     private static PlacementText Verify(PlacementText text, PlacementText actual)
     {
         if (actual.Kind != text.Kind || !actual.EndPosition.SequenceEqual(text.EndPosition) || actual.HeightMm != text.HeightMm || !actual.Position.SequenceEqual(text.Position) || actual.Contents.Count != text.Contents.Count
             || text.Contents.Any(p => !actual.Contents.TryGetValue(p.Key, out string? value) || !string.Equals(value, p.Value, StringComparison.Ordinal)))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Primitive geometry or text languages/height did not read back as requested; all changes were rolled back. Ask the engineer to check the page."); }
         return actual;
->>>>>>> b4fd63bf (feat(tools): create texts, lines and boxes with eplan_placement_create)
     }
 }

@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 319,
-      "byTools": 310,
-      "partial": 51,
-      "automatedTest": 310,
+      "implemented": 324,
+      "byTools": 316,
+      "partial": 53,
+      "automatedTest": 316,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 130,
-      "byTools": 122,
-      "partial": 45,
-      "automatedTest": 122,
+      "implemented": 133,
+      "byTools": 126,
+      "partial": 47,
+      "automatedTest": 126,
       "liveVerified": 75,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 189,
-      "byTools": 188,
+      "implemented": 191,
+      "byTools": 190,
       "partial": 6,
-      "automatedTest": 188,
+      "automatedTest": 190,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 270,
+    "used": 272,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 37,
+      "implemented": 42,
       "liveVerified": 10
     },
     {
@@ -1770,6 +1770,28 @@
       }
     },
     {
+      "name": "eplan_placement_create",
+      "safety": "write",
+      "operations": [
+        "page.drawing.get",
+        "page.get",
+        "placement.text.create.execute",
+        "project.get"
+      ],
+      "apiIds": 160,
+      "operationGroups": 88,
+      "dataDictionary": 1,
+      "dependencies": 71,
+      "actions": 0,
+      "spec": "docs/tools/eplan_placement_create.md",
+      "small": 3,
+      "medium": 3,
+      "large": 1,
+      "apiNotes": [
+        "A54"
+      ]
+    },
+    {
       "name": "eplan_plan_apply",
       "safety": "destructive",
       "operations": [],
@@ -2489,6 +2511,7 @@
         "eplan_page_get",
         "eplan_page_list",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_revision_list",
         "eplan_rule_check",
@@ -2726,6 +2749,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -2744,6 +2768,7 @@
         "eplan_export_labels",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -2776,6 +2801,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -2792,6 +2818,7 @@
       "partial": false,
       "tools": [
         "eplan_page_text_replace",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set"
       ]
@@ -2821,6 +2848,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -2864,6 +2892,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_create",
         "eplan_project_create",
         "eplan_project_translate",
         "eplan_property_set",
@@ -2882,6 +2911,7 @@
         "eplan_page_create",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_property_set"
       ]
     },
@@ -2892,7 +2922,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -2902,6 +2933,7 @@
       "partial": false,
       "tools": [
         "eplan_page_text_replace",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set"
       ]
@@ -2915,6 +2947,7 @@
         "eplan_import_pdf_comments",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -2944,6 +2977,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -2981,6 +3015,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -3001,6 +3036,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -3138,7 +3174,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -3152,6 +3189,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -3365,6 +3403,7 @@
         "eplan_page_get",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -3386,6 +3425,7 @@
         "eplan_connection_number",
         "eplan_context_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -3418,6 +3458,7 @@
         "eplan_macro_insert",
         "eplan_page_delete",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
@@ -3476,6 +3517,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_project_create",
         "eplan_project_get",
         "eplan_project_translate",
@@ -3674,6 +3716,7 @@
         "eplan_device_list",
         "eplan_device_place",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -3705,6 +3748,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -3734,6 +3778,7 @@
         "eplan_macro_insert",
         "eplan_page_delete",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -3846,6 +3891,7 @@
         "eplan_page_get",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_translate",
@@ -3885,6 +3931,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -3956,6 +4003,7 @@
         "eplan_device_renumber",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -4071,13 +4119,23 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_placement_create"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.EndPoint",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4087,7 +4145,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4206,7 +4265,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get",
-        "eplan_page_text_replace"
+        "eplan_page_text_replace",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4227,7 +4287,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4237,7 +4298,8 @@
       "partial": true,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4248,7 +4310,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4259,7 +4322,44 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_placement_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.LowerLeftCorner",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_placement_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.SetArea",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_placement_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.UpperRightCorner",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_placement_create"
       ]
     },
     {
@@ -4270,15 +4370,18 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get",
-        "eplan_page_text_replace"
+        "eplan_page_text_replace",
+        "eplan_placement_create"
       ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Text.Create",
       "layer": "operation",
-      "status": "implemented",
+      "status": "automated_test",
       "partial": true,
-      "tools": []
+      "tools": [
+        "eplan_placement_create"
+      ]
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBase.Contents",
@@ -4297,7 +4400,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4317,7 +4421,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_device_place"
+        "eplan_device_place",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4338,7 +4443,8 @@
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_page_get",
-        "eplan_page_text_replace"
+        "eplan_page_text_replace",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4348,7 +4454,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4396,7 +4503,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4407,7 +4515,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_page_get",
-        "eplan_page_text_replace"
+        "eplan_page_text_replace",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4639,6 +4748,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_text_replace",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -4661,7 +4771,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4705,6 +4816,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_translate",
         "eplan_property_get",
@@ -4734,6 +4846,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -4747,7 +4860,8 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -4760,6 +4874,7 @@
         "eplan_page_get",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ]
@@ -4776,6 +4891,7 @@
         "eplan_page_get",
         "eplan_page_list",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
@@ -4813,6 +4929,7 @@
         "eplan_import_dxf",
         "eplan_macro_insert",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ]
@@ -4861,6 +4978,7 @@
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
@@ -4894,6 +5012,7 @@
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
@@ -4983,7 +5102,8 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -5011,7 +5131,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -5131,6 +5252,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -5186,6 +5308,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -5254,6 +5377,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -5344,6 +5468,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -5370,6 +5495,7 @@
         "eplan_cabinet_list",
         "eplan_context_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_create",
         "eplan_project_get",
         "eplan_property_get",
@@ -5503,6 +5629,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
@@ -5593,6 +5720,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_create",
         "eplan_project_get",
@@ -5630,6 +5758,7 @@
         "eplan_export_untranslated",
         "eplan_language_remove",
         "eplan_language_set",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set"
       ]
@@ -5655,6 +5784,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -5671,6 +5801,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -5737,6 +5868,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -5773,6 +5905,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -5790,6 +5923,7 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5827,6 +5961,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_create",
         "eplan_project_get",
@@ -5851,6 +5986,7 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5923,6 +6059,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_property_get",
@@ -5962,6 +6099,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_create",
         "eplan_project_get",
@@ -6004,6 +6142,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6040,6 +6179,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6076,6 +6216,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6152,6 +6293,7 @@
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
@@ -6250,7 +6392,8 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_page_get"
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -6311,6 +6454,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6347,6 +6491,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6383,6 +6528,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6419,6 +6565,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6455,6 +6602,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6491,6 +6639,7 @@
         "eplan_page_update",
         "eplan_part_sync",
         "eplan_placeholder_apply",
+        "eplan_placement_create",
         "eplan_project_translate",
         "eplan_property_set",
         "eplan_report_update",
@@ -6508,6 +6657,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -6524,6 +6674,7 @@
         "eplan_cable_renumber",
         "eplan_device_get",
         "eplan_page_get",
+        "eplan_placement_create",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -6858,6 +7009,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_plc_get",
         "eplan_project_get",
         "eplan_project_list",
