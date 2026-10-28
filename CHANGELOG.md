@@ -7,6 +7,7 @@
 
 ### Added
 - 新增 `eplan_asset_review`（full，本地数据）：经工程师独立窗口审核候选、关闭缺口或提升新正式规则；`eplan_pack_build` 拒绝无来源的 mandatory 规则与缺少匹配本机确认的 official，手改 standing 无效。
+- M8 T4a：新增 `placement` 词表及 `eplan_placement_create` 的契约/只读规划，校验显式语言、完整外框并报告栅格吸附；工具尚未注册，执行留 T4b/T4c。
 - 新增 `eplan_symbol_search`（full，只读）：查询项目已有符号库、符号变体、类型及连接点，按封闭种类过滤并分页；不导入库或修改设置。
 - 新增 `eplan_cabinet_list` / `eplan_cabinet_bind`（full）：多柜映射、五层配置溯源、预览及换锁确认；`eplan_context_get` 按所选柜隔离配置与对象。
 - `eplan_import_pdf_comments`（full，Write）：导入本项目经 EPLAN 导出、Acrobat/Reader 批注的 PDF，只导入便笺 Text，忽略插入标记和下划线等。文件沿用 imports 接收校验；dry run 只校验并统计现有注释，新增数执行后才知道；scratch 外按策略审批，一次 Ctrl+Z 撤销，失败或重复导入新增 0 时回滚且不留空步。结果按不可信数据清洗、限量返回页名、文字、作者和时间。M4c 工具实现完成，实机依据 S44；新增工具的 Large 测试待运行。
