@@ -137,15 +137,22 @@ public static class ConnectionCreatePlanner
                 "corner" => s.Name == "CO" && s.Type == "Routing",
                 "t_node" => s.Type == (s.Name switch { "TLRO" => "TNodeUp", "TLRU" => "TNodeDown", "TOUL" => "TNodeLeft", "TOUR" => "TNodeRight", _ => "" }),
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
-            }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.SequenceEqual(new double[] { 0, 0 }))
-                && s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))).ToArray();
-            SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select an unambiguous verified SPECIAL variant with coincident cardinal pins using eplan_symbol_search.");
+            }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.Length == 2
+                && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && Math.Abs(v) <= 2 * grid)
+                && (node.Kind == "potential_point" || p.Location.All(v => v == 0)))
+                && s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))).OrderBy(s => s.Variant).ToArray();
+            // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
+            if (node.Kind == "potential_point" && matches.Length > 0)
+            { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
+            SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
+            double[] offset = symbol.ConnectionPoints[0].Location;
+            double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];
             string key = FormattableString.Invariant($"{symbol.Name}/{symbol.Variant}");
             double[] bounds = scene.SymbolBounds.TryGetValue(key, out double[]? found) ? found : throw Missing("Read the selected variant's complete outline before planning placement.");
-            double[] outline = [bounds[0] + node.Point[0], bounds[1] + node.Point[1], bounds[2] + node.Point[0], bounds[3] + node.Point[1]];
-            Require(DrawingCoordinates.Contains(scene.Page.PageSize, [outline]), "/items", "Keep the full symbol outline inside Page.Size.");
+            double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
+            Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
             Require(!scene.Page.Placements.Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
-            resolved.Add(new JObject { ["position"] = new JArray(node.Point), ["symbol"] = BridgeJson.FromObject(symbol), ["bounds"] = new JArray(outline) });
+            resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(symbol), ["bounds"] = new JArray(outline) });
         }
         var segments = paths.SelectMany(p => p.Zip(p.Skip(1), (a, b) => new[] { a, b })).ToList();
         var ports = scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray();
@@ -168,7 +175,7 @@ public static class ConnectionCreatePlanner
         {
             double[][] s = segments[i];
             Require(!scene.Graphical.Any(e => Intersects(s, e)), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
-            Require(!scene.Page.Placements.Any(p => Overlaps(Box(s), p.Bounds!) || (p.Bounds![0] == p.Bounds[2] || p.Bounds[1] == p.Bounds[3]) && Intersects(s, [[p.Bounds[0], p.Bounds[1]], [p.Bounds[2], p.Bounds[3]]])), "/items", "The path crosses a placement outline.");
+            Require(!scene.Page.Placements.Any(p => CrossesPlacement(s, p, scene.Pins)), "/items", "The path crosses a placement outline.");
             Require(!scene.Pins.Values.Any(p => On(p.Location, s) && !s.Any(e => e.SequenceEqual(p.Location))), "/items", "A different pin intercepts this path; select explicit endpoints.");
             foreach (var node in nodes.Values.Where(n => On(n.Point, s)))
             { Require(s.Where(p => !p.SequenceEqual(node.Point)).All(p => node.Directions.Contains(Direction(node.Point, p), StringComparer.Ordinal)), "/items", "A node's directions do not support this path."); }
@@ -221,6 +228,18 @@ public static class ConnectionCreatePlanner
     }
 
     private static string Opposite(string d) => d switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", "Right" => "Left", _ => "" };
+    private static bool CrossesPlacement(double[][] segment, DrawingPlacement placement, Dictionary<string, SymbolConnectionPoint> pins)
+    {
+        double[] bounds = placement.Bounds!;
+        double[][] diagonal = [[bounds[0], bounds[1]], [bounds[2], bounds[3]]];
+        if (!Overlaps(Box(segment), bounds) && !((bounds[0] == bounds[2] || bounds[1] == bounds[3]) && Intersects(segment, diagonal)))
+        { return false; }
+        string owner = FormattableString.Invariant($"{placement.Locator.Type}/{placement.Locator.Oid}/");
+        // Only the terminal approach to this placement's own pin may enter its outline.
+        return !pins.Any(p => p.Key.StartsWith(owner, StringComparison.Ordinal) && On(p.Value.Location, diagonal)
+            && segment.Any(end => end.SequenceEqual(p.Value.Location) && segment.Any(other => !On(other, diagonal)
+                && Direction(end, other) == p.Value.Direction)));
+    }
     private static string Direction(double[] a, double[] b) => a[0] == b[0] ? b[1] > a[1] ? "Up" : "Down" : b[0] > a[0] ? "Right" : "Left";
     private static double Distance(double[] a, double[] b) => Math.Abs(a[0] - b[0]) + Math.Abs(a[1] - b[1]);
     private static double[] Box(double[][] s) => [Math.Min(s[0][0], s[1][0]), Math.Min(s[0][1], s[1][1]), Math.Max(s[0][0], s[1][0]), Math.Max(s[0][1], s[1][1])];

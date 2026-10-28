@@ -62,6 +62,19 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         Assert.Single((JArray)plan["graphicalAutoconnect"]!);
     }
 
+    [Fact]
+    public void DryRun_PotentialPinOffsetChangesAfterFileRoundTrip_IsStale()
+    {
+        _fixture.Symbols[2].ConnectionPoints[0].Location = [0, 3];
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("potential_point", [24, 8], "Up"));
+        JObject plan = RoundTripPlan();
+        Assert.Equal([24d, 5d], plan["symbols"]![0]!["position"]!.Values<double>());
+        Assert.Equal([24d, 8d], plan["graphicalAutoconnect"]![0]![0]!.Values<double>());
+        _fixture.Symbols[2].ConnectionPoints[0].Location = [0, 4];
+        BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => _fixture.Plan((string)plan["fingerprint"]!));
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (ex.Error.Reason, ex.Error.Execution));
+    }
+
     [Theory]
     [InlineData("placement")]
     [InlineData("logical")]

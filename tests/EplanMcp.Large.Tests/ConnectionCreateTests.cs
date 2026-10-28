@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
+using EplanMcp.Tests;
 
 namespace EplanMcp.Large.Tests;
 
@@ -37,18 +38,25 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
                 new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
             string before = (await session.SnapshotAsync()).Hash;
+            var layout = new ConnectionCreateLayout(geometry.GridSize, directions.Split(','));
+            var items = new List<object> { new { kind, position = layout.Position, directions = directions.Split(',') } };
+            if (layout.Corner is { } corner)
+            { items.Add(new { kind = "corner", position = corner.Position, directions = corner.Directions }); }
             var args = new Dictionary<string, object?>
             {
                 ["project"] = session.Project,
                 ["page"] = page,
-                ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind, position = new[] { 30 * geometry.GridSize, 40 * geometry.GridSize }, directions = directions.Split(',') } })
+                ["items"] = JsonSerializer.SerializeToElement(items)
             };
             JsonElement preview = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = true, ["response_format"] = "detailed" });
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
             JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["response_format"] = "detailed" });
             Assert.Equal((ExecutionState.Committed, 2), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
             string[] expected = preview.GetProperty("logicalAfterGenerate").EnumerateArray().SelectMany(g => g.GetProperty("pins").EnumerateArray().Select(p => p.GetString()!)).Order(StringComparer.Ordinal).ToArray();
+            Assert.Equal(layout.Targets.Count, expected.Length);
+            Assert.Equal(layout.Targets.Count + (layout.Corner is null ? 0 : 1), preview.GetProperty("graphicalAutoconnect").GetArrayLength());
             JsonElement[] pairs = result.GetProperty("actualEndpoints").EnumerateArray().ToArray();
+            Assert.NotEmpty(pairs);
             Assert.Equal(expected, pairs.SelectMany(p => p.EnumerateArray()).Where(p => p.ValueKind != JsonValueKind.Null).Select(p => p.GetString()!).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal));
             if (kind == "potential_point")
             { Assert.All(pairs, pair => Assert.Equal(JsonValueKind.Null, pair[0].ValueKind)); }

@@ -13,6 +13,7 @@
     <!-- P6 planning tests also replay detached Bridge evidence through the pure planner. -->
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <Compile Include="..\EplanMcp.Bridge.Core.Tests\FakePropertyReadAdapter.cs" Link="FakePropertyReadAdapter.cs" />
+    <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
     <PackageReference Include="Newtonsoft.Json" />
     <!-- Input files the import tests copy below the imports root (S34's device list exports of the sample project). -->
     <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />

@@ -60,8 +60,11 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                 SymbolReference placed = SymbolReference.Create(item.Variant, target);
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
                 double[][] pins = placed.GraphicalConnectionPoints.Select(p => XY(p.Location)).ToArray();
+                SymbolConnectionPoint[] expected = item.Row["symbol"]!["connectionPoints"]!.ToObject<SymbolConnectionPoint[]>()!;
                 if (!XY(placed.Location).SequenceEqual(item.Row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != item.Variant.SymbolName
-                    || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != item.Row["symbol"]!["connectionPoints"]!.Count() || pins.Any(p => p.Any(v => v != 0))
+                    || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != expected.Length
+                    || pins.Where((p, i) => !p.SequenceEqual(expected[i].Location)).Any()
+                    || placed.GraphicalConnectionPoints.Where((p, i) => p.Direction.ToString() != expected[i].Direction).Any()
                     || !placed.GetBoundingBox().SelectMany(XY).SequenceEqual(item.Row["bounds"]!.Values<double>()))
                 {
                     throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
