@@ -6,10 +6,10 @@
 | 所属分组 / Profile | `workflow`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read（保存 Host 计划记录，不执行 EPLAN 写入） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented（LP-9 新计划统一 compilerVersion="2"；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具） |
+| 状态 | Implemented（旧路径 compiler=2；W2 工程计划 compiler=3，仅编译，执行待 W3；本次未运行 EPLAN） |
 
 ## 1. 这个工具解决什么任务
-“先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤，供 `eplan_plan_apply` 整体审批和执行。第 2 阶段只用覆盖全部结构的默认柜；包内工作流、配置分层、规则解释器留第 3 阶段。
+“先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤；阶段 3 增加按柜配置展开的锁定工作流与规则，工程计划的执行重核留 W3。
 
 第 2 阶段完整任务先独立调用 [`eplan_project_create`](eplan_project_create.md)，从基本项目在 scratch 中新建目标（Write，scratch 中自动允许）；新项目按该规格返回关闭状态，按既有写工具要求打开后，调用 `eplan_workflow_plan` / `eplan_plan_apply` 在这个已有项目中从参考项目生成回路。计划不承担项目创建。
 
@@ -17,12 +17,16 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string，非空 | 是 | — | 已有且已打开项目的名称或路径；编译时解析为实际项目及规范化路径，目标不存在或未打开时拒绝，不创建项目 |
-| `steps` | array | 是 | — | 有序内联步骤，1–20 步、参数 JSON ≤256 KiB（D01）；超限整体拒绝，不截断执行意图 |
+| `steps` | array | 二选一 | — | 与 `workflow` 互斥；有序内联步骤，1–20 步、参数 JSON ≤256 KiB（D01） |
+| `cabinet` | string | 多柜必填 | 单柜 | 按 v2 结构映射证明完整影响归属，越界或不明范围拒绝 |
+| `workflow` / `inputs` | string / object | 二选一 / 否 | — / `{}` | 精确锁定的工作流资源 ID 与类型化输入；从该柜配置展开有限步骤 |
 | `steps[].op` | enum | 是 | — | 只能取下表中的操作名，不能传工具名、action、脚本或表达式 |
 | `steps[].args` | object | 是 | — | 按对应操作 schema 校验；字段沿用工具的 snake_case，项目由顶层固定，不接受步内 `project`、`dry_run`、`fingerprint`、审批或备份参数 |
 | `steps[].depends_on` | integer array | 否 | `[]` | 依赖的先前步骤序号（从 1 开始）；只能指向前面的步骤，不并行执行 |
 
-schema 使用 JSON Schema 2020-12、`additionalProperties: false`，`steps` 至少一项，按 `op` 用 `oneOf` 选择参数 schema。不提供 `workflow`/包工作流参数或动态 `selection` 选择器；任务涉及选中对象时先给明确页名/设备全名，编译器解析为定位符并写死，执行不重读选择。重复编译可以生成不同 `planId`，Read 幂等提示只指不修改工程数据。
+schema 使用 JSON Schema 2020-12、`additionalProperties: false`，`steps` 至少一项，按 `op` 用 `oneOf` 选择参数 schema。任务涉及选中对象时给明确页名/设备全名，执行不重读选择。重复编译可生成不同 `planId`，Read 幂等提示只指不修改工程数据。
+
+W2：v2 绑定计划使用 schema=2/compiler=3，固定柜结构、五层配置及 trace/configDigest、工作流原始输入、正式规则摘要与求值证据；精确资源版本、清单/文件哈希及来源全部参与 planHash。候选（含 accepted）不能成为正式规则，正式规则须匹配本机 promoted 审计及来源。mandatory fail/unknown 阻止普通计划；修复入口留 R5。无绑定/旧 default 绑定的旧调用仍用 schema=1/compiler=2。W3 前 compiler=3 不可执行；宏引用闭包、关系覆盖或验收样例未证明时拒绝生成，不缩小影响范围。
 
 P11 中省略语言时与页工具一致，使用 EPLAN 界面语言，实际语言写在计划变更里（`description (zh_CN)`），执行时界面语言不同则该步 `PLAN_STALE`；Bridge 未暴露默认设备编号方案，`device.renumber` 省略方案时报 `CAPABILITY_MISSING`，要求明确指定。`contextRef` 引用落盘基准证据的 SHA-256；返回 `counts` 保留完整步骤和变更计数。
 

@@ -10262,7 +10262,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_workflow_plan.md",
-        "specStatus": "Implemented（LP-9 新计划统一 compilerVersion=\"2\"；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具）",
+        "specStatus": "Implemented（旧路径 compiler=2；W2 工程计划 compiler=3，仅编译，执行待 W3；本次未运行 EPLAN）",
         "apiNotes": [
           "A14",
           "A17",
@@ -10284,6 +10284,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
+            "name": "WorkflowEngineeringScopeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowEngineeringScopeTests.cs"
+          },
+          {
             "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
@@ -10292,6 +10297,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "WorkflowCabinetTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowCabinetTests.cs"
           },
           {
             "name": "WorkflowHttpTests",
