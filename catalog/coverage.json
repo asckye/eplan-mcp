@@ -642,8 +642,8 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 177,
-      "operationGroups": 103,
+      "apiIds": 178,
+      "operationGroups": 104,
       "dataDictionary": 3,
       "dependencies": 70,
       "actions": 0,
@@ -1415,8 +1415,8 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 106,
-      "operationGroups": 64,
+      "apiIds": 108,
+      "operationGroups": 66,
       "dataDictionary": 1,
       "dependencies": 41,
       "actions": 0,
@@ -1778,8 +1778,8 @@
         "placement.text.create.execute",
         "project.get"
       ],
-      "apiIds": 160,
-      "operationGroups": 88,
+      "apiIds": 162,
+      "operationGroups": 90,
       "dataDictionary": 1,
       "dependencies": 71,
       "actions": 0,
@@ -5185,7 +5185,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_action_run"
+        "eplan_action_run",
+        "eplan_connection_create",
+        "eplan_page_get",
+        "eplan_placement_create"
       ]
     },
     {
@@ -6326,7 +6329,9 @@
         "eplan_device_place",
         "eplan_import_list",
         "eplan_import_plc",
+        "eplan_page_get",
         "eplan_page_text_replace",
+        "eplan_placement_create",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",

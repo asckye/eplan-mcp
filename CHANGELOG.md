@@ -7,6 +7,7 @@
 
 ### Added
 - M8 T8a：`eplan_connection_create` 增加电缆定义/芯线只读规划，逐芯预测连接归属、编号/标签、颜色及截面，校验复合键、整次调用限额与完整相交范围并固定 stale 指纹；执行仍为 `CAPABILITY_MISSING`，留 T8b 核验 A55 多阶段提交，不增加工具或 Bridge 操作。
+- M8 T5a：增加 `eplan_placement_update` 未注册契约和绝对移动规划，包含父符号全部属性文字、栅格/外框/碰撞及自动线影响预测；拒绝组与宏组，校验陈旧证据并识别 no-op，执行留 T5b。
 - 新增 `eplan_rule_check`（full，Read）：按柜检查本机已提升的锁定规则，分页返回四值和证据；`fix_plan` 仅编译声明的修复计划，unknown 或修复冲突时拒绝，不执行工程修改。
 - M8 T7b：`eplan_connection_create.items[].kind` 增加 `interruption_point`，显式共享业务名、方向、坐标与对端页范围；拒绝歧义配对，提交后返回 EPLAN 双向对端和计算引用，保持两次提交/失败自动撤销。新增 Small/Medium 与待运行的 Large 配对撤销测试；不新增工具或 Bridge 操作。
 - M8 T4c：注册 `eplan_placement_create`（full、Write、非幂等），1–50 项文字/直线/矩形同一事务创建、全部读回后提交；失败整批回滚无空步，一次撤销。明确语言限制，页界/文字完整外框的 dry-run 缺口仍保留；混合 Large 已编写，未运行。

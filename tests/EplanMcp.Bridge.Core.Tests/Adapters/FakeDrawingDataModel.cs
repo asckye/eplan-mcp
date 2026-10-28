@@ -8,6 +8,7 @@ internal class Placement(long oid, int type = 4) : IDisposable
     public long ObjectIdentifier { get; } = oid;
     public string Prefix { get; set; } = "53";
     public PointD Location { get; set; }
+    public Group? Group { get; set; }
     public PointD[] Bounds { get; set; } = [new(0, 0), new(10, 10)];
     public Exception? BoundsError { get; set; }
     public string ToStringIdentifier() => $"{Prefix}/{type}/{ObjectIdentifier}/0";
