@@ -1,3 +1,4 @@
+using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -47,7 +48,9 @@ public sealed class ConnectionGenerateExecuteOperation(IProjectCatalog catalog, 
         {
             generator.Generate(request.Project.Path, request.Pages);
             return generator.ReadConnections(request.Project.Path, request.Pages);
-        });
+        },
+        // Live T5b: a generation that changes nothing must not leave an undo step (the Host reports not_started).
+        after => !BridgeJson.FromObject(after).ToString(Newtonsoft.Json.Formatting.None).Equals(BridgeJson.FromObject(before).ToString(Newtonsoft.Json.Formatting.None), StringComparison.Ordinal));
         return new ConnectionGenerateData
         {
             Project = request.Project.Name,

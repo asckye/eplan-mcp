@@ -34,6 +34,7 @@
 - 发布 ZIP 根目录新增 `README.md`，随包说明运行要求、EPLAN 授权条件与支持矩阵。
 
 ### Fixed
+- `eplan_connection_generate` 在没有新增或删除任何连接时，不再在 EPLAN 中留下一个空的撤销步骤（结果原本就报告 not_started，但按一次 Ctrl+Z 什么也不会撤销）。
 - 机器繁忙、其他程序频繁打开和关闭命名管道时，`eplanmcp` 不再偶尔找不到正在运行的 EPLAN（工具间歇性返回 `EPLAN_NOT_CONNECTED`，重试后又正常）。
 
 ## [0.4.0] - 2026-10-26

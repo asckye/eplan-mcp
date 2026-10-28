@@ -188,7 +188,22 @@ public sealed class ConnectionGenerateOperationTests
 
         Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
         Assert.Empty(_generator.Connections[NewPage]);
-        Assert.Equal(["Begin AI: eplan_connection_generate", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
+        Assert.Equal(["Begin AI: eplan_connection_generate", "Rollback", "Dispose"], _transactions.Calls); // no empty undo step
+    }
+
+    [Fact]
+    public void Execute_ThatChangesNothing_RollsBackWithoutAnUndoStep()
+    {
+        // Live T5b: the Host reports not_started for an unchanged page, so EPLAN must not keep an undo step either.
+        ConnectionGenerateArgs args = Args(NewPage);
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        _transactions.Calls.Clear();
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        Execute(args);
+
+        Assert.Equal(["Begin AI: eplan_connection_generate", "Rollback", "Dispose"], _transactions.Calls);
     }
 
     [Fact]
