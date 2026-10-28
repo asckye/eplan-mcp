@@ -128,7 +128,8 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                     ["pin"] = new JArray(point.Location.X + pin.Location.X, point.Location.Y + pin.Location.Y),
                     ["direction"] = pin.Direction.ToString(),
                     ["crossReference"] = reference.IsEmpty ? null : reference.ToString(),
-                    ["counterparts"] = new JArray(point.CrossReferencedObjectsAll.Select(peer => peer is InterruptionPoint other
+                    // Live T7b: CrossReferencedObjectsAll includes the point itself.
+                    ["counterparts"] = new JArray(point.CrossReferencedObjectsAll.Where(peer => peer.ObjectIdentifier != point.ObjectIdentifier).Select(peer => peer is InterruptionPoint other
                         ? new JObject { ["page"] = other.Page.Name, ["name"] = other.Name, ["oid"] = other.ObjectIdentifier }
                         : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Unexpected native interruption counterpart type.")))
                 });

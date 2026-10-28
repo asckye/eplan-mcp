@@ -93,8 +93,9 @@ public static class InterruptionPointPlanning
             {
                 JToken[] peers = pair.Where(p => !ReferenceEquals(p, point)).ToArray();
                 Require(point["counterparts"]!.Count() == peers.Length && peers.All(p => point["counterparts"]!.Any(c => (string?)c["page"] == (string?)p["page"] && (long?)c["oid"] == (long?)p["oid"])), // live T7b: 24300 stays empty, pairing is the proof
-                    string.Format(System.Globalization.CultureInfo.InvariantCulture, "EPLAN computed an unexpected counterpart ({0} on {1}: {2} counterparts, reference '{3}').",
-                    name, (string?)point["page"], point["counterparts"]!.Count(), (string?)point["crossReference"]));
+                    string.Format(System.Globalization.CultureInfo.InvariantCulture, "EPLAN computed an unexpected counterpart ({0} on {1}: native {2}, expected {3}).",
+                    name, (string?)point["page"], point["counterparts"]!.ToString(Newtonsoft.Json.Formatting.None),
+                    new JArray(peers.Select(p => new JObject { ["page"] = p["page"], ["oid"] = p["oid"] })).ToString(Newtonsoft.Json.Formatting.None)));
                 Require(peers.All(p => (string?)p["page"] == (string?)plan["page"] || row["interruption"]!["counterpart_pages"]!.Values<string>().Contains((string?)p["page"], StringComparer.Ordinal)), "EPLAN paired outside counterpart_pages.");
                 result.Add(point.DeepClone());
             }
