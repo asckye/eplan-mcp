@@ -16,5 +16,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Bridge.Core.Tests" />
+    <InternalsVisibleTo Include="EplanMcp.Bridge.Eplan" />
   </ItemGroup>
 </Project>

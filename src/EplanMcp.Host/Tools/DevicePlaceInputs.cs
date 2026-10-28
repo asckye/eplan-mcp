@@ -11,25 +11,38 @@ internal static class DevicePlaceInputs
     {
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part","tag"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
-             {"required":["library","symbol","symbol_variant","tag"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["part"]},{"required":["variant"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
-             {"required":["location_box","corner_x","corner_y"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}},
-             {"required":["terminal_strip","terminal_number"],"not":{"anyOf":[{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}}]
+            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","library","symbol","symbol_variant","display_properties","connection_designations","location_box","corner_x","corner_y"]}}},
+             {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","part","variant","location_box","corner_x","corner_y"]}}},
+             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations"]}}},
+             {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations"]}}}]
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
-            "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
+            "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027,20400,20403,20301]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
             """);
+        schema["dependentRequired"] = JsonNode.Parse("""{"plc_connection_point":["library","symbol","symbol_variant","tag","plc_address","plc_symbolic_address","plc_text"],"plc_address":["plc_connection_point"],"plc_symbolic_address":["plc_connection_point"],"plc_text":["plc_connection_point"]}""");
+        foreach (string field in new[] { "plc_connection_point", "plc_address", "plc_symbolic_address", "plc_text" })
+        { schema["properties"]![field]!["minLength"] = 1; schema["properties"]![field]!["maxLength"] = 256; }
+        schema["properties"]!["plc_connection_point"]!["maxLength"] = 64;
         schema["properties"]!["terminal_number"]!["minLength"] = 1;
         schema["properties"]!["terminal_number"]!["maxLength"] = 64;
         schema["properties"]!["terminal_strip_text"]!["maxLength"] = 256;
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
+        foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
+        { if (property["default"] is null) { property.Remove("default"); } }
     }
 
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
+        {
+            if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
+                || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl))
+                || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(':'))
+            { problems.Add("/plc_connection_point: require a symbol source, existing PLC tag and four nonempty PLC fields without controls (point at most 64 characters, others 256); omit a leading colon."); }
+        }
         if (args.TerminalStrip is not null)
         {
             if (args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.Tag is not null
@@ -85,7 +98,7 @@ internal static class DevicePlaceInputs
             if (item.ValueKind != JsonValueKind.Object || item.EnumerateObject().Count() != 3
                 || item.EnumerateObject().Select(p => p.Name).Distinct(StringComparer.Ordinal).Count() != 3
                 || !item.TryGetProperty("property_id", out JsonElement id) || id.ValueKind != JsonValueKind.Number || !id.TryGetInt32(out int number)
-                || number is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027)
+                || number is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301)
                 || !Offset(item, "offset_x_mm", out double x) || !Offset(item, "offset_y_mm", out double y)
                 || !double.IsFinite(args.X + x) || !double.IsFinite(args.Y + y))
             { problems.Add(at + ": require allowed property_id and finite offset_x_mm, offset_y_mm; no other or duplicate members."); continue; }

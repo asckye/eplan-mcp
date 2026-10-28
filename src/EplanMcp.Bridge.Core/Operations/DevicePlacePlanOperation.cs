@@ -7,14 +7,14 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// use, and returns one <c>create</c> change for the dry run and the approval form (docs/tools/eplan_device_place.md,
 /// section 5). Reads only: the parts database is opened and closed as eplan_part_search does it (A27).
 /// </summary>
-public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, ISymbolReader? symbols = null)
+public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, ISymbolReader? symbols = null, IPlcReader? plc = null)
     : Operation<DevicePlaceArgs, WritePlan>
 {
     public override string Name => OperationNames.DevicePlacePlan;
 
     protected override WritePlan Execute(DevicePlaceArgs args)
     {
-        var request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
+        var request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer, plc);
         request.CheckFree();
         if (args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null)
         { return DeviceSymbolPlan.Create(args, request, symbols); }

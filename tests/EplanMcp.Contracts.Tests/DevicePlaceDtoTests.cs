@@ -7,6 +7,20 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DevicePlaceDtoTests
 {
     [Fact]
+    public void Plc_RoundTripsInputsAndComputedReadbackAcrossPipeSerializers()
+    {
+        var args = new DevicePlaceArgs { Tag = "-KF1", PlcConnectionPoint = "DI a.0", PlcAddress = "I0.0", PlcSymbolicAddress = "Start", PlcText = "Start input" };
+        DevicePlaceArgs bridge = JsonConvert.DeserializeObject<DevicePlaceArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
+        Assert.Equal(("-KF1", "DI a.0", "I0.0", "Start", "Start input"), (bridge.Tag, bridge.PlcConnectionPoint, bridge.PlcAddress, bridge.PlcSymbolicAddress, bridge.PlcText));
+        var data = new DevicePlaceData { Plc = new() { Name = "+A1-KF1:DI a.0", Owner = "+A1-KF1", CardReference = "/2.1", ManualSymbolicAddress = "Start", SymbolicAddress = "Start", ParentlessRepresentations = 1 } };
+        DevicePlaceData host = System.Text.Json.JsonSerializer.Deserialize<DevicePlaceData>(JsonConvert.SerializeObject(data))!;
+        Assert.Equal(("+A1-KF1", "/2.1", "Start", "Start", 1), (host.Plc!.Owner, host.Plc.CardReference, host.Plc.ManualSymbolicAddress, host.Plc.SymbolicAddress, host.Plc.ParentlessRepresentations));
+        var symbol = new SymbolSearchItem { FunctionCategory = "PLCTerminal", PlcInputDefinition = "1/4" };
+        SymbolSearchItem copy = JsonConvert.DeserializeObject<SymbolSearchItem>(System.Text.Json.JsonSerializer.Serialize(symbol, JsonSerializerOptions.Web))!;
+        Assert.Equal(("PLCTerminal", "1/4"), (copy.FunctionCategory, copy.PlcInputDefinition));
+    }
+
+    [Fact]
     public void Terminal_RoundTripsAcrossBothPipeSerializers()
     {
         var args = new DevicePlaceArgs { TerminalStrip = "-X6", TerminalNumber = "1", TerminalStripText = "Control box", SymbolVariant = 2 };

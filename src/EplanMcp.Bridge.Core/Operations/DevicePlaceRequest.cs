@@ -52,10 +52,11 @@ internal sealed class DevicePlaceRequest
     internal string[] Existing { get; }
 
     /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the part.</summary>
-    public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer)
+    public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
         bool box = args.LocationBox is not null;
         bool terminal = args.TerminalStrip is not null;
+        DevicePlcPlan.Check(args);
         DeviceTerminalPlan.Check(args);
         DeviceSymbolPlan.CheckBox(args);
         if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null))
@@ -96,9 +97,23 @@ internal sealed class DevicePlaceRequest
         string full = box ? args.LocationBox! : tag[0] == '-' ? DeviceStructureOf(page.Name) + tag : tag;
         if (terminal)
         { full += ":" + args.TerminalNumber; }
-        string[] existing = terminal ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
+        if (args.PlcConnectionPoint is not null)
+        { full += ":" + args.PlcConnectionPoint; }
+        string[] existing = terminal || args.PlcConnectionPoint is not null ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
         if (terminal && existing.FirstOrDefault(n => SameName(full.Substring(0, full.LastIndexOf(':')), n, ignoreCase: true)) is { } canonical)
         { full = canonical + ":" + args.TerminalNumber; }
+        if (args.PlcConnectionPoint is { } point && existing.FirstOrDefault(n => SameName(full.Substring(0, full.Length - point.Length - 1), n, ignoreCase: true)) is { } card)
+        { full = card + ":" + point; }
+        if (args.PlcConnectionPoint is { } designation)
+        {
+            string parent = full.Substring(0, full.Length - designation.Length - 1);
+            PlcRecord? state = plc?.ReadPlc(project.Path, parent, "??_??");
+            if (state?.Plc is null)
+            { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
+            if (state.Channels.Any(c => string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+            { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
+            existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
+        }
         string[] taken =
         [
             .. (box ? page.LocationBoxStructures : names.FunctionNames(project.Path))

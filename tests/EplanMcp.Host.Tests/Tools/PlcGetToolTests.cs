@@ -48,6 +48,10 @@ public sealed class PlcGetToolTests
             Name = "=K1+A2-KE1:2.3",
             Page = "=K1+A2&EFS1/3",
             Main = true,
+            Owner = "=K1+A2-KE1",
+            ManualSymbolicAddress = "Start",
+            CardReference = "/1.2",
+            ParentlessRepresentations = 1,
             Address = "I0.3",
             SymbolicAddress = "Start",
             DataType = "BOOL",
@@ -66,6 +70,8 @@ public sealed class PlcGetToolTests
         Assert.Equal(["PXC.2703994"], plc.GetProperty("parts").EnumerateArray().Select(p => p.GetString()));
         JsonElement first = data.GetProperty("channels")[0];
         JsonElement second = data.GetProperty("channels")[1];
+        Assert.Equal(("=K1+A2-KE1", "Start", "/1.2", 1), (first.GetProperty("owner").GetString(), first.GetProperty("manualSymbolicAddress").GetString(), first.GetProperty("cardReference").GetString(), first.GetProperty("parentlessRepresentations").GetInt32()));
+        Assert.Equal(JsonValueKind.Null, second.GetProperty("cardReference").ValueKind);
         Assert.Equal(("=K1+A2&EFS1/3", true), (first.GetProperty("page").GetString(), first.GetProperty("main").GetBoolean()));
         Assert.Equal(("=K1+A2-KE1:2.3", "Q0.3", JsonValueKind.Null, false), (second.GetProperty("name").GetString(), second.GetProperty("address").GetString(), second.GetProperty("page").ValueKind, second.GetProperty("main").GetBoolean()));
         Assert.Equal(("I0.3", "Start", "BOOL", "Start button"), (first.GetProperty("address").GetString(), first.GetProperty("symbolicAddress").GetString(), first.GetProperty("dataType").GetString(), first.GetProperty("text").GetString()));

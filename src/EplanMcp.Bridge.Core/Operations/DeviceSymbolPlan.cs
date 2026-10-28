@@ -20,7 +20,7 @@ internal static class DeviceSymbolPlan
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
         if (args.DisplayProperties is { } displays && (displays.Count > 8 || displays.Any(p => p is null
-            || p.PropertyId is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027)
+            || p.PropertyId is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301)
             || !Finite(p.OffsetXmm) || !Finite(p.OffsetYmm) || !Finite(args.X + p.OffsetXmm) || !Finite(args.Y + p.OffsetYmm))))
         { throw WriteArguments.Invalid(["/display_properties: require at most 8 allowed property IDs and finite relative offsets."]); }
         if (args.ConnectionDesignations?.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl)) == true)
@@ -35,9 +35,19 @@ internal static class DeviceSymbolPlan
         if (found.Count > 1)
         { throw ProjectResolver.Ambiguous("symbol", name!, found.Select(s => s.Library + "/" + s.Name), "Select the exact library and symbol spelling from eplan_symbol_search."); }
         SymbolSearchItem symbol = found[0];
+        if (args.PlcConnectionPoint is { } point)
+        {
+            if (symbol.PlcInputDefinition is null || symbol.FunctionCategory != "PLCTerminal")
+            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select a PLC graphical variant with a discovered digital-input definition."); }
+            args.ConnectionDesignations ??= [point];
+            if (!args.ConnectionDesignations.SequenceEqual(new[] { point }, StringComparer.Ordinal))
+            { throw WriteArguments.Invalid(["/connection_designations: a digital input requires its single plc_connection_point designation (at most 64 characters)."]); }
+        }
+        else if (symbol.FunctionCategory == "PLCTerminal")
+        { throw WriteArguments.Invalid(["/plc_connection_point: PLC points require an existing card and explicit address, symbolic address and text."]); }
         if (symbol.ConnectionPoints.Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v))))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The symbol has invalid pin geometry; select another symbol with eplan_symbol_search."); }
-        if (box ? symbol.Type != "LocationBox" : terminal ? symbol.Kind != "terminal" || symbol.Type != "Function" : symbol.Kind != "function" || symbol.Type != "Function")
+        if (box ? symbol.Type != "LocationBox" : terminal ? symbol.Kind != "terminal" || symbol.Type != "Function" : symbol.Kind == "plc_box" ? symbol.Library != "SPECIAL" || symbol.Name != "PLCC" : symbol.Kind != "function" || symbol.Type != "Function")
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select an ordinary function, verified SPECIAL/SC location box or IEC_symbol/X terminal.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : terminal ? "device.place.terminal" : "device.place.symbol.function" }); }
         if (args.ConnectionDesignations is { } pins && pins.Length != symbol.ConnectionPoints.Count)
         { throw WriteArguments.Invalid(["/connection_designations: supply exactly one designation per symbol connection point."]); }
@@ -60,6 +70,7 @@ internal static class DeviceSymbolPlan
         for (int i = 0; i < (args.ConnectionDesignations?.Length ?? 0); i++)
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20022[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDesignations![i] }); }
         TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
+        DevicePlcPlan.Describe(args, request, changes);
         string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
         if (box)

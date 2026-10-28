@@ -38,6 +38,15 @@ public sealed class DevicePlaceArgs
     /// <summary>Optional language-independent function text, only when creating the parent strip.</summary>
     public string? TerminalStripText { get; set; }
 
+    /// <summary>PLC connection point suffix; Tag identifies its existing PLC card. Symbol source only.</summary>
+    public string? PlcConnectionPoint { get; set; }
+    /// <summary>PLC I/O address (20400), required with PlcConnectionPoint.</summary>
+    public string? PlcAddress { get; set; }
+    /// <summary>Manual symbolic address (20402), required with PlcConnectionPoint.</summary>
+    public string? PlcSymbolicAddress { get; set; }
+    /// <summary>Language-independent PLC function text (20011), required with PlcConnectionPoint.</summary>
+    public string? PlcText { get; set; }
+
     /// <summary>The insertion point's x, in millimetres from the page's left edge.</summary>
     public double X { get; set; }
 

@@ -176,7 +176,8 @@ public static class ConnectionCreatePlanner
             double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
             Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
             Require(!scene.Page.Placements.Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
-            resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(symbol), ["bounds"] = new JArray(outline) });
+            // Functional discovery metadata does not widen the existing routing-symbol contract.
+            resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(new { symbol.Library, symbol.Name, symbol.Variant, symbol.Type, symbol.Kind, symbol.ConnectionPoints }), ["bounds"] = new JArray(outline) });
             if (interruptions.TryGetValue(Key(node.Point), out JObject? interruption))
             { resolved.Last!["interruption"] = interruption; }
         }

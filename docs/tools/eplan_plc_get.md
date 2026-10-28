@@ -1,5 +1,7 @@
 # 工具规格：`eplan_plc_get`
 
+T7d 兼容读回字段：每通道增加 `owner`（原生 PLC 父名）、`manualSymbolicAddress`（20402）、`cardReference`（只读 20301 概览引用，未建立时为 null）及 `parentlessRepresentations`（同名且无 PLC 父对象的 PLCTerminal 数量，A55）。通道成员仍来自 `PLC.PLCTerminals`，不按名称去重；辅助表达数量单列，不合并为成员，也不填造引用。
+
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_plc_get` |

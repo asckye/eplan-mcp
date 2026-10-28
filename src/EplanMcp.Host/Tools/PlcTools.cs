@@ -92,6 +92,10 @@ internal sealed class PlcTools
                 .. data.Channels.Select(c => new PlcGetResult.ChannelEntry
                 {
                     Name = ResultShaper.CleanText(c.Name),
+                    ParentlessRepresentations = c.ParentlessRepresentations,
+                    Owner = ResultShaper.CleanText(c.Owner),
+                    CardReference = ResultShaper.CleanText(c.CardReference),
+                    ManualSymbolicAddress = ResultShaper.CleanText(c.ManualSymbolicAddress),
                     Page = ResultShaper.CleanText(c.Page),
                     Main = c.Main,
                     Address = ResultShaper.CleanText(c.Address),

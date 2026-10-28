@@ -43,7 +43,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = sent =>
         {
             try
-            { return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store, (_, _, symbol) => { _placement.Resolved = symbol; return _placement; }).Execute(sent!)!; }
+            { return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store, (_, _, symbol) => { _placement.Resolved = symbol; return _placement; }, _store).Execute(sent!)!; }
             catch (BridgeErrorException ex) { throw new BridgeCallException(ex.Error); }
         };
     }
@@ -277,7 +277,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, "-K2", dry_run: dryRun, library: library, symbol: symbol, symbol_variant: variant,
             display_properties: [JsonSerializer.SerializeToElement(new { property_id = 20214, offset_x_mm = 4, offset_y_mm = -4 })], connection_designations: designations ?? ["A1", "A2"], cancellationToken: TestContext.Current.CancellationToken);
 
-    private WritePlan Plan(DevicePlaceArgs args) => (WritePlan)new DevicePlacePlanOperation(_store, _store, _store, _store, _store, _store).Execute(args)!;
+    private WritePlan Plan(DevicePlaceArgs args) => (WritePlan)new DevicePlacePlanOperation(_store, _store, _store, _store, _store, _store, _store).Execute(args)!;
     private static DevicePlaceArgs Args() => new() { Project = "Line1", Page = Page, Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0, X = 80, Y = 160, Tag = "-K2" };
 
     private sealed class Placement(Store store) : IDeviceSymbolPlacement
@@ -311,6 +311,8 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                     if (FailAt == stage)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol readback differs; nothing was committed."); }
                 }
+                if (FailAt == "Cancel")
+                { throw new BridgeErrorException(ErrorReason.Cancelled, "Cancelled during symbol readback."); }
                 if (args.LocationBox is { } structure)
                 {
                     var box = new LocationBoxData { Structure = structure, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] };
@@ -351,7 +353,22 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                         }
                     };
                 }
-                return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = "Coil" };
+                if (args.PlcConnectionPoint is not null)
+                {
+                    var channel = new PlcChannel
+                    {
+                        Name = tag,
+                        Page = args.Page,
+                        Owner = FailAt == "PlcOwner" ? "-WRONG" : null,
+                        Address = FailAt == "PlcAddress" ? "I9.9" : args.PlcAddress,
+                        ManualSymbolicAddress = FailAt == "PlcSymbol" ? "WRONG" : args.PlcSymbolicAddress,
+                        Text = FailAt == "PlcText" ? "WRONG" : args.PlcText,
+                        CardReference = null
+                    };
+                    store.Channels.Add(channel);
+                    return new() { Tag = tag, Page = args.Page, Functions = 1, Category = "PLCTerminal", Plc = channel };
+                }
+                return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = Resolved?.FunctionCategory ?? "Coil" };
             }
             finally { Calls.Add("ReleaseLists"); }
         }
@@ -365,6 +382,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                 owner.Calls.Add("Abort");
                 store.Names.Clear();
                 store.Names.AddRange(names);
+                store.Channels.RemoveAll(c => !names.Contains(c.Name, StringComparer.Ordinal));
                 store.Page.Objects = [.. objects];
                 store.Page.LocationBoxStructures = [.. boxes];
             }
@@ -372,11 +390,14 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         }
     }
 
-    private sealed class Store : IProjectCatalog, IPageReader, IDeviceRenamer, IPartsDatabase, IDevicePlacer, ISymbolReader
+    private sealed class Store : IProjectCatalog, IPageReader, IDeviceRenamer, IPartsDatabase, IDevicePlacer, ISymbolReader, IPlcReader
     {
         public OpenProject Project { get; } = new() { Name = "Line1" };
         public MacroTargetPage Page { get; } = new() { Name = DeviceSymbolPlanTests.Page, Type = "Circuit", Width = 420, Height = 297, Objects = ["page:1"] };
         public List<string> Names { get; } = [];
+        public List<PlcChannel> Channels { get; } = [];
+        public PlcRecord? ReadPlc(string projectPath, string tag, string? language) => Names.Contains(tag, StringComparer.OrdinalIgnoreCase)
+            ? new() { Category = "PLCBox", Plc = new() { Tag = tag, Page = Page.Name }, Channels = [.. Channels] } : null;
         public List<SymbolSearchItem> Symbols { get; } = [new() { Library = "IEC_symbol", Name = "K", Variant = 0, Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0], Direction = "Up" }, new() { Location = [0, -4], Direction = "Down" }] }];
         public SymbolSearchArgs? Search { get; private set; }
         public int PartReads { get; private set; }

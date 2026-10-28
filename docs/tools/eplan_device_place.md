@@ -23,7 +23,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `part` | string | 来源三选一 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中并且有宏。部件号先精确匹配，没有时再不区分大小写匹配 |
 | `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
 | `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 与 `part,variant` 互斥；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；首批限普通 `Function`，专用元素留后续任务 |
-| `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
+| `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
 | `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
 | `corner_x`、`corner_y` | number | 位置框必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；其余来源禁止 |
@@ -120,3 +120,13 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - 沿 `FunctionTransactionScope` 一次提交；事务内核对实际排名、主功能、20030、原生 owner 对象及名称、位置、页和库变体。父关系为空视为提交前尚未建立（S43 relationPendingCommit，T7c 实测），读到非目标排才回滚，提交后用 `eplan_terminal_strip_get` 核实；不推测已归属；属性列表只取一次并在 Abort 前释放，Abort 后不碰新对象。成功一步撤销；不生成连接（A52/A55）。允许 LockAllObjects，负责人已确认无多用户编辑。
 - 新增 `terminal={strip,number,owner,position:[x,y],sortCode,stripCreated}`；sortCode 原样返回 EPLAN 的 20809（空为 null），不写入或重编号；dry-run/recovered 的 owner/sortCode 为 null。`functions` 为本次新增功能数（含新父排），`unplaced=0`；段连接需后续独立生成，不能把创建成功当作连接分段已验证。
 - Small 覆盖互斥/有限数/复合键与原生读回失败；Medium 假对象覆盖预览、复用、审批、stale、读回不符/取消后回滚及无空步。LargeWrite 新页创建 1..3、读回排成员/顺序、重复拒绝与逐调用一步撤销；另验独立生成后的连接分段。本次只编写，未运行。
+
+### T7d：PLC 数字输入与常开/常闭触点
+
+- 库符号来源可显式创建 SPECIAL/PLCC 主 PLC 盒；连接点使用已有原生主 PLC 卡的 `tag`（如 `-KF1`），另给 `plc_connection_point`（如 `X10:2`、`DI a.0`）、`plc_address`（如 `I0.0`）、`plc_symbolic_address` 和 `plc_text`。四字段同时必填、非空且无控制字符；连接点最多 64 字符且不含前导冒号，其余最多 256 字符。仅支持发现到真实 DI 功能定义、且单引脚的 PLC 图形变体，不能把普通功能当作 PLC 点；不隐式创建父卡。
+- 原生点名为 `<卡>:<连接点>`；按 `SameName` 容忍项目省略前导高层代号，保留已有拼写，父关系按名称识别。全项目复合键及该卡已有 I/O 地址忽略大小写拒绝重复；普通器件不能冒充父卡。指纹额外覆盖父卡、全部通道及其属性，批准后变化即拒绝。
+- `connection_designations` 省略时取单项连接点代号；显式传入时必须与它一致。地址写 20400、手工符号地址写 20402、功能文本写语言无关 20011；计算符号地址 20403 和卡页引用 20301 只读。显示表通过原生属性放置 20400/20403/20011/20301 的相对偏移构造，不使用静态文字，也不填造计算引用；20301 为概览交叉引用，缺少相应表达时可以为空。
+- `Terminal.Create(PLC,variant)`、`PlaceAt`、真实 DI 定义及上述属性沿一个 `FunctionTransactionScope` 写入。事务内核对类别/定义、名称/页/位置、引脚数量、索引 20022 与 `Pin.Name`、输入属性及全部显示布局；读到非空父关系时须与目标卡同名。不符/异常/取消均先释放缓存列表再 Abort，不 CloseUndo；绝不在 Abort 后碰新对象。成功一次 Commit/CloseUndo，一步撤销。
+- 输出 `plc` 保留实际 `name/page/owner/address/manualSymbolicAddress/symbolicAddress/text/cardReference`。父关系、计算符号地址和 20301 可能提交后才建立，事务内返回 null 不代表已验证；提交后必须用 `eplan_plc_get` 复核。A55 每点另生同名无父 PLCTerminal，事务内 finder 不能完整枚举，因此此分支 `functions/unplaced` 返回 null；读工具每通道的 `parentlessRepresentations` 按同名且无 PLC 父关系计数，不按名称去重，不算入卡的通道成员。
+- NO/NC 复用普通库符号来源，按发现的 NoContact/NcContact 类别选择实际符号；显式 `connection_designations=["13","14"]` / `["11","12"]`，写一基索引 20022 并核对 `Pin.Name`，不写汇总 20038，不比较内部 `Pin.Designation`。
+- Small 覆盖严格参数、有限偏移、复合键及序列化；Medium 假对象覆盖预览、审批拒绝/stale、字段或父关系不符、失败/取消回滚无空步。LargeWrite 新页显式创建卡、两个输入和 NO/NC，提交后用 plc_get/device_get 核对属性、父关系、辅助表达数量及原生显示，逐调用一次撤销恢复；本次仅编写，未运行。无新工具或 Bridge 操作。
