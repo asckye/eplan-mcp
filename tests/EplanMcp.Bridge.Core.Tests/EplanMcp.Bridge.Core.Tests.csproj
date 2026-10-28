@@ -9,5 +9,6 @@
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <!-- Bridge.Core compiles against Newtonsoft.Json without its runtime asset (EPLAN supplies it); tests must bring it. -->
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,8 @@
 
 M8 T4a：[`eplan_placement_create`](../tools/eplan_placement_create.md) 已有文本/直线/矩形的契约和只读规划（A54），尚未注册工具或执行操作；文字测量适配、混合创建及 Large 验收留 T4b/T4c，不计作可用写能力。
 
+M8 T3a：`eplan_connection_create` 的[规格与单页路径/连接符号预测](../tools/eplan_connection_create.md)已实现为未注册的 dry-run 规划器；尚无 MCP/Bridge 入口或执行能力。图形与生成后逻辑端点分别预测；A52 要求单独提交生成，原子执行门槛留 T3b。
+
 ---
 
 ## 1. 官方 API 的规模（EPLAN 2026.0.3，2026-10-13 对本机程序集反射统计）

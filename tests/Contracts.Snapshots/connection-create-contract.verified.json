@@ -1,0 +1,727 @@
+﻿{
+  "name": "eplan_connection_create",
+  "title": "Create connection symbols and explicit wire paths",
+  "status": "proposed_unregistered_dry_run_only",
+  "profile": "full",
+  "description": "Plan 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Logical connections require a separately committed eplan_connection_generate. Execution is unavailable until atomic placement and generation are supported. Future writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+  },
+  "inputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project": {
+        "type": "string",
+        "minLength": 1
+      },
+      "page": {
+        "type": "string",
+        "minLength": 1
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "wire"
+                },
+                "from": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "locator": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "project": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "page": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "oid": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "project",
+                        "page",
+                        "type",
+                        "oid",
+                        "digest"
+                      ]
+                    },
+                    "pin_index": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "locator",
+                    "pin_index"
+                  ]
+                },
+                "to": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "locator": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "project": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "page": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "oid": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "project",
+                        "page",
+                        "type",
+                        "oid",
+                        "digest"
+                      ]
+                    },
+                    "pin_index": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "locator",
+                    "pin_index"
+                  ]
+                },
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "minItems": 2,
+                  "maxItems": 32
+                }
+              },
+              "required": [
+                "kind",
+                "from",
+                "to",
+                "points"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "corner"
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "directions": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Up",
+                      "Down",
+                      "Left",
+                      "Right"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "position",
+                "directions"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "t_node"
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "directions": {
+                  "type": "array",
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Up",
+                      "Down",
+                      "Left",
+                      "Right"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "position",
+                "directions"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "potential_point"
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "directions": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Up",
+                      "Down",
+                      "Left",
+                      "Right"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "position",
+                "directions"
+              ]
+            }
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 50
+      },
+      "dry_run": {
+        "type": "boolean",
+        "default": false
+      },
+      "snap_to_grid": {
+        "type": "boolean",
+        "default": true
+      },
+      "response_format": {
+        "type": "string",
+        "enum": [
+          "concise",
+          "detailed"
+        ],
+        "default": "concise"
+      }
+    },
+    "required": [
+      "project",
+      "page",
+      "items"
+    ],
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
+  },
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project": {
+        "type": "string",
+        "minLength": 1
+      },
+      "page": {
+        "type": "string",
+        "minLength": 1
+      },
+      "execution": {
+        "type": "string",
+        "const": "not_started"
+      },
+      "dryRun": {
+        "const": true
+      },
+      "coordinates": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requested": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "actual": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "pointer",
+            "requested",
+            "actual"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 1600
+      },
+      "symbols": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "symbol": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "library": {
+                  "type": "string",
+                  "const": "SPECIAL"
+                },
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "CO",
+                    "TLRO",
+                    "TLRU",
+                    "TOUL",
+                    "TOUR",
+                    "PCP"
+                  ]
+                },
+                "variant": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "connectionPoints": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "location": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": -10000,
+                          "maximum": 10000
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                      },
+                      "direction": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "location",
+                      "direction"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "library",
+                "name",
+                "variant",
+                "type",
+                "kind",
+                "connectionPoints"
+              ]
+            },
+            "bounds": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "position",
+            "symbol",
+            "bounds"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 1500
+      },
+      "graphicalAutoconnect": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "minItems": 0,
+        "maxItems": 10000
+      },
+      "logicalAfterGenerate": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pins": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "maxItems": 10000
+            },
+            "potentialStartIsNull": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pins",
+            "potentialStartIsNull"
+          ]
+        },
+        "minItems": 0,
+        "maxItems": 10000
+      },
+      "gridSize": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "pageSize": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "coverage": {
+        "type": "string",
+        "const": "complete_page_predicted_endpoints"
+      },
+      "logicalDuringPlacement": {
+        "const": 0
+      },
+      "generation": {
+        "type": "string",
+        "minLength": 1
+      },
+      "undoSteps": {
+        "const": 2
+      },
+      "fingerprint": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "required": [
+      "project",
+      "page",
+      "execution",
+      "dryRun",
+      "coordinates",
+      "symbols",
+      "graphicalAutoconnect",
+      "logicalAfterGenerate",
+      "gridSize",
+      "pageSize",
+      "coverage",
+      "logicalDuringPlacement",
+      "generation",
+      "undoSteps",
+      "fingerprint"
+    ]
+  },
+  "example": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "wire",
+        "from": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 1,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "to": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 2,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "points": [
+          [
+            8.0,
+            8.0
+          ],
+          [
+            24.0,
+            8.0
+          ],
+          [
+            24.0,
+            24.0
+          ]
+        ]
+      }
+    ]
+  },
+  "dryRunExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/points/0",
+        "requested": [
+          8.0,
+          8.0
+        ],
+        "actual": [
+          8.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/1",
+        "requested": [
+          24.0,
+          8.0
+        ],
+        "actual": [
+          24.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/2",
+        "requested": [
+          24.0,
+          24.0
+        ],
+        "actual": [
+          24.0,
+          24.0
+        ]
+      }
+    ],
+    "symbols": [
+      {
+        "position": [
+          24.0,
+          8.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "CO",
+          "variant": 0,
+          "type": "Routing",
+          "kind": "routing",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Left"
+            },
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          23.0,
+          7.0,
+          25.0,
+          9.0
+        ]
+      }
+    ],
+    "graphicalAutoconnect": [
+      [
+        [
+          8.0,
+          8.0
+        ],
+        [
+          24.0,
+          8.0
+        ]
+      ],
+      [
+        [
+          24.0,
+          8.0
+        ],
+        [
+          24.0,
+          24.0
+        ]
+      ]
+    ],
+    "logicalAfterGenerate": [
+      {
+        "pins": [
+          "17/1/0",
+          "17/2/0"
+        ],
+        "potentialStartIsNull": false
+      }
+    ],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "complete_page_predicted_endpoints",
+    "logicalDuringPlacement": 0,
+    "generation": "Separate committed eplan_connection_generate; placement and generation each have their own undo step. Atomic execution remains unavailable.",
+    "undoSteps": 2,
+    "fingerprint": "11b3bfc291213be5456ccef5d3d3ec63b10efb6153a79b374d2d03633a7d75d9"
+  }
+}
