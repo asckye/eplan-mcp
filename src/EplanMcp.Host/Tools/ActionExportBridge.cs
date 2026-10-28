@@ -9,6 +9,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>One call's typed adaptation to ExportRunner's existing contract; no shared export hooks or state.</summary>
 internal sealed class ActionExportBridge(IBridgeClient bridge, ActionRunArgs args, HostDataLocations locations) : IBridgeClient
 {
+    public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => bridge.GetStatusAsync(refresh, cancellationToken);
     public WritePlan? Plan { get; private set; }
     public ActionRunData? Data { get; private set; }
     public JsonArray Files { get; } = [];

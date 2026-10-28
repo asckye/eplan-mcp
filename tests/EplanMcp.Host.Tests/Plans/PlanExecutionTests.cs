@@ -483,6 +483,7 @@ public sealed partial class PlanExecutionTests : IAsyncDisposable
     private sealed class WriteTransport(IBridgeClient reads, BridgeClient writes) : IBridgeClient
     {
         public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => reads.GetStatusAsync(cancellationToken);
+        public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => reads.GetStatusAsync(refresh, cancellationToken);
         public Task<HandshakeResult> SelectAsync(int processId, CancellationToken cancellationToken) => reads.SelectAsync(processId, cancellationToken);
         public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken) => reads.InvokeAsync<TArgs, TData>(operation, args, cancellationToken);
         public Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, TimeSpan timeout, IProgress<ProgressNotification>? progress, CancellationToken cancellationToken) => reads.InvokeAsync<TArgs, TData>(operation, args, timeout, progress, cancellationToken);

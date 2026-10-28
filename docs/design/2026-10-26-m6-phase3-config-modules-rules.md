@@ -147,6 +147,10 @@ acceptance.checks 支持 object/property/port/unchanged_outside，逐项要求 s
 
 M0a 实现 `ReferenceCopyService` 与未注册的 `ReferencePrepareOperation/ReferenceCloseOperation`；本次不接入 GapOnly 或工具。仅接纳 packSources 中本地、无链接的 referenced project/project_backup，源项目必须关闭；Host 前后按包资源摘要复核，Bridge 只用 Snapshot/原生 restore 写入全新空 scratch 目录。关闭凭据绑定副本路径及打开时的数据库身份，重开或伪造句柄拒绝关闭，记录打开前后当前项目而不依赖其选择。Large 测试已编写，本次不运行 EPLAN；异常残留副本保留供排查，不自动重试或覆盖。
 
+M0b 增加只读 `IReferenceExtractor` 接缝，M3 可替换 `GapOnlyReferenceExtractor`；输入限定本服务持有且仍只读打开的参考副本、1–50 个显式页名，返回分离的事实与缺口。缺提取器、操作或已确认的 API Extension 授权时，仅返回 Gap 和带 `missing`/操作提示的 `CAPABILITY_MISSING`，不生成事实。接缝不写副本，提取前及完成、失败或取消后复核源资源摘要；不注册工具或 Bridge 操作，导入仍保留原 GapOnly 路径。
+
+提取前强制刷新既有握手，避免复用 Host 的连接缓存；Bridge 每次握手通过有时限的主线程调度调用 `License.HasOption(APIExtension)`，不调用 `LockOption`，不消费或持有授权（A2/A37）。核验未知或调度失败时按缺能力处理；后续 M2 仍须在 inspect 内核验实际调用能力。Small/Medium 覆盖可替换读取器、缺授权/操作、只读归属及摘要变化；Large 已补副本只读提取、源摘要和副本设计文件不变，本次仅编写、未运行。
+
 “3 个回路扩到 8 个”先保留三个原实例的测得值，差异仅作为参数候选；新增五个实例的参数、标识和页/坐标须显式给出，不从前三个样本宣布公司规则。S36 未通过前允许查看提取候选，不注册 materialize 或生成步骤；不能以 `device.update`（只改标识）冒充通用属性写入。
 
 ### 4.4 规则、事实与确认

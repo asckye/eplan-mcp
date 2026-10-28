@@ -77,8 +77,9 @@ internal static class EplanEnvironment
     }
 
     /// <summary><c>HasOption</c> only checks; <c>LockOption</c> would hold a licence until EPLAN exits (api-notes A2).</summary>
-    private static bool? ApiExtension(IBridgeLog log)
+    public static bool? ApiExtension(IBridgeLog log)
     {
+        MainThread.Assert();
         try
         {
             using var license = new License();

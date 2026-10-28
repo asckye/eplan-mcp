@@ -62,6 +62,7 @@ internal static class BridgeHost
         {
             BridgeVersion = Version,
             Eplan = eplan,
+            ApiExtensionLicence = () => dispatcher.Run(() => EplanEnvironment.ApiExtension(log), _startTimeout).Value as bool?,
             BuildTarget = typeof(BridgeHost).Assembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName,
             AddinPath = addinPath,
         };

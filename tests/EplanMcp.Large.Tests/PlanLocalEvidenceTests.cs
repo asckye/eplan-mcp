@@ -204,6 +204,7 @@ public sealed partial class PlanLocalEvidenceTests(LiveEplan eplan)
         public List<string[]> Snapshots { get; } = [];
         public int StepWrites { get; private set; }
         public Func<Task>? BetweenSteps { get; set; }
+        public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => inner.GetStatusAsync(refresh, cancellationToken);
 
         public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
         {

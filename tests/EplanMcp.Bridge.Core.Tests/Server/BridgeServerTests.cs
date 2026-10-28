@@ -20,6 +20,7 @@ public sealed class BridgeServerTests : IDisposable
     private readonly ManualResetEventSlim _writeStarted = new();
     private readonly FakeTransactions _transactions = new();
     private readonly BridgeServer _server;
+    private readonly BridgeServerOptions _options = new() { BridgeVersion = "t", Eplan = new EplanInstanceInfo { ProcessId = 1 }, MaxConnections = 2, ProgressInterval = TimeSpan.Zero };
 
     public BridgeServerTests()
     {
@@ -32,6 +33,26 @@ public sealed class BridgeServerTests : IDisposable
         _server.Dispose();
         _progressSeen.Dispose();
         _writeStarted.Dispose();
+    }
+
+    [Fact]
+    public async Task Handshake_ChecksLicenceOnEveryRequest_AndUnknownNeverFallsBackToStartupTrue()
+    {
+        bool? licence = true;
+        int checks = 0;
+        _options.Eplan.ApiExtensionLicence = true;
+        _options.ApiExtensionLicence = () => { checks++; return licence; };
+        await using NamedPipeClientStream client = await ConnectAsync();
+        JObject first = await CallAsync(client, Handshake);
+        licence = false;
+        JObject second = await CallAsync(client, Handshake);
+        licence = null;
+        JObject third = await CallAsync(client, Handshake);
+        Assert.True((bool?)first["result"]!["eplan"]!["apiExtensionLicence"]);
+        Assert.False((bool?)second["result"]!["eplan"]!["apiExtensionLicence"]);
+        Assert.Null((bool?)third["result"]!["eplan"]!["apiExtensionLicence"]);
+        Assert.Equal(3, checks);
+        Assert.True(_options.Eplan.ApiExtensionLicence);
     }
 
     [Fact]
@@ -208,7 +229,7 @@ public sealed class BridgeServerTests : IDisposable
     private BridgeServer NewServer(Func<string, NamedPipeServerStream> createPipe) => new(
         "EplanMcp.Test." + Guid.NewGuid().ToString("N"),
         createPipe,
-        new BridgeServerOptions { BridgeVersion = "t", Eplan = new EplanInstanceInfo { ProcessId = 1 }, MaxConnections = 2, ProgressInterval = TimeSpan.Zero },
+        _options,
         new OperationRouter(
             [
                 new ProjectListOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p" })),

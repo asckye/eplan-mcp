@@ -8,6 +8,9 @@ internal interface IBridgeClient
     /// <summary>Discovers Bridges and handshakes with the one in use. Never throws for "not connected" states.</summary>
     public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken);
 
+    /// <summary>With refresh, obtains a new handshake instead of trusting the cached licence and operations.</summary>
+    public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken);
+
     /// <summary>
     /// Makes the EPLAN running as <paramref name="processId"/> the one every later call uses, once a handshake with it
     /// succeeds; until then the previous choice stays. Throws <see cref="BridgeCallException"/>: INVALID_ARGUMENT when

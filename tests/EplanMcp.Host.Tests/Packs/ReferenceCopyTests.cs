@@ -68,6 +68,164 @@ public sealed class ReferenceCopyTests : IDisposable
     }
 
     [Fact]
+    public async Task Extract_GapOnlyCanBeReplaced_ReaderSeesOnlyThePreparedCopyAndExplicitPages()
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        var pages = new[] { "=AP+A1/1" };
+        string copyHash = (await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(copy.Path), Token)).Sha256;
+        ReferenceExtractionResult gap = await _service.ExtractAsync(copy.Handle, pages, new GapOnlyReferenceExtractor(), Token);
+        Assert.Empty(gap.Facts);
+        Assert.Equal(ErrorReason.CapabilityMissing, gap.Problem!.Reason);
+        Assert.Equal("capability_missing", Assert.Single(gap.Gaps).Code);
+        Assert.DoesNotContain(_bridge.Calls, c => c.Operation == OperationNames.ProjectSnapshot);
+
+        var reader = new Reader(_bridge);
+        _bridge.Handlers[OperationNames.ProjectSnapshot] = args =>
+        {
+            var sent = Assert.IsType<ProjectSnapshotArgs>(args);
+            Assert.Equal(copy.Path, sent.Project);
+            Assert.Equal(pages, sent.Pages);
+            Assert.False(sent.OpenReadOnly);
+            return new ProjectSnapshotData { Format = "fake_snapshot" };
+        };
+        ReferenceExtractionResult result = await _service.ExtractAsync(copy.Handle, pages, reader, Token);
+
+        Assert.Null(result.Problem);
+        Assert.Empty(result.Gaps);
+        Assert.Equal("fake_snapshot", Assert.Single(result.Facts).Value);
+        Assert.Equal(2, _bridge.StatusRefreshes);
+        Assert.Equal(copyHash, (await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(copy.Path), Token)).Sha256);
+        Assert.Empty(_bridge.Writes);
+        await _service.CloseAsync(copy.Handle, Token);
+    }
+
+    [Theory]
+    [InlineData("licence_missing", "licence:APIExtension")]
+    [InlineData("licence_unknown", "licence:APIExtension")]
+    [InlineData("disconnected", "licence:APIExtension")]
+    [InlineData("operation_missing", "op:project.snapshot")]
+    [InlineData("operations_unknown", "op:project.snapshot")]
+    public async Task Extract_CapabilityLostAfterPreparation_ReturnsGapAndHintWithoutCallingReader(string condition, string missing)
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        if (condition == "disconnected")
+        { _bridge.Status = new([], null, new BridgeError { Reason = ErrorReason.EplanNotConnected }); }
+        else
+        {
+            HandshakeResult handshake = _bridge.Status.Handshake!;
+            if (condition.StartsWith("licence", StringComparison.Ordinal))
+            { handshake.Eplan.ApiExtensionLicence = condition == "licence_missing" ? false : null; }
+            else
+            { handshake.Operations = condition == "operations_unknown" ? null : []; }
+        }
+        var reader = new Reader(_bridge);
+        int calls = _bridge.Calls.Count;
+
+        ReferenceExtractionResult result = await _service.ExtractAsync(copy.Handle, ["=AP+A1/1"], reader, Token);
+
+        Assert.Empty(result.Facts);
+        Assert.Equal(ErrorReason.CapabilityMissing, result.Problem!.Reason);
+        Assert.Equal(missing, result.Problem.Metadata!["missing"]);
+        Assert.NotEmpty(result.Problem.Message);
+        Assert.Equal("references/Sample.elk", Assert.Single(result.Gaps).Subject);
+        Assert.False(reader.Called);
+        Assert.Equal(calls, _bridge.Calls.Count);
+        Assert.Empty(_bridge.Writes);
+        await _service.CloseAsync(copy.Handle, Token);
+    }
+
+    [Theory]
+    [InlineData("forged")]
+    [InlineData("closed")]
+    [InlineData("other-service")]
+    [InlineData("writable")]
+    [InlineData("not-open")]
+    public async Task Extract_WithoutOwnedReadOnlyCopy_RefusesBeforeReading(string condition)
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        ReferenceCopyService caller = condition == "other-service" ? Service() : _service;
+        if (condition == "closed")
+        { await _service.CloseAsync(copy.Handle, Token); }
+        if (condition == "writable")
+        { _bridge.Projects[0].ReadOnly = false; }
+        if (condition == "not-open")
+        { _bridge.Projects.Clear(); }
+        var reader = new Reader(_bridge);
+        await Assert.ThrowsAsync<BridgeCallException>(() => caller.ExtractAsync(condition == "forged" ? "forged" : copy.Handle, ["=AP+A1/1"], reader, Token));
+        Assert.False(reader.Called);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Extract_SourceChangedBeforeOrDuringReading_RejectsEvidence(bool during)
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        var reader = new Reader(_bridge);
+        void Tamper() => File.AppendAllText(Source, "changed");
+        if (!during)
+        { Tamper(); }
+        _bridge.Handlers[OperationNames.ProjectSnapshot] = _ =>
+        {
+            Tamper();
+            return new ProjectSnapshotData();
+        };
+        BridgeCallException error = await Assert.ThrowsAsync<BridgeCallException>(() => _service.ExtractAsync(copy.Handle, ["=AP+A1/1"], reader, Token));
+        Assert.Equal(ErrorReason.PlanStale, error.Error.Reason);
+        Assert.Equal(during, reader.Called);
+    }
+
+    [Theory]
+    [InlineData("empty")]
+    [InlineData("duplicate")]
+    [InlineData("blank")]
+    [InlineData("limit")]
+    public async Task Extract_InvalidExplicitScope_RejectsWithPointer(string condition)
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        string[] pages = condition switch { "empty" => [], "duplicate" => ["1", "1"], "blank" => [" "], _ => Enumerable.Range(1, 51).Select(i => i.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray() };
+        BridgeCallException error = await Assert.ThrowsAsync<BridgeCallException>(() => _service.ExtractAsync(copy.Handle, pages, new Reader(_bridge), Token));
+        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
+        Assert.Equal("/scope/pages", error.Error.Metadata!["pointer"]);
+        Assert.Equal(0, _bridge.StatusRefreshes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Extract_ReaderFailsOrCancels_StillChecksSourceHash(bool cancel)
+    {
+        ReferenceCopyData copy = await ReadyAsync();
+        _bridge.Handlers[OperationNames.ProjectSnapshot] = _ =>
+        {
+            File.AppendAllText(Source, "changed");
+            throw cancel ? new OperationCanceledException() : new IOException("Reader failed.");
+        };
+        BridgeCallException error = await Assert.ThrowsAsync<BridgeCallException>(() => _service.ExtractAsync(copy.Handle, ["=AP+A1/1"], new Reader(_bridge), Token));
+        Assert.Equal(ErrorReason.PlanStale, error.Error.Reason);
+    }
+
+    private async Task<ReferenceCopyData> ReadyAsync()
+    {
+        ReferenceCopyData copy = await _service.PrepareAsync(await ResourceAsync(), Token);
+        _bridge.Projects.AddRange(_lifecycle.Projects);
+        _bridge.Status = new([], new HandshakeResult { Eplan = new() { ApiExtensionLicence = true }, Operations = [OperationNames.ProjectSnapshot] }, null);
+        return copy;
+    }
+
+    private sealed class Reader(FakeBridgeClient bridge) : IReferenceExtractor
+    {
+        public bool Called { get; private set; }
+        public IReadOnlyList<string> RequiredOperations => [OperationNames.ProjectSnapshot];
+        public async Task<ReferenceExtractionResult> ExtractAsync(string project, string resource, IReadOnlyList<string> pages, CancellationToken cancellationToken)
+        {
+            Called = true;
+            ProjectSnapshotData snapshot = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot, new() { Project = project, Pages = [.. pages] }, cancellationToken);
+            return new([new PackFact { Resource = resource, Name = "format", Value = snapshot.Format, Evidence = "fake Bridge snapshot" }], []);
+        }
+    }
+
+    [Fact]
     public async Task Close_OtherBridgeOwnerOrReopenedDatabase_Refuses()
     {
         ReferenceCopyData copy = await _service.PrepareAsync(await ResourceAsync(), Token);

@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Static facts about the EPLAN process hosting a Bridge, captured once when the Bridge starts.</summary>
+/// <summary>Facts about the EPLAN process hosting a Bridge; the API extension licence is checked on each handshake.</summary>
 public sealed class EplanInstanceInfo
 {
     /// <summary>Windows process ID of the process EPLAN runs in: EPLAN.exe, or the offline host.</summary>

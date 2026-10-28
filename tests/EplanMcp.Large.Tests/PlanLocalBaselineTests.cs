@@ -103,6 +103,7 @@ public sealed class PlanLocalBaselineTests(LiveEplan eplan)
         public List<ProjectSnapshotArgs> Snapshots { get; } = [];
 
         public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => inner.GetStatusAsync(cancellationToken);
+        public Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken) => inner.GetStatusAsync(refresh, cancellationToken);
 
         public async Task<TData> InvokeAsync<TArgs, TData>(string operation, TArgs args, CancellationToken cancellationToken)
         {

@@ -55,12 +55,19 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         _pollInterval = pollInterval ?? DefaultPollInterval;
     }
 
-    public async Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken)
+    public Task<BridgeStatus> GetStatusAsync(CancellationToken cancellationToken) => GetStatusAsync(false, cancellationToken);
+
+    public async Task<BridgeStatus> GetStatusAsync(bool refresh, CancellationToken cancellationToken)
     {
         IReadOnlyList<BridgeEndpoint> instances = Discover();
         try
         {
-            HandshakeResult handshake = await RunExclusiveAsync(token => EnsureConnectedAsync(instances, null, token), cancellationToken).ConfigureAwait(false);
+            HandshakeResult handshake = await RunExclusiveAsync(async token =>
+            {
+                if (refresh)
+                { await DropAsync().ConfigureAwait(false); }
+                return await EnsureConnectedAsync(instances, null, token).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
             return new BridgeStatus(instances, handshake, null, Selected);
         }
         catch (BridgeCallException ex)

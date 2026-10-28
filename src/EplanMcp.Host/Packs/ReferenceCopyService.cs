@@ -9,7 +9,7 @@ namespace EplanMcp.Host.Packs;
 /// <summary>Owns in-memory handles in a concurrent map; only verified referenced resources enter the Bridge seam.</summary>
 internal sealed class ReferenceCopyService(IBridgeClient bridge, string scratchRoot, IReadOnlyDictionary<string, string> roots)
 {
-    private readonly ConcurrentDictionary<string, PackResource> _owned = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, (PackResource Resource, string Path)> _owned = new(StringComparer.Ordinal);
     private readonly IReadOnlyDictionary<string, string> _roots = roots.ToDictionary(StringComparer.Ordinal);
 
     public static string Source(PackResource resource, IReadOnlyDictionary<string, string> roots) =>
@@ -29,7 +29,7 @@ internal sealed class ReferenceCopyService(IBridgeClient bridge, string scratchR
         Directory.CreateDirectory(folder);
         var args = new ReferencePrepareArgs { Source = source, Destination = Local(Path.Combine(folder, "Reference.elk")), ScratchRoot = Local(scratchRoot) };
         ReferenceCopyData copy = await bridge.InvokeAsync<ReferencePrepareArgs, ReferenceCopyData>(OperationNames.ReferencePrepare, args, cancellationToken).ConfigureAwait(false);
-        if (!_owned.TryAdd(copy.Handle, resource))
+        if (!_owned.TryAdd(copy.Handle, (resource, copy.Path)))
         { throw Invalid(); }
         try
         { await VerifyAsync(resource, cancellationToken).ConfigureAwait(false); }
@@ -42,12 +42,39 @@ internal sealed class ReferenceCopyService(IBridgeClient bridge, string scratchR
     }
     public async Task<ProjectListData> CloseAsync(string handle, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(handle) || !_owned.TryGetValue(handle, out PackResource? resource))
+        if (string.IsNullOrEmpty(handle) || !_owned.TryGetValue(handle, out var copy))
         { throw Invalid(); }
         ProjectListData result = await bridge.InvokeAsync<ReferenceCloseArgs, ProjectListData>(OperationNames.ReferenceClose, new() { Handle = handle }, cancellationToken).ConfigureAwait(false);
         _owned.TryRemove(handle, out _);
-        await VerifyAsync(resource, CancellationToken.None).ConfigureAwait(false);
+        await VerifyAsync(copy.Resource, CancellationToken.None).ConfigureAwait(false);
         return result;
+    }
+    public async Task<ReferenceExtractionResult> ExtractAsync(string handle, IReadOnlyList<string> pages, IReferenceExtractor extractor, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrEmpty(handle) || !_owned.TryGetValue(handle, out var copy))
+        { throw Invalid(); }
+        string[] selected = [.. pages];
+        if (selected.Length is < 1 or > 50 || selected.Any(string.IsNullOrWhiteSpace) || selected.Distinct(StringComparer.Ordinal).Count() != selected.Length)
+        { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.InvalidArgument, Message = "Select 1 to 50 distinct full page names before extraction.", Metadata = new() { ["pointer"] = "/scope/pages" } }); }
+        await VerifyAsync(copy.Resource, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            BridgeStatus status = await bridge.GetStatusAsync(true, cancellationToken).ConfigureAwait(false);
+            if (status.Handshake?.Eplan.ApiExtensionLicence != true)
+            { return ReferenceExtractionResult.Missing(copy.Resource.Path, "licence:APIExtension", "Connect to EPLAN with a confirmed API Extension licence, then retry extraction; an unknown licence is insufficient."); }
+            foreach (string operation in extractor.RequiredOperations)
+            {
+                if (!BridgeClient.Supports(status.Handshake, operation))
+                { return ReferenceExtractionResult.Missing(copy.Resource.Path, "op:" + operation, "The reference reader needs a Bridge capability; install the current add-in and restart EPLAN."); }
+            }
+            ProjectListData open = await bridge.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), cancellationToken).ConfigureAwait(false);
+            if (!open.Projects.Any(p => p.ReadOnly && Safety.ScratchPaths.Canonical(p.Path.EndsWith(".elk", StringComparison.OrdinalIgnoreCase) ? p.Path : p.Path + ".elk").Equals(copy.Path, StringComparison.OrdinalIgnoreCase)))
+            { throw Invalid(); }
+            return await extractor.ExtractAsync(copy.Path, copy.Resource.Path, selected, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        { await VerifyAsync(copy.Resource, CancellationToken.None).ConfigureAwait(false); }
     }
     private async Task VerifyAsync(PackResource resource, CancellationToken cancellationToken)
     {
@@ -59,5 +86,5 @@ internal sealed class ReferenceCopyService(IBridgeClient bridge, string scratchR
         && (path.Length == 3 || PackPath.Problem(path[3..].Replace('\\', '/').TrimEnd('/')) is null);
     private static string Local(string path) => Plain(path)
         ? Safety.ScratchPaths.Canonical(new PlanPaths(Path.GetPathRoot(path)!).Check(path)) : throw Invalid();
-    private static BridgeCallException Invalid() => new(new BridgeError { Reason = ErrorReason.InvalidArgument, Message = "Use a referenced project resource and a local scratch root without links; close only this service's copy handles." });
+    private static BridgeCallException Invalid() => new(new BridgeError { Reason = ErrorReason.InvalidArgument, Message = "Use a referenced project resource and a local scratch root without links; extract from or close only this service's read-only copy handles." });
 }
