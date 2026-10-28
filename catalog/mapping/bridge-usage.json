@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "4055c04d",
-  "sourceHash": "sha256:e08d39f334d9fe632d34171d9a71ecab3f7b0ac0cf374a4211df2d248e1bbfd3",
+  "scannedSources": "74a17e50 + uncommitted changes",
+  "sourceHash": "sha256:fdda05b8f61d5b0bdc777b51bcbbc9d1d75ae68edc3c294cf3ef209c947e225d",
   "operations": [
     {
       "name": "action.execute",
@@ -253,6 +253,10 @@
     {
       "name": "message.list",
       "class": "MessageListOperation"
+    },
+    {
+      "name": "module.inspect",
+      "class": "ModuleInspectOperation"
     },
     {
       "name": "object.resolve",
@@ -1335,6 +1339,17 @@
     ],
     "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Bool": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadDefinition",
         "member": "ValueType",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
@@ -1438,6 +1453,17 @@
       }
     ],
     "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.MultilangString": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadDefinition",
         "member": "ValueType",
@@ -2915,6 +2941,17 @@
     ],
     "M:Eplan.EplApi.Base.ISOCode.#ctor(Eplan.EplApi.Base.ISOCode.Language)": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -3225,6 +3262,17 @@
     ],
     "M:Eplan.EplApi.Base.ISOCode.GetString": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -3431,6 +3479,17 @@
       }
     ],
     "M:Eplan.EplApi.Base.LanguageList.#ctor": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPageTexts",
         "member": "Entries",
@@ -3718,6 +3777,17 @@
     ],
     "M:Eplan.EplApi.Base.MultiLangString.GetLanguageList(Eplan.EplApi.Base.LanguageList@)": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -3745,6 +3815,17 @@
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.GetString(Eplan.EplApi.Base.ISOCode.Language)": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPageDescriptions",
         "member": "Read",
@@ -4297,6 +4378,17 @@
     ],
     "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -4344,6 +4436,17 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -4417,6 +4520,17 @@
         "operations": [
           "connection.list",
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -4785,6 +4899,17 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -5439,6 +5564,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -5762,6 +5898,7 @@
           "call"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -5948,6 +6085,17 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -6142,6 +6290,7 @@
           "call"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -6487,7 +6636,44 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlaceholderReader",
         "member": "Record",
@@ -7201,6 +7387,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -7713,6 +7900,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadDefinition",
         "member": "Bound",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
@@ -7801,6 +7999,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPageDescriptions",
         "member": "Read",
@@ -7943,6 +8152,17 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -8387,6 +8607,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Ends",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -8580,6 +8811,17 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -9415,6 +9657,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.UniversalPropertyList.Dispose": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPagePlotFrames",
         "member": "Dispose",
@@ -10875,6 +11128,17 @@
     ],
     "P:Eplan.EplApi.Base.LanguageList.Language(System.Int32)": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -11210,6 +11474,17 @@
         "operations": [
           "page.drawing.get"
         ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.AnyPropertyId.AsString": [
@@ -11226,6 +11501,32 @@
           "device.get",
           "page.get",
           "project.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.AnyPropertyId.Definition": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.AnyPropertyId.Index": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -11628,6 +11929,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -11712,6 +12024,17 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -11818,6 +12141,17 @@
           "connection.generate.execute",
           "connection.generate.plan",
           "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -12016,6 +12350,17 @@
         "operations": [
           "connection.list",
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -12261,6 +12606,19 @@
         "operations": [
           "terminal.renumber.execute",
           "terminal.renumber.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Function.AllSubFunctions": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -12785,6 +13143,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Function.ParentFunction": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Function.Pins": [
       {
         "adapter": "EplanDeviceReader",
@@ -12909,6 +13280,17 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -13377,6 +13759,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -14676,6 +15069,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -14690,6 +15094,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlaceholderWriter",
         "member": "Apply",
@@ -14717,6 +15132,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord(System.Int32)": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Record",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -14742,6 +15168,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlaceholderWriter",
         "member": "HasValueSet",
@@ -14782,6 +15219,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value(System.String,System.String)": [
       {
         "adapter": "EplanPlaceholderReader",
@@ -14798,6 +15248,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "PlaceHolderApi",
         "member": "Read",
@@ -15498,6 +15959,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Placed",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -15568,6 +16040,7 @@
           "get"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -15584,6 +16057,19 @@
           "plan.step.execute",
           "plan.step.guard",
           "project.snapshot"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Page.Functions": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -15873,6 +16359,17 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -16441,6 +16938,17 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -17225,6 +17733,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -17453,6 +17972,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -17626,6 +18156,18 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Project.IsReadOnly": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanProjectCatalog",
         "member": "ListOpenProjects",
@@ -17977,6 +18519,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -18130,6 +18673,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.ProjectName": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProjectCatalog",
         "member": "ListOpenProjects",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectCatalog.cs",
@@ -18252,6 +18806,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Project.Properties": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
@@ -18465,6 +19030,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -18613,6 +19179,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -18825,6 +19392,17 @@
     ],
     "P:Eplan.EplApi.DataModel.PropertyDefinition.IsIndexed": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -18978,6 +19556,17 @@
     ],
     "P:Eplan.EplApi.DataModel.PropertyDefinition.Type": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadDefinition",
         "member": "Metadata",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
@@ -19019,6 +19608,17 @@
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.Definition": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -19059,6 +19659,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.PropertyValue.Indexes": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanProperties",
         "member": "Add",
@@ -19190,6 +19801,17 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -19430,7 +20052,31 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanReferenceProjects",
         "member": "Close",
@@ -19712,6 +20358,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.StorableObject.Properties": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements": [
       {
         "adapter": "EplanDrawingReader",
@@ -19768,6 +20427,17 @@
     ],
     "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -19802,6 +20472,17 @@
     ],
     "P:Eplan.EplApi.DataModel.UniversalPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadAdapter.Handle",
         "member": "OpenValue",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
@@ -19829,6 +20510,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.UniversalPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadAdapter.Handle",
         "member": "OpenValue",
@@ -21820,6 +22512,17 @@
     ],
     "T:Eplan.EplApi.Base.ISOCode": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -22176,6 +22879,17 @@
     ],
     "T:Eplan.EplApi.Base.LanguageList": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -22358,6 +23072,17 @@
         ],
         "operations": [
           "page.drawing.get"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -22806,6 +23531,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPagePlotFrames",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPagePlotFrames.cs",
@@ -23084,6 +23820,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -23250,6 +23997,17 @@
         "operations": [
           "connection.list",
           "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       }
     ],
@@ -23786,6 +24544,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -24164,6 +24933,7 @@
           "type"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24190,6 +24960,7 @@
           "type"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24446,6 +25217,17 @@
           "connection.generate.execute",
           "connection.generate.plan",
           "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -25107,6 +25889,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -25249,6 +26042,7 @@
           "type"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -25685,6 +26479,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPlaceholderReader",
         "member": "CurrentValues",
@@ -26635,6 +27440,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanObjectFinder",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectFinder.cs",
@@ -26931,6 +27747,7 @@
           "type"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -26957,6 +27774,7 @@
           "type"
         ],
         "operations": [
+          "module.inspect",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27243,6 +28061,17 @@
         ]
       },
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -27317,6 +28146,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -27581,6 +28421,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -27869,6 +28720,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -27976,6 +28828,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -28354,6 +29207,7 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "module.inspect",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -28714,6 +29568,17 @@
     ],
     "T:Eplan.EplApi.DataModel.PropertyDefinition": [
       {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -28767,6 +29632,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadDefinition",
         "member": "Metadata",
@@ -28948,6 +29824,17 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -29294,6 +30181,17 @@
         ],
         "operations": [
           "macro.insert.execute"
+        ]
+      },
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
         ]
       },
       {
@@ -29648,6 +30546,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.UniversalPropertyList": [
+      {
+        "adapter": "EplanModuleInspectionReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanModuleInspectionReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "module.inspect"
+        ]
+      },
       {
         "adapter": "EplanProperties",
         "member": "Read",

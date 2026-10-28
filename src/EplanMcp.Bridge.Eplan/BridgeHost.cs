@@ -103,6 +103,7 @@ internal static class BridgeHost
         var translator = new EplanProjectTranslator();
         var placeholders = new EplanPlaceholderReader();
         var projectFiles = new EplanProjectFiles();
+        var referenceCopies = new ReferenceCopies(catalog, projectFiles, new EplanReferenceProjects(log));
         var factory = new EplanProjectFactory(log);
         var actions = new EplanActionRunner();
         int actionMajor = System.Version.TryParse(eplan.Version, out System.Version? actionVersion) ? actionVersion.Major : 0;
@@ -113,6 +114,9 @@ internal static class BridgeHost
             new ActionRunOperation(actionMajor, catalog, actions, new EplanSystemMessageReader()),
             new ActionRunExecuteOperation(actionMajor, catalog, actions, new EplanSystemMessageReader(), transactions),
             new ProjectListOperation(catalog),
+            new ReferencePrepareOperation(referenceCopies),
+            new ReferenceCloseOperation(referenceCopies),
+            new ModuleInspectOperation(new EplanModuleInspectionReader(), () => EplanEnvironment.ApiExtension(log)),
             new ProjectGetOperation(catalog, new EplanProjectReader()),
             new PropertyReadOperation(new EplanPropertyReadAdapter()),
             new PropertySetPlanOperation(path => new EplanPropertySetSession(path), actionMajor),

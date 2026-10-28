@@ -6,4 +6,4 @@
 
 清单顶层为 `{reviewedBy:"engineer",pages:[完整页名],complete:布尔,objects:[...],references:[...],placeholders:[...],gapPointers:[JSON Pointer]}`。三个数组按 [内部服务规格](../../../../docs/design/2026-10-27-m6-module-inspect.md) 填写，使用稳定定位符，保持原生顺序；对象/属性/语言和闭包外端点也逐项列出。若有不能解析的变量或跨页引用，complete 必须为 false，gapPointers 逐条列明预期缺口；不得为了使断言通过删除引用或改为 complete。
 
-启用后续集成的 reference.prepare/close 和 module.inspect 后，运行 Large 的 `ModuleInspectTests`。测试比较上述完整清单，并核对源、宏和副本设计文件前后摘要；缺能力时跳过。准备工程、核对清单和实跑仍由维护者完成，本次仅编写测试。
+reference.prepare/close 和 module.inspect 已登记；运行 Large 的 `ModuleInspectTests` 时，测试比较上述完整清单，并核对源、宏和副本设计文件前后摘要。缺夹具仍跳过；夹具存在但缺操作即失败。定位符为 `类型号/对象号`，与打开时分配的数据库号无关；现有未设值/图形绑定目录缺口及未定位变量须列入清单。准备工程、核对清单和实跑仍由维护者完成，本次仅编写测试。

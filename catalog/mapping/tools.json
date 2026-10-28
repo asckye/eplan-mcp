@@ -10460,7 +10460,6 @@
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.Dispose",
     "M:Eplan.EplApi.DataModel.LockingStep.#ctor",
     "M:Eplan.EplApi.DataModel.PropertyDefinition.Dispose",
-    "M:Eplan.EplApi.DataModel.UniversalPropertyList.Dispose",
     "T:Eplan.EplApi.ApplicationFramework.IEplAddIn",
     "T:Eplan.EplApi.ApplicationFramework.IEplAddInShadowCopy",
     "T:Eplan.EplApi.ApplicationFramework.License",

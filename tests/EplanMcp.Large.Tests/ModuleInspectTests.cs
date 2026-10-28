@@ -28,8 +28,9 @@ public sealed class ModuleInspectTests(LiveEplan eplan)
         Assert.NotEmpty(pages);
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
         BridgeStatus status = await bridge.GetStatusAsync(true, token);
-        Assert.SkipUnless(status.Handshake?.Operations is { } operations && new[] { OperationNames.ReferencePrepare, OperationNames.ReferenceClose, ModuleInspectService.Operation }.All(operations.Contains),
-            "Reference and module operations remain unregistered until their integration gate is enabled.");
+        Assert.NotNull(status.Handshake);
+        Assert.NotNull(status.Handshake.Operations);
+        Assert.All(new[] { OperationNames.ReferencePrepare, OperationNames.ReferenceClose, OperationNames.ModuleInspect }, op => Assert.Contains(op, status.Handshake.Operations));
         (string sourceHash, long bytes, int files) = await PackHasher.HashTreeAsync(PackHasher.ProjectFiles(source), token);
         (string macroHash, long macroBytes) = await PackHasher.HashFileAsync(macro, token);
         var resource = new PackResource

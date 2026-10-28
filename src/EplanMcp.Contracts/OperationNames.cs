@@ -6,6 +6,8 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Read-only reference module evidence. Arguments: ModuleInspectArgs; data: ModuleInspectData.</summary>
+    public const string ModuleInspect = "module.inspect";
     /// <summary>Unregistered reference-copy preparation; arguments: ReferencePrepareArgs; data: ReferenceCopyData.</summary>
     public const string ReferencePrepare = "reference.prepare";
     /// <summary>Unregistered owned-copy close; arguments: ReferenceCloseArgs; data: ProjectListData.</summary>

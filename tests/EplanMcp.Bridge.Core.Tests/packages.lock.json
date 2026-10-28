@@ -143,6 +143,9 @@
       },
       "eplanmcp.contracts": {
         "type": "Project"
+      },
+      "eplanmcp.packs": {
+        "type": "Project"
       }
     }
   }

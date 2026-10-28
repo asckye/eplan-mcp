@@ -66,7 +66,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 294,
+      "implemented": 304,
       "byTools": 286,
       "partial": 48,
       "automatedTest": 286,
@@ -84,7 +84,7 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 123,
+      "implemented": 125,
       "byTools": 116,
       "partial": 43,
       "automatedTest": 116,
@@ -102,7 +102,7 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 171,
+      "implemented": 179,
       "byTools": 170,
       "partial": 5,
       "automatedTest": 170,
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 124,
+      "implemented": 131,
       "liveVerified": 83
     },
     {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 34,
+      "implemented": 37,
       "liveVerified": 10
     },
     {
@@ -3022,6 +3022,20 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.Definition",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.Index",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Article.PartNr",
       "layer": "operation",
       "status": "live_verified",
@@ -3511,6 +3525,13 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.AllSubFunctions",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.ArticleReferences",
       "layer": "operation",
       "status": "live_verified",
@@ -3588,6 +3609,13 @@
         "eplan_property_set",
         "eplan_workflow_plan"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.ParentFunction",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Function.Pins",
@@ -3936,6 +3964,20 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue",
       "layer": "operation",
       "status": "live_verified",
@@ -3984,6 +4026,13 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value",
@@ -4380,6 +4429,13 @@
       "tools": [
         "eplan_page_create"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.Functions",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Page.GridSize",
@@ -5739,6 +5795,13 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier",
       "layer": "operation",
       "status": "implemented",
@@ -5761,6 +5824,13 @@
         "eplan_property_set",
         "eplan_workflow_plan"
       ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.Properties",
+      "layer": "operation",
+      "status": "implemented",
+      "partial": false,
+      "tools": []
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",

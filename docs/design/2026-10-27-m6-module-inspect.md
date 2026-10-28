@@ -1,6 +1,6 @@
 # M2 模块只读检查服务
 
-入口为 Host 内部 `ModuleInspectService.InspectAsync`，供 M3 使用；设计第 6 节的 `module.inspect` 是 invoke 能力，未命名独立 MCP 工具。本 PR 不注册工具、资源或 Bridge 操作，不改变 full/core、用法资源或 MCP 契约快照。原生读取器及其登记仍须通过后续集成门槛；当前 Bridge 缺此能力时返回 `CAPABILITY_MISSING`，不能以普通宏列表推断完整闭包。
+入口为 Host 内部 `ModuleInspectService.InspectAsync`，供 M3 使用；`module.inspect` 已作为只读 invoke 能力登记，接通既有 reference.prepare/close，不增加 MCP 工具、资源或写操作。Bridge 严格校验四项参数、持有只读宏句柄并核对摘要，读取前后仅经 HasOption 核实授权；原生适配器拒绝可写项目。
 
 输入：`ReferenceCopyService` 持有的只读副本 handle、1–50 个显式页名、包根下 bundled `.ema` 资源，可附 M1 已校验的 `ModuleDefinition`。源参考资源前后复核摘要；宏以拒绝写入/替换的只读句柄持有，SHA-256 必须匹配。检查不插宏、不应用值集、不调用 `GetAllCurrentValues`，不写副本或项目（A33/A51/A56）。
 
@@ -19,4 +19,4 @@
 
 提取前强制刷新握手；缺操作或授权未知/缺失时，只返回 `CAPABILITY_MISSING`、`missing` 和安装/授权提示，无证据、无 execution。实际读取中授权丢失同样拒绝；取消向上传播，源变化报 `PLAN_STALE`。本服务不创建 FactSet、候选或计划；M3 决定如何保存证据。
 
-Small 覆盖严格正文、数值、范围、跨页与声明绑定；Medium 用 Fake Bridge 覆盖完整/不完整闭包、能力拒绝、只读句柄、来源变化。Large 代码按 `tests/EplanMcp.Large.Tests/fixtures/module-inspect/README.md` 比较工程师逐项核对的实际闭包；本次未运行，缺原生能力时跳过，不计为实机通过。
+原生读取按类型号/对象号定位，追踪跨页、父/子功能、同名功能和连接端点；每对象属性列表只取得/释放一次，不释放借用对象。属性目录 ExistingIds 无法证明未设值/图形绑定均已发现，含占位符时明确保留 Gap，placeholderBindings=false，不以找到全部变量代替完整性证明；只读已发现绑定所请求的实际属性，10 秒、50 页及 10,000 明细上限不裁剪闭包。Small 验证严格参数；Medium 用原生 API 假对象及 Fake Bridge 核对闭包、语言、属性生命周期与能力拒绝。Large 按 `tests/EplanMcp.Large.Tests/fixtures/module-inspect/README.md` 比较工程师核对的闭包，夹具存在时缺操作即失败；本次只编写，未运行，不计为实机通过。

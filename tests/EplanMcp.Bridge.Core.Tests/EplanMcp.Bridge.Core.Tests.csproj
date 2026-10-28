@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanModuleInspectionReader.cs" Link="Adapters\EplanModuleInspectionReader.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R2\SpikeS26R2Assessment.cs" Link="Spikes\SpikeS26R2Assessment.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R3\SpikeS26R3Assessment.cs" Link="Spikes\SpikeS26R3Assessment.cs" />
     <Compile Include="..\Shared\PageTextStore.cs" Link="PageTextStore.cs" />
     <Compile Include="..\Shared\PageFrameStore.cs" Link="PageFrameStore.cs" />
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
+    <ProjectReference Include="..\..\src\EplanMcp.Packs\EplanMcp.Packs.csproj" />
     <!-- Bridge.Core compiles against Newtonsoft.Json without its runtime asset (EPLAN supplies it); tests must bring it. -->
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>

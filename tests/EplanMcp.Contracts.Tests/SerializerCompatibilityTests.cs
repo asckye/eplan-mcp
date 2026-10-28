@@ -20,6 +20,9 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new ModuleInspectArgs(),
+        new ModuleInspectArgs { Project = @"D:\reference\Copy.elk", Macro = @"D:\pack\Module.ema", Sha256 = new string('a', 64), Pages = ["=F+A1/1", "=F+A1/2"] },
+        new ModuleInspectData(),
         new ImportPdfCommentsArgs(),
         new ImportPdfCommentsArgs { Project = "Line1", File = "review.pdf", FilePath = @"D:\Imports\review.pdf", Sha256 = new string('a', 64), Fingerprint = "f" },
         new ImportPdfCommentsData(),
