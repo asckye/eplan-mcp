@@ -93,9 +93,9 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
                 point["crossReference"] = others.Length == 0 ? null : "native:" + (string?)others[0]["page"];
             }
             bool afterCommit = Generation.Calls.Contains("Commit", StringComparer.Ordinal);
-            if (State == 2 && (Failure == "pair" || Failure == "postcommit" && afterCommit))
+            if (State == 2 && (Failure is "pair" or "undo" || Failure == "postcommit" && afterCommit))
             { points.Last!["counterparts"] = new JArray(new JObject { ["page"] = "outside", ["oid"] = 999 }); }
-            if (State == 2 && Failure is "empty_reference" or "undo")
+            if (State == 2 && Failure == "empty_reference")
             { points[0]!["crossReference"] = ""; }
         }
         return new()
