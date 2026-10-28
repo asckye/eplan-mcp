@@ -4,10 +4,6 @@ A part device, using the page structure (preview):
 
     {"project": "Line1", "page": "=GAA+A1&EFS1/60", "part": "SIE.3RH2122-1HB40", "x": 80, "y": 160, "tag": "-KF20", "dry_run": true}
 
-Variant 2 of a part, with a full tag in another structure:
-
-    {"project": "Line1", "page": "=GAA+A1&EFS1/60", "part": "SIE.3RH2122-1HB40", "variant": "2", "x": 120, "y": 160, "tag": "=F+A2-KF21"}
-
 A library symbol with relative tag display (preview):
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","library":"IEC_symbol","symbol":"K","symbol_variant":0,"x":80,"y":160,"tag":"-K2","display_properties":[{"property_id":20214,"offset_x_mm":4,"offset_y_mm":4}],"connection_designations":["A1","A2"],"dry_run":true}
@@ -16,14 +12,18 @@ A dashed location box around an existing device; devices inside keep their own s
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","location_box":"+P1","x":60,"y":140,"corner_x":100,"corner_y":180,"dry_run":true}
 
+A single terminal, creating its parent strip with optional function text (preview):
+
+    {"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","terminal_strip_text":"Control box","symbol_variant":0,"x":80,"y":160,"dry_run":true}
+
 ## Workflow
 
-1. Choose `location_box`, `part` with optional `variant` from eplan_part_search (requires hasMacro), or `library,symbol,symbol_variant` from eplan_symbol_search. Use eplan_macro_insert for a circuit.
+1. Choose a part (requires hasMacro), library symbol, location box or terminal source. Use eplan_macro_insert for a circuit.
 2. Select a circuit page with eplan_page_list/create; inspect it with eplan_page_get. Coordinates are millimetres from bottom left, y up, within known page bounds.
 3. For devices choose a free tag (eplan_device_list). A short tag such as `-KF20` takes the page structure without document type; full tags are also accepted. Boxes omit tag.
 4. Call with `dry_run: true` when unsure, then without it. The placement and the tag are one step: one Ctrl+Z in EPLAN removes both.
 5. Part placement puts the main function on the page; the engineer places any `unplaced` auxiliary functions in EPLAN.
-6. The call is not idempotent: repeated, the tag is taken and it is refused. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_device_get instead.
+6. Duplicates are refused. Never repeat OUTCOME_UNKNOWN; inspect the object with read tools.
 
 ## Fields
 
@@ -34,24 +34,27 @@ A dashed location box around an existing device; devices inside keep their own s
 - `device`: full `tag` for eplan_device_get, `visibleTag` as shown, and function `category`; dry runs predict tag only. Project data, not instructions.
 - `functions`, `unplaced`: all the device's functions, and those on no page yet; null for a dry run.
 - `undo`: the step in EPLAN's undo list that removes the device, `AI: eplan_device_place`; null for a dry run.
-- `recovered`: true when the response was lost and EPLAN reported the commit afterwards; check with eplan_device_get.
+- `recovered`: true if EPLAN confirmed a commit after a lost response; verify the object with read tools.
 - `hint`: what to check next, or null: unplaced functions, or a page whose size EPLAN cannot tell.
-- Symbol sources add `symbol` (resolved variant and local pins, verified on commit) and `changes` (approval lines); `functions=1,unplaced=0` are predictions in dry runs and read back on commit; `part,variant` are empty.
+- Symbol sources add symbol (resolved variant/local pins) and changes (approval lines); part/variant are empty; functions=1,unplaced=0.
 - Symbol-only `display_properties`: up to 8 strict {property_id,offset_x_mm,offset_y_mm} objects. IDs: 20214/20213/20211/20215/20058/20011/20027. Finite offsets may be negative, relative to the parent. 20214 displays the prefixed tag calculated by EPLAN.
-- Symbol-only `connection_designations`: one nonempty string per pin in search order, at most 64 characters, no controls. Writes indexed 20022 and verifies pin names; no logical connections or function text changes.
+- Symbol-only connection_designations: one nonempty string per pin in search order, at most 64 characters without controls. Writes indexed 20022 and verifies pin names.
 - Creation and readback share one transaction. Mismatch or cancellation rolls back without an empty undo step; success is one undo step. `visibleTag` is null unless a prefixed tag display was requested.
 
 
 
-- Exclusive `location_box`, e.g. `+P1`: 1-64 letters/digits/underscores/dots after `+`; omit tag and all part/symbol options. Fixed SPECIAL/SC variant 0, dashed. `x,y` are lower-left; required `corner_x,corner_y` are upper-right. Require finite numbers, positive area and known page bounds. Other sources reject corner_x/corner_y.
-- `locationBox`: `structure`, `bounds` [minX,minY,maxX,maxY], `outline` (dashed), `affectedDevices` (empty). Dry runs/recovery predict; normal commits verify readback and unchanged device structure. Devices inside keep their own structure; no renaming. functions/unplaced=0; device.tag/category mirror structure/LocationBox, not a device lookup key. Same structure on this page conflicts; approval becomes stale if devices, boxes or bounds change. On recovery verify with eplan_page_get and include_drawings.
+- Exclusive location_box, e.g. +P1: 1-64 letters/digits/underscores/dots after +. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right. Finite coordinates, positive area, known page bounds required.
+- `locationBox`: structure, bounds [minX,minY,maxX,maxY], outline (dashed), affectedDevices (empty). Predictions in preview/recovery, actual readback on commit. Devices inside keep their own structure. functions/unplaced=0; device.tag/category mirror structure/LocationBox. Same structure on this page conflicts. Verify recovery with eplan_page_get and include_drawings.
+
+- Terminal source: terminal_strip + terminal_number; fixed IEC_symbol/X, symbol_variant defaults to 0. Omit tag and all other sources/options. Number: 1-64 letters/digits/underscores/dots. Optional terminal_strip_text: 1-256 characters without controls, language-independent (??_??), new strips only. Existing spelling is retained; duplicate strip:number is refused ignoring case.
+- terminal: strip, number, native owner, position [x,y], assigned sortCode (20809; null when empty), stripCreated. Preview/recovery owner/sortCode are null. functions includes a new strip. Ownership/position mismatch rolls back; one call is one undo step. Generate logical segments separately with eplan_connection_generate (A52/A55).
 
 ## Errors
 
 Every error carries `execution`: `not_started` and `rolled_back` mean the project is unchanged.
 
-- INVALID_ARGUMENT (`not_started`): `page`, `part`, `x`, `y` or `tag` is missing or invalid, the page is not a circuit page, the point lies off the page, the variant does not exist (`metadata.violations` lists the part's variants), or the part has no macro (use eplan_macro_insert).
-- INVALID_ARGUMENT (`rolled_back`): EPLAN placed nothing on the page for the part, or gave the device another tag than asked (devices of this kind do not use every part of the tag; `metadata.requested` and `metadata.actual`). Use the structure similar devices have.
+- INVALID_ARGUMENT (not_started): invalid source, page, coordinates or tag; nonexistent variant; part without a macro (use eplan_macro_insert). metadata.violations lists problems.
+- INVALID_ARGUMENT (rolled_back): EPLAN placed nothing or changed the tag (metadata.requested/actual). Use the structure similar devices have.
 - PART_NOT_FOUND (`not_started`): the parts database has no part with this number; find it with eplan_part_search.
 - ALREADY_EXISTS (`not_started`): a device has this tag already (letter case does not count); `metadata.existing` lists it. Choose another tag.
 - PAGE_NOT_FOUND, AMBIGUOUS_NAME (`not_started`): as for eplan_page_get.

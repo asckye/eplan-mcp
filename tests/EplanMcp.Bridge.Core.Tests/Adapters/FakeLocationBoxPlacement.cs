@@ -11,6 +11,12 @@ internal sealed partial class EplanDeviceSymbolPlacement(Project project, Page p
     private readonly object _variant = new();
     private readonly SymbolSearchItem _symbol = new() { Library = "SPECIAL", Name = "SC", Variant = 0 };
     public DevicePlaceData PlaceBox(DevicePlaceArgs args) => CreateLocationBox(args);
+    public DevicePlaceData PlaceTerminal(DevicePlaceArgs args, string tag)
+    {
+        _symbol.Library = "IEC_symbol";
+        _symbol.Name = "X";
+        return CreateTerminal(args, tag);
+    }
     private static void Require(bool matches)
     {
         if (!matches)

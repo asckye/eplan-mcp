@@ -38,7 +38,7 @@ public sealed class DevicePlaceExecuteOperation(
             }
 
             request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
-            WritePlan? symbolPlan = args.Library is null && args.LocationBox is null ? null : DeviceSymbolPlan.Create(args, request, symbols);
+            WritePlan? symbolPlan = args.Library is null && args.LocationBox is null && args.TerminalStrip is null ? null : DeviceSymbolPlan.Create(args, request, symbols);
             if (!string.Equals(symbolPlan?.Fingerprint ?? request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(
@@ -63,7 +63,7 @@ public sealed class DevicePlaceExecuteOperation(
         if (symbolSession is not null)
         {
             // S41: Abort without CloseUndo leaves no empty step. Lists are already released (A55).
-            Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () => PlaceSymbol(symbolSession, args, request.Tag), _ => true);
+            Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () => PlaceSymbol(symbolSession, args, request.Tag, request.Page.Name), _ => true);
             result.Result.Project = request.Project.Name;
             result.Result.PageSizeKnown = request.Page.Width is not null;
             result.Result.Warning = result.Warning;
@@ -88,12 +88,16 @@ public sealed class DevicePlaceExecuteOperation(
         };
     }
 
-    private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag)
+    private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag, string page)
     {
         DevicePlaceData data = session.Place(args, tag);
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Location box structure, outline or unaffected-device readback differs; nothing was committed."); }
+        if (args.TerminalStrip is not null && (data.Terminal is not { } terminal || data.Tag != tag || data.Page != page
+            || terminal.Strip != tag.Substring(0, tag.LastIndexOf(':')) || terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
+            || !terminal.Position.SequenceEqual(new[] { args.X, args.Y })))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal identity, ownership or position differs; nothing was committed."); }
         return data;
     }
 

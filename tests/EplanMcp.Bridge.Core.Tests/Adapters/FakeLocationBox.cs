@@ -38,6 +38,8 @@ internal sealed class PropertyValue(string text) : IDisposable
     public bool IsEmpty => Text.Length == 0;
     public override string ToString() => Text;
     public static implicit operator PropertyValue(string text) => new(text);
+    public Eplan.EplApi.Base.MultiLangString ToMultiLangString() => new(Text);
+    public static implicit operator PropertyValue(Eplan.EplApi.Base.MultiLangString value) => new(value.GetAsString());
     public void Dispose() { }
 }
 

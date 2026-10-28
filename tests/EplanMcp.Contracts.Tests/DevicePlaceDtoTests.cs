@@ -7,6 +7,18 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DevicePlaceDtoTests
 {
     [Fact]
+    public void Terminal_RoundTripsAcrossBothPipeSerializers()
+    {
+        var args = new DevicePlaceArgs { TerminalStrip = "-X6", TerminalNumber = "1", TerminalStripText = "Control box", SymbolVariant = 2 };
+        DevicePlaceArgs bridge = JsonConvert.DeserializeObject<DevicePlaceArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
+        Assert.Equal(("-X6", "1", "Control box", 2), (bridge.TerminalStrip, bridge.TerminalNumber, bridge.TerminalStripText, bridge.SymbolVariant));
+        var data = new DevicePlaceData { Terminal = new() { Strip = "=F+A1-X6", Owner = "=F+A1-X6", Number = "1", Position = [80, 160], SortCode = "17", StripCreated = true } };
+        DevicePlaceData host = System.Text.Json.JsonSerializer.Deserialize<DevicePlaceData>(JsonConvert.SerializeObject(data))!;
+        Assert.Equal(("=F+A1-X6", "1", "17", true), (host.Terminal!.Owner, host.Terminal.Number, host.Terminal.SortCode, host.Terminal.StripCreated));
+        Assert.Equal([80d, 160d], host.Terminal.Position);
+    }
+
+    [Fact]
     public void LocationBox_RoundTripsAcrossBothPipeSerializers()
     {
         var args = new DevicePlaceArgs { Project = "Line1", Page = "/1", LocationBox = "+P1", X = 60, Y = 140, CornerX = 100, CornerY = 180 };

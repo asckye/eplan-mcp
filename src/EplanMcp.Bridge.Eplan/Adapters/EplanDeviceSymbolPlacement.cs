@@ -31,7 +31,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {
         try
-        { return args.LocationBox is null ? Create(args, tag) : CreateLocationBox(args); }
+        { return args.TerminalStrip is not null ? CreateTerminal(args, tag) : args.LocationBox is null ? Create(args, tag) : CreateLocationBox(args); }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed,

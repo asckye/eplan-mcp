@@ -12,6 +12,7 @@ internal sealed class MultiLangString(string content = "") : IDisposable
     public bool Disposed { get; private set; }
     public string GetAsString() => string.Concat(_entries.Select(p => new ISOCode(p.Key).GetString() + "@" + p.Value + ";"));
     public void AddString(ISOCode.Language language, string text) => _entries[language] = text;
+    public string GetStringToDisplay(ISOCode.Language language) => _entries[language];
     public string GetString(ISOCode.Language language) => _entries[language];
     public int GetLanguageList(ref LanguageList languages) { languages.Values = [.. _entries.Keys]; return _entries.Count; }
     public void Dispose() => Disposed = true;

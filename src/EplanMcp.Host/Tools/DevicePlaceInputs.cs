@@ -11,14 +11,18 @@ internal static class DevicePlaceInputs
     {
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part","tag"],"not":{"anyOf":[{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
-             {"required":["library","symbol","symbol_variant","tag"],"not":{"anyOf":[{"required":["part"]},{"required":["variant"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
-             {"required":["location_box","corner_x","corner_y"],"not":{"anyOf":[{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}}]
+            [{"required":["part","tag"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
+             {"required":["library","symbol","symbol_variant","tag"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["part"]},{"required":["variant"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]}]}},
+             {"required":["location_box","corner_x","corner_y"],"not":{"anyOf":[{"required":["terminal_strip"]},{"required":["terminal_number"]},{"required":["terminal_strip_text"]},{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["symbol_variant"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}},
+             {"required":["terminal_strip","terminal_number"],"not":{"anyOf":[{"required":["tag"]},{"required":["part"]},{"required":["variant"]},{"required":["library"]},{"required":["symbol"]},{"required":["location_box"]},{"required":["corner_x"]},{"required":["corner_y"]},{"required":["display_properties"]},{"required":["connection_designations"]}]}}]
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
             "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
             """);
+        schema["properties"]!["terminal_number"]!["minLength"] = 1;
+        schema["properties"]!["terminal_number"]!["maxLength"] = 64;
+        schema["properties"]!["terminal_strip_text"]!["maxLength"] = 256;
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
     }
@@ -26,6 +30,24 @@ internal static class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.TerminalStrip is not null)
+        {
+            if (args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.Tag is not null
+                || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.SymbolVariant is < 0)
+            { problems.Add("/terminal_strip: use an exclusive terminal source with optional symbol_variant; omit tag and other sources."); }
+            if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
+                || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
+            { problems.Add("/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."); }
+            if (args.TerminalNumber is not { Length: > 0 and <= 64 } number || number.Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.')))
+            { problems.Add("/terminal_number: require 1-64 letters, digits, '_' or '.'."); }
+            if (args.TerminalStripText is { } text && (string.IsNullOrWhiteSpace(text) || text.Length > 256 || text.Any(char.IsControl)))
+            { problems.Add("/terminal_strip_text: require nonempty text of at most 256 characters without controls."); }
+            if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
+            { problems.Add("/x: x and y must be finite millimetre coordinates."); }
+            return problems;
+        }
+        if (args.TerminalNumber is not null || args.TerminalStripText is not null)
+        { problems.Add("/terminal_strip: terminal_number and terminal_strip_text require a terminal source."); }
         if (args.LocationBox is { } structure)
         {
             if (structure.Length is < 2 or > 65 || structure[0] != '+' || structure.Skip(1).Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.'))
