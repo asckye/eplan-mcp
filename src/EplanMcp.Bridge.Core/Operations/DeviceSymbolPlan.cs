@@ -12,8 +12,15 @@ internal static class DeviceSymbolPlan
     {
         if (reader is null)
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol discovery is unavailable; use a Bridge with symbol search.", metadata: new Dictionary<string, string> { ["missing"] = "symbol.search" }); }
-        if (!string.IsNullOrWhiteSpace(args.Part) || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol) || args.SymbolVariant is null or < 0)
+        if (!string.IsNullOrWhiteSpace(args.Part) || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+            || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0)
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
+        if (args.DisplayProperties is { } displays && (displays.Count > 8 || displays.Any(p => p is null
+            || p.PropertyId is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027)
+            || !Finite(p.OffsetXmm) || !Finite(p.OffsetYmm) || !Finite(args.X + p.OffsetXmm) || !Finite(args.Y + p.OffsetYmm))))
+        { throw WriteArguments.Invalid(["/display_properties: require at most 8 allowed property IDs and finite relative offsets."]); }
+        if (args.ConnectionDesignations?.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl)) == true)
+        { throw WriteArguments.Invalid(["/connection_designations: require nonempty text of at most 64 characters without controls."]); }
         List<SymbolSearchItem> found = [.. reader.Read(request.Project.Path, new() { Library = args.Library, NameContains = args.Symbol })
             .Where(s => string.Equals(s.Library, args.Library, StringComparison.OrdinalIgnoreCase) && string.Equals(s.Name, args.Symbol, StringComparison.OrdinalIgnoreCase) && s.Variant == args.SymbolVariant)];
         List<SymbolSearchItem> exact = [.. found.Where(s => s.Library == args.Library && s.Name == args.Symbol)];
@@ -56,4 +63,6 @@ internal static class DeviceSymbolPlan
             Details = new() { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" },
         };
     }
+
+    private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
 }

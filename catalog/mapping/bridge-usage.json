@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "cf20a353",
-  "sourceHash": "sha256:dafa2624b6b6d2cdd7fbeb0afa13c47cc4d321c3c3e3edc8ea6e427c1c8bc235",
+  "scannedSources": "a75adf9e",
+  "sourceHash": "sha256:4233c7db4461b9bd7c04cfd64fe089c336f387c79d658d9e941d8408ad69f33c",
   "operations": [
     {
       "name": "action.execute",
@@ -917,6 +917,43 @@
         ]
       },
       {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -1128,6 +1165,19 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Graphics.TextBase.JustificationType.BaseLineLeft": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -2579,6 +2629,43 @@
         ]
       },
       {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -2617,6 +2704,43 @@
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": "EndQuietMode",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
       {
         "adapter": "TransactionScope",
         "member": "EndQuietMode",
@@ -3777,6 +3901,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -4200,6 +4335,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPagePlotFrames",
         "member": "Read",
@@ -6141,6 +6287,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Function.#ctor": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor": [
       {
         "adapter": "EplanActionRunner",
@@ -6330,6 +6502,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.#ctor": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create(Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.AnyPropertyId)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox(System.Boolean)": [
       {
         "adapter": "EplanDrawingReader",
@@ -6344,6 +6542,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetDisplayString": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanDrawingReader",
         "member": "Read",
@@ -6363,6 +6572,54 @@
         "operations": [
           "page.drawing.get"
         ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.ITransaction.Dispose": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
       }
     ],
     "M:Eplan.EplApi.DataModel.LockingStep.#ctor": [
@@ -6385,6 +6642,7 @@
           "call"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -6767,6 +7025,45 @@
         ],
         "operations": [
           "project.snapshot"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Project.LockAllObjects": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
         ]
       }
     ],
@@ -7624,6 +7921,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -7781,6 +8089,7 @@
           "call"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -7866,6 +8175,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.String)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPageWriter",
         "member": "Create",
@@ -8540,7 +8860,200 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Transaction.Abort": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": "Rollback",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Transaction.Commit": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": "Commit",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.TransactionManager.#ctor": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.TransactionManager.CreateTransaction": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.UndoManager.#ctor": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
       {
         "adapter": "TransactionScope",
         "member": ".ctor",
@@ -8581,6 +9094,43 @@
     ],
     "M:Eplan.EplApi.DataModel.UndoManager.CreateUndoStep": [
       {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -8619,6 +9169,52 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.UndoManager.Dispose": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": "Dispose",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": []
+      },
       {
         "adapter": "TransactionScope",
         "member": ".ctor",
@@ -8668,6 +9264,43 @@
     ],
     "M:Eplan.EplApi.DataModel.UndoStep.CloseUndo": [
       {
+        "adapter": "FunctionTransactionScope",
+        "member": "CloseUndo",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": "CloseUndo",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -8706,6 +9339,43 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.UndoStep.SetUndoDescription(System.String)": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
       {
         "adapter": "TransactionScope",
         "member": ".ctor",
@@ -10306,6 +10976,17 @@
     ],
     "P:Eplan.EplApi.Base.PointD.X": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -10394,6 +11075,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -10401,6 +11083,17 @@
     ],
     "P:Eplan.EplApi.Base.PointD.Y": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -10489,8 +11182,33 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.AnyPropertyId.AsInt": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "DisplayedId",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
         ]
       }
     ],
@@ -11595,6 +12313,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageReader",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReader.cs",
@@ -11699,6 +12428,17 @@
         ],
         "operations": [
           "device.list"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -12060,6 +12800,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -12133,6 +12884,17 @@
         "operations": [
           "device.update.execute",
           "device.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -12250,7 +13012,32 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Function.SymbolVariant": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionBase.Location": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPropertyReadAdapter",
         "member": "Describe",
@@ -12506,6 +13293,18 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -13482,6 +14281,20 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.Property(Eplan.EplApi.DataModel.Properties.Function,System.Int32)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching": [
       {
         "adapter": "EplanDeviceReader",
@@ -13803,6 +14616,20 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.Line.EndPoint": [
       {
         "adapter": "EplanDrawingReader",
@@ -14011,7 +14838,42 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.DisplayedProperty": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "DisplayedId",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Parent": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanDrawingReader",
         "member": "Read",
@@ -14073,6 +14935,48 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextBase.Height": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextBase.Justification": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextBase.Location": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -14229,6 +15133,15 @@
     ],
     "P:Eplan.EplApi.DataModel.MasterData.Symbol.Name": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -14236,6 +15149,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14250,6 +15164,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14264,6 +15179,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14271,6 +15187,15 @@
     ],
     "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -14278,6 +15203,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14285,19 +15211,14 @@
     ],
     "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name": [
       {
-        "adapter": "EplanSymbolReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
           "get"
         ],
-        "operations": [
-          "device.place.plan",
-          "symbol.search"
-        ]
-      }
-    ],
-    "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols": [
+        "operations": []
+      },
       {
         "adapter": "EplanSymbolReader",
         "member": "Read",
@@ -14306,6 +15227,31 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14320,6 +15266,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14334,12 +15281,59 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.SymbolLibraryName": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.SymbolName": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanSymbolReader",
         "member": "Read",
@@ -14348,6 +15342,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -14776,6 +15771,26 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -16122,6 +17137,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -16257,6 +17283,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -16271,6 +17298,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -16299,6 +17327,17 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "device.place.execute"
@@ -16400,6 +17439,17 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -16725,6 +17775,15 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Project.Pages": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
       {
         "adapter": "EplanPagePlotFrames",
         "member": "Available",
@@ -17269,6 +18328,15 @@
     ],
     "P:Eplan.EplApi.DataModel.Project.SymbolLibraries": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": []
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -17276,6 +18344,7 @@
           "get"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -18097,6 +19166,18 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -18270,6 +19351,7 @@
           "set"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -18397,6 +19479,17 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -19817,6 +20910,43 @@
         ]
       },
       {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -20068,6 +21198,43 @@
         ]
       },
       {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
         "adapter": "TransactionScope",
         "member": ".ctor",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
@@ -20194,6 +21361,17 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Place",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -20634,6 +21812,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -21379,6 +22558,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -21593,6 +22783,28 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.AnyPropertyId": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "DisplayedId",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
       {
         "adapter": "EplanPagePlotFrames",
         "member": "Read",
@@ -23806,6 +25018,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -24184,6 +25407,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPropertySetSession",
         "member": "Dispose",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertySetSession.cs",
@@ -24526,6 +25760,28 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PropertyPlacement": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "DisplayedId",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.drawing.get"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -24647,6 +25903,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.TextBase": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "Entries",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -24668,6 +25935,19 @@
         ],
         "operations": [
           "page.text.inspect"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.TextBase.JustificationType": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -24826,6 +26106,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -24838,6 +26119,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -24852,6 +26134,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -24866,6 +26149,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -24880,6 +26164,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -25947,6 +27232,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Connections",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -26810,6 +28106,43 @@
         "operations": [
           "project.snapshot"
         ]
+      },
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.Project.ProjectType": [
@@ -27327,6 +28660,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Properties": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Category",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -27334,8 +28678,22 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Properties.Function": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -27348,6 +28706,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -27567,6 +28926,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "Create",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -27779,6 +29149,7 @@
           "type"
         ],
         "operations": [
+          "device.place.execute",
           "device.place.plan",
           "symbol.search"
         ]
@@ -28083,7 +29454,122 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Transaction": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.TransactionManager": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.UndoManager": [
+      {
+        "adapter": "FunctionTransactionScope",
+        "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/FunctionTransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
       {
         "adapter": "TransactionScope",
         "member": ".ctor",

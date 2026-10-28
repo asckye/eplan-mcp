@@ -3465,7 +3465,7 @@
     {
       "name": "eplan_device_place",
       "title": "Place a device on an EPLAN page",
-      "description": "Places a part device; Ctrl+Z undoes it. Or plans a library symbol without a part (dry_run only). Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.",
+      "description": "Places a part device or a library symbol without a part; Ctrl+Z undoes it. Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3679,7 +3679,7 @@
             "type": "string"
           },
           "symbol": {
-            "description": "Resolved symbol and local pins; present only for symbol plans.",
+            "description": "Resolved symbol and local pins; present only for symbol sources, verified on commit.",
             "type": [
               "object",
               "null"
@@ -3720,7 +3720,7 @@
             }
           },
           "changes": {
-            "description": "Predicted function, relative property placements and pin designations; symbol plans only.",
+            "description": "Planned function, relative property placements and pin designations; symbol sources only.",
             "type": [
               "array",
               "null"

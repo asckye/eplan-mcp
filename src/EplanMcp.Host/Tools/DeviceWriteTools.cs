@@ -99,7 +99,7 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places a part device; Ctrl+Z undoes it. Or plans a library symbol without a part (dry_run only). " +
+        "Places a part device or a library symbol without a part; Ctrl+Z undoes it. " +
         "Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
@@ -141,15 +141,28 @@ internal sealed class DeviceWriteTools
             error.Execution = ExecutionState.NotStarted;
             return ToolResults.Error(error);
         }
-        if (args.Library is not null && !dry_run)
-        { return ToolResults.Error(new BridgeError { Reason = ErrorReason.CapabilityMissing, Execution = ExecutionState.NotStarted, Message = "Symbol placement execution is unavailable; use dry_run to preview.", Metadata = new() { ["missing"] = "device.place.symbol.execute" } }); }
         var request = new WriteRequest<DevicePlaceArgs, DevicePlaceArgs>(
             PlaceTool,
             ToolTier.Write,
             OperationNames.DevicePlacePlan,
             OperationNames.DevicePlaceExecute,
             args,
-            plan => new DevicePlaceArgs { Project = args.Project, Page = args.Page, Part = args.Part, Variant = args.Variant, X = args.X, Y = args.Y, Tag = args.Tag, Fingerprint = plan.Fingerprint },
+            plan => new DevicePlaceArgs
+            {
+                Project = args.Project,
+                Page = args.Page,
+                Part = args.Part,
+                Variant = args.Variant,
+                X = args.X,
+                Y = args.Y,
+                Tag = args.Tag,
+                Library = args.Library,
+                Symbol = args.Symbol,
+                SymbolVariant = args.SymbolVariant,
+                DisplayProperties = args.DisplayProperties,
+                ConnectionDesignations = args.ConnectionDesignations,
+                Fingerprint = plan.Fingerprint
+            },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Placing the device");

@@ -32,16 +32,23 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         var seen = new HashSet<string>(StringComparer.Ordinal);
         void Walk(IEnumerable<Placement> placements, bool excluded, DrawingLocator? parent = null)
         {
+            int index = 0;
             foreach (Placement placement in placements)
             {
                 OperationContext.Current.ThrowIfCancellationRequested();
-                if ((placement is PropertyPlacement && parent is null && !excluded) || !seen.Add(placement.ToStringIdentifier()))
+                // Live T2b run: Function.PropertyPlacements are ContextPropertyPlacements that share the function's
+                // identifier, so key them by parent, displayed property and position, not by ToStringIdentifier.
+                string? slot = placement is PropertyPlacement child && parent is not null
+                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", DisplayedId(child), index++)
+                    : null;
+                string key = slot is null ? placement.ToStringIdentifier() : placement.ToStringIdentifier() + "#" + slot;
+                if ((placement is PropertyPlacement && parent is null && !excluded) || !seen.Add(key))
                 {
                     continue;
                 }
 
                 DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement || placement.GetType() == typeof(Text)
-                    || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent) : null;
+                    || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot) : null;
                 if (row is not null)
                 {
                     result.Placements.Add(row);
@@ -57,7 +64,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }
         }
 
-        DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent)
+        DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot)
         {
             // A53/A54: property Location is relative, GetBoundingBox(false) is absolute.
             PointD origin = placement is PropertyPlacement property && property.Parent is Placement owner ? owner.Location : new PointD(0, 0);
@@ -74,6 +81,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 kind = placement.GetType().Name,
                 parentType = parent?.Type,
                 parentOid = parent?.Oid,
+                slot, // property placements share their parent's identifier
                 location,
                 bounds,
                 content = contents?.GetAsString(),
@@ -86,7 +94,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 Properties = new Dictionary<string, string?> { ["name"] = (placement as FunctionBase)?.Name, ["text"] = contents?.GetAsString(), ["display"] = (placement as PropertyPlacement)?.GetDisplayString() }
                     .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
-                Kind = placement.GetType().Name,
+                Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too
                 Location = location,
                 Bounds = bounds,
                 Parent = parent,
@@ -101,6 +109,12 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
 
         Walk(page.AllPlacements, excluded: false);
         return result;
+    }
+
+    private static int DisplayedId(PropertyPlacement placement)
+    {
+        using AnyPropertyId id = placement.DisplayedProperty;
+        return id.AsInt;
     }
 
     private static double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];

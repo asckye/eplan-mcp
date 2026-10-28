@@ -1,4 +1,5 @@
 using System.Globalization;
+using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -15,7 +16,9 @@ public sealed class DevicePlaceExecuteOperation(
     IDeviceRenamer names,
     IPartsDatabase parts,
     IDevicePlacer placer,
-    ITransactionScopeFactory transactions)
+    ITransactionScopeFactory transactions,
+    ISymbolReader? symbols = null,
+    Func<string, string, SymbolSearchItem, IDeviceSymbolPlacement>? openSymbol = null)
     : Operation<DevicePlaceArgs, DevicePlaceData>, IWriteOperation
 {
     /// <summary>The tool whose undo step this is: EPLAN lists it as "AI: eplan_device_place".</summary>
@@ -26,17 +29,17 @@ public sealed class DevicePlaceExecuteOperation(
     protected override DevicePlaceData Execute(DevicePlaceArgs args)
     {
         DevicePlaceRequest request;
+        IDeviceSymbolPlacement? symbolSession = null;
         try
         {
-            if (args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null)
-            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol placement execution is unavailable; use dry_run to preview.", metadata: new Dictionary<string, string> { ["missing"] = "device.place.symbol.execute" }); }
             if (string.IsNullOrEmpty(args.Fingerprint))
             {
                 throw InvalidArgument("'fingerprint' is required: the one device.place.plan returned.");
             }
 
             request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer);
-            if (!string.Equals(request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
+            WritePlan? symbolPlan = args.Library is null ? null : DeviceSymbolPlan.Create(args, request, symbols);
+            if (!string.Equals(symbolPlan?.Fingerprint ?? request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(
                     ErrorReason.PlanStale,
@@ -46,10 +49,25 @@ public sealed class DevicePlaceExecuteOperation(
             }
 
             request.CheckFree();
+            if (symbolPlan is not null)
+            {
+                SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(symbolPlan.Details!["symbol"]).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
+                symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol);
+            }
         }
         catch (BridgeErrorException ex)
         {
             throw WriteArguments.NotStarted(ex);
+        }
+
+        if (symbolSession is not null)
+        {
+            // S41: Abort without CloseUndo leaves no empty step. Lists are already released (A55).
+            Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () => symbolSession.Place(args, request.Tag), _ => true);
+            result.Result.Project = request.Project.Name;
+            result.Result.PageSizeKnown = request.Page.Width is not null;
+            result.Result.Warning = result.Warning;
+            return result.Result;
         }
 
         Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () => Place(request));

@@ -5,6 +5,7 @@ using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,14 +22,27 @@ public sealed class DeviceSymbolPlanTests : IDisposable
     private const string Page = "=F+A1&EFS1/1";
     private readonly WriteToolHarness _harness = new();
     private readonly Store _store = new();
+    private readonly Placement _placement;
 
     public DeviceSymbolPlanTests()
     {
-        _store.Project.Path = _harness.ProjectPath;
-        _harness.Bridge.Handlers[OperationNames.DevicePlacePlan] = sent =>
+        _placement = new Placement(_store);
+        Bind(_harness);
+    }
+
+    private void Bind(WriteToolHarness harness)
+    {
+        _store.Project.Path = harness.ProjectPath;
+        harness.Bridge.Handlers[OperationNames.DevicePlacePlan] = sent =>
         {
             try
             { return Plan((DevicePlaceArgs)sent!); }
+            catch (BridgeErrorException ex) { throw new BridgeCallException(ex.Error); }
+        };
+        harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = sent =>
+        {
+            try
+            { return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store, (_, _, symbol) => { _placement.Resolved = symbol; return _placement; }).Execute(sent!)!; }
             catch (BridgeErrorException ex) { throw new BridgeCallException(ex.Error); }
         };
     }
@@ -120,22 +134,67 @@ public sealed class DeviceSymbolPlanTests : IDisposable
     }
 
     [Fact]
-    public async Task Execution_IsCapabilityMissingBeforeApprovalOrAnyBridgeCall()
+    public async Task Execution_ForwardsTheCompleteSymbolRequestAndCommitsOneStep_ThenRejectsRepeats()
     {
+        JsonElement result = WriteToolHarness.Structured(await Place(dryRun: false));
+        Assert.Equal(("committed", 1, 0, "AI: eplan_device_place"), (result.GetProperty("execution").GetString(), result.GetProperty("functions").GetInt32(), result.GetProperty("unplaced").GetInt32(), result.GetProperty("undo").GetString()));
+        Assert.Equal("-K2", result.GetProperty("device").GetProperty("visibleTag").GetString());
+        Assert.Equal(("IEC_symbol", "K", 0), (_placement.Resolved!.Library, _placement.Resolved.Name, _placement.Resolved.Variant));
+        Assert.Equal((80, 160, "-K2"), (_placement.Args!.X, _placement.Args.Y, _placement.Args.Tag));
+        Assert.Equal((20214, 4, -4), (_placement.Args.DisplayProperties![0].PropertyId, _placement.Args.DisplayProperties[0].OffsetXmm, _placement.Args.DisplayProperties[0].OffsetYmm));
+        Assert.Equal(["A1", "A2"], _placement.Args.ConnectionDesignations!);
+        Assert.Equal(["Begin", "Write", "Readback", "ReleaseLists", "Commit", "CloseUndo", "Dispose"], _placement.Calls);
+        Assert.Equal(0, _store.PartReads);
+        JsonElement again = WriteToolHarness.Error(await Place(dryRun: false));
+        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (again.GetProperty("reason").GetString(), again.GetProperty("execution").GetString()));
+        Assert.Single(_harness.Bridge.Writes);
+    }
+
+    [Theory]
+    [InlineData("Write")]
+    [InlineData("Readback")]
+    public async Task Execution_MidWriteOrReadbackMismatch_ReleasesListsBeforeAbortAndRestoresState(string failAt)
+    {
+        _placement.FailAt = failAt;
         JsonElement error = WriteToolHarness.Error(await Place(dryRun: false));
-        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
-        Assert.Equal("device.place.symbol.execute", error.GetProperty("metadata").GetProperty("missing").GetString());
-        Assert.Empty(_harness.Bridge.Calls);
-        Assert.Empty(_harness.Bridge.Writes);
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Empty(_store.Names);
+        Assert.Equal(["page:1"], _store.Page.Objects);
+        Assert.Equal(["ReleaseLists", "Abort", "Dispose"], _placement.Calls.TakeLast(3));
+        Assert.DoesNotContain("CloseUndo", _placement.Calls);
+        Assert.DoesNotContain("Commit", _placement.Calls);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Execution_OutsideScratch_BindsApprovalToSymbolDisplaysAndPins(bool grant)
+    {
+        var channel = new FakeApprovalChannel("eplan", grant ? ApprovalDecision.Granted : ApprovalDecision.Denied);
+        using var harness = new WriteToolHarness(channel) { ProjectPath = @"D:\Projects\Line1" };
+        Bind(harness);
+        CallToolResult result = await Place(dryRun: false, harness: harness);
+        Assert.Equal(4, Assert.Single(channel.Questions).Plan.Changes.Count);
+        Assert.Contains("20214 offset (4, -4)", channel.Questions[0].Plan.Changes[1].NewValue, StringComparison.Ordinal);
+        if (grant)
+        { Assert.Equal("committed", WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        else
+        {
+            Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(result).GetProperty("reason").GetString());
+            Assert.Empty(harness.Bridge.Writes);
+            Assert.Empty(_placement.Calls);
+        }
     }
 
     [Fact]
-    public void BridgeExecution_AlsoRejectsSymbolsWithoutEnteringThePartPath()
+    public async Task Execution_ApprovalChangesSymbolGeometry_RefusesBeforeTransaction()
     {
-        var operation = new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!);
-        BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => operation.Execute(Args()));
-        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (ex.Error.Reason, ex.Error.Execution));
-        Assert.Equal(0, _store.PartReads);
+        var channel = new FakeApprovalChannel("eplan", ApprovalDecision.Granted) { Wait = () => _store.Symbols[0].ConnectionPoints[0].Location[0] = 8 };
+        using var harness = new WriteToolHarness(channel) { ProjectPath = @"D:\Projects\Line1" };
+        Bind(harness);
+        JsonElement error = WriteToolHarness.Error(await Place(dryRun: false, harness: harness));
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Empty(_placement.Calls);
     }
 
     [Fact]
@@ -213,12 +272,57 @@ public sealed class DeviceSymbolPlanTests : IDisposable
         }
     }
 
-    private Task<CallToolResult> Place(bool dryRun = true, string[]? designations = null, string library = "IEC_symbol", string symbol = "K", int variant = 0) =>
-        DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, "Line1", Page, 80, 160, "-K2", dry_run: dryRun, library: library, symbol: symbol, symbol_variant: variant,
+    private Task<CallToolResult> Place(bool dryRun = true, string[]? designations = null, string library = "IEC_symbol", string symbol = "K", int variant = 0, WriteToolHarness? harness = null) =>
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, "-K2", dry_run: dryRun, library: library, symbol: symbol, symbol_variant: variant,
             display_properties: [JsonSerializer.SerializeToElement(new { property_id = 20214, offset_x_mm = 4, offset_y_mm = -4 })], connection_designations: designations ?? ["A1", "A2"], cancellationToken: TestContext.Current.CancellationToken);
 
     private WritePlan Plan(DevicePlaceArgs args) => (WritePlan)new DevicePlacePlanOperation(_store, _store, _store, _store, _store, _store).Execute(args)!;
     private static DevicePlaceArgs Args() => new() { Project = "Line1", Page = Page, Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0, X = 80, Y = 160, Tag = "-K2" };
+
+    private sealed class Placement(Store store) : IDeviceSymbolPlacement
+    {
+        public List<string> Calls { get; } = [];
+        public string? FailAt { get; set; }
+        public DevicePlaceArgs? Args { get; private set; }
+        public SymbolSearchItem? Resolved { get; set; }
+        public ITransactionScope Begin(string undoDescription)
+        {
+            Assert.Equal("AI: eplan_device_place", undoDescription);
+            Calls.Add("Begin");
+            return new Scope(this, store, [.. store.Names], [.. store.Page.Objects]);
+        }
+        public DevicePlaceData Place(DevicePlaceArgs args, string tag)
+        {
+            Args = args;
+            store.Names.Add(tag);
+            store.Page.Objects.Add("created");
+            try
+            {
+                foreach (string stage in new[] { "Write", "Readback" })
+                {
+                    Calls.Add(stage);
+                    if (FailAt == stage)
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol readback differs; nothing was committed."); }
+                }
+                return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = "Coil" };
+            }
+            finally { Calls.Add("ReleaseLists"); }
+        }
+        private sealed class Scope(Placement owner, Store store, string[] names, string[] objects) : ITransactionScope
+        {
+            public void Commit() => owner.Calls.Add("Commit");
+            public void CloseUndo() => owner.Calls.Add("CloseUndo");
+            public void Rollback()
+            {
+                Assert.Equal("ReleaseLists", owner.Calls[^1]);
+                owner.Calls.Add("Abort");
+                store.Names.Clear();
+                store.Names.AddRange(names);
+                store.Page.Objects = [.. objects];
+            }
+            public void Dispose() => owner.Calls.Add("Dispose");
+        }
+    }
 
     private sealed class Store : IProjectCatalog, IPageReader, IDeviceRenamer, IPartsDatabase, IDevicePlacer, ISymbolReader
     {
