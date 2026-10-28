@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-28",
-  "scannedSources": "5f5b9993",
-  "sourceHash": "sha256:ce4f55c5cd10d7d0f8e0f47606f2f7f269698157809c683538293bfce661eedf",
+  "scannedSources": "10a16506",
+  "sourceHash": "sha256:bd5fb9a373aeb9c43d11a2cb3ac979dd6977c665ff58656fa7dbec615cd66303",
   "operations": [
     {
       "name": "action.execute",
@@ -1127,6 +1127,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L___": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPageDescriptions",
         "member": "Number",
@@ -3839,6 +3850,17 @@
     ],
     "M:Eplan.EplApi.Base.MultiLangString.#ctor": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -3895,6 +3917,17 @@
       }
     ],
     "M:Eplan.EplApi.Base.MultiLangString.AddString(Eplan.EplApi.Base.ISOCode.Language,System.String)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPageDescriptions",
         "member": "Write",
@@ -4093,6 +4126,17 @@
     ],
     "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanText",
         "member": "Display",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
@@ -4213,6 +4257,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "new"
         ],
@@ -5099,6 +5154,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "new"
         ],
@@ -6124,6 +6190,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanLanguageTexts",
         "member": "All",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLanguageTexts.cs",
@@ -6708,6 +6785,17 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminalStrips(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "ReadStrip",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -6780,6 +6868,58 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Terminal.#ctor": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.#ctor": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Create(Eplan.EplApi.DataModel.Page)": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -8515,6 +8655,17 @@
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -8663,6 +8814,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "call"
         ],
@@ -8882,6 +9044,17 @@
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(Eplan.EplApi.Base.MultiLangString)~Eplan.EplApi.DataModel.PropertyValue": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -8933,6 +9106,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "call"
         ],
@@ -11975,6 +12159,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -12162,6 +12357,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "get"
         ],
@@ -13398,6 +13604,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.Terminal.FunctionCategory": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.Terminal.InternalConnections": [
       {
         "adapter": "EplanTerminalReader",
@@ -13449,6 +13668,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.Terminal.TerminalStrip": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges": [
       {
         "adapter": "EplanTerminalReader",
@@ -13463,7 +13695,31 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Properties": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Terminals": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalReader",
         "member": "Item",
@@ -13546,6 +13802,17 @@
         ],
         "operations": [
           "device.list"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -13897,6 +14164,18 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -14124,6 +14403,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -14251,6 +14541,17 @@
     "P:Eplan.EplApi.DataModel.Function.SymbolVariant": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -14272,6 +14573,18 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -14585,6 +14898,18 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
         ],
         "operations": [
           "device.place.execute"
@@ -15333,6 +15658,20 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PINORTERMINALNUMBER": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_PLCADDRESS": [
       {
         "adapter": "EplanPlcReader",
@@ -15554,6 +15893,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TERMINALSORTCODE": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT": [
       {
         "adapter": "EplanActionRunner",
@@ -15579,6 +15931,18 @@
           "cable.renumber.execute",
           "cable.renumber.plan",
           "device.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -16983,6 +17347,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -17030,6 +17405,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -17068,6 +17454,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "get"
         ],
@@ -17645,6 +18042,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "get"
         ],
@@ -19463,6 +19871,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -19601,6 +20020,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "get"
         ],
@@ -21422,6 +21852,18 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get",
+          "set"
         ],
         "operations": [
           "device.place.execute"
@@ -24394,6 +24836,17 @@
     ],
     "T:Eplan.EplApi.Base.ISOCode": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "LanguageCode",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -24681,6 +25134,17 @@
       }
     ],
     "T:Eplan.EplApi.Base.ISOCode.Language": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
       {
         "adapter": "EplanPageDescriptions",
         "member": "Number",
@@ -25002,6 +25466,17 @@
     ],
     "T:Eplan.EplApi.Base.MultiLangString": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -25263,6 +25738,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "type"
         ],
@@ -26521,6 +27007,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingImporter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingImporter.cs",
@@ -27524,6 +28021,17 @@
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Terminal": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanMacroReader",
         "member": "ReadMacro",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
@@ -27657,6 +28165,17 @@
     ],
     "T:Eplan.EplApi.DataModel.EObjects.TerminalStrip": [
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalReader",
         "member": "Item",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalReader.cs",
@@ -27689,6 +28208,19 @@
         "operations": [
           "terminal.renumber.execute",
           "terminal.renumber.plan"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyListComplete": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       }
     ],
@@ -28356,6 +28888,17 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -32439,6 +32982,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "type"
         ],
