@@ -207,6 +207,7 @@
 - 电缆芯线：导线 → 生成 → 电缆定义线 → 生成 → 单独提交的绑定 → 生成 → 芯线，电缆读回 3 个成员并精确分配，未用全项目重分配。— S43。
 - PLC 盒（SPECIAL `PLCC`）下的 DI 连接点地址、符号地址、通道读回正确；**每个连接点另有一个同名、无父对象的 PLCTerminal**，计数与核对须考虑。— S43。
 - 位置盒（SPECIAL `SC`）可放置并改为虚线，但盒内符号的结构没有继承盒的位置（读回 `=+`），条件未查明。— S43。
+- T7a Large 5/5（2026-10-27，2026.0.3.25421，Electric P8，LargeWrite 副本）：`LocationBox.GetGraphics()` 的图形外框是相对于盒原点的坐标（例 0,-40;40,0），页面范围以 `GetLogicalArea()` 为准；结构名经 `NameParts.DESIGNATION_LOCATION` 写入并读回；盒内已有器件不被改名；一次撤销恢复。— `eplan_device_place` 位置盒。
 ### A54. 文字、图形、移动与打开页（spike S42，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S42](../../spikes/S42-graphics-move-view/README.md)。
 
