@@ -44,7 +44,7 @@ public sealed class LocationBoxPlacementTests
     [InlineData("pen")]
     [InlineData("area")]
     [InlineData("device")]
-    [InlineData("outside")]
+    [InlineData("nonFinite")]
     [InlineData("unknownBounds")]
     [InlineData("structure")]
     [InlineData("symbol")]
@@ -67,11 +67,11 @@ public sealed class LocationBoxPlacementTests
             case "device":
                 _outline.OnSet = () => _coil.Name = "=F+P1-K1";
                 break;
+            case "nonFinite":
+                _outline.Bounds = [new(double.NaN, 0), new(40, 0)];
+                break;
             case "unknownBounds":
                 _outline.Bounds = [];
-                break;
-            case "outside":
-                _outline.Bounds = [new(60, 140), new(500, 180)];
                 break;
             case "structure":
                 _outline.OnSet = () => _box.LocationName = "WRONG";
