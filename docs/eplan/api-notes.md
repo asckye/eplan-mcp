@@ -216,6 +216,7 @@
 - `Text.Create(page, MultiLangString, height)`、`Line.Create(page, p1, p2)`、`Rectangle.Create(page)` + `SetArea` 可在 `SafetyPoint → UndoStep → QuietModeStep` 中提交，几何读回与请求一致；一步撤销，失败回滚无空步，重开持久。— S42。
 - 只含 en_US 或 en_US+de_DE 的自由文字在中文显示语言下**不显示**，语言无关文字（`??_??`）显示：写自由文字须包含项目显示语言或语言无关。— S42。
 - 移动：文字、矩形、功能用 `Location`；直线须同时设 `StartPoint`、`EndPoint`。`PropertyPlacement.Location` 是相对父符号的偏移，父符号移动时属性文字随之移动。— S42。
+- T5b Large（2026-10-28，2026.0.3.25421，Electric P8，LargeWrite 副本）：移动功能及其属性文字、自由文字在一个 `SafetyPoint` 事务中提交，属性文字随父符号移动，范围外对象不变，一次撤销恢复。内容为空的属性文字外框读回 `0,0,0,0`，边界检查改用其位置。移动后重新生成连接若无变化，原先仍留下空撤销步（下一次 Ctrl+Z 无效），已改为不提交。— `eplan_placement_update`。
 - `Edit.OpenPageWithName(项目路径, 页名)` 在编辑器中打开该页并返回 `Page`，不写项目文件、不留撤销步；编辑器打开着时，提交后的修改**自动刷新**到画面。打开页时 EPLAN 加载部件库和宏库，634 个部件引用的 `ObjectIdentifier` 全部改号（数量、内容不变）：部件引用的对象号不能作稳定标识。— S42。
 - 打开页会让该项目成为当前项目；编辑器开着时，关闭再重新打开其他项目（ProjectOpen），当前项目仍是编辑器所在的项目。要切换当前项目，就在目标项目里再打开一页。`XEsUndoAction` 作用于当前项目，撤销前必须核对（A41）。— `eplan_page_open` Large 实测，2026-10-27。
 - `ExistingIds` 会返回索引为 0 的带索引属性（如 1122），按普通属性读抛 `IndexedPropertyException`（S063172）。— S42。
