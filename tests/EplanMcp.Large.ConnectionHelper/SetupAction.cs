@@ -3,6 +3,7 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.MasterData;
 using Eplan.EplApi.HEServices;
+using EplanMcp.Tests;
 
 namespace EplanMcp.Large.ConnectionHelper;
 
@@ -27,22 +28,20 @@ public sealed class SetupAction : IEplAction
             Page page = project.Pages.Single(p => p.Name == pageName);
             if (page.PageType.ToString() != "Circuit" || page.AllPlacements.Length != 0)
             { Log("page: " + page.PageType + " placements=" + page.AllPlacements.Length); return false; }
-            double grid = page.GridSize, x = grid * 30, y = grid * 40;
+            double grid = page.GridSize;
+            var layout = new ConnectionCreateLayout(grid, directions.Split(','));
             var choices = new List<(SymbolVariant Variant, PointD Position)>();
-            foreach (string direction in directions.Split(','))
+            foreach (var target in layout.Targets)
             {
-                string opposite = direction switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", "Right" => "Left", _ => throw new InvalidOperationException("Invalid fixture direction.") };
-                double dx = direction == "Right" ? 8 * grid : direction == "Left" ? -8 * grid : 0;
-                double dy = direction == "Up" ? 8 * grid : direction == "Down" ? -8 * grid : 0;
                 var choice = project.SymbolLibraries.Where(l => l.Name == "IEC_symbol").SelectMany(l => l.Symbols)
-                    .Where(s => s.Type.ToString() == "Function").SelectMany(s => s.Variants)
+                    .Where(s => s.Name == "BAT" && s.Type.ToString() == "Function").SelectMany(s => s.Variants)
                     .Select(v => (Variant: v, Pins: v.ConnectionPoints))
-                    .Where(v => v.Pins.Length == 2 && v.Pins.Any(p => p.Direction.ToString() == opposite)
+                    .Where(v => v.Pins.Length == 2 && v.Pins.Any(p => p.Direction.ToString() == target.Facing)
                         && v.Pins.All(p => Math.Abs(p.Location.X) <= 2 * grid && Math.Abs(p.Location.Y) <= 2 * grid
                             && Math.Abs(p.Location.X / grid - Math.Round(p.Location.X / grid)) < 1e-8 && Math.Abs(p.Location.Y / grid - Math.Round(p.Location.Y / grid)) < 1e-8))
                     .OrderBy(v => v.Variant.SymbolName, StringComparer.Ordinal).ThenBy(v => v.Variant.VariantNr).First();
-                PinBase pin = choice.Pins.First(p => p.Direction.ToString() == opposite);
-                choices.Add((choice.Variant, new PointD(x + dx - pin.Location.X, y + dy - pin.Location.Y)));
+                PinBase pin = choice.Pins.First(p => p.Direction.ToString() == target.Facing);
+                choices.Add((choice.Variant, new PointD(target.Pin[0] - pin.Location.X, target.Pin[1] - pin.Location.Y)));
             }
             // A13/A52: Function.Create requires UndoStep -> Transaction, with discovery outside the write.
             project.LockAllObjects();
@@ -71,6 +70,8 @@ public sealed class SetupAction : IEplAction
                 undo.CloseUndo();
             }
             catch { transaction.Abort(); throw; }
+            if (page.AllPlacements.OfType<SymbolReference>().Any(r => r.GraphicalConnections.Length != 0))
+            { throw new InvalidOperationException("Fixture endpoints already autoconnect before node placement."); }
             return true;
         }
         catch (Exception ex) { Log(ex.ToString()); return false; }

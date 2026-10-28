@@ -25,9 +25,9 @@
 规划及 stale 为 execution=not_started；INVALID_ARGUMENT 带 JSON Pointer；CAPABILITY_MISSING 表示几何不完整、未选中目标项目或无法产生有效的两个撤销步骤。第二步失败或端点不符，回滚生成并撤销放置，返回 rolled_back；提交或补偿无法确认则返回 unknown，暂停写入且不重发。
 
 ## 5. 实现要点
-规划复用 T1 的 ISymbolReader，在写事务之前只读查询 SPECIAL；按实际连接点方向唯一选择 CO/Routing、TLRO/TLRU/TOUL/TOUR 对应 TNodeUp/Down/Left/Right、PCP/PotentialTerminal。转弯自动规划 CO，T 分支必须显式给出；不选任意近似符号。本期仅支持连接点与插入点重合的变体，其他偏移缺少几何证明即拒绝。
+规划复用 T1 的 ISymbolReader，在写事务之前只读查询 SPECIAL；按实际连接点方向唯一选择 CO/Routing、TLRO/TLRU/TOUL/TOUR 对应 TNodeUp/Down/Left/Right。转弯自动规划 CO，T 分支必须显式给出；二者仍只支持连接点与插入点重合的变体。PCP/PotentialTerminal 必须只有一个有限偏移引脚（每轴不超过两格），同方向选最小变体号；重复的同号候选仍拒绝。potential_point 的 position 表示吸附后的电气连接点，symbols.position 为减去库引脚偏移后的实际插入点，外框按插入点平移；插入点可以不在栅格，连接点必须在栅格。
 内部 Scene 从原生完整单页放置、外框、引脚、既有图形与逻辑连接及变体外框读取；未能覆盖原生对象即拒绝，Complete 不来自工具参数。Page.Size 缺失不以图框尺寸兜底；吸附中点远离零，端点须等于既有引脚。
-检查所有路径正交、非零、无重复或折返；拒绝斜线、未声明交叉、重叠线段、其他引脚截断、节点方向不符以及既有连线/放置冲突。新节点向最近的相向引脚/节点预测自动线，连带端点纳入全页预测；不能隐式覆盖已有线。全页基线、栅格/页界、所选库变体及请求进入指纹，重新规划可用 expectedFingerprint 检测 stale；不新增落盘格式（沿 ADR-0029）。
+检查所有路径正交、非零、无重复或折返；拒绝斜线、未声明交叉、重叠线段、其他引脚截断、节点方向不符以及既有连线/放置冲突。只有终端线段沿所属引脚的出线方向接近、另一端在该外框之外时，才允许接触或进入该 placement 的外框；所属关系按 type/oid/pin_index 证明，不能整条路径豁免目标外框。新节点向最近的相向引脚/节点预测自动线，连带端点纳入全页预测；不能隐式覆盖已有线。全页基线、栅格/页界、所选库变体及请求进入指纹，重新规划可用 expectedFingerprint 检测 stale；不新增落盘格式（沿 ADR-0029）。
 执行沿既有串行主线程 LockingStep 和 WritePipeline：规划→scratch 外审批→完整指纹重核→执行→outcome，默认 60 秒。符号发现与变体选择在写入之前完成；不显式 LockObject，不保留跨请求原生对象。
 
 ## 6. 写操作专项
@@ -36,7 +36,7 @@
 
 ## 7. 测试
 Small 覆盖严格参数与预测、两次提交顺序、读回不符/取消/生成失败补偿、补偿失败 unknown、stale 零写入。Medium fake Bridge 覆盖成功、rolled_back、stale、dry-run 和审批；快照按[测试规范](../standards/testing.md#更新快照)生成审阅后接收。
-Large 已编写但本次不运行 EPLAN：在 write copy 的新页逐方向核验角/T/电位点、实际 StartPin/EndPin、图像导出和两次撤销恢复快照哈希；真实生成故障尚无可重复触发方式，失败路径由 fake 注入覆盖。实机及 Agent 验收仍待维护者执行；实测前先构建 tests/EplanMcp.Large.ConnectionHelper（仅生成独立虚构端点夹具，不注册产品工具）。
+Large 在 write copy 的新页逐方向核验角/T/电位点、实际 StartPin/EndPin、图像导出和两次撤销恢复快照哈希；T 夹具使用 BAT 两端器件，将相反方向的一臂经同批角连接折转，放置前检查无自动连线，并断言三个真实端点均进入预测。Small 复用夹具布局验证全部 12 个方向组合，覆盖自身端点外框、其他/中间穿越、PCP 四向偏移和镜像选择。此次修复不运行 EPLAN，12 例须重跑；真实生成故障尚无可重复触发方式，失败路径由 fake 注入覆盖。实测前先构建 tests/EplanMcp.Large.ConnectionHelper；辅助程序集每个 EPLAN 进程只加载一次，更新后须重启 EPLAN，不以注销代替重载。
 
 ### 英文用法
 
