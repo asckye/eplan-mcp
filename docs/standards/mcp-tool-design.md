@@ -40,6 +40,7 @@
 | `revision` | 项目的修订（变更跟踪）：状态、修订记录 | 链接文件扩展名 `.elk`/`.ell`/`.elr`、`PROJ_REVISION_LOG_*`、`HEServices.Revision` |
 | `page` | 页面 | `Page` |
 | `page_text` | 页面自由文本（含组内文本，不含图框） | `Graphics.Text` |
+| `placement` | 页上的二维放置对象；创建自由文本、图形线和矩形，后续支持同页绝对移动（M8） | `Placement`、`Graphics.Text/Line/Rectangle`；图形线不是导线 |
 | `device` | 设备，即带标识的一组功能 | `Function`（主功能和辅助功能） |
 | `connection` | 逻辑连接、连线 | `Connection` |
 | `cable` | 电缆 | `Cable` |

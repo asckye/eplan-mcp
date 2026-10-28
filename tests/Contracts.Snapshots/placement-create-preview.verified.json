@@ -1,0 +1,119 @@
+﻿{
+  "project": "Line1",
+  "page": "P",
+  "execution": "not_started",
+  "dryRun": true,
+  "gridSize": 5,
+  "boundarySource": "Page.Size",
+  "items": [
+    {
+      "requested": {
+        "kind": "text",
+        "position": [
+          12.5,
+          22.5
+        ],
+        "contents": {
+          "en_US": "Panel",
+          "de_DE": "Feld"
+        },
+        "height_mm": 3
+      },
+      "actual": {
+        "kind": "text",
+        "position": [
+          15,
+          25
+        ],
+        "contents": {
+          "en_US": "Panel",
+          "de_DE": "Feld"
+        },
+        "height_mm": 3
+      },
+      "bounds": [
+        15,
+        25,
+        35,
+        30
+      ],
+      "snapped": true
+    },
+    {
+      "requested": {
+        "kind": "line",
+        "points": [
+          [
+            12.5,
+            22.5
+          ],
+          [
+            32.5,
+            22.5
+          ]
+        ]
+      },
+      "actual": {
+        "kind": "line",
+        "points": [
+          [
+            15,
+            25
+          ],
+          [
+            35,
+            25
+          ]
+        ]
+      },
+      "bounds": [
+        15,
+        25,
+        35,
+        25
+      ],
+      "snapped": true
+    },
+    {
+      "requested": {
+        "kind": "rectangle",
+        "corners": [
+          [
+            40,
+            40
+          ],
+          [
+            10,
+            10
+          ]
+        ]
+      },
+      "actual": {
+        "kind": "rectangle",
+        "corners": [
+          [
+            40,
+            40
+          ],
+          [
+            10,
+            10
+          ]
+        ]
+      },
+      "bounds": [
+        10,
+        10,
+        40,
+        40
+      ],
+      "snapped": false
+    }
+  ],
+  "changes": [
+    "create text P item 0: {\"kind\":\"text\",\"position\":[15,25],\"contents\":{\"en_US\":\"Panel\",\"de_DE\":\"Feld\"},\"height_mm\":3} bounds [15,25,35,30]",
+    "create line P item 1: {\"kind\":\"line\",\"points\":[[15,25],[35,25]]} bounds [15,25,35,25]",
+    "create rectangle P item 2: {\"kind\":\"rectangle\",\"corners\":[[40,40],[10,10]]} bounds [10,10,40,40]"
+  ],
+  "connectionChanges": []
+}
