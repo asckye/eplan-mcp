@@ -23,7 +23,8 @@ internal static class ToolLocator
     /// <c>claude.exe</c> on <paramref name="searchPath"/> (the PATH), otherwise the newest copy the Claude desktop app
     /// keeps under <c>Claude\claude-code\&lt;version&gt;\&lt;build&gt;\</c> in its roaming data. The app is an MSIX package:
     /// its own processes see that folder in <paramref name="appData"/>, every other process only in the package's
-    /// redirected copy under <paramref name="localAppData"/> (api-notes A6), so both are searched.
+    /// redirected copy under <paramref name="localAppData"/> (api-notes A6), so both are searched. Newer app builds keep
+    /// it under <c>Claude-Data\claude_&lt;publisher&gt;\claude-code</c> in <paramref name="localAppData"/> instead.
     /// </summary>
     public static string? Claude(string? searchPath, string appData, string localAppData)
     {
@@ -37,11 +38,15 @@ internal static class ToolLocator
         }
 
         var packages = new DirectoryInfo(Path.Combine(localAppData, "Packages"));
+        var data = new DirectoryInfo(Path.Combine(localAppData, "Claude-Data"));
         IEnumerable<DirectoryInfo> roots =
         [
             new(Path.Combine(appData, "Claude", "claude-code")),
             .. packages.Exists
                 ? packages.EnumerateDirectories("Claude_*").Select(p => new DirectoryInfo(Path.Combine(p.FullName, "LocalCache", "Roaming", "Claude", "claude-code")))
+                : [],
+            .. data.Exists
+                ? data.EnumerateDirectories("claude_*").Select(p => new DirectoryInfo(Path.Combine(p.FullName, "claude-code")))
                 : [],
         ];
         return roots

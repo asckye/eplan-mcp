@@ -41,6 +41,16 @@ public sealed class ToolLocatorTests : IDisposable
     }
 
     [Fact]
+    public void Claude_InTheAppsLocalData_IsFoundThere()
+    {
+        // Desktop app 3.6556 keeps its Claude Code under %LOCALAPPDATA%\Claude-Data\claude_<publisher>\claude-code.
+        Touch("local", "Claude-Data", "claude_pzs8sxrjxfjjc", "claude-code", "2.1.299", "f058", "claude.exe");
+        string newest = Touch("local", "Claude-Data", "claude_pzs8sxrjxfjjc", "claude-code", "2.1.308", "c17a", "claude.exe");
+
+        Assert.Equal(newest, ToolLocator.Claude(null, Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
+    }
+
+    [Fact]
     public void Claude_Nowhere_IsNull()
     {
         Assert.Null(ToolLocator.Claude(string.Empty, Path.Combine(_directory.FullName, "appdata"), Path.Combine(_directory.FullName, "local")));
