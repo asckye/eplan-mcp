@@ -78,13 +78,23 @@ public static class PlacementMovePlanner
                 if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
                 { throw Missing("Grouped objects, macro groups and unverified placement kinds cannot be moved."); }
                 offsets.Add(child, offset);
-                double[] bounds = child.Bounds!.Select((n, j) => n + offset[j % 2]).ToArray();
-                Require(DrawingCoordinates.Contains(page.PageSize, [bounds]) && bounds.All(n => n <= 10000), "/moves", "Keep every following outline inside Page.Size and 0..10000 mm.");
-                rows.Add(new JObject { ["locator"] = BridgeJson.FromObject(child.Locator), ["parent"] = child.Parent is null ? null : BridgeJson.FromObject(child.Parent), ["before"] = new JArray(child.Location), ["requested"] = new JArray(child.Location.Select((n, j) => n + target.Requested[j] - target.Row.Location[j])), ["after"] = new JArray(child.Location.Zip(offset, (a, b) => a + b)), ["snapped"] = !actual.SequenceEqual(target.Requested), ["bounds"] = new JArray(bounds) });
+                // S42/A14, live T5b: an empty property text reports the outline 0,0,0,0; check its moved location instead.
+                bool empty = child.Bounds!.All(n => n == 0);
+                double[] bounds = empty ? [child.Location[0] + offset[0], child.Location[1] + offset[1], child.Location[0] + offset[0], child.Location[1] + offset[1]]
+                    : child.Bounds!.Select((n, j) => n + offset[j % 2]).ToArray();
+                Require(DrawingCoordinates.Contains(page.PageSize, [bounds]) && bounds.All(n => n <= 10000), "/moves", string.Format(System.Globalization.CultureInfo.InvariantCulture, "Keep every following outline inside Page.Size and 0..10000 mm ({0} at {1}: outline {2} moved to {3}).",
+                    child.Kind, string.Join(",", child.Location), string.Join(",", child.Bounds!), string.Join(",", bounds)));
+                rows.Add(new JObject { ["locator"] = BridgeJson.FromObject(child.Locator), ["parent"] = child.Parent is null ? null : BridgeJson.FromObject(child.Parent), ["before"] = new JArray(child.Location), ["requested"] = new JArray(child.Location.Select((n, j) => n + target.Requested[j] - target.Row.Location[j])), ["after"] = new JArray(child.Location.Zip(offset, (a, b) => a + b)), ["snapped"] = !actual.SequenceEqual(target.Requested), ["bounds"] = new JArray(empty ? child.Bounds! : bounds) });
             }
         }
         bool noOp = offsets.Values.All(d => d.All(n => n == 0));
-        double[] Box(DrawingPlacement p) => p.Bounds!.Select((n, j) => n + (offsets.TryGetValue(p, out double[]? d) ? d[j % 2] : 0)).ToArray();
+        double[] Box(DrawingPlacement p)
+        {
+            double[] d = offsets.TryGetValue(p, out double[]? o) ? o : [0, 0];
+            return p.Bounds!.All(n => n == 0)
+                ? [p.Location[0] + d[0], p.Location[1] + d[1], p.Location[0] + d[0], p.Location[1] + d[1]]
+                : p.Bounds!.Select((n, j) => n + d[j % 2]).ToArray();
+        }
         foreach (DrawingPlacement moved in offsets.Keys.Where(p => offsets[p].Any(n => n != 0)))
         {
             double[] a = Box(moved);

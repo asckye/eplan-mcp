@@ -67,15 +67,29 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         Assert.Equal([80d, 140d], Find(coil).Location);
         Assert.Equal([label.Location[0], label.Location[1] - 20], Find(label).Location);
         Assert.Equal([160d, 100d], Find(text).Location);
-        foreach (DrawingPlacement outside in before.Placements.Where(p => p.Locator.Oid != coil.Locator.Oid && p.Locator.Oid != text.Locator.Oid))
-        { Assert.Equal(JsonSerializer.Serialize(outside), JsonSerializer.Serialize(Find(outside))); }
+        // Several empty property texts share their function's identifier (A57), so compare everything outside the
+        // closure as one ordered sequence instead of looking each row up.
+        bool Outside(DrawingPlacement p) => p.Locator.Oid != coil.Locator.Oid && p.Locator.Oid != text.Locator.Oid && p.Parent?.Oid != coil.Locator.Oid;
+        Assert.Equal(JsonSerializer.Serialize(before.Placements.Where(Outside)), JsonSerializer.Serialize(after.Placements.Where(Outside)));
         JsonElement generated = await host.CallAsync("eplan_connection_generate", target);
         // Alignment and endpoint identities are retained; regeneration must not leave an empty step (A19).
         Assert.Equal(ExecutionState.NotStarted, generated.GetProperty("execution").GetString());
         JsonElement connectionsAfter = await host.CallAsync("eplan_connection_list", new() { ["project"] = host.Writable, ["page"] = page });
         Assert.Equal(connectionsBefore.GetProperty("connections").GetRawText(), connectionsAfter.GetProperty("connections").GetRawText());
         await session.UndoAsync();
-        Assert.Equal(original, JsonSerializer.Serialize(await Read(bridge, page)));
+        PageDrawingGeometry undone = await Read(bridge, page);
+        JsonElement connectionsUndone = await host.CallAsync("eplan_connection_list", new() { ["project"] = host.Writable, ["page"] = page });
+        TestContext.Current.TestOutputHelper!.WriteLine($"after undo: {connectionsUndone.GetProperty("connections").GetArrayLength()} connections (before move {connectionsBefore.GetProperty("connections").GetArrayLength()}), coil at {string.Join(",", undone.Placements.First(p => p.Locator.Oid == coil.Locator.Oid && p.Kind == "Function").Location)}");
+        foreach (var (was, now) in before.Placements.Zip(undone.Placements).Where(p => JsonSerializer.Serialize(p.First) != JsonSerializer.Serialize(p.Second)))
+        { TestContext.Current.TestOutputHelper!.WriteLine($"undo differs: {JsonSerializer.Serialize(was)} -> {JsonSerializer.Serialize(now)}"); }
+        if (JsonSerializer.Serialize(undone) != original)
+        {
+            await session.UndoAsync(); // diagnostic only: does a second undo reach the move?
+            PageDrawingGeometry second = await Read(bridge, page);
+            JsonElement c2 = await host.CallAsync("eplan_connection_list", new() { ["project"] = host.Writable, ["page"] = page });
+            TestContext.Current.TestOutputHelper!.WriteLine($"after second undo: {c2.GetProperty("connections").GetArrayLength()} connections, coil at {string.Join(",", second.Placements.First(p => p.Locator.Oid == coil.Locator.Oid && p.Kind == "Function").Location)}, text exists {second.Placements.Any(p => p.Locator.Oid == text.Locator.Oid)}");
+        }
+        Assert.Equal(original, JsonSerializer.Serialize(undone));
         Assert.Equal(business, (await session.SnapshotAsync()).Hash);
     }
 

@@ -49,18 +49,29 @@ public static class PlacementMoveExecution
         {
             ConnectionCreatePlanner.Scene actual = Read();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
-            { throw Mismatch(); }
+            { throw Mismatch("placement count"); }
             for (int i = 0; i < expected.Page.Placements.Count; i++)
             {
                 DrawingPlacement want = expected.Page.Placements[i], found = actual.Page.Placements[i];
                 if (rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, want.Locator)))
                 { found.Locator.Digest = want.Locator.Digest; if (found.Parent is not null && want.Parent is not null) { found.Parent.Digest = want.Parent.Digest; } }
             }
-            if (!actual.Complete || actual.PageType != scene.PageType || !JToken.DeepEquals(BridgeJson.FromObject(expected.Page), BridgeJson.FromObject(actual.Page))
-                || !JToken.DeepEquals(BridgeJson.FromObject(expected.Pins), BridgeJson.FromObject(actual.Pins))
-                || !JToken.DeepEquals(BridgeJson.FromObject(scene.Logical), BridgeJson.FromObject(actual.Logical))
-                || committed && Segments(expected.Graphical) != Segments(actual.Graphical))
-            { throw Mismatch(); }
+            if (!actual.Complete || actual.PageType != scene.PageType)
+            { throw Mismatch("page inventory"); }
+            for (int i = 0; i < expected.Page.Placements.Count; i++)
+            {
+                JToken want = BridgeJson.FromObject(expected.Page.Placements[i]), found = BridgeJson.FromObject(actual.Page.Placements[i]);
+                if (!JToken.DeepEquals(want, found))
+                { throw Mismatch("placement " + want.ToString(Formatting.None) + " read back as " + found.ToString(Formatting.None)); }
+            }
+            if (!JToken.DeepEquals(BridgeJson.FromObject(expected.Page), BridgeJson.FromObject(actual.Page)))
+            { throw Mismatch("page geometry"); }
+            if (!JToken.DeepEquals(BridgeJson.FromObject(expected.Pins), BridgeJson.FromObject(actual.Pins)))
+            { throw Mismatch("pins"); }
+            if (!JToken.DeepEquals(BridgeJson.FromObject(scene.Logical), BridgeJson.FromObject(actual.Logical)))
+            { throw Mismatch("logical connections"); }
+            if (committed && Segments(expected.Graphical) != Segments(actual.Graphical))
+            { throw Mismatch("autoconnect lines " + Segments(actual.Graphical) + " instead of " + Segments(expected.Graphical)); }
         }
         Committed<bool> result = TransactionRunner.Run(transactions, "eplan_placement_update", () => { move(); Verify(false); return true; }, _ => true,
             _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { Verify(true); return true; }),
@@ -69,5 +80,5 @@ public static class PlacementMoveExecution
         plan["warning"] = result.Warning;
         return plan;
     }
-    private static BridgeErrorException Mismatch() => new(ErrorReason.EplanOperationFailed, "Placement closure, following text, pins or connections differ from the approved move.");
+    private static BridgeErrorException Mismatch(string what) => new(ErrorReason.EplanOperationFailed, "Placement closure, following text, pins or connections differ from the approved move (" + what + ").");
 }
