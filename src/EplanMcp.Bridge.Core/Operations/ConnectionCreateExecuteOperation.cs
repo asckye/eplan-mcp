@@ -66,8 +66,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 }
                 if (added.Count == 0 && !interruptions)
                 { throw Mismatch(); }
-                if (interruptions)
-                { InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages)); }
+                // Live T7b: EPLAN computes interruption cross-references only after the commit; verify below.
                 return actual;
             }, _ => true);
             if (generated.Warning is not null)
