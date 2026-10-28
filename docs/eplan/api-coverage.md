@@ -10,6 +10,7 @@
 M8 T4a：[`eplan_placement_create`](../tools/eplan_placement_create.md) 已有文本/直线/矩形的契约和只读规划（A54），尚未注册工具或执行操作；文字测量适配、混合创建及 Large 验收留 T4b/T4c，不计作可用写能力。
 
 M8 T3a：`eplan_connection_create` 的[规格与单页路径/连接符号预测](../tools/eplan_connection_create.md)已实现为未注册的 dry-run 规划器；尚无 MCP/Bridge 入口或执行能力。图形与生成后逻辑端点分别预测；A52 要求单独提交生成，原子执行门槛留 T3b。
+M6 第 3 阶段 M2：已增加 [模块只读检查内部服务](../design/2026-10-27-m6-module-inspect.md) 与闭包证据校验，供 M3 使用；原生 `module.inspect` 尚未注册，缺能力明确拒绝，Large 实机对照未运行，不计入已开放的工具覆盖。
 
 ---
 
