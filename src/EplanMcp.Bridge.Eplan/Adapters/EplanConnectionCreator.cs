@@ -47,7 +47,36 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
         foreach (SymbolVariant variant in Variants(target.Path))
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
+        scene.ReadCables = () => ReadCables(target.Path, page, scene);
         return scene;
+    }
+    private static CableDefinitionPlanner.Inventory ReadCables(string project, string page, ConnectionCreatePlanner.Scene scene)
+    {
+        using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
+        var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = finder.GetFunctions(null).Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
+        foreach (Connection connection in finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
+        {
+            Pin? start = connection.StartPin, end = connection.EndPin;
+            if (start?.ParentFunction is not { } a || end?.ParentFunction is not { } b || a.Page?.Name != page || b.Page?.Name != page
+                || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to)
+                || !scene.Graphical.Any(s => s[0].SequenceEqual(from.Location) && s[1].SequenceEqual(to.Location) || s[1].SequenceEqual(from.Location) && s[0].SequenceEqual(to.Location)))
+            { inventory.Complete = false; continue; }
+            using ConnectionPropertyList properties = connection.Properties;
+            string? Read(int number)
+            { using AnyPropertyId id = number; using PropertyValue value = properties[id]; return EplanText.Read(value, EplanText.Language(null)); }
+            var wire = new CableDefinitionPlanner.Wire
+            {
+                Points = [from.Location, to.Location],
+                Pins = [Key(a, start.Index), Key(b, end.Index)],
+                Cable = connection.ConnectionDefPoints.Length > 0 ? "<definition-points>" : Read(20005),
+                Label = Read(31011),
+                Colour = Read(31004),
+                CrossSection = Read(31002)
+            };
+            wire.Locator = DrawingLocators.FromIdentifier(project, page, connection.ToStringIdentifier(), SnapshotCanonical.Sha256(JObject.FromObject(wire).ToString()));
+            inventory.Wires.Add(wire);
+        }
+        return inventory;
     }
     public System.Action Prepare(string project, string page, JArray symbols)
     {

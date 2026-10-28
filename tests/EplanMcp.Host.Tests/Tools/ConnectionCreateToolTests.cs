@@ -47,6 +47,40 @@ public sealed class ConnectionCreateToolTests
     }
 
     [Fact]
+    public async Task CableDryRun_ReturnsCompleteCoreImpactWithNoApprovalOrWrites()
+    {
+        var channel = new FakeApprovalChannel("eplan", ApprovalDecision.Denied);
+        using var harness = Setup(channel);
+        harness.ProjectPath = Path.Combine(harness.Locations.Root, "Outside", "Line1");
+        harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = _ =>
+        {
+            WritePlan plan = harness.Plan([new() { Action = "create", Kind = "connections", Name = "page", NewValue = "Cable planning only" }]);
+            plan.Details = new() { ["preview"] = """{"project":"Line1","page":"page","execution":"not_started","undoSteps":null,"executionCapability":"CAPABILITY_MISSING","coreImpact":[{"connection":{"item_index":0},"designation":"-W3","label":"1","colour":"BK"}]}""" };
+            return plan;
+        };
+        var result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline, "Line1", "page",
+            [JsonSerializer.SerializeToElement(new { kind = "cable_definition", points = (int[][])[[0, 16], [40, 16]], designation = "-W3", type_text = "Fictional cable", core_count = 1, cross_section_mm2 = 1.5, cores = new[] { new { connection = new { locator = new { project = "scratch-project", page = "page", type = 9, oid = 9, digest = new string('c', 64) } }, label = "1", colour = "BK" } } })],
+            dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("undoSteps").ValueKind);
+        Assert.Equal("-W3", Assert.Single(result.GetProperty("coreImpact").EnumerateArray()).GetProperty("designation").GetString());
+        Assert.Equal(ExecutionState.NotStarted, result.GetProperty("execution").GetString());
+        Assert.Empty(harness.Bridge.Writes);
+        Assert.Empty(channel.Questions);
+    }
+
+    [Fact]
+    public async Task CableExecute_IsMissingBeforePlanningOrApproval()
+    {
+        var channel = new FakeApprovalChannel("eplan", ApprovalDecision.Denied);
+        using var harness = Setup(channel);
+        JsonElement error = WriteToolHarness.Error(await ConnectionCreateTools.CreateAsync(harness.Pipeline, "Line1", "page",
+            [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Empty(harness.Bridge.Calls);
+        Assert.Empty(channel.Questions);
+    }
+
+    [Fact]
     public async Task OversizedEvidence_IsCleanedAndClipped_WithoutChangingExecutedArguments()
     {
         using var harness = Setup();

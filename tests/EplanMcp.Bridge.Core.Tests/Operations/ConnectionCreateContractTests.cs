@@ -1,3 +1,4 @@
+using EplanMcp.Bridge.Core.Operations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +26,7 @@ public sealed class ConnectionCreateContractTests
             ["title"] = "Create connection symbols and explicit wire paths",
             ["status"] = "registered_preview_contract",
             ["profile"] = "full",
-            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. One call commits placement then generation: 2 undo steps. Generation failure undoes placement. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes commit placement then generation: 2 undo steps; failure undoes placement. cable_definition is planning only; execution returns CAPABILITY_MISSING. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
             ["annotations"] = new JObject { ["readOnlyHint"] = false, ["destructiveHint"] = false, ["idempotentHint"] = false, ["openWorldHint"] = false },
             ["inputSchema"] = InputSchema(),
             ["outputSchema"] = OutputSchema(),
@@ -35,6 +36,13 @@ public sealed class ConnectionCreateContractTests
             ["interruptionPreview"] = interruptionPreview,
             ["interruptionReadback"] = interruptions.Execute()["interruptionPoints"],
         };
+        var cables = new CableDefinitionFixture();
+        contract["cablePlanningExample"] = cables.Base.Request;
+        JObject cablePlan = cables.Plan();
+        Validate(InputSchema(), cables.Base.Request);
+        Validate(OutputSchema(cable: true), cablePlan);
+        contract["cableOutputSchema"] = OutputSchema(cable: true);
+        contract["cableDryRunExample"] = cablePlan;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -73,11 +81,26 @@ public sealed class ConnectionCreateContractTests
             ["counterpart_pages"] = Array(Text(), 1, 20),
         });
         interruption["properties"]!["counterpart_pages"]!["uniqueItems"] = true;
+        JObject cable = Object(new()
+        {
+            ["kind"] = Constant("cable_definition"),
+            ["points"] = Array(Point(), 2, 2),
+            ["designation"] = Text(),
+            ["type_text"] = Text(),
+            ["core_count"] = new JObject { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = 50 },
+            ["cross_section_mm2"] = new JObject { ["type"] = "number", ["exclusiveMinimum"] = 0 },
+            ["cores"] = Array(Object(new()
+            {
+                ["connection"] = new JObject { ["oneOf"] = new JArray(Object(new() { ["locator"] = locator }), Object(new() { ["item_index"] = new JObject { ["type"] = "integer", ["minimum"] = 0, ["maximum"] = 49 } })) },
+                ["label"] = Text(),
+                ["colour"] = new JObject { ["type"] = "string", ["enum"] = new JArray(CableDefinitionPlanner.Colours.Split(' ')) },
+            }), 1, 50),
+        });
         JObject schema = Object(new()
         {
             ["project"] = Text(),
             ["page"] = Text(),
-            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), Node("t_node", 3), Node("potential_point", 1), interruption) }, 1, 50),
+            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), Node("t_node", 3), Node("potential_point", 1), interruption, cable) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = false },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
@@ -86,7 +109,7 @@ public sealed class ConnectionCreateContractTests
         return schema;
     }
 
-    private static JObject OutputSchema()
+    private static JObject OutputSchema(bool cable = false)
     {
         JObject symbol = Object(new()
         {
@@ -97,7 +120,8 @@ public sealed class ConnectionCreateContractTests
             ["kind"] = Text(),
             ["connectionPoints"] = Array(Object(new() { ["location"] = Point(signed: true), ["direction"] = Text() }), 1, 3),
         });
-        JObject optionalInterruption = (JObject)InputSchema()["properties"]!["items"]!["items"]!["oneOf"]!.Last!.DeepClone();
+        JObject optionalInterruption = (JObject)InputSchema()["properties"]!["items"]!["items"]!["oneOf"]!
+            .Single(s => (string?)s["properties"]!["kind"]!["const"] == "interruption_point").DeepClone();
         JObject placedSymbol = Object(new() { ["position"] = Point(), ["symbol"] = symbol, ["bounds"] = Array(new() { ["type"] = "number", ["minimum"] = 0 }, 4, 4), ["interruption"] = optionalInterruption }, "position symbol bounds");
         JObject counterpart = Object(new() { ["page"] = Text(), ["name"] = Text(), ["oid"] = Integer(1) });
         JObject point = Object(new()
@@ -117,7 +141,7 @@ public sealed class ConnectionCreateContractTests
             ["points"] = Array(point, 0, 1000),
             ["preservedEndpoints"] = Array(Array(new(), 2, 2), 0, 10000),
         });
-        return Object(new()
+        JObject output = Object(new()
         {
             ["project"] = Text(),
             ["page"] = Text(),
@@ -138,6 +162,15 @@ public sealed class ConnectionCreateContractTests
             ["interruptionScope"] = scope,
             ["interruptionPoints"] = Array(point, 0, 100),
         }, "project page execution dryRun coordinates symbols graphicalAutoconnect logicalAfterGenerate gridSize pageSize coverage logicalDuringPlacement generation undoSteps fingerprint");
+        if (cable)
+        {
+            output["properties"]!["undoSteps"] = new JObject { ["type"] = "null" };
+            output["properties"]!["cableDefinitions"] = new JObject { ["type"] = "array", ["items"] = new JObject(), ["minItems"] = 1, ["maxItems"] = 50 };
+            output["properties"]!["coreImpact"] = new JObject { ["type"] = "array", ["items"] = new JObject(), ["minItems"] = 1, ["maxItems"] = 50 };
+            output["properties"]!["executionCapability"] = Constant("CAPABILITY_MISSING");
+            ((JArray)output["required"]!).Add("coreImpact");
+        }
+        return output;
     }
 
     private static JObject Object(JObject properties, string? required = null) => new()
@@ -167,7 +200,9 @@ public sealed class ConnectionCreateContractTests
         { Assert.Contains(options, option => JToken.DeepEquals(option, value)); }
         if (schema["oneOf"] is JArray choices)
         {
-            JObject branch = Assert.Single(choices.OfType<JObject>(), s => JToken.DeepEquals(s["properties"]!["kind"]!["const"], value["kind"]));
+            JObject branch = Assert.Single(choices.OfType<JObject>(), s => s["properties"]!["kind"] is { } kind
+                ? JToken.DeepEquals(kind["const"], value["kind"])
+                : value is JObject obj && s["required"]!.Values<string>().All(n => obj[n!] is not null) && obj.Properties().All(p => s["properties"]![p.Name] is not null));
             Validate(branch, value);
             return;
         }
