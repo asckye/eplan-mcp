@@ -4,8 +4,8 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>O3/A52: two commits in one call; a failed generation is rolled back before undoing committed placement.</summary>
-public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions)
+/// <summary>O3/A52: creation uses two commits; A54 moves share this entry and one still-open undo step.</summary>
+public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions, IPlacementMover? mover = null)
     : Operation<JObject, JObject>, IWriteOperation
 {
     public override string Name => OperationNames.ConnectionCreateExecute;
@@ -13,6 +13,8 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
     {
         JObject input = args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/request: supply the planned request."]));
         string fingerprint = (string?)args["fingerprint"] ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/fingerprint: supply the plan fingerprint."]));
+        if (input.ContainsKey("moves"))
+        { return PlacementMoveExecution.Execute(mover ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Placement moving is unavailable in this Bridge.")), transactions, input, fingerprint); }
         ConnectionCreatePlanner.Scene scene;
         JObject plan;
         Action place;

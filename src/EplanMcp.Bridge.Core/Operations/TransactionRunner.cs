@@ -7,7 +7,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// does its own read-back check and throws when it fails, so a commit only ever follows a passed check (coding
 /// standards 9.3, rule 9). Any exception from the change, or a cancel found before the commit, rolls everything back
 /// and is rethrown as "rolled back"; a commit or rollback that itself fails makes the outcome unknown
-/// (OUTCOME_UNKNOWN), never "rolled back" by guess; a problem after the commit is a warning on the committed result.
+/// (OUTCOME_UNKNOWN), never "rolled back" by guess. Optional committed readback precedes CloseUndo; A7 permits its
+/// failure to reverse that still-open step and verify restoration. Later release failures warn on the committed result.
 /// The order of the calls follows what spikes S1, S2 and S10 verified (api-notes A7, A9, A14). Main thread only.
 /// </summary>
 public static class TransactionRunner
@@ -15,7 +16,8 @@ public static class TransactionRunner
     /// <summary>The prefix of the undo step EPLAN lists for every write (M3 design 4.6).</summary>
     public const string UndoPrefix = "AI: ";
 
-    public static Committed<T> Run<T>(ITransactionScopeFactory transactions, string tool, Func<T> change, Func<T, bool>? shouldCommit = null)
+    public static Committed<T> Run<T>(ITransactionScopeFactory transactions, string tool, Func<T> change, Func<T, bool>? shouldCommit = null,
+        Action<T>? verifyCommitted = null, Action? verifyRollback = null)
     {
         ITransactionScope scope = transactions.Begin(UndoPrefix + tool);
         T result;
@@ -31,7 +33,7 @@ public static class TransactionRunner
         }
         catch (Exception failure)
         {
-            Abandon(scope, tool, closeUndo: shouldCommit is null);
+            Abandon(scope, tool, closeUndo: shouldCommit is null, verifyRollback);
             if (failure is BridgeErrorException known)
             {
                 known.Error.Execution = ExecutionState.RolledBack;
@@ -59,6 +61,14 @@ public static class TransactionRunner
 
         string? warning = null;
         try
+        { verifyCommitted?.Invoke(result); }
+        catch (Exception failure)
+        {
+            Abandon(scope, tool, closeUndo: false, verifyRollback);
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
+            { Error = { Execution = ExecutionState.RolledBack } };
+        }
+        try
         {
             scope.CloseUndo();
         }
@@ -84,7 +94,7 @@ public static class TransactionRunner
     /// Rolls back; legacy writes close first (S1/S2), PDF imports leave the step unclosed as verified in S44.
     /// A failed close leaves the data alone; a failed rollback or release leaves the project in an unknown state.
     /// </summary>
-    private static void Abandon(ITransactionScope scope, string tool, bool closeUndo)
+    private static void Abandon(ITransactionScope scope, string tool, bool closeUndo, Action? verifyRollback = null)
     {
         try
         {
@@ -101,6 +111,7 @@ public static class TransactionRunner
         try
         {
             scope.Rollback();
+            verifyRollback?.Invoke();
             scope.Dispose();
         }
         catch (Exception ex)

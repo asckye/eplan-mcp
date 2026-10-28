@@ -19,7 +19,7 @@ public sealed class PlacementUpdateContractTests
 {
     private static readonly JsonSerializerOptions _json = new(McpJsonUtilities.DefaultOptions) { WriteIndented = true, NewLine = "\n", Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
     [Fact]
-    public async Task ContractAndUsage_SnapshotWithoutRegistration()
+    public async Task ContractAndUsage_RegisteredWithClosedSchema()
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
@@ -27,14 +27,14 @@ public sealed class PlacementUpdateContractTests
         services.AddEplanMcp();
         await using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;
-        Assert.DoesNotContain(options.ToolCollection!, t => t.ProtocolTool.Name == PlacementUpdateContract.Definition.Name);
-        Assert.DoesNotContain(PlacementUpdateContract.Definition.Name, ToolUsageCatalog.Usage.Keys);
+        Assert.Contains(options.ToolCollection!, t => t.ProtocolTool.Name == PlacementUpdateContract.Definition.Name);
+        Assert.Contains(PlacementUpdateContract.Definition.Name, ToolUsageCatalog.Usage.Keys);
         DirectoryInfo root = new(AppContext.BaseDirectory);
         while (!File.Exists(Path.Combine(root.FullName, "EplanMcp.Ci.slnf")))
         { root = root.Parent!; }
         string usage = await File.ReadAllTextAsync(Path.Combine(root.FullName, "src/EplanMcp.Host/Tools/PlacementUpdate.usage.md"), TestContext.Current.CancellationToken);
         Assert.Equal(ToolUsageCatalog.Topics, ToolUsageCatalog.Parse("PlacementUpdate.usage.md", usage).Keys);
-        JsonElement example = JsonDocument.Parse(usage.Split("```json\n", StringSplitOptions.None)[1].Split("```", StringSplitOptions.None)[0]).RootElement;
+        JsonElement example = JsonDocument.Parse(usage.ReplaceLineEndings("\n").Split("```json\n", StringSplitOptions.None)[1].Split("```", StringSplitOptions.None)[0]).RootElement;
         Assert.True(PropertyGetContractTests.Accepts(PlacementUpdateContract.Input, example, PlacementUpdateContract.Input));
         Assert.Equal((false, false, true, false), (PlacementUpdateContract.Definition.Annotations!.ReadOnlyHint, PlacementUpdateContract.Definition.Annotations.DestructiveHint, PlacementUpdateContract.Definition.Annotations.IdempotentHint, PlacementUpdateContract.Definition.Annotations.OpenWorldHint));
         var scene = new ConnectionCreatePlanner.Scene
@@ -63,7 +63,7 @@ public sealed class PlacementUpdateContractTests
             JsonElement output = PlacementUpdateContract.Definition.OutputSchema!.Value;
             Assert.True(PropertyGetContractTests.Accepts(output, result, output));
         }
-        await Verify(JsonSerializer.Serialize(new { registered = false, tool = PlacementUpdateContract.Definition, usage = usage.ReplaceLineEndings("\n") }, _json) + "\n", "json")
+        await Verify(JsonSerializer.Serialize(new { registered = true, tool = PlacementUpdateContract.Definition, usage = usage.ReplaceLineEndings("\n") }, _json) + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("placement-update-contract");
     }
 }
