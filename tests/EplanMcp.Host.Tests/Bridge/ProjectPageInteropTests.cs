@@ -26,6 +26,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
     private readonly BridgeServer _server;
     private readonly BridgeClient _client;
     private readonly DrawingReader _drawings = new();
+    private readonly PageEditor _editor = new();
 
     public ProjectPageInteropTests()
     {
@@ -36,6 +37,7 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
             new ProjectGetOperation(_catalog, new ProjectReader()),
             new PageListOperation(_catalog, pages),
             new PageGetOperation(_catalog, pages),
+            new PageOpenOperation(_catalog, _editor),
             new PageDrawingGetOperation(_catalog, _drawings),
         ];
         var router = new OperationRouter(operations, new InlineDispatcher(), null, new NullLog(), TimeSpan.FromSeconds(10));
@@ -61,8 +63,56 @@ public sealed class ProjectPageInteropTests : IAsyncDisposable
         BridgeStatus status = await _client.GetStatusAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            [OperationNames.OperationCancel, OperationNames.OutcomeGet, OperationNames.PageDrawingGet, OperationNames.PageGet, OperationNames.PageList, OperationNames.ProjectGet, OperationNames.ProjectList],
+            [OperationNames.OperationCancel, OperationNames.OutcomeGet, OperationNames.PageDrawingGet, OperationNames.PageGet, OperationNames.PageList, OperationNames.PageOpen, OperationNames.ProjectGet, OperationNames.ProjectList],
             status.Handshake!.Operations);
+    }
+
+    [Fact]
+    public async Task PageOpen_ExplicitProjectAndExactPage_IgnoreCurrentProjectAndPrefixNeighbors()
+    {
+        _catalog.Projects = [_line1, new() { Name = "Line2", Path = @"D:\Projects\Line2" }];
+        for (int i = 0; i < 2; i++)
+        {
+            JsonElement data = Structured(await PageOpenTools.OpenAsync(_client, "Line2", "=A/1", Token));
+            Assert.Equal(("Line2", "=A/1", true), (data.GetProperty("project").GetString(), data.GetProperty("page").GetString(), data.GetProperty("editor_opened").GetBoolean()));
+            Assert.False(data.TryGetProperty("execution", out _));
+        }
+        Assert.Equal(Enumerable.Repeat((@"D:\Projects\Line2", "=A/1"), 2), _editor.Calls);
+        Assert.True(_line1.Current);
+    }
+
+    [Theory]
+    [InlineData("Line1", "=A/1", ErrorReason.PageNotFound)]
+    [InlineData("Line2", "=a/1", ErrorReason.PageNotFound)]
+    [InlineData("Line2", "=A/", ErrorReason.PageNotFound)]
+    [InlineData("Line2", "=A/9", ErrorReason.PageNotFound)]
+    [InlineData("missing", "=A/1", ErrorReason.ProjectNotOpen)]
+    public async Task PageOpen_MissingOrWrongScope_ReturnsActionableReadError(string project, string page, string reason)
+    {
+        _catalog.Projects = [_line1, new() { Name = "Line2", Path = @"D:\Projects\Line2" }];
+        JsonElement error = Error(await PageOpenTools.OpenAsync(_client, project, page, Token));
+        Assert.Equal(reason, error.GetProperty("reason").GetString());
+        Assert.False(error.TryGetProperty("execution", out JsonElement execution) && execution.ValueKind != JsonValueKind.Null);
+    }
+
+    [Fact]
+    public async Task PageOpen_DuplicateProjectNames_RequiresExplicitPath()
+    {
+        _catalog.Projects = [_line1, new() { Name = "Line1", Path = @"D:\Projects\Line2" }];
+        Assert.Equal(ErrorReason.AmbiguousName, Error(await PageOpenTools.OpenAsync(_client, "Line1", "=A/1", Token)).GetProperty("reason").GetString());
+        Assert.Empty(_editor.Calls);
+        Assert.Equal("Line1", Structured(await PageOpenTools.OpenAsync(_client, @"D:\Projects\Line2.elk", "=A/1", Token)).GetProperty("project").GetString());
+    }
+
+    private sealed class PageEditor : IPageEditor
+    {
+        public List<(string Path, string Page)> Calls { get; } = [];
+        public string? Open(string projectPath, string pageName)
+        {
+            Calls.Add((projectPath, pageName));
+            string[] pages = projectPath == @"D:\Projects\Line2" ? ["=A/1", "=A/10"] : ["=A/10"];
+            return pages.FirstOrDefault(name => string.Equals(name, pageName, StringComparison.Ordinal));
+        }
     }
 
     [Fact]

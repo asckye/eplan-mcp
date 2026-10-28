@@ -26,6 +26,8 @@ public sealed class ToolProfileTests
     [Fact]
     public void Core_HasNoDestructiveTool()
     {
+        Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PageOpenTools.Tool);
+        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PageOpenTools.Tool);
         Assert.All(Tools(ToolProfile.Core), t => Assert.False(t.Annotations?.DestructiveHint, t.Name));
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == ListImportTools.ImportTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == ListImportTools.ImportTool);
@@ -38,7 +40,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(80, Tools(ToolProfile.Full).Length);
+        Assert.Equal(81, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == AssetTools.ReviewTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == AssetTools.ReviewTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == SymbolTools.Tool);

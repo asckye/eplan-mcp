@@ -49,6 +49,9 @@ public static class OperationNames
     /// <summary>One page by its full name: type, description, devices, optionally its properties. Arguments: <see cref="PageGetArgs"/>; data: <see cref="PageGetData"/>.</summary>
     public const string PageGet = "page.get";
 
+    /// <summary>Open or focus an exact page editor. Arguments: <see cref="PageOpenArgs"/>; data: <see cref="PageOpenData"/>.</summary>
+    public const string PageOpen = "page.open";
+
     /// <summary>Read-only drawing discovery for an exact page. Arguments: <see cref="PageGetArgs"/>; data: <see cref="PageDrawingGeometry"/>.</summary>
     public const string PageDrawingGet = "page.drawing.get";
 

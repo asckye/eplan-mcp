@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 294,
-      "byTools": 286,
+      "implemented": 296,
+      "byTools": 288,
       "partial": 48,
-      "automatedTest": 286,
+      "automatedTest": 288,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 123,
-      "byTools": 116,
+      "implemented": 124,
+      "byTools": 117,
       "partial": 43,
-      "automatedTest": 116,
+      "automatedTest": 117,
       "liveVerified": 75,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 171,
-      "byTools": 170,
+      "implemented": 172,
+      "byTools": 171,
       "partial": 5,
-      "automatedTest": 170,
+      "automatedTest": 171,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 258,
+    "used": 260,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 124,
+      "implemented": 125,
       "liveVerified": 83
     },
     {
@@ -205,7 +205,7 @@
     {
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
-      "implemented": 33,
+      "implemented": 34,
       "liveVerified": 17
     },
     {
@@ -1423,6 +1423,25 @@
         "note": "调用后当前项目的 User.eod、User.eox 被改写，原因待查",
         "verifies": true
       }
+    },
+    {
+      "name": "eplan_page_open",
+      "safety": "read",
+      "operations": [
+        "page.open"
+      ],
+      "apiIds": 25,
+      "operationGroups": 13,
+      "dataDictionary": 0,
+      "dependencies": 12,
+      "actions": 0,
+      "spec": "docs/tools/eplan_page_open.md",
+      "small": 3,
+      "medium": 2,
+      "large": 1,
+      "apiNotes": [
+        "A54"
+      ]
     },
     {
       "name": "eplan_page_renumber",
@@ -3321,6 +3340,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4423,6 +4443,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4571,6 +4592,7 @@
         "eplan_macro_insert",
         "eplan_page_delete",
         "eplan_page_get",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4601,6 +4623,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4811,6 +4834,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4929,6 +4953,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -4965,6 +4990,7 @@
         "eplan_import_plc",
         "eplan_language_remove",
         "eplan_page_delete",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_part_sync",
         "eplan_project_create",
@@ -5015,6 +5041,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -5167,6 +5194,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -5253,6 +5281,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -5763,6 +5792,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObject.Project",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_open"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier",
       "layer": "operation",
       "status": "live_verified",
@@ -6171,6 +6209,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.HEServices.Edit.OpenPageWithName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_page_open"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
       "layer": "operation",
       "status": "automated_test",
@@ -6365,6 +6412,7 @@
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
+        "eplan_page_open",
         "eplan_page_renumber",
         "eplan_page_text_replace",
         "eplan_page_update",

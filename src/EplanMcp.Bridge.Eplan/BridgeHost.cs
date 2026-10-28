@@ -120,6 +120,7 @@ internal static class BridgeHost
             new ProjectBackupOperation(catalog, pages, backup),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
+            new PageOpenOperation(catalog, eplan.Offline ? null : new EplanPageEditor()),
             new PageDrawingGetOperation(catalog, new EplanDrawingReader()),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),

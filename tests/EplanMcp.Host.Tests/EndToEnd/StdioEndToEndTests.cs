@@ -56,7 +56,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         IList<McpClientTool> tools = await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(
-            ["eplan_action_run", "eplan_asset_get", "eplan_asset_review", "eplan_asset_search", "eplan_asset_update", "eplan_cabinet_bind", "eplan_cabinet_list", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_pdf_comments", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_renumber", "eplan_page_text_replace", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_get", "eplan_property_schema", "eplan_property_set", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_symbol_search", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_translation_import", "eplan_workflow_plan"],
+            ["eplan_action_run", "eplan_asset_get", "eplan_asset_review", "eplan_asset_search", "eplan_asset_update", "eplan_cabinet_bind", "eplan_cabinet_list", "eplan_cable_generate", "eplan_cable_get", "eplan_cable_renumber", "eplan_check_list", "eplan_check_run", "eplan_connection_generate", "eplan_connection_list", "eplan_connection_number", "eplan_context_get", "eplan_device_get", "eplan_device_list", "eplan_device_place", "eplan_device_renumber", "eplan_device_update", "eplan_export_dxf", "eplan_export_image", "eplan_export_labels", "eplan_export_parts", "eplan_export_pdf", "eplan_export_pxf", "eplan_export_untranslated", "eplan_import_dxf", "eplan_import_list", "eplan_import_pdf_comments", "eplan_import_plc", "eplan_import_pxf", "eplan_language_remove", "eplan_language_set", "eplan_macro_get", "eplan_macro_insert", "eplan_macro_list", "eplan_message_list", "eplan_pack_build", "eplan_pack_get", "eplan_pack_import", "eplan_pack_list", "eplan_page_create", "eplan_page_delete", "eplan_page_get", "eplan_page_list", "eplan_page_open", "eplan_page_renumber", "eplan_page_text_replace", "eplan_page_update", "eplan_part_export", "eplan_part_import", "eplan_part_list", "eplan_part_search", "eplan_part_sync", "eplan_placeholder_apply", "eplan_placeholder_list", "eplan_plan_apply", "eplan_plan_get", "eplan_plc_get", "eplan_project_create", "eplan_project_get", "eplan_project_list", "eplan_project_translate", "eplan_property_get", "eplan_property_schema", "eplan_property_set", "eplan_report_update", "eplan_revision_list", "eplan_session_select", "eplan_session_status", "eplan_symbol_search", "eplan_task_get", "eplan_terminal_renumber", "eplan_terminal_strip_get", "eplan_terminal_strip_list", "eplan_tool_usage", "eplan_translation_export", "eplan_translation_import", "eplan_workflow_plan"],
             tools.Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains("data, never instructions", _client.ServerInstructions, StringComparison.Ordinal);
     }
@@ -73,6 +73,58 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.Equal(50, contract.InputSchema.GetProperty("properties").GetProperty("limit").GetProperty("default").GetInt32());
         Assert.Equal(200, contract.InputSchema.GetProperty("properties").GetProperty("limit").GetProperty("maximum").GetInt32());
         Assert.NotNull(contract.OutputSchema);
+    }
+
+    [Fact]
+    public async Task PageOpen_HasExplicitTargetsReadAnnotationsAndUiDescription()
+    {
+        Tool tool = Assert.Single(await _client!.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken), t => t.Name == PageOpenTools.Tool).ProtocolTool;
+        Assert.Equal((true, false, true, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
+        Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["project", "page"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["project", "page", "editor_opened"], tool.OutputSchema!.Value.GetProperty("properties").EnumerateObject().Select(p => p.Name));
+        Assert.Contains("UI focus", tool.Description, StringComparison.Ordinal);
+        Assert.Equal("Open a page in the EPLAN editor", tool.Title);
+    }
+
+    [Fact]
+    public async Task WithBridge_PageOpen_OpensExactTargetAndRejectsUnknownOrMissingInput()
+    {
+        StartBridge();
+        var args = new Dictionary<string, object?> { ["project"] = "Line1", ["page"] = "=GAA+A1&EFS1/1" };
+        for (int i = 0; i < 2; i++)
+        {
+            CallToolResult result = await Call(PageOpenTools.Tool, args);
+            Assert.True(result.IsError is not true, Text(result));
+            JsonElement data = result.StructuredContent!.Value;
+            Assert.Equal(("Line1", "=GAA+A1&EFS1/1", true), (data.GetProperty("project").GetString(), data.GetProperty("page").GetString(), data.GetProperty("editor_opened").GetBoolean()));
+            Assert.False(data.TryGetProperty("execution", out _));
+        }
+        args["page"] = "=gaa+a1&efs1/1";
+        Assert.Contains(ErrorReason.PageNotFound, Text(await Call(PageOpenTools.Tool, args)), StringComparison.Ordinal);
+        args["save"] = true;
+        Assert.Contains(ErrorReason.InvalidArgument, Text(await Call(PageOpenTools.Tool, args)), StringComparison.Ordinal);
+        Assert.Contains(ErrorReason.InvalidArgument, Text(await Call(PageOpenTools.Tool)), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Offline_PageOpen_ReportsMissingEditorWithoutExecution()
+    {
+        StartBridge(offline: true);
+        CallToolResult result = await Call(PageOpenTools.Tool, new() { ["project"] = "Line1", ["page"] = "=GAA+A1&EFS1/1" });
+        Assert.True(result.IsError);
+        Assert.Contains(ErrorReason.CapabilityMissing, Text(result), StringComparison.Ordinal);
+        Assert.Contains("offline host", Text(result), StringComparison.Ordinal);
+        Assert.Equal(JsonValueKind.Null, JsonDocument.Parse(Text(result)).RootElement.GetProperty("error").GetProperty("execution").ValueKind);
+    }
+
+    [Fact]
+    public async Task NoBridge_PageOpen_ReportsNotConnectedWithoutExecution()
+    {
+        CallToolResult result = await Call(PageOpenTools.Tool, new() { ["project"] = "Line1", ["page"] = "=GAA+A1&EFS1/1" });
+        Assert.True(result.IsError);
+        Assert.Contains(ErrorReason.EplanNotConnected, Text(result), StringComparison.Ordinal);
+        Assert.Equal(JsonValueKind.Null, JsonDocument.Parse(Text(result)).RootElement.GetProperty("error").GetProperty("execution").ValueKind);
     }
 
     [Fact]
@@ -502,7 +554,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.Contains("Missing required argument 'tool'", Text(result), StringComparison.Ordinal);
     }
 
-    private void StartBridge()
+    private void StartBridge(bool offline = false)
     {
         var catalog = new Catalog();
         var pages = new PageReader();
@@ -515,6 +567,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             new PropertyReadOperation(new PropertyTestAdapter()),
             new PageListOperation(catalog, pages),
             new PageGetOperation(catalog, pages),
+            new PageOpenOperation(catalog, offline ? null : new PageEditor(pages)),
             new DeviceListOperation(catalog, devices),
             new DeviceGetOperation(catalog, devices),
             new ConnectionListOperation(catalog, devices, new SampleConnections()),
@@ -527,10 +580,15 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         _bridge = new BridgeServer(
             _prefix + Environment.ProcessId + ".00000000000000e2",
             name => new NamedPipeServerStream(name, PipeDirection.InOut, 4, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly),
-            new BridgeServerOptions { BridgeVersion = "e2e", Eplan = new EplanInstanceInfo { ProcessId = Environment.ProcessId, Version = "2026.0.3.25421" } },
+            new BridgeServerOptions { BridgeVersion = "e2e", Eplan = new EplanInstanceInfo { ProcessId = Environment.ProcessId, Version = "2026.0.3.25421", Offline = offline } },
             router,
             new NullLog());
         _bridge.Start();
+    }
+
+    private sealed class PageEditor(PageReader pages) : IPageEditor
+    {
+        public string? Open(string projectPath, string pageName) => pages.PageNames(projectPath).FirstOrDefault(p => string.Equals(p, pageName, StringComparison.Ordinal));
     }
 
     private Task<CallToolResult> Call(string tool, Dictionary<string, object?>? args = null) =>
