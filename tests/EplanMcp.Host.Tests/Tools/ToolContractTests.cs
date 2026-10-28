@@ -175,7 +175,8 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(tool.Annotations.DestructiveHint);
         Assert.True(tool.Annotations.IdempotentHint);
         Assert.False(tool.Annotations.OpenWorldHint);
-        Assert.Equal(["project", "steps"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+        Assert.Equal(["project"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+        Assert.Equal(2, tool.InputSchema.GetProperty("oneOf").GetArrayLength());
         Assert.Equal(7, tool.InputSchema.GetProperty("properties").GetProperty("steps").GetProperty("items").GetProperty("oneOf").GetArrayLength());
         Assert.Equal(2, tool.OutputSchema!.Value.GetProperty("anyOf").GetArrayLength());
     }

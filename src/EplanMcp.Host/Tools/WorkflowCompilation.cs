@@ -13,7 +13,7 @@ internal static class WorkflowCompilation
     internal const string CompilerVersion = "2";
 
     public static async Task<(PlanDefinition Definition, Dictionary<string, byte[]> Evidence)> CompileAsync(IBridgeClient bridge, PackLibrary packs, PlanArgumentCheck input,
-        string project, PlanOwner owner, CancellationToken cancellationToken)
+        string project, PlanOwner owner, KnowledgeReviewService? reviews, string? cabinet, string? workflow, JsonElement inputs, CancellationToken cancellationToken)
     {
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
         if (status.Problem is not null)
@@ -42,13 +42,29 @@ internal static class WorkflowCompilation
         PlanProject? identity = null;
         ProjectBinding? binding = null;
         string? locks = null;
+        WorkflowEngineering? engineering = null;
+        PlanEngineering? provenance = null;
         var compiled = new List<PlanStep>();
         var sources = new List<PlanSource>();
         PlanBaselineRead read = await new PlanLocalBaselineReader(bridge).ReadAsync(project, requests, async (baseline, impacts) =>
         {
             identity = baseline.Snapshot.Project;
             binding = await BindingAsync().ConfigureAwait(false);
+            if (workflow is not null && binding?.BindingVersion != 2)
+            { throw PlanLocalScopeRules.Stale("The workflow binding changed; compile again."); }
             locks = ContextBuilder.Reference(null, binding)["lockDigest"]?.GetValue<string>();
+            if (binding?.BindingVersion == 2)
+            {
+                engineering = await WorkflowEngineering.ReadAsync(packs, binding, cabinet, workflow, inputs, cancellationToken).ConfigureAwait(false);
+                string[] capabilities = [.. engineering.Workflow?.Document?.Spec["requiredCapabilities"]?.AsArray().Select(c => c!.GetValue<string>().StartsWith("op:", StringComparison.Ordinal) ? c.GetValue<string>()[3..] : c.GetValue<string>()) ?? []];
+                if (capabilities.Except(status.Handshake!.Operations ?? [], StringComparer.Ordinal).Any())
+                { throw PlanLocalScopeRules.Missing("workflow:required_capabilities"); }
+                required = [.. required.Concat(capabilities).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)];
+                if (workflow is not null && JsonSerializer.Serialize(engineering.Expand(project).Steps) != JsonSerializer.Serialize(input.Steps))
+                { throw PlanLocalScopeRules.Stale("Workflow inputs changed during expansion; compile again."); }
+            }
+            else
+            { _ = ContextBuilder.SelectCabinet(binding, cabinet); }
             foreach (PlanArgumentStep step in input.Steps)
             {
                 PlanMacroInspectArgs macroArgs = new()
@@ -84,6 +100,11 @@ internal static class WorkflowCompilation
                 }
                 compiled.Add(result);
             }
+            if (engineering is not null)
+            {
+                engineering.Guard(binding!, baseline, compiled);
+                provenance = await engineering.CompleteAsync(reviews!, baseline, cancellationToken).ConfigureAwait(false);
+            }
         }, cancellationToken).ConfigureAwait(false);
         ProjectBinding? after = identity is null ? null : await BindingAsync().ConfigureAwait(false);
         if (read.Baseline is not { } stable || JsonSerializer.Serialize(binding) != JsonSerializer.Serialize(after))
@@ -93,6 +114,18 @@ internal static class WorkflowCompilation
                 {
                     conflicts = read.Conflicts.IsEmpty ? [new PlanSnapshotConflict("binding", "changed", null, null)] : read.Conflicts,
                 });
+        }
+        if (engineering is not null)
+        {
+            WorkflowEngineering current = await WorkflowEngineering.ReadAsync(packs, after!, cabinet, workflow, inputs, cancellationToken).ConfigureAwait(false);
+            if (!engineering.Resources.SequenceEqual(current.Resources) || engineering.Config.ToJsonString() != current.Config.ToJsonString())
+            { throw PlanLocalScopeRules.Stale("Locked configuration or knowledge changed during compilation; compile again."); }
+            foreach (AssetEntry rule in current.Assets.Where(a => a.Document?.Kind == EplanMcp.Packs.Knowledge.KnowledgeKind.Rule))
+            {
+                if (await reviews!.CheckPlanAsync(rule, current.Assets, cancellationToken).ConfigureAwait(false) != provenance!.RuleDigests.GetProperty(rule.Id).GetProperty("reviewDigest").GetString())
+                { throw PlanLocalScopeRules.Stale("Knowledge confirmation changed during compilation; compile again."); }
+            }
+            sources.AddRange(engineering.Resources.Select(r => new PlanSource("asset-" + r.Pack + "-" + r.ResourcePath, null, null, null, null, null, r.Pack, r.ExactVersion, r.ResourcePath, r.ManifestDigest, r.FileHash)));
         }
         // Only checked or written objects are sources; contextRef references the local baseline and complete names.
         var referenced = new HashSet<(string Kind, int Type, long Oid)>(compiled.SelectMany(s => s.Preconditions.OfType<PlanObjectHash>()
@@ -104,10 +137,11 @@ internal static class WorkflowCompilation
         DateTimeOffset now = packs.Clock.GetUtcNow();
         byte[] evidence = JsonSerializer.SerializeToUtf8Bytes(stable, PlanJson.Options);
         string evidenceHash = PlanStore.Hash(evidence);
-        var definition = new PlanDefinition(Guid.NewGuid().ToString("N"), stable.Snapshot.Project, "default", owner, now, now.AddHours(packs.Config.PlanLifetimeHours),
-            1, CompilerVersion, 1, status.Handshake!.Eplan.Version, status.Handshake.Eplan.Variant ?? "unknown", [.. required],
-            new([.. input.Steps.Select(s => new PlanInputStep(s.Op, s.Args))]), binding?.Revision, locks, "sha256:" + evidenceHash, [],
-            [.. sources.Distinct().OrderBy(s => s.Id, StringComparer.Ordinal)], new(stable.Snapshot.ComposedHash, stable.Snapshot.MembersHash, stable.NamesHash, null), [.. compiled]);
+        var definition = new PlanDefinition(Guid.NewGuid().ToString("N"), stable.Snapshot.Project, engineering?.Cabinet.Id ?? "default", owner, now, now.AddHours(packs.Config.PlanLifetimeHours),
+            engineering is null ? 1 : 2, engineering is null ? CompilerVersion : "3", 1, status.Handshake!.Eplan.Version, status.Handshake.Eplan.Variant ?? "unknown", [.. required],
+            new([.. input.Steps.Select(s => new PlanInputStep(s.Op, s.Args))]), binding?.Revision, locks, "sha256:" + evidenceHash, [.. engineering?.Resources ?? []],
+            [.. sources.Distinct().OrderBy(s => s.Id, StringComparer.Ordinal)], new(stable.Snapshot.ComposedHash, stable.Snapshot.MembersHash, stable.NamesHash, null), [.. compiled])
+        { Engineering = provenance };
         return (definition, new()
         {
             [evidenceHash] = evidence,
@@ -117,14 +151,14 @@ internal static class WorkflowCompilation
         {
             ProjectBinding? value = await packs.Workspaces.ReadAsync(identity!.Path, cancellationToken).ConfigureAwait(false);
             if (value is not null && (PlanSnapshotHashes.ProjectKey(value.Project) != identity.Path
-                || value.Cabinets.Count > 1 || value.Cabinets.Any(c => c.Id != "default")))
+                || value.BindingVersion == 1 && (value.Cabinets.Count > 1 || value.Cabinets.Any(c => c.Id != "default"))))
             {
                 throw new WorkflowCompilationException(ErrorReason.CapabilityMissing, "Use a single default cabinet binding and compile again.", new
                 {
                     missing = (string[])["cabinet:single_default_binding"],
                 });
             }
-            return value?.Cabinets.Count == 0 ? null : value;
+            return value is { BindingVersion: 1, Cabinets.Count: 0 } ? null : value;
         }
     }
 }

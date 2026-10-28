@@ -58,6 +58,8 @@ internal static class WorkflowResults
         };
         int Tokens() => ResultShaper.ResultTokens(data.ToJsonString(HostJson.Options)) + ResultShaper.EstimateTokens(summary)
             + ResultShaper.EstimateTokens(JsonSerializer.Serialize(link, HostJson.Options));
+        if (Tokens() > Math.Min(budget, ResultShaper.MaxTokenBudget) && data.Remove("engineering"))
+        { data["truncated"] = true; data["hint"] = "Read the complete stored engineering evidence with eplan_plan_get."; }
         foreach (JsonArray entries in new[] { data["diffPreview"]!["entries"]!.AsArray(), data["steps"]!.AsArray(), data["inputs"]!["steps"]!.AsArray() })
         {
             while (Tokens() > Math.Min(budget, ResultShaper.MaxTokenBudget) && entries.Count > 0)
@@ -100,14 +102,18 @@ internal static class WorkflowResults
         {
             if (step!["properties"]!["args"]!["properties"]!["language"] is JsonObject language)
             {
-                language["description"] = "The one language to write; omitted: EPLAN's user interface language, which the planned changes name. "
-                    + "A different interface language at apply time makes the step PLAN_STALE.";
+                language["description"] = "Omitted: EPLAN interface language, named in changes; a different language at apply is PLAN_STALE.";
             }
             if (step["properties"]!["args"]!["properties"]!["scheme"] is JsonObject scheme)
             {
                 scheme["description"] = "Explicit scheme required; Bridge cannot expose its current default.";
             }
         }
+        input["properties"]!["cabinet"] = JsonNode.Parse("""{"type":"string"}""");
+        input["properties"]!["workflow"] = JsonNode.Parse("""{"type":"string"}""");
+        input["properties"]!["inputs"] = JsonNode.Parse("""{"type":"object","additionalProperties":{"type":["string","number","boolean"]}}""");
+        input["required"] = new JsonArray("project");
+        input["oneOf"] = JsonNode.Parse("""[{"required":["steps"],"not":{"anyOf":[{"required":["workflow"]},{"required":["inputs"]}]}},{"required":["workflow"],"not":{"required":["steps"]}}]""");
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
         var properties = new JsonObject();
         foreach (string name in new[] { "schemaVersion", "planId", "planHash", "project", "cabinet", "bindingRevision", "lockDigest", "contextRef", "inputs", "tier", "status", "createdAt", "expiresAt", "steps", "diffPreview", "counts", "truncated", "hint", "resource" })
@@ -123,7 +129,6 @@ internal static class WorkflowResults
         properties["planId"]!["pattern"] = "^[a-f0-9]{32}$";
         properties["tier"]!["enum"] = new JsonArray("Write", "Destructive");
         properties["status"]!["const"] = "compiled";
-        properties["cabinet"]!["const"] = "default";
         properties["steps"]!["items"] = new JsonObject
         {
             ["type"] = "object",
@@ -140,6 +145,7 @@ internal static class WorkflowResults
             ["required"] = new JsonArray([.. properties.Select(p => JsonValue.Create(p.Key))]),
         };
         var failure = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["error"],"properties":{"error":{"type":"object","required":["reason","message","retryable","metadata","eplanMessages","correlationId"]}}}""");
+        properties["engineering"] = JsonNode.Parse("""{"type":"object"}""");
         tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(new JsonObject
         {
             ["type"] = "object",
