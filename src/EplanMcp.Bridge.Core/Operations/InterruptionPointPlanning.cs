@@ -93,7 +93,8 @@ public static class InterruptionPointPlanning
             {
                 JToken[] peers = pair.Where(p => !ReferenceEquals(p, point)).ToArray();
                 Require(point["counterparts"]!.Count() == peers.Length && peers.All(p => point["counterparts"]!.Any(c => (string?)c["page"] == (string?)p["page"] && (long?)c["oid"] == (long?)p["oid"]))
-                    && (peers.Length == 0 || !string.IsNullOrWhiteSpace((string?)point["crossReference"])), "EPLAN computed an unexpected counterpart or empty paired cross-reference.");
+                    && (peers.Length == 0 || !string.IsNullOrWhiteSpace((string?)point["crossReference"])), string.Format(System.Globalization.CultureInfo.InvariantCulture, "EPLAN computed an unexpected counterpart or empty paired cross-reference ({0} on {1}: {2} counterparts, reference '{3}').",
+                    name, (string?)point["page"], point["counterparts"]!.Count(), (string?)point["crossReference"]));
                 Require(peers.All(p => (string?)p["page"] == (string?)plan["page"] || row["interruption"]!["counterpart_pages"]!.Values<string>().Contains((string?)p["page"], StringComparer.Ordinal)), "EPLAN paired outside counterpart_pages.");
                 result.Add(point.DeepClone());
             }
