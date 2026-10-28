@@ -65,13 +65,8 @@ public sealed class ActionRunContractTests
     public void Config_InvalidSwitchIsRejected(string value) => Assert.Null(HostConfig.Parse("{\"actionRun\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-<<<<<<< HEAD
-    [InlineData(false, false, 82)]
-    [InlineData(true, false, 83)]
-=======
-    [InlineData(false, false, 81)]
-    [InlineData(true, false, 82)]
->>>>>>> b4fd63bf (feat(tools): create texts, lines and boxes with eplan_placement_create)
+    [InlineData(false, false, 83)]
+    [InlineData(true, false, 84)]
     [InlineData(false, true, 25)]
     [InlineData(true, true, 25)]
     public void ToolAndUsage_AreRegisteredOnlyInFullWithSwitchOn(bool enabled, bool core, int count)
