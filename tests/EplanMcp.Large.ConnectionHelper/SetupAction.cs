@@ -23,10 +23,10 @@ public sealed class SetupAction : IEplAction
             Project project = new SelectionSet().GetCurrentProject(false);
             string expected = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "scratch", "writes", "LargeWrite");
             if (!string.Equals(project.ProjectFullName, expected, StringComparison.OrdinalIgnoreCase) || !pageName.StartsWith("=GAA+A1&EFS1/", StringComparison.Ordinal))
-            { return false; }
+            { Log("project/page: " + project.ProjectFullName + " | " + pageName); return false; }
             Page page = project.Pages.Single(p => p.Name == pageName);
             if (page.PageType.ToString() != "Circuit" || page.AllPlacements.Length != 0)
-            { return false; }
+            { Log("page: " + page.PageType + " placements=" + page.AllPlacements.Length); return false; }
             double grid = page.GridSize, x = grid * 30, y = grid * 40;
             var choices = new List<(SymbolVariant Variant, PointD Position)>();
             foreach (string direction in directions.Split(','))
@@ -61,8 +61,6 @@ public sealed class SetupAction : IEplAction
                         var function = new Function();
 #pragma warning restore CA2000
                         function.Create(page, choice.Variant);
-                        foreach (var property in function.PropertyPlacements)
-                        { property.Remove(); }
                         function.Location = choice.Position;
                         function.Name = FormattableString.Invariant($"-T3B{page.ObjectIdentifier}{++index}");
                         if (function.ArticleReferences.Length != 0)
@@ -75,6 +73,8 @@ public sealed class SetupAction : IEplAction
             catch { transaction.Abort(); throw; }
             return true;
         }
-        catch (Exception ex) { System.Diagnostics.Trace.WriteLine(ex); return false; }
+        catch (Exception ex) { Log(ex.ToString()); return false; }
     }
+
+    private static void Log(string message) => File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-connection-helper.log"), DateTime.Now.ToString("s") + " " + message + Environment.NewLine);
 }
