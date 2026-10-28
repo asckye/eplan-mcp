@@ -1409,7 +1409,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 4,
-      "large": 7,
+      "large": 8,
       "apiNotes": [
         "A11"
       ],
@@ -1862,7 +1862,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 4,
-      "large": 6,
+      "large": 7,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
