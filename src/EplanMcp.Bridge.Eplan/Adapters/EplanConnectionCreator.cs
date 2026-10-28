@@ -43,7 +43,7 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
             }
         }
         foreach (SymbolVariant variant in Variants(target.Path))
-        { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), variant.GetBoundingBox().SelectMany(XY).ToArray()); }
+        { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
         return scene;
     }
@@ -63,9 +63,20 @@ internal sealed class EplanConnectionCreator : IConnectionCreator
                 if (!XY(placed.Location).SequenceEqual(item.Row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != item.Variant.SymbolName
                     || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != item.Row["symbol"]!["connectionPoints"]!.Count() || pins.Any(p => p.Any(v => v != 0))
                     || !placed.GetBoundingBox().SelectMany(XY).SequenceEqual(item.Row["bounds"]!.Values<double>()))
-                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Placed symbol geometry differs from the plan."); }
+                {
+                    throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
+                        $"Placed symbol geometry differs from the plan: {item.Variant.SymbolName}/{item.Variant.VariantNr} outline {string.Join(",", placed.GetBoundingBox().SelectMany(XY))}, pins {string.Join(";", pins.Select(p => string.Join(",", p)))}."));
+                }
             }
         };
+    }
+    /// <summary>Unplaced library variants have no outline (BaseException); the point is checked against the placed outline.</summary>
+    private static double[] Outline(SymbolVariant variant)
+    {
+        try
+        { return variant.GetBoundingBox().SelectMany(XY).ToArray(); }
+        catch (BaseException)
+        { return [0, 0, 0, 0]; }
     }
     private static List<double[][]> Graphical(string project, string page) => Page(project, page).AllPlacements.OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)
         .Select(g => new[] { new[] { g.StartSymbolRef.Location.X + g.StartConnectionPoint.Location.X, g.StartSymbolRef.Location.Y + g.StartConnectionPoint.Location.Y },
