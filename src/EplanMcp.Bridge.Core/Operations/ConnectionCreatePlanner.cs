@@ -6,22 +6,22 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>Unregistered, read-only T3a predictor. A52 requires committed placement before a separate generation call.</summary>
-internal static class ConnectionCreatePlanner
+/// <summary>A52: complete-page prediction before either committed placement or generation.</summary>
+public static class ConnectionCreatePlanner
 {
-    internal sealed class Scene
+    public sealed class Scene
     {
-        internal OpenProject Project { get; set; } = new();
-        internal PageDrawingGeometry Page { get; set; } = new();
-        internal string PageType { get; set; } = "Circuit";
-        internal bool Complete { get; set; }
-        internal Dictionary<string, SymbolConnectionPoint> Pins { get; set; } = [];
-        internal List<double[][]> Graphical { get; set; } = [];
-        internal List<ConnectionRecord> Logical { get; set; } = [];
-        internal Dictionary<string, double[]> SymbolBounds { get; set; } = [];
+        public OpenProject Project { get; set; } = new();
+        public PageDrawingGeometry Page { get; set; } = new();
+        public string PageType { get; set; } = "Circuit";
+        public bool Complete { get; set; }
+        public Dictionary<string, SymbolConnectionPoint> Pins { get; set; } = [];
+        public List<double[][]> Graphical { get; set; } = [];
+        public List<ConnectionRecord> Logical { get; set; } = [];
+        public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
     }
 
-    internal static JObject Plan(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint = null)
+    public static JObject Plan(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint = null)
     {
         try
         { return Predict(json, scene, reader, expectedFingerprint); }
@@ -47,8 +47,6 @@ internal static class ConnectionCreatePlanner
         foreach (string name in new[] { "dry_run", "snap_to_grid" })
         { Require(input[name] is null || input[name]!.Type == JTokenType.Boolean, "/" + name, "Supply a boolean."); }
         Require(input["response_format"] is null || input["response_format"]!.Type == JTokenType.String && (string?)input["response_format"] is "concise" or "detailed", "/response_format", "Use concise or detailed.");
-        if ((bool?)input["dry_run"] != true)
-        { throw Missing("Execution is unavailable until T3b; use dry_run=true."); }
         Require(input["items"] is JArray { Count: >= 1 and <= 50 }, "/items", "Supply 1..50 items.");
         if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null
             || scene.Page.Placements.Any(p => !DrawingCoordinates.ValidBounds(p.Bounds)) || scene.SymbolBounds.Values.Any(b => !DrawingCoordinates.ValidBounds(b))
@@ -212,7 +210,7 @@ internal static class ConnectionCreatePlanner
             ["pageSize"] = new JArray(scene.Page.PageSize!),
             ["coverage"] = "complete_page_predicted_endpoints",
             ["logicalDuringPlacement"] = 0,
-            ["generation"] = "Separate committed eplan_connection_generate; placement and generation each have their own undo step. Atomic execution remains unavailable.",
+            ["generation"] = "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
             ["undoSteps"] = 2
         };
         string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete }).ToString(Formatting.None), resolved.ToString(Formatting.None),

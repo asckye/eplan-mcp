@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Eplan.EplApi.AFu"><HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.Baseu"><HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.DataModelu"><HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu"><HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>
