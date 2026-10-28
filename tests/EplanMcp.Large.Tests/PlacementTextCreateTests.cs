@@ -67,9 +67,9 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         { Assert.Contains(language + "@" + text + ";", stored, StringComparison.Ordinal); }
         JsonElement line = Assert.Single(drawings.GetProperty("items").EnumerateArray(), r => r.GetProperty("kind").GetString() == "Line");
         Assert.Equal([10d, 20d], line.GetProperty("location").EnumerateArray().Select(n => n.GetDouble()));
-        Assert.Equal([10d, 20d, 30d, 40d], line.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()));
+        AssertOutline([10d, 20d, 30d, 40d], line.GetProperty("bounds")); // live T4c: bounds include the pen width
         JsonElement rectangle = Assert.Single(drawings.GetProperty("items").EnumerateArray(), r => r.GetProperty("kind").GetString() == "Rectangle");
-        Assert.Equal([20d, 30d, 60d, 80d], rectangle.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()));
+        AssertOutline([20d, 30d, 60d, 80d], rectangle.GetProperty("bounds"));
         Assert.NotEqual(drawingBefore, await DrawingHash(bridge, page));
 
         await selection.UndoAsync();
@@ -112,4 +112,14 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
     private async Task<string> DrawingHash(BridgeClient bridge, string page) => SnapshotCanonical.Sha256(JsonSerializer.Serialize(
         await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
             new() { Project = host.Writable, Page = page }, TestContext.Current.CancellationToken)));
+
+    /// <summary>The drawn geometry inside the reported bounds, which add at most 1 mm of pen width on each side.</summary>
+    private static void AssertOutline(double[] geometry, JsonElement bounds)
+    {
+        double[] actual = [.. bounds.EnumerateArray().Select(n => n.GetDouble())];
+        Assert.InRange(geometry[0] - actual[0], 0, 1);
+        Assert.InRange(geometry[1] - actual[1], 0, 1);
+        Assert.InRange(actual[2] - geometry[2], 0, 1);
+        Assert.InRange(actual[3] - geometry[3], 0, 1);
+    }
 }
