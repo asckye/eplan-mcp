@@ -343,7 +343,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                         Terminal = new()
                         {
                             Strip = strip,
-                            Owner = FailAt == "Owner" ? null : strip,
+                            Owner = FailAt == "Owner" ? "+A1-XOTHER" : strip, // a null owner is a relation pending commit (S43, live T7c)
                             Number = FailAt == "Number" ? "99" : args.TerminalNumber!,
                             Position = FailAt == "Position" ? [0, 0] : [args.X, args.Y],
                             StripCreated = createStrip,

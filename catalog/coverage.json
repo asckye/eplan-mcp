@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 326,
-      "byTools": 318,
-      "partial": 54,
-      "automatedTest": 318,
+      "implemented": 331,
+      "byTools": 323,
+      "partial": 55,
+      "automatedTest": 323,
       "liveVerified": 162,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 133,
-      "byTools": 126,
-      "partial": 47,
-      "automatedTest": 126,
+      "implemented": 135,
+      "byTools": 128,
+      "partial": 48,
+      "automatedTest": 128,
       "liveVerified": 75,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 193,
-      "byTools": 192,
+      "implemented": 196,
+      "byTools": 195,
       "partial": 7,
-      "automatedTest": 192,
+      "automatedTest": 195,
       "liveVerified": 87,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 272,
+    "used": 275,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 47,
+    "used": 49,
     "registered": 8585
   },
   "actionNames": {
@@ -151,7 +151,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
-      "implemented": 14,
+      "implemented": 19,
       "liveVerified": 5
     },
     {
@@ -825,13 +825,13 @@
         "device.place.execute",
         "device.place.plan"
       ],
-      "apiIds": 179,
-      "operationGroups": 100,
+      "apiIds": 199,
+      "operationGroups": 109,
       "dataDictionary": 4,
-      "dependencies": 70,
+      "dependencies": 77,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 3,
+      "small": 4,
       "medium": 3,
       "large": 1,
       "apiNotes": [
@@ -2912,6 +2912,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_page_create",
         "eplan_page_text_replace",
         "eplan_page_update",
@@ -3571,6 +3572,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list"
@@ -3670,12 +3672,30 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.ExternalConnections",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_terminal_strip_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.FunctionCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
       ]
     },
     {
@@ -3707,6 +3727,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.TerminalStrip",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges",
       "layer": "operation",
       "status": "automated_test",
@@ -3717,11 +3746,30 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Terminals",
       "layer": "operation",
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list"
@@ -6076,6 +6124,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_import_pdf_comments",
         "eplan_page_create",
         "eplan_page_get",
