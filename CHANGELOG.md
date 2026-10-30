@@ -41,6 +41,7 @@
 - 发布 ZIP 根目录新增 `README.md`，随包说明运行要求、EPLAN 授权条件与支持矩阵。
 
 ### Fixed
+- `eplan_connection_create`：页上已有 T 节点或角节点时不再拒绝后续连线；电缆芯线可以选在含母线节点的页上；中断点结果只返回 `interruptionScope` 的摘要，不再因体积超限被截断；回滚时说明与计划不一致的具体连接。
 - `eplan_device_place` 放置 PLC 连接点不再在页面原点（图框外）多留一个器件级 PLC 端子；新建端子排时端子排定义不再放到页面原点。
 - `eplan_connection_create` 可以连到不在栅格上的引脚（如 IEC 端子 `X`），导线和节点可以穿过、位于位置盒内；拒绝时说明是哪一项检查、哪个对象挡住了路径。
 - `eplan_connection_generate` 在没有新增或删除任何连接时，不再在 EPLAN 中留下一个空的撤销步骤（结果原本就报告 not_started，但按一次 Ctrl+Z 什么也不会撤销）。

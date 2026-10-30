@@ -28,7 +28,7 @@
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。普通连线结果与审批均注明 2 undo steps；电缆例外见第 2 节。
 逻辑集合是生成后的端点预测，不承诺 T 节点的有向连接条数；电位点预期逻辑起点为空（A52）。logicalDuringPlacement=0 表示本次放置不负责生成逻辑连接；既有逻辑连接完整保留在基线中。内存规划保留完整证据；Host 展示超预算时裁剪数组并标 truncated，不能因显示预算缩小 guard。
-中断点预览另含 affectedPages 与 interruptionScope（显式页完整绘图、引脚、连接、原生中断点基线），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。
+中断点预览另含 affectedPages 与 interruptionScope 摘要（涉及的页名，以及图元、原生中断点和须保留连接的数量；完整基线只在 Bridge 内用于核对，不返回），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。
 
 ## 4. 错误
 规划及 stale 为 execution=not_started；INVALID_ARGUMENT 带 JSON Pointer；CAPABILITY_MISSING 表示几何不完整、未选中目标项目或不支持的组合（电缆与中断点须分开调用）。普通连线第二步失败或端点不符，回滚生成并撤销放置，返回 rolled_back；提交或补偿无法确认则返回 unknown，暂停写入且不重发。

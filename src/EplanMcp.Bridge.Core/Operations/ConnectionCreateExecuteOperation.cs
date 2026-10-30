@@ -38,27 +38,27 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         try
         {
             string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
-            if (Segments(creator.Read(project, page).Graphical) != Segments(scene.Graphical.Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!)))
-            { throw Mismatch(); }
+            if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(scene.Graphical.Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!)) is var predicted && drawn != predicted)
+            { throw Mismatch("autoconnect lines after placement: " + drawn + "; predicted: " + predicted); }
             Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", () =>
             {
                 generator.Generate(project, pages);
                 List<string?[]> actual = pages.SelectMany(p => creator.Endpoints(project, p)).ToList();
                 if (interruptions && plan["interruptionScope"]!["preservedEndpoints"]!.Any(p => !actual.Any(a => a[0] == (string?)p[0] && a[1] == (string?)p[1])))
-                { throw Mismatch(); }
+                { throw Mismatch("an interruption point's existing connection was lost"); }
                 var added = actual.Select(p => p.ToArray()).ToList();
                 foreach (ConnectionRecord before in interruptions ? [] : scene.Logical)
                 {
                     int index = added.FindIndex(p => p[0] == before.StartDevice && p[1] == before.EndDevice);
                     if (index < 0)
-                    { throw Mismatch(); }
+                    { throw Mismatch("existing connection " + before.StartDevice + " - " + before.EndDevice + " is gone after generation"); }
                     added.RemoveAt(index);
                 }
                 List<HashSet<string>> groups = plan["logicalAfterGenerate"]!.Select(g => new HashSet<string>(g["pins"]!.Values<string>().Select(p => p!).Concat((bool)g["potentialStartIsNull"]! ? ["<potential>"] : []), StringComparer.Ordinal)).ToList();
                 foreach (string?[] pair in added)
                 {
                     if (pair[1] is null || pair[0] == pair[1] || !groups.Any(g => g.Contains(pair[0] ?? "<potential>") && g.Contains(pair[1]!)))
-                    { throw Mismatch(); }
+                    { throw Mismatch("generation added the unplanned connection " + (pair[0] ?? "<potential>") + " - " + (pair[1] ?? "<none>") + "; generate existing autoconnect lines first"); }
                 }
                 foreach (HashSet<string> group in groups)
                 {
@@ -66,10 +66,10 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     for (int i = 0; i < group.Count; i++)
                     { foreach (string?[] pair in added.Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
                     if (!reached.SetEquals(group))
-                    { throw Mismatch(); }
+                    { throw Mismatch("planned pins " + string.Join(", ", group.Except(reached)) + " were not connected"); }
                 }
                 if (added.Count == 0 && !interruptions)
-                { throw Mismatch(); }
+                { throw Mismatch("generation added no connection"); }
                 // Live T7b: EPLAN computes interruption cross-references only after the commit; verify below.
                 return actual;
             }, _ => true);
@@ -91,10 +91,11 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 { if (generationCommitted) { creator.Undo(project); } creator.Undo(project); return ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint); });
             }
             catch (Exception) { throw Unknown(); }
-            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying.", failure)
+            string cause = failure is BridgeErrorException { Error.Reason: ErrorReason.EplanOperationFailed } known ? " Cause: " + known.Error.Message : string.Empty;
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying." + cause, failure)
             { Error = { Execution = ExecutionState.RolledBack } };
         }
     }
-    private static BridgeErrorException Mismatch() => new(ErrorReason.EplanOperationFailed, "Actual connection geometry or logical endpoints differ from the plan.");
+    private static BridgeErrorException Mismatch(string detail) => new(ErrorReason.EplanOperationFailed, "Actual connection geometry or logical endpoints differ from the plan: " + detail + ".");
     private static BridgeErrorException Unknown() => new(ErrorReason.OutcomeUnknown, "Connection creation outcome is unknown; ask the engineer to inspect the project before further writes.") { Error = { Execution = ExecutionState.Unknown } };
 }

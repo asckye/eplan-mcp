@@ -41,6 +41,18 @@ internal sealed class ConnectionCreateTools
                 { if (child is JsonValue v && v.TryGetValue(out string? text)) { child.ReplaceWith(ResultShaper.CleanText(text)); } else { Clean(child); } }
             }
             Clean(result);
+            // Acceptance trial: the scope carries every placement of the scoped pages (up to 10000) as planning evidence and
+            // pushed the result over budget; report its size, the pairing outcome is in interruptionPoints.
+            if (result["interruptionScope"] is JsonObject scope)
+            {
+                result["interruptionScope"] = new JsonObject
+                {
+                    ["pages"] = scope["pages"] is JsonArray scoped ? new JsonArray(scoped.Select(p => (JsonNode?)JsonValue.Create(p?["page"]?.GetValue<string>())).ToArray()) : null,
+                    ["placements"] = scope["pages"] is JsonArray counted ? counted.Sum(p => p?["drawing"]?["placements"] is JsonArray a ? a.Count : 0) : 0,
+                    ["points"] = scope["points"] is JsonArray points ? points.Count : 0,
+                    ["preservedEndpoints"] = scope["preservedEndpoints"] is JsonArray kept ? kept.Count : 0,
+                };
+            }
             int budget = response_format == "detailed" ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
             foreach (string field in new[] { "interruptionScope", "coordinates", "symbols", "graphicalAutoconnect", "logicalAfterGenerate", "actualEndpoints", "interruptionPoints", "cableDefinitions", "coreImpact", "actualCores" })
             {
