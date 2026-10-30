@@ -77,7 +77,7 @@ public static class CableDefinitionPlanner
             string PinKey(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
             string[] pins = [PinKey(items[i]["from"]!), PinKey(items[i]["to"]!)];
             if (!result["logicalAfterGenerate"]!.Any(g => g["pins"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal).SequenceEqual(pins.OrderBy(p => p, StringComparer.Ordinal)) && (bool?)g["potentialStartIsNull"] == false))
-            { throw Missing(); }
+            { throw Missing("a wire item has no predicted logical connection"); }
             candidates.Add((new JObject { ["item_index"] = i }, points, null));
         }
         for (int i = 0; i < items.Count; i++)
@@ -125,9 +125,9 @@ public static class CableDefinitionPlanner
             definition["points"] = JArray.FromObject(line);
             definitions.Add(definition);
         }
-        Inventory inventory = scene.ReadCables?.Invoke() ?? throw Missing();
+        Inventory inventory = scene.ReadCables?.Invoke() ?? throw Missing("the cable inventory reader is unavailable");
         if (!inventory.Complete || inventory.Wires.Count > 10000)
-        { throw Missing(); }
+        { throw Missing("the wire inventory is incomplete or too large"); }
         Require(!inventory.Names.Any(n => names.Any(d => SameName(d, n, scene.Page.Page))), "/items", "A cable designation already exists; choose an explicit unused name.");
         candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Points, (Wire?)w)));
         foreach (JToken row in impact)
@@ -137,8 +137,8 @@ public static class CableDefinitionPlanner
             { throw new BridgeErrorException(ErrorReason.PlanStale, "The connection locator changed; read the page and re-plan."); }
             var selected = matches[0];
             Require(assigned.Add(selected.Reference.ToString(Formatting.None)), "/items", "Assign each connection only once.");
-            if (selected.Before is { } old && (!string.IsNullOrEmpty(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))
-            { throw Missing(); }
+            if (selected.Before is { } old && (HasCable(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))
+            { throw Missing($"a selected connection already has cable '{old.Cable}' or is on {old.Locator.Project} / {old.Locator.Page} instead of {scene.Project.Path} / {scene.Page.Page}"); }
             row["before"] = selected.Before is null ? JValue.CreateNull() : BridgeJson.FromObject(selected.Before);
         }
         string Segment(double[][] pair) => string.Join("|", pair.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal));
@@ -151,7 +151,7 @@ public static class CableDefinitionPlanner
             JToken[] expected = impact.Where(r => (string?)r["designation"] == (string?)definition["designation"]).Select(r => r["connection"]!).ToArray();
             if (crossed.Any(c => Crossings(line, c.Points) != 1) || crossed.Length != expected.Length || crossed.Any(c => !expected.Any(e => JToken.DeepEquals(e, c.Reference)))
                 || allSegments.Any(s => Crossings(line, s) > 0 && !knownSegments.Contains(Segment(s))))
-            { throw Missing(); }
+            { throw Missing("the definition line does not cross exactly the planned cores once"); }
         }
         result["cableDefinitions"] = definitions;
         result["coreImpact"] = impact;
@@ -159,6 +159,8 @@ public static class CableDefinitionPlanner
         result["undoSteps"] = 6 + (result["symbols"]!.Any() ? 1 : 0) + (result["graphicalAutoconnect"]!.Any() ? 1 : 0);
         return Fingerprint.Of(inventory.Names.Select(n => "name:" + n).Concat(inventory.Wires.Select(w => BridgeJson.FromObject(w).ToString(Formatting.None))));
     }
+    /// <summary>Live T8b: a connection without a cable reads its cable name as the bare separator "+".</summary>
+    private static bool HasCable(string? name) => name is not null && name.Trim('=', '+', '&', ' ').Length > 0;
     private static int Crossings(double[][] line, double[][] points) => points.Zip(points.Skip(1), (a, b) =>
     {
         bool vertical = line[0][0] == line[1][0];
@@ -174,5 +176,5 @@ public static class CableDefinitionPlanner
         Require(token?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)token) && ((string)token!).Length <= limit && !((string)token!).Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format), at, "Supply nonempty bounded text without controls.");
         return (string)token!;
     }
-    private static BridgeErrorException Missing() => new(ErrorReason.CapabilityMissing, "Read complete, unbranched same-page wire geometry and unused cable names; the definition line must cross exactly the explicit, unassigned cores once.", metadata: new Dictionary<string, string> { ["missing"] = "connection.create.cable.execute" });
+    private static BridgeErrorException Missing(string why) => new(ErrorReason.CapabilityMissing, "Read complete, unbranched same-page wire geometry and unused cable names; the definition line must cross exactly the explicit, unassigned cores once (" + why + ").", metadata: new Dictionary<string, string> { ["missing"] = "connection.create.cable.execute" });
 }
