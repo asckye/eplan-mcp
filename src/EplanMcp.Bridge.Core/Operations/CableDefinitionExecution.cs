@@ -17,7 +17,9 @@ internal static class CableDefinitionExecution
         JObject before;
         try
         {
-            ConnectionCreatePlanner.Require(plan["logicalAfterGenerate"]!.All(g => g["pins"]!.Count() == 2 && (bool?)g["potentialStartIsNull"] == false), "/items", "Cable calls require explicit two-pin logical paths.");
+            JToken? branched = plan["logicalAfterGenerate"]!.FirstOrDefault(g => g["pins"]!.Count() != 2 || (bool?)g["potentialStartIsNull"] != false);
+            ConnectionCreatePlanner.Require(branched is null, "/items", "Cable calls require explicit two-pin logical paths"
+                + (branched is null ? "." : "; predicted group " + branched["pins"]!.ToString(Newtonsoft.Json.Formatting.None) + (((bool?)branched["potentialStartIsNull"]) == true ? " from a potential point." : ".")));
             definitions = writer.PrepareCables(project, page, input, plan);
             symbols = plan["symbols"]!.Any() ? creator.Prepare(project, page, (JArray)plan["symbols"]!) : null;
             before = CableDefinitionRestoration.Capture(scene);
