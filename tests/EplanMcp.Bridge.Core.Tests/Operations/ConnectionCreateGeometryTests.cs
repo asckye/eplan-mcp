@@ -218,7 +218,7 @@ public sealed class ConnectionCreateGeometryTests
     {
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
-        Assert.Contains("/items: The path crosses a placement outline.", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Matches(@"/items: The path [0-9.,]+ -> [0-9.,]+ crosses the outline of \w* ?\d+/\d+ \[", error.Metadata!["violations"]);
     }
 
     private static string Opposite(string direction) => direction switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", _ => "Left" };
