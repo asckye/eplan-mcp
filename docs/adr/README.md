@@ -38,3 +38,4 @@
 | [0029](0029-phase3-engineering-records.md) | 采用版本化的配置、模块、规则与工程计划证据格式 | Accepted | 单向门（新增落盘格式） |
 | [0030](0030-action-catalog-tiers.md) | EPLAN action 分三级：已验证条目照旧，全部 action 只读可查，未验证 action 只在 scratch 中逐次审批后执行，并批量自动验证 | Accepted | 单向门（未验证执行发布后） |
 | [0031](0031-private-extension-modules.md) | 私有扩展模块在单独的工作进程中运行，经清单与哈希注册，只能经现有操作和审批流水线写入，默认关闭 | Accepted | 单向门（扩展契约发布后） |
+| [0032](0032-generic-api-layer.md) | EPLAN API 以通用层加专用工具补齐：对象类型通用读、白名单写，全部操作层与 action 只读目录加分级执行，批量实机验证 | Proposed | 单向门（通用读写与分级执行契约发布后） |
