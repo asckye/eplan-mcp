@@ -53,7 +53,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
             JsonElement[] actual = result.GetProperty("actualCores").EnumerateArray().ToArray();
             Assert.Equal(wires.Select(w => w.GetProperty("Locator").GetProperty("Oid").GetInt64()), actual.Select(c => c.GetProperty("oid").GetInt64()));
             string tag = actual[0].GetProperty("designation").GetString()!;
-            Assert.True(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.SameName("=GAA+A1-W9", tag, page));
+            Assert.True(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.SameName("=GAA+A1-W9", tag, page), "actual cable designation: " + tag);
             JsonElement read = await eplan.CallAsync("eplan_cable_get", new() { ["project"] = session.Project, ["cable"] = tag });
             Assert.Equal("ÖLFLEX CLASSIC 100 300/500V", read.GetProperty("cable").GetProperty("type").GetString());
             Assert.Equal("3", read.GetProperty("cable").GetProperty("wireCount").GetString());
