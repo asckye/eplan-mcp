@@ -298,14 +298,18 @@ public static class ConnectionCreatePlanner
     // Names the first failed scene check so the caller can tell which page object blocks drawing.
     private static string? SceneGap(Scene scene)
     {
-        if (!scene.Complete) { return "a page placement has no drawing record"; }
-        if (scene.PageType != "Circuit") { return "page type " + scene.PageType; }
-        if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null) { return "page geometry is unavailable"; }
+        if (!scene.Complete)
+        { return "a page placement has no drawing record"; }
+        if (scene.PageType != "Circuit")
+        { return "page type " + scene.PageType; }
+        if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null)
+        { return "page geometry is unavailable"; }
         if (scene.Page.Placements.FirstOrDefault(p => !DrawingCoordinates.ValidBounds(p.Bounds)) is { } placement)
         { return FormattableString.Invariant($"invalid bounds of {placement.Kind} {placement.Locator.Type}/{placement.Locator.Oid}"); }
         if (scene.SymbolBounds.FirstOrDefault(b => !DrawingCoordinates.ValidBounds(b.Value)) is { Key: not null } symbol)
         { return "invalid outline of symbol " + symbol.Key; }
-        if (scene.Pins.Count > 10000) { return "more than 10000 pins"; }
+        if (scene.Pins.Count > 10000)
+        { return "more than 10000 pins"; }
         if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""
             || !DrawingCoordinates.Contains(scene.Page.PageSize, [[p.Value.Location[0], p.Value.Location[1], p.Value.Location[0], p.Value.Location[1]]])) is { Key: not null } pin)
         { return "pin " + pin.Key + " at " + Point(pin.Value.Location) + " direction " + pin.Value.Direction + " is outside the page or undirected"; }
