@@ -193,7 +193,7 @@ public static class ConnectionCreatePlanner
             double[] bounds = scene.SymbolBounds.TryGetValue(key, out double[]? found) ? found : throw Missing("Read the selected variant's complete outline before planning placement.");
             double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
             Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
-            Require(!scene.Page.Placements.Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
+            Require(!scene.Page.Placements.Where(Obstacle).Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
             // Functional discovery metadata does not widen the existing routing-symbol contract.
             resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(new { symbol.Library, symbol.Name, symbol.Variant, symbol.Type, symbol.Kind, symbol.ConnectionPoints }), ["bounds"] = new JArray(outline) });
             if (interruptions.TryGetValue(Key(node.Point), out JObject? interruption))
@@ -220,7 +220,7 @@ public static class ConnectionCreatePlanner
         {
             double[][] s = segments[i];
             Require(!scene.Graphical.Any(e => Intersects(s, e)), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
-            if (scene.Page.Placements.FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
+            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
                     $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]."));
@@ -321,6 +321,9 @@ public static class ConnectionCreatePlanner
         { return "pins " + string.Join(", ", shared.Select(p => p.Key)) + " share " + shared.Key; }
         return null;
     }
+
+    // Acceptance trial: a location box is a dashed frame around devices; wires and nodes cross and sit inside it.
+    private static bool Obstacle(DrawingPlacement placement) => placement.Kind != "LocationBox";
 
     private static string FormatPoint(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
 

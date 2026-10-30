@@ -265,4 +265,13 @@ public sealed class ConnectionCreatePlannerTests
         Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
         Assert.Contains("invalid bounds of PropertyPlacement 45/9", error.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Scene_LocationBoxAroundThePath_IsNotAnObstacle()
+    {
+        var fixture = new ConnectionCreateFixture();
+        var locator = new DrawingLocator { Project = "scratch-project", Page = ConnectionCreateFixture.PageName, Type = 88, Oid = 7, Digest = new string('c', 64) };
+        fixture.Scene.Page.Placements.Add(new() { Locator = locator, Kind = "LocationBox", Location = [0, 0], Bounds = [2, 2, 40, 40] });
+        Assert.Equal("not_started", (string?)fixture.Plan()["execution"]);
+    }
 }
