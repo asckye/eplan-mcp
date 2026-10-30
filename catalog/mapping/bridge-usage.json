@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-30",
-  "scannedSources": "67d57c8b",
-  "sourceHash": "sha256:99287468dd2ee6c3ce94ef84e0d69151c62e4e1b656b6fff635a8d8dfee7536a",
+  "scannedSources": "c6a476a0",
+  "sourceHash": "sha256:1a23482468341bddb052ec594392e76fd0c51073b366362b121ee683edb3b658",
   "operations": [
     {
       "name": "action.execute",
@@ -1124,6 +1124,17 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -1458,6 +1469,19 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.Symbol.SymbolType.CableDefinitionLine": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -4499,6 +4523,17 @@
     "M:Eplan.EplApi.Base.PointD.#ctor(System.Double,System.Double)": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -5014,6 +5049,17 @@
     "M:Eplan.EplApi.DataModel.AnyPropertyId.op_Implicit(System.Int32)~Eplan.EplApi.DataModel.AnyPropertyId": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -5216,6 +5262,28 @@
         ],
         "operations": [
           "check.run.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -6200,6 +6268,28 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -7197,6 +7287,45 @@
         "operations": [
           "terminal.renumber.execute",
           "terminal.renumber.plan"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Cable.#ctor": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Cable.AddLocalFunctionTemplates(Eplan.EplApi.DataModel.Connection[])": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Cable.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -9207,6 +9336,39 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -9546,6 +9708,28 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(System.String)~Eplan.EplApi.DataModel.PropertyValue": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
@@ -10387,6 +10571,17 @@
     ],
     "M:Eplan.EplApi.DataModel.SymbolReference.GetLogicalArea": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
@@ -11178,6 +11373,30 @@
         ],
         "operations": [
           "cable.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.CableService.DoReassignWires(Eplan.EplApi.DataModel.Function,Eplan.EplApi.DataModel.Connection[],System.Boolean,Eplan.EplApi.DataModel.AnyPropertyId[])": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -12646,6 +12865,17 @@
     "P:Eplan.EplApi.Base.PointD.X": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Graphical",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -12873,6 +13103,17 @@
       }
     ],
     "P:Eplan.EplApi.Base.PointD.Y": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
@@ -13103,6 +13344,17 @@
     ],
     "P:Eplan.EplApi.Base.RectangleD.LowerLeft": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
@@ -13115,6 +13367,17 @@
       }
     ],
     "P:Eplan.EplApi.Base.RectangleD.UpperRight": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
@@ -13555,7 +13818,53 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.CableNameParts": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.ConnectionDefPoints": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
@@ -13580,6 +13889,28 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CablePins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -13672,6 +14003,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.IsTemplate": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.Page": [
       {
         "adapter": "EplanCableGenerator",
@@ -13736,6 +14080,50 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -13819,6 +14207,28 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CablePins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -13904,6 +14314,41 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.CableDefinitionLine": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -14045,6 +14490,17 @@
     "P:Eplan.EplApi.DataModel.ConnectionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -14053,6 +14509,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ConnectionPropertyList.Property(Eplan.EplApi.DataModel.Properties.Connection)": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -14109,6 +14578,30 @@
         "operations": [
           "cable.get"
         ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CheckMembership",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.EObjects.Cable.FunctionCategory": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.EObjects.Cable.Properties": [
@@ -14121,6 +14614,39 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -14725,6 +15251,30 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Function.FunctionTemplates": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -15429,6 +15979,73 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "FindCable",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -16019,6 +16636,17 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionBase.NameParts": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDevicePlacer",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
@@ -16065,6 +16693,40 @@
         ],
         "operations": [
           "cable.get"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -16980,6 +17642,41 @@
         ],
         "operations": [
           "property.set.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.FunctionPropertyList.Property(Eplan.EplApi.DataModel.Properties.Function)": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -18349,6 +19046,17 @@
     ],
     "P:Eplan.EplApi.DataModel.MasterData.Symbol.Type": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -18365,6 +19073,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.MasterData.Symbol.Variants": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Variants",
@@ -18405,6 +19124,17 @@
     "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Name": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Variants",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -18441,6 +19171,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Variants",
@@ -18606,6 +19347,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.MasterData.SymbolVariant.VariantNr": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Prepare",
@@ -18783,6 +19535,17 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "FindCable",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -19061,6 +19824,39 @@
         "operations": [
           "cable.renumber.execute",
           "cable.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -20798,6 +21594,28 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CablePins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -20939,6 +21757,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.PinBase.Index": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CablePins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
@@ -21213,6 +22042,17 @@
         "operations": [
           "cable.renumber.execute",
           "cable.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -22278,6 +23118,17 @@
     "P:Eplan.EplApi.DataModel.Project.SymbolLibraries": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Variants",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -23126,6 +23977,39 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -23521,6 +24405,72 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CheckMembership",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -23864,6 +24814,17 @@
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.EndSymbolRef": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Graphical",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -23890,6 +24851,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.StartSymbolRef": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
@@ -23941,6 +24913,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnections": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
@@ -26238,6 +27221,17 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
@@ -27345,6 +28339,17 @@
     "T:Eplan.EplApi.Base.PointD": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -27561,6 +28566,17 @@
     ],
     "T:Eplan.EplApi.Base.RectangleD": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
@@ -27677,6 +28693,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.AnyPropertyId": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Prepare",
@@ -27932,6 +28959,94 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CablePins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CheckMembership",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -28174,6 +29289,41 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.ConnectionDefinitionPoint": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.ConnectionPropertyList": [
       {
         "adapter": "EplanCableGenerator",
@@ -28185,6 +29335,61 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -28348,6 +29553,28 @@
         ],
         "operations": [
           "check.run.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableSnapshot",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -29666,6 +30893,105 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableRuns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CheckMembership",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "FindCable",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyBindings",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanMacroReader",
         "member": "ReadMacro",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs",
@@ -30643,6 +31969,17 @@
     ],
     "T:Eplan.EplApi.DataModel.FunctionBasePropertyList": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "BindCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanDevicePlacer",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
@@ -30731,6 +32068,39 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -31762,6 +33132,17 @@
     ],
     "T:Eplan.EplApi.DataModel.MasterData.Symbol": [
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "Category",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -31789,6 +33170,19 @@
           "device.place.execute",
           "device.place.plan",
           "symbol.search"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.Symbol.SymbolType": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -31827,6 +33221,28 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.SymbolVariant": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableVariant",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Outline",
@@ -32051,6 +33467,17 @@
         "operations": [
           "check.run.execute",
           "check.run.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -34641,6 +36068,50 @@
     "T:Eplan.EplApi.DataModel.Properties": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -34678,7 +36149,53 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Properties.Connection": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Properties.Function": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "PrepareCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
@@ -34921,6 +36438,39 @@
         "operations": [
           "cable.generate.execute",
           "cable.generate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "CableText",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "VerifyCables",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -35908,6 +37458,17 @@
         ],
         "operations": [
           "cable.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "AssignCores",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],

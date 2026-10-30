@@ -7,6 +7,47 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class CableNativeLifetimeTests
 {
     [Fact]
+    public void ScopedFunctionList_DisposedBeforeCommit_ReleasesTheListAndInvalidatesItsValues()
+    {
+        var store = new FakeCableStore();
+        var list = new FunctionPropertyList(store, []);
+        list[(Properties.Function)20040] = "cable";
+        PropertyValue value = list[(Properties.Function)20040];
+        Assert.Equal("cable", value.ToString());
+        Assert.Equal(1, store.OpenLists);
+
+        list.Dispose();
+
+        Assert.True(list.Disposed);
+        Assert.Equal(0, store.OpenLists);
+        Assert.Throws<ObjectDisposedException>(() => list[(Properties.Function)20040]);
+        Assert.Throws<ObjectDisposedException>(() => value.IsEmpty);
+        Assert.Throws<ObjectDisposedException>(list.Dispose);
+    }
+
+    [Fact]
+    public void ScopeEnded_PreviouslyAcquiredConnectionAndList_RejectReadsAndEndpointChanges()
+    {
+        var store = new FakeCableStore();
+        Connection connection = Assert.Single(store.FindConnections());
+        ConnectionPropertyList list = connection.Properties;
+        PropertyValue value = list[(Properties.Connection)31011];
+        store.Generation++;
+
+        Assert.Throws<ObjectDisposedException>(() => connection.Page);
+        Assert.Throws<ObjectDisposedException>(() => connection.StartPin);
+        Assert.Throws<ObjectDisposedException>(() => connection.EndPin);
+        Assert.Throws<ObjectDisposedException>(() => connection.Properties);
+        Assert.Throws<ObjectDisposedException>(() => connection.Page = null);
+        Assert.Throws<ObjectDisposedException>(() => connection.StartPin = null);
+        Assert.Throws<ObjectDisposedException>(() => connection.EndPin = null);
+        Assert.Throws<ObjectDisposedException>(() => list[(Properties.Connection)31011]);
+        Assert.Throws<ObjectDisposedException>(() => value.IsEmpty);
+        Assert.Throws<ObjectDisposedException>(list.Dispose);
+        Assert.Equal(1, store.OpenLists);
+    }
+
+    [Fact]
     public void ScopeEnded_PreviouslyAcquiredObjectListAndValue_ThrowOnReuse()
     {
         var store = new FakeCableStore();

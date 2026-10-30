@@ -12,9 +12,10 @@ internal sealed class SymbolLibrary
 internal sealed class Symbol
 {
     public string Name { get; set; } = "PLC_DI";
-    public string Type { get; set; } = "Function";
+    public SymbolType Type { get; set; } = SymbolType.Function;
     public SymbolPropertyList Properties { get; } = new();
     public SymbolVariant[] Variants { get; set; } = [];
+    public enum SymbolType { Function, BoxFunction, CableDefinitionLine }
 }
 
 internal sealed class SymbolVariant

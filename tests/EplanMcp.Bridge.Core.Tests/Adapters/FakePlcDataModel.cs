@@ -14,16 +14,3 @@ internal sealed class ArticleReference
 {
     public string? PartNr { get; set; }
 }
-
-internal sealed class Pin
-{
-    public Function? ParentFunction { get; set; }
-    public string? Name { get; set; }
-}
-
-internal class Connection
-{
-    public Pin? StartPin { get; set; }
-    public Pin? EndPin { get; set; }
-    public Page? Page { get; set; }
-}
