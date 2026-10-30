@@ -7,6 +7,42 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class AcceptanceListFileTests
 {
     [Fact]
+    public async Task FictionalFile_NativePlacementAndWireBatches_PersistOnlyGenuineUnsupportedReasons()
+    {
+        string folder = Directory.CreateTempSubdirectory("eplanmcp-acceptance-").FullName;
+        try
+        {
+            string fixture = Path.Combine(folder, "fixture.json");
+            await File.WriteAllTextAsync(fixture, AcceptanceDrawingListTests.Fixture(), TestContext.Current.CancellationToken);
+            JsonElement list = await AcceptanceListFile.LoadAsync(folder, fixture, null, TestContext.Current.CancellationToken);
+            var fake = new AcceptanceRedrawDriverTests.DrawingTools { ConnectWires = true, PaginateDrawings = true };
+            var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "medium", _ => { });
+            await driver.DrawAsync();
+            await driver.ExportAsync();
+            Assert.Equal(22, fake.ConnectionItems!.Value.GetArrayLength());
+            Assert.Equal(40, driver.UndoSteps);
+            string report = Path.Combine(folder, "report.json");
+            await File.WriteAllTextAsync(report, JsonSerializer.Serialize(driver.Report), TestContext.Current.CancellationToken);
+            using JsonDocument saved = JsonDocument.Parse(await File.ReadAllTextAsync(report, TestContext.Current.CancellationToken));
+            string[] skipped = saved.RootElement.GetProperty("skipped").EnumerateArray().Select(s => s.GetProperty("item").GetString()!).ToArray();
+            Assert.Equal(7, skipped.Length);
+            Assert.All(skipped, id => Assert.EndsWith("/display_properties", id, StringComparison.Ordinal));
+            Assert.Equal(2, fake.Requests.Count(r => r.Tool == "eplan_cable_get"));
+            Assert.Equal(3, fake.Requests.Count(r => r.Tool == "eplan_connection_create"));
+            JsonElement[] writes = saved.RootElement.GetProperty("evidence").EnumerateArray().Where(e => e.GetProperty("tool").GetString() == "eplan_connection_create").Select(e => e.GetProperty("result")).ToArray();
+            Assert.Equal(7, writes[0].GetProperty("actualCores").GetArrayLength());
+            Assert.Equal(10, writes[2].GetProperty("interruptionPoints").GetArrayLength());
+            Assert.All(writes[2].GetProperty("interruptionPoints").EnumerateArray(), p => Assert.Single(p.GetProperty("counterparts").EnumerateArray()));
+            Assert.False(driver.UndoCountIncomplete);
+            int wireCall = fake.Requests.FindIndex(r => r.Tool == "eplan_connection_create");
+            Assert.True(fake.Requests.FindIndex(r => r.Tool == "eplan_device_place" && r.Args.TryGetProperty("terminal_number", out _)) < wireCall);
+            Assert.Equal("eplan_page_get", fake.Requests[wireCall - 1].Tool);
+            Assert.Equal(2, fake.Calls.Count(c => c == "eplan_symbol_search"));
+        }
+        finally { Directory.Delete(folder, recursive: true); }
+    }
+
+    [Fact]
     public async Task DefaultAndExternalFile_ReadWithoutCopyingPrivateInputIntoRepository()
     {
         string folder = Directory.CreateTempSubdirectory("eplanmcp-acceptance-").FullName;

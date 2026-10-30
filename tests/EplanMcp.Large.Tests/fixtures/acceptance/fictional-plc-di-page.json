@@ -157,7 +157,30 @@
         "connection_point": "1",
         "address": "I0.0",
         "symbolic_address": "MEADOW_DI_AMBER",
-        "function_text": "Fictional amber gate input"
+        "function_text": "Fictional amber gate input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input1",
@@ -172,7 +195,30 @@
         "connection_point": "2",
         "address": "I0.1",
         "symbolic_address": "MEADOW_DI_BROOK",
-        "function_text": "Fictional brook guard input"
+        "function_text": "Fictional brook guard input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input2",
@@ -187,7 +233,30 @@
         "connection_point": "3",
         "address": "I0.2",
         "symbolic_address": "MEADOW_DI_CEDAR",
-        "function_text": "Fictional cedar latch input"
+        "function_text": "Fictional cedar latch input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input3",
@@ -202,7 +271,30 @@
         "connection_point": "4",
         "address": "I0.3",
         "symbolic_address": "MEADOW_DI_DUNE",
-        "function_text": "Fictional dune toggle input"
+        "function_text": "Fictional dune toggle input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input4",
@@ -217,7 +309,30 @@
         "connection_point": "5",
         "address": "I0.4",
         "symbolic_address": "MEADOW_DI_EMBER",
-        "function_text": "Fictional ember key input"
+        "function_text": "Fictional ember key input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input5",
@@ -232,7 +347,30 @@
         "connection_point": "6",
         "address": "I0.5",
         "symbolic_address": "MEADOW_DI_FERN",
-        "function_text": "Fictional fern pendant input"
+        "function_text": "Fictional fern pendant input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       },
       {
         "id": "input6",
@@ -247,7 +385,30 @@
         "connection_point": "7",
         "address": "I0.6",
         "symbolic_address": "MEADOW_DI_GROVE",
-        "function_text": "Fictional grove spare input"
+        "function_text": "Fictional grove spare input",
+        "direction": "Up",
+        "display_properties": [
+          {
+            "property_id": 20400,
+            "offset_x_mm": 4,
+            "offset_y_mm": -8
+          },
+          {
+            "property_id": 20403,
+            "offset_x_mm": 4,
+            "offset_y_mm": -16
+          },
+          {
+            "property_id": 20011,
+            "offset_x_mm": 4,
+            "offset_y_mm": -24
+          },
+          {
+            "property_id": 20301,
+            "offset_x_mm": 4,
+            "offset_y_mm": -32
+          }
+        ]
       }
     ]
   },
@@ -407,29 +568,6 @@
       ]
     },
     {
-      "id": "supply1",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch1",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          48,
-          244
-        ],
-        "to"
-      ]
-    },
-    {
       "id": "signal2",
       "from": {
         "item": "switch2",
@@ -441,29 +579,6 @@
       },
       "points": [
         "from",
-        "to"
-      ]
-    },
-    {
-      "id": "supply2",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch2",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          80,
-          244
-        ],
         "to"
       ]
     },
@@ -483,29 +598,6 @@
       ]
     },
     {
-      "id": "supply3",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch3",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          112,
-          244
-        ],
-        "to"
-      ]
-    },
-    {
       "id": "signal4",
       "from": {
         "item": "switch4",
@@ -517,29 +609,6 @@
       },
       "points": [
         "from",
-        "to"
-      ]
-    },
-    {
-      "id": "supply4",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch4",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          144,
-          244
-        ],
         "to"
       ]
     },
@@ -559,29 +628,6 @@
       ]
     },
     {
-      "id": "supply5",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch5",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          176,
-          244
-        ],
-        "to"
-      ]
-    },
-    {
       "id": "signal6",
       "from": {
         "item": "switch6",
@@ -593,29 +639,6 @@
       },
       "points": [
         "from",
-        "to"
-      ]
-    },
-    {
-      "id": "supply6",
-      "from": {
-        "item": "terminal8",
-        "pin": "2"
-      },
-      "to": {
-        "item": "switch6",
-        "pin": "13"
-      },
-      "points": [
-        "from",
-        [
-          256,
-          244
-        ],
-        [
-          208,
-          244
-        ],
         "to"
       ]
     },
@@ -777,6 +800,43 @@
         "Right",
         "Down"
       ]
+    },
+    {
+      "id": "supplyT5",
+      "kind": "t_node",
+      "position": [
+        208,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Right",
+        "Down"
+      ]
+    },
+    {
+      "id": "supplyLeft",
+      "kind": "corner",
+      "position": [
+        48,
+        244
+      ],
+      "directions": [
+        "Right",
+        "Down"
+      ]
+    },
+    {
+      "id": "supplyRight",
+      "kind": "corner",
+      "position": [
+        256,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Down"
+      ]
     }
   ],
   "cables": [
@@ -860,70 +920,70 @@
       "name": "=REDRAW{run}+TEST-LINK1",
       "position": [
         48,
-        248
+        256
       ],
-      "direction": "Down",
+      "direction": "Up",
       "counterpart_position": [
         48,
         200
       ],
-      "counterpart_direction": "Up"
+      "counterpart_direction": "Down"
     },
     {
       "id": "link2",
       "name": "=REDRAW{run}+TEST-LINK2",
       "position": [
         80,
-        248
+        256
       ],
-      "direction": "Down",
+      "direction": "Up",
       "counterpart_position": [
         80,
         200
       ],
-      "counterpart_direction": "Up"
+      "counterpart_direction": "Down"
     },
     {
       "id": "link3",
       "name": "=REDRAW{run}+TEST-LINK3",
       "position": [
         112,
-        248
+        256
       ],
-      "direction": "Down",
+      "direction": "Up",
       "counterpart_position": [
         112,
         200
       ],
-      "counterpart_direction": "Up"
+      "counterpart_direction": "Down"
     },
     {
       "id": "link4",
       "name": "=REDRAW{run}+TEST-LINK4",
       "position": [
         144,
-        248
+        256
       ],
-      "direction": "Down",
+      "direction": "Up",
       "counterpart_position": [
         144,
         200
       ],
-      "counterpart_direction": "Up"
+      "counterpart_direction": "Down"
     },
     {
       "id": "link5",
       "name": "=REDRAW{run}+TEST-LINK5",
       "position": [
         176,
-        248
+        256
       ],
-      "direction": "Down",
+      "direction": "Up",
       "counterpart_position": [
         176,
         200
       ],
-      "counterpart_direction": "Up"
+      "counterpart_direction": "Down"
     }
   ],
   "texts": [
@@ -960,7 +1020,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch1",
@@ -980,7 +1040,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch2",
@@ -1000,7 +1060,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch3",
@@ -1020,7 +1080,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch4",
@@ -1040,7 +1100,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch5",
@@ -1060,7 +1120,7 @@
     {
       "from": {
         "item": "terminal8",
-        "pin": "2"
+        "pin": "1"
       },
       "to": {
         "item": "switch6",
@@ -1137,5 +1197,61 @@
         "pin": "7"
       }
     }
-  ]
+  ],
+  "interruption_support": {
+    "page": {
+      "device": {
+        "id": "supportMAIN",
+        "tag": "=REDRAW{run}+TEST-SUPPORT_MAIN",
+        "library": "IEC_symbol",
+        "symbol": "O_EL",
+        "variant": 0,
+        "position": [
+          300,
+          180
+        ],
+        "connection_designations": [
+          "13",
+          "14"
+        ],
+        "contact_kind": "no"
+      },
+      "potential_point": {
+        "position": [
+          300,
+          196
+        ],
+        "directions": [
+          "Down"
+        ]
+      }
+    },
+    "counterpart_page": {
+      "device": {
+        "id": "supportPEER",
+        "tag": "=REDRAW{run}+TEST-SUPPORT_PEER",
+        "library": "IEC_symbol",
+        "symbol": "O_EL",
+        "variant": 0,
+        "position": [
+          300,
+          180
+        ],
+        "connection_designations": [
+          "13",
+          "14"
+        ],
+        "contact_kind": "no"
+      },
+      "potential_point": {
+        "position": [
+          300,
+          196
+        ],
+        "directions": [
+          "Down"
+        ]
+      }
+    }
+  }
 }

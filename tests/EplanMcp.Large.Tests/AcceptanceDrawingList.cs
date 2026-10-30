@@ -13,7 +13,7 @@ internal static class AcceptanceDrawingList
         using JsonDocument document = JsonDocument.Parse(json, new() { MaxDepth = 32 });
         JsonElement root = document.RootElement;
         FiniteNumbers(root, "");
-        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "");
+        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "interruption_support");
         Integer(root.GetProperty("version"), "/version", 1, 1);
         Text(root, "page", "");
         Text(root, "counterpart_page", "");
@@ -59,13 +59,29 @@ internal static class AcceptanceDrawingList
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         Each(plc, "points", "/plc", (point, at) =>
         {
-            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text", "");
+            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text direction", "display_properties");
             Identity(point, at);
             foreach (string key in "tag connection_point address symbolic_address function_text".Split(' '))
             { Text(point, key, at); }
             Require(tags.Add(point.GetProperty("tag").GetString()!), at + "/tag", "duplicate tag");
             Position(point.GetProperty("position"), at + "/position");
-            pins.Add(point.GetProperty("id").GetString()!, Strings(point.GetProperty("connection_designations"), at + "/connection_designations", 1, 1));
+            string[] names = Strings(point.GetProperty("connection_designations"), at + "/connection_designations", 1, 1);
+            Require(names[0] == point.GetProperty("connection_point").GetString(), at + "/connection_designations", "must equal the PLC connection point");
+            Require(point.GetProperty("tag").GetString() == plc.GetProperty("box").GetProperty("tag").GetString() + ":" + names[0], at + "/tag", "must name a connection point on the PLC box");
+            pins.Add(point.GetProperty("id").GetString()!, names);
+            Require(point.GetProperty("direction").ValueKind == JsonValueKind.String && point.GetProperty("direction").GetString() is "Up" or "Down" or "Left" or "Right", at + "/direction", "must be a native pin direction");
+            if (point.TryGetProperty("display_properties", out _))
+            {
+                var displayed = new HashSet<int>();
+                Each(point, "display_properties", at, (display, pointer) =>
+                {
+                    Object(display, pointer, "property_id offset_x_mm offset_y_mm", "");
+                    int id = Integer(display.GetProperty("property_id"), pointer + "/property_id", 0, int.MaxValue);
+                    Require(id is 20400 or 20403 or 20011 or 20301 && displayed.Add(id), pointer + "/property_id", "must be a distinct PLC display property");
+                    foreach (string axis in "offset_x_mm offset_y_mm".Split(' '))
+                    { Require(display.GetProperty(axis).ValueKind == JsonValueKind.Number, pointer + "/" + axis, "must be a finite number"); }
+                }, 0, 8);
+            }
             Require(addresses.Add(point.GetProperty("address").GetString()!), at + "/address", "duplicate PLC address");
         });
         JsonElement strip = root.GetProperty("terminal_strip");
@@ -80,6 +96,8 @@ internal static class AcceptanceDrawingList
             Device(terminal, at, " number");
             Text(terminal, "number", at);
             Require(numbers.Add(terminal.GetProperty("number").GetString()!), at + "/number", "duplicate terminal number");
+            Require(terminal.GetProperty("tag").GetString() == strip.GetProperty("tag").GetString() + ":" + terminal.GetProperty("number").GetString(), at + "/tag", "must name a terminal on the strip");
+            Require(terminal.GetProperty("library").GetString() == "IEC_symbol" && terminal.GetProperty("symbol").GetString() == "X", at + "/symbol", "terminal placement requires IEC_symbol/X");
         });
         void Endpoint(JsonElement endpoint, string at)
         {
@@ -123,7 +141,6 @@ internal static class AcceptanceDrawingList
                 && directions.All(d => d is "Up" or "Down" or "Left" or "Right")
                 && (kind != "corner" || directions.Any(d => d is "Up" or "Down") && directions.Any(d => d is "Left" or "Right")), at + "/directions", "must match the node kind");
         });
-        Require(root.GetProperty("wires").GetArrayLength() + root.GetProperty("nodes").GetArrayLength() <= 50, "/wires", "wire and node batch exceeds 50 items");
         var assigned = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "cables", "", (cable, at) =>
         {
@@ -150,16 +167,38 @@ internal static class AcceptanceDrawingList
                 Require("BK BN RD OG YE GN BU VT GY WH PK TQ GNYE".Split(' ').Contains(core.GetProperty("colour").GetString(), StringComparer.Ordinal), pointer + "/colour", "unsupported colour");
             }, 1, count);
         });
+        Require(root.GetProperty("wires").GetArrayLength() + root.GetProperty("nodes").GetArrayLength() + root.GetProperty("cables").GetArrayLength() <= 50, "/cables", "shared wire, node and cable batch exceeds 50 items");
+        Require(assigned.Count <= 50, "/cables", "shared cable batch exceeds 50 cores");
+        var interruptionNames = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "interruption_points", "", (point, at) =>
         {
             Object(point, at, "id name position direction counterpart_position counterpart_direction", "");
             Identity(point, at);
             Text(point, "name", at);
+            Require(interruptionNames.Add(point.GetProperty("name").GetString()!), at + "/name", "duplicate interruption name");
             Position(point.GetProperty("position"), at + "/position");
             Position(point.GetProperty("counterpart_position"), at + "/counterpart_position");
             foreach (string key in "direction counterpart_direction".Split(' '))
             { Text(point, key, at); Require(point.GetProperty(key).GetString() is "Up" or "Down" or "Left" or "Right", at + "/" + key, "invalid direction"); }
-        });
+        }, 0, 49);
+        Require(root.GetProperty("interruption_points").GetArrayLength() == 0 || root.TryGetProperty("interruption_support", out _), "/interruption_support", "paired page batches require explicit generation support");
+        if (root.TryGetProperty("interruption_support", out JsonElement support))
+        {
+            Object(support, "/interruption_support", "page counterpart_page", "");
+            foreach (string key in new[] { "page", "counterpart_page" })
+            {
+                string at = "/interruption_support/" + key;
+                JsonElement item = support.GetProperty(key);
+                Object(item, at, "device potential_point", "");
+                Device(item.GetProperty("device"), at + "/device");
+                Require(item.GetProperty("device").GetProperty("connection_designations").GetArrayLength() > 0, at + "/device/connection_designations", "generation support requires a pin");
+                JsonElement node = item.GetProperty("potential_point");
+                Object(node, at + "/potential_point", "position directions", "");
+                Position(node.GetProperty("position"), at + "/potential_point/position");
+                string[] directions = Strings(node.GetProperty("directions"), at + "/potential_point/directions", 1, 1);
+                Require(directions[0] is "Up" or "Down" or "Left" or "Right", at + "/potential_point/directions", "invalid direction");
+            }
+        }
         Each(root, "texts", "", (text, at) =>
         {
             Object(text, at, "id position text height_mm", "");
