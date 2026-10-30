@@ -36,3 +36,5 @@
 | [0027](0027-workbench-plan-review.md) | Workbench 的计划审阅与计划结果通知扩展为版本化协议（M6 第 2 阶段不依赖） | Proposed | 单向门（改变 Workbench IPC 合同） |
 | [0028](0028-plan-record-format.md) | 计划以版本化的不可变定义加原子替换的状态记录落盘（`state\plans\`），规范 SHA-256，可执行 24 小时、保留 30 天 | Accepted | 单向门（新增落盘格式） |
 | [0029](0029-phase3-engineering-records.md) | 采用版本化的配置、模块、规则与工程计划证据格式 | Accepted | 单向门（新增落盘格式） |
+| [0030](0030-action-catalog-tiers.md) | EPLAN action 分三级：已验证条目照旧，全部 action 只读可查，未验证 action 只在 scratch 中逐次审批后执行，并批量自动验证 | Proposed | 单向门（未验证执行发布后） |
+| [0031](0031-private-extension-modules.md) | 私有扩展模块在单独的工作进程中运行，经清单与哈希注册，只能经现有操作和审批流水线写入，默认关闭 | Proposed | 单向门（扩展契约发布后） |
