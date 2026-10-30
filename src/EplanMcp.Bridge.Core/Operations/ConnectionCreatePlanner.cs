@@ -220,7 +220,11 @@ public static class ConnectionCreatePlanner
         {
             double[][] s = segments[i];
             Require(!scene.Graphical.Any(e => Intersects(s, e)), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
-            Require(!scene.Page.Placements.Any(p => CrossesPlacement(s, p, scene.Pins)), "/items", "The path crosses a placement outline.");
+            if (scene.Page.Placements.FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
+            {
+                Require(false, "/items", FormattableString.Invariant(
+                    $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]."));
+            }
             Require(!scene.Pins.Values.Any(p => On(p.Location, s) && !s.Any(e => e.SequenceEqual(p.Location))), "/items", "A different pin intercepts this path; select explicit endpoints.");
             foreach (var node in nodes.Values.Where(n => On(n.Point, s)))
             { Require(s.Where(p => !p.SequenceEqual(node.Point)).All(p => node.Directions.Contains(Direction(node.Point, p), StringComparer.Ordinal)), "/items", "A node's directions do not support this path."); }
@@ -312,13 +316,13 @@ public static class ConnectionCreatePlanner
         { return "more than 10000 pins"; }
         if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""
             || !DrawingCoordinates.Contains(scene.Page.PageSize, [[p.Value.Location[0], p.Value.Location[1], p.Value.Location[0], p.Value.Location[1]]])) is { Key: not null } pin)
-        { return "pin " + pin.Key + " at " + Point(pin.Value.Location) + " direction " + pin.Value.Direction + " is outside the page or undirected"; }
-        if (scene.Pins.GroupBy(p => Point(p.Value.Location), StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1) is { } shared)
+        { return "pin " + pin.Key + " at " + FormatPoint(pin.Value.Location) + " direction " + pin.Value.Direction + " is outside the page or undirected"; }
+        if (scene.Pins.GroupBy(p => FormatPoint(p.Value.Location), StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1) is { } shared)
         { return "pins " + string.Join(", ", shared.Select(p => p.Key)) + " share " + shared.Key; }
         return null;
     }
 
-    private static string Point(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
+    private static string FormatPoint(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
 
     private static BridgeErrorException Missing(string message) => new(ErrorReason.CapabilityMissing, message, metadata: new Dictionary<string, string> { ["missing"] = "connection.create.execute" });
     internal static void Members(JToken? token, string at, string required, string optional)
