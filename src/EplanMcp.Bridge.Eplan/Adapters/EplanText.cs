@@ -40,7 +40,7 @@ internal static class EplanText
                 new Dictionary<string, string> { ["language"] = code! });
     }
 
-    /// <summary>The text of a property in <paramref name="language"/>, or null; see <see cref="ReadWithLanguage(PropertyValue, TextLanguage)"/>.</summary>
+    /// <summary>The text of a property in <paramref name="language"/>, or null; see <see cref="ReadWithLanguage(PropertyValue, TextLanguage, bool)"/>.</summary>
     public static string? Read(PropertyValue value, TextLanguage language) => ReadWithLanguage(value, language).Text;
 
     /// <summary>
@@ -50,9 +50,10 @@ internal static class EplanText
     /// language-independent values alike (S6). It does not fall back to other languages (A12), so with
     /// <see cref="TextLanguage.Fallback"/> the raw value is read for the languages the text has, only when the requested
     /// one has no text.
+    /// With <paramref name="storedOrder"/>, fallback follows stored order instead of preferring English.
     /// </summary>
-    public static (string? Text, string? Fallback) ReadWithLanguage(PropertyValue value, TextLanguage language) =>
-        value.IsEmpty ? (null, null) : Display(value.ToMultiLangString, value.ToString, language);
+    public static (string? Text, string? Fallback) ReadWithLanguage(PropertyValue value, TextLanguage language, bool storedOrder = false) =>
+        value.IsEmpty ? (null, null) : Display(value.ToMultiLangString, value.ToString, language, storedOrder);
 
     /// <summary>
     /// The same for a property of the parts database (eplan_part_search): <c>MDPropertyValue</c> has the same
@@ -70,7 +71,7 @@ internal static class EplanText
     public static (string? Text, string? Fallback) ReadWithLanguage(Func<MultiLangString> value, string raw, TextLanguage language) =>
         raw.Length == 0 ? (null, null) : Display(value, () => raw, language);
 
-    private static (string? Text, string? Fallback) Display(Func<MultiLangString> multiLanguage, Func<string> raw, TextLanguage language)
+    private static (string? Text, string? Fallback) Display(Func<MultiLangString> multiLanguage, Func<string> raw, TextLanguage language, bool storedOrder = false)
     {
         using MultiLangString text = multiLanguage();
         string display = text.GetStringToDisplay(language.Number);
@@ -79,7 +80,8 @@ internal static class EplanText
             return (display.Length == 0 ? null : display, null);
         }
 
-        foreach (string code in TextLanguages.Fallbacks(raw()))
+        // Symbol descriptions use stored order; existing readers retain their English-first fallback.
+        foreach (string code in storedOrder ? TextLanguages.Stored(raw()) : TextLanguages.Fallbacks(raw()))
         {
             using var iso = new ISOCode(code);
             if (iso.IsValid() && text.GetStringToDisplay(iso.GetNumber()) is { Length: > 0 } other)

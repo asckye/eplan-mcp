@@ -16,6 +16,9 @@ internal sealed class EplanSymbolReader : ISymbolReader
         MainThread.Assert();
         var result = new List<SymbolSearchItem>();
         Project project = EplanProjects.ByPath(projectPath);
+        TextLanguage? requested = string.IsNullOrEmpty(args.Language) ? null : EplanText.Language(args.Language);
+        string displayCode = LanguageCodes.Split(new EplanProjectLanguages().Read(projectPath).Display).FirstOrDefault(c => c != LanguageCodes.Unset) ?? TextLanguages.Independent;
+        var display = new TextLanguage(EplanText.Language(displayCode).Number, fallback: true);
         var inputDefinitions = new Dictionary<int, string?>();
         foreach (SymbolLibrary library in project.SymbolLibraries)
         {
@@ -24,7 +27,10 @@ internal sealed class EplanSymbolReader : ISymbolReader
             foreach (Symbol symbol in library.Symbols)
             {
                 string type = symbol.Type.ToString();
-                string? category = type is "Function" or "BoxFunction" ? Category(symbol) : null;
+                // A36/A39: category and description share one property list for every symbol type.
+                using SymbolPropertyList properties = symbol.Properties;
+                string? category = type is "Function" or "BoxFunction" ? Category(properties) : null;
+                string? description = Description(properties, requested, display);
                 string kind = SymbolKinds.From(type, category);
                 if (!SymbolKinds.Matches(args, library.Name, symbol.Name, kind))
                 { continue; }
@@ -42,6 +48,7 @@ internal sealed class EplanSymbolReader : ISymbolReader
                     {
                         Library = library.Name,
                         Name = symbol.Name,
+                        Description = description,
                         Type = type,
                         Kind = kind,
                         FunctionCategory = category,
@@ -56,10 +63,18 @@ internal sealed class EplanSymbolReader : ISymbolReader
         return result;
     }
 
-    private static string? Category(Symbol symbol)
+    private static string? Description(SymbolPropertyList properties, TextLanguage? requested, TextLanguage display)
     {
-        // S43: 20188 encodes category/group/id. Read a property list once (A36/A39).
-        using SymbolPropertyList properties = symbol.Properties;
+        if (!properties.Exists(Properties.Symbol.SYMB_DESC))
+        { return null; }
+        using PropertyValue value = properties[Properties.Symbol.SYMB_DESC];
+        return (requested is null ? null : EplanText.Read(value, requested))
+            ?? EplanText.ReadWithLanguage(value, display, storedOrder: true).Text;
+    }
+
+    private static string? Category(SymbolPropertyList properties)
+    {
+        // S43: 20188 encodes category/group/id.
         var id = (Properties.Symbol)20188;
         if (!properties.Exists(id))
         { return null; }

@@ -10895,6 +10895,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "SymbolDescriptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SymbolDescriptionTests.cs"
+          },
+          {
             "name": "SymbolSearchTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SymbolSearchTests.cs"

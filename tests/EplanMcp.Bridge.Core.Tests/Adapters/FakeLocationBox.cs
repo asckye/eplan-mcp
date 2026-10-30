@@ -35,13 +35,14 @@ internal sealed class FunctionBasePropertyList(Action? checkAlive = null) : IDis
 
 internal sealed class PropertyValue(string text, Action? checkAlive = null) : IDisposable
 {
+    public bool Disposed { get; private set; }
     public string Text { get { checkAlive?.Invoke(); return text; } }
     public bool IsEmpty => Text.Length == 0;
     public override string ToString() => Text;
     public static implicit operator PropertyValue(string text) => new(text);
     public Eplan.EplApi.Base.MultiLangString ToMultiLangString() => new(Text);
     public static implicit operator PropertyValue(Eplan.EplApi.Base.MultiLangString value) => new(value.GetAsString());
-    public void Dispose() { }
+    public void Dispose() { checkAlive?.Invoke(); Disposed = true; }
 }
 
 internal sealed class BoxSymbolVariant

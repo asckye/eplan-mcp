@@ -11,6 +11,8 @@ public sealed class SymbolSearchItem
     public string Library { get; set; } = string.Empty;
     /// <summary>Symbol name.</summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>Symbol description in the selected language, or null when empty.</summary>
+    public string? Description { get; set; }
     /// <summary>Native variant number.</summary>
     public int Variant { get; set; }
     /// <summary>Native Symbol.SymbolType name.</summary>

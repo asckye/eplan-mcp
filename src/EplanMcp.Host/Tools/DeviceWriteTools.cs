@@ -242,6 +242,7 @@ internal sealed class DeviceWriteTools
         {
             plannedSymbol.Library = ResultShaper.CleanText(plannedSymbol.Library);
             plannedSymbol.Name = ResultShaper.CleanText(plannedSymbol.Name);
+            plannedSymbol.Description = ResultShaper.CleanText(plannedSymbol.Description);
         }
         if (result.Terminal is { } placedTerminal)
         { placedTerminal.Strip = ResultShaper.CleanText(placedTerminal.Strip); placedTerminal.Owner = ResultShaper.CleanText(placedTerminal.Owner); placedTerminal.Number = ResultShaper.CleanText(placedTerminal.Number); placedTerminal.SortCode = ResultShaper.CleanText(placedTerminal.SortCode); }

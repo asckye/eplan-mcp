@@ -8,8 +8,8 @@ public sealed class SymbolSearchOperation(IProjectCatalog catalog, ISymbolReader
 {
     public override string Name => OperationNames.SymbolSearch;
 
-    public override object ParseArgs(JToken? args) => args is JObject obj && obj.Properties().Any(p => p.Name is not ("project" or "library" or "nameContains" or "kind" or "limit" or "offset"))
-        ? throw InvalidArgument("Unknown symbol search member; use project, library, nameContains, kind, limit and offset.") : base.ParseArgs(args);
+    public override object ParseArgs(JToken? args) => args is JObject obj && obj.Properties().Any(p => p.Name is not ("project" or "library" or "nameContains" or "textContains" or "language" or "kind" or "limit" or "offset"))
+        ? throw InvalidArgument("Unknown symbol search member; use project, library, nameContains, textContains, language, kind, limit and offset.") : base.ParseArgs(args);
 
     protected override ListData<SymbolSearchItem> Execute(SymbolSearchArgs args)
     {
@@ -19,7 +19,10 @@ public sealed class SymbolSearchOperation(IProjectCatalog catalog, ISymbolReader
         }
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
-        List<SymbolSearchItem> items = [.. reader.Read(project.Path, args).OrderBy(s => s.Library, StringComparer.Ordinal).ThenBy(s => s.Name, StringComparer.Ordinal).ThenBy(s => s.Variant)];
+        string? text = args.TextContains?.Trim();
+        List<SymbolSearchItem> items = [.. reader.Read(project.Path, args)
+            .Where(s => string.IsNullOrEmpty(text) || s.Name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0 || s.Description?.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
+            .OrderBy(s => s.Library, StringComparer.Ordinal).ThenBy(s => s.Name, StringComparer.Ordinal).ThenBy(s => s.Variant)];
         if (items.SelectMany(s => s.ConnectionPoints).Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v))))
         {
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "A symbol has invalid connection point geometry. Narrow the filters to another symbol.");

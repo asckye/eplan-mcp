@@ -53,11 +53,13 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
     [Fact]
     public async Task DryRun_ResolvesT1SymbolAndPredictsRelativePlacementsAndIndexedPins()
     {
+        _store.Symbols[0].Description = "Coil\u202e\u0001";
         JsonElement result = WriteToolHarness.Structured(await Place());
         Assert.Equal(("not_started", 1, 0, "", ""), (result.GetProperty("execution").GetString(), result.GetProperty("functions").GetInt32(), result.GetProperty("unplaced").GetInt32(), result.GetProperty("part").GetString(), result.GetProperty("variant").GetString()));
         Assert.Equal("=F+A1-K2", result.GetProperty("device").GetProperty("tag").GetString());
         Assert.Equal(JsonValueKind.Null, result.GetProperty("device").GetProperty("visibleTag").ValueKind);
         Assert.Equal(("IEC_symbol", "K", 0), (result.GetProperty("symbol").GetProperty("library").GetString(), result.GetProperty("symbol").GetProperty("name").GetString(), result.GetProperty("symbol").GetProperty("variant").GetInt32()));
+        Assert.Equal("Coil", result.GetProperty("symbol").GetProperty("description").GetString());
         Assert.Equal(4, result.GetProperty("changes").GetArrayLength());
         Assert.Equal("20214 offset (4, -4), page (84, 156)", result.GetProperty("changes")[1].GetProperty("newValue").GetString());
         Assert.Equal("20022[1]", result.GetProperty("changes")[2].GetProperty("property").GetString());

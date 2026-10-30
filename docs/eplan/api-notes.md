@@ -6,6 +6,8 @@
 
 ---
 
+待验证：`IEC_symbol` 的 `SYMB_DESC` 实机读回（SYMB_DESC readback on IEC_symbol: to be verified live）。
+
 ## A. 实机验证记录（2026-10-12，EPLAN 2026.0.3，Pro Panel 变体，Windows 11）
 
 ### A1. 环境与进程

@@ -9,6 +9,15 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class EplanTextTests
 {
     [Fact]
+    public void ReadWithLanguage_StoredOrderIsOptIn_ExistingReadersStillPreferEnglish()
+    {
+        using var property = new PropertyValue("de_DE@First;en_US@English;");
+        var language = new TextLanguage(ISOCode.Language.zh_CN, fallback: true);
+        Assert.Equal(("English", "en_US"), EplanText.ReadWithLanguage(property, language));
+        Assert.Equal(("First", "de_DE"), EplanText.ReadWithLanguage(property, language, storedOrder: true));
+    }
+
+    [Fact]
     public void Language_IndependentBypassesIsoValidityAndReadsFunctionText()
     {
         using var iso = new ISOCode("??_??");

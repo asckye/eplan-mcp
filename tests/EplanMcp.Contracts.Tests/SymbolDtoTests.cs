@@ -43,13 +43,15 @@ public sealed class SymbolDtoTests
     [Fact]
     public void Variant_RoundTripsAcrossBothPipeSerializers()
     {
-        var item = new SymbolSearchItem { Library = "SPECIAL", Name = "CO", Variant = 2, Type = "Routing", Kind = "routing", ConnectionPoints = [new() { Location = [-4, 0], Direction = "Left" }] };
+        var item = new SymbolSearchItem { Library = "SPECIAL", Name = "CO", Description = "Corner", Variant = 2, Type = "Routing", Kind = "routing", ConnectionPoints = [new() { Location = [-4, 0], Direction = "Left" }] };
         string json = System.Text.Json.JsonSerializer.Serialize(item, JsonSerializerOptions.Web);
         SymbolSearchItem read = JsonConvert.DeserializeObject<SymbolSearchItem>(json)!;
         Assert.Equal(("SPECIAL", "CO", 2, "Routing", "routing"), (read.Library, read.Name, read.Variant, read.Type, read.Kind));
+        Assert.Equal("Corner", read.Description);
         SymbolConnectionPoint point = Assert.Single(read.ConnectionPoints);
         Assert.Equal([-4d, 0d], point.Location);
         Assert.Equal("Left", point.Direction);
-        Assert.Equal(item.Variant, System.Text.Json.JsonSerializer.Deserialize<SymbolSearchItem>(JsonConvert.SerializeObject(read))!.Variant);
+        SymbolSearchItem returned = System.Text.Json.JsonSerializer.Deserialize<SymbolSearchItem>(JsonConvert.SerializeObject(read))!;
+        Assert.Equal((item.Variant, item.Description), (returned.Variant, returned.Description));
     }
 }

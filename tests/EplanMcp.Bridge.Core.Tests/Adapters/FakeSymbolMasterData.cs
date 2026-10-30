@@ -13,7 +13,9 @@ internal sealed class Symbol
 {
     public string Name { get; set; } = "PLC_DI";
     public SymbolType Type { get; set; } = SymbolType.Function;
-    public SymbolPropertyList Properties { get; } = new();
+    public SymbolPropertyList StoredProperties { get; } = new();
+    public int PropertyListReads { get; private set; }
+    public SymbolPropertyList Properties { get { PropertyListReads++; return StoredProperties; } }
     public SymbolVariant[] Variants { get; set; } = [];
     public enum SymbolType { Function, BoxFunction, CableDefinitionLine }
 }
@@ -33,9 +35,23 @@ internal sealed class NativeSymbolPoint
 internal sealed class SymbolPropertyList : IDisposable
 {
     public bool HasDefinition { get; set; } = true;
-    public bool Exists(Properties.Symbol id) => HasDefinition;
-    public PropertyValue this[Properties.Symbol id] => new(FormattableString.Invariant($"{(int)FunctionCategory.PLCTerminal}/1/1"));
-    public void Dispose() { }
+    public string? Description { get; set; }
+    public List<PropertyValue> Values { get; } = [];
+    public List<Properties.Symbol> Reads { get; } = [];
+    public int Disposals { get; private set; }
+    public bool Exists(Properties.Symbol id) => id == Properties.Symbol.SYMB_DESC ? Description is not null : HasDefinition;
+    public PropertyValue this[Properties.Symbol id]
+    {
+        get
+        {
+            Reads.Add(id);
+            int disposals = Disposals;
+            var value = new PropertyValue(id == Properties.Symbol.SYMB_DESC ? Description! : FormattableString.Invariant($"{(int)FunctionCategory.PLCTerminal}/1/1"), () => Assert.Equal(disposals, Disposals));
+            Values.Add(value);
+            return value;
+        }
+    }
+    public void Dispose() => Disposals++;
 }
 
 internal sealed class FunctionDefinitionLibrary
