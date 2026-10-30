@@ -58,7 +58,7 @@ public sealed class ConnectionCreateToolTests
             plan.Details = new() { ["preview"] = """{"project":"Line1","page":"page","execution":"not_started","undoSteps":6,"coreImpact":[{"connection":{"item_index":0},"designation":"-W3","label":"1","colour":"BK"}]}""" };
             return plan;
         };
-        var result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline, "Line1", "page",
+        var result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page",
             [JsonSerializer.SerializeToElement(new { kind = "cable_definition", points = (int[][])[[0, 16], [40, 16]], designation = "-W3", type_text = "Fictional cable", core_count = 1, cross_section_mm2 = 1.5, cores = new[] { new { connection = new { locator = new { project = "scratch-project", page = "page", type = 9, oid = 9, digest = new string('c', 64) } }, label = "1", colour = "BK" } } })],
             dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal(6, result.GetProperty("undoSteps").GetInt32());
@@ -73,7 +73,7 @@ public sealed class ConnectionCreateToolTests
     {
         using var harness = Setup();
         harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("""{"project":"Line1","page":"page","undoSteps":6,"actualCores":[{"designation":"+A1-W9","type":"Fictional cable","oid":9,"pins":["17/1/0","17/2/0"],"label":"1","colour":"BK"}]}""")!;
-        var call = await ConnectionCreateTools.CreateAsync(harness.Pipeline, "Line1", "page",
+        var call = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page",
             [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], cancellationToken: TestContext.Current.CancellationToken);
         JsonElement result = WriteToolHarness.Structured(call);
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
@@ -89,7 +89,7 @@ public sealed class ConnectionCreateToolTests
         using var harness = Setup(channel);
         harness.ProjectPath = Path.Combine(harness.Locations.Root, "Outside", "Line1");
         harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = _ => harness.Plan([new() { Action = "create", Kind = "connections", Name = "page", NewValue = "6 undo steps; cable -W9 cores 1 BK, 2 BU, 3 GNYE" }]);
-        JsonElement error = WriteToolHarness.Error(await ConnectionCreateTools.CreateAsync(harness.Pipeline, "Line1", "page",
+        JsonElement error = WriteToolHarness.Error(await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page",
             [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal((ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
         Assert.Contains("6 undo steps", Assert.Single(WritePipeline.ChangeLines(Assert.Single(channel.Questions).Plan)), StringComparison.Ordinal);
@@ -137,6 +137,6 @@ public sealed class ConnectionCreateToolTests
         harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => new JsonObject { ["project"] = "Line1", ["undoSteps"] = 2 };
         return harness;
     }
-    private static Task<ModelContextProtocol.Protocol.CallToolResult> Call(WriteToolHarness harness, bool dry = false) => ConnectionCreateTools.CreateAsync(harness.Pipeline,
+    private static Task<ModelContextProtocol.Protocol.CallToolResult> Call(WriteToolHarness harness, bool dry = false) => ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge,
         "Line1", "page", [JsonSerializer.SerializeToElement(new { kind = "corner", position = (int[])[24, 16], directions = (string[])["Left", "Up"] })], dry_run: dry, cancellationToken: TestContext.Current.CancellationToken);
 }

@@ -64,7 +64,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
-        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5000);
+        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5200);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
@@ -384,17 +384,22 @@ public sealed class ToolContractTests : IDisposable
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
         // Property tools share closed target/selector schemas; budget their prose and structural schema separately.
-        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or PlacementUpdateTools.Tool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or PlacementCreateTools.Tool or PlacementUpdateTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        foreach (Tool drawing in Tools.Where(t => t.Name is PlacementCreateTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool))
+        {
+            Assert.InRange(drawing.Description!.Length + Descriptions(drawing.InputSchema), 1, 1000);
+            Assert.InRange(drawing.InputSchema.GetRawText().Length, 1, 1000);
+        }
         Tool connection = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.InRange(connection.Description!.Length + Descriptions(connection.InputSchema), 1, 1000);
-        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5000);
+        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5200);
         Tool move = Tools.Single(t => t.Name == PlacementUpdateTools.Tool);
         Assert.InRange(move.Description!.Length, 1, 600);
         Assert.InRange(move.Description.Length + Descriptions(move.InputSchema), 1, 1000);
         Assert.InRange(move.InputSchema.GetRawText().Length, 1, 3000);
         Tool place = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         Assert.InRange(place.Description!.Length + Descriptions(place.InputSchema), 1, 1000);
-        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3500);
+        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3700);
         Tool bind = Tools.Single(t => t.Name == CabinetTools.BindTool);
         Assert.InRange(bind.Description!.Length + Descriptions(bind.InputSchema), 1, 1000);
         Assert.InRange(bind.InputSchema.GetRawText().Length, 1, 4000);

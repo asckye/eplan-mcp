@@ -81,6 +81,11 @@
           "type": "boolean",
           "default": false
         },
+        "show_page": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."
+        },
         "snap_to_grid": {
           "type": "boolean",
           "default": true
@@ -179,6 +184,18 @@
         },
         "generation": {
           "type": "string"
+        },
+        "pageShown": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "hint": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "warning": {
           "type": [

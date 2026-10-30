@@ -104,6 +104,7 @@ internal sealed class DeviceWriteTools
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
+        IBridgeClient bridge,
         [Description("Project")] string project,
         [Description("Circuit page")] string page,
         [Description("mm")] double x,
@@ -127,6 +128,7 @@ internal sealed class DeviceWriteTools
         [Description("PLC I/O address, e.g. I0.0")] string? plc_address = null,
         [Description("PLC manual symbolic address")] string? plc_symbolic_address = null,
         [Description("PLC function text (??_??)")] string? plc_text = null,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -196,6 +198,7 @@ internal sealed class DeviceWriteTools
             dry_run,
             PageWriteTools.DefaultLimit,
             "Placing the device");
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Page, cancellationToken).ConfigureAwait(false);
         WriteOutcome<DevicePlaceData> outcome;
         try
         {
@@ -203,7 +206,7 @@ internal sealed class DeviceWriteTools
         }
         catch (BridgeCallException ex)
         {
-            return ToolResults.Error(ex.Error);
+            return display.Apply(ToolResults.Error(ex.Error));
         }
 
         bool committed = outcome.Execution == ExecutionState.Committed;
@@ -266,7 +269,7 @@ internal sealed class DeviceWriteTools
             : args.PlcConnectionPoint is not null ? "Placed one PLC point; verify its additional representation with eplan_plc_get. Ctrl+Z undoes this step."
             : data is null ? "Placed a device; Ctrl+Z in EPLAN undoes this step."
             : $"Placed a device with {ToolResults.Count(data.Functions, "function")}; Ctrl+Z in EPLAN undoes this step.";
-        return ToolResults.Success(summary, result);
+        return display.Apply(ToolResults.Success(summary, result));
     }
 
     /// <summary>The hints of the tool spec (section 3), each when it applies, in one text.</summary>

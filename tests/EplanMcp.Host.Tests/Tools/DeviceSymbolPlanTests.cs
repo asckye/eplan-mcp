@@ -274,7 +274,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
     }
 
     private Task<CallToolResult> Place(bool dryRun = true, string[]? designations = null, string library = "IEC_symbol", string symbol = "K", int variant = 0, WriteToolHarness? harness = null) =>
-        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, "-K2", dry_run: dryRun, library: library, symbol: symbol, symbol_variant: variant,
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 80, 160, "-K2", dry_run: dryRun, library: library, symbol: symbol, symbol_variant: variant,
             display_properties: [JsonSerializer.SerializeToElement(new { property_id = 20214, offset_x_mm = 4, offset_y_mm = -4 })], connection_designations: designations ?? ["A1", "A2"], cancellationToken: TestContext.Current.CancellationToken);
 
     private WritePlan Plan(DevicePlaceArgs args) => (WritePlan)new DevicePlacePlanOperation(_store, _store, _store, _store, _store, _store, _store).Execute(args)!;

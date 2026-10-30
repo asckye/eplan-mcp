@@ -19,12 +19,14 @@
 | `file` | string | 是 | — | 导入目录中的相对路径，如 `drawings/4685200F.DXF`；扩展名只能是 `.dxf`、`.dwg` |
 | `scale` | enum `fit` / `none` | 否 | `fit` | `fit`：按页面缩放；`none`：保持原尺寸 |
 | `position` | enum `center` / `lower_left` | 否 | `center` | 图形放在页的中央，或左下角 |
+| `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的导入，不请求审批，也不修改项目 |
 
 - **导入目录**（M4c 设计 4.5、Q4）：`<数据根目录>\imports\`，固定、不能配置。`file` 的规则同 SEC-19：拒绝绝对路径、UNC、驱动器号和 `..`，每一级都不能是符号链接或联接点；文件不超过 100 MB。
 - 代理或工程师先把文件放进导入目录，再调用本工具。
 
 ## 3. 输出
+`show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 ```json
 {
   "project": "Line1",

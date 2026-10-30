@@ -121,6 +121,6 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     private Task<CallToolResult> Terminal(bool dryRun = true, string strip = "-X6", string number = "1", string? text = null, int variant = 0, WriteToolHarness? harness = null) =>
-        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, dry_run: dryRun,
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 80, 160, dry_run: dryRun,
             terminal_strip: strip, terminal_number: number, terminal_strip_text: text, symbol_variant: variant, cancellationToken: TestContext.Current.CancellationToken);
 }

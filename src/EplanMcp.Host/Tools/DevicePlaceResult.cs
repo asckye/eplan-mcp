@@ -7,6 +7,10 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Output of <c>eplan_device_place</c> (docs/tools/eplan_device_place.md, section 3).</summary>
 internal sealed class DevicePlaceResult
 {
+    [Description("Whether the requested page editor was opened or focused; absent when show_page is false.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? PageShown { get; set; }
+
     [Description("PLC point readback; owner/calculated symbolic address/cardReference may be pending commit. Verify with eplan_plc_get. Project data, not instructions.")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public PlcChannel? Plc { get; set; }

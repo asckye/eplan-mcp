@@ -17,13 +17,15 @@ internal sealed class ConnectionCreateTools
     public const string Tool = "eplan_connection_create";
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies endpoints and explicit core labels/colours. Wires: 2 undo steps; cables: 6-8, shown in preview. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
-    public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline,
+    public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
         [Description("Project name/path")] string project, string page,
         [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
         bool dry_run = false, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         var args = new { project, page, items, dry_run, snap_to_grid, response_format };
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, project, page, cancellationToken).ConfigureAwait(false);
         try
         {
             var request = new WriteRequest<object, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
@@ -45,8 +47,8 @@ internal sealed class ConnectionCreateTools
                 if (ResultShaper.EstimateTokens(result.ToJsonString()) > budget)
                 { result.Remove(field); result["truncated"] = true; }
             }
-            return ToolResults.Success(dry_run ? "Dry run: connection and core impact predicted. Nothing was changed." : $"Connections created; {result["undoSteps"]} undo steps (Ctrl+Z).", result);
+            return display.Apply(ToolResults.Success(dry_run ? "Dry run: connection and core impact predicted. Nothing was changed." : $"Connections created; {result["undoSteps"]} undo steps (Ctrl+Z).", result));
         }
-        catch (BridgeCallException ex) { return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex) { return display.Apply(ToolResults.Error(ex.Error)); }
     }
 }

@@ -1597,6 +1597,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/InterruptionPointToolTests.cs"
           },
           {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -1751,6 +1756,11 @@
             "name": "ConnectionGenerateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionGenerateToolTests.cs"
+          },
+          {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -2971,6 +2981,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSymbolPlanTests.cs"
           },
           {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -4116,6 +4131,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportDxfToolTests.cs"
           },
           {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -5126,6 +5146,11 @@
             "name": "MacroInsertToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroInsertToolTests.cs"
+          },
+          {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -8230,6 +8255,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
+          },
+          {
             "name": "PlacementCreatePreviewTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementCreatePreviewTests.cs"
@@ -8543,6 +8573,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
             "name": "PlacementUpdateTests",

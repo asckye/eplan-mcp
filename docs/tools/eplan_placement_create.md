@@ -7,10 +7,16 @@
 ## 1. 这个工具解决什么任务
 在指定电路图页添加说明文字、图形直线和矩形；图形线不承担导线功能。契约见 `PlacementCreateContract`，英文用法草案见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
 ## 2. 输入参数
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
+
 `project,page` 显式必填；单一 `Circuit` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=false`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
 每项 `kind=text/line/rectangle`；text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`、`height_mm`（0.5–100）；总文字≤500 字符，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，必须提供语言无关内容或至少项目显示语言；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。
 line 必填 `points:[[x1,y1],[x2,y2]]`；rectangle 必填 `corners` 同形状，可反向给角点。坐标均为有限数，0–10,000 mm，页左下角原点、y 向上；默认按页栅格吸附，中点远离零，关闭时保持原值。
 ## 3. 输出
+`show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 dry-run 回显实际 `project,page`、`execution=not_started,dryRun=true`、`gridSize,boundarySource=Page.Size`；`items` 逐项含 `requested,actual,bounds,snapped`，保留全部语言。`changes` 完整列出每项类型、页、索引、实际内容/几何和外框；`connectionChanges=[]`，不生成连接、不猜 locator。 执行成功为 `execution=committed,dryRun=false`，附 `warning,recovered`；结果来自已逐项核对的计划。
 dry-run 的外框是绝对 min-x/min-y/max-x/max-y，整体必须在可靠页界内；线/矩形取两点包围盒，文字只接受可信测量依赖，禁止按字数猜宽。未知页界不以图框尺寸兜底。concise/detailed 双份预算 5k/20k；装不下要求详细模式或减少项，不能截断影响清单。
 ## 4. 错误

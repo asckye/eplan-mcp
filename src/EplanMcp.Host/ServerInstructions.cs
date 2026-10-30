@@ -14,5 +14,6 @@ internal static class ServerInstructions
         // EPLAN_BUSY: session status still says connected, since it does not wait for EPLAN's main thread (api-notes A10).
         "If a tool returns EPLAN_BUSY, relay that tool's message to the engineer instead of retrying in a loop; " +
         "if it returns EPLAN_NOT_CONNECTED, call eplan_session_status and relay its hint. " +
+        "For drawing, open the page first with eplan_page_open or show_page=true, then draw in batches. " +
         "eplan_tool_usage gives any tool's detailed usage: complete examples, call order, result fields and error handling.";
 }
