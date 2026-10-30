@@ -266,7 +266,7 @@ internal sealed class DeviceWriteTools
         if (result.LocationBox is { } location)
         { location.Structure = ResultShaper.CleanText(location.Structure); result.Hint = "Devices inside keep their own structure; affected devices: none. " + result.Hint; }
         string summary = args.LocationBox is not null ? (committed ? "Placed one dashed location box; affected devices: none. Ctrl+Z undoes this step." : "Dry run: would place one dashed location box; affected devices: none. Nothing was changed.") : !committed ? "Dry run: would place one device. Nothing was changed."
-            : args.PlcConnectionPoint is not null ? "Placed one PLC point; verify its additional representation with eplan_plc_get. Ctrl+Z undoes this step."
+            : args.PlcConnectionPoint is not null ? "Placed one PLC point; verify it with eplan_plc_get. Ctrl+Z undoes this step."
             : data is null ? "Placed a device; Ctrl+Z in EPLAN undoes this step."
             : $"Placed a device with {ToolResults.Count(data.Functions, "function")}; Ctrl+Z in EPLAN undoes this step.";
         return display.Apply(ToolResults.Success(summary, result));

@@ -30,8 +30,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Require(definition.ConnectionPoints.Length == _symbol.ConnectionPoints.Count);
         var terminal = new Terminal();
 #pragma warning restore CA2000
-        terminal.Create(cards[0], _variant);
-        terminal.PlaceAt(_page, new PointD(args.X, args.Y), DocumentTypeManager.DocumentType.Circuit, _variant);
+        // Acceptance trial: Create(PLC, variant) instantiates a representation at the page origin and PlaceAt then adds a
+        // second function (PlaceAt docs), so each point left a visible device-level terminal at (0,0). Create the point
+        // on the page in one step; it joins the card by its device tag (Name is set by the caller).
+        terminal.Create(_page, _variant);
         terminal.FunctionDefinition = definition;
         Require(terminal.FunctionCategory == FunctionCategory.PLCTerminal && terminal.FunctionDefinition.Group == definition.Group && terminal.FunctionDefinition.Id == definition.Id);
         // A55/live T7c: relations may be null before commit; compare names rather than object identifiers.

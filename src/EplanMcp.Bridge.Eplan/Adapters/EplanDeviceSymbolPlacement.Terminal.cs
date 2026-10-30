@@ -1,4 +1,5 @@
 using Eplan.EplApi.Base;
+using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using EplanMcp.Bridge.Core;
@@ -22,7 +23,9 @@ internal sealed partial class EplanDeviceSymbolPlacement
         TerminalStrip strip = create ? new TerminalStrip() : matches[0];
         if (create)
         {
-            strip.Create(_page);
+            // Acceptance trial: Create(Page) placed the strip definition at the page origin, outside the frame. An
+            // unplaced definition (Create(Project, FunctionDefinition)) is listed in the navigator only.
+            strip.Create(_project, _project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText));
             strip.IsMainFunction = true;
             strip.Name = name;
         }

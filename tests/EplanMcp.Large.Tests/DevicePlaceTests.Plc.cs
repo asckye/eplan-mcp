@@ -133,13 +133,13 @@ public sealed partial class DevicePlaceTests
             if (i is 1 or 2)
             {
                 JsonElement remaining = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["response_format"] = "detailed" });
-                // Each placed point also brings a device-level PLC terminal without a connection point (live T7d).
+                // One function per point: the device-level terminal that Create(PLC)+PlaceAt left at the page origin is gone.
                 JsonElement[] left = [.. remaining.GetProperty("channels").EnumerateArray().Where(c => c.GetProperty("name").GetString()!.Contains(':', StringComparison.Ordinal))];
                 Assert.Equal(i - 1, left.Length);
                 Assert.All(left, c => Assert.Equal(1, c.GetProperty("parentlessRepresentations").GetInt32()));
                 JsonElement names = await eplan.CallAsync("eplan_device_list", new() { ["project"] = project, ["category"] = "PLCTerminal", ["tag_contains"] = tag, ["include_auxiliary"] = true });
                 TestContext.Current.TestOutputHelper!.WriteLine($"after undo {i}: {names.GetRawText()}");
-                Assert.Equal(2 * (i - 1), names.GetProperty("total").GetInt32()); // a point and its device-level terminal; also detects orphans
+                Assert.Equal(i - 1, names.GetProperty("total").GetInt32()); // also detects orphans
             }
         }
         Assert.Equal(0, await DevicesOnAsync(project, page));

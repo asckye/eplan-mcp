@@ -13,16 +13,26 @@ public sealed class TerminalPlacementTests : IDisposable
 {
     private readonly Page _page = new() { Name = "=F+A1/1" };
     private readonly EplanDeviceSymbolPlacement _adapter;
-    public TerminalPlacementTests() { Terminal.OnCreate = null; _adapter = new(new Project(_page), _page); }
+    private readonly Project _project;
+    public TerminalPlacementTests()
+    {
+        Terminal.OnCreate = null;
+        _project = new Project(_page);
+        _project.FunctionDefinitionLibrary.Definitions = [new() { FunctionCategory = FunctionCategory.Terminal }, new() { FunctionCategory = FunctionCategory.TerminalDefText }];
+        _adapter = new(_project, _page);
+    }
     public void Dispose() => Terminal.OnCreate = null;
 
     [Fact]
     public void Create_ParentPrecedesTerminal_AndNativeReadbackPreservesAssignedSortCode()
     {
-        Terminal.OnCreate = terminal => Assert.IsType<TerminalStrip>(_page.AllPlacements[0]);
+        TerminalStrip? parent = null;
+        Terminal.OnCreate = terminal => parent = terminal.TerminalStrip;
         DevicePlaceData data = _adapter.PlaceTerminal(Args(), "=F+A1-X6:1");
-        TerminalStrip strip = Assert.IsType<TerminalStrip>(_page.AllPlacements[0]);
-        Terminal terminal = Assert.IsType<Terminal>(_page.AllPlacements[1]);
+        // The strip definition is created unplaced (acceptance trial: Create(Page) put it at the page origin).
+        Terminal terminal = Assert.IsType<Terminal>(Assert.Single(_page.AllPlacements));
+        TerminalStrip strip = Assert.IsType<TerminalStrip>(parent);
+        Assert.Same(_project, strip.DefinedIn);
         Assert.Same(strip, terminal.TerminalStrip);
         Assert.Equal(("=F+A1-X6", "1", "17", true), (data.Terminal!.Owner, data.Terminal.Number, data.Terminal.SortCode, data.Terminal.StripCreated));
         Assert.Equal([80d, 160d], data.Terminal.Position);
@@ -72,7 +82,7 @@ public sealed class TerminalPlacementTests : IDisposable
         DevicePlaceData data = _adapter.PlaceTerminal(Args(), "=F+A1-X6:1");
         Assert.Null(data.Terminal!.Owner);
         Assert.Equal("=F+A1-X6", data.Terminal.Strip);
-        Assert.True(Assert.IsType<Terminal>(_page.AllPlacements[1]).Properties.Disposed);
+        Assert.True(Assert.IsType<Terminal>(Assert.Single(_page.AllPlacements)).Properties.Disposed);
     }
 
     [Fact]
