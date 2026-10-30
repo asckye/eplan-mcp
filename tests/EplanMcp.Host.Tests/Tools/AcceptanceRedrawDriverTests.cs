@@ -18,10 +18,10 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(["eplan_page_create", "eplan_page_open", "eplan_page_get"], fake.Calls.Take(3));
         Assert.Equal("eplan_export_image", fake.Calls[^1]);
         Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.OrdinalIgnoreCase) || c.Contains("delete", StringComparison.OrdinalIgnoreCase));
-        Assert.Equal(40, driver.UndoSteps);
+        Assert.Equal(41, driver.UndoSteps);
         Assert.False(driver.UndoCountIncomplete);
         JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
-        Assert.Equal(["pages", "location_boxes", "devices", "plc", "terminals", "wires_symbols_and_cables", "generate", "interruption_points", "texts", "verify"], report.GetProperty("stages").EnumerateArray().Select(n => n.GetString()));
+        Assert.Equal(["pages", "location_boxes", "devices", "plc", "terminals", "wires_symbols_and_cables", "generate", "cables_after_generate", "interruption_points", "texts", "verify"], report.GetProperty("stages").EnumerateArray().Select(n => n.GetString()));
         string[] skipped = report.GetProperty("skipped").EnumerateArray().Select(s => s.GetProperty("item").GetString()!).ToArray();
         Assert.DoesNotContain("plc", skipped);
         Assert.DoesNotContain("strip", skipped);
@@ -54,7 +54,7 @@ public sealed class AcceptanceRedrawDriverTests
     public async Task Cables_ShareTheWireCall_AndReferenceOnlyItsWireItems()
     {
         var fake = new DrawingTools { ConnectWires = true };
-        await Driver(fake).DrawAsync();
+        await new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", _ => { }).DrawAsync();
         JsonElement[] calls = fake.Requests.Where(r => r.Tool == "eplan_connection_create").Select(r => r.Args).ToArray();
         Assert.Equal(3, calls.Length);
         JsonElement batch = calls[0].GetProperty("items");
@@ -90,6 +90,149 @@ public sealed class AcceptanceRedrawDriverTests
     }
 
     [Theory]
+    [InlineData("Up")]
+    [InlineData("Down")]
+    [InlineData("Left")]
+    [InlineData("Right")]
+    public async Task AlignedAnchors_GenerateLogicalConnection_WithoutDrawingAWire(string direction)
+    {
+        var fake = new DrawingTools { ConnectWires = true, PaginateDrawings = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AutoconnectList(direction), "test", _ => { });
+        await driver.DrawAsync();
+        Assert.DoesNotContain("eplan_connection_create", fake.Calls);
+        Assert.Contains("eplan_connection_generate", fake.Calls);
+        JsonElement evidence = Assert.Single(JsonSerializer.SerializeToElement(driver.Report).GetProperty("evidence").EnumerateArray(), e => e.TryGetProperty("wire", out _));
+        Assert.Equal("testwire", evidence.GetProperty("wire").GetString());
+        Assert.Equal("autoconnect", evidence.GetProperty("mode").GetString());
+        Assert.True(fake.ContinuationReads > 0);
+        Assert.Equal(23, driver.UndoSteps);
+    }
+
+    [Theory]
+    [InlineData("axis")]
+    [InlineData("direction")]
+    [InlineData("away")]
+    [InlineData("coincident")]
+    public async Task InvalidAutoconnectAnchors_FailWithWireIdAndBendPointGuidance(string fault)
+    {
+        JsonObject list = JsonNode.Parse(AutoconnectList("Down").GetRawText())!.AsObject();
+        if (fault == "axis")
+        { list["devices"]![1]!["position"]![0] = 52; }
+        else if (fault == "direction")
+        { list["wires"]![0]!["to"]!["pin"] = "14"; }
+        else
+        { list["devices"]![1]!["position"]![1] = fault == "away" ? 240 : 204; }
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { });
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        Assert.Contains("testwire", error.Message, StringComparison.Ordinal);
+        Assert.Contains("do not face each other on one axis", error.Message, StringComparison.Ordinal);
+        Assert.Contains("explicit bend points", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("eplan_connection_create", fake.Calls);
+        Assert.DoesNotContain("eplan_connection_generate", fake.Calls);
+    }
+
+    [Fact]
+    public async Task AutoconnectCables_AfterGenerate_UseExactDetailedLocatorsAcrossAllPages()
+    {
+        var fake = new DrawingTools { ConnectWires = true, PaginateConnections = true };
+        var driver = Driver(fake);
+        await driver.DrawAsync();
+        JsonElement[] calls = fake.Requests.Where(r => r.Tool == "eplan_connection_create").Select(r => r.Args).ToArray();
+        Assert.Equal(4, calls.Length);
+        Assert.Equal(7, calls[0].GetProperty("items").GetArrayLength());
+        Assert.DoesNotContain(calls.SelectMany(c => c.GetProperty("items").EnumerateArray()), i => i.GetProperty("kind").GetString() == "wire");
+        int generated = fake.Requests.FindIndex(r => r.Tool == "eplan_connection_generate");
+        int cableCall = fake.Requests.FindIndex(generated, r => r.Tool == "eplan_connection_create");
+        Assert.True(generated < cableCall);
+        Assert.All(fake.Requests.Skip(generated + 1).Take(cableCall - generated - 1), r =>
+        {
+            Assert.Equal("eplan_connection_list", r.Tool);
+            Assert.Equal("detailed", r.Args.GetProperty("response_format").GetString());
+        });
+        Assert.True(cableCall - generated > 2);
+        JsonElement[] listed = JsonSerializer.SerializeToElement(driver.Report).GetProperty("evidence").EnumerateArray()
+            .Where(e => e.TryGetProperty("tool", out JsonElement tool) && tool.GetString() == "eplan_connection_list")
+            .SelectMany(e => e.GetProperty("result").GetProperty("connections").EnumerateArray()).Where(c => c.TryGetProperty("locator", out _)).ToArray();
+        JsonElement[] definitions = calls[1].GetProperty("items").EnumerateArray().ToArray();
+        Assert.Equal(2, definitions.Length);
+        foreach (JsonElement core in definitions.SelectMany(c => c.GetProperty("cores").EnumerateArray()))
+        {
+            JsonElement reference = core.GetProperty("connection");
+            Assert.Single(reference.EnumerateObject());
+            Assert.Contains(listed, c => JsonElement.DeepEquals(c.GetProperty("locator"), reference.GetProperty("locator")));
+        }
+        Assert.True(fake.Requests.FindIndex(r => r.Tool == "eplan_cable_get") > cableCall);
+    }
+
+    [Fact]
+    public async Task AutoconnectOnlyCable_ReversedEndpoints_CreatesOnlyDefinitionAfterGenerate()
+    {
+        JsonObject list = JsonNode.Parse(AutoconnectList("Up").GetRawText())!.AsObject();
+        list["cables"] = JsonNode.Parse("""[{"id":"testcable","tag":"=GAA+A1-W{run}","type_text":"Fictional test cable","core_count":1,"cross_section_mm2":0.5,"points":[[40,180],[56,180]],"cores":[{"wire":"testwire","label":"1","colour":"RD"}]}]""");
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { });
+        await driver.DrawAsync();
+        JsonElement batch = Assert.Single(fake.Requests, r => r.Tool == "eplan_connection_create").Args.GetProperty("items");
+        JsonElement definition = Assert.Single(batch.EnumerateArray());
+        Assert.Equal("cable_definition", definition.GetProperty("kind").GetString());
+        Assert.True(Assert.Single(definition.GetProperty("cores").EnumerateArray()).GetProperty("connection").TryGetProperty("locator", out _));
+        Assert.True(fake.Calls.IndexOf("eplan_connection_create") > fake.Calls.IndexOf("eplan_connection_generate"));
+        Assert.Single(fake.Calls, c => c == "eplan_cable_get");
+    }
+
+    [Fact]
+    public async Task MixedCables_KeepExplicitOnlyItemIndices_AndDeferMixedDefinitionOnce()
+    {
+        JsonObject list = JsonNode.Parse(ExplicitWiresList().GetRawText())!.AsObject();
+        list["wires"]![0]!["points"] = new JsonArray("from", "to");
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { });
+        await driver.DrawAsync();
+        JsonElement[] batches = fake.Requests.Where(r => r.Tool == "eplan_connection_create").Select(r => r.Args.GetProperty("items")).ToArray();
+        Assert.Equal(12, batches[0].EnumerateArray().Count(i => i.GetProperty("kind").GetString() == "wire"));
+        JsonElement early = Assert.Single(batches[0].EnumerateArray(), i => i.GetProperty("kind").GetString() == "cable_definition");
+        Assert.EndsWith("4", early.GetProperty("designation").GetString(), StringComparison.Ordinal);
+        int index = Assert.Single(early.GetProperty("cores").EnumerateArray()).GetProperty("connection").GetProperty("item_index").GetInt32();
+        Assert.Equal(11, index);
+        Assert.Equal("wire", batches[0][index].GetProperty("kind").GetString());
+        JsonElement mixed = Assert.Single(batches[1].EnumerateArray());
+        Assert.EndsWith("3", mixed.GetProperty("designation").GetString(), StringComparison.Ordinal);
+        Assert.Equal(6, mixed.GetProperty("cores").GetArrayLength());
+        Assert.All(mixed.GetProperty("cores").EnumerateArray(), c => Assert.True(c.GetProperty("connection").TryGetProperty("locator", out _)));
+        int generate = fake.Requests.FindIndex(r => r.Tool == "eplan_connection_generate");
+        Assert.True(fake.Requests.FindIndex(r => r.Tool == "eplan_cable_get") < generate);
+        Assert.True(fake.Requests.FindLastIndex(r => r.Tool == "eplan_cable_get") > generate);
+        Assert.Equal(2, fake.Calls.Count(c => c == "eplan_cable_get"));
+    }
+
+    [Theory]
+    [InlineData("missing", "exactly one generated connection")]
+    [InlineData("duplicate", "exactly one generated connection")]
+    [InlineData("locator", "requires a locator")]
+    [InlineData("truncated", "truncated without a continuation cursor")]
+    public async Task GeneratedCableConnection_IncompleteOrAmbiguousEvidence_FailsBeforeCableWrite(string fault, string message)
+    {
+        var fake = new DrawingTools { ConnectWires = true, ConnectionFault = fault };
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(() => Driver(fake).DrawAsync());
+        Assert.Contains(message, error.Message, StringComparison.Ordinal);
+        Assert.Single(fake.Calls, c => c == "eplan_connection_create");
+        Assert.Contains("eplan_connection_generate", fake.Calls);
+        Assert.DoesNotContain("eplan_cable_get", fake.Calls);
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("duplicate")]
+    public async Task AutoconnectExpectedConnection_MissingOrDuplicated_FailsVerification(string fault)
+    {
+        var fake = new DrawingTools { ConnectWires = true, ConnectionFault = fault };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AutoconnectList("Down"), "test", _ => { });
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        Assert.DoesNotContain("eplan_connection_create", fake.Calls);
+    }
+
+    [Theory]
     [InlineData("actual.designation")]
     [InlineData("actual.type")]
     [InlineData("actual.label")]
@@ -109,9 +252,9 @@ public sealed class AcceptanceRedrawDriverTests
         var fake = new DrawingTools { ConnectWires = true, CableFault = fault };
         var driver = Driver(fake);
         await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
-        Assert.Single(fake.Calls, c => c == "eplan_connection_create");
-        Assert.DoesNotContain("eplan_connection_generate", fake.Calls);
-        Assert.Equal(33, driver.UndoSteps);
+        Assert.Equal(2, fake.Calls.Count(c => c == "eplan_connection_create"));
+        Assert.Contains("eplan_connection_generate", fake.Calls);
+        Assert.Equal(34, driver.UndoSteps);
         Assert.All(JsonSerializer.SerializeToElement(driver.Report).GetProperty("skipped").EnumerateArray(), s => Assert.EndsWith("/display_properties", s.GetProperty("item").GetString(), StringComparison.Ordinal));
     }
 
@@ -125,7 +268,7 @@ public sealed class AcceptanceRedrawDriverTests
         var fake = new DrawingTools { ConnectWires = true, CounterpartFault = fault };
         var driver = Driver(fake);
         await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
-        Assert.Equal(3, fake.Calls.Count(c => c == "eplan_connection_create"));
+        Assert.Equal(4, fake.Calls.Count(c => c == "eplan_connection_create"));
         Assert.DoesNotContain("eplan_export_image", fake.Calls);
     }
 
@@ -214,11 +357,48 @@ public sealed class AcceptanceRedrawDriverTests
     {
         JsonObject list = JsonNode.Parse(AcceptanceDrawingListTests.Fixture())!.AsObject();
         list["devices"] = new JsonArray(list["devices"]![0]!.DeepClone(), list["devices"]![1]!.DeepClone());
+        // Keep unrelated placed pins off the two switches' axes and each other's axes.
+        foreach (JsonNode? terminal in list["terminal_strip"]!["terminals"]!.AsArray())
+        { terminal!["position"]![0] = terminal["position"]![0]!.GetValue<int>() + 4; }
+        foreach (JsonNode? input in list["plc"]!["points"]!.AsArray())
+        { input!["position"]![0] = input["position"]![0]!.GetValue<int>() + 8; }
         list["wires"] = JsonNode.Parse("""[{"id":"testwire","from":{"item":"switch1","pin":"14"},"to":{"item":"switch2","pin":"14"},"points":["from",[48,188],[80,188],"to"]}]""");
         list["expected_connections"] = JsonNode.Parse("""[{"from":{"item":"switch1","pin":"14"},"to":{"item":"switch2","pin":"14"}}]""");
         list["nodes"] = new JsonArray();
         list["cables"] = new JsonArray();
         list["interruption_points"] = new JsonArray();
+        return AcceptanceDrawingList.Read(list.ToJsonString());
+    }
+
+    private static JsonElement AutoconnectList(string direction)
+    {
+        JsonObject list = JsonNode.Parse(TwoSwitches().GetRawText())!.AsObject();
+        bool horizontal = direction is "Left" or "Right";
+        list["devices"]![1]!["position"] = horizontal ? new JsonArray(96, 212) : new JsonArray(48, 160);
+        foreach (JsonNode? device in list["devices"]!.AsArray())
+        { device!["variant"] = horizontal ? 1 : 0; }
+        list["wires"]![0]!["to"]!["pin"] = "13";
+        list["wires"]![0]!["points"] = new JsonArray("from", "to");
+        if (direction is "Up" or "Left")
+        {
+            JsonNode from = list["wires"]![0]!["from"]!.DeepClone();
+            list["wires"]![0]!["from"] = list["wires"]![0]!["to"]!.DeepClone();
+            list["wires"]![0]!["to"] = from;
+        }
+        list["expected_connections"] = new JsonArray(new JsonObject { ["from"] = list["wires"]![0]!["from"]!.DeepClone(), ["to"] = list["wires"]![0]!["to"]!.DeepClone() });
+        return AcceptanceDrawingList.Read(list.ToJsonString());
+    }
+
+    internal static JsonElement ExplicitWiresList()
+    {
+        JsonObject list = JsonNode.Parse(AcceptanceDrawingListTests.Fixture())!.AsObject();
+        foreach (JsonNode? wire in list["wires"]!.AsArray())
+        {
+            bool signal = wire!["id"]!.GetValue<string>().StartsWith("signal", StringComparison.Ordinal);
+            string id = wire["from"]!["item"]!.GetValue<string>();
+            JsonNode source = (signal ? list["devices"] : list["terminal_strip"]!["terminals"])!.AsArray().Single(d => d!["id"]!.GetValue<string>() == id)!;
+            wire["points"] = new JsonArray("from", new JsonArray(source["position"]![0]!.GetValue<int>(), signal ? 160 : 88), "to");
+        }
         return AcceptanceDrawingList.Read(list.ToJsonString());
     }
 
@@ -235,6 +415,8 @@ public sealed class AcceptanceRedrawDriverTests
         internal string? FailPlace { get; init; }
         internal bool ConnectWires { get; init; }
         internal bool PaginateDrawings { get; init; }
+        internal bool PaginateConnections { get; init; }
+        internal string? ConnectionFault { get; init; }
         internal bool WrongPin { get; init; }
         internal bool DuplicateEdge { get; init; }
         internal string? CableFault { get; init; }
@@ -244,6 +426,10 @@ public sealed class AcceptanceRedrawDriverTests
         private readonly List<object> _drawings = [];
         private readonly Dictionary<string, string[]> _pins = new(StringComparer.Ordinal);
         private readonly Dictionary<string, JsonElement> _functions = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, JsonElement[]> _symbolPoints = new(StringComparer.Ordinal);
+        private readonly List<JsonElement> _connections = [];
+        private readonly Dictionary<long, JsonElement> _connectionWires = [];
+        private readonly List<JsonElement> _cables = [];
         private readonly Dictionary<string, string> _owners = new(StringComparer.Ordinal);
         private readonly List<object> _channels = [];
         private readonly List<object> _members = [];
@@ -287,6 +473,8 @@ public sealed class AcceptanceRedrawDriverTests
                         string[] pins = terminal ? ["1", "2"] : input ? [(string)point!] : ((JsonElement)args["connection_designations"]!).EnumerateArray().Select(n => n.GetString()!).ToArray();
                         string category = terminal ? "Terminal" : input ? "PLCTerminal" : (string)args["symbol"]! == "PLCC" ? "PLCBox" : "NoContact";
                         _pins[tag] = pins;
+                        bool horizontal = (int)args["symbol_variant"]! == 1;
+                        _symbolPoints[tag] = pins.Select((_, i) => JsonSerializer.SerializeToElement(new { location = horizontal ? new[] { 8 * i, 0 } : new[] { 0, -8 * i }, direction = horizontal ? i == 0 ? "Left" : "Right" : i == 0 ? "Up" : "Down" })).ToArray();
                         if (terminal || input)
                         { _owners[tag] = parent; }
                         if (args.TryGetValue("terminal_strip_text", out object? text))
@@ -305,7 +493,7 @@ public sealed class AcceptanceRedrawDriverTests
                             _channels.Add(new { name = tag, owner = WrongPlcField == "owner" ? "+OTHER-KF1" : parent, page = args["page"], address = Field("address"), manualSymbolicAddress = Field("symbolic_address"), symbolicAddress = Field("address"), text = Field("text"), parentlessRepresentations = 1 });
                             _channels.Add(new { name = parent, address = (string?)null });
                         }
-                        result = new { execution = "committed", undo = "Device", recovered = false, device = new { tag, category }, terminal = member, symbol = new { connectionPoints = pins.Select((_, i) => new { location = new[] { 0, -8 * i }, direction = i == 0 ? "Up" : "Down" }) } };
+                        result = new { execution = "committed", undo = "Device", recovered = false, device = new { tag, category }, terminal = member, symbol = new { connectionPoints = _symbolPoints[tag] } };
                     }
                     break;
                 case "eplan_device_get":
@@ -335,7 +523,13 @@ public sealed class AcceptanceRedrawDriverTests
                     result = new { drawings = new { gridSize = 4, pageSize = new[] { 420, 297 }, items = drawings.Skip(offset).Take(count), nextCursor = next, truncated = next is not null } };
                     break;
                 case "eplan_connection_generate":
-                    result = new { execution = "not_started", undo = (string?)null };
+                    int before = _connections.Count;
+                    if (ConnectWires)
+                    {
+                        foreach (string page in (string[])args["pages"]!)
+                        { GenerateAutoconnect(page); }
+                    }
+                    result = new { execution = _connections.Count > before ? "committed" : "not_started", undoSteps = 1 };
                     break;
                 case "eplan_connection_create":
                     if (!ConnectWires)
@@ -345,17 +539,23 @@ public sealed class AcceptanceRedrawDriverTests
                     { result = Interruptions(args, items); }
                     else
                     {
-                        ConnectionItems = items;
-                        _connectionPage = (string)args["page"]!;
-                        result = new { execution = "committed", undoSteps = items.EnumerateArray().Any(i => i.GetProperty("kind").GetString() == "cable_definition") ? 8 : 2, actualCores = ActualCores(items) };
+                        string page = (string)args["page"]!;
+                        if (items.EnumerateArray().Any(i => i.GetProperty("kind").GetString() != "cable_definition"))
+                        { ConnectionItems = items; _connectionPage = page; }
+                        foreach (JsonElement wire in items.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "wire"))
+                        { AddConnection(wire, page); }
+                        JsonElement[] cables = items.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "cable_definition").ToArray();
+                        _cables.AddRange(cables);
+                        int steps = cables.Length == 0 ? 2 : 6 + (items.EnumerateArray().Any(i => i.GetProperty("kind").GetString() == "wire") ? 1 : 0) + (items.EnumerateArray().Any(i => i.GetProperty("kind").GetString() is "corner" or "t_node" or "potential_point") ? 1 : 0);
+                        result = new { execution = "committed", undoSteps = steps, actualCores = ActualCores(items) };
                     }
                     break;
                 case "eplan_cable_get":
-                    JsonElement cable = Assert.Single(ConnectionItems!.Value.EnumerateArray(), c => c.GetProperty("kind").GetString() == "cable_definition" && Stored(c.GetProperty("designation").GetString()!) == (string)args["cable"]!);
+                    JsonElement cable = Assert.Single(_cables, c => Stored(c.GetProperty("designation").GetString()!) == (string)args["cable"]!);
                     result = new
                     {
                         cable = new { tag = args["cable"], type = cable.GetProperty("type_text"), wireCount = cable.GetProperty("core_count").GetRawText(), crossSection = cable.GetProperty("cross_section_mm2").GetRawText().Replace('.', ',') },
-                        cores = cable.GetProperty("cores").EnumerateArray().Reverse().Select(c => new { designation = c.GetProperty("label"), colour = c.GetProperty("colour"), from = End(ConnectionItems.Value[c.GetProperty("connection").GetProperty("item_index").GetInt32()], "from"), to = End(ConnectionItems.Value[c.GetProperty("connection").GetProperty("item_index").GetInt32()], "to") }),
+                        cores = cable.GetProperty("cores").EnumerateArray().Reverse().Select(c => new { designation = c.GetProperty("label"), colour = c.GetProperty("colour"), from = End(CoreWire(c, ConnectionItems), "from"), to = End(CoreWire(c, ConnectionItems), "to") }),
                         nextCursor = (string?)null,
                         truncated = false,
                     };
@@ -367,19 +567,27 @@ public sealed class AcceptanceRedrawDriverTests
                     break;
                 case "eplan_connection_list":
                     var connections = new List<object>();
+                    connections.AddRange(_connections.Where(c => c.GetProperty("page").GetString() == (string)args["page"]!).Select(c => (object)c));
                     if (ConnectWires && (string)args["page"]! == _connectionPage && ConnectionItems is { } batch)
                     {
-                        foreach (JsonElement wire in batch.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "wire"))
-                        {
-                            connections.Add(new { from = End(wire, "from"), to = End(wire, "to") });
-                        }
                         connections.AddRange(NodeConnections(batch));
-                        if (DuplicateEdge)
-                        { connections.Add(connections[0]); }
                     }
+                    if ((DuplicateEdge || ConnectionFault == "duplicate") && connections.Count > 0)
+                    { connections.Add(connections[0]); }
                     if (_support.TryGetValue((string)args["page"]!, out var support))
                     { connections.Add(new { from = (object?)null, to = new { device = support.Tag, pin = support.Pin } }); }
-                    result = new { connections, nextCursor = (string?)null, truncated = false };
+                    if (ConnectionFault == "missing")
+                    { connections.Clear(); }
+                    JsonObject[] rows = connections.Select(c => JsonNode.Parse(JsonSerializer.Serialize(c))!.AsObject()).ToArray();
+                    foreach (JsonObject row in rows)
+                    {
+                        if (!args.TryGetValue("response_format", out object? format) || (string)format! != "detailed" || ConnectionFault == "locator")
+                        { row.Remove("locator"); }
+                    }
+                    int connectionOffset = args.TryGetValue("cursor", out object? connectionCursor) ? int.Parse((string)connectionCursor!, System.Globalization.CultureInfo.InvariantCulture) : 0;
+                    int connectionCount = PaginateConnections ? 1 : rows.Length;
+                    string? connectionNext = connectionOffset + connectionCount < rows.Length ? (connectionOffset + connectionCount).ToString(System.Globalization.CultureInfo.InvariantCulture) : null;
+                    result = new { connections = rows.Skip(connectionOffset).Take(connectionCount), nextCursor = connectionNext, truncated = connectionNext is not null || ConnectionFault == "truncated" };
                     break;
                 case "eplan_export_image":
                     result = new { directory = "scratch", fileCount = 1, totalBytes = 100, truncated = false };
@@ -388,7 +596,7 @@ public sealed class AcceptanceRedrawDriverTests
                     throw new InvalidOperationException("Unexpected tool: " + tool);
             }
             JsonObject data = JsonSerializer.SerializeToNode(result)!.AsObject();
-            if (CableFault is { } fault && (fault.StartsWith("actual.", StringComparison.Ordinal) && tool == "eplan_connection_create" || fault.StartsWith("stored.", StringComparison.Ordinal) && tool == "eplan_cable_get"))
+            if (CableFault is { } fault && (fault.StartsWith("actual.", StringComparison.Ordinal) && tool == "eplan_connection_create" && data["actualCores"] is JsonArray { Count: > 0 } || fault.StartsWith("stored.", StringComparison.Ordinal) && tool == "eplan_cable_get"))
             {
                 bool actual = fault.StartsWith("actual.", StringComparison.Ordinal);
                 string field = fault[(fault.IndexOf('.', StringComparison.Ordinal) + 1)..];
@@ -415,24 +623,70 @@ public sealed class AcceptanceRedrawDriverTests
             return new { device = "=" + tag, pin = WrongPin ? "wrong" : _pins[tag][reference.GetProperty("pin_index").GetInt32()] };
         }
 
-        private static IEnumerable<object> ActualCores(JsonElement items)
+        private JsonElement CoreWire(JsonElement core, JsonElement? items)
+        {
+            JsonElement reference = core.GetProperty("connection");
+            Assert.Single(reference.EnumerateObject());
+            if (reference.TryGetProperty("locator", out JsonElement locator))
+            {
+                JsonElement connection = Assert.Single(_connections, c => c.GetProperty("locator").GetProperty("oid").GetInt64() == locator.GetProperty("oid").GetInt64());
+                Assert.True(JsonElement.DeepEquals(locator, connection.GetProperty("locator")));
+                return _connectionWires[locator.GetProperty("oid").GetInt64()];
+            }
+            JsonElement wire = items!.Value[reference.GetProperty("item_index").GetInt32()];
+            Assert.Equal("wire", wire.GetProperty("kind").GetString());
+            return wire;
+        }
+
+        private IEnumerable<object> ActualCores(JsonElement items)
         {
             foreach (JsonElement cable in items.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "cable_definition"))
             {
                 foreach (JsonElement core in cable.GetProperty("cores").EnumerateArray())
                 {
-                    JsonElement reference = core.GetProperty("connection");
-                    Assert.Single(reference.EnumerateObject());
-                    int index = reference.GetProperty("item_index").GetInt32();
-                    JsonElement wire = items[index];
-                    Assert.Equal("wire", wire.GetProperty("kind").GetString());
+                    JsonElement wire = CoreWire(core, items);
                     string Pin(string end)
                     {
                         JsonElement pin = wire.GetProperty(end), locator = pin.GetProperty("locator");
                         return FormattableString.Invariant($"{locator.GetProperty("type").GetInt32()}/{locator.GetProperty("oid").GetInt64()}/{pin.GetProperty("pin_index").GetInt32()}");
                     }
-                    yield return new { designation = Stored(cable.GetProperty("designation").GetString()!), type = cable.GetProperty("type_text"), label = core.GetProperty("label"), colour = core.GetProperty("colour"), oid = 1000 + index, pins = new[] { Pin("to"), Pin("from") } };
+                    long oid = Assert.Single(_connectionWires, c => JsonElement.DeepEquals(c.Value, wire)).Key;
+                    yield return new { designation = Stored(cable.GetProperty("designation").GetString()!), type = cable.GetProperty("type_text"), label = core.GetProperty("label"), colour = core.GetProperty("colour"), oid, pins = new[] { Pin("to"), Pin("from") } };
                 }
+            }
+        }
+
+        private void AddConnection(JsonElement wire, string page)
+        {
+            long oid = 1000 + _connections.Count;
+            _connectionWires.Add(oid, wire);
+            _connections.Add(JsonSerializer.SerializeToElement(new { from = End(wire, "from"), to = End(wire, "to"), page, locator = new { project = "LargeWrite", page, type = 9, oid, digest = new string('b', 64) } }));
+        }
+
+        private void GenerateAutoconnect(string page)
+        {
+            var ports = _drawings.Select(d => JsonSerializer.SerializeToElement(d)).Where(d => d.GetProperty("page").GetString() == page && d.TryGetProperty("locator", out _)).SelectMany(row =>
+            {
+                string tag = row.GetProperty("properties").GetProperty("name").GetString()![1..];
+                return _symbolPoints[tag].Select((p, i) => new
+                {
+                    X = row.GetProperty("location")[0].GetDouble() + p.GetProperty("location")[0].GetDouble(),
+                    Y = row.GetProperty("location")[1].GetDouble() + p.GetProperty("location")[1].GetDouble(),
+                    Direction = p.GetProperty("direction").GetString(),
+                    Reference = new { locator = row.GetProperty("locator"), pin_index = i },
+                });
+            }).ToArray();
+            foreach (var from in ports.Where(p => p.Direction is "Down" or "Right"))
+            {
+                var to = ports.Where(p => from.Direction == "Down" ? p.Direction == "Up" && p.X == from.X && p.Y < from.Y : p.Direction == "Left" && p.Y == from.Y && p.X > from.X)
+                    .OrderBy(p => Math.Abs(p.X - from.X) + Math.Abs(p.Y - from.Y)).FirstOrDefault();
+                if (to is null)
+                { continue; }
+                JsonElement wire = JsonSerializer.SerializeToElement(new { kind = "wire", from = from.Reference, to = to.Reference });
+                if (_connectionWires.Values.Any(w => JsonElement.DeepEquals(w.GetProperty("from"), wire.GetProperty("from")) && JsonElement.DeepEquals(w.GetProperty("to"), wire.GetProperty("to"))
+                    || JsonElement.DeepEquals(w.GetProperty("from"), wire.GetProperty("to")) && JsonElement.DeepEquals(w.GetProperty("to"), wire.GetProperty("from"))))
+                { continue; }
+                AddConnection(wire, page);
             }
         }
 

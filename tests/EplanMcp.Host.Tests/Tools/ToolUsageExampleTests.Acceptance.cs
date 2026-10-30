@@ -5,11 +5,14 @@ namespace EplanMcp.Host.Tests.Tools;
 
 public sealed partial class ToolUsageExampleTests
 {
-    [Fact]
-    public async Task AcceptanceDriver_AllBatches_MatchRegisteredToolArguments()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AcceptanceDriver_AllBatches_MatchRegisteredToolArguments(bool explicitWires)
     {
         var fake = new AcceptanceRedrawDriverTests.DrawingTools { ConnectWires = true };
-        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture()), "schema", _ => { });
+        JsonElement list = explicitWires ? AcceptanceRedrawDriverTests.ExplicitWiresList() : AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture());
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "schema", _ => { });
         await driver.DrawAsync();
         await driver.ExportAsync();
         foreach ((string name, JsonElement args) in fake.Requests)
