@@ -33,7 +33,7 @@ internal sealed partial class EplanConnectionCreator
                 var cable = new Cable();
 #pragma warning restore CA2000
                 cable.Create(target, variant, new PointD(points[0][0], points[0][1]), new PointD(points[1][0], points[1][1]));
-                cable.Name = (string)definition["designation"]!;
+                cable.Name = (string?)definition["name"] ?? (string)definition["designation"]!;
                 using FunctionPropertyList properties = cable.Properties;
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
