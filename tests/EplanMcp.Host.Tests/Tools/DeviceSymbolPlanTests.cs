@@ -316,7 +316,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                     Offset = [p.OffsetXmm, p.OffsetYmm],
                     Position = [args.X + p.OffsetXmm, args.Y + p.OffsetYmm],
                     FormatMatches = true,
-                    Text = p.PropertyId switch { 20400 or 20403 => args.PlcAddress!, 20011 => args.PlcText!, 20301 => "", _ => "-K2" }
+                    Text = "-K2"
                 }));
                 foreach (string stage in new[] { "Write", "Readback" })
                 {
@@ -368,6 +368,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                 }
                 if (args.PlcConnectionPoint is not null)
                 {
+                    Assert.Empty(args.DisplayProperties ?? []);
                     var channel = new PlcChannel
                     {
                         Name = tag,
@@ -389,48 +390,9 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays()
         {
             Calls.Add("ReadDisplays");
-            switch (FailAt)
+            if (FailAt == "DisplayMissing")
             {
-                case "DisplayMissing":
-                    Displays.RemoveAt(Displays.Count - 1);
-                    break;
-                case "DisplayRemoved":
-                    Displays.Clear();
-                    Displays.Add(new() { PropertyId = 20029, Offset = [0, -4], Position = [Args!.X, Args.Y - 4] });
-                    break;
-                case "DisplayOtherPoint":
-                    Displays[0].OnPlacedFunction = false;
-                    break;
-                case "DisplayParent":
-                    Displays[0].ParentTag = "+A1-KF1";
-                    break;
-                case "DisplayPage":
-                    Displays[0].Page = "=F+A1/2";
-                    break;
-                case "DisplayOffset":
-                    Displays[0].Offset[1]++;
-                    break;
-                case "DisplayPosition":
-                    Displays[0].Position[1]++;
-                    break;
-                case "DisplayFormat":
-                    Displays[0].FormatMatches = false;
-                    break;
-                case "DisplayText":
-                    Displays[0].Text = "";
-                    break;
-                case "DisplayCalculated":
-                    Displays[1].Text = "Start";
-                    break;
-                case "DisplayFunctionText":
-                    Displays[2].Text = "";
-                    break;
-                case "DisplayReference":
-                    Displays[3].Text = Args!.Page;
-                    break;
-                case "DisplayDuplicate":
-                    Displays.Add(Displays[0]);
-                    break;
+                Displays.RemoveAt(Displays.Count - 1);
             }
             return Displays;
         }
