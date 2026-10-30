@@ -209,6 +209,7 @@
 - T7d 同轮反馈：两点请求的 20400/20403/20011/20301 显示均未出现在页面；反馈中点旁只见一个空属性放置（A53 记录的默认项为 20029）。旧校验只检查刚创建的 `PropertyPlacement` 对象，不能证明实际显示集合含有该项。显示循环没有被 PLC 分支跳过，且其后没有再次创建功能；[2026 PlaceAt 文档](https://www.eplan.help/en-us/Infoportal/Content/api/2026/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.Function~PlaceAt.html) 说明对已实例化功能会另建功能，但尚无证据断言显示具体被挂到哪一对象或何时丢失。修订在全部写入后独立枚举已放置点的 `PropertyPlacements`（A57），逐项核对属性、父对象/页、相对与绝对位置、格式和 PLC 原生显示值；缺失即回滚报错，不再仅凭创建句柄报告成功。此次未运行 EPLAN，是否能实际保留四项显示仍以既有 Large 绝对位置/文本断言为准。
 - 连接点代号写**带索引的 20022（FUNC_CONNECTIONDESIGNATION）**，按引脚生效；20038（全部代号）是汇总，写入无效；`Pin.Designation` 是内部编号，实际代号读 `Pin.Name`。— S43。
 - 电缆芯线：导线 → 生成 → 电缆定义线 → 生成 → 单独提交的绑定 → 生成 → 芯线，电缆读回 3 个成员并精确分配，未用全项目重分配。— S43。
+- 命名读回须兼容未使用的功能结构段被 EPLAN 丢弃（LargeWrite 的 `=GAA`）；电缆按相同规则比较完整请求与实际名称，保留位置段和设备标识的精确比较。T8b 仅新增离线实现与测试，最终生成和全部撤销步数尚待 Large 实测。
 - PLC 盒（SPECIAL `PLCC`）下的 DI 连接点地址、符号地址、通道读回正确；**每个连接点另有一个同名、无父对象的 PLCTerminal**，计数与核对须考虑。— S43。
 - 位置盒（SPECIAL `SC`）可放置并改为虚线，但盒内符号的结构没有继承盒的位置（读回 `=+`），条件未查明。— S43。
 - T7a Large 5/5（2026-10-27，2026.0.3.25421，Electric P8，LargeWrite 副本）：`LocationBox.GetGraphics()` 的图形外框是相对于盒原点的坐标（例 0,-40;40,0），页面范围以 `GetLogicalArea()` 为准；结构名经 `NameParts.DESIGNATION_LOCATION` 写入并读回；盒内已有器件不被改名；一次撤销恢复。— `eplan_device_place` 位置盒。

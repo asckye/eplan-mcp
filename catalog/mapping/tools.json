@@ -851,6 +851,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
+          },
+          {
             "name": "CableTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableTests.cs"
@@ -1566,6 +1571,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
+          },
+          {
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
@@ -1576,6 +1586,11 @@
             "name": "ConnectionCreateExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          },
+          {
+            "name": "CableDefinitionExecutionTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CableDefinitionExecutionTests.cs"
           },
           {
             "name": "CableDefinitionPlanTests",
@@ -1839,6 +1854,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
           },
           {
             "name": "ConnectionCreateTests",

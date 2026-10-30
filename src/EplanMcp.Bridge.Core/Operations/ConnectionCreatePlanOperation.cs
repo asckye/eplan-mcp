@@ -16,7 +16,7 @@ public sealed class ConnectionCreatePlanOperation(IConnectionCreator creator) : 
         { scene.SymbolBounds.Clear(); }
         JObject preview = moving ? PlacementMovePlanner.Plan(args.ToString(Formatting.None), scene) : ConnectionCreatePlanner.Plan(args.ToString(Formatting.None), scene, creator);
         var plan = new WritePlan { Project = scene.Project.Name, ProjectPath = scene.Project.Path, Fingerprint = (string)preview["fingerprint"]! };
-        plan.Changes = moving && (bool)preview["noOp"]! ? [] : [new() { Action = moving ? "move" : "create", Kind = moving ? "placements" : "connections", Name = scene.Page.Page, NewValue = (moving ? "1 undo step; " : preview["cableDefinitions"] is null ? "2 undo steps; " : "Cable planning only; execution unavailable; ") + preview.ToString(Formatting.None) }];
+        plan.Changes = moving && (bool)preview["noOp"]! ? [] : [new() { Action = moving ? "move" : "create", Kind = moving ? "placements" : "connections", Name = scene.Page.Page, NewValue = (moving ? "1 undo step; " : preview["undoSteps"] + " undo steps; ") + preview.ToString(Formatting.None) }];
         plan.Details = new() { ["preview"] = preview.ToString(Formatting.None) };
         return plan;
     }

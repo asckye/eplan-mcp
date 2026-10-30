@@ -9,7 +9,7 @@ internal sealed class CableDefinitionFixture
 {
     internal ConnectionCreateFixture Base { get; } = new();
     internal CableDefinitionPlanner.Inventory Inventory { get; } = new() { Complete = true, Names = ["-W99"] };
-    internal JObject Cable => (JObject)Base.Request["items"]![1]!;
+    internal JObject Cable => (JObject)Base.Request["items"]!.First(i => (string?)i["kind"] == "cable_definition");
     internal JArray Cores => (JArray)Cable["cores"]!;
     internal CableDefinitionFixture()
     {

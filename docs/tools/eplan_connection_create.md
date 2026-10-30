@@ -18,9 +18,9 @@
 
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 
-T8a 增加仅规划的 `cable_definition`：必填 `points`（定义线两点）、`designation`、`type_text`、`core_count`（1..50）、`cross_section_mm2`（正有限数）、`cores`。每芯为 `{connection,label,colour}`；connection 严格二选一 `{locator:{project,page,type,oid,digest}}`（既有连接）或 `{item_index:0}`（本次 wire 的零基下标，允许前向引用）。每电缆至少一芯、不超过声明芯数，每调用合计最多 50 芯；按 designation+label 判重复，不同电缆可复用芯号，同一连接只能分配一次。数字 label 必须为声明范围内无前导零的正整数，文字标签以英文字母开头、最多 32 字符，仅含字母、数字、`_ . -`；colour 为 `BK BN RD OG YE GN BU VT GY WH PK TQ GNYE` 之一。型号文本原样作为输入，不查询或推断部件/选型，不批量重编号。
+`cable_definition` 支持规划与执行：必填 `points`（定义线两点）、`designation`、`type_text`、`core_count`（1..50）、`cross_section_mm2`（正有限数）、`cores`。每芯为 `{connection,label,colour}`；connection 严格二选一 `{locator:{project,page,type,oid,digest}}`（既有连接）或 `{item_index:0}`（本次 wire 的零基下标，允许前向引用）。每电缆至少一芯、不超过声明芯数，每调用合计最多 50 芯；按 designation+label 判重复，不同电缆可复用芯号，同一连接只能分配一次。数字 label 必须为声明范围内无前导零的正整数，文字标签以英文字母开头、最多 32 字符，仅含字母、数字、`_ . -`；colour 为 `BK BN RD OG YE GN BU VT GY WH PK TQ GNYE` 之一。型号文本原样作为输入，不查询或推断部件/选型，不批量重编号。
 六个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,000 字符。
-预览另含 `cableDefinitions`、逐连接的 `coreImpact`（原 locator/属性、designation、label、colour、截面）和 `executionCapability=CAPABILITY_MISSING`；`undoSteps=null`。依据 A55，阶段顺序固定为导线→生成→定义线→生成→绑定→生成→芯线，不能套普通节点的两步承诺。T8b 前任何含电缆的执行在准备/事务之前拒绝，混合请求也不部分执行。
+预览另含 `cableDefinitions`、逐连接的 `coreImpact`（原 locator/属性、designation、label、colour、截面）和 `undoSteps`；既有导线为 6 步，同次新增路径生成另加 1 步、节点放置再加 1 步。审批列出相同步数。执行另含 `actualCores`，逐芯返回实际 designation/type、连接 oid/pins、label/colour；按 A55 允许未使用的功能结构（例如 `=GAA`）被丢弃，位置段和设备标识仍须一致。
 定义线须正交、非零、在页界/栅格内，且恰好与显式芯线各相交一次；相交的其他连接、重复跨越、已归属其他电缆、分支/电位关系或跨页范围无法证明时拒绝。现有连接读取首批限可唯一证明的同页直连；同次 wire 可有转角，但生成后必须恰有两个显式端点。名称筛查覆盖全项目功能名；既有完整连接 locator、端点、几何、芯号/颜色/截面/归属与名称清单进入指纹，改变即重新规划或 stale；不新增计划落盘格式。
 
 ## 3. 输出
@@ -29,7 +29,7 @@ T8a 增加仅规划的 `cable_definition`：必填 `points`（定义线两点）
 中断点预览另含 affectedPages 与 interruptionScope（显式页完整绘图、引脚、连接、原生中断点基线），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。
 
 ## 4. 错误
-规划及 stale 为 execution=not_started；INVALID_ARGUMENT 带 JSON Pointer；CAPABILITY_MISSING 表示几何不完整、未选中目标项目、无法产生有效的两个撤销步骤，或电缆执行尚未开放。普通连线第二步失败或端点不符，回滚生成并撤销放置，返回 rolled_back；提交或补偿无法确认则返回 unknown，暂停写入且不重发。
+规划及 stale 为 execution=not_started；INVALID_ARGUMENT 带 JSON Pointer；CAPABILITY_MISSING 表示几何不完整、未选中目标项目或不支持的组合（电缆与中断点须分开调用）。普通连线第二步失败或端点不符，回滚生成并撤销放置，返回 rolled_back；提交或补偿无法确认则返回 unknown，暂停写入且不重发。
 
 ## 5. 实现要点
 规划复用 T1 的 ISymbolReader，在写事务之前只读查询 SPECIAL；按实际连接点方向唯一选择 CO/Routing、TLRO/TLRU/TOUL/TOUR 对应 TNodeUp/Down/Left/Right。转弯自动规划 CO，T 分支必须显式给出；二者仍只支持连接点与插入点重合的变体。PCP/PotentialTerminal 必须只有一个有限偏移引脚（每轴不超过两格），同方向选最小变体号；重复的同号候选仍拒绝。potential_point 的 position 表示吸附后的电气连接点，symbols.position 为减去库引脚偏移后的实际插入点，外框按插入点平移；插入点可以不在栅格，连接点必须在栅格。
@@ -38,7 +38,8 @@ T8a 增加仅规划的 `cable_definition`：必填 `points`（定义线两点）
 执行沿既有串行主线程 LockingStep 和 WritePipeline：规划→scratch 外审批→完整指纹重核→执行→outcome，默认 60 秒。符号发现与变体选择在写入之前完成；不显式 LockObject，不保留跨请求原生对象。
 
 ## 6. 写操作专项
-**普通连线一次调用、两次提交（负责人 O3）。** 第一步在现有 SafetyPoint→UndoStep→QuietModeStep 中用 SymbolReference.Create(variant,page) 放连接符号及路径拐角，读回位置、变体、外框后提交；对齐的连接点产生图形自动连线。第二步独立 SafetyPoint 中运行目标页 Generate.Connections，核对既有连接不变、实际 StartPin/EndPin 连通集合与预测一致，电位点起点为空，才提交。成功需 Ctrl+Z 两次；电缆提交顺序与补偿核验留 T8b。
+**普通连线一次调用、两次提交（负责人 O3）。** 第一步在现有 SafetyPoint→UndoStep→QuietModeStep 中用 SymbolReference.Create(variant,page) 放连接符号及路径拐角，读回位置、变体、外框后提交；对齐的连接点产生图形自动连线。第二步独立 SafetyPoint 中运行目标页 Generate.Connections，核对既有连接不变、实际 StartPin/EndPin 连通集合与预测一致，电位点起点为空，才提交。成功需 Ctrl+Z 两次。
+电缆按 S43/A55：先完成同次导线和生成，再独立提交定义线→生成→定向绑定→生成→芯线分配→生成。定义线、绑定和芯线使用 FunctionTransactionScope，生成使用既有 SafetyPoint；只对显式连接对齐定义点名称、赋 CableNameParts，并用电缆及显式模板重载 DoReassignWires，不运行全项目重分配。提交后核对 CableConnections、型号/芯数/截面、每芯连接/标签/颜色和其他本页连接不变。任一步读回不符，先回滚当前阶段，再撤销本次全部已确认提交并重新核对原指纹，成功才报 rolled_back；撤销/恢复核验失败报 unknown。属性列表在 Abort 前释放，Abort 后不读取新对象。
 审批保留完整节点、几何、端点及两步撤销说明；审计绑定参数与指纹。第二步失败先释放其事务，再按 A41/S35 检查当前项目并执行固定撤销，重新读整页指纹确认恢复；从不在 Abort 后访问新建对象属性列表（A55）。补偿不能确认则为 unknown，无成功半结果。
 T7b 依 [S43](../../spikes/S43-engineering-elements/README.md)/A55：SPECIAL BPF 按实际单引脚方向选择最小变体号，先 SymbolReference.Create → 确认真正 InterruptionPoint → 写完整 Name 并读回 → 按引脚偏移设置 Location → 原生属性 24300 放置。第一步使用 LockAllObjects → UndoStep → Transaction → QuietModeStep，第二步仍用 SafetyPoint 生成显式页集合；属性列表逐对象获取一次并在返回前释放，不让包装跨入 Abort。
 沿 T3b 的两步撤销门槛，执行必须预测新增自动连线和有效逻辑端点；只有孤立中断点而没有新增电气连接时可预览、执行拒绝，不能把空生成称为第二个有效撤销步。Large 每次放置另含独立的电位点连接，确保实际生成发生。
@@ -48,6 +49,7 @@ T7b 依 [S43](../../spikes/S43-engineering-elements/README.md)/A55：SPECIAL BPF
 Small 覆盖严格参数与预测、两次提交顺序、读回不符/取消/生成失败补偿、补偿失败 unknown、stale 零写入。Medium fake Bridge 覆盖成功、rolled_back、stale、dry-run 和审批；快照按[测试规范](../standards/testing.md#更新快照)生成审阅后接收。
 Large 在 write copy 的新页逐方向核验角/T/电位点、实际 StartPin/EndPin、图像导出和两次撤销恢复快照哈希；T 夹具使用 BAT 两端器件，将相反方向的一臂经同批角连接折转，放置前检查无自动连线，并断言三个真实端点均进入预测。Small 复用夹具布局验证全部 12 个方向组合，覆盖自身端点外框、其他/中间穿越、PCP 四向偏移和镜像选择。此次修复不运行 EPLAN，12 例须重跑；真实生成故障尚无可重复触发方式，失败路径由 fake 注入覆盖。实测前先构建 tests/EplanMcp.Large.ConnectionHelper；辅助程序集每个 EPLAN 进程只加载一次，更新后须重启 EPLAN，不以注销代替重载。
 T7b 新增 Small 严格参数/范围/歧义/stale/双向引用与提交后补偿、Medium fake Bridge 审批/透传/失败不重发，以及 Large 两个新 LargeWrite 页的同名配对、双向原生计算引用和逐次撤销恢复；本次按任务约束不运行 EPLAN，Large 待维护者实测。
+T8b 新增 Small 结构兼容名称比较、Medium fake 多阶段提交/逐芯读回不符补偿/补偿失败 unknown/非法分配零写入，以及 Large 新 LargeWrite 页三根竖线、-W9、ÖLFLEX CLASSIC 100 300/500V、3×0.5、BK/BU/GNYE 的 cable_get 与撤销恢复测试；本次不运行 EPLAN，最终生成的撤销行为仍须实机确认。
 
 ### 英文用法
 

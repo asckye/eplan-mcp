@@ -32,7 +32,7 @@ public sealed class CableDefinitionPlanTests : IDisposable
         Assert.Equal(("7", "BU", "1,5"), ((string?)rows[1]!["before"]!["label"], (string?)rows[1]!["before"]!["colour"], (string?)rows[1]!["before"]!["crossSection"]));
         Assert.Equal(1.5, (double)rows[1]!["crossSectionMm2"]!);
         Assert.Contains("coreImpact", Assert.Single(plan.Changes).NewValue, StringComparison.Ordinal);
-        Assert.DoesNotContain("2 undo steps", Assert.Single(plan.Changes).NewValue, StringComparison.Ordinal);
+        Assert.Contains("8 undo steps", Assert.Single(plan.Changes).NewValue, StringComparison.Ordinal);
         Assert.Equal(before, File.ReadAllBytes(file));
         Assert.Equal([file], Directory.GetFiles(_root));
     }
@@ -96,7 +96,7 @@ public sealed class CableDefinitionPlanTests : IDisposable
     }
 
     [Fact]
-    public void Execute_CableOnlyOrMixedRequest_RemainsCapabilityMissingBeforeAnyWrite()
+    public void Execute_AdapterWithoutCableStages_RefusesBeforeAnyWrite()
     {
         var creator = new Creator(_fixture);
         var transactions = new FakeTransactions();
@@ -115,7 +115,6 @@ public sealed class CableDefinitionPlanTests : IDisposable
             string fingerprint = (string)_fixture.Plan()["fingerprint"]!;
             var error = Assert.Throws<BridgeErrorException>(() => operation.Execute(new JObject { ["request"] = _fixture.Base.Request, ["fingerprint"] = fingerprint })).Error;
             Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.Reason, error.Execution));
-            Assert.Equal("connection.create.cable.execute", error.Metadata!["missing"]);
             Assert.Empty(transactions.Calls);
             Assert.Equal(0, creator.Prepares);
         }

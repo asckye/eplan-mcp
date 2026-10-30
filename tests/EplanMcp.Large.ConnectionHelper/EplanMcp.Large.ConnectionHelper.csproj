@@ -4,6 +4,8 @@
     <EplanBinPath Condition="'$(EplanBinPath)' == ''">C:\Program Files\EPLAN\Platform\2026.0.3\Bin</EplanBinPath>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
+    <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
     <Reference Include="Eplan.EplApi.AFu"><HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Eplan.EplApi.Baseu"><HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath><Private>false</Private></Reference>

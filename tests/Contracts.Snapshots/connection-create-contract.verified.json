@@ -3,7 +3,7 @@
   "title": "Create connection symbols and explicit wire paths",
   "status": "registered_preview_contract",
   "profile": "full",
-  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes commit placement then generation: 2 undo steps; failure undoes placement. cable_definition is planning only; execution returns CAPABILITY_MISSING. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes: 2 undo steps; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
   "annotations": {
     "readOnlyHint": false,
     "destructiveHint": false,
@@ -1996,7 +1996,9 @@
         "minLength": 1
       },
       "undoSteps": {
-        "type": "null"
+        "type": "integer",
+        "minimum": 6,
+        "maximum": 8
       },
       "fingerprint": {
         "type": "string",
@@ -2236,9 +2238,11 @@
         "minItems": 1,
         "maxItems": 50
       },
-      "executionCapability": {
-        "type": "string",
-        "const": "CAPABILITY_MISSING"
+      "actualCores": {
+        "type": "array",
+        "items": {},
+        "minItems": 1,
+        "maxItems": 50
       }
     },
     "required": [
@@ -2397,8 +2401,8 @@
     ],
     "coverage": "complete_page_predicted_endpoints",
     "logicalDuringPlacement": 0,
-    "generation": "A55: wires -> generate -> definition line -> generate -> bind -> generate -> cores. Execution requires T8b.",
-    "undoSteps": null,
+    "generation": "A55: wires -> generate -> definition line -> generate -> committed bind -> generate -> cores -> generate; failure undoes all confirmed commits.",
+    "undoSteps": 8,
     "cableDefinitions": [
       {
         "kind": "cable_definition",
@@ -2439,7 +2443,6 @@
         "before": null
       }
     ],
-    "executionCapability": "CAPABILITY_MISSING",
     "fingerprint": "f7fdd6dcfc40ea4170679b53e327d09b212b292f0db8c1f2611e3f7a0669b9db"
   }
 }

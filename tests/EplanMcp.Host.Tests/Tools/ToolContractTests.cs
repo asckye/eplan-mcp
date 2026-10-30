@@ -58,7 +58,7 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
-    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithClosedCablePreviewBranch()
+    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithClosedCableExecutionBranch()
     {
         Tool tool = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
@@ -81,9 +81,10 @@ public sealed class ToolContractTests : IDisposable
         JsonElement cores = cable.GetProperty("properties").GetProperty("cores");
         Assert.Equal(50, cores.GetProperty("maxItems").GetInt32());
         Assert.False(cores.GetProperty("items").GetProperty("additionalProperties").GetBoolean());
-        Assert.Equal(["2", "null"], tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("enum").EnumerateArray().Select(v => v.GetRawText()));
+        Assert.Equal(["2", "6", "7", "8"], tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("enum").EnumerateArray().Select(v => v.GetRawText()));
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("coreImpact", out _));
-        Assert.Contains("CAPABILITY_MISSING", tool.Description, StringComparison.Ordinal);
+        Assert.Contains("cables: 6-8", tool.Description, StringComparison.Ordinal);
+        Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualCores", out _));
         Assert.Contains("2 undo steps", tool.Description, StringComparison.Ordinal);
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualEndpoints", out _));
     }

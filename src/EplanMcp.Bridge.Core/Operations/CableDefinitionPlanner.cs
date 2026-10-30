@@ -7,7 +7,7 @@ using static EplanMcp.Bridge.Core.Operations.ConnectionCreatePlanner;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>A55/S43: predict explicit cable membership; execution remains unavailable until T8b.</summary>
+/// <summary>A55/S43: predict explicit cable membership and bounded staged execution.</summary>
 public static class CableDefinitionPlanner
 {
     public sealed class Inventory
@@ -27,6 +27,35 @@ public static class CableDefinitionPlanner
         public string? CrossSection { get; set; }
     }
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
+
+    /// <summary>A55: retain the location/device parts when EPLAN drops an unused function structure.</summary>
+    public static bool SameName(string requested, string actual, string page)
+    {
+        if (requested == actual)
+        { return true; }
+        string full = requested.StartsWith("-", StringComparison.Ordinal) ? DevicePlaceRequest.DeviceStructureOf(page) + requested : requested;
+        int end = full.IndexOfAny(['+', '-']);
+        return full == actual || full.StartsWith("=", StringComparison.Ordinal) && end > 0 && full.Substring(end) == actual;
+    }
+    public static void VerifyCores(JObject plan, JArray actual, string page, JObject request)
+    {
+        JToken[] expected = plan["coreImpact"]!.ToArray();
+        if (actual.Count != expected.Length || actual.Select((row, i) => !SameName((string)expected[i]["designation"]!, (string?)row["designation"] ?? "", page)
+            || (string?)row["type"] != (string?)plan["cableDefinitions"]!.Single(d => (string?)d["designation"] == (string?)expected[i]["designation"])["type_text"]
+            || (string?)row["label"] != (string?)expected[i]["label"] || (string?)row["colour"] != (string?)expected[i]["colour"]).Any(b => b))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable designation, type or core readback differs from the plan."); }
+        var ids = new HashSet<long>();
+        for (int i = 0; i < actual.Count; i++)
+        {
+            string Key(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
+            string[] pins = expected[i]["connection"]!["item_index"] is { } index
+                ? [Key(request["items"]![(int)index]!["from"]!), Key(request["items"]![(int)index]!["to"]!)] : expected[i]["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
+            long id = (long?)actual[i]["oid"] ?? 0;
+            if (id <= 0 || !ids.Add(id) || !new HashSet<string?>(actual[i]["pins"]!.Values<string>(), StringComparer.Ordinal).SetEquals(pins)
+                || expected[i]["connection"]!["locator"] is { } locator && id != (long)locator["oid"]!)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Core connection identity differs from the explicit mapping."); }
+        }
+    }
 
     internal static string Add(JObject input, Scene scene, JObject result, Func<JToken?, string, double[]> point)
     {
@@ -64,7 +93,7 @@ public static class CableDefinitionPlanner
             string designation = Text(item["designation"], at + "/designation", 128);
             int separator = designation.IndexOf('-');
             Require(designation[0] is '-' or '=' or '+' && separator >= 0 && separator + 1 < designation.Length && char.IsLetterOrDigit(designation[separator + 1]) && designation.All(c => char.IsLetterOrDigit(c) || "=+-_.".Contains(c)), at + "/designation", "Use an explicit literal cable designation, for example -W3.");
-            Require(names.Add(designation), at + "/designation", "Do not create the same cable twice.");
+            Require(!names.Any(n => SameName(n, designation, scene.Page.Page) || SameName(designation, n, scene.Page.Page)) && names.Add(designation), at + "/designation", "Do not create the same cable twice.");
             Text(item["type_text"], at + "/type_text", 200);
             Require(item["core_count"]?.Type == JTokenType.Integer && (double)item["core_count"]! is >= 1 and <= 50, at + "/core_count", "Supply a declared count in 1..50.");
             Require(item["cross_section_mm2"]?.Type is JTokenType.Integer or JTokenType.Float && (double)item["cross_section_mm2"]! > 0, at + "/cross_section_mm2", "Supply a positive finite cross-section in mm2.");
@@ -99,7 +128,7 @@ public static class CableDefinitionPlanner
         Inventory inventory = scene.ReadCables?.Invoke() ?? throw Missing();
         if (!inventory.Complete || inventory.Wires.Count > 10000)
         { throw Missing(); }
-        Require(!inventory.Names.Any(n => names.Any(d => n == d || d.StartsWith("-", StringComparison.Ordinal) && n.EndsWith(d, StringComparison.Ordinal))), "/items", "A cable designation already exists; choose an explicit unused name.");
+        Require(!inventory.Names.Any(n => names.Any(d => SameName(d, n, scene.Page.Page))), "/items", "A cable designation already exists; choose an explicit unused name.");
         candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Points, (Wire?)w)));
         foreach (JToken row in impact)
         {
@@ -126,9 +155,8 @@ public static class CableDefinitionPlanner
         }
         result["cableDefinitions"] = definitions;
         result["coreImpact"] = impact;
-        result["generation"] = "A55: wires -> generate -> definition line -> generate -> bind -> generate -> cores. Execution requires T8b.";
-        result["undoSteps"] = JValue.CreateNull();
-        result["executionCapability"] = "CAPABILITY_MISSING";
+        result["generation"] = "A55: wires -> generate -> definition line -> generate -> committed bind -> generate -> cores -> generate; failure undoes all confirmed commits.";
+        result["undoSteps"] = 6 + (result["symbols"]!.Any() ? 1 : 0) + (result["graphicalAutoconnect"]!.Any() ? 1 : 0);
         return Fingerprint.Of(inventory.Names.Select(n => "name:" + n).Concat(inventory.Wires.Select(w => BridgeJson.FromObject(w).ToString(Formatting.None))));
     }
     private static int Crossings(double[][] line, double[][] points) => points.Zip(points.Skip(1), (a, b) =>

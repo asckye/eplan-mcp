@@ -21,8 +21,8 @@ public sealed class CableInterruptionTests
         Assert.Contains(plan["symbols"]!, s => s["interruption"] is not null);
         Assert.Equal("-W3", (string?)Assert.Single(plan["coreImpact"]!)["designation"]);
         Assert.Equal(0, (int)plan["coreImpact"]![0]!["connection"]!["item_index"]!);
-        Assert.Equal(JTokenType.Null, plan["undoSteps"]!.Type);
-        Assert.Equal(ErrorReason.CapabilityMissing, (string?)plan["executionCapability"]);
+        Assert.Equal(8, (int)plan["undoSteps"]!);
+        Assert.Null(plan["executionCapability"]);
         Assert.Empty(fake.Placement.Calls);
         Assert.Empty(fake.Generation.Calls);
     }
@@ -33,7 +33,7 @@ public sealed class CableInterruptionTests
         var (fake, _) = Setup();
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
         Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.Reason, error.Execution));
-        Assert.Equal("connection.create.cable.execute", error.Metadata!["missing"]);
+        Assert.Contains("without interruption points", error.Message, StringComparison.Ordinal);
         Assert.Equal(0, fake.State);
         Assert.Empty(fake.Placement.Calls);
         Assert.Empty(fake.Generation.Calls);
