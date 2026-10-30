@@ -14,8 +14,18 @@ public sealed class CableDefinitionPlannerTests
     [InlineData("=GAA+A1-W9", "=OTHER+A1-W9", false)]
     [InlineData("-W9", "+A1-W90", false)]
     [InlineData("-W9", "+A1-W8", false)]
+    [InlineData("=GAA+A1-W9", "+", false)]
     public void CableDesignation_OnlyToleratesDroppedFunctionStructure(string requested, string actual, bool expected) =>
         Assert.Equal(expected, EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.SameName(requested, actual, "=GAA+A1&EFS1/1"));
+
+    [Fact]
+    public void CoreCountReadbackMismatch_ReportsExpectedAndActualCounts()
+    {
+        var f = new CableDefinitionFixture();
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() =>
+            EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.VerifyCores(f.Plan(), [], ConnectionCreateFixture.PageName, f.Base.Request));
+        Assert.Contains("core count readback: expected 1; actual 0", error.Message, StringComparison.Ordinal);
+    }
 
     [Fact]
     public void SameCallWire_ForwardReference_PredictsExplicitCoreWithoutWriting()

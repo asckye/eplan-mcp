@@ -14,11 +14,13 @@ internal static class CableDefinitionExecution
         { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Use cable definitions without interruption points and a cable-capable Bridge.")); }
         Action definitions;
         Action? symbols;
+        JObject before;
         try
         {
             ConnectionCreatePlanner.Require(plan["logicalAfterGenerate"]!.All(g => g["pins"]!.Count() == 2 && (bool?)g["potentialStartIsNull"] == false), "/items", "Cable calls require explicit two-pin logical paths.");
             definitions = writer.PrepareCables(project, page, input, plan);
             symbols = plan["symbols"]!.Any() ? creator.Prepare(project, page, (JArray)plan["symbols"]!) : null;
+            before = CableDefinitionRestoration.Capture(scene);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         int commits = 0;
@@ -69,7 +71,8 @@ internal static class CableDefinitionExecution
                 {
                     for (int i = 0; i < commits; i++)
                     { creator.Undo(project); }
-                    return ConnectionCreatePlanner.Plan(input.ToString(), creator.Read(project, page), creator, (string)plan["fingerprint"]!);
+                    CableDefinitionRestoration.Verify(before, CableDefinitionRestoration.Capture(creator.Read(project, page)));
+                    return true;
                 });
             }
             catch (Exception compensation) { throw Unknown(new AggregateException(failure, compensation)); }

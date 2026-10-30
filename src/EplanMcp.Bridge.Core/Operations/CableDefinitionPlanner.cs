@@ -40,20 +40,25 @@ public static class CableDefinitionPlanner
     public static void VerifyCores(JObject plan, JArray actual, string page, JObject request)
     {
         JToken[] expected = plan["coreImpact"]!.ToArray();
-        if (actual.Count != expected.Length || actual.Select((row, i) => !SameName((string)expected[i]["designation"]!, (string?)row["designation"] ?? "", page)
-            || (string?)row["type"] != (string?)plan["cableDefinitions"]!.Single(d => (string?)d["designation"] == (string?)expected[i]["designation"])["type_text"]
-            || (string?)row["label"] != (string?)expected[i]["label"] || (string?)row["colour"] != (string?)expected[i]["colour"]).Any(b => b))
-        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable designation, type or core readback differs from the plan."); }
+        if (actual.Count != expected.Length)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Cable core count readback: expected {expected.Length}; actual {actual.Count}.")); }
         var ids = new HashSet<long>();
         for (int i = 0; i < actual.Count; i++)
         {
+            foreach (string field in new[] { "designation", "type", "label", "colour" })
+            {
+                string? wanted = (string?)(field == "type" ? plan["cableDefinitions"]!.Single(d => (string?)d["designation"] == (string?)expected[i]["designation"])["type_text"] : expected[i][field]);
+                string? read = (string?)actual[i][field];
+                if (field == "designation" ? !SameName(wanted!, read ?? "", page) : wanted != read)
+                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, $"Cable core {field} readback: expected '{wanted}'; actual '{read ?? "<empty>"}'."); }
+            }
             string Key(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
             string[] pins = expected[i]["connection"]!["item_index"] is { } index
                 ? [Key(request["items"]![(int)index]!["from"]!), Key(request["items"]![(int)index]!["to"]!)] : expected[i]["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
             long id = (long?)actual[i]["oid"] ?? 0;
             if (id <= 0 || !ids.Add(id) || !new HashSet<string?>(actual[i]["pins"]!.Values<string>(), StringComparer.Ordinal).SetEquals(pins)
                 || expected[i]["connection"]!["locator"] is { } locator && id != (long)locator["oid"]!)
-            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Core connection identity differs from the explicit mapping."); }
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Core connection identity differs: expected pins {new JArray(pins)}, oid {expected[i]["connection"]!["locator"]?["oid"]}; actual pins {actual[i]["pins"]}, oid {id}.")); }
         }
     }
 
@@ -160,7 +165,7 @@ public static class CableDefinitionPlanner
         return Fingerprint.Of(inventory.Names.Select(n => "name:" + n).Concat(inventory.Wires.Select(w => BridgeJson.FromObject(w).ToString(Formatting.None))));
     }
     /// <summary>Live T8b: a connection without a cable reads its cable name as the bare separator "+".</summary>
-    private static bool HasCable(string? name) => name is not null && name.Trim('=', '+', '&', ' ').Length > 0;
+    internal static bool HasCable(string? name) => name is not null && name.Trim('=', '+', '&', ' ').Length > 0;
     private static int Crossings(double[][] line, double[][] points) => points.Zip(points.Skip(1), (a, b) =>
     {
         bool vertical = line[0][0] == line[1][0];
