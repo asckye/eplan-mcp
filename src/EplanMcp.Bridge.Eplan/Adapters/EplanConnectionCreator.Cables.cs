@@ -14,16 +14,16 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanConnectionCreator
 {
-    public (System.Action Create, System.Action Verify) PrepareCables(string project, string page, JObject request, JObject plan)
+    public System.Action PrepareCables(string project, string page, JObject request, JObject plan)
     {
         AssertCurrent(project);
-        Page target = Page(project, page);
-        SymbolVariant variant = EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL").SelectMany(l => l.Symbols)
-            .Where(s => s.Type == Symbol.SymbolType.CableDefinitionLine).SelectMany(s => s.Variants).FirstOrDefault(v => v.VariantNr == 0)
-            ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Load a SPECIAL cable definition line variant before creating cables.");
-        var created = new List<Cable>();
-        return (() =>
+        _ = Page(project, page);
+        _ = CableVariant(project);
+        return () =>
         {
+            // A55: the closure retains managed inputs only; native handles belong to this stage.
+            Page target = Page(project, page);
+            SymbolVariant variant = CableVariant(project);
             plan["_cableBefore"] = CableSnapshot(project, page);
             foreach (JToken definition in plan["cableDefinitions"]!)
             {
@@ -33,36 +33,39 @@ internal sealed partial class EplanConnectionCreator
                 var cable = new Cable();
 #pragma warning restore CA2000
                 cable.Create(target, variant, new PointD(points[0][0], points[0][1]), new PointD(points[1][0], points[1][1]));
-                created.Add(cable);
                 cable.Name = (string)definition["designation"]!;
                 using FunctionPropertyList properties = cable.Properties;
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
                 properties[(Properties.Function)20043] = (string)definition["cross_section_mm2"]!;
             }
-        }, () =>
+        };
+    }
+    private static SymbolVariant CableVariant(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL").SelectMany(l => l.Symbols)
+        .Where(s => s.Type == Symbol.SymbolType.CableDefinitionLine).SelectMany(s => s.Variants).FirstOrDefault(v => v.VariantNr == 0)
+        ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Load a SPECIAL cable definition line variant before creating cables.");
+    public void VerifyCables(string project, string page, JObject request, JObject plan)
+    {
+        foreach (JToken definition in plan["cableDefinitions"]!)
         {
-            foreach (var (definition, cable) in plan["cableDefinitions"]!.Zip(created, (definition, cable) => (definition, cable)))
+            Cable cable = FindCable(project, page, definition);
+            double[][] points = definition["points"]!.ToObject<double[][]>()!;
+            Check(CableDefinitionPlanner.SameName((string)definition["designation"]!, cable.Name, page), $"designation: expected '{definition["designation"]}'; actual '{cable.Name}'");
+            Check(cable.Page.Name == page, $"page: expected '{page}'; actual '{cable.Page.Name}'");
+            Check(cable.FunctionCategory == FunctionCategory.Cable, $"category: actual '{cable.FunctionCategory}'");
+            RectangleD area = cable.GetLogicalArea();
+            double[] actualPoints = [area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y];
+            double[] expectedPoints = [Math.Min(points[0][0], points[1][0]), Math.Min(points[0][1], points[1][1]), Math.Max(points[0][0], points[1][0]), Math.Max(points[0][1], points[1][1])];
+            Check(actualPoints.SequenceEqual(expectedPoints), $"definition line points: expected {new JArray(expectedPoints)}; actual {new JArray(actualPoints)}");
+            using FunctionPropertyList properties = cable.Properties;
+            foreach (int id in new[] { 20040, 20042, 20043 })
             {
-                double[][] points = definition["points"]!.ToObject<double[][]>()!;
-                Check(CableDefinitionPlanner.SameName((string)definition["designation"]!, cable.Name, page), $"designation: expected '{definition["designation"]}'; actual '{cable.Name}'");
-                Check(cable.Page.Name == page, $"page: expected '{page}'; actual '{cable.Page.Name}'");
-                Check(cable.FunctionCategory == FunctionCategory.Cable, $"category: actual '{cable.FunctionCategory}'");
-                RectangleD area = cable.GetLogicalArea();
-                double[] actualPoints = [area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y];
-                double[] expectedPoints = [Math.Min(points[0][0], points[1][0]), Math.Min(points[0][1], points[1][1]), Math.Max(points[0][0], points[1][0]), Math.Max(points[0][1], points[1][1])];
-                Check(actualPoints.SequenceEqual(expectedPoints), $"definition line points: expected {new JArray(expectedPoints)}; actual {new JArray(actualPoints)}");
-                using FunctionPropertyList properties = cable.Properties;
-                foreach (int id in new[] { 20040, 20042, 20043 })
-                {
-                    using PropertyValue value = properties[(Properties.Function)id];
-                    string field = id == 20040 ? "type_text" : id == 20042 ? "core_count" : "cross_section_mm2";
-                    string? actual = value.IsEmpty ? null : value.ToString();
-                    Check(id == 20043 ? SameSection(actual, (double)definition[field]!) : actual == (string)definition[field]!, $"{field}: expected '{definition[field]}'; actual '{actual ?? "<empty>"}'");
-                }
+                using PropertyValue value = properties[(Properties.Function)id];
+                string field = id == 20040 ? "type_text" : id == 20042 ? "core_count" : "cross_section_mm2";
+                string? actual = value.IsEmpty ? null : value.ToString();
+                Check(id == 20043 ? SameSection(actual, (double)definition[field]!) : actual == (string)definition[field]!, $"{field}: expected '{definition[field]}'; actual '{actual ?? "<empty>"}'");
             }
         }
-        );
     }
     private static Cable FindCable(string project, string page, JToken definition) => Page(project, page).AllPlacements.OfType<Cable>()
         .Single(c => CableDefinitionPlanner.SameName((string)definition["designation"]!, c.Name, page));

@@ -64,7 +64,9 @@ internal sealed class Page : IDisposable
     public Exception? SizeError { get; set; }
     public PointD Size => SizeError is { } error ? throw error : StoredSize;
     public PlotFrame? PlotFrame { get; set; }
-    public Placement[] AllPlacements { get; set; } = [];
+    private Placement[] _placements = [];
+    public Func<Placement[]>? FindPlacements { get; set; }
+    public Placement[] AllPlacements { get => FindPlacements?.Invoke() ?? _placements; set => _placements = value; }
     public Action? AfterGraphicCreate { get; set; }
     public void Dispose() => throw new InvalidOperationException("Borrowed page must never be disposed.");
 }
@@ -78,6 +80,7 @@ internal sealed class Project(params Page[] pages)
     public List<(string? Name, bool Exact, FunctionCategory? Category)> FunctionQueries { get; } = [];
     public MasterData.SymbolLibrary[] SymbolLibraries { get; set; } = [];
     public MasterData.FunctionDefinitionLibrary FunctionDefinitionLibrary { get; } = new();
+    public Func<Connection[]>? FindConnections { get; set; }
 }
 
 internal static class DocumentTypeManager
@@ -96,6 +99,7 @@ internal sealed class DMObjectsFinder(Project project) : IDisposable
         return [.. functions.Where(f => (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
             && (filter?.FunctionCategory is not { } category || f.FunctionCategory == category))];
     }
+    public Connection[] GetConnections(object? filter) => project.FindConnections?.Invoke() ?? [];
     public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];
     public void Dispose() { }
 }
@@ -110,5 +114,6 @@ internal sealed class PagesFilter : IDisposable
 internal sealed class AnyPropertyId(int id) : IDisposable
 {
     public int AsInt { get; } = id;
+    public static implicit operator AnyPropertyId(int id) => new(id);
     public void Dispose() { }
 }

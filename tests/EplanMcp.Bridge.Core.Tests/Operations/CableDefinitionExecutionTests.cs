@@ -263,7 +263,8 @@ public sealed class CableDefinitionExecutionTests
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Base.Read(projectPath, args);
         public Action Prepare(string project, string page, JArray symbols) => () => Stage("symbols");
-        public (Action Create, Action Verify) PrepareCables(string project, string page, JObject request, JObject plan) => (() => Stage("definitions"), () =>
+        public Action PrepareCables(string project, string page, JObject request, JObject plan) => () => Stage("definitions");
+        public void VerifyCables(string project, string page, JObject request, JObject plan)
         {
             Assert.False(InTransaction);
             Assert.False(_abortedCreation);
@@ -273,7 +274,6 @@ public sealed class CableDefinitionExecutionTests
             if (Failure == "definition-readback")
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable readback differs: type_text: expected 'cable'; actual '<empty>'."); }
         }
-        );
         public void BindCables(string project, string page, JObject request, JObject plan) { Assert.True(_generates > 0); Stage("bind"); }
         public void VerifyBindings(string project, string page, JObject request, JObject plan)
         {
