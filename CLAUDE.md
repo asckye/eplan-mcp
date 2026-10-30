@@ -25,7 +25,7 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 - **与项目负责人交流一律使用中文**：回复、提问、进度说明、总结和表格都用中文，长时间运行任务之后也一样；代码标识符、API 名称、文件路径和命令保持原文。
 - 文档用中文；代码标识符、代码注释、日志消息、提交信息用英文。
 - 提交信息遵循 Conventional Commits，scope 取自：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `evals` `docs` `ci` `spikes`。
-- 一个 PR 只做一件事，改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、快照、夹具、原样复制的第三方代码不计入。
+- 一次提交只做一件事，改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、快照、夹具、原样复制的第三方代码不计入。
 
 ## 本机环境注意事项
 - 开发机装有 EPLAN 2026.0.3（`C:\Program Files\EPLAN\Platform\2026.0.3\Bin`），通常以 `/Variant:"Pro Panel"` 启动。
@@ -41,6 +41,7 @@ dotnet test --solution EplanMcp.Ci.slnf -- --filter-not-trait "Size=Large"   # S
 dotnet test --project tests\EplanMcp.Host.Tests -- --filter-trait "Size=Small"
 dotnet test --project tests\EplanMcp.Large.Tests   # Large：需要 EPLAN 以夹具运行（eng\scripts\eval-fixture.ps1 -Open），见该目录的 README
 dotnet format EplanMcp.Ci.slnf --verify-no-changes
+pwsh eng/scripts/local-gate.ps1 -Push             # 本地关卡（与 CI 相同的步骤）通过后直接推送 main，不开 PR、不等 CI
 dotnet run --project src\EplanMcp.Host -- doctor   # 自检；serve（默认）是 stdio MCP 服务器
 dotnet build src\EplanMcp.Bridge.Eplan -c Release  # 注册脚本默认用 Release 版插件（可用 -Configuration 改）
 eng\scripts\eplan-addin.ps1 -Action register    # 开发用：注册插件，立即加载；每个用到的变体各注册一次（-Variant 'Electric P8'）；改了插件要重新跑上一行，再重启 EPLAN

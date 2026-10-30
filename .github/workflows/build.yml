@@ -1,7 +1,8 @@
 name: build
 
 # CI gates of docs/process/development-workflow.md section 7 that need no EPLAN: build with warnings as errors,
-# format check, and Small + Medium tests. The add-in (EplanMcp.Bridge.Eplan) compiles against the EPLAN API and
+# format check, and Small + Medium tests. eng/scripts/local-gate.ps1 runs the same steps before a push to main; on
+# main this workflow is a non-blocking check. The add-in (EplanMcp.Bridge.Eplan) compiles against the EPLAN API and
 # is built only on machines with EPLAN, so CI uses the EplanMcp.Ci.slnf filter.
 on:
   pull_request:
@@ -59,31 +60,7 @@ jobs:
       # its floor in tests/test-suites.json, and every assembly that ran must be listed there (testing.md section 7).
       - name: Test count floor
         shell: pwsh
-        run: |
-          $suites = @((Get-Content tests/test-suites.json -Raw | ConvertFrom-Json).suites)
-          $passed = @{}
-          foreach ($file in Get-ChildItem "$env:RUNNER_TEMP/test-results" -Filter *.trx -ErrorAction SilentlyContinue) {
-            [xml]$trx = Get-Content $file.FullName -Raw
-            $codeBase = @($trx.TestRun.TestDefinitions.UnitTest)[0].TestMethod.codeBase
-            if (-not $codeBase) { continue }
-            $assembly = [IO.Path]::GetFileNameWithoutExtension($codeBase)
-            $passed[$assembly] += @($trx.TestRun.Results.UnitTestResult | Where-Object { $_ -and $_.outcome -eq 'Passed' }).Count
-          }
-          $errors = @()
-          foreach ($suite in $suites) {
-            if (-not $passed.ContainsKey($suite.assembly)) {
-              $errors += "$($suite.assembly) has no test results: it ran no tests or did not run."
-            } elseif ($passed[$suite.assembly] -lt $suite.minPassed) {
-              $errors += "$($suite.assembly) passed $($passed[$suite.assembly]) tests, below its floor of $($suite.minPassed). Check the test filter, the Size traits and test discovery."
-            } else {
-              Write-Output "$($suite.assembly): $($passed[$suite.assembly]) passed, floor $($suite.minPassed)"
-            }
-          }
-          foreach ($assembly in $passed.Keys | Where-Object { $_ -notin $suites.assembly }) {
-            $errors += "$assembly is not in tests/test-suites.json; add it with a minPassed floor."
-          }
-          $errors | ForEach-Object { Write-Output "::error title=Test count floor::$_" }
-          if ($errors.Count -gt 0) { exit 1 }
+        run: eng/scripts/check-test-floor.ps1 -ResultsDirectory "$env:RUNNER_TEMP/test-results"
 
       # Job logs need a GitHub sign-in, annotations do not: repeat each failed test as an annotation.
       - name: Report failed tests
