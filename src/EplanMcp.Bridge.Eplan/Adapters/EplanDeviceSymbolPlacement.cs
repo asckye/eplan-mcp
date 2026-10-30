@@ -48,6 +48,15 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         Function function = CreateFunction(args, tag);
 #pragma warning restore CA2000
         function.Name = tag;
+        // Live T7d: a standalone contact is not a main function by default, so device reads cannot find it. The tag is
+        // new (ALREADY_EXISTS otherwise), so this function is the device's main function, like a pushbutton's contact.
+        // A PLC point belongs to its existing PLC box (its own main function), so it stays as EPLAN places it.
+        if (args.PlcConnectionPoint is null)
+        {
+            if (!function.IsMainFunction)
+            { function.IsMainFunction = true; }
+            Require(function.IsMainFunction);
+        }
         function.Location = new PointD(DrawingCoordinates.MillimetresToApi(args.X), DrawingCoordinates.MillimetresToApi(args.Y));
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;

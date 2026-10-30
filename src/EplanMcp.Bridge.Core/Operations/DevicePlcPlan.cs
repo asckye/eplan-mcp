@@ -10,6 +10,14 @@ internal static class DevicePlcPlan
         { throw WriteArguments.Invalid(["/plc_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
         if (args.PlcConnectionPoint is null && args.PlcAddress is null && args.PlcSymbolicAddress is null && args.PlcText is null)
         { return; }
+        // Live T7d: displays added to a placed PLC point pass the in-transaction readback but are not on the page after
+        // the commit. Until a spike explains it, refuse instead of reporting displays that are not drawn.
+        if (args.PlcConnectionPoint is not null && args.DisplayProperties is { Count: > 0 })
+        {
+            throw new BridgeErrorException(ErrorReason.CapabilityMissing,
+                "display_properties are not supported for PLC connection points yet; omit them. The PLC symbol shows its address and texts with its own displays.",
+                retryable: false, new Dictionary<string, string> { ["missing"] = "device.place.plc.displays" });
+        }
         if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
             || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => string.IsNullOrWhiteSpace(s) || s!.Length > 256 || s.Any(char.IsControl))
             || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(":", StringComparison.Ordinal))
