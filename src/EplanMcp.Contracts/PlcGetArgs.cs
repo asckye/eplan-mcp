@@ -8,4 +8,7 @@ public sealed class PlcGetArgs : ListArgs
 
     /// <summary>Language code for multi-language texts, for example <c>zh_CN</c>; null means EPLAN's user interface language.</summary>
     public string? Language { get; set; }
+
+    /// <summary>Include native owner, manual symbolic address, card reference and parentless representation count.</summary>
+    public bool Detailed { get; set; }
 }

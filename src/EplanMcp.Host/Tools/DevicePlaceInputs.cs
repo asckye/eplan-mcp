@@ -1,11 +1,12 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 
-internal static class DevicePlaceInputs
+internal static partial class DevicePlaceInputs
 {
     internal static void Configure(JsonObject schema)
     {
@@ -36,6 +37,11 @@ internal static class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        foreach ((string field, string? text) in new[] { ("plc_text", args.PlcText), ("terminal_strip_text", args.TerminalStripText) })
+        {
+            if (text is not null && StoredLanguage().IsMatch(text))
+            { problems.Add("/" + field + ": use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."); }
+        }
         if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
         {
             if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
@@ -112,4 +118,7 @@ internal static class DevicePlaceInputs
         value = 0;
         return item.TryGetProperty(name, out JsonElement node) && node.ValueKind == JsonValueKind.Number && node.TryGetDouble(out value) && double.IsFinite(value);
     }
+
+    [GeneratedRegex(@"(?:^|;)([A-Za-z]{2}_[A-Za-z]{2}|\?\?_\?\?)@", RegexOptions.CultureInvariant)]
+    private static partial Regex StoredLanguage();
 }

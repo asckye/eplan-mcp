@@ -8,6 +8,19 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class DevicePlcInputTests
 {
     [Theory]
+    [InlineData("??_??@Start;en_US@Start;")]
+    [InlineData("en_US@Start;??_??@Start;")]
+    [InlineData("en_US@Start;")]
+    public void FunctionTexts_SerializedLanguageEntries_AreRejectedBeforeCallingTheBridge(string raw)
+    {
+        DevicePlaceArgs plc = Args();
+        plc.PlcText = raw;
+        var strip = new DevicePlaceArgs { Project = "Line1", TerminalStrip = "-X1", TerminalNumber = "1", TerminalStripText = raw };
+        Assert.Contains(DevicePlaceInputs.Check(plc, null), p => p.StartsWith("/plc_text:", StringComparison.Ordinal));
+        Assert.Contains(DevicePlaceInputs.Check(strip, null), p => p.StartsWith("/terminal_strip_text:", StringComparison.Ordinal));
+    }
+
+    [Theory]
     [InlineData("X10:2")]
     [InlineData("DI a.0")]
     public void Plc_ValidDesignationAndNativeDisplayFields_AreAccepted(string point)

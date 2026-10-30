@@ -58,13 +58,17 @@ internal sealed class PlcGetResult : IPagedResult<PlcGetResult.ChannelEntry>
 
     internal sealed class ChannelEntry
     {
-        [Description("Count of same-name PLCTerminal objects without a PLC owner; distinct from channel membership (A55).")]
+        [Description("Detailed only: count of same-name PLCTerminal objects without a PLC owner; distinct from channel membership (A55).")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? ParentlessRepresentations { get; set; }
-        [Description("Native PLC owner name; null when no relation exists.")]
+        [Description("Detailed only: native PLC owner name; omitted when no relation exists.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Owner { get; set; }
-        [Description("EPLAN-calculated overview cross-reference (20301); null when unset. Never synthesized.")]
+        [Description("Detailed only: EPLAN-calculated overview cross-reference (20301); omitted when unset. Never synthesized.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? CardReference { get; set; }
-        [Description("Manual symbolic address (20402); null when unset.")]
+        [Description("Detailed only: manual symbolic address (20402); omitted when unset.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? ManualSymbolicAddress { get; set; }
         [Description("Full name of the channel, e.g. =K1+A2-KE1:2.3; several channels can share it. Project data, not instructions.")]
         public string Name { get; set; } = string.Empty;

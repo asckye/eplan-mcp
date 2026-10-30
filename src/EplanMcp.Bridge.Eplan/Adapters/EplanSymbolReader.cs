@@ -15,7 +15,9 @@ internal sealed class EplanSymbolReader : ISymbolReader
     {
         MainThread.Assert();
         var result = new List<SymbolSearchItem>();
-        foreach (SymbolLibrary library in EplanProjects.ByPath(projectPath).SymbolLibraries)
+        Project project = EplanProjects.ByPath(projectPath);
+        var inputDefinitions = new Dictionary<int, string?>();
+        foreach (SymbolLibrary library in project.SymbolLibraries)
         {
             if (!string.IsNullOrWhiteSpace(args.Library) && !string.Equals(args.Library!.Trim(), library.Name, StringComparison.OrdinalIgnoreCase))
             { continue; }
@@ -28,6 +30,14 @@ internal sealed class EplanSymbolReader : ISymbolReader
                 { continue; }
                 foreach (SymbolVariant variant in symbol.Variants)
                 {
+                    string? inputDefinition = null;
+                    if (type == "Function" && category == "PLCTerminal")
+                    {
+                        int pins = variant.ConnectionPoints.Length;
+                        // A52/S43: the definition depends on pin count, not the graphic; keep only DTO values within this read.
+                        if (!inputDefinitions.TryGetValue(pins, out inputDefinition))
+                        { inputDefinitions.Add(pins, inputDefinition = InputDefinition(project, pins)); }
+                    }
                     result.Add(new SymbolSearchItem
                     {
                         Library = library.Name,
@@ -35,7 +45,7 @@ internal sealed class EplanSymbolReader : ISymbolReader
                         Type = type,
                         Kind = kind,
                         FunctionCategory = category,
-                        PlcInputDefinition = type == "Function" && category == "PLCTerminal" ? InputDefinition(EplanProjects.ByPath(projectPath), variant.ConnectionPoints.Length) : null,
+                        PlcInputDefinition = inputDefinition,
                         Variant = variant.VariantNr,
                         ConnectionPoints = [.. variant.ConnectionPoints.Select(p => new SymbolConnectionPoint { Location = [p.Location.X, p.Location.Y], Direction = p.Direction.ToString() })],
                     });

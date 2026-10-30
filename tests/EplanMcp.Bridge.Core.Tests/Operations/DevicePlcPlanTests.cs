@@ -7,6 +7,27 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class DevicePlcPlanTests
 {
     [Theory]
+    [InlineData("??_??@Start;en_US@Start;")]
+    [InlineData("en_US@Start;??_??@Start;")]
+    [InlineData("en_US@Start;")]
+    public void FunctionTexts_SerializedLanguageEntries_AreRejectedAtBothWriteBoundaries(string raw)
+    {
+        var plc = new DevicePlaceArgs { PlcText = raw };
+        var strip = new DevicePlaceArgs { TerminalStripText = raw };
+        Assert.Contains("/plc_text:", Assert.Throws<BridgeErrorException>(() => DevicePlcPlan.Check(plc)).Error.Message, StringComparison.Ordinal);
+        Assert.Contains("/terminal_strip_text:", Assert.Throws<BridgeErrorException>(() => DeviceTerminalPlan.Check(strip)).Error.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("Start input")]
+    [InlineData("Contact a@b; start input")]
+    public void FunctionTexts_PlainIndependentText_IsAccepted(string text)
+    {
+        DevicePlcPlan.Check(new() { Library = "IEC_symbol", PlcConnectionPoint = "1", PlcAddress = "I0.0", PlcSymbolicAddress = "Start", PlcText = text });
+        DeviceTerminalPlan.Check(new() { TerminalStrip = "-X1", TerminalNumber = "1", TerminalStripText = text });
+    }
+
+    [Theory]
     [InlineData("address")]
     [InlineData("point")]
     [InlineData("text")]

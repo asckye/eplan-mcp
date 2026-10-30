@@ -140,7 +140,7 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
 
     public Task<WriteResult<JsonElement>> ExecuteAsync(PlanStepExecuteArgs step, string request) => bridge.InvokeWriteAsync<PlanStepExecuteArgs, JsonElement>(OperationNames.PlanStepExecute, step, request, TimeSpan.FromSeconds(120), null, TestContext.Current.CancellationToken);
     public async Task<string> OutcomeAsync(string request) => (await bridge.InvokeAsync<OutcomeGetArgs, OutcomeGetData>(OperationNames.OutcomeGet, new() { RequestId = request }, TestContext.Current.CancellationToken)).Status;
-    public Task<LiveSnapshots.Snapshot> SnapshotAsync() => LiveSnapshots.TakeAsync(bridge, new() { Project = Project });
+    public Task<LiveSnapshots.Snapshot> SnapshotAsync(params string[] pages) => LiveSnapshots.TakeAsync(bridge, new() { Project = Project, Pages = pages.Length == 0 ? null : [.. pages] });
     public async Task<string> StateAsync() => string.Join("\n", (await SnapshotAsync()).Pages.OrderBy(p => p.Name, StringComparer.Ordinal).Select(p => p.Name + "\t" + p.Hash));
     public async Task<string[]> OpenPathsAsync() => [.. (await ProjectsAsync()).Select(p => p.Path).Order(StringComparer.Ordinal)];
     public async Task UndoAsync()

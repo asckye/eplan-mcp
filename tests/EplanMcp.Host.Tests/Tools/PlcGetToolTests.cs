@@ -60,7 +60,7 @@ public sealed class PlcGetToolTests
         });
         _channels.Add(new PlcChannel { Name = "=K1+A2-KE1:2.3", Address = "Q0.3" });
 
-        CallToolResult result = await Get("=K1+A2-KE1");
+        CallToolResult result = await Get("=K1+A2-KE1", format: ToolArguments.Detailed);
 
         JsonElement data = Structured(result);
         Assert.Equal("Line1", data.GetProperty("project").GetString());
@@ -71,7 +71,7 @@ public sealed class PlcGetToolTests
         JsonElement first = data.GetProperty("channels")[0];
         JsonElement second = data.GetProperty("channels")[1];
         Assert.Equal(("=K1+A2-KE1", "Start", "/1.2", 1), (first.GetProperty("owner").GetString(), first.GetProperty("manualSymbolicAddress").GetString(), first.GetProperty("cardReference").GetString(), first.GetProperty("parentlessRepresentations").GetInt32()));
-        Assert.Equal(JsonValueKind.Null, second.GetProperty("cardReference").ValueKind);
+        Assert.False(second.TryGetProperty("cardReference", out _));
         Assert.Equal(("=K1+A2&EFS1/3", true), (first.GetProperty("page").GetString(), first.GetProperty("main").GetBoolean()));
         Assert.Equal(("=K1+A2-KE1:2.3", "Q0.3", JsonValueKind.Null, false), (second.GetProperty("name").GetString(), second.GetProperty("address").GetString(), second.GetProperty("page").ValueKind, second.GetProperty("main").GetBoolean()));
         Assert.Equal(("I0.3", "Start", "BOOL", "Start button"), (first.GetProperty("address").GetString(), first.GetProperty("symbolicAddress").GetString(), first.GetProperty("dataType").GetString(), first.GetProperty("text").GetString()));
@@ -120,6 +120,7 @@ public sealed class PlcGetToolTests
     [InlineData("project")]
     [InlineData("plc")]
     [InlineData("language")]
+    [InlineData("format")]
     public async Task PlcGet_CursorPassedWithAnotherProjectPlcBoxOrLanguage_IsInvalidArgument(string changed)
     {
         _channels.AddRange(Enumerable.Range(1, 3).Select(i => new PlcChannel { Name = $"=K1+A2-KE1:{i}" }));
@@ -129,6 +130,7 @@ public sealed class PlcGetToolTests
         {
             "project" => await Get("=K1+A2-KE1", project: "Line2", limit: 1, cursor: cursor),
             "plc" => await Get("=K1+A2-KE2", limit: 1, cursor: cursor),
+            "format" => await Get("=K1+A2-KE1", limit: 1, cursor: cursor, format: ToolArguments.Detailed),
             _ => await Get("=K1+A2-KE1", language: "de_DE", limit: 1, cursor: cursor),
         };
 
@@ -193,8 +195,64 @@ public sealed class PlcGetToolTests
         Assert.Equal(texts[kept], second.GetProperty("channels")[0].GetProperty("text").GetString());
     }
 
-    private Task<CallToolResult> Get(string plc, string? project = null, string? language = null, int limit = PlcTools.DefaultLimit, string? cursor = null) =>
-        PlcTools.PlcGetAsync(_bridge, plc, project, language, limit, cursor, TestContext.Current.CancellationToken);
+    [Fact]
+    public async Task PlcGet_Concise_ThirtyFourSampleSizedChannelsFitWithoutTruncation()
+    {
+        _channels.AddRange(Enumerable.Range(0, 34).Select(i => new PlcChannel
+        {
+            Name = $"=K1+A2-KE1:{i / 2 / 8 + 1}.{i / 2 % 8 + 1}",
+            Page = i % 2 == 0 ? "=K1+A2&EFS1/3" : "=K1+A2&EFS1/1",
+            Main = i % 2 == 0,
+            Address = i % 2 == 0 ? $"%IX{i / 16}.{i / 2 % 8}" : null,
+            SymbolicAddress = i % 2 == 0 ? $"%IX{i / 16}.{i / 2 % 8}" : null,
+            DataType = "BOOL",
+            Text = "Sample PLC input channel",
+            Owner = _plc.Tag,
+            ManualSymbolicAddress = "Input",
+            CardReference = "/1.2",
+            ParentlessRepresentations = 1,
+            Connected = i < 20 ? [new() { Device = "+A2-XD4:3", Pin = "1" }] : []
+        }));
+        JsonElement data = Structured(await Get(_plc.Tag));
+        Assert.Equal(34, data.GetProperty("total").GetInt32());
+        Assert.Equal(34, data.GetProperty("channels").GetArrayLength());
+        Assert.False(data.GetProperty("truncated").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, data.GetProperty("nextCursor").ValueKind);
+        Assert.InRange(ResultShaper.ResultTokens(data.GetRawText()), 1, ResultShaper.DefaultTokenBudget);
+    }
+
+    [Fact]
+    public async Task PlcGet_Concise_KeepsThePreT7dJsonBytesEvenWhenTheBridgeSuppliesDetails()
+    {
+        _channels.Add(new() { Name = "=K1+A2-KE1:1", Owner = "=K1+A2-KE1", ManualSymbolicAddress = "Start", CardReference = "/1.2", ParentlessRepresentations = 1 });
+        CallToolResult result = await Get("=K1+A2-KE1");
+        string expected = JsonSerializer.Serialize(new
+        {
+            project = "Line1",
+            plc = new { tag = _plc.Tag, visibleTag = _plc.VisibleTag, page = _plc.Page, parts = _plc.Parts, station = _plc.Station, rack = _plc.Rack, slot = _plc.Slot, cpu = _plc.Cpu },
+            channels = new[] { new { name = "=K1+A2-KE1:1", page = (string?)null, main = false, address = (string?)null, symbolicAddress = (string?)null, dataType = (string?)null, text = (string?)null, connected = Array.Empty<object>() } },
+            total = 1,
+            nextCursor = (string?)null,
+            truncated = false,
+            hint = (string?)null
+        }, HostJson.Options);
+        Assert.Equal(expected, Text(result, 1));
+        Assert.False(Assert.IsType<PlcGetArgs>(Assert.Single(_bridge.Calls).Args).Detailed);
+    }
+
+    [Fact]
+    public async Task PlcGet_DetailedAndIndependentLanguage_ArePassedThroughAndInvalidFormatIsRejected()
+    {
+        await Get("-KE1", language: "??_??", format: ToolArguments.Detailed);
+        var args = Assert.IsType<PlcGetArgs>(Assert.Single(_bridge.Calls).Args);
+        Assert.True(args.Detailed);
+        Assert.Equal("??_??", args.Language);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(await Get("-KE1", format: "all")).GetProperty("reason").GetString());
+        Assert.Single(_bridge.Calls);
+    }
+
+    private Task<CallToolResult> Get(string plc, string? project = null, string? language = null, int limit = PlcTools.DefaultLimit, string? cursor = null, string format = ToolArguments.Concise) =>
+        PlcTools.PlcGetAsync(_bridge, plc, project, language, limit, cursor, format, TestContext.Current.CancellationToken);
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 

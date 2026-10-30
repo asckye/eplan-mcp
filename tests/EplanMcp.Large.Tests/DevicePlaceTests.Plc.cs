@@ -14,20 +14,31 @@ public sealed partial class DevicePlaceTests
         string project = await eplan.WriteProjectAsync();
         string page = await NewPageAsync(project);
         string suffix = page[Prefix.Length..];
-        var snapshots = new List<string> { (await selection.SnapshotAsync()).Hash };
+        LiveSnapshots.Snapshot original = await selection.SnapshotAsync();
+        var snapshots = new List<string> { LiveSnapshots.Hash([original.Page(page)]) };
+        var discovered = new Dictionary<string, (List<JsonElement> Symbols, string? Cursor)>(StringComparer.Ordinal);
 
         async Task<JsonElement> Find(string kind, Func<JsonElement, bool> matches)
         {
-            string? cursor = null;
+            if (!discovered.TryGetValue(kind, out var scan))
+            { scan = ([], null); }
+            foreach (JsonElement symbol in scan.Symbols)
+            { if (matches(symbol)) { return symbol; } }
+            if (scan.Symbols.Count > 0 && scan.Cursor is null)
+            { throw new Xunit.Sdk.XunitException("Required native symbol was not discovered."); }
+            string? cursor = scan.Cursor;
             do
             {
-                JsonElement result = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = project, ["kind"] = kind, ["limit"] = 200, ["cursor"] = cursor });
-                foreach (JsonElement symbol in result.GetProperty("symbols").EnumerateArray())
+                JsonElement result = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = project, ["kind"] = kind, ["library"] = kind == "plc_box" ? "SPECIAL" : null, ["name_contains"] = kind == "plc_box" ? "PLCC" : null, ["limit"] = 200, ["cursor"] = cursor });
+                JsonElement[] symbols = [.. result.GetProperty("symbols").EnumerateArray()];
+                scan.Symbols.AddRange(symbols);
+                cursor = result.GetProperty("nextCursor").GetString();
+                discovered[kind] = (scan.Symbols, cursor);
+                foreach (JsonElement symbol in symbols)
                 {
                     if (matches(symbol))
                     { return symbol; }
                 }
-                cursor = result.GetProperty("nextCursor").GetString();
             }
             while (cursor is not null);
             throw new Xunit.Sdk.XunitException("Required native symbol was not discovered.");
@@ -49,10 +60,10 @@ public sealed partial class DevicePlaceTests
         async Task<JsonElement> Place(Dictionary<string, object?> args)
         {
             await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
-            Assert.Equal(snapshots[^1], (await selection.SnapshotAsync()).Hash);
+            Assert.Equal(snapshots[^1], (await selection.SnapshotAsync(page)).Hash);
             JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
             Assert.Equal((ExecutionState.Committed, "AI: eplan_device_place"), (Text(placed, "execution"), Text(placed, "undo")));
-            snapshots.Add((await selection.SnapshotAsync()).Hash);
+            snapshots.Add((await selection.SnapshotAsync(page)).Hash);
             return placed;
         }
         JsonElement card = await Place(Args(cardSymbol, "-KFT" + suffix, 40, 100));
@@ -74,7 +85,7 @@ public sealed partial class DevicePlaceTests
             Assert.Equal(args["plc_address"], Text(placed.GetProperty("plc"), "address"));
             pointArgs.Add(args);
         }
-        JsonElement plc = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["language"] = "??_??", ["limit"] = 100 });
+        JsonElement plc = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["language"] = "??_??", ["limit"] = 100, ["response_format"] = "detailed" });
         Assert.Equal(2, plc.GetProperty("total").GetInt32());
         JsonElement drawings = (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true })).GetProperty("drawings").GetProperty("items");
         foreach (Dictionary<string, object?> args in pointArgs)
@@ -101,7 +112,7 @@ public sealed partial class DevicePlaceTests
             duplicate[field == "plc_address" ? "plc_connection_point" : "plc_address"] = field == "plc_address" ? "Other" : "I1.0";
             JsonElement error = await eplan.ErrorAsync("eplan_device_place", duplicate);
             Assert.Equal(ErrorReason.AlreadyExists, Text(error, "reason"));
-            Assert.Equal(snapshots[^1], (await selection.SnapshotAsync()).Hash);
+            Assert.Equal(snapshots[^1], (await selection.SnapshotAsync(page)).Hash);
         }
         foreach ((string category, string[] pins, int x) in new[] { ("NoContact", new[] { "13", "14" }, 100), ("NcContact", new[] { "11", "12" }, 160) })
         {
@@ -117,10 +128,10 @@ public sealed partial class DevicePlaceTests
         for (int i = snapshots.Count - 2; i >= 0; i--)
         {
             await selection.UndoAsync();
-            Assert.Equal(snapshots[i], (await selection.SnapshotAsync()).Hash);
+            Assert.Equal(snapshots[i], (await selection.SnapshotAsync(page)).Hash);
             if (i is 1 or 2)
             {
-                JsonElement remaining = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag });
+                JsonElement remaining = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["response_format"] = "detailed" });
                 Assert.Equal(i - 1, remaining.GetProperty("total").GetInt32());
                 Assert.All(remaining.GetProperty("channels").EnumerateArray(), c => Assert.Equal(1, c.GetProperty("parentlessRepresentations").GetInt32()));
                 JsonElement names = await eplan.CallAsync("eplan_device_list", new() { ["project"] = project, ["category"] = "PLCTerminal", ["tag_contains"] = tag, ["include_auxiliary"] = true });
@@ -128,5 +139,6 @@ public sealed partial class DevicePlaceTests
             }
         }
         Assert.Equal(0, await DevicesOnAsync(project, page));
+        Assert.Equal(original.Hash, (await selection.SnapshotAsync()).Hash);
     }
 }

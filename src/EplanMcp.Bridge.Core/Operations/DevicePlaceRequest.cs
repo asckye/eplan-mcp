@@ -107,7 +107,7 @@ internal sealed class DevicePlaceRequest
         if (args.PlcConnectionPoint is { } designation)
         {
             string parent = full.Substring(0, full.Length - designation.Length - 1);
-            PlcRecord? state = plc?.ReadPlc(project.Path, parent, "??_??");
+            PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
             if (state?.Plc is null)
             { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
             if (state.Channels.Any(c => string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
@@ -116,7 +116,7 @@ internal sealed class DevicePlaceRequest
         }
         string[] taken =
         [
-            .. (box ? page.LocationBoxStructures : names.FunctionNames(project.Path))
+            .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
                 .Where(n => SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.Ordinal),
         ];

@@ -74,6 +74,13 @@ public sealed class PlcToolsInteropTests : IAsyncDisposable
         JsonElement[] channels = [.. Structured(await Get("=K1+A2-KE1", limit: 100)).GetProperty("channels").EnumerateArray()];
 
         Assert.Equal(34, channels.Length);
+        JsonElement result = Structured(await Get("=K1+A2-KE1"));
+        Assert.Equal(34, result.GetProperty("total").GetInt32());
+        Assert.False(result.GetProperty("truncated").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("nextCursor").ValueKind);
+        Assert.InRange(ResultShaper.ResultTokens(result.GetRawText()), 1, ResultShaper.DefaultTokenBudget);
+        string[] detailedFields = ["owner", "manualSymbolicAddress", "cardReference", "parentlessRepresentations"];
+        Assert.All(channels, c => Assert.All(detailedFields, name => Assert.False(c.TryGetProperty(name, out _))));
         Assert.Equal(17, channels.Select(c => c.GetProperty("name").GetString()).Distinct(StringComparer.Ordinal).Count());
         JsonElement[] point = [.. channels.Where(c => c.GetProperty("name").GetString() == "=K1+A2-KE1:2.3")];
         Assert.Equal(2, point.Length);
@@ -93,7 +100,7 @@ public sealed class PlcToolsInteropTests : IAsyncDisposable
     }
 
     private Task<CallToolResult> Get(string plc, int limit = PlcTools.DefaultLimit, string? cursor = null) =>
-        PlcTools.PlcGetAsync(_client, plc, null, null, limit, cursor, TestContext.Current.CancellationToken);
+        PlcTools.PlcGetAsync(_client, plc, null, null, limit, cursor, cancellationToken: TestContext.Current.CancellationToken);
 
     private static JsonElement Structured(CallToolResult result)
     {
@@ -116,7 +123,7 @@ public sealed class PlcToolsInteropTests : IAsyncDisposable
     {
         private const string Schematic = "=K1+A2&EFS1/3";
 
-        public PlcRecord? ReadPlc(string projectPath, string tag, string? language) => tag switch
+        public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false) => tag switch
         {
             "=K1+A2-KE1" => new PlcRecord
             {
@@ -126,7 +133,7 @@ public sealed class PlcToolsInteropTests : IAsyncDisposable
                 [
                     .. Enumerable.Range(0, 17).SelectMany(i => new[]
                     {
-                        new PlcChannel { Name = Point(tag, i), Page = Schematic, Main = true, Address = $"%IX{i / 8}.{i % 8}" },
+                        new PlcChannel { Name = Point(tag, i), Page = Schematic, Main = true, Address = $"%IX{i / 8}.{i % 8}", SymbolicAddress = $"%IX{i / 8}.{i % 8}", DataType = "BOOL", Text = "Sample PLC input channel", Owner = tag, ManualSymbolicAddress = "Input", CardReference = "/1.2", ParentlessRepresentations = 1 },
                         new PlcChannel { Name = Point(tag, i), Page = "=K1+A2&EFS1/1" },
                     }),
                 ],

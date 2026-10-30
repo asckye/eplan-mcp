@@ -15,7 +15,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanPlcReader : IPlcReader
 {
-    public PlcRecord? ReadPlc(string projectPath, string tag, string? language)
+    public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false)
     {
         MainThread.Assert();
         TextLanguage textLanguage = EplanText.Language(language);
@@ -44,12 +44,16 @@ internal sealed class EplanPlcReader : IPlcReader
             Cpu = plc.IsCPU,
         };
         Terminal[] channels = plc.PLCTerminals ?? [];
-        record.Channels = [.. channels.Select(terminal => Channel(terminal, textLanguage))];
-        // A55: preserve same-name representations; the extra objects have no PLC relation.
-        ILookup<string, Terminal> parentless = finder.GetFunctions(null).OfType<Terminal>()
-            .Where(t => t.FunctionCategory == FunctionCategory.PLCTerminal && t.PLC is null).ToLookup(t => t.Name, StringComparer.Ordinal);
-        foreach (PlcChannel channel in record.Channels)
-        { channel.ParentlessRepresentations = parentless[channel.Name].Count(); }
+        record.Channels = [.. channels.Select(terminal => Channel(terminal, textLanguage, detailed))];
+        if (detailed && record.Channels.Count > 0)
+        {
+            // A11/A55: a native name-prefix filter includes unplaced and cross-page representations of this card.
+            using var filter = new FunctionsFilter { Name = plc.Name + ":", ExactNameMatching = false, FunctionCategory = FunctionCategory.PLCTerminal };
+            ILookup<string, Terminal> parentless = finder.GetFunctions(filter).OfType<Terminal>()
+                .Where(t => t.PLC is null).ToLookup(t => t.Name, StringComparer.Ordinal);
+            foreach (PlcChannel channel in record.Channels)
+            { channel.ParentlessRepresentations = parentless[channel.Name].Count(); }
+        }
         record.Connections = Connections(finder, plc, channels);
         return record;
     }
@@ -57,13 +61,13 @@ internal sealed class EplanPlcReader : IPlcReader
     /// <summary>The object of a PLC box is a PLC of category PLCBox (tool spec 5).</summary>
     private static bool IsPlcBox(Function function) => function is PLC && function.FunctionCategory == FunctionCategory.PLCBox;
 
-    private static PlcChannel Channel(Terminal terminal, TextLanguage language)
+    private static PlcChannel Channel(Terminal terminal, TextLanguage language, bool detailed)
     {
         using FunctionPropertyList properties = terminal.Properties;
-        return Channel(terminal, language, properties);
+        return Channel(terminal, language, properties, detailed);
     }
 
-    internal static PlcChannel Channel(Terminal terminal, TextLanguage language, FunctionPropertyList properties)
+    internal static PlcChannel Channel(Terminal terminal, TextLanguage language, FunctionPropertyList properties, bool detailed = true)
     {
         (string? text, string? textLanguage) = EplanText.ReadWithLanguage(properties.FUNC_TEXT, language);
         return new PlcChannel
@@ -71,9 +75,9 @@ internal sealed class EplanPlcReader : IPlcReader
             Name = terminal.Name ?? string.Empty,
             Page = terminal.Page?.Name,
             Main = terminal.IsMainFunction,
-            Owner = terminal.PLC?.Name,
-            CardReference = EplanText.Read(properties.FUNC_PLCPAIRCROSSREFERENCE, language),
-            ManualSymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_MANUAL, language),
+            Owner = detailed ? terminal.PLC?.Name : null,
+            CardReference = detailed ? EplanText.Read(properties.FUNC_PLCPAIRCROSSREFERENCE, language) : null,
+            ManualSymbolicAddress = detailed ? EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_MANUAL, language) : null,
             Address = EplanText.Read(properties.FUNC_PLCADDRESS, language),
             SymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_CALCULATED, language),
             DataType = EplanText.Read(properties.FUNC_PLCDATATYPE, language),

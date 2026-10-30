@@ -3,7 +3,6 @@ namespace Eplan.EplApi.DataModel.EObjects;
 internal sealed class TerminalStrip() : Function(2)
 {
     public Terminal[] Terminals { get; set; } = [];
-    public bool IsMainFunction { get; set; }
     public TerminalStripPropertyListComplete Properties { get; } = new();
     public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
 }
@@ -15,10 +14,8 @@ internal sealed class Terminal() : Function(3)
     private TerminalStrip? _owner;
     public TerminalStrip? TerminalStrip => _owner;
     public FunctionPropertyList Properties { get; } = new();
-    public Page Page { get; private set; } = null!;
     public bool IsPlaced { get; set; } = true;
-    public object[] ArticleReferences { get; set; } = [];
-    public string FunctionCategory { get; set; } = "Terminal";
+    public PLC? PLC { get; set; }
     public BoxSymbolVariant SymbolVariant { get; } = new() { Library = "IEC_symbol", Name = "X" };
     public void Create(TerminalStrip strip, Page page, object variant)
     {

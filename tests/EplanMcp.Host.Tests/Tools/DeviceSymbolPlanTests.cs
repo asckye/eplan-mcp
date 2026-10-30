@@ -396,15 +396,16 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public MacroTargetPage Page { get; } = new() { Name = DeviceSymbolPlanTests.Page, Type = "Circuit", Width = 420, Height = 297, Objects = ["page:1"] };
         public List<string> Names { get; } = [];
         public List<PlcChannel> Channels { get; } = [];
-        public PlcRecord? ReadPlc(string projectPath, string tag, string? language) => Names.Contains(tag, StringComparer.OrdinalIgnoreCase)
+        public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false) => Names.Contains(tag, StringComparer.OrdinalIgnoreCase)
             ? new() { Category = "PLCBox", Plc = new() { Tag = tag, Page = Page.Name }, Channels = [.. Channels] } : null;
         public List<SymbolSearchItem> Symbols { get; } = [new() { Library = "IEC_symbol", Name = "K", Variant = 0, Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0], Direction = "Up" }, new() { Location = [0, -4], Direction = "Down" }] }];
         public SymbolSearchArgs? Search { get; private set; }
         public int PartReads { get; private set; }
+        public int NameReads { get; private set; }
         public IReadOnlyCollection<string> PageTypes => ["Circuit"];
         public IReadOnlyList<OpenProject> ListOpenProjects() => [Project];
         public IReadOnlyList<string> PageNames(string projectPath) => [Page.Name];
-        public IReadOnlyList<string> FunctionNames(string projectPath) => Names;
+        public IReadOnlyList<string> FunctionNames(string projectPath) { NameReads++; return Names; }
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => pageName == Page.Name ? Page : null;
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) { Search = args; return Symbols; }
         public PartsDatabaseContent Read(string? database) { PartReads++; throw new NotSupportedException(); }
