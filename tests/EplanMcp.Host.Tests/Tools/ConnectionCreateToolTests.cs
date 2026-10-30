@@ -43,7 +43,7 @@ public sealed class ConnectionCreateToolTests
         JsonElement locator = Assert.Single(listed.GetProperty("connections").EnumerateArray()).GetProperty("locator");
         JObject definition = CableDefinitionFixture.Definition("-W3", [[32, 16], [48, 16]],
             CableDefinitionFixture.Core(new() { ["locator"] = JObject.Parse(locator.GetRawText()) }, "1", "BK"));
-        JsonElement result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline,
+        JsonElement result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge,
             "Line1", ConnectionCreateFixture.PageName, [JsonSerializer.SerializeToElement(JsonNode.Parse(definition.ToString()))], dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
         JsonElement impact = Assert.Single(result.GetProperty("coreImpact").EnumerateArray());
         Assert.Equal(locator.GetRawText(), impact.GetProperty("connection").GetProperty("locator").GetRawText());
