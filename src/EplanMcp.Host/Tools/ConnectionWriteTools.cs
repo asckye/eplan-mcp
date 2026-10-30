@@ -33,9 +33,11 @@ internal sealed class ConnectionWriteTools
         "it. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/60\"]}.")]
     public static async Task<CallToolResult> ConnectionGenerateAsync(
         WritePipeline pipeline,
+        IBridgeClient bridge,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 full page names")] string[] pages,
         [Description("Only count the connections now")] bool dry_run = false,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -67,6 +69,7 @@ internal sealed class ConnectionWriteTools
             dry_run,
             PageWriteTools.Limit(args.Pages.Count),
             "Generating connections");
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Pages[0], cancellationToken).ConfigureAwait(false);
         WriteOutcome<ConnectionGenerateData> outcome;
         try
         {
@@ -74,10 +77,10 @@ internal sealed class ConnectionWriteTools
         }
         catch (BridgeCallException ex)
         {
-            return ToolResults.Error(ex.Error);
+            return display.Apply(ToolResults.Error(ex.Error));
         }
 
-        return outcome.Data is { } data ? Generated(data) : Planned(outcome, dry_run);
+        return display.Apply(outcome.Data is { } data ? Generated(data) : Planned(outcome, dry_run));
     }
 
     /// <summary>A commit that answered in time: the pages as read back, at most 100 connections listed (tool spec 3).</summary>

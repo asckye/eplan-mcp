@@ -66,6 +66,11 @@
           "type": "boolean",
           "default": false
         },
+        "show_page": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."
+        },
         "response_format": {
           "enum": [
             "concise",
@@ -163,6 +168,18 @@
         "connectionChanges": {
           "type": "array",
           "maxItems": 0
+        },
+        "pageShown": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "hint": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "warning": {
           "type": [

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -14,10 +15,12 @@ internal sealed class PlacementUpdateTools
 {
     public const string Tool = "eplan_placement_update";
     [McpServerTool(Name = Tool, ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    public static async Task<CallToolResult> UpdateAsync(WritePipeline pipeline, RequestContext<CallToolRequestParams> context,
+    public static async Task<CallToolResult> UpdateAsync(WritePipeline pipeline, IBridgeClient bridge, RequestContext<CallToolRequestParams> context,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
-        JsonElement input = JsonSerializer.SerializeToElement(context.Params?.Arguments ?? new Dictionary<string, JsonElement>());
+        JsonElement input = JsonSerializer.SerializeToElement((context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Where(p => p.Key != "show_page").ToDictionary());
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, input, cancellationToken).ConfigureAwait(false);
         bool dryRun = input.TryGetProperty("dry_run", out JsonElement dry) && dry.ValueKind == JsonValueKind.True;
         try
         {
@@ -28,8 +31,8 @@ internal sealed class PlacementUpdateTools
             result["execution"] = outcome.Execution;
             result["dryRun"] = dryRun;
             result["recovered"] = outcome.Recovered;
-            return ToolResults.Success(outcome.Execution == ExecutionState.Committed ? "Moved placements; one Ctrl+Z restores the closure." : "Nothing was changed.", ContextBuilder.Clean(result));
+            return display.Apply(ToolResults.Success(outcome.Execution == ExecutionState.Committed ? "Moved placements; one Ctrl+Z restores the closure." : "Nothing was changed.", ContextBuilder.Clean(result)));
         }
-        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return display.Apply(ToolResults.Error(ex.Error)); }
     }
 }

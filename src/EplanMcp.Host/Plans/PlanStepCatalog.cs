@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,12 +23,13 @@ internal static class PlanStepCatalog
     ];
     private static readonly Dictionary<string, JsonObject> _schemas = _entries.ToDictionary(e => e.Op, e =>
     {
-        using ServiceProvider services = new ServiceCollection().AddSingleton<WritePipeline>().BuildServiceProvider();
+        using ServiceProvider services = new ServiceCollection().AddSingleton<WritePipeline>().AddSingleton<IBridgeClient, BridgeClient>().BuildServiceProvider();
         McpServerTool tool = McpServerTool.Create(e.Tool.GetMethod(e.Method)!, options: new() { Services = services });
         ToolSchemas.Harden([tool]);
         var schema = JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!.AsObject();
         schema["properties"]!.AsObject().Remove("project");
         schema["properties"]!.AsObject().Remove("dry_run");
+        schema["properties"]!.AsObject().Remove("show_page");
         schema["required"]!.AsArray().Remove(schema["required"]!.AsArray().Single(n => n!.GetValue<string>() == "project"));
         if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.
         {

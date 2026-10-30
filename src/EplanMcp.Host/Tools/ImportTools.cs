@@ -56,6 +56,7 @@ internal sealed class ImportTools
         "Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/92\", \"file\": \"drawings/4685200F.DXF\"}.")]
     public static async Task<CallToolResult> ImportDxfAsync(
         WritePipeline pipeline,
+        IBridgeClient bridge,
         ImportFiles files,
         [Description("From eplan_project_list")] string project,
         [Description("Full page name")] string page,
@@ -63,6 +64,7 @@ internal sealed class ImportTools
         [Description("fit: to the page; none: own size")][AllowedValues("fit", "none")] string scale = "fit",
         [AllowedValues("center", "lower_left")] string position = "center",
         [Description("Only return the plan")] bool dry_run = false,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -104,6 +106,7 @@ internal sealed class ImportTools
             dry_run,
             PageWriteTools.DefaultLimit,
             "Importing the drawing");
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Page, cancellationToken).ConfigureAwait(false);
         WriteOutcome<ImportDxfData> outcome;
         try
         {
@@ -111,7 +114,7 @@ internal sealed class ImportTools
         }
         catch (BridgeCallException ex)
         {
-            return ToolResults.Error(ex.Error);
+            return display.Apply(ToolResults.Error(ex.Error));
         }
 
         bool committed = outcome.Execution == ExecutionState.Committed;
@@ -135,7 +138,7 @@ internal sealed class ImportTools
         string summary = !committed ? "Dry run: would import one drawing. Nothing was changed."
             : data is null ? "Imported a drawing; Ctrl+Z in EPLAN undoes this step."
             : $"Imported a drawing with {ToolResults.Count(data.ObjectsAdded, "object")}; Ctrl+Z in EPLAN undoes this step.";
-        return ToolResults.Success(summary, result);
+        return display.Apply(ToolResults.Success(summary, result));
     }
 
     [McpServerTool(

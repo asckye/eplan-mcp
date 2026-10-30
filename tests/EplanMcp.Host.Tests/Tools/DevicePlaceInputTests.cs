@@ -101,7 +101,7 @@ public sealed class DevicePlaceInputTests
     [Fact]
     public async Task InvalidSource_IsRejectedBeforeAnyPipelineCall()
     {
-        var result = await DeviceWriteTools.DevicePlaceAsync(null!, "Line1", "/1", 80, 160, "-K1", part: "P", library: "IEC_symbol", symbol: "K", symbol_variant: 0, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await DeviceWriteTools.DevicePlaceAsync(null!, null!, "Line1", "/1", 80, 160, "-K1", part: "P", library: "IEC_symbol", symbol: "K", symbol_variant: 0, cancellationToken: TestContext.Current.CancellationToken);
         JsonElement error = WriteToolHarness.Error(result);
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }

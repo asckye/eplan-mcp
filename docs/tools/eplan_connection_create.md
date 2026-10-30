@@ -13,17 +13,19 @@
 | points / position | number[2][2..32] / number[2] | `[x_mm,y_mm]`；毫米、左下原点、y 向上；有限数、0..10,000，且受 Page.Size 限制 |
 | kind / directions | enum / enum[] | wire、corner、t_node、potential_point；节点分别需 2 个垂直方向、3 个不同方向、1 个方向；方向为 Up/Down/Left/Right |
 | interruption_point | object | `{kind:"interruption_point",name,direction,position,counterpart_pages}`；name 为共享的完整业务名（1..200 字符），direction 为 Up/Down/Left/Right，position 为电气连接点坐标；counterpart_pages 必填 1..20 个不同的精确完整页名，不隐式搜索全项目 |
+| show_page | boolean，false | 绘制前打开或聚焦主参数 `page`，便于观看；仅影响界面，不修改数据，dry-run 也开页；不打开对端页 |
 | dry_run / snap_to_grid | boolean，false / true | dry_run 只规划；执行时关闭吸附仍拒绝非栅格接线 |
 | response_format | concise / detailed，concise | Host 以 ResultShaper 清洗并限制 5k/20k token；展示裁剪不影响完整 guard |
 
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 
 `cable_definition` 支持规划与执行：必填 `points`（定义线两点）、`designation`、`type_text`、`core_count`（1..50）、`cross_section_mm2`（正有限数）、`cores`。每芯为 `{connection,label,colour}`；connection 严格二选一 `{locator:{project,page,type,oid,digest}}`（既有连接）或 `{item_index:0}`（本次 wire 的零基下标，允许前向引用）。每电缆至少一芯、不超过声明芯数，每调用合计最多 50 芯；按 designation+label 判重复，不同电缆可复用芯号，同一连接只能分配一次。数字 label 必须为声明范围内无前导零的正整数，文字标签以英文字母开头、最多 32 字符，仅含字母、数字、`_ . -`；colour 为 `BK BN RD OG YE GN BU VT GY WH PK TQ GNYE` 之一。型号文本原样作为输入，不查询或推断部件/选型，不批量重编号。
-六个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,000 字符。
+六个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,200 字符（含可选开页参数）。
 预览另含 `cableDefinitions`、逐连接的 `coreImpact`（原 locator/属性、designation、label、colour、截面）和 `undoSteps`；既有导线为 6 步，同次新增路径生成另加 1 步、节点放置再加 1 步。审批列出相同步数。执行另含 `actualCores`，逐芯返回实际 designation/type、连接 oid/pins、label/colour；按 A55 允许未使用的功能结构（例如 `=GAA`）被丢弃，并在比较前去除空结构段（`+-W9`、`=+-W9` 等价于 `-W9`），非空位置段和设备标识仍须一致。
 定义线须正交、非零、在页界/栅格内，且恰好与显式芯线各相交一次；相交的其他连接、重复跨越、已归属其他电缆、分支/电位关系或跨页范围无法证明时拒绝。现有连接读取首批限可唯一证明的同页直连；同次 wire 可有转角，但生成后必须恰有两个显式端点。名称筛查覆盖全项目功能名；既有完整连接 locator、端点、几何、芯号/颜色/截面/归属与名称清单进入指纹，改变即重新规划或 stale；不新增计划落盘格式。
 
 ## 3. 输出
+`show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。普通连线结果与审批均注明 2 undo steps；电缆例外见第 2 节。
 逻辑集合是生成后的端点预测，不承诺 T 节点的有向连接条数；电位点预期逻辑起点为空（A52）。logicalDuringPlacement=0 表示本次放置不负责生成逻辑连接；既有逻辑连接完整保留在基线中。内存规划保留完整证据；Host 展示超预算时裁剪数组并标 truncated，不能因显示预算缩小 guard。
 中断点预览另含 affectedPages 与 interruptionScope（显式页完整绘图、引脚、连接、原生中断点基线），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。

@@ -72,6 +72,6 @@ public sealed class InterruptionPointToolTests
         harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("{\"affectedPages\":[\"page\",\"peer\"],\"undoSteps\":2,\"interruptionPoints\":[{\"name\":\"LINK\",\"crossReference\":\"native:/2.4\",\"counterparts\":[{\"page\":\"peer\",\"oid\":90}]}]}")!;
         return harness;
     }
-    private static Task<ModelContextProtocol.Protocol.CallToolResult> Call(WriteToolHarness harness, bool dry = false) => ConnectionCreateTools.CreateAsync(harness.Pipeline,
+    private static Task<ModelContextProtocol.Protocol.CallToolResult> Call(WriteToolHarness harness, bool dry = false) => ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge,
         "Line1", "page", [Item], dry_run: dry, cancellationToken: TestContext.Current.CancellationToken);
 }

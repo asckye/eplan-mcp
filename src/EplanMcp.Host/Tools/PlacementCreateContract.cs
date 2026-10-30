@@ -10,7 +10,7 @@ internal static class PlacementCreateContract
         {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{
           "project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},
           "items":{"type":"array","minItems":1,"maxItems":50,"items":{"$ref":"#/$defs/item"}},
-          "snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":false},
+          "snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":false},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},
           "response_format":{"type":"string","enum":["concise","detailed"],"default":"concise"}},"$defs":{
           "point":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000}},
           "pair":{"type":"array","minItems":2,"maxItems":2,"items":{"$ref":"#/$defs/point"}},
@@ -29,7 +29,7 @@ internal static class PlacementCreateContract
           "gridSize":{"type":"number","exclusiveMinimum":0},"boundarySource":{"enum":["Page.Size","unverified"]},
           "items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["requested","actual","bounds","snapped"],"properties":{
             "requested":{"$ref":"#/$defs/item"},"actual":{"$ref":"#/$defs/item"},"bounds":{"type":["array","null"],"minItems":4,"maxItems":4,"items":{"type":"number"}},"snapped":{"type":"boolean"}}}},
-          "changes":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"string"}},"connectionChanges":{"type":"array","maxItems":0},"warning":{"type":["string","null"]},"recovered":{"type":"boolean"}}}
+          "changes":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"string"}},"connectionChanges":{"type":"array","maxItems":0},"pageShown":{"type":["boolean","null"]},"hint":{"type":["string","null"]},"warning":{"type":["string","null"]},"recovered":{"type":"boolean"}}}
         """).RootElement.Clone();
 
     internal static Tool Definition => new()
@@ -50,7 +50,7 @@ internal static class PlacementCreateContract
         tool.Title = Definition.Title;
         tool.Description = Definition.Description;
         tool.InputSchema = JsonDocument.Parse("""
-            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"contents":{"type":"object","additionalProperties":{"type":"string"}},"height_mm":{"type":"number"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":false},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
+            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"contents":{"type":"object","additionalProperties":{"type":"string"}},"height_mm":{"type":"number"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":false},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
             """).RootElement.Clone();
         tool.OutputSchema = Definition.OutputSchema;
     }

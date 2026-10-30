@@ -148,7 +148,7 @@ public sealed class DevicePlaceToolTests : IDisposable
         harness.Bridge.Handlers[OperationNames.DevicePlacePlan] = _ => harness.Plan([new PlannedChange { Action = "create", Kind = "device", Name = Page, NewValue = "SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)" }]);
         harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = _ => new DevicePlaceData { Project = "Line1", Page = Page, Tag = "=GAA+A1-KF20", Functions = 5, PageSizeKnown = true };
 
-        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(harness.Pipeline, "Line1", Page, 80, 160, "-KF20", Part, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(harness.Pipeline, harness.Bridge, "Line1", Page, 80, 160, "-KF20", Part, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("committed", data.GetProperty("execution").GetString());
         Assert.Equal("create device =GAA+A1&EFS1/60 (SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160))", Assert.Single(WritePipeline.ChangeLines(Assert.Single(channel.Questions).Plan)));
@@ -157,12 +157,12 @@ public sealed class DevicePlaceToolTests : IDisposable
     [Fact]
     public async Task WithoutAProject_TheBridgeIsNotAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, " ", Page, 80, 160, "-KF20", Part, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, _harness.Bridge, " ", Page, 80, 160, "-KF20", Part, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("'project' is required", error.GetProperty("message").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
     private Task<CallToolResult> Place(bool dryRun = false) =>
-        DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, "Line1", Page, 80, 160, "-KF20", Part, "2", dryRun, cancellationToken: TestContext.Current.CancellationToken);
+        DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 80, 160, "-KF20", Part, "2", dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

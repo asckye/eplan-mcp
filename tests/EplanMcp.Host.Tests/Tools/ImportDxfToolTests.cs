@@ -85,7 +85,7 @@ public sealed class ImportDxfToolTests : IDisposable
     [Fact]
     public async Task AMissingFile_IsFileNotFound_AndTheBridgeIsNotAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await ImportTools.ImportDxfAsync(_harness.Pipeline, _files, "Line1", Page, "drawings/missing.dxf", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await ImportTools.ImportDxfAsync(_harness.Pipeline, _harness.Bridge, _files, "Line1", Page, "drawings/missing.dxf", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal((ErrorReason.FileNotFound, ExecutionState.NotStarted, "drawings/missing.dxf"), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString(), error.GetProperty("metadata").GetProperty("file").GetString()));
         Assert.DoesNotContain(_harness.Locations.Root, error.GetProperty("message").GetString(), StringComparison.OrdinalIgnoreCase);
@@ -95,7 +95,7 @@ public sealed class ImportDxfToolTests : IDisposable
     [Fact]
     public async Task APathOutsideTheImportFolder_AndAMissingProject_AreReportedTogether()
     {
-        JsonElement error = WriteToolHarness.Error(await ImportTools.ImportDxfAsync(_harness.Pipeline, _files, " ", Page, @"..\..\secret.dxf", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await ImportTools.ImportDxfAsync(_harness.Pipeline, _harness.Bridge, _files, " ", Page, @"..\..\secret.dxf", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
         string[] violations = error.GetProperty("metadata").GetProperty("violations").GetString()!.Split('\n');
@@ -152,7 +152,7 @@ public sealed class ImportDxfToolTests : IDisposable
         harness.Bridge.Handlers[OperationNames.ImportDxfPlan] = _ => harness.Plan([new PlannedChange { Action = "create", Kind = "drawing", Name = Page, NewValue = "plan.dxf (3 bytes, sha256 039058c6f2c0…), scale fit, center" }]);
         harness.Bridge.Handlers[OperationNames.ImportDxfExecute] = _ => new ImportDxfData { Project = "Line1", Page = Page, ObjectsAdded = 3 };
 
-        JsonElement data = WriteToolHarness.Structured(await ImportTools.ImportDxfAsync(harness.Pipeline, new ImportFiles(harness.Locations), "Line1", Page, "plan.dxf", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement data = WriteToolHarness.Structured(await ImportTools.ImportDxfAsync(harness.Pipeline, harness.Bridge, new ImportFiles(harness.Locations), "Line1", Page, "plan.dxf", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("committed", data.GetProperty("execution").GetString());
         Assert.Equal(
@@ -161,5 +161,5 @@ public sealed class ImportDxfToolTests : IDisposable
     }
 
     private Task<CallToolResult> Import(bool dryRun = false, string scale = "fit", string position = "center") =>
-        ImportTools.ImportDxfAsync(_harness.Pipeline, _files, "Line1", Page, File, scale, position, dryRun, cancellationToken: TestContext.Current.CancellationToken);
+        ImportTools.ImportDxfAsync(_harness.Pipeline, _harness.Bridge, _files, "Line1", Page, File, scale, position, dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

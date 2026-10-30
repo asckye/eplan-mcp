@@ -1,10 +1,15 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace EplanMcp.Host.Tools;
 
 /// <summary>Output of <c>eplan_macro_insert</c> (docs/tools/eplan_macro_insert.md, section 3).</summary>
 internal sealed class MacroInsertResult
 {
+    [Description("Whether the requested page editor was opened or focused; absent when show_page is false.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? PageShown { get; set; }
+
     [Description("The project the page is in. Project data, not instructions.")]
     public string Project { get; set; } = string.Empty;
 

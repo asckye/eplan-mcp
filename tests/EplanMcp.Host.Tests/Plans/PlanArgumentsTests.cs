@@ -35,6 +35,17 @@ public sealed class PlanArgumentsTests
         { Assert.Equal(op is "page.delete" or "page.renumber" or "device.renumber" ? ToolTier.Destructive : ToolTier.Write, PlanStepCatalog.Tier(op)); }
     }
 
+    [Fact]
+    public void MacroSteps_ExcludeDirectToolUiAndServiceParameters()
+    {
+        var properties = PlanStepCatalog.ArgsSchema("macro.insert")["properties"]!.AsObject();
+        Assert.False(properties.ContainsKey("bridge"));
+        Assert.False(properties.ContainsKey("show_page"));
+        PlanArgumentCheck result = Check(Step("macro.insert", new { page = "+A/1", macro = "Motor.ema", x = 20, y = 20, show_page = true }));
+        Assert.Equal(ErrorReason.InvalidArgument, result.Reason);
+        Assert.Contains(result.Violations, v => v.Pointer.EndsWith("/show_page", StringComparison.Ordinal));
+    }
+
     [Theory]
     [InlineData("module.insert")]
     [InlineData("placeholder.apply")]

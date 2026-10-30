@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -16,14 +17,16 @@ internal sealed class PlacementCreateTools
 
     [McpServerTool(Name = Tool, ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     public static async Task<CallToolResult> CreateAsync(IBridgeClient bridge, WritePipeline pipeline, RequestContext<CallToolRequestParams> context,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
-        JsonElement input = JsonSerializer.SerializeToElement(context.Params?.Arguments ?? new Dictionary<string, JsonElement>());
+        JsonElement input = JsonSerializer.SerializeToElement((context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Where(p => p.Key != "show_page").ToDictionary());
         List<string> problems = PlacementCreatePlanning.Validate(input);
         if (problems.Count > 0)
         { BridgeError error = ToolResults.InvalidArgumentError(problems); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, input, cancellationToken).ConfigureAwait(false);
         if (input.TryGetProperty("dry_run", out JsonElement dry) && dry.GetBoolean())
-        { return await PlacementCreatePlanning.PreviewAsync(bridge, input, cancellationToken: cancellationToken).ConfigureAwait(false); }
+        { return display.Apply(await PlacementCreatePlanning.PreviewAsync(bridge, input, cancellationToken: cancellationToken).ConfigureAwait(false)); }
         try
         {
             OpenProject project = (await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet,
@@ -67,8 +70,8 @@ internal sealed class PlacementCreateTools
             result["execution"] = outcome.Execution;
             result["warning"] = ResultShaper.CleanText(outcome.Data?.Warning);
             result["recovered"] = outcome.Recovered;
-            return ToolResults.Success("Created text/graphics; one Ctrl+Z undoes the batch.", ContextBuilder.Clean(result));
+            return display.Apply(ToolResults.Success("Created text/graphics; one Ctrl+Z undoes the batch.", ContextBuilder.Clean(result)));
         }
-        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return display.Apply(ToolResults.Error(ex.Error)); }
     }
 }

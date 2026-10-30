@@ -49,7 +49,8 @@ public sealed class PlacementCreateProtocolTests
                 Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], store.Calls);
                 Tool tool = Assert.Single(await client.ListToolsAsync(cancellationToken: Token), t => t.Name == PlacementCreateTools.Tool).ProtocolTool;
                 Assert.True(PropertyGetContractTests.Accepts(tool.OutputSchema!.Value, data, tool.OutputSchema.Value));
-                Assert.InRange(tool.Description!.Length + tool.InputSchema.GetRawText().Length, 1, 1000);
+                Assert.InRange(tool.Description!.Length + PageDisplay.Description.Length, 1, 1000);
+                Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 1000);
             }
         });
     }

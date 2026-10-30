@@ -173,7 +173,7 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     private Task<CallToolResult> Box(bool dryRun = true, string structure = "+P1", WriteToolHarness? harness = null) =>
-        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 60, 140, location_box: structure, corner_x: 100, corner_y: 180, dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 60, 140, location_box: structure, corner_x: 100, corner_y: 180, dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
 
     private static DevicePlaceArgs BoxArgs() => new() { Project = "Line1", Page = Page, LocationBox = "+P1", X = 60, Y = 140, CornerX = 100, CornerY = 180 };
 }

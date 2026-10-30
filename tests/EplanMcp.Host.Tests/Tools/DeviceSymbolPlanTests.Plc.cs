@@ -179,7 +179,7 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     private Task<CallToolResult> Plc(bool dryRun = true, string point = "X10:2", WriteToolHarness? harness = null, JsonElement[]? displays = null, string address = "I0.0") =>
-        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, "-KF1", dry_run: dryRun,
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 80, 160, "-KF1", dry_run: dryRun,
             library: "IEC_symbol", symbol: "PLC_DI", symbol_variant: 0, plc_connection_point: point, plc_address: address, plc_symbolic_address: "Start", plc_text: "Start input",
             display_properties: displays,
             cancellationToken: TestContext.Current.CancellationToken);

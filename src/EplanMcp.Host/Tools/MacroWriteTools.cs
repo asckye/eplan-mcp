@@ -34,6 +34,7 @@ internal sealed class MacroWriteTools
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
         WritePipeline pipeline,
+        IBridgeClient bridge,
         [Description("From eplan_project_list")] string project,
         [Description("Full circuit page name")] string page,
         [Description("Path from eplan_macro_list")] string macro,
@@ -42,6 +43,7 @@ internal sealed class MacroWriteTools
         [Description("From eplan_macro_get")] int variant = 0,
         [Description("keep: the macro's tags")][AllowedValues("number", "keep")] string numbering = "number",
         [Description("Only return the plan")] bool dry_run = false,
+        [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -62,6 +64,7 @@ internal sealed class MacroWriteTools
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");
+        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Page, cancellationToken).ConfigureAwait(false);
         WriteOutcome<MacroInsertData> outcome;
         try
         {
@@ -69,7 +72,7 @@ internal sealed class MacroWriteTools
         }
         catch (BridgeCallException ex)
         {
-            return ToolResults.Error(ex.Error);
+            return display.Apply(ToolResults.Error(ex.Error));
         }
 
         bool committed = outcome.Execution == ExecutionState.Committed;
@@ -90,9 +93,9 @@ internal sealed class MacroWriteTools
         int devices = data?.DeviceCount ?? Count(details, "deviceCount");
         result.Hint = Hint(outcome, details, string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), result.Devices.Count, devices);
         string what = "a macro with " + ToolResults.Count(devices, "device");
-        return ToolResults.Success(
+        return display.Apply(ToolResults.Success(
             committed ? $"Inserted {what}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would insert {what}. Nothing was changed.",
-            result);
+            result));
     }
 
     /// <summary>The hints of the tool spec (section 3), each when it applies, in one text.</summary>

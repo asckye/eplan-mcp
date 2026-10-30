@@ -20,11 +20,13 @@
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上。宏外框的左上角落在这里（A14） |
 | `variant` | integer | 否 | 0 | 宏的变体编号（`eplan_macro_get` 的 `variants`） |
 | `numbering` | enum `number` / `keep` | 否 | `number` | `number`：EPLAN 给宏中的设备分配不冲突的标识；`keep`：保留宏中的标识，结构跟随目标页，与已有设备同名时拒绝（M3b 设计 Q2） |
+| `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的插入，不请求审批，也不修改项目 |
 
 - **与 M3b 设计 4.2 的差别**：这一版不提供 `representation` 参数。只往电路图页上插 `MultiLine` 表达类型，宏没有 `MultiLine` 时返回 `INVALID_ARGUMENT`。其他页类型和表达类型以后再加，需要先实机验证。
 
 ## 3. 输出
+`show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 ```json
 {
   "project": "Line1",

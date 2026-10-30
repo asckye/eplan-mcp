@@ -146,12 +146,12 @@ public sealed class MacroInsertToolTests : IDisposable
     [Fact]
     public async Task WithoutAProject_TheBridgeIsNotAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, " ", Page, Macro, 40, 280, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, " ", Page, Macro, 40, 280, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("'project' is required", error.GetProperty("message").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
     private Task<CallToolResult> Insert(bool dryRun = false) =>
-        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, "Line1", Page, Macro, 40, 280, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);
+        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, Macro, 40, 280, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

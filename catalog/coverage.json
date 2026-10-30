@@ -649,7 +649,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 1,
-      "medium": 4,
+      "medium": 5,
       "large": 2,
       "apiNotes": [
         "A52",
@@ -670,7 +670,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_generate.md",
       "small": 1,
-      "medium": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": [
         "A3",
@@ -832,7 +832,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
       "small": 4,
-      "medium": 3,
+      "medium": 4,
       "large": 2,
       "apiNotes": [
         "A13",
@@ -1073,7 +1073,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_import_dxf.md",
       "small": 1,
-      "medium": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": [
         "A29"
@@ -1234,7 +1234,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 4,
-      "medium": 2,
+      "medium": 3,
       "large": 2,
       "apiNotes": [
         "A12",
@@ -1785,7 +1785,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 3,
-      "medium": 3,
+      "medium": 4,
       "large": 2,
       "apiNotes": [
         "A54"
@@ -1805,7 +1805,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 2,
-      "medium": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": []
     },

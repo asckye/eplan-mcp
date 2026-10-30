@@ -16,12 +16,14 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–50 项 | 是 | — | 完整页名，如 `=GAA+A1&EFS1/60`（用 `eplan_page_list` 查） |
+| `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页；只打开 `pages[0]` |
 | `dry_run` | boolean | 否 | false | 为 true 时只返回这些页上现有的连接数，不请求审批，也不修改项目 |
 
 - 页名的查找规则与 `eplan_page_get` 相同；同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 只做"更新"（`bRebuildAllConnections = false`），不提供"重建全部"，也不对整个项目执行（Q4）。
 
 ## 3. 输出
+`show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 ```json
 {
   "project": "Line1",
