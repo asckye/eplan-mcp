@@ -1,8 +1,8 @@
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
-using EplanMcp.Bridge.Eplan.Adapters;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Eplan.Adapters;
 
 namespace EplanMcp.Bridge.Core.Tests.Adapters;
 

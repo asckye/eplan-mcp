@@ -66,11 +66,11 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 332,
-      "byTools": 324,
+      "implemented": 342,
+      "byTools": 334,
       "partial": 56,
-      "automatedTest": 324,
-      "liveVerified": 163,
+      "automatedTest": 334,
+      "liveVerified": 164,
       "envBlocked": 122,
       "undocumented": 134
     },
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 136,
-      "byTools": 129,
+      "implemented": 137,
+      "byTools": 130,
       "partial": 49,
-      "automatedTest": 129,
+      "automatedTest": 130,
       "liveVerified": 76,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 196,
-      "byTools": 195,
+      "implemented": 205,
+      "byTools": 204,
       "partial": 7,
-      "automatedTest": 195,
-      "liveVerified": 87,
+      "automatedTest": 204,
+      "liveVerified": 88,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 275,
+    "used": 279,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 49,
+    "used": 51,
     "registered": 8585
   },
   "actionNames": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 146,
+      "implemented": 155,
       "liveVerified": 84
     },
     {
@@ -152,7 +152,7 @@
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
       "implemented": 19,
-      "liveVerified": 5
+      "liveVerified": 6
     },
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
@@ -169,7 +169,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 22,
+      "implemented": 23,
       "liveVerified": 8
     },
     {
@@ -249,7 +249,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 24,
-      "implemented": 3,
+      "implemented": 4,
       "liveVerified": 0
     },
     {
@@ -475,10 +475,10 @@
       "operations": [
         "project.get"
       ],
-      "apiIds": 55,
+      "apiIds": 56,
       "operationGroups": 30,
       "dataDictionary": 0,
-      "dependencies": 25,
+      "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_cabinet_bind.md",
       "small": 2,
@@ -492,10 +492,10 @@
       "operations": [
         "project.get"
       ],
-      "apiIds": 55,
+      "apiIds": 56,
       "operationGroups": 30,
       "dataDictionary": 0,
-      "dependencies": 25,
+      "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_cabinet_list.md",
       "small": 2,
@@ -531,10 +531,10 @@
       "operations": [
         "cable.get"
       ],
-      "apiIds": 66,
+      "apiIds": 67,
       "operationGroups": 33,
       "dataDictionary": 2,
-      "dependencies": 26,
+      "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_get.md",
       "small": 2,
@@ -551,10 +551,10 @@
         "cable.renumber.execute",
         "cable.renumber.plan"
       ],
-      "apiIds": 128,
+      "apiIds": 129,
       "operationGroups": 67,
       "dataDictionary": 2,
-      "dependencies": 58,
+      "dependencies": 59,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_renumber.md",
       "small": 1,
@@ -642,10 +642,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 179,
-      "operationGroups": 105,
+      "apiIds": 191,
+      "operationGroups": 113,
       "dataDictionary": 3,
-      "dependencies": 70,
+      "dependencies": 74,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 1,
@@ -663,10 +663,10 @@
         "connection.generate.execute",
         "connection.generate.plan"
       ],
-      "apiIds": 82,
+      "apiIds": 83,
       "operationGroups": 40,
       "dataDictionary": 1,
-      "dependencies": 40,
+      "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_generate.md",
       "small": 1,
@@ -696,10 +696,10 @@
       "operations": [
         "connection.list"
       ],
-      "apiIds": 61,
+      "apiIds": 62,
       "operationGroups": 33,
       "dataDictionary": 1,
-      "dependencies": 26,
+      "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_list.md",
       "small": 2,
@@ -724,10 +724,10 @@
         "connection.number.execute",
         "connection.number.plan"
       ],
-      "apiIds": 90,
+      "apiIds": 91,
       "operationGroups": 40,
       "dataDictionary": 1,
-      "dependencies": 49,
+      "dependencies": 50,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_number.md",
       "small": 1,
@@ -767,10 +767,10 @@
       "operations": [
         "device.get"
       ],
-      "apiIds": 74,
+      "apiIds": 75,
       "operationGroups": 43,
       "dataDictionary": 2,
-      "dependencies": 28,
+      "dependencies": 29,
       "actions": 0,
       "spec": "docs/tools/eplan_device_get.md",
       "small": 9,
@@ -825,10 +825,10 @@
         "device.place.execute",
         "device.place.plan"
       ],
-      "apiIds": 200,
-      "operationGroups": 110,
+      "apiIds": 248,
+      "operationGroups": 136,
       "dataDictionary": 4,
-      "dependencies": 77,
+      "dependencies": 90,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
       "small": 4,
@@ -1360,10 +1360,10 @@
         "page.create.execute",
         "page.create.plan"
       ],
-      "apiIds": 75,
+      "apiIds": 76,
       "operationGroups": 31,
       "dataDictionary": 1,
-      "dependencies": 36,
+      "dependencies": 37,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
       "small": 10,
@@ -1415,10 +1415,10 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 108,
+      "apiIds": 109,
       "operationGroups": 66,
       "dataDictionary": 1,
-      "dependencies": 41,
+      "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
       "small": 5,
@@ -1435,10 +1435,10 @@
       "operations": [
         "page.list"
       ],
-      "apiIds": 40,
+      "apiIds": 41,
       "operationGroups": 19,
       "dataDictionary": 1,
-      "dependencies": 20,
+      "dependencies": 21,
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
@@ -1628,10 +1628,10 @@
       "operations": [
         "part.list"
       ],
-      "apiIds": 43,
+      "apiIds": 44,
       "operationGroups": 23,
       "dataDictionary": 1,
-      "dependencies": 18,
+      "dependencies": 19,
       "actions": 0,
       "spec": "docs/tools/eplan_part_list.md",
       "small": 2,
@@ -1655,10 +1655,10 @@
       "operations": [
         "part.search"
       ],
-      "apiIds": 35,
+      "apiIds": 36,
       "operationGroups": 16,
       "dataDictionary": 1,
-      "dependencies": 14,
+      "dependencies": 15,
       "actions": 0,
       "spec": "docs/tools/eplan_part_search.md",
       "small": 3,
@@ -1684,10 +1684,10 @@
         "part.sync.execute",
         "part.sync.plan"
       ],
-      "apiIds": 117,
+      "apiIds": 118,
       "operationGroups": 53,
       "dataDictionary": 1,
-      "dependencies": 60,
+      "dependencies": 61,
       "actions": 1,
       "spec": "docs/tools/eplan_part_sync.md",
       "small": 2,
@@ -1714,10 +1714,10 @@
         "placeholder.apply.execute",
         "placeholder.apply.plan"
       ],
-      "apiIds": 69,
+      "apiIds": 70,
       "operationGroups": 38,
       "dataDictionary": 0,
-      "dependencies": 31,
+      "dependencies": 32,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_apply.md",
       "small": 1,
@@ -1744,10 +1744,10 @@
       "operations": [
         "placeholder.list"
       ],
-      "apiIds": 42,
+      "apiIds": 43,
       "operationGroups": 26,
       "dataDictionary": 0,
-      "dependencies": 16,
+      "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_list.md",
       "small": 2,
@@ -1798,10 +1798,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 179,
-      "operationGroups": 105,
+      "apiIds": 191,
+      "operationGroups": 113,
       "dataDictionary": 3,
-      "dependencies": 70,
+      "dependencies": 74,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 2,
@@ -1849,16 +1849,18 @@
       "operations": [
         "plc.get"
       ],
-      "apiIds": 72,
-      "operationGroups": 37,
+      "apiIds": 79,
+      "operationGroups": 39,
       "dataDictionary": 1,
-      "dependencies": 28,
+      "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_plc_get.md",
       "small": 2,
       "medium": 2,
       "large": 2,
-      "apiNotes": [],
+      "apiNotes": [
+        "A55"
+      ],
       "latestLive": {
         "date": "2026-10-21",
         "result": "pass_with_findings",
@@ -1899,10 +1901,10 @@
       "operations": [
         "project.get"
       ],
-      "apiIds": 55,
+      "apiIds": 56,
       "operationGroups": 30,
       "dataDictionary": 0,
-      "dependencies": 25,
+      "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_project_get.md",
       "small": 5,
@@ -2068,10 +2070,10 @@
       "operations": [
         "revision.list"
       ],
-      "apiIds": 45,
+      "apiIds": 46,
       "operationGroups": 21,
       "dataDictionary": 2,
-      "dependencies": 16,
+      "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_revision_list.md",
       "small": 2,
@@ -2164,10 +2166,10 @@
       "operations": [
         "symbol.search"
       ],
-      "apiIds": 36,
-      "operationGroups": 23,
+      "apiIds": 51,
+      "operationGroups": 32,
       "dataDictionary": 1,
-      "dependencies": 12,
+      "dependencies": 18,
       "actions": 0,
       "spec": "docs/tools/eplan_symbol_search.md",
       "small": 3,
@@ -3017,7 +3019,8 @@
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
-        "eplan_revision_list"
+        "eplan_revision_list",
+        "eplan_symbol_search"
       ]
     },
     {
@@ -3306,6 +3309,7 @@
         "eplan_cable_renumber",
         "eplan_context_get",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_import_list",
         "eplan_part_list",
         "eplan_part_sync",
@@ -3350,6 +3354,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_context_get",
+        "eplan_device_place",
         "eplan_placement_update",
         "eplan_plc_get",
         "eplan_property_get",
@@ -3372,6 +3377,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_context_get",
+        "eplan_device_place",
         "eplan_placement_update",
         "eplan_plc_get",
         "eplan_property_get",
@@ -3412,6 +3418,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_context_get",
+        "eplan_device_place",
         "eplan_placement_update",
         "eplan_plc_get",
         "eplan_property_get",
@@ -3438,6 +3445,7 @@
       "partial": false,
       "tools": [
         "eplan_connection_list",
+        "eplan_device_place",
         "eplan_plc_get"
       ]
     },
@@ -3487,6 +3495,7 @@
         "eplan_connection_list",
         "eplan_connection_number",
         "eplan_context_get",
+        "eplan_device_place",
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_placement_update",
@@ -3672,6 +3681,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_plc_get"
       ]
     },
@@ -3681,6 +3691,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
         "eplan_plc_get"
       ]
     },
@@ -3691,6 +3702,7 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_device_place",
         "eplan_plc_get"
       ]
     },
@@ -3761,9 +3773,11 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.PLC",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_device_place",
+        "eplan_plc_get",
         "eplan_terminal_strip_get"
       ]
     },
@@ -3871,6 +3885,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.FunctionDefinition",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.IsMainFunction",
       "layer": "operation",
       "status": "live_verified",
@@ -3914,6 +3937,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.PlaceAt",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.Properties",
       "layer": "operation",
       "status": "live_verified",
@@ -3944,6 +3976,7 @@
         "eplan_cable_renumber",
         "eplan_connection_list",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_plc_get",
         "eplan_rule_check",
@@ -4054,6 +4087,78 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.ConnectionPoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.FunctionCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.Group",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.GroupName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.Id",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
@@ -4073,6 +4178,7 @@
         "eplan_cable_renumber",
         "eplan_connection_list",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_plc_get",
         "eplan_rule_check",
@@ -4089,6 +4195,8 @@
         "eplan_cable_generate",
         "eplan_cable_renumber",
         "eplan_device_list",
+        "eplan_device_place",
+        "eplan_plc_get",
         "eplan_workflow_plan"
       ]
     },
@@ -4102,6 +4210,7 @@
         "eplan_cable_renumber",
         "eplan_connection_list",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_plc_get",
         "eplan_rule_check",
@@ -4617,6 +4726,18 @@
       "partial": false,
       "tools": [
         "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.FunctionDefinitions",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
       ]
     },
     {
@@ -5210,6 +5331,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_context_get",
+        "eplan_device_place",
         "eplan_placement_update",
         "eplan_plc_get",
         "eplan_property_get",
@@ -5365,6 +5487,18 @@
         "eplan_rule_check",
         "eplan_terminal_renumber",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Project.FunctionDefinitionLibrary",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update",
+        "eplan_symbol_search"
       ]
     },
     {
@@ -6586,6 +6720,7 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
+        "eplan_device_place",
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_placement_update"

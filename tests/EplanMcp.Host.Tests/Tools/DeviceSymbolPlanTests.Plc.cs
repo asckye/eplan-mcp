@@ -71,7 +71,9 @@ public sealed partial class DeviceSymbolPlanTests
         PlcSymbol();
         JsonElement preview = WriteToolHarness.Structured(await Plc());
         Assert.Empty(_placement.Calls);
+        Assert.Contains(preview.GetProperty("changes").EnumerateArray(), c => c.GetProperty("property").GetString() == "20400" && c.GetProperty("newValue").GetString() == "I0.0");
         Assert.Contains(preview.GetProperty("changes").EnumerateArray(), c => c.GetProperty("property").GetString() == "20402" && c.GetProperty("newValue").GetString() == "Start");
+        Assert.Contains(preview.GetProperty("changes").EnumerateArray(), c => c.GetProperty("property").GetString() == "20011 (??_??)" && c.GetProperty("newValue").GetString() == "Start input");
         Assert.Contains("parentless PLCTerminal", preview.GetProperty("changes")[0].GetProperty("newValue").GetString(), StringComparison.Ordinal);
         Assert.Equal("+A1-KF1:X10:2", preview.GetProperty("device").GetProperty("tag").GetString());
         JsonElement placed = WriteToolHarness.Structured(await Plc(dryRun: false));
@@ -80,43 +82,36 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.Equal(JsonValueKind.Null, point.GetProperty("owner").ValueKind);
         Assert.Equal(JsonValueKind.Null, point.GetProperty("cardReference").ValueKind);
         Assert.Equal(["X10:2"], _placement.Args!.ConnectionDesignations!);
-        Assert.Equal([20400, 20403, 20011, 20301], _placement.Displays.Select(p => p.PropertyId));
-        Assert.Equal([152d, 144d, 136d, 128d], _placement.Displays.Select(p => p.Position[1]));
-        Assert.Equal(["I0.0", "I0.0", "Start input", ""], _placement.Displays.Select(p => p.Text));
-        Assert.Equal(["Begin", "Write", "Readback", "ReleaseLists", "ReadDisplays", "Commit", "CloseUndo", "Dispose"], _placement.Calls);
-        Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await Plc(dryRun: false)).GetProperty("reason").GetString());
+        Assert.Equal(("I0.0", "Start", "Start input"), (_placement.Args.PlcAddress, _placement.Args.PlcSymbolicAddress, _placement.Args.PlcText));
+        Assert.Null(_placement.Args.DisplayProperties);
+        Assert.Empty(_placement.Displays);
+        Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
+        Assert.Equal(["Begin", "Write", "Readback", "ReleaseLists", "Commit", "CloseUndo", "Dispose"], _placement.Calls);
+        Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await Plc(dryRun: false, address: "I0.1")).GetProperty("reason").GetString());
         Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await Plc(point: "DI a.0")).GetProperty("reason").GetString());
+        Assert.Single(_store.Channels);
+        Assert.Single(_harness.Bridge.Writes);
         Assert.Equal(0, _store.PartReads);
     }
 
     [Theory]
-    [InlineData("DisplayMissing")]
-    [InlineData("DisplayRemoved")]
-    [InlineData("DisplayOtherPoint")]
-    [InlineData("DisplayParent")]
-    [InlineData("DisplayPage")]
-    [InlineData("DisplayOffset")]
-    [InlineData("DisplayPosition")]
-    [InlineData("DisplayFormat")]
-    [InlineData("DisplayText")]
-    [InlineData("DisplayCalculated")]
-    [InlineData("DisplayFunctionText")]
-    [InlineData("DisplayReference")]
-    [InlineData("DisplayDuplicate")]
-    public async Task Plc_PlaceReportsSuccessButFinalDisplaysDiffer_AbortsWithoutCommit(string failAt)
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Plc_RequestedDisplays_AreRefusedBeforeAnyWrite(bool dryRun)
     {
         PlcSymbol();
-        _placement.FailAt = failAt;
-        JsonElement error = WriteToolHarness.Error(await Plc(dryRun: false));
-        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
-        Assert.Contains("/display_properties/", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        JsonElement error = WriteToolHarness.Error(await Plc(dryRun: dryRun,
+            displays: [.. _plcDisplayIds.Select((id, row) => JsonSerializer.SerializeToElement(new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row }))]));
+        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Equal("device.place.plc.displays", error.GetProperty("metadata").GetProperty("missing").GetString());
+        Assert.False(error.GetProperty("retryable").GetBoolean());
         Assert.Equal(["+A1-KF1"], _store.Names);
         Assert.Equal(["page:1"], _store.Page.Objects);
         Assert.Empty(_store.Channels);
         Assert.Empty(_placement.Displays);
-        Assert.Equal(["ReleaseLists", "ReadDisplays", "Abort", "Dispose"], _placement.Calls.TakeLast(4));
-        Assert.DoesNotContain("Commit", _placement.Calls);
-        Assert.DoesNotContain("CloseUndo", _placement.Calls);
+        Assert.Empty(_placement.Calls);
+        Assert.Empty(_harness.Bridge.Writes);
+        Assert.Equal(OperationNames.DevicePlacePlan, Assert.Single(_harness.Bridge.Calls).Operation);
     }
 
     [Fact]
@@ -143,11 +138,13 @@ public sealed partial class DeviceSymbolPlanTests
         PlcSymbol();
         _placement.FailAt = failAt;
         JsonElement error = WriteToolHarness.Error(await Plc(dryRun: false));
-        Assert.Equal(ExecutionState.RolledBack, error.GetProperty("execution").GetString());
+        Assert.Equal((failAt == "Cancel" ? ErrorReason.Cancelled : ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
         Assert.Equal(["+A1-KF1"], _store.Names);
+        Assert.Equal(["page:1"], _store.Page.Objects);
         Assert.Empty(_store.Channels);
         Assert.Equal(["ReleaseLists", "Abort", "Dispose"], _placement.Calls.TakeLast(3));
         Assert.DoesNotContain("CloseUndo", _placement.Calls);
+        Assert.DoesNotContain("Commit", _placement.Calls);
     }
 
     [Fact]
@@ -173,14 +170,17 @@ public sealed partial class DeviceSymbolPlanTests
         using var harness = new WriteToolHarness(approval) { ProjectPath = @"D:\Projects\Line1" };
         Bind(harness);
         JsonElement error = WriteToolHarness.Error(await Plc(dryRun: false, harness: harness));
-        Assert.Equal(stale ? ErrorReason.PlanStale : ErrorReason.ApprovalDenied, error.GetProperty("reason").GetString());
-        Assert.Contains(Assert.Single(approval.Questions).Plan.Changes, c => c.Property == "20011 (??_??)");
+        Assert.Equal((stale ? ErrorReason.PlanStale : ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        IReadOnlyList<PlannedChange> changes = Assert.Single(approval.Questions).Plan.Changes;
+        Assert.Contains(changes, c => c.Property == "20400" && c.NewValue == "I0.0");
+        Assert.Contains(changes, c => c.Property == "20402" && c.NewValue == "Start");
+        Assert.Contains(changes, c => c.Property == "20011 (??_??)" && c.NewValue == "Start input");
         Assert.Empty(_placement.Calls);
     }
 
-    private Task<CallToolResult> Plc(bool dryRun = true, string point = "X10:2", WriteToolHarness? harness = null) =>
+    private Task<CallToolResult> Plc(bool dryRun = true, string point = "X10:2", WriteToolHarness? harness = null, JsonElement[]? displays = null, string address = "I0.0") =>
         DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, "Line1", Page, 80, 160, "-KF1", dry_run: dryRun,
-            library: "IEC_symbol", symbol: "PLC_DI", symbol_variant: 0, plc_connection_point: point, plc_address: "I0.0", plc_symbolic_address: "Start", plc_text: "Start input",
-            display_properties: [.. _plcDisplayIds.Select((id, row) => JsonSerializer.SerializeToElement(new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row }))],
+            library: "IEC_symbol", symbol: "PLC_DI", symbol_variant: 0, plc_connection_point: point, plc_address: address, plc_symbolic_address: "Start", plc_text: "Start input",
+            display_properties: displays,
             cancellationToken: TestContext.Current.CancellationToken);
 }

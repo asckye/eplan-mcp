@@ -7,6 +7,44 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class DevicePlcPlanTests
 {
     [Theory]
+    [InlineData(20400)]
+    [InlineData(20403)]
+    [InlineData(20011)]
+    [InlineData(20301)]
+    public void Check_RequestedPlcDisplay_ReportsMissingCapability(int propertyId)
+    {
+        var args = new DevicePlaceArgs
+        {
+            Library = "IEC_symbol",
+            PlcConnectionPoint = "X10:2",
+            PlcAddress = "I0.0",
+            PlcSymbolicAddress = "Start",
+            PlcText = "Start input",
+            DisplayProperties = [new() { PropertyId = propertyId, OffsetYmm = -8 }]
+        };
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => DevicePlcPlan.Check(args)).Error;
+        Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
+        Assert.Equal("device.place.plc.displays", error.Metadata!["missing"]);
+        Assert.False(error.Retryable);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Check_PlcWithoutRequestedDisplays_IsAccepted(bool empty)
+    {
+        DevicePlcPlan.Check(new()
+        {
+            Library = "IEC_symbol",
+            PlcConnectionPoint = "X10:2",
+            PlcAddress = "I0.0",
+            PlcSymbolicAddress = "Start",
+            PlcText = "Start input",
+            DisplayProperties = empty ? [] : null
+        });
+    }
+
+    [Theory]
     [InlineData("??_??@Start;en_US@Start;")]
     [InlineData("en_US@Start;??_??@Start;")]
     [InlineData("en_US@Start;")]
