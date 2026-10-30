@@ -13,7 +13,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanConnectionReader : IConnectionReader
 {
-    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page)
+    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page, bool detailed = false)
     {
         MainThread.Assert();
 
@@ -39,7 +39,13 @@ internal sealed class EplanConnectionReader : IConnectionReader
             found = found.Where(connection => target.Equals(PageOf(connection)));
         }
 
-        return [.. found.Select(connection => Record(connection, language))];
+        return [.. found.Select(connection =>
+        {
+            ConnectionRecord record = Record(connection, language);
+            if (detailed && record.Page is { } placedPage)
+            { record.Locator = EplanConnectionCreator.ReadCableWire(projectPath, placedPage, connection).Locator; }
+            return record;
+        })];
     }
 
     /// <summary>

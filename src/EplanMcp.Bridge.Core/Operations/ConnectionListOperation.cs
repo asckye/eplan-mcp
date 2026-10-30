@@ -25,7 +25,7 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
 
         OpenProject project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project);
         string? tag = device is null ? null : FullTag(project.Path, device);
-        IReadOnlyList<ConnectionRecord> found = connections.ReadConnections(project.Path, tag, page)
+        IReadOnlyList<ConnectionRecord> found = connections.ReadConnections(project.Path, tag, page, args.Detailed)
             ?? throw new BridgeErrorException(
                 ErrorReason.PageNotFound,
                 "The project has no page with this full name. Call eplan_page_list to see the page names and pass one exactly as listed.",
@@ -66,6 +66,7 @@ public sealed class ConnectionListOperation(IProjectCatalog catalog, IDeviceRead
             Colour = connection.Colour,
             Designation = connection.Designation,
             Kind = ConnectionListItem.Kind2D,
+            Locator = connection.Locator,
         };
 
     /// <summary>Empty names are no names; an end with neither a function nor a connection point name is not connected.</summary>

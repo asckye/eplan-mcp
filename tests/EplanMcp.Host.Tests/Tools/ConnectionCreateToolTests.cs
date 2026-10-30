@@ -1,15 +1,63 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Core.Tests.Operations;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Bridge;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
+using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
 public sealed class ConnectionCreateToolTests
 {
+    [Fact]
+    public async Task DetailedConnectionList_LocatorIsAcceptedByRealCableDryRunPlanner()
+    {
+        using var harness = new WriteToolHarness();
+        var fixture = new CableDefinitionFixture();
+        fixture.Base.Scene.Project.Path = harness.ProjectPath;
+        fixture.Base.Scene.Page.Project = harness.ProjectPath;
+        CableDefinitionPlanner.Wire wire = fixture.AddExisting();
+        CableDefinitionPlanner.Identify(wire, harness.ProjectPath, ConnectionCreateFixture.PageName, "0/9/9/0");
+        var connections = new SampleConnections();
+        connections.Pages.Add(ConnectionCreateFixture.PageName);
+        connections.Connections.Clear();
+        connections.Connections.Add(new() { Page = ConnectionCreateFixture.PageName, Locator = wire.Locator });
+        var list = new ConnectionListOperation(new Catalog(fixture.Base.Scene.Project), new SampleDevices(), connections);
+        harness.Bridge.Handlers[OperationNames.ConnectionList] = args => list.Execute((ConnectionListArgs)args!)!;
+        harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = args =>
+        {
+            JObject preview = ConnectionCreatePlanner.Plan(JsonSerializer.Serialize(args), fixture.Base.Scene, fixture.Base);
+            WritePlan plan = harness.Plan([new() { Action = "create", Kind = "connections", Name = ConnectionCreateFixture.PageName }]);
+            plan.Fingerprint = (string)preview["fingerprint"]!;
+            plan.Details = new() { ["preview"] = preview.ToString() };
+            return plan;
+        };
+
+        JsonElement listed = WriteToolHarness.Structured(await ConnectionTools.ConnectionListAsync(harness.Bridge,
+            project: "Line1", page: ConnectionCreateFixture.PageName, response_format: "detailed", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement locator = Assert.Single(listed.GetProperty("connections").EnumerateArray()).GetProperty("locator");
+        JObject definition = CableDefinitionFixture.Definition("-W3", [[32, 16], [48, 16]],
+            CableDefinitionFixture.Core(new() { ["locator"] = JObject.Parse(locator.GetRawText()) }, "1", "BK"));
+        JsonElement result = WriteToolHarness.Structured(await ConnectionCreateTools.CreateAsync(harness.Pipeline,
+            "Line1", ConnectionCreateFixture.PageName, [JsonSerializer.SerializeToElement(JsonNode.Parse(definition.ToString()))], dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement impact = Assert.Single(result.GetProperty("coreImpact").EnumerateArray());
+        Assert.Equal(locator.GetRawText(), impact.GetProperty("connection").GetProperty("locator").GetRawText());
+        Assert.Equal(wire.Locator.Oid, impact.GetProperty("before").GetProperty("locator").GetProperty("oid").GetInt64());
+        Assert.Equal(ExecutionState.NotStarted, result.GetProperty("execution").GetString());
+        Assert.True(result.GetProperty("dryRun").GetBoolean());
+        Assert.Empty(harness.Bridge.Writes);
+    }
+
+    private sealed class Catalog(OpenProject project) : IProjectCatalog
+    {
+        public IReadOnlyList<OpenProject> ListOpenProjects() => [project];
+    }
+
     [Fact]
     public async Task FakeBridge_Success_UsesOneWriteRequestWithFingerprintAndTwoUndoSteps()
     {

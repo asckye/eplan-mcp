@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\EplanMcp.Bridge.Core.Tests\Operations\ConnectionCreateFixture.cs" Link="Bridge\ConnectionCreateFixture.cs" />
+    <Compile Include="..\EplanMcp.Bridge.Core.Tests\Operations\CableDefinitionFixture.cs" Link="Bridge\CableDefinitionFixture.cs" />
     <Compile Include="..\Shared\ModuleInspectionEvidence.cs" Link="ModuleInspectionEvidence.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\Shared\PageTextStore.cs" Link="PageTextStore.cs" />

@@ -23,6 +23,7 @@ Next page: repeat the same arguments and add the `nextCursor` of the previous re
 3. The device's connections include those at its contacts and other auxiliary functions, wherever they are drawn. Add `page` to keep those on one page.
 4. To answer "where does terminal 2 of -FC1 go", find the entry whose `from` or `to` is that device and pin, and read the other end. A connection can be listed in either direction.
 5. The cursor is an offset: if the project changes between two calls, entries can shift. Start again without `cursor` when the engineer has edited the project.
+6. Use `response_format: "detailed"` to get each placed 2D connection's `locator` (project, page, type, oid, digest) for `eplan_connection_create` cable_definition cores.
 
 ## Fields
 

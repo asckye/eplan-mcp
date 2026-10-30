@@ -12,4 +12,7 @@ public sealed class ConnectionListArgs : ListArgs
 
     /// <summary>Full name of the page the connections are placed on, matched exactly.</summary>
     public string? Page { get; set; }
+
+    /// <summary>Include connection locators for detailed output.</summary>
+    public bool Detailed { get; set; }
 }

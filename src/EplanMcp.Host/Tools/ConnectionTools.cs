@@ -40,9 +40,11 @@ internal sealed class ConnectionTools
         [Description("Full page name.")] string page = "",
         [Description("Max connections, 1-200.")][Range(1, MaxLimit)] int limit = DefaultLimit,
         [Description("nextCursor of the last result.")] string cursor = "",
+        [Description("detailed adds connection locators for cable_definition cores.")][AllowedValues(ToolArguments.Concise, ToolArguments.Detailed)] string response_format = ToolArguments.Concise,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
+        bool detailed = ToolArguments.IsDetailed(response_format, violations);
         if (string.IsNullOrWhiteSpace(device) && string.IsNullOrWhiteSpace(page))
         {
             violations.Add("'device' or 'page' is required: a device tag such as =GAA+A1-FC1, a full page name such as =GAA+A1&EFS1/1, or both.");
@@ -74,7 +76,7 @@ internal sealed class ConnectionTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new ConnectionListArgs { Project = project, Device = device, Page = page, Offset = offset, Limit = limit };
+        var args = new ConnectionListArgs { Project = project, Device = device, Page = page, Offset = offset, Limit = limit, Detailed = detailed };
         ListData<ConnectionListItem> data;
         try
         {
@@ -89,11 +91,16 @@ internal sealed class ConnectionTools
         var result = new ConnectionListResult
         {
             Project = ResultShaper.CleanText(data.Project),
-            Connections = [.. data.Items.Select(Entry<ConnectionListResult.ConnectionEntry>)],
+            Connections = [.. data.Items.Select(c =>
+            {
+                var entry = Entry<ConnectionListResult.ListedConnectionEntry>(c);
+                entry.Locator = detailed ? c.Locator : null;
+                return entry;
+            })],
             Total = data.Total,
             NextCursor = next < data.Total ? PageCursor.Encode(next, fingerprint) : null,
         };
-        ResultShaper.FitPage(result, offset, fingerprint);
+        ResultShaper.FitPage(result, offset, fingerprint, detailed ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget);
         return ToolResults.Success(ListSummary(result), result);
     }
 
