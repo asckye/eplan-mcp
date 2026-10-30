@@ -201,6 +201,7 @@
 ### A55. 中断点、端子、触点代号、电缆芯线、PLC 连接点与位置盒（spike S43，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S43](../../spikes/S43-engineering-elements/README.md)。
 
+- 🔴 2026-10-30，live T8b：提交后的定义线读回触发 `System.AccessViolationException`，EPLAN 进程终止；堆栈为 `PropertyUserHandle.= → UniversalPropertyList.getProp → FunctionPropertyList.get_Property → PrepareCables` 读回闭包 → `CableDefinitionExecution.Run`。该闭包保留了定义线事务内创建的 `Cable`。**在 `Transaction` 内取得的原生对象、属性列表及 `PropertyValue` 不得在提交后继续使用**；提交并结束作用域后，必须通过新的 `DMObjectsFinder`／页面枚举按对象号或名称重新查找，再在本次读回内取得并释放新属性列表；闭包只保留托管输入或标识。仍禁止 Abort 后读取或释放新对象列表，失败继续用已确认提交的撤销补偿。本次离线修复未运行 EPLAN，Large 全链仍待复验。
 - 🔴 **写入失败、`Transaction.Abort` 之后，不要再读取或释放事务内新建对象的属性列表**：r2 在 Abort 后释放这些缓存时 EPLAN 原生堆损坏（`0xc0000374`）并崩溃，随后以 `/RestartOnCrash` 自行重启、只打开启动时的项目。须在 Abort 之前释放缓存，Abort 后不碰新建对象（同 A36/A39）。— S43。
 - 中断点（SPECIAL `BPF`）用 `SymbolReference.Create` 放置，名称写完整标识，读回一致；端子（IEC_symbol `X`）先建端子排再建端子，名称 `<排>:<号>`；提交后单独生成连接（A52）。— S43。
 - T7b Large（2026-10-27，2026.0.3.25421，Electric P8，LargeWrite 副本）：中断点配对（`CrossReferencedObjectsAll`）在生成连接的事务提交之后才可读，事务内为空；提交后同名一对能互相找到对方，但属性 24300 仍为空字符串，交叉引用文字不能从 24300 读取；`CrossReferencedObjectsAll` 的结果包含中断点自身（同对象号），须先排除。— `eplan_connection_create` 中断点。

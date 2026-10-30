@@ -12,13 +12,13 @@ internal static class CableDefinitionExecution
         string project = scene.Project.Path, page = scene.Page.Page;
         if (creator is not ICableDefinitionWriter writer || plan["interruptionScope"] is not null)
         { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Use cable definitions without interruption points and a cable-capable Bridge.")); }
-        Action definitions, verifyDefinitions;
+        Action definitions;
         Action? symbols;
         JObject before;
         try
         {
             ConnectionCreatePlanner.Require(plan["logicalAfterGenerate"]!.All(g => g["pins"]!.Count() == 2 && (bool?)g["potentialStartIsNull"] == false), "/items", "Cable calls require explicit two-pin logical paths.");
-            (definitions, verifyDefinitions) = writer.PrepareCables(project, page, input, plan);
+            definitions = writer.PrepareCables(project, page, input, plan);
             symbols = plan["symbols"]!.Any() ? creator.Prepare(project, page, (JArray)plan["symbols"]!) : null;
             before = CableDefinitionRestoration.Capture(scene);
         }
@@ -52,7 +52,8 @@ internal static class CableDefinitionExecution
             if (baseline != Endpoints(scene.Logical.Select(c => new[] { c.StartDevice, c.EndDevice }).Concat(plan["logicalAfterGenerate"]!.Select(g => g["pins"]!.Values<string>().ToArray()))))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Generated cable paths differ from planned endpoints."); }
             Commit(creator.PlacementTransactions(project), definitions, createsObjects: true);
-            verifyDefinitions();
+            // A55: each readback discovers fresh native objects after the transaction has ended.
+            writer.VerifyCables(project, page, input, plan);
             Generate();
             Commit(creator.PlacementTransactions(project), () => writer.BindCables(project, page, input, plan));
             writer.VerifyBindings(project, page, input, plan);

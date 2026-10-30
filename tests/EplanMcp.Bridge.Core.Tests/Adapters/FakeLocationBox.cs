@@ -25,16 +25,17 @@ internal sealed class LocationBox(long oid) : SymbolReference(oid)
     public RectangleD GetLogicalArea() => WrongArea ? new(new(0, 0), new(4, 4)) : _area;
 }
 
-internal sealed class FunctionBasePropertyList : IDisposable
+internal sealed class FunctionBasePropertyList(Action? checkAlive = null) : IDisposable
 {
-    public PropertyValue DESIGNATION_LOCATION { get; set; } = new("");
+    private PropertyValue _location = new("");
+    public PropertyValue DESIGNATION_LOCATION { get { checkAlive?.Invoke(); return _location; } set { checkAlive?.Invoke(); _location = value; } }
     public bool Disposed { get; private set; }
-    public void Dispose() => Disposed = true;
+    public void Dispose() { checkAlive?.Invoke(); Disposed = true; }
 }
 
-internal sealed class PropertyValue(string text) : IDisposable
+internal sealed class PropertyValue(string text, Action? checkAlive = null) : IDisposable
 {
-    public string Text { get; } = text;
+    public string Text { get { checkAlive?.Invoke(); return text; } }
     public bool IsEmpty => Text.Length == 0;
     public override string ToString() => Text;
     public static implicit operator PropertyValue(string text) => new(text);
