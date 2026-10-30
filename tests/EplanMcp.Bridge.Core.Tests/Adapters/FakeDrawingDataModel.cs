@@ -78,7 +78,8 @@ internal sealed class Project(params Page[] pages)
     public Function[] UnplacedFunctions { get; set; } = [];
     public bool RejectUnfilteredFunctions { get; set; }
     public List<(string? Name, bool Exact, FunctionCategory? Category)> FunctionQueries { get; } = [];
-    public MasterData.SymbolLibrary[] SymbolLibraries { get; set; } = [];
+    public MasterData.SymbolLibrary[] SymbolLibraries { get; set; } =
+        [new() { Name = "SPECIAL", Symbols = [new() { Type = MasterData.Symbol.SymbolType.CableDefinitionLine, Variants = [new()] }] }];
     public MasterData.FunctionDefinitionLibrary FunctionDefinitionLibrary { get; } = new();
     public Func<Connection[]>? FindConnections { get; set; }
 }

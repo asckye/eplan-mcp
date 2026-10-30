@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 342,
-      "byTools": 334,
-      "partial": 56,
-      "automatedTest": 334,
+      "implemented": 350,
+      "byTools": 342,
+      "partial": 58,
+      "automatedTest": 342,
       "liveVerified": 164,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 137,
-      "byTools": 130,
-      "partial": 49,
-      "automatedTest": 130,
+      "implemented": 140,
+      "byTools": 133,
+      "partial": 51,
+      "automatedTest": 133,
       "liveVerified": 76,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 205,
-      "byTools": 204,
+      "implemented": 210,
+      "byTools": 209,
       "partial": 7,
-      "automatedTest": 204,
+      "automatedTest": 209,
       "liveVerified": 88,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 279,
+    "used": 284,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 155,
+      "implemented": 159,
       "liveVerified": 84
     },
     {
@@ -151,7 +151,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
-      "implemented": 19,
+      "implemented": 22,
       "liveVerified": 6
     },
     {
@@ -205,7 +205,7 @@
     {
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
-      "implemented": 34,
+      "implemented": 35,
       "liveVerified": 17
     },
     {
@@ -642,10 +642,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 191,
-      "operationGroups": 113,
-      "dataDictionary": 3,
-      "dependencies": 74,
+      "apiIds": 222,
+      "operationGroups": 130,
+      "dataDictionary": 5,
+      "dependencies": 85,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 1,
@@ -704,7 +704,7 @@
       "spec": "docs/tools/eplan_connection_list.md",
       "small": 2,
       "medium": 3,
-      "large": 4,
+      "large": 5,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-20",
@@ -1798,10 +1798,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 191,
-      "operationGroups": 113,
-      "dataDictionary": 3,
-      "dependencies": 74,
+      "apiIds": 222,
+      "operationGroups": 130,
+      "dataDictionary": 5,
+      "dependencies": 85,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 2,
@@ -2480,11 +2480,13 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_language_remove",
+        "eplan_placement_update",
         "eplan_plc_get",
         "eplan_project_translate",
         "eplan_property_get",
@@ -2499,7 +2501,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3090,7 +3094,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3099,7 +3105,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3333,6 +3341,16 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.CableNameParts",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Connection.ConnectionDefPoints",
       "layer": "operation",
       "status": "automated_test",
@@ -3362,6 +3380,16 @@
         "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.IsTemplate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3426,6 +3454,16 @@
         "eplan_rule_check",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.CableDefinitionLine",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3648,13 +3686,45 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.AddLocalFunctionTemplates",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_cable_generate",
-        "eplan_cable_get"
+        "eplan_cable_get",
+        "eplan_connection_create",
+        "eplan_placement_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Cable.FunctionCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3672,7 +3742,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_cable_get"
+        "eplan_cable_get",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ]
     },
     {
@@ -3894,6 +3966,16 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.FunctionTemplates",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.IsMainFunction",
       "layer": "operation",
       "status": "live_verified",
@@ -4059,7 +4141,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ]
     },
     {
@@ -4071,6 +4155,7 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_connection_list",
         "eplan_context_get",
         "eplan_device_get",
@@ -4081,6 +4166,7 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_placement_create",
+        "eplan_placement_update",
         "eplan_plc_get",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -4164,7 +4250,9 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_update",
         "eplan_property_set"
       ]
     },
@@ -6640,7 +6728,9 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ]
     },
     {
@@ -7123,6 +7213,16 @@
       "tools": [
         "eplan_check_list",
         "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.CableService.DoReassignWires",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_placement_update"
       ]
     },
     {

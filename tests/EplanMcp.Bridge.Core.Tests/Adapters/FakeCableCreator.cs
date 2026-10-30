@@ -15,8 +15,3 @@ internal sealed partial class EplanConnectionCreator : ICableDefinitionWriter
     private static void AssertCurrent(string project) => Assert.NotNull(EplanProjects.ByPath(project));
     private static string Key(SymbolReference function, int index) => FormattableString.Invariant($"17/{function.ObjectIdentifier}/{index}");
 }
-
-internal static class EplanConnectionReader
-{
-    public static Page PageOf(Connection connection) => connection.Page;
-}
