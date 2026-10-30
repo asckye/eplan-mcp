@@ -6,11 +6,12 @@ namespace EplanMcp.Large.Tests;
 
 internal sealed class AcceptanceRedrawDriver(
     Func<string, Dictionary<string, object?>, Task<(bool Succeeded, JsonElement Result)>> call,
-    string project, JsonElement list, string run, Action<string> output)
+    string project, JsonElement list, string run, Action<string> output, string? next = null)
 {
     private readonly Dictionary<string, JsonElement> _placed = new(StringComparer.Ordinal);
     private readonly Dictionary<string, JsonElement> _symbols = new(StringComparer.Ordinal);
     private readonly Dictionary<string, JsonElement> _devices = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string[]> _pins = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _actualTags = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _devicePages = new(StringComparer.Ordinal);
     private readonly Dictionary<string, (string Tag, string Pin)> _interruptionSupport = new(StringComparer.Ordinal);
@@ -141,8 +142,18 @@ internal sealed class AcceptanceRedrawDriver(
         JsonElement read = await ReadAsync("eplan_device_get", new() { ["tag"] = owner ?? actualTag, ["language"] = "??_??", ["response_format"] = "detailed" });
         RequireComplete(read);
         JsonElement actual = owner is null ? read.GetProperty("device") : Assert.Single(read.GetProperty("functions").EnumerateArray(), f => SameName(actualTag, f.GetProperty("tag").GetString()!) && f.GetProperty("page").GetString() == Page);
-        Assert.Equal(device.GetProperty("connection_designations").EnumerateArray().Select(n => n.GetString()), actual.GetProperty("pins").EnumerateArray().Select(n => n.GetString()));
-        Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), actual.GetProperty("pins").GetArrayLength());
+        string[] designations = [.. device.GetProperty("connection_designations").EnumerateArray().Select(n => n.GetString()!)];
+        string[] pins = [.. actual.GetProperty("pins").EnumerateArray().Select(n => n.GetString()!)];
+        if (owner is not null && pins.Length == 0)
+        {
+            // A placed terminal reads back without named pins (no connection_designations on terminals); wires address it by connection point order.
+            Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), designations.Length);
+            _evidence.Add(new { note = "terminal pins unnamed; mapped by symbol connection point order", tag = actualTag, pins = designations });
+            pins = designations;
+        }
+        Assert.Equal(designations, pins);
+        Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), pins.Length);
+        _pins[Id(device)] = pins;
         Assert.Empty(read.GetProperty("parts").EnumerateArray());
         _devices[Id(device)] = actual;
     }
@@ -368,7 +379,7 @@ internal sealed class AcceptanceRedrawDriver(
         if (!_devices.TryGetValue(id, out JsonElement device))
         { return null; }
         JsonElement row = Function(drawings, _actualTags[id]);
-        string[] pins = device.GetProperty("pins").EnumerateArray().Select(n => n.GetString()!).ToArray();
+        string[] pins = _pins[id];
         int index = Array.IndexOf(pins, endpoint.GetProperty("pin").GetString());
         Assert.True(index >= 0);
         JsonElement local = _symbols[id].GetProperty("connectionPoints")[index].GetProperty("location");
@@ -435,6 +446,8 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task VerifyAsync()
     {
+        await InsidePageAsync(Page);
+        await InsidePageAsync(CounterpartPage);
         JsonElement[] drawings = await DrawingsAsync(Page);
         foreach (JsonElement device in _devices.Keys.Where(id => !_devicePages.TryGetValue(id, out string? page) || page == Page).Select(id => _placed[id]))
         {
@@ -501,6 +514,22 @@ internal sealed class AcceptanceRedrawDriver(
         return rows.ToArray();
     }
 
+    // Acceptance trial (2026-10-30): PLC points and a strip definition once left visible objects at the page origin,
+    // outside the frame, while every per-object readback passed. Nothing drawn may lie outside the page.
+    private async Task InsidePageAsync(string page)
+    {
+        double[] size = [.. (await ReadAsync("eplan_page_get", PageArgs(page))).GetProperty("drawings").GetProperty("pageSize").EnumerateArray().Select(v => v.GetDouble())];
+        foreach (JsonElement row in await DrawingsAsync(page))
+        {
+            double[] location = [.. row.GetProperty("location").EnumerateArray().Select(v => v.GetDouble())];
+            double[] box = row.TryGetProperty("bounds", out JsonElement b) && b.ValueKind == JsonValueKind.Array ? [.. b.EnumerateArray().Select(v => v.GetDouble())] : [];
+            // An empty property text reports zero bounds (A55); its location still has to be on the page.
+            double[] area = box.Length == 4 && (box[2] > box[0] || box[3] > box[1]) ? box : [location[0], location[1], location[0], location[1]];
+            if (!(area[0] >= 0 && area[1] >= 0 && area[2] <= size[0] && area[3] <= size[1]))
+            { Assert.Fail($"{row.GetProperty("kind").GetString()} {row.GetProperty("locator").GetProperty("type").GetInt32()}/{row.GetProperty("locator").GetProperty("oid").GetInt64()} on {page} lies outside the page at [{string.Join(", ", area)}]."); }
+        }
+    }
+
     private async Task<JsonElement[]> ConnectionsAsync(string page)
     {
         var rows = new List<JsonElement>();
@@ -555,7 +584,7 @@ internal sealed class AcceptanceRedrawDriver(
     private JsonElement Function(JsonElement[] drawings, string tag) => Assert.Single(drawings, d => d.GetProperty("kind").GetString() != "PropertyPlacement" && d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && SameName(tag, name.GetString()!));
     private bool SameName(string requested, string actual) => CableDefinitionPlanner.SameName(requested, actual, Page);
     private JsonElement[] Items(string key) => list.GetProperty(key).EnumerateArray().ToArray();
-    private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal);
+    private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal).Replace("{next}", next ?? run + "2", StringComparison.Ordinal);
     private static string Id(JsonElement item) => item.GetProperty("id").GetString()!;
     private void Stage(string name) { _stages.Add(name); output("Drawing batch: " + name); }
     private void Skip(string id, string reason) { _skipped.Add(new { item = id, status = "skipped", reason }); output("Skipped " + id + ": " + reason); }

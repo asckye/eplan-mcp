@@ -34,7 +34,7 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(7, inputs.Length);
         Assert.All(inputs, a =>
         {
-            Assert.Equal("+TEST-KF1", a.GetProperty("tag").GetString());
+            Assert.Equal("+A1-KFtest1", a.GetProperty("tag").GetString());
             Assert.Equal("DI_NATIVE", a.GetProperty("symbol").GetString());
             Assert.False(a.TryGetProperty("display_properties", out _));
             Assert.False(a.TryGetProperty("connection_designations", out _));
@@ -84,7 +84,7 @@ public sealed class AcceptanceRedrawDriverTests
         {
             JsonElement[] points = call.GetProperty("items").EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "interruption_point").ToArray();
             Assert.Equal(5, points.Length);
-            Assert.All(points, p => Assert.Equal(call.GetProperty("page").GetString() == "=REDRAWtest+TEST&EFS1/1" ? "=REDRAWtest+TEST&EFS1/2" : "=REDRAWtest+TEST&EFS1/1", Assert.Single(p.GetProperty("counterpart_pages").EnumerateArray()).GetString()));
+            Assert.All(points, p => Assert.Equal(call.GetProperty("page").GetString() == "=GAA+A1&EFS1/test" ? "=GAA+A1&EFS1/test2" : "=GAA+A1&EFS1/test", Assert.Single(p.GetProperty("counterpart_pages").EnumerateArray()).GetString()));
             Assert.Single(call.GetProperty("items").EnumerateArray(), i => i.GetProperty("kind").GetString() == "potential_point");
         }
     }
@@ -332,7 +332,7 @@ public sealed class AcceptanceRedrawDriverTests
                     { ContinuationReads++; }
                     int count = PaginateDrawings ? 1 : drawings.Length;
                     string? next = offset + count < drawings.Length ? (offset + count).ToString(System.Globalization.CultureInfo.InvariantCulture) : null;
-                    result = new { drawings = new { gridSize = 4, items = drawings.Skip(offset).Take(count), nextCursor = next, truncated = next is not null } };
+                    result = new { drawings = new { gridSize = 4, pageSize = new[] { 420, 297 }, items = drawings.Skip(offset).Take(count), nextCursor = next, truncated = next is not null } };
                     break;
                 case "eplan_connection_generate":
                     result = new { execution = "not_started", undo = (string?)null };

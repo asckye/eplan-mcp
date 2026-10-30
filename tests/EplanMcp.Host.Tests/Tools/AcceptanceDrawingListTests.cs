@@ -19,8 +19,8 @@ public sealed class AcceptanceDrawingListTests
     {
         JsonElement list = AcceptanceDrawingList.Read(Fixture());
         Assert.Equal(6, list.GetProperty("devices").GetArrayLength());
-        Assert.Equal(5, list.GetProperty("devices").EnumerateArray().Count(d => d.GetProperty("tag").GetString()!.Contains("+P1-", StringComparison.Ordinal)));
-        Assert.Single(list.GetProperty("devices").EnumerateArray(), d => d.GetProperty("tag").GetString()!.Contains("+HMT-", StringComparison.Ordinal));
+        Assert.Equal(5, list.GetProperty("devices").EnumerateArray().Count(d => d.GetProperty("tag").GetString()!.Contains("+P{run}-", StringComparison.Ordinal)));
+        Assert.Single(list.GetProperty("devices").EnumerateArray(), d => d.GetProperty("tag").GetString()!.Contains("+HMT{run}-", StringComparison.Ordinal));
         Assert.Equal(["RD", "WH", "BN", "GY", "BU", "VT"], list.GetProperty("cables")[0].GetProperty("cores").EnumerateArray().Select(c => c.GetProperty("colour").GetString()));
         Assert.Single(list.GetProperty("cables")[1].GetProperty("cores").EnumerateArray());
         Assert.Equal(Enumerable.Range(0, 7).Select(i => "I0." + i.ToString(System.Globalization.CultureInfo.InvariantCulture)), list.GetProperty("plc").GetProperty("points").EnumerateArray().Select(p => p.GetProperty("address").GetString()));

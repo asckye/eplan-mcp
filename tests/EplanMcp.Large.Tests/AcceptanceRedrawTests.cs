@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 
 namespace EplanMcp.Large.Tests;
@@ -20,11 +21,12 @@ public sealed class AcceptanceRedrawTests(LiveEplan eplan)
             string.Equals(Path.GetFileName(p.GetProperty("path").GetString()), WriteHost.WritableName, StringComparison.Ordinal));
         string project = copy.GetProperty("path").GetString()!;
         Assert.True(Host.Safety.ScratchPaths.IsInside(project, [WriteHost.ScratchFolder]));
-        string run = Guid.NewGuid().ToString("N")[..12];
-        string artifacts = Path.Combine(WriteHost.ScratchFolder, "acceptance-results", run);
+        int number = await LastPageNumberAsync(project) + 1;
+        string run = number.ToString(CultureInfo.InvariantCulture);
+        string artifacts = Path.Combine(WriteHost.ScratchFolder, "acceptance-results", run + "-" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(artifacts);
         void Output(string message) => TestContext.Current.TestOutputHelper!.WriteLine(message);
-        var driver = new AcceptanceRedrawDriver(eplan.CallOrErrorAsync, project, list, run, Output);
+        var driver = new AcceptanceRedrawDriver(eplan.CallOrErrorAsync, project, list, run, Output, (number + 1).ToString(CultureInfo.InvariantCulture));
         string status = "failed";
         try
         {
@@ -49,6 +51,35 @@ public sealed class AcceptanceRedrawTests(LiveEplan eplan)
                 JsonSerializer.Serialize(new { status, drawing = driver.Report }, _reportOptions), CancellationToken.None);
             Output($"Acceptance {status}: {driver.Page}; counterpart: {driver.CounterpartPage}; confirmed undo steps: {driver.UndoSteps}; count incomplete: {driver.UndoCountIncomplete}; evidence: {artifacts}");
         }
+    }
+
+    // Pages under a new structure segment are rejected (S063133), so the run takes fresh numbers under the sample's =GAA+A1&EFS1.
+    private async Task<int> LastPageNumberAsync(string project)
+    {
+        const string Prefix = "=GAA+A1&EFS1/";
+        int last = 0;
+        string? cursor = null;
+        do
+        {
+            Dictionary<string, object?> args = new() { ["project"] = project, ["name_prefix"] = Prefix, ["limit"] = 200 };
+            if (cursor is not null)
+            {
+                args["cursor"] = cursor;
+            }
+
+            JsonElement pages = await eplan.CallAsync("eplan_page_list", args);
+            foreach (JsonElement page in pages.GetProperty("pages").EnumerateArray())
+            {
+                if (int.TryParse(page.GetProperty("name").GetString()![Prefix.Length..], NumberStyles.None, CultureInfo.InvariantCulture, out int value))
+                {
+                    last = Math.Max(last, value);
+                }
+            }
+
+            cursor = pages.GetProperty("nextCursor").GetString();
+        }
+        while (cursor is not null);
+        return last;
     }
 
     private static string Repository()

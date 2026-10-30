@@ -11,7 +11,7 @@ UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未�
 | 字段 | 内容 |
 |---|---|
 | version | 当前为 1，未知版本拒绝 |
-| page、counterpart_page | 不同的完整 Circuit 页名；页名、tag 和中断点 name 中的 `{run}` 替换为本次随机标识，避免重复运行冲突；无占位符时同名页直接失败，不覆盖 |
+| page、counterpart_page | 不同的完整 Circuit 页名；页名、tag 和中断点 name 中的 `{run}` 替换为本次运行的新页号，`{next}` 替换为下一个页号，避免重复运行冲突；页名须使用样例项目已有的结构（如 `=GAA+A1&EFS1/{run}`），新结构段的页名 EPLAN 会拒绝（S063133）；无占位符时同名页直接失败，不覆盖 |
 | location_boxes | `{id,structure,corners:[[左,下],[右,上]]}`；structure 为 +位置标识；盒不传播结构，器件 tag 必须显式包含自己的结构 |
 | devices | `{id,tag,library,symbol,variant,position,connection_designations,contact_kind?}`；variant 为原生非负编号，代号按符号连接点数组顺序；contact_kind 为 no/nc |
 | plc | `{box,points}`；box 使用设备字段；每个 DI point 为 `{id,tag,position,connection_designations,connection_point,address,symbolic_address,function_text,direction,display_properties?}`；direction 指定引脚方向，驱动分页发现具有真实 DI 定义的单引脚变体，不猜符号名；display_properties 为 `{property_id,offset_x_mm,offset_y_mm}` 数组，仅允许 20400/20403/20011/20301，当前明确记录为 skipped，不传给放置工具；禁止用自由文本模拟 PLC 属性表 |
