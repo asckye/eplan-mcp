@@ -28,6 +28,30 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.All(Enumerable.Range(0, 7), i => Assert.Contains("input" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/display_properties", skipped));
         Assert.DoesNotContain(skipped, id => id.StartsWith("terminal", StringComparison.Ordinal));
         JsonElement[] placements = fake.Requests.Where(r => r.Tool == "eplan_device_place").Select(r => r.Args).ToArray();
+        Assert.Equal(["SSRW", "SSRW", "SSD", "SSD", "SONOT2", "SSD"], placements.Skip(2).Take(6).Select(a => a.GetProperty("symbol").GetString()));
+        JsonElement[] evidence = report.GetProperty("evidence").EnumerateArray().Where(e => e.TryGetProperty("tool", out _)).ToArray();
+        JsonElement[] switches = evidence.Where(e => e.GetProperty("tool").GetString() == "eplan_device_place")
+            .Select(e => e.GetProperty("result")).Where(r => r.TryGetProperty("device", out JsonElement device) && device.GetProperty("category").GetString() == "Switch").ToArray();
+        Assert.Equal(6, switches.Length);
+        Assert.All(switches, s =>
+        {
+            JsonElement points = s.GetProperty("symbol").GetProperty("connectionPoints");
+            Assert.Equal(2, points.GetArrayLength());
+            Assert.Equal(["Up", "Down"], points.EnumerateArray().Select(p => p.GetProperty("direction").GetString()));
+            Assert.Equal([0d, 0d, 0d, -8d], points.EnumerateArray().SelectMany(p => p.GetProperty("location").EnumerateArray()).Select(n => n.GetDouble()));
+        });
+        JsonElement emergencyStop = Assert.Single(evidence, e => e.GetProperty("tool").GetString() == "eplan_device_get" && e.GetProperty("result").GetProperty("device").GetProperty("tag").GetString() == "+Ptest-S5");
+        Assert.Equal(["11", "12"], emergencyStop.GetProperty("result").GetProperty("device").GetProperty("pins").EnumerateArray().Select(p => p.GetString()));
+        JsonElement[] discovered = evidence.Where(e => e.GetProperty("tool").GetString() == "eplan_symbol_search")
+            .SelectMany(e => e.GetProperty("result").GetProperty("symbols").EnumerateArray()).Where(s => s.GetProperty("functionCategory").GetString() == "Switch").ToArray();
+        Assert.Equal(["SSD", "SSRW", "SONOT2"], discovered.Select(s => s.GetProperty("name").GetString()));
+        Assert.Equal(["Pushbutton, normally open contact", "Rotary switch, normally open contact, 2 positions", "Emergency stop pushbutton, normally closed contact, rotary reset"], discovered.Select(s => s.GetProperty("description").GetString()));
+        Assert.All(discovered, s =>
+        {
+            Assert.Equal("IEC_symbol", s.GetProperty("library").GetString());
+            Assert.Equal(0, s.GetProperty("variant").GetInt32());
+            Assert.True(JsonElement.DeepEquals(switches[0].GetProperty("symbol").GetProperty("connectionPoints"), s.GetProperty("connectionPoints")));
+        });
         JsonElement box = Assert.Single(placements, a => a.TryGetProperty("symbol", out JsonElement symbol) && symbol.GetString() == "PLCC");
         Assert.False(box.TryGetProperty("display_properties", out _));
         JsonElement[] inputs = placements.Where(a => a.TryGetProperty("plc_connection_point", out _)).ToArray();
@@ -406,6 +430,13 @@ public sealed class AcceptanceRedrawDriverTests
 
     internal sealed class DrawingTools
     {
+        private static readonly Dictionary<string, string> _switchDescriptions = new(StringComparer.Ordinal)
+        {
+            ["SSD"] = "Pushbutton, normally open contact",
+            ["SSRW"] = "Rotary switch, normally open contact, 2 positions",
+            ["SONOT2"] = "Emergency stop pushbutton, normally closed contact, rotary reset",
+        };
+
         internal List<string> Calls { get; } = [];
         internal List<(string Tool, JsonElement Args)> Requests { get; } = [];
         internal bool MissingPoint { get; init; }
@@ -441,6 +472,9 @@ public sealed class AcceptanceRedrawDriverTests
 
         private static string Stored(string tag) => tag.StartsWith('=') ? tag[tag.IndexOf('+', StringComparison.Ordinal)..] : tag;
 
+        private static JsonElement[] ConnectionPoints(int count, bool horizontal = false) => Enumerable.Range(0, count)
+            .Select(i => JsonSerializer.SerializeToElement(new { location = horizontal ? new[] { 8 * i, 0 } : new[] { 0, -8 * i }, direction = horizontal ? i == 0 ? "Left" : "Right" : i == 0 ? "Up" : "Down" })).ToArray();
+
         internal Task<(bool Succeeded, JsonElement Result)> CallAsync(string tool, Dictionary<string, object?> args)
         {
             Calls.Add(tool);
@@ -471,10 +505,13 @@ public sealed class AcceptanceRedrawDriverTests
                         string parent = terminal ? Stored((string)strip!) : Stored((string)args["tag"]!);
                         string tag = terminal ? parent + ":" + args["terminal_number"] : input ? parent + ":" + point : parent;
                         string[] pins = terminal ? ["1", "2"] : input ? [(string)point!] : ((JsonElement)args["connection_designations"]!).EnumerateArray().Select(n => n.GetString()!).ToArray();
-                        string category = terminal ? "Terminal" : input ? "PLCTerminal" : (string)args["symbol"]! == "PLCC" ? "PLCBox" : "NoContact";
+                        string? description = terminal || input ? null : _switchDescriptions.GetValueOrDefault((string)args["symbol"]!);
+                        string category = terminal ? "Terminal" : input ? "PLCTerminal" : (string)args["symbol"]! == "PLCC" ? "PLCBox" : description is not null ? "Switch" : "NoContact";
+                        if (category == "Switch")
+                        { Assert.Equal(2, pins.Length); }
                         _pins[tag] = pins;
                         bool horizontal = (int)args["symbol_variant"]! == 1;
-                        _symbolPoints[tag] = pins.Select((_, i) => JsonSerializer.SerializeToElement(new { location = horizontal ? new[] { 8 * i, 0 } : new[] { 0, -8 * i }, direction = horizontal ? i == 0 ? "Left" : "Right" : i == 0 ? "Up" : "Down" })).ToArray();
+                        _symbolPoints[tag] = ConnectionPoints(pins.Length, horizontal);
                         if (terminal || input)
                         { _owners[tag] = parent; }
                         if (args.TryGetValue("terminal_strip_text", out object? text))
@@ -493,7 +530,7 @@ public sealed class AcceptanceRedrawDriverTests
                             _channels.Add(new { name = tag, owner = WrongPlcField == "owner" ? "+OTHER-KF1" : parent, page = args["page"], address = Field("address"), manualSymbolicAddress = Field("symbolic_address"), symbolicAddress = Field("address"), text = Field("text"), parentlessRepresentations = 1 });
                             _channels.Add(new { name = parent, address = (string?)null });
                         }
-                        result = new { execution = "committed", undo = "Device", recovered = false, device = new { tag, category }, terminal = member, symbol = new { connectionPoints = _symbolPoints[tag] } };
+                        result = new { execution = "committed", undo = "Device", recovered = false, device = new { tag, category }, terminal = member, symbol = new { description, connectionPoints = _symbolPoints[tag] } };
                     }
                     break;
                 case "eplan_device_get":
@@ -511,7 +548,9 @@ public sealed class AcceptanceRedrawDriverTests
                     break;
                 case "eplan_symbol_search":
                     bool second = args["cursor"] is not null;
-                    result = new { symbols = new[] { new { library = "IEC_symbol", name = "DI_NATIVE", variant = 0, functionCategory = "PLCTerminal", plcInputDefinition = second ? "1/1" : null, connectionPoints = new[] { new { direction = "Up" } } } }, nextCursor = second ? null : "next", truncated = !second };
+                    object inputSymbol = new { library = "IEC_symbol", name = "DI_NATIVE", description = "Digital input connection point", variant = 0, functionCategory = "PLCTerminal", plcInputDefinition = second ? "1/1" : null, connectionPoints = ConnectionPoints(1) };
+                    object[] symbols = second ? [inputSymbol] : [.. _switchDescriptions.Select(s => (object)new { library = "IEC_symbol", name = s.Key, description = s.Value, variant = 0, functionCategory = "Switch", connectionPoints = ConnectionPoints(2) }), inputSymbol];
+                    result = new { symbols, nextCursor = second ? null : "next", truncated = !second };
                     break;
                 case "eplan_page_get":
                     object[] drawings = _drawings.Where(d => JsonSerializer.SerializeToElement(d).GetProperty("page").GetString() == (string)args["page"]!).ToArray();

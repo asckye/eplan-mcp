@@ -19,6 +19,21 @@ public sealed class AcceptanceDrawingListTests
     {
         JsonElement list = AcceptanceDrawingList.Read(Fixture());
         Assert.Equal(6, list.GetProperty("devices").GetArrayLength());
+        JsonElement[] switches = list.GetProperty("devices").EnumerateArray().ToArray();
+        Assert.Equal(["SSRW", "SSRW", "SSD", "SSD", "SONOT2", "SSD"], switches.Select(d => d.GetProperty("symbol").GetString()));
+        Assert.All(switches, device =>
+        {
+            bool emergencyStop = device.GetProperty("id").GetString() == "switch5";
+            Assert.Equal("IEC_symbol", device.GetProperty("library").GetString());
+            Assert.Equal(0, device.GetProperty("variant").GetInt32());
+            Assert.Equal(emergencyStop ? "nc" : "no", device.GetProperty("contact_kind").GetString());
+            string[] pins = emergencyStop ? ["11", "12"] : ["13", "14"];
+            Assert.Equal(pins, device.GetProperty("connection_designations").EnumerateArray().Select(p => p.GetString()));
+        });
+        Assert.Equal("12", Assert.Single(list.GetProperty("wires").EnumerateArray(), w => w.GetProperty("id").GetString() == "signal5").GetProperty("from").GetProperty("pin").GetString());
+        JsonElement[] connections = list.GetProperty("expected_connections").EnumerateArray().ToArray();
+        Assert.Equal("12", Assert.Single(connections, c => c.GetProperty("from").GetProperty("item").GetString() == "switch5").GetProperty("from").GetProperty("pin").GetString());
+        Assert.Equal("11", Assert.Single(connections, c => c.GetProperty("to").GetProperty("item").GetString() == "switch5").GetProperty("to").GetProperty("pin").GetString());
         Assert.Equal(5, list.GetProperty("devices").EnumerateArray().Count(d => d.GetProperty("tag").GetString()!.Contains("+P{run}-", StringComparison.Ordinal)));
         Assert.Single(list.GetProperty("devices").EnumerateArray(), d => d.GetProperty("tag").GetString()!.Contains("+HMT{run}-", StringComparison.Ordinal));
         Assert.Equal(["RD", "WH", "BN", "GY", "BU", "VT"], list.GetProperty("cables")[0].GetProperty("cores").EnumerateArray().Select(c => c.GetProperty("colour").GetString()));
