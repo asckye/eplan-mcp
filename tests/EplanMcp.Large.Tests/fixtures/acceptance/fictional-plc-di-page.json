@@ -8,11 +8,11 @@
       "structure": "+P1",
       "corners": [
         [
-          32,
+          72,
           180
         ],
         [
-          188,
+          228,
           232
         ]
       ]
@@ -22,11 +22,11 @@
       "structure": "+HMT",
       "corners": [
         [
-          196,
+          236,
           180
         ],
         [
-          228,
+          268,
           232
         ]
       ]
@@ -40,7 +40,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        48,
+        88,
         212
       ],
       "connection_designations": [
@@ -56,7 +56,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        80,
+        120,
         212
       ],
       "connection_designations": [
@@ -72,7 +72,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        112,
+        152,
         212
       ],
       "connection_designations": [
@@ -88,7 +88,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        144,
+        184,
         212
       ],
       "connection_designations": [
@@ -104,7 +104,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        176,
+        216,
         212
       ],
       "connection_designations": [
@@ -120,7 +120,7 @@
       "symbol": "O_EL",
       "variant": 0,
       "position": [
-        208,
+        248,
         212
       ],
       "connection_designations": [
@@ -138,7 +138,7 @@
       "symbol": "PLCC",
       "variant": 0,
       "position": [
-        32,
+        72,
         40
       ],
       "connection_designations": []
@@ -148,7 +148,7 @@
         "id": "input0",
         "tag": "=GAA+A1-KF{run}1:1",
         "position": [
-          48,
+          88,
           64
         ],
         "connection_designations": [
@@ -186,7 +186,7 @@
         "id": "input1",
         "tag": "=GAA+A1-KF{run}1:2",
         "position": [
-          80,
+          120,
           64
         ],
         "connection_designations": [
@@ -224,7 +224,7 @@
         "id": "input2",
         "tag": "=GAA+A1-KF{run}1:3",
         "position": [
-          112,
+          152,
           64
         ],
         "connection_designations": [
@@ -262,7 +262,7 @@
         "id": "input3",
         "tag": "=GAA+A1-KF{run}1:4",
         "position": [
-          144,
+          184,
           64
         ],
         "connection_designations": [
@@ -300,7 +300,7 @@
         "id": "input4",
         "tag": "=GAA+A1-KF{run}1:5",
         "position": [
-          176,
+          216,
           64
         ],
         "connection_designations": [
@@ -338,7 +338,7 @@
         "id": "input5",
         "tag": "=GAA+A1-KF{run}1:6",
         "position": [
-          208,
+          248,
           64
         ],
         "connection_designations": [
@@ -376,7 +376,7 @@
         "id": "input6",
         "tag": "=GAA+A1-KF{run}1:7",
         "position": [
-          240,
+          280,
           64
         ],
         "connection_designations": [
@@ -417,7 +417,7 @@
     "tag": "=GAA+A1-X{run}6",
     "function_text": "Fictional meadow input marshalling",
     "position": [
-      32,
+      72,
       120
     ],
     "terminals": [
@@ -428,7 +428,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          48,
+          88,
           120
         ],
         "connection_designations": [
@@ -444,7 +444,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          80,
+          120,
           120
         ],
         "connection_designations": [
@@ -460,7 +460,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          112,
+          152,
           120
         ],
         "connection_designations": [
@@ -476,7 +476,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          144,
+          184,
           120
         ],
         "connection_designations": [
@@ -492,7 +492,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          176,
+          216,
           120
         ],
         "connection_designations": [
@@ -508,7 +508,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          208,
+          248,
           120
         ],
         "connection_designations": [
@@ -524,7 +524,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          240,
+          280,
           120
         ],
         "connection_designations": [
@@ -540,7 +540,7 @@
         "symbol": "X",
         "variant": 0,
         "position": [
-          256,
+          296,
           120
         ],
         "connection_designations": [
@@ -753,7 +753,7 @@
       "id": "supplyT1",
       "kind": "t_node",
       "position": [
-        80,
+        120,
         244
       ],
       "directions": [
@@ -766,7 +766,7 @@
       "id": "supplyT2",
       "kind": "t_node",
       "position": [
-        112,
+        152,
         244
       ],
       "directions": [
@@ -779,7 +779,7 @@
       "id": "supplyT3",
       "kind": "t_node",
       "position": [
-        144,
+        184,
         244
       ],
       "directions": [
@@ -792,7 +792,7 @@
       "id": "supplyT4",
       "kind": "t_node",
       "position": [
-        176,
+        216,
         244
       ],
       "directions": [
@@ -805,7 +805,7 @@
       "id": "supplyT5",
       "kind": "t_node",
       "position": [
-        208,
+        248,
         244
       ],
       "directions": [
@@ -818,7 +818,7 @@
       "id": "supplyLeft",
       "kind": "corner",
       "position": [
-        48,
+        88,
         244
       ],
       "directions": [
@@ -830,7 +830,7 @@
       "id": "supplyRight",
       "kind": "corner",
       "position": [
-        256,
+        296,
         244
       ],
       "directions": [
@@ -848,11 +848,11 @@
       "cross_section_mm2": 0.5,
       "points": [
         [
-          36,
+          76,
           160
         ],
         [
-          220,
+          260,
           160
         ]
       ],
@@ -897,11 +897,11 @@
       "cross_section_mm2": 0.5,
       "points": [
         [
-          232,
+          272,
           92
         ],
         [
-          248,
+          288,
           92
         ]
       ],
@@ -919,12 +919,12 @@
       "id": "link1",
       "name": "=GAA+A1-LINK{run}1",
       "position": [
-        48,
+        88,
         256
       ],
       "direction": "Up",
       "counterpart_position": [
-        48,
+        88,
         200
       ],
       "counterpart_direction": "Down"
@@ -933,12 +933,12 @@
       "id": "link2",
       "name": "=GAA+A1-LINK{run}2",
       "position": [
-        80,
+        120,
         256
       ],
       "direction": "Up",
       "counterpart_position": [
-        80,
+        120,
         200
       ],
       "counterpart_direction": "Down"
@@ -947,12 +947,12 @@
       "id": "link3",
       "name": "=GAA+A1-LINK{run}3",
       "position": [
-        112,
+        152,
         256
       ],
       "direction": "Up",
       "counterpart_position": [
-        112,
+        152,
         200
       ],
       "counterpart_direction": "Down"
@@ -961,12 +961,12 @@
       "id": "link4",
       "name": "=GAA+A1-LINK{run}4",
       "position": [
-        144,
+        184,
         256
       ],
       "direction": "Up",
       "counterpart_position": [
-        144,
+        184,
         200
       ],
       "counterpart_direction": "Down"
@@ -975,12 +975,12 @@
       "id": "link5",
       "name": "=GAA+A1-LINK{run}5",
       "position": [
-        176,
+        216,
         256
       ],
       "direction": "Up",
       "counterpart_position": [
-        176,
+        216,
         200
       ],
       "counterpart_direction": "Down"
@@ -990,7 +990,7 @@
     {
       "id": "title",
       "position": [
-        32,
+        72,
         268
       ],
       "text": "Fictional meadow training rig - digital inputs",
@@ -999,7 +999,7 @@
     {
       "id": "legend",
       "position": [
-        32,
+        72,
         24
       ],
       "text": "Invented equipment and signals for redraw acceptance",
@@ -1207,7 +1207,7 @@
         "symbol": "O_EL",
         "variant": 0,
         "position": [
-          300,
+          340,
           180
         ],
         "connection_designations": [
@@ -1218,7 +1218,7 @@
       },
       "potential_point": {
         "position": [
-          300,
+          340,
           196
         ],
         "directions": [
@@ -1234,7 +1234,7 @@
         "symbol": "O_EL",
         "variant": 0,
         "position": [
-          300,
+          340,
           180
         ],
         "connection_designations": [
@@ -1245,7 +1245,7 @@
       },
       "potential_point": {
         "position": [
-          300,
+          340,
           196
         ],
         "directions": [
