@@ -15,7 +15,26 @@ public sealed class CableDefinitionPlannerTests
     [InlineData("-W9", "+A1-W90", false)]
     [InlineData("-W9", "+A1-W8", false)]
     [InlineData("=GAA+A1-W9", "+", false)]
-    public void CableDesignation_OnlyToleratesDroppedFunctionStructure(string requested, string actual, bool expected) =>
+    [InlineData("-W9", "+-W9", true)]
+    [InlineData("-W9", "=+-W9", true)]
+    [InlineData("=+-W9", "-W9", true)]
+    [InlineData("+-W9", "=+-W9", true)]
+    [InlineData("=GAA+-W9", "-W9", true)]
+    [InlineData("=+A1-W9", "+A1-W9", true)]
+    [InlineData("=GAA+A1-W9", "=GAA+A1&-W9", true)]
+    [InlineData("-W9", "=+A2-W9", false)]
+    [InlineData("+A2-W9", "+-W9", false)]
+    [InlineData("-W9", "=+-W90", false)]
+    [InlineData("-W9", "=+-W8", false)]
+    [InlineData("-W9", "=+", false)]
+    [InlineData("=GAA+A1-W9", "==GAA+A1-W9", false)]
+    [InlineData("+A1-W9", "++A1-W9", false)]
+    [InlineData("+A1-W9-A", "+A1-W9-A", true)]
+    [InlineData("+A1-W9-A", "+A1-W9A", false)]
+    [InlineData("=GAA#B-W9", "-W9", false)]
+    [InlineData("=GAA&A-W9", "-W9", false)]
+    [InlineData("=GAA#B-W9", "#B-W9", true)]
+    public void CableDesignation_IgnoresEmptySegmentsAndToleratesDroppedFunctionStructure(string requested, string actual, bool expected) =>
         Assert.Equal(expected, EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.SameName(requested, actual, "=GAA+A1&EFS1/1"));
 
     [Fact]

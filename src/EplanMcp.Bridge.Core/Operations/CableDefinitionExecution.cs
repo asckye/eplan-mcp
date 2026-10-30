@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>A55/S43: commit binding before generating membership; compensate only confirmed commits.</summary>
+/// <summary>A55: commit native creation before readback; compensate only confirmed commits using undo.</summary>
 internal static class CableDefinitionExecution
 {
     internal static JObject Run(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions,
@@ -12,21 +12,26 @@ internal static class CableDefinitionExecution
         string project = scene.Project.Path, page = scene.Page.Page;
         if (creator is not ICableDefinitionWriter writer || plan["interruptionScope"] is not null)
         { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Use cable definitions without interruption points and a cable-capable Bridge.")); }
-        Action definitions;
+        Action definitions, verifyDefinitions;
         Action? symbols;
         JObject before;
         try
         {
             ConnectionCreatePlanner.Require(plan["logicalAfterGenerate"]!.All(g => g["pins"]!.Count() == 2 && (bool?)g["potentialStartIsNull"] == false), "/items", "Cable calls require explicit two-pin logical paths.");
-            definitions = writer.PrepareCables(project, page, input, plan);
+            (definitions, verifyDefinitions) = writer.PrepareCables(project, page, input, plan);
             symbols = plan["symbols"]!.Any() ? creator.Prepare(project, page, (JArray)plan["symbols"]!) : null;
             before = CableDefinitionRestoration.Capture(scene);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         int commits = 0;
-        void Commit(ITransactionScopeFactory factory, Action action)
+        void Commit(ITransactionScopeFactory factory, Action action, bool createsObjects = false)
         {
-            Committed<bool> result = TransactionRunner.Run(factory, "eplan_connection_create", () => { action(); return true; }, _ => true);
+            Committed<bool> result;
+            try
+            { result = TransactionRunner.Run(factory, "eplan_connection_create", () => { action(); return true; }, _ => true); }
+            // Live T8b: Abort can leave created objects behind. Do not inspect their property lists (A55).
+            catch (Exception failure) when (createsObjects)
+            { throw Unknown(failure); }
             if (result.Warning is not null)
             { throw Unknown(new InvalidOperationException(result.Warning)); }
             commits++;
@@ -46,11 +51,14 @@ internal static class CableDefinitionExecution
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable wire geometry differs from the plan."); }
             if (baseline != Endpoints(scene.Logical.Select(c => new[] { c.StartDevice, c.EndDevice }).Concat(plan["logicalAfterGenerate"]!.Select(g => g["pins"]!.Values<string>().ToArray()))))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Generated cable paths differ from planned endpoints."); }
-            Commit(creator.PlacementTransactions(project), definitions);
+            Commit(creator.PlacementTransactions(project), definitions, createsObjects: true);
+            verifyDefinitions();
             Generate();
             Commit(creator.PlacementTransactions(project), () => writer.BindCables(project, page, input, plan));
+            writer.VerifyBindings(project, page, input, plan);
             Generate();
-            Commit(creator.PlacementTransactions(project), () => writer.AssignCores(project, page, input, plan));
+            Commit(creator.PlacementTransactions(project), () => writer.AssignCores(project, page, input, plan), createsObjects: true);
+            CableDefinitionPlanner.VerifyCores(plan, writer.ReadCores(project, page, input, plan), page, input);
             Generate();
             // Membership and all final properties are checked after the last commit, never after Abort (A55).
             plan["actualCores"] = writer.ReadCores(project, page, input, plan);
