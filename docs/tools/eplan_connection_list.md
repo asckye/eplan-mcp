@@ -19,6 +19,7 @@
 | `page` | string | 二选一 | — | 完整页名 |
 | `limit` | integer，1–200 | 否 | 50 | 每页最多条数 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor` |
+| `response_format` | `concise` / `detailed` | 否 | `concise` | `detailed` 增加连接定位器 |
 
 `device` 和 `page` 至少给一个；两个都给时取交集。不提供"列出整个项目的连接"：示例项目有 2060 个连接，这类需求属于 M4 的导出工具。
 
@@ -43,6 +44,7 @@
 - `page`：连接所在页的完整页名；未放置时为 `null`。
 - `crossSection`、`colour`：EPLAN 给出的文本，**不按区域解析**（S6：截面是 `1,5` 这样的区域格式）。`colour` 来自 `CONNECTION_WIRENUMBER`：示例项目中它存的是颜色代码（S6）；在其他项目中的含义在 Large 测试中确认，不确定时字段改名为 `wireNumber`。
 - `kind`：`2d` 或 `3d`。3D 连接（`Connection3D`）没有可读的端点和页（S6），返回 `kind = "3d"`，`from`、`to`、`page` 为 `null`；`crossSection`、`colour` 照常读取（S6 的样本中 3D 连接的这两个属性可读）。
+- `locator`：仅 `detailed` 返回已放置二维连接的 `{project,page,type,oid,digest}`；无页或 3D 时省略。`project` 是解析后的项目路径，`digest` 与电缆规划 inventory 使用同一读取与 SHA-256 算法，覆盖端点几何、引脚、归属、芯号、颜色及截面；工程变化后应重新查询。可将定位器用于 `eplan_connection_create` 的 `cable_definition.cores[].connection.locator`。默认 `concise` 输出保持不变。
 - 顺序：按页列出时是 `GetConnections(null)` 的顺序；按设备列出时先是主功能的连接，再按 `SubFunctions` 的顺序是各辅助功能的连接，同一个连接只出现一次。超出 token 预算时由 ResultShaper 截断。
 - 一行摘要：`Listed 40 connections.` / `Listed 50 of 120 connections (more: cursor).`，不回显标识。
 
@@ -73,5 +75,6 @@
 ## 7. 测试
 - Small：参数校验（`device`、`page` 都缺）、`kind` 与空端点、摘要。
 - Medium：假 Bridge 上按设备、按页、两者交集、分页。
+- Medium：详细列表定位器可直接用于同连接的电缆 dry-run；Large：新 LargeWrite 页生成导线后，经详细列表定位器规划电缆，不执行电缆写入（本次未运行）。
 - Large：示例项目副本上，`page = "=GAA+A1&EFS1/1"` 返回 40 个连接（S6）。
 - Agent 评测："-FC1 的 2 号端子接到哪里？"

@@ -3080,6 +3080,15 @@
             "description": "nextCursor of the last result.",
             "type": "string",
             "default": ""
+          },
+          "response_format": {
+            "description": "detailed adds connection locators for cable_definition cores.",
+            "type": "string",
+            "default": "concise",
+            "enum": [
+              "concise",
+              "detailed"
+            ]
           }
         },
         "additionalProperties": false
@@ -3097,6 +3106,30 @@
             "items": {
               "type": "object",
               "properties": {
+                "locator": {
+                  "description": "Connection locator for cable_definition cores; detailed only, omitted when unplaced or 3d.",
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "project": {
+                      "type": "string"
+                    },
+                    "page": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "integer"
+                    },
+                    "oid": {
+                      "type": "integer"
+                    },
+                    "digest": {
+                      "type": "string"
+                    }
+                  }
+                },
                 "from": {
                   "description": "Where the connection starts; null when it is not connected there, or for kind 3d.",
                   "type": [

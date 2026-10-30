@@ -24,7 +24,7 @@ internal sealed class SampleConnections : IConnectionReader
         new() { Is3D = true, StartDevice = "=GAA+A1-MA2", EndDevice = "=GAA+A1-MA1", CrossSection = "1,5", Colour = "BU" },
     ];
 
-    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page) =>
+    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page, bool detailed = false) =>
         page is not null && !Pages.Contains(page, StringComparer.Ordinal)
             ? null
             : [.. Connections.Where(c => (device is null || At(c.StartDevice, device) || At(c.EndDevice, device)) && (page is null || c.Page == page))];

@@ -7,6 +7,52 @@ namespace EplanMcp.Large.Tests;
 public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Fact]
+    public async Task GeneratedWires_DetailedListLocators_PlanCableWithoutWriting()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = Assert.Single(await session.CreatePagesAsync(1));
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        Assert.True(File.Exists(helper), "Build the connection helper before running cable Large tests.");
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Cable");
+            await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            string before = (await session.SnapshotAsync()).Hash;
+            JsonElement listed = await eplan.CallAsync("eplan_connection_list", new()
+            { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
+            JsonElement[] wires = listed.GetProperty("connections").EnumerateArray().ToArray();
+            Assert.Equal(3, wires.Length);
+            Assert.False(listed.GetProperty("truncated").GetBoolean());
+            await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+            PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            string[] colours = ["BK", "BU", "GNYE"];
+            JsonElement result = await eplan.CallAsync("eplan_connection_create", new()
+            {
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["dry_run"] = true,
+                ["response_format"] = "detailed",
+                ["items"] = JsonSerializer.SerializeToElement(new[] { new
+                {
+                    kind = "cable_definition", points = new double[][] { [15 * geometry.GridSize, 35 * geometry.GridSize], [55 * geometry.GridSize, 35 * geometry.GridSize] },
+                    designation = "-W9", type_text = "ÖLFLEX CLASSIC 100 300/500V", core_count = 3, cross_section_mm2 = 0.5,
+                    cores = wires.Select((w, i) => new { connection = new { locator = w.GetProperty("locator") },
+                        label = (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), colour = colours[i] }).ToArray(),
+                } }),
+            });
+            Assert.Equal(ExecutionState.NotStarted, result.GetProperty("execution").GetString());
+            Assert.True(result.GetProperty("dryRun").GetBoolean());
+            Assert.Equal(wires.Select(w => w.GetProperty("locator").GetRawText()),
+                result.GetProperty("coreImpact").EnumerateArray().Select(c => c.GetProperty("connection").GetProperty("locator").GetRawText()));
+            Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+        }
+        finally { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
+    }
+
+    [Fact]
     public async Task ThreeVerticalWires_DefineW9_ReadNativeCores_UndosRestore()
     {
         Assert.NotNull(host);

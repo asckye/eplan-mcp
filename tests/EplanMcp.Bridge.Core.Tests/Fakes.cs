@@ -161,7 +161,7 @@ internal sealed class FakeConnectionReader : IConnectionReader
 
     public List<(string Path, string? Device, string? Page)> Reads { get; } = [];
 
-    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page)
+    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page, bool detailed = false)
     {
         Reads.Add((projectPath, device, page));
         if (page is not null && !Pages.Contains(page, StringComparer.Ordinal))
