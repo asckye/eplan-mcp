@@ -37,10 +37,20 @@ internal sealed partial class EplanConnectionCreator
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
                 properties[(Properties.Function)20043] = (string)definition["cross_section_mm2"]!;
-                Check(CableDefinitionPlanner.SameName((string)definition["designation"]!, cable.Name, page)
-                    && cable.Page.Name == page && cable.FunctionCategory == FunctionCategory.Cable);
+                Check(CableDefinitionPlanner.SameName((string)definition["designation"]!, cable.Name, page), $"designation: expected '{definition["designation"]}'; actual '{cable.Name}'");
+                Check(cable.Page.Name == page, $"page: expected '{page}'; actual '{cable.Page.Name}'");
+                Check(cable.FunctionCategory == FunctionCategory.Cable, $"category: actual '{cable.FunctionCategory}'");
+                RectangleD area = cable.GetLogicalArea();
+                double[] actualPoints = [area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y];
+                double[] expectedPoints = [Math.Min(points[0][0], points[1][0]), Math.Min(points[0][1], points[1][1]), Math.Max(points[0][0], points[1][0]), Math.Max(points[0][1], points[1][1])];
+                Check(actualPoints.SequenceEqual(expectedPoints), $"definition line points: expected {new JArray(expectedPoints)}; actual {new JArray(actualPoints)}");
                 foreach (int id in new[] { 20040, 20042, 20043 })
-                { using PropertyValue value = properties[(Properties.Function)id]; Check(!value.IsEmpty && (id == 20043 ? SameSection(value.ToString(), (double)definition["cross_section_mm2"]!) : value.ToString() == (string)definition[id == 20040 ? "type_text" : "core_count"]!)); }
+                {
+                    using PropertyValue value = properties[(Properties.Function)id];
+                    string field = id == 20040 ? "type_text" : id == 20042 ? "core_count" : "cross_section_mm2";
+                    string? actual = value.IsEmpty ? null : value.ToString();
+                    Check(id == 20043 ? SameSection(actual, (double)definition[field]!) : actual == (string)definition[field]!, $"{field}: expected '{definition[field]}'; actual '{actual ?? "<empty>"}'");
+                }
             }
         };
     }
@@ -59,11 +69,12 @@ internal sealed partial class EplanConnectionCreator
                 ? [PinKey(request["items"]![(int)index]!["from"]!), PinKey(request["items"]![(int)index]!["to"]!)] : row["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
             Connection run = all.Single(c => new HashSet<string?>(CablePins(c), StringComparer.Ordinal).SetEquals(pins));
             Check(reference["item_index"] is not null || run.StartPin?.ParentFunction is { } a && run.EndPin?.ParentFunction is { } b
-                && cable.GraphicalConnections.Any(g => new HashSet<long> { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }.SetEquals([a.ObjectIdentifier, b.ObjectIdentifier])));
+                && cable.GraphicalConnections.Any(g => new HashSet<long> { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }.SetEquals([a.ObjectIdentifier, b.ObjectIdentifier])),
+                $"graphical membership: expected pins {new JArray(pins)}; actual {JArray.FromObject(cable.GraphicalConnections.Select(g => new[] { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }))}");
             if (reference["locator"] is { } locator)
-            { Check(run.ObjectIdentifier == (long)locator["oid"]!); }
+            { Check(run.ObjectIdentifier == (long)locator["oid"]!, FormattableString.Invariant($"connection identity: expected {locator["oid"]}; actual {run.ObjectIdentifier}")); }
             if (plan["_cableBefore"] is JObject before)
-            { Check(before[run.ObjectIdentifier.ToString(CultureInfo.InvariantCulture)] is JObject old && JToken.DeepEquals(old["pins"], JArray.FromObject(CablePins(run)))); }
+            { Check(before[run.ObjectIdentifier.ToString(CultureInfo.InvariantCulture)] is JObject old && JToken.DeepEquals(old["pins"], JArray.FromObject(CablePins(run))), $"preserved pins: actual {JArray.FromObject(CablePins(run))}"); }
             return run;
         }).ToArray();
     }
@@ -76,12 +87,18 @@ internal sealed partial class EplanConnectionCreator
             using FunctionBasePropertyList name = cable.NameParts;
             foreach (Connection run in CableRuns(project, page, request, plan, definition))
             {
-                Check(run.ConnectionDefPoints.Length > 0 && run.ConnectionDefPoints.All(p => p.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier));
+                Check(run.ConnectionDefPoints.Length > 0, $"definition points: actual {run.ConnectionDefPoints.Length.ToString(CultureInfo.InvariantCulture)}");
                 foreach (ConnectionDefinitionPoint point in run.ConnectionDefPoints)
-                { point.Name = cable.Name; point.VisibleName = cable.VisibleName; Check(point.Name == cable.Name && point.VisibleName == cable.VisibleName); }
+                {
+                    Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"definition point membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
+                    point.Name = cable.Name;
+                    point.VisibleName = cable.VisibleName;
+                    Check(CableDefinitionPlanner.SameName(cable.Name, point.Name, page), $"definition point designation: expected '{cable.Name}'; actual '{point.Name}'");
+                    Check(point.VisibleName == cable.VisibleName, $"definition point visible name: expected '{cable.VisibleName}'; actual '{point.VisibleName}'");
+                }
                 run.CableNameParts = name;
                 using ConnectionPropertyList properties = run.Properties;
-                Check(CableText(properties, 20005) == cable.Name);
+                Check(CableDefinitionPlanner.SameName(cable.Name, CableText(properties, 20005) ?? "", page), $"bound membership: expected '{cable.Name}'; actual '{CableText(properties, 20005) ?? "<empty>"}'");
             }
         }
     }
@@ -91,7 +108,8 @@ internal sealed partial class EplanConnectionCreator
         {
             Cable cable = FindCable(project, page, definition);
             Connection[] runs = CableRuns(project, page, request, plan, definition);
-            Check(cable.FunctionTemplates.Length == 0 && cable.CableConnections.Select(c => c.ObjectIdentifier).OrderBy(id => id).SequenceEqual(runs.Select(c => c.ObjectIdentifier).OrderBy(id => id)));
+            Check(cable.FunctionTemplates.Length == 0, $"initial templates: actual {cable.FunctionTemplates.Length.ToString(CultureInfo.InvariantCulture)}");
+            CheckMembership(cable, runs);
             JToken[] cores = definition["cores"]!.ToArray();
             for (int i = 0; i < runs.Length; i++)
             {
@@ -102,7 +120,8 @@ internal sealed partial class EplanConnectionCreator
             }
             cable.AddLocalFunctionTemplates(runs);
             Connection[] templates = cable.FunctionTemplates.OfType<Connection>().ToArray();
-            Check(templates.Length == runs.Length && templates.All(t => t.IsTemplate));
+            Check(templates.Length == runs.Length, FormattableString.Invariant($"template count: expected {runs.Length}; actual {templates.Length}"));
+            Check(templates.All(t => t.IsTemplate), $"template flags: actual {JArray.FromObject(templates.Select(t => t.IsTemplate))}");
             using var service = new CableService();
             service.DoReassignWires(cable, templates, true, []);
         }
@@ -116,24 +135,35 @@ internal sealed partial class EplanConnectionCreator
         {
             Cable cable = FindCable(project, page, definition);
             Connection[] runs = CableRuns(project, page, request, plan, definition);
-            Check(cable.CableConnections.Select(c => c.ObjectIdentifier).OrderBy(id => id).SequenceEqual(runs.Select(c => c.ObjectIdentifier).OrderBy(id => id)));
+            CheckMembership(cable, runs);
             using FunctionPropertyList properties = cable.Properties;
             using PropertyValue type = properties[(Properties.Function)20040];
             using PropertyValue count = properties[(Properties.Function)20042];
             using PropertyValue section = properties[(Properties.Function)20043];
-            Check(!type.IsEmpty && !count.IsEmpty && !section.IsEmpty && count.ToString() == (string)definition["core_count"]! && SameSection(section.ToString(), (double)definition["cross_section_mm2"]!));
+            string? actualType = type.IsEmpty ? null : type.ToString(), actualCount = count.IsEmpty ? null : count.ToString(), actualSection = section.IsEmpty ? null : section.ToString();
+            Check(actualType == (string)definition["type_text"]!, $"type_text: expected '{definition["type_text"]}'; actual '{actualType ?? "<empty>"}'");
+            Check(actualCount == (string)definition["core_count"]!, $"core_count: expected '{definition["core_count"]}'; actual '{actualCount ?? "<empty>"}'");
+            Check(SameSection(actualSection, (double)definition["cross_section_mm2"]!), $"cross_section_mm2: expected '{definition["cross_section_mm2"]}'; actual '{actualSection ?? "<empty>"}'");
             foreach (Connection run in runs)
             {
-                Check(selected.Add(run.ObjectIdentifier) && run.ConnectionDefPoints.Length > 0 && run.ConnectionDefPoints.All(p => p.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier && p.Name == cable.Name && p.VisibleName == cable.VisibleName));
+                Check(selected.Add(run.ObjectIdentifier), FormattableString.Invariant($"duplicate core membership: actual {run.ObjectIdentifier}"));
+                Check(run.ConnectionDefPoints.Length > 0, "definition points: actual 0");
+                foreach (ConnectionDefinitionPoint point in run.ConnectionDefPoints)
+                {
+                    Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"core definition membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
+                    Check(CableDefinitionPlanner.SameName(cable.Name, point.Name, page), $"core definition designation: expected '{cable.Name}'; actual '{point.Name}'");
+                    Check(point.VisibleName == cable.VisibleName, $"core definition visible name: expected '{cable.VisibleName}'; actual '{point.VisibleName}'");
+                }
                 using ConnectionPropertyList core = run.Properties;
-                Check(CableText(core, 20005) == cable.Name && SameSection(CableText(core, 31002), (double)definition["cross_section_mm2"]!));
+                Check(CableDefinitionPlanner.SameName(cable.Name, CableText(core, 20005) ?? "", page), $"core membership: expected '{cable.Name}'; actual '{CableText(core, 20005) ?? "<empty>"}'");
+                Check(SameSection(CableText(core, 31002), (double)definition["cross_section_mm2"]!), $"core cross_section_mm2: expected '{definition["cross_section_mm2"]}'; actual '{CableText(core, 31002) ?? "<empty>"}'");
                 result.Add(new JObject { ["designation"] = cable.Name, ["type"] = type.ToString(), ["oid"] = run.ObjectIdentifier, ["pins"] = JArray.FromObject(CablePins(run)), ["label"] = CableText(core, 31011), ["colour"] = CableText(core, 31004) });
             }
         }
         JObject after = CableSnapshot(project, page), before = (JObject)plan["_cableBefore"]!.DeepClone();
         foreach (long id in selected)
         { after.Remove(id.ToString(CultureInfo.InvariantCulture)); before.Remove(id.ToString(CultureInfo.InvariantCulture)); }
-        Check(JToken.DeepEquals(before, after));
+        Check(JToken.DeepEquals(before, after), $"unselected connections: expected {before}; actual {after}");
         return result;
     }
     private static JObject CableSnapshot(string project, string page)
@@ -150,5 +180,10 @@ internal sealed partial class EplanConnectionCreator
     private static string? CableText(ConnectionPropertyList properties, int number)
     { using AnyPropertyId id = number; using PropertyValue value = properties[id]; return value.IsEmpty ? null : value.ToString(); }
     private static bool SameSection(string? text, double expected) => double.TryParse(text?.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double actual) && actual == expected;
-    private static void Check(bool valid) { if (!valid) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable definition, membership or core readback differs from the plan."); } }
+    private static void CheckMembership(Cable cable, Connection[] runs)
+    {
+        long[] actual = cable.CableConnections.Select(c => c.ObjectIdentifier).OrderBy(id => id).ToArray(), expected = runs.Select(c => c.ObjectIdentifier).OrderBy(id => id).ToArray();
+        Check(actual.SequenceEqual(expected), $"cable membership: expected {new JArray(expected)}; actual {new JArray(actual)}");
+    }
+    private static void Check(bool valid, string detail) { if (!valid) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable readback differs: " + detail + "."); } }
 }
