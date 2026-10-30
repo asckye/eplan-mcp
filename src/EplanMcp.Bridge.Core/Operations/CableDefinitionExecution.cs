@@ -26,7 +26,7 @@ internal static class CableDefinitionExecution
         {
             Committed<bool> result = TransactionRunner.Run(factory, "eplan_connection_create", () => { action(); return true; }, _ => true);
             if (result.Warning is not null)
-            { throw Unknown(); }
+            { throw Unknown(new InvalidOperationException(result.Warning)); }
             commits++;
         }
         void Generate() => Commit(transactions, () => generator.Generate(project, [page]));
@@ -72,10 +72,11 @@ internal static class CableDefinitionExecution
                     return ConnectionCreatePlanner.Plan(input.ToString(), creator.Read(project, page), creator, (string)plan["fingerprint"]!);
                 });
             }
-            catch (Exception) { throw Unknown(); }
+            catch (Exception compensation) { throw Unknown(new AggregateException(failure, compensation)); }
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable creation failed; all commits from this call were undone. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
         }
     }
-    private static BridgeErrorException Unknown() => new(ErrorReason.OutcomeUnknown, "Cable outcome is unknown; ask the engineer to inspect the project before further writes.") { Error = { Execution = ExecutionState.Unknown } };
+    // The cause travels as the inner exception so the Bridge log shows why the outcome became unknown.
+    private static BridgeErrorException Unknown(Exception cause) => new(ErrorReason.OutcomeUnknown, "Cable outcome is unknown; ask the engineer to inspect the project before further writes.", cause) { Error = { Execution = ExecutionState.Unknown } };
 }
