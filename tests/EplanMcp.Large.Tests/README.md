@@ -1,5 +1,7 @@
 # Large 测试：工具的实机测试
 
+`AcceptanceRedrawTests` 按[整页重绘清单 v1](fixtures/acceptance/README.md)在 `LargeWrite` 新页分批绘制，先打开编辑器供观看，保留页面、PNG 和逐项验收报告，不自动撤销；支持仓库外本地 `EPLANMCP_ACCEPTANCE_LIST`。默认夹具为独立虚构 PLC DI 页。生产工具缺口逐项记 skipped，不能当整页通过；本次仅编写，不运行 EPLAN。
+
 `ReferenceCopyTests` 覆盖示例项目关闭源的原生 Snapshot 复制、可选 `.zw1` 还原（`EPLANMCP_LARGE_ZW1`）、只读打开、版本/会话文件、GapOnly 替换后的只读提取、授权刷新、仅副本关闭及源摘要/副本设计文件不变。M0a 保持两个操作未注册，测试明确跳过，待后续接入启用；本次仅编写，未运行 EPLAN。
 `PlacementTextCreateTests`（M8 T4c，仅编写、未运行）：在 `LargeWrite` 新页调用 Host 混合文字/直线/矩形入口，以 `eplan_page_get include_drawings` 核对显示语言、另一语言、字高和位置，一步撤销恢复标准与绘图摘要。强制读回不符使用 `EplanMcp.Large.DrawingHelper` 的 `mixed-rollback` 模式在第二项后强制失败，使用独立 scratch 副本；须设置 `EPLANMCP_DRAWING_VARIANT_BIN` 并先构建 helper。失败后下一次撤销必须移除预置页，证明无空步；故障注入不进入生产协议。
 

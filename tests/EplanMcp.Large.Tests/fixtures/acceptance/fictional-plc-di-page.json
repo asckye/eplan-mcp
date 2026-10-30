@@ -1,0 +1,1141 @@
+{
+  "version": 1,
+  "page": "=REDRAW{run}+TEST&EFS1/1",
+  "counterpart_page": "=REDRAW{run}+TEST&EFS1/2",
+  "location_boxes": [
+    {
+      "id": "panel",
+      "structure": "+P1",
+      "corners": [
+        [
+          32,
+          180
+        ],
+        [
+          188,
+          232
+        ]
+      ]
+    },
+    {
+      "id": "pendant",
+      "structure": "+HMT",
+      "corners": [
+        [
+          196,
+          180
+        ],
+        [
+          228,
+          232
+        ]
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "switch1",
+      "tag": "=REDRAW{run}+P1-S1",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        48,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    },
+    {
+      "id": "switch2",
+      "tag": "=REDRAW{run}+P1-S2",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        80,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    },
+    {
+      "id": "switch3",
+      "tag": "=REDRAW{run}+P1-S3",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        112,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    },
+    {
+      "id": "switch4",
+      "tag": "=REDRAW{run}+P1-S4",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        144,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    },
+    {
+      "id": "switch5",
+      "tag": "=REDRAW{run}+P1-S5",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        176,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    },
+    {
+      "id": "switch6",
+      "tag": "=REDRAW{run}+HMT-S6",
+      "library": "IEC_symbol",
+      "symbol": "O_EL",
+      "variant": 0,
+      "position": [
+        208,
+        212
+      ],
+      "connection_designations": [
+        "13",
+        "14"
+      ],
+      "contact_kind": "no"
+    }
+  ],
+  "plc": {
+    "box": {
+      "id": "plc",
+      "tag": "=REDRAW{run}+TEST-KF1",
+      "library": "SPECIAL",
+      "symbol": "PLCC",
+      "variant": 0,
+      "position": [
+        32,
+        40
+      ],
+      "connection_designations": []
+    },
+    "points": [
+      {
+        "id": "input0",
+        "tag": "=REDRAW{run}+TEST-KF1:1",
+        "position": [
+          48,
+          64
+        ],
+        "connection_designations": [
+          "1"
+        ],
+        "connection_point": "1",
+        "address": "I0.0",
+        "symbolic_address": "MEADOW_DI_AMBER",
+        "function_text": "Fictional amber gate input"
+      },
+      {
+        "id": "input1",
+        "tag": "=REDRAW{run}+TEST-KF1:2",
+        "position": [
+          80,
+          64
+        ],
+        "connection_designations": [
+          "2"
+        ],
+        "connection_point": "2",
+        "address": "I0.1",
+        "symbolic_address": "MEADOW_DI_BROOK",
+        "function_text": "Fictional brook guard input"
+      },
+      {
+        "id": "input2",
+        "tag": "=REDRAW{run}+TEST-KF1:3",
+        "position": [
+          112,
+          64
+        ],
+        "connection_designations": [
+          "3"
+        ],
+        "connection_point": "3",
+        "address": "I0.2",
+        "symbolic_address": "MEADOW_DI_CEDAR",
+        "function_text": "Fictional cedar latch input"
+      },
+      {
+        "id": "input3",
+        "tag": "=REDRAW{run}+TEST-KF1:4",
+        "position": [
+          144,
+          64
+        ],
+        "connection_designations": [
+          "4"
+        ],
+        "connection_point": "4",
+        "address": "I0.3",
+        "symbolic_address": "MEADOW_DI_DUNE",
+        "function_text": "Fictional dune toggle input"
+      },
+      {
+        "id": "input4",
+        "tag": "=REDRAW{run}+TEST-KF1:5",
+        "position": [
+          176,
+          64
+        ],
+        "connection_designations": [
+          "5"
+        ],
+        "connection_point": "5",
+        "address": "I0.4",
+        "symbolic_address": "MEADOW_DI_EMBER",
+        "function_text": "Fictional ember key input"
+      },
+      {
+        "id": "input5",
+        "tag": "=REDRAW{run}+TEST-KF1:6",
+        "position": [
+          208,
+          64
+        ],
+        "connection_designations": [
+          "6"
+        ],
+        "connection_point": "6",
+        "address": "I0.5",
+        "symbolic_address": "MEADOW_DI_FERN",
+        "function_text": "Fictional fern pendant input"
+      },
+      {
+        "id": "input6",
+        "tag": "=REDRAW{run}+TEST-KF1:7",
+        "position": [
+          240,
+          64
+        ],
+        "connection_designations": [
+          "7"
+        ],
+        "connection_point": "7",
+        "address": "I0.6",
+        "symbolic_address": "MEADOW_DI_GROVE",
+        "function_text": "Fictional grove spare input"
+      }
+    ]
+  },
+  "terminal_strip": {
+    "id": "strip",
+    "tag": "=REDRAW{run}+TEST-X6",
+    "function_text": "Fictional meadow input marshalling",
+    "position": [
+      32,
+      120
+    ],
+    "terminals": [
+      {
+        "id": "terminal1",
+        "tag": "=REDRAW{run}+TEST-X6:1",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          48,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "1"
+      },
+      {
+        "id": "terminal2",
+        "tag": "=REDRAW{run}+TEST-X6:2",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          80,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "2"
+      },
+      {
+        "id": "terminal3",
+        "tag": "=REDRAW{run}+TEST-X6:3",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          112,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "3"
+      },
+      {
+        "id": "terminal4",
+        "tag": "=REDRAW{run}+TEST-X6:4",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          144,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "4"
+      },
+      {
+        "id": "terminal5",
+        "tag": "=REDRAW{run}+TEST-X6:5",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          176,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "5"
+      },
+      {
+        "id": "terminal6",
+        "tag": "=REDRAW{run}+TEST-X6:6",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          208,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "6"
+      },
+      {
+        "id": "terminal7",
+        "tag": "=REDRAW{run}+TEST-X6:7",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          240,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "7"
+      },
+      {
+        "id": "terminal8",
+        "tag": "=REDRAW{run}+TEST-X6:8",
+        "library": "IEC_symbol",
+        "symbol": "X",
+        "variant": 0,
+        "position": [
+          256,
+          120
+        ],
+        "connection_designations": [
+          "1",
+          "2"
+        ],
+        "number": "8"
+      }
+    ]
+  },
+  "wires": [
+    {
+      "id": "signal1",
+      "from": {
+        "item": "switch1",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal1",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply1",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch1",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          48,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "signal2",
+      "from": {
+        "item": "switch2",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal2",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply2",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch2",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          80,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "signal3",
+      "from": {
+        "item": "switch3",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal3",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply3",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch3",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          112,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "signal4",
+      "from": {
+        "item": "switch4",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal4",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply4",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch4",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          144,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "signal5",
+      "from": {
+        "item": "switch5",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal5",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply5",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch5",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          176,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "signal6",
+      "from": {
+        "item": "switch6",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal6",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "supply6",
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch6",
+        "pin": "13"
+      },
+      "points": [
+        "from",
+        [
+          256,
+          244
+        ],
+        [
+          208,
+          244
+        ],
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire0",
+      "from": {
+        "item": "terminal1",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input0",
+        "pin": "1"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire1",
+      "from": {
+        "item": "terminal2",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input1",
+        "pin": "2"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire2",
+      "from": {
+        "item": "terminal3",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input2",
+        "pin": "3"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire3",
+      "from": {
+        "item": "terminal4",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input3",
+        "pin": "4"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire4",
+      "from": {
+        "item": "terminal5",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input4",
+        "pin": "5"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire5",
+      "from": {
+        "item": "terminal6",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input5",
+        "pin": "6"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "id": "inputWire6",
+      "from": {
+        "item": "terminal7",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input6",
+        "pin": "7"
+      },
+      "points": [
+        "from",
+        "to"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "supplyT1",
+      "kind": "t_node",
+      "position": [
+        80,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Right",
+        "Down"
+      ]
+    },
+    {
+      "id": "supplyT2",
+      "kind": "t_node",
+      "position": [
+        112,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Right",
+        "Down"
+      ]
+    },
+    {
+      "id": "supplyT3",
+      "kind": "t_node",
+      "position": [
+        144,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Right",
+        "Down"
+      ]
+    },
+    {
+      "id": "supplyT4",
+      "kind": "t_node",
+      "position": [
+        176,
+        244
+      ],
+      "directions": [
+        "Left",
+        "Right",
+        "Down"
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": "cableW3",
+      "tag": "=REDRAW{run}+TEST-W3",
+      "type_text": "Fictional M6 control cable",
+      "core_count": 6,
+      "cross_section_mm2": 0.5,
+      "points": [
+        [
+          36,
+          160
+        ],
+        [
+          220,
+          160
+        ]
+      ],
+      "cores": [
+        {
+          "wire": "signal1",
+          "label": "1",
+          "colour": "RD"
+        },
+        {
+          "wire": "signal2",
+          "label": "2",
+          "colour": "WH"
+        },
+        {
+          "wire": "signal3",
+          "label": "3",
+          "colour": "BN"
+        },
+        {
+          "wire": "signal4",
+          "label": "4",
+          "colour": "GY"
+        },
+        {
+          "wire": "signal5",
+          "label": "5",
+          "colour": "BU"
+        },
+        {
+          "wire": "signal6",
+          "label": "6",
+          "colour": "VT"
+        }
+      ]
+    },
+    {
+      "id": "cableW4",
+      "tag": "=REDRAW{run}+TEST-W4",
+      "type_text": "Fictional M1 control cable",
+      "core_count": 1,
+      "cross_section_mm2": 0.5,
+      "points": [
+        [
+          232,
+          92
+        ],
+        [
+          248,
+          92
+        ]
+      ],
+      "cores": [
+        {
+          "wire": "inputWire6",
+          "label": "1",
+          "colour": "BK"
+        }
+      ]
+    }
+  ],
+  "interruption_points": [
+    {
+      "id": "link1",
+      "name": "=REDRAW{run}+TEST-LINK1",
+      "position": [
+        48,
+        248
+      ],
+      "direction": "Down",
+      "counterpart_position": [
+        48,
+        200
+      ],
+      "counterpart_direction": "Up"
+    },
+    {
+      "id": "link2",
+      "name": "=REDRAW{run}+TEST-LINK2",
+      "position": [
+        80,
+        248
+      ],
+      "direction": "Down",
+      "counterpart_position": [
+        80,
+        200
+      ],
+      "counterpart_direction": "Up"
+    },
+    {
+      "id": "link3",
+      "name": "=REDRAW{run}+TEST-LINK3",
+      "position": [
+        112,
+        248
+      ],
+      "direction": "Down",
+      "counterpart_position": [
+        112,
+        200
+      ],
+      "counterpart_direction": "Up"
+    },
+    {
+      "id": "link4",
+      "name": "=REDRAW{run}+TEST-LINK4",
+      "position": [
+        144,
+        248
+      ],
+      "direction": "Down",
+      "counterpart_position": [
+        144,
+        200
+      ],
+      "counterpart_direction": "Up"
+    },
+    {
+      "id": "link5",
+      "name": "=REDRAW{run}+TEST-LINK5",
+      "position": [
+        176,
+        248
+      ],
+      "direction": "Down",
+      "counterpart_position": [
+        176,
+        200
+      ],
+      "counterpart_direction": "Up"
+    }
+  ],
+  "texts": [
+    {
+      "id": "title",
+      "position": [
+        32,
+        268
+      ],
+      "text": "Fictional meadow training rig - digital inputs",
+      "height_mm": 3.5
+    },
+    {
+      "id": "legend",
+      "position": [
+        32,
+        24
+      ],
+      "text": "Invented equipment and signals for redraw acceptance",
+      "height_mm": 2.5
+    }
+  ],
+  "expected_connections": [
+    {
+      "from": {
+        "item": "switch1",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal1",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch1",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "switch2",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal2",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch2",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "switch3",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal3",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch3",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "switch4",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal4",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch4",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "switch5",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal5",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch5",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "switch6",
+        "pin": "14"
+      },
+      "to": {
+        "item": "terminal6",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal8",
+        "pin": "2"
+      },
+      "to": {
+        "item": "switch6",
+        "pin": "13"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal1",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input0",
+        "pin": "1"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal2",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input1",
+        "pin": "2"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal3",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input2",
+        "pin": "3"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal4",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input3",
+        "pin": "4"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal5",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input4",
+        "pin": "5"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal6",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input5",
+        "pin": "6"
+      }
+    },
+    {
+      "from": {
+        "item": "terminal7",
+        "pin": "2"
+      },
+      "to": {
+        "item": "input6",
+        "pin": "7"
+      }
+    }
+  ]
+}
