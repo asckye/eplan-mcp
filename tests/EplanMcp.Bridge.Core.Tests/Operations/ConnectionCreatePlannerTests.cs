@@ -254,4 +254,15 @@ public sealed class ConnectionCreatePlannerTests
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (ex.Error.Reason, ex.Error.Execution));
         Assert.Contains(pointer, ex.Error.Metadata!["violations"], StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Scene_PlacementWithoutBounds_NamesTheBlockingPlacement()
+    {
+        var fixture = new ConnectionCreateFixture();
+        var locator = new DrawingLocator { Project = "scratch-project", Page = ConnectionCreateFixture.PageName, Type = 45, Oid = 9, Digest = new string('b', 64) };
+        fixture.Scene.Page.Placements.Add(new() { Locator = locator, Kind = "PropertyPlacement", Location = [16, 8], Bounds = null });
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
+        Assert.Contains("invalid bounds of PropertyPlacement 45/9", error.Message, StringComparison.Ordinal);
+    }
 }

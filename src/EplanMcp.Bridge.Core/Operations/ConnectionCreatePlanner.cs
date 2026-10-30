@@ -55,15 +55,14 @@ public static class ConnectionCreatePlanner
         { Require(input[name] is null || input[name]!.Type == JTokenType.Boolean, "/" + name, "Supply a boolean."); }
         Require(input["response_format"] is null || input["response_format"]!.Type == JTokenType.String && (string?)input["response_format"] is "concise" or "detailed", "/response_format", "Use concise or detailed.");
         Require(input["items"] is JArray { Count: >= 1 and <= 50 }, "/items", "Supply 1..50 items.");
-        if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null
-            || scene.Page.Placements.Any(p => !DrawingCoordinates.ValidBounds(p.Bounds)) || scene.SymbolBounds.Values.Any(b => !DrawingCoordinates.ValidBounds(b))
-            || scene.Pins.Count > 10000 || scene.Pins.Values.Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Direction) == "" || !DrawingCoordinates.Contains(scene.Page.PageSize, [[p.Location[0], p.Location[1], p.Location[0], p.Location[1]]]))
-            || scene.Pins.Values.GroupBy(p => string.Join(",", p.Location.Select(v => v.ToString("R", CultureInfo.InvariantCulture))), StringComparer.Ordinal).Any(g => g.Count() > 1))
-        { throw Missing("Read a complete Circuit page inventory with verified bounds and pin geometry."); }
+        if (SceneGap(scene) is { } gap)
+        { throw Missing("Read a complete Circuit page inventory with verified bounds and pin geometry: " + gap + "."); }
         bool snap = (bool?)input["snap_to_grid"] ?? true;
         double grid = scene.Page.GridSize;
-        if (double.IsNaN(grid) || double.IsInfinity(grid) || grid <= 0 || scene.Pins.Values.Any(p => p.Location.Any(v => Math.Abs(v / grid - Math.Round(v / grid)) >= 1e-8)))
-        { throw Missing("Read valid page grid and on-grid pin geometry."); }
+        // Acceptance trial: library pins may be off grid (IEC_symbol X has pins at +2 and -0.75 mm), so only path
+        // endpoints that equal their pin are exempt from the grid; bends and nodes stay on it.
+        if (double.IsNaN(grid) || double.IsInfinity(grid) || grid <= 0)
+        { throw Missing("Read a valid page grid."); }
         var paths = new List<double[][]>();
         var nodes = new Dictionary<string, (double[] Point, string[] Directions, string Kind)>(StringComparer.Ordinal);
         var requested = new JArray();
@@ -78,6 +77,17 @@ public static class ConnectionCreatePlanner
             Require(DrawingCoordinates.Contains(scene.Page.PageSize, [[actual[0], actual[1], actual[0], actual[1]]]), at, "Keep the path inside Page.Size.");
             requested.Add(new JObject { ["pointer"] = at, ["requested"] = token!.DeepClone(), ["actual"] = new JArray(actual) });
             return actual;
+        }
+        // The exact, unsnapped location of a resolvable pin that the requested end point names; otherwise null.
+        double[]? PinPoint(JToken? pin, JToken requested)
+        {
+            if (requested is not JArray { Count: 2 } r || r.Any(n => n.Type is not (JTokenType.Integer or JTokenType.Float)) || pin is not JObject
+                || pin["locator"] is not JObject locator || pin["pin_index"]?.Type != JTokenType.Integer
+                || locator["type"]?.Type != JTokenType.Integer || locator["oid"]?.Type != JTokenType.Integer)
+            { return null; }
+            string key = FormattableString.Invariant($"{(int?)locator["type"]}/{(long?)locator["oid"]}/{(int)pin["pin_index"]!}");
+            return scene.Pins.TryGetValue(key, out SymbolConnectionPoint? located) && located.Location.Length == 2
+                && Math.Abs((double)r[0] - located.Location[0]) < 1e-9 && Math.Abs((double)r[1] - located.Location[1]) < 1e-9 ? located.Location : null;
         }
         string Pin(JToken? token, string at)
         {
@@ -133,7 +143,15 @@ public static class ConnectionCreatePlanner
                 continue;
             }
             Require(item["points"] is JArray { Count: >= 2 and <= 32 }, at + "/points", "Supply 2..32 orthogonal points.");
-            double[][] points = item["points"]!.Select((p, i) => Point(p, at + "/points/" + i.ToString(CultureInfo.InvariantCulture))).ToArray();
+            JToken[] raw = [.. item["points"]!];
+            double[][] points = raw.Select((p, i) =>
+            {
+                string pointer = at + "/points/" + i.ToString(CultureInfo.InvariantCulture);
+                if ((i == 0 ? PinPoint(item["from"], p) : i == raw.Length - 1 ? PinPoint(item["to"], p) : null) is not { } pin)
+                { return Point(p, pointer); }
+                requested.Add(new JObject { ["pointer"] = pointer, ["requested"] = p.DeepClone(), ["actual"] = new JArray(pin) });
+                return pin;
+            }).ToArray();
             Require(points.Select(Key).Distinct(StringComparer.Ordinal).Count() == points.Length, at + "/points", "Remove duplicate nodes.");
             for (int i = 1; i < points.Length; i++)
             { Require((points[i][0] == points[i - 1][0]) != (points[i][1] == points[i - 1][1]), at + "/points", "Use nonzero orthogonal segments."); }
@@ -277,6 +295,27 @@ public static class ConnectionCreatePlanner
     private static bool Overlaps(double[] a, double[] b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
     internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
+    // Names the first failed scene check so the caller can tell which page object blocks drawing.
+    private static string? SceneGap(Scene scene)
+    {
+        if (!scene.Complete) { return "a page placement has no drawing record"; }
+        if (scene.PageType != "Circuit") { return "page type " + scene.PageType; }
+        if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null) { return "page geometry is unavailable"; }
+        if (scene.Page.Placements.FirstOrDefault(p => !DrawingCoordinates.ValidBounds(p.Bounds)) is { } placement)
+        { return FormattableString.Invariant($"invalid bounds of {placement.Kind} {placement.Locator.Type}/{placement.Locator.Oid}"); }
+        if (scene.SymbolBounds.FirstOrDefault(b => !DrawingCoordinates.ValidBounds(b.Value)) is { Key: not null } symbol)
+        { return "invalid outline of symbol " + symbol.Key; }
+        if (scene.Pins.Count > 10000) { return "more than 10000 pins"; }
+        if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""
+            || !DrawingCoordinates.Contains(scene.Page.PageSize, [[p.Value.Location[0], p.Value.Location[1], p.Value.Location[0], p.Value.Location[1]]])) is { Key: not null } pin)
+        { return "pin " + pin.Key + " at " + Point(pin.Value.Location) + " direction " + pin.Value.Direction + " is outside the page or undirected"; }
+        if (scene.Pins.GroupBy(p => Point(p.Value.Location), StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1) is { } shared)
+        { return "pins " + string.Join(", ", shared.Select(p => p.Key)) + " share " + shared.Key; }
+        return null;
+    }
+
+    private static string Point(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
+
     private static BridgeErrorException Missing(string message) => new(ErrorReason.CapabilityMissing, message, metadata: new Dictionary<string, string> { ["missing"] = "connection.create.execute" });
     internal static void Members(JToken? token, string at, string required, string optional)
     {
