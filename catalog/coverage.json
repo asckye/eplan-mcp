@@ -537,8 +537,8 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_get.md",
-      "small": 2,
-      "medium": 2,
+      "small": 3,
+      "medium": 3,
       "large": 3,
       "apiNotes": [
         "A24"
@@ -648,8 +648,8 @@
       "dependencies": 85,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
-      "small": 1,
-      "medium": 5,
+      "small": 2,
+      "medium": 6,
       "large": 2,
       "apiNotes": [
         "A52",
@@ -669,9 +669,9 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_generate.md",
-      "small": 1,
+      "small": 2,
       "medium": 3,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A3",
         "A11",
@@ -702,8 +702,8 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_list.md",
-      "small": 2,
-      "medium": 3,
+      "small": 3,
+      "medium": 4,
       "large": 5,
       "apiNotes": [],
       "latestLive": {
@@ -773,7 +773,7 @@
       "dependencies": 29,
       "actions": 0,
       "spec": "docs/tools/eplan_device_get.md",
-      "small": 9,
+      "small": 10,
       "medium": 4,
       "large": 4,
       "apiNotes": [],
@@ -831,8 +831,8 @@
       "dependencies": 90,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 4,
-      "medium": 4,
+      "small": 5,
+      "medium": 5,
       "large": 2,
       "apiNotes": [
         "A13",
@@ -940,7 +940,7 @@
       "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_export_image.md",
-      "small": 2,
+      "small": 3,
       "medium": 3,
       "large": 3,
       "apiNotes": [
@@ -1366,7 +1366,7 @@
       "dependencies": 37,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 10,
+      "small": 11,
       "medium": 17,
       "large": 5,
       "apiNotes": [
@@ -1421,8 +1421,8 @@
       "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
-      "small": 5,
-      "medium": 5,
+      "small": 6,
+      "medium": 6,
       "large": 14,
       "apiNotes": [
         "A11",
@@ -1443,7 +1443,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 4,
-      "large": 9,
+      "large": 10,
       "apiNotes": [
         "A11"
       ],
@@ -1470,7 +1470,7 @@
       "dependencies": 12,
       "actions": 0,
       "spec": "docs/tools/eplan_page_open.md",
-      "small": 3,
+      "small": 4,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -1784,7 +1784,7 @@
       "dependencies": 71,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_create.md",
-      "small": 3,
+      "small": 4,
       "medium": 4,
       "large": 2,
       "apiNotes": [
@@ -1855,7 +1855,7 @@
       "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_plc_get.md",
-      "small": 2,
+      "small": 3,
       "medium": 2,
       "large": 2,
       "apiNotes": [
@@ -1938,7 +1938,7 @@
       "spec": "docs/tools/eplan_project_list.md",
       "small": 7,
       "medium": 4,
-      "large": 7,
+      "large": 8,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-18",
@@ -2172,8 +2172,8 @@
       "dependencies": 18,
       "actions": 0,
       "spec": "docs/tools/eplan_symbol_search.md",
-      "small": 3,
-      "medium": 2,
+      "small": 4,
+      "medium": 3,
       "large": 2,
       "apiNotes": [
         "A52",
@@ -2239,7 +2239,7 @@
       "dependencies": 16,
       "actions": 0,
       "spec": "docs/tools/eplan_terminal_strip_get.md",
-      "small": 2,
+      "small": 3,
       "medium": 2,
       "large": 3,
       "apiNotes": []

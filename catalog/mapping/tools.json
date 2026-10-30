@@ -831,6 +831,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "CableGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/CableGetToolTests.cs"
@@ -839,6 +844,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AcceptanceListFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
           },
           {
             "name": "CableToolsInteropTests",
@@ -1577,9 +1587,19 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AcceptanceListFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
           },
           {
             "name": "ConnectionCreateContractTests",
@@ -1748,6 +1768,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -1766,6 +1791,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -1872,6 +1902,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "ConnectionListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionListToolTests.cs"
@@ -1880,6 +1915,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ConnectionCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionCreateToolTests.cs"
           },
           {
             "name": "ConnectionGenerateToolTests",
@@ -1927,6 +1967,11 @@
             "name": "ConnectionListOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionListOperationTests.cs"
+          },
+          {
+            "name": "ConnectionCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionCreateToolTests.cs"
           },
           {
             "name": "ConnectionToolsInteropTests",
@@ -2390,6 +2435,11 @@
         "specStatus": "Proposed（M2）",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
           {
             "name": "AfterRunnerTests",
             "size": "Small",
@@ -2951,6 +3001,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "DevicePlaceInputTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceInputTests.cs"
@@ -2969,6 +3024,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AcceptanceListFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
           },
           {
             "name": "DevicePlaceToolTests",
@@ -3465,6 +3525,11 @@
           "A16"
         ],
         "tests": [
+          {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
           {
             "name": "ExportToolContractTests",
             "size": "Small",
@@ -5593,6 +5658,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "AgentTraceTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Agent/AgentTraceTests.cs"
@@ -6113,6 +6183,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "AgentTraceTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Agent/AgentTraceTests.cs"
@@ -6136,6 +6211,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AcceptanceListFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
           },
           {
             "name": "MacroInsertToolTests",
@@ -6438,6 +6518,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "AcceptanceRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AcceptanceRedrawTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
@@ -6561,6 +6646,11 @@
           "A54"
         ],
         "tests": [
+          {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
           {
             "name": "PageOpenToolTests",
             "size": "Small",
@@ -8240,6 +8330,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "PlacementCreateTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementCreateTests.cs"
@@ -8921,6 +9016,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "PlcGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlcGetToolTests.cs"
@@ -9358,6 +9458,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "AcceptanceRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AcceptanceRedrawTests.cs"
           },
           {
             "name": "ImportPxfTests",
@@ -10870,6 +10975,11 @@
         ],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "SymbolToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SymbolToolTests.cs"
@@ -10883,6 +10993,11 @@
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "AcceptanceListFileTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
           },
           {
             "name": "DeviceSymbolPlanTests",
@@ -11181,6 +11296,11 @@
         "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
           {
             "name": "TerminalStripGetToolTests",
             "size": "Small",
