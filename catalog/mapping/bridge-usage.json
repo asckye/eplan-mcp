@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-30",
-  "scannedSources": "8aeb9ad4",
-  "sourceHash": "sha256:a341e45e6f87d5b1cefb76feec70ff61ffb9b6efe50c1c4c78747ed320520037",
+  "scannedSources": "8ee14676",
+  "sourceHash": "sha256:19476d2590e77538cdbff5ff97adf02a88c1fad5d378d67e1983820eca4d3f2c",
   "operations": [
     {
       "name": "action.execute",
@@ -998,6 +998,45 @@
       {
         "adapter": "TransactionScope",
         "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
         "access": [
           "read"
@@ -2850,6 +2889,45 @@
           "report.update.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.Dispose": [
@@ -4312,6 +4390,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -5501,6 +5590,17 @@
         ],
         "operations": [
           "placeholder.apply.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -9197,6 +9297,45 @@
           "report.update.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.SafetyPoint.Create": [
@@ -9720,6 +9859,17 @@
         ],
         "operations": [
           "import.pdf_comments.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -10371,6 +10521,47 @@
       {
         "adapter": "TransactionScope",
         "member": "CloseUndo",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.UndoStep.DoUndo": [
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
         "access": [
           "call"
@@ -12240,6 +12431,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -12444,6 +12646,17 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -16400,6 +16613,18 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -16436,6 +16661,18 @@
           "connection.create.plan",
           "page.drawing.get",
           "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -17755,6 +17992,17 @@
         ],
         "operations": [
           "page.text.inspect"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -19880,6 +20128,17 @@
           "page.drawing.get",
           "placement.text.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Placement.IsPlaced": [
@@ -19931,6 +20190,18 @@
           "connection.create.plan",
           "page.drawing.get",
           "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -22375,6 +22646,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlanFunctionReader.cs",
@@ -24014,6 +24296,45 @@
           "report.update.execute",
           "terminal.renumber.execute"
         ]
+      },
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.ApplicationFramework.QuietModes": [
@@ -24282,6 +24603,45 @@
       {
         "adapter": "TransactionScope",
         "member": ".ctor",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.execute",
+          "cable.generate.execute",
+          "cable.renumber.execute",
+          "check.run.execute",
+          "connection.create.execute",
+          "connection.generate.execute",
+          "connection.number.execute",
+          "device.place.execute",
+          "device.renumber.execute",
+          "device.update.execute",
+          "import.dxf.execute",
+          "import.list.execute",
+          "import.pdf_comments.execute",
+          "import.plc.execute",
+          "language.remove.execute",
+          "language.set.execute",
+          "macro.insert.execute",
+          "page.create.execute",
+          "page.delete.execute",
+          "page.renumber.execute",
+          "page.text.replace.execute",
+          "page.update.execute",
+          "part.sync.execute",
+          "placeholder.apply.execute",
+          "placement.text.create.execute",
+          "project.translate.execute",
+          "property.set.execute",
+          "report.update.execute",
+          "terminal.renumber.execute"
+        ]
+      },
+      {
+        "adapter": "TransactionScope",
+        "member": "Rollback",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/TransactionScope.cs",
         "access": [
           "type"
@@ -25908,6 +26268,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -27436,6 +27807,17 @@
         ],
         "operations": [
           "placeholder.apply.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       },
       {
@@ -29264,6 +29646,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -29436,6 +29829,17 @@
           "page.text.inspect",
           "page.text.replace.execute",
           "page.text.replace.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
@@ -30754,6 +31158,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlacementTextWriter",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementTextWriter.cs",
@@ -31350,6 +31765,17 @@
         ],
         "operations": [
           "page.text.inspect"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementMover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute"
         ]
       }
     ],
