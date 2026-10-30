@@ -17,11 +17,12 @@ public sealed class CableDefinitionExecutionTests
         Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
         Assert.Equal(steps, (int)result["undoSteps"]!);
         Assert.Equal(steps, fake.Commits);
-        Assert.Equal(["definitions", "generate", "bind", "generate", "cores", "generate", "readback"], fake.Events.TakeLast(7));
+        Assert.Equal(["definitions", "definitions-readback", "generate", "bind", "bind-readback", "generate", "cores", "readback", "generate", "readback"], fake.Events.TakeLast(10));
         Assert.Equal("+A1-W3", (string?)result["actualCores"]![0]!["designation"]);
         Assert.Equal("BK", (string?)result["actualCores"]![0]!["colour"]);
         Assert.Equal(steps.ToString(System.Globalization.CultureInfo.InvariantCulture), File.ReadAllText(fake.FilePath));
         Assert.DoesNotContain("undo", fake.Events);
+        Assert.Equal(0, fake.Aborts);
         Assert.Null(result["_cableBefore"]);
     }
 
@@ -32,11 +33,9 @@ public sealed class CableDefinitionExecutionTests
     [InlineData("designation")]
     [InlineData("pins")]
     [InlineData("oid")]
-    [InlineData("definitions")]
     [InlineData("bind")]
-    [InlineData("cores")]
+    [InlineData("bind-readback")]
     [InlineData("generate")]
-    [InlineData("cancel")]
     public void Failure_RollsBackCurrentStage_UndoesOnlyThisCallsCommitsAndChecksRestoredContent(string failure)
     {
         foreach (bool sameCall in new[] { false, true })
@@ -58,25 +57,53 @@ public sealed class CableDefinitionExecutionTests
     [InlineData("colour")]
     public void CoreReadbackMismatch_RolledBack_RetainsFieldAndActualValue(string field)
     {
-        using var fake = new Creator(false) { Failure = field };
-        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => fake.Execute());
-        Assert.Equal(ExecutionState.RolledBack, error.Error.Execution);
-        Assert.Contains("core " + field + " readback", error.InnerException!.Message, StringComparison.Ordinal);
-        Assert.Contains("actual 'wrong'", error.InnerException.Message, StringComparison.Ordinal);
-        Assert.Equal("0", File.ReadAllText(fake.FilePath));
+        foreach (bool final in new[] { false, true })
+        {
+            using var fake = new Creator(false) { Failure = final ? "final-" + field : field };
+            BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => fake.Execute());
+            Assert.Equal(ExecutionState.RolledBack, error.Error.Execution);
+            Assert.Contains("core " + field + " readback", error.InnerException!.Message, StringComparison.Ordinal);
+            Assert.Contains("actual 'wrong'", error.InnerException.Message, StringComparison.Ordinal);
+            Assert.Equal(final ? 6 : 5, fake.Commits);
+            Assert.Equal(fake.Commits, fake.Events.Count(e => e == "undo"));
+            Assert.Equal(0, fake.Aborts);
+            Assert.Equal(0, fake.NativeObjects);
+            Assert.Equal("0", File.ReadAllText(fake.FilePath));
+        }
     }
 
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void DefinitionReadbackMismatch_RolledBack_RetainsLabelAndUndoesEarlierCommits(bool sameCall)
+    public void DefinitionReadbackMismatch_AfterCommit_UndoesCableAndPropertyPlacementsWithoutAbort(bool sameCall)
     {
         using var fake = new Creator(sameCall) { Failure = "definition-readback" };
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => fake.Execute());
         Assert.Equal(ExecutionState.RolledBack, error.Error.Execution);
         Assert.Contains("type_text: expected 'cable'; actual '<empty>'", error.InnerException!.Message, StringComparison.Ordinal);
-        Assert.Equal(sameCall ? 2 : 0, fake.Events.Count(e => e == "undo"));
+        Assert.Equal(sameCall ? 3 : 1, fake.Commits);
+        Assert.Equal(fake.Commits, fake.Events.Count(e => e == "undo"));
+        Assert.Equal(0, fake.Aborts);
+        Assert.Equal(0, fake.NativeObjects);
+        Assert.DoesNotContain(fake.Fixture.Base.Scene.Page.Placements, p => p.Kind is "Cable" or "PropertyPlacement");
+        Assert.True(fake.RestorationRead);
         Assert.Equal("0", File.ReadAllText(fake.FilePath));
+    }
+
+    [Theory]
+    [InlineData("definitions", 6)]
+    [InlineData("cores", 7)]
+    [InlineData("cancel", 7)]
+    public void NativeCreationFailure_AbortLeavesObjects_ReportsUnknownWithoutReadingThem(string failure, int remaining)
+    {
+        using var fake = new Creator(false) { Failure = failure };
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+        Assert.Equal(1, fake.Aborts);
+        Assert.Equal(remaining, fake.NativeObjects);
+        Assert.False(fake.InTransaction);
+        Assert.False(fake.RestorationRead);
+        Assert.DoesNotContain("undo", fake.Events);
     }
 
     [Theory]
@@ -128,7 +155,7 @@ public sealed class CableDefinitionExecutionTests
         Assert.Equal(commits, fake.Commits);
         Assert.Equal(commits, fake.Events.Count(e => e == "undo"));
         Assert.Equal("0", File.ReadAllText(fake.FilePath));
-        Assert.DoesNotContain("readback", fake.Events);
+        Assert.Equal(generation == 4 ? 1 : 0, fake.Events.Count(e => e == "readback"));
         Assert.False(fake.InTransaction);
         Assert.True(fake.RestorationRead);
     }
@@ -169,7 +196,10 @@ public sealed class CableDefinitionExecutionTests
     private sealed class Creator : IConnectionCreator, IConnectionGenerator, ICableDefinitionWriter, ITransactionScopeFactory, IDisposable
     {
         private readonly string _root = Directory.CreateTempSubdirectory("cable-execute-").FullName;
-        private readonly Stack<int> _history = new();
+        private readonly Stack<(int State, int Objects)> _history = new();
+        private readonly List<double[][]> _graphical;
+        private readonly List<DrawingPlacement> _createdPlacements = [];
+        private bool _abortedCreation;
         private int _state;
         private int _generates;
         public CableDefinitionFixture Fixture { get; } = new();
@@ -180,6 +210,8 @@ public sealed class CableDefinitionExecutionTests
         public bool RenumberOnUndo { get; init; }
         public string? RestorationDifference { get; init; }
         public int Commits { get; private set; }
+        public int Aborts { get; private set; }
+        public int NativeObjects { get; private set; }
         public bool InTransaction { get; private set; }
         public bool RestorationRead { get; private set; }
         public Creator(bool sameCall)
@@ -191,6 +223,7 @@ public sealed class CableDefinitionExecutionTests
                 Fixture.Cable["points"] = JArray.Parse("[[32,16],[48,16]]");
                 Fixture.Base.Request["items"] = new JArray(Fixture.Cable);
             }
+            _graphical = Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!;
             Save(0);
         }
         public JObject Execute() => Assert.IsType<JObject>(new OperationContext("cable", true, null).Run(() =>
@@ -201,8 +234,17 @@ public sealed class CableDefinitionExecutionTests
             Assert.True(InTransaction);
             Events.Add(stage);
             Save(_state + 1);
-            if (Failure == "definition-readback" && stage == "definitions")
-            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable readback differs: type_text: expected 'cable'; actual '<empty>'."); }
+            if (stage == "definitions")
+            {
+                NativeObjects = 6;
+                var cable = new DrawingPlacement { Locator = new() { Type = 23, Oid = 10 }, Kind = "Cable", Location = [60, 140], Bounds = [59.75, 139.75, 220.25, 140.25] };
+                _createdPlacements.Add(cable);
+                for (int i = 0; i < 5; i++)
+                { _createdPlacements.Add(new() { Parent = cable.Locator, Kind = "PropertyPlacement", Location = [60, 140] }); }
+                Fixture.Base.Scene.Page.Placements.AddRange(_createdPlacements);
+            }
+            if (stage == "cores")
+            { NativeObjects++; }
             if (Failure == stage || Failure == "rollback" && stage == "cores")
             { throw Failed(); }
             if (Failure == "cancel" && stage == "cores")
@@ -210,26 +252,49 @@ public sealed class CableDefinitionExecutionTests
         }
         public ConnectionCreatePlanner.Scene Read(string project, string page)
         {
-            if (Events.Contains("undo", StringComparer.Ordinal) || Events.Contains("definitions", StringComparer.Ordinal))
+            Assert.False(_abortedCreation);
+            if (Events.Contains("undo", StringComparer.Ordinal))
             { RestorationRead = true; }
             if (_state > 0 && Fixture.Base.Request["items"]!.Count() > 1)
-            { return new() { Graphical = Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()! }; }
+            { return new() { Graphical = _graphical }; }
             if (Failure == "restore" && RestorationRead)
             { Fixture.Base.Scene.Page.GridSize = 2; }
             return Fixture.Base.Scene;
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Base.Read(projectPath, args);
         public Action Prepare(string project, string page, JArray symbols) => () => Stage("symbols");
-        public Action PrepareCables(string project, string page, JObject request, JObject plan) => () => Stage("definitions");
+        public (Action Create, Action Verify) PrepareCables(string project, string page, JObject request, JObject plan) => (() => Stage("definitions"), () =>
+        {
+            Assert.False(InTransaction);
+            Assert.False(_abortedCreation);
+            Assert.Equal(6, NativeObjects);
+            Assert.Equal(_state, Commits);
+            Events.Add("definitions-readback");
+            if (Failure == "definition-readback")
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable readback differs: type_text: expected 'cable'; actual '<empty>'."); }
+        }
+        );
         public void BindCables(string project, string page, JObject request, JObject plan) { Assert.True(_generates > 0); Stage("bind"); }
+        public void VerifyBindings(string project, string page, JObject request, JObject plan)
+        {
+            Assert.False(InTransaction);
+            Assert.Equal(_state, Commits);
+            Events.Add("bind-readback");
+            if (Failure == "bind-readback")
+            { throw Failed(); }
+        }
         public void AssignCores(string project, string page, JObject request, JObject plan) { Assert.True(_generates >= 2); Stage("cores"); }
         public JArray ReadCores(string project, string page, JObject request, JObject plan)
         {
             Assert.False(InTransaction);
+            Assert.Equal(_state, Commits);
+            Assert.False(_abortedCreation);
             Events.Add("readback");
             var row = new JObject { ["designation"] = "+A1-W3", ["type"] = Fixture.Cable["type_text"]!.DeepClone(), ["label"] = "1", ["colour"] = "BK", ["oid"] = 9, ["pins"] = new JArray("17/3/0", "17/4/0") };
-            if (Failure is "label" or "colour" or "type" or "designation")
-            { row[Failure] = "wrong"; }
+            string? mismatch = Failure?.StartsWith("final-", StringComparison.Ordinal) == true
+                ? Events.Count(e => e == "readback") == 2 ? Failure.Substring(6) : null : Failure;
+            if (mismatch is "label" or "colour" or "type" or "designation")
+            { row[mismatch] = "wrong"; }
             if (request["items"]!.Count() > 1)
             { row["pins"] = new JArray("17/1/0", "17/2/0"); }
             if (Failure == "pins")
@@ -254,7 +319,11 @@ public sealed class CableDefinitionExecutionTests
             Events.Add("undo");
             if (Failure == "undo")
             { throw Failed(); }
-            Save(_history.Pop());
+            var before = _history.Pop();
+            Save(before.State);
+            NativeObjects = before.Objects;
+            if (NativeObjects == 0)
+            { Fixture.Base.Scene.Page.Placements.RemoveAll(_createdPlacements.Contains); _createdPlacements.Clear(); }
             if (_state == 0)
             { RestoreContent(); }
         }
@@ -298,11 +367,18 @@ public sealed class CableDefinitionExecutionTests
             }
         }
         public ITransactionScopeFactory PlacementTransactions(string project) => this;
-        public ITransactionScope Begin(string undoDescription) { Assert.False(InTransaction); InTransaction = true; return new Scope(this, _state); }
-        private sealed class Scope(Creator owner, int before) : ITransactionScope
+        public ITransactionScope Begin(string undoDescription) { Assert.False(InTransaction); InTransaction = true; return new Scope(this, _state, NativeObjects); }
+        private sealed class Scope(Creator owner, int before, int objects) : ITransactionScope
         {
-            public void Commit() { if (owner.Failure == "commit") { throw Failed(); } owner.Commits++; owner._history.Push(before); }
-            public void Rollback() { if (owner.Failure == "rollback") { throw Failed(); } owner.Save(before); }
+            public void Commit() { if (owner.Failure == "commit") { throw Failed(); } owner.Commits++; owner._history.Push((before, objects)); }
+            public void Rollback()
+            {
+                owner.Aborts++;
+                owner._abortedCreation = owner.NativeObjects != objects;
+                if (owner.Failure == "rollback")
+                { throw Failed(); }
+                owner.Save(before);
+            }
             public void CloseUndo() { if (owner.Failure == "close") { throw Failed(); } }
             public void Dispose() => owner.InTransaction = false;
         }

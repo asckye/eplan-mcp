@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 using Newtonsoft.Json;
@@ -28,14 +29,34 @@ public static class CableDefinitionPlanner
     }
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
 
-    /// <summary>A55: retain the location/device parts when EPLAN drops an unused function structure.</summary>
+    /// <summary>A55: ignore empty structure segments and tolerate a dropped unused function structure.</summary>
     public static bool SameName(string requested, string actual, string page)
     {
+        requested = WithoutEmptyStructure(requested);
+        actual = WithoutEmptyStructure(actual);
         if (requested == actual)
         { return true; }
-        string full = requested.StartsWith("-", StringComparison.Ordinal) ? DevicePlaceRequest.DeviceStructureOf(page) + requested : requested;
-        int end = full.IndexOfAny(['+', '-']);
+        string full = WithoutEmptyStructure(requested.StartsWith("-", StringComparison.Ordinal) ? DevicePlaceRequest.DeviceStructureOf(page) + requested : requested);
+        int end = full.IndexOfAny(['+', '-', '&', '#']);
         return full == actual || full.StartsWith("=", StringComparison.Ordinal) && end > 0 && full.Substring(end) == actual;
+    }
+    private static string WithoutEmptyStructure(string name)
+    {
+        var result = new StringBuilder();
+        for (int i = 0; i < name.Length;)
+        {
+            int start = i++;
+            if (!"=+&#".Contains(name[start]))
+            { result.Append(name.Substring(start)); break; }
+            if (name[start] is '=' or '+' && i < name.Length && name[i] == name[start])
+            { i++; }
+            int value = i;
+            while (i < name.Length && !"=+&#-".Contains(name[i]))
+            { i++; }
+            if (i > value)
+            { result.Append(name, start, i - start); }
+        }
+        return result.ToString();
     }
     public static void VerifyCores(JObject plan, JArray actual, string page, JObject request)
     {
