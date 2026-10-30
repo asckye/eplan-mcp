@@ -144,7 +144,11 @@ internal sealed class AcceptanceRedrawDriver(
         Assert.True(SameName(Expand(device.GetProperty("tag").GetString()!), actualTag));
         _actualTags[Id(device)] = actualTag;
         if (device.TryGetProperty("contact_kind", out JsonElement kind))
-        { Assert.Equal(kind.GetString() == "no" ? "NoContact" : "NcContact", placed.GetProperty("device").GetProperty("category").GetString()); }
+        {
+            // Operated switches (pushbutton, selector, emergency stop) are one IEC_symbol of category Switch, e.g. SSD or SONOT2.
+            string category = placed.GetProperty("device").GetProperty("category").GetString()!;
+            Assert.Contains(category, new[] { kind.GetString() == "no" ? "NoContact" : "NcContact", "Switch" });
+        }
         JsonElement read = await ReadAsync("eplan_device_get", new() { ["tag"] = owner ?? actualTag, ["language"] = "??_??", ["response_format"] = "detailed" });
         RequireComplete(read);
         JsonElement actual = owner is null ? read.GetProperty("device") : Assert.Single(read.GetProperty("functions").EnumerateArray(), f => SameName(actualTag, f.GetProperty("tag").GetString()!) && f.GetProperty("page").GetString() == Page);

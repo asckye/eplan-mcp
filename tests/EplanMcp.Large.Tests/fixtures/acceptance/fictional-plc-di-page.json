@@ -37,7 +37,7 @@
       "id": "switch1",
       "tag": "=GAA+P{run}-S1",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SSRW",
       "variant": 0,
       "position": [
         88,
@@ -53,7 +53,7 @@
       "id": "switch2",
       "tag": "=GAA+P{run}-S2",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SSRW",
       "variant": 0,
       "position": [
         120,
@@ -69,7 +69,7 @@
       "id": "switch3",
       "tag": "=GAA+P{run}-S3",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SSD",
       "variant": 0,
       "position": [
         152,
@@ -85,7 +85,7 @@
       "id": "switch4",
       "tag": "=GAA+P{run}-S4",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SSD",
       "variant": 0,
       "position": [
         184,
@@ -101,23 +101,23 @@
       "id": "switch5",
       "tag": "=GAA+P{run}-S5",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SONOT2",
       "variant": 0,
       "position": [
         216,
         212
       ],
       "connection_designations": [
-        "13",
-        "14"
+        "11",
+        "12"
       ],
-      "contact_kind": "no"
+      "contact_kind": "nc"
     },
     {
       "id": "switch6",
       "tag": "=GAA+HMT{run}-S6",
       "library": "IEC_symbol",
-      "symbol": "O_EL",
+      "symbol": "SSD",
       "variant": 0,
       "position": [
         248,
@@ -616,7 +616,7 @@
       "id": "signal5",
       "from": {
         "item": "switch5",
-        "pin": "14"
+        "pin": "12"
       },
       "to": {
         "item": "terminal5",
@@ -1090,7 +1090,7 @@
     {
       "from": {
         "item": "switch5",
-        "pin": "14"
+        "pin": "12"
       },
       "to": {
         "item": "terminal5",
@@ -1104,7 +1104,7 @@
       },
       "to": {
         "item": "switch5",
-        "pin": "13"
+        "pin": "11"
       }
     },
     {
