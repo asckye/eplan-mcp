@@ -73,6 +73,10 @@ internal sealed class AcceptanceRedrawDriver(
         Stage("terminals");
         await TerminalsAsync();
 
+        // Acceptance trial: aligned pins are joined by autoconnect lines as soon as they are placed; generate them first so
+        // connection_create predicts only its own items (otherwise its generation adds these and rolls back).
+        Stage("generate_autoconnect");
+        await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["autoconnect"]);
         Stage("wires_symbols_and_cables");
         await WiresAsync();
         Stage("generate");
@@ -357,7 +361,9 @@ internal sealed class AcceptanceRedrawDriver(
             JsonElement wire = Assert.Single(Items("wires"), w => Id(w) == id);
             bool End(JsonElement c, string expected, string end) => c.GetProperty(end).ValueKind == JsonValueKind.Object
                 && SameName(_actualTags[wire.GetProperty(expected).GetProperty("item").GetString()!], c.GetProperty(end).GetProperty("device").GetString()!)
-                && wire.GetProperty(expected).GetProperty("pin").GetString() == c.GetProperty(end).GetProperty("pin").GetString();
+                && (wire.GetProperty(expected).GetProperty("pin").GetString() == c.GetProperty(end).GetProperty("pin").GetString()
+                    // Placed terminals have unnamed pins (api-notes acceptance trial); the other end still names its pin.
+                    || c.GetProperty(end).GetProperty("pin").ValueKind == JsonValueKind.Null && IsTerminal(wire.GetProperty(expected).GetProperty("item").GetString()!));
             JsonElement[] matches = connections.Where(c => End(c, "from", "from") && End(c, "to", "to") || End(c, "from", "to") && End(c, "to", "from")).ToArray();
             Assert.True(matches.Length == 1, $"Wire '{id}' requires exactly one generated connection between its expected pins; found {matches.Length}.");
             Assert.True(matches[0].TryGetProperty("locator", out JsonElement locator) && locator.ValueKind == JsonValueKind.Object, $"Wire '{id}' requires a locator from the detailed generated connection list.");
@@ -409,7 +415,8 @@ internal sealed class AcceptanceRedrawDriver(
                 JsonElement read = Assert.Single(stored, c => c.GetProperty("designation").GetString() == core.GetProperty("label").GetString());
                 Assert.Equal(core.GetProperty("colour").GetString(), read.GetProperty("colour").GetString());
                 JsonElement wire = Assert.Single(Items("wires"), w => Id(w) == core.GetProperty("wire").GetString());
-                bool End(string expected, string end) => SameName(_actualTags[wire.GetProperty(expected).GetProperty("item").GetString()!], read.GetProperty(end).GetProperty("device").GetString()!) && wire.GetProperty(expected).GetProperty("pin").GetString() == read.GetProperty(end).GetProperty("pin").GetString();
+                bool End(string expected, string end) => SameName(_actualTags[wire.GetProperty(expected).GetProperty("item").GetString()!], read.GetProperty(end).GetProperty("device").GetString()!) && (wire.GetProperty(expected).GetProperty("pin").GetString() == read.GetProperty(end).GetProperty("pin").GetString()
+                    || read.GetProperty(end).GetProperty("pin").ValueKind == JsonValueKind.Null && IsTerminal(wire.GetProperty(expected).GetProperty("item").GetString()!));
                 Assert.True(End("from", "from") && End("to", "to") || End("from", "to") && End("to", "from"));
             }
         }
@@ -520,7 +527,9 @@ internal sealed class AcceptanceRedrawDriver(
             JsonElement device = list.GetProperty("interruption_support").GetProperty("counterpart_page").GetProperty("device");
             Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), Function(peers, _actualTags[Id(device)]).GetProperty("location"));
         }
-        string Endpoint(JsonElement endpoint) => JsonSerializer.Serialize(new[] { endpoint.GetProperty("item").GetString(), endpoint.GetProperty("pin").GetString() });
+        // Terminal pins are unnamed in EPLAN's connection readback, so a terminal end is compared by device only.
+        string Endpoint(JsonElement endpoint) => JsonSerializer.Serialize(new[] { endpoint.GetProperty("item").GetString(),
+            IsTerminal(endpoint.GetProperty("item").GetString()!) ? null : endpoint.GetProperty("pin").GetString() });
         string ReadEndpoint(JsonElement endpoint)
         {
             Assert.NotEqual(JsonValueKind.Null, endpoint.ValueKind);
@@ -638,6 +647,7 @@ internal sealed class AcceptanceRedrawDriver(
     private bool SameName(string requested, string actual) => CableDefinitionPlanner.SameName(requested, actual, Page);
     private JsonElement[] Items(string key) => list.GetProperty(key).EnumerateArray().ToArray();
     private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal).Replace("{next}", next ?? run + "2", StringComparison.Ordinal);
+    private bool IsTerminal(string id) => list.GetProperty("terminal_strip").GetProperty("terminals").EnumerateArray().Any(t => Id(t) == id);
     private static string Id(JsonElement item) => item.GetProperty("id").GetString()!;
     private void Stage(string name) { _stages.Add(name); output("Drawing batch: " + name); }
     private void Skip(string id, string reason) { _skipped.Add(new { item = id, status = "skipped", reason }); output("Skipped " + id + ": " + reason); }
