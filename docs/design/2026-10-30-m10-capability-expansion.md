@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Draft（项目负责人 2026-10-30 同意分级方案；ADR-0030、ADR-0031 待确认） |
+| 状态 | Accepted（项目负责人 2026-10-30 同意分级方案，并接受 ADR-0030、ADR-0031） |
 | 级别 | L2 为主；action 未验证执行与私有扩展模块为 L3，见 ADR-0030、ADR-0031 |
 | 相关依据 | [ADR-0021](../adr/0021-action-run-whitelist.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[架构](../architecture/architecture.md) 里程碑表 |
 | 最后更新 | 2026-10-30 |
@@ -36,7 +36,7 @@
 | 13 | 多语言 README 与面向 AI 的能力总览 | 中文 | 补英文等语种和 `docs/llm.md` | L1 |
 
 ## 4. 分批
-1. **第 1 批**：ADR-0030/0031 确认；B 级目录、批量验证工具、discovery Profile、生命周期工具、scratch 建项目、能力总览与多语言文档。
+1. **第 1 批**：B 级目录、批量验证工具、discovery Profile、生命周期工具、scratch 建项目、能力总览与多语言文档。
 2. **第 2 批**：C 级执行（ADR-0030 接受后）、图片识别符号、本地文档检索与 action 核对、技能包、AAS。
 3. **第 3 批**：浏览器查看器、私有扩展模块（ADR-0031 接受后）、Workbench 对照补齐。
 
