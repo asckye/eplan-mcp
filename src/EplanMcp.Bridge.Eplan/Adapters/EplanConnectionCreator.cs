@@ -60,7 +60,10 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             if (start?.ParentFunction is not { } a || end?.ParentFunction is not { } b || a.Page?.Name != page || b.Page?.Name != page
                 || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to)
                 || !scene.Graphical.Any(s => s[0].SequenceEqual(from.Location) && s[1].SequenceEqual(to.Location) || s[1].SequenceEqual(from.Location) && s[0].SequenceEqual(to.Location)))
-            { inventory.Complete = false; continue; }
+            // Acceptance trial: logical connections run device to device through corner and T-node symbols, so one may span
+            // several drawn segments. It cannot be a core then; the planner still refuses a definition line that crosses
+            // any drawn segment outside the selected cores.
+            { continue; }
             inventory.Wires.Add(ReadCableWire(project, page, connection, [from.Location, to.Location]));
         }
         return inventory;
