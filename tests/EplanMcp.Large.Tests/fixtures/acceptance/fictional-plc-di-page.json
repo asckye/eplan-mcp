@@ -157,7 +157,7 @@
         "connection_point": "1",
         "address": "I0.0",
         "symbolic_address": "MEADOW_DI_AMBER",
-        "function_text": "Fictional amber gate input",
+        "function_text": "Amber gate",
         "direction": "Up",
         "display_properties": [
           {
@@ -195,7 +195,7 @@
         "connection_point": "2",
         "address": "I0.1",
         "symbolic_address": "MEADOW_DI_BROOK",
-        "function_text": "Fictional brook guard input",
+        "function_text": "Brook guard",
         "direction": "Up",
         "display_properties": [
           {
@@ -233,7 +233,7 @@
         "connection_point": "3",
         "address": "I0.2",
         "symbolic_address": "MEADOW_DI_CEDAR",
-        "function_text": "Fictional cedar latch input",
+        "function_text": "Cedar latch",
         "direction": "Up",
         "display_properties": [
           {
@@ -271,7 +271,7 @@
         "connection_point": "4",
         "address": "I0.3",
         "symbolic_address": "MEADOW_DI_DUNE",
-        "function_text": "Fictional dune toggle input",
+        "function_text": "Dune toggle",
         "direction": "Up",
         "display_properties": [
           {
@@ -309,7 +309,7 @@
         "connection_point": "5",
         "address": "I0.4",
         "symbolic_address": "MEADOW_DI_EMBER",
-        "function_text": "Fictional ember key input",
+        "function_text": "Ember key",
         "direction": "Up",
         "display_properties": [
           {
@@ -347,7 +347,7 @@
         "connection_point": "6",
         "address": "I0.5",
         "symbolic_address": "MEADOW_DI_FERN",
-        "function_text": "Fictional fern pendant input",
+        "function_text": "Fern pendant",
         "direction": "Up",
         "display_properties": [
           {
@@ -385,7 +385,7 @@
         "connection_point": "7",
         "address": "I0.6",
         "symbolic_address": "MEADOW_DI_GROVE",
-        "function_text": "Fictional grove spare input",
+        "function_text": "Grove spare",
         "direction": "Up",
         "display_properties": [
           {
