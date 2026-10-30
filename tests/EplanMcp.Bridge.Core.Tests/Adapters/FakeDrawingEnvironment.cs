@@ -41,4 +41,10 @@ internal static class EplanDeviceReader
         using var filter = new PagesFilter { Name = page, ExactNameMatching = true };
         return finder.GetPages(filter).SingleOrDefault(p => p.Name == page);
     }
+
+    public static Function? FindMain(DMObjectsFinder finder, string tag, Func<Function, bool> preferred)
+    {
+        using var filter = new FunctionsFilter { Name = tag, ExactNameMatching = true };
+        return finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && preferred(f));
+    }
 }
