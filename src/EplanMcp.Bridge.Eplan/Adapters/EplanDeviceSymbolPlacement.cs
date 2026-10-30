@@ -16,6 +16,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     private readonly Page _page;
     private readonly SymbolVariant _variant;
     private readonly SymbolSearchItem _symbol;
+    private Function? _placedFunction;
 
     public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol)
     {
@@ -92,6 +93,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i]);
         }
         PlcChannel? plc = args.PlcConnectionPoint is null ? null : EplanPlcReader.Channel((Terminal)function, new TextLanguage(ISOCode.Language.L___, false), properties);
+        _placedFunction = function;
         return new DevicePlaceData { Page = _page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
     }
 

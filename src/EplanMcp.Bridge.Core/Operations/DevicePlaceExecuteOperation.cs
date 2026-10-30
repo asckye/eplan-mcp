@@ -106,6 +106,8 @@ public sealed class DevicePlaceExecuteOperation(
             || !DevicePlaceRequest.SameName(tag.Substring(0, tag.LastIndexOf(':')), terminal.Strip) || terminal.Owner is not null && terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
             || !terminal.Position.SequenceEqual(new[] { args.X, args.Y })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal identity, ownership or position differs; nothing was committed."); }
+        if (args.DisplayProperties is { Count: > 0 })
+        { DeviceSymbolDisplays.Verify(args, tag, page, data.Plc, session.ReadDisplays()); }
         return data;
     }
 

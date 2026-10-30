@@ -144,7 +144,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         Assert.Equal((80, 160, "-K2"), (_placement.Args!.X, _placement.Args.Y, _placement.Args.Tag));
         Assert.Equal((20214, 4, -4), (_placement.Args.DisplayProperties![0].PropertyId, _placement.Args.DisplayProperties[0].OffsetXmm, _placement.Args.DisplayProperties[0].OffsetYmm));
         Assert.Equal(["A1", "A2"], _placement.Args.ConnectionDesignations!);
-        Assert.Equal(["Begin", "Write", "Readback", "ReleaseLists", "Commit", "CloseUndo", "Dispose"], _placement.Calls);
+        Assert.Equal(["Begin", "Write", "Readback", "ReleaseLists", "ReadDisplays", "Commit", "CloseUndo", "Dispose"], _placement.Calls);
         Assert.Equal(0, _store.PartReads);
         JsonElement again = WriteToolHarness.Error(await Place(dryRun: false));
         Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (again.GetProperty("reason").GetString(), again.GetProperty("execution").GetString()));
@@ -286,11 +286,12 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public string? FailAt { get; set; }
         public DevicePlaceArgs? Args { get; private set; }
         public SymbolSearchItem? Resolved { get; set; }
+        public List<DeviceSymbolDisplay> Displays { get; } = [];
         public ITransactionScope Begin(string undoDescription)
         {
             Assert.Equal("AI: eplan_device_place", undoDescription);
             Calls.Add("Begin");
-            return new Scope(this, store, [.. store.Names], [.. store.Page.Objects], [.. store.Page.LocationBoxStructures]);
+            return new Scope(this, store, [.. store.Names], [.. store.Page.Objects], [.. store.Page.LocationBoxStructures], [.. Displays]);
         }
         public DevicePlaceData Place(DevicePlaceArgs args, string tag)
         {
@@ -305,6 +306,18 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             store.Page.Objects.Add("created");
             try
             {
+                Displays.Clear();
+                Displays.AddRange((args.DisplayProperties ?? []).Select(p => new DeviceSymbolDisplay
+                {
+                    PropertyId = p.PropertyId,
+                    OnPlacedFunction = true,
+                    ParentTag = tag,
+                    Page = args.Page,
+                    Offset = [p.OffsetXmm, p.OffsetYmm],
+                    Position = [args.X + p.OffsetXmm, args.Y + p.OffsetYmm],
+                    FormatMatches = true,
+                    Text = p.PropertyId switch { 20400 or 20403 => args.PlcAddress!, 20011 => args.PlcText!, 20301 => "", _ => "-K2" }
+                }));
                 foreach (string stage in new[] { "Write", "Readback" })
                 {
                     Calls.Add(stage);
@@ -361,6 +374,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                         Page = args.Page,
                         Owner = FailAt == "PlcOwner" ? "-WRONG" : null,
                         Address = FailAt == "PlcAddress" ? "I9.9" : args.PlcAddress,
+                        SymbolicAddress = args.PlcAddress,
                         ManualSymbolicAddress = FailAt == "PlcSymbol" ? "WRONG" : args.PlcSymbolicAddress,
                         Text = FailAt == "PlcText" ? "WRONG" : args.PlcText,
                         CardReference = null
@@ -372,19 +386,69 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             }
             finally { Calls.Add("ReleaseLists"); }
         }
-        private sealed class Scope(Placement owner, Store store, string[] names, string[] objects, string[] boxes) : ITransactionScope
+        public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays()
+        {
+            Calls.Add("ReadDisplays");
+            switch (FailAt)
+            {
+                case "DisplayMissing":
+                    Displays.RemoveAt(Displays.Count - 1);
+                    break;
+                case "DisplayRemoved":
+                    Displays.Clear();
+                    Displays.Add(new() { PropertyId = 20029, Offset = [0, -4], Position = [Args!.X, Args.Y - 4] });
+                    break;
+                case "DisplayOtherPoint":
+                    Displays[0].OnPlacedFunction = false;
+                    break;
+                case "DisplayParent":
+                    Displays[0].ParentTag = "+A1-KF1";
+                    break;
+                case "DisplayPage":
+                    Displays[0].Page = "=F+A1/2";
+                    break;
+                case "DisplayOffset":
+                    Displays[0].Offset[1]++;
+                    break;
+                case "DisplayPosition":
+                    Displays[0].Position[1]++;
+                    break;
+                case "DisplayFormat":
+                    Displays[0].FormatMatches = false;
+                    break;
+                case "DisplayText":
+                    Displays[0].Text = "";
+                    break;
+                case "DisplayCalculated":
+                    Displays[1].Text = "Start";
+                    break;
+                case "DisplayFunctionText":
+                    Displays[2].Text = "";
+                    break;
+                case "DisplayReference":
+                    Displays[3].Text = Args!.Page;
+                    break;
+                case "DisplayDuplicate":
+                    Displays.Add(Displays[0]);
+                    break;
+            }
+            return Displays;
+        }
+        private sealed class Scope(Placement owner, Store store, string[] names, string[] objects, string[] boxes, DeviceSymbolDisplay[] displays) : ITransactionScope
         {
             public void Commit() => owner.Calls.Add("Commit");
             public void CloseUndo() => owner.Calls.Add("CloseUndo");
             public void Rollback()
             {
-                Assert.Equal("ReleaseLists", owner.Calls[^1]);
+                Assert.True(owner.Calls[^1] is "ReleaseLists" or "ReadDisplays");
                 owner.Calls.Add("Abort");
                 store.Names.Clear();
                 store.Names.AddRange(names);
                 store.Channels.RemoveAll(c => !names.Contains(c.Name, StringComparer.Ordinal));
                 store.Page.Objects = [.. objects];
                 store.Page.LocationBoxStructures = [.. boxes];
+                owner.Displays.Clear();
+                owner.Displays.AddRange(displays);
             }
             public void Dispose() => owner.Calls.Add("Dispose");
         }

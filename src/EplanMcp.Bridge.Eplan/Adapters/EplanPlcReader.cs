@@ -44,7 +44,10 @@ internal sealed class EplanPlcReader : IPlcReader
             Cpu = plc.IsCPU,
         };
         Terminal[] channels = plc.PLCTerminals ?? [];
+        // Live T7d: Terminal.PLC of a placed point stays null although PLCTerminals lists it; the owner is this PLC.
         record.Channels = [.. channels.Select(terminal => Channel(terminal, textLanguage, detailed))];
+        if (detailed)
+        { foreach (PlcChannel channel in record.Channels) { channel.Owner ??= plc.Name; } }
         if (detailed && record.Channels.Count > 0)
         {
             // A11/A55: a native name-prefix filter includes unplaced and cross-page representations of this card.

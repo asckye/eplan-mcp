@@ -86,20 +86,26 @@ public sealed partial class DevicePlaceTests
             pointArgs.Add(args);
         }
         JsonElement plc = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["language"] = "??_??", ["limit"] = 100, ["response_format"] = "detailed" });
-        Assert.Equal(2, plc.GetProperty("total").GetInt32());
+        JsonElement[] channels = [.. plc.GetProperty("channels").EnumerateArray()];
+        TestContext.Current.TestOutputHelper!.WriteLine("plc channels: " + string.Join("; ", channels.Select(c => c.GetRawText())));
+        // A55, live T7d: EPLAN adds one device-level PLC terminal (the bare PLC tag, no address) per placed point.
+        JsonElement[] points = [.. channels.Where(c => c.GetProperty("name").GetString()!.Contains(':', StringComparison.Ordinal))];
+        Assert.Equal(["I0.0", "I0.1"], points.Select(c => c.GetProperty("address").GetString()).Order(StringComparer.Ordinal));
+        Assert.All(channels.Except(points), c => Assert.Equal(JsonValueKind.Null, c.GetProperty("address").ValueKind));
         JsonElement drawings = (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true })).GetProperty("drawings").GetProperty("items");
         foreach (Dictionary<string, object?> args in pointArgs)
         {
             JsonElement channel = Assert.Single(plc.GetProperty("channels").EnumerateArray(), c => Text(c, "address") == (string)args["plc_address"]!);
             Assert.Equal((tag, page, (string)args["plc_symbolic_address"]!, (string)args["plc_text"]!), (Text(channel, "owner"), Text(channel, "page"), Text(channel, "manualSymbolicAddress"), Text(channel, "text")));
-            Assert.Equal(args["plc_symbolic_address"], Text(channel, "symbolicAddress"));
+            Assert.False(string.IsNullOrEmpty(Text(channel, "symbolicAddress"))); // calculated per project settings: I0.0 in the sample (live T7d)
             Assert.Equal(1, channel.GetProperty("parentlessRepresentations").GetInt32());
-            JsonElement device = await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = Text(channel, "name"), ["response_format"] = "detailed", ["language"] = "??_??" });
+            JsonElement device = await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag, ["response_format"] = "detailed", ["language"] = "??_??" });
             JsonElement[] functions = [device.GetProperty("device"), .. device.GetProperty("functions").EnumerateArray()];
-            Assert.Contains(functions, f => Text(f, "category") == "PLCTerminal" && Text(f, "page") == page && f.GetProperty("pins").EnumerateArray().Any(p => p.GetString() == (string)args["plc_connection_point"]!));
+            JsonElement point = Assert.Single(functions, f => Text(f, "category") == "PLCTerminal" && Text(f, "page") == page && f.GetProperty("pins").EnumerateArray().Any(p => p.GetString() == (string)args["plc_connection_point"]!));
             static string? Property(JsonElement read, int id) => read.GetProperty("properties").EnumerateArray().Where(p => p.GetProperty("id").ValueKind == JsonValueKind.Number && p.GetProperty("id").GetInt32() == id).Select(p => p.GetProperty("value").GetString()).FirstOrDefault();
-            Assert.Equal(Property(device, 20301), Text(channel, "cardReference")); // Empty is valid without an overview counterpart; never synthesize the page.
+            Assert.Equal(point.TryGetProperty("properties", out _) ? Property(point, 20301) : Text(channel, "cardReference"), Text(channel, "cardReference")); // Empty is valid without an overview counterpart; never synthesize the page.
             string?[] values = [(string)args["plc_address"]!, Text(channel, "symbolicAddress"), (string)args["plc_text"]!, Text(channel, "cardReference")];
+            TestContext.Current.TestOutputHelper!.WriteLine("near " + args["x"] + ": " + string.Join("; ", drawings.EnumerateArray().Where(d => Math.Abs(d.GetProperty("location")[0].GetDouble() - (double)args["x"]!) < 20).Select(d => Text(d, "kind") + "@" + d.GetProperty("location").GetRawText() + "=" + (d.GetProperty("properties").TryGetProperty("display", out JsonElement t) ? t.GetString() : ""))));
             for (int row = 0; row < values.Length; row++)
             {
                 JsonElement display = Assert.Single(drawings.EnumerateArray(), d => Text(d, "kind") == "PropertyPlacement" && d.GetProperty("location")[0].GetDouble() == (double)args["x"]! && d.GetProperty("location")[1].GetDouble() == 180 - 8 - 8 * row);

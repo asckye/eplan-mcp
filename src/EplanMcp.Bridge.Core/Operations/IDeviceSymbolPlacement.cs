@@ -7,4 +7,7 @@ public interface IDeviceSymbolPlacement : ITransactionScopeFactory
 {
     /// <summary>Creates and verifies the function, displays and indexed pins; releases lists before returning or throwing (A55).</summary>
     public DevicePlaceData Place(DevicePlaceArgs args, string tag);
+
+    /// <summary>Re-enumerates the placed function's displays after all writes, inside the same transaction (A57).</summary>
+    public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays();
 }
