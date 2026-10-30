@@ -79,7 +79,9 @@ public sealed partial class DevicePlaceTests
             args["plc_address"] = "I0." + number;
             args["plc_symbolic_address"] = "Input_" + number;
             args["plc_text"] = "Fictional input " + number;
-            args["display_properties"] = JsonSerializer.SerializeToElement(_plcDisplayIds.Select((id, row) => new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row }));
+            // Live T7d: added displays are not on the page after the commit, so the tool refuses them for PLC points.
+            JsonElement refused = await eplan.ErrorAsync("eplan_device_place", new(args) { ["display_properties"] = JsonSerializer.SerializeToElement(_plcDisplayIds.Select((id, row) => new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row })) });
+            Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (refused.GetProperty("reason").GetString(), refused.GetProperty("execution").GetString()));
             JsonElement placed = await Place(args);
             Assert.Equal(JsonValueKind.Null, placed.GetProperty("functions").ValueKind);
             Assert.Equal(args["plc_address"], Text(placed.GetProperty("plc"), "address"));
@@ -104,13 +106,6 @@ public sealed partial class DevicePlaceTests
             JsonElement point = Assert.Single(functions, f => Text(f, "category") == "PLCTerminal" && Text(f, "page") == page && f.GetProperty("pins").EnumerateArray().Any(p => p.GetString() == (string)args["plc_connection_point"]!));
             static string? Property(JsonElement read, int id) => read.GetProperty("properties").EnumerateArray().Where(p => p.GetProperty("id").ValueKind == JsonValueKind.Number && p.GetProperty("id").GetInt32() == id).Select(p => p.GetProperty("value").GetString()).FirstOrDefault();
             Assert.Equal(point.TryGetProperty("properties", out _) ? Property(point, 20301) : Text(channel, "cardReference"), Text(channel, "cardReference")); // Empty is valid without an overview counterpart; never synthesize the page.
-            string?[] values = [(string)args["plc_address"]!, Text(channel, "symbolicAddress"), (string)args["plc_text"]!, Text(channel, "cardReference")];
-            TestContext.Current.TestOutputHelper!.WriteLine("near " + args["x"] + ": " + string.Join("; ", drawings.EnumerateArray().Where(d => Math.Abs(d.GetProperty("location")[0].GetDouble() - (double)args["x"]!) < 20).Select(d => Text(d, "kind") + "@" + d.GetProperty("location").GetRawText() + "=" + (d.GetProperty("properties").TryGetProperty("display", out JsonElement t) ? t.GetString() : ""))));
-            for (int row = 0; row < values.Length; row++)
-            {
-                JsonElement display = Assert.Single(drawings.EnumerateArray(), d => Text(d, "kind") == "PropertyPlacement" && d.GetProperty("location")[0].GetDouble() == (double)args["x"]! && d.GetProperty("location")[1].GetDouble() == 180 - 8 - 8 * row);
-                Assert.Equal(values[row] ?? "", Text(display.GetProperty("properties"), "display") ?? "");
-            }
         }
         foreach (string field in new[] { "plc_connection_point", "plc_address" })
         {
@@ -138,10 +133,13 @@ public sealed partial class DevicePlaceTests
             if (i is 1 or 2)
             {
                 JsonElement remaining = await eplan.CallAsync("eplan_plc_get", new() { ["project"] = project, ["plc"] = tag, ["response_format"] = "detailed" });
-                Assert.Equal(i - 1, remaining.GetProperty("total").GetInt32());
-                Assert.All(remaining.GetProperty("channels").EnumerateArray(), c => Assert.Equal(1, c.GetProperty("parentlessRepresentations").GetInt32()));
+                // Each placed point also brings a device-level PLC terminal without a connection point (live T7d).
+                JsonElement[] left = [.. remaining.GetProperty("channels").EnumerateArray().Where(c => c.GetProperty("name").GetString()!.Contains(':', StringComparison.Ordinal))];
+                Assert.Equal(i - 1, left.Length);
+                Assert.All(left, c => Assert.Equal(1, c.GetProperty("parentlessRepresentations").GetInt32()));
                 JsonElement names = await eplan.CallAsync("eplan_device_list", new() { ["project"] = project, ["category"] = "PLCTerminal", ["tag_contains"] = tag, ["include_auxiliary"] = true });
-                Assert.Equal(i - 1, names.GetProperty("total").GetInt32()); // Also detects an orphaned implicit representation after undo.
+                TestContext.Current.TestOutputHelper!.WriteLine($"after undo {i}: {names.GetRawText()}");
+                Assert.Equal(2 * (i - 1), names.GetProperty("total").GetInt32()); // a point and its device-level terminal; also detects orphans
             }
         }
         Assert.Equal(0, await DevicesOnAsync(project, page));
