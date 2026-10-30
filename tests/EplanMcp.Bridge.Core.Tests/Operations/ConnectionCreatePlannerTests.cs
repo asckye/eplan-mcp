@@ -283,7 +283,10 @@ public sealed class ConnectionCreatePlannerTests
         fixture.Scene.Page.Placements.Add(new() { Locator = node, Kind = "Function", Location = [60, 60], Bounds = [60, 60, 60, 60] });
         foreach ((int index, string direction) in new[] { (0, "Left"), (1, "Right"), (2, "Down") })
         { fixture.Scene.Pins.Add(FormattableString.Invariant($"42/9/{index}"), new() { Location = [60, 60], Direction = direction }); }
-        Assert.Equal("not_started", (string?)fixture.Plan()["execution"]);
+        JObject plan = fixture.Plan();
+        Assert.Equal("not_started", (string?)plan["execution"]);
+        // The untouched node's own pins predict no connection; only the planned wire's two pins do.
+        Assert.Equal(["17/1/0", "17/2/0"], Assert.Single(plan["logicalAfterGenerate"]!)["pins"]!.Values<string>());
 
         fixture.Scene.Pins.Add("17/77/0", new() { Location = [60, 60], Direction = "Up" });
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;

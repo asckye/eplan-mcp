@@ -245,9 +245,14 @@ public static class ConnectionCreatePlanner
             foreach (string key in group)
             { groups[key] = group; }
         }
-        foreach (HashSet<string> connected in groups.Values.Distinct())
+        // Acceptance trial: an existing corner or T-node keeps all its pins at one point. Its pins are not logical ends (EPLAN
+        // connects the devices through it), and a point no new segment touches predicts nothing.
+        var nodeOwners = new HashSet<string>(scene.Pins.GroupBy(p => Owner(p.Key), StringComparer.Ordinal)
+            .Where(g => g.Count() > 1 && g.Select(p => Key(p.Value.Location)).Distinct(StringComparer.Ordinal).Count() == 1).Select(g => g.Key), StringComparer.Ordinal);
+        var touched = new HashSet<string>(segments.SelectMany(s => s).Select(Key), StringComparer.Ordinal);
+        foreach (HashSet<string> connected in groups.Values.Distinct().Where(g => g.Overlaps(touched)))
         {
-            string[] ends = scene.Pins.Where(p => connected.Contains(Key(p.Value.Location))).Select(p => p.Key).OrderBy(p => p, StringComparer.Ordinal).ToArray();
+            string[] ends = scene.Pins.Where(p => connected.Contains(Key(p.Value.Location)) && !nodeOwners.Contains(Owner(p.Key))).Select(p => p.Key).OrderBy(p => p, StringComparer.Ordinal).ToArray();
             bool potential = nodes.Values.Any(n => n.Kind == "potential_point" && connected.Contains(Key(n.Point)));
             if (ends.Length > 1 || potential && ends.Length > 0)
             { logical.Add(new JObject { ["pins"] = new JArray(ends), ["potentialStartIsNull"] = potential }); }
