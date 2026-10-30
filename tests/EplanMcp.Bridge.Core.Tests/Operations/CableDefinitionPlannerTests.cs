@@ -6,6 +6,17 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class CableDefinitionPlannerTests
 {
+    [Theory]
+    [InlineData("-W9", "+A1-W9", true)]
+    [InlineData("=GAA+A1-W9", "+A1-W9", true)]
+    [InlineData("=GAA+A1-W9", "=GAA+A1-W9", true)]
+    [InlineData("-W9", "+A2-W9", false)]
+    [InlineData("=GAA+A1-W9", "=OTHER+A1-W9", false)]
+    [InlineData("-W9", "+A1-W90", false)]
+    [InlineData("-W9", "+A1-W8", false)]
+    public void CableDesignation_OnlyToleratesDroppedFunctionStructure(string requested, string actual, bool expected) =>
+        Assert.Equal(expected, EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.SameName(requested, actual, "=GAA+A1&EFS1/1"));
+
     [Fact]
     public void SameCallWire_ForwardReference_PredictsExplicitCoreWithoutWriting()
     {
@@ -15,8 +26,8 @@ public sealed class CableDefinitionPlannerTests
         f.Base.Request["items"] = new JArray(f.Cable, wire);
         JObject plan = f.Plan();
         Assert.Equal(ExecutionState.NotStarted, (string?)plan["execution"]);
-        Assert.Equal("CAPABILITY_MISSING", (string?)plan["executionCapability"]);
-        Assert.Equal(JTokenType.Null, plan["undoSteps"]!.Type);
+        Assert.Null(plan["executionCapability"]);
+        Assert.Equal(8, (int)plan["undoSteps"]!);
         Assert.Equal("1", (string?)Assert.Single((JArray)plan["coreImpact"]!)["label"]);
         Assert.Contains("bind -> generate -> cores", (string?)plan["generation"], StringComparison.Ordinal);
     }

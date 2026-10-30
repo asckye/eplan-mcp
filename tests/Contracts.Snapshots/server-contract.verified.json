@@ -2263,7 +2263,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruption points with explicit counterpart pages, and orthogonal wires on a Circuit page; verifies pairing, references and endpoints. 2 undo steps; failure undoes placement. cable_definition: dry-run only; execution returns CAPABILITY_MISSING. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
+      "description": "Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies endpoints and explicit core labels/colours. Wires: 2 undo steps; cables: 6-8, shown in preview. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2786,7 +2786,9 @@
           "undoSteps": {
             "enum": [
               2,
-              null
+              6,
+              7,
+              8
             ]
           },
           "recovered": {
@@ -2816,8 +2818,8 @@
           "coreImpact": {
             "type": "array"
           },
-          "executionCapability": {
-            "const": "CAPABILITY_MISSING"
+          "actualCores": {
+            "type": "array"
           },
           "gridSize": {
             "type": "number"

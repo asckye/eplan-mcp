@@ -22,13 +22,13 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
-            if (plan["cableDefinitions"] is not null)
-            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Cable execution requires T8b; use dry_run to review coreImpact.", metadata: new Dictionary<string, string> { ["missing"] = "connection.create.cable.execute" }); }
-            if (!plan["symbols"]!.Any() || !plan["logicalAfterGenerate"]!.Any() || plan["interruptionScope"] is not null && !plan["graphicalAutoconnect"]!.Any())
+            if (plan["cableDefinitions"] is null && (!plan["symbols"]!.Any() || !plan["logicalAfterGenerate"]!.Any() || plan["interruptionScope"] is not null && !plan["graphicalAutoconnect"]!.Any()))
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
-            place = creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!);
+            place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!) : () => { };
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
+        if (plan["cableDefinitions"] is not null)
+        { return CableDefinitionExecution.Run(creator, generator, transactions, scene, input, plan); }
         string project = scene.Project.Path, page = scene.Page.Page;
         bool interruptions = plan["interruptionScope"] is not null, generationCommitted = false;
         string[] pages = interruptions ? InterruptionPointPlanning.Pages(plan) : [page];

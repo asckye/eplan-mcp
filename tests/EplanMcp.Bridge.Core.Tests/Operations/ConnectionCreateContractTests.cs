@@ -26,7 +26,7 @@ public sealed class ConnectionCreateContractTests
             ["title"] = "Create connection symbols and explicit wire paths",
             ["status"] = "registered_preview_contract",
             ["profile"] = "full",
-            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes commit placement then generation: 2 undo steps; failure undoes placement. cable_definition is planning only; execution returns CAPABILITY_MISSING. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes: 2 undo steps; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
             ["annotations"] = new JObject { ["readOnlyHint"] = false, ["destructiveHint"] = false, ["idempotentHint"] = false, ["openWorldHint"] = false },
             ["inputSchema"] = InputSchema(),
             ["outputSchema"] = OutputSchema(),
@@ -164,10 +164,10 @@ public sealed class ConnectionCreateContractTests
         }, "project page execution dryRun coordinates symbols graphicalAutoconnect logicalAfterGenerate gridSize pageSize coverage logicalDuringPlacement generation undoSteps fingerprint");
         if (cable)
         {
-            output["properties"]!["undoSteps"] = new JObject { ["type"] = "null" };
+            output["properties"]!["undoSteps"] = new JObject { ["type"] = "integer", ["minimum"] = 6, ["maximum"] = 8 };
             output["properties"]!["cableDefinitions"] = new JObject { ["type"] = "array", ["items"] = new JObject(), ["minItems"] = 1, ["maxItems"] = 50 };
             output["properties"]!["coreImpact"] = new JObject { ["type"] = "array", ["items"] = new JObject(), ["minItems"] = 1, ["maxItems"] = 50 };
-            output["properties"]!["executionCapability"] = Constant("CAPABILITY_MISSING");
+            output["properties"]!["actualCores"] = new JObject { ["type"] = "array", ["items"] = new JObject(), ["minItems"] = 1, ["maxItems"] = 50 };
             ((JArray)output["required"]!).Add("coreImpact");
         }
         return output;

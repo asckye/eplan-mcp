@@ -26,12 +26,16 @@ public sealed class SetupAction : IEplAction
             if (!string.Equals(project.ProjectFullName, expected, StringComparison.OrdinalIgnoreCase) || !pageName.StartsWith("=GAA+A1&EFS1/", StringComparison.Ordinal))
             { Log("project/page: " + project.ProjectFullName + " | " + pageName); return false; }
             Page page = project.Pages.Single(p => p.Name == pageName);
+            if (directions == "CableRead" && page.PageType.ToString() == "Circuit" && page.AllPlacements.OfType<Function>().Count() == 6)
+            { CableFixture.GenerateAndRead(project, page); return true; }
             if (page.PageType.ToString() != "Circuit" || page.AllPlacements.Length != 0)
             { Log("page: " + page.PageType + " placements=" + page.AllPlacements.Length); return false; }
             double grid = page.GridSize;
-            var layout = new ConnectionCreateLayout(grid, directions.Split(','));
+            List<(double[] Pin, string Facing)> targets = directions == "Cable"
+                ? Enumerable.Range(0, 3).SelectMany(i => new (double[], string)[] { ([(20 + 15 * i) * grid, 45 * grid], "Down"), ([(20 + 15 * i) * grid, 25 * grid], "Up") }).ToList()
+                : new ConnectionCreateLayout(grid, directions.Split(',')).Targets;
             var choices = new List<(SymbolVariant Variant, PointD Position)>();
-            foreach (var target in layout.Targets)
+            foreach (var target in targets)
             {
                 var choice = project.SymbolLibraries.Where(l => l.Name == "IEC_symbol").SelectMany(l => l.Symbols)
                     .Where(s => s.Name == "BAT" && s.Type.ToString() == "Function").SelectMany(s => s.Variants)
@@ -70,6 +74,8 @@ public sealed class SetupAction : IEplAction
                 undo.CloseUndo();
             }
             catch { transaction.Abort(); throw; }
+            if (directions == "Cable")
+            { return true; }
             if (page.AllPlacements.OfType<SymbolReference>().Any(r => r.GraphicalConnections.Length != 0))
             { throw new InvalidOperationException("Fixture endpoints already autoconnect before node placement."); }
             return true;
