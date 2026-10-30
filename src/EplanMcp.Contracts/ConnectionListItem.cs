@@ -29,4 +29,7 @@ public sealed class ConnectionListItem
 
     /// <summary><see cref="Kind2D"/> or <see cref="Kind3D"/>.</summary>
     public string Kind { get; set; } = Kind2D;
+
+    /// <summary>Observed connection identity; null for concise output, unplaced or 3D connections.</summary>
+    public DrawingLocator? Locator { get; set; }
 }

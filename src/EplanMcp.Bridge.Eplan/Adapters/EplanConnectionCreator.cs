@@ -61,22 +61,30 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to)
                 || !scene.Graphical.Any(s => s[0].SequenceEqual(from.Location) && s[1].SequenceEqual(to.Location) || s[1].SequenceEqual(from.Location) && s[0].SequenceEqual(to.Location)))
             { inventory.Complete = false; continue; }
-            using ConnectionPropertyList properties = connection.Properties;
-            string? Read(int number)
-            { using AnyPropertyId id = number; using PropertyValue value = properties[id]; return EplanText.Read(value, EplanText.Language(null)); }
-            var wire = new CableDefinitionPlanner.Wire
-            {
-                Points = [from.Location, to.Location],
-                Pins = [Key(a, start.Index), Key(b, end.Index)],
-                Cable = connection.ConnectionDefPoints.Length > 0 ? "<definition-points>" : Read(20005),
-                Label = Read(31011),
-                Colour = Read(31004),
-                CrossSection = Read(31002)
-            };
-            wire.Locator = DrawingLocators.FromIdentifier(project, page, connection.ToStringIdentifier(), SnapshotCanonical.Sha256(JObject.FromObject(wire).ToString()));
-            inventory.Wires.Add(wire);
+            inventory.Wires.Add(ReadCableWire(project, page, connection, [from.Location, to.Location]));
         }
         return inventory;
+    }
+    // Listing and planning hash the same detached evidence, before assigning the locator itself.
+    internal static CableDefinitionPlanner.Wire ReadCableWire(string project, string page, Connection connection, double[][]? points = null)
+    {
+        double[] Point(Pin? pin) => pin?.ParentFunction is { } owner && owner.GraphicalConnectionPoints.FirstOrDefault(p => p.Index == pin.Index) is { } graphical
+            ? [owner.Location.X + graphical.Location.X, owner.Location.Y + graphical.Location.Y] : [];
+        Pin? start = connection.StartPin, end = connection.EndPin;
+        using ConnectionPropertyList properties = connection.Properties;
+        string? Read(int number)
+        { using AnyPropertyId id = number; using PropertyValue value = properties[id]; return EplanText.Read(value, EplanText.Language(null)); }
+        var wire = new CableDefinitionPlanner.Wire
+        {
+            Points = points ?? [Point(start), Point(end)],
+            Pins = [start?.ParentFunction is { } a ? Key(a, start.Index) : "", end?.ParentFunction is { } b ? Key(b, end.Index) : ""],
+            Cable = connection.ConnectionDefPoints.Length > 0 ? "<definition-points>" : Read(20005),
+            Label = Read(31011),
+            Colour = Read(31004),
+            CrossSection = Read(31002)
+        };
+        CableDefinitionPlanner.Identify(wire, project, page, connection.ToStringIdentifier());
+        return wire;
     }
     public System.Action Prepare(string project, string page, JArray symbols)
     {

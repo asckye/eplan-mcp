@@ -115,7 +115,7 @@ public sealed class ConnectionToolsInteropTests : IAsyncDisposable
     }
 
     private Task<CallToolResult> List(string device = "", string page = "", int limit = ConnectionTools.DefaultLimit, string cursor = "") =>
-        ConnectionTools.ConnectionListAsync(_client, string.Empty, device, page, limit, cursor, TestContext.Current.CancellationToken);
+        ConnectionTools.ConnectionListAsync(_client, string.Empty, device, page, limit, cursor, cancellationToken: TestContext.Current.CancellationToken);
 
     private static JsonElement Structured(CallToolResult result)
     {

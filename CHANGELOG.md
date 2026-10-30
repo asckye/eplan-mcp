@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Added
+- `eplan_connection_list` 增加 `response_format=detailed`，返回与电缆规划同源的连接定位器，可直接用于 `cable_definition` 芯线；默认简洁输出不变。
 - M8 T8a：`eplan_connection_create` 增加电缆定义/芯线只读规划，逐芯预测连接归属、编号/标签、颜色及截面，校验复合键、整次调用限额与完整相交范围并固定 stale 指纹；执行仍为 `CAPABILITY_MISSING`，留 T8b 核验 A55 多阶段提交，不增加工具或 Bridge 操作。
 - M8 T5b：注册 `eplan_placement_update`（full、Write）：整体移动无组符号及属性文字、自由文本/线/矩形，读回与提交后自动线校验；失败整体撤回，无变化不留撤销步，成功一步撤销。逻辑连接另用既有生成工具更新；新增 Large 未运行。
 - M8 T5a：增加 `eplan_placement_update` 未注册契约和绝对移动规划，包含父符号全部属性文字、栅格/外框/碰撞及自动线影响预测；拒绝组与宏组，校验陈旧证据并识别 no-op，执行留 T5b。

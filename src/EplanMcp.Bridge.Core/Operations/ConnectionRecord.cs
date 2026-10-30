@@ -1,3 +1,5 @@
+using EplanMcp.Contracts;
+
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>One connection as <see cref="IConnectionReader"/> reads it: EPLAN's values, unchanged.</summary>
@@ -29,4 +31,7 @@ public sealed class ConnectionRecord
 
     /// <summary>The display text of <c>CONNECTION_DESIGNATION</c>, read for cable cores only; null otherwise.</summary>
     public string? Designation { get; set; }
+
+    /// <summary>Connection identity computed from the cable inventory evidence, when requested.</summary>
+    public DrawingLocator? Locator { get; set; }
 }

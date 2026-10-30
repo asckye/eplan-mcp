@@ -6,6 +6,45 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class CableDefinitionPlannerTests
 {
+    [Fact]
+    public void ConnectionLocator_MatchesOriginalInventoryDigestAndCanBeRecomputed()
+    {
+        var wire = new EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Wire
+        {
+            Points = [[40, 8], [40, 40]],
+            Pins = ["17/3/0", "17/4/0"],
+            Label = "7",
+            Colour = "BU",
+            CrossSection = "1,5",
+        };
+        string expected = EplanMcp.Bridge.Core.Operations.SnapshotCanonical.Sha256(JObject.FromObject(wire).ToString());
+        EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Identify(wire, "scratch-project", ConnectionCreateFixture.PageName, "0/9/9/0");
+        Assert.Equal(expected, wire.Locator.Digest);
+        Assert.Equal(("scratch-project", ConnectionCreateFixture.PageName, 9, 9L), (wire.Locator.Project, wire.Locator.Page, wire.Locator.Type, wire.Locator.Oid));
+        EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Identify(wire, "scratch-project", ConnectionCreateFixture.PageName, "999/9/9/0");
+        Assert.Equal(expected, wire.Locator.Digest);
+    }
+
+    [Theory]
+    [InlineData("Points", "[[40,8],[40,44]]")]
+    [InlineData("Pins", "[\"17/3/0\",\"17/5/0\"]")]
+    [InlineData("Cable", "\"-W9\"")]
+    [InlineData("Label", "\"8\"")]
+    [InlineData("Colour", "\"BK\"")]
+    [InlineData("CrossSection", "\"2,5\"")]
+    public void ConnectionLocator_AnyInventoryEvidenceChanges_ChangesDigest(string field, string value)
+    {
+        var fixture = new CableDefinitionFixture();
+        var wire = fixture.AddExisting();
+        EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Identify(wire, "scratch-project", ConnectionCreateFixture.PageName, "0/9/9/0");
+        string before = wire.Locator.Digest;
+        JObject changed = JObject.FromObject(wire);
+        changed[field] = JToken.Parse(value);
+        wire = changed.ToObject<EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Wire>()!;
+        EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.Identify(wire, "scratch-project", ConnectionCreateFixture.PageName, "0/9/9/0");
+        Assert.NotEqual(before, wire.Locator.Digest);
+    }
+
     [Theory]
     [InlineData("-W9", "+A1-W9", true)]
     [InlineData("=GAA+A1-W9", "+A1-W9", true)]

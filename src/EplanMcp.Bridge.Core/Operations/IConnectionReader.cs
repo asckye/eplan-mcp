@@ -14,5 +14,5 @@ public interface IConnectionReader
     /// whose full name is exactly this; with both, those meeting both. At least one is given. Null when the project
     /// has no page of that name.
     /// </summary>
-    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page);
+    public IReadOnlyList<ConnectionRecord>? ReadConnections(string projectPath, string? device, string? page, bool detailed = false);
 }

@@ -29,6 +29,14 @@ public static class CableDefinitionPlanner
     }
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
 
+    /// <summary>Assigns the observed connection identity using the inventory's original evidence format.</summary>
+    public static void Identify(Wire wire, string project, string page, string identifier)
+    {
+        // The digest includes the empty locator, never its own previous value.
+        wire.Locator = new();
+        wire.Locator = DrawingLocators.FromIdentifier(project, page, identifier, SnapshotCanonical.Sha256(JObject.FromObject(wire).ToString()));
+    }
+
     /// <summary>A55: ignore empty structure segments and tolerate a dropped unused function structure.</summary>
     public static bool SameName(string requested, string actual, string page)
     {

@@ -29,6 +29,17 @@ public sealed class ConnectionListOperationTests
     }
 
     [Fact]
+    public void Execute_Detailed_PreservesConnectionLocatorWithoutGivingOneTo3D()
+    {
+        var locator = new DrawingLocator { Project = Path1, Page = Page1, Type = 9, Oid = 42, Digest = new string('c', 64) };
+        _connections.Connections.Add(new ConnectionRecord { Page = Page1, Locator = locator });
+        _connections.Connections.Add(new ConnectionRecord { Page = Page1, Is3D = true, Locator = locator });
+        var data = Run(new ConnectionListArgs { Page = Page1, Detailed = true, Limit = 50 });
+        Assert.Same(locator, data.Items[0].Locator);
+        Assert.Null(data.Items[1].Locator);
+    }
+
+    [Fact]
     public void Execute_ByPage_ListsThatPagesConnectionsInEplansOrder()
     {
         _connections.Connections.AddRange(

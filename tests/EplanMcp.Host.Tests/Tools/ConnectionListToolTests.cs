@@ -25,6 +25,42 @@ public sealed class ConnectionListToolTests
     }
 
     [Fact]
+    public async Task ConnectionList_Detailed_PreservesExactLocatorAndConciseBytes()
+    {
+        var locator = new DrawingLocator { Project = @"D:\Projects\Line1", Page = Page1, Type = 9, Oid = 42, Digest = new string('c', 64) };
+        _connections.Add(new ConnectionListItem { Locator = locator });
+        CallToolResult concise = await List(page: Page1);
+        const string expected = """{"project":"Line1","connections":[{"from":null,"to":null,"page":null,"crossSection":null,"colour":null,"kind":"2d"}],"total":1,"nextCursor":null,"truncated":false,"hint":null}""";
+        Assert.Equal(expected, Structured(concise).GetRawText());
+        Assert.Equal(expected, Text(concise, 1));
+        Assert.Equal("Listed 1 connection.", Text(concise, 0));
+        Assert.False(((ConnectionListArgs)_bridge.Calls[0].Args!).Detailed);
+
+        JsonElement detailed = Structured(await ConnectionTools.ConnectionListAsync(_bridge, page: Page1, response_format: "detailed", cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(JsonSerializer.SerializeToElement(locator, HostJson.Options).GetRawText(), detailed.GetProperty("connections")[0].GetProperty("locator").GetRawText());
+        Assert.True(((ConnectionListArgs)_bridge.Calls[1].Args!).Detailed);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("concise")]
+    [InlineData("detailed")]
+    public async Task ConnectionList_NoLocator_OmitsItForAllFormats(string? format)
+    {
+        _connections.Add(new ConnectionListItem { Kind = ConnectionListItem.Kind3D });
+        JsonElement data = Structured(await ConnectionTools.ConnectionListAsync(_bridge, device: "-K1", response_format: format!, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.False(data.GetProperty("connections")[0].TryGetProperty("locator", out _));
+    }
+
+    [Fact]
+    public async Task ConnectionList_UnknownFormat_IsInvalidBeforeBridgeRead()
+    {
+        var result = await ConnectionTools.ConnectionListAsync(_bridge, page: Page1, response_format: "verbose", cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(result).GetProperty("reason").GetString());
+        Assert.Empty(_bridge.Calls);
+    }
+
+    [Fact]
     public async Task ConnectionList_PassesDeviceAndPageAndThePageToTheBridge()
     {
         await List(project: "Line1", device: "-FC1", page: Page1, limit: 7);
@@ -128,7 +164,7 @@ public sealed class ConnectionListToolTests
         _connections.AddRange(Enumerable.Range(1, 3).Select(i => new ConnectionListItem { Colour = $"C{i}" }));
         string cursor = Structured(await List(page: Page1, limit: 1)).GetProperty("nextCursor").GetString()!;
 
-        CallToolResult result = await ConnectionTools.ConnectionListAsync(_bridge, null!, null!, Page1, 1, cursor, TestContext.Current.CancellationToken);
+        CallToolResult result = await ConnectionTools.ConnectionListAsync(_bridge, null!, null!, Page1, 1, cursor, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("C2", Structured(result).GetProperty("connections")[0].GetProperty("colour").GetString());
     }
@@ -182,7 +218,7 @@ public sealed class ConnectionListToolTests
     }
 
     private Task<CallToolResult> List(string project = "", string device = "", string page = "", int limit = ConnectionTools.DefaultLimit, string cursor = "") =>
-        ConnectionTools.ConnectionListAsync(_bridge, project, device, page, limit, cursor, TestContext.Current.CancellationToken);
+        ConnectionTools.ConnectionListAsync(_bridge, project, device, page, limit, cursor, cancellationToken: TestContext.Current.CancellationToken);
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 
