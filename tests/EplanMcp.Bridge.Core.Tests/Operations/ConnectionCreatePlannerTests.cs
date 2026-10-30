@@ -274,4 +274,20 @@ public sealed class ConnectionCreatePlannerTests
         fixture.Scene.Page.Placements.Add(new() { Locator = locator, Kind = "LocationBox", Location = [0, 0], Bounds = [2, 2, 40, 40] });
         Assert.Equal("not_started", (string?)fixture.Plan()["execution"]);
     }
+
+    [Fact]
+    public void Scene_NodePinsAtOneCentre_AreAllowed_ButPinsOfTwoPlacementsAtOnePoint_AreNamed()
+    {
+        var fixture = new ConnectionCreateFixture();
+        var node = new DrawingLocator { Project = "scratch-project", Page = ConnectionCreateFixture.PageName, Type = 42, Oid = 9, Digest = new string('d', 64) };
+        fixture.Scene.Page.Placements.Add(new() { Locator = node, Kind = "Function", Location = [60, 60], Bounds = [60, 60, 60, 60] });
+        foreach ((int index, string direction) in new[] { (0, "Left"), (1, "Right"), (2, "Down") })
+        { fixture.Scene.Pins.Add(FormattableString.Invariant($"42/9/{index}"), new() { Location = [60, 60], Direction = direction }); }
+        Assert.Equal("not_started", (string?)fixture.Plan()["execution"]);
+
+        fixture.Scene.Pins.Add("17/77/0", new() { Location = [60, 60], Direction = "Up" });
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
+        Assert.Contains("share 60,60", error.Message, StringComparison.Ordinal);
+    }
 }

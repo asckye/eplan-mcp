@@ -317,13 +317,17 @@ public static class ConnectionCreatePlanner
         if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""
             || !DrawingCoordinates.Contains(scene.Page.PageSize, [[p.Value.Location[0], p.Value.Location[1], p.Value.Location[0], p.Value.Location[1]]])) is { Key: not null } pin)
         { return "pin " + pin.Key + " at " + FormatPoint(pin.Value.Location) + " direction " + pin.Value.Direction + " is outside the page or undirected"; }
-        if (scene.Pins.GroupBy(p => FormatPoint(p.Value.Location), StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1) is { } shared)
+        // Acceptance trial: corner and T-node symbols keep all their pins at the node centre; only pins of different
+        // placements may not coincide.
+        if (scene.Pins.GroupBy(p => FormatPoint(p.Value.Location), StringComparer.Ordinal).FirstOrDefault(g => g.Select(p => Owner(p.Key)).Distinct(StringComparer.Ordinal).Count() > 1) is { } shared)
         { return "pins " + string.Join(", ", shared.Select(p => p.Key)) + " share " + shared.Key; }
         return null;
     }
 
     // Acceptance trial: a location box is a dashed frame around devices; wires and nodes cross and sit inside it.
     private static bool Obstacle(DrawingPlacement placement) => placement.Kind != "LocationBox";
+
+    private static string Owner(string pin) => string.Join("/", pin.Split('/').Take(2));
 
     private static string FormatPoint(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
 
