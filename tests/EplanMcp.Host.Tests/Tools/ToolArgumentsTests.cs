@@ -41,6 +41,7 @@ public sealed class ToolArgumentsTests
     [InlineData("")]
     [InlineData("zh_CN")]
     [InlineData("en_us")]
+    [InlineData("??_??")]
     public void CheckLanguage_AcceptsOmittedAndLanguageCodes(string? language)
     {
         var violations = new List<string>();
@@ -54,6 +55,8 @@ public sealed class ToolArgumentsTests
     [InlineData("zh")]
     [InlineData("zh-CN")]
     [InlineData("zh_CN;de_DE")]
+    [InlineData("??_??;en_US")]
+    [InlineData("en_US;??_??")]
     [InlineData("Chinese")]
     public void CheckLanguage_OtherShapes_AreAViolation(string language)
     {

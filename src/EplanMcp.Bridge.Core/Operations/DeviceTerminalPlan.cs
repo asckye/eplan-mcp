@@ -6,6 +6,8 @@ internal static class DeviceTerminalPlan
 {
     internal static void Check(DevicePlaceArgs args)
     {
+        if (args.TerminalStripText is { } raw && TextLanguages.Stored(raw).Count > 0)
+        { throw WriteArguments.Invalid(["/terminal_strip_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
         if (args.TerminalStrip is null)
         {
             if (args.TerminalNumber is not null || args.TerminalStripText is not null)

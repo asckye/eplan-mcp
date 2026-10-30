@@ -25,7 +25,7 @@ public sealed class PlcGetOperation(IProjectCatalog catalog, IDeviceReader devic
             project.Path,
             tag,
             "plc",
-            t => plcs.ReadPlc(project.Path, t, language),
+            t => plcs.ReadPlc(project.Path, t, language, args.Detailed),
             "No device in the project has this tag. Call eplan_device_list with category PLCBox to find the full tags of the PLC boxes.");
         if (record.Plc is not { } plc)
         {

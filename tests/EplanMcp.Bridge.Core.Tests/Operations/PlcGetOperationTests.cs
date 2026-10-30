@@ -7,6 +7,16 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PlcGetOperationTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Execute_ForwardsTheRequestedDetailLevel(bool detailed)
+    {
+        Plc("=K1+A2-KE1", "-KE1");
+        Run(new() { Plc = "=K1+A2-KE1", Detailed = detailed, Limit = 100 });
+        Assert.Equal(detailed, _plcs.Detailed);
+    }
+
     private const string Path1 = @"D:\Projects\Line1";
     private static readonly OpenProject _line1 = new() { Name = "Line1", Path = Path1, Current = true };
 
@@ -217,12 +227,14 @@ public sealed class PlcGetOperationTests
     /// <summary>Returns <see cref="Records"/> by full tag (ordinal), like the adapter's exact lookup; records every read.</summary>
     private sealed class FakePlcReader : IPlcReader
     {
+        public bool Detailed { get; private set; }
         public Dictionary<string, PlcRecord> Records { get; } = new(StringComparer.Ordinal);
 
         public List<(string Path, string Tag, string? Language)> Reads { get; } = [];
 
-        public PlcRecord? ReadPlc(string projectPath, string tag, string? language)
+        public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false)
         {
+            Detailed = detailed;
             Reads.Add((projectPath, tag, language));
             return Records.GetValueOrDefault(tag);
         }

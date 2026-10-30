@@ -26,6 +26,10 @@ internal static class EplanText
             return new TextLanguage(languages.GuiLanguage.GetNumber(), fallback: true);
         }
 
+        // A54/T4b: ISOCode.IsValid rejects the language-independent entry even though MultiLangString supports it.
+        if (code == TextLanguages.Independent)
+        { return new TextLanguage(ISOCode.Language.L___, fallback: false); }
+
         using var iso = new ISOCode(code);
         return iso.IsValid()
             ? new TextLanguage(iso.GetNumber(), fallback: false)

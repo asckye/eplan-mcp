@@ -6,6 +6,8 @@ internal static class DevicePlcPlan
 {
     internal static void Check(DevicePlaceArgs args)
     {
+        if (args.PlcText is { } text && TextLanguages.Stored(text).Count > 0)
+        { throw WriteArguments.Invalid(["/plc_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
         if (args.PlcConnectionPoint is null && args.PlcAddress is null && args.PlcSymbolicAddress is null && args.PlcText is null)
         { return; }
         if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null

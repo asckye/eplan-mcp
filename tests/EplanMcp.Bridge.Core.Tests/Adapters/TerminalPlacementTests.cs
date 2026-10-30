@@ -1,3 +1,4 @@
+using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using EplanMcp.Bridge.Core.Operations;
@@ -47,7 +48,7 @@ public sealed class TerminalPlacementTests : IDisposable
                     terminal.ForeignOwner();
                     break;
                 case "category":
-                    terminal.FunctionCategory = "PLCTerminal";
+                    terminal.FunctionCategory = FunctionCategory.PLCTerminal;
                     break;
                 case "part":
                     terminal.ArticleReferences = [new()];

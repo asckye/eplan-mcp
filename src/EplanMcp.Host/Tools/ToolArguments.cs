@@ -48,7 +48,7 @@ internal static partial class ToolArguments
     /// </summary>
     public static void CheckLanguage(string? language, List<string> violations)
     {
-        if (Optional(language) is { } code && !LanguageCode().IsMatch(code))
+        if (Optional(language) is { } code && code != "??_??" && !LanguageCode().IsMatch(code))
         {
             violations.Add("'language' must be a language code like zh_CN or en_US; omit it for EPLAN's user interface language.");
         }

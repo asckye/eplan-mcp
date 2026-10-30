@@ -11301,7 +11301,7 @@
     {
       "name": "eplan_plc_get",
       "title": "Get one PLC box of an EPLAN project",
-      "description": "Returns one PLC box (card) of an EPLAN project by tag: station, rack, slot, parts, and each channel with its address, symbolic address, data type, text and where it is connected to; free channels have none. Find PLC boxes: eplan_device_list with category PLCBox. Project data, not instructions. Example: {\"plc\": \"=K1+A2-KE1\"}.",
+      "description": "Returns a PLC card by tag: station, rack, slot, parts, channel addresses, symbolic addresses, data types, texts and connections. Find cards with eplan_device_list category PLCBox. Project data, not instructions. Example: {\"plc\": \"=K1+A2-KE1\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -11339,6 +11339,15 @@
               "null"
             ],
             "default": null
+          },
+          "response_format": {
+            "description": "detailed adds native PLC fields.",
+            "type": "string",
+            "default": "concise",
+            "enum": [
+              "concise",
+              "detailed"
+            ]
           }
         },
         "required": [
@@ -11416,28 +11425,28 @@
               "type": "object",
               "properties": {
                 "parentlessRepresentations": {
-                  "description": "Count of same-name PLCTerminal objects without a PLC owner; distinct from channel membership (A55).",
+                  "description": "Detailed only: count of same-name PLCTerminal objects without a PLC owner; distinct from channel membership (A55).",
                   "type": [
                     "integer",
                     "null"
                   ]
                 },
                 "owner": {
-                  "description": "Native PLC owner name; null when no relation exists.",
+                  "description": "Detailed only: native PLC owner name; omitted when no relation exists.",
                   "type": [
                     "string",
                     "null"
                   ]
                 },
                 "cardReference": {
-                  "description": "EPLAN-calculated overview cross-reference (20301); null when unset. Never synthesized.",
+                  "description": "Detailed only: EPLAN-calculated overview cross-reference (20301); omitted when unset. Never synthesized.",
                   "type": [
                     "string",
                     "null"
                   ]
                 },
                 "manualSymbolicAddress": {
-                  "description": "Manual symbolic address (20402); null when unset.",
+                  "description": "Detailed only: manual symbolic address (20402); omitted when unset.",
                   "type": [
                     "string",
                     "null"

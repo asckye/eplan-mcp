@@ -1,4 +1,5 @@
 using Eplan.EplApi.Base;
+using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel.Graphics;
 
 namespace Eplan.EplApi.DataModel;
@@ -37,7 +38,16 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
     public string Name { get; set; } = "+A1-K1";
 }
 
-internal class Function(long oid) : FunctionBase(oid);
+internal class Function(long oid) : FunctionBase(oid)
+{
+    public Page Page { get; set; } = null!;
+    public bool IsMainFunction { get; set; }
+    public string? VisibleName { get; set; }
+    public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
+    public ArticleReference[] ArticleReferences { get; set; } = [];
+    public Function[] SubFunctions { get; set; } = [];
+    public Pin[] Pins { get; set; } = [];
+}
 
 internal sealed class PlotFrame(params Placement[] children)
 {
@@ -63,6 +73,11 @@ internal sealed class Project(params Page[] pages)
 {
     public Page[] Pages { get; } = pages;
     public string Display { get; set; } = "zh_CN;";
+    public Function[] UnplacedFunctions { get; set; } = [];
+    public bool RejectUnfilteredFunctions { get; set; }
+    public List<(string? Name, bool Exact, FunctionCategory? Category)> FunctionQueries { get; } = [];
+    public MasterData.SymbolLibrary[] SymbolLibraries { get; set; } = [];
+    public MasterData.FunctionDefinitionLibrary FunctionDefinitionLibrary { get; } = new();
 }
 
 internal static class DocumentTypeManager
@@ -73,7 +88,14 @@ internal static class DocumentTypeManager
 internal sealed class DMObjectsFinder(Project project) : IDisposable
 {
     public EObjects.TerminalStrip[] GetTerminalStrips(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<EObjects.TerminalStrip>()];
-    public Function[] GetFunctions(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>()];
+    public Function[] GetFunctions(FunctionsFilter? filter)
+    {
+        Assert.False(project.RejectUnfilteredFunctions && filter is null, "A whole-project function scan is forbidden for this read.");
+        project.FunctionQueries.Add((filter?.Name, filter?.ExactNameMatching ?? false, filter?.FunctionCategory));
+        IEnumerable<Function> functions = project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>().Concat(project.UnplacedFunctions);
+        return [.. functions.Where(f => (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
+            && (filter?.FunctionCategory is not { } category || f.FunctionCategory == category))];
+    }
     public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];
     public void Dispose() { }
 }

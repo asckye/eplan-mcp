@@ -31,6 +31,21 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     [Fact]
+    public void Plc_PlanReusesTheProjectNameScanForParentResolutionAndDuplicateChecks()
+    {
+        PlcSymbol();
+        DevicePlaceArgs args = Args();
+        args.Tag = "-KF1";
+        args.Symbol = "PLC_DI";
+        args.PlcConnectionPoint = "DI a.0";
+        args.PlcAddress = "I0.0";
+        args.PlcSymbolicAddress = "Start";
+        args.PlcText = "Start input";
+        Plan(args);
+        Assert.Equal(1, _store.NameReads);
+    }
+
+    [Fact]
     public void Plc_RejectsAPlainSymbolCallAndInconsistentDesignations()
     {
         PlcSymbol();

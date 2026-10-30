@@ -6,6 +6,18 @@ namespace EplanMcp.Contracts.Tests;
 [Trait("Size", "Small")]
 public sealed class DevicePlaceDtoTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PlcGet_DetailedAndIndependentLanguage_RoundTripAcrossPipeSerializers(bool detailed)
+    {
+        var args = new PlcGetArgs { Plc = "-KF1", Language = "??_??", Detailed = detailed };
+        PlcGetArgs bridge = JsonConvert.DeserializeObject<PlcGetArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
+        Assert.Equal(("-KF1", "??_??", detailed), (bridge.Plc, bridge.Language, bridge.Detailed));
+        PlcGetArgs host = System.Text.Json.JsonSerializer.Deserialize<PlcGetArgs>(JsonConvert.SerializeObject(bridge))!;
+        Assert.Equal(detailed, host.Detailed);
+    }
+
     [Fact]
     public void Plc_RoundTripsInputsAndComputedReadbackAcrossPipeSerializers()
     {

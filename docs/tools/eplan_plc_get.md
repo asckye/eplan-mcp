@@ -1,6 +1,6 @@
 # 工具规格：`eplan_plc_get`
 
-T7d 兼容读回字段：每通道增加 `owner`（原生 PLC 父名）、`manualSymbolicAddress`（20402）、`cardReference`（只读 20301 概览引用，未建立时为 null）及 `parentlessRepresentations`（同名且无 PLC 父对象的 PLCTerminal 数量，A55）。通道成员仍来自 `PLC.PLCTerminals`，不按名称去重；辅助表达数量单列，不合并为成员，也不填造引用。
+T7d 兼容读回字段仅在 `response_format=detailed` 时返回：`owner`（原生 PLC 父名）、`manualSymbolicAddress`（20402）、`cardReference`（只读 20301 概览引用）及 `parentlessRepresentations`（同名且无 PLC 父对象的 PLCTerminal 数量，A55）；未设置的可选字段省略。默认 concise 保持 T7d 之前的字段和 5k token 预算。通道成员仍来自 `PLC.PLCTerminals`，不按名称去重；辅助表达按卡的完整标识前缀查询，包含无页和跨页表达，不合并为成员，也不填造引用。
 
 | 项 | 内容 |
 |---|---|
@@ -20,9 +20,10 @@ T7d 兼容读回字段：每通道增加 `owner`（原生 PLC 父名）、`manua
 |---|---|---|---|---|
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `plc` | string | 是 | — | PLC 盒的设备标识，规则同 `eplan_device_get` 的 `tag`，如 `=K1+A2-KE1` |
-| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言 |
+| `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言；`??_??` 显式读取语言无关文本 |
 | `limit` | integer，1–200 | 否 | 100 | 每页最多列出的通道数 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor` |
+| `response_format` | concise / detailed | 否 | concise | detailed 增加上述原生读回字段；游标不能跨格式复用 |
 
 ## 3. 输出
 ```json

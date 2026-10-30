@@ -246,7 +246,7 @@ internal sealed class DeviceWriteTools
         {
             result.Functions = null;
             result.Unplaced = null; // A55: implicit representations are verified after commit.
-            result.Hint = "Verify committed PLC membership, calculated symbolic address and cardReference with eplan_plc_get; null references are not synthesized. " + result.Hint;
+            result.Hint = "Verify committed PLC membership, calculated symbolic address and cardReference with eplan_plc_get response_format=detailed; unset references are not synthesized. " + result.Hint;
         }
         if (result.Plc is { } plc)
         {
