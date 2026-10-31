@@ -260,4 +260,46 @@ public sealed class CableDefinitionPlannerTests
         Assert.Contains(pointer, error.Metadata!["violations"], StringComparison.Ordinal);
     }
     private static void Missing(CableDefinitionFixture f) => Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => f.Plan()).Error.Reason);
+
+    [Fact]
+    public void DrawnPath_RunsThroughNodeCentresOnly_AndIsNullWhenAmbiguous()
+    {
+        var scene = new EplanMcp.Bridge.Core.Operations.ConnectionCreatePlanner.Scene();
+        scene.Pins["17/1/0"] = new() { Location = [10, 10], Direction = "Up" };
+        scene.Pins["17/2/0"] = new() { Location = [30, 30], Direction = "Left" };
+        foreach (int index in new[] { 0, 1, 2 })
+        { scene.Pins[$"42/9/{index}"] = new() { Location = [10, 30], Direction = "Down" }; }
+        scene.Graphical.Add([[10, 10], [10, 30]]);
+        scene.Graphical.Add([[10, 30], [30, 30]]);
+        Assert.Equal([[10, 10], [10, 30], [30, 30]], EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30]));
+
+        scene.Pins["17/3/0"] = new() { Location = [20, 30], Direction = "Up" };
+        scene.Graphical.RemoveAt(1);
+        scene.Graphical.Add([[10, 30], [20, 30]]);
+        scene.Graphical.Add([[20, 30], [30, 30]]);
+        Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30])); // a device pin is not a pass-through point
+
+        scene.Graphical.Clear();
+        scene.Graphical.Add([[10, 10], [10, 30]]);
+        scene.Graphical.Add([[10, 30], [30, 30]]);
+        scene.Pins["43/8/0"] = new() { Location = [10, 20], Direction = "Up" };
+        scene.Pins["43/8/1"] = new() { Location = [10, 20], Direction = "Down" };
+        scene.Graphical.Add([[10, 10], [10, 20]]);
+        scene.Graphical.Add([[10, 20], [10, 30]]);
+        Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30])); // two routes
+    }
+
+    [Fact]
+    public void ExistingCore_DrawnThroughANode_IsSelectedByItsDrawnPath()
+    {
+        var f = new CableDefinitionFixture();
+        var wire = f.AddExisting();
+        f.Base.Scene.Graphical.RemoveAt(f.Base.Scene.Graphical.Count - 1);
+        wire.Path = [[40, 8], [40, 24], [60, 24]];
+        f.Base.Scene.Graphical.Add([[40, 8], [40, 24]]);
+        f.Base.Scene.Graphical.Add([[40, 24], [60, 24]]);
+        f.Cable["points"] = JArray.Parse("[[32,16],[48,16]]");
+        f.Cores[0]!["connection"] = CableDefinitionFixture.Reference(wire);
+        Assert.Equal(ExecutionState.NotStarted, (string?)f.Plan()["execution"]);
+    }
 }

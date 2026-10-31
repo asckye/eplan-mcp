@@ -21,6 +21,10 @@ public static class CableDefinitionPlanner
     {
         public DrawingLocator Locator { get; set; } = new();
         public double[][] Points { get; set; } = [];
+        /// <summary>The drawn path through corner and T-node centres, when it differs from the two end points. It is not part
+        /// of the locator digest, so listed and planned locators stay equal.</summary>
+        [Newtonsoft.Json.JsonIgnore]
+        public double[][]? Path { get; set; }
         public string[] Pins { get; set; } = [];
         public string? Cable { get; set; }
         public string? Label { get; set; }
@@ -28,6 +32,33 @@ public static class CableDefinitionPlanner
         public string? CrossSection { get; set; }
     }
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
+
+    /// <summary>The single drawn path between two pins whose inner points are all corner or T-node centres; null when none or several.</summary>
+    public static double[][]? DrawnPath(ConnectionCreatePlanner.Scene scene, double[] from, double[] to)
+    {
+        static string P(double[] p) => FormattableString.Invariant($"{p[0]:R},{p[1]:R}");
+        // A node symbol keeps all its pins at its centre (api-notes acceptance trial).
+        var centres = new HashSet<string>(scene.Pins.GroupBy(p => string.Join("/", p.Key.Split('/').Take(2)))
+            .Where(g => g.Count() > 1 && g.Select(p => P(p.Value.Location)).Distinct().Count() == 1).Select(g => P(g.First().Value.Location)));
+        var edges = scene.Graphical.SelectMany(s => new[] { (From: P(s[0]), To: s[1]), (From: P(s[1]), To: s[0]) }).ToLookup(e => e.From, e => e.To);
+        var paths = new List<double[][]>();
+        void Walk(double[] at, List<double[]> trail)
+        {
+            if (paths.Count > 1)
+            { return; }
+            foreach (double[] next in edges[P(at)])
+            {
+                if (trail.Any(t => P(t) == P(next)))
+                { continue; }
+                if (P(next) == P(to))
+                { paths.Add([.. trail, next]); continue; }
+                if (centres.Contains(P(next)))
+                { Walk(next, [.. trail, next]); }
+            }
+        }
+        Walk(from, [from]);
+        return paths.Count == 1 ? [.. paths[0]] : null;
+    }
 
     /// <summary>Assigns the observed connection identity using the inventory's original evidence format.</summary>
     public static void Identify(Wire wire, string project, string page, string identifier)
@@ -165,7 +196,7 @@ public static class CableDefinitionPlanner
         if (!inventory.Complete || inventory.Wires.Count > 10000)
         { throw Missing("the wire inventory is incomplete or too large"); }
         Require(!inventory.Names.Any(n => names.Any(d => SameName(d, n, scene.Page.Page))), "/items", "A cable designation already exists; choose an explicit unused name.");
-        candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Points, (Wire?)w)));
+        candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Path ?? w.Points, (Wire?)w)));
         foreach (JToken row in impact)
         {
             var matches = candidates.Where(c => JToken.DeepEquals(c.Reference, row["connection"])).ToArray();

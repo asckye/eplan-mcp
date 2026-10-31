@@ -58,13 +58,17 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         {
             Pin? start = connection.StartPin, end = connection.EndPin;
             if (start?.ParentFunction is not { } a || end?.ParentFunction is not { } b || a.Page?.Name != page || b.Page?.Name != page
-                || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to)
-                || !scene.Graphical.Any(s => s[0].SequenceEqual(from.Location) && s[1].SequenceEqual(to.Location) || s[1].SequenceEqual(from.Location) && s[0].SequenceEqual(to.Location)))
-            // Acceptance trial: logical connections run device to device through corner and T-node symbols, so one may span
-            // several drawn segments. It cannot be a core then; the planner still refuses a definition line that crosses
-            // any drawn segment outside the selected cores.
+                || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to))
             { continue; }
-            inventory.Wires.Add(ReadCableWire(project, page, connection, [from.Location, to.Location]));
+            // Acceptance trial: logical connections run device to device through corner and T-node symbols, so one may span
+            // several drawn segments. Only a unique path through node centres makes it a core candidate; the planner still
+            // refuses a definition line that crosses any drawn segment outside the selected cores.
+            if (CableDefinitionPlanner.DrawnPath(scene, from.Location, to.Location) is not { } path)
+            { continue; }
+            CableDefinitionPlanner.Wire wire = ReadCableWire(project, page, connection, [from.Location, to.Location]);
+            if (path.Length > 2)
+            { wire.Path = path; }
+            inventory.Wires.Add(wire);
         }
         return inventory;
     }
