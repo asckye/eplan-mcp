@@ -1,9 +1,7 @@
 # EPLAN API 覆盖报告
 
-> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-31 按 Bridge 源码 185ef35f 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
-
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 185ef35f）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 4e772d4f）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -150,7 +148,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_catalog_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | — |
 | eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/1 | — | — |
 | eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
-| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 0 | 0 | 0 | 0 | 0 | 3/1/1 | A9 A40 | — |
+| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 3/1/1 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
 | eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 205 | 112 | 5 | 63 | 0 | 3/1/1 | — | — |

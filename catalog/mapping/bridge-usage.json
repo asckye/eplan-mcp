@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-31",
-  "scannedSources": "185ef35f",
-  "sourceHash": "sha256:ad3035306ea349d42070565f84f0743f98a5408ef93884ecbf41a351ebf7b25c",
+  "scannedSources": "4e772d4f",
+  "sourceHash": "sha256:e58f80435691e1061fe36f6d55ea5a97c13701c5291f22ed9ba360db64eb3ee7",
   "operations": [
     {
       "name": "action.execute",
@@ -15,6 +15,14 @@
     {
       "name": "action.run",
       "class": "ActionRunOperation"
+    },
+    {
+      "name": "action.try.execute",
+      "class": "ActionTryExecuteOperation"
+    },
+    {
+      "name": "action.try.plan",
+      "class": "ActionTryPlanOperation"
     },
     {
       "name": "api.try.execute",
@@ -760,7 +768,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -994,6 +1003,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1033,6 +1043,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1072,6 +1083,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1115,6 +1127,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -1605,6 +1619,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -2258,6 +2274,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -2396,7 +2414,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -2490,7 +2509,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -2584,7 +2604,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -2678,7 +2699,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -2860,7 +2882,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -3094,6 +3117,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3133,6 +3157,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3172,6 +3197,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3213,6 +3239,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3252,6 +3279,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3294,6 +3322,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -3313,6 +3342,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -3331,7 +3361,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -4163,6 +4194,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -4594,6 +4627,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -4768,6 +4803,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -4825,6 +4862,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -4906,6 +4945,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -4999,6 +5040,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -5117,6 +5160,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -5301,6 +5345,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -5316,6 +5362,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6295,6 +6343,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6347,6 +6397,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6446,6 +6498,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6636,6 +6690,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6998,6 +7054,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -7013,6 +7071,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -7057,6 +7117,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -7608,6 +7670,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -7832,6 +7896,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -8266,6 +8332,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -8796,6 +8863,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -8911,6 +8979,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -9685,6 +9755,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -9700,6 +9772,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -10196,6 +10270,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10235,6 +10310,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10276,6 +10352,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10317,6 +10394,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10367,6 +10445,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11036,6 +11115,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11077,6 +11157,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11118,6 +11199,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11159,6 +11241,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11200,6 +11283,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11239,6 +11323,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11280,6 +11365,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11319,6 +11405,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11360,6 +11447,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11408,6 +11496,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11458,6 +11547,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11497,6 +11587,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11538,6 +11629,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11579,6 +11671,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11618,6 +11711,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -12196,6 +12290,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -12213,6 +12309,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -12380,6 +12478,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -12498,6 +12598,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -12691,6 +12793,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -12857,6 +12961,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -12983,6 +13089,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -13051,6 +13159,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -13161,6 +13271,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -13180,6 +13291,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -15390,6 +15502,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -16514,6 +16628,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -18304,6 +18420,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -18321,6 +18439,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -18446,6 +18566,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -18580,6 +18702,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -18794,6 +18918,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -19061,6 +19187,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -19079,6 +19207,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -19096,6 +19226,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -19113,6 +19245,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -19130,6 +19264,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -23278,6 +23414,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -23756,6 +23894,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -23850,6 +23990,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -23992,6 +24134,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -24032,6 +24176,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -24058,6 +24204,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -24174,6 +24322,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -24405,6 +24555,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -24665,6 +24817,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -24680,6 +24834,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -24722,6 +24878,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -24878,6 +25036,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -25457,6 +25617,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -25473,6 +25635,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -25923,6 +26087,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -25938,6 +26104,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26635,6 +26803,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26652,6 +26822,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26762,6 +26934,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -26794,6 +26968,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -26813,6 +26989,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26830,6 +27008,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26847,6 +27027,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26864,6 +27046,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26881,6 +27065,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26898,6 +27084,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -26985,6 +27173,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27002,6 +27192,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27019,6 +27211,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27036,6 +27230,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27053,6 +27249,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27070,6 +27268,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27217,6 +27417,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -27311,7 +27513,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -27394,7 +27597,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -27514,7 +27718,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -27652,7 +27857,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -27886,6 +28092,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -27925,6 +28132,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -27964,6 +28172,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28005,7 +28214,8 @@
         ],
         "operations": [
           "action.execute",
-          "action.run"
+          "action.run",
+          "action.try.execute"
         ]
       },
       {
@@ -28239,6 +28449,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28278,6 +28489,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28317,6 +28529,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28582,6 +28795,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "part.export.plan",
@@ -28799,6 +29014,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -28841,6 +29057,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -29712,6 +29930,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -29996,6 +30216,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -30317,6 +30539,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -30403,6 +30627,7 @@
         "operations": [
           "action.execute",
           "action.run",
+          "action.try.execute",
           "cable.generate.execute",
           "import.list.execute",
           "import.pdf_comments.execute",
@@ -31214,6 +31439,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -31229,6 +31456,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -33234,6 +33463,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -33974,6 +34205,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -33989,6 +34222,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -34147,6 +34382,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -34348,6 +34585,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -35141,6 +35380,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -36916,6 +37157,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -36931,6 +37174,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -37404,6 +37649,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -37516,6 +37763,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -37747,6 +37996,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -37790,6 +38040,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -37807,6 +38059,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -37945,6 +38199,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -38693,6 +38949,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -38708,6 +38966,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -39183,6 +39443,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39561,6 +39822,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -39578,6 +39841,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -39593,6 +39858,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39634,6 +39900,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39675,6 +39942,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39714,6 +39982,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39755,6 +40024,7 @@
         ],
         "operations": [
           "action.execute",
+          "action.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -40237,6 +40507,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -40452,6 +40724,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "cable.generate.execute",
@@ -40671,6 +40945,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -40758,6 +41034,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan",
           "translation.export.plan",
@@ -40819,6 +41097,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
@@ -40954,6 +41234,8 @@
           "action.execute",
           "action.plan",
           "action.run",
+          "action.try.execute",
+          "action.try.plan",
           "api.try.execute",
           "api.try.plan"
         ]
