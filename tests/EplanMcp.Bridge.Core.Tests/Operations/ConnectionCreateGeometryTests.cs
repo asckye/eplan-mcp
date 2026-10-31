@@ -42,8 +42,8 @@ public sealed class ConnectionCreateGeometryTests
     [InlineData("two_nodes", "At most one node")]
     [InlineData("endpoint", "strictly inside")]
     [InlineData("crossing", "one existing autoconnect segment")]
-    [InlineData("other_line", "path conflicts with existing autoconnect lines")]
-    [InlineData("branch_on_line", "path conflicts with existing autoconnect lines")]
+    [InlineData("other_line", "conflicts with the existing autoconnect line")]
+    [InlineData("branch_on_line", "conflicts with the existing autoconnect line")]
     [InlineData("diagonal", "both aligned directions")]
     public void Node_UnsupportedExistingLineIntersection_RefusesWithReason(string scenario, string reason)
     {

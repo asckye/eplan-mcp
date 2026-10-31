@@ -236,8 +236,10 @@ public static class ConnectionCreatePlanner
             double[][] s = segments[i];
             // Replacement halves inherit the old segment's contacts at its original endpoints.
             bool replacement = splits.Any(split => s.Any(p => p.SequenceEqual(split.Point)) && s.Any(p => split.Segment.Any(end => end.SequenceEqual(p))));
-            Require(replacement || !existingSegments.Any(e => Intersects(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
-                && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0]))), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
+            double[][]? conflict = replacement ? null : existingSegments.FirstOrDefault(e => Intersects(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
+                && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
+            Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
+                + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");
             if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
