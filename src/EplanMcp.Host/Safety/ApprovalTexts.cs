@@ -141,6 +141,8 @@ internal static class ApprovalTexts
         string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
         string name = Value(change.Name, zh);
+        if (change.Kind == "UI selection")
+        { return "Replace/clear UI selection before action; nonempty opens/focuses its page. See selection JSON below. UI state is not rolled back."; }
         return change.Action switch
         {
             _ when change.Property == "list" => zh
@@ -526,11 +528,22 @@ internal static class ApprovalTexts
 
     private static IEnumerable<string> TrialParameters(WritePlan plan)
     {
+        foreach (string line in SelectionLines(plan))
+        { yield return line; }
         if (plan.Details?.GetValueOrDefault("rawParameters") is not { } raw)
         { yield break; }
         string escaped = JsonSerializer.Serialize(raw);
         for (int offset = 0; offset < escaped.Length; offset += 300)
         { yield return string.Concat("parameters (JSON text): ", escaped.AsSpan(offset, Math.Min(300, escaped.Length - offset))); }
+    }
+    internal static IEnumerable<string> SelectionLines(WritePlan plan)
+    {
+        foreach (PlannedChange change in plan.Changes.Where(c => c.Kind == "UI selection"))
+        {
+            string text = JsonSerializer.Serialize(change.NewValue);
+            for (int offset = 0; offset < text.Length; offset += 300)
+            { yield return string.Concat("selection JSON: ", text.AsSpan(offset, Math.Min(300, text.Length - offset))); }
+        }
     }
     private static string Quoted(string? value, bool zh) => value is null ? (zh ? "（未设置）" : "(not set)") : "'" + Value(value, zh) + "'";
 

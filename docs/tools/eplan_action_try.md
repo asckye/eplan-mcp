@@ -13,6 +13,7 @@
 ## 2. 输入
 `project`、`action` 必填；`type` 可选，精确匹配目录 TYPE；`parameters` 默认 `{}`，同一目录行已知名称的扁平 string/number/bool 对象；`dry_run` 默认 false。
 最多 32 个参数，每值最多 100 字符；拒绝重复名、未知名、嵌套值、斜杠、引号、控制字符、路径、替代目标和内层 action。禁止项目/文件/凭据等控制参数。参数逐个交给 `ActionCallingContext.AddParameter`，与 action_run 相同，不接受命令行。
+可选 `selection`：0–200 个 object_find 定位符，沿用 selection_set 的 20000 字符/双份 6000 token 限制，转义后的审批文本不超过 55000 字符；空数组明确清空，省略保留现有上下文。非空须同一目标项目、同页，规划核对身份不改 UI；审批逐项展示完整定位符（分段避免截断），审计记录原文。批准后在 action 前打开目标页、replace 并读回；缺失或额外选择即拒绝执行。选择 UI 不由项目回滚恢复；失败后用 selection_get 核实。批量 harness 接入仅列为后续。
 ## 3. 输出
 结构化对象含 action、type、project、unverified、execution、dryRun、recovered、before、after、changed、truncated、hint。前后指纹只返回前 20 项；changed 比较完整证据。没有逐项读回或分页，不能据此认定 action 已验证。
 ## 4. 错误

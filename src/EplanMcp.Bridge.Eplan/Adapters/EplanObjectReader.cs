@@ -103,6 +103,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
 
     internal static SnapshotObject Describe(StorableObject obj, string kind)
     {
+        kind = kind == "boxeddevice" ? "blackbox" : kind == "terminal" && obj is Terminal t && t.FunctionCategory == FunctionCategory.PLCTerminal ? "plcterminal" : kind;
         if (!Legacy(kind))
         {
             return new SnapshotObject

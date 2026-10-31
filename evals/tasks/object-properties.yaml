@@ -3,14 +3,23 @@ set: dev
 prompt: |
   用通用对象工具查找 =GAA+A1&EFS1/1 页上的 Function，选择一个返回的 locator，分页读它的英文属性。
   返回一个实际读到的属性 ID 和正式名称；再查询 Arc 类型，说明本批是否支持。
+  然后用 selection_set 的 replace 和 show_page 选中刚才的一个 Function locator，读取选择并核对摘要相同，最后 clear 并读回空选择。
 answer:
   type: object
-  required: [property_id, property_name, arc_status]
+  required: [property_id, property_name, arc_status, selected_count, cleared_count, selection_exact]
   properties:
     property_id: { type: integer }
     property_name: { type: string }
     arc_status: { type: string }
+    selected_count: { type: integer }
+    cleared_count: { type: integer }
+    selection_exact: { type: boolean }
 checks:
   - answer: "$.arc_status"
     equals: supported
+  - { answer: '$.selected_count', equals: 1 }
+  - { answer: '$.cleared_count', equals: 0 }
+  - { answer: '$.selection_exact', equals: true }
+  - { answer: '$.cleared_count', equals: oracle.cleared }
+oracle: { cleared: { tool: eplan_selection_get, args: {}, pick: '$.total' } }
 budget: { max_tool_calls: 20 }

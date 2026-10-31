@@ -212,13 +212,37 @@ public sealed class ActionTryToolTests : IDisposable
         {
             var args = (ActionTryArgs)value!;
             var plan = _harness.Plan([new() { Action = "try", Kind = "action", Name = args.Action, NewValue = JsonSerializer.Serialize(args.Parameters, HostJson.Options) }]);
+            if (args.Selection is not null)
+            { plan.Changes.Add(new() { Action = "set", Kind = "UI selection", Name = "replace", NewValue = JsonSerializer.Serialize(args.Selection, HostJson.Options) }); }
             plan.Details = new() { ["unverified"] = "true", ["effects"] = "unverified; TYPE=DETAIL", ["actionRun"] = JsonSerializer.Serialize(Data(false), HostJson.Options) };
             return plan;
         };
         _harness.Bridge.Handlers[OperationNames.ActionTryExecute] = _ => Data(true);
     }
     public void Dispose() => _harness.Dispose();
-    private Task<CallToolResult> Run(bool dry = false) => _tool.TryAsync("Scratch", "XViewAction", "DETAIL", JsonSerializer.SerializeToElement(new { Factor = 1.25 }), dry, cancellationToken: TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Run(bool dry = false, List<DrawingLocator>? selection = null) => _tool.TryAsync("Scratch", "XViewAction", "DETAIL", JsonSerializer.SerializeToElement(new { Factor = 1.25 }), dry, selection, cancellationToken: TestContext.Current.CancellationToken);
+
+    [Fact]
+    public async Task Selection_IsFullyShownAndAudited_AndDenialNeverSendsExecution()
+    {
+        List<DrawingLocator> locators = [new() { Project = _harness.ProjectPath, Page = "=A/1", Type = 17, Oid = 11, Digest = new string('a', 64) }];
+        _approved = false;
+        Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(await Run(selection: locators)).GetProperty("reason").GetString());
+        Assert.Empty(_harness.Bridge.Writes);
+        ApprovalAskArgs text = ApprovalTexts.For(Assert.Single(_approval.Questions), CultureInfo.GetCultureInfo("en-US"));
+        string reconstructed = string.Concat(text.Changes.Where(c => c.StartsWith("selection JSON: ", StringComparison.Ordinal)).Select(c => c[16..]));
+        Assert.Equal(JsonSerializer.Serialize(JsonSerializer.Serialize(locators, HostJson.Options)), reconstructed);
+        Assert.All(text.Changes, line => Assert.True(line.Length <= 400));
+        Assert.True(text.Changes.Count <= 200);
+        _approved = true;
+        Assert.False((await Run(selection: locators)).IsError == true);
+        var execute = Assert.Single(_harness.Bridge.Calls, c => c.Operation == OperationNames.ActionTryExecute);
+        Assert.Equal(locators, Assert.IsType<ActionTryArgs>(execute.Args).Selection);
+        var records = Directory.GetFiles(_harness.Locations.Audit, "*.jsonl").SelectMany(File.ReadAllLines).Select(line => JsonNode.Parse(line)!);
+        var started = Assert.Single(records, r => r["kind"]!.GetValue<string>() == "execution_started");
+        Assert.Equal(JsonSerializer.Serialize(locators, HostJson.Options), started["arguments"]!["selection"]!.ToJsonString(HostJson.Options));
+        Assert.Contains("selection JSON", started["changes"]!.ToJsonString(), StringComparison.Ordinal);
+    }
     private ActionRunData Data(bool after) => new()
     {
         Before = new() { ["count:pages"] = "1", ["file:Design.eod"] = "10\t2026-10-30T00:00:00Z" },

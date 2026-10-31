@@ -19,6 +19,15 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
+            if (tool?.ProtocolTool.Name is SelectionTools.GetTool or SelectionTools.SetTool or ActionTryTools.Tool
+                && (context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Any(p => p.Key is "locators" or "selection" && (p.Value.ValueKind != JsonValueKind.Array || p.Value.EnumerateArray().Any(l => l.ValueKind != JsonValueKind.Object
+                    || l.EnumerateObject().Select(f => f.Name).Distinct(StringComparer.Ordinal).Count() != l.EnumerateObject().Count()
+                    || l.EnumerateObject().Any(f => f.Name is "type" or "oid" ? f.Value.ValueKind != JsonValueKind.Number || !f.Value.TryGetInt64(out long number) || number <= 0 || f.Name == "type" && number > int.MaxValue : f.Value.ValueKind != JsonValueKind.String)))))
+            {
+                BridgeError error = ToolResults.InvalidArgumentError(["Use locator objects with string fields and integer type/oid; nulls, coercion and duplicate fields are invalid."]);
+                error.Execution = tool.ProtocolTool.Name == ActionTryTools.Tool ? ExecutionState.NotStarted : null;
+                return ValueTask.FromResult(ToolResults.Error(error));
+            }
             if (tool?.ProtocolTool.Name == ActionTryTools.Tool && context.Params?.Arguments?.TryGetValue("parameters", out JsonElement parameters) == true && parameters.ValueKind != JsonValueKind.Object)
             {
                 BridgeError error = ToolResults.InvalidArgumentError(["parameters must be a flat object."]);

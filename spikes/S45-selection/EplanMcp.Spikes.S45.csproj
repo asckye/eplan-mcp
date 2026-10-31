@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net481</TargetFramework><AssemblyName>EplanMcp.Spikes.S45</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\S42-graphics-move-view\Evidence.cs" Link="Evidence.cs" />
+    <Compile Include="..\S42-graphics-move-view\SpikeAddIn.cs" Link="SpikeAddIn.cs" />
+    <Reference Include="Eplan.EplApi.AFu"><HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.Baseu"><HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.DataModelu"><HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.HEServicesu"><HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>$(EplanBinPath)\Newtonsoft.Json.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>

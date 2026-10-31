@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>Independent exclusions and explicit current-project guard before any trial inspection.</summary>
-public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunner runner) : Operation<ActionTryArgs, WritePlan>
+public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunner runner, ISelectionAdapter? selection = null) : Operation<ActionTryArgs, WritePlan>
 {
     public override string Name => OperationNames.ActionTryPlan;
-    internal static ActionRunRequest Check(ActionTryArgs args, IProjectCatalog catalog, IActionRunner runner)
+    internal static ActionRunRequest Check(ActionTryArgs args, IProjectCatalog catalog, IActionRunner runner, ISelectionAdapter? selection = null)
     {
         if (!ActionTryPolicy.Name(args.Action) || ActionTryPolicy.Denied("action", args.Action + "/" + args.Type)
             || args.Type is not null && !ActionTryPolicy.Name(args.Type)
@@ -23,6 +23,8 @@ public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunne
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
         if (!project.Current || catalog.ListOpenProjects().Count != 1)
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Only the target scratch project may be open and current for a trial."); }
+        if (args.Selection is { } locators)
+        { new SelectionOperation(catalog, selection, SelectionKind.Select).Validate(project.Path, locators); }
         var parameters = args.Parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
         if (args.Type is not null)
         { parameters.Add("TYPE", args.Type); }
@@ -32,14 +34,16 @@ public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunne
     }
     protected override WritePlan Execute(ActionTryArgs args)
     {
-        ActionRunRequest request = Check(args, catalog, runner);
+        ActionRunRequest request = Check(args, catalog, runner, selection);
         return new WritePlan
         {
             Project = request.Project!.Name,
             ProjectPath = request.Project.Path,
-            Fingerprint = request.StateFingerprint(),
-            Changes = [new PlannedChange { Action = "try", Kind = "action", Name = args.Action, NewValue = JsonConvert.SerializeObject(request.Data.Parameters) }],
+            Fingerprint = TrialFingerprint(request, args),
+            Changes = [new PlannedChange { Action = "try", Kind = "action", Name = args.Action, NewValue = JsonConvert.SerializeObject(request.Data.Parameters) },
+                .. args.Selection is null ? Array.Empty<PlannedChange>() : new[] { new PlannedChange { Action = "set", Kind = "UI selection", Name = "replace", NewValue = JsonConvert.SerializeObject(args.Selection) } }],
             Details = new() { ["unverified"] = "true", ["effects"] = "unverified; TYPE=" + args.Type + "; rollback and undo are unverified.", ["actionRun"] = JsonConvert.SerializeObject(request.Data) },
         };
     }
+    internal static string TrialFingerprint(ActionRunRequest request, ActionTryArgs args) => Fingerprint.Of([request.StateFingerprint(), JsonConvert.SerializeObject(args.Selection)]);
 }

@@ -27,5 +27,7 @@ public sealed class OperationRootTests
 
         Assert.Equal(("EplanMcp.Bridge.Core.Operations.ExportPlanOperation", "EplanMcp.Bridge.Core.Operations.ExportKind", "Pdf"), (pdf.ClassName, pdf.KindType, pdf.KindValue));
         Assert.Equal(("EplanMcp.Bridge.Core.Operations.ProjectExportRunOperation", "Labels"), (labels.ClassName, labels.KindValue));
+        Assert.Equal("Read", Assert.Single(_roots, r => r.Name == OperationNames.SelectionGet).KindValue);
+        Assert.Equal("Select", Assert.Single(_roots, r => r.Name == OperationNames.SelectionSet).KindValue);
     }
 }

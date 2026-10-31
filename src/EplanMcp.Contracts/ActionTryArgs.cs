@@ -8,4 +8,6 @@ public sealed class ActionTryArgs
     public string Project { get; set; } = string.Empty;
     public List<ActionParameter> Parameters { get; set; } = [];
     public string? Fingerprint { get; set; }
+    /// <summary>Optional exact UI selection; empty clears, null preserves existing context.</summary>
+    public List<DrawingLocator>? Selection { get; set; }
 }

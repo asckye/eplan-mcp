@@ -12,7 +12,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>Prepared LargeWrite scratch copy only; the trial approval is answered by the script and must be asked.</summary>
 [Trait("Size", "Large")]
-public sealed class ActionTryTests(LiveEplan eplan)
+public sealed class ActionTryTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Fact]
     public async Task ScratchCopy_ZoomAction_LeavesDesignFingerprintUnchanged()
@@ -24,6 +24,16 @@ public sealed class ActionTryTests(LiveEplan eplan)
             await using PlanStepLiveSession alone = await PlanStepLiveSession.StartAsync(eplan);
             string project = alone.Project;
             Assert.True(ScratchPaths.IsInside(project, [LiveEplan.ScratchRoot()]));
+            string page = Assert.Single(await alone.CreatePagesAsync(1));
+            await host.CallAsync("eplan_placement_create", new()
+            {
+                ["project"] = project,
+                ["page"] = page,
+                ["snap_to_grid"] = false,
+                ["items"] = new[] { new { kind = "rectangle", corners = (int[][])[[40, 40], [80, 80]] } }
+            });
+            JsonElement found = await host.CallAsync("eplan_object_find", new() { ["project"] = project, ["page"] = page, ["object_type"] = "Rectangle" });
+            DrawingLocator selected = Assert.Single(found.GetProperty("items").EnumerateArray()).GetProperty("locator").Deserialize<DrawingLocator>(HostJson.Options)!;
             Dictionary<string, string> files = LiveSnapshots.DesignFiles(project);
             var approvals = new TrialApprovals(ActionTryTools.Tool);
             var services = new ServiceCollection();
@@ -39,10 +49,9 @@ public sealed class ActionTryTests(LiveEplan eplan)
             var zoom = catalog.Items.First(i => i.Source == "ui" && i.Name == "XGedZoomAllAction" && i.Type is null);
             Assert.Null(zoom.ExcludedReason);
             // Zoom needs an open graphical page editor; without one EPLAN reports failure and the trial rolls back.
-            string page = (await alone.SnapshotAsync()).Pages.Select(p => p.Name).Order(StringComparer.Ordinal).First();
             await provider.GetRequiredService<IBridgeClient>().InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = project, Page = page }, TestContext.Current.CancellationToken);
             var tool = ActivatorUtilities.CreateInstance<ActionTryTools>(provider);
-            var result = await tool.TryAsync(project, zoom.Name, cancellationToken: TestContext.Current.CancellationToken);
+            var result = await tool.TryAsync(project, zoom.Name, selection: [selected], cancellationToken: TestContext.Current.CancellationToken);
             Assert.False(result.IsError == true, string.Join("\n", result.Content.OfType<ModelContextProtocol.Protocol.TextContentBlock>().Select(c => c.Text)));
             JsonElement data = result.StructuredContent!.Value;
             Assert.Equal("committed", data.GetProperty("execution").GetString());
@@ -50,6 +59,8 @@ public sealed class ActionTryTests(LiveEplan eplan)
             Assert.False(data.GetProperty("changed").GetBoolean());
             Assert.Equal(data.GetProperty("before").GetRawText(), data.GetProperty("after").GetRawText());
             Assert.Equal(ActionTryTools.Tool, Assert.Single(approvals.Questions).Tool);
+            SelectionData selection = await provider.GetRequiredService<IBridgeClient>().InvokeAsync<SelectionArgs, SelectionData>(OperationNames.SelectionGet, new(), TestContext.Current.CancellationToken);
+            Assert.Equal(selected.Digest, Assert.Single(selection.Objects).Locator.Digest);
             var audit = Directory.GetFiles(provider.GetRequiredService<HostDataLocations>().Audit, "*.jsonl").SelectMany(File.ReadAllLines)
                 .Select(line => JsonDocument.Parse(line).RootElement);
             Assert.Contains(audit, record => record.GetProperty("tool").GetString() == ActionTryTools.Tool

@@ -30,7 +30,7 @@ internal static class WriteChangeLines
         _ when c.Property == "translations" => $"translate {c.OldValue}",
         _ when c.Property == "value set" => $"apply value set '{c.NewValue}' to placeholder {c.Name}",
         _ => $"update {c.Kind} {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
-    });
+    }).Concat(ApprovalTexts.SelectionLines(plan));
 
     private static string Parts(string? count) => count == "1" ? "1 part" : (count ?? "?") + " parts";
 

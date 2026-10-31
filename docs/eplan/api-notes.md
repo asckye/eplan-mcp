@@ -681,6 +681,9 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 
 ## B. 官方文档与反射核实的事实（2026-10-12）
 
+### B11. 选择集签名（2026-10-31，仅目录工具与 XML 核对，未运行 EPLAN）
+`eplan_api_search/get` 确认 HEServices.SelectionSet.Selection 返回 StorableObject[]，CurrentlyEdited 返回 StorableObject（文档为 Page/InstallationSpace 或 null），OpenedPages 返回 Page[]；两个默认锁定开关均可设置。Edit.SelectObjects(string,StringCollection,bool) 返回 void；XML 要求 Type/Id/0，不含数据库前缀；ClearSelection 只清 GED，不清导航器。无编辑器、跨页及属性放置的实际效果、安全副作用与撤销历史由 Large SelectionSpikeTests 打印，尚未运行；实现只按独立读回报告成功，不假定原生调用全选中。A57 属性放置仍不提供无歧义定位符。
+
 > 出处缩写：`2026/<页面>` 指 `https://www.eplan.help/en-us/Infoportal/Content/api/2026/<页面>`；"XML" 指 EPLAN Bin 目录中随 API 一起提供的 IntelliSense 文档（`Eplan.EplApi.*u.xml`）；"反射" 指对 `C:\Program Files\EPLAN\Platform\2026.0.3\Bin` 中程序集做只读反射。
 
 ### B1. 程序集与目标框架

@@ -6,6 +6,10 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Read current UI context and a bounded selection block.</summary>
+    public const string SelectionGet = "selection.get";
+    /// <summary>Set UI selection without a project transaction.</summary>
+    public const string SelectionSet = "selection.set";
     /// <summary>Plans one unverified catalog group without invoking it.</summary>
     public const string ApiTryPlan = "api.try.plan";
     /// <summary>Executes one generated catalog call with outcome tracking.</summary>

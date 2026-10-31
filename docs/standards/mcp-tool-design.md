@@ -53,6 +53,7 @@
 | `symbol` | 符号 | `SymbolLibrary`、`SymbolVariant` |
 | `property` | 属性 | `PropertyValue` |
 | `object` | 数据字典对象，只读通用查找与属性读取 | `StorableObject` 及具体对象类型 |
+| `selection` | 当前窗口的对象选择与当前页；设置只改变 UI 状态，沿用 page_open 的 Read 注解 | `HEServices.SelectionSet`、`Edit.SelectObjects` |
 | `report` | 报表 | 报表页、报表模板 |
 | `check` | 检查 | 检查运行、消息管理 |
 | `export` | 导出 | PDF、DXF、图片…… |

@@ -10,9 +10,53 @@ public sealed class ActionTryOperationTests
     private readonly Runner _runner = new();
     private readonly FakeTransactions _transactions = new();
     private readonly Messages _messages = new();
+    private readonly SelectionOperationTests.Selection _selection = new();
     private static ActionTryArgs Args() => new() { Project = "Scratch", Action = "XViewAction", Type = "DETAIL", Parameters = [new() { Name = "Factor", Value = "1.25" }] };
-    private WritePlan Plan(ActionTryArgs args) => (WritePlan)new ActionTryPlanOperation(new FakeCatalog(_project), _runner).Execute(args)!;
-    private ActionRunData Execute(ActionTryArgs args) => (ActionRunData)new ActionTryExecuteOperation(new FakeCatalog(_project), _runner, _messages, _transactions).Execute(args)!;
+    private WritePlan Plan(ActionTryArgs args) => (WritePlan)new ActionTryPlanOperation(new FakeCatalog(_project), _runner, _selection).Execute(args)!;
+    private ActionRunData Execute(ActionTryArgs args) => (ActionRunData)new ActionTryExecuteOperation(new FakeCatalog(_project), _runner, _messages, _transactions, _selection).Execute(args)!;
+
+    [Fact]
+    public void Selection_PlanningHasNoUiEffect_ApprovalFingerprintBindsEveryLocator()
+    {
+        var args = Args();
+        args.Selection = [SelectionOperationTests.Locator()];
+        args.Fingerprint = Plan(args).Fingerprint;
+        Assert.Equal(0, _selection.Mutations);
+        args.Selection[0].Oid++;
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Reason);
+        Assert.Equal(0, _selection.Mutations);
+        Assert.Null(_runner.Action);
+    }
+
+    [Fact]
+    public void Selection_MismatchPreventsActionAndTransaction_ExactSelectionExecutesOnce()
+    {
+        var args = Args();
+        args.Selection = [SelectionOperationTests.Locator(), SelectionOperationTests.Locator(2)];
+        args.Fingerprint = Plan(args).Fingerprint;
+        _selection.Drop = true;
+        Assert.Equal(ExecutionState.NotStarted, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Execution);
+        Assert.Empty(_transactions.Calls);
+        Assert.Null(_runner.Action);
+        _selection.Drop = false;
+        Execute(args);
+        Assert.Equal(2, _selection.Current.Objects.Count);
+        Assert.Single(_transactions.Calls, c => c.StartsWith("Begin", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Selection_CrossProjectIsRejected_EmptyExplicitlyClears()
+    {
+        var args = Args();
+        args.Selection = [SelectionOperationTests.Locator(project: @"D:\real")];
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+        Assert.Null(_runner.Action);
+        args.Selection = [];
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Equal(1, _selection.Mutations);
+        Assert.Empty(_selection.Current.Objects);
+    }
 
     [Fact]
     public void Trial_UsesTypedParametersTransactionsAndFullFingerprintReadback()

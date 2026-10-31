@@ -3,7 +3,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>Trial execution uses the action runner and ordinary transaction/outcome infrastructure.</summary>
-public sealed class ActionTryExecuteOperation(IProjectCatalog catalog, IActionRunner runner, ISystemMessageReader messages, ITransactionScopeFactory transactions)
+public sealed class ActionTryExecuteOperation(IProjectCatalog catalog, IActionRunner runner, ISystemMessageReader messages, ITransactionScopeFactory transactions, ISelectionAdapter? selection = null)
     : Operation<ActionTryArgs, ActionRunData>, IWriteOperation
 {
     public override string Name => OperationNames.ActionTryExecute;
@@ -12,9 +12,12 @@ public sealed class ActionTryExecuteOperation(IProjectCatalog catalog, IActionRu
         ActionRunRequest request;
         try
         {
-            request = ActionTryPlanOperation.Check(args, catalog, runner);
-            if (string.IsNullOrEmpty(args.Fingerprint) || request.StateFingerprint() != args.Fingerprint)
+            request = ActionTryPlanOperation.Check(args, catalog, runner, selection);
+            if (string.IsNullOrEmpty(args.Fingerprint) || ActionTryPlanOperation.TrialFingerprint(request, args) != args.Fingerprint)
             { throw new BridgeErrorException(ErrorReason.PlanStale, "The trial plan changed; request a new plan."); }
+            if (args.Selection is { } locators && !((SelectionData)new SelectionOperation(catalog, selection, SelectionKind.Select).Execute(new SelectionArgs
+            { Mode = locators.Count == 0 ? "clear" : "replace", Locators = locators, ShowPage = locators.Count > 0 })!).Exact)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN did not select the exact action context; action was not run. Read eplan_selection_get."); }
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         var elapsed = System.Diagnostics.Stopwatch.StartNew();

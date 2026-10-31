@@ -15,9 +15,9 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
 {
     public const string Tool = "eplan_action_try";
     [McpServerTool(Name = Tool, Title = "Try an unverified catalog action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
-    [Description("Try one unverified catalog action in scratch; full + actionTry:on. eplan_action_catalog_get returns try_template parameters, selection guidance and deny status; INVALID_ARGUMENT includes the closest template. Always requires approval; refusal: APPROVAL_DENIED. Prefer verified task tools; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}")]
+    [Description("Try one unverified catalog action in scratch; full + actionTry:on. eplan_action_catalog_get returns try_template parameters, selection guidance and deny status; INVALID_ARGUMENT includes the closest template. Optional selection sets same-page discovery locators; [] clears, omission preserves UI context. Always requires approval; refusal: APPROVAL_DENIED. Prefer verified task tools; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}")]
     public async Task<CallToolResult> TryAsync(string project, string action, string? type = null, JsonElement? parameters = null, bool dry_run = false,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        List<DrawingLocator>? selection = null, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         ActionCatalogData? definitions = null;
         try
@@ -26,8 +26,12 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
             { throw ActionRunCatalog.Denied("Action trials are disabled."); }
             definitions = await catalog.ReadAsync(cancellationToken).ConfigureAwait(false);
             ActionTryArgs args = Check(definitions, project, action, type, parameters ?? default);
+            if (selection is not null && (!SelectionTools.Valid(selection, selection.Count == 0 ? "clear" : "replace")
+                || JsonSerializer.Serialize(JsonSerializer.Serialize(selection, HostJson.Options)).Length > 55000))
+            { throw new BridgeCallException(ToolResults.InvalidArgumentError(["selection must contain unique same-page discovery locators, at most 200 objects and 20000 JSON characters."])); }
+            args.Selection = selection;
             var request = new WriteRequest<ActionTryArgs, ActionTryArgs>(Tool, ToolTier.Write, OperationNames.ActionTryPlan, OperationNames.ActionTryExecute, args,
-                p => new() { Project = args.Project, Action = args.Action, Type = args.Type, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified action")
+                p => new() { Project = args.Project, Action = args.Action, Type = args.Type, Parameters = args.Parameters, Selection = args.Selection, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified action")
             { Unverified = true };
             WriteOutcome<ActionRunData> outcome = await writes.RunAsync<ActionTryArgs, ActionTryArgs, ActionRunData>(request, progress, cancellationToken).ConfigureAwait(false);
             ActionRunData before = JsonSerializer.Deserialize<ActionRunData>(outcome.Plan.Details!["actionRun"], HostJson.Options)!;
