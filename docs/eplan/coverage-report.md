@@ -168,14 +168,14 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 129 | 67 | 2 | 59 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 26 | 14 | 0 | 12 | 0 | 1/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 68 | 32 | 0 | 36 | 0 | 0/1/1 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/5/2 | A52 A55 | — |
-| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 83 | 40 | 1 | 41 | 0 | 1/2/3 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_connection_list | read | connection.list | 76 | 44 | 1 | 29 | 0 | 2/4/5 | — | 2026-10-20 pass（api-notes A19） |
+| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/5/4 | A52 A55 | — |
+| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 83 | 40 | 1 | 41 | 0 | 1/2/5 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_connection_list | read | connection.list | 76 | 44 | 1 | 29 | 0 | 2/4/6 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 91 | 40 | 1 | 50 | 0 | 0/1/1 | A24 | — |
 | eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 75 | 43 | 2 | 29 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 6/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 135 | 4 | 90 | 0 | 5/4/2 | A13 A14 A26 A53 A55 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 135 | 4 | 90 | 0 | 5/4/4 | A13 A14 A26 A53 A55 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 75 | 33 | 0 | 42 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 57 | 30 | 1 | 26 | 0 | 2/1/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 1/1/0 | A16 | — |
@@ -204,7 +204,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_page_create | write | page.create.execute<br>page.create.plan | 76 | 31 | 1 | 37 | 0 | 10/16/5 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 67 | 34 | 0 | 33 | 0 | 3/9/1 | A15 A18 A24 | — |
-| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 109 | 66 | 1 | 42 | 0 | 6/6/14 | A11 A12 | — |
+| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 109 | 66 | 1 | 42 | 0 | 6/6/16 | A11 A12 | — |
 | eplan_page_list | read | page.list | 41 | 19 | 1 | 21 | 0 | 15/4/10 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 25 | 13 | 0 | 12 | 0 | 4/2/2 | A54 | — |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 68 | 28 | 0 | 40 | 0 | 2/1/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |

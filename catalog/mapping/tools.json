@@ -3656,6 +3656,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
@@ -3664,6 +3669,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "InterruptionPairingSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -3817,6 +3827,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
@@ -3825,6 +3840,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "InterruptionPairingSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -3973,6 +3993,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
           },
           {
             "name": "CableDefinitionTests",
@@ -5064,9 +5089,19 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
+          },
+          {
+            "name": "InterruptionPairingSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -8922,6 +8957,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
             "name": "CheckAndReportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CheckAndReportTests.cs"
@@ -8935,6 +8975,11 @@
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
+          },
+          {
+            "name": "InterruptionPairingSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           },
           {
             "name": "MacroInsertTests",
