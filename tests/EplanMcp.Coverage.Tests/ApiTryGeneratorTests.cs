@@ -1,5 +1,5 @@
-using EplanMcp.Host.Tools;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Coverage.Tests;
 
