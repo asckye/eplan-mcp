@@ -70,7 +70,7 @@ internal sealed class ApiTools
             entry is null ? new BridgeError { Reason = ErrorReason.ResourceNotFound, Message = "API ID not found. Use eplan_api_search and pass an exact id or group." } : null);
     }
 
-    private static CallToolResult Page<T, TResult>(T[] rows, int limit, string? cursor, string fingerprint, string tool,
+    internal static CallToolResult Page<T, TResult>(T[] rows, int limit, string? cursor, string fingerprint, string tool,
         List<string> violations, Func<List<T>, string?, bool, string?, TResult> create, CancellationToken cancellationToken, BridgeError? missing = null)
     {
         if (limit is < 1 or > 100)
@@ -97,7 +97,7 @@ internal sealed class ApiTools
         {
             cancellationToken.ThrowIfCancellationRequested();
             items.Add(row);
-            if (ResultShaper.ResultTokens(JsonSerializer.Serialize(Result(), HostJson.Options)) > (tool == SearchTool ? ResultShaper.DefaultTokenBudget : ResultShaper.MaxTokenBudget) - 100)
+            if (ResultShaper.ResultTokens(JsonSerializer.Serialize(Result(), HostJson.Options)) > (tool.EndsWith("_search", StringComparison.Ordinal) ? ResultShaper.DefaultTokenBudget : ResultShaper.MaxTokenBudget) - 100)
             {
                 items.RemoveAt(items.Count - 1);
                 break;

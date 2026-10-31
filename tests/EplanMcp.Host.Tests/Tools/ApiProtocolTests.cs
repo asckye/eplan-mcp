@@ -26,6 +26,7 @@ public sealed class ApiProtocolTests
         builder.Logging.ClearProviders();
         builder.Services.AddEplanMcp().WithStreamServerTransport(toServer.Reader.AsStream(), toClient.Writer.AsStream());
         builder.Services.AddSingleton<IBridgeClient>(bridge);
+        builder.Services.AddSingleton(new ActionCatalogReader(() => (null, null)));
         using IHost host = builder.Build();
         CancellationToken token = TestContext.Current.CancellationToken;
         await host.StartAsync(token);
@@ -34,7 +35,7 @@ public sealed class ApiProtocolTests
             await using McpClient client = await McpClient.CreateAsync(
                 new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: token);
             var tools = await client.ListToolsAsync(cancellationToken: token);
-            foreach (string name in new[] { ApiTools.SearchTool, ApiTools.GetTool })
+            foreach (string name in new[] { ApiTools.SearchTool, ApiTools.GetTool, ActionCatalogTools.SearchTool, ActionCatalogTools.GetTool })
             {
                 var tool = Assert.Single(tools, t => t.Name == name).ProtocolTool;
                 Assert.Equal((true, false, true, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint,
@@ -48,6 +49,17 @@ public sealed class ApiProtocolTests
             var details = ApiToolTests.Data(await client.CallToolAsync(ApiTools.GetTool,
                 new Dictionary<string, object?> { ["id"] = "D:Function", ["limit"] = 1 }, cancellationToken: token));
             Assert.Equal("dictionary", details.GetProperty("items")[0].GetProperty("kind").GetString());
+            var actions = ApiToolTests.Data(await client.CallToolAsync(ActionCatalogTools.SearchTool,
+                new Dictionary<string, object?> { ["source"] = "official", ["tier"] = "A", ["text"] = "backup" }, cancellationToken: token));
+            Assert.Equal("MASTERDATA", Assert.Single(actions.GetProperty("items").EnumerateArray()).GetProperty("type").GetString());
+            var action = ApiToolTests.Data(await client.CallToolAsync(ActionCatalogTools.GetTool,
+                new Dictionary<string, object?> { ["name"] = "backup" }, cancellationToken: token));
+            Assert.Equal(2, action.GetProperty("total").GetInt32());
+            Assert.NotEmpty(action.GetProperty("gaps").EnumerateArray());
+            ApiToolTests.AssertError(await client.CallToolAsync(ActionCatalogTools.SearchTool,
+                new Dictionary<string, object?> { ["misspelled"] = true }, cancellationToken: token));
+            ApiToolTests.AssertError(await client.CallToolAsync(ActionCatalogTools.GetTool,
+                new Dictionary<string, object?> { ["name"] = "missing" }, cancellationToken: token), ErrorReason.ResourceNotFound);
             ApiToolTests.AssertError(await client.CallToolAsync(ApiTools.GetTool,
                 new Dictionary<string, object?> { ["id"] = "D:Function", ["misspelled"] = true }, cancellationToken: token));
             ApiToolTests.AssertError(await client.CallToolAsync(ApiTools.GetTool,
@@ -70,9 +82,12 @@ public sealed class ApiProtocolTests
         using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;
         Assert.DoesNotContain(options.ToolCollection!, t => t.ProtocolTool.Name is ApiTools.SearchTool or ApiTools.GetTool);
+        Assert.DoesNotContain(options.ToolCollection!, t => t.ProtocolTool.Name is ActionCatalogTools.SearchTool or ActionCatalogTools.GetTool);
         var names = options.ToolCollection!.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool.InputSchema
             .GetProperty("properties").GetProperty("tool").GetProperty("enum").EnumerateArray().Select(n => n.GetString());
         Assert.DoesNotContain(ApiTools.SearchTool, names);
         Assert.DoesNotContain(ApiTools.GetTool, names);
+        Assert.DoesNotContain(ActionCatalogTools.SearchTool, names);
+        Assert.DoesNotContain(ActionCatalogTools.GetTool, names);
     }
 }

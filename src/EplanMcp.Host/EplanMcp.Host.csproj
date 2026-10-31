@@ -24,6 +24,7 @@
     <EmbeddedResource Include="Tools\PlacementUpdate.usage.md" LogicalName="EplanMcp.Host.Tools.Usage.eplan_placement_update.md" />
     <EmbeddedResource Include="Tools\ActionRun.output.json" />
     <EmbeddedResource Include="Tools\ApiIndex.g.base64" LogicalName="EplanMcp.ApiIndex" />
+    <EmbeddedResource Include="..\..\catalog\eplan-2026.0.3\actions.json" LogicalName="EplanMcp.Actions" />
   </ItemGroup>
 
   <ItemGroup>

@@ -61,7 +61,8 @@
 | `translation` | 系统翻译库（所有项目共用） | `Translate.TranslateDatabase` |
 | `scratch` | 沙箱项目 | 本项目的概念 |
 | `message` | EPLAN 系统消息 | 系统消息树 |
-| `action` | EPLAN 的 action，只用于受控的 `eplan_action_run`（只执行白名单中的条目，[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
+| `action` | EPLAN 的 action，受控的 `eplan_action_run` 只执行白名单条目（[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
+| `action_catalog` | 官方与本机 UI action 的只读目录（[ADR-0030](../adr/0030-action-catalog-tiers.md)），查询不授予执行权限 | 官方 actions 及本机功能区/菜单定义 |
 | `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
 | `api` | ADR-0032 B 级离线能力目录，搜索重载组及查询签名、状态与证据 | 已提交的 API 目录与覆盖映射 |
 | `pack` | 工程包：开发目录 `packs-dev\`、已安装的版本 `packs\`（M6 设计 4.1） | 本项目的概念；包中的原生文件是 EPLAN 的宏、项目等 |
