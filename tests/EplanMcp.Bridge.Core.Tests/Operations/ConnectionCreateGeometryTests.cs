@@ -8,6 +8,142 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class ConnectionCreateGeometryTests
 {
     [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void TNode_InsideAlignedExistingLine_PredictsHalvesAndOpenBranch(bool horizontal, bool reverse)
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine(horizontal);
+        if (reverse)
+        {
+            fixture.Scene.Graphical[0] = fixture.Scene.Graphical[0].Reverse().ToArray();
+            fixture.Request["items"] = new JArray(fixture.Request["items"]!.Reverse().Select(n => n.DeepClone()));
+        }
+        // Native graphical discovery can report the same segment from both symbol references.
+        fixture.Scene.Graphical.Add(fixture.Scene.Graphical[0].Reverse().ToArray());
+        JObject plan = fixture.Plan();
+        JToken split = Assert.Single(plan["splitSegments"]!);
+        Assert.True(JToken.DeepEquals(JArray.FromObject(fixture.Scene.Graphical[0]), split["segment"]));
+        double[] point = horizontal ? [24, 24] : [16, 24];
+        Assert.Equal(point, split["position"]!.Values<double>());
+        List<double[][]> predicted = plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!;
+        Assert.Equal(3, predicted.Count);
+        foreach (double[] end in fixture.Scene.Graphical[0])
+        { AssertSegment(predicted, end, point); }
+        AssertSegment(predicted, point, horizontal ? [24, 40] : [32, 24]);
+        Assert.Empty(plan["logicalAfterGenerate"]!);
+    }
+
+    [Theory]
+    [InlineData("unaligned", "both aligned directions")]
+    [InlineData("corner", "Only a T-node")]
+    [InlineData("two_nodes", "At most one node")]
+    [InlineData("endpoint", "strictly inside")]
+    [InlineData("crossing", "one existing autoconnect segment")]
+    [InlineData("other_line", "path conflicts with existing autoconnect lines")]
+    [InlineData("branch_on_line", "path conflicts with existing autoconnect lines")]
+    [InlineData("diagonal", "both aligned directions")]
+    public void Node_UnsupportedExistingLineIntersection_RefusesWithReason(string scenario, string reason)
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine();
+        JArray items = (JArray)fixture.Request["items"]!;
+        switch (scenario)
+        {
+            case "unaligned":
+                items[0]!["directions"] = new JArray("Left", "Right", "Up");
+                break;
+            case "corner":
+                items[0]!["kind"] = "corner";
+                items[0]!["directions"] = new JArray("Up", "Right");
+                break;
+            case "two_nodes":
+                items.Add(ConnectionCreateFixture.Node("t_node", [16, 32], "Up", "Down", "Right"));
+                break;
+            case "endpoint":
+                items[0]!["position"] = new JArray(16, 8);
+                break;
+            case "crossing":
+                fixture.Scene.Graphical.Add([[8, 24], [40, 24]]);
+                break;
+            case "other_line":
+                fixture.Scene.Graphical.Add([[24, 16], [24, 32]]);
+                break;
+            case "diagonal":
+                fixture.Scene.Graphical[0] = [[8, 8], [24, 40]];
+                break;
+            case "branch_on_line":
+                // A branch from another same-call corner meets the old line away from the declared split.
+                items.Add(ConnectionCreateFixture.Node("corner", [8, 16], "Right", "Up"));
+                fixture.Symbols.Add(ConnectionCreateFixture.Variant("CO", "Routing", 1, "Right", "Up"));
+                fixture.Scene.SymbolBounds["CO/1"] = [-1, -1, 1, 1];
+                fixture.AddPin(3, [32, 16], "Left", [32, 14, 36, 18]);
+                break;
+        }
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Contains(reason, error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Split_WithDeviceAtBranchEnd_PredictsNewGroupIncludingPreservedPins()
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine(branchPin: true);
+        JObject plan = fixture.Plan();
+        Assert.Equal(["17/1/0", "17/2/0", "17/3/0"], Assert.Single(plan["logicalAfterGenerate"]!)["pins"]!.Values<string>());
+        Assert.Equal(4, plan["graphicalAutoconnect"]!.Count());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Split_ExistingCornerAtSegmentEnd_UsesDeviceConnectivityAndExcludesNodePins(bool branchPin)
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine(branchPin: branchPin);
+        fixture.Scene.Pins["17/2/0"].Location = [48, 40];
+        fixture.Scene.Page.Placements[1].Location = [48, 40];
+        fixture.Scene.Page.Placements[1].Bounds = [48, 38, 52, 42];
+        fixture.Scene.Pins["17/2/0"].Direction = "Left";
+        fixture.AddPin(9, [16, 40], "Down", [15, 39, 17, 41]);
+        fixture.Scene.Pins.Add("17/9/1", new() { Location = [16, 40], Direction = "Right" });
+        // Discovery inventories both halves of the old device-to-device path through the existing corner.
+        fixture.Scene.Graphical.Add([[16, 40], [48, 40]]);
+        JObject plan = fixture.Plan();
+        if (branchPin)
+        {
+            string?[] ends = Assert.Single(plan["logicalAfterGenerate"]!)["pins"]!.Values<string>().ToArray();
+            Assert.Equal(["17/1/0", "17/2/0", "17/3/0"], ends);
+        }
+        else
+        { Assert.Empty(plan["logicalAfterGenerate"]!); }
+    }
+
+    private static void AssertSegment(List<double[][]> segments, double[] a, double[] b) => Assert.Contains(segments,
+        s => s[0].SequenceEqual(a) && s[1].SequenceEqual(b) || s[1].SequenceEqual(a) && s[0].SequenceEqual(b));
+
+    [Fact]
+    public void Split_DifferentSegments_CanJoinTheirPreservedGroupsThroughBothTNodes()
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine();
+        fixture.AddPin(3, [64, 8], "Up", [62, 4, 66, 8]);
+        fixture.AddPin(4, [64, 40], "Down", [62, 40, 66, 44]);
+        fixture.Scene.Graphical.Add([[64, 8], [64, 40]]);
+        fixture.Scene.Logical.Add(new() { StartDevice = "17/3/0", EndDevice = "17/4/0" });
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("TOUL", "TNodeLeft", 9, "Up", "Down", "Left"));
+        fixture.Scene.SymbolBounds["TOUL/9"] = [-1, -1, 1, 1];
+        fixture.Request["items"]![1] = ConnectionCreateFixture.Node("t_node", [64, 24], "Up", "Down", "Left");
+        JObject plan = fixture.Plan();
+        Assert.Equal(2, plan["splitSegments"]!.Count());
+        Assert.Equal(5, plan["graphicalAutoconnect"]!.Count());
+        Assert.Equal(["17/1/0", "17/2/0", "17/3/0", "17/4/0"], Assert.Single(plan["logicalAfterGenerate"]!)["pins"]!.Values<string>());
+    }
+
+    [Theory]
     [InlineData("Up", 0)]
     [InlineData("Down", 0)]
     [InlineData("Left", 0)]

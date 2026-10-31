@@ -42,6 +42,36 @@ internal sealed class ConnectionCreateFixture : ISymbolReader
     }
 
     internal JObject Plan(string? fingerprint = null) => ConnectionCreatePlanner.Plan(Request.ToString(), Scene, this, fingerprint);
+    internal void SplitLine(bool horizontal = false, bool branchPin = false)
+    {
+        Scene.Pins.Clear();
+        Scene.Page.Placements.Clear();
+        Symbols.Clear();
+        if (horizontal)
+        {
+            AddPin(1, [8, 24], "Right", [4, 22, 8, 26]);
+            AddPin(2, [40, 24], "Left", [40, 22, 44, 26]);
+            Symbols.Add(Variant("TLRO", "TNodeUp", 8, "Left", "Right", "Up"));
+            Symbols.Add(Variant("CO", "Routing", 0, "Down", "Right"));
+            Scene.Graphical = [[[8, 24], [40, 24]]];
+            Request["items"] = new JArray(Node("t_node", [24, 24], "Left", "Right", "Up"), Node("corner", [24, 40], "Down", "Right"));
+            if (branchPin)
+            { AddPin(3, [40, 40], "Left", [40, 38, 44, 42]); }
+        }
+        else
+        {
+            AddPin(1, [16, 8], "Up", [14, 4, 18, 8]);
+            AddPin(2, [16, 40], "Down", [14, 40, 18, 44]);
+            Symbols.Add(Variant("TOUR", "TNodeRight", 8, "Up", "Down", "Right"));
+            Symbols.Add(Variant("CO", "Routing", 0, "Left", "Down"));
+            Scene.SymbolBounds["TOUR/8"] = [-1, -1, 1, 1];
+            Scene.Graphical = [[[16, 8], [16, 40]]];
+            Request["items"] = new JArray(Node("t_node", [16, 24], "Up", "Down", "Right"), Node("corner", [32, 24], "Left", "Down"));
+            if (branchPin)
+            { AddPin(3, [32, 8], "Up", [30, 4, 34, 8]); }
+        }
+        Scene.Logical = [new() { StartDevice = "17/1/0", EndDevice = "17/2/0" }];
+    }
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args)
     {
         ProjectPath = projectPath;

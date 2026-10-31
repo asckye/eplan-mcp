@@ -28,6 +28,7 @@
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。普通连线结果与审批均注明 2 undo steps；电缆例外见第 2 节。
 逻辑集合是生成后的端点预测，不承诺 T 节点的有向连接条数；电位点预期逻辑起点为空（A52）。logicalDuringPlacement=0 表示本次放置不负责生成逻辑连接；既有逻辑连接完整保留在基线中。内存规划保留完整证据；Host 展示超预算时裁剪数组并标 truncated，不能因显示预算缩小 guard。
+显式 `t_node` 可放在恰好一条既有自动连接线段的严格内部，竖线须含 Up/Down，横线须含 Left/Right；每次调用同一既有线段最多一个节点，角节点、方向不符、端点接触及其他相交仍拒绝。结果增加 `splitSegments:[{segment:[[x1,y1],[x2,y2]],position:[x,y]}]`，`graphicalAutoconnect` 包含两条替代半段及按最近相向引脚/同批节点规则生成的支路；执行核对完整图形等于原图形减去被拆线段加上预测线段。原逻辑连接必须保留，既有节点引脚不作逻辑端点；`logicalAfterGenerate` 只列新增连通关系的组。仅拆线并接到远端尚无器件引脚的角节点时可执行，预测组为空则允许生成零条新逻辑连接；仍报告两次提交、两步撤销。此拆线行为及撤销步数待实机 Large 验证。
 中断点预览另含 affectedPages 与 interruptionScope 摘要（涉及的页名，以及图元、原生中断点和须保留连接的数量；完整基线只在 Bridge 内用于核对，不返回），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。
 
 ## 4. 错误
@@ -45,7 +46,7 @@
 2026-10-30 live T8b（EPLAN 2026.0.3，LargeWrite 副本）日志确认：空位置段使 `-W9` 读回 `+-W9`；该事务 Abort 后，`(60,140)`、横向外框 `59.75..220.25` 的 Cable 及五个属性放置仍留在页上。S43 未验证这条失败路径，因此定义线补偿只依赖提交后的原生撤销，不依赖 Abort 移除新对象；本次未运行 EPLAN。
 审批保留完整节点、几何、端点及两步撤销说明；审计绑定参数与指纹。第二步失败先释放其事务，再按 A41/S35 检查当前项目并执行固定撤销，重新读整页指纹确认恢复；从不在 Abort 后访问新建对象属性列表（A55）。补偿不能确认则为 unknown，无成功半结果。
 T7b 依 [S43](../../spikes/S43-engineering-elements/README.md)/A55：SPECIAL BPF 按实际单引脚方向选择最小变体号，先 SymbolReference.Create → 确认真正 InterruptionPoint → 写完整 Name 并读回 → 按引脚偏移设置 Location → 原生属性 24300 放置。第一步使用 LockAllObjects → UndoStep → Transaction → QuietModeStep，第二步仍用 SafetyPoint 生成显式页集合；属性列表逐对象获取一次并在返回前释放，不让包装跨入 Abort。
-沿 T3b 的两步撤销门槛，执行必须预测新增自动连线和有效逻辑端点；只有孤立中断点而没有新增电气连接时可预览、执行拒绝，不能把空生成称为第二个有效撤销步。Large 每次放置另含独立的电位点连接，确保实际生成发生。
+除第 3 节的显式拆线外，沿 T3b 的两步撤销门槛，执行必须预测新增自动连线和有效逻辑端点；只有孤立中断点而没有新增电气连接时可预览、执行拒绝，不能把空生成称为第二个有效撤销步。Large 每次放置另含独立的电位点连接，确保实际生成发生。
 对端可以暂缺，后续在对端页显式创建同名点；每页同名只允许一个点，一点最多一个对端，已成对、同范围内多对端或原生配对越出显式页集合均拒绝。目标页加全部对端页最多 21 页，完整证据合计最多 10,000 个绘图对象及 1,000 个中断点；缺页、非 Circuit、闭包不能证明均拒绝。页内绘图、端点、配对及引用进入指纹/审批；变化后重新规划。第二次提交后再读双向原生配对与非空计算引用；不一致时撤销生成再撤销放置，完整基线恢复才能报告 rolled_back。
 
 ## 7. 测试

@@ -4,6 +4,7 @@ using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.MasterData;
 using Eplan.EplApi.HEServices;
 using EplanMcp.Tests;
+using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Large.ConnectionHelper;
 
@@ -26,6 +27,17 @@ public sealed class SetupAction : IEplAction
             if (!string.Equals(project.ProjectFullName, expected, StringComparison.OrdinalIgnoreCase) || !pageName.StartsWith("=GAA+A1&EFS1/", StringComparison.Ordinal))
             { Log("project/page: " + project.ProjectFullName + " | " + pageName); return false; }
             Page page = project.Pages.Single(p => p.Name == pageName);
+            if (directions == "SplitRead" && page.PageType.ToString() == "Circuit")
+            {
+                var graphical = page.AllPlacements.OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections).Select(g => new double[][]
+                {
+                    [g.StartSymbolRef.Location.X + g.StartConnectionPoint.Location.X, g.StartSymbolRef.Location.Y + g.StartConnectionPoint.Location.Y],
+                    [g.EndSymbolRef.Location.X + g.EndConnectionPoint.Location.X, g.EndSymbolRef.Location.Y + g.EndConnectionPoint.Location.Y],
+                });
+                File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-split-graphics.json"),
+                    JObject.FromObject(new { page = page.Name, graphical }).ToString());
+                return true;
+            }
             if (directions == "CableRead" && page.PageType.ToString() == "Circuit" && page.AllPlacements.OfType<Function>().Count() == 6)
             { CableFixture.GenerateAndRead(project, page); return true; }
             if (page.PageType.ToString() != "Circuit" || page.AllPlacements.Length != 0)
@@ -33,6 +45,7 @@ public sealed class SetupAction : IEplAction
             double grid = page.GridSize;
             List<(double[] Pin, string Facing)> targets = directions == "Cable"
                 ? Enumerable.Range(0, 3).SelectMany(i => new (double[], string)[] { ([(20 + 15 * i) * grid, 45 * grid], "Down"), ([(20 + 15 * i) * grid, 25 * grid], "Up") }).ToList()
+                : directions == "Split" ? [([30 * grid, 45 * grid], "Down"), ([30 * grid, 25 * grid], "Up")]
                 : new ConnectionCreateLayout(grid, directions.Split(',')).Targets;
             var choices = new List<(SymbolVariant Variant, PointD Position)>();
             foreach (var target in targets)
@@ -74,7 +87,7 @@ public sealed class SetupAction : IEplAction
                 undo.CloseUndo();
             }
             catch { transaction.Abort(); throw; }
-            if (directions == "Cable")
+            if (directions is "Cable" or "Split")
             { return true; }
             if (page.AllPlacements.OfType<SymbolReference>().Any(r => r.GraphicalConnections.Length != 0))
             { throw new InvalidOperationException("Fixture endpoints already autoconnect before node placement."); }

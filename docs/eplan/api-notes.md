@@ -245,6 +245,8 @@
 ### A52. 连接符号、自动连线与生成连接（spike S40，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 详细数据见 [spike S40](../../spikes/S40-connection-symbols/README.md)。
 
+- 待验证：T 节点放在已有自动连接线上拆分该线（实机待验证）
+
 - 项目符号库经 `Project.SymbolLibraries` 只读枚举（不 Initialize、不 Close、不 Dispose），不改项目文件和设置。SPECIAL 库中：角连接 `CO`（Routing，4 个变体），T 节点 `TLRO/TLRU/TOUL/TOUR`（TNodeUp/Down/Left/Right），电位连接点 `PCP` 等（PotentialTerminal），另有 `COST`（StrandConnectorAngle）、`CR`、`BR`、`PDP`（PotentialDefinition）等。— S40。
 - S40 `r1-discover` 原始记录：`PCP` 每变体只有一个引脚，0/4 为 Up、偏移 `(0,3)`；1/5 为 Left、`(-2,0)`；2/6 为 Down、`(0,-4)`；3/7 为 Right、`(2,0)`。方向不唯一且引脚不与插入点重合；规划按实际读取的偏移定位电气点，同方向选最小变体号，不能硬编码方向到变体。— S40，T3b 后续离线复核。
 - T3b Large 实测反馈（2026.0.3，LargeWrite 副本）：未放置库变体的 `GetBoundingBox()` 可抛 `BaseException`（NULL object），暂以零外框预测，执行时仍须比较实际放置外框，不符回滚；端点引脚可能位于所属器件外框边缘或内部，终端接近可进入自身外框，其他穿越仍拒绝。T 的相向共线端点会在节点放置前自动连线，夹具须用折角分支避免预连；事务内调用 `PropertyPlacement.Remove()` 曾触发 `SEHException`，辅助夹具不调用它。此条采用已提供的实测反馈，本次未运行 EPLAN。

@@ -7,6 +7,79 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
+    [Fact]
+    public async Task TNodeOnGeneratedLine_OpenCornerBranch_PreservesLogicalConnection_TwoUndosRestore()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        Assert.True(File.Exists(helper), "Build the connection helper before running split Large tests.");
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Split");
+            await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+            PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            double grid = geometry.GridSize;
+            async Task<JsonElement> Graphics()
+            {
+                await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:SplitRead");
+                using JsonDocument read = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "EplanMcp", "logs", "large-split-graphics.json"), TestContext.Current.CancellationToken));
+                Assert.Equal(page, read.RootElement.GetProperty("page").GetString());
+                return read.RootElement.GetProperty("graphical").Clone();
+            }
+            async Task<JsonElement> Connections() => (await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page })).GetProperty("connections");
+            JsonElement original = Assert.Single((await Connections()).EnumerateArray());
+            string before = (await session.SnapshotAsync()).Hash;
+            int initial = await SymbolsAsync(session.Project, page);
+            string[] originalGraphics = SegmentKeys(await Graphics());
+            Assert.Single(originalGraphics);
+            var args = new Dictionary<string, object?>
+            {
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["response_format"] = "detailed",
+                ["items"] = JsonSerializer.SerializeToElement(new object[]
+                {
+                    new { kind = "t_node", position = (double[])[30 * grid, 30 * grid], directions = (string[])["Up", "Down", "Right"] },
+                    new { kind = "corner", position = (double[])[34 * grid, 30 * grid], directions = (string[])["Left", "Down"] },
+                }),
+            };
+            JsonElement preview = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = true });
+            Assert.Empty(preview.GetProperty("logicalAfterGenerate").EnumerateArray());
+            Assert.Single(preview.GetProperty("splitSegments").EnumerateArray());
+            Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+            JsonElement result = await eplan.CallAsync("eplan_connection_create", args);
+            Assert.Equal((ExecutionState.Committed, 2), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
+            JsonElement current = Assert.Single((await Connections()).EnumerateArray());
+            Assert.Equal(original.GetProperty("from").GetRawText(), current.GetProperty("from").GetRawText());
+            Assert.Equal(original.GetProperty("to").GetRawText(), current.GetProperty("to").GetRawText());
+            JsonElement expected = JsonSerializer.SerializeToElement(new double[][][]
+            {
+                [[30 * grid, 45 * grid], [30 * grid, 30 * grid]],
+                [[30 * grid, 25 * grid], [30 * grid, 30 * grid]],
+                [[30 * grid, 30 * grid], [34 * grid, 30 * grid]],
+            });
+            Assert.Equal(SegmentKeys(expected), SegmentKeys(await Graphics()));
+            Assert.Equal(SegmentKeys(expected), SegmentKeys(result.GetProperty("graphicalAutoconnect")));
+            Assert.Equal(initial + 2, await SymbolsAsync(session.Project, page));
+            for (int i = 0; i < result.GetProperty("undoSteps").GetInt32(); i++)
+            { await session.UndoAsync(); }
+            Assert.Equal(initial, await SymbolsAsync(session.Project, page));
+            Assert.Equal(originalGraphics, SegmentKeys(await Graphics()));
+            Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+        }
+        finally { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
+    }
+
+    private static string[] SegmentKeys(JsonElement segments) => segments.EnumerateArray().Select(s => string.Join("|", s.EnumerateArray()
+        .Select(p => string.Join(",", p.EnumerateArray().Select(n => n.GetDouble().ToString("R", System.Globalization.CultureInfo.InvariantCulture))))
+        .Order(StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+
     [Theory]
     [InlineData("corner", "Up,Left")]
     [InlineData("corner", "Up,Right")]

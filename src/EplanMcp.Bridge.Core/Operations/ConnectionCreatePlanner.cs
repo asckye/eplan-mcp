@@ -170,6 +170,20 @@ public static class ConnectionCreatePlanner
                 { Node(path[i], directions, "corner", "/items"); }
             }
         }
+        var splits = new List<(double[][] Segment, double[] Point)>();
+        var existingSegments = scene.Graphical.GroupBy(SegmentKey, StringComparer.Ordinal).Select(g => g.First()).ToArray();
+        foreach (var node in nodes.Values)
+        {
+            double[][][] existing = existingSegments.Where(s => On(node.Point, s)).ToArray();
+            if (existing.Length == 0)
+            { continue; }
+            Require(existing.Length == 1 && node.Kind == "t_node" && !existing[0].Any(p => p.SequenceEqual(node.Point))
+                && (existing[0][0][0] == existing[0][1][0] || existing[0][0][1] == existing[0][1][1])
+                && existing[0].All(p => node.Directions.Contains(Direction(node.Point, p), StringComparer.Ordinal)), "/items",
+                "Only a T-node strictly inside one existing autoconnect segment with both aligned directions may split it.");
+            Require(!splits.Any(s => ReferenceEquals(s.Segment, existing[0])), "/items", "At most one node may split each existing autoconnect segment per call.");
+            splits.Add((existing[0], node.Point));
+        }
         List<SymbolSearchItem> variants = reader.Read(scene.Project.Path, new() { Library = "SPECIAL" });
         foreach (var node in nodes.Values)
         {
@@ -200,6 +214,7 @@ public static class ConnectionCreatePlanner
             { resolved.Last!["interruption"] = interruption; }
         }
         var segments = paths.SelectMany(p => p.Zip(p.Skip(1), (a, b) => new[] { a, b })).ToList();
+        segments.AddRange(splits.SelectMany(s => s.Segment.Select(p => new[] { p, s.Point })));
         var ports = scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray();
         foreach (var node in nodes.Values)
         {
@@ -219,7 +234,10 @@ public static class ConnectionCreatePlanner
         for (int i = 0; i < segments.Count; i++)
         {
             double[][] s = segments[i];
-            Require(!scene.Graphical.Any(e => Intersects(s, e)), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
+            // Replacement halves inherit the old segment's contacts at its original endpoints.
+            bool replacement = splits.Any(split => s.Any(p => p.SequenceEqual(split.Point)) && s.Any(p => split.Segment.Any(end => end.SequenceEqual(p))));
+            Require(replacement || !existingSegments.Any(e => Intersects(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
+                && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0]))), "/items", "The path conflicts with existing autoconnect lines; plan an explicit replacement separately.");
             if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
@@ -245,6 +263,16 @@ public static class ConnectionCreatePlanner
             foreach (string key in group)
             { groups[key] = group; }
         }
+        // Retain the original device connectivity through existing nodes when a split gains a branch.
+        foreach (ConnectionRecord before in splits.Count == 0 ? [] : scene.Logical)
+        {
+            if (before.StartDevice is null || before.EndDevice is null || !scene.Pins.TryGetValue(before.StartDevice, out SymbolConnectionPoint? a)
+                || !scene.Pins.TryGetValue(before.EndDevice, out SymbolConnectionPoint? b))
+            { continue; }
+            var group = new HashSet<string>(groups[Key(a.Location)].Concat(groups[Key(b.Location)]), StringComparer.Ordinal);
+            foreach (string key in group)
+            { groups[key] = group; }
+        }
         // Acceptance trial: an existing corner or T-node keeps all its pins at one point. Its pins are not logical ends (EPLAN
         // connects the devices through it), and a point no new segment touches predicts nothing.
         var nodeOwners = new HashSet<string>(scene.Pins.GroupBy(p => Owner(p.Key), StringComparer.Ordinal)
@@ -254,6 +282,19 @@ public static class ConnectionCreatePlanner
         {
             string[] ends = scene.Pins.Where(p => connected.Contains(Key(p.Value.Location)) && !nodeOwners.Contains(Owner(p.Key))).Select(p => p.Key).OrderBy(p => p, StringComparer.Ordinal).ToArray();
             bool potential = nodes.Values.Any(n => n.Kind == "potential_point" && connected.Contains(Key(n.Point)));
+            if (splits.Count > 0 && !potential && ends.Length > 1)
+            {
+                var preserved = new HashSet<string>(StringComparer.Ordinal) { ends[0] };
+                for (int i = 0; i < ends.Length; i++)
+                {
+                    foreach (ConnectionRecord before in scene.Logical.Where(c => c.StartDevice is not null && c.EndDevice is not null
+                        && ends.Contains(c.StartDevice, StringComparer.Ordinal) && ends.Contains(c.EndDevice, StringComparer.Ordinal)
+                        && (preserved.Contains(c.StartDevice) || preserved.Contains(c.EndDevice))))
+                    { preserved.Add(before.StartDevice!); preserved.Add(before.EndDevice!); }
+                }
+                if (preserved.SetEquals(ends))
+                { continue; }
+            }
             if (ends.Length > 1 || potential && ends.Length > 0)
             { logical.Add(new JObject { ["pins"] = new JArray(ends), ["potentialStartIsNull"] = potential }); }
         }
@@ -274,6 +315,8 @@ public static class ConnectionCreatePlanner
             ["generation"] = "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
             ["undoSteps"] = 2
         };
+        if (splits.Count > 0)
+        { result["splitSegments"] = new JArray(splits.Select(s => new JObject { ["segment"] = JArray.FromObject(s.Segment), ["position"] = new JArray(s.Point) })); }
         if (interruptions.Count > 0)
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         string cableFingerprint = CableDefinitionPlanner.Add(input, scene, result, Point);
@@ -285,6 +328,12 @@ public static class ConnectionCreatePlanner
     }
 
     private static string Opposite(string d) => d switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", "Right" => "Left", _ => "" };
+    private static string SegmentKey(double[][] segment) => string.Join("|", segment.Select(FormatPoint).OrderBy(p => p, StringComparer.Ordinal));
+    internal static IEnumerable<double[][]> ExpectedGraphical(Scene scene, JObject plan)
+    {
+        var split = new HashSet<string>(plan["splitSegments"]?.Select(s => SegmentKey(s["segment"]!.ToObject<double[][]>()!)) ?? [], StringComparer.Ordinal);
+        return scene.Graphical.Where(s => !split.Contains(SegmentKey(s))).Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!);
+    }
     private static bool CrossesPlacement(double[][] segment, DrawingPlacement placement, Dictionary<string, SymbolConnectionPoint> pins)
     {
         double[] bounds = placement.Bounds!;

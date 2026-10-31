@@ -40,7 +40,7 @@ internal static class CableDefinitionExecution
         }
         void Generate() => Commit(transactions, () => generator.Generate(project, [page]));
         string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString()).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
-        string geometry = Segments(scene.Graphical.Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!));
+        string geometry = Segments(ConnectionCreatePlanner.ExpectedGraphical(scene, plan));
         try
         {
             if (symbols is not null)

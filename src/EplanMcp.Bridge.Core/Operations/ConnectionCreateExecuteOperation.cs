@@ -22,7 +22,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
-            if (plan["cableDefinitions"] is null && (!plan["symbols"]!.Any() || !plan["logicalAfterGenerate"]!.Any() || plan["interruptionScope"] is not null && !plan["graphicalAutoconnect"]!.Any()))
+            if (plan["cableDefinitions"] is null && (!plan["symbols"]!.Any() || (!plan["logicalAfterGenerate"]!.Any() && plan["splitSegments"] is null) || plan["interruptionScope"] is not null && !plan["graphicalAutoconnect"]!.Any()))
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
             place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!) : () => { };
         }
@@ -38,7 +38,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         try
         {
             string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
-            if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(scene.Graphical.Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!)) is var predicted && drawn != predicted)
+            if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(ConnectionCreatePlanner.ExpectedGraphical(scene, plan)) is var predicted && drawn != predicted)
             { throw Mismatch("autoconnect lines after placement: " + drawn + "; predicted: " + predicted); }
             Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", () =>
             {
@@ -64,11 +64,11 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 {
                     var reached = new HashSet<string>(StringComparer.Ordinal) { group.First() };
                     for (int i = 0; i < group.Count; i++)
-                    { foreach (string?[] pair in added.Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
+                    { foreach (string?[] pair in (plan["splitSegments"] is not null ? actual : added).Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
                     if (!reached.SetEquals(group))
                     { throw Mismatch("planned pins " + string.Join(", ", group.Except(reached)) + " were not connected"); }
                 }
-                if (added.Count == 0 && !interruptions)
+                if (added.Count == 0 && groups.Count > 0 && !interruptions)
                 { throw Mismatch("generation added no connection"); }
                 // Live T7b: EPLAN computes interruption cross-references only after the commit; verify below.
                 return actual;
