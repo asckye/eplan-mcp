@@ -55,6 +55,20 @@ public sealed class InterruptionExistingNetTests
     [Theory]
     [InlineData("missing_interruption")]
     [InlineData("missing_bus_interruption")]
+    public void Execute_InterruptionWithoutDeviceBeyondIt_CommitsWithoutItsConnection(string missing)
+    {
+        // Live customer rehearsal: EPLAN connects devices through interruption points, so a point whose counterpart side
+        // has no device yet gets no generated connection; that is not a mismatch.
+        var fake = new Rehearsal();
+        if (missing == "missing_interruption")
+        { fake.Generated.RemoveAt(fake.Generated.Count - 1); }
+        else
+        { fake.Generated.RemoveAll(p => p.Contains(InterruptionPointPlanning.Endpoint(ConnectionCreateFixture.PageName, "I2"), StringComparer.Ordinal)); }
+        Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
+        Assert.Equal(0, fake.Undos);
+    }
+
+    [Theory]
     [InlineData("missing_support")]
     [InlineData("unrelated_net")]
     [InlineData("cross_net")]
@@ -65,12 +79,6 @@ public sealed class InterruptionExistingNetTests
         var fake = new Rehearsal();
         switch (failure)
         {
-            case "missing_interruption":
-                fake.Generated.RemoveAt(fake.Generated.Count - 1);
-                break;
-            case "missing_bus_interruption":
-                fake.Generated.RemoveAll(p => p.Contains(InterruptionPointPlanning.Endpoint(ConnectionCreateFixture.PageName, "I2"), StringComparer.Ordinal));
-                break;
             case "missing_support":
                 fake.Generated.RemoveAll(p => p[0] is null);
                 break;

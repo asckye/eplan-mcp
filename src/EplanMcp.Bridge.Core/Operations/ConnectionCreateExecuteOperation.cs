@@ -58,7 +58,10 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 }
                 List<HashSet<string>> groups = plan["logicalAfterGenerate"]!.Select(g => new HashSet<string>(g["pins"]!.Values<string>().Select(p => p!)
                     .Concat(g["interruptionPins"]?.Values<string>().Select(p => p!) ?? []).Concat((bool)g["potentialStartIsNull"]! ? ["<potential>"] : []), StringComparer.Ordinal)).ToList();
-                var optional = new HashSet<string>(plan["logicalAfterGenerate"]!.SelectMany(g => g["interruptionPins"]?.Values<string>().Select(p => p!) ?? []), StringComparer.Ordinal);
+                // Customer rehearsal: EPLAN connects devices through interruption points, so a point whose counterpart side has
+                // no device yet gets no connection; interruption ends are never required.
+                var optional = new HashSet<string>(plan["logicalAfterGenerate"]!.SelectMany(g => (g["interruptionPins"]?.Values<string>() ?? []).Concat(g["pins"]!.Values<string>()))
+                    .Select(p => p!).Where(p => p.StartsWith("<interruption:", StringComparison.Ordinal) || (plan["logicalAfterGenerate"]!.Any(g => g["interruptionPins"]?.Values<string>().Contains(p) == true))), StringComparer.Ordinal);
                 foreach (string?[] pair in added)
                 {
                     if (pair[1] is null || pair[0] == pair[1] || !groups.Any(g => g.Contains(pair[0] ?? "<potential>") && g.Contains(pair[1]!)))
