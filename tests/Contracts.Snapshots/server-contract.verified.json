@@ -1249,7 +1249,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Trials an unverified API group on scratch with per-call approval and snapshots. full + apiTry:on; scalar reads and property writes. Copy target from eplan_object_find; value writes. Prefer verified tools. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.",
+      "description": "Trials scratch properties/methods; approval each call, full + apiTry:on. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1271,6 +1271,22 @@
                 },
                 {
                   "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  }
                 },
                 {
                   "type": "object",
@@ -1341,9 +1357,45 @@
             "type": "boolean"
           },
           "value": {
-            "type": [
-              "string",
-              "null"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "project",
+                  "page",
+                  "type",
+                  "oid",
+                  "digest"
+                ],
+                "properties": {
+                  "project": {
+                    "type": "string"
+                  },
+                  "page": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  },
+                  "oid": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "before": {
