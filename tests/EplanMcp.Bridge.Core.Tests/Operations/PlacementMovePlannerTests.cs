@@ -9,6 +9,16 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PlacementMovePlannerTests
 {
     [Fact]
+    public void SceneWithACableReader_SerializesWithoutFollowingTheReader()
+    {
+        // The reader's closure refers back to the scene; serializing the scene must not follow it (regression 2026-10-31).
+        var scene = new ConnectionCreatePlanner.Scene();
+        scene.ReadCables = () => throw new InvalidOperationException(scene.PageType);
+        Newtonsoft.Json.Linq.JToken json = EplanMcp.Bridge.Core.Protocol.BridgeJson.FromObject(scene);
+        Assert.Null(json["readCables"]);
+    }
+
+    [Fact]
     public void ParentMove_IncludesEveryContextPropertyWithSharedIdentifier()
     {
         var f = new MoveFixture();

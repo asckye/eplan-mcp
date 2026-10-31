@@ -19,6 +19,8 @@ public static class ConnectionCreatePlanner
         public List<double[][]> Graphical { get; set; } = [];
         public List<ConnectionRecord> Logical { get; set; } = [];
         public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
+        // A reader, not scene data: plans that serialize the scene (placement move) must not follow its closure back here.
+        [Newtonsoft.Json.JsonIgnore]
         public Func<CableDefinitionPlanner.Inventory>? ReadCables { get; set; }
     }
 
