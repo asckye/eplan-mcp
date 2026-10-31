@@ -29,6 +29,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<PropertySchemaPaging>();
+        services.TryAddSingleton(_ => ApiIndex.Load());
         services.TryAddSingleton<PropertyGetPaging>();
         services.TryAddSingleton<TaskRegistry>();
         services.TryAddSingleton<PlanTrust>();
@@ -99,6 +100,7 @@ internal static class McpServerSetup
             .WithTools<SessionTools>(HostJson.Options)
             .WithTools<ProjectTools>(HostJson.Options)
             .WithTools<RevisionTools>(HostJson.Options)
+            .WithTools<ApiTools>(HostJson.Options)
             .WithTools<SymbolTools>(HostJson.Options)
             .WithTools<PageTools>(HostJson.Options)
             .WithTools<PageOpenTools>(HostJson.Options)

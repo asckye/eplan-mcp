@@ -62,6 +62,7 @@
 | `message` | EPLAN 系统消息 | 系统消息树 |
 | `action` | EPLAN 的 action，只用于受控的 `eplan_action_run`（只执行白名单中的条目，[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
 | `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage`（第 10 节） | 本项目的概念 |
+| `api` | ADR-0032 B 级离线能力目录，搜索重载组及查询签名、状态与证据 | 已提交的 API 目录与覆盖映射 |
 | `pack` | 工程包：开发目录 `packs-dev\`、已安装的版本 `packs\`（M6 设计 4.1） | 本项目的概念；包中的原生文件是 EPLAN 的宏、项目等 |
 | `asset` | 工程包中的一个资源：原生文件，或 EplanMcp 生成的知识文档（候选、模块、缺口等，M6 设计 4.1.3） | 本项目的概念 |
 | `cabinet`、`rule` | M6 第 3 阶段起：柜与配置绑定、规则（M6 设计 4.5.1） | 本项目的概念 |

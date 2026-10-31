@@ -183,6 +183,75 @@
       "live": []
     },
     {
+      "name": "eplan_api_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/ApiTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_api_get.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ApiToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ApiCatalogCoverageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiCatalogCoverageTests.cs"
+          },
+          {
+            "name": "ApiProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
+      "name": "eplan_api_search",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/ApiTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_api_search.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ApiToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ApiProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_asset_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
@@ -11502,6 +11571,11 @@
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "ApiProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
           },
           {
             "name": "HttpEndToEndTests",

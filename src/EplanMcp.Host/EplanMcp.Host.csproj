@@ -23,6 +23,7 @@
     <EmbeddedResource Include="Tools\PlacementCreate.usage.md" LogicalName="EplanMcp.Host.Tools.Usage.eplan_placement_create.md" />
     <EmbeddedResource Include="Tools\PlacementUpdate.usage.md" LogicalName="EplanMcp.Host.Tools.Usage.eplan_placement_update.md" />
     <EmbeddedResource Include="Tools\ActionRun.output.json" />
+    <EmbeddedResource Include="Tools\ApiIndex.g.base64" LogicalName="EplanMcp.ApiIndex" />
   </ItemGroup>
 
   <ItemGroup>

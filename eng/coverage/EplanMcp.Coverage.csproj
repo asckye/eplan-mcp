@@ -26,5 +26,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Coverage.Tests" />
+    <Compile Include="../../src/EplanMcp.Host/Tools/ApiIndexData.cs" Link="ApiIndexData.cs" />
   </ItemGroup>
 </Project>

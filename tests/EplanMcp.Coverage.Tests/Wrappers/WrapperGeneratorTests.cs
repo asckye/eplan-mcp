@@ -138,6 +138,7 @@ public sealed class WrapperGeneratorTests : IDisposable
         const string Directory = "catalog/eplan-2026.0.3/";
         string type = $"\"type\":\"T:{Page}\"";
         _repository
+            .Write(Directory + "summary.json", """{"layers":{"data_dictionary":{"byObject":{}}}}""")
             .Write(Directory + "types.jsonl", $$$"""
                 {"id":"T:{{{Page}}}","kind":"class","layer":"type","ns":"Eplan.EplApi.Test"}
                 {"id":"T:Eplan.EplApi.Test.Kind","kind":"enum","layer":"type","ns":"Eplan.EplApi.Test","values":{"A":"0"}}

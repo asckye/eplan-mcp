@@ -45,6 +45,8 @@ dotnet run --project eng\coverage -- check      # 与 CI 相同的检查
 
 ## 通用属性字典资源
 
+`generate/check` 同时维护 `src/EplanMcp.Host/Tools/ApiIndex.g.base64`：已提交的操作层目录、对象字典、覆盖状态与工具证据构成确定性 JSON，经 gzip/base64 压缩后嵌入 Host。发布 ZIP 离线可用，不读取 SDK。目录未保存的摘要返回 null；该资源不计入 API 实现覆盖。用 `eplan_api_search` 发现、`eplan_api_get` 分页读取完整签名和证据。
+
 `generate/check` 同时生成并核对 `src/EplanMcp.Contracts/Generated/PropertyDictionary.g.tsv`，源为
 `eplan-2026.0.3/data-dictionary.jsonl`，不修改源目录。资源嵌入 Contracts，Host 与 Bridge 共用同一份发布数据，
 运行时不依赖目录文件，也不新增 JSON 运行时依赖。TSV 保留对象类型、正式名称、可空数值 ID、obsolete 和读取分类。

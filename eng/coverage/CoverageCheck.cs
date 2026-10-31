@@ -24,6 +24,7 @@ internal static class CoverageCheck
         (ToolMapping.RelativePath, root => CoverageJson.Serialize(ToolMapping.Build(root))),
         (CoverageReport.RelativePath, root => CoverageJson.Serialize(CoverageReport.Build(root))),
         (CoverageMarkdown.RelativePath, CoverageMarkdown.Render),
+        (ApiIndexGenerator.RelativePath, ApiIndexGenerator.Render),
     ];
 
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>

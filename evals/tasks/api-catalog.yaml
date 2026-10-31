@@ -1,0 +1,7 @@
+id: api-catalog
+set: dev
+prompt: 不连接 EPLAN，查询 Function 数据字典登记了多少个属性 ID，并说明目录条目是否授予执行权限。用目录搜索和详情工具核对。
+answer: { type: object, required: [properties, execution_authorized], properties: { properties: { type: integer }, execution_authorized: { type: boolean } } }
+oracle: { properties: { tool: eplan_api_get, args: { id: 'D:Function' }, pick: '$.items[0].propertyCount' } }
+checks: [{ answer: $.properties, equals: oracle.properties }, { answer: $.execution_authorized, equals: false }]
+budget: { max_tool_calls: 8 }

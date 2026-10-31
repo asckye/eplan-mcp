@@ -40,7 +40,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(85, Tools(ToolProfile.Full).Length);
+        Assert.Equal(87, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PlacementCreateTools.Tool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PlacementCreateTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == AssetTools.ReviewTool);

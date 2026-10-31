@@ -154,13 +154,13 @@ internal sealed class CoverageReport
     }
 
     /// <summary>The first overlay rule for a unit: N:&lt;namespace&gt; with its sub-namespaces, T:&lt;declaring type&gt;, or the unit's key.</summary>
-    private static ApiRule? Rule(Unit unit, Overlay overlay) => overlay.Api.FirstOrDefault(r => r.Match.StartsWith("N:", StringComparison.Ordinal)
+    internal static ApiRule? Rule(Unit unit, IReadOnlyList<ApiRule> rules) => rules.FirstOrDefault(r => r.Match.StartsWith("N:", StringComparison.Ordinal)
         ? unit.Layer == ApiCatalog.Operation && (unit.Scope == r.Match[2..] || unit.Scope.StartsWith(r.Match[2..] + ".", StringComparison.Ordinal))
         : string.Equals(r.Match, unit.Type, StringComparison.Ordinal) || string.Equals(r.Match, unit.Key, StringComparison.Ordinal));
 
     private static string Status(Unit unit, Dictionary<string, (int Level, SortedSet<string> Tools, HashSet<string> Ids)> used, Overlay overlay)
     {
-        ApiRule? rule = Rule(unit, overlay);
+        ApiRule? rule = Rule(unit, overlay.Api);
         return unit.Exclusion is { } reason ? "excluded:" + reason
             : rule is { Status: "excluded" } ? "excluded:overlay:" + rule.Reason
             : used.TryGetValue(unit.Key, out var use) ? _levels[use.Level]
