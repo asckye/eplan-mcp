@@ -231,12 +231,18 @@ public static class ConnectionCreatePlanner
             double[][] points = s.Concat(nodes.Values.Select(n => n.Point).Where(p => On(p, s))).GroupBy(Key, StringComparer.Ordinal).Select(g => g.First()).OrderBy(p => Distance(s[0], p)).ToArray();
             return points.Zip(points.Skip(1), (a, b) => new[] { a, b });
         }).ToList();
+        // Customer rehearsal: a new segment may end at an existing corner or T-node centre whose other drawn segment
+        // leaves at a right angle there; meeting at that free port is a connection, not a conflict.
+        var nodeCentres = new HashSet<string>(scene.Pins.GroupBy(p => Owner(p.Key), StringComparer.Ordinal)
+            .Where(g => g.Count() > 1 && g.Select(p => Key(p.Value.Location)).Distinct(StringComparer.Ordinal).Count() == 1).Select(g => Key(g.First().Value.Location)), StringComparer.Ordinal);
+        bool MeetsAtNode(double[][] a, double[][] b) => (a[0][0] == a[1][0]) != (b[0][0] == b[1][0])
+            && a.Any(p => b.Any(q => q.SequenceEqual(p)) && nodeCentres.Contains(Key(p)));
         for (int i = 0; i < segments.Count; i++)
         {
             double[][] s = segments[i];
             // Replacement halves inherit the old segment's contacts at its original endpoints.
             bool replacement = splits.Any(split => s.Any(p => p.SequenceEqual(split.Point)) && s.Any(p => split.Segment.Any(end => end.SequenceEqual(p))));
-            double[][]? conflict = replacement ? null : existingSegments.FirstOrDefault(e => Intersects(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
+            double[][]? conflict = replacement ? null : existingSegments.FirstOrDefault(e => Intersects(s, e) && !MeetsAtNode(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
                 && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
             Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
                 + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");

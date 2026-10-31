@@ -293,4 +293,19 @@ public sealed class ConnectionCreatePlannerTests
         Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
         Assert.Contains("share 60,60", error.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Wire_EndingAtAnExistingNodesFreePort_MeetsItsOtherLineWithoutConflict()
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.Scene.Pins.Clear();
+        fixture.Scene.Page.Placements.Clear();
+        JObject from = fixture.AddPin(1, [8, 8], "Right", [4, 6, 8, 10]);
+        JObject node = fixture.AddPin(9, [40, 8], "Left", [40, 8, 40, 8]);
+        fixture.Scene.Pins["17/9/1"] = new() { Location = [40, 8], Direction = "Up" };
+        fixture.Scene.Pins["17/5/0"] = new() { Location = [40, 30], Direction = "Down" };
+        fixture.Scene.Graphical.Add([[40, 8], [40, 30]]);
+        fixture.Request["items"] = new JArray(ConnectionCreateFixture.Wire(from, node, [8, 8], [40, 8]));
+        Assert.Equal("not_started", (string?)fixture.Plan()["execution"]);
+    }
 }
