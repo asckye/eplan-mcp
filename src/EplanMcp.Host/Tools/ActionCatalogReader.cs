@@ -12,9 +12,9 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
 {
     public ActionCatalogReader() : this(FindInstallation) { }
 
-    private static readonly Lazy<ActionCatalogItem[]> OfficialItems = new(ReadOfficial);
+    private static readonly Lazy<ActionCatalogItem[]> _officialItems = new(ReadOfficial);
 
-    internal static ActionCatalogItem[] Official() => OfficialItems.Value;
+    internal static ActionCatalogItem[] Official() => _officialItems.Value;
 
     private static ActionCatalogItem[] ReadOfficial()
     {
