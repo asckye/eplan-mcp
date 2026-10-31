@@ -21,7 +21,23 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
         try
         {
             if (!write)
-            { return Invoke(); }
+            {
+                try
+                { return Invoke(); }
+                catch (Exception ex) when (ex is not (BridgeErrorException or TimeoutException or OperationCanceledException))
+                {
+                    // EPLAN refuses some reads (e.g. S029128, no current page): unchanged state makes that a known failure.
+                    var before = JsonConvert.DeserializeObject<Dictionary<string, string>>(plan.Details!["before"])!;
+                    Dictionary<string, string> after = dispatch.Inspect(args.Project);
+                    if (before.Count == after.Count && before.All(p => after.TryGetValue(p.Key, out string? v) && v == p.Value))
+                    {
+                        throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN refused this read and nothing changed; it may need a current page or selection.", ex)
+                        { Error = { Execution = ExecutionState.RolledBack } };
+                    }
+
+                    throw;
+                }
+            }
             Committed<ApiTryData> committed = TransactionRunner.Run(transactions, "eplan_api_try", () =>
             {
                 try
@@ -33,7 +49,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             committed.Result.Warning = committed.Warning;
             return committed.Result;
         }
-        catch (BridgeErrorException ex) when (write && ex.Error.Execution == ExecutionState.RolledBack
+        catch (BridgeErrorException ex) when (ex.Error.Execution == ExecutionState.RolledBack
             && ex.Error.Reason is not (ErrorReason.Timeout or ErrorReason.EplanBusy or ErrorReason.OutcomeUnknown))
         { throw; }
         catch (Exception ex)

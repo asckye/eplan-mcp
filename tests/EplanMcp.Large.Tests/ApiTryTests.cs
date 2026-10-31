@@ -137,8 +137,25 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     {
         string project = await eplan.WriteProjectAsync();
         Dictionary<string, string> files = LiveSnapshots.DesignFiles(project);
-        JsonElement result = await Call(project, "O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested",
-            new { target = await Locator(project, "Project"), pFunction = await Locator(project, "Function") });
+        const string Group = "O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested";
+        JsonElement function = await Locator(project, "Function");
+        var parameters = new { target = await Locator(project, "Project"), pFunction = function };
+
+        // Without a page editor EPLAN refuses (S029128): a known failure that changed nothing and pauses no writes.
+        await eplan.CallAsync("eplan_page_open", new() { ["project"] = project, ["page"] = function.GetProperty("page").GetString() });
+        await PlanStepLiveSession.ActionAsync("XGedClosePage");
+        CallToolResult refused = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), Group, project, JsonSerializer.SerializeToElement(parameters), false, TestContext.Current.CancellationToken);
+        if (refused.IsError == true)
+        {
+            string text = string.Join("\n", refused.Content.OfType<TextContentBlock>().Select(c => c.Text));
+            Assert.Contains("EPLAN_OPERATION_FAILED", text, StringComparison.Ordinal);
+            Assert.Contains("rolled_back", text, StringComparison.Ordinal);
+        }
+
+        // The overload with an explicit page needs no page context (api-notes A63).
+        _approvals.Clear();
+        JsonElement page = await Locator(project, "Page", function.GetProperty("page").GetString());
+        JsonElement result = await Call(project, Group, new { target = parameters.target, pPage = page, pFunction = function });
         Assert.Equal("committed", result.GetProperty("execution").GetString());
         Assert.True(result.GetProperty("value").GetString() is "True" or "False");
         Assert.Equal(result.GetProperty("before").GetString(), result.GetProperty("after").GetString());

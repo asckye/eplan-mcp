@@ -209,6 +209,11 @@
 - **`E3D.MateEntry` 的身份不稳定**：同一对象在 `eplan_object_find` 与随后的 `eplan_object_get` 之间描述摘要不同（`PLAN_STALE`），因此列为不支持（`unstable_identity`），不提供定位器。
 - 两个 EPLAN 实例同时运行时，分页游标不能绑定全部实例列表：另一个实例启动或退出会使游标失效。游标只绑定所选实例（进程号与管道名）。— Large `GenericObjectReadTests`、`ObjectReadTests`（A、B 两槽并行）。
 
+### A63. 服务类方法的试执行（C1 第五片，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 上）
+- `HEServices.NameService.CanDeviceTagBeNested(Function)` 在只读调用时抛 `ApplicationException`（S029128，"未确定任何页"）；先用 `eplan_page_open` 打开该功能所在的页也一样。带页参数的重载 `CanDeviceTagBeNested(Page, Function)` 正常返回布尔值，业务快照与设计文件都不变。需要"当前页"的服务方法，优先选带显式页参数的重载。
+- 试执行把这类拒绝报告为已知失败（`EPLAN_OPERATION_FAILED`，`rolled_back`）：只在调用前后快照一致时这样报告，否则仍为 `OUTCOME_UNKNOWN` 并暂停写入。
+- `HEServices.ConnectionService.SwapSourceAndTarget` 作为写入试执行：一次撤销恢复连接的源与目标，之前的哨兵页仍在。— Large `ApiTryTests`。
+
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - `Function.PropertyPlacements` 返回的是 `ContextPropertyPlacement`（`PropertyPlacement` 的子类），**它们的 `ToStringIdentifier()` / `ObjectIdentifier` 与父功能相同**，也不出现在 `Page.AllPlacements` 中。按标识去重会把它们全部当成父功能而丢掉；须按父对象 + 显示的属性 + 序号区分。新建的 20214 放置同样如此，画面上正常显示（导出图片核对）。— T2b。
 - 经 `eplan_device_place` 的库符号分支放置无部件线圈：标识 20214 显示带 `-` 且位于“父位置 + 偏移”，连接点代号经带索引 20022 写入并显示，重复标识拒绝，一次撤销恢复。— T2b。

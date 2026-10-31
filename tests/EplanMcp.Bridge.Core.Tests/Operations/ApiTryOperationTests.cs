@@ -317,9 +317,22 @@ public sealed class ApiTryOperationTests
     {
         ApiTryArgs args = Args();
         args.Fingerprint = Plan(args).Fingerprint;
-        _dispatch.Failure = new InvalidOperationException(cause);
+        _dispatch.Failure = cause == "timeout" ? new TimeoutException(cause) : new BridgeErrorException(ErrorReason.EplanBusy, cause);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RefusedRead_IsAKnownFailureOnlyWhenNothingChanged(bool changed)
+    {
+        ApiTryArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.Failure = new InvalidOperationException("S029128 no page determined");
+        _dispatch.ChangeOnInvoke = changed;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal(changed ? (ErrorReason.OutcomeUnknown, ExecutionState.Unknown) : (ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
     }
 
     [Theory]
@@ -467,9 +480,9 @@ public sealed class ApiTryOperationTests
             Invocations++;
             if (JObject.Parse(args.Parameters).TryGetValue("value", out JToken? value))
             { Value = Mismatch ? "different" : value.Value<string>()!; }
+            _changed |= ChangeOnInvoke;
             if (Failure is { } failure)
             { throw failure; }
-            _changed |= ChangeOnInvoke;
             if (ApiTryCatalog.MethodAccess(args.Group) is not null)
             { return MethodResult; }
             return Value;

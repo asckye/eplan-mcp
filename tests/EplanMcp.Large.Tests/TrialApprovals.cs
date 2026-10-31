@@ -22,6 +22,15 @@ internal sealed class TrialApprovals(string tool) : IApprovalChannel
         }
     }
 
+    /// <summary>Forgets the questions asked so far, so a later assertion sees only its own call.</summary>
+    public void Clear()
+    {
+        lock (_questions)
+        {
+            _questions.Clear();
+        }
+    }
+
     public Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
         lock (_questions)
