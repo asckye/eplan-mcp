@@ -260,7 +260,15 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
                 }
 
                 Assert.Equal(original.Select(p => p.Path).Order(StringComparer.Ordinal), await OpenPathsAsync());
-                Assert.Equal(original.Single(p => p.Current).Path, (await CurrentAsync()).Path, ignoreCase: true);
+                string wanted = original.Single(p => p.Current).Path;
+                if (!string.Equals(wanted, (await CurrentAsync()).Path, StringComparison.OrdinalIgnoreCase))
+                {
+                    // A page editor opened during the test keeps its project current; opening a page selects (api-notes, page_open).
+                    string page = (await LiveSnapshots.TakeAsync(bridge, new() { Project = wanted })).Pages.Select(p => p.Name).Order(StringComparer.Ordinal).First();
+                    await bridge.InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = wanted, Page = page }, TestContext.Current.CancellationToken);
+                }
+
+                Assert.Equal(wanted, (await CurrentAsync()).Path, ignoreCase: true);
             }
             finally
             {

@@ -194,6 +194,10 @@
 - **Page 继承 Group（即 Placement）**，读 `Page.Location` 会抛 `InvalidOperationException`（S063136 无法确定页尺寸）；按 Placement 处理放置时须先排除 Page。— 实机（B2 第二部分 Large，2026-10-30，EPLAN 2026.0.3，Electric P8，scratch）。
 - 11 种新类型的读取已在 scratch 上实机通过（ObjectReadTests，读取前后设计文件不变）；其余条目是文档核对；读取资源归属仍以 A36/A39 为准。新增类型的 Large 读取和无写入断言已编写，本次未运行。
 
+### A61. 界面 action 的试执行（C2 `eplan_action_try`，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 上）
+- `XGedZoomAllAction` 在没有打开图形页编辑器时，`Execute` 返回 false，不弹对话框，系统日志也没有消息；工具按失败处理并回滚。先用 `eplan_page_open` 打开一页后再执行，返回成功，业务快照和设计文件指纹都不变。— Large `ActionTryTests`。
+- 界面 action 作用于当前项目，所以试执行要求 EPLAN 中只打开目标 scratch 项目、并且它是当前项目。测试中按 A11/A41 依次关闭夹具副本来满足这一条件；恢复现场时，若测试打开过页面，重新打开的项目不会成为当前项目，需要在原当前项目里再打开一页（同 `eplan_page_open` 那条）。— 同上。
+
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - `Function.PropertyPlacements` 返回的是 `ContextPropertyPlacement`（`PropertyPlacement` 的子类），**它们的 `ToStringIdentifier()` / `ObjectIdentifier` 与父功能相同**，也不出现在 `Page.AllPlacements` 中。按标识去重会把它们全部当成父功能而丢掉；须按父对象 + 显示的属性 + 序号区分。新建的 20214 放置同样如此，画面上正常显示（导出图片核对）。— T2b。
 - 经 `eplan_device_place` 的库符号分支放置无部件线圈：标识 20214 显示带 `-` 且位于“父位置 + 偏移”，连接点代号经带索引 20022 写入并显示，重复标识拒绝，一次撤销恢复。— T2b。

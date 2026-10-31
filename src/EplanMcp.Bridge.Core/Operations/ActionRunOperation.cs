@@ -45,7 +45,7 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         request.Data.EplanMessages = [.. added.Take(20).Select(m => m.Index + ": " + m.Text)];
         if (!done || failure is not null || added.Any(m => m.Level is 4 or 5) || elapsed.Elapsed.TotalSeconds > (int)request.Entry["seconds"]!)
         {
-            const string message = "EPLAN could not complete the whitelisted action; check this call's EPLAN messages.";
+            string message = "EPLAN could not complete the " + (unverified ? "trial" : "whitelisted") + " action; check this call's EPLAN messages.";
             var error = failure is null ? new BridgeErrorException(ErrorReason.EplanOperationFailed, message) : new BridgeErrorException(ErrorReason.EplanOperationFailed, message, failure);
             error.Error.Metadata = new Dictionary<string, string> { ["eplanMessages"] = JsonConvert.SerializeObject(request.Data.EplanMessages) };
             throw error;
