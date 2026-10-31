@@ -82,7 +82,11 @@ internal sealed partial class EplanConnectionCreator
                 ? [PinKey(request["items"]![(int)index]!["from"]!), PinKey(request["items"]![(int)index]!["to"]!)] : row["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
             Connection run = all.Single(c => new HashSet<string?>(CablePins(c), StringComparer.Ordinal).SetEquals(pins));
             Check(reference["item_index"] is not null || run.StartPin?.ParentFunction is { } a && run.EndPin?.ParentFunction is { } b
-                && cable.GraphicalConnections.Any(g => new HashSet<long> { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }.SetEquals([a.ObjectIdentifier, b.ObjectIdentifier])),
+                // Customer rehearsal: when a T-node splits the core's wire, the crossed drawn segment runs from one of the
+                // connection's devices to the node, not device to device; the plan already pinned the crossing to this core.
+                && cable.GraphicalConnections.Any(g => new HashSet<long> { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }.SetEquals([a.ObjectIdentifier, b.ObjectIdentifier])
+                    || g.StartSymbolRef.ObjectIdentifier == a.ObjectIdentifier || g.StartSymbolRef.ObjectIdentifier == b.ObjectIdentifier
+                    || g.EndSymbolRef.ObjectIdentifier == a.ObjectIdentifier || g.EndSymbolRef.ObjectIdentifier == b.ObjectIdentifier),
                 $"graphical membership: expected pins {new JArray(pins)}; actual {JArray.FromObject(cable.GraphicalConnections.Select(g => new[] { g.StartSymbolRef.ObjectIdentifier, g.EndSymbolRef.ObjectIdentifier }))}");
             if (reference["locator"] is { } locator)
             { Check(run.ObjectIdentifier == (long)locator["oid"]!, FormattableString.Invariant($"connection identity: expected {locator["oid"]}; actual {run.ObjectIdentifier}")); }
