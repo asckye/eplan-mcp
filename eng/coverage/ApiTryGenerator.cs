@@ -18,7 +18,9 @@ internal static class ApiTryGenerator
     private static string Literal(string value) => JsonSerializer.Serialize(value);
     private static readonly string[] _enumShape = ["enum"];
     private static readonly string[] _readPrefixes = ["Get", "Is", "Has", "Can", "Find"];
-    private static readonly string[] _excludedPrefixes = ["Remove", "Delete", "Erase", "Create", "#"];
+    // Lifecycle and session locks: Destroy/Init(ialize) change an object's existence or internal state, Freeze/Lock*
+    // are session state that one undo step is not known to restore (batch verification 2026-10-31).
+    private static readonly string[] _excludedPrefixes = ["Remove", "Delete", "Erase", "Create", "Destroy", "Init", "init", "Freeze", "Lock", "#"];
     private static Dictionary<string, string[]> Enums(string root) => (File.Exists(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) ? File.ReadLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) : [])
         .Select(l => JsonSerializer.Deserialize<JsonElement>(l)).Where(t => t.GetProperty("kind").GetString() == "enum" && t.TryGetProperty("values", out _) && !t.TryGetProperty("excluded", out _))
         .ToDictionary(t => t.GetProperty("id").GetString()![2..], t => t.GetProperty("values").EnumerateObject().Select(p => p.Name).ToArray(), StringComparer.Ordinal);
