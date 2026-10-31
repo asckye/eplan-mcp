@@ -66,7 +66,11 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     for (int i = 0; i < group.Count; i++)
                     { foreach (string?[] pair in (plan["splitSegments"] is not null ? actual : added).Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
                     if (!reached.SetEquals(group))
-                    { throw Mismatch("planned pins " + string.Join(", ", group.Except(reached)) + " were not connected"); }
+                    {
+                        IEnumerable<string> seen = actual.Where(p => group.Contains(p[0] ?? "<potential>") || group.Contains(p[1] ?? "<none>")).Select(p => (p[0] ?? "<potential>") + "-" + (p[1] ?? "<none>"));
+                        throw Mismatch("planned pins " + string.Join(", ", group.Except(reached)) + " were not connected (group " + string.Join(", ", group)
+                            + "; generated with these pins: " + string.Join(", ", seen.DefaultIfEmpty("none")) + ")");
+                    }
                 }
                 if (added.Count == 0 && groups.Count > 0 && !interruptions)
                 { throw Mismatch("generation added no connection"); }
