@@ -11,20 +11,25 @@
       2. with -Push: fetch and rebase onto origin/main;
       3. every commit in origin/main..HEAD against eng\scripts\check-commit-message.sh (Conventional Commits, no AI
          attribution);
-      4. restore, Release build (warnings as errors), format, action catalog, coverage files, Small and Medium tests
-         with the test count floor, vulnerable packages;
+      4. restore, Release build (warnings as errors), format, action catalog, coverage files, the Small and Medium
+         tests of the assemblies the changes since origin/main can affect (eng\scripts\affected-tests.ps1; -Full runs
+         every assembly) with the test count floor, vulnerable packages;
       5. with -Push: push HEAD to main, only if origin/main has not moved since the rebase.
 
-    CI still runs on every push to main as a non-blocking check; a red run is fixed with a follow-up commit.
+    CI still runs every test assembly on every push to main as a non-blocking check; a red run is fixed with a
+    follow-up commit.
     Large tests are not part of the gate: they need EPLAN and are run by hand (testing.md).
 
 .PARAMETER Push
     Rebase onto origin/main before the gate and push HEAD to main after it passes.
 
+.PARAMETER Full
+    Run every Small and Medium test assembly, not only the affected ones.
+
 .EXAMPLE
     pwsh eng/scripts/local-gate.ps1 -Push
 #>
-param([switch]$Push)
+param([switch]$Push, [switch]$Full)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -63,6 +68,10 @@ Step 'Commit messages' {
     } finally { Remove-Item $message }
 }
 
+$suites = @((Get-Content tests/test-suites.json -Raw | ConvertFrom-Json).suites.assembly)
+$affected = if ($Full) { $suites } else { @(pwsh -NoProfile -File eng/scripts/affected-tests.ps1 -Base $base) }
+Write-Output ("== Tests to run: " + $(if ($affected.Count -eq $suites.Count) { 'all' } else { $affected -join ', ' }))
+$filter = Join-Path $root '.gate-tests.slnf'
 $results = Join-Path ([IO.Path]::GetTempPath()) ("eplanmcp-gate-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
 try {
     Step 'Restore' { dotnet restore EplanMcp.Ci.slnf }
@@ -72,10 +81,19 @@ try {
     Step 'Coverage files' { dotnet run --project eng/coverage -c Release --no-build -- check }
     Step 'Small and Medium tests' {
         $env:EPLANMCP_HANG_REPORT_DIR = $results
-        dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --timeout 20m --report-xunit-trx --results-directory $results
+        $solution = 'EplanMcp.Ci.slnf'
+        if ($affected.Count -lt $suites.Count) {
+            # A solution filter of just the affected test projects; built above, so --no-build holds.
+            @{ solution = @{ path = 'EplanMcp.slnx'; projects = @($affected | ForEach-Object { "tests\$_\$_.csproj" }) } } |
+                ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 $filter
+            $solution = $filter
+        }
+        if ($affected.Count -gt 0) {
+            dotnet test --solution $solution -c Release --no-build -- --filter-not-trait "Size=Large" --timeout 20m --report-xunit-trx --results-directory $results
+        } else { Write-Output '   no test assembly is affected'; $global:LASTEXITCODE = 0 }
     }
     Step 'Test count floor' {
-        $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results 2>&1
+        $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies $affected 2>&1
         # TRX names carry only a timestamp, so two assemblies finishing together can overwrite each other's file; rerun
         # an assembly that left no results on its own before judging the floor.
         $missing = @($floor | Select-String '(\S+) has no test results' | ForEach-Object { $_.Matches[0].Groups[1].Value })
@@ -83,7 +101,7 @@ try {
             Write-Output "   rerunning $assembly for its results"
             dotnet test --project "tests/$assembly" -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory $results | Out-Null
         }
-        if ($missing.Count -gt 0) { $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results 2>&1 }
+        if ($missing.Count -gt 0) { $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies $affected 2>&1 }
         $floor | ForEach-Object { Write-Output "   $_" }
         $global:LASTEXITCODE = if ($floor | Select-String 'has no test results|below its floor|is not in tests/test-suites.json') { 1 } else { 0 }
     }
@@ -97,6 +115,7 @@ try {
     }
 } finally {
     Remove-Item -Recurse -Force $results -ErrorAction SilentlyContinue
+    Remove-Item -Force $filter -ErrorAction SilentlyContinue
 }
 
 if ($Push) {

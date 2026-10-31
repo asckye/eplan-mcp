@@ -125,7 +125,7 @@ Refs: #42
 
 ## 7. CI 关卡
 
-下表中运行位置为 GitHub 托管 runner 的关卡，`eng/scripts/local-gate.ps1` 在开发机上按相同步骤先跑一遍（工作区必须干净，没有未提交或未跟踪的文件），通过后才推送；GitHub 上的运行改为推送后的事后检查（项目负责人 2026-10-30 决定）。
+下表中运行位置为 GitHub 托管 runner 的关卡，`eng/scripts/local-gate.ps1` 在开发机上按相同步骤先跑一遍（工作区必须干净，没有未提交或未跟踪的文件），通过后才推送；GitHub 上的运行改为推送后的事后检查（项目负责人 2026-10-30 决定）。本地关卡的 Small/Medium 测试只跑本次改动（相对 `origin/main`）可能影响的测试程序集（`eng/scripts/affected-tests.ps1`）：改了项目代码，跑直接或间接引用它的测试程序集；改了构建配置、`eng/scripts`、`tests/Shared` 或 `tests/test-suites.json`，跑全部；改了其他文件（文档、目录、评测数据、快照、插件），跑除 Workbench 外的全部。`-Full` 跑全部；CI 在 `main` 上仍跑全部（项目负责人 2026-10-31 决定）。
 
 | 关卡 | 内容 | 运行位置 | 触发 |
 |---|---|---|---|

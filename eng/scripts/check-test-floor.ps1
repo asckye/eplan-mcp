@@ -9,12 +9,16 @@
 
 .PARAMETER ResultsDirectory
     The directory that holds the *.trx files of the run.
+
+.PARAMETER Assemblies
+    Only these assemblies were run (the local gate's affected tests); by default every listed assembly must have run.
 #>
-param([Parameter(Mandatory)][string]$ResultsDirectory)
+param([Parameter(Mandatory)][string]$ResultsDirectory, [string[]]$Assemblies)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $suites = @((Get-Content (Join-Path $root 'tests/test-suites.json') -Raw | ConvertFrom-Json).suites)
+if ($Assemblies) { $suites = @($suites | Where-Object { $_.assembly -in $Assemblies }) }
 $passed = @{}
 foreach ($file in Get-ChildItem $ResultsDirectory -Filter *.trx -ErrorAction SilentlyContinue) {
     [xml]$trx = Get-Content $file.FullName -Raw
