@@ -144,7 +144,14 @@ internal static class AcceptanceDrawingList
         var assigned = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "cables", "", (cable, at) =>
         {
-            Object(cable, at, "id tag type_text core_count cross_section_mm2 points cores", "");
+            Object(cable, at, "id tag type_text core_count cross_section_mm2 points cores", "text_layout");
+            if (cable.TryGetProperty("text_layout", out JsonElement layout))
+            {
+                Object(layout, at + "/text_layout", "position angle_deg", "");
+                Position(layout.GetProperty("position"), at + "/text_layout/position");
+                int angle = Integer(layout.GetProperty("angle_deg"), at + "/text_layout/angle_deg", 0, 270);
+                Require(angle % 90 == 0, at + "/text_layout/angle_deg", "must be a right angle");
+            }
             Identity(cable, at);
             Text(cable, "tag", at);
             Text(cable, "type_text", at);

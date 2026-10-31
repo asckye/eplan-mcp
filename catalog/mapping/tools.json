@@ -5670,6 +5670,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportDxfToolTests.cs"
           },
           {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
+          },
+          {
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
@@ -11610,6 +11615,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "MoveTransactionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
@@ -11628,6 +11638,11 @@
             "name": "PlacementUpdateTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementUpdateTests.cs"
+          },
+          {
+            "name": "CableDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
           },
           {
             "name": "PlacementMoveTests",

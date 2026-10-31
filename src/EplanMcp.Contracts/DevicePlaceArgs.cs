@@ -37,6 +37,8 @@ public sealed class DevicePlaceArgs
     public string? TerminalNumber { get; set; }
     /// <summary>Optional language-independent function text, only when creating the parent strip.</summary>
     public string? TerminalStripText { get; set; }
+    /// <summary>Optional absolute [x,y] mm for a new strip definition; requires TerminalStripText.</summary>
+    public double[]? TerminalStripPosition { get; set; }
 
     /// <summary>PLC connection point suffix; Tag identifies its existing PLC card. Symbol source only.</summary>
     public string? PlcConnectionPoint { get; set; }

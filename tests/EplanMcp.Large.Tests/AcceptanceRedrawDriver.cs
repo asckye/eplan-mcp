@@ -62,6 +62,7 @@ internal sealed class AcceptanceRedrawDriver(
         await StageAsync("generate", async () =>
             await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["generate"]));
         await ObserveAsync("cables_after_generate", GeneratedCablesAsync);
+        await StageAsync("cable_text_layout", CableTextLayoutAsync);
         await StageAsync("interruption_points", () => InterruptionsAsync());
         await StageAsync("texts", TextsAsync);
         await StageAsync("verify", VerifyAsync);
@@ -279,11 +280,20 @@ internal sealed class AcceptanceRedrawDriver(
                 ["y"] = terminal.GetProperty("position")[1].GetDouble(),
             };
             if (!created)
-            { args["terminal_strip_text"] = strip.GetProperty("function_text").GetString(); }
+            {
+                args["terminal_strip_text"] = strip.GetProperty("function_text").GetString();
+                args["terminal_strip_position"] = strip.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray();
+            }
             JsonElement? result = await WriteAsync("eplan_device_place", args, created ? [Id(terminal)] : [Id(strip), Id(terminal)]);
             if (result is not { } placed)
             { continue; }
             JsonElement member = placed.GetProperty("terminal");
+            if (!created)
+            {
+                Near(strip.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), member.GetProperty("stripPosition"));
+                Check(() => Assert.Equal(strip.GetProperty("function_text").GetString(), member.GetProperty("stripText").GetString()));
+                output("Strip definition readback: " + member.GetRawText());
+            }
             Check(() => Assert.True(SameName(tag, member.GetProperty("strip").GetString()!)));
             Check(() => Assert.True(member.GetProperty("owner").ValueKind == JsonValueKind.Null || SameName(tag, member.GetProperty("owner").GetString()!)));
             Check(() => Assert.Equal(!created, member.GetProperty("stripCreated").GetBoolean()));
@@ -309,6 +319,54 @@ internal sealed class AcceptanceRedrawDriver(
         JsonElement read = await ReadAsync("eplan_device_get", new() { ["tag"] = tag, ["language"] = "??_??", ["response_format"] = "detailed" });
         RequireComplete(read);
         Check(() => Assert.Equal(strip.GetProperty("function_text").GetString(), read.GetProperty("device").GetProperty("text").GetString()));
+        JsonElement definition = Function(await DrawingsAsync(Page), tag);
+        Near(strip.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), definition.GetProperty("location"));
+    }
+
+    private async Task CableTextLayoutAsync()
+    {
+        foreach (JsonElement cable in Items("cables").Where(c => c.TryGetProperty("text_layout", out _)))
+        {
+            if (!_placed.ContainsKey(Id(cable)))
+            { Skip(Id(cable) + "/text_layout", "The cable was not created and independently read back."); continue; }
+            JsonElement layout = cable.GetProperty("text_layout");
+            JsonElement[] before = await DrawingsAsync(Page);
+            JsonElement parent = Function(before, Expand(cable.GetProperty("tag").GetString()!));
+            JsonElement[] texts = before.Where(p => p.GetProperty("kind").GetString() == "PropertyPlacement" && p.TryGetProperty("parent", out JsonElement owner)
+                && JsonElement.DeepEquals(owner, parent.GetProperty("locator")) && p.GetProperty("properties").TryGetProperty("display", out JsonElement display) && !string.IsNullOrWhiteSpace(display.GetString())).ToArray();
+            Assert.NotEmpty(texts);
+            double[] origin = texts[0].GetProperty("location").EnumerateArray().Select(n => n.GetDouble()).ToArray();
+            int angle = layout.GetProperty("angle_deg").GetInt32();
+            var moves = texts.Select(text =>
+            {
+                double x = text.GetProperty("location")[0].GetDouble() - origin[0], y = text.GetProperty("location")[1].GetDouble() - origin[1];
+                for (int i = 0; i < angle / 90; i++)
+                { (x, y) = (-y, x); }
+                return new
+                {
+                    parent = parent.GetProperty("locator"),
+                    property_id = int.Parse(text.GetProperty("properties").GetProperty("property_id").GetString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    property_index = int.Parse(text.GetProperty("properties").GetProperty("property_index").GetString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    x_mm = layout.GetProperty("position")[0].GetDouble() + x,
+                    y_mm = layout.GetProperty("position")[1].GetDouble() + y,
+                    angle_deg = angle
+                };
+            }).ToArray();
+            output("Cable property text before: " + JsonSerializer.Serialize(texts));
+            JsonElement? result = await WriteAsync("eplan_placement_update", new() { ["page"] = Page, ["property_moves"] = moves, ["snap_to_grid"] = false, ["response_format"] = "detailed" }, [Id(cable) + "/text_layout"]);
+            if (result is null)
+            { continue; }
+            JsonElement[] after = await DrawingsAsync(Page);
+            Check(() => Assert.True(JsonElement.DeepEquals(parent, Function(after, Expand(cable.GetProperty("tag").GetString()!)))));
+            foreach (var move in moves)
+            {
+                JsonElement text = Assert.Single(after, t => t.GetProperty("kind").GetString() == "PropertyPlacement" && t.TryGetProperty("parent", out JsonElement owner) && JsonElement.DeepEquals(owner, move.parent)
+                    && t.GetProperty("properties").GetProperty("property_id").GetString() == move.property_id.ToString(System.Globalization.CultureInfo.InvariantCulture) && t.GetProperty("properties").GetProperty("property_index").GetString() == move.property_index.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                Near([move.x_mm, move.y_mm], text.GetProperty("location"));
+                Check(() => Assert.Equal(angle.ToString(System.Globalization.CultureInfo.InvariantCulture), text.GetProperty("properties").GetProperty("angle_deg").GetString()));
+                output("Cable property text after: " + text.GetRawText());
+            }
+        }
     }
 
     private async Task WiresAsync(bool dryRun = false)
@@ -470,6 +528,7 @@ internal sealed class AcceptanceRedrawDriver(
                 RequireComplete(data);
                 Check(() => Assert.Null(data.GetProperty("nextCursor").GetString()));
                 JsonElement definition = data.GetProperty("cable");
+                _placed[Id(cable)] = cable;
                 Check(() => Assert.True(SameName(tag, definition.GetProperty("tag").GetString()!)));
                 Check(() => Assert.Equal(cable.GetProperty("type_text").GetString(), definition.GetProperty("type").GetString()));
                 Check(() => Assert.Equal(cable.GetProperty("core_count").GetRawText(), definition.GetProperty("wireCount").GetString()));
@@ -736,7 +795,7 @@ internal sealed class AcceptanceRedrawDriver(
         string execution = result.GetProperty("execution").GetString()!;
         Assert.True(execution is ExecutionState.Committed or ExecutionState.NotStarted, result.GetRawText());
         if (execution == ExecutionState.Committed)
-        { UndoSteps += result.TryGetProperty("undoSteps", out JsonElement steps) ? steps.GetInt32() : tool == "eplan_placement_create" || result.TryGetProperty("undo", out JsonElement undo) && undo.ValueKind == JsonValueKind.String ? 1 : throw new InvalidOperationException("Committed write has no undo-step evidence."); }
+        { UndoSteps += result.TryGetProperty("undoSteps", out JsonElement steps) ? steps.GetInt32() : tool is "eplan_placement_create" or "eplan_placement_update" || result.TryGetProperty("undo", out JsonElement undo) && undo.ValueKind == JsonValueKind.String ? 1 : throw new InvalidOperationException("Committed write has no undo-step evidence."); }
         RequireComplete(result);
         return result;
     }

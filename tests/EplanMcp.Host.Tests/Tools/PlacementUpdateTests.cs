@@ -28,10 +28,17 @@ public sealed class PlacementUpdateTests
     [InlineData("noop")]
     [InlineData("dry")]
     [InlineData("policy")]
+    [InlineData("property_success")]
+    [InlineData("property_batch")]
+    [InlineData("property_stale")]
+    [InlineData("property_noop")]
+    [InlineData("property_dry")]
     public async Task RegisteredTool_UsesExistingWritePipelineAndAtomicMoveBranch(string scenario)
     {
+        bool property = scenario.StartsWith("property_", StringComparison.Ordinal);
+        scenario = scenario.Replace("property_", "", StringComparison.Ordinal);
         using var harness = new WriteToolHarness(OutsideScratchWrites.Deny);
-        var fake = new Mover(harness.ProjectPath) { Fail = scenario == "batch" };
+        var fake = new Mover(harness.ProjectPath, property) { Fail = scenario == "batch" };
         if (scenario == "policy")
         { fake.Scene.Project.Path = Path.Combine(harness.Locations.Root, "outside", "Line1"); fake.Scene.Page.Project = fake.Scene.Project.Path; }
         var planner = new ConnectionCreatePlanOperation(fake);
@@ -60,25 +67,33 @@ public sealed class PlacementUpdateTests
                 ["dry_run"] = scenario == "dry",
                 ["moves"] = new[] { new { locator = fake.Scene.Page.Placements[0].Locator, x_mm = scenario == "noop" ? 20 : 30, y_mm = 20 } }
             };
+            int target = property ? 1 : 0;
+            if (property)
+            {
+                args.Remove("moves");
+                args["property_moves"] = new[] { new { parent = fake.Scene.Page.Placements[0].Locator, property_id = 20214, property_index = 0, x_mm = scenario == "noop" ? 20 : 30, y_mm = 20, angle_deg = scenario == "noop" ? 0 : 90 } };
+            }
             CallToolResult result = await client.CallToolAsync(PlacementUpdateTools.Tool, args, cancellationToken: Token);
             if (scenario is "batch" or "stale" or "policy")
             {
                 JsonElement error = WriteToolHarness.Error(result);
                 Assert.Equal(scenario == "batch" ? ErrorReason.EplanOperationFailed : scenario == "stale" ? ErrorReason.PlanStale : ErrorReason.PolicyDenied, error.GetProperty("reason").GetString());
                 Assert.Equal(scenario == "batch" ? ExecutionState.RolledBack : ExecutionState.NotStarted, error.GetProperty("execution").GetString());
-                Assert.Equal([20d, 20d], fake.Scene.Page.Placements[0].Location);
+                Assert.Equal([20d, 20d], fake.Scene.Page.Placements[target].Location);
             }
             else
             {
                 JsonElement data = WriteToolHarness.Structured(result);
                 Assert.Equal(scenario == "success" ? ExecutionState.Committed : ExecutionState.NotStarted, data.GetProperty("execution").GetString());
-                Assert.Equal(scenario == "success" ? [30d, 20d] : [20d, 20d], fake.Scene.Page.Placements[0].Location);
+                Assert.Equal(scenario == "success" ? [30d, 20d] : [20d, 20d], fake.Scene.Page.Placements[target].Location);
                 JsonElement schema = PlacementUpdateContract.Definition.OutputSchema!.Value;
                 Assert.True(PropertyGetContractTests.Accepts(schema, data, schema));
             }
             Assert.Equal(scenario is "success" or "batch" or "stale" ? 1 : 0, harness.Bridge.Writes.Count);
             Assert.Equal(scenario is "success" or "batch" ? 1 : 0, fake.Transactions);
             Assert.Equal(scenario == "success" ? 1 : 0, fake.Closed);
+            if (property)
+            { Assert.Equal([20d, 20d], fake.Scene.Page.Placements[0].Location); }
         }
         finally { await host.StopAsync(CancellationToken.None); }
     }
@@ -102,16 +117,21 @@ public sealed class PlacementUpdateTests
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => this;
         public int Transactions { get; private set; }
         public int Closed { get; private set; }
-        public Mover(string path)
+        public Mover(string path, bool property = false)
         {
             Scene = new() { Complete = true, Project = new() { Name = "Line1", Path = path }, Page = new() { Project = path, Page = "P", GridSize = 5, PageSize = [100, 100] } };
             Scene.Page.Placements.Add(new() { Kind = "Text", Locator = new() { Project = path, Page = "P", Type = 4, Oid = 1, Digest = new string('a', 64) }, Location = [20, 20], Bounds = [20, 20, 25, 25], Properties = new() { ["grouped"] = "false", ["text"] = "??_??@Panel;" } });
+            if (property)
+            { Scene.Page.Placements.Add(new() { Kind = "PropertyPlacement", Locator = new() { Project = path, Page = "P", Type = 4, Oid = 1, Digest = new string('b', 64) }, Parent = Scene.Page.Placements[0].Locator, Location = [20, 20], Bounds = [20, 20, 25, 25], Properties = new() { ["grouped"] = "false", ["property_id"] = "20214", ["property_index"] = "0", ["angle_deg"] = "0", ["docked"] = "false" } }); }
         }
         public ConnectionCreatePlanner.Scene Read(string project, string page) => Clone(Scene);
         public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
         {
-            Scene.Page.Placements[0].Location = moves[0]!["after"]!.Values<double>().ToArray();
-            Scene.Page.Placements[0].Bounds = moves[0]!["bounds"]!.Values<double>().ToArray();
+            DrawingPlacement target = Scene.Page.Placements.Single(p => p.Locator.Digest == (string)moves[0]!["locator"]!["digest"]!);
+            target.Location = moves[0]!["after"]!.Values<double>().ToArray();
+            target.Bounds = moves[0]!["bounds"]!.Values<double>().ToArray();
+            if (moves[0]!["angle"] is { } angle)
+            { target.Properties["angle_deg"] = angle.ToString(); target.Properties["docked"] = "false"; }
             if (Fail)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure after moving the first item."); }
         };

@@ -30,6 +30,8 @@ public static class PlacementMoveExecution
             double[] delta = row["after"]!.Values<double>().Zip(placement.Location, (a, b) => a - b).ToArray();
             placement.Location = row["after"]!.Values<double>().ToArray();
             placement.Bounds = row["bounds"]!.Values<double>().ToArray();
+            if (row["angle"] is { } angle)
+            { placement.Properties["angle_deg"] = ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; }
             if (placement.Parent is null)
             {
                 string prefix = FormattableString.Invariant($"{placement.Locator.Type}/{placement.Locator.Oid}/");
@@ -54,7 +56,13 @@ public static class PlacementMoveExecution
             {
                 DrawingPlacement want = expected.Page.Placements[i], found = actual.Page.Placements[i];
                 if (rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, want.Locator)))
-                { found.Locator.Digest = want.Locator.Digest; if (found.Parent is not null && want.Parent is not null) { found.Parent.Digest = want.Parent.Digest; } }
+                {
+                    found.Locator.Digest = want.Locator.Digest;
+                    if (input.ContainsKey("property_moves") && found.Bounds is { } bounds && want.Bounds is { } expectedBounds && bounds.Length == expectedBounds.Length && bounds.Zip(expectedBounds, (a, b) => Math.Abs(a - b) <= 0.000001).All(equal => equal))
+                    { found.Bounds = expectedBounds; }
+                    if (found.Parent is not null && want.Parent is not null)
+                    { found.Parent.Digest = want.Parent.Digest; }
+                }
             }
             if (!actual.Complete || actual.PageType != scene.PageType)
             { throw Mismatch("page inventory"); }

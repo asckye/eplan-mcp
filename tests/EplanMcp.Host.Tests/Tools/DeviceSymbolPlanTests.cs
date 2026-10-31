@@ -364,6 +364,8 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                             Number = FailAt == "Number" ? "99" : args.TerminalNumber!,
                             Position = FailAt == "Position" ? [0, 0] : [args.X, args.Y],
                             StripCreated = createStrip,
+                            StripPosition = FailAt == "StripPosition" ? [0, 0] : args.TerminalStripPosition,
+                            StripText = FailAt == "StripText" ? "wrong" : args.TerminalStripText,
                             SortCode = "17"
                         }
                     };

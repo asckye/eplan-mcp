@@ -12,9 +12,9 @@ internal static partial class DevicePlaceInputs
     {
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","library","symbol","symbol_variant","display_properties","connection_designations","location_box","corner_x","corner_y"]}}},
-             {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","part","variant","location_box","corner_x","corner_y"]}}},
-             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations"]}}},
+            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","location_box","corner_x","corner_y"]}}},
+             {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","part","variant","location_box","corner_x","corner_y"]}}},
+             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations"]}}},
              {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations"]}}}]
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
@@ -28,6 +28,8 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["terminal_number"]!["minLength"] = 1;
         schema["properties"]!["terminal_number"]!["maxLength"] = 64;
         schema["properties"]!["terminal_strip_text"]!["maxLength"] = 256;
+        schema["properties"]!["terminal_strip_position"] = JsonNode.Parse("""{"type":["array","null"],"minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000},"description":"New strip definition [x,y], mm; requires terminal_strip_text."}""");
+        schema["dependentRequired"]!["terminal_strip_position"] = JsonNode.Parse("""["terminal_strip","terminal_strip_text"]""");
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
         foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
@@ -37,6 +39,8 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2 || position.Any(n => !double.IsFinite(n) || n is < 0 or > 10000)))
+        { problems.Add("/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."); }
         foreach ((string field, string? text) in new[] { ("plc_text", args.PlcText), ("terminal_strip_text", args.TerminalStripText) })
         {
             if (text is not null && StoredLanguage().IsMatch(text))

@@ -13,6 +13,43 @@ public sealed partial class DeviceSymbolPlanTests
     private void TerminalSymbol() => _store.Symbols.Add(new() { Library = "IEC_symbol", Name = "X", Type = "Function", Kind = "terminal", Variant = 0 });
 
     [Fact]
+    public async Task TerminalDefinition_PositionTextInPreviewApprovalAndReadback_OneUndo()
+    {
+        TerminalSymbol();
+        JsonElement preview = WriteToolHarness.Structured(await Terminal(text: "Fictional box", position: [72, 120]));
+        Assert.Equal([72d, 120d], preview.GetProperty("terminal").GetProperty("stripPosition").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Contains("(72, 120)", preview.GetProperty("changes")[0].GetProperty("newValue").GetString(), StringComparison.Ordinal);
+        JsonElement result = WriteToolHarness.Structured(await Terminal(dryRun: false, text: "Fictional box", position: [72, 120]));
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        Assert.Equal("Fictional box", result.GetProperty("terminal").GetProperty("stripText").GetString());
+        Assert.Single(_placement.Calls, c => c == "CloseUndo");
+    }
+
+    [Theory]
+    [InlineData("StripPosition")]
+    [InlineData("StripText")]
+    public async Task TerminalDefinition_MismatchRollsBackBothObjectsWithoutEmptyUndo(string failure)
+    {
+        TerminalSymbol();
+        _placement.FailAt = failure;
+        JsonElement error = WriteToolHarness.Error(await Terminal(dryRun: false, text: "Fictional box", position: [72, 120]));
+        Assert.Equal(ExecutionState.RolledBack, error.GetProperty("execution").GetString());
+        Assert.Empty(_store.Names);
+        Assert.DoesNotContain("CloseUndo", _placement.Calls);
+    }
+
+    [Fact]
+    public void TerminalDefinition_PositionChangesAfterApproval_IsStale()
+    {
+        TerminalSymbol();
+        var args = new DevicePlaceArgs { Project = "Line1", Page = Page, TerminalStrip = "-X6", TerminalNumber = "1", TerminalStripText = "Fictional box", TerminalStripPosition = [72, 120], X = 80, Y = 160 };
+        args.Fingerprint = Plan(args).Fingerprint;
+        args.TerminalStripPosition = [76, 120];
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeCallException>(() => _harness.Bridge.Handlers[OperationNames.DevicePlaceExecute](args)).Error.Reason);
+        Assert.Empty(_placement.Calls);
+    }
+
+    [Fact]
     public async Task Terminal_PreviewCreatesParentFirst_ThenCommitsAndReusesIt()
     {
         TerminalSymbol();
@@ -64,8 +101,9 @@ public sealed partial class DeviceSymbolPlanTests
         var channel = new FakeApprovalChannel("eplan", grant ? ApprovalDecision.Granted : ApprovalDecision.Denied);
         using var harness = new WriteToolHarness(channel) { ProjectPath = @"D:\Projects\Line1" };
         Bind(harness);
-        CallToolResult result = await Terminal(dryRun: false, text: "Control box", harness: harness);
+        CallToolResult result = await Terminal(dryRun: false, text: "Control box", position: [72, 120], harness: harness);
         Assert.Equal(2, Assert.Single(channel.Questions).Plan.Changes.Count);
+        Assert.Contains("(72, 120)", channel.Questions[0].Plan.Changes[0].NewValue, StringComparison.Ordinal);
         if (grant)
         { Assert.Equal("committed", WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
         else
@@ -120,7 +158,7 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.Empty(_placement.Calls);
     }
 
-    private Task<CallToolResult> Terminal(bool dryRun = true, string strip = "-X6", string number = "1", string? text = null, int variant = 0, WriteToolHarness? harness = null) =>
+    private Task<CallToolResult> Terminal(bool dryRun = true, string strip = "-X6", string number = "1", string? text = null, int variant = 0, WriteToolHarness? harness = null, double[]? position = null) =>
         DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 80, 160, dry_run: dryRun,
-            terminal_strip: strip, terminal_number: number, terminal_strip_text: text, symbol_variant: variant, cancellationToken: TestContext.Current.CancellationToken);
+            terminal_strip: strip, terminal_number: number, terminal_strip_text: text, terminal_strip_position: position, symbol_variant: variant, cancellationToken: TestContext.Current.CancellationToken);
 }

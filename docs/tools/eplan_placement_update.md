@@ -10,7 +10,9 @@
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 
 显式 `project,page,moves[1..50]`；每项给 `eplan_page_get include_drawings` 的完整 locator（含 digest），以及绝对 `x_mm,y_mm` 或 `delta_mm:[dx,dy]`，两者互斥。请求≤256 KiB，严格成员/重复键/有限数；坐标 0–10,000 mm，增量允许负值。默认 `dry_run=false,snap_to_grid=true,response_format=concise`。
-增量先换算绝对目标，再按页栅格吸附（中点远离零）；结果固化绝对位置，重复使用增量不具有幂等性，后续执行必须消费固化计划。无组 Function、SymbolReference、PotentialDefinition、Text、Line、Rectangle 及父符号的全部属性文字构成闭包。属性文字不可独立指定；重复 locator、父子同时指定、组/宏组/未知类型拒绝。A57 属性文字共享父对象号，以父归属和各自 digest 区分，不能按 oid 去重。
+增量先换算绝对目标，再按页栅格吸附（中点远离零）；结果固化绝对位置，重复使用增量不具有幂等性，后续执行必须消费固化计划。无组 Function、SymbolReference、PotentialDefinition、Text、Line、Rectangle 及父符号的全部属性文字构成闭包。重复 locator、组/宏组/未知类型拒绝。
+
+D4 增加与 `moves` 互斥的 `property_moves[1..50]`：每项 `{parent,property_id,property_index,x_mm,y_mm,angle_deg}`。parent 为最新绘图父定位器，ID 和零基序号取子项 properties 的同名字段；不能用共享父号的子定位器代替。角度为绝对 0/90/180/270 度，坐标为页面绝对毫米；仅改变选定文字，脱离停靠，父线和其他文字不变。绘图 properties 增加 angle_deg、docked；继承图层或非直角的原始旋转暂拒绝。规划绕文字插入点旋转外框并平移，页界不明或越界拒绝。输出 moves 增加 propertyId/propertyIndex/beforeAngle/angle；沿相同审批、完整页指纹、事务、提交前后读回和一步撤销流程，no-op 无撤销步。Small/Medium 覆盖同父同属性多项、角度/位置/旁项错误及 stale；Large 新页电缆竖排和 PNG 仅编写，未运行。
 ## 预览与错误
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 返回 `execution=not_started,dryRun=true,noOp`、栅格/`Page.Size`、闭包逐对象 locator/parent/before/requested/after/snapped/bounds，以及 `graphicalChanges` 的引脚/前后线段、`connectionChanges` 的受影响逻辑端点对和完整页 fingerprint。零增量/同绝对位置保持原位（即使原位不在栅格），或吸附回原位为 no-op，不创建事务。

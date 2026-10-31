@@ -68,6 +68,21 @@ public sealed class TerminalPlaceInputTests
     }
 
     [Fact]
+    public void DefinitionPosition_RequiresNewStripTextAndFinitePair()
+    {
+        DevicePlaceArgs args = Args();
+        args.TerminalStripPosition = [72, 120];
+        Assert.Contains(DevicePlaceInputs.Check(args, null), p => p.StartsWith("/terminal_strip_position:", StringComparison.Ordinal));
+        args.TerminalStripText = "Fictional box";
+        Assert.Empty(DevicePlaceInputs.Check(args, null));
+        foreach (double[] invalid in new double[][] { [72], [72, 120, 0], [double.NaN, 120], [-1, 120], [10001, 120] })
+        {
+            args.TerminalStripPosition = invalid;
+            Assert.Contains(DevicePlaceInputs.Check(args, null), p => p.StartsWith("/terminal_strip_position:", StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
     public void OptionsWithoutTerminalSource_AreRejected()
     {
         DevicePlaceArgs args = Args();

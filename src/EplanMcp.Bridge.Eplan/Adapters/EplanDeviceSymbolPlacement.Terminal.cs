@@ -2,6 +2,7 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
+using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -25,10 +26,19 @@ internal sealed partial class EplanDeviceSymbolPlacement
         {
             // Acceptance trial: Create(Page) placed the strip definition at the page origin, outside the frame. An
             // unplaced definition (Create(Project, FunctionDefinition)) is listed in the navigator only.
-            strip.Create(_project, _project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText));
+            if (args.TerminalStripPosition is { } position)
+            { strip.Create(_page); strip.Location = new PointD(position[0], position[1]); }
+            else
+            { strip.Create(_project, _project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText)); }
             strip.IsMainFunction = true;
             strip.Name = name;
         }
+        var terminal = new Terminal();
+#pragma warning restore CA2000
+        CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
+        terminal.Create(strip, _page, _variant);
+        terminal.Name = tag;
+        terminal.Location = new PointD(args.X, args.Y);
         if (args.TerminalStripText is { } text)
         {
             CheckTerminal(create, "strip text is only set on a new strip");
@@ -41,12 +51,28 @@ internal sealed partial class EplanDeviceSymbolPlacement
             using MultiLangString actual = value.ToMultiLangString();
             CheckTerminal(actual.GetStringToDisplay(ISOCode.Language.L___) == text, "strip text reads back as '" + actual.GetStringToDisplay(ISOCode.Language.L___) + "'");
         }
-        var terminal = new Terminal();
+        if (args.TerminalStripPosition is { } expected)
+        {
+            CheckTerminal(create && strip.IsPlaced && strip.Page.Name == _page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
+            foreach (int numberId in new[] { 20214, 20011 })
+            {
+                PropertyPlacement? display = strip.PropertyPlacements.FirstOrDefault(p => { using AnyPropertyId id = p.DisplayedProperty; return id.AsInt == numberId; });
+                if (display is null)
+                {
+#pragma warning disable CA2000 // A39/A57: EPLAN owns context property placements, also after Abort.
+                    display = new PropertyPlacement();
 #pragma warning restore CA2000
-        CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
-        terminal.Create(strip, _page, _variant);
-        terminal.Name = tag;
-        terminal.Location = new PointD(args.X, args.Y);
+                    using AnyPropertyId id = numberId;
+                    display.Create(strip, id);
+                }
+                if (display.IsDocked)
+                { display.UndockText(); }
+                display.Location = new PointD(0, numberId == 20214 ? 0 : -4);
+                display.Height = 2.5;
+                display.IsVisible = true;
+                CheckTerminal(numberId == 20011 ? display.GetDisplayString() == args.TerminalStripText : display.GetDisplayString().EndsWith(name.Substring(name.LastIndexOf('-')), StringComparison.Ordinal), "strip displayed text differs");
+            }
+        }
         // A55: release the cached list before TransactionRunner can Abort; never access these objects afterwards.
         using FunctionPropertyList values = terminal.Properties;
         values.FUNC_PINORTERMINALNUMBER = args.TerminalNumber!;
@@ -79,7 +105,9 @@ internal sealed partial class EplanDeviceSymbolPlacement
                 Owner = owner?.Name,
                 Position = [terminal.Location.X, terminal.Location.Y],
                 SortCode = sort.IsEmpty ? null : sort.ToString(),
-                StripCreated = create
+                StripCreated = create,
+                StripPosition = args.TerminalStripPosition is null ? null : [strip.Location.X, strip.Location.Y],
+                StripText = args.TerminalStripText
             }
         };
     }

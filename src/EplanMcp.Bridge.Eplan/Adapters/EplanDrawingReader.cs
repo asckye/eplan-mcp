@@ -82,6 +82,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 parentType = parent?.Type,
                 parentOid = parent?.Oid,
                 slot, // property placements share their parent's identifier
+                rotation = (placement as PropertyPlacement)?.Rotation,
+                docked = (placement as PropertyPlacement)?.IsDocked,
                 group = placement.Group?.ObjectIdentifier,
                 location,
                 bounds,
@@ -100,6 +102,10 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["name"] = (placement as FunctionBase)?.Name,
                     ["text"] = contents?.GetAsString(),
                     ["display"] = (placement as PropertyPlacement)?.GetDisplayString(),
+                    ["property_id"] = placement is PropertyPlacement propertyId ? DisplayedId(propertyId).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+                    ["property_index"] = slot?.Split('#')[1],
+                    ["angle_deg"] = placement is PropertyPlacement rotated ? (rotated.Rotation == -16002 ? "from_layer" : Math.Round((rotated.Rotation * 180 / Math.PI % 360 + 360) % 360, 8).ToString("R", System.Globalization.CultureInfo.InvariantCulture)) : null,
+                    ["docked"] = placement is PropertyPlacement docked ? docked.IsDocked.ToString().ToLowerInvariant() : null,
                     ["height_mm"] = placement is Text heightText ? DrawingCoordinates.ApiToMillimetres(heightText.Height).ToString("R", System.Globalization.CultureInfo.InvariantCulture) : null
                 }
                     .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),

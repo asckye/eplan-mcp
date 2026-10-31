@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-/// <summary>A54: line endpoints move together; A53/A57 property offsets are never assigned or deduplicated by OID.</summary>
+/// <summary>A54: line endpoints move together; A57 property text is selected by parent, property and collection slot.</summary>
 internal sealed class EplanPlacementMover : IPlacementMover
 {
     public ConnectionCreatePlanner.Scene Read(string project, string page) => new EplanConnectionCreator(readSymbolBounds: false).Read(project, page);
@@ -25,8 +25,26 @@ internal sealed class EplanPlacementMover : IPlacementMover
             { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Grouped placements cannot be moved.")); }
             return (Root: root, Before: root.Location, After: new PointD((double)m["after"]![0]!, (double)m["after"]![1]!));
         }).ToArray();
+        var texts = moves.Where(m => m["angle"] is not null).Select(m =>
+        {
+            DrawingLocator parent = m["parent"]!.ToObject<DrawingLocator>()!;
+            Placement owner = page.AllPlacements.Single(p => p is not PropertyPlacement && p.ObjectIdentifier == parent.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == parent.Type);
+            PropertyPlacement text = (owner is SymbolReference symbol ? symbol.PropertyPlacements : ((IPropertyPlacementsContainer)owner).PropertyPlacements)[(int)m["propertyIndex"]!];
+            using AnyPropertyId id = text.DisplayedProperty;
+            if (id.AsInt != (int)m["propertyId"]! || text.Parent.ObjectIdentifier != owner.ObjectIdentifier)
+            { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PlanStale, "Property placement selection changed; refresh drawings.")); }
+            return (Text: text, Owner: owner, Row: m);
+        }).ToArray();
         return () =>
         {
+            foreach (var item in texts)
+            {
+                OperationContext.Current.ThrowIfCancellationRequested();
+                if (item.Text.IsDocked)
+                { item.Text.UndockText(); }
+                item.Text.Rotation = (double)item.Row["angle"]! * Math.PI / 180;
+                item.Text.Location = new PointD((double)item.Row["after"]![0]! - item.Owner.Location.X, (double)item.Row["after"]![1]! - item.Owner.Location.Y);
+            }
             foreach (var item in roots)
             {
                 OperationContext.Current.ThrowIfCancellationRequested();

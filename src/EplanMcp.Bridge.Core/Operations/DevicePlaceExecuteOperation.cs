@@ -104,7 +104,8 @@ public sealed class DevicePlaceExecuteOperation(
         // relation can stay null until the commit (S43), and eplan_terminal_strip_get confirms it afterwards.
         if (args.TerminalStrip is not null && (data.Terminal is not { } terminal || !DevicePlaceRequest.SameName(tag, data.Tag) || data.Page != page
             || !DevicePlaceRequest.SameName(tag.Substring(0, tag.LastIndexOf(':')), terminal.Strip) || terminal.Owner is not null && terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
-            || !terminal.Position.SequenceEqual(new[] { args.X, args.Y })))
+            || !terminal.Position.SequenceEqual(new[] { args.X, args.Y }) || args.TerminalStripPosition is { } position
+                && (terminal.StripPosition is null || !terminal.StripPosition.SequenceEqual(position) || terminal.StripText != args.TerminalStripText)))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal identity, ownership or position differs; nothing was committed."); }
         if (args.DisplayProperties is { Count: > 0 })
         { DeviceSymbolDisplays.Verify(args, tag, page, data.Plc, session.ReadDisplays()); }

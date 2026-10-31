@@ -24,6 +24,19 @@ public sealed class TerminalPlacementTests : IDisposable
     public void Dispose() => Terminal.OnCreate = null;
 
     [Fact]
+    public void PlacedDefinition_SetsIndependentPositionTextAndNativeDisplays()
+    {
+        DevicePlaceArgs args = Args();
+        args.TerminalStripPosition = [72, 120];
+        DevicePlaceData result = _adapter.PlaceTerminal(args, "=F+A1-X6:1");
+        TerminalStrip strip = Assert.Single(_page.AllPlacements.OfType<TerminalStrip>());
+        Assert.Equal([72d, 120d], result.Terminal!.StripPosition!);
+        Assert.Equal("Control box", result.Terminal.StripText);
+        Assert.Equal([20214, 20011], strip.PropertyPlacements.Select(p => p.DisplayedId));
+        Assert.All(strip.PropertyPlacements, p => Assert.True(p.IsVisible));
+    }
+
+    [Fact]
     public void Create_ParentPrecedesTerminal_AndNativeReadbackPreservesAssignedSortCode()
     {
         TerminalStrip? parent = null;

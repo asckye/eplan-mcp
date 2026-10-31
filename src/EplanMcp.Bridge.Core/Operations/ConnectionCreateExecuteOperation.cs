@@ -13,7 +13,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
     {
         JObject input = args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/request: supply the planned request."]));
         string fingerprint = (string?)args["fingerprint"] ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/fingerprint: supply the plan fingerprint."]));
-        if (input.ContainsKey("moves"))
+        if (input.ContainsKey("moves") || input.ContainsKey("property_moves"))
         { return PlacementMoveExecution.Execute(mover ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Placement moving is unavailable in this Bridge.")), transactions, input, fingerprint); }
         ConnectionCreatePlanner.Scene scene;
         JObject plan;

@@ -27,6 +27,8 @@ public static class PlacementMovePlanner
             Require(!parser.Read(), "", "Supply one JSON object.");
         }
         catch (JsonReaderException) { throw WriteArguments.Invalid(["/: Supply strict JSON without duplicate members."]); }
+        if (input.ContainsKey("property_moves"))
+        { return PropertyPlacementMoves.Plan(input, scene, expectedFingerprint); }
         ConnectionCreatePlanner.Members(input, "", "project page moves", "dry_run snap_to_grid response_format");
         ConnectionCreatePlanner.FiniteNumbers(input, "");
         Require(input["project"]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input["project"]), "/project", "Specify an open project.");

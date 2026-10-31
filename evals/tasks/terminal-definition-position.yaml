@@ -1,0 +1,22 @@
+id: terminal-definition-position
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的新页 =GAA+A1&EFS1/9601 上放端子 +A1-XDE6:1，端子位置 (100,160) mm。
+  同次把原生端子排定义放在 (72,120) mm，功能文本为 Fictional control box。
+  不用自由文本代替端子排定义。读回后报告功能文本；此任务只使用虚构名称。
+answer:
+  type: object
+  required: [text]
+  properties:
+    text: { type: string }
+after:
+  text: { tool: eplan_device_get, args: { tag: "+A1-XDE6", language: "??_??" }, pick: $.device.text }
+  locations: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9601", include_drawings: true, drawing_limit: 200, response_format: detailed }, pick: "$.drawings.items[*].location" }
+  kinds: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9601", include_drawings: true, drawing_limit: 200, response_format: detailed }, pick: "$.drawings.items[*].kind" }
+checks:
+  - { answer: $.text, equals: after.text }
+  - { after: text, equals: Fictional control box }
+  - { after: locations, contains: [[72, 120]] }
+  - { after: kinds, contains: TerminalStrip }
+budget: { max_tool_calls: 16, max_minutes: 5 }

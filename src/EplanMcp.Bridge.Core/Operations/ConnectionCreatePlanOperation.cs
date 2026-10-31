@@ -11,7 +11,7 @@ public sealed class ConnectionCreatePlanOperation(IConnectionCreator creator) : 
     protected override WritePlan Execute(JObject args)
     {
         ConnectionCreatePlanner.Scene scene = creator.Read((string?)args["project"] ?? "", (string?)args["page"] ?? "");
-        bool moving = args.ContainsKey("moves");
+        bool moving = args.ContainsKey("moves") || args.ContainsKey("property_moves");
         if (moving)
         { scene.SymbolBounds.Clear(); }
         JObject preview = moving ? PlacementMovePlanner.Plan(args.ToString(Formatting.None), scene) : ConnectionCreatePlanner.Plan(args.ToString(Formatting.None), scene, creator);

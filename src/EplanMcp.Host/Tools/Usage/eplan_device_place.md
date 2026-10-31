@@ -1,5 +1,7 @@
 ## Examples
 
+For a terminal source, terminal_strip_position:[x,y] places the new strip definition independently of the terminal's x/y. Supply terminal_strip_text (plain ??_?? function text). Only the first terminal may request it; existing strips cannot be moved or rewritten here. The returned terminal.stripPosition/stripText are read back before commit. The strip and first terminal share one Ctrl+Z; omit the position to keep a new definition unplaced.
+
 A part device, using the page structure (preview):
 
     {"project": "Line1", "page": "=GAA+A1&EFS1/60", "part": "SIE.3RH2122-1HB40", "x": 80, "y": 160, "tag": "-KF20", "dry_run": true}

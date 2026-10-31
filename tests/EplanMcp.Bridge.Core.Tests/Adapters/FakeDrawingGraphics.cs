@@ -6,6 +6,10 @@ internal abstract class TextBase(long oid) : Placement(oid)
 {
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
+    public double Rotation { get; set; }
+    public bool IsDocked { get; set; }
+    public void UndockText() => IsDocked = false;
+    public bool IsVisible { get; set; }
 }
 
 internal sealed class Text(long oid = 99) : TextBase(oid)
@@ -18,13 +22,21 @@ internal sealed class Text(long oid = 99) : TextBase(oid)
     }
 }
 
-internal sealed class PropertyPlacement(long oid, Placement parent) : TextBase(oid)
+internal sealed class PropertyPlacement(long oid = 99, Placement? parent = null) : TextBase(oid)
 {
-    public Placement Parent { get; } = parent;
+    public Placement Parent { get; private set; } = parent!;
     public string Display { get; set; } = "-K1";
     public int DisplayedId { get; set; } = 20214;
     public AnyPropertyId DisplayedProperty => new(DisplayedId);
     public string GetDisplayString() => Display;
+    public void Create(Function owner, AnyPropertyId id)
+    {
+        Parent = owner;
+        DisplayedId = id.AsInt;
+        using MultiLangString text = ((EObjects.TerminalStrip)owner).Properties.FUNC_TEXT.ToMultiLangString();
+        Display = id.AsInt == 20214 ? owner.Name : text.GetStringToDisplay(ISOCode.Language.L___);
+        owner.PropertyPlacements = [.. owner.PropertyPlacements, this];
+    }
     public PointD[] GetBoundingBox(bool relative)
     {
         Assert.False(relative);

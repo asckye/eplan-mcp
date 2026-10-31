@@ -14,6 +14,31 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class PlacementMoverTests
 {
     [Fact]
+    public void PropertySelector_ChangesOnlySelectedSlot_WithRadiansAndRelativePosition()
+    {
+        var owner = new Function(1) { Location = new(20, 20) };
+        var first = new PropertyPlacement(1, owner) { Location = new(2, 3) };
+        var second = new PropertyPlacement(1, owner) { Location = new(4, 5), IsDocked = true };
+        owner.PropertyPlacements = [first, second];
+        var page = new Page { AllPlacements = [owner] };
+        EplanProjects.Project = new(page);
+        try
+        {
+            JObject row = Row(second, owner, [60, 80]);
+            row["propertyId"] = 20214;
+            row["propertyIndex"] = 1;
+            row["angle"] = 90;
+            new EplanPlacementMover().Prepare(new() { Project = new() { Path = "project" }, Page = new() { Page = page.Name } }, new JArray(row))();
+            Assert.Equal(new PointD(40, 60), second.Location);
+            Assert.Equal(Math.PI / 2, second.Rotation);
+            Assert.False(second.IsDocked);
+            Assert.Equal(new PointD(2, 3), first.Location);
+            Assert.Equal(new PointD(20, 20), owner.Location);
+        }
+        finally { EplanProjects.Project = null; }
+    }
+
+    [Fact]
     public void Move_MixedRootsAndSameIdentifierChildren_UsesRelativeOffsetsAndBothLineEndpoints()
     {
         var symbol = new Function(1) { Location = new(20, 20) };

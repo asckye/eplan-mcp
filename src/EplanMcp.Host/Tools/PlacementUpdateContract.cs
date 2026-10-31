@@ -4,12 +4,13 @@ using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tools;
 
-/// <summary>Full-profile moves use complete locators and closed absolute/delta branches.</summary>
+/// <summary>Full-profile updates use complete locators and exclusive parent or individual-property branches.</summary>
 internal static class PlacementUpdateContract
 {
     internal static readonly JsonElement Input = JsonDocument.Parse("""
-        {"type":"object","additionalProperties":false,"required":["project","page","moves"],"properties":{
+        {"type":"object","additionalProperties":false,"required":["project","page"],"oneOf":[{"required":["moves"],"not":{"required":["property_moves"]}},{"required":["property_moves"],"not":{"required":["moves"]}}],"properties":{
           "project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},
+          "property_moves":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["parent","property_id","property_index","x_mm","y_mm","angle_deg"],"properties":{"parent":{"$ref":"#/$defs/locator"},"property_id":{"type":"integer","minimum":1,"maximum":2147483647},"property_index":{"type":"integer","minimum":0,"maximum":9999},"x_mm":{"type":"number","minimum":0,"maximum":10000},"y_mm":{"type":"number","minimum":0,"maximum":10000},"angle_deg":{"type":"integer","enum":[0,90,180,270]}}}},
           "moves":{"type":"array","minItems":1,"maxItems":50,"items":{"oneOf":[
             {"type":"object","additionalProperties":false,"required":["locator","x_mm","y_mm"],"properties":{"locator":{"$ref":"#/$defs/locator"},"x_mm":{"type":"number","minimum":0,"maximum":10000},"y_mm":{"type":"number","minimum":0,"maximum":10000}}},
             {"type":"object","additionalProperties":false,"required":["locator","delta_mm"],"properties":{"locator":{"$ref":"#/$defs/locator"},"delta_mm":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":-10000,"maximum":10000}}}}
@@ -21,7 +22,7 @@ internal static class PlacementUpdateContract
     {
         Name = "eplan_placement_update",
         Title = "Move placements on an EPLAN page",
-        Description = "Moves same-page symbols and text/line/rectangle from eplan_page_get include_drawings locators. mm, bottom left, y up; x_mm/y_mm or delta_mm. Property text follows its parent; groups refused. One undo; no-op leaves none. Approval outside scratch; denial returns APPROVAL_DENIED. Use eplan_connection_generate afterwards.",
+        Description = "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
         InputSchema = Input,
         OutputSchema = Output(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = true, OpenWorldHint = false },
@@ -48,6 +49,9 @@ internal static class PlacementUpdateContract
         schema["$defs"] = JsonNode.Parse(Input.GetProperty("$defs").GetRawText());
         schema["$defs"]!["point"] = JsonNode.Parse("""{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number"}}""");
         schema["$defs"]!["segment"] = JsonNode.Parse("""{"type":["array","null"],"minItems":2,"maxItems":2,"items":{"$ref":"#/$defs/point"}}""");
+        JsonNode fields = schema["properties"]!["moves"]!["items"]!["properties"]!;
+        foreach (string name in new[] { "propertyId", "propertyIndex", "beforeAngle", "angle" })
+        { fields[name] = JsonNode.Parse("""{"type":"number"}"""); }
         return JsonSerializer.SerializeToElement(schema);
     }
 }

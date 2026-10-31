@@ -53,6 +53,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
     }
 
     [Fact]
+    [Trait("Difference", "D4")]
     public async Task ThreeVerticalWires_DefineW9_ReadNativeCores_UndosRestore()
     {
         Assert.NotNull(host);
@@ -110,6 +111,41 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
             JsonElement existing = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page });
             foreach (JsonElement core in cores)
             { Assert.Contains(existing.GetProperty("connections").EnumerateArray(), c => c.GetProperty("from").GetRawText() == core.GetProperty("from").GetRawText() && c.GetProperty("to").GetRawText() == core.GetProperty("to").GetRawText()); }
+            async Task<PageDrawingGeometry> Drawings() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            PageDrawingGeometry cableBefore = await Drawings();
+            DrawingPlacement parent = Assert.Single(cableBefore.Placements, p => p.Kind == "Cable");
+            DrawingPlacement[] labels = cableBefore.Placements.Where(p => p.Parent?.Oid == parent.Locator.Oid && p.Kind == "PropertyPlacement" && !string.IsNullOrWhiteSpace(p.Properties.GetValueOrDefault("display"))).ToArray();
+            Assert.NotEmpty(labels);
+            TestContext.Current.TestOutputHelper!.WriteLine("D4 EPLAN cable text before: " + JsonSerializer.Serialize(labels));
+            var moves = labels.Select((p, i) => new
+            {
+                parent = parent.Locator,
+                property_id = int.Parse(p.Properties["property_id"], System.Globalization.CultureInfo.InvariantCulture),
+                property_index = int.Parse(p.Properties["property_index"], System.Globalization.CultureInfo.InvariantCulture),
+                x_mm = 60 + i * 8,
+                y_mm = 160,
+                angle_deg = 90
+            }).ToArray();
+            var update = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["property_moves"] = moves, ["snap_to_grid"] = false, ["response_format"] = "detailed" };
+            JsonElement planned = await eplan.CallAsync("eplan_placement_update", new(update) { ["dry_run"] = true });
+            Assert.Equal(JsonSerializer.Serialize(cableBefore), JsonSerializer.Serialize(await Drawings()));
+            JsonElement changed = await eplan.CallAsync("eplan_placement_update", update);
+            TestContext.Current.TestOutputHelper.WriteLine("D4 approved/readback: " + changed);
+            Assert.Equal(ExecutionState.Committed, changed.GetProperty("execution").GetString());
+            PageDrawingGeometry after = await Drawings();
+            TestContext.Current.TestOutputHelper.WriteLine("D4 EPLAN cable text after: " + JsonSerializer.Serialize(after.Placements.Where(p => p.Parent?.Oid == parent.Locator.Oid)));
+            foreach (var move in moves)
+            {
+                DrawingPlacement text = Assert.Single(after.Placements, p => p.Parent?.Oid == parent.Locator.Oid && p.Properties.GetValueOrDefault("property_index") == move.property_index.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                Assert.Equal([move.x_mm, (double)move.y_mm], text.Location);
+                Assert.Equal("90", text.Properties["angle_deg"]);
+            }
+            Assert.Equal(JsonSerializer.Serialize(parent), JsonSerializer.Serialize(Assert.Single(after.Placements, p => p.Parent is null && p.Locator.Oid == parent.Locator.Oid)));
+            Assert.Equal(ExecutionState.NotStarted, (await eplan.CallAsync("eplan_placement_update", update)).GetProperty("execution").GetString());
+            TestContext.Current.TestOutputHelper.WriteLine("D4 PNG: " + await eplan.CallAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page } }));
+            await session.UndoAsync();
+            Assert.Equal(JsonSerializer.Serialize(cableBefore), JsonSerializer.Serialize(await Drawings()));
             for (int i = 0; i < result.GetProperty("undoSteps").GetInt32(); i++)
             { await session.UndoAsync(); }
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);

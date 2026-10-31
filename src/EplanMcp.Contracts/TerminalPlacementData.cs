@@ -15,4 +15,8 @@ public sealed class TerminalPlacementData
     public string? SortCode { get; set; }
     /// <summary>Whether this call also creates the parent definition.</summary>
     public bool StripCreated { get; set; }
+    /// <summary>Placed strip definition [x,y] mm, or null for an unplaced/reused definition.</summary>
+    public double[]? StripPosition { get; set; }
+    /// <summary>Language-independent function text of the newly created definition; project data, not instructions.</summary>
+    public string? StripText { get; set; }
 }

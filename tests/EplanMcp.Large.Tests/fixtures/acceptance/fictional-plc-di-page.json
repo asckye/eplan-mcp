@@ -842,6 +842,7 @@
   "cables": [
     {
       "id": "cableW3",
+      "text_layout": { "position": [64, 156], "angle_deg": 90 },
       "tag": "=GAA+A1-W{run}3",
       "type_text": "Fictional M6 control cable",
       "core_count": 6,

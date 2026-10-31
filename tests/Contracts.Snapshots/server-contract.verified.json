@@ -5462,6 +5462,20 @@
             ],
             "maxLength": 256
           },
+          "terminal_strip_position": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "description": "New strip definition [x,y], mm; requires terminal_strip_text."
+          },
           "plc_connection_point": {
             "description": "PLC point suffix; tag is existing card",
             "type": [
@@ -5523,6 +5537,7 @@
                   "terminal_strip",
                   "terminal_number",
                   "terminal_strip_text",
+                  "terminal_strip_position",
                   "library",
                   "symbol",
                   "symbol_variant",
@@ -5548,6 +5563,7 @@
                   "terminal_strip",
                   "terminal_number",
                   "terminal_strip_text",
+                  "terminal_strip_position",
                   "part",
                   "variant",
                   "location_box",
@@ -5569,6 +5585,7 @@
                   "terminal_strip",
                   "terminal_number",
                   "terminal_strip_text",
+                  "terminal_strip_position",
                   "tag",
                   "part",
                   "variant",
@@ -5622,6 +5639,10 @@
           ],
           "plc_text": [
             "plc_connection_point"
+          ],
+          "terminal_strip_position": [
+            "terminal_strip",
+            "terminal_strip_text"
           ]
         }
       },
@@ -5912,6 +5933,21 @@
               },
               "stripCreated": {
                 "type": "boolean"
+              },
+              "stripPosition": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "number"
+                }
+              },
+              "stripText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -12517,14 +12553,35 @@
     {
       "name": "eplan_placement_update",
       "title": "Move placements on an EPLAN page",
-      "description": "Moves same-page symbols and text/line/rectangle from eplan_page_get include_drawings locators. mm, bottom left, y up; x_mm/y_mm or delta_mm. Property text follows its parent; groups refused. One undo; no-op leaves none. Approval outside scratch; denial returns APPROVAL_DENIED. Use eplan_connection_generate afterwards.",
+      "description": "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "project",
-          "page",
-          "moves"
+          "page"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "moves"
+            ],
+            "not": {
+              "required": [
+                "property_moves"
+              ]
+            }
+          },
+          {
+            "required": [
+              "property_moves"
+            ],
+            "not": {
+              "required": [
+                "moves"
+              ]
+            }
+          }
         ],
         "properties": {
           "project": {
@@ -12534,6 +12591,57 @@
           "page": {
             "type": "string",
             "minLength": 1
+          },
+          "property_moves": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "parent",
+                "property_id",
+                "property_index",
+                "x_mm",
+                "y_mm",
+                "angle_deg"
+              ],
+              "properties": {
+                "parent": {
+                  "$ref": "#/$defs/locator"
+                },
+                "property_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "property_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9999
+                },
+                "x_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "y_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "angle_deg": {
+                  "type": "integer",
+                  "enum": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ]
+                }
+              }
+            }
           },
           "moves": {
             "type": "array",
@@ -12767,6 +12875,18 @@
                   "items": {
                     "type": "number"
                   }
+                },
+                "propertyId": {
+                  "type": "number"
+                },
+                "propertyIndex": {
+                  "type": "number"
+                },
+                "beforeAngle": {
+                  "type": "number"
+                },
+                "angle": {
+                  "type": "number"
                 }
               }
             }
