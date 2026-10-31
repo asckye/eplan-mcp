@@ -9,7 +9,6 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A12/A36/A39 borrowed identities; no EPLAN object crosses a request boundary.</summary>
 internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
 {
-    private static readonly string[] _extraKinds = ["page", "connection", "placeholder", "interruptionpoint", "potentialdefinition", "locationbox", "macrobox"];
     public void CheckTarget(ApiTryArgs args)
     {
         JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
@@ -22,10 +21,11 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
     {
         MainThread.Assert();
         DrawingLocator locator = token.ToObject<DrawingLocator>()!;
-        using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
+        Project nativeProject = EplanProjects.ByPath(project);
+        using var finder = new DMObjectsFinder(nativeProject);
         foreach (string kind in kinds)
         {
-            IEnumerable<StorableObject> candidates = EplanObjectReader.Candidates(finder, kind, () => OperationContext.Current.ThrowIfCancellationRequested(), locator.Page);
+            IEnumerable<StorableObject> candidates = EplanObjectReader.Candidates(finder, kind, () => OperationContext.Current.ThrowIfCancellationRequested(), locator.Page, nativeProject);
             foreach (StorableObject found in candidates.Where(o => o.ObjectIdentifier == locator.Oid && EplanObjectReader.Matches(o, kind)))
             {
                 SnapshotObject identity = EplanObjectReader.Describe(found, kind);
@@ -55,7 +55,7 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
     }
     private static DrawingLocator Locator(string project, StorableObject obj)
     {
-        string kind = ApiTryCatalog.Kinds("Eplan.EplApi.DataModel.Function").Concat(_extraKinds).FirstOrDefault(k => EplanObjectReader.Matches(obj, k))
+        string kind = ObjectReadTypes.Types.Where(ObjectReadTypes.Supported).OrderBy(k => k == "PLCTerminal" ? 1 : 0).Select(k => k.ToLowerInvariant()).FirstOrDefault(k => EplanObjectReader.Matches(obj, k))
             ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned object has no supported discovery locator.");
         SnapshotObject identity = EplanObjectReader.Describe(obj, kind);
         return new() { Project = project, Page = obj is Page page ? page.Name : identity.Page ?? string.Empty, Type = identity.Type, Oid = identity.Oid, Digest = SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) };

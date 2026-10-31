@@ -1120,7 +1120,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_try.md",
-        "specStatus": "Implemented（C1 第三片，未实机验证；工具数不变）",
+        "specStatus": "Implemented（C1 第四片，未实机验证；工具数不变）",
         "apiNotes": [],
         "tests": [
           {
@@ -6294,7 +6294,7 @@
       "evidence": {
         "spec": "docs/tools/eplan_object_find.md",
         "apiNotes": [
-          "A36",
+          "A57",
           "A60"
         ],
         "tests": [
@@ -6312,6 +6312,11 @@
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
+          },
+          {
+            "name": "GenericObjectReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GenericObjectReadTests.cs"
           },
           {
             "name": "ObjectReadTests",
@@ -6520,6 +6525,11 @@
             "name": "ObjectReadProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
+          },
+          {
+            "name": "GenericObjectReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GenericObjectReadTests.cs"
           },
           {
             "name": "ObjectReadTests",

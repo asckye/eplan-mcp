@@ -51,7 +51,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         if (target.Locator is { } locator)
         {
             StorableObject found = PropertyReadTargets.Located(projectPath, locator,
-                EplanObjectReader.Candidates(objects, locator.Kind, Check), obj => EplanObjectReader.Describe(obj, locator.Kind));
+                EplanObjectReader.Candidates(objects, locator.Kind, Check, project: project), obj => EplanObjectReader.Describe(obj, locator.Kind));
             Check();
             return new Scope(EplanObjectReader.Properties(found), ObjectReadTypes.DictionaryType(found.GetType().Name), language, Check);
         }

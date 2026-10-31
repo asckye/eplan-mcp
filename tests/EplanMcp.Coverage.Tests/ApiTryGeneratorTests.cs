@@ -40,8 +40,9 @@ public sealed class ApiTryGeneratorTests
     [Fact]
     public void ReviewedTypesCoverEveryDiscoveryKind_AndInheritedFunctionTargets()
     {
-        Assert.Equal(14, ApiTryGenerator.Kinds.Values.SelectMany(k => k).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(["terminal", "plcterminal"], ApiTryCatalog.TargetKinds("O:Eplan.EplApi.DataModel.EObjects.Terminal.IsMainTerminal"));
+        Assert.True(ObjectReadTypes.Types.Count(ObjectReadTypes.Supported) > 100);
+        Assert.Contains("terminal", ApiTryCatalog.TargetKinds("O:Eplan.EplApi.DataModel.EObjects.Terminal.IsMainTerminal"));
+        Assert.Contains("plcterminal", ApiTryCatalog.TargetKinds("O:Eplan.EplApi.DataModel.EObjects.Terminal.IsMainTerminal"));
         Assert.Contains("cable", ApiTryCatalog.TargetKinds("O:Eplan.EplApi.DataModel.Function.WriteProtected"));
         Assert.Contains("terminalstrip", ApiTryCatalog.TargetKinds("O:Eplan.EplApi.DataModel.Function.IsMainFunction"));
     }

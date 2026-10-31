@@ -22,8 +22,9 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
             if (watch.Elapsed >= TimeSpan.FromSeconds(20))
             { throw new BridgeErrorException(ErrorReason.Timeout, "Object discovery exceeded 20 seconds. Select one page."); }
         }
-        using var finder = new DMObjectsFinder(EplanProjects.ByPath(args.Project!));
-        IEnumerable<StorableObject> objects = Candidates(finder, args.ObjectType.ToLowerInvariant(), Check, args.Page);
+        Project project = EplanProjects.ByPath(args.Project!);
+        using var finder = new DMObjectsFinder(project);
+        IEnumerable<StorableObject> objects = Candidates(finder, args.ObjectType.ToLowerInvariant(), Check, args.Page, project);
         var found = new Dictionary<(int, long), ObjectSummary>();
         foreach (StorableObject obj in objects)
         {
@@ -53,7 +54,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         return found.Values.OrderBy(o => o.Locator.Type).ThenBy(o => o.Locator.Oid).ToList();
     }
 
-    internal static IEnumerable<StorableObject> Candidates(DMObjectsFinder finder, string kind, Action check, string? pageName = null)
+    internal static IEnumerable<StorableObject> Candidates(DMObjectsFinder finder, string kind, Action check, string? pageName = null, Project? project = null)
     {
         check();
         IEnumerable<StorableObject> objects = kind switch
@@ -70,7 +71,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
             "interruptionpoint" => finder.GetInterruptionPoints(null),
             "potentialdefinition" => finder.GetPotentialDefinitionsWithFilterScheme(null),
             "locationbox" or "macrobox" => Placements(),
-            _ => [],
+            _ => ObjectKindDispatch.Candidates(finder, project ?? throw new InvalidOperationException("Project is required for generic discovery."), kind, check, pageName),
         };
         foreach (StorableObject obj in objects)
         {
@@ -97,11 +98,22 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
     {
         "blackbox" => obj.GetType() == typeof(BoxedDevice),
         "plcterminal" => obj.GetType() == typeof(Terminal) && ((Terminal)obj).FunctionCategory == FunctionCategory.PLCTerminal,
-        _ => string.Equals(obj.GetType().Name, kind, StringComparison.OrdinalIgnoreCase),
+        _ => ObjectKindDispatch.Matches(obj, kind),
     };
 
     internal static SnapshotObject Describe(StorableObject obj, string kind)
     {
+        if (!Legacy(kind))
+        {
+            return new SnapshotObject
+            {
+                Type = SnapshotCanonical.TypeOf(obj.ToStringIdentifier()),
+                Oid = obj.ObjectIdentifier,
+                Kind = kind,
+                Page = obj is Placement placed and not Page ? placed.Page?.Name : obj is Connection connected ? EplanConnectionReader.PageOf(connected)?.Name : null,
+                Name = obj is FunctionBase named ? named.Name : string.Empty,
+            };
+        }
         SnapshotObject identity = EplanPropertyReadAdapter.Describe(obj);
         identity.Kind = kind;
         // Page derives from Group (a Placement); its Location throws "page size cannot be determined" (A60).
@@ -115,20 +127,8 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         return identity;
     }
 
-    // A60: derived lists hide base Properties; TerminalStrip explicitly forbids Function.Properties.
-    internal static UniversalPropertyList Properties(StorableObject obj) => obj switch
-    {
-        TerminalStrip strip => strip.Properties,
-        PlugStrip strip => strip.Properties,
-        Cable cable => cable.Properties,
-        Page page => page.Properties,
-        Function function => function.Properties,
-        Connection connection => connection.Properties,
-        PlaceHolder holder => holder.Properties,
-        LocationBox box => box.Properties,
-        InterruptionPoint point => point.Properties,
-        PotentialDefinition potential => potential.Properties,
-        MacroBox box => box.Properties,
-        _ => throw new BridgeErrorException(ErrorReason.CapabilityMissing, "This locator kind has no property adapter."),
-    };
+    internal static bool Legacy(string kind) => kind is "page" or "function" or "connection" or "terminal" or "plcterminal"
+        or "terminalstrip" or "plc" or "cable" or "blackbox" or "placeholder" or "interruptionpoint" or "potentialdefinition" or "locationbox" or "macrobox";
+    // A60: exact runtime dispatch selects the most-derived declared Properties getter.
+    internal static UniversalPropertyList Properties(StorableObject obj) => ObjectKindDispatch.Properties(obj);
 }

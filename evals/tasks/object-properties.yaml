@@ -12,5 +12,5 @@ answer:
     arc_status: { type: string }
 checks:
   - answer: "$.arc_status"
-    equals: unsupported
+    equals: supported
 budget: { max_tool_calls: 20 }

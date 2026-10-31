@@ -13,16 +13,15 @@ public sealed class ObjectReadOperationTests
         (ObjectReadData)((IOperation)new ObjectReadOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = Project, Current = true }), reader, get ? ObjectReadKind.Get : ObjectReadKind.Find)).Execute(args)!;
 
     [Fact]
-    public void All68Types_HaveAnExplicitStatus_UnsupportedNeverAccessesNativeResources()
+    public void AllTypes_HaveAnExplicitStatus_UnsupportedNeverAccessesNativeResources()
     {
-        string[] types = [.. PropertyCatalog.Entries.Where(e => !e.Obsolete).Select(e => e.ObjectType).Distinct(StringComparer.Ordinal)];
-        Assert.Equal(68, types.Length);
+        string[] types = [.. ObjectReadTypes.Types];
+        Assert.True(types.Length > 100);
         foreach (string type in types)
         {
             var reader = new Reader();
             ObjectReadData result = Execute(reader, new() { ObjectType = type });
-            Assert.Equal(type is "Page" or "Function" or "Connection" or "TerminalStrip" or "Cable" or "PlaceHolder" or "LocationBox"
-                or "InterruptionPoint" or "PotentialDefinition" or "MacroBox", result.Unsupported is null);
+            Assert.Equal(ObjectReadTypes.Supported(type), result.Unsupported is null);
             if (result.Unsupported is not null)
             {
                 Assert.False(string.IsNullOrWhiteSpace(result.Unsupported));

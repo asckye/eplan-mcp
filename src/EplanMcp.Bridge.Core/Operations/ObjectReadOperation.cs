@@ -16,7 +16,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
     }
     protected override ObjectReadData Execute(ObjectReadArgs args)
     {
-        if (!PropertyCatalog.Entries.Any(e => e.ObjectType == args.ObjectType && !e.Obsolete) && !ObjectReadTypes.FunctionTypes.Contains(args.ObjectType)
+        if (!ObjectReadTypes.Types.Contains(args.ObjectType)
             || args.Offset < 0 || args.IndexOffset < 0)
         { throw InvalidArgument("Use a shipped object_type and nonnegative continuation positions."); }
         var watch = Stopwatch.StartNew();
