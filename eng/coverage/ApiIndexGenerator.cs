@@ -39,7 +39,8 @@ internal static class ApiIndexGenerator
     {
         var used = report.Units.ToDictionary(u => u.Unit, StringComparer.Ordinal);
         var groups = members.ToLookup(m => Text(m, "group") ?? Text(m, "id")!, StringComparer.Ordinal);
-        var reaching = mapping.Tools.SelectMany(t => t.Api.Select(id => (Key: catalog.Resolve(id), t.Name))).ToLookup(p => p.Key, p => p.Name);
+        var reaching = mapping.Tools.SelectMany(t => t.Api.Select(id => (Key: catalog.Resolve(id), t.Name))
+            .Concat(t.DataDictionary.Select(key => (Key: (string?)key, t.Name)))).ToLookup(p => p.Key, p => p.Name);
         var entries = new List<ApiEntry>();
         foreach (Unit unit in catalog.Units.Values.Where(u => u.Layer != ApiCatalog.Action).OrderBy(u => u.Key, StringComparer.Ordinal))
         {

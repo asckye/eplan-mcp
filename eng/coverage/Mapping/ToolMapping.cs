@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using EplanMcp.Contracts;
+using EplanMcp.Coverage.Reporting;
 using EplanMcp.Coverage.Scanning;
 
 namespace EplanMcp.Coverage.Mapping;
@@ -12,11 +14,12 @@ internal sealed record ToolEvidence(string? Spec, string? SpecStatus, IReadOnlyL
 
 /// <summary>
 /// One MCP tool: safety level from its annotations, Host file, Bridge operations, EPLAN API IDs, actions, evidence, and
-/// from overlay.yaml its live-verification records and a note.
+/// from overlay.yaml its live-verification records and a note. DataDictionary adds supported generic-read units without
+/// inventing EPLAN member references for their property IDs.
 /// </summary>
 internal sealed record ToolEntry(
     string Name, string Safety, string Host, IReadOnlyList<string> Operations, IReadOnlyList<string> Api, IReadOnlyList<string> Actions,
-    ToolEvidence Evidence, IReadOnlyList<LiveRecord> Live, string? Note);
+    ToolEvidence Evidence, IReadOnlyList<LiveRecord> Live, string? Note, IReadOnlyList<string> DataDictionary);
 
 /// <summary>
 /// catalog/mapping/tools.json: every tool of the contract snapshot mapped through the Host's tool code to Bridge
@@ -50,6 +53,11 @@ internal sealed partial class ToolMapping
         using JsonDocument contract = JsonDocument.Parse(File.ReadAllText(Path.Combine(repositoryRoot, ContractSnapshot)));
         JsonElement[] snapshot = [.. contract.RootElement.GetProperty("tools").EnumerateArray()];
         Overlay overlay = Overlay.Load(repositoryRoot, [.. snapshot.Select(t => t.GetProperty("name").GetString()!)]);
+        string dictionaryPath = Path.Combine(repositoryRoot, PropertyDictionaryGenerator.SourcePath);
+        string[] dictionaries = File.Exists(dictionaryPath)
+            ? [.. ApiCatalog.Lines(dictionaryPath).Select(p => p.GetProperty("object").GetString()!).Distinct(StringComparer.Ordinal)
+                .Where(ObjectReadTypes.Supported).Select(kind => "D:" + kind).Order(StringComparer.Ordinal)]
+            : [];
         var tools = new List<ToolEntry>();
         foreach (JsonElement tool in snapshot)
         {
@@ -72,7 +80,8 @@ internal sealed partial class ToolMapping
                 [.. ids.Where(id => id.StartsWith("A:", StringComparison.Ordinal))],
                 Evidence(repositoryRoot, name, sections, tests.Using(names), tests.Using(classes)),
                 overlay.Live.GetValueOrDefault(name) ?? [],
-                overlay.Tools.GetValueOrDefault(name)?.Note));
+                overlay.Tools.GetValueOrDefault(name)?.Note,
+                IsObjectReader(name) ? dictionaries : []));
         }
 
         return new ToolMapping
@@ -83,6 +92,8 @@ internal sealed partial class ToolMapping
             UnreachedGenerated = [.. usage.Usages.Where(u => !u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key)],
         };
     }
+
+    internal static bool IsObjectReader(string name) => name is "eplan_object_find" or "eplan_object_get";
 
     private static string Safety(JsonElement annotations) =>
         Flag(annotations, "readOnlyHint") ? "read" : Flag(annotations, "destructiveHint") ? "destructive" : "write";

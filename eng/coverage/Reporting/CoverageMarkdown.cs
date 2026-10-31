@@ -51,6 +51,7 @@ internal static class CoverageMarkdown
                 + "；排除（按签名）：" + string.Join("，", trials.Where(r => r[2] == "excluded").GroupBy(r => r[3]).OrderByDescending(g => g.Count()).Select(g => g.Key + " " + g.Count().ToString(CultureInfo.InvariantCulture))) + "。");
         }
         Line("- 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。");
+        Line("- 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。");
         Line("- 状态（设计文档第 4 节），每一级都包含更高的级别：implemented 表示 Bridge 中有代码到达它，经 MCP 工具，或只经插件的基础设施（启动、调度、授权检查）；automated_test 表示到达它的某个工具有 Small 或 Medium 测试，或它的 Bridge 操作有 Bridge.Core 测试（这些测试用假的 EPLAN，不执行 EPLAN 成员）；live_verified 表示这个工具还在 overlay 中有写明工具名、结果通过的实机记录（api-notes、规格或 Large 测试 README，带日期和版本）。另有 env_blocked（overlay 标为被环境挡住且没有实现）、excluded（目录的机械规则或 overlay 排除，不进入分母）、部分重载（重载组中只用到一部分重载）和无文档（不在 IntelliSense 中，仍在分母里，Q2）。");
         Line("- 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向\"可能到达\"：扫描判断不了的分支都算到达。");
         Line();

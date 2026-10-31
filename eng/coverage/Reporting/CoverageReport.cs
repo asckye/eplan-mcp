@@ -33,6 +33,7 @@ internal sealed record ToolCoverage(
 /// tool also has a stated live record that passed: api-notes, a spec or the Large README, with date and version). A
 /// tool-level fact stands for every unit the tool reaches, so the upper levels are upper bounds. A use only in generated
 /// code that no operation reaches counts for nothing (<see cref="BridgeUsage.Counts"/>).
+/// Generic dictionary reads also count supported ObjectReadTypes kinds, with live evidence limited to named A60/A62 kinds.
 /// </summary>
 internal sealed class CoverageReport
 {
@@ -83,8 +84,10 @@ internal sealed class CoverageReport
         ApiCatalog catalog = ApiCatalog.Load(Path.Combine(repositoryRoot, directory));
 
         ILookup<string, ToolEntry> toolsById = mapping.Tools.SelectMany(t => t.Api.Concat(t.Actions).Select(id => (id, t))).ToLookup(p => p.id, p => p.t);
-        static bool Tested(ToolEntry t) => t.Evidence.Tests.Any(c => c.Size is "Small" or "Medium") || t.Evidence.OperationTests.Count > 0;
-        int Level(string id) => toolsById[id].Any(t => Tested(t) && t.Live.Any(r => r.Verifies)) ? 2 : toolsById[id].Any(Tested) ? 1 : 0;
+        static bool Tested(ToolEntry t) => t.Evidence.Tests.Concat(t.Evidence.OperationTests).Any(c => c.Size is "Small" or "Medium");
+        int Level(ToolEntry tool, Unit unit) => !Tested(tool) ? 0
+            : (unit.Layer == ApiCatalog.DataDictionary && ToolMapping.IsObjectReader(tool.Name)
+                ? ObjectKindGenerator.LiveReadSource(unit.Scope, usage.EplanApi) is not null : tool.Live.Any(r => r.Verifies)) ? 2 : 1;
         var used = new Dictionary<string, (int Level, SortedSet<string> Tools, HashSet<string> Ids)>(StringComparer.Ordinal);
         var dependencies = new HashSet<string>(StringComparer.Ordinal);
         var properties = new HashSet<string>(StringComparer.Ordinal);
@@ -103,7 +106,7 @@ internal sealed class CoverageReport
                 (int level, SortedSet<string> tools, HashSet<string> ids) = used.GetValueOrDefault(unit, (0, new(StringComparer.Ordinal), new(StringComparer.Ordinal)));
                 tools.UnionWith(toolsById[id].Select(t => t.Name));
                 ids.Add(id);
-                used[unit] = (Math.Max(level, Level(id)), tools, ids);
+                used[unit] = (Math.Max(level, toolsById[id].Select(t => Level(t, catalog.Units[unit])).DefaultIfEmpty().Max()), tools, ids);
                 actionNames.UnionWith(catalog.Units[unit].Layer == ApiCatalog.Action ? [catalog.Units[unit].Scope] : []);
             }
             else if (id.StartsWith("A:", StringComparison.Ordinal) && catalog.HasAction(id))
@@ -113,6 +116,20 @@ internal sealed class CoverageReport
             else if (id.StartsWith("A:", StringComparison.Ordinal) ? catalog.HasActions : catalog.HasSdk)
             {
                 unmatched.Add(id);
+            }
+        }
+
+        // Generic property access has no per-kind property ID reference for the scanner to resolve.
+        foreach (ToolEntry tool in mapping.Tools)
+        {
+            foreach (string key in tool.DataDictionary)
+            {
+                if (catalog.Units.TryGetValue(key, out Unit? unit))
+                {
+                    (int level, SortedSet<string> tools, HashSet<string> ids) = used.GetValueOrDefault(key, (0, new(StringComparer.Ordinal), new(StringComparer.Ordinal)));
+                    tools.Add(tool.Name);
+                    used[key] = (Math.Max(level, Level(tool, unit)), tools, ids);
+                }
             }
         }
 
@@ -196,7 +213,8 @@ internal sealed class CoverageReport
     private static ToolCoverage Tool(ToolEntry tool, ApiCatalog catalog)
     {
         string?[] resolved = [.. tool.Api.Concat(tool.Actions).Select(catalog.Resolve)];
-        Unit[] units = [.. resolved.Where(u => u is not null and not "dependency").Select(u => catalog.Units[u!]).Distinct()];
+        Unit[] units = [.. resolved.Where(u => u is not null and not "dependency").Concat(tool.DataDictionary)
+            .Where(u => catalog.Units.ContainsKey(u!)).Select(u => catalog.Units[u!]).Distinct()];
         int Of(string layer) => units.Count(u => u.Layer == layer);
         int Size(string size) => tool.Evidence.Tests.Count(c => c.Size == size);
         return new ToolCoverage(

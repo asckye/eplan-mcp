@@ -7,6 +7,7 @@
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
 - C 级方法选择：read 49 组，write 193 组；排除（按签名）：lifecycle_or_creation 286，external_path_parameter 184，unsupported_return 93，unsupported_parameter 72，settings_or_scheme_parameter 72，catalog:banned_symbol 62，no_public_default_constructor 56，masterdata_or_parts_management 50，shared_interactive_state 39，array_or_params 38，catalog:deprecated 37，printer_parameter 32，abstract_service 29，static_or_nonpublic 28，generic_or_collection_parameter 28，catalog:internal 14，catalog:deprecated: obsolete_attribute 14，catalog:not_applicable 6，ref_out 4，database_parameter 4，external_destination 3，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
+- 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
 - 状态（设计文档第 4 节），每一级都包含更高的级别：implemented 表示 Bridge 中有代码到达它，经 MCP 工具，或只经插件的基础设施（启动、调度、授权检查）；automated_test 表示到达它的某个工具有 Small 或 Medium 测试，或它的 Bridge 操作有 Bridge.Core 测试（这些测试用假的 EPLAN，不执行 EPLAN 成员）；live_verified 表示这个工具还在 overlay 中有写明工具名、结果通过的实机记录（api-notes、规格或 Large 测试 README，带日期和版本）。另有 env_blocked（overlay 标为被环境挡住且没有实现）、excluded（目录的机械规则或 overlay 排除，不进入分母）、部分重载（重载组中只用到一部分重载）和无文档（不在 IntelliSense 中，仍在分母里，Q2）。
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
@@ -38,7 +39,7 @@ Bridge 共用到 2269 个 ID（方法 534，属性 673，类型 302，字段和�
 | 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1019 / 4014（25.4%） | 1011 | 82 | 1011 / 4014（25.2%） | 171 / 4014（4.3%） | 88 | 134 |
 | 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 401 / 1799（22.3%） | 394 | 74 | 394 / 1799（21.9%） | 76 / 1799（4.2%） | 35 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 618 / 2215（27.9%） | 617 | 8 | 617 / 2215（27.9%） | 95 / 2215（4.3%） | 53 | 68 |
-| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 12 / 68（17.6%） | 12 | 0 | 12 / 68（17.6%） | 5 / 68（7.4%） | 0 | 0 |
+| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 63 / 68（92.6%） | 63 | 0 | 63 / 68（92.6%） | 16 / 68（23.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
@@ -73,7 +74,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 |
 | `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 |
 
-数据字典中已实现的对象类型（12 个）：Article（live_verified）、Comment（automated_test）、Connection（live_verified）、Function（live_verified）、FunctionBase（automated_test）、InterruptionPoint（automated_test）、MDPartsDatabaseItem（live_verified）、Page（live_verified）、Project（automated_test）、Segment（automated_test）、Symbol（automated_test）、Text（automated_test）。
+数据字典中已实现的对象类型（63 个）：Arc（live_verified）、Article（live_verified）、Block（automated_test）、BusBar（live_verified）、Cable（live_verified）、Comment（automated_test）、Connection（live_verified）、ConnectionDefinitionPoint（automated_test）、ConnectionPointsInfo（automated_test）、CopperBundle（automated_test）、DeletedObjectInfo（automated_test）、DeviceListEntry（automated_test）、DimensionCircle（automated_test）、DimensionItem（automated_test）、Function（live_verified）、Function3D（automated_test）、FunctionBase（automated_test）、FunctionDefinitionLibrary（automated_test）、GraphicalPlacement（automated_test）、HyperLink（automated_test）、Image（automated_test）、InstallationSpace（automated_test）、InterruptionPoint（live_verified）、Line（automated_test）、Location（automated_test）、LocationBox（live_verified）、MDPartsDatabaseItem（live_verified）、MacroBox（live_verified）、MacroEntry（automated_test）、MergedArticleReference（automated_test）、Option（automated_test）、OptionFragment（automated_test）、OptionGroup（automated_test）、Page（live_verified）、PathText（automated_test）、PipingDefinition（automated_test）、PlaceHolder（live_verified）、Placement（automated_test）、Placement3D（automated_test）、PlanningSegment（automated_test）、PlcIO（automated_test）、PlotFrame（automated_test）、PlugStrip（automated_test）、PotentialDefinition（live_verified）、Project（live_verified）、ProtectedGroup（automated_test）、QRCode（live_verified）、Rectangle（automated_test）、RoutedConnection（automated_test）、Segment（automated_test）、SegmentDefinition（automated_test）、SegmentPlacement（automated_test）、SegmentTemplate（automated_test）、StorableObject（automated_test）、StrandConnector（automated_test）、Symbol（automated_test）、SymbolLibrary（automated_test）、SymbolReference（automated_test）、SymbolVariant（automated_test）、TerminalStrip（live_verified）、Text（automated_test）、TextBase（automated_test）、ViewPlacement（automated_test）。
 
 无文档的重载组（不在 IntelliSense 中，仍在分母里，Q2）：共 134 组，按命名空间：
 
@@ -196,8 +197,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/2/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 377 | 215 | 1 | 160 | 0 | 1/1/3 | A57 A60 | — |
-| eplan_object_get | read | object.find<br>object.get<br>project.get | 377 | 215 | 1 | 160 | 0 | 1/1/2 | — | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 377 | 215 | 63 | 160 | 0 | 1/1/3 | A57 A60 | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 377 | 215 | 63 | 160 | 0 | 1/1/2 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A35 | — |

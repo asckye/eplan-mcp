@@ -79,7 +79,8 @@ public sealed class ApiIndexGeneratorTests
             Infrastructure = [],
             UnreachedGenerated = [],
             Tools = [new("eplan_property_get", "read", "host", [], ["T:N.FunctionPropertyList"], [],
-                new("docs/tools/eplan_property_get.md", "Implemented", ["A1"], [new("ReaderTests", "Small", "tests/ReaderTests.cs")], []), [], null)],
+                new("docs/tools/eplan_property_get.md", "Implemented", ["A1"], [new("ReaderTests", "Small", "tests/ReaderTests.cs")], []), [], null, []),
+                new("eplan_object_get", "read", "host", [], [], [], new(null, null, [], [], []), [], null, ["D:Function"])],
         };
         ApiIndexData data = ApiIndexGenerator.Build(catalog, Report([new("D:Function", "data_dictionary", "live_verified", false, ["eplan_property_get"])], []),
             mapping, [], types, objects.RootElement, new Dictionary<string, string>(StringComparer.Ordinal) { ["A1"] = "docs/eplan/api-notes.md#a1-environment" });
@@ -90,7 +91,7 @@ public sealed class ApiIndexGeneratorTests
         Assert.Contains("T:N.Function", entry.Aliases);
         Assert.Contains("T:N.Properties.Function", entry.Aliases);
         Assert.Contains("T:N.FunctionPropertyList", entry.Aliases);
-        Assert.Equal(["eplan_property_get"], entry.Row.Tools);
+        Assert.Equal(["eplan_object_get", "eplan_property_get"], entry.Row.Tools);
         ApiDetail[] evidence = data.Evidence["eplan_property_get"];
         Assert.Contains(evidence, e => e.Reference == "docs/tools/eplan_property_get.md");
         Assert.Contains(evidence, e => e.Reference == "tests/ReaderTests.cs#ReaderTests");

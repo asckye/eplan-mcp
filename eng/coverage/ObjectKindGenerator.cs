@@ -10,6 +10,16 @@ internal static class ObjectKindGenerator
     internal const string TablePath = "docs/tools/eplan_object_kinds.g.md";
     private const string Prefix = "Eplan.EplApi.DataModel.";
     internal sealed record Kind(string Name, string Type, string Dictionary, string PropertyOwner, string[] Sources, string? Reason);
+    // A60: the eleven additions exercised by ObjectReadTests on 2026-10-30.
+    // A62: only the explicitly named successful kinds; the other successes and zero-object kinds are not inferred.
+    internal static string? LiveReadSource(string kind, string eplanApi) => eplanApi != "2026.0.3.25421" ? null : kind switch
+    {
+        "Terminal" or "TerminalStrip" or "PLC" or "Cable" or "PlaceHolder" or "LocationBox" or "InterruptionPoint"
+            or "PotentialDefinition" or "BlackBox" or "PLCTerminal" or "MacroBox" => "api-notes A60",
+        "Arc" or "Cabinet" or "MountingPanel" or "MountingRail" or "BusBar" or "Harness" or "Connection3D"
+            or "RoutingSegment" or "QRCode" or "PlanningObject" or "Project" => "api-notes A62",
+        _ => null,
+    };
     private static string Q(string value) => JsonSerializer.Serialize(value);
     private static string Text(JsonElement value, string key) => value.TryGetProperty(key, out JsonElement field) ? field.GetString() ?? "" : "";
     internal static Kind[] Build(JsonElement[] types, ApiIndexData data)

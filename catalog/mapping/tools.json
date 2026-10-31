@@ -30,7 +30,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_action_catalog_search",
@@ -66,7 +67,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_action_run",
@@ -242,7 +244,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_action_try",
@@ -424,7 +427,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_api_get",
@@ -456,7 +460,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_api_search",
@@ -488,7 +493,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_api_try",
@@ -2293,7 +2299,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_asset_get",
@@ -2315,7 +2322,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_asset_review",
@@ -2347,7 +2355,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_asset_search",
@@ -2376,7 +2385,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_asset_update",
@@ -2398,7 +2408,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_cabinet_bind",
@@ -2510,7 +2521,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_cabinet_list",
@@ -2622,7 +2634,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_cable_generate",
@@ -2807,7 +2820,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_cable_get",
@@ -2942,7 +2956,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_cable_renumber",
@@ -3121,7 +3136,8 @@
           "note": "Large：按 Standard 给全部电缆编号，复现 S21 的两对互换",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_check_list",
@@ -3241,7 +3257,8 @@
           "note": "检查后的 6 条警告、14 条提示与它读到的一致",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_check_run",
@@ -3371,7 +3388,8 @@
           "note": "取消后在下一个安全点回滚，审计为 rolled_back",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_connection_create",
@@ -3704,7 +3722,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_connection_generate",
@@ -3871,7 +3890,8 @@
           "note": "没有增删的生成不留撤销步骤，因此返回 not_started",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_connection_list",
@@ -4069,7 +4089,8 @@
           "note": "生成连接后读到的 9 条与生成结果一致",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_connection_number",
@@ -4210,7 +4231,8 @@
           "note": "编号工具的 Large 测试中，线号的 all 和 except_manual 都通过",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_context_get",
@@ -4396,7 +4418,8 @@
         ]
       },
       "live": [],
-      "note": "P24 通过 PlanBaselineReader 每次读取新快照；只读包索引与真实绑定，不运行规则。Large 待实跑。"
+      "note": "P24 通过 PlanBaselineReader 每次读取新快照；只读包索引与真实绑定，不运行规则。Large 待实跑。",
+      "dataDictionary": []
     },
     {
       "name": "eplan_device_get",
@@ -4603,7 +4626,8 @@
           "note": "短标识 -FC1 返回 AMBIGUOUS_NAME 和候选",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_device_list",
@@ -4771,7 +4795,8 @@
           "note": "按类别 Cable 列出 56 根电缆",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_device_place",
@@ -5127,7 +5152,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_device_renumber",
@@ -5264,7 +5290,8 @@
           "note": "PostNumerate 在部分输入上使 EPLAN 崩溃；改为只交带 ? 的设备标识后不再崩溃",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_device_update",
@@ -5384,7 +5411,8 @@
           "note": "Q1 拒绝、Q2 读回不一致时回滚、交叉引用跟着改名",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_dxf",
@@ -5479,7 +5507,8 @@
           "note": "DXF 在给定目录下按项目名和结构建子目录",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_image",
@@ -5611,7 +5640,8 @@
           "note": "inline 的 PNG 交给了模型，模型读出了图上的标识和文字",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_labels",
@@ -5712,7 +5742,8 @@
           "note": "第一次 Large 测试发现方案设置的相对路径从 Data 节点算起",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_parts",
@@ -5795,7 +5826,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_pdf",
@@ -5894,7 +5926,8 @@
           "note": "文件名不重复 .pdf；整个项目 322 页约 13 秒",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_pxf",
@@ -5975,7 +6008,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_export_untranslated",
@@ -6055,7 +6089,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_import_dxf",
@@ -6172,7 +6207,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_import_list",
@@ -6326,7 +6362,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_import_pdf_comments",
@@ -6466,7 +6503,8 @@
           "note": "S44 action 与类型读回验证：只导入便笺 Text；重复导入零新增且无撤销步；提交一步撤销、失败回滚、重开持久；新 Host 工具的 Large 测试尚未运行",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_import_plc",
@@ -6597,7 +6635,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_import_pxf",
@@ -6644,7 +6683,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_language_remove",
@@ -6760,7 +6800,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_language_set",
@@ -6878,7 +6919,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_macro_get",
@@ -6970,7 +7012,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_macro_insert",
@@ -7155,7 +7198,8 @@
           "note": "在用 eplan_page_create 新建的页上按幅面检查外框",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_macro_list",
@@ -7210,7 +7254,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_message_list",
@@ -7292,7 +7337,8 @@
           "note": "M2 的 13 个只读工具全部成功（A12 没有逐个列出）",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_object_find",
@@ -7744,7 +7790,72 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": [
+        "D:Arc",
+        "D:Article",
+        "D:Block",
+        "D:BusBar",
+        "D:Cable",
+        "D:Comment",
+        "D:Connection",
+        "D:Connection3D",
+        "D:ConnectionDefinitionPoint",
+        "D:ConnectionPointsInfo",
+        "D:CopperBundle",
+        "D:DeletedObjectInfo",
+        "D:DeviceListEntry",
+        "D:DimensionCircle",
+        "D:DimensionItem",
+        "D:Function",
+        "D:Function3D",
+        "D:FunctionBase",
+        "D:FunctionDefinitionLibrary",
+        "D:GraphicalPlacement",
+        "D:HyperLink",
+        "D:Image",
+        "D:InstallationSpace",
+        "D:InterruptionPoint",
+        "D:Line",
+        "D:Location",
+        "D:LocationBox",
+        "D:MacroBox",
+        "D:MacroEntry",
+        "D:MergedArticleReference",
+        "D:Option",
+        "D:OptionFragment",
+        "D:OptionGroup",
+        "D:Page",
+        "D:PathText",
+        "D:PipingDefinition",
+        "D:PlaceHolder",
+        "D:Placement",
+        "D:Placement3D",
+        "D:PlanningSegment",
+        "D:PlcIO",
+        "D:PlotFrame",
+        "D:PlugStrip",
+        "D:PotentialDefinition",
+        "D:Project",
+        "D:ProtectedGroup",
+        "D:QRCode",
+        "D:Rectangle",
+        "D:RoutedConnection",
+        "D:Segment",
+        "D:SegmentDefinition",
+        "D:SegmentPlacement",
+        "D:SegmentTemplate",
+        "D:StorableObject",
+        "D:StrandConnector",
+        "D:Symbol",
+        "D:SymbolLibrary",
+        "D:SymbolReference",
+        "D:SymbolVariant",
+        "D:TerminalStrip",
+        "D:Text",
+        "D:TextBase",
+        "D:ViewPlacement"
+      ]
     },
     {
       "name": "eplan_object_get",
@@ -8188,7 +8299,72 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": [
+        "D:Arc",
+        "D:Article",
+        "D:Block",
+        "D:BusBar",
+        "D:Cable",
+        "D:Comment",
+        "D:Connection",
+        "D:Connection3D",
+        "D:ConnectionDefinitionPoint",
+        "D:ConnectionPointsInfo",
+        "D:CopperBundle",
+        "D:DeletedObjectInfo",
+        "D:DeviceListEntry",
+        "D:DimensionCircle",
+        "D:DimensionItem",
+        "D:Function",
+        "D:Function3D",
+        "D:FunctionBase",
+        "D:FunctionDefinitionLibrary",
+        "D:GraphicalPlacement",
+        "D:HyperLink",
+        "D:Image",
+        "D:InstallationSpace",
+        "D:InterruptionPoint",
+        "D:Line",
+        "D:Location",
+        "D:LocationBox",
+        "D:MacroBox",
+        "D:MacroEntry",
+        "D:MergedArticleReference",
+        "D:Option",
+        "D:OptionFragment",
+        "D:OptionGroup",
+        "D:Page",
+        "D:PathText",
+        "D:PipingDefinition",
+        "D:PlaceHolder",
+        "D:Placement",
+        "D:Placement3D",
+        "D:PlanningSegment",
+        "D:PlcIO",
+        "D:PlotFrame",
+        "D:PlugStrip",
+        "D:PotentialDefinition",
+        "D:Project",
+        "D:ProtectedGroup",
+        "D:QRCode",
+        "D:Rectangle",
+        "D:RoutedConnection",
+        "D:Segment",
+        "D:SegmentDefinition",
+        "D:SegmentPlacement",
+        "D:SegmentTemplate",
+        "D:StorableObject",
+        "D:StrandConnector",
+        "D:Symbol",
+        "D:SymbolLibrary",
+        "D:SymbolReference",
+        "D:SymbolVariant",
+        "D:TerminalStrip",
+        "D:Text",
+        "D:TextBase",
+        "D:ViewPlacement"
+      ]
     },
     {
       "name": "eplan_pack_build",
@@ -8220,7 +8396,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_pack_get",
@@ -8242,7 +8419,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_pack_import",
@@ -8271,7 +8449,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_pack_list",
@@ -8293,7 +8472,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_create",
@@ -8586,7 +8766,8 @@
           "note": "新建的页在规划时就能读到幅面",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_delete",
@@ -8765,7 +8946,8 @@
           "note": "删页前完整备份，一次 Ctrl+Z 恢复，拒绝时不执行",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_get",
@@ -9081,7 +9263,8 @@
           "note": "M2 的 13 个只读工具全部成功（A12 没有逐个列出）",
           "verifies": false
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_list",
@@ -9321,7 +9504,8 @@
           "note": "调用后当前项目的 User.eod、User.eox 被改写，原因待查",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_open",
@@ -9424,7 +9608,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_renumber",
@@ -9558,7 +9743,8 @@
           "note": "/90–/92 改为 /200、/210、/220；与已有页重名时返回 ALREADY_EXISTS",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_text_replace",
@@ -9693,7 +9879,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_page_update",
@@ -9883,7 +10070,8 @@
           "note": "一次写入一个撤销步骤；只改一种语言时其他语言不变",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_part_export",
@@ -10000,7 +10188,8 @@
           "note": "format: edz：经批准的 PartExportTests 全部 6 个通过（含 EDZ），部件库的 SHA-256 不变",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_part_import",
@@ -10143,7 +10332,8 @@
           "verifies": true
         }
       ],
-      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）"
+      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）",
+      "dataDictionary": []
     },
     {
       "name": "eplan_part_list",
@@ -10259,7 +10449,8 @@
           "note": "部件没有中文描述时为空，之后按语言回退设计实现",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_part_search",
@@ -10372,7 +10563,8 @@
           "note": "部件导入的 Large 测试中找到新导入的部件，变体 1",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_part_sync",
@@ -10563,7 +10755,8 @@
           "verifies": true
         }
       ],
-      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）"
+      "note": "写流水线在审批之后调用 masterdata.backup 备份部件库（ADR-0019，规格第 5 节）",
+      "dataDictionary": []
     },
     {
       "name": "eplan_placeholder_apply",
@@ -10684,7 +10877,8 @@
           "note": "写副本上先应用 mA 再应用 V 都 committed，执行后的当前值等于值集的值；场外副本 POLICY_DENIED；值集 X 为 INVALID_ARGUMENT。第一次实测时规划读当前值抛 LockingException，已改为只在写事务中读。Ctrl+Z 未手工核对",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_placeholder_list",
@@ -10778,7 +10972,8 @@
           "note": "夹具 2 个占位符（=TM1、=TM2 的 EFS1/1），值集 V、mA，变量 T1、T2；值未与 EPLAN 的值集对话框逐项对照",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_placement_create",
@@ -11047,7 +11242,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_placement_update",
@@ -11348,7 +11544,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_plan_apply",
@@ -11444,7 +11641,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_plan_get",
@@ -11537,7 +11735,8 @@
         "operationTests": []
       },
       "live": [],
-      "note": "P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。"
+      "note": "P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。",
+      "dataDictionary": []
     },
     {
       "name": "eplan_plc_get",
@@ -11683,7 +11882,8 @@
           "note": "按通道对象查不到连接，改为按设备读",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_project_create",
@@ -11806,7 +12006,8 @@
         ]
       },
       "live": [],
-      "note": "Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。"
+      "note": "Host 只接受不存在的目标；Bridge 执行内创建目录、检查兼容性并负责清理。尚未运行工具 Large 验收。",
+      "dataDictionary": []
     },
     {
       "name": "eplan_project_get",
@@ -11986,7 +12187,8 @@
           "note": "detailed 最慢一次 493 ms；Large 中属性名可读",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_project_list",
@@ -12199,7 +12401,8 @@
           "note": "M1 完成标准：列出打开的项目；模态对话框时 EPLAN_BUSY",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_project_translate",
@@ -12320,7 +12523,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_property_get",
@@ -12792,7 +12996,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_property_schema",
@@ -12829,7 +13034,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_property_set",
@@ -13327,7 +13533,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_report_update",
@@ -13439,7 +13646,8 @@
           "note": "带 progressToken 时第 5 秒收到心跳，第 7 秒返回",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_revision_list",
@@ -13523,7 +13731,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_rule_check",
@@ -13817,7 +14026,8 @@
         ]
       },
       "live": [],
-      "note": "R5 柜内正式规则四值查询；修复仅编译计划，unknown 或范围冲突拒绝。未运行实机。"
+      "note": "R5 柜内正式规则四值查询；修复仅编译计划，unknown 或范围冲突拒绝。未运行实机。",
+      "dataDictionary": []
     },
     {
       "name": "eplan_session_select",
@@ -13871,7 +14081,8 @@
           "verifies": true
         }
       ],
-      "note": "只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作"
+      "note": "只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作",
+      "dataDictionary": []
     },
     {
       "name": "eplan_session_status",
@@ -13980,7 +14191,8 @@
           "verifies": true
         }
       ],
-      "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作"
+      "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作",
+      "dataDictionary": []
     },
     {
       "name": "eplan_symbol_search",
@@ -14122,7 +14334,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_task_get",
@@ -14174,7 +14387,8 @@
         ],
         "operationTests": []
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_terminal_renumber",
@@ -14309,7 +14523,8 @@
           "note": "只编带 ? 的选项挡不住已编号的端子，改为只交带 ? 的端子",
           "verifies": true
         }
-      ]
+      ],
+      "dataDictionary": []
     },
     {
       "name": "eplan_terminal_strip_get",
@@ -14409,7 +14624,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_terminal_strip_list",
@@ -14483,7 +14699,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_tool_usage",
@@ -14566,7 +14783,8 @@
         "operationTests": []
       },
       "live": [],
-      "note": "只在 Host 中运行：返回工具用法文本，不接触 EPLAN"
+      "note": "只在 Host 中运行：返回工具用法文本，不接触 EPLAN",
+      "dataDictionary": []
     },
     {
       "name": "eplan_translation_export",
@@ -14666,7 +14884,8 @@
           }
         ]
       },
-      "live": []
+      "live": [],
+      "dataDictionary": []
     },
     {
       "name": "eplan_translation_import",
@@ -14784,7 +15003,8 @@
           "verifies": true
         }
       ],
-      "note": "language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 须负责人逐次批准后运行，2026-10-27 通过。"
+      "note": "language 分组；写流水线每次审批后先备份翻译库（.zw7）。Large 须负责人逐次批准后运行，2026-10-27 通过。",
+      "dataDictionary": []
     },
     {
       "name": "eplan_workflow_plan",
@@ -15148,7 +15368,8 @@
         ]
       },
       "live": [],
-      "note": "P11 双读之间编译并审计后发布；返回计划链接，Resource 已由 P12 注册。Large 已编写、未实跑。"
+      "note": "P11 双读之间编译并审计后发布；返回计划链接，Resource 已由 P12 注册。Large 已编写、未实跑。",
+      "dataDictionary": []
     }
   ],
   "infrastructure": [
