@@ -16,6 +16,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal List<string[]> ScopeReads { get; } = [];
     internal List<string[]> Generates { get; } = [];
     internal string? Failure { get; set; }
+    internal List<string?[]>? GeneratedEndpoints { get; set; }
     internal int State { get; private set; }
     internal int Undos { get; private set; }
     internal string DrawingRevision { get; set; } = "initial";
@@ -54,7 +55,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         [ [8, 8], [24, 8] ],
         [ [24, 8], [24, 24] ],
     ];
-    public List<string?[]> Endpoints(string project, string page) => page == PeerPage ? [] : _connected ? [["17/1/0", "17/2/0"], ["17/3/0", "17/9/0"]] : [["17/1/0", "17/2/0"]];
+    public List<string?[]> Endpoints(string project, string page) => page == PeerPage ? [] : GeneratedEndpoints ?? (_connected ? [["17/1/0", "17/2/0"], ["17/3/0", "17/9/0"]] : [["17/1/0", "17/2/0"]]);
     internal void ConnectPair()
     {
         _connected = true;

@@ -1,3 +1,4 @@
+using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 
@@ -156,6 +157,22 @@ public sealed class InterruptionPointTests
         Assert.Equal(["17/3/0", "17/9/0"], group["pins"]!.Values<string>());
         Assert.False((bool)group["potentialStartIsNull"]!);
         Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConnectedPair_NativeInterruptionEnds_AllowOnlyThePredictedNet(bool crossNet)
+    {
+        var fake = new InterruptionPointFixture();
+        fake.ConnectPair();
+        fake.GeneratedEndpoints = [["17/1/0", "17/2/0"], ["17/3/0", "17/9/0"],
+            [crossNet ? "17/1/0" : "17/3/0", InterruptionPointPlanning.Endpoint(ConnectionCreateFixture.PageName, InterruptionPointFixture.BusinessName)],
+            [InterruptionPointPlanning.Endpoint(InterruptionPointFixture.PeerPage, InterruptionPointFixture.BusinessName), "17/9/0"]];
+        if (crossNet)
+        { Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error.Execution); }
+        else
+        { Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]); }
     }
 
     [Fact]

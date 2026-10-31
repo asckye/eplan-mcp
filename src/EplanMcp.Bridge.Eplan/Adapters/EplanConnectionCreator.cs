@@ -209,7 +209,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         {
             Pin? start = connection.StartPin; // borrowed, never disposed (A39)
             Pin? end = connection.EndPin;
-            result.Add([start?.ParentFunction is { } a ? Key(a, start.Index) : null, end?.ParentFunction is { } b ? Key(b, end.Index) : null]);
+            string? Endpoint(Pin? pin, SymbolReference? reference) => pin?.ParentFunction is { } owner ? Key(owner, pin.Index)
+                : reference is InterruptionPoint point ? InterruptionPointPlanning.Endpoint(point.Page.Name, point.Name) : null;
+            result.Add([Endpoint(start, connection.StartSymbolReference), Endpoint(end, connection.EndSymbolReference)]);
         }
         return result;
     }

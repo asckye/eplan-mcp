@@ -47,14 +47,18 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 if (interruptions && plan["interruptionScope"]!["preservedEndpoints"]!.Any(p => !actual.Any(a => a[0] == (string?)p[0] && a[1] == (string?)p[1])))
                 { throw Mismatch("an interruption point's existing connection was lost"); }
                 var added = actual.Select(p => p.ToArray()).ToList();
-                foreach (ConnectionRecord before in interruptions ? [] : scene.Logical)
+                IEnumerable<string?[]> preserved = interruptions ? plan["interruptionScope"]!["preservedEndpoints"]!.ToObject<List<string?[]>>()!
+                    : scene.Logical.Select(c => new string?[] { c.StartDevice, c.EndDevice });
+                foreach (string?[] before in preserved)
                 {
-                    int index = added.FindIndex(p => p[0] == before.StartDevice && p[1] == before.EndDevice);
+                    int index = added.FindIndex(p => p[0] == before[0] && p[1] == before[1]);
                     if (index < 0)
-                    { throw Mismatch("existing connection " + before.StartDevice + " - " + before.EndDevice + " is gone after generation"); }
+                    { throw Mismatch("existing connection " + before[0] + " - " + before[1] + " is gone after generation"); }
                     added.RemoveAt(index);
                 }
-                List<HashSet<string>> groups = plan["logicalAfterGenerate"]!.Select(g => new HashSet<string>(g["pins"]!.Values<string>().Select(p => p!).Concat((bool)g["potentialStartIsNull"]! ? ["<potential>"] : []), StringComparer.Ordinal)).ToList();
+                List<HashSet<string>> groups = plan["logicalAfterGenerate"]!.Select(g => new HashSet<string>(g["pins"]!.Values<string>().Select(p => p!)
+                    .Concat(g["interruptionPins"]?.Values<string>().Select(p => p!) ?? []).Concat((bool)g["potentialStartIsNull"]! ? ["<potential>"] : []), StringComparer.Ordinal)).ToList();
+                var optional = new HashSet<string>(plan["logicalAfterGenerate"]!.SelectMany(g => g["interruptionPins"]?.Values<string>().Select(p => p!) ?? []), StringComparer.Ordinal);
                 foreach (string?[] pair in added)
                 {
                     if (pair[1] is null || pair[0] == pair[1] || !groups.Any(g => g.Contains(pair[0] ?? "<potential>") && g.Contains(pair[1]!)))
@@ -62,10 +66,10 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 }
                 foreach (HashSet<string> group in groups)
                 {
-                    var reached = new HashSet<string>(StringComparer.Ordinal) { group.First() };
+                    var reached = new HashSet<string>(StringComparer.Ordinal) { group.First(p => !optional.Contains(p)) };
                     for (int i = 0; i < group.Count; i++)
-                    { foreach (string?[] pair in (plan["splitSegments"] is not null ? actual : added).Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
-                    if (!reached.SetEquals(group))
+                    { foreach (string?[] pair in actual.Where(p => group.Contains(p[0] ?? "<potential>") && group.Contains(p[1]!) && (reached.Contains(p[0] ?? "<potential>") || reached.Contains(p[1]!)))) { reached.Add(pair[0] ?? "<potential>"); reached.Add(pair[1]!); } }
+                    if (group.Except(optional).Any(p => !reached.Contains(p)))
                     {
                         IEnumerable<string> seen = actual.Where(p => group.Contains(p[0] ?? "<potential>") || group.Contains(p[1] ?? "<none>")).Select(p => (p[0] ?? "<potential>") + "-" + (p[1] ?? "<none>"));
                         throw Mismatch("planned pins " + string.Join(", ", group.Except(reached)) + " were not connected (group " + string.Join(", ", group)

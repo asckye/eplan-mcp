@@ -263,16 +263,17 @@ public static class ConnectionCreatePlanner
             }
         }
         var logical = new JArray();
-        var vertices = ports.Select(p => p.Point).Concat(segments.SelectMany(s => s)).GroupBy(Key, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+        var vertices = ports.Select(p => p.Point).Concat(segments.Concat(existingSegments).SelectMany(s => s)).GroupBy(Key, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
         var groups = vertices.Keys.ToDictionary(k => k, k => new HashSet<string>(StringComparer.Ordinal) { k }, StringComparer.Ordinal);
-        foreach (double[][] segment in segments)
+        // A55 acceptance trial: existing drawn edges continue through node centres, never through device bodies.
+        foreach (double[][] segment in segments.Concat(existingSegments))
         {
-            var group = new HashSet<string>(vertices.Where(p => On(p.Value, segment)).SelectMany(p => groups[p.Key]), StringComparer.Ordinal);
+            var group = new HashSet<string>(segment.SelectMany(p => groups[Key(p)]), StringComparer.Ordinal);
             foreach (string key in group)
             { groups[key] = group; }
         }
-        // Retain the original device connectivity through existing nodes when a split gains a branch.
-        foreach (ConnectionRecord before in splits.Count == 0 ? [] : scene.Logical)
+        // Logical evidence also retains nets whose drawn route spans several existing nodes.
+        foreach (ConnectionRecord before in scene.Logical)
         {
             if (before.StartDevice is null || before.EndDevice is null || !scene.Pins.TryGetValue(before.StartDevice, out SymbolConnectionPoint? a)
                 || !scene.Pins.TryGetValue(before.EndDevice, out SymbolConnectionPoint? b))

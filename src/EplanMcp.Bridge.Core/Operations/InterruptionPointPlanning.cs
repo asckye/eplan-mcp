@@ -7,6 +7,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 public static class InterruptionPointPlanning
 {
     private static readonly string[] _identity = ["page", "name", "position", "pin", "direction"];
+    public static string Endpoint(string page, string name) => "<interruption:" + new JArray(page, name).ToString(Formatting.None) + ">";
     public static string[] Pages(JObject plan) => plan["affectedPages"]!.Values<string>().Select(p => p!).ToArray();
     public static void Plan(JObject plan, ConnectionCreatePlanner.Scene scene, IConnectionCreator reader)
     {
@@ -32,23 +33,33 @@ public static class InterruptionPointPlanning
         Require(projected.GroupBy(p => (string?)p["name"], StringComparer.Ordinal).All(g => g.Count() <= 2), "More than one counterpart makes pairing ambiguous.");
         // Join page-local autoconnect graphs through the shared business name, retaining real function-pin identities.
         var groups = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
-        string Vertex(string page, JToken point) => page + ":" + point.ToString(Formatting.None);
+        string Vertex(string page, JToken point) => page + ":" + string.Join(",", point.Values<double>().Select(v => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture)));
         HashSet<string> Group(string key)
         { if (!groups.TryGetValue(key, out HashSet<string>? g)) { groups[key] = g = new(StringComparer.Ordinal) { key }; } return g; }
         void Join(string a, string b)
         { var union = new HashSet<string>(Group(a).Concat(Group(b)), StringComparer.Ordinal); foreach (string key in union) { groups[key] = union; } }
         var pins = new Dictionary<string, string>(StringComparer.Ordinal);
+        var nodePins = new HashSet<string>(StringComparer.Ordinal);
         foreach (JToken page in scope["pages"]!)
         {
             string name = (string)page["page"]!;
             foreach (JProperty pin in ((JObject)page["pins"]!).Properties())
             { string key = Vertex(name, pin.Value["location"]!); Group(key); pins.Add(pin.Name, key); }
+            foreach (var owner in ((JObject)page["pins"]!).Properties().GroupBy(p => string.Join("/", p.Name.Split('/').Take(2)), StringComparer.Ordinal)
+                .Where(g => g.Count() > 1 && g.Select(p => Vertex(name, p.Value["location"]!)).Distinct(StringComparer.Ordinal).Count() == 1))
+            { nodePins.UnionWith(owner.Select(p => p.Name)); }
             IEnumerable<JToken> lines = page["graphical"]!;
             if (name == scene.Page.Page)
             { lines = lines.Concat(plan["graphicalAutoconnect"]!); }
             foreach (JToken line in lines)
             { Join(Vertex(name, line[0]!), Vertex(name, line[1]!)); }
         }
+        foreach (JToken connection in scope["pages"]!.SelectMany(p => p["logical"]!))
+        {
+            if (pins.TryGetValue((string?)connection["startDevice"] ?? "", out string? a) && pins.TryGetValue((string?)connection["endDevice"] ?? "", out string? b))
+            { Join(a, b); }
+        }
+        var touched = new HashSet<string>(plan["graphicalAutoconnect"]!.SelectMany(s => s).Select(p => Vertex(scene.Page.Page, p)), StringComparer.Ordinal);
         foreach (var pair in projected.GroupBy(p => (string)p["name"]!, StringComparer.Ordinal))
         {
             JToken first = pair.First();
@@ -57,16 +68,24 @@ public static class InterruptionPointPlanning
         }
         var logical = new JArray();
         var affectedPins = new HashSet<string>(StringComparer.Ordinal);
-        foreach (HashSet<string> group in groups.Values.Distinct())
+        foreach (HashSet<string> group in groups.Values.Distinct().Where(g => g.Overlaps(touched)))
         {
-            string[] ends = pins.Where(p => group.Contains(p.Value)).Select(p => p.Key).OrderBy(p => p, StringComparer.Ordinal).ToArray();
-            if (projected.Any(p => group.Contains(Vertex((string)p["page"]!, p["pin"]!)) && requested.Any(r => (string?)r["interruption"]!["name"] == (string?)p["name"])))
-            { affectedPins.UnionWith(ends); }
-            bool potential = projected.Any(p => group.Contains(Vertex((string)p["page"]!, p["pin"]!)) && projected.Count(q => (string?)q["name"] == (string?)p["name"]) == 1);
-            potential |= plan["logicalAfterGenerate"]!.Any(g => (bool)g["potentialStartIsNull"]! && g["pins"]!.Values<string>().Any(p => ends.Contains(p, StringComparer.Ordinal)));
+            JToken[] points = projected.Where(p => group.Contains(Vertex((string)p["page"]!, p["pin"]!))).ToArray();
+            bool Paired(JToken p) => projected.Count(q => (string?)q["name"] == (string?)p["name"]) == 2;
+            string[] ends = pins.Where(p => group.Contains(p.Value) && !nodePins.Contains(p.Key)).Select(p => p.Key)
+                .Concat(points.Where(p => !Paired(p)).Select(p => Endpoint((string)p["page"]!, (string)p["name"]!))).OrderBy(p => p, StringComparer.Ordinal).ToArray();
+            affectedPins.UnionWith(ends);
+            // An unpaired interruption is a named end, not the null start of an unrelated potential point.
+            bool potential = plan["logicalAfterGenerate"]!.Any(g => (bool)g["potentialStartIsNull"]! && g["pins"]!.Values<string>().Any(p => ends.Contains(p, StringComparer.Ordinal)));
             potential |= scope["pages"]!.Any(p => p["logical"]!.Any(c => c["startDevice"]!.Type == JTokenType.Null && ends.Contains((string?)c["endDevice"], StringComparer.Ordinal))) && !projected.Any(p => group.Contains(Vertex((string)p["page"]!, p["pin"]!)));
             if (ends.Length > 1 || potential && ends.Length > 0)
-            { logical.Add(new JObject { ["pins"] = new JArray(ends), ["potentialStartIsNull"] = potential }); }
+            {
+                var prediction = new JObject { ["pins"] = new JArray(ends), ["potentialStartIsNull"] = potential };
+                // T7b may read a paired connection directly between devices, omitting the intermediate interruptions.
+                if (points.Any(Paired))
+                { prediction["interruptionPins"] = new JArray(points.Where(Paired).Select(p => Endpoint((string)p["page"]!, (string)p["name"]!))); }
+                logical.Add(prediction);
+            }
         }
         plan["logicalAfterGenerate"] = logical;
         scope["preservedEndpoints"] = new JArray(scope["pages"]!.SelectMany(p => p["logical"]!).Where(c => !affectedPins.Contains((string?)c["startDevice"] ?? "") && !affectedPins.Contains((string?)c["endDevice"] ?? "")).Select(c => new JArray(c["startDevice"]!, c["endDevice"]!)));
