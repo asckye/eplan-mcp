@@ -49,6 +49,7 @@ public sealed class WriteHost : IAsyncLifetime
             EnvironmentVariables = new Dictionary<string, string?> { ["EPLANMCP_HOME"] = Home },
         });
         _client = await McpClient.CreateAsync(transport, cancellationToken: TestContext.Current.CancellationToken);
+        await LiveEplan.SelectConfiguredAsync(_client);
 
         // Like LiveEplan's, this eplanmcp talks to the one EPLAN there is; with several it would refuse every call.
         JsonElement status = await CallAsync("eplan_session_status", []);

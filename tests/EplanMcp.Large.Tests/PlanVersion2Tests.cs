@@ -80,6 +80,7 @@ public sealed class PlanVersion2Tests(LiveEplan eplan)
             EnvironmentVariables = new Dictionary<string, string?> { ["EPLANMCP_HOME"] = home },
         });
         await using McpClient client = await McpClient.CreateAsync(transport, cancellationToken: Token);
+        await LiveEplan.SelectConfiguredAsync(client);
         bool safeToClean = true;
         try
         {

@@ -52,6 +52,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
                 Arguments = ["serve"],
                 EnvironmentVariables = new Dictionary<string, string?> { ["EPLANMCP_HOME"] = run._home }
             }), cancellationToken: Token);
+            await LiveEplan.SelectConfiguredAsync(run._client);
             JsonElement status = await run.CallAsync("eplan_session_status", []);
             run.ProcessId = status.GetProperty("eplan").GetProperty("processId").GetInt32();
             Assert.Equal(eplan.ProcessId, run.ProcessId);

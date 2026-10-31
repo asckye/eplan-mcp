@@ -39,6 +39,21 @@ public sealed class LiveEplan : IAsyncLifetime
 
     public int ProcessId { get; private set; }
 
+    /// <summary>
+    /// For every eplanmcp or Host a test builds itself: selects the EPLAN of <see cref="EplanPidVariable"/> when it is
+    /// set, so that each one reaches the same instance as <see cref="LiveEplan"/> while a second EPLAN runs other tests.
+    /// </summary>
+    internal static async Task SelectConfiguredAsync(McpClient client)
+    {
+        if (Environment.GetEnvironmentVariable(EplanPidVariable) is { Length: > 0 } pid)
+        {
+            CallToolResult result = await client.CallToolAsync(
+                "eplan_session_select", new Dictionary<string, object?> { ["process_id"] = int.Parse(pid, CultureInfo.InvariantCulture) },
+                cancellationToken: TestContext.Current.CancellationToken);
+            Assert.False(result.IsError == true, Text(result));
+        }
+    }
+
     public async ValueTask InitializeAsync()
     {
         if (Environment.GetEnvironmentVariable(OfflineHost.VariantBinVariable) is { Length: > 0 } variantBin)
@@ -58,10 +73,7 @@ public sealed class LiveEplan : IAsyncLifetime
         _client = await McpClient.CreateAsync(transport, cancellationToken: TestContext.Current.CancellationToken);
 
         // Two EPLAN instances can run Large tests side by side (each with its own EPLANMCP_HOME and variant): pick one.
-        if (Environment.GetEnvironmentVariable(EplanPidVariable) is { Length: > 0 } pid)
-        {
-            await CallAsync("eplan_session_select", new() { ["process_id"] = int.Parse(pid, CultureInfo.InvariantCulture) });
-        }
+        await SelectConfiguredAsync(_client);
 
         JsonElement status = await CallAsync("eplan_session_status");
         if (!status.GetProperty("connected").GetBoolean())

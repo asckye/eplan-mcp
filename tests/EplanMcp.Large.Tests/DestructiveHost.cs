@@ -65,6 +65,7 @@ public sealed class DestructiveHost : IAsyncLifetime
         _host = builder.Build();
         await _host.StartAsync(cancellationToken);
         _client = await McpClient.CreateAsync(new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: cancellationToken);
+        await LiveEplan.SelectConfiguredAsync(_client);
 
         // Like WriteHost's eplanmcp, this Host talks to the one EPLAN there is; with several it would refuse every call.
         JsonElement status = await CallAsync("eplan_session_status", []);

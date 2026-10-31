@@ -64,7 +64,9 @@ internal sealed class ObjectReadTools
             BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
             if (status.Problem is { } problem)
             { return ToolResults.Error(problem); }
-            string binding = PropertyGetPaging.Hash(JsonSerializer.Serialize(new { operation, args, status.Handshake?.Eplan.ProcessId, status.Instances }, HostJson.Options));
+            // Bound to the selected instance only: another EPLAN starting or exiting must not invalidate this cursor.
+            string? instance = status.Instances.FirstOrDefault(e => e.ProcessId == status.Handshake?.Eplan.ProcessId)?.PipeName;
+            string binding = PropertyGetPaging.Hash(JsonSerializer.Serialize(new { operation, args, status.Handshake?.Eplan.ProcessId, instance }, HostJson.Options));
             string? cursor = Text("cursor");
             string[] parts = cursor?.Split(':', 2) ?? [];
             string expected = parts.Length == 2 ? parts[0] : string.Empty;
