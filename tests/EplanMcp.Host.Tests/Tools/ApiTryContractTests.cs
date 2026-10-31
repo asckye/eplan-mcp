@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,23 @@ namespace EplanMcp.Host.Tests.Tools;
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class ApiTryContractTests
 {
+    [Theory]
+    [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":2}", true)]
+    [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":1e999}", false)]
+    [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":2,\"z\":3}", false)]
+    [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"x\":2,\"y\":3}", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "\"nKind\":\"Manual\"", true)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "\"nKind\":\"manual\"", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "\"nKind\":2", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "\"value\":\"Manual\"", false)]
+    [InlineData("Graphics.PlaceHolder.ApplyRecord", "\"strRecordName\":\"r\"", true)]
+    [InlineData("Graphics.PlaceHolder.ApplyRecord", "\"strRecordName\":\"r\",\"bApplyPageAndProjectData\":false", true)]
+    [InlineData("Graphics.PlaceHolder.ApplyRecord", "\"strRecordName\":\"r\",\"bApplyPageAndProjectData\":\"false\"", false)]
+    public void MethodShapeValidationMatchesGeneratedSignature(string member, string fields, bool valid)
+    {
+        using JsonDocument json = JsonDocument.Parse("{\"target\":{\"project\":\"Scratch\",\"page\":\"=A/1\",\"type\":1,\"oid\":1,\"digest\":\"" + new string('a', 64) + "\"}," + fields + "}");
+        Assert.Equal(valid, ApiTryTools.MethodParameters("O:Eplan.EplApi.DataModel." + member, json.RootElement));
+    }
     [Theory]
     [InlineData("{}", false)]
     [InlineData("{\"apiTry\":\"off\"}", false)]
@@ -51,5 +69,10 @@ public sealed class ApiTryContractTests
         Assert.Equal((false, true, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.Equal(["group", "project", "parameters"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        JsonElement shapes = tool.InputSchema.GetProperty("properties").GetProperty("parameters").GetProperty("additionalProperties").GetProperty("oneOf");
+        JsonElement point = Assert.Single(shapes.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("x", out _));
+        Assert.Equal(["x", "y"], point.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
+        Assert.False(point.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(3, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
     }
 }

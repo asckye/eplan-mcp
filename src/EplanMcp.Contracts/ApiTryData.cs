@@ -4,6 +4,8 @@ public sealed class ApiTryData
 {
     /// <summary>Scalar result, formatted invariantly.</summary>
     public string? Value { get; set; }
+    /// <summary>A returned object's discovery locator, when the result is not scalar.</summary>
+    public DrawingLocator? Locator { get; set; }
     /// <summary>A committed transaction cleanup or undo warning, if any.</summary>
     public string? Warning { get; set; }
     /// <summary>Business page hashes, counts and design-file fingerprints before execution.</summary>

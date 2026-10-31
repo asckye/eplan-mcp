@@ -179,6 +179,15 @@ public sealed class ApiTryToolTests : IDisposable
     }
 
     [Fact]
+    public async Task ObjectMethodResultReturnsTheExactDiscoveryLocator()
+    {
+        var locator = new DrawingLocator { Project = _harness.ProjectPath, Page = "=A/1", Type = 2, Oid = 12, Digest = new string('a', 64) };
+        _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData { Locator = locator };
+        JsonElement value = WriteToolHarness.Structured(await Call()).GetProperty("value");
+        Assert.Equal(JsonSerializer.SerializeToElement(locator, EplanMcp.Host.HostJson.Options).GetRawText(), value.GetRawText());
+    }
+
+    [Fact]
     public async Task RecoveredCommitDoesNotInventReadback()
     {
         _harness.Bridge.WriteRecovered = true;

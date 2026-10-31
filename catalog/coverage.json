@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 408,
-      "byTools": 400,
-      "partial": 58,
-      "automatedTest": 400,
+      "implemented": 434,
+      "byTools": 426,
+      "partial": 57,
+      "automatedTest": 426,
       "liveVerified": 171,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 143,
-      "byTools": 136,
-      "partial": 51,
-      "automatedTest": 136,
+      "implemented": 169,
+      "byTools": 162,
+      "partial": 50,
+      "automatedTest": 162,
       "liveVerified": 76,
       "envBlocked": 45,
       "undocumented": 66
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 578,
+    "used": 589,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 211,
+      "implemented": 231,
       "liveVerified": 91
     },
     {
@@ -151,13 +151,13 @@
     {
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
-      "implemented": 25,
+      "implemented": 26,
       "liveVerified": 6
     },
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 45,
+      "implemented": 50,
       "liveVerified": 10
     },
     {
@@ -496,10 +496,10 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 576,
-      "operationGroups": 164,
+      "apiIds": 616,
+      "operationGroups": 191,
       "dataDictionary": 5,
-      "dependencies": 382,
+      "dependencies": 394,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
       "small": 2,
@@ -3544,6 +3544,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.IsFunctionInside",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.IsSetAsVisible",
       "layer": "operation",
       "status": "automated_test",
@@ -3554,6 +3563,24 @@
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.IsVisible",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.SetVisibilityDependingOnLayer",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.Assign",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -3627,6 +3654,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.GetWriteProtectionFlagSet",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Connection.IsCoveredTemplate",
       "layer": "operation",
       "status": "automated_test",
@@ -3683,6 +3719,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.MakePersistent",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Connection.Page",
       "layer": "operation",
       "status": "live_verified",
@@ -3705,6 +3750,24 @@
         "eplan_property_set",
         "eplan_rule_check",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.PauseWriteProtection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Connection.PlaceAsConnectionDefinitionPoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {
@@ -4307,6 +4370,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.MakeConnectionExternalOrInternal",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Terminal.PLC",
       "layer": "operation",
       "status": "live_verified",
@@ -4402,6 +4474,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.Assign",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.BmkSearchDirection",
       "layer": "operation",
       "status": "automated_test",
@@ -4493,6 +4574,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.GetWriteProtectionFlagSet",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.HasDefaultGraphicalTerminalsToConnectionPointsMapping",
       "layer": "operation",
       "status": "automated_test",
@@ -4581,6 +4671,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.IsPointInsideLogicalArea",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.IsTemplate",
       "layer": "operation",
       "status": "automated_test",
@@ -4599,7 +4698,34 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.LockDevice",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.MakePersistent",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.ManualPlacementType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.PauseWriteProtection",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -4617,6 +4743,15 @@
         "eplan_device_get",
         "eplan_device_place",
         "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.Place",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {
@@ -4646,6 +4781,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Function.ResetGraphicalTerminalsToConnectionPointsMapping",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Function.SubFunctions",
       "layer": "operation",
       "status": "live_verified",
@@ -4668,6 +4812,15 @@
       "partial": false,
       "tools": [
         "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {
@@ -5100,11 +5253,30 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord",
       "layer": "operation",
       "status": "live_verified",
-      "partial": true,
+      "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_placeholder_apply"
       ]
     },
@@ -5128,6 +5300,24 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindRecord",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindVariable",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues",
       "layer": "operation",
       "status": "live_verified",
@@ -5145,6 +5335,15 @@
       "tools": [
         "eplan_placeholder_apply",
         "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {
@@ -5449,7 +5648,25 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.InterruptionPoint.GetWriteProtectionFlagSet",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.InterruptionPoint.IsStarSource",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.InterruptionPoint.PauseWriteProtection",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -5931,6 +6148,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Page.GetWriteProtectionFlagSet",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Page.GridSize",
       "layer": "operation",
       "status": "automated_test",
@@ -6066,6 +6292,15 @@
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Page.PauseWriteProtection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {

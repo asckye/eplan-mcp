@@ -91,6 +91,34 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ScratchCopy_MethodEnumReadAndRecordWritePreserveSingleUndoHistory()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string[] sentinel = await selection.CreatePagesAsync(1);
+        JsonElement read = await Call(selection.Project, "Page.GetWriteProtectionFlagSet", new { target = await Locator(selection.Project, page: sentinel[0]), nKind = "Manual" });
+        Assert.True(read.GetProperty("value").GetString() is "True" or "False");
+        Assert.Equal(read.GetProperty("before").GetString(), read.GetProperty("after").GetString());
+        string record = "ApiTry_" + Guid.NewGuid().ToString("N");
+        JsonElement holder = await Locator(selection.Project, "PlaceHolder");
+        string holderPage = holder.GetProperty("page").GetString()!;
+        long oid = holder.GetProperty("oid").GetInt64();
+        async Task<JsonElement> FreshHolder()
+        {
+            JsonElement found = await eplan.CallAsync("eplan_object_find", new Dictionary<string, object?> { ["project"] = selection.Project, ["object_type"] = "PlaceHolder", ["page"] = holderPage, ["limit"] = 200 });
+            return Assert.Single(found.GetProperty("items").EnumerateArray(), item => item.GetProperty("locator").GetProperty("oid").GetInt64() == oid).GetProperty("locator");
+        }
+        Assert.Equal("-1", (await Call(selection.Project, "Graphics.PlaceHolder.FindRecord", new { target = await FreshHolder(), strName = record })).GetProperty("value").GetString());
+        JsonElement written = await Call(selection.Project, "Graphics.PlaceHolder.AddRecord", new { target = await FreshHolder(), strRecordName = record });
+        Assert.Equal("committed", written.GetProperty("execution").GetString());
+        Assert.Equal(written.GetProperty("value").GetString(), (await Call(selection.Project, "Graphics.PlaceHolder.FindRecord", new { target = await FreshHolder(), strName = record })).GetProperty("value").GetString());
+        await selection.UndoAsync();
+        Assert.Equal("-1", (await Call(selection.Project, "Graphics.PlaceHolder.FindRecord", new { target = await FreshHolder(), strName = record })).GetProperty("value").GetString());
+        Assert.Contains((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel[0]);
+        await selection.UndoAsync();
+        Assert.DoesNotContain((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel[0]);
+    }
+
+    [Fact]
     public async Task ScratchCopy_TerminalLocatorReadsGeneratedPropertyWithoutChanges()
     {
         string project = await eplan.WriteProjectAsync();

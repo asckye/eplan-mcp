@@ -109,6 +109,105 @@ public sealed class ApiTryOperationTests
         { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
     }
 
+    [Theory]
+    [InlineData("Function.IsPointInsideLogicalArea", "pnt", "{\"x\":1.25,\"y\":-2}", true)]
+    [InlineData("Function.IsPointInsideLogicalArea", "pnt", "{\"x\":1,\"y\":\"2\"}", false)]
+    [InlineData("Function.IsPointInsideLogicalArea", "pnt", "{\"x\":1,\"y\":1e999}", false)]
+    [InlineData("Function.IsPointInsideLogicalArea", "pnt", "{\"x\":1,\"y\":2,\"z\":3}", false)]
+    [InlineData("Function.IsPointInsideLogicalArea", "pnt", "{\"x\":1,\"x\":2,\"y\":3}", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "nKind", "\"Manual\"", true)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "nKind", "\"manual\"", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "nKind", "\"2\"", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "nKind", "2", false)]
+    [InlineData("Page.GetWriteProtectionFlagSet", "value", "\"Manual\"", false)]
+    [InlineData("Graphics.PlaceHolder.ApplyRecord", "strRecordName", "\"test\"", true)]
+    public void MethodParametersRequireExactGeneratedTypes(string member, string name, string json, bool valid)
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel." + member);
+        args.Parameters = args.Parameters[..^1] + ",\"" + name + "\":" + json + "}";
+        if (valid)
+        { Assert.Single(Plan(args).Changes); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
+        Assert.Equal(0, _dispatch.Invocations);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LocatorArgumentsMustBelongToTheTargetProject(bool sameProject)
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Function.Assign");
+        JObject p = JObject.Parse(args.Parameters);
+        p["argument_target"] = p["target"]!.DeepClone();
+        if (!sameProject)
+        { p["argument_target"]!["project"] = @"D:\real\Project"; }
+        args.Parameters = p.ToString();
+        if (sameProject)
+        { Assert.Equal("write", Assert.Single(Plan(args).Changes).Action); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
+    }
+
+    [Fact]
+    public void MethodWriteReturnsNullOrLocatorWithoutSetterReadback_AndCommitsOneUndoStep()
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Function.Assign");
+        JObject p = JObject.Parse(args.Parameters);
+        p["argument_target"] = p["target"]!.DeepClone();
+        args.Parameters = p.ToString();
+        foreach (object? returned in new object?[] { null, p["target"]!.ToObject<DrawingLocator>() })
+        {
+            _transactions.Calls.Clear();
+            _dispatch.MethodResult = returned;
+            args.Fingerprint = Plan(args).Fingerprint;
+            var result = (ApiTryData)Executor().Execute(args)!;
+            Assert.Null(result.Value);
+            Assert.Same(returned, result.Locator);
+            Assert.Equal(["Begin AI: eplan_api_try", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+            Assert.DoesNotContain(result.After.Keys, k => k.StartsWith("property:", StringComparison.Ordinal));
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MethodWriteFailureRollsBackAndTimeoutRemainsUnknown(bool timeout)
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord");
+        JObject p = JObject.Parse(args.Parameters);
+        p["strRecordName"] = "test";
+        args.Parameters = p.ToString();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.Failure = timeout ? new TimeoutException() : new InvalidOperationException();
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal(timeout ? ExecutionState.Unknown : ExecutionState.RolledBack, error.Execution);
+        Assert.Contains("Rollback", _transactions.Calls);
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+    }
+
+    [Fact]
+    public void MethodReadRunsOnceWithoutCreatingAnUndoStep()
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Page.GetWriteProtectionFlagSet");
+        JObject p = JObject.Parse(args.Parameters);
+        p["nKind"] = "Manual";
+        args.Parameters = p.ToString();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.MethodResult = "True";
+        Assert.Equal("True", ((ApiTryData)Executor().Execute(args)!).Value);
+        Assert.Equal(1, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("System.Int32", "Integer", "2147483648", false)]
+    [InlineData("System.Int64", "Integer", "9223372036854775807", true)]
+    [InlineData("System.Int64", "Integer", "9223372036854775808", false)]
+    [InlineData("System.Int64", "Float", "1.0", false)]
+    [InlineData("System.Double", "Float", "NaN", false)]
+    public void GeneratedScalarValidationRejectsOverflowAndCoercion(string type, string kind, string value, bool valid) => Assert.Equal(valid, ApiTryCatalog.ValidValue([type], kind, value));
+
     [Fact]
     public void RegisteredButUndispatchable_ProducesAnEmptyPlan()
     {
@@ -287,6 +386,7 @@ public sealed class ApiTryOperationTests
         public Exception? Failure { get; set; }
         public bool Mismatch { get; set; }
         public string Value { get; set; } = "=A/1";
+        public object? MethodResult { get; set; }
         private bool _changed;
         public void CheckTarget(ApiTryArgs args) { }
         public Dictionary<string, string> Inspect(string project)
@@ -295,7 +395,7 @@ public sealed class ApiTryOperationTests
             return new() { ["snapshot:1"] = _changed ? "after" : "before", ["file:Page.eod"] = _changed ? "new-file" : "old-file" };
         }
         public string Read(ApiTryArgs args) => Value;
-        public string Invoke(ApiTryArgs args)
+        public object? Invoke(ApiTryArgs args)
         {
             Invocations++;
             if (JObject.Parse(args.Parameters).TryGetValue("value", out JToken? value))
@@ -303,6 +403,8 @@ public sealed class ApiTryOperationTests
             if (Failure is { } failure)
             { throw failure; }
             _changed |= ChangeOnInvoke;
+            if (ApiTryCatalog.MethodAccess(args.Group) is not null)
+            { return MethodResult; }
             return Value;
         }
     }

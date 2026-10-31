@@ -27,6 +27,7 @@ internal static class CoverageCheck
         (ApiIndexGenerator.RelativePath, ApiIndexGenerator.Render),
         (ApiTryGenerator.CatalogPath, ApiTryGenerator.Catalog),
         (ApiTryGenerator.DispatchPath, ApiTryGenerator.Dispatch),
+        (ApiTryGenerator.ReportPath, ApiTryGenerator.Report),
     ];
 
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>

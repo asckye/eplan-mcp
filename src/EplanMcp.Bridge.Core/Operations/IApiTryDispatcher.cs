@@ -9,6 +9,6 @@ public interface IApiTryDispatcher
     public Dictionary<string, string> Inspect(string project);
     /// <summary>Reads the generated property before a write.</summary>
     public string? Read(ApiTryArgs args);
-    /// <summary>Invokes one generated read or setter followed by readback.</summary>
-    public string? Invoke(ApiTryArgs args);
+    /// <summary>Invokes one generated member, returning text, a detached locator or null.</summary>
+    public object? Invoke(ApiTryArgs args);
 }

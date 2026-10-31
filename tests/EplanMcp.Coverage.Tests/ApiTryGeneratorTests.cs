@@ -7,7 +7,7 @@ namespace EplanMcp.Coverage.Tests;
 public sealed class ApiTryGeneratorTests
 {
     [Fact]
-    public void SelectionIsClosedToScalarPropertiesOnReviewedTypesAndExactMethodShape()
+    public void SelectionIsClosedToScalarPropertiesOnReviewedTypes()
     {
         ApiDetail getter = new("overload", "P:Eplan.EplApi.DataModel.Page.Name", "Page.Name", Parameters: [], ReturnType: "System.String", Accessors: "get;set");
         ApiEntry Entry(string group, ApiDetail member, string? excluded = null, string type = "T:Eplan.EplApi.DataModel.Page") =>
@@ -55,5 +55,54 @@ public sealed class ApiTryGeneratorTests
         ApiIndexData data = new([Entry("valid"), Entry("excluded", "unsafe")], []);
         Assert.Empty(ApiTryGenerator.Selected(data));
         Assert.Equal("valid", Assert.Single(ApiTryGenerator.Selected(data, new Dictionary<string, string[]> { ["Example.Enum"] = ["One"] })).Entry.Row.Group);
+    }
+
+    private static ApiEntry Method(string name, params ApiDetail[] members) => new(new(members[0].Id, "O:Page." + name, "method", name, "registered", null, [], false),
+        "Eplan.EplApi.DataModel", "T:Eplan.EplApi.DataModel.Page", name, null, [], members);
+    private static ApiDetail Overload(string type, string name = "value", string returns = "System.Boolean") => new("overload", "M:Page.Test(" + type + ")", Parameters: [new(name, type)], ReturnType: returns);
+
+    [Fact]
+    public void MethodsSelectExactlyOneSignaturePerNameSetWithoutUsingValueTypes()
+    {
+        ApiEntry entry = Method("GetTest", Overload("System.Int32"), Overload("System.String"), Overload("System.Int64", "index"));
+        Assert.Equal("index", Assert.Single(ApiTryGenerator.Methods(new([entry], []))).Member.Parameters![0].Name);
+        ApiEntry reordered = Method("GetOther", Overload("System.Int32") with { Parameters = [new("x", "System.Int32"), new("y", "System.Int32")] },
+            Overload("System.String") with { Parameters = [new("y", "System.String"), new("x", "System.String")] });
+        Assert.Empty(ApiTryGenerator.Methods(new([reordered], [])));
+    }
+
+    [Theory]
+    [InlineData("Dispose", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("RemoveFromPage", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("DeleteRecord", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("EraseAll", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("CreateTransient", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("GetTest", "System.Int32@", "ref_out")]
+    [InlineData("GetTest", "System.Int32[]", "array_or_params")]
+    [InlineData("GetTest", "System.Action", "delegate_parameter")]
+    [InlineData("GetTest", "System.Collections.Generic.List{System.String}", "generic_or_collection_parameter")]
+    [InlineData("GetTest", "T", "unsupported_parameter")]
+    public void MethodExclusionsAreReported(string name, string type, string reason) => Assert.Equal(reason, ApiTryGenerator.Exclusion(Method(name, Overload(type)), Overload(type), null));
+
+    [Theory]
+    [InlineData("GetTest", true)]
+    [InlineData("IsTest", true)]
+    [InlineData("HasTest", true)]
+    [InlineData("CanTest", true)]
+    [InlineData("FindTest", true)]
+    [InlineData("getTest", false)]
+    [InlineData("Assign", false)]
+    public void MethodClassificationUsesExactCatalogName(string name, bool read) => Assert.Equal(read, ApiTryGenerator.ReadMethod(Method(name, Overload("System.Int32"))));
+
+    [Fact]
+    public void MethodsHonorVisibilityCatalogAndReturnRestrictions()
+    {
+        ApiDetail member = Overload("System.Int32");
+        foreach (ApiDetail excluded in new[] { member with { Static = true }, member with { Access = "protected" }, member with { ExcludedReason = "unsafe" }, member with { ReturnType = "System.Object" } })
+        { Assert.Empty(ApiTryGenerator.Methods(new([Method("GetTest", excluded)], []))); }
+        ApiEntry entry = Method("GetTest", member);
+        Assert.Empty(ApiTryGenerator.Methods(new([entry with { Row = entry.Row with { ExcludedReason = "unsafe" } }], [])));
+        foreach (string type in new[] { "System.Boolean", "System.Int32", "System.Int64", "System.Double", "System.String", "Eplan.EplApi.Base.PointD", "Eplan.EplApi.DataModel.Function", "Example.Enum" })
+        { Assert.Single(ApiTryGenerator.Methods(new([Method("SetTest", Overload(type, returns: "System.Void"))], []), new Dictionary<string, string[]> { ["Example.Enum"] = ["One"] })); }
     }
 }

@@ -1,0 +1,122 @@
+group	signature	status	reason
+O:Eplan.EplApi.DataModel.BoxedDevice.Create	M:Eplan.EplApi.DataModel.BoxedDevice.Create(Eplan.EplApi.DataModel.Page)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.BoxedDevice.IsFunctionInside	M:Eplan.EplApi.DataModel.BoxedDevice.IsFunctionInside(Eplan.EplApi.DataModel.Function)	read	
+O:Eplan.EplApi.DataModel.BoxedDevice.SetVisibilityDependingOnLayer	M:Eplan.EplApi.DataModel.BoxedDevice.SetVisibilityDependingOnLayer	write	
+O:Eplan.EplApi.DataModel.Connection.AddArticleReference	M:Eplan.EplApi.DataModel.Connection.AddArticleReference(System.String)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Connection.AddArticleReference	M:Eplan.EplApi.DataModel.Connection.AddArticleReference(System.String,System.String,System.UInt32)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Connection.AddArticleReference	M:Eplan.EplApi.DataModel.Connection.AddArticleReference(System.String,System.String,System.UInt32,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Connection.Assign	M:Eplan.EplApi.DataModel.Connection.Assign(Eplan.EplApi.DataModel.Connection)	write	
+O:Eplan.EplApi.DataModel.Connection.GetTemplateObject_Internal	M:Eplan.EplApi.DataModel.Connection.GetTemplateObject_Internal	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Connection.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.Connection.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	
+O:Eplan.EplApi.DataModel.Connection.MakePersistent	M:Eplan.EplApi.DataModel.Connection.MakePersistent	write	
+O:Eplan.EplApi.DataModel.Connection.PauseWriteProtection	M:Eplan.EplApi.DataModel.Connection.PauseWriteProtection(System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Connection.PlaceAsConnectionDefinitionPoint	M:Eplan.EplApi.DataModel.Connection.PlaceAsConnectionDefinitionPoint(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD)	write	
+O:Eplan.EplApi.DataModel.Connection.Remove	M:Eplan.EplApi.DataModel.Connection.Remove	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Connection.RemoveArticleReference	M:Eplan.EplApi.DataModel.Connection.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Connection.getArticleByPropertyIndex	M:Eplan.EplApi.DataModel.Connection.getArticleByPropertyIndex(System.Int16)	excluded	static_or_nonpublic
+O:Eplan.EplApi.DataModel.EObjects.Cable.AddLocalFunctionTemplates	M:Eplan.EplApi.DataModel.EObjects.Cable.AddLocalFunctionTemplates(Eplan.EplApi.DataModel.Connection[])	excluded	array_or_params
+O:Eplan.EplApi.DataModel.EObjects.Cable.Create	M:Eplan.EplApi.DataModel.EObjects.Cable.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Cable.Create	M:Eplan.EplApi.DataModel.EObjects.Cable.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Cable.DeleteAllLocalFunctionTemplates	M:Eplan.EplApi.DataModel.EObjects.Cable.DeleteAllLocalFunctionTemplates	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets	M:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets(System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject},System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject})	excluded	generic_or_collection_parameter
+O:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets	M:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets(System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject},System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject},System.Boolean)	excluded	generic_or_collection_parameter
+O:Eplan.EplApi.DataModel.EObjects.PLC.Create	M:Eplan.EplApi.DataModel.EObjects.PLC.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.PLC.Create	M:Eplan.EplApi.DataModel.EObjects.PLC.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.PLC.GetAvailableSchemeList	M:Eplan.EplApi.DataModel.EObjects.PLC.GetAvailableSchemeList	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.EObjects.Terminal.Create	M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.PLC,Eplan.EplApi.DataModel.FunctionDefinition)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Terminal.Create	M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.PLC,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Terminal.Create	M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Terminal.Create	M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.Terminal.MakeConnectionExternalOrInternal	M:Eplan.EplApi.DataModel.EObjects.Terminal.MakeConnectionExternalOrInternal(Eplan.EplApi.DataModel.Connection,Eplan.EplApi.DataModel.EObjects.Terminal.ConnectionSide)	write	
+O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.AddLocalFunctionTemplates	M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.AddLocalFunctionTemplates(Eplan.EplApi.DataModel.Function[])	excluded	array_or_params
+O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Create	M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Create(Eplan.EplApi.DataModel.Page)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.DeleteAllLocalFunctionTemplates	M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.DeleteAllLocalFunctionTemplates	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.AddArticleReference	M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Function.AddArticleReference	M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.AddArticleReference	M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.AddConnectionPointPosition	M:Eplan.EplApi.DataModel.Function.AddConnectionPointPosition	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Function.Assign	M:Eplan.EplApi.DataModel.Function.Assign(Eplan.EplApi.DataModel.Function)	write	
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.FunctionDefinition)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.FunctionDefinition)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.Create	M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.CreateTransient	M:Eplan.EplApi.DataModel.Function.CreateTransient(Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.CreateTransient	M:Eplan.EplApi.DataModel.Function.CreateTransient(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.GetGraphics	M:Eplan.EplApi.DataModel.Function.GetGraphics	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Function.GetTemplateObject_Internal	M:Eplan.EplApi.DataModel.Function.GetTemplateObject_Internal	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Function.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.Function.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	
+O:Eplan.EplApi.DataModel.Function.IsDeviceLocked	M:Eplan.EplApi.DataModel.Function.IsDeviceLocked(System.Boolean)	read	
+O:Eplan.EplApi.DataModel.Function.IsPointInsideLogicalArea	M:Eplan.EplApi.DataModel.Function.IsPointInsideLogicalArea(Eplan.EplApi.Base.PointD)	read	
+O:Eplan.EplApi.DataModel.Function.LockDevice	M:Eplan.EplApi.DataModel.Function.LockDevice(System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Function.MakePersistent	M:Eplan.EplApi.DataModel.Function.MakePersistent	write	
+O:Eplan.EplApi.DataModel.Function.PauseWriteProtection	M:Eplan.EplApi.DataModel.Function.PauseWriteProtection(System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Function.Place	M:Eplan.EplApi.DataModel.Function.Place(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,System.Boolean,System.Boolean,System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Function.PlaceAt	M:Eplan.EplApi.DataModel.Function.PlaceAt(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType,Eplan.EplApi.DataModel.MasterData.SymbolVariant)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.PlaceFunctionalMacro	M:Eplan.EplApi.DataModel.Function.PlaceFunctionalMacro(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Function.RemoveArticleReference	M:Eplan.EplApi.DataModel.Function.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.RemoveConnectionPointPosition	M:Eplan.EplApi.DataModel.Function.RemoveConnectionPointPosition(System.Int16)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.RemoveFromPage	M:Eplan.EplApi.DataModel.Function.RemoveFromPage	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Function.ResetGraphicalTerminalsToConnectionPointsMapping	M:Eplan.EplApi.DataModel.Function.ResetGraphicalTerminalsToConnectionPointsMapping	write	
+O:Eplan.EplApi.DataModel.Function.SetPlanningSegment	M:Eplan.EplApi.DataModel.Function.SetPlanningSegment(Eplan.EplApi.DataModel.Planning.PlanningSegment,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.SetPlanningSegmentInternal	M:Eplan.EplApi.DataModel.Function.SetPlanningSegmentInternal(Eplan.EplApi.DataModel.Planning.PlanningSegment,System.Boolean)	excluded	static_or_nonpublic
+O:Eplan.EplApi.DataModel.Function.SetSymbolVariant	M:Eplan.EplApi.DataModel.Function.SetSymbolVariant(Eplan.EplApi.DataModel.MasterData.SymbolVariant,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.SetSymbolVariantInternal	M:Eplan.EplApi.DataModel.Function.SetSymbolVariantInternal(Eplan.EplApi.DataModel.MasterData.SymbolVariant,System.Boolean)	excluded	static_or_nonpublic
+O:Eplan.EplApi.DataModel.Function.StoreConnectionPointPosition	M:Eplan.EplApi.DataModel.Function.StoreConnectionPointPosition(Eplan.EplApi.DataModel.ConnectionPointPosition,System.Int16)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate	M:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate	write	
+O:Eplan.EplApi.DataModel.Function.getAllRelevantForPessimisticLockObjects	M:Eplan.EplApi.DataModel.Function.getAllRelevantForPessimisticLockObjects(std.set<BaseHandle,std::less<BaseHandle>,std::allocator<BaseHandle> >)	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Function.getArticleByPropertyIndex	M:Eplan.EplApi.DataModel.Function.getArticleByPropertyIndex(System.Int16)	excluded	static_or_nonpublic
+O:Eplan.EplApi.DataModel.Function.testCategory	M:Eplan.EplApi.DataModel.Function.testCategory(DMFunctionHandle,System.Int16,System.Int16,System.UInt32)	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Function.testCategory	M:Eplan.EplApi.DataModel.Function.testCategory(DMFunctionHandle,System.Int16,System.UInt32)	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Function.testCategory	M:Eplan.EplApi.DataModel.Function.testCategory(DMFunctionHandle,std.vector<short,std::allocator<short> >,System.UInt32)	excluded	catalog:internal
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord(System.String)	write	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference(Eplan.EplApi.DataModel.StorableObject)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable(System.String)	write	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String)	write	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord(System.String,System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Create	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Create(Eplan.EplApi.DataModel.Page)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.CreateTransient	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.CreateTransient(Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord(System.Int32)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord(System.String)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteUnusedVariables	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteUnusedVariables	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteVariable	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteVariable(System.String)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindRecord(System.String)	read	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindReference	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindReference(Eplan.EplApi.DataModel.StorableObject)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindVariable	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindVariable(System.String)	read	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetCurrentValue	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetCurrentValue(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues(System.String)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid(System.String)	read	
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveInvalidObjectReferences	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveInvalidObjectReferences	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveObjectReferences	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveObjectReferences(Eplan.EplApi.DataModel.StorableObject[])	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetProjectPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId,Eplan.EplApi.Base.MultiLangString)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetPropertyEntry(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId,Eplan.EplApi.Base.MultiLangString)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetValue	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetValue(System.String,System.String,Eplan.EplApi.Base.MultiLangString)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetVisibilityDependingOnLayer	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetVisibilityDependingOnLayer	excluded	catalog:deprecated
+O:Eplan.EplApi.DataModel.InterruptionPoint.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.InterruptionPoint.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	
+O:Eplan.EplApi.DataModel.InterruptionPoint.PauseWriteProtection	M:Eplan.EplApi.DataModel.InterruptionPoint.PauseWriteProtection(System.Boolean)	write	
+O:Eplan.EplApi.DataModel.LocationBox.GetGraphics	M:Eplan.EplApi.DataModel.LocationBox.GetGraphics	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.MacroBox.AddReference	M:Eplan.EplApi.DataModel.MacroBox.AddReference(Eplan.EplApi.DataModel.StorableObject)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.MacroBox.Create	M:Eplan.EplApi.DataModel.MacroBox.Create(Eplan.EplApi.DataModel.Page)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.MacroBox.GetGraphics	M:Eplan.EplApi.DataModel.MacroBox.GetGraphics	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.MacroBox.RemoveAllReferences	M:Eplan.EplApi.DataModel.MacroBox.RemoveAllReferences	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.MacroBox.RemoveReference	M:Eplan.EplApi.DataModel.MacroBox.RemoveReference(Eplan.EplApi.DataModel.StorableObject)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Page.ConvertToGraphics	M:Eplan.EplApi.DataModel.Page.ConvertToGraphics	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Page.CopyTo	M:Eplan.EplApi.DataModel.Page.CopyTo(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.PagePropertyList,Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Page.CopyTo	M:Eplan.EplApi.DataModel.Page.CopyTo(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.PagePropertyList,Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode,System.Boolean,System.Boolean)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Page.Create	M:Eplan.EplApi.DataModel.Page.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType,Eplan.EplApi.DataModel.PagePropertyList)	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Page.GetBoundingBox	M:Eplan.EplApi.DataModel.Page.GetBoundingBox	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Page.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.Page.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	
+O:Eplan.EplApi.DataModel.Page.PauseWriteProtection	M:Eplan.EplApi.DataModel.Page.PauseWriteProtection(System.Boolean)	write	
+O:Eplan.EplApi.DataModel.Page.Remove	M:Eplan.EplApi.DataModel.Page.Remove	excluded	lifecycle_or_creation
+O:Eplan.EplApi.DataModel.Page.SetName	M:Eplan.EplApi.DataModel.Page.SetName(Eplan.EplApi.DataModel.PagePropertyList)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.Page.SetProject	M:Eplan.EplApi.DataModel.Page.SetProject(Eplan.EplApi.DataModel.Project)	excluded	unsupported_parameter
+O:Eplan.EplApi.DataModel.PotentialDefinition.internalSetPotentialName	M:Eplan.EplApi.DataModel.PotentialDefinition.internalSetPotentialName(System.String)	excluded	static_or_nonpublic
+O:Eplan.EplApi.DataModel.PotentialDefinition.internalSetSignalName	M:Eplan.EplApi.DataModel.PotentialDefinition.internalSetSignalName(System.String)	excluded	static_or_nonpublic
