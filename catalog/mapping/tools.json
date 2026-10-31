@@ -18,19 +18,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ActionCatalogTests",
@@ -59,11 +49,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ActionCatalogFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogFileTests.cs"
@@ -72,11 +57,6 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ActionCatalogTests",
@@ -247,11 +227,6 @@
             "name": "ActionRunContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunContractTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -426,11 +401,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionTryTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
@@ -474,11 +444,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ApiCatalogCoverageTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiCatalogCoverageTests.cs"
@@ -487,11 +452,6 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -524,11 +484,6 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -1134,19 +1089,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiTryContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ApiTryTests",
@@ -1197,19 +1142,9 @@
         "apiNotes": [],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "AssetGetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetGetToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -1242,11 +1177,6 @@
             "name": "AssetReviewToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetReviewToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -1268,11 +1198,6 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "AssetGetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetGetToolTests.cs"
@@ -1281,11 +1206,6 @@
             "name": "AssetSearchToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetSearchToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -1305,19 +1225,9 @@
         "apiNotes": [],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "AssetUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetUpdateToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -1409,11 +1319,6 @@
             "name": "CabinetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/CabinetToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": [
@@ -1518,19 +1423,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/CabinetContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "CabinetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/CabinetToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CabinetContextTests",
@@ -1843,11 +1738,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/CableGetToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "AcceptanceListFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
@@ -1856,11 +1746,6 @@
             "name": "CableToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/CableToolsInteropTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CableDefinitionTests",
@@ -2041,19 +1926,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "CableRenumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/CableRenumberToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CableRenumberTests",
@@ -2129,11 +2004,6 @@
             "name": "CheckListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/CheckListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "CheckInteropTests",
@@ -2296,19 +2166,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "CheckRunToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/CheckRunToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CheckAndReportTests",
@@ -2630,11 +2490,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
@@ -2786,11 +2641,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ConnectionGenerateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionGenerateToolTests.cs"
@@ -2799,11 +2649,6 @@
             "name": "PageDisplayToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CableDefinitionTests",
@@ -2942,11 +2787,6 @@
             "name": "ConnectionListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "ConnectionCreateToolTests",
@@ -3150,19 +2990,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ConnectionNumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionNumberToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ConnectionNumberTests",
@@ -3513,11 +3343,6 @@
             "file": "tests/EplanMcp.Evals.Tests/Tasks/TaskLoaderTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "DevicePlaceToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceToolTests.cs"
@@ -3669,11 +3494,6 @@
             "name": "PageCursorTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageCursorTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "DeviceToolsInteropTests",
@@ -4078,11 +3898,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
@@ -4219,19 +4034,9 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanLocalScopeRulesTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "DeviceRenumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceRenumberToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "DeviceRenumberTests",
@@ -4349,19 +4154,9 @@
             "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalQueueTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "DeviceUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceUpdateToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -4454,19 +4249,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": [
@@ -4568,11 +4353,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ImageExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ImageExportToolTests.cs"
@@ -4581,11 +4361,6 @@
             "name": "ImportDxfToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportDxfToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ConnectionCreateTests",
@@ -4699,11 +4474,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ProjectExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectExportInteropTests.cs"
@@ -4712,11 +4482,6 @@
             "name": "ProjectExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ProjectExportTests",
@@ -4796,11 +4561,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ProjectExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectExportInteropTests.cs"
@@ -4809,11 +4569,6 @@
             "name": "ProjectExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ImportListTests",
@@ -4909,19 +4664,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": [
@@ -4996,11 +4741,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ProjectExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectExportInteropTests.cs"
@@ -5009,11 +4749,6 @@
             "name": "ProjectExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ImportPxfTests",
@@ -5091,11 +4826,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ProjectExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectExportInteropTests.cs"
@@ -5104,11 +4834,6 @@
             "name": "ProjectExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ProjectExportTests",
@@ -5231,11 +4956,6 @@
             "name": "PageDisplayToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ImportDxfTests",
@@ -5387,11 +5107,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportListToolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "ImportListTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportListTests.cs"
@@ -5524,11 +5239,6 @@
             "name": "ImportPdfCommentsToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportPdfCommentsToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ImportPdfCommentsTests",
@@ -5668,11 +5378,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportPlcToolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "ImportPlcTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportPlcTests.cs"
@@ -5720,19 +5425,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ImportPxfToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportPxfToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ImportPxfTests",
@@ -5846,19 +5541,9 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "LanguageRemoveToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/LanguageRemoveToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "LanguageRemoveTests",
@@ -5954,19 +5639,9 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LanguageTransactionTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "LanguageSetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/LanguageSetToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "LanguageRemoveTests",
@@ -6064,16 +5739,6 @@
             "name": "MacroGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroGetToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "MacroTests",
@@ -6250,11 +5915,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
@@ -6321,16 +5981,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroListToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "MacroTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroTests.cs"
@@ -6390,11 +6040,6 @@
             "name": "MessageListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/MessageListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "MessageInteropTests",
@@ -6624,11 +6269,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
@@ -6842,11 +6482,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "ObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ObjectReadTests.cs"
@@ -6895,11 +6530,6 @@
         "apiNotes": [],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "AssetReviewToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetReviewToolTests.cs"
@@ -6913,11 +6543,6 @@
             "name": "PackBuildToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackBuildToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -6937,19 +6562,9 @@
         "apiNotes": [],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PackGetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackGetToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -6971,11 +6586,6 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PackImportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackImportToolTests.cs"
@@ -6984,11 +6594,6 @@
             "name": "PackInstallTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackInstallTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -7008,19 +6613,9 @@
         "apiNotes": [],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PackListToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackListToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ],
         "operationTests": []
@@ -7159,11 +6754,6 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanArgumentsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "TransactionRunnerTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TransactionRunnerTests.cs"
@@ -7237,11 +6827,6 @@
             "name": "PageCreateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageCreateToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "SuspensionStoreTests",
@@ -7428,11 +7013,6 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "WorkbenchJsonTests",
             "size": "Small",
             "file": "tests/EplanMcp.Workbench.Protocol.Tests/WorkbenchJsonTests.cs"
@@ -7471,11 +7051,6 @@
             "name": "PageDeleteToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDeleteToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "TrayAndExitTests",
@@ -7949,11 +7524,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ResultShaperTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ToolPagesTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Server/ToolPagesTests.cs"
@@ -8266,19 +7836,9 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanLocalScopeRulesTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PageRenumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageRenumberToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ObjectResolveTests",
@@ -8407,11 +7967,6 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
@@ -8420,11 +7975,6 @@
             "name": "PageTextReplaceProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageTextReplaceProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PageTextReplaceTests",
@@ -8591,11 +8141,6 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "PageUpdateFrameTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageUpdateFrameTests.cs"
@@ -8710,11 +8255,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "MasterDataExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/MasterDataExportInteropTests.cs"
@@ -8723,11 +8263,6 @@
             "name": "MasterDataExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MasterDataExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PartExportTests",
@@ -8850,11 +8385,6 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "DanglingWritesTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/DanglingWritesTests.cs"
@@ -8868,11 +8398,6 @@
             "name": "PartImportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PartImportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "SuspensionStoreTests",
@@ -8997,11 +8522,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PartListToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PartToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
@@ -9115,11 +8635,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PartSearchToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "MasterDataExportOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataExportOperationTests.cs"
@@ -9128,11 +8643,6 @@
             "name": "PartToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "NoSideEffectTests",
@@ -9320,19 +8830,9 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PartSyncToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PartSyncToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PartSyncTests",
@@ -9467,19 +8967,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PlaceholderApplyToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderApplyToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PlaceholderApplyTests",
@@ -9574,16 +9064,6 @@
             "name": "PlaceholderListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PlaceholderListTests",
@@ -9829,11 +9309,6 @@
             "name": "PlacementCreateProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementCreateProtocolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -10152,11 +9627,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementUpdateTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
@@ -10219,11 +9689,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "DanglingWritesTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/DanglingWritesTests.cs"
@@ -10257,11 +9722,6 @@
             "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "WorkflowHttpTests",
@@ -10364,11 +9824,6 @@
             "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "WorkflowProtocolTests",
@@ -10503,19 +9958,9 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlcGetToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PlcToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PlcToolsInteropTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "NoSideEffectTests",
@@ -10907,11 +10352,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectToolsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
@@ -11174,19 +10614,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ProjectTranslateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ProjectTranslateToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ProjectTranslateTests",
@@ -11704,11 +11134,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PropertySetProtocolTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "PropertySetToolTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PropertySetToolTests.cs"
@@ -11830,19 +11255,9 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ReportUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ReportUpdateToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "CheckAndReportTests",
@@ -11943,16 +11358,6 @@
             "name": "RevisionListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/RevisionListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "RevisionListTests",
@@ -12153,11 +11558,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "WorkflowHttpTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/WorkflowHttpTests.cs"
@@ -12292,11 +11692,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/SessionToolsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "HttpEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
@@ -12305,11 +11700,6 @@
             "name": "SessionSelectInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/SessionSelectInteropTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "PartAndMessageTests",
@@ -12359,11 +11749,6 @@
             "name": "SessionToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SessionToolsTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "UsageToolsTests",
@@ -12544,11 +11929,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/SymbolToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
@@ -12612,11 +11992,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "PlanApplyProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanApplyProtocolTests.cs"
@@ -12625,11 +12000,6 @@
             "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "WorkflowHttpTests",
@@ -12760,16 +12130,6 @@
         ],
         "tests": [
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "TerminalRenumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/TerminalRenumberToolTests.cs"
@@ -12866,16 +12226,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/TerminalStripGetToolTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
-          },
-          {
             "name": "TerminalToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
@@ -12953,16 +12303,6 @@
             "name": "TerminalStripListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/TerminalStripListToolTests.cs"
-          },
-          {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "TerminalToolsInteropTests",
@@ -13143,11 +12483,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "MasterDataExportInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/MasterDataExportInteropTests.cs"
@@ -13156,11 +12491,6 @@
             "name": "MasterDataExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MasterDataExportToolTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "TranslationExportTests",
@@ -13244,11 +12574,6 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
-            "name": "ToolContractTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
-          },
-          {
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
@@ -13257,11 +12582,6 @@
             "name": "TranslationImportToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/TranslationImportToolContractTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "TranslationImportSupportTests",
@@ -13517,11 +12837,6 @@
             "name": "PlanTaskAcceptanceScenariosTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlanTaskAcceptanceScenariosTests.cs"
-          },
-          {
-            "name": "StdioEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "WorkflowCabinetTests",

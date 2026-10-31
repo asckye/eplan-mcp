@@ -145,99 +145,99 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 
 | 工具 | 级别 | Bridge 操作 | API ID | 操作层 | 数据字典 | 依赖 | action | 测试 S/M/L | api-notes | 最近一次实机 |
 |---|---|---|---:|---:|---:|---:|---:|---|---|---|
-| eplan_action_catalog_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | — |
-| eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/1 | — | — |
-| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 2/1/0 | A11 A25 A30 A39 A40 | — |
-| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 3/1/1 | A9 A40 | — |
-| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/0 | — | — |
-| eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 576 | 164 | 5 | 382 | 0 | 3/1/1 | — | — |
-| eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A33 | — |
-| eplan_asset_update | write | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_cabinet_bind | write | project.get | 56 | 30 | 0 | 26 | 0 | 2/2/0 | — | — |
-| eplan_cabinet_list | read | project.get | 56 | 30 | 0 | 26 | 0 | 2/2/1 | — | — |
+| eplan_action_catalog_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
+| eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/1 | — | — |
+| eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 1/1/0 | A11 A25 A30 A39 A40 | — |
+| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 2/1/1 | A9 A40 | — |
+| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
+| eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 576 | 164 | 5 | 382 | 0 | 2/0/1 | — | — |
+| eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
+| eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
+| eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
+| eplan_asset_update | write | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
+| eplan_cabinet_bind | write | project.get | 56 | 30 | 0 | 26 | 0 | 2/1/0 | — | — |
+| eplan_cabinet_list | read | project.get | 56 | 30 | 0 | 26 | 0 | 1/1/1 | — | — |
 | eplan_cable_generate | destructive | cable.generate.execute<br>cable.generate.plan | 118 | 57 | 2 | 49 | 1 | 3/2/1 | A24 A30 A31 | — |
-| eplan_cable_get | read | cable.get | 67 | 33 | 2 | 27 | 0 | 3/3/3 | A24 | — |
-| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 129 | 67 | 2 | 59 | 0 | 1/2/1 | A24 | 2026-10-21 pass（api-notes A24） |
-| eplan_check_list | read | check.list | 26 | 14 | 0 | 12 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
-| eplan_check_run | write | check.run.execute<br>check.run.plan | 68 | 32 | 0 | 36 | 0 | 1/2/1 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/6/2 | A52 A55 | — |
-| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 83 | 40 | 1 | 41 | 0 | 2/3/3 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_connection_list | read | connection.list | 76 | 44 | 1 | 29 | 0 | 3/4/5 | — | 2026-10-20 pass（api-notes A19） |
-| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 91 | 40 | 1 | 50 | 0 | 1/2/1 | A24 | — |
+| eplan_cable_get | read | cable.get | 67 | 33 | 2 | 27 | 0 | 2/2/3 | A24 | — |
+| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 129 | 67 | 2 | 59 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
+| eplan_check_list | read | check.list | 26 | 14 | 0 | 12 | 0 | 1/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
+| eplan_check_run | write | check.run.execute<br>check.run.plan | 68 | 32 | 0 | 36 | 0 | 0/1/1 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
+| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/5/2 | A52 A55 | — |
+| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 83 | 40 | 1 | 41 | 0 | 1/2/3 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_connection_list | read | connection.list | 76 | 44 | 1 | 29 | 0 | 2/4/5 | — | 2026-10-20 pass（api-notes A19） |
+| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 91 | 40 | 1 | 50 | 0 | 0/1/1 | A24 | — |
 | eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
-| eplan_device_get | read | device.get | 75 | 43 | 2 | 29 | 0 | 10/4/4 | — | 2026-10-19 pass（api-notes A12） |
-| eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 7/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 135 | 4 | 90 | 0 | 5/5/2 | A13 A14 A26 A53 A55 | — |
-| eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 75 | 33 | 0 | 42 | 0 | 3/2/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_device_update | write | device.update.execute<br>device.update.plan | 57 | 30 | 1 | 26 | 0 | 3/2/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
-| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 2/2/0 | A16 | — |
-| eplan_export_image | write | export.image.plan<br>export.image.run | 43 | 17 | 0 | 26 | 0 | 3/3/3 | A14 A16 | 2026-10-20 pass（api-notes A21） |
-| eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 2/3/1 | A24 A25 B9 | — |
-| eplan_export_parts | write | export.parts.plan<br>export.parts.run | 24 | 8 | 0 | 16 | 0 | 2/3/2 | A25 | — |
-| eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 44 | 19 | 0 | 25 | 0 | 2/2/0 | A16 | — |
-| eplan_export_pxf | write | export.pxf.plan<br>export.pxf.run | 22 | 8 | 0 | 14 | 0 | 2/3/2 | A25 | — |
-| eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 25 | 9 | 0 | 16 | 0 | 2/3/1 | A25 B9 | — |
-| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 68 | 29 | 0 | 39 | 0 | 1/3/1 | A29 | — |
-| eplan_import_list | destructive | import.list.execute<br>import.list.plan | 88 | 45 | 0 | 39 | 2 | 4/2/1 | A30 A31 | — |
-| eplan_import_pdf_comments | write | import.pdf_comments.execute<br>import.pdf_comments.plan | 79 | 38 | 2 | 37 | 1 | 2/2/1 | A39 | — |
-| eplan_import_plc | destructive | import.plc.execute<br>import.plc.plan | 76 | 37 | 0 | 37 | 1 | 2/2/1 | A30 | — |
-| eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 7 | 2 | 0 | 5 | 0 | 1/2/1 | A28 A29 | — |
-| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 72 | 34 | 2 | 36 | 0 | 2/2/1 | A28 | — |
-| eplan_language_set | write | language.set.execute<br>language.set.plan | 49 | 22 | 0 | 27 | 0 | 3/2/3 | A28 | — |
-| eplan_macro_get | read | macro.get | 39 | 20 | 0 | 17 | 0 | 2/1/3 | A14 | — |
-| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/3/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 2/1/4 | A4 | — |
-| eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 2/2/2 | A1 A11 | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 146 | 84 | 1 | 60 | 0 | 1/2/2 | A36 A60 | — |
-| eplan_object_get | read | object.find<br>object.get<br>project.get | 146 | 84 | 1 | 60 | 0 | 1/2/1 | — | — |
-| eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 1/4/0 | — | — |
-| eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A35 | — |
-| eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
-| eplan_page_create | write | page.create.execute<br>page.create.plan | 76 | 31 | 1 | 37 | 0 | 11/17/5 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
-| eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 67 | 34 | 0 | 33 | 0 | 4/10/1 | A15 A18 A24 | — |
+| eplan_device_get | read | device.get | 75 | 43 | 2 | 29 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 6/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
+| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 135 | 4 | 90 | 0 | 5/4/2 | A13 A14 A26 A53 A55 | — |
+| eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 75 | 33 | 0 | 42 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
+| eplan_device_update | write | device.update.execute<br>device.update.plan | 57 | 30 | 1 | 26 | 0 | 2/1/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 1/1/0 | A16 | — |
+| eplan_export_image | write | export.image.plan<br>export.image.run | 43 | 17 | 0 | 26 | 0 | 2/2/3 | A14 A16 | 2026-10-20 pass（api-notes A21） |
+| eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 1/2/1 | A24 A25 B9 | — |
+| eplan_export_parts | write | export.parts.plan<br>export.parts.run | 24 | 8 | 0 | 16 | 0 | 1/2/2 | A25 | — |
+| eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 44 | 19 | 0 | 25 | 0 | 1/1/0 | A16 | — |
+| eplan_export_pxf | write | export.pxf.plan<br>export.pxf.run | 22 | 8 | 0 | 14 | 0 | 1/2/2 | A25 | — |
+| eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 25 | 9 | 0 | 16 | 0 | 1/2/1 | A25 B9 | — |
+| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 68 | 29 | 0 | 39 | 0 | 1/2/1 | A29 | — |
+| eplan_import_list | destructive | import.list.execute<br>import.list.plan | 88 | 45 | 0 | 39 | 2 | 4/1/1 | A30 A31 | — |
+| eplan_import_pdf_comments | write | import.pdf_comments.execute<br>import.pdf_comments.plan | 79 | 38 | 2 | 37 | 1 | 2/1/1 | A39 | — |
+| eplan_import_plc | destructive | import.plc.execute<br>import.plc.plan | 76 | 37 | 0 | 37 | 1 | 2/1/1 | A30 | — |
+| eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 7 | 2 | 0 | 5 | 0 | 0/1/1 | A28 A29 | — |
+| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 72 | 34 | 2 | 36 | 0 | 1/1/1 | A28 | — |
+| eplan_language_set | write | language.set.execute<br>language.set.plan | 49 | 22 | 0 | 27 | 0 | 2/1/3 | A28 | — |
+| eplan_macro_get | read | macro.get | 39 | 20 | 0 | 17 | 0 | 1/0/3 | A14 | — |
+| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/2/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
+| eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 146 | 84 | 1 | 60 | 0 | 1/1/2 | A36 A60 | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 146 | 84 | 1 | 60 | 0 | 1/1/1 | — | — |
+| eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
+| eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
+| eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A35 | — |
+| eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
+| eplan_page_create | write | page.create.execute<br>page.create.plan | 76 | 31 | 1 | 37 | 0 | 10/16/5 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 67 | 34 | 0 | 33 | 0 | 3/9/1 | A15 A18 A24 | — |
 | eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 109 | 66 | 1 | 42 | 0 | 6/6/14 | A11 A12 | — |
-| eplan_page_list | read | page.list | 41 | 19 | 1 | 21 | 0 | 16/4/10 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
+| eplan_page_list | read | page.list | 41 | 19 | 1 | 21 | 0 | 15/4/10 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 25 | 13 | 0 | 12 | 0 | 4/2/1 | A54 | — |
-| eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 68 | 28 | 0 | 40 | 0 | 3/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
-| eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 76 | 37 | 0 | 39 | 0 | 2/2/1 | A41 | — |
-| eplan_page_update | write | page.update.execute<br>page.update.plan | 77 | 39 | 1 | 36 | 0 | 3/5/5 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
-| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 2/3/1 | A30 | 2026-10-27 pass（Large 测试 README） |
-| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 45 | 13 | 0 | 30 | 1 | 2/6/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
-| eplan_part_list | read | part.list | 44 | 23 | 1 | 19 | 0 | 2/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
-| eplan_part_search | read | part.search | 36 | 16 | 1 | 15 | 0 | 3/3/3 | — | 2026-10-21 pass（api-notes A30） |
-| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 118 | 53 | 1 | 61 | 1 | 2/2/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
-| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 70 | 38 | 0 | 32 | 0 | 1/2/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
-| eplan_placeholder_list | read | placeholder.list | 43 | 26 | 0 | 17 | 0 | 2/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
-| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>project.get | 163 | 91 | 1 | 71 | 0 | 4/4/2 | A54 | — |
-| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/3/1 | — | — |
-| eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 3/9/5 | A14 A17 A39 | — |
-| eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/7/3 | — | — |
-| eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 3/2/2 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
+| eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 68 | 28 | 0 | 40 | 0 | 2/1/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
+| eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 76 | 37 | 0 | 39 | 0 | 1/1/1 | A41 | — |
+| eplan_page_update | write | page.update.execute<br>page.update.plan | 77 | 39 | 1 | 36 | 0 | 3/4/5 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
+| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 1/2/1 | A30 | 2026-10-27 pass（Large 测试 README） |
+| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 45 | 13 | 0 | 30 | 1 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
+| eplan_part_list | read | part.list | 44 | 23 | 1 | 19 | 0 | 1/2/2 | — | 2026-10-19 pass_with_findings（api-notes A12） |
+| eplan_part_search | read | part.search | 36 | 16 | 1 | 15 | 0 | 2/2/3 | — | 2026-10-21 pass（api-notes A30） |
+| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 118 | 53 | 1 | 61 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
+| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 70 | 38 | 0 | 32 | 0 | 0/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
+| eplan_placeholder_list | read | placeholder.list | 43 | 26 | 0 | 17 | 0 | 1/0/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
+| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>project.get | 163 | 91 | 1 | 71 | 0 | 4/3/2 | A54 | — |
+| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/2/1 | — | — |
+| eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
+| eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
+| eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 2/1/2 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 56 | 30 | 0 | 26 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
-| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 7/4/8 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 79 | 36 | 2 | 41 | 0 | 1/2/1 | A11 A14 A25 A28 | — |
+| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/8 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 79 | 36 | 2 | 41 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
 | eplan_property_get | read | project.get<br>property.read | 146 | 84 | 1 | 60 | 0 | 2/2/2 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
-| eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 185 | 102 | 1 | 80 | 0 | 2/2/1 | A36 A44 A48 | — |
-| eplan_report_update | write | report.update.execute<br>report.update.plan | 56 | 26 | 0 | 30 | 0 | 1/2/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
-| eplan_revision_list | read | revision.list | 46 | 21 | 2 | 17 | 0 | 2/1/1 | A28 | — |
-| eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 148 | 68 | 4 | 51 | 0 | 2/2/0 | — | — |
-| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/3/1 | — | 2026-10-19 pass（api-notes A12） |
-| eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 5/3/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 4/3/2 | A52 A53 A55 | — |
-| eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/4/3 | — | — |
-| eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 1/2/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
-| eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 3/2/3 | — | — |
-| eplan_terminal_strip_list | read | terminal.strip.list | 18 | 10 | 0 | 8 | 0 | 3/2/2 | — | — |
+| eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 185 | 102 | 1 | 80 | 0 | 2/1/1 | A36 A44 A48 | — |
+| eplan_report_update | write | report.update.execute<br>report.update.plan | 56 | 26 | 0 | 30 | 0 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
+| eplan_revision_list | read | revision.list | 46 | 21 | 2 | 17 | 0 | 1/0/1 | A28 | — |
+| eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 148 | 68 | 4 | 51 | 0 | 2/1/0 | — | — |
+| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/2 | A52 A53 A55 | — |
+| eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
+| eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
+| eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 2/1/3 | — | — |
+| eplan_terminal_strip_list | read | terminal.strip.list | 18 | 10 | 0 | 8 | 0 | 2/1/2 | — | — |
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 10/3/0 | — | — |
-| eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 2/3/2 | A30 | — |
-| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 4/3/1 | A47 | 2026-10-27 pass（Large 测试 README） |
-| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 3/5/7 | A14 A17 A32 A33 A36 A37 A39 | — |
+| eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 1/2/2 | A30 | — |
+| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 3/2/1 | A47 | 2026-10-27 pass（Large 测试 README） |
+| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 3/4/7 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性
 | 范围 | 状态 | 说明 | 来源 |

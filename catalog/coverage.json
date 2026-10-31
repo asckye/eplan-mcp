@@ -392,8 +392,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_action_catalog_get.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 1,
       "apiNotes": []
     },
@@ -407,8 +407,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_action_catalog_search.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": []
     },
@@ -426,7 +426,7 @@
       "dependencies": 55,
       "actions": 0,
       "spec": "docs/tools/eplan_action_run.md",
-      "small": 2,
+      "small": 1,
       "medium": 1,
       "large": 0,
       "apiNotes": [
@@ -450,7 +450,7 @@
       "dependencies": 55,
       "actions": 0,
       "spec": "docs/tools/eplan_action_try.md",
-      "small": 3,
+      "small": 2,
       "medium": 1,
       "large": 1,
       "apiNotes": [
@@ -468,8 +468,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_api_get.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 0,
       "apiNotes": []
     },
@@ -484,7 +484,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_api_search.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -502,8 +502,8 @@
       "dependencies": 382,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
-      "small": 3,
-      "medium": 1,
+      "small": 2,
+      "medium": 0,
       "large": 1,
       "apiNotes": []
     },
@@ -517,8 +517,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_asset_get.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -533,7 +533,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_asset_review.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -547,8 +547,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_asset_search.md",
-      "small": 1,
-      "medium": 3,
+      "small": 0,
+      "medium": 2,
       "large": 0,
       "apiNotes": [
         "A33"
@@ -564,8 +564,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_asset_update.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -582,7 +582,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_cabinet_bind.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -598,8 +598,8 @@
       "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_cabinet_list.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 1,
       "apiNotes": []
     },
@@ -637,8 +637,8 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_get.md",
-      "small": 3,
-      "medium": 3,
+      "small": 2,
+      "medium": 2,
       "large": 3,
       "apiNotes": [
         "A24"
@@ -657,8 +657,8 @@
       "dependencies": 59,
       "actions": 0,
       "spec": "docs/tools/eplan_cable_renumber.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A24"
@@ -686,7 +686,7 @@
       "dependencies": 12,
       "actions": 0,
       "spec": "docs/tools/eplan_check_list.md",
-      "small": 2,
+      "small": 1,
       "medium": 3,
       "large": 3,
       "apiNotes": [
@@ -716,8 +716,8 @@
       "dependencies": 36,
       "actions": 0,
       "spec": "docs/tools/eplan_check_run.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A11",
@@ -749,7 +749,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 2,
-      "medium": 6,
+      "medium": 5,
       "large": 2,
       "apiNotes": [
         "A52",
@@ -769,8 +769,8 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_generate.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 3,
       "apiNotes": [
         "A3",
@@ -802,7 +802,7 @@
       "dependencies": 29,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_list.md",
-      "small": 3,
+      "small": 2,
       "medium": 4,
       "large": 5,
       "apiNotes": [],
@@ -830,8 +830,8 @@
       "dependencies": 50,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_number.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A24"
@@ -873,7 +873,7 @@
       "dependencies": 29,
       "actions": 0,
       "spec": "docs/tools/eplan_device_get.md",
-      "small": 10,
+      "small": 9,
       "medium": 4,
       "large": 4,
       "apiNotes": [],
@@ -900,7 +900,7 @@
       "dependencies": 14,
       "actions": 0,
       "spec": "docs/tools/eplan_device_list.md",
-      "small": 7,
+      "small": 6,
       "medium": 2,
       "large": 7,
       "apiNotes": [
@@ -932,7 +932,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
       "small": 5,
-      "medium": 5,
+      "medium": 4,
       "large": 2,
       "apiNotes": [
         "A13",
@@ -955,8 +955,8 @@
       "dependencies": 42,
       "actions": 0,
       "spec": "docs/tools/eplan_device_renumber.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A14",
@@ -987,8 +987,8 @@
       "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_device_update.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A3",
@@ -1020,8 +1020,8 @@
       "dependencies": 21,
       "actions": 0,
       "spec": "docs/tools/eplan_export_dxf.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 0,
       "apiNotes": [
         "A16"
@@ -1040,8 +1040,8 @@
       "dependencies": 26,
       "actions": 0,
       "spec": "docs/tools/eplan_export_image.md",
-      "small": 3,
-      "medium": 3,
+      "small": 2,
+      "medium": 2,
       "large": 3,
       "apiNotes": [
         "A14",
@@ -1069,8 +1069,8 @@
       "dependencies": 20,
       "actions": 0,
       "spec": "docs/tools/eplan_export_labels.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A24",
@@ -1091,8 +1091,8 @@
       "dependencies": 16,
       "actions": 0,
       "spec": "docs/tools/eplan_export_parts.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 2,
       "apiNotes": [
         "A25"
@@ -1111,8 +1111,8 @@
       "dependencies": 25,
       "actions": 0,
       "spec": "docs/tools/eplan_export_pdf.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 0,
       "apiNotes": [
         "A16"
@@ -1131,8 +1131,8 @@
       "dependencies": 14,
       "actions": 0,
       "spec": "docs/tools/eplan_export_pxf.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 2,
       "apiNotes": [
         "A25"
@@ -1151,8 +1151,8 @@
       "dependencies": 16,
       "actions": 0,
       "spec": "docs/tools/eplan_export_untranslated.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A25",
@@ -1173,7 +1173,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_import_dxf.md",
       "small": 1,
-      "medium": 3,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A29"
@@ -1193,7 +1193,7 @@
       "actions": 2,
       "spec": "docs/tools/eplan_import_list.md",
       "small": 4,
-      "medium": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A30",
@@ -1214,7 +1214,7 @@
       "actions": 1,
       "spec": "docs/tools/eplan_import_pdf_comments.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A39"
@@ -1234,7 +1234,7 @@
       "actions": 1,
       "spec": "docs/tools/eplan_import_plc.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A30"
@@ -1253,8 +1253,8 @@
       "dependencies": 5,
       "actions": 0,
       "spec": "docs/tools/eplan_import_pxf.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A28",
@@ -1274,8 +1274,8 @@
       "dependencies": 36,
       "actions": 0,
       "spec": "docs/tools/eplan_language_remove.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A28"
@@ -1294,8 +1294,8 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_language_set.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 3,
       "apiNotes": [
         "A28"
@@ -1313,8 +1313,8 @@
       "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_get.md",
-      "small": 2,
-      "medium": 1,
+      "small": 1,
+      "medium": 0,
       "large": 3,
       "apiNotes": [
         "A14"
@@ -1334,7 +1334,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 4,
-      "medium": 3,
+      "medium": 2,
       "large": 2,
       "apiNotes": [
         "A12",
@@ -1364,8 +1364,8 @@
       "dependencies": 1,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_list.md",
-      "small": 2,
-      "medium": 1,
+      "small": 1,
+      "medium": 0,
       "large": 4,
       "apiNotes": [
         "A4"
@@ -1383,7 +1383,7 @@
       "dependencies": 3,
       "actions": 0,
       "spec": "docs/tools/eplan_message_list.md",
-      "small": 2,
+      "small": 1,
       "medium": 2,
       "large": 2,
       "apiNotes": [
@@ -1406,7 +1406,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_object_find.md",
       "small": 1,
-      "medium": 2,
+      "medium": 1,
       "large": 2,
       "apiNotes": [
         "A36",
@@ -1428,7 +1428,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_object_get.md",
       "small": 1,
-      "medium": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": []
     },
@@ -1442,8 +1442,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_pack_build.md",
-      "small": 1,
-      "medium": 4,
+      "small": 0,
+      "medium": 3,
       "large": 0,
       "apiNotes": []
     },
@@ -1457,8 +1457,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_pack_get.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -1472,8 +1472,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_pack_import.md",
-      "small": 1,
-      "medium": 3,
+      "small": 0,
+      "medium": 2,
       "large": 0,
       "apiNotes": [
         "A35"
@@ -1489,8 +1489,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_pack_list.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -1507,8 +1507,8 @@
       "dependencies": 37,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 11,
-      "medium": 17,
+      "small": 10,
+      "medium": 16,
       "large": 5,
       "apiNotes": [
         "A7",
@@ -1539,8 +1539,8 @@
       "dependencies": 33,
       "actions": 0,
       "spec": "docs/tools/eplan_page_delete.md",
-      "small": 4,
-      "medium": 10,
+      "small": 3,
+      "medium": 9,
       "large": 1,
       "apiNotes": [
         "A15",
@@ -1582,7 +1582,7 @@
       "dependencies": 21,
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
-      "small": 16,
+      "small": 15,
       "medium": 4,
       "large": 10,
       "apiNotes": [
@@ -1631,8 +1631,8 @@
       "dependencies": 40,
       "actions": 0,
       "spec": "docs/tools/eplan_page_renumber.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 2,
       "apiNotes": [
         "A18",
@@ -1662,8 +1662,8 @@
       "dependencies": 39,
       "actions": 0,
       "spec": "docs/tools/eplan_page_text_replace.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A41"
@@ -1683,7 +1683,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_update.md",
       "small": 3,
-      "medium": 5,
+      "medium": 4,
       "large": 5,
       "apiNotes": [
         "A7",
@@ -1715,8 +1715,8 @@
       "dependencies": 19,
       "actions": 1,
       "spec": "docs/tools/eplan_part_export.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A30"
@@ -1746,8 +1746,8 @@
       "dependencies": 30,
       "actions": 1,
       "spec": "docs/tools/eplan_part_import.md",
-      "small": 2,
-      "medium": 6,
+      "small": 1,
+      "medium": 5,
       "large": 1,
       "apiNotes": [
         "A30"
@@ -1775,7 +1775,7 @@
       "dependencies": 19,
       "actions": 0,
       "spec": "docs/tools/eplan_part_list.md",
-      "small": 2,
+      "small": 1,
       "medium": 2,
       "large": 2,
       "apiNotes": [],
@@ -1802,8 +1802,8 @@
       "dependencies": 15,
       "actions": 0,
       "spec": "docs/tools/eplan_part_search.md",
-      "small": 3,
-      "medium": 3,
+      "small": 2,
+      "medium": 2,
       "large": 3,
       "apiNotes": [],
       "latestLive": {
@@ -1831,8 +1831,8 @@
       "dependencies": 61,
       "actions": 1,
       "spec": "docs/tools/eplan_part_sync.md",
-      "small": 2,
-      "medium": 2,
+      "small": 1,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A30"
@@ -1861,8 +1861,8 @@
       "dependencies": 32,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_apply.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A14",
@@ -1891,8 +1891,8 @@
       "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_list.md",
-      "small": 2,
-      "medium": 1,
+      "small": 1,
+      "medium": 0,
       "large": 1,
       "apiNotes": [
         "A11",
@@ -1926,7 +1926,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 4,
-      "medium": 4,
+      "medium": 3,
       "large": 2,
       "apiNotes": [
         "A54"
@@ -1946,7 +1946,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 2,
-      "medium": 3,
+      "medium": 2,
       "large": 1,
       "apiNotes": []
     },
@@ -1960,8 +1960,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_plan_apply.md",
-      "small": 3,
-      "medium": 9,
+      "small": 2,
+      "medium": 8,
       "large": 5,
       "apiNotes": [
         "A14",
@@ -1980,7 +1980,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_plan_get.md",
       "small": 6,
-      "medium": 7,
+      "medium": 6,
       "large": 3,
       "apiNotes": []
     },
@@ -1996,8 +1996,8 @@
       "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_plc_get.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 2,
       "apiNotes": [
         "A55"
@@ -2077,7 +2077,7 @@
       "dependencies": 5,
       "actions": 0,
       "spec": "docs/tools/eplan_project_list.md",
-      "small": 7,
+      "small": 6,
       "medium": 4,
       "large": 8,
       "apiNotes": [],
@@ -2105,8 +2105,8 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_project_translate.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A11",
@@ -2166,7 +2166,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_property_set.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A36",
@@ -2187,8 +2187,8 @@
       "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_report_update.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 2,
       "apiNotes": [
         "A16",
@@ -2217,8 +2217,8 @@
       "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_revision_list.md",
-      "small": 2,
-      "medium": 1,
+      "small": 1,
+      "medium": 0,
       "large": 1,
       "apiNotes": [
         "A28"
@@ -2247,7 +2247,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_rule_check.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 0,
       "apiNotes": []
     },
@@ -2261,8 +2261,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_session_select.md",
-      "small": 3,
-      "medium": 3,
+      "small": 2,
+      "medium": 2,
       "large": 1,
       "apiNotes": [],
       "latestLive": {
@@ -2286,7 +2286,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_session_status.md",
-      "small": 5,
+      "small": 4,
       "medium": 3,
       "large": 9,
       "apiNotes": [],
@@ -2313,7 +2313,7 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_symbol_search.md",
-      "small": 4,
+      "small": 3,
       "medium": 3,
       "large": 2,
       "apiNotes": [
@@ -2332,8 +2332,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_task_get.md",
-      "small": 2,
-      "medium": 4,
+      "small": 1,
+      "medium": 3,
       "large": 3,
       "apiNotes": []
     },
@@ -2350,8 +2350,8 @@
       "dependencies": 48,
       "actions": 0,
       "spec": "docs/tools/eplan_terminal_renumber.md",
-      "small": 1,
-      "medium": 2,
+      "small": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A20",
@@ -2380,8 +2380,8 @@
       "dependencies": 16,
       "actions": 0,
       "spec": "docs/tools/eplan_terminal_strip_get.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 3,
       "apiNotes": []
     },
@@ -2397,8 +2397,8 @@
       "dependencies": 8,
       "actions": 0,
       "spec": "docs/tools/eplan_terminal_strip_list.md",
-      "small": 3,
-      "medium": 2,
+      "small": 2,
+      "medium": 1,
       "large": 2,
       "apiNotes": []
     },
@@ -2430,8 +2430,8 @@
       "dependencies": 23,
       "actions": 1,
       "spec": "docs/tools/eplan_translation_export.md",
-      "small": 2,
-      "medium": 3,
+      "small": 1,
+      "medium": 2,
       "large": 2,
       "apiNotes": [
         "A30"
@@ -2451,8 +2451,8 @@
       "dependencies": 18,
       "actions": 1,
       "spec": "docs/tools/eplan_translation_import.md",
-      "small": 4,
-      "medium": 3,
+      "small": 3,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A47"
@@ -2491,7 +2491,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_workflow_plan.md",
       "small": 3,
-      "medium": 5,
+      "medium": 4,
       "large": 7,
       "apiNotes": [
         "A14",
