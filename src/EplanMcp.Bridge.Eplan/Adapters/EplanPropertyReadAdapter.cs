@@ -50,21 +50,10 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
 
         if (target.Locator is { } locator)
         {
-            StorableObject found = locator.Kind switch
-            {
-                "page" => PropertyReadTargets.Located(projectPath, locator, Pages(objects, Check), Describe),
-                "function" => PropertyReadTargets.Located(projectPath, locator, Functions(objects, Check), Describe),
-                _ => PropertyReadTargets.Located(projectPath, locator, Connections(objects, Check), Describe),
-            };
+            StorableObject found = PropertyReadTargets.Located(projectPath, locator,
+                EplanObjectReader.Candidates(objects, locator.Kind, Check), obj => EplanObjectReader.Describe(obj, locator.Kind));
             Check();
-            UniversalPropertyList list = found switch
-            {
-                Page p => p.Properties,
-                Function f => f.Properties,
-                Connection c => c.Properties,
-                _ => throw new BridgeErrorException(ErrorReason.CapabilityMissing, "This locator kind has no property adapter."),
-            };
-            return new Scope(list, found.GetType().Name, language, Check);
+            return new Scope(EplanObjectReader.Properties(found), ObjectReadTypes.DictionaryType(found.GetType().Name), language, Check);
         }
 
         Page page;
@@ -109,16 +98,6 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         {
             check();
             yield return page;
-        }
-    }
-
-    private static IEnumerable<Connection> Connections(DMObjectsFinder finder, Action check)
-    {
-        check();
-        foreach (Connection connection in finder.GetConnections(null))
-        {
-            check();
-            yield return connection;
         }
     }
 

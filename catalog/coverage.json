@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 350,
-      "byTools": 342,
+      "implemented": 359,
+      "byTools": 351,
       "partial": 58,
-      "automatedTest": 342,
+      "automatedTest": 351,
       "liveVerified": 171,
       "envBlocked": 122,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 138,
-      "byTools": 131,
+      "implemented": 142,
+      "byTools": 135,
       "partial": 51,
-      "automatedTest": 131,
+      "automatedTest": 135,
       "liveVerified": 76,
       "envBlocked": 45,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 212,
-      "byTools": 211,
+      "implemented": 217,
+      "byTools": 216,
       "partial": 7,
-      "automatedTest": 211,
+      "automatedTest": 216,
       "liveVerified": 95,
       "envBlocked": 77,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 285,
+    "used": 288,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 160,
+      "implemented": 167,
       "liveVerified": 91
     },
     {
@@ -151,13 +151,13 @@
     {
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
-      "implemented": 21,
+      "implemented": 22,
       "liveVerified": 6
     },
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 42,
+      "implemented": 43,
       "liveVerified": 10
     },
     {
@@ -1359,17 +1359,18 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 113,
-      "operationGroups": 65,
+      "apiIds": 146,
+      "operationGroups": 84,
       "dataDictionary": 1,
-      "dependencies": 46,
+      "dependencies": 60,
       "actions": 0,
       "spec": "docs/tools/eplan_object_find.md",
       "small": 1,
       "medium": 2,
       "large": 1,
       "apiNotes": [
-        "A36"
+        "A36",
+        "A60"
       ]
     },
     {
@@ -1380,10 +1381,10 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 113,
-      "operationGroups": 65,
+      "apiIds": 146,
+      "operationGroups": 84,
       "dataDictionary": 1,
-      "dependencies": 46,
+      "dependencies": 60,
       "actions": 0,
       "spec": "docs/tools/eplan_object_get.md",
       "small": 1,
@@ -2081,10 +2082,10 @@
         "project.get",
         "property.read"
       ],
-      "apiIds": 113,
-      "operationGroups": 65,
+      "apiIds": 146,
+      "operationGroups": 84,
       "dataDictionary": 1,
-      "dependencies": 46,
+      "dependencies": 60,
       "actions": 0,
       "spec": "docs/tools/eplan_property_get.md",
       "small": 2,
@@ -2118,10 +2119,10 @@
         "property.set.execute",
         "property.set.plan"
       ],
-      "apiIds": 152,
-      "operationGroups": 83,
+      "apiIds": 185,
+      "operationGroups": 102,
       "dataDictionary": 1,
-      "dependencies": 66,
+      "dependencies": 80,
       "actions": 0,
       "spec": "docs/tools/eplan_property_set.md",
       "small": 2,
@@ -3681,6 +3682,30 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetBoxedDevices",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetCablesWithFilterScheme",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections",
       "layer": "operation",
       "status": "live_verified",
@@ -3748,13 +3773,29 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetInterruptionPoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_action_run",
-        "eplan_import_plc"
+        "eplan_import_plc",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -3818,8 +3859,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_placeholder_apply",
-        "eplan_placeholder_list"
+        "eplan_placeholder_list",
+        "eplan_property_get",
+        "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetPotentialDefinitionsWithFilterScheme",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -3829,6 +3886,10 @@
       "partial": false,
       "tools": [
         "eplan_device_place",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set",
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_terminal_strip_list"
@@ -3841,6 +3902,10 @@
       "partial": false,
       "tools": [
         "eplan_action_run",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set",
         "eplan_terminal_renumber"
       ]
     },
@@ -3912,7 +3977,11 @@
       "tools": [
         "eplan_cable_get",
         "eplan_connection_create",
-        "eplan_placement_update"
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_placement_update",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -3944,6 +4013,18 @@
         "eplan_action_run",
         "eplan_device_place",
         "eplan_plc_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PlugStrip.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -3988,7 +4069,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_device_place",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -4046,7 +4131,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_device_place",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -4680,8 +4769,12 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_placeholder_apply",
-        "eplan_placeholder_list"
+        "eplan_placeholder_list",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -4712,6 +4805,18 @@
       "tools": [
         "eplan_placeholder_apply",
         "eplan_placeholder_list"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -4955,7 +5060,11 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
-        "eplan_placement_update"
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_placement_update",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -4975,6 +5084,30 @@
       "partial": false,
       "tools": [
         "eplan_device_place"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.LocationBox.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MacroBox.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -5684,9 +5817,13 @@
       "partial": false,
       "tools": [
         "eplan_connection_create",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_placement_create",
-        "eplan_placement_update"
+        "eplan_placement_update",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {
@@ -5718,6 +5855,18 @@
         "eplan_terminal_renumber",
         "eplan_terminal_strip_get",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PotentialDefinition.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_property_get",
+        "eplan_property_set"
       ]
     },
     {

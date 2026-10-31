@@ -16,14 +16,15 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
     }
     protected override ObjectReadData Execute(ObjectReadArgs args)
     {
-        if (!PropertyCatalog.Entries.Any(e => e.ObjectType == args.ObjectType && !e.Obsolete) || args.Offset < 0 || args.IndexOffset < 0)
+        if (!PropertyCatalog.Entries.Any(e => e.ObjectType == args.ObjectType && !e.Obsolete) && !ObjectReadTypes.FunctionTypes.Contains(args.ObjectType)
+            || args.Offset < 0 || args.IndexOffset < 0)
         { throw InvalidArgument("Use a shipped object_type and nonnegative continuation positions."); }
         var watch = Stopwatch.StartNew();
         args.Project = ProjectResolver.Resolve(catalog.ListOpenProjects(), args.Project).Path;
         var result = new ObjectReadData();
-        if (args.ObjectType is not ("Page" or "Function" or "Connection"))
+        if (!ObjectReadTypes.Supported(args.ObjectType))
         {
-            result.Unsupported = "not_implemented_in_batch_1: no reviewed enumeration/property adapter for this dictionary type";
+            result.Unsupported = ObjectReadTypes.UnsupportedReason(args.ObjectType);
             return result;
         }
         IReadOnlyList<ObjectSummary> objects = adapter.Find(args);
@@ -46,7 +47,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
             Detailed = args.Detailed,
             SelectorOffset = args.Offset,
             IndexOffset = args.IndexOffset,
-            Properties = PropertyCatalog.Entries.Where(e => e.ObjectType == args.ObjectType && e.PropertyId.HasValue)
+            Properties = PropertyCatalog.Entries.Where(e => e.ObjectType == ObjectReadTypes.DictionaryType(args.ObjectType) && e.PropertyId.HasValue)
                 .OrderBy(e => e.PropertyId).Select(e => new PropertySelector(propertyId: e.PropertyId)).ToList(),
         };
         if (args.Offset >= read.Properties.Count)

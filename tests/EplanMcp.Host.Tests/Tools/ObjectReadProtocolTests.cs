@@ -43,7 +43,7 @@ public sealed class ObjectReadProtocolTests
                     McpClientTool tool = Assert.Single(tools, t => t.Name == name);
                     Assert.Equal((true, false, true, false), (tool.ProtocolTool.Annotations!.ReadOnlyHint, tool.ProtocolTool.Annotations.DestructiveHint, tool.ProtocolTool.Annotations.IdempotentHint, tool.ProtocolTool.Annotations.OpenWorldHint));
                     Assert.NotNull(tool.ProtocolTool.OutputSchema);
-                    Assert.Equal(68, tool.ProtocolTool.InputSchema.GetProperty("properties").GetProperty("object_type").GetProperty("enum").GetArrayLength());
+                    Assert.Equal(72, tool.ProtocolTool.InputSchema.GetProperty("properties").GetProperty("object_type").GetProperty("enum").GetArrayLength());
                 }
                 if (profile == ToolProfile.Core)
                 { continue; }

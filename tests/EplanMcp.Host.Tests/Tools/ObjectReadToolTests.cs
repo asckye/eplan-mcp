@@ -68,6 +68,7 @@ public sealed class ObjectReadToolTests
 
     [Theory]
     [InlineData("filter")]
+    [InlineData("object_type")]
     [InlineData("content")]
     [InlineData("instance")]
     [InlineData("connection")]
@@ -83,6 +84,9 @@ public sealed class ObjectReadToolTests
         {
             case "filter":
                 input["page"] = "=A/2";
+                break;
+            case "object_type":
+                input["object_type"] = "Terminal";
                 break;
             case "content":
                 Func<object?, object> original = bridge.Handlers[OperationNames.ObjectFind];
@@ -124,11 +128,51 @@ public sealed class ObjectReadToolTests
         JsonElement get = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), input, true));
         JsonElement row = Assert.Single(get.GetProperty("items").EnumerateArray());
         Assert.Equal((11011, "PAGE_NOMINATIOMN", "zh_CN", "text"), (row.GetProperty("property_id").GetInt32(), row.GetProperty("property_name").GetString(), row.GetProperty("language").GetString(), row.GetProperty("value").GetString()));
-        bridge.Handlers[OperationNames.ObjectFind] = _ => new ObjectReadData { Unsupported = "not_implemented_in_batch_1" };
+        bridge.Handlers[OperationNames.ObjectFind] = _ => new ObjectReadData { Unsupported = "not_implemented" };
         JsonElement unsupported = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), new() { ["object_type"] = "Arc" }));
         Assert.Equal("unsupported", unsupported.GetProperty("status").GetString());
         Assert.NotNull(unsupported.GetProperty("reason").GetString());
         Assert.Empty(unsupported.GetProperty("items").EnumerateArray());
+    }
+
+    [Theory]
+    [InlineData("Terminal", "Function")]
+    [InlineData("TerminalStrip", "TerminalStrip")]
+    [InlineData("PLC", "Function")]
+    [InlineData("Cable", "Cable")]
+    [InlineData("PlaceHolder", "PlaceHolder")]
+    [InlineData("LocationBox", "LocationBox")]
+    [InlineData("InterruptionPoint", "InterruptionPoint")]
+    [InlineData("PotentialDefinition", "PotentialDefinition")]
+    [InlineData("BlackBox", "Function")]
+    [InlineData("PLCTerminal", "Function")]
+    [InlineData("MacroBox", "MacroBox")]
+    public async Task AddedType_DiscoveryAndGetPreserveLocatorAndUseFormalDictionaryName(string type, string dictionary)
+    {
+        FakeBridgeClient bridge = Bridge(1);
+        var entry = PropertyCatalog.Entries.First(e => e.ObjectType == dictionary && e.PropertyId.HasValue && e.ReadRefusal is null);
+        bridge.Handlers[OperationNames.ObjectGet] = value =>
+        {
+            var args = Assert.IsType<ObjectReadArgs>(value);
+            Assert.Equal(type, args.ObjectType);
+            Assert.Equal(1, args.Locator!.Oid);
+            return new ObjectReadData
+            {
+                Properties = new() { Items = [new("value", new("text", text: "nonempty")) { Target = new(locator: new() { Project = Project, Kind = type.ToLowerInvariant(), Type = args.Locator.Type, Oid = args.Locator.Oid }), PropertyId = entry.PropertyId!.Value, Language = args.Language }] },
+            };
+        };
+        JsonElement found = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), new() { ["object_type"] = type }));
+        Assert.Equal("supported", found.GetProperty("status").GetString());
+        JsonElement locator = Assert.Single(found.GetProperty("items").EnumerateArray()).GetProperty("locator");
+        JsonElement get = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), new()
+        {
+            ["object_type"] = type,
+            ["locator"] = JsonNode.Parse(locator.GetRawText()),
+            ["language"] = "zh_CN",
+        }, true));
+        JsonElement row = Assert.Single(get.GetProperty("items").EnumerateArray());
+        Assert.Equal((entry.PropertyName, "zh_CN", "nonempty"),
+            (row.GetProperty("property_name").GetString(), row.GetProperty("language").GetString(), row.GetProperty("value").GetString()));
     }
 
     [Fact]

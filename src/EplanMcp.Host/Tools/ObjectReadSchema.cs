@@ -10,7 +10,7 @@ internal static class ObjectReadSchema
     {
         var schema = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["object_type"],"properties":{"object_type":{"type":"string"},"project":{"type":"string"},"limit":{"type":"integer","minimum":1,"maximum":200,"default":50},"cursor":{"type":"string"}}}""")!;
         JsonNode fields = schema["properties"]!;
-        fields["object_type"]!["enum"] = new JsonArray([.. PropertyCatalog.Entries.Where(e => !e.Obsolete).Select(e => e.ObjectType).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(s => (JsonNode?)JsonValue.Create(s))]);
+        fields["object_type"]!["enum"] = new JsonArray([.. PropertyCatalog.Entries.Where(e => !e.Obsolete).Select(e => e.ObjectType).Concat(ObjectReadTypes.FunctionTypes).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(s => (JsonNode?)JsonValue.Create(s))]);
         if (get)
         {
             schema["required"]!.AsArray().Add("locator");

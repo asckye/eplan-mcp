@@ -21,15 +21,83 @@ public sealed class ObjectReadOperationTests
         {
             var reader = new Reader();
             ObjectReadData result = Execute(reader, new() { ObjectType = type });
-            Assert.Equal(type is "Page" or "Function" or "Connection", result.Unsupported is null);
+            Assert.Equal(type is "Page" or "Function" or "Connection" or "TerminalStrip" or "Cable" or "PlaceHolder" or "LocationBox"
+                or "InterruptionPoint" or "PotentialDefinition" or "MacroBox", result.Unsupported is null);
             if (result.Unsupported is not null)
             {
-                Assert.Contains("not_implemented_in_batch_1", result.Unsupported, StringComparison.Ordinal);
+                Assert.False(string.IsNullOrWhiteSpace(result.Unsupported));
                 Assert.Equal(0, reader.Finds);
                 Assert.Equal(0, reader.Native.Opens);
                 Assert.NotNull(Execute(reader, new() { ObjectType = type, Locator = Locator() }, get: true).Unsupported);
             }
         }
+    }
+
+    public static TheoryData<string, string, int> AddedTypes => new()
+    {
+        { "Terminal", "Function", 22022 }, { "TerminalStrip", "TerminalStrip", 1320 }, { "PLC", "Function", 22022 },
+        { "Cable", "Cable", 35108 }, { "PlaceHolder", "PlaceHolder", 19308 }, { "LocationBox", "LocationBox", 25102 },
+        { "InterruptionPoint", "InterruptionPoint", 25102 }, { "PotentialDefinition", "PotentialDefinition", 31005 },
+        { "BlackBox", "Function", 22022 }, { "PLCTerminal", "Function", 22022 }, { "MacroBox", "MacroBox", 20111 },
+    };
+
+    [Theory]
+    [MemberData(nameof(AddedTypes))]
+    public void AddedType_ReadsItsDictionaryAndReleasesEachScope_AndRejectsStaleObjects(string type, string dictionary, int propertyId)
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = Locator(), Name = "selected" });
+        reader.Native.ObjectType = dictionary;
+        reader.Native.Properties.Add(propertyId, new() { Stored = "nonempty" });
+        int? refused = PropertyCatalog.Entries.Where(e => e.ObjectType == dictionary && e.PropertyId.HasValue && e.ReadRefusal is not null).Select(e => e.PropertyId).FirstOrDefault();
+        if (refused.HasValue)
+        { reader.Native.Properties.Add(refused.Value, new() { Stored = "must not be read" }); }
+        var args = new ObjectReadArgs { ObjectType = type, Locator = Locator(), Language = "en_US" };
+        Assert.Single(Execute(reader, args).Objects);
+        var rows = new List<PropertyReadRow>();
+        int blocks = 0;
+        do
+        {
+            ObjectReadData block = Execute(reader, args, get: true);
+            Assert.Null(block.Unsupported);
+            rows.AddRange(block.Properties!.Items);
+            Assert.InRange(++blocks, 1, 100);
+            if (block.NextOffset is not { } next)
+            { break; }
+            args.Offset = next;
+            args.IndexOffset = block.Properties.NextIndexOffset;
+        } while (true);
+        Assert.Equal("nonempty", Assert.Single(rows, r => r.PropertyId == propertyId).Value!.Text);
+        if (refused.HasValue)
+        { Assert.Equal("read_refused", Assert.Single(rows, r => r.PropertyId == refused).Status); }
+        Assert.DoesNotContain(reader.Native.ValueRequests, request => request.Id == refused);
+        Assert.Equal(type.ToLowerInvariant(), reader.Native.Target!.Locator!.Kind);
+        Assert.Equal(blocks, reader.Native.Opens);
+        reader.Native.AssertDisposed();
+        reader.Objects.Clear();
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(reader, args, true)).Error.Reason);
+        Assert.Equal(blocks, reader.Native.Opens);
+    }
+
+    [Theory]
+    [MemberData(nameof(AddedTypes))]
+    public void AddedType_ValueGetterFails_ReleasesListDefinitionAndValue(string type, string dictionary, int propertyId)
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = Locator() });
+        reader.Native.ObjectType = dictionary;
+        reader.Native.Properties.Add(propertyId, new());
+        reader.Native.OnAccess = stage => { if (stage == "stored") { throw new InvalidOperationException("read failed"); } };
+        var args = new ObjectReadArgs
+        {
+            ObjectType = type,
+            Locator = Locator(),
+            Offset = PropertyCatalog.Entries.Where(e => e.ObjectType == dictionary && e.PropertyId.HasValue)
+                .OrderBy(e => e.PropertyId).Select(e => e.PropertyId).ToList().IndexOf(propertyId),
+        };
+        Assert.Throws<InvalidOperationException>(() => Execute(reader, args, true));
+        Assert.Equal(1, reader.Native.Opens);
+        reader.Native.AssertDisposed();
     }
 
     [Fact]

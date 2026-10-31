@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-31",
-  "scannedSources": "1aa55fb3 + uncommitted changes",
-  "sourceHash": "sha256:74ff5975804a95817b623dfe58227d65622c7e13ca62825c1d3e025697e31ebf",
+  "scannedSources": "6d49f593 + uncommitted changes",
+  "sourceHash": "sha256:7f89620d85dc7a585a051a4d7bc7713d09fd558fc76a59d4ae72ccb67c40c96d",
   "operations": [
     {
       "name": "action.execute",
@@ -1209,6 +1209,21 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6311,6 +6326,40 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetBoxedDevices(Eplan.EplApi.DataModel.FunctionsFilter)": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetCablesWithFilterScheme(System.String)": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)": [
       {
         "adapter": "EplanActionRunner",
@@ -6447,14 +6496,17 @@
       },
       {
         "adapter": "EplanObjectReader",
-        "member": "Find",
+        "member": "Candidates",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
           "call"
         ],
         "operations": [
           "object.find",
-          "object.get"
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -6466,20 +6518,6 @@
         ],
         "operations": [
           "project.get"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "Connections",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "object.get",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan"
         ]
       },
       {
@@ -6837,6 +6875,23 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetInterruptionPoints(Eplan.EplApi.DataModel.InterruptionPointsFilter)": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPLCs(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
         "adapter": "EplanActionRunner",
@@ -6862,6 +6917,21 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7041,14 +7111,17 @@
       },
       {
         "adapter": "EplanObjectReader",
-        "member": "Find",
+        "member": "Candidates",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
           "call"
         ],
         "operations": [
           "object.find",
-          "object.get"
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7288,6 +7361,21 @@
     ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPlaceholdersWithFilterScheme(System.String)": [
       {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -7312,6 +7400,23 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPotentialDefinitionsWithFilterScheme(System.String)": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetTerminalStrips(Eplan.EplApi.DataModel.FunctionsFilter)": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -7322,6 +7427,21 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -7372,6 +7492,21 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -13165,6 +13300,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlacementMover",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
@@ -13417,6 +13567,21 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -14353,9 +14518,9 @@
         ]
       },
       {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "Open",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
           "get"
         ],
@@ -14867,6 +15032,20 @@
         "operations": [
           "connection.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.EObjects.PLC.IsCPU": [
@@ -14924,6 +15103,22 @@
           "device.place.execute",
           "device.place.plan",
           "plc.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.EObjects.PlugStrip.Properties": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -14987,6 +15182,21 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15115,6 +15325,20 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -15926,6 +16150,20 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "Channel",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -16626,6 +16864,21 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -18539,6 +18792,21 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name": [
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderWriter",
         "member": "Apply",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
@@ -18627,6 +18895,22 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -19127,6 +19411,20 @@
           "connection.create.execute",
           "connection.create.plan"
         ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property(Eplan.EplApi.DataModel.Properties.InterruptionPoint)": [
@@ -19140,6 +19438,38 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.LocationBox.Properties": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.Properties": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -19955,6 +20285,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -20466,6 +20811,36 @@
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -21090,6 +21465,20 @@
           "language.remove.plan",
           "project.translate.execute",
           "project.translate.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -22350,6 +22739,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlacementMover",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
@@ -22538,6 +22942,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageRemover",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageRemover.cs",
@@ -22660,6 +23079,22 @@
         "operations": [
           "terminal.renumber.execute",
           "terminal.renumber.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PotentialDefinition.Properties": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -27715,6 +28150,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlcReader",
         "member": "IsPlcBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlcReader.cs",
@@ -28969,6 +29419,21 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlacementMover",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementMover.cs",
@@ -29391,6 +29856,23 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.BoxedDevice": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Connection": [
       {
         "adapter": "EplanCableGenerator",
@@ -29646,6 +30128,20 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -29673,20 +30169,6 @@
       },
       {
         "adapter": "EplanPropertyReadAdapter",
-        "member": "Connections",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "object.get",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
         "member": "Describe",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
         "access": [
@@ -29694,20 +30176,6 @@
         ],
         "operations": [
           "object.find",
-          "object.get",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "Open",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
           "object.get",
           "property.read",
           "property.set.execute",
@@ -30564,6 +31032,21 @@
       },
       {
         "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
@@ -30954,20 +31437,6 @@
         ],
         "operations": [
           "project.translate.execute"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "Connections",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "object.get",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan"
         ]
       },
       {
@@ -31485,6 +31954,20 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs",
@@ -31580,6 +32063,22 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.EObjects.PlugStrip": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.EObjects.Terminal": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -31627,6 +32126,21 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -31762,6 +32276,20 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -32225,6 +32753,35 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -32436,6 +32993,21 @@
           "connection.create.plan",
           "page.drawing.get",
           "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -32998,6 +33570,35 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
       {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderReader",
         "member": "CurrentValues",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderReader.cs",
@@ -33546,6 +34147,20 @@
         "operations": [
           "connection.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.InterruptionPointPropertyList": [
@@ -33601,6 +34216,20 @@
         "operations": [
           "device.place.execute"
         ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.LockingStep": [
@@ -33626,6 +34255,20 @@
           "action.execute",
           "action.plan",
           "action.run"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -34409,6 +35052,21 @@
       },
       {
         "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
@@ -34417,6 +35075,20 @@
         "operations": [
           "object.find",
           "object.get"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -35207,6 +35879,36 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanPageTexts",
         "member": "FreeTexts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageTexts.cs",
@@ -35239,6 +35941,22 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.PotentialDefinition": [
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       }
     ],
@@ -37582,6 +38300,36 @@
       },
       {
         "adapter": "EplanObjectReader",
+        "member": "Candidates",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
         "access": [
@@ -37590,6 +38338,35 @@
         "operations": [
           "object.find",
           "object.get"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Matches",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
         ]
       },
       {
@@ -38006,6 +38783,20 @@
     ],
     "T:Eplan.EplApi.DataModel.UniversalPropertyList": [
       {
+        "adapter": "EplanObjectReader",
+        "member": "Properties",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.get",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -38018,20 +38809,6 @@
           "device.get",
           "page.get",
           "project.get"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "Open",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "object.get",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan"
         ]
       },
       {

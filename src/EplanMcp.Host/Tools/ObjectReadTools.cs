@@ -90,7 +90,7 @@ internal sealed class ObjectReadTools
                 {
                     JsonObject row = PropertyGetRows.Map(r, 0, args.Detailed);
                     row.Remove("query"); row.Remove("target");
-                    row["property_name"] = PropertyCatalog.Find(args.ObjectType, r.PropertyId)?.PropertyName;
+                    row["property_name"] = PropertyCatalog.Find(ObjectReadTypes.DictionaryType(args.ObjectType), r.PropertyId)?.PropertyName;
                     return row;
                 })] : [.. block.Objects.Select(o => new JsonObject { ["locator"] = JsonSerializer.SerializeToNode(o.Locator, HostJson.Options), ["name"] = ResultShaper.CleanText(o.Name) })];
                 if (rows.Length > 200 || JsonSerializer.SerializeToUtf8Bytes(block, HostJson.Options).Length > 1024 * 1024 || block.NextOffset is { } next
