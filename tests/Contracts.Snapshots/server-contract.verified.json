@@ -1007,6 +1007,20 @@
                     "null"
                   ],
                   "default": null
+                },
+                "setterAccess": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
+                },
+                "access": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
                 }
               },
               "required": [
@@ -1235,7 +1249,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Trials one unverified catalog group on scratch with per-call approval and snapshot comparison. full + apiTry:on; scalar reads only. target comes from eplan_object_find. Prefer verified task tools. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.",
+      "description": "Trials an unverified API group on scratch with per-call approval and snapshots. full + apiTry:on; scalar reads and property writes. Copy target from eplan_object_find; value writes. Prefer verified tools. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
