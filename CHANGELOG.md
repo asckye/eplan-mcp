@@ -8,6 +8,7 @@
 - ADR-0032 B2 第一部分：新增 full / Read 的 `eplan_object_find`、`eplan_object_get`，支持 Page、Function、Connection；其余 65 种类型明确返回 unsupported，规格列全类型，补分页、定位符与属性读取测试，Large 仅编写未运行。
 
 ### Added
+- C2：新增 `eplan_action_try`，默认关闭，仅 full；目录未验证 action 只在 scratch 副本逐次审批后执行，带禁止表、前后指纹与未验证审计；超时/模态窗口按 unknown 暂停写入。Large 已编写未运行。
 - 新增 `eplan_action_catalog_search` / `eplan_action_catalog_get`（full、Read）：查询官方 177 行与运行时本机 UI action，返回 TYPE、已知参数、白名单级别、验证引用及安装版本缺口；不启动 EPLAN，不保存或分发本机清单。
 - 新增默认关闭的 `eplan_api_try` 只读首片：scratch 限定、逐次独立审批、目录生成的编译分发表、业务快照/设计文件指纹比较和 unverified 审计；超时结果未知时暂停写入。当前仅接入三类对象的简单读取，其余组明确尚不可分发；属性写入、15 类扩展及撤销验证待后续切片，Large 已编写未运行。
 - 新增 `eplan_api_search` / `eplan_api_get`（full、Read）：离线发现全部 4,649 个 API 重载组及 69 种属性字典，查询完整签名、排除原因、覆盖状态、证据与到达工具；压缩索引嵌入 Host，无需 EPLAN。

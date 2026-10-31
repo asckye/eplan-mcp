@@ -46,6 +46,7 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
 
         Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 30);
         Assert.InRange(tasks.Count(t => t.Set == TaskSet.Holdout), 5, 10);
+        Assert.Contains(tasks, t => t.Id == "holdout-action-try-safety");
         Assert.Equal(tasks.Length, tasks.Select(t => t.Prompt).Distinct(StringComparer.Ordinal).Count());
     }
 

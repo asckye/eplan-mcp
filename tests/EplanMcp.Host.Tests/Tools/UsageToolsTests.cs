@@ -19,6 +19,17 @@ public sealed class UsageToolsTests
         Assert.Contains("OUTCOME_UNKNOWN", text, StringComparison.Ordinal);
         Assert.Contains("unverified", text, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ActionTryUsage_IsOptInAndExplainsUnverifiedScratchAndUnknownOutcome()
+    {
+        Assert.True(UsageTools.ToolUsage(ActionTryTools.Tool).IsError);
+        var config = EplanMcp.Host.Safety.HostConfig.Defaults(new(@"D:\test")) with { ActionTry = EplanMcp.Host.Safety.ActionRunSwitch.On };
+        string text = Structured(UsageTools.ToolUsage(ActionTryTools.Tool, config: config)).GetProperty("text").GetString()!;
+        foreach (string token in new[] { "unverified", "scratch", "OUTCOME_UNKNOWN", "Ctrl+Z", "30", "AddParameter" })
+        { Assert.Contains(token, text, StringComparison.Ordinal); }
+        Assert.True(UsageTools.ToolUsage(ActionTryTools.Tool, config: config, profile: new(ToolProfile.Core)).IsError);
+    }
     [Fact]
     public void ProjectCreateUsage_ExplainsTheNewFolderCompatibilityAndUnknownOutcome()
     {

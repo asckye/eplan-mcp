@@ -438,6 +438,27 @@
       ]
     },
     {
+      "name": "eplan_action_try",
+      "safety": "destructive",
+      "operations": [
+        "action.try.execute",
+        "action.try.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_action_try.md",
+      "small": 3,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A9",
+        "A40"
+      ]
+    },
+    {
       "name": "eplan_api_get",
       "safety": "read",
       "operations": [],

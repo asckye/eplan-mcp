@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="ActionRunWhitelist.json" />
+    <EmbeddedResource Include="ActionTryDeny.tsv" />
     <EmbeddedResource Include="Generated/PropertyDictionary.g.tsv" />
   </ItemGroup>
 </Project>

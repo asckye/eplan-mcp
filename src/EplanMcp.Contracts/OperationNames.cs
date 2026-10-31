@@ -10,6 +10,8 @@ public static class OperationNames
     public const string ApiTryPlan = "api.try.plan";
     /// <summary>Executes one generated catalog call with outcome tracking.</summary>
     public const string ApiTryExecute = "api.try.execute";
+    public const string ActionTryPlan = "action.try.plan";
+    public const string ActionTryExecute = "action.try.execute";
     /// <summary>Finds exact dictionary object identities in an open project; never writes.</summary>
     public const string ObjectFind = "object.find";
     /// <summary>Reads a bounded property block of an exact, digest-checked dictionary object.</summary>

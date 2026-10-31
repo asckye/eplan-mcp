@@ -593,7 +593,7 @@ public sealed class ActionRunOperationTests
             state["layer:visible"] = Visible ? "1" : "0";
             return new ActionRunData { Target = projectPath ?? "configured-file-library", Before = state, Parameters = Pairs(parameters) };
         }
-        public bool Run(string action, IReadOnlyDictionary<string, string> parameters)
+        public bool Run(string action, IReadOnlyDictionary<string, string> parameters, bool unverified = false)
         {
             Calls.Add("Run");
             Runs++;

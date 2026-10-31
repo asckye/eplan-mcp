@@ -32,7 +32,7 @@ public sealed class ToolContractSnapshotTests
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         await using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;

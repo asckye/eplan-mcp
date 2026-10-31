@@ -80,6 +80,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionTrySchema.Configure(options, profile.Profile == ToolProfile.Full && config.ActionTry == ActionRunSwitch.On));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile == ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
@@ -155,6 +156,7 @@ internal static class McpServerSetup
             .WithTools<PlcImportTools>(HostJson.Options)
             .WithTools<MasterDataExportTools>(HostJson.Options)
             .WithTools<ActionRunTools>(HostJson.Options)
+            .WithTools<ActionTryTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<CabinetTools>(HostJson.Options)

@@ -18,6 +18,12 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
+            if (tool?.ProtocolTool.Name == ActionTryTools.Tool && context.Params?.Arguments?.TryGetValue("parameters", out JsonElement parameters) == true && parameters.ValueKind != JsonValueKind.Object)
+            {
+                BridgeError error = ToolResults.InvalidArgumentError(["parameters must be a flat object."]);
+                error.Execution = ExecutionState.NotStarted;
+                return ValueTask.FromResult(ToolResults.Error(error));
+            }
             if (tool?.ProtocolTool.Name is PropertyGetTools.Tool or PropertySetTools.Tool or PlacementCreateTools.Tool)
             {
                 // The raw-argument handler runs P5a validation before SDK coercion, with JSON Pointer violations.
@@ -32,7 +38,7 @@ internal static class UnknownArgumentFilter
             // Device placement checks raw display objects itself, preserving duplicate members for pointer errors.
             if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments, nestedMembers: tool.ProtocolTool.Name != DeviceWriteTools.PlaceTool) is { Count: > 0 } violations)
             {
-                if (tool.ProtocolTool.Name is PageTextReplaceTools.Tool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PlacementUpdateTools.Tool or ApiTryTools.Tool)
+                if (tool.ProtocolTool.Name is PageTextReplaceTools.Tool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PlacementUpdateTools.Tool or ApiTryTools.Tool or ActionTryTools.Tool)
                 {
                     BridgeError error = ToolResults.InvalidArgumentError(violations);
                     error.Execution = ExecutionState.NotStarted;

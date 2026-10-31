@@ -113,17 +113,27 @@ internal sealed partial class EplanActionRunner : IActionRunner
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not inspect the action target; check the project or configured database.", ex); }
     }
 
-    public bool Run(string actionName, IReadOnlyDictionary<string, string> parameters)
+    public bool Run(string actionName, IReadOnlyDictionary<string, string> parameters, bool unverified = false)
     {
         MainThread.Assert();
         using var context = new ActionCallingContext();
         foreach (KeyValuePair<string, string> parameter in parameters)
         { context.AddParameter(parameter.Key, parameter.Value); }
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
-#pragma warning disable RS0030 // ADR-0021: only shipped whitelist entries, rechecked by Bridge.Core, into the Host's folder or Write transaction.
+#pragma warning disable RS0030 // ADR-0021/0030: Bridge.Core checks whitelist or trial exclusions before typed-context execution.
         var action = new ActionManager().FindAction(actionName) ?? throw new InvalidOperationException("EPLAN has no action for this whitelist entry.");
 #pragma warning restore RS0030
-        return action.Execute(context);
+        int modal = 0;
+        using var process = System.Diagnostics.Process.GetCurrentProcess();
+        IntPtr window = unverified ? process.MainWindowHandle : IntPtr.Zero;
+        using var monitor = new System.Threading.Timer(_ =>
+        {
+            if (window != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(window)) { System.Threading.Interlocked.Exchange(ref modal, 1); }
+        }, null, unverified ? 0 : System.Threading.Timeout.Infinite, 25);
+        bool result = action.Execute(context);
+        if (System.Threading.Volatile.Read(ref modal) != 0)
+        { throw new BridgeErrorException(ErrorReason.OutcomeUnknown, "A modal dialog was observed during the trial; inspect EPLAN before further writes."); }
+        return result;
     }
 
     private static void Files(string path, string relative, Dictionary<string, string> state)

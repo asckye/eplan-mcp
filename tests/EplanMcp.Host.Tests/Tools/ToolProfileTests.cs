@@ -87,7 +87,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(full ? ToolProfile.Full : ToolProfile.Core));
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
 
@@ -99,7 +99,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(profile));
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         return [.. provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Select(t => t.ProtocolTool)];

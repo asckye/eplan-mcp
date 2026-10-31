@@ -6,5 +6,5 @@ namespace EplanMcp.Bridge.Core.Operations;
 public interface IActionRunner
 {
     public ActionRunData Inspect(string entry, string? projectPath, IReadOnlyDictionary<string, string> parameters);
-    public bool Run(string action, IReadOnlyDictionary<string, string> parameters);
+    public bool Run(string action, IReadOnlyDictionary<string, string> parameters, bool unverified = false);
 }

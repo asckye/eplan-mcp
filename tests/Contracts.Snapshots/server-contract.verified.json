@@ -710,6 +710,130 @@
       }
     },
     {
+      "name": "eplan_action_try",
+      "title": "Try an unverified catalog action",
+      "description": "Try one unverified catalog action in scratch; full + actionTry:on.\nAlways requires approval; refusal: APPROVAL_DENIED.\nPrefer verified task tools; never retry unknown outcomes.\nExample: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "parameters": {
+            "type": "object",
+            "maxProperties": 32,
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "project",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "type",
+          "project",
+          "unverified",
+          "execution",
+          "dryRun",
+          "recovered",
+          "before",
+          "after",
+          "changed",
+          "truncated",
+          "hint"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "project": {
+            "type": "string"
+          },
+          "unverified": {
+            "const": true
+          },
+          "execution": {
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "recovered": {
+            "type": "boolean"
+          },
+          "before": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "after": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "changed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "hint": {
+            "type": "string"
+          }
+        }
+      },
+      "annotations": {
+        "title": "Try an unverified catalog action",
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_api_get",
       "title": "Describe an offline EPLAN API group",
       "description": "Gets a catalogued API group by exact XML member ID, group key or dictionary type ID, without EPLAN. Pages full overload signatures then tool-level evidence; pass nextCursor as cursor for the rest. Null summaries were not stored in the source. Example: {\"id\":\"D:Function\"}. Discover IDs with eplan_api_search. Catalog status does not authorize execution.",
@@ -16852,6 +16976,7 @@
             "description": "The tool to explain.",
             "type": "string",
             "enum": [
+              "eplan_action_try",
               "eplan_action_catalog_search",
               "eplan_action_catalog_get",
               "eplan_api_try",

@@ -194,7 +194,7 @@ public sealed class ActionRunContractTests
     {
         var services = new ServiceCollection();
         services.AddLogging(l => l.ClearProviders());
-        services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with { ActionRun = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off, ApiTry = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with { ActionRun = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off, ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
         services.AddSingleton(new ToolProfileChoice(core ? ToolProfile.Core : ToolProfile.Full));
         services.AddEplanMcp();
         return services.BuildServiceProvider();

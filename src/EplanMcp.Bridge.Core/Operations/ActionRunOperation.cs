@@ -23,7 +23,7 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         return Run(request, runner, messages);
     }
 
-    internal static ActionRunData Run(ActionRunRequest request, IActionRunner runner, ISystemMessageReader messages)
+    internal static ActionRunData Run(ActionRunRequest request, IActionRunner runner, ISystemMessageReader messages, bool unverified = false)
     {
         OperationContext.Current.ThrowIfCancellationRequested();
         OperationContext.Current.ReportProgress(0, message: "Running whitelisted action");
@@ -34,8 +34,9 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         bool done = false;
         var parameters = request.Data.Parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
         try
-        { done = runner.Run((string)request.Entry["action"]!, parameters); }
+        { done = runner.Run((string)request.Entry["action"]!, parameters, unverified); }
         catch (Exception ex) { failure = ex; }
+        if (unverified && failure is BridgeErrorException { Error.Reason: ErrorReason.OutcomeUnknown }) { throw failure; }
         List<SystemMessageRecord> added;
         try
         { added = [.. messages.ReadAll().Skip(bookmark)]; }

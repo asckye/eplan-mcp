@@ -85,6 +85,7 @@
 - M6 第 2 阶段加入 `plan`（将内联任务编译为有前置条件、预期结果和差异预览的计划；不执行写入），并将已有 `apply` 用于执行已编译计划（ADR-0023 的整体审批和备份）。`plan` 同时是资源词，含义由其在名称中的位置区分。
 - M6 第 3 阶段加入 `review`（经既有工程师独立窗口审核知识候选、关闭缺口或提升正式规则）；仅更新本地知识与审计，客户端不能批准。
 - M8 加入 `open`：仅用于 `eplan_page_open`，在编辑器打开或聚焦显式项目中的精确页面；不打开项目文件，不修改工程数据，界面副作用须写入描述。
+- ADR-0030 加入 `try`：`eplan_action_try` 仅在 scratch 中逐次审批试执行目录未验证条目；静态注解按 Destructive，运行时按 Write 加 Unverified 限制，默认关闭。
 - 例外：导出工具以 `export` 为资源，动作的位置放导出的格式：`eplan_export_pdf`、`eplan_export_dxf`、`eplan_export_image`（M4 设计 4.1）。
 - 例外：项目导入以 `import` 为资源，动作的位置放格式或交换数据类别：`dxf`、`pdf_comments`（PDF 审图便笺）、`pxf`、`list`（设备清单或项目部件清单，不是分页查询）、`plc`（PLC 总线数据）。这里的 `list` / `plc` 是导入类别；写系统部件库仍用 `eplan_part_import`。`cable` 和 `generate` 已在词表中，`eplan_cable_generate` 仅生成/更新自动电缆，已有电缆重编号用 `eplan_cable_renumber`。
 

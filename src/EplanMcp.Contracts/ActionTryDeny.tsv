@@ -1,0 +1,12 @@
+# Reviewed shipped exclusions for ADR-0030 / C2; not a local UI action catalog.
+# scope	pattern	reason
+action	(exit|quit|restart|shutdown|reboot|terminate|finishsession|close|open|endapplication|stopapplication)	Terminates/restarts EPLAN or changes open documents.
+action	(project|prj|workspace|newdocument|closedocument|opendocument)	Changes project identity or workspace and may escape scratch.
+action	(settings?|workstation|user|profile|config|scheme|option|registry|environment)	Changes persistent settings, workstation or user data.
+action	(licen[cs]|activation|dongle|borrow)	Changes licensing or authorization.
+action	(update|upgrade|install|setup|register|unregister|module|addin|plugin)	Updates, installs or loads external modules.
+action	(network|online|cloud|portal|service|sync|publish|upload|download|send|mail|web|url|http|ftp|remote|connect)	Uses networks, publication or external services.
+action	(print|plot)	Sends physical print or plot jobs.
+action	(script|execute|exec|shell|command|process|program|application|start|launch|run|call|dispatch|invoke|batch|automatic)	Executes external programs, code or nested actions.
+action	(master|partsmanagement|translate|backup|restore|export|import|file|saveas|saveall|database|sql|odbc)	Touches shared master data, files or databases beyond the target scratch project.
+parameter	(project|prj|path|file|directory|folder|destination|source|target|action|command|script|program|exec|function|method|operation|arguments?|parameters?|verb|url|host|server|database|password|token|credential|secret|setting|scheme|config|user|allprojects|allproject)	Overrides targets, paths, credentials, settings or invokes nested/batch execution.

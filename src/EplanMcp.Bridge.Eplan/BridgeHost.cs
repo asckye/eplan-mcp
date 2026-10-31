@@ -114,6 +114,8 @@ internal static class BridgeHost
         [
             apiPlan,
             new ApiTryExecuteOperation(apiPlan, apiTrials),
+            new ActionTryPlanOperation(catalog, actions),
+            new ActionTryExecuteOperation(catalog, actions, new EplanSystemMessageReader(), transactions),
             new ActionRunPlanOperation(actionMajor, catalog, actions),
             new ActionRunOperation(actionMajor, catalog, actions, new EplanSystemMessageReader()),
             new ActionRunExecuteOperation(actionMajor, catalog, actions, new EplanSystemMessageReader(), transactions),
