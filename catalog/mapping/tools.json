@@ -5667,6 +5667,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
           },
           {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
             "name": "ObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ObjectReadTests.cs"
@@ -5840,6 +5845,11 @@
             "name": "ObjectReadProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
             "name": "ObjectReadTests",

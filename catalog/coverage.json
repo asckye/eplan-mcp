@@ -1336,7 +1336,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_object_find.md",
       "small": 1,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A36"
@@ -1357,7 +1357,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_object_get.md",
       "small": 1,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": []
     },
