@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-31",
-  "scannedSources": "4e772d4f",
-  "sourceHash": "sha256:e58f80435691e1061fe36f6d55ea5a97c13701c5291f22ed9ba360db64eb3ee7",
+  "scannedSources": "45c290f0",
+  "sourceHash": "sha256:55db90405b8cefd70de322326f067e53a7eab4d96daa87e1088529f28ce337d5",
   "operations": [
     {
       "name": "action.execute",
@@ -1004,6 +1004,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1044,6 +1045,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1084,6 +1086,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -1115,7 +1118,343 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Accessories": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.AnalogSensor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Antenna": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.AreaDefinition": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ArticleDefinitionPoint": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ArticlePlacement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Blackbox": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.BlackboxFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Brake": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.BreatherFilterHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.BusBarDefText": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Busbar": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMech19Inch": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechBodyAccessoryInside": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechBusBar": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechCabinet": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechConduit": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechHousing": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechInterlockingsystem": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechRoutingAccessory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabMechSystemAccessory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabVirtAuxiliaryElement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabVirtBusbarsystem": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabVirtCopperbundle": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CabVirtNC": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.Cable": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
@@ -1196,7 +1535,889 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CableUnit": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Capacitor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ChangeOverContact": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ChangeOverContactHook": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CheckValveHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CircuitBreaker": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Coil": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CoilAdditionalTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CompressorHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ConnectorDefText": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ControlValve": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Controller": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Converter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Coupler": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.CurrentCircuitBreaker": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DataRecorder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DeviceEndTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DeviceEndTerminalFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Diode": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DirectionalControlValveHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Discharger": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DisplayDevice": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Distributor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.DistributorOrConnector": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ElectroDistributor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FixedDisplacementPump": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FlowControlValveHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidAccessories": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidAccumulator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidAcousticalSignalDevice": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidController": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidCylinder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidDataRecorder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidFilter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidGeneralDevice": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidHeatExchanger": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidHeating": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidLogicalItem": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidMeasuringInstrument": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidMotor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidOperatingElement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidOpticalSignalDevice": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidPlugInConnector": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FluidSeparator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FunctionalFunction": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.FunctionalPlacement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Generator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.HallGenerator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Harness": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Heating": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Inductivity": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Invalid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.IsolatingTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Lamp": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.LevelDetector": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.LightBarrier": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.LineFilterHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.LogicalItem": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.MeasuringInstrument": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.MeasuringRecorder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Motor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.MotorOverloadSwitch": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.MountingPlate": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.NcContact": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.NoContact": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.OpenConnectionEnd": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Overload": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCBox": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
@@ -1238,7 +2459,31 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCBoxFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
@@ -1258,6 +2503,8 @@
           "read"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -1294,7 +2541,993 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PLCTerminalFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Packet": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PhaseBar": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PiezoElectricCrystal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Plug": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PressureControlValveHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.PressureIntensifierHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcesDryer": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessAllocator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessBackStrokeArmature": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessBlackBox": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessCentrifuge": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessChimney": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessCompressor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessControlFitting": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessConveyor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessCooler": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessDeviceConnectionPoint": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessElectrolysisCell": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessEvaporator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessExtractorHood": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessFilter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessForm": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessFourWayFitting": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessHeatExchanger": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessHoister": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessIncreaser": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessKneader": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessLockArmature": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessMainEngine": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessMeasuring": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessMisc": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessMixer": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessOven": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessPiping": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessPump": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSafetyControlValve": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessScales": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSeparator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessShredder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSieve": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSifter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSorter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSpinExtractor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessSteamBoiler": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessStirer": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessStorage": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessThreeWayArmature": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessTransporter": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVacuumPump": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVentilator": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVessel": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVesselCoating": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVesselPipeQueue": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProcessVesselTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProtectiveCircuit": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProtectiveRelais": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ProximitySwitch": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Rectifier": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Resistor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ReturnLineFilterHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Routing": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.SafetyFuse": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Semiconductor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Sensor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.SensorFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Shielding": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.SignalDeviceAcustic": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.SignalLamp": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Socket": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Source": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.StopSwitch": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Switch": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Terminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.TerminalAccessories": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.Base.Enums.FunctionCategory.TerminalDefText": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateTerminal",
@@ -1304,6 +3537,149 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Topology": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Transformer": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Transistor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Transmission": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Undefined": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.UndefinedFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Valve": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.VariableDisplacementPumpHYP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.ViewPlacement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.VoltageCircuitBreaker": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.Wire": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -1466,7 +3842,70 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.AssemblyModuleOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.CableConnectionDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.CableLayout": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.CableOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Circuit": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPlacementTextWriter",
         "member": "Validate",
@@ -1479,7 +3918,915 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.CircuitFluid": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.CircuitSingleLine": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ConduitLinePlan": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ConnectionList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.DeviceConnectionDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.DeviceList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.DistributedDeviceList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.DrillingPlan": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.External": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ExternalDocument": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.FluidFunctionalOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Form": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.FormCopper": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.FormOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Frame": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.FrameOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Functional": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Graphics": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.InterconnectDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.LogocadTriga": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Macro": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ManufacturerList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ModelView": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.MountingList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.OutlineExtrusion": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.OutlineNCData": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Overview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PCTLoopLegend": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PLCCardOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PLCDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PairCrossReference": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PanelLayout": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PanelLayout3D": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PanelLayoutCaption": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PanelLayoutDetail": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PartsList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PartsSumList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PlaceholderObjectsOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Planning": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PlugConnectionDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PlugDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PlugOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PotentialOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningPipeClassOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningPlanningObjectOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningPlanningObjectPlan": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningSegmentTemplateOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningSegmentTemplatePlan": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningStructureSegmentOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningStructureSegmentPlan": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.PreplanningSubstanceOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ProcessAndInstrumentationDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ProcessOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.ProjectOptionsOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.RevisionOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.SignalOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.StructIdentifierOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Symbol": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.SymbolOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TableOfContents": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TerminalConnectiondiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TerminalDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TerminalLineupDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TerminalStripOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TitlePage": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Topology": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TopologyRoutedCables": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TopologyRoutingPathDiagram": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.TopologyRoutingPathList": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Undefined": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPageReader",
         "member": "_pageTypes",
@@ -1502,6 +4849,45 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Graphics.ContactImage.Enums.ContactImageType.InPath": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Graphics.ContactImage.Enums.ContactImageType.None": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Graphics.ContactImage.Enums.ContactImageType.OnComponent": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -1537,6 +4923,136 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.InsertMacroBox.FromProjectSettings": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.InsertMacroBox.No": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.InsertMacroBox.Yes": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TakeConnectionPointDesignationsIntoAccount.FromUserSettings": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TakeConnectionPointDesignationsIntoAccount.No": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TakeConnectionPointDesignationsIntoAccount.Yes": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TypeOfUsage.Definition": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TypeOfUsage.Inferior": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TypeOfUsage.Reference": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MacroBox.Enums.TypeOfUsage.Undefined": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -1579,7 +5095,122 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.ArticlePlacement": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.ArticlePlacement3D": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Cabling": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Default": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.FluidFunctionalOverview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Fluid_MultiLine": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Functional": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Graphics": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.MultiLine": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
@@ -1604,6 +5235,123 @@
           "macro.insert.plan",
           "plan.macro.inspect",
           "plan.step.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Neutral": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Overview": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.PI_FlowChart": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.PairCrossReference": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.Planning": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType.SingleLine": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Placement.Visibility.ByLayer": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Placement.Visibility.Invisible": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.Placement.Visibility.Visible": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -3118,6 +6866,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3158,6 +6907,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3198,6 +6948,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3240,6 +6991,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -3280,6 +7032,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -6461,6 +10214,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -6478,6 +10233,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -6500,18 +10257,6 @@
           "action.run",
           "action.try.execute",
           "action.try.plan",
-          "api.try.execute",
-          "api.try.plan"
-        ]
-      },
-      {
-        "adapter": "EplanApiTryDispatcher",
-        "member": "Resolve",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
           "api.try.execute",
           "api.try.plan"
         ]
@@ -6644,6 +10389,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7034,6 +10781,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7085,6 +10834,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7119,18 +10870,6 @@
           "action.run",
           "action.try.execute",
           "action.try.plan",
-          "api.try.execute",
-          "api.try.plan"
-        ]
-      },
-      {
-        "adapter": "EplanApiTryDispatcher",
-        "member": "Resolve",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
           "api.try.execute",
           "api.try.plan"
         ]
@@ -7291,6 +11030,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7546,6 +11287,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7587,6 +11330,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7615,6 +11360,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -7684,6 +11431,8 @@
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -8333,6 +12082,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -8864,6 +12614,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10271,6 +14022,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10311,6 +14063,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10353,6 +14106,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10395,6 +14149,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10446,6 +14201,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -10513,18 +14269,6 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier": [
-      {
-        "adapter": "EplanApiTryDispatcher",
-        "member": "Resolve",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute",
-          "api.try.plan"
-        ]
-      },
       {
         "adapter": "EplanCableGenerator",
         "member": "End",
@@ -11116,6 +14860,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11158,6 +14903,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11200,6 +14946,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11242,6 +14989,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11284,6 +15032,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11324,6 +15073,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11366,6 +15116,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11406,6 +15157,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11448,6 +15200,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11497,6 +15250,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11548,6 +15302,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11588,6 +15343,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11630,6 +15386,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11672,6 +15429,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -11712,6 +15470,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -13602,6 +17361,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -13876,6 +17637,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -14443,6 +18206,54 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.BoxedDevice.IsSetAsVisible": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.BoxedDevice.IsVisible": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.CableNameParts": [
       {
         "adapter": "EplanConnectionCreator",
@@ -14751,6 +18562,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.KindOfWire": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.Page": [
       {
         "adapter": "EplanCableGenerator",
@@ -14935,6 +18759,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.RepresentationType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.StartPin": [
       {
         "adapter": "EplanCableGenerator",
@@ -15100,6 +18948,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -15389,6 +19248,28 @@
     ],
     "P:Eplan.EplApi.DataModel.EObjects.Cable.FunctionCategory": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "VerifyCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
@@ -15460,7 +19341,53 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.PLC.FunctionCategory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.PLC.IsCPU": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPlcReader",
         "member": "ReadPlc",
@@ -15522,6 +19449,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.PLC.Scheme": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.PlugStrip.Properties": [
       {
         "adapter": "EplanObjectReader",
@@ -15579,6 +19530,28 @@
     ],
     "P:Eplan.EplApi.DataModel.EObjects.Terminal.FunctionCategory": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
@@ -15608,6 +19581,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -15630,6 +19605,28 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.EObjects.Terminal.IsMainTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalReader",
         "member": "Read",
@@ -15731,6 +19728,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.FunctionCategory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Properties": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -15813,6 +19823,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -15942,6 +19963,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Function.BmkSearchDirection": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Function.CanGiveConnDesignationsToOtherFunctions": [
       {
         "adapter": "ApiTryDispatch",
@@ -15968,7 +20002,53 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Function.ContactImageType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Function.FunctionCategory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanCableReader",
         "member": "IsCable",
@@ -16208,6 +20288,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.IsCoveredTemplate": [
@@ -16234,6 +20325,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.IsMainFunction": [
@@ -16243,6 +20345,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -16549,6 +20662,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.Function.IsTemplate": [
@@ -16571,6 +20695,30 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Function.ManualPlacementType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -16874,6 +21022,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -17464,6 +21623,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -19437,6 +23598,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ArePagePropertiesDisplayed": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AssignedObjects": [
       {
         "adapter": "EplanPlaceholderReader",
@@ -19454,6 +23639,28 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanObjectReader",
         "member": "Describe",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
@@ -19461,6 +23668,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -19521,6 +23730,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanPlaceholderWriter",
         "member": "HasValueSet",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs",
@@ -19542,6 +23762,19 @@
           "placeholder.apply.execute",
           "placeholder.apply.plan",
           "placeholder.list"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfReferences": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -20061,6 +24294,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.InterruptionPoint.IsStarSource": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.InterruptionPoint.Properties": [
       {
         "adapter": "EplanConnectionCreator",
@@ -20089,6 +24346,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.InterruptionPoint.WriteProtected": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property(Eplan.EplApi.DataModel.Properties.InterruptionPoint)": [
       {
         "adapter": "EplanConnectionCreator",
@@ -20100,6 +24381,30 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.LocationBox.IsSurfaceFilled": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -20119,6 +24424,126 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.MacroBox.GenerateProtectedGroup": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.InsertMacroBox": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.InsertionPointActive": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.IsSurfaceFilled": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.MacroName": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.MacroBox.Properties": [
       {
         "adapter": "EplanObjectReader",
@@ -20132,6 +24557,126 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.ReferencesActive": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.RepresentationType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.TakeConnectionPointDesignationsIntoAccount": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.TypeOfUsage": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.MacroBox.Variant": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -20954,6 +25499,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -21068,6 +25615,17 @@
         ]
       },
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
@@ -21119,6 +25677,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Page.MacroRepresentationType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Page.Name": [
       {
         "adapter": "ApiTryDispatch",
@@ -21126,6 +25697,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -21547,6 +26129,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -21562,6 +26146,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -21998,6 +26584,28 @@
     ],
     "P:Eplan.EplApi.DataModel.Page.PageType": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
@@ -22394,6 +27002,17 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
         ],
         "operations": [
           "api.try.execute"
@@ -23528,6 +28147,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -23731,6 +28352,8 @@
           "get"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -23866,6 +28489,30 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.PotentialDefinition.PotentialName": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.PotentialDefinition.Properties": [
       {
         "adapter": "EplanObjectReader",
@@ -23879,6 +28526,30 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.PotentialDefinition.SignalName": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -28093,6 +32764,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28133,6 +32805,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28173,6 +32846,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28450,6 +33124,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28490,6 +33165,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -28530,6 +33206,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -29047,6 +33724,17 @@
     ],
     "T:Eplan.EplApi.Base.Enums.FunctionCategory": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanActionRunner",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.cs",
@@ -29161,6 +33849,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -30440,6 +35130,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -30881,6 +35573,28 @@
     ],
     "T:Eplan.EplApi.DataModel.BoxedDevice": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanObjectReader",
         "member": "Matches",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
@@ -30888,6 +35602,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -30900,6 +35616,17 @@
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "type"
@@ -32104,6 +36831,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -32689,6 +37418,17 @@
     ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanPageReader",
         "member": "ListPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReader.cs",
@@ -32734,6 +37474,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPageReader",
         "member": "ListPages",
@@ -32881,6 +37632,28 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Cable": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanCableGenerator",
         "member": "Read",
@@ -33062,6 +37835,28 @@
     ],
     "T:Eplan.EplApi.DataModel.EObjects.PLC": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
@@ -33161,6 +37956,28 @@
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Terminal": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
@@ -33216,6 +38033,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -33350,6 +38169,17 @@
     ],
     "T:Eplan.EplApi.DataModel.EObjects.TerminalStrip": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateTerminal",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
@@ -33444,6 +38274,17 @@
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "type"
@@ -33857,6 +38698,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -34108,6 +38951,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -34573,6 +39418,45 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Graphics.ContactImage": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.ContactImage.Enums": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.Graphics.ContactImage.Enums.ContactImageType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayer": [
       {
         "adapter": "EplanActionRunner",
@@ -34693,6 +39577,28 @@
     ],
     "T:Eplan.EplApi.DataModel.Graphics.PlaceHolder": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanObjectReader",
         "member": "Describe",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
@@ -34700,6 +39606,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -35239,6 +40147,28 @@
     ],
     "T:Eplan.EplApi.DataModel.InterruptionPoint": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "Endpoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
@@ -35320,6 +40250,28 @@
     ],
     "T:Eplan.EplApi.DataModel.LocationBox": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDevicePlacer",
         "member": "ReadPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDevicePlacer.cs",
@@ -35370,6 +40322,28 @@
     ],
     "T:Eplan.EplApi.DataModel.MacroBox": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanActionRunner",
         "member": "InspectPending",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanActionRunner.Pending.cs",
@@ -35398,6 +40372,58 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox.Enums": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox.Enums.InsertMacroBox": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox.Enums.TakeConnectionPointDesignationsIntoAccount": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MacroBox.Enums.TypeOfUsage": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -35594,6 +40620,17 @@
     ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroInserter.cs",
@@ -35621,6 +40658,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
@@ -35662,6 +40710,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanMacroInserter",
         "member": "Insert",
@@ -35734,6 +40793,17 @@
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "type"
@@ -36212,6 +41282,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -36227,6 +41299,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -37012,6 +42086,17 @@
     ],
     "T:Eplan.EplApi.DataModel.Placement": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
@@ -37071,6 +42156,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -37086,6 +42173,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -37129,7 +42218,42 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.Placement.Visibility": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.PotentialDefinition": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanObjectReader",
         "member": "Properties",
@@ -37997,6 +43121,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39444,6 +44569,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39480,6 +44606,28 @@
         "adapter": "ApiTryDispatch",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.cs",
         "access": [
           "type"
         ],
@@ -39566,6 +44714,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -39581,6 +44731,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -39608,6 +44760,8 @@
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -39859,6 +45013,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39901,6 +45056,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39943,6 +45099,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -39983,6 +45140,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
@@ -40025,6 +45183,7 @@
         "operations": [
           "action.execute",
           "action.try.execute",
+          "api.try.execute",
           "cable.generate.execute",
           "cable.renumber.execute",
           "check.run.execute",
