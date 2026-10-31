@@ -27,8 +27,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             async Task<JsonElement> Graphics()
             {
                 await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:SplitRead");
-                using JsonDocument read = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "EplanMcp", "logs", "large-split-graphics.json"), TestContext.Current.CancellationToken));
+                using JsonDocument read = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(LiveEplan.DataRoot(), "logs", "large-split-graphics.json"), TestContext.Current.CancellationToken));
                 Assert.Equal(page, read.RootElement.GetProperty("page").GetString());
                 return read.RootElement.GetProperty("graphical").Clone();
             }

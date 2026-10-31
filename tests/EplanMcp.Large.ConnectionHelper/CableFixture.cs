@@ -45,7 +45,7 @@ internal static class CableFixture
         }
         if (wires.Count != 3 || wires.Any(w => w.Points[0][0] != w.Points[1][0]))
         { throw new InvalidOperationException("Expected three vertical fixture wires."); }
-        string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-cable-inventory.json");
+        string file = Path.Combine(DataRoot.Path, "logs", "large-cable-inventory.json");
         File.WriteAllText(file, JObject.FromObject(new { page = page.Name, wires = wires.OrderBy(w => w.Points[0][0]) }).ToString());
     }
 }

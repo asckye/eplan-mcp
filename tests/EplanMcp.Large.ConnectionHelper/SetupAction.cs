@@ -23,7 +23,7 @@ public sealed class SetupAction : IEplAction
             oActionCallingContext.GetParameter("PAGE", ref pageName);
             oActionCallingContext.GetParameter("DIRECTIONS", ref directions);
             Project project = new SelectionSet().GetCurrentProject(false);
-            string expected = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "scratch", "writes", "LargeWrite");
+            string expected = Path.Combine(DataRoot.Path, "scratch", "writes", "LargeWrite");
             if (!string.Equals(project.ProjectFullName, expected, StringComparison.OrdinalIgnoreCase) || !pageName.StartsWith("=GAA+A1&EFS1/", StringComparison.Ordinal))
             { Log("project/page: " + project.ProjectFullName + " | " + pageName); return false; }
             Page page = project.Pages.Single(p => p.Name == pageName);
@@ -34,7 +34,7 @@ public sealed class SetupAction : IEplAction
                     [g.StartSymbolRef.Location.X + g.StartConnectionPoint.Location.X, g.StartSymbolRef.Location.Y + g.StartConnectionPoint.Location.Y],
                     [g.EndSymbolRef.Location.X + g.EndConnectionPoint.Location.X, g.EndSymbolRef.Location.Y + g.EndConnectionPoint.Location.Y],
                 });
-                File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-split-graphics.json"),
+                File.WriteAllText(Path.Combine(DataRoot.Path, "logs", "large-split-graphics.json"),
                     JObject.FromObject(new { page = page.Name, graphical }).ToString());
                 return true;
             }
@@ -96,5 +96,5 @@ public sealed class SetupAction : IEplAction
         catch (Exception ex) { Log(ex.ToString()); return false; }
     }
 
-    private static void Log(string message) => File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-connection-helper.log"), DateTime.Now.ToString("s") + " " + message + Environment.NewLine);
+    private static void Log(string message) => File.AppendAllText(Path.Combine(DataRoot.Path, "logs", "large-connection-helper.log"), DateTime.Now.ToString("s") + " " + message + Environment.NewLine);
 }

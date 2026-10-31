@@ -65,7 +65,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
         {
             await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Cable");
             await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:CableRead");
-            using JsonDocument inventory = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "logs", "large-cable-inventory.json"), TestContext.Current.CancellationToken));
+            using JsonDocument inventory = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(LiveEplan.DataRoot(), "logs", "large-cable-inventory.json"), TestContext.Current.CancellationToken));
             Assert.Equal(page, inventory.RootElement.GetProperty("page").GetString());
             JsonElement[] wires = inventory.RootElement.GetProperty("wires").EnumerateArray().ToArray();
             Assert.Equal(3, wires.Length);

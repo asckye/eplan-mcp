@@ -22,8 +22,7 @@ public sealed class SpikeAction : IEplAction
             using var locking = new LockingStep();
             JObject request = JObject.Parse(File.ReadAllText(requestFile));
             Project project = new SelectionSet().GetCurrentProject(false);
-            string root = Environment.GetEnvironmentVariable("EPLANMCP_HOME")
-                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp");
+            string root = DataRoot.Path;
             string expected = Path.Combine(root, "scratch", "writes", "LargeWrite");
             if (!string.Equals(project.ProjectFullName, expected, StringComparison.OrdinalIgnoreCase)
                 || !string.Equals(project.ProjectFullName, (string?)request["project"], StringComparison.OrdinalIgnoreCase))
