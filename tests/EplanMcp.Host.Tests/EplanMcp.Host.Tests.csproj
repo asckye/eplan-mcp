@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceDrawingList.cs" Link="Acceptance\AcceptanceDrawingList.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceListFile.cs" Link="Acceptance\AcceptanceListFile.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceRedrawDriver.cs" Link="Acceptance\AcceptanceRedrawDriver.cs" />

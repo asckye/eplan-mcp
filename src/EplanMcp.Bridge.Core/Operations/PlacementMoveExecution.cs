@@ -8,7 +8,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A54: read every location inside the SafetyPoint; autoconnect is checked after commit, before CloseUndo.</summary>
 public static class PlacementMoveExecution
 {
-    public static JObject Execute(IPlacementMover mover, ITransactionScopeFactory transactions, JObject input, string fingerprint)
+    public static JObject Execute(IPlacementMover mover, ITransactionScopeFactory transactions, JObject input, string fingerprint, string tool = "eplan_placement_update")
     {
         ConnectionCreatePlanner.Scene scene;
         try
@@ -93,7 +93,7 @@ public static class PlacementMoveExecution
                 { measured.Row["bounds"] = measured.Bounds is null ? null : new JArray(measured.Bounds); }
             }
         }
-        Committed<bool> result = TransactionRunner.Run(transactions, "eplan_placement_update", () => { move(); Verify(false); return true; }, _ => true,
+        Committed<bool> result = TransactionRunner.Run(transactions, tool, () => { move(); Verify(false); return true; }, _ => true,
             _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { Verify(true); return true; }),
             () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => PlacementMovePlanner.Plan(input.ToString(Formatting.None), Read(), fingerprint)));
         plan["execution"] = ExecutionState.Committed;

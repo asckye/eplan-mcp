@@ -1,0 +1,23 @@
+id: placement-edit
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的新原理图页 =GAA+A1&EFS1/9901 上放一个矩形，角点为 (40,100)、(50,110) 毫米。
+  找到它，将它复制两份：第一份原点相对源对象偏移 (80,0)，第二份再沿 x 增加 60 毫米。
+  报告新页上矩形总数和实际复制的新对象数；不要删除源矩形。
+answer: { type: object, required: [count, copied], properties: { count: { type: integer }, copied: { type: integer } } }
+after:
+  rectangles:
+    tool: eplan_page_get
+    args: { project: "{project}", page: "=GAA+A1&EFS1/9901", include_drawings: true }
+    pick: $.drawings.total
+  positions:
+    tool: eplan_page_get
+    args: { project: "{project}", page: "=GAA+A1&EFS1/9901", include_drawings: true }
+    pick: $.drawings.items[*].location[0]
+checks:
+  - { answer: $.count, equals: 3 }
+  - { answer: $.copied, equals: 2 }
+  - { after: rectangles, equals: 3 }
+  - { after: positions, set_equals: [40, 120, 180] }
+budget: { max_tool_calls: 15 }

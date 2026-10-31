@@ -48,7 +48,7 @@ internal static class UnknownArgumentFilter
             // Device placement checks raw display objects itself, preserving duplicate members for pointer errors.
             if (tool is not null && Violations(tool.ProtocolTool.InputSchema, context.Params?.Arguments, nestedMembers: tool.ProtocolTool.Name != DeviceWriteTools.PlaceTool) is { Count: > 0 } violations)
             {
-                if (tool.ProtocolTool.Name is PageTextReplaceTools.Tool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PlacementUpdateTools.Tool or ApiTryTools.Tool or ActionTryTools.Tool)
+                if (tool.ProtocolTool.Name is PageTextReplaceTools.Tool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or ApiTryTools.Tool or ActionTryTools.Tool)
                 {
                     BridgeError error = ToolResults.InvalidArgumentError(violations);
                     error.Execution = ExecutionState.NotStarted;

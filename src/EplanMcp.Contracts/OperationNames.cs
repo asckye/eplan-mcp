@@ -10,6 +10,10 @@ public static class OperationNames
     public const string SelectionGet = "selection.get";
     /// <summary>Set UI selection without a project transaction.</summary>
     public const string SelectionSet = "selection.set";
+    /// <summary>Same-page placement editing preview.</summary>
+    public const string PlacementEditPlan = "placement.edit.plan";
+    /// <summary>Approved placement editing with readback and one undo step.</summary>
+    public const string PlacementEditExecute = "placement.edit.execute";
     /// <summary>Plans one unverified catalog group without invoking it.</summary>
     public const string ApiTryPlan = "api.try.plan";
     /// <summary>Executes one generated catalog call with outcome tracking.</summary>

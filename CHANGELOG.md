@@ -12,6 +12,7 @@
 - C1 静态与入口片：公开静态成员无需 target，项目/页面对象通过最多两层的目录属性路径到达，补项目图层、图框和结构标识符入口；设置/方案只读，维持 scratch、逐次审批、编译分派、快照和单撤销。补充 Small 与 LargeWrite 撤销测试；未运行 EPLAN，schema 不变。
 - 新增 full / Read 的 `eplan_selection_get/set`：读取当前项目/编辑页、分页选择集，按通用对象摘要定位并 replace/add/clear，仅改变 UI，报告未选中对象；`eplan_action_try` 可在审批后设置精确 selection，审批与审计记录上下文。Large spike 和单撤销验证已编写，未运行。
 - 设置只读切片：`eplan_api_try` 通过 scratch Project 定位器读取 USER/STATION/PROJECT 设置、枚举节点与方案列表；路径逐级枚举核对、列表有界分页，所有设置写入仍以 settings_write 拒绝。schema 不变，补只读形状/校验测试及 LargeWrite 读取与单撤销测试；Large 仅编写未运行。
+- 新增 `eplan_placement_edit`（full）：同页删除、复制、90 度旋转、镜像、对齐和等间隙分布；复用绘图事务和单步撤销，删除逐次审批并备份，返回连接影响及复制定位符。Small/Medium 覆盖失败路径；原生行为 Large spike 仅编写未运行。
 - C1 第五片：`eplan_api_try` 新增服务类 7 个读组、90 个写组，按公开无参构造和 IDisposable 生成编译入口；Project 定位器锚定 scratch，拒绝跨项目参数及共享数据或外部资源签名，逐签名列出分类理由。写入复用单撤销事务，补充 Large 服务读取和连接两端交换撤销测试，仅编写未运行；工具契约不变。
 - C1 第四片：对象发现扩展到目录驱动的 121 个查询名称（119 个原生类型），11 个名称给出明确 unsupported 原因；生成完整类型表及最派生 Properties 分发，保留原有 14 种定位器摘要。api_try 现有 384 个读组、314 个写组，支持全部新增类型的定位器参数；覆盖与契约快照同步，Large 仅编写未运行。
 - C1 第三片：`eplan_api_try` 新增 9 个读方法组、18 个写方法组，支持精确重载选择、目录枚举、PointD 与同项目对象定位器参数；返回标量文本、定位器或 null，写方法复用单撤销事务。生成逐签名排除清单并更新覆盖报告，Large 已编写未运行。

@@ -1,7 +1,7 @@
 id: page-count
 set: dev
-prompt: 这个项目一共有多少页？
-answer: { type: object, required: [pages], properties: { pages: { type: integer } } }
-oracle: { pages: { tool: eplan_project_get, pick: $.counts.pages } }
-checks: [{ answer: $.pages, equals: oracle.pages }]
+prompt: 这个项目一共有多少页、多少设备？
+answer: { type: object, required: [pages, devices], properties: { pages: { type: integer }, devices: { type: integer } } }
+oracle: { pages: { tool: eplan_project_get, pick: $.counts.pages }, devices: { tool: eplan_project_get, pick: $.counts.devices } }
+checks: [{ answer: $.pages, equals: oracle.pages }, { answer: $.devices, equals: oracle.devices }]
 budget: { max_tool_calls: 6 }

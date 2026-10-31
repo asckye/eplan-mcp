@@ -173,6 +173,8 @@ internal static class BridgeHost
                 (path, page, symbol) => new EplanDeviceSymbolPlacement(path, page, symbol), new EplanPlcReader()),
             new ConnectionGeneratePlanOperation(catalog, pages, generator),
             new ConnectionCreatePlanOperation(connectionCreator),
+            new PlacementEditOperation(new EplanPlacementEditor(), transactions, false, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
+            new PlacementEditExecuteOperation(new EplanPlacementEditor(), transactions, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
             new ConnectionCreateExecuteOperation(connectionCreator, generator, transactions, new EplanPlacementMover()),
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),

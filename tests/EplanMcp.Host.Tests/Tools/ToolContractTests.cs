@@ -387,7 +387,10 @@ public sealed class ToolContractTests : IDisposable
         Tool api = Tools.Single(t => t.Name == ApiTools.SearchTool);
         Assert.InRange(api.Description!.Length + Descriptions(api.InputSchema), 1, 1000);
         Assert.InRange(api.InputSchema.GetRawText().Length, 1, 2000);
-        Assert.All(Tools.Where(t => t.Name is not (ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or PlacementUpdateTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Tool edit = Tools.Single(t => t.Name == PlacementEditTools.Tool);
+        Assert.InRange(edit.Description!.Length + Descriptions(edit.InputSchema), 1, 1000);
+        Assert.InRange(edit.InputSchema.GetRawText().Length, 1, 2500);
         foreach (Tool drawing in Tools.Where(t => t.Name is PlacementCreateTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool))
         {
             Assert.InRange(drawing.Description!.Length + Descriptions(drawing.InputSchema), 1, 1000);
