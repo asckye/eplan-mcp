@@ -418,7 +418,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_api_get.md",
       "small": 2,
-      "medium": 2,
+      "medium": 3,
       "large": 0,
       "apiNotes": []
     },
@@ -433,7 +433,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_api_search.md",
       "small": 2,
-      "medium": 1,
+      "medium": 2,
       "large": 0,
       "apiNotes": []
     },
