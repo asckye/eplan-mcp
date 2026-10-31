@@ -16,7 +16,8 @@ internal static class ApiTrySchema
         var usage = options.ToolCollection.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         JsonNode schema = JsonNode.Parse(usage.InputSchema.GetRawText())!;
         JsonArray names = schema["properties"]!["tool"]!["enum"]!.AsArray();
-        names.Remove(names.Single(n => n!.GetValue<string>() == ApiTryTools.Tool));
+        // The usage tool is shared by every HTTP session; a later session finds the name already gone.
+        foreach (JsonNode? name in names.Where(n => n!.GetValue<string>() == ApiTryTools.Tool).ToList()) { names.Remove(name); }
         usage.InputSchema = JsonSerializer.SerializeToElement(schema);
     }
 }

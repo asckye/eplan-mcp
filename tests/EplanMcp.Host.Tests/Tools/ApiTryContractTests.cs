@@ -28,8 +28,8 @@ public sealed class ApiTryContractTests
     public void InvalidSwitchCannotEnableTrials(string value) => Assert.Null(HostConfig.Parse("{\"apiTry\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-    [InlineData(false, false, 88)]
-    [InlineData(true, false, 89)]
+    [InlineData(false, false, 90)]
+    [InlineData(true, false, 91)]
     [InlineData(false, true, 25)]
     [InlineData(true, true, 25)]
     public void ToolAndUsageAreAbsentWhenOffOrCore(bool enabled, bool core, int count)
