@@ -8,6 +8,7 @@
 - ADR-0032 B2 第一部分：新增 full / Read 的 `eplan_object_find`、`eplan_object_get`，支持 Page、Function、Connection；其余 65 种类型明确返回 unsupported，规格列全类型，补分页、定位符与属性读取测试，Large 仅编写未运行。
 
 ### Added
+- C1 第五片：`eplan_api_try` 新增服务类 7 个读组、90 个写组，按公开无参构造和 IDisposable 生成编译入口；Project 定位器锚定 scratch，拒绝跨项目参数及共享数据或外部资源签名，逐签名列出分类理由。写入复用单撤销事务，补充 Large 服务读取和连接两端交换撤销测试，仅编写未运行；工具契约不变。
 - C1 第四片：对象发现扩展到目录驱动的 121 个查询名称（119 个原生类型），11 个名称给出明确 unsupported 原因；生成完整类型表及最派生 Properties 分发，保留原有 14 种定位器摘要。api_try 现有 384 个读组、314 个写组，支持全部新增类型的定位器参数；覆盖与契约快照同步，Large 仅编写未运行。
 - C1 第三片：`eplan_api_try` 新增 9 个读方法组、18 个写方法组，支持精确重载选择、目录枚举、PointD 与同项目对象定位器参数；返回标量文本、定位器或 null，写方法复用单撤销事务。生成逐签名排除清单并更新覆盖报告，Large 已编写未运行。
 - C2：新增 `eplan_action_try`，默认关闭，仅 full；目录未验证 action 只在 scratch 副本逐次审批后执行，带禁止表、前后指纹与未验证审计；超时/模态窗口按 unknown 暂停写入。Large 已编写未运行。

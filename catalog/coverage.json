@@ -505,7 +505,9 @@
       "small": 2,
       "medium": 0,
       "large": 1,
-      "apiNotes": []
+      "apiNotes": [
+        "A39"
+      ]
     },
     {
       "name": "eplan_asset_get",

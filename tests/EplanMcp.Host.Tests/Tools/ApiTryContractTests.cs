@@ -12,6 +12,18 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class ApiTryContractTests
 {
     [Theory]
+    [InlineData("target,pFunction", true)]
+    [InlineData("target,pPage,pFunction", true)]
+    [InlineData("pFunction", false)]
+    [InlineData("target,pFunction,unknown", false)]
+    public void ServiceUsesTheExistingLocatorSchemaAndExactParameterNameSet(string fields, bool valid)
+    {
+        object locator = new { project = "Scratch", page = "", type = 1, oid = 1, digest = new string('a', 64) };
+        JsonElement parameters = JsonSerializer.SerializeToElement(fields.Split(',').ToDictionary(f => f, _ => locator));
+        Assert.Equal(valid, ApiTryTools.MethodParameters("O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested", parameters));
+    }
+
+    [Theory]
     [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":2}", true)]
     [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":1e999}", false)]
     [InlineData("Function.IsPointInsideLogicalArea", "\"pnt\":{\"x\":1,\"y\":2,\"z\":3}", false)]

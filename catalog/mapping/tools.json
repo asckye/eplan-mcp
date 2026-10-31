@@ -2067,8 +2067,10 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_try.md",
-        "specStatus": "Implemented（C1 第四片，未实机验证；工具数不变）",
-        "apiNotes": [],
+        "specStatus": "Implemented（C1 第五片，服务入口未实机验证；工具数不变）",
+        "apiNotes": [
+          "A39"
+        ],
         "tests": [
           {
             "name": "ApiTryContractTests",

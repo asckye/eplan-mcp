@@ -10,8 +10,9 @@ public sealed class ApiTryOperationTests
     private const string Group = "O:Eplan.EplApi.DataModel.Page.Name";
     private readonly Dispatcher _dispatch = new();
     private readonly FakeTransactions _transactions = new();
+    private readonly Catalog _catalog = new();
     private ApiTryExecuteOperation Executor() => new(Planner(), _dispatch, _transactions);
-    private ApiTryPlanOperation Planner(int major = 2026) => new(major, new Catalog(), _dispatch);
+    private ApiTryPlanOperation Planner(int major = 2026) => new(major, _catalog, _dispatch);
     private static ApiTryArgs Args(string group = Group) => new()
     {
         Group = group,
@@ -200,6 +201,71 @@ public sealed class ApiTryOperationTests
         Assert.Empty(_transactions.Calls);
     }
 
+    private static ApiTryArgs ServiceArgs(bool write)
+    {
+        ApiTryArgs args = Args(write ? "O:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget" : "O:Eplan.EplApi.HEServices.SelectionSet.GetSelectedObject");
+        JObject p = JObject.Parse(args.Parameters);
+        if (write)
+        { p["connection"] = p["target"]!.DeepClone(); }
+        else
+        { p["bFirst"] = true; }
+        args.Parameters = p.ToString();
+        return args;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ServiceReadAndWriteUseExistingObservationsAndExactlyOneWriteTransaction(bool write)
+    {
+        ApiTryArgs args = ServiceArgs(write);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.ChangeOnInvoke = write;
+        var data = (ApiTryData)Executor().Execute(args)!;
+        Assert.Equal("before", data.Before["snapshot:1"]);
+        Assert.Equal(write ? "after" : "before", data.After["snapshot:1"]);
+        Assert.Equal(1, _dispatch.Invocations);
+        Assert.Equal(write ? ["Begin AI: eplan_api_try", "Commit", "CloseUndo", "Dispose"] : Array.Empty<string>(), _transactions.Calls);
+    }
+
+    [Fact]
+    public void ServiceLocatorInAnotherScratchProjectIsRefusedBeforeInspectionAndExecution()
+    {
+        ApiTryArgs args = ServiceArgs(true);
+        JObject p = JObject.Parse(args.Parameters);
+        p["connection"]!["project"] = @"D:\scratch\Another";
+        args.Parameters = p.ToString();
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal(0, _dispatch.Inspections);
+        Assert.Equal(0, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void ImplicitServiceRequiresCurrentTargetAndRechecksItAtExecution()
+    {
+        ApiTryArgs args = ServiceArgs(false);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _catalog.Current = false;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal(0, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
+        Assert.Equal("write", Assert.Single(Plan(ServiceArgs(true)).Changes).Action);
+    }
+
+    [Fact]
+    public void ServiceWriteFailureRollsBackWithoutCommitting()
+    {
+        ApiTryArgs args = ServiceArgs(true);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.Failure = new InvalidOperationException();
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error.Execution);
+        Assert.Contains("Rollback", _transactions.Calls);
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+    }
+
     [Theory]
     [InlineData("System.Int32", "Integer", "2147483648", false)]
     [InlineData("System.Int64", "Integer", "9223372036854775807", true)]
@@ -376,7 +442,8 @@ public sealed class ApiTryOperationTests
 
     private sealed class Catalog : IProjectCatalog
     {
-        public IReadOnlyList<OpenProject> ListOpenProjects() => [new() { Name = "Scratch", Path = @"D:\scratch\Scratch" }];
+        public bool Current { get; set; } = true;
+        public IReadOnlyList<OpenProject> ListOpenProjects() => [new() { Name = "Scratch", Path = @"D:\scratch\Scratch", Current = Current }];
     }
     private sealed class Dispatcher : IApiTryDispatcher
     {

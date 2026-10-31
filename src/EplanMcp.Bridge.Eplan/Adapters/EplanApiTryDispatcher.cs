@@ -21,6 +21,8 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
     {
         MainThread.Assert();
         DrawingLocator locator = token.ToObject<DrawingLocator>()!;
+        if (!ProjectResolver.SamePath(project, locator.Project))
+        { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Every locator must belong to the target scratch project."); }
         Project nativeProject = EplanProjects.ByPath(project);
         using var finder = new DMObjectsFinder(nativeProject);
         foreach (string kind in kinds)
@@ -55,6 +57,9 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
     }
     private static DrawingLocator Locator(string project, StorableObject obj)
     {
+        Project? owner = obj as Project ?? obj.Project;
+        if (owner is null || !ProjectResolver.SamePath(project, owner.ProjectFullName))
+        { throw new BridgeErrorException(ErrorReason.PolicyDenied, "The returned object does not belong to the target scratch project."); }
         string kind = ObjectReadTypes.Types.Where(ObjectReadTypes.Supported).OrderBy(k => k == "PLCTerminal" ? 1 : 0).Select(k => k.ToLowerInvariant()).FirstOrDefault(k => EplanObjectReader.Matches(obj, k))
             ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned object has no supported discovery locator.");
         SnapshotObject identity = EplanObjectReader.Describe(obj, kind);

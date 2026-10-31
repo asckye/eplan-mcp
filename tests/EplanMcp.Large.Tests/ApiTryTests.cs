@@ -47,7 +47,7 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     }
     private async Task<JsonElement> Call(string project, string member, object parameters, bool dry = false)
     {
-        CallToolResult result = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), "O:Eplan.EplApi.DataModel." + member,
+        CallToolResult result = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), member.StartsWith("O:", StringComparison.Ordinal) ? member : "O:Eplan.EplApi.DataModel." + member,
             project, JsonSerializer.SerializeToElement(parameters), dry, TestContext.Current.CancellationToken);
         Assert.False(result.IsError == true, string.Join("\n", result.Content.OfType<TextContentBlock>().Select(c => c.Text)));
         return result.StructuredContent!.Value;
@@ -130,5 +130,45 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         Assert.Equal(result.GetProperty("before").GetString(), result.GetProperty("after").GetString());
         Assert.Equal(0, result.GetProperty("totalChanges").GetInt32());
         Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task ScratchCopy_ServiceReadLeavesBusinessAndDesignFilesUnchanged()
+    {
+        string project = await eplan.WriteProjectAsync();
+        Dictionary<string, string> files = LiveSnapshots.DesignFiles(project);
+        JsonElement result = await Call(project, "O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested",
+            new { target = await Locator(project, "Project"), pFunction = await Locator(project, "Function") });
+        Assert.Equal("committed", result.GetProperty("execution").GetString());
+        Assert.True(result.GetProperty("value").GetString() is "True" or "False");
+        Assert.Equal(result.GetProperty("before").GetString(), result.GetProperty("after").GetString());
+        Assert.Equal(0, result.GetProperty("totalChanges").GetInt32());
+        Assert.Contains(Assert.Single(_approvals.Questions).Changes, c => c.StartsWith("read unverified API O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested", StringComparison.Ordinal));
+        Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task ScratchCopy_ServiceWriteOneUndoRestoresConnectionAndEarlierHistory()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string sentinel = Assert.Single(await selection.CreatePagesAsync(1));
+        JsonElement connection = await Locator(selection.Project, "Connection");
+        long oid = connection.GetProperty("oid").GetInt64();
+        EplanMcp.Contracts.SnapshotObject FindConnection(LiveSnapshots.Snapshot snapshot) => Assert.Single(snapshot.Pages.SelectMany(p => p.Objects), o => o.Kind == "connection" && o.Oid == oid);
+        EplanMcp.Contracts.SnapshotObject original = FindConnection(await selection.SnapshotAsync());
+        string before = await selection.StateAsync();
+        JsonElement written = await Call(selection.Project, "O:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget",
+            new { target = await Locator(selection.Project, "Project"), connection });
+        Assert.Equal("committed", written.GetProperty("execution").GetString());
+        Assert.Equal(JsonValueKind.Null, written.GetProperty("value").ValueKind);
+        EplanMcp.Contracts.SnapshotObject swapped = FindConnection(await selection.SnapshotAsync());
+        Assert.Equal(JsonSerializer.Serialize(original.Start), JsonSerializer.Serialize(swapped.End));
+        Assert.Equal(JsonSerializer.Serialize(original.End), JsonSerializer.Serialize(swapped.Start));
+        Assert.NotEqual(before, await selection.StateAsync());
+        await selection.UndoAsync();
+        Assert.Equal(before, await selection.StateAsync());
+        Assert.Contains((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel);
+        await selection.UndoAsync();
+        Assert.DoesNotContain((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel);
     }
 }

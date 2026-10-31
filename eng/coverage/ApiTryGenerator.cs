@@ -25,14 +25,20 @@ internal static class ApiTryGenerator
     internal static bool Writable(ApiDetail member) => member.Id != "P:Eplan.EplApi.DataModel.ViewPart.UseLocalPropertyPlacements" && member.SetterAccess is null && member.Access is null && member.Accessors?.Split(';').Contains("set", StringComparer.Ordinal) == true;
     private static bool ObjectType(string? type, IReadOnlyDictionary<string, string[]>? kinds = null) => kinds is null ? ApiTryCatalog.Kinds(type).Length > 0 : kinds.ContainsKey((type ?? "").Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal));
     private static bool Scalar(string? type, IReadOnlyDictionary<string, string[]>? enums) => type is "System.String" or "System.Boolean" or "System.Double" or "System.Int32" or "System.Int64" || type is not null && enums?.ContainsKey(type) == true;
-    internal static bool ReadMethod(ApiEntry entry) => _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal));
+    internal static bool ReadMethod(ApiEntry entry) => _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal))
+        && !entry.Details.Where(d => d.Kind == "overload").SelectMany(d => d.Parameters!).Any(ApiTryServices.SideEffectParameter);
     private static string ParameterName(ApiParameter p) => p.Name == "target" ? "argument_target" : p.Name;
     internal static string Names(ApiDetail member) => string.Join("|", member.Parameters!.Select(ParameterName).Order(StringComparer.Ordinal));
-    internal static string? Exclusion(ApiEntry entry, ApiDetail member, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds = null)
+    private static string Classification(ApiEntry entry, bool service) => (ReadMethod(entry) ? "read" : "write") + "\t"
+        + (service ? ReadMethod(entry) ? "read_prefix_without_side_effect_parameters" : _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) ? "side_effect_parameters" : "service_method_write" : "-");
+    internal static string? Exclusion(ApiEntry entry, ApiDetail member, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds = null, IReadOnlyDictionary<string, ApiTryServices.Service>? services = null)
     {
         if (entry.Row.ExcludedReason is not null || member.ExcludedReason is not null)
         { return "catalog:" + (entry.Row.ExcludedReason ?? member.ExcludedReason); }
-        if (entry.Name == "Dispose" || _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
+        bool service = services?.ContainsKey(entry.Type[2..]) == true;
+        if (service && (services![entry.Type[2..]].Reason ?? ApiTryServices.Exclusion(entry, member)) is { } reason)
+        { return reason; }
+        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
         { return "lifecycle_or_creation"; }
         if (member.Static || member.Access is not null)
         { return "static_or_nonpublic"; }
@@ -48,8 +54,8 @@ internal static class ApiTryGenerator
         { return "unsupported_parameter"; }
         return member.ReturnType != "System.Void" && !Scalar(member.ReturnType, enums) && !ObjectType(member.ReturnType, kinds) && member.ReturnType != "Eplan.EplApi.DataModel.StorableObject" ? "unsupported_return" : null;
     }
-    internal static IEnumerable<(ApiEntry Entry, ApiDetail Member)> Methods(ApiIndexData data, IReadOnlyDictionary<string, string[]>? enums = null, IReadOnlyDictionary<string, string[]>? kinds = null) => data.Entries
-        .Where(e => e.Row.Kind == "method" && ObjectType(e.Type[2..], kinds)).SelectMany(e => e.Details.Where(d => d.Kind == "overload" && Exclusion(e, d, enums, kinds) is null)
+    internal static IEnumerable<(ApiEntry Entry, ApiDetail Member)> Methods(ApiIndexData data, IReadOnlyDictionary<string, string[]>? enums = null, IReadOnlyDictionary<string, string[]>? kinds = null, IReadOnlyDictionary<string, ApiTryServices.Service>? services = null) => data.Entries
+        .Where(e => e.Row.Kind == "method" && (ObjectType(e.Type[2..], kinds) || services?.ContainsKey(e.Type[2..]) == true)).SelectMany(e => e.Details.Where(d => d.Kind == "overload" && Exclusion(e, d, enums, kinds, services) is null)
             .GroupBy(Names, StringComparer.Ordinal).Where(g => g.Count() == 1).Select(g => (e, g.Single())));
     internal static IEnumerable<(ApiEntry Entry, ApiDetail Member)> Selected(ApiIndexData data, IReadOnlyDictionary<string, string[]>? enums = null, IReadOnlyDictionary<string, string[]>? kinds = null) => data.Entries
         .Where(e => e.Row.ExcludedReason is null && ObjectType(e.Type[2..], kinds))
@@ -64,17 +70,19 @@ internal static class ApiTryGenerator
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
         Dictionary<string, string[]> enums = Enums(root);
-        return "group\tsignature\tstatus\treason\n" + string.Join("\n", data.Entries.Where(e => e.Row.Kind == "method" && ObjectType(e.Type[2..], kinds))
+        Dictionary<string, ApiTryServices.Service> services = ApiTryServices.Load(root);
+        return "group\tsignature\tstatus\treason\n" + string.Join("\n", data.Entries.Where(e => e.Row.Kind == "method" && (ObjectType(e.Type[2..], kinds) || services.ContainsKey(e.Type[2..])))
             .SelectMany(e => e.Details.Where(d => d.Kind == "overload").Select(d => e.Row.Group + "\t" + d.Id + "\t"
-                + (Exclusion(e, d, enums, kinds) is { } reason ? "excluded\t" + reason : e.Details.Count(o => o.Kind == "overload" && Names(o) == Names(d) && Exclusion(e, o, enums, kinds) is null) != 1 ? "excluded\tambiguous_parameter_names" : (ReadMethod(e) ? "read" : "write") + "\t-")))) + "\n";
+                + (Exclusion(e, d, enums, kinds, services) is { } reason ? "excluded\t" + reason : e.Details.Count(o => o.Kind == "overload" && Names(o) == Names(d) && Exclusion(e, o, enums, kinds, services) is null) != 1 ? "excluded\tambiguous_parameter_names" : Classification(e, services.ContainsKey(e.Type[2..])))))) + "\n";
     }
     internal static string Catalog(string root)
     {
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
         Dictionary<string, string[]> enums = Enums(root);
+        Dictionary<string, ApiTryServices.Service> services = ApiTryServices.Load(root);
         (ApiEntry Entry, ApiDetail Member)[] selected = [.. Selected(data, enums, kinds)];
-        (ApiEntry Entry, ApiDetail Member)[] methods = [.. Methods(data, enums, kinds)];
+        (ApiEntry Entry, ApiDetail Member)[] methods = [.. Methods(data, enums, kinds, services)];
         string Shape(string type) => "[" + string.Join(", ", (enums.TryGetValue(type, out string[]? values) ? _enumShape.Concat(values) : [type]).Select(Literal)) + "]";
         return "// <auto-generated/>\n#nullable enable\nnamespace EplanMcp.Contracts;\npublic static class ApiTryCatalog\n{\n"
             + "    public static bool Allowed(string group) => group switch\n    {\n"
@@ -84,12 +92,13 @@ internal static class ApiTryGenerator
             + "\n        _ => null,\n    };\n    public static string[]? Shape(string group, System.Collections.Generic.IEnumerable<string> names) => Shape(group) ?? ((group, string.Join(\"|\", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Where(names, n => n != \"target\"), n => n, System.StringComparer.Ordinal))) switch\n    {\n"
             + string.Join("\n", methods.Select(s => "        (" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => [" + string.Join(", ", new[] { s.Entry.Type[2..], s.Member.Signature! }.Concat(s.Member.Parameters!.Select(ParameterName)).Select(Literal)) + "],"))
             + "\n        _ => null,\n    });\n    public static string? MethodAccess(string group) => group switch\n    {\n"
-            + string.Join("\n", data.Entries.Where(e => e.Row.Kind == "method" && ObjectType(e.Type[2..], kinds) && e.Details.Any(d => d.Kind == "overload" && Exclusion(e, d, enums, kinds) is null)).Select(e => "        " + Literal(e.Row.Group) + " => " + Literal(ReadMethod(e) ? "read" : "write") + ","))
+            + string.Join("\n", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => "        " + Literal(s.Entry.Row.Group) + " => " + Literal(ReadMethod(s.Entry) ? "read" : "write") + ","))
             + "\n        _ => null,\n    };\n    public static string[]? ParameterShape(string signature, string name) => (signature, name) switch\n    {\n"
             + string.Join("\n", methods.SelectMany(s => s.Member.Parameters!.Select(p => "        (" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
             + "\n        _ => null,\n    };\n    public static string[]? ValueShape(string group) => group switch\n    {\n"
             + string.Join("\n", selected.Where(s => Writable(s.Member) && s.Member.ReturnType != "System.Int64").Select(s => "        " + Literal(s.Entry.Row.Group) + " => [" + string.Join(", ", (enums.TryGetValue(s.Member.ReturnType!, out string[]? values) ? _enumShape.Concat(values) : [s.Member.ReturnType!]).Select(Literal)) + "],"))
-            + "\n        _ => null,\n    };\n    public static string[] TargetKinds(string group) => Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
+            + "\n        _ => null,\n    };\n    public static bool Service(string group) => group switch { " + string.Join(" ", methods.Where(s => services.ContainsKey(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => false };\n"
+            + "    public static string[] TargetKinds(string group) => Service(group) ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
             + string.Join("\n", kinds.Select(p => "        " + Literal("Eplan.EplApi.DataModel." + p.Key) + " => [" + string.Join(", ", p.Value.Select(Literal)) + "],"))
             + "\n        _ => [],\n    };\n"
             + "    public static bool ValidValue(string[]? shape, string kind, string text) => shape?[0] switch\n    {\n"
@@ -106,6 +115,7 @@ internal static class ApiTryGenerator
         Dictionary<string, string[]> enums = Enums(root);
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
+        Dictionary<string, ApiTryServices.Service> services = ApiTryServices.Load(root);
         (ApiEntry Entry, ApiDetail Member)[] selected = [.. Selected(data, enums, kinds)];
         string Argument(ApiParameter p) => enums.TryGetValue(p.Type, out string[]? values)
             ? "(parameters[" + Literal(ParameterName(p)) + "]!.Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + p.Type + "." + v)) + ", _ => throw new System.InvalidOperationException(\"Invalid enum value.\") })"
@@ -123,7 +133,13 @@ internal static class ApiTryGenerator
                 ? "parameters[\"value\"]!.Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + s.Member.ReturnType + "." + v)) + ", _ => throw new System.InvalidOperationException(\"Invalid enum value.\") }"
                 : "parameters[\"value\"]!.Value<" + s.Member.ReturnType + ">()") + "; break;"))
         + "\n            default: throw new System.InvalidOperationException(\"No compiled setter for this group.\");\n        }\n    }\n    internal static object? Invoke(string signature, StorableObject target, JObject parameters, System.Func<JToken, string, StorableObject> resolve)\n    {\n        switch (signature)\n        {\n"
-        + string.Join("\n", Methods(data, enums, kinds).Select(s => "            case " + Literal(s.Member.Signature!) + ": " + (s.Member.ReturnType == "System.Void" ? "" : "return ") + Target(s.Entry) + "(" + string.Join(", ", s.Member.Parameters!.Select(Argument)) + ");" + (s.Member.ReturnType == "System.Void" ? " return null;" : "")))
+        + string.Join("\n", Methods(data, enums, kinds, services).Select(s =>
+        {
+            bool service = services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? receiver);
+            string construct = service ? (receiver!.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..] + "(); " : "";
+            return "            case " + Literal(s.Member.Signature!) + ": { " + construct + (s.Member.ReturnType == "System.Void" ? "" : "return ")
+                + (service ? "service." + s.Entry.Name : Target(s.Entry)) + "(" + string.Join(", ", s.Member.Parameters!.Select(Argument)) + ");" + (s.Member.ReturnType == "System.Void" ? " return null;" : "") + " }";
+        }))
         + "\n            default: throw new System.InvalidOperationException(\"No compiled method for this signature.\");\n        }\n    }\n}\n";
     }
 }

@@ -35,6 +35,8 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
             || parameters["target"] is not JObject target || !Locator(target)
             || parameters.Properties().Any(p => Kind(p.Value) == "locator" && !ProjectResolver.SamePath(project.Path, (string)p.Value["project"]!)))
         { throw InvalidArgument("Use the exact generated parameter shape and a target locator from eplan_object_find; no coercion is allowed."); }
+        if (ApiTryCatalog.Service(args.Group) && !project.Current && !shape.Skip(2).Any(n => ApiTryCatalog.Kinds(ApiTryCatalog.ParameterShape(shape[1], n)?[0]).Length > 0))
+        { throw new BridgeErrorException(ErrorReason.PolicyDenied, "A service without explicit object arguments requires the target scratch project to be current."); }
         args.Project = project.Path;
         dispatch.CheckTarget(args);
         Dictionary<string, string> before = dispatch.Inspect(project.Path);

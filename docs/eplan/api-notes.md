@@ -198,6 +198,8 @@
 
 - C1 第四片（2026-10-31，不运行 EPLAN）：目录继承关系与本机 XML 确认 `GetStorableObjects(null)` 枚举 StorableObject 及派生对象，但不含 Page、PropertyPlacement、Symbol；Page 用 GetPages，Symbol 用 GetSymbolsWithFilterScheme，属性放置仍按 A57 拒绝。GetFunctions3D 不含 InstallationSpace，另用 Project.InstallationSpaces；GetPlacements3D 不含 MateEntry，另有 GetCustomMateEntries。3D 连接可从 InstallationSpace.Connection3Ds 取得。Properties 必须沿声明继承链取最派生 getter；没有独立字典的派生属性列表使用最近的目录字典，未知 ID 拒读。ViewPart.UseLocalPropertyPlacements 仅 setter 过时，不生成该写入口。— `catalog/eplan-2026.0.3/`、本机 `Eplan.EplApi.DataModelu.xml` 对应成员；本片只有离线编译与测试，未增加实机验证结论。
 
+- C1 第五片（2026-10-31，仅核对目录和本机 `Eplan.EplApi.HEServicesu.xml`，不运行 EPLAN）：`PlcService.ImportData(Project, string strFullName, ImportMatch)` 的 strFullName 是输入文件完整路径，按路径排除；`NameService.EvaluateAndSetAllNamesTXN` 自建事务，文档禁止外层事务，不能接入单撤销试执行。`NameService.CanDeviceTagBeNested(Function)` 返回 bool；`ConnectionService.SwapSourceAndTarget(Connection)` 交换连接两端；两者的 Large 服务读取与撤销测试仅编写，未实机验证。`StorableObject.Project` 在 transient 或无项目归属时可为 null，返回定位器前须校验项目归属（本机 `Eplan.EplApi.DataModelu.xml`）。
+
 ### A61. 界面 action 的试执行（C2 `eplan_action_try`，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 上）
 - `XGedZoomAllAction` 在没有打开图形页编辑器时，`Execute` 返回 false，不弹对话框，系统日志也没有消息；工具按失败处理并回滚。先用 `eplan_page_open` 打开一页后再执行，返回成功，业务快照和设计文件指纹都不变。— Large `ActionTryTests`。
 - 界面 action 作用于当前项目，所以试执行要求 EPLAN 中只打开目标 scratch 项目、并且它是当前项目。测试中按 A11/A41 依次关闭夹具副本来满足这一条件；恢复现场时，若测试打开过页面，重新打开的项目不会成为当前项目，需要在原当前项目里再打开一页（同 `eplan_page_open` 那条）。— 同上。
