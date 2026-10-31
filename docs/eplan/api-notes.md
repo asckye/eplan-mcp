@@ -202,6 +202,11 @@
 - `XGedZoomAllAction` 在没有打开图形页编辑器时，`Execute` 返回 false，不弹对话框，系统日志也没有消息；工具按失败处理并回滚。先用 `eplan_page_open` 打开一页后再执行，返回成功，业务快照和设计文件指纹都不变。— Large `ActionTryTests`。
 - 界面 action 作用于当前项目，所以试执行要求 EPLAN 中只打开目标 scratch 项目、并且它是当前项目。测试中按 A11/A41 依次关闭夹具副本来满足这一条件；恢复现场时，若测试打开过页面，重新打开的项目不会成为当前项目，需要在原当前项目里再打开一页（同 `eplan_page_open` 那条）。— 同上。
 
+### A62. 通用对象读取的实机结果（C1 第四片，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只读 scratch 副本 LargeWrite）
+- 按目录生成的查找路径（`DMObjectsFinder` 的 `Get*` 方法与页 `AllPlacements` 按运行时类型筛选）在 LargeWrite 上找到并读出 60 种新类型的属性（如 Arc、Cabinet、MountingPanel、MountingRail、BusBar、Harness、Connection3D、RoutingSegment、QRCode、PlanningObject、Project），读取前后设计文件不变。另有 22 种在该副本中没有对象（如 Comment、Function3D、HyperLink、LockedMountingArea），未实机读取。
+- **`E3D.MateEntry` 的身份不稳定**：同一对象在 `eplan_object_find` 与随后的 `eplan_object_get` 之间描述摘要不同（`PLAN_STALE`），因此列为不支持（`unstable_identity`），不提供定位器。
+- 两个 EPLAN 实例同时运行时，分页游标不能绑定全部实例列表：另一个实例启动或退出会使游标失效。游标只绑定所选实例（进程号与管道名）。— Large `GenericObjectReadTests`、`ObjectReadTests`（A、B 两槽并行）。
+
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - `Function.PropertyPlacements` 返回的是 `ContextPropertyPlacement`（`PropertyPlacement` 的子类），**它们的 `ToStringIdentifier()` / `ObjectIdentifier` 与父功能相同**，也不出现在 `Page.AllPlacements` 中。按标识去重会把它们全部当成父功能而丢掉；须按父对象 + 显示的属性 + 序号区分。新建的 20214 放置同样如此，画面上正常显示（导出图片核对）。— T2b。
 - 经 `eplan_device_place` 的库符号分支放置无部件线圈：标识 20214 显示带 `-` 且位于“父位置 + 偏移”，连接点代号经带索引 20022 写入并显示，重复标识拒绝，一次撤销恢复。— T2b。

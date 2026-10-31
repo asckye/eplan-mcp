@@ -34,7 +34,8 @@ internal static class ObjectKindGenerator
             string list = property?.Details.FirstOrDefault(d => d.Kind == "overload")?.ReturnType ?? "";
             string dictionary = Ancestors(list).Select(n => n[(n.LastIndexOf('.') + 1)..].Replace("PropertyListComplete", "", StringComparison.Ordinal).Replace("PropertyList", "", StringComparison.Ordinal)).FirstOrDefault(dictionaries.Contains) ?? "StorableObject";
             string? reason = t.TryGetProperty("excluded", out _) ? "catalog_excluded" : Text(t, "modifiers").Contains("abstract", StringComparison.Ordinal) ? "abstract_type"
-                : Derives(type, Prefix + "ArticleReference") ? "transient_reference:A60" : Derives(type, Prefix + "Graphics.PropertyPlacement") ? "shared_parent_identity:A57" : null;
+                : Derives(type, Prefix + "ArticleReference") ? "transient_reference:A60" : Derives(type, Prefix + "Graphics.PropertyPlacement") ? "shared_parent_identity:A57"
+                : type == Prefix + "E3D.MateEntry" ? "unstable_identity:A62" : null;
             var sources = new List<string>();
             foreach (ApiEntry e in data.Entries.Where(e => e.Type == "T:" + Prefix + "DMObjectsFinder" && e.Name.StartsWith("Get", StringComparison.Ordinal) && !e.Name.Contains("WithCF", StringComparison.Ordinal)))
             {

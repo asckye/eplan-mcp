@@ -65,7 +65,7 @@
 | MDSymbolVariant | unsupported | not_storable_catalog_type | MDSymbolVariant |
 | MacroBox | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | MacroBox |
 | MacroEntry | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | MacroEntry |
-| MateEntry | supported | finder.GetCustomMateEntries(null) + finder.GetStorableObjects(null) | Placement3D |
+| MateEntry | unsupported | unstable_identity:A62 | Placement3D |
 | MergedArticleReference | supported | finder.GetStorableObjects(null) | MergedArticleReference |
 | MergedConnection | supported | finder.GetStorableObjects(null) | StorableObject |
 | MergedFunction | supported | finder.GetStorableObjects(null) | StorableObject |

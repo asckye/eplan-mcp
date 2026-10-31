@@ -17,6 +17,7 @@ public sealed class GenericObjectReadTests(LiveEplan eplan, WriteHost host, ITes
     {
         var readKinds = new List<string>();
         var skipped = new List<string>();
+        var failed = new List<string>();
         Dictionary<string, string> before = LiveSnapshots.DesignFiles(host.Writable);
         try
         {
@@ -27,14 +28,26 @@ public sealed class GenericObjectReadTests(LiveEplan eplan, WriteHost host, ITes
                 if (found.GetProperty("items").GetArrayLength() == 0)
                 { skipped.Add(kind); output.WriteLine("Skipped (zero objects): " + kind); continue; }
                 JsonElement obj = Assert.Single(found.GetProperty("items").EnumerateArray());
-                JsonElement read = await eplan.CallAsync("eplan_object_get", new()
+                JsonElement read;
+                try
                 {
-                    ["project"] = host.Writable,
-                    ["object_type"] = kind,
-                    ["locator"] = obj.GetProperty("locator"),
-                    ["language"] = "en_US",
-                    ["limit"] = 200,
-                });
+                    read = await eplan.CallAsync("eplan_object_get", new()
+                    {
+                        ["project"] = host.Writable,
+                        ["object_type"] = kind,
+                        ["locator"] = obj.GetProperty("locator"),
+                        ["language"] = "en_US",
+                        ["limit"] = 200,
+                    });
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    // Every kind is tried, so one unstable kind does not hide the others; all failures are reported below.
+                    failed.Add(kind + ": " + ex.Message);
+                    output.WriteLine("Failed: " + kind + ": " + ex.Message);
+                    continue;
+                }
+
                 Assert.Equal("supported", read.GetProperty("status").GetString());
                 Assert.NotEmpty(read.GetProperty("items").EnumerateArray());
                 Assert.All(read.GetProperty("items").EnumerateArray(), r => Assert.False(string.IsNullOrWhiteSpace(r.GetProperty("property_name").GetString())));
@@ -46,8 +59,10 @@ public sealed class GenericObjectReadTests(LiveEplan eplan, WriteHost host, ITes
         {
             output.WriteLine("Read kinds: " + string.Join(", ", readKinds));
             output.WriteLine("Skipped zero-object kinds: " + string.Join(", ", skipped));
+            output.WriteLine("Failed kinds: " + string.Join(" | ", failed));
             Assert.Equal(before.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(host.Writable).OrderBy(p => p.Key, StringComparer.Ordinal));
         }
+        Assert.Empty(failed);
         Assert.True(readKinds.Count >= 10, "LargeWrite must contain at least ten newly supported runtime kinds; found " + readKinds.Count);
     }
 }
