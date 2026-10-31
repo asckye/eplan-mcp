@@ -1644,6 +1644,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
           },
           {
+            "name": "InterruptionExistingNetTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/InterruptionExistingNetTests.cs"
+          },
+          {
             "name": "CableDefinitionExecutionTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CableDefinitionExecutionTests.cs"
@@ -1796,6 +1801,11 @@
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -8695,6 +8705,11 @@
             "name": "ConnectionCreateExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          },
+          {
+            "name": "InterruptionExistingNetTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/InterruptionExistingNetTests.cs"
           },
           {
             "name": "CableDefinitionExecutionTests",
