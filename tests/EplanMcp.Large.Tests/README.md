@@ -55,6 +55,8 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 |---|---|
 | `PlanFunctionsTests` | 只读 `fixtures\EPLAN_Sample_Project`（或离线宿主的夹具副本），分页读取全部 device.list（含辅助功能）并结合完整快照发现全部名称，再以每批最多 200 个名称读 plan.functions：动态寻找无页功能、同名跨页主功能、超过 50 个同名辅助功能，核对完整性、持久标识、排序及与快照/列表的一致性；只有完整扫描确实没有相应对象时才跳过，并说明缺少哪类对象，能力缺失或 complete=false 必须失败，选中对象的名称、页、type/oid 写入测试输出；尚未实跑 |
 | `PlanImpactTests` | 只读 P06 闭包，不调用改名/删页的 plan 或 execute：A13 优先选择 `=F+A2-KF1`，否则动态找完全放置的跨页设备，逐项核对 read/modify scope 和对象哈希；A18 优先找 `+A1-WE1` 主功能页，否则找会留下 orphan 的页，核对全部剩余功能及修改范围，再用只读取得的局部基准验证缺页证据会 CAPABILITY_MISSING；独立测试查找同名无页功能关联的页，核对拒绝及含无页功能的 orphan 诊断，无合适样本时明确跳过；尚未实跑 |
+| `CableBusStarSpikeTests` | **Spike=D1，仅编写、未运行**：在 `LargeWrite` 新页用产品工具放三器件及单个 T 节点，分别在节点前后画电缆定义线；独立新页提供固定 1/RD、2/BK、3/BU 芯线模板。测试专用 `ConnectionHelper` 分阶段定义、绑定及调用限定电缆的原生分配，输出逻辑器件对、图形段/路径、电缆成员、芯号/颜色属性及失败信息，只断言搭建成功。结束由 `PlanStepLiveSession` 删除全部新增页。先构建 `tests/EplanMcp.Large.ConnectionHelper`，使用标准 Large 写副本及 Remote Client 环境；按 `--filter-trait "Spike=D1"` 单独运行，文件头列出回填 api-notes 所需输出 |
+| `InterruptionPairingSpikeTests` | **Spike=D2，仅编写、未运行**：产品工具在 `LargeWrite` 一张或两张新页搭四个独立器件/中断点，正反创建次序；`ConnectionHelper` 仅将已知点改成隔离的同名 I2，依次观察同名两点、三点、四点。输出页顺序、位置、方向、原生引用集合、逻辑器件对、交叉引用属性与显示文字，只断言搭建成功，不预设配对规则。结束删除新增页；构建和环境同 D1，按 `--filter-trait "Spike=D2"` 运行，文件头列出回填 api-notes 所需输出 |
 | `ProjectAndPageTests` | 页数、设备数、连接数、部件引用数和各类页的数量；detailed 属性的名称和索引；按类型、名称前缀筛选页；读取页描述的耗时；页上的设备；不存在的页 |
 | `DeviceAndConnectionTests` | 设备总数，同一页上的设备不重复；短标识 `-FC1` 的 14 个候选；断路器 `=GAA+A1-FC1` 的部件、连接点，以及负载侧接到哪些设备；不存在的设备 |
 | `PartAndMessageTests` | 部件总数和各制造商的部件数；按语言读部件描述，以及省略 `language` 时的回退；系统消息和检查结果；选择 EPLAN 实例 |
