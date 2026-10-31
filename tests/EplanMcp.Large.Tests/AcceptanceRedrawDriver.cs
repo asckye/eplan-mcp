@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -6,7 +7,7 @@ namespace EplanMcp.Large.Tests;
 
 internal sealed class AcceptanceRedrawDriver(
     Func<string, Dictionary<string, object?>, Task<(bool Succeeded, JsonElement Result)>> call,
-    string project, JsonElement list, string run, Action<string> output, string? next = null)
+    string project, JsonElement list, string run, Action<string> output, string? next = null, bool keepGoing = false, bool preflight = false)
 {
     private readonly Dictionary<string, JsonElement> _placed = new(StringComparer.Ordinal);
     private readonly Dictionary<string, JsonElement> _symbols = new(StringComparer.Ordinal);
@@ -17,8 +18,10 @@ internal sealed class AcceptanceRedrawDriver(
     private readonly Dictionary<string, string> _devicePages = new(StringComparer.Ordinal);
     private readonly Dictionary<string, (string Tag, string Pin)> _interruptionSupport = new(StringComparer.Ordinal);
     private readonly List<object> _evidence = [];
-    private readonly List<object> _skipped = [];
+    private readonly List<SkippedItem> _skipped = [];
     private readonly List<string> _stages = [];
+    private readonly List<string> _problems = [];
+    private readonly List<object> _preflight = [];
     private double _tolerance;
     private bool _wireBatchCommitted;
 
@@ -26,23 +29,62 @@ internal sealed class AcceptanceRedrawDriver(
     internal string CounterpartPage => Expand(list.GetProperty("counterpart_page").GetString()!);
     internal int UndoSteps { get; private set; }
     internal int SkippedCount => _skipped.Count;
+    internal bool PreflightOnly => preflight && !keepGoing;
     internal bool UndoCountIncomplete { get; private set; }
     internal JsonElement? Image { get; private set; }
-    internal object Report => new { page = Page, counterpartPage = CounterpartPage, undoSteps = UndoSteps, undoCountIncomplete = UndoCountIncomplete, stages = _stages, skipped = _skipped, evidence = _evidence };
+    internal object Report => new { page = Page, counterpartPage = CounterpartPage, undoSteps = UndoSteps, undoCountIncomplete = UndoCountIncomplete, stages = _stages, skipped = _skipped.Select(s => new { item = s.Item, status = "skipped", reason = s.Reason }), problems = _problems, preflight = _preflight, evidence = _evidence };
 
     internal async Task DrawAsync()
     {
-        Stage("pages");
+        await StageAsync("pages", PagesAsync);
+        await StageAsync("location_boxes", LocationBoxesAsync);
+        await StageAsync("devices", async () =>
+        {
+            foreach (JsonElement device in Items("devices"))
+            { await ObserveAsync(Id(device), () => PlaceDeviceAsync(device)); }
+        });
+        await StageAsync("plc", PlcAsync);
+        await StageAsync("terminals", TerminalsAsync);
+        if (preflight)
+        {
+            await StageAsync("interruption_support", PlaceInterruptionSupportAsync);
+            await StageAsync("preflight", PreflightAsync);
+            if (PreflightOnly)
+            {
+                ThrowIfProblems();
+                return;
+            }
+        }
+
+        // Acceptance trial: aligned pins are joined by autoconnect lines as soon as they are placed; generate them first so
+        // connection_create predicts only its own items (otherwise its generation adds these and rolls back).
+        await StageAsync("generate_autoconnect", async () =>
+            await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["autoconnect"]));
+        await StageAsync("wires_symbols_and_cables", () => WiresAsync());
+        await StageAsync("generate", async () =>
+            await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["generate"]));
+        await ObserveAsync("cables_after_generate", GeneratedCablesAsync);
+        await StageAsync("interruption_points", () => InterruptionsAsync());
+        await StageAsync("texts", TextsAsync);
+        await StageAsync("verify", VerifyAsync);
+        if (keepGoing)
+        { ThrowIfProblems(); }
+    }
+
+    private async Task PagesAsync()
+    {
         await WriteAsync("eplan_page_create", new() { ["pages"] = new[] { new { name = Page }, new { name = CounterpartPage } } }, ["pages"]);
         // A54: opening the editor selects LargeWrite and lets the engineer watch all subsequent batches.
         JsonElement opened = await ReadAsync("eplan_page_open", new() { ["page"] = Page });
-        Assert.True(opened.GetProperty("editor_opened").GetBoolean());
+        Check(() => Assert.True(opened.GetProperty("editor_opened").GetBoolean()));
         JsonElement initial = await ReadAsync("eplan_page_get", PageArgs(Page));
         double grid = initial.GetProperty("drawings").GetProperty("gridSize").GetDouble();
         Assert.True(double.IsFinite(grid) && grid > 0);
         _tolerance = grid / 2;
+    }
 
-        Stage("location_boxes");
+    private async Task LocationBoxesAsync()
+    {
         foreach (JsonElement box in Items("location_boxes"))
         {
             JsonElement corners = box.GetProperty("corners");
@@ -58,35 +100,15 @@ internal sealed class AcceptanceRedrawDriver(
             if (result is not { } placed)
             { continue; }
             JsonElement read = placed.GetProperty("locationBox");
-            Assert.Equal(box.GetProperty("structure").GetString(), read.GetProperty("structure").GetString());
-            Assert.Equal("dashed", read.GetProperty("outline").GetString());
+            Check(() => Assert.Equal(box.GetProperty("structure").GetString(), read.GetProperty("structure").GetString()));
+            Check(() => Assert.Equal("dashed", read.GetProperty("outline").GetString()));
             Near([corners[0][0].GetDouble(), corners[0][1].GetDouble(), corners[1][0].GetDouble(), corners[1][1].GetDouble()], read.GetProperty("bounds"));
             _placed[Id(box)] = box;
         }
+    }
 
-        Stage("devices");
-        foreach (JsonElement device in Items("devices"))
-        { await PlaceDeviceAsync(device); }
-
-        Stage("plc");
-        await PlcAsync();
-        Stage("terminals");
-        await TerminalsAsync();
-
-        // Acceptance trial: aligned pins are joined by autoconnect lines as soon as they are placed; generate them first so
-        // connection_create predicts only its own items (otherwise its generation adds these and rolls back).
-        Stage("generate_autoconnect");
-        await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["autoconnect"]);
-        Stage("wires_symbols_and_cables");
-        await WiresAsync();
-        Stage("generate");
-        await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["generate"]);
-        await GeneratedCablesAsync();
-
-        Stage("interruption_points");
-        await InterruptionsAsync();
-
-        Stage("texts");
+    private async Task TextsAsync()
+    {
         JsonElement[] texts = Items("texts");
         if (texts.Length > 0)
         {
@@ -97,17 +119,17 @@ internal sealed class AcceptanceRedrawDriver(
                 ["items"] = texts.Select(t => new { kind = "text", position = t.GetProperty("position"), height_mm = t.GetProperty("height_mm").GetDouble(), contents = new Dictionary<string, string> { ["??_??"] = t.GetProperty("text").GetString()! } }).ToArray(),
             }, texts.Select(Id).ToArray());
         }
-        Stage("verify");
-        await VerifyAsync();
     }
 
     internal async Task ExportAsync()
     {
         Image = await ReadAsync("eplan_export_image", new() { ["pages"] = new[] { Page }, ["format"] = "png", ["width_px"] = 2400 });
-        Assert.False(Image.Value.GetProperty("truncated").GetBoolean());
-        Assert.Equal(1, Image.Value.GetProperty("fileCount").GetInt32());
-        Assert.True(Image.Value.GetProperty("totalBytes").GetInt64() > 0);
+        Check(() => Assert.False(Image.Value.GetProperty("truncated").GetBoolean()));
+        Check(() => Assert.Equal(1, Image.Value.GetProperty("fileCount").GetInt32()));
+        Check(() => Assert.True(Image.Value.GetProperty("totalBytes").GetInt64() > 0));
         output("Page image: " + Image.Value.GetProperty("directory").GetString());
+        if (keepGoing)
+        { ThrowIfProblems(); }
     }
 
     private async Task PlaceDeviceAsync(JsonElement device, string? page = null)
@@ -137,35 +159,39 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task RememberDeviceAsync(JsonElement device, JsonElement placed, string? owner = null)
     {
-        Assert.False(placed.GetProperty("recovered").GetBoolean());
+        Check(() => Assert.False(placed.GetProperty("recovered").GetBoolean()));
         _placed[Id(device)] = device;
         _symbols[Id(device)] = placed.GetProperty("symbol");
         string actualTag = placed.GetProperty("device").GetProperty("tag").GetString()!;
-        Assert.True(SameName(Expand(device.GetProperty("tag").GetString()!), actualTag));
+        Check(() => Assert.True(SameName(Expand(device.GetProperty("tag").GetString()!), actualTag)));
         _actualTags[Id(device)] = actualTag;
         if (device.TryGetProperty("contact_kind", out JsonElement kind))
         {
             // Operated switches (pushbutton, selector, emergency stop) are one IEC_symbol of category Switch, e.g. SSD or SONOT2.
             string category = placed.GetProperty("device").GetProperty("category").GetString()!;
-            Assert.Contains(category, new[] { kind.GetString() == "no" ? "NoContact" : "NcContact", "Switch" });
+            Check(() => Assert.Contains(category, new[] { kind.GetString() == "no" ? "NoContact" : "NcContact", "Switch" }));
         }
         JsonElement read = await ReadAsync("eplan_device_get", new() { ["tag"] = owner ?? actualTag, ["language"] = "??_??", ["response_format"] = "detailed" });
         RequireComplete(read);
         JsonElement actual = owner is null ? read.GetProperty("device") : Assert.Single(read.GetProperty("functions").EnumerateArray(), f => SameName(actualTag, f.GetProperty("tag").GetString()!) && f.GetProperty("page").GetString() == Page);
         string[] designations = [.. device.GetProperty("connection_designations").EnumerateArray().Select(n => n.GetString()!)];
         string[] pins = [.. actual.GetProperty("pins").EnumerateArray().Select(n => n.GetString()!)];
+        bool terminalPinCountMatches = true;
         if (owner is not null && pins.Length == 0)
         {
             // A placed terminal reads back without named pins (no connection_designations on terminals); wires address it by connection point order.
-            Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), designations.Length);
+            terminalPinCountMatches = Check(() => Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), designations.Length));
             _evidence.Add(new { note = "terminal pins unnamed; mapped by symbol connection point order", tag = actualTag, pins = designations });
             pins = designations;
         }
-        Assert.Equal(designations, pins);
-        Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), pins.Length);
-        _pins[Id(device)] = pins;
-        Assert.Empty(read.GetProperty("parts").EnumerateArray());
-        _devices[Id(device)] = actual;
+        bool designationsMatch = Check(() => Assert.Equal(designations, pins));
+        bool pinCountMatches = Check(() => Assert.Equal(_symbols[Id(device)].GetProperty("connectionPoints").GetArrayLength(), pins.Length));
+        Check(() => Assert.Empty(read.GetProperty("parts").EnumerateArray()));
+        if (terminalPinCountMatches && designationsMatch && pinCountMatches)
+        {
+            _pins[Id(device)] = pins;
+            _devices[Id(device)] = actual;
+        }
     }
 
     private async Task PlcAsync()
@@ -173,7 +199,7 @@ internal sealed class AcceptanceRedrawDriver(
         JsonElement plc = list.GetProperty("plc"), box = plc.GetProperty("box");
         await PlaceDeviceAsync(box);
         if (_devices.TryGetValue(Id(box), out JsonElement card))
-        { Assert.Equal("PLCBox", card.GetProperty("category").GetString()); }
+        { Check(() => Assert.Equal("PLCBox", card.GetProperty("category").GetString())); }
         var symbols = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         foreach (JsonElement point in plc.GetProperty("points").EnumerateArray())
         {
@@ -190,8 +216,9 @@ internal sealed class AcceptanceRedrawDriver(
             JsonElement? result = await WriteAsync("eplan_device_place", args, [Id(point)]);
             if (result is not { } placed)
             { continue; }
-            await RememberDeviceAsync(point, placed, parent);
-            Assert.Equal("PLCTerminal", _devices[Id(point)].GetProperty("category").GetString());
+            await ObserveAsync(Id(point), () => RememberDeviceAsync(point, placed, parent));
+            if (_devices.TryGetValue(Id(point), out JsonElement actual))
+            { Check(() => Assert.Equal("PLCTerminal", actual.GetProperty("category").GetString())); }
             if (point.TryGetProperty("display_properties", out JsonElement displays) && displays.GetArrayLength() > 0)
             { Skip(Id(point) + "/display_properties", "A55 live T7d: display_properties are refused for PLC points because added displays do not survive commit; native PLC values are verified separately."); }
         }
@@ -202,17 +229,20 @@ internal sealed class AcceptanceRedrawDriver(
         // A55: count connection-point names, not the extra device-level PLC terminals.
         JsonElement[] channels = read.GetProperty("channels").EnumerateArray().Where(c => c.GetProperty("name").GetString()!.Contains(':', StringComparison.Ordinal)).ToArray();
         JsonElement[] points = plc.GetProperty("points").EnumerateArray().Where(p => _placed.ContainsKey(Id(p))).ToArray();
-        Assert.Equal(points.Length, channels.Length);
+        Check(() => Assert.Equal(points.Length, channels.Length));
         foreach (JsonElement point in points)
         {
-            JsonElement channel = Assert.Single(channels, c => SameName(_actualTags[Id(point)], c.GetProperty("name").GetString()!));
-            Assert.True(SameName(tag, channel.GetProperty("owner").GetString()!));
-            Assert.Equal(Page, channel.GetProperty("page").GetString());
-            Assert.Equal(point.GetProperty("address").GetString(), channel.GetProperty("address").GetString());
-            Assert.Equal(point.GetProperty("symbolic_address").GetString(), channel.GetProperty("manualSymbolicAddress").GetString());
-            Assert.Equal(point.GetProperty("function_text").GetString(), channel.GetProperty("text").GetString());
-            Assert.False(string.IsNullOrWhiteSpace(channel.GetProperty("symbolicAddress").GetString()));
-            Assert.Equal(1, channel.GetProperty("parentlessRepresentations").GetInt32());
+            Check(() =>
+            {
+                JsonElement channel = Assert.Single(channels, c => SameName(_actualTags[Id(point)], c.GetProperty("name").GetString()!));
+                Check(() => Assert.True(SameName(tag, channel.GetProperty("owner").GetString()!)));
+                Check(() => Assert.Equal(Page, channel.GetProperty("page").GetString()));
+                Check(() => Assert.Equal(point.GetProperty("address").GetString(), channel.GetProperty("address").GetString()));
+                Check(() => Assert.Equal(point.GetProperty("symbolic_address").GetString(), channel.GetProperty("manualSymbolicAddress").GetString()));
+                Check(() => Assert.Equal(point.GetProperty("function_text").GetString(), channel.GetProperty("text").GetString()));
+                Check(() => Assert.False(string.IsNullOrWhiteSpace(channel.GetProperty("symbolicAddress").GetString())));
+                Check(() => Assert.Equal(1, channel.GetProperty("parentlessRepresentations").GetInt32()));
+            }, Id(point));
         }
     }
 
@@ -229,7 +259,7 @@ internal sealed class AcceptanceRedrawDriver(
                 { return JsonSerializer.SerializeToElement(new { library = symbol.GetProperty("library").GetString(), symbol = symbol.GetProperty("name").GetString(), variant = symbol.GetProperty("variant").GetInt32() }); }
             }
             cursor = read.GetProperty("nextCursor").GetString();
-            Assert.True(!read.GetProperty("truncated").GetBoolean() || cursor is not null, "Symbol discovery was truncated without a continuation cursor.");
+            Check(() => Assert.True(!read.GetProperty("truncated").GetBoolean() || cursor is not null, "Symbol discovery was truncated without a continuation cursor."));
         } while (cursor is not null);
         throw new InvalidOperationException("No single-pin native digital-input symbol with direction " + direction + " was discovered.");
     }
@@ -256,51 +286,62 @@ internal sealed class AcceptanceRedrawDriver(
             if (result is not { } placed)
             { continue; }
             JsonElement member = placed.GetProperty("terminal");
-            Assert.True(SameName(tag, member.GetProperty("strip").GetString()!));
-            Assert.True(member.GetProperty("owner").ValueKind == JsonValueKind.Null || SameName(tag, member.GetProperty("owner").GetString()!));
-            Assert.Equal(!created, member.GetProperty("stripCreated").GetBoolean());
-            Assert.Equal(terminal.GetProperty("number").GetString(), member.GetProperty("number").GetString());
+            Check(() => Assert.True(SameName(tag, member.GetProperty("strip").GetString()!)));
+            Check(() => Assert.True(member.GetProperty("owner").ValueKind == JsonValueKind.Null || SameName(tag, member.GetProperty("owner").GetString()!)));
+            Check(() => Assert.Equal(!created, member.GetProperty("stripCreated").GetBoolean()));
+            Check(() => Assert.Equal(terminal.GetProperty("number").GetString(), member.GetProperty("number").GetString()));
             tag = member.GetProperty("strip").GetString()!;
             created = true;
-            await RememberDeviceAsync(terminal, placed, tag);
-            Assert.Equal("Terminal", _devices[Id(terminal)].GetProperty("category").GetString());
+            await ObserveAsync(Id(terminal), () => RememberDeviceAsync(terminal, placed, tag));
+            if (_devices.TryGetValue(Id(terminal), out JsonElement actual))
+            { Check(() => Assert.Equal("Terminal", actual.GetProperty("category").GetString())); }
         }
         if (!created)
         { return; }
         // A55: membership is authoritative only after commit; the strip text is read in its stored language.
         JsonElement members = await ReadAsync("eplan_terminal_strip_get", new() { ["strip"] = tag, ["limit"] = 200 });
         RequireComplete(members);
-        Assert.True(SameName(tag, members.GetProperty("strip").GetProperty("name").GetString()!));
-        Assert.Equal(strip.GetProperty("terminals").EnumerateArray().Where(t => _placed.ContainsKey(Id(t))).Select(t => t.GetProperty("number").GetString()), members.GetProperty("terminals").EnumerateArray().Select(t => t.GetProperty("designation").GetString()));
-        Assert.All(members.GetProperty("terminals").EnumerateArray(), t => Assert.Equal(Page, t.GetProperty("page").GetString()));
+        Check(() => Assert.True(SameName(tag, members.GetProperty("strip").GetProperty("name").GetString()!)));
+        Check(() => Assert.Equal(strip.GetProperty("terminals").EnumerateArray().Where(t => _placed.ContainsKey(Id(t))).Select(t => t.GetProperty("number").GetString()), members.GetProperty("terminals").EnumerateArray().Select(t => t.GetProperty("designation").GetString())));
+        Check(() => Assert.All(members.GetProperty("terminals").EnumerateArray(), t => Assert.Equal(Page, t.GetProperty("page").GetString())));
         string[] expectedNames = strip.GetProperty("terminals").EnumerateArray().Where(t => _placed.ContainsKey(Id(t))).Select(t => _actualTags[Id(t)]).ToArray();
         string[] actualNames = members.GetProperty("terminals").EnumerateArray().Select(t => t.GetProperty("name").GetString()!).ToArray();
-        Assert.Equal(expectedNames.Length, actualNames.Length);
-        Assert.All(expectedNames.Zip(actualNames), pair => Assert.True(SameName(pair.First, pair.Second)));
+        Check(() => Assert.Equal(expectedNames.Length, actualNames.Length));
+        Check(() => Assert.All(expectedNames.Zip(actualNames), pair => Assert.True(SameName(pair.First, pair.Second))));
         JsonElement read = await ReadAsync("eplan_device_get", new() { ["tag"] = tag, ["language"] = "??_??", ["response_format"] = "detailed" });
         RequireComplete(read);
-        Assert.Equal(strip.GetProperty("function_text").GetString(), read.GetProperty("device").GetProperty("text").GetString());
+        Check(() => Assert.Equal(strip.GetProperty("function_text").GetString(), read.GetProperty("device").GetProperty("text").GetString()));
     }
 
-    private async Task WiresAsync()
+    private async Task WiresAsync(bool dryRun = false)
     {
+        _wires.Clear();
         JsonElement[] drawings = await DrawingsAsync(Page);
         var items = new List<object>();
         var wireIds = new List<string>();
         bool incomplete = false;
         foreach (JsonElement wire in Items("wires"))
         {
+            int before = _problems.Count;
+            if (!Check(() => PlanWire(wire), Id(wire)) || _problems.Count != before)
+            {
+                incomplete = true;
+                Skip(Id(wire), "Wire geometry or pin evidence failed verification; the shared topology is not written.");
+            }
+        }
+        void PlanWire(JsonElement wire)
+        {
             ResolvedPin? from = ResolvePin(wire.GetProperty("from"), wire.GetProperty("points")[0], drawings);
             JsonElement points = wire.GetProperty("points");
             ResolvedPin? to = ResolvePin(wire.GetProperty("to"), points[points.GetArrayLength() - 1], drawings);
             if (from is null || to is null)
-            { Skip(Id(wire), "An endpoint or independent pin readback was skipped; no wire is drawn from guessed pin coordinates."); incomplete = true; continue; }
+            { Skip(Id(wire), "An endpoint or independent pin readback was skipped; no wire is drawn from guessed pin coordinates."); incomplete = true; return; }
             if (points.GetArrayLength() == 2 && points[0].ValueKind == JsonValueKind.String && points[1].ValueKind == JsonValueKind.String)
             {
                 Assert.True(Facing(from, to), $"Wire '{Id(wire)}' uses [\"from\",\"to\"] for autoconnect, but its pins do not face each other on one axis; provide explicit bend points in the drawing list.");
                 _wires[Id(wire)] = (from, to, null);
                 _evidence.Add(new { wire = Id(wire), mode = "autoconnect" });
-                continue;
+                return;
             }
             double[][] path = points.EnumerateArray().Select(p => p.ValueKind == JsonValueKind.String
                 ? p.GetString() == "from" ? from.Position : to.Position : p.EnumerateArray().Select(n => n.GetDouble()).ToArray()).ToArray();
@@ -327,7 +368,14 @@ internal sealed class AcceptanceRedrawDriver(
         items.AddRange(cables.Select(c => CableItem(c, id => new { item_index = _wires[id].ItemIndex!.Value })));
         if (items.Count == 0)
         { _wireBatchCommitted = true; return; }
-        JsonElement? created = await WriteAsync("eplan_connection_create", new() { ["page"] = Page, ["items"] = items, ["response_format"] = "detailed" }, wireIds.Concat(nodes.Select(Id)).Concat(cables.Select(Id)).ToArray());
+        var args = new Dictionary<string, object?> { ["page"] = Page, ["items"] = items, ["response_format"] = "detailed" };
+        string[] ids = wireIds.Concat(nodes.Select(Id)).Concat(cables.Select(Id)).ToArray();
+        if (dryRun)
+        {
+            await PreflightBatchAsync("wires_symbols_and_cables", args, ids);
+            return;
+        }
+        JsonElement? created = await WriteAsync("eplan_connection_create", args, ids);
         _wireBatchCommitted = created is { } result && result.GetProperty("execution").GetString() == ExecutionState.Committed;
         if (_wireBatchCommitted && cables.Length > 0)
         { await VerifyCablesAsync(created!.Value, cables); }
@@ -373,8 +421,19 @@ internal sealed class AcceptanceRedrawDriver(
             Assert.True(matches[0].TryGetProperty("locator", out JsonElement locator) && locator.ValueKind == JsonValueKind.Object, $"Wire '{id}' requires a locator from the detailed generated connection list.");
             return new { locator };
         }
+        // Validate every independent locator before deciding whether the whole cable batch can be built.
+        var references = new Dictionary<string, object>(StringComparer.Ordinal);
+        bool complete = true;
+        foreach (string id in cables.SelectMany(c => c.GetProperty("cores").EnumerateArray()).Select(c => c.GetProperty("wire").GetString()!).Distinct(StringComparer.Ordinal))
+        { complete &= Check(() => references[id] = Reference(id), "generated connection/" + id); }
+        if (!complete)
+        {
+            foreach (JsonElement cable in cables)
+            { Skip(Id(cable), "The generated cable batch has missing or ambiguous connection locators."); }
+            return;
+        }
         // A mixed cable is created once after generation; earlier wire item indices cannot cross calls.
-        object[] items = cables.Select(c => CableItem(c, Reference)).ToArray();
+        object[] items = cables.Select(c => CableItem(c, id => references[id])).ToArray();
         JsonElement? created = await WriteAsync("eplan_connection_create", new() { ["page"] = Page, ["items"] = items, ["response_format"] = "detailed" }, cables.Select(Id).ToArray());
         if (created is { } result && result.GetProperty("execution").GetString() == ExecutionState.Committed)
         { await VerifyCablesAsync(result, cables); }
@@ -383,46 +442,55 @@ internal sealed class AcceptanceRedrawDriver(
     private async Task VerifyCablesAsync(JsonElement created, JsonElement[] cables)
     {
         JsonElement[] actual = created.GetProperty("actualCores").EnumerateArray().ToArray();
-        Assert.Equal(cables.Sum(c => c.GetProperty("cores").GetArrayLength()), actual.Length);
-        Assert.Equal(actual.Length, actual.Select(c => c.GetProperty("oid").GetInt64()).Distinct().Count());
+        Check(() => Assert.Equal(cables.Sum(c => c.GetProperty("cores").GetArrayLength()), actual.Length));
+        Check(() => Assert.Equal(actual.Length, actual.Select(c => c.GetProperty("oid").GetInt64()).Distinct().Count()));
         foreach (JsonElement cable in cables)
         {
-            string tag = Expand(cable.GetProperty("tag").GetString()!);
-            JsonElement[] cores = cable.GetProperty("cores").EnumerateArray().ToArray();
-            foreach (JsonElement core in cores)
+            await ObserveAsync(Id(cable), async () =>
             {
-                JsonElement read = Assert.Single(actual, c => SameName(tag, c.GetProperty("designation").GetString()!) && c.GetProperty("label").GetString() == core.GetProperty("label").GetString());
-                Assert.Equal(cable.GetProperty("type_text").GetString(), read.GetProperty("type").GetString());
-                Assert.Equal(core.GetProperty("colour").GetString(), read.GetProperty("colour").GetString());
-                Assert.True(read.GetProperty("oid").GetInt64() > 0);
-                var wire = _wires[core.GetProperty("wire").GetString()!];
-                static string Pin(ResolvedPin endpoint)
+                string tag = Expand(cable.GetProperty("tag").GetString()!);
+                JsonElement[] cores = cable.GetProperty("cores").EnumerateArray().ToArray();
+                foreach (JsonElement core in cores)
                 {
-                    JsonElement pin = JsonSerializer.SerializeToElement(endpoint.Reference), locator = pin.GetProperty("locator");
-                    return FormattableString.Invariant($"{locator.GetProperty("type").GetInt32()}/{locator.GetProperty("oid").GetInt64()}/{pin.GetProperty("pin_index").GetInt32()}");
+                    Check(() =>
+                    {
+                        JsonElement read = Assert.Single(actual, c => SameName(tag, c.GetProperty("designation").GetString()!) && c.GetProperty("label").GetString() == core.GetProperty("label").GetString());
+                        Check(() => Assert.Equal(cable.GetProperty("type_text").GetString(), read.GetProperty("type").GetString()));
+                        Check(() => Assert.Equal(core.GetProperty("colour").GetString(), read.GetProperty("colour").GetString()));
+                        Check(() => Assert.True(read.GetProperty("oid").GetInt64() > 0));
+                        var wire = _wires[core.GetProperty("wire").GetString()!];
+                        static string Pin(ResolvedPin endpoint)
+                        {
+                            JsonElement pin = JsonSerializer.SerializeToElement(endpoint.Reference), locator = pin.GetProperty("locator");
+                            return FormattableString.Invariant($"{locator.GetProperty("type").GetInt32()}/{locator.GetProperty("oid").GetInt64()}/{pin.GetProperty("pin_index").GetInt32()}");
+                        }
+                        Check(() => Assert.Equal(new[] { Pin(wire.From), Pin(wire.To) }.Order(StringComparer.Ordinal), read.GetProperty("pins").EnumerateArray().Select(p => p.GetString()).Order(StringComparer.Ordinal)));
+                    }, Id(cable) + "/core/" + core.GetProperty("label").GetString());
                 }
-                Assert.Equal(new[] { Pin(wire.From), Pin(wire.To) }.Order(StringComparer.Ordinal), read.GetProperty("pins").EnumerateArray().Select(p => p.GetString()).Order(StringComparer.Ordinal));
-            }
-            string actualTag = actual.First(c => SameName(tag, c.GetProperty("designation").GetString()!)).GetProperty("designation").GetString()!;
-            JsonElement data = await ReadAsync("eplan_cable_get", new() { ["cable"] = actualTag, ["limit"] = 200, ["language"] = "??_??" });
-            RequireComplete(data);
-            Assert.Null(data.GetProperty("nextCursor").GetString());
-            JsonElement definition = data.GetProperty("cable");
-            Assert.True(SameName(tag, definition.GetProperty("tag").GetString()!));
-            Assert.Equal(cable.GetProperty("type_text").GetString(), definition.GetProperty("type").GetString());
-            Assert.Equal(cable.GetProperty("core_count").GetRawText(), definition.GetProperty("wireCount").GetString());
-            Assert.Equal(cable.GetProperty("cross_section_mm2").GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture), definition.GetProperty("crossSection").GetString()!.Replace(',', '.'));
-            JsonElement[] stored = data.GetProperty("cores").EnumerateArray().ToArray();
-            Assert.Equal(cores.Length, stored.Length);
-            foreach (JsonElement core in cores)
-            {
-                JsonElement read = Assert.Single(stored, c => c.GetProperty("designation").GetString() == core.GetProperty("label").GetString());
-                Assert.Equal(core.GetProperty("colour").GetString(), read.GetProperty("colour").GetString());
-                JsonElement wire = Assert.Single(Items("wires"), w => Id(w) == core.GetProperty("wire").GetString());
-                bool End(string expected, string end) => SameName(_actualTags[wire.GetProperty(expected).GetProperty("item").GetString()!], read.GetProperty(end).GetProperty("device").GetString()!) && (wire.GetProperty(expected).GetProperty("pin").GetString() == read.GetProperty(end).GetProperty("pin").GetString()
-                    || read.GetProperty(end).GetProperty("pin").ValueKind == JsonValueKind.Null && IsTerminal(wire.GetProperty(expected).GetProperty("item").GetString()!));
-                Assert.True(End("from", "from") && End("to", "to") || End("from", "to") && End("to", "from"));
-            }
+                string actualTag = actual.Where(c => SameName(tag, c.GetProperty("designation").GetString()!)).Select(c => c.GetProperty("designation").GetString()).FirstOrDefault() ?? tag;
+                JsonElement data = await ReadAsync("eplan_cable_get", new() { ["cable"] = actualTag, ["limit"] = 200, ["language"] = "??_??" });
+                RequireComplete(data);
+                Check(() => Assert.Null(data.GetProperty("nextCursor").GetString()));
+                JsonElement definition = data.GetProperty("cable");
+                Check(() => Assert.True(SameName(tag, definition.GetProperty("tag").GetString()!)));
+                Check(() => Assert.Equal(cable.GetProperty("type_text").GetString(), definition.GetProperty("type").GetString()));
+                Check(() => Assert.Equal(cable.GetProperty("core_count").GetRawText(), definition.GetProperty("wireCount").GetString()));
+                Check(() => Assert.Equal(cable.GetProperty("cross_section_mm2").GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture), definition.GetProperty("crossSection").GetString()!.Replace(',', '.')));
+                JsonElement[] stored = data.GetProperty("cores").EnumerateArray().ToArray();
+                Check(() => Assert.Equal(cores.Length, stored.Length));
+                foreach (JsonElement core in cores)
+                {
+                    Check(() =>
+                    {
+                        JsonElement read = Assert.Single(stored, c => c.GetProperty("designation").GetString() == core.GetProperty("label").GetString());
+                        Check(() => Assert.Equal(core.GetProperty("colour").GetString(), read.GetProperty("colour").GetString()));
+                        JsonElement wire = Assert.Single(Items("wires"), w => Id(w) == core.GetProperty("wire").GetString());
+                        bool End(string expected, string end) => SameName(_actualTags[wire.GetProperty(expected).GetProperty("item").GetString()!], read.GetProperty(end).GetProperty("device").GetString()!) && (wire.GetProperty(expected).GetProperty("pin").GetString() == read.GetProperty(end).GetProperty("pin").GetString()
+                            || read.GetProperty(end).GetProperty("pin").ValueKind == JsonValueKind.Null && IsTerminal(wire.GetProperty(expected).GetProperty("item").GetString()!));
+                        Check(() => Assert.True(End("from", "from") && End("to", "to") || End("from", "to") && End("to", "from")));
+                    }, Id(cable) + "/core/" + core.GetProperty("label").GetString());
+                }
+            });
         }
     }
 
@@ -452,7 +520,51 @@ internal sealed class AcceptanceRedrawDriver(
         _ => false,
     };
 
-    private async Task InterruptionsAsync()
+    private async Task PlaceInterruptionSupportAsync()
+    {
+        if (Items("interruption_points").Length == 0)
+        { return; }
+        foreach ((string page, string key) in new[] { (Page, "page"), (CounterpartPage, "counterpart_page") })
+        {
+            JsonElement device = list.GetProperty("interruption_support").GetProperty(key).GetProperty("device");
+            await ObserveAsync(Id(device), () => PlaceDeviceAsync(device, page));
+        }
+    }
+
+    private async Task PreflightAsync()
+    {
+        await ObserveAsync("wires_symbols_and_cables", () => WiresAsync(dryRun: true));
+        // Generated connection locators do not exist yet; item_index cannot reference an earlier call.
+        foreach (JsonElement cable in Items("cables"))
+        {
+            if (cable.GetProperty("cores").EnumerateArray().Any(c => !_wires.TryGetValue(c.GetProperty("wire").GetString()!, out var wire) || wire.ItemIndex is null))
+            {
+                string reason = "Requires connection locators after generation; not preflighted.";
+                _preflight.Add(new { tool = "eplan_connection_create", batch = "cables_after_generate", item = Id(cable), status = "not preflighted", reason });
+                output("Preflight eplan_connection_create cables_after_generate/" + Id(cable) + ": " + reason);
+            }
+        }
+        await ObserveAsync("interruption_points", () => InterruptionsAsync(dryRun: true));
+        output("Connection preflight complete.");
+    }
+
+    private async Task PreflightBatchAsync(string batch, Dictionary<string, object?> args, string[] ids)
+    {
+        const string Tool = "eplan_connection_create";
+        args["dry_run"] = true;
+        (bool succeeded, JsonElement result) = await InvokeAsync(Tool, args);
+        _preflight.Add(new { tool = Tool, batch, items = ids, status = succeeded ? "accepted" : "refused", result });
+        output("Preflight " + Tool + " " + batch + ": " + result.GetRawText());
+        if (result.TryGetProperty("execution", out JsonElement state) && state.GetString() == ExecutionState.Unknown)
+        {
+            UndoCountIncomplete = true;
+            throw new InvalidOperationException(Tool + " " + batch + " failed; no retry: " + result.GetRawText());
+        }
+        if (!succeeded)
+        { Problem(Tool + " " + batch + ": " + result.GetRawText()); }
+    }
+
+    private async Task InterruptionsAsync(bool dryRun = false)
     {
         JsonElement[] points = Items("interruption_points");
         if (points.Length == 0)
@@ -464,7 +576,8 @@ internal sealed class AcceptanceRedrawDriver(
         })
         {
             JsonElement support = list.GetProperty("interruption_support").GetProperty(key), device = support.GetProperty("device");
-            await PlaceDeviceAsync(device, page);
+            if (!preflight)
+            { await ObserveAsync(Id(device), () => PlaceDeviceAsync(device, page)); }
             string[] ids = points.Select(p => Id(p) + (page == Page ? "/page" : "/counterpart")).ToArray();
             if (!_devices.ContainsKey(Id(device)))
             { foreach (string id in ids) { Skip(id, "The explicit interruption generation support device was skipped."); } continue; }
@@ -472,64 +585,75 @@ internal sealed class AcceptanceRedrawDriver(
             JsonElement node = support.GetProperty("potential_point");
             // A55/T7b: each page batch needs an independent real generated connection, even for isolated pairs.
             items.Add(new { kind = "potential_point", position = node.GetProperty("position"), directions = node.GetProperty("directions") });
-            JsonElement? result = await WriteAsync("eplan_connection_create", new()
+            var args = new Dictionary<string, object?> { ["page"] = page, ["response_format"] = "detailed", ["items"] = items };
+            if (dryRun)
             {
-                ["page"] = page,
-                ["response_format"] = "detailed",
-                ["items"] = items,
-            }, ids);
+                await PreflightBatchAsync("interruption_points/" + key, args, ids);
+                continue;
+            }
+            JsonElement? result = await WriteAsync("eplan_connection_create", args, ids);
             if (result is not { } read)
             { continue; }
             RequireComplete(read);
-            Assert.Equal(points.Length * (page == Page ? 1 : 2), read.GetProperty("interruptionPoints").GetArrayLength());
+            Check(() => Assert.Equal(points.Length * (page == Page ? 1 : 2), read.GetProperty("interruptionPoints").GetArrayLength()));
             _interruptionSupport[page] = (_actualTags[Id(device)], device.GetProperty("connection_designations")[0].GetString()!);
             foreach (JsonElement point in points)
             {
-                string name = Expand(point.GetProperty("name").GetString()!);
-                JsonElement actual = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("page").GetString() == page && p.GetProperty("name").GetString() == name);
-                Assert.Equal(name, actual.GetProperty("name").GetString());
-                Assert.Equal(point.GetProperty(direction).GetString(), actual.GetProperty("direction").GetString());
-                Near(point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("position"));
-                if (page == CounterpartPage)
+                Check(() =>
                 {
-                    foreach (JsonElement pair in read.GetProperty("interruptionPoints").EnumerateArray().Where(p => p.GetProperty("name").GetString() == name))
+                    string name = Expand(point.GetProperty("name").GetString()!);
+                    JsonElement actual = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("page").GetString() == page && p.GetProperty("name").GetString() == name);
+                    Check(() => Assert.Equal(name, actual.GetProperty("name").GetString()));
+                    Check(() => Assert.Equal(point.GetProperty(direction).GetString(), actual.GetProperty("direction").GetString()));
+                    Near(point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("position"));
+                    if (page == CounterpartPage)
                     {
-                        JsonElement counterpart = Assert.Single(pair.GetProperty("counterparts").EnumerateArray());
-                        Assert.Equal(name, counterpart.GetProperty("name").GetString());
-                        Assert.Equal(pair.GetProperty("page").GetString() == Page ? CounterpartPage : Page, counterpart.GetProperty("page").GetString());
-                        JsonElement peerPoint = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("name").GetString() == name && p.GetProperty("page").GetString() == counterpart.GetProperty("page").GetString());
-                        Assert.Equal(peerPoint.GetProperty("oid").GetInt64(), counterpart.GetProperty("oid").GetInt64());
+                        foreach (JsonElement pair in read.GetProperty("interruptionPoints").EnumerateArray().Where(p => p.GetProperty("name").GetString() == name))
+                        {
+                            JsonElement counterpart = Assert.Single(pair.GetProperty("counterparts").EnumerateArray());
+                            Check(() => Assert.Equal(name, counterpart.GetProperty("name").GetString()));
+                            Check(() => Assert.Equal(pair.GetProperty("page").GetString() == Page ? CounterpartPage : Page, counterpart.GetProperty("page").GetString()));
+                            JsonElement peerPoint = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("name").GetString() == name && p.GetProperty("page").GetString() == counterpart.GetProperty("page").GetString());
+                            Check(() => Assert.Equal(peerPoint.GetProperty("oid").GetInt64(), counterpart.GetProperty("oid").GetInt64()));
+                        }
+                        // A55: 24300 may be empty after commit; native counterparts are the acceptance evidence.
                     }
-                    // A55: 24300 may be empty after commit; native counterparts are the acceptance evidence.
-                }
+                }, page + "/" + Id(point));
             }
         }
     }
 
     private async Task VerifyAsync()
     {
-        await InsidePageAsync(Page);
-        await InsidePageAsync(CounterpartPage);
+        await ObserveAsync(Page, () => InsidePageAsync(Page));
+        await ObserveAsync(CounterpartPage, () => InsidePageAsync(CounterpartPage));
         JsonElement[] drawings = await DrawingsAsync(Page);
         foreach (JsonElement device in _devices.Keys.Where(id => !_devicePages.TryGetValue(id, out string? page) || page == Page).Select(id => _placed[id]))
         {
-            JsonElement row = Function(drawings, _actualTags[Id(device)]);
-            Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), row.GetProperty("location"));
+            Check(() =>
+            {
+                JsonElement row = Function(drawings, _actualTags[Id(device)]);
+                Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), row.GetProperty("location"));
+            }, Id(device));
         }
         foreach (JsonElement text in Items("texts"))
         {
-            string stored = "??_??@" + text.GetProperty("text").GetString() + ";";
-            JsonElement actual = Assert.Single(drawings, d => d.GetProperty("kind").GetString() == "Text" && d.GetProperty("properties").GetProperty("text").GetString() == stored);
-            Near(text.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("location"));
+            Check(() =>
+            {
+                string stored = "??_??@" + text.GetProperty("text").GetString() + ";";
+                JsonElement actual = Assert.Single(drawings, d => d.GetProperty("kind").GetString() == "Text" && d.GetProperty("properties").GetProperty("text").GetString() == stored);
+                Near(text.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("location"));
+            }, Id(text));
         }
         JsonElement[] connections = await ConnectionsAsync(Page);
         connections = WithoutInterruptionSupport(Page, connections);
         if (_interruptionSupport.ContainsKey(CounterpartPage))
         {
-            Assert.Empty(WithoutInterruptionSupport(CounterpartPage, await ConnectionsAsync(CounterpartPage)));
+            JsonElement[] peerConnections = await ConnectionsAsync(CounterpartPage);
+            Check(() => Assert.Empty(WithoutInterruptionSupport(CounterpartPage, peerConnections)));
             JsonElement[] peers = await DrawingsAsync(CounterpartPage);
             JsonElement device = list.GetProperty("interruption_support").GetProperty("counterpart_page").GetProperty("device");
-            Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), Function(peers, _actualTags[Id(device)]).GetProperty("location"));
+            Check(() => Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), Function(peers, _actualTags[Id(device)]).GetProperty("location")), Id(device));
         }
         // Terminal pins are unnamed in EPLAN's connection readback, so a terminal end is compared by device only.
         string Endpoint(JsonElement endpoint) => JsonSerializer.Serialize(new[] { endpoint.GetProperty("item").GetString(),
@@ -546,8 +670,10 @@ internal sealed class AcceptanceRedrawDriver(
         if (supported.Length != expectedConnections.Length)
         { Skip("connection_set", "Some expected endpoints were skipped; compare all observable connections against the supported subset and retain incomplete whole-page status."); }
         string[] expected = supported.Select(c => Pair(Endpoint(c.GetProperty("from")), Endpoint(c.GetProperty("to")))).Order(StringComparer.Ordinal).ToArray();
-        string[] actualPairs = connections.Select(c => Pair(ReadEndpoint(c.GetProperty("from")), ReadEndpoint(c.GetProperty("to")))).Order(StringComparer.Ordinal).ToArray();
-        Assert.Equal(expected, actualPairs);
+        var actualPairs = new List<string>();
+        foreach (JsonElement connection in connections)
+        { Check(() => actualPairs.Add(Pair(ReadEndpoint(connection.GetProperty("from")), ReadEndpoint(connection.GetProperty("to")))), "connection endpoints/" + connection.GetRawText()); }
+        Check(() => Assert.Equal(expected, actualPairs.Order(StringComparer.Ordinal)));
     }
 
     private JsonElement[] WithoutInterruptionSupport(string page, JsonElement[] connections)
@@ -556,7 +682,7 @@ internal sealed class AcceptanceRedrawDriver(
         { return connections; }
         bool Support(JsonElement c) => c.GetProperty("from").ValueKind == JsonValueKind.Null && c.GetProperty("to").ValueKind == JsonValueKind.Object
             && SameName(support.Tag, c.GetProperty("to").GetProperty("device").GetString()!) && c.GetProperty("to").GetProperty("pin").GetString() == support.Pin;
-        Assert.Single(connections, Support);
+        Check(() => Assert.Single(connections, Support));
         return connections.Where(c => !Support(c)).ToArray();
     }
 
@@ -570,10 +696,10 @@ internal sealed class AcceptanceRedrawDriver(
             if (cursor is not null)
             { args["drawing_cursor"] = cursor; }
             JsonElement data = (await ReadAsync("eplan_page_get", args)).GetProperty("drawings");
-            Assert.Equal(_tolerance * 2, data.GetProperty("gridSize").GetDouble());
+            Check(() => Assert.Equal(_tolerance * 2, data.GetProperty("gridSize").GetDouble()));
             rows.AddRange(data.GetProperty("items").EnumerateArray());
             cursor = data.GetProperty("nextCursor").GetString();
-            Assert.Equal(cursor is not null, data.GetProperty("truncated").GetBoolean());
+            Check(() => Assert.Equal(cursor is not null, data.GetProperty("truncated").GetBoolean()));
         } while (cursor is not null);
         return rows.ToArray();
     }
@@ -590,7 +716,7 @@ internal sealed class AcceptanceRedrawDriver(
             // An empty property text reports zero bounds (A55); its location still has to be on the page.
             double[] area = box.Length == 4 && (box[2] > box[0] || box[3] > box[1]) ? box : [location[0], location[1], location[0], location[1]];
             if (!(area[0] >= 0 && area[1] >= 0 && area[2] <= size[0] && area[3] <= size[1]))
-            { Assert.Fail($"{row.GetProperty("kind").GetString()} {row.GetProperty("locator").GetProperty("type").GetInt32()}/{row.GetProperty("locator").GetProperty("oid").GetInt64()} on {page} lies outside the page at [{string.Join(", ", area)}]."); }
+            { Check(() => Assert.Fail($"{row.GetProperty("kind").GetString()} {row.GetProperty("locator").GetProperty("type").GetInt32()}/{row.GetProperty("locator").GetProperty("oid").GetInt64()} on {page} lies outside the page at [{string.Join(", ", area)}].")); }
         }
     }
 
@@ -608,7 +734,7 @@ internal sealed class AcceptanceRedrawDriver(
             JsonElement data = await ReadAsync("eplan_connection_list", args);
             rows.AddRange(data.GetProperty("connections").EnumerateArray());
             cursor = data.GetProperty("nextCursor").GetString();
-            Assert.True(!data.GetProperty("truncated").GetBoolean() || cursor is not null, "Connection evidence was truncated without a continuation cursor.");
+            Check(() => Assert.True(!data.GetProperty("truncated").GetBoolean() || cursor is not null, "Connection evidence was truncated without a continuation cursor."));
         } while (cursor is not null);
         return rows.ToArray();
     }
@@ -616,11 +742,24 @@ internal sealed class AcceptanceRedrawDriver(
     private async Task<JsonElement?> WriteAsync(string tool, Dictionary<string, object?> args, string[] ids)
     {
         (bool succeeded, JsonElement result) = await InvokeAsync(tool, args);
-        if (!succeeded && result.GetProperty("reason").GetString() == ErrorReason.CapabilityMissing && result.GetProperty("execution").GetString() == ExecutionState.NotStarted)
-        { foreach (string id in ids) { Skip(id, tool + ": " + result.GetRawText()); } return null; }
+        if (result.TryGetProperty("execution", out JsonElement outcome) && outcome.GetString() == ExecutionState.Unknown)
+        {
+            UndoCountIncomplete = true;
+            throw new InvalidOperationException(tool + " failed; no retry: " + result.GetRawText());
+        }
         if (!succeeded)
         {
-            UndoCountIncomplete = result.TryGetProperty("execution", out JsonElement state) && state.GetString() == ExecutionState.Unknown;
+            string? reason = result.GetProperty("reason").GetString();
+            string? state = result.TryGetProperty("execution", out JsonElement executionState) ? executionState.GetString() : null;
+            UndoCountIncomplete = state == ExecutionState.Unknown;
+            bool safeFailure = state is ExecutionState.NotStarted or ExecutionState.RolledBack
+                && reason is ErrorReason.InvalidArgument or ErrorReason.PlanStale or ErrorReason.CapabilityMissing or ErrorReason.EplanOperationFailed;
+            if (reason == ErrorReason.CapabilityMissing && state == ExecutionState.NotStarted || keepGoing && safeFailure)
+            {
+                foreach (string id in ids)
+                { Skip(id, tool + ": " + result.GetRawText()); }
+                return null;
+            }
             throw new InvalidOperationException(tool + " failed; no retry: " + result.GetRawText());
         }
         string execution = result.GetProperty("execution").GetString()!;
@@ -653,16 +792,57 @@ internal sealed class AcceptanceRedrawDriver(
     private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal).Replace("{next}", next ?? run + "2", StringComparison.Ordinal);
     private bool IsTerminal(string id) => list.GetProperty("terminal_strip").GetProperty("terminals").EnumerateArray().Any(t => Id(t) == id);
     private static string Id(JsonElement item) => item.GetProperty("id").GetString()!;
+    private async Task StageAsync(string name, Func<Task> action)
+    {
+        Stage(name);
+        await ObserveAsync(name, action);
+    }
+
+    private async Task ObserveAsync(string name, Func<Task> action)
+    {
+        try
+        { await action(); }
+        catch (Xunit.Sdk.XunitException error) when (keepGoing)
+        { Problem(name + ": " + error.Message); }
+    }
+
+    private bool Check(Action assertion, [CallerArgumentExpression(nameof(assertion))] string? check = null)
+    {
+        try
+        {
+            assertion();
+            return true;
+        }
+        catch (Xunit.Sdk.XunitException error) when (keepGoing)
+        {
+            Problem(_stages.LastOrDefault() + "/" + check + ": " + error.Message);
+            return false;
+        }
+    }
+
+    private void Problem(string message)
+    {
+        _problems.Add(message);
+        output("Problem: " + message);
+    }
+
+    private void ThrowIfProblems()
+    {
+        if (_problems.Count > 0 || _skipped.Count > 0)
+        { Assert.Fail("Acceptance rehearsal is incomplete:\n" + string.Join("\n", _problems.Concat(_skipped.Select(s => s.Item + ": " + s.Reason)))); }
+    }
+
     private void Stage(string name) { _stages.Add(name); output("Drawing batch: " + name); }
-    private void Skip(string id, string reason) { _skipped.Add(new { item = id, status = "skipped", reason }); output("Skipped " + id + ": " + reason); }
-    private static void RequireComplete(JsonElement result) => Assert.False(result.TryGetProperty("truncated", out JsonElement flag) && flag.GetBoolean(), "Acceptance evidence must not be truncated.");
+    private void Skip(string id, string reason) { _skipped.Add(new(id, reason)); output("Skipped " + id + ": " + reason); }
+    private void RequireComplete(JsonElement result) => Check(() => Assert.False(result.TryGetProperty("truncated", out JsonElement flag) && flag.GetBoolean(), "Acceptance evidence must not be truncated."));
     private static string Pair(string a, string b) => JsonSerializer.Serialize(new[] { a, b }.Order(StringComparer.Ordinal));
     private void Near(double[] expected, JsonElement actual)
     {
         Assert.Equal(expected.Length, actual.GetArrayLength());
         for (int i = 0; i < expected.Length; i++)
-        { Assert.InRange(Math.Abs(expected[i] - actual[i].GetDouble()), 0, _tolerance); }
+        { Check(() => Assert.InRange(Math.Abs(expected[i] - actual[i].GetDouble()), 0, _tolerance), "coordinate " + i); }
     }
 
+    private sealed record SkippedItem(string Item, string Reason);
     private sealed record ResolvedPin(object Reference, double[] Position, string Direction);
 }

@@ -26,11 +26,19 @@ public sealed class AcceptanceRedrawTests(LiveEplan eplan)
         string artifacts = Path.Combine(WriteHost.ScratchFolder, "acceptance-results", run + "-" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(artifacts);
         void Output(string message) => TestContext.Current.TestOutputHelper!.WriteLine(message);
-        var driver = new AcceptanceRedrawDriver(eplan.CallOrErrorAsync, project, list, run, Output, (number + 1).ToString(CultureInfo.InvariantCulture));
+        bool keepGoing = Environment.GetEnvironmentVariable("EPLANMCP_ACCEPTANCE_KEEP_GOING") == "1";
+        bool preflight = Environment.GetEnvironmentVariable("EPLANMCP_ACCEPTANCE_PREFLIGHT") == "1";
+        var driver = new AcceptanceRedrawDriver(eplan.CallOrErrorAsync, project, list, run, Output,
+            (number + 1).ToString(CultureInfo.InvariantCulture), keepGoing, preflight);
         string status = "failed";
         try
         {
             await driver.DrawAsync();
+            if (driver.PreflightOnly)
+            {
+                status = "preflight";
+                Assert.Skip("Preflight rehearsal only; inspect local evidence in " + artifacts);
+            }
             await driver.ExportAsync();
             JsonElement image = driver.Image!.Value;
             string exportRoot = image.GetProperty("directory").GetString()!;

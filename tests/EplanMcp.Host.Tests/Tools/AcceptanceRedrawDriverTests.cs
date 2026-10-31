@@ -414,6 +414,241 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.True(driver.SkippedCount > 0);
     }
 
+    [Theory]
+    [InlineData(ErrorReason.InvalidArgument, ExecutionState.NotStarted)]
+    [InlineData(ErrorReason.InvalidArgument, ExecutionState.RolledBack)]
+    [InlineData(ErrorReason.PlanStale, ExecutionState.NotStarted)]
+    [InlineData(ErrorReason.PlanStale, ExecutionState.RolledBack)]
+    [InlineData(ErrorReason.CapabilityMissing, ExecutionState.NotStarted)]
+    [InlineData(ErrorReason.CapabilityMissing, ExecutionState.RolledBack)]
+    [InlineData(ErrorReason.EplanOperationFailed, ExecutionState.NotStarted)]
+    [InlineData(ErrorReason.EplanOperationFailed, ExecutionState.RolledBack)]
+    public async Task KeepGoing_RefusedWireBatch_RecordsFullErrorAndContinues(string reason, string execution)
+    {
+        JsonElement refusal = Refusal(reason, execution);
+        var fake = new DrawingTools
+        {
+            ConnectWires = true,
+            Refuse = (tool, args) => tool == "eplan_connection_create" && args.GetProperty("items")[0].GetProperty("kind").GetString() == "wire" ? refusal : null,
+        };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", _ => { }, keepGoing: true);
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
+        Assert.Contains(report.GetProperty("skipped").EnumerateArray(), s => s.GetProperty("item").GetString() == "signal1" && s.GetProperty("reason").GetString()!.Contains(refusal.GetRawText(), StringComparison.Ordinal));
+        Assert.Contains(refusal.GetRawText(), error.Message, StringComparison.Ordinal);
+        Assert.Equal(3, fake.Calls.Count(c => c == "eplan_connection_create"));
+        Assert.Contains("eplan_placement_create", fake.Calls);
+        Assert.Equal("verify", report.GetProperty("stages").EnumerateArray().Last().GetString());
+        Assert.False(driver.UndoCountIncomplete);
+    }
+
+    [Theory]
+    [InlineData(ErrorReason.OutcomeUnknown, ExecutionState.Unknown)]
+    [InlineData(ErrorReason.InvalidArgument, ExecutionState.Unknown)]
+    [InlineData(ErrorReason.PolicyDenied, ExecutionState.NotStarted)]
+    [InlineData(ErrorReason.EplanOperationFailed, ExecutionState.Committed)]
+    public async Task KeepGoing_UnsafeFailure_StopsImmediately(string reason, string execution)
+    {
+        JsonElement refusal = Refusal(reason, execution);
+        var fake = new DrawingTools { ConnectWires = true, Refuse = (tool, _) => tool == "eplan_connection_create" ? refusal : null };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", _ => { }, keepGoing: true);
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(driver.DrawAsync);
+        Assert.Contains(refusal.GetRawText(), error.Message, StringComparison.Ordinal);
+        Assert.Single(fake.Calls, c => c == "eplan_connection_create");
+        Assert.Single(fake.Calls, c => c == "eplan_connection_generate");
+        Assert.DoesNotContain("eplan_placement_create", fake.Calls);
+        Assert.Equal(execution == ExecutionState.Unknown, driver.UndoCountIncomplete);
+        Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task KeepGoing_IndependentVerificationFailures_ListsEveryProblemAtTheEnd()
+    {
+        var fake = new DrawingTools { ConnectWires = true, WrongPlcField = "address", WrongStripText = true, OutOfPageObject = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture()), "test", _ => { }, keepGoing: true);
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        string[] problems = JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray().Select(p => p.GetString()!).ToArray();
+        Assert.Equal(10, problems.Length);
+        Assert.Equal(7, problems.Count(p => p.Contains("manualSymbolicAddress", StringComparison.Ordinal) || p.Contains("channel.GetProperty(\"address\")", StringComparison.Ordinal)));
+        Assert.Contains(problems, p => p.Contains("function_text", StringComparison.Ordinal));
+        Assert.Equal(2, problems.Count(p => p.Contains("lies outside the page", StringComparison.Ordinal)));
+        Assert.All(problems, p => Assert.Contains(p, error.Message, StringComparison.Ordinal));
+        Assert.Contains("eplan_placement_create", fake.Calls);
+        Assert.Equal(4, fake.Calls.Count(c => c == "eplan_connection_create"));
+    }
+
+    [Fact]
+    public async Task KeepGoing_OnlyUnsupportedItems_StillFailsAtTheEnd()
+    {
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", TwoSwitches(), "test", _ => { }, keepGoing: true);
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        Assert.Empty(JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray());
+        Assert.True(driver.SkippedCount > 0);
+        Assert.Contains("/display_properties", error.Message, StringComparison.Ordinal);
+        Assert.Contains("eplan_placement_create", fake.Calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Preflight_AllRefusals_AreReportedBeforeAnyRealConnectionExecution(bool keepGoing)
+    {
+        var output = new List<string>();
+        JsonElement refusal = Refusal(ErrorReason.InvalidArgument, ExecutionState.NotStarted);
+        var fake = new DrawingTools
+        {
+            ConnectWires = true,
+            Refuse = (tool, args) => tool == "eplan_connection_create" && args.TryGetProperty("dry_run", out _) ? refusal : null,
+        };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", output.Add, keepGoing: keepGoing, preflight: true);
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        JsonElement[] preflight = JsonSerializer.SerializeToElement(driver.Report).GetProperty("preflight").EnumerateArray().ToArray();
+        Assert.Equal(3, preflight.Length);
+        Assert.All(preflight, p =>
+        {
+            Assert.Equal("refused", p.GetProperty("status").GetString());
+            Assert.True(JsonElement.DeepEquals(refusal, p.GetProperty("result")));
+            Assert.Contains(output, line => line.Contains(p.GetProperty("batch").GetString()!, StringComparison.Ordinal) && line.Contains(refusal.GetRawText(), StringComparison.Ordinal));
+            Assert.Contains(p.GetProperty("batch").GetString()!, error.Message, StringComparison.Ordinal);
+        });
+        int lastDryRun = fake.Requests.FindLastIndex(r => r.Args.TryGetProperty("dry_run", out _));
+        Assert.All(fake.Requests.Take(lastDryRun + 1), r =>
+        {
+            Assert.NotEqual("eplan_connection_generate", r.Tool);
+            Assert.NotEqual("eplan_placement_create", r.Tool);
+            if (r.Tool == "eplan_connection_create")
+            { Assert.True(r.Args.GetProperty("dry_run").GetBoolean()); }
+        });
+        Assert.True(fake.Requests.FindLastIndex(r => r.Tool == "eplan_device_place") < fake.Requests.FindIndex(r => r.Tool == "eplan_connection_create"));
+        if (keepGoing)
+        {
+            Assert.Equal(6, fake.Calls.Count(c => c == "eplan_connection_create"));
+            Assert.True(fake.Requests.FindIndex(r => r.Tool == "eplan_connection_generate") > lastDryRun);
+            Assert.Contains("eplan_placement_create", fake.Calls);
+        }
+        else
+        {
+            Assert.Equal(lastDryRun + 1, fake.Requests.Count);
+            Assert.DoesNotContain("eplan_connection_generate", fake.Calls);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task Preflight_SharedBatches_PreserveItemIndicesAndCounterpartScope(bool explicitWires, bool mixed)
+    {
+        JsonElement list = explicitWires ? ExplicitWiresList() : AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture());
+        if (mixed)
+        {
+            JsonObject changed = JsonNode.Parse(list.GetRawText())!.AsObject();
+            changed["wires"]![0]!["points"] = new JsonArray("from", "to");
+            list = AcceptanceDrawingList.Read(changed.ToJsonString());
+        }
+        bool deferredCable = !explicitWires || mixed;
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "test", _ => { }, keepGoing: true, preflight: true);
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        JsonElement[] dryRuns = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
+        JsonElement[] writes = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && !r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
+        Assert.Equal(3, dryRuns.Length);
+        Assert.Equal(deferredCable ? 4 : 3, writes.Length);
+        for (int i = 0; i < dryRuns.Length; i++)
+        {
+            JsonElement write = writes[i == 0 || !deferredCable ? i : i + 1];
+            Assert.Equal(write.GetProperty("page").GetString(), dryRuns[i].GetProperty("page").GetString());
+            Assert.True(JsonElement.DeepEquals(write.GetProperty("items"), dryRuns[i].GetProperty("items")));
+        }
+        JsonElement[] deferred = JsonSerializer.SerializeToElement(driver.Report).GetProperty("preflight").EnumerateArray().Where(p => p.GetProperty("status").GetString() == "not preflighted").ToArray();
+        Assert.Equal(mixed ? 1 : explicitWires ? 0 : 2, deferred.Length);
+        Assert.All(deferred, p => Assert.Contains("locators after generation", p.GetProperty("reason").GetString(), StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Preflight_UnknownOutcome_StopsBeforeTheNextDryRun()
+    {
+        var fake = new DrawingTools { ConnectWires = true, Refuse = (tool, _) => tool == "eplan_connection_create" ? Refusal(ErrorReason.OutcomeUnknown, ExecutionState.Unknown) : null };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", _ => { }, keepGoing: true, preflight: true);
+        await Assert.ThrowsAsync<InvalidOperationException>(driver.DrawAsync);
+        Assert.True(driver.UndoCountIncomplete);
+        Assert.Single(fake.Calls, c => c == "eplan_connection_create");
+        Assert.DoesNotContain("eplan_connection_generate", fake.Calls);
+    }
+
+    [Fact]
+    public async Task Rehearsal_CompleteDrawingWithoutSkippedItems_CanPass()
+    {
+        JsonObject list = JsonNode.Parse(TwoSwitches().GetRawText())!.AsObject();
+        foreach (JsonNode? point in list["plc"]!["points"]!.AsArray())
+        { point!.AsObject().Remove("display_properties"); }
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { }, keepGoing: true, preflight: true);
+        await driver.DrawAsync();
+        await driver.ExportAsync();
+        Assert.Equal(0, driver.SkippedCount);
+        Assert.Empty(JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task KeepGoing_MultipleInvalidPaths_CollectsEachWireAndContinuesWithoutPartialTopology()
+    {
+        JsonObject list = JsonNode.Parse(ExplicitWiresList().GetRawText())!.AsObject();
+        foreach (JsonNode? wire in list["wires"]!.AsArray().Take(2))
+        { wire!["points"]![1]![0] = wire["points"]![1]![0]!.GetValue<int>() + 4; }
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { }, keepGoing: true);
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        string[] problems = JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray().Select(p => p.GetString()!).ToArray();
+        Assert.Contains(problems, p => p.StartsWith("wires_symbols_and_cables/signal1:", StringComparison.Ordinal));
+        Assert.Contains(problems, p => p.StartsWith("wires_symbols_and_cables/signal2:", StringComparison.Ordinal));
+        Assert.Contains("signal1", error.Message, StringComparison.Ordinal);
+        Assert.Contains("signal2", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain(fake.Requests, r => r.Tool == "eplan_connection_create" && r.Args.GetProperty("items").EnumerateArray().Any(i => i.GetProperty("kind").GetString() == "wire"));
+        Assert.Contains("eplan_placement_create", fake.Calls);
+    }
+
+    [Fact]
+    public async Task KeepGoing_MissingGeneratedLocators_CollectsAllRequiredWiresBeforeSkippingCables()
+    {
+        var fake = new DrawingTools { ConnectWires = true, ConnectionFault = "missing" };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture()), "test", _ => { }, keepGoing: true);
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        string[] problems = JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray().Select(p => p.GetString()!).ToArray();
+        Assert.Equal(7, problems.Count(p => p.StartsWith("cables_after_generate/generated connection/", StringComparison.Ordinal)));
+        Assert.DoesNotContain(fake.Requests, r => r.Tool == "eplan_connection_create" && r.Args.GetProperty("items")[0].GetProperty("kind").GetString() == "cable_definition");
+        Assert.Contains("eplan_placement_create", fake.Calls);
+    }
+
+    [Fact]
+    public async Task PreflightOnly_AcceptedBatches_StopsAfterReportWithoutClaimingFullAcceptance()
+    {
+        JsonObject list = JsonNode.Parse(TwoSwitches().GetRawText())!.AsObject();
+        foreach (JsonNode? point in list["plc"]!["points"]!.AsArray())
+        { point!.AsObject().Remove("display_properties"); }
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { }, preflight: true);
+        await driver.DrawAsync();
+        Assert.True(driver.PreflightOnly);
+        Assert.Null(driver.Image);
+        JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
+        Assert.Equal("accepted", Assert.Single(report.GetProperty("preflight").EnumerateArray()).GetProperty("status").GetString());
+        Assert.Equal("preflight", report.GetProperty("stages").EnumerateArray().Last().GetString());
+        Assert.DoesNotContain("eplan_connection_generate", fake.Calls);
+        Assert.DoesNotContain("eplan_placement_create", fake.Calls);
+        Assert.DoesNotContain("eplan_export_image", fake.Calls);
+        Assert.All(fake.Requests.Where(r => r.Tool == "eplan_connection_create"), r => Assert.True(r.Args.GetProperty("dry_run").GetBoolean()));
+    }
+
+    private static JsonElement Refusal(string reason, string execution) => JsonSerializer.SerializeToElement(new
+    {
+        reason,
+        execution,
+        message = "Rejected drawing batch.",
+        metadata = new { problems = new[] { new { item = 0, detail = "Full diagnostic evidence." } } },
+    });
+
     private static JsonElement TwoSwitches()
     {
         JsonObject list = JsonNode.Parse(AcceptanceDrawingListTests.Fixture())!.AsObject();
@@ -500,6 +735,7 @@ public sealed class AcceptanceRedrawDriverTests
 
         internal List<string> Calls { get; } = [];
         internal List<(string Tool, JsonElement Args)> Requests { get; } = [];
+        internal Func<string, JsonElement, JsonElement?>? Refuse { get; init; }
         internal bool MissingPoint { get; init; }
         internal string? WrongPlcField { get; init; }
         internal bool MissingMember { get; init; }
@@ -544,6 +780,10 @@ public sealed class AcceptanceRedrawDriverTests
             Calls.Add(tool);
             Requests.Add((tool, JsonSerializer.SerializeToElement(args)));
             Assert.Equal("LargeWrite", args["project"]);
+            if (Refuse?.Invoke(tool, Requests[^1].Args) is { } refusal)
+            { return Task.FromResult((false, refusal)); }
+            if (tool == "eplan_connection_create" && args.TryGetValue("dry_run", out object? dryRun) && dryRun is true)
+            { return Task.FromResult((true, JsonSerializer.SerializeToElement(new { execution = ExecutionState.NotStarted }))); }
             object result;
             if (tool == "eplan_device_place" && FailPlace is { } state)
             { return Task.FromResult((false, JsonSerializer.SerializeToElement(new { reason = ErrorReason.EplanOperationFailed, execution = state }))); }
