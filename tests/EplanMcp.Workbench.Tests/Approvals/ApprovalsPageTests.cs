@@ -143,29 +143,36 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Add("r2", 90);
             Open();
             Button approve = Button(page, "ApproveButton");
-            approve.Focus();
+            Focus(window, approve);
 
             Press(approve);
 
             Assert.Equal("r2", _view!.Shown!.RequestId);
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.False(approve.IsEnabled);
             Assert.Equal("1", ((Button)window.FindName("PendingBadge")).Content); // the Header followed
         }));
     }
 
-    [Fact]
-    public void AnArrival_NeverMovesTheFocus()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AnArrival_NeverMovesTheFocus(bool loseKeyboardFocus)
     {
         wpf.Run(() => WithPage((window, page) =>
         {
             var settings = (Button)window.FindName("SettingsButton");
-            settings.Focus();
+            Focus(window, settings);
 
             Add("r1");
+            if (loseKeyboardFocus)
+            {
+                Keyboard.ClearFocus();
+                Assert.Null(Keyboard.FocusedElement);
+            }
 
             Assert.Equal("r1", _view!.Shown!.RequestId);
-            Assert.Same(settings, Keyboard.FocusedElement);
+            Assert.Same(settings, Focused(window));
         }));
     }
 
@@ -176,12 +183,12 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         {
             Question question = Add("r1");
             Open();
-            Button(page, "RejectButton").Focus();
+            Focus(window, Button(page, "RejectButton"));
 
             _queue!.End(question, QuestionEnd.Expired);
             WpfContext.Drain();
 
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.False(((FrameworkElement)page.FindName("Waiting")).IsVisible);
         }));
     }
@@ -194,12 +201,12 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Question question = Add("r1");
             Open();
             var list = (ListBox)page.FindName("Questions");
-            list.Focus();
+            Focus(window, list);
 
             list.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(list), 0, Key.Enter) { RoutedEvent = Keyboard.KeyDownEvent });
             WpfContext.Drain();
 
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.Null(question.End);
         }));
     }
@@ -350,20 +357,20 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Add("r1");
             Add("r2", 150);
             Open();
-            Button(page, "ApproveButton").Focus();
+            Focus(window, Button(page, "ApproveButton"));
 
             Activated(window);
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            Assert.Same(page.FindName("QuestionTitle"), Focused(window));
 
             var list = (ListBox)page.FindName("Questions");
             var row = (ListBoxItem)list.ItemContainerGenerator.ContainerFromIndex(1);
-            row.Focus();
+            Focus(window, row);
             Activated(window);
-            Assert.Same(row, Keyboard.FocusedElement);
+            Assert.Same(row, Focused(window));
             var menu = (UIElement)window.FindName("ApprovalsItem");
-            menu.Focus();
+            Focus(window, menu);
             Activated(window);
-            Assert.Same(menu, Keyboard.FocusedElement);
+            Assert.Same(menu, Focused(window));
         }));
     }
 
@@ -411,10 +418,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Open();
             window.Navigate(WorkbenchPage.Status, NavigationOrigin.Shortcut);
             window.Hide();
-            // Keyboard focus needs the window active. The click on the notification lets the Workbench come to the
-            // front; a test run does not get that, and once its window hid, the program in the foreground (on a desktop
-            // in use, or a full solution run) can keep or take back activation, and with it the focus. So what is
-            // checked is where the window asks for focus, and the focus itself where the window is still active.
+            // Check both the focus request and the window's logical focus, even if the desktop takes focus back.
             var asked = new List<object>();
             window.AddHandler(
                 Keyboard.KeyboardInputProviderAcquireFocusEvent,
@@ -429,10 +433,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
             Assert.Same(second, _view!.Shown!.Question);
             Assert.Same(title, asked.LastOrDefault());
-            if (window.IsActive)
-            {
-                Assert.Same(title, Keyboard.FocusedElement);
-            }
+            Assert.Same(title, Focused(window));
 
             Assert.False(Button(page, "ApproveButton").IsEnabled);
         }));
@@ -476,20 +477,21 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         }));
     }
 
-    [Fact]
-    public void F6_GoesRoundTheRegions_BothWays_NeverToAnAnswerButton_AndNotUnderTheSettingsDrawer()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void F6_GoesRoundTheRegions_BothWays_NeverToAnAnswerButton_AndNotUnderTheSettingsDrawer(bool loseKeyboardFocus)
     {
         wpf.Run(() => WithPage((window, page) =>
         {
             Add("r1");
             Open();
-            ((UIElement)window.FindName("SettingsButton")).Focus(); // in the Sider
+            Focus(window, (UIElement)window.FindName("SettingsButton")); // in the Sider
             var stops = new List<object>();
             for (int i = 0; i < 5; i++)
             {
-                MainWindow.RegionCommand.Execute("1", window);
-                WpfContext.Drain();
-                stops.Add(Keyboard.FocusedElement);
+                MoveRegion("1");
+                stops.Add(Focused(window));
             }
 
             // The Header's stop is the waiting count, shown as a question waits.
@@ -497,17 +499,29 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.Equal(
                 [window.FindName("PendingBadge"), list.ItemContainerGenerator.ContainerFromIndex(0), page.FindName("QuestionTitle"), window.FindName("ApprovalsItem"), window.FindName("PendingBadge")],
                 stops);
-            MainWindow.RegionCommand.Execute("-1", window);
-            WpfContext.Drain();
-            Assert.Same(window.FindName("ApprovalsItem"), Keyboard.FocusedElement);
-            MainWindow.RegionCommand.Execute("-1", window);
-            WpfContext.Drain();
-            Assert.Same(page.FindName("QuestionTitle"), Keyboard.FocusedElement);
+            MoveRegion("-1");
+            Assert.Same(window.FindName("ApprovalsItem"), Focused(window));
+            MoveRegion("-1");
+            Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.Contains(window.InputBindings.OfType<KeyBinding>(), b => b.Key == Key.F6 && b.Modifiers == ModifierKeys.Shift && b.Command == MainWindow.RegionCommand);
 
             window.OpenSettings();
             Assert.False(MainWindow.RegionCommand.CanExecute("1", window));
             window.CloseSettings();
+
+            void MoveRegion(string direction)
+            {
+                // F6 reads IsKeyboardFocusWithin. Restore the saved logical stop before executing, rather than
+                // letting a desktop deactivation turn every step into the first region.
+                Focus(window, Focused(window));
+                MainWindow.RegionCommand.Execute(direction, window);
+                WpfContext.Drain();
+                if (loseKeyboardFocus)
+                {
+                    Keyboard.ClearFocus();
+                    Assert.Null(Keyboard.FocusedElement);
+                }
+            }
         }));
     }
 
@@ -561,6 +575,18 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
     private static Button Button(ApprovalsPage page, string name) => (Button)page.FindName(name);
 
     private QuestionItem Item(Question question) => _view!.Pending.Concat(_view.Answered).Single(i => i.Question == question);
+
+    // Keyboard.FocusedElement can become null while Drain pumps desktop deactivation messages. Logical focus belongs
+    // to this window and survives that loss; do not reacquire focus after the action, which could hide a wrong stop.
+    private static IInputElement Focused(Window window) => Assert.IsAssignableFrom<IInputElement>(FocusManager.GetFocusedElement(window));
+
+    private static void Focus(Window window, IInputElement element)
+    {
+        window.Activate();
+        WpfContext.Drain(); // finish activation's queued Refocus before establishing the action's starting focus
+        Assert.Same(element, Keyboard.Focus(element));
+        Assert.Same(element, Focused(window));
+    }
 
     /// <summary>What Windows does when the window comes to the front, without taking the foreground in a test run.</summary>
     private static void Activated(Window window)
