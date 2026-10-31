@@ -270,6 +270,54 @@
       "live": []
     },
     {
+      "name": "eplan_action_try",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/ActionTryTools.cs",
+      "operations": [
+        "action.try.execute",
+        "action.try.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_action_try.md",
+        "specStatus": "Implemented；实机验证待运行（ADR-0030、ADR-0032）",
+        "apiNotes": [
+          "A9",
+          "A40"
+        ],
+        "tests": [
+          {
+            "name": "ActionTryContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionTryTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "UsageToolsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ActionTryTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": []
+    },
+    {
       "name": "eplan_api_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/ApiTools.cs",
@@ -12458,6 +12506,11 @@
             "name": "ActionRunValidationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunValidationTests.cs"
+          },
+          {
+            "name": "ActionTryContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionTryTests.cs"
           },
           {
             "name": "ApiTryContractTests",

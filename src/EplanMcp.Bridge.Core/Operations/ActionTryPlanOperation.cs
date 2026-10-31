@@ -24,7 +24,8 @@ public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunne
         if (!project.Current || catalog.ListOpenProjects().Count != 1)
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Only the target scratch project may be open and current for a trial."); }
         var parameters = args.Parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
-        if (args.Type is not null) { parameters.Add("TYPE", args.Type); }
+        if (args.Type is not null)
+        { parameters.Add("TYPE", args.Type); }
         string entry = "try:" + args.Action + "/" + args.Type;
         return new ActionRunRequest(new JObject { ["entry"] = entry, ["action"] = args.Action, ["seconds"] = 30, ["effects"] = "unverified; rollback and undo are unverified." },
             project, runner.Inspect(entry, project.Path, parameters));
@@ -34,7 +35,9 @@ public sealed class ActionTryPlanOperation(IProjectCatalog catalog, IActionRunne
         ActionRunRequest request = Check(args, catalog, runner);
         return new WritePlan
         {
-            Project = request.Project!.Name, ProjectPath = request.Project.Path, Fingerprint = request.StateFingerprint(),
+            Project = request.Project!.Name,
+            ProjectPath = request.Project.Path,
+            Fingerprint = request.StateFingerprint(),
             Changes = [new PlannedChange { Action = "try", Kind = "action", Name = args.Action, NewValue = JsonConvert.SerializeObject(request.Data.Parameters) }],
             Details = new() { ["unverified"] = "true", ["effects"] = "unverified; TYPE=" + args.Type + "; rollback and undo are unverified.", ["actionRun"] = JsonConvert.SerializeObject(request.Data) },
         };

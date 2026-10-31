@@ -21,18 +21,26 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
     {
         try
         {
-            if (config.ActionTry != ActionRunSwitch.On) { throw ActionRunCatalog.Denied("Action trials are disabled."); }
+            if (config.ActionTry != ActionRunSwitch.On)
+            { throw ActionRunCatalog.Denied("Action trials are disabled."); }
             ActionTryArgs args = Check(await catalog.ReadAsync(cancellationToken).ConfigureAwait(false), project, action, type, parameters ?? default);
             var request = new WriteRequest<ActionTryArgs, ActionTryArgs>(Tool, ToolTier.Write, OperationNames.ActionTryPlan, OperationNames.ActionTryExecute, args,
-                p => new() { Project = args.Project, Action = args.Action, Type = args.Type, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified action") { Unverified = true };
+                p => new() { Project = args.Project, Action = args.Action, Type = args.Type, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified action")
+            { Unverified = true };
             WriteOutcome<ActionRunData> outcome = await writes.RunAsync<ActionTryArgs, ActionTryArgs, ActionRunData>(request, progress, cancellationToken).ConfigureAwait(false);
             ActionRunData before = JsonSerializer.Deserialize<ActionRunData>(outcome.Plan.Details!["actionRun"], HostJson.Options)!;
             var after = outcome.Data?.After;
             var result = new JsonObject
             {
-                ["action"] = action, ["type"] = type, ["project"] = outcome.Plan.Project, ["unverified"] = true,
-                ["execution"] = outcome.Execution, ["dryRun"] = dry_run, ["recovered"] = outcome.Recovered,
-                ["before"] = Evidence(before.Before), ["after"] = after is null ? null : Evidence(after),
+                ["action"] = action,
+                ["type"] = type,
+                ["project"] = outcome.Plan.Project,
+                ["unverified"] = true,
+                ["execution"] = outcome.Execution,
+                ["dryRun"] = dry_run,
+                ["recovered"] = outcome.Recovered,
+                ["before"] = Evidence(before.Before),
+                ["after"] = after is null ? null : Evidence(after),
                 ["changed"] = after is null ? null : !before.Before.OrderBy(p => p.Key, StringComparer.Ordinal).SequenceEqual(after.OrderBy(p => p.Key, StringComparer.Ordinal)),
                 ["truncated"] = before.Before.Count > 20 || after?.Count > 20,
                 ["hint"] = "unverified; fingerprint comparison only. Rollback and Ctrl+Z are unverified. " + ResultShaper.CleanText(outcome.Data?.Warning),
@@ -53,21 +61,28 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
                 && string.Equals(e["fixed"]?["TYPE"]?.GetValue<string>(), type, StringComparison.OrdinalIgnoreCase)))
         { throw ActionRunCatalog.Denied("This catalog action is excluded from trials."); }
         var problems = new List<string>();
-        if (string.IsNullOrWhiteSpace(project)) { problems.Add("project is required."); }
-        if (type is not null && !ActionTryPolicy.Name(type)) { problems.Add("type must exactly match the catalog TYPE."); }
-        if (parameters.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.Object)) { problems.Add("parameters must be a flat object."); }
+        if (string.IsNullOrWhiteSpace(project))
+        { problems.Add("project is required."); }
+        if (type is not null && !ActionTryPolicy.Name(type))
+        { problems.Add("type must exactly match the catalog TYPE."); }
+        if (parameters.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.Object))
+        { problems.Add("parameters must be a flat object."); }
         JsonProperty[] given = parameters.ValueKind == JsonValueKind.Object ? [.. parameters.EnumerateObject()] : [];
-        if (given.Length > 32 || given.GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).Any(g => g.Count() > 1)) { problems.Add("Use at most 32 unique parameter names."); }
-        if (!rows.Any(r => given.All(p => r.Parameters.Any(k => k.GetProperty("name").GetString() == p.Name)))) { problems.Add("Every parameter name must be known in the same catalog row."); }
+        if (given.Length > 32 || given.GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).Any(g => g.Count() > 1))
+        { problems.Add("Use at most 32 unique parameter names."); }
+        if (!rows.Any(r => given.All(p => r.Parameters.Any(k => k.GetProperty("name").GetString() == p.Name))))
+        { problems.Add("Every parameter name must be known in the same catalog row."); }
         var args = new ActionTryArgs { Action = action, Project = project, Type = type };
         foreach (JsonProperty p in given)
         {
             string? value = p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString() : p.Value.ValueKind is JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False ? p.Value.GetRawText() : null;
             if (!ActionTryPolicy.Name(p.Name) || p.Name.Equals("TYPE", StringComparison.OrdinalIgnoreCase) || ActionTryPolicy.Denied("parameter", p.Name) || !ActionTryPolicy.Value(value))
             { problems.Add("A parameter is invalid; use simple catalog values without paths, control characters, quotes or target overrides."); }
-            else { args.Parameters.Add(new() { Name = p.Name, Value = value! }); }
+            else
+            { args.Parameters.Add(new() { Name = p.Name, Value = value! }); }
         }
-        if (problems.Count > 0) { throw new BridgeCallException(ToolResults.InvalidArgumentError(problems)); }
+        if (problems.Count > 0)
+        { throw new BridgeCallException(ToolResults.InvalidArgumentError(problems)); }
         return args;
     }
 }

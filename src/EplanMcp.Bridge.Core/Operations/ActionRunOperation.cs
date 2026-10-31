@@ -36,7 +36,8 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         try
         { done = runner.Run((string)request.Entry["action"]!, parameters, unverified); }
         catch (Exception ex) { failure = ex; }
-        if (unverified && failure is BridgeErrorException { Error.Reason: ErrorReason.OutcomeUnknown }) { throw failure; }
+        if (unverified && failure is BridgeErrorException { Error.Reason: ErrorReason.OutcomeUnknown })
+        { throw failure; }
         List<SystemMessageRecord> added;
         try
         { added = [.. messages.ReadAll().Skip(bookmark)]; }

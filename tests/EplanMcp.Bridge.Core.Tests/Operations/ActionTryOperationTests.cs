@@ -42,10 +42,18 @@ public sealed class ActionTryOperationTests
             args.Fingerprint = Plan(args).Fingerprint;
             switch (field)
             {
-                case "parameter": args.Parameters[0].Value = "2"; break;
-                case "type": args.Type = "OTHER"; break;
-                case "action": args.Action = "XOtherView"; break;
-                case "design": _runner.Bytes++; break;
+                case "parameter":
+                    args.Parameters[0].Value = "2";
+                    break;
+                case "type":
+                    args.Type = "OTHER";
+                    break;
+                case "action":
+                    args.Action = "XOtherView";
+                    break;
+                case "design":
+                    _runner.Bytes++;
+                    break;
             }
             var error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
             Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
@@ -138,14 +146,18 @@ public sealed class ActionTryOperationTests
             Inspections++;
             return new()
             {
-                Target = projectPath!, Parameters = [.. parameters.Select(p => new ActionParameter { Name = p.Key, Value = p.Value })],
+                Target = projectPath!,
+                Parameters = [.. parameters.Select(p => new ActionParameter { Name = p.Key, Value = p.Value })],
                 Before = new() { ["count:pages"] = "1", ["file:Design.eod"] = Bytes.ToString(System.Globalization.CultureInfo.InvariantCulture) + "\t2026-10-30T00:00:00Z" },
             };
         }
         public bool Run(string action, IReadOnlyDictionary<string, string> parameters, bool unverified = false)
         {
-            Action = action; Parameters = parameters; Unverified = unverified;
-            if (Fail is not null) { throw new BridgeErrorException(Fail, "Action failed."); }
+            Action = action;
+            Parameters = parameters;
+            Unverified = unverified;
+            if (Fail is not null)
+            { throw new BridgeErrorException(Fail, "Action failed."); }
             return true;
         }
     }

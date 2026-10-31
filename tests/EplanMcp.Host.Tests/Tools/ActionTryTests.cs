@@ -145,8 +145,10 @@ public sealed class ActionTryContractTests
     public void Config_IsExplicitAndDefaultsOff(string json, bool? enabled)
     {
         var config = HostConfig.Parse(json, new(@"D:\test"));
-        if (enabled is null) { Assert.Null(config.Config); }
-        else { Assert.Equal(enabled.Value, config.Config!.ActionTry == ActionRunSwitch.On); }
+        if (enabled is null)
+        { Assert.Null(config.Config); }
+        else
+        { Assert.Equal(enabled.Value, config.Config!.ActionTry == ActionRunSwitch.On); }
     }
 
     [Theory]
@@ -196,7 +198,8 @@ public sealed class ActionTryToolTests : IDisposable
         {
             Answers = q =>
             {
-                if (_retarget) { q.Plan.ProjectPath = Path.Combine(_harness!.Locations.Root, "real"); }
+                if (_retarget)
+                { q.Plan.ProjectPath = Path.Combine(_harness!.Locations.Root, "real"); }
                 return _approved ? ApprovalDecision.Granted : ApprovalDecision.Denied;
             },
         };

@@ -1,5 +1,7 @@
 # EPLAN API 覆盖报告
 
+> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-31 按 Bridge 源码 185ef35f 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
+
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 185ef35f）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
@@ -88,7 +90,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 92（32.6%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 93（32.3%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -234,7 +236,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 1/2/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 3/2/3 | — | — |
 | eplan_terminal_strip_list | read | terminal.strip.list | 18 | 10 | 0 | 8 | 0 | 3/2/2 | — | — |
-| eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 9/3/0 | — | — |
+| eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 10/3/0 | — | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 2/3/2 | A30 | — |
 | eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 4/3/1 | A47 | 2026-10-27 pass（Large 测试 README） |
 | eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 149 | 69 | 4 | 51 | 0 | 3/5/7 | A14 A17 A32 A33 A36 A37 A39 | — |
