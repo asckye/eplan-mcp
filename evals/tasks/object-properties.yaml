@@ -1,0 +1,16 @@
+id: object-properties
+set: dev
+prompt: |
+  用通用对象工具查找 =GAA+A1&EFS1/1 页上的 Function，选择一个返回的 locator，分页读它的英文属性。
+  返回一个实际读到的属性 ID 和正式名称；再查询 Arc 类型，说明本批是否支持。
+answer:
+  type: object
+  required: [property_id, property_name, arc_status]
+  properties:
+    property_id: { type: integer }
+    property_name: { type: string }
+    arc_status: { type: string }
+checks:
+  - answer: "$.arc_status"
+    equals: unsupported
+budget: { max_tool_calls: 20 }

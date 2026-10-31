@@ -6,6 +6,10 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Finds exact dictionary object identities in an open project; never writes.</summary>
+    public const string ObjectFind = "object.find";
+    /// <summary>Reads a bounded property block of an exact, digest-checked dictionary object.</summary>
+    public const string ObjectGet = "object.get";
     /// <summary>Complete-page connection creation preview; JSON arguments, WritePlan result.</summary>
     public const string ConnectionCreatePlan = "connection.create.plan";
     /// <summary>Two-commit connection creation; approved request/fingerprint, JSON result.</summary>

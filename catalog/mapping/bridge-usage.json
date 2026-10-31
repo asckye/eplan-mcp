@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-10-30",
-  "scannedSources": "73f06e6f",
-  "sourceHash": "sha256:1a23482468341bddb052ec594392e76fd0c51073b366362b121ee683edb3b658",
+  "scannedOn": "2026-10-31",
+  "scannedSources": "1aa55fb3 + uncommitted changes",
+  "sourceHash": "sha256:74ff5975804a95817b623dfe58227d65622c7e13ca62825c1d3e025697e31ebf",
   "operations": [
     {
       "name": "action.execute",
@@ -261,6 +261,16 @@
     {
       "name": "message.list",
       "class": "MessageListOperation"
+    },
+    {
+      "name": "object.find",
+      "class": "ObjectReadOperation",
+      "kind": "ObjectReadKind.Find"
+    },
+    {
+      "name": "object.get",
+      "class": "ObjectReadOperation",
+      "kind": "ObjectReadKind.Get"
     },
     {
       "name": "object.resolve",
@@ -1230,6 +1240,19 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.Base.Enums.FunctionCategory.TerminalDefText": [
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L___": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -1317,6 +1340,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1366,7 +1390,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -1388,17 +1413,6 @@
       }
     ],
     "F:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType.Circuit": [
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
-        "access": [
-          "read"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
       {
         "adapter": "EplanPlacementTextWriter",
         "member": "Validate",
@@ -1637,6 +1651,23 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.DataModel.Properties.Symbol.SYMB_DESC": [
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.DataModel.PropertyDefinition.PropertyType.Bool": [
       {
         "adapter": "EplanPropertyReadDefinition",
@@ -1646,6 +1677,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1659,6 +1691,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -1672,6 +1705,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1685,6 +1719,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -1698,6 +1733,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1711,6 +1747,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -1724,6 +1761,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1737,6 +1775,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -1750,6 +1789,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1765,6 +1805,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -1778,6 +1819,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -1791,6 +1833,7 @@
           "read"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3352,6 +3395,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3460,6 +3504,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3509,7 +3554,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -3545,7 +3591,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -3592,6 +3639,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3641,7 +3689,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -3677,7 +3726,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -3761,6 +3811,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3774,6 +3825,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3885,7 +3937,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -3921,7 +3974,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -3958,6 +4012,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -3997,6 +4052,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -4035,7 +4091,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -4056,6 +4113,7 @@
           "cable.renumber.execute",
           "check.run.execute",
           "connection.create.execute",
+          "connection.create.plan",
           "connection.generate.execute",
           "connection.number.execute",
           "device.place.execute",
@@ -4094,6 +4152,7 @@
           "property.set.execute",
           "property.set.plan",
           "report.update.execute",
+          "symbol.search",
           "terminal.renumber.execute",
           "translation.export.plan",
           "translation.export.run",
@@ -4331,6 +4390,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -4393,6 +4453,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -4459,7 +4520,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -4558,17 +4620,6 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
-        "access": [
-          "new"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "new"
         ],
@@ -5040,6 +5091,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -5071,14 +5123,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "call"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -5135,6 +5188,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -5645,6 +5699,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -6009,6 +6075,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -6379,6 +6446,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanProjectReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectReader.cs",
@@ -6397,6 +6476,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -6749,6 +6829,8 @@
           "call"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -6958,6 +7040,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -7134,6 +7228,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -7147,6 +7242,8 @@
           "call"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -7379,19 +7476,6 @@
         ]
       }
     ],
-    "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.PLC,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      }
-    ],
     "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -7412,19 +7496,6 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "new"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Create(Eplan.EplApi.DataModel.Page)": [
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateTerminal",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
-        "access": [
-          "call"
         ],
         "operations": [
           "device.place.execute"
@@ -7457,11 +7528,11 @@
         ]
       }
     ],
-    "M:Eplan.EplApi.DataModel.Function.PlaceAt(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+    "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.FunctionDefinition)": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "call"
         ],
@@ -8006,6 +8077,21 @@
           "device.place.plan",
           "symbol.search"
         ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.MasterData.WindowMacro.#ctor": [
@@ -8320,6 +8406,7 @@
           "new"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -8608,6 +8695,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -8920,6 +9009,10 @@
           "new"
         ],
         "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -8928,7 +9021,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
-          "property.set.plan"
+          "property.set.plan",
+          "symbol.search"
         ]
       },
       {
@@ -8976,6 +9070,10 @@
           "call"
         ],
         "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -8984,7 +9082,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
-          "property.set.plan"
+          "property.set.plan",
+          "symbol.search"
         ]
       },
       {
@@ -9082,6 +9181,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9131,6 +9231,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9144,6 +9245,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       },
@@ -9168,6 +9270,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9181,6 +9284,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -9194,6 +9298,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9207,6 +9312,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -9254,6 +9360,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9291,7 +9398,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -9532,6 +9640,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -9545,6 +9654,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       },
@@ -9633,7 +9743,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -10102,7 +10213,8 @@
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -10119,14 +10231,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "call"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -10433,6 +10546,8 @@
           "call"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -10446,6 +10561,8 @@
           "call"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -10459,6 +10576,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -12008,6 +12126,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -12122,6 +12242,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -12781,6 +12903,7 @@
           "call"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -12820,6 +12943,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -12858,7 +12982,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -12908,6 +13033,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -13067,6 +13205,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -13152,6 +13292,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "XY",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -13307,6 +13460,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -13867,14 +14022,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       }
     ],
@@ -13927,6 +14083,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -13972,6 +14141,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -14000,6 +14171,20 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Connection.EndSymbolReference": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       }
     ],
@@ -14047,6 +14232,8 @@
           "connection.number.plan",
           "device.place.execute",
           "device.place.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard",
@@ -14128,14 +14315,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -14172,6 +14360,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -14241,6 +14430,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -14286,6 +14488,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -14314,6 +14518,20 @@
         ],
         "operations": [
           "terminal.strip.get"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Connection.StartSymbolReference": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       }
     ],
@@ -14501,14 +14719,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "get"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       }
     ],
@@ -15220,6 +15439,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -15531,6 +15752,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -15723,6 +15946,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -15736,6 +15960,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -15845,6 +16070,19 @@
         ]
       },
       {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "ReadDisplays",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Displays.cs",
@@ -15887,6 +16125,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -16042,6 +16282,18 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -16509,6 +16761,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -16931,6 +17185,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "get"
         ],
@@ -18891,6 +19156,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "InputDefinition",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -19030,7 +19306,7 @@
     "P:Eplan.EplApi.DataModel.MasterData.Symbol.Properties": [
       {
         "adapter": "EplanSymbolReader",
-        "member": "Category",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
         "access": [
           "get"
@@ -19223,6 +19499,21 @@
       {
         "adapter": "EplanSymbolReader",
         "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
         "access": [
           "get"
@@ -19732,6 +20023,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -20176,6 +20469,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -20474,6 +20779,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -20487,6 +20794,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -20862,6 +21170,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -21311,6 +21620,7 @@
           "set"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -21470,6 +21780,7 @@
           "set"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -21548,6 +21859,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -21628,6 +21941,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -21673,6 +21999,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -21806,6 +22134,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -21863,6 +22204,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -22053,6 +22407,18 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
         ]
       },
       {
@@ -22266,6 +22632,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -22361,6 +22729,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanSymbolReader",
         "member": "InputDefinition",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
@@ -22440,6 +22819,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -22640,6 +23021,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -22749,6 +23132,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -22977,6 +23362,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -23085,6 +23472,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23281,6 +23669,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -23433,6 +23823,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -23670,6 +24062,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23700,6 +24093,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23715,6 +24109,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23730,6 +24125,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23745,6 +24141,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23760,6 +24157,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23775,6 +24173,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23807,6 +24206,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23820,6 +24220,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -23833,6 +24234,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23863,6 +24265,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -23876,6 +24279,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -23904,6 +24308,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       },
@@ -24176,6 +24581,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24189,6 +24595,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24292,7 +24699,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -24490,7 +24898,8 @@
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -24670,6 +25079,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24683,6 +25094,8 @@
           "get"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24696,6 +25109,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -24910,6 +25324,19 @@
           "connection.create.execute",
           "connection.create.plan"
         ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnections": [
@@ -25110,6 +25537,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -25123,6 +25551,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -25138,6 +25567,7 @@
           "get"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -26779,6 +27209,8 @@
           "connection.number.plan",
           "device.place.execute",
           "device.place.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard",
@@ -27059,6 +27491,10 @@
           "type"
         ],
         "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -27067,7 +27503,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
-          "property.set.plan"
+          "property.set.plan",
+          "symbol.search"
         ]
       },
       {
@@ -27102,6 +27539,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27115,6 +27553,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27257,6 +27696,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateTerminal",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "type"
         ],
@@ -27505,6 +27955,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27518,6 +27969,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27531,6 +27983,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27595,7 +28048,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -27631,7 +28085,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -27667,7 +28122,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -27782,6 +28238,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27846,7 +28303,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -27882,7 +28340,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -27919,6 +28378,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27958,6 +28418,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -27996,7 +28457,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -28017,6 +28479,7 @@
           "cable.renumber.execute",
           "check.run.execute",
           "connection.create.execute",
+          "connection.create.plan",
           "connection.generate.execute",
           "connection.number.execute",
           "device.place.execute",
@@ -28055,6 +28518,7 @@
           "property.set.execute",
           "property.set.plan",
           "report.update.execute",
+          "symbol.search",
           "terminal.renumber.execute",
           "translation.export.plan",
           "translation.export.run",
@@ -28262,7 +28726,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       },
       {
@@ -28386,17 +28851,6 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"
         ],
@@ -28544,6 +28998,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -28717,14 +29173,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "type"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -28836,6 +29293,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -29059,6 +29517,19 @@
       },
       {
         "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "ReadCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -29124,6 +29595,8 @@
           "connection.number.plan",
           "device.place.execute",
           "device.place.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard",
@@ -29206,6 +29679,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -29219,6 +29693,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -29232,6 +29708,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -29394,14 +29871,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "type"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -30085,6 +30563,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -30474,6 +30964,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -30487,6 +30978,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -30500,6 +30993,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -30513,6 +31007,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -30652,17 +31148,6 @@
     ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager": [
       {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
-      {
         "adapter": "EplanPageReader",
         "member": "ListPages",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReader.cs",
@@ -30708,17 +31193,6 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DocumentTypeManager.DocumentType": [
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "CreateFunction",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
       {
         "adapter": "EplanPageReader",
         "member": "ListPages",
@@ -30795,6 +31269,8 @@
           "connection.number.plan",
           "device.place.execute",
           "device.place.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard",
@@ -30840,6 +31316,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -31830,6 +32308,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -31843,6 +32323,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -31856,6 +32338,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -31869,6 +32352,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -31882,6 +32366,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -32166,6 +32651,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -33028,6 +33514,18 @@
     "T:Eplan.EplApi.DataModel.InterruptionPoint": [
       {
         "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
         "member": "Interruptions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
@@ -33073,6 +33571,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -33144,21 +33643,6 @@
       },
       {
         "adapter": "EplanSymbolReader",
-        "member": "Category",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "connection.create.execute",
-          "connection.create.plan",
-          "device.place.execute",
-          "device.place.plan",
-          "symbol.search"
-        ]
-      },
-      {
-        "adapter": "EplanSymbolReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
         "access": [
@@ -33207,6 +33691,36 @@
       {
         "adapter": "EplanSymbolReader",
         "member": "Category",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
         "access": [
           "type"
@@ -33570,6 +34084,8 @@
           "connection.number.plan",
           "device.place.execute",
           "device.place.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "plan.step.execute",
           "plan.step.guard",
@@ -33892,6 +34408,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPageDescriptions",
         "member": "Find",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs",
@@ -34158,6 +34686,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -34171,6 +34701,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -34184,6 +34716,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -34197,6 +34730,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -34456,6 +34991,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -34485,6 +35021,19 @@
         "operations": [
           "connection.create.execute",
           "connection.create.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "ReadCableWire",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -34545,6 +35094,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -35091,6 +35642,10 @@
           "type"
         ],
         "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -35099,7 +35654,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
-          "property.set.plan"
+          "property.set.plan",
+          "symbol.search"
         ]
       },
       {
@@ -35231,6 +35787,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -35342,6 +35900,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -35402,6 +35962,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -35577,6 +36138,7 @@
           "cable.renumber.execute",
           "check.run.execute",
           "connection.create.execute",
+          "connection.create.plan",
           "connection.generate.execute",
           "connection.number.execute",
           "device.place.execute",
@@ -35615,6 +36177,7 @@
           "property.set.execute",
           "property.set.plan",
           "report.update.execute",
+          "symbol.search",
           "terminal.renumber.execute",
           "translation.export.plan",
           "translation.export.run",
@@ -35758,6 +36321,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",
@@ -36030,6 +36595,10 @@
           "type"
         ],
         "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "language.remove.execute",
           "language.remove.plan",
           "language.set.execute",
@@ -36038,7 +36607,8 @@
           "project.translate.execute",
           "project.translate.plan",
           "property.set.execute",
-          "property.set.plan"
+          "property.set.plan",
+          "symbol.search"
         ]
       },
       {
@@ -36147,6 +36717,21 @@
           "device.place.plan",
           "symbol.search"
         ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.Properties.Connection": [
@@ -36237,6 +36822,21 @@
           "device.place.plan",
           "symbol.search"
         ]
+      },
+      {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.PropertyDefinition": [
@@ -36263,6 +36863,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36276,6 +36877,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36289,6 +36891,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -36302,6 +36905,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36315,6 +36919,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36328,6 +36933,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read"
         ]
       }
@@ -36356,6 +36962,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36369,6 +36976,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36487,14 +37095,15 @@
       },
       {
         "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
+        "member": "ReadCableWire",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
         "access": [
           "type"
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -36678,6 +37287,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36691,6 +37301,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -36775,6 +37386,21 @@
         ]
       },
       {
+        "adapter": "EplanSymbolReader",
+        "member": "Description",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanSymbolReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "symbol.search"
+        ]
+      },
+      {
         "adapter": "EplanText",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanText.cs",
@@ -36799,7 +37425,8 @@
           "part.list",
           "part.sync.execute",
           "part.sync.plan",
-          "plc.get"
+          "plc.get",
+          "symbol.search"
         ]
       },
       {
@@ -36834,7 +37461,8 @@
           "placeholder.list",
           "plc.get",
           "project.get",
-          "revision.list"
+          "revision.list",
+          "symbol.search"
         ]
       }
     ],
@@ -36953,6 +37581,18 @@
         ]
       },
       {
+        "adapter": "EplanObjectReader",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "object.find",
+          "object.get"
+        ]
+      },
+      {
         "adapter": "EplanPartReader",
         "member": "Reference",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPartReader.cs",
@@ -37011,6 +37651,8 @@
           "type"
         ],
         "operations": [
+          "object.find",
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -37024,6 +37666,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -37031,6 +37674,18 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.SymbolReference": [
+      {
+        "adapter": "EplanConnectionCreator",
+        "member": "Endpoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "Graphical",
@@ -37052,7 +37707,8 @@
         ],
         "operations": [
           "connection.create.execute",
-          "connection.create.plan"
+          "connection.create.plan",
+          "connection.list"
         ]
       },
       {
@@ -37372,6 +38028,7 @@
           "type"
         ],
         "operations": [
+          "object.get",
           "property.read",
           "property.set.execute",
           "property.set.plan"
@@ -38061,6 +38718,8 @@
           "macro.get",
           "macro.insert.execute",
           "macro.insert.plan",
+          "object.find",
+          "object.get",
           "object.resolve",
           "page.create.execute",
           "page.create.plan",

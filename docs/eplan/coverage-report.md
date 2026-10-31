@@ -1,9 +1,7 @@
 # EPLAN API 覆盖报告
 
-> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-30 按 Bridge 源码 73f06e6f 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
-
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-30 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 73f06e6f）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 1aa55fb3 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
@@ -11,15 +9,15 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 724 个 ID（方法 219，属性 265，类型 163，字段和枚举值 62，action 15），其中 704 个能被某个 Bridge 操作到达，19 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
+Bridge 共用到 726 个 ID（方法 217，属性 267，类型 163，字段和枚举值 64，action 15），其中 706 个能被某个 Bridge 操作到达，19 个只属于基础设施，1 个只出现在没有操作到达的生成代码中（不计入覆盖，设计文档第 8 节）。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 25 |
-| `Eplan.EplApi.Base` | 56 |
-| `Eplan.EplApi.DataModel` | 313 |
+| `Eplan.EplApi.Base` | 57 |
+| `Eplan.EplApi.DataModel` | 316 |
 | `Eplan.EplApi.DataModel.E3D` | 1 |
-| `Eplan.EplApi.DataModel.EObjects` | 34 |
+| `Eplan.EplApi.DataModel.EObjects` | 32 |
 | `Eplan.EplApi.DataModel.Graphics` | 61 |
 | `Eplan.EplApi.DataModel.MasterData` | 39 |
 | `Eplan.EplApi.DataModel.Topology` | 4 |
@@ -32,18 +30,18 @@ Bridge 共用到 724 个 ID（方法 219，属性 265，类型 163，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 350 / 4014（8.7%） | 342 | 58 | 342 / 4014（8.5%） | 164 / 4014（4.1%） | 122 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 140 / 1799（7.8%） | 133 | 51 | 133 / 1799（7.4%） | 76 / 1799（4.2%） | 45 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 210 / 2215（9.5%） | 209 | 7 | 209 / 2215（9.4%） | 88 / 2215（4.0%） | 77 | 68 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 350 / 4014（8.7%） | 342 | 58 | 342 / 4014（8.5%） | 171 / 4014（4.3%） | 122 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 138 / 1799（7.7%） | 131 | 51 | 131 / 1799（7.3%） | 76 / 1799（4.2%） | 45 | 66 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 212 / 2215（9.6%） | 211 | 7 | 211 / 2215（9.5%） | 95 / 2215（4.3%） | 77 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 12 / 68（17.6%） | 12 | 0 | 12 / 68（17.6%） | 5 / 68（7.4%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 350 / 4342（8.1%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 140 / 1799（7.8%），live_verified 76 / 1799（4.2%）。
-- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 51 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 284 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 138 / 1799（7.7%），live_verified 76 / 1799（4.2%）。
+- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 52 个，未过时的共 8585 个。
+- 依赖层：Bridge 用到 285 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 7 个，没有整个排除的 action 共 64 个。
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
@@ -53,9 +51,9 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 2 |
 | `Eplan.EplApi.Base` | 268 | 29 / 268（10.8%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 159 / 1247（12.8%） | 84 |
+| `Eplan.EplApi.DataModel` | 1247 | 160 / 1247（12.8%） | 91 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 0 / 368（0.0%） | 0 |
-| `Eplan.EplApi.DataModel.EObjects` | 83 | 22 / 83（26.5%） | 6 |
+| `Eplan.EplApi.DataModel.EObjects` | 83 | 21 / 83（25.3%） | 6 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 42 / 414（10.1%） | 10 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 23 / 121（19.0%） | 8 |
@@ -161,14 +159,14 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 129 | 67 | 2 | 59 | 0 | 1/2/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 26 | 14 | 0 | 12 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 68 | 32 | 0 | 36 | 0 | 1/2/1 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 222 | 130 | 5 | 85 | 0 | 2/6/2 | A52 A55 | — |
+| eplan_connection_create | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/6/2 | A52 A55 | — |
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 83 | 40 | 1 | 41 | 0 | 2/3/3 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_connection_list | read | connection.list | 62 | 33 | 1 | 27 | 0 | 3/4/5 | — | 2026-10-20 pass（api-notes A19） |
+| eplan_connection_list | read | connection.list | 76 | 44 | 1 | 29 | 0 | 3/4/5 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 91 | 40 | 1 | 50 | 0 | 1/2/1 | A24 | — |
 | eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 75 | 43 | 2 | 29 | 0 | 10/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 7/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 136 | 4 | 90 | 0 | 5/5/2 | A13 A14 A26 A53 A55 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan | 248 | 135 | 4 | 90 | 0 | 5/5/2 | A13 A14 A26 A53 A55 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 75 | 33 | 0 | 42 | 0 | 3/2/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 57 | 30 | 1 | 26 | 0 | 3/2/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 2/2/0 | A16 | — |
@@ -189,6 +187,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/3/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 2/1/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 2/2/2 | A1 A11 | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 113 | 65 | 1 | 46 | 0 | 1/1/1 | A36 | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 113 | 65 | 1 | 46 | 0 | 1/1/1 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 1/4/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 1/3/0 | A35 | — |
@@ -209,7 +209,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 70 | 38 | 0 | 32 | 0 | 1/2/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 43 | 26 | 0 | 17 | 0 | 2/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>project.get | 163 | 91 | 1 | 71 | 0 | 4/4/2 | A54 | — |
-| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 222 | 130 | 5 | 85 | 0 | 2/3/1 | — | — |
+| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 228 | 133 | 5 | 87 | 0 | 2/3/1 | — | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 3/9/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/7/3 | — | — |
 | eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 3/2/2 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
@@ -225,7 +225,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 148 | 68 | 4 | 51 | 0 | 2/2/0 | — | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 3/3/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 5/3/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_symbol_search | read | symbol.search | 51 | 32 | 1 | 18 | 0 | 4/3/2 | A52 A53 A55 | — |
+| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 4/3/2 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 2/4/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 1/2/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 3/2/3 | — | — |

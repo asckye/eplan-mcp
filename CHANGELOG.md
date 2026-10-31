@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- ADR-0032 B2 第一部分：新增 full / Read 的 `eplan_object_find`、`eplan_object_get`，支持 Page、Function、Connection；其余 65 种类型明确返回 unsupported，规格列全类型，补分页、定位符与属性读取测试，Large 仅编写未运行。
+
 ### Added
 - 新增 `eplan_api_search` / `eplan_api_get`（full、Read）：离线发现全部 4,649 个 API 重载组及 69 种属性字典，查询完整签名、排除原因、覆盖状态、证据与到达工具；压缩索引嵌入 Host，无需 EPLAN。
 - `eplan_connection_create` 支持在既有自动连接线段内显式放置方向对齐的 T 节点拆线并引出支路，返回被拆线段与节点位置；保留原逻辑连接，支路远端尚无器件时允许零新增逻辑连接。新增离线回归与待运行的 Large 验证。

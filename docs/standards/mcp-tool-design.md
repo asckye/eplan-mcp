@@ -52,6 +52,7 @@
 | `placeholder` | 占位符对象：值集、变量和当前值（宏插入后随之进入项目） | `Graphics.PlaceHolder` |
 | `symbol` | 符号 | `SymbolLibrary`、`SymbolVariant` |
 | `property` | 属性 | `PropertyValue` |
+| `object` | 数据字典对象，只读通用查找与属性读取 | `StorableObject` 及具体对象类型 |
 | `report` | 报表 | 报表页、报表模板 |
 | `check` | 检查 | 检查运行、消息管理 |
 | `export` | 导出 | PDF、DXF、图片…… |
@@ -77,6 +78,7 @@
 - 领域动作只在标准动作表达不了时使用：`place`、`connect`、`renumber`、`generate`、`run`（如 `eplan_check_run`）、`export`、`usage`（只用于 `eplan_tool_usage`）；M4c 加入 `set`（设置一组值，如 `eplan_language_set`）、`remove`（从项目中去掉而不是删除对象，如 `eplan_language_remove`）、`import`（导入到系统主数据，如 `eplan_part_import`）、`sync`（项目与系统主数据之间同步，如 `eplan_part_sync`）、`translate`（按翻译库翻译，如 `eplan_project_translate`）。API 能力覆盖第一期加入 `apply`（应用一组预先定义的值，如 `eplan_placeholder_apply` 应用值集）。M6 中 `import` 也用于把工程师的材料导入工程包（`eplan_pack_import`），另加入 `build`（把开发包冻结为版本，`eplan_pack_build`），以后还有 `migrate`、`bind`、`trace`、`diff` 和只用于规则的 `check`；`apply` 在 M6 中也用于执行计划（`eplan_plan_apply`，M6 设计 4.5.1）。
 - 同一个动作在不同资源上**含义必须一致**。例如 `list` 一律分页，`get` 一律在找不到时返回 `*_NOT_FOUND`。
 - `schema` 表示描述属性定义及读写限制，用于 `eplan_property_schema`，不读取项目属性值。
+- `find` 表示按精确数据字典类型、页面和名称发现对象，用于 `eplan_object_find`，返回摘要校验定位符。
 - M6 的 `task.get` 在未知或已过期时使用 `RESOURCE_NOT_FOUND`（M6 设计 4.5.1）；`project.create`、`task.get` 沿用标准动作，无需新增领域动作。
 - M6 第 2 阶段加入 `plan`（将内联任务编译为有前置条件、预期结果和差异预览的计划；不执行写入），并将已有 `apply` 用于执行已编译计划（ADR-0023 的整体审批和备份）。`plan` 同时是资源词，含义由其在名称中的位置区分。
 - M6 第 3 阶段加入 `review`（经既有工程师独立窗口审核知识候选、关闭缺口或提升正式规则）；仅更新本地知识与审计，客户端不能批准。

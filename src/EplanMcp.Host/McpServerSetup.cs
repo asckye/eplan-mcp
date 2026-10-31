@@ -68,6 +68,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => ToolSchemas.Harden(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertySchemaContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertyGetTools.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => ObjectReadSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PropertySetContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlacementCreateContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlacementUpdateContract.Configure(options.ToolCollection ?? []));
@@ -126,6 +127,7 @@ internal static class McpServerSetup
             .WithTools<PartTools>(HostJson.Options)
             .WithTools<PropertySchemaTools>(HostJson.Options)
             .WithTools<PropertyGetTools>(HostJson.Options)
+            .WithTools<ObjectReadTools>(HostJson.Options)
             .WithTools<PartMasterDataTools>(HostJson.Options)
             .WithTools<TranslationImportTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)

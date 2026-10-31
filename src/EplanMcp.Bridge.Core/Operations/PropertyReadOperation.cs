@@ -45,6 +45,13 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
             throw InvalidArgument("Supply a resolved project, one valid property target and 1..20 numeric selectors with valid continuation positions.");
         }
 
+        return Read(args, () => adapter.Open(args.ProjectPath, args.Target), elapsed, utcNow);
+    }
+
+    /// <summary>Reads a bounded block, acquiring and disposing one list from the supplied factory (A36/A39).</summary>
+    public static PropertyReadData Read(PropertyReadArgs args, Func<IPropertyReadScope> open, Func<TimeSpan>? elapsed = null,
+        Func<DateTimeOffset>? utcNow = null)
+    {
         var watch = Stopwatch.StartNew();
         Func<TimeSpan> clock = elapsed ?? (() => watch.Elapsed);
         void Checkpoint()
@@ -57,7 +64,7 @@ public sealed class PropertyReadOperation(IPropertyReadAdapter adapter, Func<Tim
         }
 
         Checkpoint();
-        using IPropertyReadScope scope = adapter.Open(args.ProjectPath, args.Target);
+        using IPropertyReadScope scope = open();
         var result = new PropertyReadData();
         for (int selector = args.SelectorOffset; selector < args.Properties.Count; selector++)
         {
