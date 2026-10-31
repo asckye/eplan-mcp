@@ -16,7 +16,7 @@ internal sealed class ConnectionCreateTools
 {
     public const string Tool = "eplan_connection_create";
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies endpoints and explicit core labels/colours. Wires: 2 undo steps; cables: 6-8, shown in preview. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
+    [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Interruption calls: 1 undo, including graphical ends without counterpart devices; wires: 2; cables: 6-8. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
         [Description("Project name/path")] string project, string page,
         [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
@@ -54,7 +54,7 @@ internal sealed class ConnectionCreateTools
                 };
             }
             int budget = response_format == "detailed" ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
-            foreach (string field in new[] { "interruptionScope", "coordinates", "symbols", "graphicalAutoconnect", "logicalAfterGenerate", "actualEndpoints", "interruptionPoints", "cableDefinitions", "coreImpact", "actualCores" })
+            foreach (string field in new[] { "interruptionScope", "coordinates", "symbols", "graphicalAutoconnect", "logicalAfterGenerate", "actualEndpoints", "actualGraphicalAutoconnect", "interruptionPoints", "cableDefinitions", "coreImpact", "actualCores" })
             {
                 if (ResultShaper.EstimateTokens(result.ToJsonString()) > budget)
                 { result.Remove(field); result["truncated"] = true; }

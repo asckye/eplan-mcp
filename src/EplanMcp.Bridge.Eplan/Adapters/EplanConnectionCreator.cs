@@ -139,9 +139,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             }
         };
     }
-    private sealed class PlacementFactory(string project) : ITransactionScopeFactory
-    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription); }
-    public ITransactionScopeFactory PlacementTransactions(string project) => new PlacementFactory(project);
+    private sealed class PlacementFactory(string project, bool undoCommitted) : ITransactionScopeFactory
+    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted); }
+    public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => new PlacementFactory(project, undoCommitted);
 
     public JObject Interruptions(string project, IReadOnlyList<string> pages)
     {

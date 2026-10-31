@@ -12,10 +12,14 @@ internal sealed class FunctionTransactionScope : ITransactionScope
     private readonly Transaction _transaction;
     private QuietModeStep? _quietMode;
     private bool _disposed;
+    private readonly bool _undoCommitted;
+    private bool _committed;
+    private bool _transactionDisposed;
 
-    public FunctionTransactionScope(Project project, string description)
+    public FunctionTransactionScope(Project project, string description, bool undoCommitted = false)
     {
         MainThread.Assert();
+        _undoCommitted = undoCommitted;
 #pragma warning disable RS0030 // A13/A52/S41: explicit locks are required for Function.Create under Transaction.
         project.LockAllObjects();
 #pragma warning restore RS0030
@@ -41,6 +45,14 @@ internal sealed class FunctionTransactionScope : ITransactionScope
     {
         EndQuietMode();
         _transaction.Commit();
+        _committed = true;
+        if (_undoCommitted)
+        {
+            // A55: no native transaction wrapper survives into fresh committed readback.
+            _transaction.Dispose();
+            _transactionDisposed = true;
+            _quietMode = new QuietModeStep(QuietModes.ShowNoDialogs);
+        }
     }
 
     public void CloseUndo() => _undoStep.CloseUndo();
@@ -49,7 +61,11 @@ internal sealed class FunctionTransactionScope : ITransactionScope
     public void Rollback()
     {
         EndQuietMode();
-        _transaction.Abort();
+        // UndoStep's documented lifetime spans committed transactions; D5 keeps generation in that same step.
+        if (_committed && _undoCommitted)
+        { using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs); _undoStep.DoUndo(); }
+        else
+        { _transaction.Abort(); }
     }
 
     public void Dispose()
@@ -63,7 +79,8 @@ internal sealed class FunctionTransactionScope : ITransactionScope
         try
         {
             EndQuietMode();
-            _transaction.Dispose();
+            if (!_transactionDisposed)
+            { _transaction.Dispose(); }
         }
         finally
         {

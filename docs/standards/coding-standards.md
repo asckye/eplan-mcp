@@ -111,6 +111,8 @@ EPLAN 安装可能是中文、德文或英文界面，项目也可能是多语�
 
 `Function.Create` 是第 7–9 条的已验证例外（A13/A52/A53，S40/S41/S43）：统一经 `FunctionTransactionScope`，在调度器的 `LockingStep` 内严格按 `LockAllObjects → UndoStep → Transaction → QuietModeStep` 创建；读回通过才 Commit/CloseUndo，失败 Abort 且不 CloseUndo，不留空步。A39/A55 的对象归属优先于第 10 条：不释放 EPLAN 所有的功能、引脚、属性放置或库对象；缓存属性列表必须在 Abort 前释放，Abort 后不再访问或释放新对象的列表。
 
+D5 中断点沿上述 FunctionTransactionScope，但放置 Commit 后保持 UndoStep 打开，在同一静默作用域中生成并独立读回，最后才 CloseUndo；提交后的补偿使用该步 DoUndo 并核对完整范围指纹。此事务组合依据及待验证状态见 api-notes 的 D5 离线说明，Large 只编写、不运行。
+
 ### 9.4 界面与授权（B8、A2）
 11. 除了审批对话框，Bridge **不显示任何界面**：不调用 `MessageBox`，不打开 EPLAN 对话框；执行期间始终处于 `QuietModeStep(ShowNoDialogs)` 之下。
 12. 只用 `License.HasOption` 检查授权，**不调用 `LockOption`**（它会占用一个授权直到 EPLAN 退出）。

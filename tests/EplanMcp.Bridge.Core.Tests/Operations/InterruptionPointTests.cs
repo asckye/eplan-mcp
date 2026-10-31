@@ -82,7 +82,7 @@ public sealed class InterruptionPointTests
     }
 
     [Fact]
-    public void Execute_NativeReferencesBothWays_SeparatePlacementAndGenerationScopes()
+    public void Execute_NativeReferencesBothWays_SingleUndoScope()
     {
         var fake = new InterruptionPointFixture();
         JObject result = fake.Execute();
@@ -91,7 +91,8 @@ public sealed class InterruptionPointTests
         Assert.All(result["interruptionPoints"]!, p => Assert.StartsWith("native:", (string?)p["crossReference"], StringComparison.Ordinal));
         Assert.Equal([ConnectionCreateFixture.PageName, InterruptionPointFixture.PeerPage], Assert.Single(fake.Generates));
         Assert.Single(fake.Placement.Calls, c => c == "Commit");
-        Assert.Single(fake.Generation.Calls, c => c == "Commit");
+        Assert.Empty(fake.Generation.Calls);
+        Assert.Equal(1, (int)result["undoSteps"]!);
         Assert.Equal(0, fake.Undos);
     }
 
@@ -106,10 +107,9 @@ public sealed class InterruptionPointTests
     }
 
     [Theory]
-    [InlineData("generate", 1)]
-    [InlineData("cancel", 1)]
-    [InlineData("pair", 2)] // live T7b: pairing is read only after the generation commit
-    [InlineData("postcommit", 2)]
+    [InlineData("generate", 0)]
+    [InlineData("pair", 0)] // live T7b: pairing is read only after the generation commit
+    [InlineData("postcommit", 0)]
     public void GenerationOrReferenceFailure_CompensatesAndVerifiesScope(string failure, int undos)
     {
         var fake = new InterruptionPointFixture { Failure = failure };
@@ -125,7 +125,7 @@ public sealed class InterruptionPointTests
         var fake = new InterruptionPointFixture { Failure = "placement" };
         Assert.Throws<BridgeErrorException>(() => fake.Execute());
         Assert.Equal(0, fake.State);
-        Assert.Equal(2, fake.ScopeReads.Count); // planning and preflight only
+        Assert.Equal(3, fake.ScopeReads.Count); // Planning, preflight and fresh restoration evidence.
         Assert.DoesNotContain("CloseUndo", fake.Placement.Calls);
         Assert.Empty(fake.Generates);
     }
@@ -187,13 +187,64 @@ public sealed class InterruptionPointTests
     }
 
     [Fact]
-    public void IsolatedInterruption_NoRealGeneration_RefusedBeforeTransaction()
+    public void IsolatedInterruption_NoRealGeneration_CommitsWithOneUndo()
     {
         var fake = new InterruptionPointFixture();
         fake.Request["items"] = new JArray(fake.Request["items"]!.Last!.DeepClone());
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
-        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (error.Reason, error.Execution));
-        Assert.Empty(fake.Placement.Calls);
+        fake.GeneratedEndpoints = [];
+        fake.Base.Scene.Graphical = [];
+        fake.Isolated = true;
+        JObject result = fake.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(1, (int)result["undoSteps"]!);
+        Assert.Empty(result["actualEndpoints"]!);
+        Assert.Single(fake.Placement.Calls, c => c == "CloseUndo");
         Assert.Empty(fake.Generation.Calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DanglingInterruption_LineWithoutCounterpartDevice_CommitsWithoutLogicalConnection(bool paired)
+    {
+        var fake = new InterruptionPointFixture { Dangling = true, GeneratedEndpoints = [] };
+        fake.ConnectPair();
+        if (!paired)
+        { fake.Peers.Clear(); }
+        fake.Request["items"] = new JArray(fake.Request["items"]!.Last!.DeepClone());
+        JObject result = fake.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(1, (int)result["undoSteps"]!);
+        Assert.Empty(result["actualEndpoints"]!);
+        Assert.Single(result["actualGraphicalAutoconnect"]!);
+        Assert.Equal(paired ? 2 : 1, result["interruptionPoints"]!.Count());
+    }
+
+    [Theory]
+    [InlineData("line")]
+    [InlineData("generated_line")]
+    [InlineData("peer_line")]
+    [InlineData("peer_pin")]
+    [InlineData("position")]
+    [InlineData("pin")]
+    [InlineData("name")]
+    [InlineData("direction")]
+    [InlineData("cancel")]
+    public void GraphicalOrIdentityMismatchOrCancellation_RestoresWithoutClosingUndo(string failure)
+    {
+        var fake = new InterruptionPointFixture { Failure = failure };
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error.Execution);
+        Assert.Equal(0, fake.State);
+        Assert.DoesNotContain("CloseUndo", fake.Placement.Calls);
+    }
+
+    [Fact]
+    public void ConnectedPair_MissingRealDeviceConnection_RollsBack()
+    {
+        var fake = new InterruptionPointFixture();
+        fake.ConnectPair();
+        fake.GeneratedEndpoints = [["17/1/0", "17/2/0"]];
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error.Execution);
+        Assert.Equal(0, fake.State);
     }
 }

@@ -181,7 +181,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
                     ["project"] = session.Project,
                     ["page"] = page,
                     ["response_format"] = "detailed",
-                    // PCP independently ensures generation adds a real connection and a second undo step on each call.
+                    // Retain a mixed interruption/potential-point regression with one undo for the call.
                     ["items"] = JsonSerializer.SerializeToElement(new object[]
                     {
                         new { kind = "potential_point", position = layout.Position, directions = (string[])["Up"] },
@@ -193,7 +193,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             int[] counts = [await SymbolsAsync(session.Project, pages[0]), await SymbolsAsync(session.Project, pages[1])];
             JsonElement firstPreview = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = true });
             JsonElement first = await eplan.CallAsync("eplan_connection_create", requests[0]);
-            Assert.Equal(2, first.GetProperty("undoSteps").GetInt32());
+            Assert.Equal(1, first.GetProperty("undoSteps").GetInt32());
             Assert.Empty(Assert.Single(first.GetProperty("interruptionPoints").EnumerateArray()).GetProperty("counterparts").EnumerateArray());
             JsonElement secondPreview = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = true });
             JsonElement second = await eplan.CallAsync("eplan_connection_create", requests[1]);
@@ -203,17 +203,15 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             foreach (JsonElement point in pair)
             {
                 Assert.Equal("=F+A1-T7BLINK", point.GetProperty("name").GetString());
-                Assert.False(string.IsNullOrWhiteSpace(point.GetProperty("crossReference").GetString()));
+                // A55/T7b: 24300 may remain empty; native counterparts prove the pair.
                 JsonElement peer = Assert.Single(point.GetProperty("counterparts").EnumerateArray());
                 Assert.NotEqual(point.GetProperty("page").GetString(), peer.GetProperty("page").GetString());
                 Assert.Contains(pair, p => p.GetProperty("oid").GetInt64() == peer.GetProperty("oid").GetInt64());
                 TestContext.Current.TestOutputHelper!.WriteLine($"T7b native reference {point.GetProperty("page")}: {point.GetProperty("crossReference")}");
             }
             await session.UndoAsync();
-            await session.UndoAsync();
             JsonElement restoredSecond = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = true });
             Assert.Equal(secondPreview.GetProperty("fingerprint").GetString(), restoredSecond.GetProperty("fingerprint").GetString());
-            await session.UndoAsync();
             await session.UndoAsync();
             JsonElement restoredFirst = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = true });
             Assert.Equal(firstPreview.GetProperty("fingerprint").GetString(), restoredFirst.GetProperty("fingerprint").GetString());

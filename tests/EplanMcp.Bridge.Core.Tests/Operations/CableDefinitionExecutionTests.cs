@@ -366,7 +366,7 @@ public sealed class CableDefinitionExecutionTests
                     break;
             }
         }
-        public ITransactionScopeFactory PlacementTransactions(string project) => this;
+        public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => this;
         public ITransactionScope Begin(string undoDescription) { Assert.False(InTransaction); InTransaction = true; return new Scope(this, _state, NativeObjects); }
         private sealed class Scope(Creator owner, int before, int objects) : ITransactionScope
         {

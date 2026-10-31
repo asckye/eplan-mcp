@@ -16,7 +16,6 @@ internal sealed class AcceptanceRedrawDriver(
     private readonly Dictionary<string, (ResolvedPin From, ResolvedPin To, int? ItemIndex)> _wires = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _actualTags = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _devicePages = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, (string Tag, string Pin)> _interruptionSupport = new(StringComparer.Ordinal);
     private readonly List<object> _evidence = [];
     private readonly List<SkippedItem> _skipped = [];
     private readonly List<string> _stages = [];
@@ -47,7 +46,6 @@ internal sealed class AcceptanceRedrawDriver(
         await StageAsync("terminals", TerminalsAsync);
         if (preflight)
         {
-            await StageAsync("interruption_support", PlaceInterruptionSupportAsync);
             await StageAsync("preflight", PreflightAsync);
             if (PreflightOnly)
             {
@@ -520,17 +518,6 @@ internal sealed class AcceptanceRedrawDriver(
         _ => false,
     };
 
-    private async Task PlaceInterruptionSupportAsync()
-    {
-        if (Items("interruption_points").Length == 0)
-        { return; }
-        foreach ((string page, string key) in new[] { (Page, "page"), (CounterpartPage, "counterpart_page") })
-        {
-            JsonElement device = list.GetProperty("interruption_support").GetProperty(key).GetProperty("device");
-            await ObserveAsync(Id(device), () => PlaceDeviceAsync(device, page));
-        }
-    }
-
     private async Task PreflightAsync()
     {
         await ObserveAsync("wires_symbols_and_cables", () => WiresAsync(dryRun: true));
@@ -575,16 +562,8 @@ internal sealed class AcceptanceRedrawDriver(
             (CounterpartPage, Page, "counterpart_position", "counterpart_direction", "counterpart_page"),
         })
         {
-            JsonElement support = list.GetProperty("interruption_support").GetProperty(key), device = support.GetProperty("device");
-            if (!preflight)
-            { await ObserveAsync(Id(device), () => PlaceDeviceAsync(device, page)); }
             string[] ids = points.Select(p => Id(p) + (page == Page ? "/page" : "/counterpart")).ToArray();
-            if (!_devices.ContainsKey(Id(device)))
-            { foreach (string id in ids) { Skip(id, "The explicit interruption generation support device was skipped."); } continue; }
             var items = points.Select(p => (object)new { kind = "interruption_point", name = Expand(p.GetProperty("name").GetString()!), position = p.GetProperty(position), direction = p.GetProperty(direction).GetString(), counterpart_pages = new[] { peer } }).ToList();
-            JsonElement node = support.GetProperty("potential_point");
-            // A55/T7b: each page batch needs an independent real generated connection, even for isolated pairs.
-            items.Add(new { kind = "potential_point", position = node.GetProperty("position"), directions = node.GetProperty("directions") });
             var args = new Dictionary<string, object?> { ["page"] = page, ["response_format"] = "detailed", ["items"] = items };
             if (dryRun)
             {
@@ -596,7 +575,8 @@ internal sealed class AcceptanceRedrawDriver(
             { continue; }
             RequireComplete(read);
             Check(() => Assert.Equal(points.Length * (page == Page ? 1 : 2), read.GetProperty("interruptionPoints").GetArrayLength()));
-            _interruptionSupport[page] = (_actualTags[Id(device)], device.GetProperty("connection_designations")[0].GetString()!);
+            Check(() => Assert.Equal(1, read.GetProperty("undoSteps").GetInt32()));
+            output("Interruption graphics on " + page + ": " + read.GetProperty("actualGraphicalAutoconnect").GetRawText());
             foreach (JsonElement point in points)
             {
                 Check(() =>
@@ -605,7 +585,10 @@ internal sealed class AcceptanceRedrawDriver(
                     JsonElement actual = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("page").GetString() == page && p.GetProperty("name").GetString() == name);
                     Check(() => Assert.Equal(name, actual.GetProperty("name").GetString()));
                     Check(() => Assert.Equal(point.GetProperty(direction).GetString(), actual.GetProperty("direction").GetString()));
-                    Near(point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("position"));
+                    Near(point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("pin"));
+                    output("EPLAN interruption: " + actual.GetRawText());
+                    if (page == Page && point.TryGetProperty("line_to", out JsonElement end))
+                    { Check(() => Assert.Contains(read.GetProperty("actualGraphicalAutoconnect").EnumerateArray(), line => SameSegment(line, point.GetProperty(position), end))); }
                     if (page == CounterpartPage)
                     {
                         foreach (JsonElement pair in read.GetProperty("interruptionPoints").EnumerateArray().Where(p => p.GetProperty("name").GetString() == name))
@@ -646,15 +629,10 @@ internal sealed class AcceptanceRedrawDriver(
             }, Id(text));
         }
         JsonElement[] connections = await ConnectionsAsync(Page);
-        connections = WithoutInterruptionSupport(Page, connections);
-        if (_interruptionSupport.ContainsKey(CounterpartPage))
-        {
-            JsonElement[] peerConnections = await ConnectionsAsync(CounterpartPage);
-            Check(() => Assert.Empty(WithoutInterruptionSupport(CounterpartPage, peerConnections)));
-            JsonElement[] peers = await DrawingsAsync(CounterpartPage);
-            JsonElement device = list.GetProperty("interruption_support").GetProperty("counterpart_page").GetProperty("device");
-            Check(() => Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), Function(peers, _actualTags[Id(device)]).GetProperty("location")), Id(device));
-        }
+        JsonElement[] peerConnections = await ConnectionsAsync(CounterpartPage);
+        Check(() => Assert.Empty(peerConnections));
+        JsonElement[] peerDrawings = await DrawingsAsync(CounterpartPage);
+        Check(() => Assert.DoesNotContain(peerDrawings, d => d.GetProperty("kind").GetString() == "Function"));
         // Terminal pins are unnamed in EPLAN's connection readback, so a terminal end is compared by device only.
         string Endpoint(JsonElement endpoint) => JsonSerializer.Serialize(new[] { endpoint.GetProperty("item").GetString(),
             IsTerminal(endpoint.GetProperty("item").GetString()!) ? null : endpoint.GetProperty("pin").GetString() });
@@ -676,15 +654,8 @@ internal sealed class AcceptanceRedrawDriver(
         Check(() => Assert.Equal(expected, actualPairs.Order(StringComparer.Ordinal)));
     }
 
-    private JsonElement[] WithoutInterruptionSupport(string page, JsonElement[] connections)
-    {
-        if (!_interruptionSupport.TryGetValue(page, out var support))
-        { return connections; }
-        bool Support(JsonElement c) => c.GetProperty("from").ValueKind == JsonValueKind.Null && c.GetProperty("to").ValueKind == JsonValueKind.Object
-            && SameName(support.Tag, c.GetProperty("to").GetProperty("device").GetString()!) && c.GetProperty("to").GetProperty("pin").GetString() == support.Pin;
-        Check(() => Assert.Single(connections, Support));
-        return connections.Where(c => !Support(c)).ToArray();
-    }
+    private static bool SameSegment(JsonElement line, JsonElement a, JsonElement b) =>
+        JsonElement.DeepEquals(line[0], a) && JsonElement.DeepEquals(line[1], b) || JsonElement.DeepEquals(line[0], b) && JsonElement.DeepEquals(line[1], a);
 
     private async Task<JsonElement[]> DrawingsAsync(string page)
     {

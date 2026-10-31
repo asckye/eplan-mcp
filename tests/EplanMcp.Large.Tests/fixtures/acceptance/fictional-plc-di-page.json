@@ -919,15 +919,19 @@
       "id": "link1",
       "name": "=GAA+A1-LINK{run}1",
       "position": [
-        88,
+        252,
         256
       ],
-      "direction": "Up",
+      "direction": "Down",
       "counterpart_position": [
         88,
         200
       ],
-      "counterpart_direction": "Down"
+      "counterpart_direction": "Down",
+      "line_to": [
+        252,
+        212
+      ]
     },
     {
       "id": "link2",
@@ -1197,61 +1201,5 @@
         "pin": "7"
       }
     }
-  ],
-  "interruption_support": {
-    "page": {
-      "device": {
-        "id": "supportMAIN",
-        "tag": "=GAA+A1-SUPPORT_MAIN{run}",
-        "library": "IEC_symbol",
-        "symbol": "O_EL",
-        "variant": 0,
-        "position": [
-          340,
-          180
-        ],
-        "connection_designations": [
-          "13",
-          "14"
-        ],
-        "contact_kind": "no"
-      },
-      "potential_point": {
-        "position": [
-          340,
-          196
-        ],
-        "directions": [
-          "Down"
-        ]
-      }
-    },
-    "counterpart_page": {
-      "device": {
-        "id": "supportPEER",
-        "tag": "=GAA+A1-SUPPORT_PEER{run}",
-        "library": "IEC_symbol",
-        "symbol": "O_EL",
-        "variant": 0,
-        "position": [
-          340,
-          180
-        ],
-        "connection_designations": [
-          "13",
-          "14"
-        ],
-        "contact_kind": "no"
-      },
-      "potential_point": {
-        "position": [
-          340,
-          196
-        ],
-        "directions": [
-          "Down"
-        ]
-      }
-    }
-  }
+  ]
 }

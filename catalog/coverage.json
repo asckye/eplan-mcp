@@ -1058,7 +1058,7 @@
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 2,
       "medium": 5,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A52",
         "A55"
@@ -1241,7 +1241,7 @@
       "spec": "docs/tools/eplan_device_place.md",
       "small": 5,
       "medium": 4,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A13",
         "A14",
@@ -1350,7 +1350,7 @@
       "spec": "docs/tools/eplan_export_image.md",
       "small": 2,
       "medium": 2,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A14",
         "A16"
@@ -1872,7 +1872,7 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 6,
       "medium": 6,
-      "large": 16,
+      "large": 17,
       "apiNotes": [
         "A11",
         "A12"

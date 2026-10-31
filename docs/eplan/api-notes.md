@@ -228,6 +228,10 @@
 - 落单的中断点不产生逻辑连接，生成连接时不报错。
 - 对重画的影响：同页同名中断点（如客户页的 I2/I5）要按页内从左到右的位置安排，使相邻两个正好是要连接的一对。— Large `InterruptionPairingSpikeTests`。
 
+### D5 离线实现说明（2026-10-31，未运行 EPLAN）
+- A55/A65 的无对端设备或落单中断点允许零逻辑连接；产品仍完整核对实际自动连线、名称、位置、引脚方向和原生配对，两侧真实设备引脚仍须连通。
+- 本机 `Eplan.EplApi.DataModelu.xml` 的 `UndoStep` 文档说明：撤销协议独立于 Transaction，DoUndo 回到初始化或最后一次 CloseOpenUndo。中断点路径先提交放置事务，再在仍打开的同一 UndoStep 和静默模式内生成与读回；失败 DoUndo 并重新核对范围指纹。此单步撤销组合尚未实机验证，不能视为 A55 已验证行为；Large 测试仅编写。
+
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - `Function.PropertyPlacements` 返回的是 `ContextPropertyPlacement`（`PropertyPlacement` 的子类），**它们的 `ToStringIdentifier()` / `ObjectIdentifier` 与父功能相同**，也不出现在 `Page.AllPlacements` 中。按标识去重会把它们全部当成父功能而丢掉；须按父对象 + 显示的属性 + 序号区分。新建的 20214 放置同样如此，画面上正常显示（导出图片核对）。— T2b。
 - 经 `eplan_device_place` 的库符号分支放置无部件线圈：标识 20214 显示带 `-` 且位于“父位置 + 偏移”，连接点代号经带索引 20022 写入并显示，重复标识拒绝，一次撤销恢复。— T2b。

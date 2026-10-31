@@ -47,29 +47,16 @@ public sealed class AcceptanceDrawingListTests
             Assert.Equal([20400, 20403, 20011, 20301], point.GetProperty("display_properties").EnumerateArray().Select(p => p.GetProperty("property_id").GetInt32()));
         });
         Assert.Contains(list.GetProperty("nodes").EnumerateArray(), n => n.GetProperty("kind").GetString() == "t_node");
-        JsonElement support = list.GetProperty("interruption_support");
-        Assert.All(support.EnumerateObject(), p =>
-        {
-            Assert.Equal("O_EL", p.Value.GetProperty("device").GetProperty("symbol").GetString());
-            Assert.Equal("Down", Assert.Single(p.Value.GetProperty("potential_point").GetProperty("directions").EnumerateArray()).GetString());
-        });
+        Assert.False(list.TryGetProperty("interruption_support", out _));
+        Assert.Equal([252d, 212d], list.GetProperty("interruption_points")[0].GetProperty("line_to").EnumerateArray().Select(n => n.GetDouble()));
     }
 
     [Fact]
-    public void PairedInterruptions_RequireExplicitSupportOnBothPages_AndUniqueNames()
+    public void PairedInterruptions_RequireUniqueNames_WithoutSupportDevices()
     {
-        foreach ((string pointer, Action<JsonObject> change) in new (string, Action<JsonObject>)[]
-        {
-            ("/interruption_support", l => l.Remove("interruption_support")),
-            ("/interruption_support/counterpart_page", l => l["interruption_support"]!.AsObject().Remove("counterpart_page")),
-            ("/interruption_support/page/potential_point/directions", l => l["interruption_support"]!["page"]!["potential_point"]!["directions"] = new JsonArray("Diagonal")),
-            ("/interruption_points/1/name", l => l["interruption_points"]![1]!["name"] = l["interruption_points"]![0]!["name"]!.DeepClone()),
-        })
-        {
-            JsonObject list = JsonNode.Parse(Fixture())!.AsObject();
-            change(list);
-            Assert.Contains(pointer, Assert.Throws<JsonException>(() => AcceptanceDrawingList.Read(list.ToJsonString())).Message, StringComparison.Ordinal);
-        }
+        JsonObject list = JsonNode.Parse(Fixture())!.AsObject();
+        list["interruption_points"]![1]!["name"] = list["interruption_points"]![0]!["name"]!.DeepClone();
+        Assert.Contains("/interruption_points/1/name", Assert.Throws<JsonException>(() => AcceptanceDrawingList.Read(list.ToJsonString())).Message, StringComparison.Ordinal);
     }
 
     [Fact]

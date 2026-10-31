@@ -19,7 +19,7 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(["eplan_page_create", "eplan_page_open", "eplan_page_get"], fake.Calls.Take(3));
         Assert.Equal("eplan_export_image", fake.Calls[^1]);
         Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.OrdinalIgnoreCase) || c.Contains("delete", StringComparison.OrdinalIgnoreCase));
-        Assert.Equal(41, driver.UndoSteps);
+        Assert.Equal(37, driver.UndoSteps);
         Assert.False(driver.UndoCountIncomplete);
         JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
         Assert.Equal(["pages", "location_boxes", "devices", "plc", "terminals", "generate_autoconnect", "wires_symbols_and_cables", "generate", "cables_after_generate", "interruption_points", "texts", "verify"], report.GetProperty("stages").EnumerateArray().Select(n => n.GetString()));
@@ -121,7 +121,7 @@ public sealed class AcceptanceRedrawDriverTests
             JsonElement[] points = call.GetProperty("items").EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "interruption_point").ToArray();
             Assert.Equal(5, points.Length);
             Assert.All(points, p => Assert.Equal(call.GetProperty("page").GetString() == "=GAA+A1&EFS1/test" ? "=GAA+A1&EFS1/test2" : "=GAA+A1&EFS1/test", Assert.Single(p.GetProperty("counterpart_pages").EnumerateArray()).GetString()));
-            Assert.Single(call.GetProperty("items").EnumerateArray(), i => i.GetProperty("kind").GetString() == "potential_point");
+            Assert.All(call.GetProperty("items").EnumerateArray(), i => Assert.Equal("interruption_point", i.GetProperty("kind").GetString()));
         }
     }
 
@@ -301,6 +301,14 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Contains("eplan_connection_generate", fake.Calls);
         Assert.Equal(34, driver.UndoSteps);
         Assert.All(JsonSerializer.SerializeToElement(driver.Report).GetProperty("skipped").EnumerateArray(), s => Assert.EndsWith("/display_properties", s.GetProperty("item").GetString(), StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task DanglingInterruption_WithoutLine_FailsEvenWhenTheConnectionSetMatches()
+    {
+        var fake = new DrawingTools { ConnectWires = true, MissingInterruptionLine = true };
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(Driver(fake).DrawAsync);
+        Assert.DoesNotContain(fake.Requests.Where(r => r.Tool == "eplan_device_place"), r => r.Args.GetProperty("page").GetString() == "=GAA+A1&EFS1/test2");
     }
 
     [Theory]
@@ -751,6 +759,7 @@ public sealed class AcceptanceRedrawDriverTests
         internal bool DuplicateEdge { get; init; }
         internal string? CableFault { get; init; }
         internal string? CounterpartFault { get; init; }
+        internal bool MissingInterruptionLine { get; init; }
         internal JsonElement? ConnectionItems { get; private set; }
         internal int ContinuationReads { get; private set; }
         internal List<JsonElement[]> GeneratedConnections { get; } = [];
@@ -765,7 +774,6 @@ public sealed class AcceptanceRedrawDriverTests
         private readonly List<object> _channels = [];
         private readonly List<object> _members = [];
         private readonly List<JsonElement> _interruptions = [];
-        private readonly Dictionary<string, (string Tag, string Pin)> _support = new(StringComparer.Ordinal);
         private string? _connectionPage;
         private string? _stripText;
         private long _oid;
@@ -925,8 +933,6 @@ public sealed class AcceptanceRedrawDriverTests
                     }
                     if ((DuplicateEdge || ConnectionFault == "duplicate") && connections.Count > 0)
                     { connections.Add(connections[0]); }
-                    if (_support.TryGetValue((string)args["page"]!, out var support))
-                    { connections.Add(new { from = (object?)null, to = new { device = support.Tag, pin = support.Pin } }); }
                     if (ConnectionFault == "missing")
                     { connections.Clear(); }
                     JsonObject[] rows = connections.Select(c => JsonNode.Parse(JsonSerializer.Serialize(c))!.AsObject()).ToArray();
@@ -1058,18 +1064,13 @@ public sealed class AcceptanceRedrawDriverTests
         private object Interruptions(Dictionary<string, object?> args, JsonElement items)
         {
             string page = (string)args["page"]!;
-            JsonElement potential = Assert.Single(items.EnumerateArray(), i => i.GetProperty("kind").GetString() == "potential_point");
-            Assert.Equal("Down", Assert.Single(potential.GetProperty("directions").EnumerateArray()).GetString());
-            JsonElement helper = Assert.Single(_drawings.Select(d => JsonSerializer.SerializeToElement(d)), d => d.GetProperty("page").GetString() == page && d.GetProperty("location")[0].GetDouble() == potential.GetProperty("position")[0].GetDouble() && d.GetProperty("location")[1].GetDouble() == potential.GetProperty("position")[1].GetDouble() - 16);
-            string tag = helper.GetProperty("properties").GetProperty("name").GetString()![1..];
-            _support.Add(page, (tag, _pins[tag][0]));
             var result = new List<JsonObject>();
             foreach (JsonElement point in items.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "interruption_point"))
             {
                 string peer = Assert.Single(point.GetProperty("counterpart_pages").EnumerateArray()).GetString()!;
                 Assert.NotEqual(page, peer);
                 string name = point.GetProperty("name").GetString()!;
-                _interruptions.Add(JsonSerializer.SerializeToElement(new { name, page, position = point.GetProperty("position"), direction = point.GetProperty("direction"), oid = ++_oid }));
+                _interruptions.Add(JsonSerializer.SerializeToElement(new { name, page, position = point.GetProperty("position"), pin = point.GetProperty("position"), direction = point.GetProperty("direction"), oid = ++_oid }));
                 JsonElement[] pair = _interruptions.Where(p => p.GetProperty("name").GetString() == name).ToArray();
                 foreach (JsonElement entry in pair)
                 {
@@ -1086,7 +1087,7 @@ public sealed class AcceptanceRedrawDriverTests
                     result.Add(row);
                 }
             }
-            return new { execution = "committed", undoSteps = 2, interruptionPoints = result };
+            return new { execution = "committed", undoSteps = 1, interruptionPoints = result, graphicalAutoconnect = new double[][][] { [[252, 256], [252, 212]] }, actualGraphicalAutoconnect = MissingInterruptionLine ? [] : new double[][][] { [[252, 256], [252, 212]] } };
         }
 
         private IEnumerable<object> NodeConnections(JsonElement batch)

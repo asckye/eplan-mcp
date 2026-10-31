@@ -48,7 +48,7 @@ public sealed class InterruptionExistingNetTests
         if (reverseInterruption)
         { fake.Generated[^1] = [fake.Generated[^1][1], fake.Generated[^1][0]]; }
         Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
-        Assert.Equal(2, fake.Transactions.Calls.Count(c => c == "Commit"));
+        Assert.Single(fake.Transactions.Calls, c => c == "Commit");
         Assert.Equal(0, fake.Undos);
     }
 
@@ -98,7 +98,7 @@ public sealed class InterruptionExistingNetTests
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
         Assert.Equal(ExecutionState.RolledBack, error.Execution);
         Assert.Equal(0, fake.State);
-        Assert.Equal(1, fake.Undos);
+        Assert.Equal(0, fake.Undos);
     }
 
     private sealed class Rehearsal : IConnectionCreator, IConnectionGenerator
@@ -203,7 +203,7 @@ public sealed class InterruptionExistingNetTests
         public List<string?[]> Endpoints(string project, string page) => page == ConnectionCreateFixture.PageName ? Generated : [];
         public void Generate(string projectPath, IReadOnlyList<string> pages) => State = 2;
         public void Undo(string project) { State--; Undos++; }
-        public ITransactionScopeFactory PlacementTransactions(string project) => Transactions;
+        public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => Transactions;
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => new()
         {
             ["points"] = State == 0 ? new JArray() : _points.DeepClone(),

@@ -3371,7 +3371,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies endpoints and explicit core labels/colours. Wires: 2 undo steps; cables: 6-8, shown in preview. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
+      "description": "Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Interruption calls: 1 undo, including graphical ends without counterpart devices; wires: 2; cables: 6-8. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {

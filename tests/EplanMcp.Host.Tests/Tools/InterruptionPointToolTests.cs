@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class InterruptionPointToolTests
 {
-    private const string Evidence = "2 undo steps; LINK; counterpart_pages=[peer]; native peer oid=90";
+    private const string Evidence = "1 undo step; LINK; counterpart_pages=[peer]; native peer oid=90";
     private static JsonElement Item => JsonSerializer.SerializeToElement(new { kind = "interruption_point", name = "LINK", direction = "Up", position = (int[])[60, 60], counterpart_pages = (string[])["peer"] });
 
     [Theory]
@@ -66,10 +66,10 @@ public sealed class InterruptionPointToolTests
         harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = _ =>
         {
             WritePlan plan = harness.Plan([new() { Action = "create", Kind = "connections", Name = "page", NewValue = Evidence }]);
-            plan.Details = new() { ["preview"] = "{\"affectedPages\":[\"page\",\"peer\"],\"undoSteps\":2}" };
+            plan.Details = new() { ["preview"] = "{\"affectedPages\":[\"page\",\"peer\"],\"undoSteps\":1}" };
             return plan;
         };
-        harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("{\"affectedPages\":[\"page\",\"peer\"],\"undoSteps\":2,\"interruptionPoints\":[{\"name\":\"LINK\",\"crossReference\":\"native:/2.4\",\"counterparts\":[{\"page\":\"peer\",\"oid\":90}]}]}")!;
+        harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("{\"affectedPages\":[\"page\",\"peer\"],\"undoSteps\":1,\"interruptionPoints\":[{\"name\":\"LINK\",\"crossReference\":\"native:/2.4\",\"counterparts\":[{\"page\":\"peer\",\"oid\":90}]}]}")!;
         return harness;
     }
     private static Task<ModelContextProtocol.Protocol.CallToolResult> Call(WriteToolHarness harness, bool dry = false) => ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge,

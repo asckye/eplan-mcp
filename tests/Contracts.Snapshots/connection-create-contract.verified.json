@@ -3,7 +3,7 @@
   "title": "Create connection symbols and explicit wire paths",
   "status": "registered_preview_contract",
   "profile": "full",
-  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Wires/nodes: 2 undo steps; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruption calls: 1 undo, including graphical ends without counterpart devices; wires/nodes: 2; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
   "annotations": {
     "readOnlyHint": false,
     "destructiveHint": false,
@@ -788,7 +788,10 @@
         "minLength": 1
       },
       "undoSteps": {
-        "const": 2
+        "enum": [
+          1,
+          2
+        ]
       },
       "fingerprint": {
         "type": "string",
@@ -1420,8 +1423,8 @@
     ],
     "coverage": "complete_page_predicted_endpoints",
     "logicalDuringPlacement": 0,
-    "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
-    "undoSteps": 2,
+    "generation": "Placement then generation share one undo step; graphical-only interruption ends need no logical connection.",
+    "undoSteps": 1,
     "affectedPages": [
       "=F+A1&EFS1/1",
       "=F+A1&EFS1/2"

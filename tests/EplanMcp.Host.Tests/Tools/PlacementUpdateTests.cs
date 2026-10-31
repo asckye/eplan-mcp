@@ -99,7 +99,7 @@ public sealed class PlacementUpdateTests
         public ConnectionCreatePlanner.Scene Scene { get; private set; }
         public bool Fail { get; init; }
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => new() { ["pages"] = new JArray(), ["points"] = new JArray() };
-        public ITransactionScopeFactory PlacementTransactions(string project) => this;
+        public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => this;
         public int Transactions { get; private set; }
         public int Closed { get; private set; }
         public Mover(string path)

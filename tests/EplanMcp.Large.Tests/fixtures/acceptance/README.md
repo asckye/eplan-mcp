@@ -4,11 +4,11 @@
 
 `fictional-plc-di-page.json` 包含两个位置盒（+P1 中五个开关，+HMT 中一个）、公共供电 T 节点及两端角节点（由端子 8 的上侧引脚供电，不重复绘制共享路径）、-X6 的 1..8 号端子、-KF1 的 I0.0..I0.6、-W3 六芯（RD/WH/BN/GY/BU/VT）、-W4 单芯、五个跨页中断点和自由文本。未经整页实机验收；不能把清单或离线测试存在称为整页已通过。
 
-六个操作开关均使用 `IEC_symbol` 的单个双引脚 `Switch` 符号：switch1/2 为 `SSRW` 两位置旋转开关，switch3/4/6 为 `SSD` 常开按钮，均用 13/14；switch5 为 `SONOT2` 旋转复位急停按钮，`contact_kind=nc`，用 11/12，信号线接 12、公共供电接 11。两页中断点辅助回路仍使用 `O_EL`，不代表操作按钮。符号类别及说明依据见 [api-notes 的验收试画记录](../../../../docs/eplan/api-notes.md)。
+六个操作开关均使用 `IEC_symbol` 的单个双引脚 `Switch` 符号：switch1/2 为 `SSRW` 两位置旋转开关，switch3/4/6 为 `SSD` 常开按钮，均用 13/14；switch5 为 `SONOT2` 旋转复位急停按钮，`contact_kind=nc`，用 11/12，信号线接 12、公共供电接 11。中断点不再添加辅助器件或电位点。符号类别及说明依据见 [api-notes 的验收试画记录](../../../../docs/eplan/api-notes.md)。
 
 ## 格式
 
-UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未知键、非有限十进制数、重复 ID、重复 PLC 地址、端子号及芯线分配。错误使用 JSON Pointer。数组最多 50 项；单批 wires+nodes+cables 合计最多 50、全部电缆合计最多 50 芯，避免拆批改变自动连线拓扑。中断点最多 49 个，为同批辅助电位点保留一项。坐标为毫米、左下原点、y 向上，范围 0..10000，实际页界、方向、外框及栅格仍由工具规划器核验。
+UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未知键、非有限十进制数、重复 ID、重复 PLC 地址、端子号及芯线分配。错误使用 JSON Pointer。数组最多 50 项；单批 wires+nodes+cables 合计最多 50、全部电缆合计最多 50 芯，避免拆批改变自动连线拓扑。中断点最多 49 个。坐标为毫米、左下原点、y 向上，范围 0..10000，实际页界、方向、外框及栅格仍由工具规划器核验。
 
 | 字段 | 内容 |
 |---|---|
@@ -21,8 +21,7 @@ UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未�
 | wires | `{id,from:{item,pin},to:{item,pin},points}`；item 引用设备、端子或 PLC 点的 ID，pin 是实际代号；points 至少两点、最多 32 点，只允许首点 `"from"`、末点 `"to"` 为引脚锚点，其余为显式坐标。`["from","to"]` 表示由 EPLAN 自动连线连接，不调用 connection_create；两引脚必须在同一轴上相向（同 x 的 Up/Down 或同 y 的 Left/Right，并朝向对方），否则必须给出显式转折坐标；不自动寻路 |
 | nodes | `{id,kind,position,directions}`；kind 为 corner/t_node/potential_point，方向为 Up/Down/Left/Right；分支必须显式声明 |
 | cables | `{id,tag,type_text,core_count,cross_section_mm2,points,cores}`；定义线两个正交坐标，每芯 `{wire,label,colour}` 引用 wire ID；全为显式路径时转换为同次调用的 `{connection:{item_index:n},label,colour}`，与导线及节点一起提交。含自动连线芯线时，整条电缆在 generate 后单独创建，所有芯线引用详细连接列表返回的原样 `{locator}`；颜色使用工具封闭代码 |
-| interruption_points | `{id,name,position,direction,counterpart_position,counterpart_direction}`；在两页创建同名原生中断点，counterpart_pages 只指向清单的另一页 |
-| interruption_support | 有中断点时必填 `{page,counterpart_page}`，两项均为 `{device,potential_point:{position,directions}}`；device 使用设备字段。虚构夹具在两页各声明一个独立辅助触点及向下的电位点，随该页全部中断点同批生成真实连接（A55/T7b），避免孤立中断点触发空生成；不省略对端页 |
+| interruption_points | `{id,name,position,direction,counterpart_position,counterpart_direction,line_to?}`；在两页创建同名原生中断点，counterpart_pages 只指向清单的另一页；可选 line_to 为主页该点必须接到的图形端点，驱动以实际线段双向比较。link1 接 switch6 上侧引脚，对端无设备，必须无逻辑连接且保留图形 |
 | texts | `{id,position,text,height_mm}`；写语言无关 `??_??`，避免未设置显示语言时不显示；不与其他语言混写 |
 | expected_connections | 完整预期连接多重集：`{from:{item,pin},to:{item,pin}}`；同一对端点的重复连接也计数，不只核对连通集合；忽略起止方向，名称按 A55 容忍空结构段及未使用的功能结构段 |
 
@@ -38,7 +37,7 @@ dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filt
 
 默认使用本目录虚构清单。维护者可设置 `EPLANMCP_ACCEPTANCE_LIST` 为**仓库外本地文件的绝对路径**，同一格式；拒绝 UNC、相对路径及链接/联接路径。私有清单不得复制进仓库、提交或附到 PR。运行后移除该环境变量。驱动从不修改或复制输入文件。
 
-先创建两页并立即 `eplan_page_open` 主页面；随后按位置盒→器件→PLC→端子→显式导线/连接符号/全显式芯线电缆→生成→含自动连线芯线的电缆→两页辅助回路及配对中断点→文本的顺序执行。导线批次前分页读取页面绘图，结合已验证符号连接点核对自动连线的实际位置和方向，记录 `{wire,mode:"autoconnect"}`。生成后以 `response_format=detailed` 分页读取本页 connection_list，按两端设备标识与引脚代号唯一匹配生成连接，保留返回的完整 locator；缺失、歧义、定位器缺失或无续页截断均失败。混合显式与自动连线的电缆整条延后创建，其中先前显式绘制的芯线也使用生成连接 locator，因为 item_index 不能跨调用引用；全显式芯线电缆仍用同批 wire 的零基 item_index。两种方式均严格检查 actualCores 的结构容忍标识、型号、芯号、颜色及真实引脚身份，并用实际标识调用 cable_get 独立核对型号、芯数、截面、芯号、颜色与端点；截断即失败。expected_connections 在生成后统一核对完整逻辑连接多重集，不因自动连线而省略。两页中断点双向核对原生 counterparts，辅助电位连接也精确核对后才从主回路多重集中分离；对端页不得有额外连接。最后读回并导出 PNG；页及编辑器保留，不做自动撤销或删除。报告统计已确认提交的撤销步数（连接/电缆取 undoSteps，图元创建按已验证的一步合同），生成 no-op 不计；unknown 时标明步数不完整，不重发。
+先创建两页并立即 `eplan_page_open` 主页面；随后按位置盒→器件→PLC→端子→显式导线/连接符号/全显式芯线电缆→生成→含自动连线芯线的电缆→两页配对中断点→文本的顺序执行。导线批次前分页读取页面绘图，结合已验证符号连接点核对自动连线的实际位置和方向，记录 `{wire,mode:"autoconnect"}`。生成后以 `response_format=detailed` 分页读取本页 connection_list，按两端设备标识与引脚代号唯一匹配生成连接，保留返回的完整 locator；缺失、歧义、定位器缺失或无续页截断均失败。混合显式与自动连线的电缆整条延后创建，其中先前显式绘制的芯线也使用生成连接 locator，因为 item_index 不能跨调用引用；全显式芯线电缆仍用同批 wire 的零基 item_index。两种方式均严格检查 actualCores 的结构容忍标识、型号、芯号、颜色及真实引脚身份，并用实际标识调用 cable_get 独立核对型号、芯数、截面、芯号、颜色与端点；截断即失败。expected_connections 在生成后统一核对完整逻辑连接多重集，不因自动连线而省略。两页中断点双向核对原生 counterparts，不剔除辅助连接，对端页不得有额外连接或 Function；每次中断点调用必须报告一步撤销，并输出实际图形、名称、位置和原生配对。最后读回并导出 PNG；页及编辑器保留，不做自动撤销或删除。报告统计已确认提交的撤销步数（连接/电缆取 undoSteps，图元创建按已验证的一步合同），生成 no-op 不计；unknown 时标明步数不完整，不重发。
 
 报告和 PNG 只保存到本地 scratch 的 `writes/acceptance-results/<run>/`，路径写入测试输出。报告包含逐次工具结果、阶段、每个 skipped 项及原因，以及 `problems` 数组和 `preflight` 批次记录。支持的连接子集仍精确比较，存在任何 skipped 时整页结果为 skipped，不得记为 passed；其他错误停止并保留失败报告。
 
@@ -49,7 +48,7 @@ dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filt
 以下两个环境变量**仅用于 scratch 副本上的排错试画**，只有值为 `1` 时启用。负责人录制的正式整页重绘验收必须移除这两个变量，使用默认严格模式；试画报告不能代替正式验收记录。
 
 - `EPLANMCP_ACCEPTANCE_KEEP_GOING=1`：绘图阶段的写工具返回 `INVALID_ARGUMENT`、`PLAN_STALE`、`CAPABILITY_MISSING` 或 `EPLAN_OPERATION_FAILED`，且 `execution` 为 `not_started` 或 `rolled_back` 时，将相关项目记为 skipped，保存完整错误并继续后续阶段，不重试该批次。独立读回校验和断言逐项收集到报告的 `problems` 数组并输出，最后一次性列出全部问题并使测试失败；即使仅有预先已知的显示属性 skipped，也不能通过。缺少后续校验所需证据时终止该项校验，继续其他独立项目。`execution=unknown` 始终立即停止，标明撤销步数不完整；其他不在上述范围的写错误仍立即停止。
-- `EPLANMCP_ACCEPTANCE_PREFLIGHT=1`：正常创建页面、位置盒、器件、PLC、端子及两页中断点辅助器件，以获得真实几何与定位器；随后在任何连接生成、真实 `connection_create` 或文本写入之前，按后续执行顺序预检所有可构造的连接批次，统一传 `dry_run=true`。预检复用实际批次，包括导线/节点、使用同批 `item_index` 芯线的电缆，以及带对端页范围的两页中断点。每次拒绝都输出工具、批次及完整错误，拒绝不会阻止后续批次预检。依赖生成后连接 locator 的电缆（包括混合芯线电缆）在 `preflight` 中列为 `not preflighted`，不猜定位器。单独启用时完成预检报告后停止，不执行连接与文本阶段，也不导出 PNG；不作为整页通过。若同时启用 keep-going，则先完成全部预检报告，再继续真实执行；预检拒绝仍保留在 `problems` 中并导致最终失败。未知结果在预检中同样立即停止。
+- `EPLANMCP_ACCEPTANCE_PREFLIGHT=1`：正常创建页面、位置盒、器件、PLC、端子，以获得真实几何与定位器；随后在任何连接生成、真实 `connection_create` 或文本写入之前，按后续执行顺序预检所有可构造的连接批次，统一传 `dry_run=true`。预检复用实际批次，包括导线/节点、使用同批 `item_index` 芯线的电缆，以及带对端页范围的两页中断点。每次拒绝都输出工具、批次及完整错误，拒绝不会阻止后续批次预检。依赖生成后连接 locator 的电缆（包括混合芯线电缆）在 `preflight` 中列为 `not preflighted`，不猜定位器。单独启用时完成预检报告后停止，不执行连接与文本阶段，也不导出 PNG；不作为整页通过。若同时启用 keep-going，则先完成全部预检报告，再继续真实执行；预检拒绝仍保留在 `problems` 中并导致最终失败。未知结果在预检中同样立即停止。
 
 例如，完整排错试画前设置：
 

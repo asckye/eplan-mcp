@@ -15,6 +15,8 @@ public static class InterruptionPointPlanning
         string[] pages = requested.SelectMany(s => s["interruption"]!["counterpart_pages"]!.Values<string>()).Select(p => p!).Append(scene.Page.Page).Distinct(StringComparer.Ordinal).OrderBy(p => p, StringComparer.Ordinal).ToArray();
         Require(pages.Length <= 21, "Keep the combined counterpart scope within 20 pages plus the target page.");
         plan["affectedPages"] = new JArray(pages);
+        plan["undoSteps"] = 1;
+        plan["generation"] = "Placement then generation share one undo step; graphical-only interruption ends need no logical connection.";
         JObject scope = reader.Interruptions(scene.Project.Path, pages);
         Require(scope["pages"]!.Sum(p => p["drawing"]!["placements"]!.Count()) <= 10000 && scope["points"]!.Count() <= 1000, "Keep complete scoped evidence within 10000 placements and 1000 interruption points.");
         var projected = (JArray)scope["points"]!.DeepClone();
@@ -94,6 +96,12 @@ public static class InterruptionPointPlanning
     public static JArray Verify(JObject plan, JObject actual)
     {
         var result = new JArray();
+        string Segments(JToken lines) => string.Join(";", lines.Select(s => string.Join("|", s.Select(p => string.Join(",", p.Values<double>().Select(v => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture)))).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
+        foreach (JToken page in plan["interruptionScope"]!["pages"]!.Where(p => (string?)p["page"] != (string?)plan["page"]))
+        {
+            JToken found = actual["pages"]!.Single(p => (string?)p["page"] == (string?)page["page"]);
+            Require(Segments(page["graphical"]!) == Segments(found["graphical"]!) && JToken.DeepEquals(page["pins"], found["pins"]), "Counterpart page lines or device pins changed unexpectedly.");
+        }
         JToken[] before = plan["interruptionScope"]!["points"]!.ToArray();
         Require(actual["points"]!.Count() == before.Length + plan["symbols"]!.Count(s => s["interruption"] is not null), "The scoped interruption inventory changed unexpectedly.");
         foreach (JToken point in before)
@@ -107,7 +115,9 @@ public static class InterruptionPointPlanning
             JToken[] pair = actual["points"]!.Where(p => (string?)p["name"] == name).ToArray();
             Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous.");
             JToken placed = pair.Single(p => (string?)p["page"] == (string?)plan["page"]);
-            Require(JToken.DeepEquals(placed["position"], row["position"]) && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position or direction readback differs.");
+            var pin = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b));
+            Require(JToken.DeepEquals(placed["position"], row["position"]) && JToken.DeepEquals(placed["pin"], pin)
+                && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position, pin or direction readback differs.");
             foreach (JToken point in pair)
             {
                 JToken[] peers = pair.Where(p => !ReferenceEquals(p, point)).ToArray();

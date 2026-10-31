@@ -21,6 +21,8 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal int Undos { get; private set; }
     internal string DrawingRevision { get; set; } = "initial";
     private bool _connected;
+    internal bool Isolated { get; set; }
+    internal bool Dangling { get; set; }
     internal JObject Request => Base.Request;
     internal InterruptionPointFixture()
     {
@@ -45,11 +47,14 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     {
         Assert.Contains(symbols, s => (string?)s["interruption"]?["name"] == BusinessName);
         State = 1;
+        if (Failure == "cancel")
+        { OperationContext.Current.Cancel(); }
         if (Failure == "placement")
         { throw Failed(); }
     };
-    public ITransactionScopeFactory PlacementTransactions(string project) => Placement;
-    private List<double[][]> Geometry() => _connected ? [.. BasicGeometry(), new[] { new[] { 60d, 60d }, new[] { 60d, 76d } }] : BasicGeometry();
+    public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false)
+    { Assert.True(undoCommitted); if (Failure == "undo") { Placement.FailAt = "Rollback"; } return Placement; }
+    private List<double[][]> Geometry() => Failure == "line" || State == 2 && Failure == "generated_line" ? [] : Isolated ? [] : Dangling ? [[[60, 60], [60, 76]]] : _connected ? [.. BasicGeometry(), new[] { new[] { 60d, 60d }, new[] { 60d, 76d } }] : BasicGeometry();
     private static List<double[][]> BasicGeometry() =>
     [
         [ [8, 8], [24, 8] ],
@@ -65,12 +70,13 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     {
         Assert.Equal(1, State);
         Assert.Contains("Commit", Placement.Calls);
+        Assert.DoesNotContain("CloseUndo", Placement.Calls);
+        Placement.Calls.Add("Generate");
         Generates.Add([.. pages]);
         State = 2;
         if (Failure == "generate")
         { throw Failed(); }
-        if (Failure == "cancel")
-        { OperationContext.Current.Cancel(); }
+
     }
     public void Undo(string project)
     {
@@ -93,13 +99,15 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
                 point["counterparts"] = new JArray(others.Select(p => new JObject { ["page"] = p["page"], ["oid"] = p["oid"], ["name"] = p["name"] }));
                 point["crossReference"] = others.Length == 0 ? null : "native:" + (string?)others[0]["page"];
             }
-            bool afterCommit = Generation.Calls.Contains("Commit", StringComparer.Ordinal);
+            bool afterCommit = Placement.Calls.Contains("Commit", StringComparer.Ordinal);
             if (State == 2 && (Failure is "pair" or "undo" || Failure == "postcommit" && afterCommit))
             { points.Last!["counterparts"] = new JArray(new JObject { ["page"] = "outside", ["oid"] = 999 }); }
+            if (State == 2 && Failure is "position" or "pin" or "direction" or "name")
+            { points.Last![Failure] = Failure is "position" or "pin" ? new JArray(64d, 60d) : "wrong"; }
             if (State == 2 && Failure == "empty_reference")
             { points[0]!["crossReference"] = ""; }
         }
-        return new()
+        JObject scope = new()
         {
             ["points"] = points,
             ["pages"] = new JArray(pages.Select(p => new JObject
@@ -107,11 +115,16 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
                 ["page"] = p,
                 ["drawing"] = BridgeJson.FromObject(Base.Scene.Page),
                 ["revision"] = DrawingRevision,
-                ["pins"] = p == PeerPage ? _connected ? new JObject { ["17/9/0"] = BridgeJson.FromObject(new SymbolConnectionPoint { Location = [80, 64], Direction = "Up" }) } : new JObject() : BridgeJson.FromObject(Base.Scene.Pins),
-                ["graphical"] = p == PeerPage && _connected ? JArray.FromObject(new double[][][] { [[80, 64], [80, 80]] }) : new JArray(),
-                ["logical"] = p == PeerPage && _connected ? BridgeJson.FromObject(new[] { new ConnectionRecord { EndDevice = "17/9/0" } }) : new JArray(),
+                ["pins"] = p == PeerPage ? _connected && !Dangling ? new JObject { ["17/9/0"] = BridgeJson.FromObject(new SymbolConnectionPoint { Location = [80, 64], Direction = "Up" }) } : new JObject() : BridgeJson.FromObject(Base.Scene.Pins),
+                ["graphical"] = p == PeerPage && _connected && !Dangling ? JArray.FromObject(new double[][][] { [[80, 64], [80, 80]] }) : new JArray(),
+                ["logical"] = p == PeerPage && _connected && !Dangling ? BridgeJson.FromObject(new[] { new ConnectionRecord { EndDevice = "17/9/0" } }) : new JArray(),
             })),
         };
+        if (State == 2 && Failure == "peer_line")
+        { scope["pages"]![1]!["graphical"] = JArray.FromObject(new double[][][] { [[80, 64], [84, 80]] }); }
+        if (State == 2 && Failure == "peer_pin")
+        { scope["pages"]![1]!["pins"]!["17/999/0"] = new JObject { ["location"] = new JArray(84, 80), ["direction"] = "Up" }; }
+        return scope;
     }
     internal static JObject Point(string page, long oid, double[] position, string direction) => new()
     {

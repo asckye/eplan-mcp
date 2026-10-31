@@ -3677,6 +3677,11 @@
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
+            "name": "DanglingInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
+          },
+          {
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
@@ -5107,6 +5112,11 @@
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
           },
           {
+            "name": "DanglingInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
@@ -5584,6 +5594,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "DanglingInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -9140,6 +9155,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "DanglingInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
           },
           {
             "name": "DevicePlaceTests",

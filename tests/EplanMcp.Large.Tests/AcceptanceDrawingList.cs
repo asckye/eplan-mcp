@@ -13,7 +13,7 @@ internal static class AcceptanceDrawingList
         using JsonDocument document = JsonDocument.Parse(json, new() { MaxDepth = 32 });
         JsonElement root = document.RootElement;
         FiniteNumbers(root, "");
-        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "interruption_support");
+        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "");
         Integer(root.GetProperty("version"), "/version", 1, 1);
         Text(root, "page", "");
         Text(root, "counterpart_page", "");
@@ -172,33 +172,17 @@ internal static class AcceptanceDrawingList
         var interruptionNames = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "interruption_points", "", (point, at) =>
         {
-            Object(point, at, "id name position direction counterpart_position counterpart_direction", "");
+            Object(point, at, "id name position direction counterpart_position counterpart_direction", "line_to");
             Identity(point, at);
             Text(point, "name", at);
             Require(interruptionNames.Add(point.GetProperty("name").GetString()!), at + "/name", "duplicate interruption name");
             Position(point.GetProperty("position"), at + "/position");
             Position(point.GetProperty("counterpart_position"), at + "/counterpart_position");
+            if (point.TryGetProperty("line_to", out JsonElement line))
+            { Position(line, at + "/line_to"); }
             foreach (string key in "direction counterpart_direction".Split(' '))
             { Text(point, key, at); Require(point.GetProperty(key).GetString() is "Up" or "Down" or "Left" or "Right", at + "/" + key, "invalid direction"); }
         }, 0, 49);
-        Require(root.GetProperty("interruption_points").GetArrayLength() == 0 || root.TryGetProperty("interruption_support", out _), "/interruption_support", "paired page batches require explicit generation support");
-        if (root.TryGetProperty("interruption_support", out JsonElement support))
-        {
-            Object(support, "/interruption_support", "page counterpart_page", "");
-            foreach (string key in new[] { "page", "counterpart_page" })
-            {
-                string at = "/interruption_support/" + key;
-                JsonElement item = support.GetProperty(key);
-                Object(item, at, "device potential_point", "");
-                Device(item.GetProperty("device"), at + "/device");
-                Require(item.GetProperty("device").GetProperty("connection_designations").GetArrayLength() > 0, at + "/device/connection_designations", "generation support requires a pin");
-                JsonElement node = item.GetProperty("potential_point");
-                Object(node, at + "/potential_point", "position directions", "");
-                Position(node.GetProperty("position"), at + "/potential_point/position");
-                string[] directions = Strings(node.GetProperty("directions"), at + "/potential_point/directions", 1, 1);
-                Require(directions[0] is "Up" or "Down" or "Left" or "Right", at + "/potential_point/directions", "invalid direction");
-            }
-        }
         Each(root, "texts", "", (text, at) =>
         {
             Object(text, at, "id position text height_mm", "");

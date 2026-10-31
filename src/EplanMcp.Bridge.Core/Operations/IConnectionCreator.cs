@@ -10,5 +10,5 @@ public interface IConnectionCreator : ISymbolReader
     public List<string?[]> Endpoints(string project, string page);
     public void Undo(string project);
     public JObject Interruptions(string project, IReadOnlyList<string> pages);
-    public ITransactionScopeFactory PlacementTransactions(string project);
+    public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false);
 }
