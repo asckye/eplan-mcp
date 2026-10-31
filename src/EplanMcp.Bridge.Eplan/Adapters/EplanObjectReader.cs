@@ -104,7 +104,8 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
     {
         SnapshotObject identity = EplanPropertyReadAdapter.Describe(obj);
         identity.Kind = kind;
-        if (obj is Placement placement && obj is not Function)
+        // Page derives from Group (a Placement); its Location throws "page size cannot be determined" (A60).
+        if (obj is Placement placement and not Function and not Page)
         {
             identity.Page = placement.Page?.Name;
             identity.Name = obj is FunctionBase function ? function.Name : obj is PlaceHolder holder ? holder.Name : string.Empty;

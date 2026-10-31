@@ -191,7 +191,8 @@
 - `GetTerminalStrips(null)`、`GetPLCs(null)`、`GetBoxedDevices(null)`、`GetInterruptionPoints(null)` 返回相应类型；电缆、占位符、电位定义可用对应 `Get*WithFilterScheme(null)` 的无筛选导航器枚举。电缆枚举还含屏蔽功能，须精确匹配运行时类型。— 本机 XML 的 DMObjectsFinder 各成员；[DMObjectsFinder](https://www.eplan.help/en-us/Infoportal/Content/api/2026/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.DMObjectsFinder.html)。
 - LocationBox 是结构盒；MacroBox 是已放置的宏盒，都可从页 AllPlacements 筛选，使用各自 Properties。TerminalStrip / Cable 等隐藏基类 Properties；**TerminalStrip 禁止访问 Function / FunctionBase / Placement.Properties**，必须先匹配派生类型。— 本机 XML 的各 Properties 与 LocationBox / MacroBox 类；[Function.Properties](https://www.eplan.help/en-us/Infoportal/Content/api/2026/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.Function~Properties.html)。
 - ArticleReference 是父项目、功能或连接上的 transient 引用；`ReferencePos` 是父对象属性的引用索引，属性更改经 StoreToObject 才持久化。公开 finder 只返回有效引用，不直接返回连接定义点的引用。**本次未核实 transient 原生标识的跨请求稳定性**，不能把继承来的 ObjectIdentifier 当作已验证的通用定位能力；暂不接入，不调用 StoreToObject。— [ArticleReference](https://www.eplan.help/en-us/Infoportal/Content/api/2026/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.ArticleReference.html)、本机 XML 的 GetArticleReferences。
-- 上述是文档核对，不代表实机验证；读取资源归属仍以 A36/A39 为准。新增类型的 Large 读取和无写入断言已编写，本次未运行。
+- **Page 继承 Group（即 Placement）**，读 `Page.Location` 会抛 `InvalidOperationException`（S063136 无法确定页尺寸）；按 Placement 处理放置时须先排除 Page。— 实机（B2 第二部分 Large，2026-10-30，EPLAN 2026.0.3，Electric P8，scratch）。
+- 11 种新类型的读取已在 scratch 上实机通过（ObjectReadTests，读取前后设计文件不变）；其余条目是文档核对；读取资源归属仍以 A36/A39 为准。新增类型的 Large 读取和无写入断言已编写，本次未运行。
 
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - `Function.PropertyPlacements` 返回的是 `ContextPropertyPlacement`（`PropertyPlacement` 的子类），**它们的 `ToStringIdentifier()` / `ObjectIdentifier` 与父功能相同**，也不出现在 `Page.AllPlacements` 中。按标识去重会把它们全部当成父功能而丢掉；须按父对象 + 显示的属性 + 序号区分。新建的 20214 放置同样如此，画面上正常显示（导出图片核对）。— T2b。
