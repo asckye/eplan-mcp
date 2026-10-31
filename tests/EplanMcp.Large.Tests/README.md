@@ -148,6 +148,13 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 - 再同步一次：`not_started`，新增和存入都是 0，没有再审批；
 - 测试输出：耗时、前后的部件数、提示。规格第 5 节的两点：EPLAN 的系统消息中是否仍有 `S328014`（写存取前没有加锁该对象）——第一次运行中没有出现（A30）；同步之后在只开着写副本时按一次 Ctrl+Z，项目中存入的部件是否撤回（部件库不会撤回）——要手工核对并补进 api-notes A30。
 
+## 两个 EPLAN 实例并行
+同一台机器上可以同时运行两个界面中的 EPLAN（项目负责人 2026-10-31 确认许可允许），各跑一组 Large 测试：
+- 两个实例用**不同的变体**（例如 Electric P8 与 Pro Panel）：插件按变体注册（`eng\scripts\eplan-addin.ps1 -Variant`），两个工作树的插件版本才不会互相覆盖。
+- 两组测试用**不同的数据根目录** `EPLANMCP_HOME`（例如 `%USERPROFILE%\EplanMcp` 与 `%USERPROFILE%\EplanMcp-b`）：各自的夹具、`writes\` 副本、审计与暂停记录分开，EPLAN 不会因两个实例打开同一份副本而锁住项目。`eval-fixture.ps1 -Open -Variant <变体>` 在当前 `EPLANMCP_HOME` 下准备副本并启动该变体。
+- 设 `EPLANMCP_LARGE_EPLAN_PID=<进程号>`：`LiveEplan` 先用 `eplan_session_select` 选中这个 EPLAN；测试中自己构建的 Host 都按 `LiveEplan.ProcessId` 选择。
+- 用 Remote Client 执行 action 的辅助代码（`PlanStepLiveSession.ActionAsync`）按 `EPLREMOTE_PORT` 连接；两个实例的端口不同，可由 `EplanRemoteClient.GetActiveEplanServersOnLocalMachine` 按进程号查到（`EplanServerData.EplanProcessID` / `ServerPort`）。
+
 ## 离线宿主
 标有 `[Trait("Host", "Offline")]` 的测试类（`ProjectAndPageTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`MacroTests`、`NoSideEffectTests` 等，都只读）也可以不用界面中的 EPLAN，改在离线宿主 `EplanMcp.Bridge.Offline` 上运行（[M5 设计](../../docs/design/2026-10-20-m5-operability.md) 4.9）。CI 的自托管 runner 将来就这样运行。
 

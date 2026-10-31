@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using EplanMcp.Host;
 using EplanMcp.Host.Bridge;
@@ -33,6 +34,9 @@ public sealed class LiveEplan : IAsyncLifetime
     public string ProjectPath { get; private set; } = string.Empty;
 
     /// <summary>The process id of the EPLAN the tests talk to.</summary>
+    /// <summary>Optional: the EPLAN process this run uses when several are running (README.md, two instances).</summary>
+    public const string EplanPidVariable = "EPLANMCP_LARGE_EPLAN_PID";
+
     public int ProcessId { get; private set; }
 
     public async ValueTask InitializeAsync()
@@ -53,6 +57,12 @@ public sealed class LiveEplan : IAsyncLifetime
         });
         _client = await McpClient.CreateAsync(transport, cancellationToken: TestContext.Current.CancellationToken);
 
+        // Two EPLAN instances can run Large tests side by side (each with its own EPLANMCP_HOME and variant): pick one.
+        if (Environment.GetEnvironmentVariable(EplanPidVariable) is { Length: > 0 } pid)
+        {
+            await CallAsync("eplan_session_select", new() { ["process_id"] = int.Parse(pid, CultureInfo.InvariantCulture) });
+        }
+
         JsonElement status = await CallAsync("eplan_session_status");
         if (!status.GetProperty("connected").GetBoolean())
         {
@@ -62,6 +72,10 @@ public sealed class LiveEplan : IAsyncLifetime
         }
 
         ProcessId = status.GetProperty("eplan").GetProperty("processId").GetInt32();
+        if (Environment.GetEnvironmentVariable(EplanPidVariable) is { Length: > 0 } wanted && ProcessId.ToString(CultureInfo.InvariantCulture) != wanted)
+        {
+            throw new InvalidOperationException($"eplanmcp reached EPLAN process {ProcessId}, not {EplanPidVariable}={wanted}.");
+        }
         if (_offline is not null && ProcessId != _offline.ProcessId)
         {
             throw new InvalidOperationException($"eplanmcp reached EPLAN process {ProcessId}, not the offline host {_offline.ProcessId}.");
