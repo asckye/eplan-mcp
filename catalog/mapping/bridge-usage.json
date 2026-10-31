@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-10-31",
-  "scannedSources": "142d19df",
-  "sourceHash": "sha256:260bdb3f8d7cb40ffc273e53beab843748b25b004712633bcec56cc3a04bbcca",
+  "scannedSources": "d24bf688",
+  "sourceHash": "sha256:37d7082ce474d7cd609c558f254764714215db450bc56d6afc1c87a7ae8a7868",
   "operations": [
     {
       "name": "action.execute",
@@ -18385,32 +18385,6 @@
         ]
       }
     ],
-    "M:Eplan.EplApi.DataModel.DaisyChain.init(Eplan.EplApi.DataModel.NetDefinitionPoint)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.DeletedObjectInfo.Destroy": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
     "M:Eplan.EplApi.DataModel.DynamicConnectionLine.GetFirstEmbeddedInstance": [
       {
         "adapter": "ApiTryDispatch",
@@ -19099,19 +19073,6 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Function.IsPointInsideLogicalArea(Eplan.EplApi.Base.PointD)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.Function.LockDevice(System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -20436,85 +20397,7 @@
         ]
       }
     ],
-    "M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize(Eplan.EplApi.DataModel.Project)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.Symbol.Initialize(Eplan.EplApi.DataModel.MasterData.SymbolLibrary,System.Int32)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.Symbol.Initialize(Eplan.EplApi.DataModel.MasterData.SymbolLibrary,System.String)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
     "M:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Close": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Initialize(Eplan.EplApi.DataModel.Project,System.String)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Initialize(System.String)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -20556,19 +20439,6 @@
           "device.place.execute",
           "device.place.plan",
           "symbol.search"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.MasterData.SymbolVariant.Initialize(Eplan.EplApi.DataModel.MasterData.Symbol,System.Int32)": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
         ]
       }
     ],
@@ -22818,19 +22688,6 @@
         ]
       }
     ],
-    "M:Eplan.EplApi.DataModel.ReportBlock.Freeze": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
     "M:Eplan.EplApi.DataModel.SafetyPoint.Commit": [
       {
         "adapter": "TransactionScope",
@@ -23089,19 +22946,6 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.StorableObject.GetTypeName": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      }
-    ],
-    "M:Eplan.EplApi.DataModel.StorableObject.LockObject": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -55726,17 +55570,6 @@
     ],
     "T:Eplan.EplApi.DataModel.DaisyChain": [
       {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      },
-      {
         "adapter": "ObjectKindDispatch",
         "member": "Matches",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs",
@@ -55769,17 +55602,6 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.DeletedObjectInfo": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      },
       {
         "adapter": "ObjectKindDispatch",
         "member": "Matches",
@@ -62502,17 +62324,6 @@
     "T:Eplan.EplApi.DataModel.MasterData.Symbol": [
       {
         "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      },
-      {
-        "adapter": "ApiTryDispatch",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -63147,17 +62958,6 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.NetDefinitionPoint": [
-      {
-        "adapter": "ApiTryDispatch",
-        "member": "Invoke",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "api.try.execute"
-        ]
-      },
       {
         "adapter": "ObjectKindDispatch",
         "member": "Matches",

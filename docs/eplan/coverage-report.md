@@ -1,7 +1,7 @@
 # EPLAN API 覆盖报告
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 142d19df）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 d24bf688）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
@@ -12,17 +12,17 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 2269 个 ID（方法 534，属性 673，类型 302，字段和枚举值 745，action 15），其中 2250 个能被某个 Bridge 操作到达，19 个只属于基础设施。按命名空间：
+Bridge 共用到 2257 个 ID（方法 522，属性 673，类型 302，字段和枚举值 745，action 15），其中 2238 个能被某个 Bridge 操作到达，19 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 25 |
 | `Eplan.EplApi.Base` | 476 |
-| `Eplan.EplApi.DataModel` | 709 |
+| `Eplan.EplApi.DataModel` | 704 |
 | `Eplan.EplApi.DataModel.E3D` | 136 |
 | `Eplan.EplApi.DataModel.EObjects` | 60 |
 | `Eplan.EplApi.DataModel.Graphics` | 385 |
-| `Eplan.EplApi.DataModel.MasterData` | 68 |
+| `Eplan.EplApi.DataModel.MasterData` | 61 |
 | `Eplan.EplApi.DataModel.Planning` | 43 |
 | `Eplan.EplApi.DataModel.Revisions` | 15 |
 | `Eplan.EplApi.DataModel.Topology` | 7 |
@@ -36,16 +36,16 @@ Bridge 共用到 2269 个 ID（方法 534，属性 673，类型 302，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1019 / 4014（25.4%） | 1011 | 82 | 1011 / 4014（25.2%） | 171 / 4014（4.3%） | 88 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 401 / 1799（22.3%） | 394 | 74 | 394 / 1799（21.9%） | 76 / 1799（4.2%） | 35 | 66 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1010 / 4014（25.2%） | 1002 | 82 | 1002 / 4014（25.0%） | 171 / 4014（4.3%） | 88 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 392 / 1799（21.8%） | 385 | 74 | 385 / 1799（21.4%） | 76 / 1799（4.2%） | 35 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 618 / 2215（27.9%） | 617 | 8 | 617 / 2215（27.9%） | 95 / 2215（4.3%） | 53 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 63 / 68（92.6%） | 63 | 0 | 63 / 68（92.6%） | 16 / 68（23.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1019 / 4342（23.5%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 401 / 1799（22.3%），live_verified 76 / 1799（4.2%）。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1010 / 4342（23.3%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 392 / 1799（21.8%），live_verified 76 / 1799（4.2%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 52 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 1118 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 7 个，没有整个排除的 action 共 64 个。
@@ -57,12 +57,12 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 2 |
 | `Eplan.EplApi.Base` | 268 | 29 / 268（10.8%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 413 / 1247（33.1%） | 91 |
+| `Eplan.EplApi.DataModel` | 1247 | 408 / 1247（32.7%） | 91 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 98 / 368（26.6%） | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 40 / 83（48.2%） | 6 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 193 / 414（46.6%） | 10 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
-| `Eplan.EplApi.DataModel.MasterData` | 121 | 33 / 121（27.3%） | 8 |
+| `Eplan.EplApi.DataModel.MasterData` | 121 | 29 / 121（24.0%） | 8 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 34 / 122（27.9%） | 0 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 12 / 20（60.0%） | 0 |
 | `Eplan.EplApi.DataModel.Topology` | 17 | 3 / 17（17.6%） | 0 |
@@ -157,7 +157,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 2/1/1 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1740 | 710 | 5 | 959 | 0 | 2/0/1 | A39 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1728 | 701 | 5 | 959 | 0 | 2/0/1 | A39 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |

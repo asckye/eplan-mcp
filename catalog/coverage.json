@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 1019,
-      "byTools": 1011,
+      "implemented": 1010,
+      "byTools": 1002,
       "partial": 82,
-      "automatedTest": 1011,
+      "automatedTest": 1002,
       "liveVerified": 171,
       "envBlocked": 88,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 401,
-      "byTools": 394,
+      "implemented": 392,
+      "byTools": 385,
       "partial": 74,
-      "automatedTest": 394,
+      "automatedTest": 385,
       "liveVerified": 76,
       "envBlocked": 35,
       "undocumented": 66
@@ -139,7 +139,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 413,
+      "implemented": 408,
       "liveVerified": 91
     },
     {
@@ -169,7 +169,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 33,
+      "implemented": 29,
       "liveVerified": 8
     },
     {
@@ -802,8 +802,8 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 1740,
-      "operationGroups": 710,
+      "apiIds": 1728,
+      "operationGroups": 701,
       "dataDictionary": 5,
       "dependencies": 959,
       "actions": 0,
@@ -5496,24 +5496,6 @@
       ]
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.DaisyChain.init",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfo.Destroy",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
       "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfo.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -7259,15 +7241,6 @@
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Function.IsTemplateReadOnly",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.Function.LockDevice",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -10094,15 +10067,6 @@
       ]
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -10164,15 +10128,6 @@
       ]
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Initialize",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Name",
       "layer": "operation",
       "status": "automated_test",
@@ -10228,15 +10183,6 @@
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Close",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Initialize",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -10315,15 +10261,6 @@
         "eplan_device_place",
         "eplan_placement_update",
         "eplan_symbol_search"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariant.Initialize",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
       ]
     },
     {
@@ -13042,15 +12979,6 @@
       ]
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.ReportBlock.Freeze",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
       "unit": "O:Eplan.EplApi.DataModel.ReportBlock.FunctionFilterSchemaData",
       "layer": "operation",
       "status": "automated_test",
@@ -13438,15 +13366,6 @@
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.IsValid",
-      "layer": "operation",
-      "status": "automated_test",
-      "partial": false,
-      "tools": [
-        "eplan_api_try"
-      ]
-    },
-    {
-      "unit": "O:Eplan.EplApi.DataModel.StorableObject.LockObject",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
