@@ -1,5 +1,7 @@
 # EPLAN API 覆盖报告
 
+> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-10-31 按 Bridge 源码 6d49f593 + uncommitted changes 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
+
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-10-31 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 6d49f593 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
