@@ -45,7 +45,8 @@ public sealed class ApiTryContractTests
         Assert.Equal(enabled && !core, tools.Any(t => t.ProtocolTool.Name == ApiTryTools.Tool));
         var usage = tools.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         Assert.Equal(enabled && !core, usage.InputSchema.GetProperty("properties").GetProperty("tool").GetProperty("enum").EnumerateArray().Any(n => n.GetString() == ApiTryTools.Tool));
-        if (!enabled || core) { return; }
+        if (!enabled || core)
+        { return; }
         var tool = tools.Single(t => t.ProtocolTool.Name == ApiTryTools.Tool).ProtocolTool;
         Assert.Equal((false, true, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.Equal(["group", "project", "parameters"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(n => n.GetString()));

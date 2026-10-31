@@ -7,6 +7,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
+
 [McpServerToolType]
 internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, HostConfig config, ApiIndex index)
 {
@@ -18,7 +19,8 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
     {
         try
         {
-            if (config.ApiTry != ActionRunSwitch.On) { throw ActionRunCatalog.Denied("apiTry is off in config.json."); }
+            if (config.ApiTry != ActionRunSwitch.On)
+            { throw ActionRunCatalog.Denied("apiTry is off in config.json."); }
             ApiEntry? entry = index.Data.Entries.FirstOrDefault(e => e.Row.Group == group);
             if (entry is null || entry.Row.ExcludedReason is not null || !ApiTryCatalog.Allowed(group))
             { throw ActionRunCatalog.Denied("This API group is unknown or excluded from trial execution."); }
@@ -27,10 +29,12 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
                 || parameters.EnumerateObject().Any(p => p.Value.ValueKind is JsonValueKind.Array or JsonValueKind.Null || p.Value.ValueKind == JsonValueKind.Object && (p.Name != "target" || !Locator(p.Value))))
             { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and a parameter object (2048 characters maximum) containing only simple values and target locator." }); }
             ProjectGetData resolved = await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false);
-            if (!ScratchPaths.IsInside(resolved.Project.Path, config.ScratchRoots)) { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
+            if (!ScratchPaths.IsInside(resolved.Project.Path, config.ScratchRoots))
+            { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
             var args = new ApiTryArgs { Group = group, Project = resolved.Project.Path, Parameters = parameters.GetRawText() };
             var request = new WriteRequest<ApiTryArgs, ApiTryArgs>(Tool, ToolTier.Write, OperationNames.ApiTryPlan, OperationNames.ApiTryExecute, args,
-                p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified API") { Unverified = true };
+                p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified API")
+            { Unverified = true };
             WriteOutcome<ApiTryData> outcome = await writes.RunAsync<ApiTryArgs, ApiTryArgs, ApiTryData>(request, progress, cancellationToken).ConfigureAwait(false);
             ApiTryData? data = outcome.Data;
             string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).Order(StringComparer.Ordinal)];

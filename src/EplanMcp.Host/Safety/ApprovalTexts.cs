@@ -130,7 +130,8 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
-        if (change.Kind == "unverified API") { return "unverified: " + change.Name + "; " + change.Property; }
+        if (change.Kind == "unverified API")
+        { return "unverified: " + change.Name + "; " + change.Property; }
         if (change.Kind == "action")
         {
             List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];
@@ -521,7 +522,8 @@ internal static class ApprovalTexts
 
     private static IEnumerable<string> TrialParameters(WritePlan plan)
     {
-        if (plan.Details?.GetValueOrDefault("rawParameters") is not { } raw) { yield break; }
+        if (plan.Details?.GetValueOrDefault("rawParameters") is not { } raw)
+        { yield break; }
         string escaped = JsonSerializer.Serialize(raw);
         for (int offset = 0; offset < escaped.Length; offset += 300)
         { yield return string.Concat("parameters (JSON text): ", escaped.AsSpan(offset, Math.Min(300, escaped.Length - offset))); }

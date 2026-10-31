@@ -23,7 +23,8 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             OperationContext.Current.ThrowIfCancellationRequested();
             var data = new ApiTryData { Value = value, Before = JsonConvert.DeserializeObject<Dictionary<string, string>>(plan.Details!["before"])!, After = dispatch.Inspect(args.Project) };
             OperationContext.Current.ThrowIfCancellationRequested();
-            if (elapsed.Elapsed.TotalSeconds > 30) { throw new TimeoutException("Trial exceeded its execution budget."); }
+            if (elapsed.Elapsed.TotalSeconds > 30)
+            { throw new TimeoutException("Trial exceeded its execution budget."); }
             return data;
         }
         catch (Exception ex)

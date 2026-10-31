@@ -14,7 +14,8 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         if (string.IsNullOrWhiteSpace(args.Project) || args.Parameters is null || args.Parameters.Length > 2048)
         { throw InvalidArgument("Supply an explicit project and at most 2048 characters of parameters."); }
         JObject parameters;
-        try { parameters = Parameters(args.Parameters); }
+        try
+        { parameters = Parameters(args.Parameters); }
         catch (JsonException) { throw InvalidArgument("parameters must be a JSON object without duplicate fields."); }
         if (parameters.Properties().Any(p => p.Value.Type is not (JTokenType.String or JTokenType.Integer or JTokenType.Float or JTokenType.Boolean)
             && (p.Name != "target" || p.Value is not JObject locator || locator.Count != 5 || locator.Properties().Any(f => f.Name is not ("project" or "page" or "type" or "oid" or "digest")) || locator.Values().Any(v => v.Type is not (JTokenType.String or JTokenType.Integer)))))
@@ -22,7 +23,8 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
         string[]? shape = ApiTryCatalog.Shape(args.Group);
         var plan = new WritePlan { Project = project.Name, ProjectPath = project.Path, Details = new() { ["unverified"] = "true", ["status"] = "not_dispatchable_yet" } };
-        if (shape is null) { return plan; }
+        if (shape is null)
+        { return plan; }
         if (parameters.Count != shape.Length - 1 || parameters.Properties().Any(p => p.Name != "target" && (!shape.Skip(2).Contains(p.Name, StringComparer.Ordinal) || p.Value.Type != JTokenType.Boolean))
             || parameters["target"] is not JObject target || target.Count != 5 || target.Properties().Any(p => p.Name is not ("project" or "page" or "type" or "oid" or "digest"))
             || target["project"]?.Type != JTokenType.String || target["page"]?.Type != JTokenType.String || target["type"]?.Type != JTokenType.Integer || target["oid"]?.Type != JTokenType.Integer

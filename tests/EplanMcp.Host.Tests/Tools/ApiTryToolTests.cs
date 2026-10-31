@@ -112,8 +112,10 @@ public sealed class ApiTryToolTests : IDisposable
         _dispatchable = dry;
         JsonElement result = WriteToolHarness.Structured(await Call(dry));
         Assert.Equal(ExecutionState.NotStarted, result.GetProperty("execution").GetString());
-        Assert.Empty(_approval.Questions); Assert.Empty(_harness.Bridge.Writes);
-        if (!dry) { Assert.Equal("not_dispatchable_yet", result.GetProperty("status").GetString()); }
+        Assert.Empty(_approval.Questions);
+        Assert.Empty(_harness.Bridge.Writes);
+        if (!dry)
+        { Assert.Equal("not_dispatchable_yet", result.GetProperty("status").GetString()); }
     }
 
     [Fact]

@@ -12,7 +12,9 @@ public sealed class ApiTryOperationTests
     private ApiTryPlanOperation Planner(int major = 2026) => new(major, new Catalog(), _dispatch);
     private static ApiTryArgs Args(string group = Group) => new()
     {
-        Group = group, Project = "Scratch", Parameters = new JObject
+        Group = group,
+        Project = "Scratch",
+        Parameters = new JObject
         {
             ["target"] = new JObject { ["project"] = @"D:\scratch\Scratch", ["page"] = "=A/1", ["type"] = 1, ["oid"] = 1, ["digest"] = new string('a', 64) },
         }.ToString(Newtonsoft.Json.Formatting.None),
@@ -63,13 +65,27 @@ public sealed class ApiTryOperationTests
         var locator = (JObject)p["target"]!;
         switch (mode)
         {
-            case "missing": p.Remove("target"); break;
-            case "type-string": locator["type"] = "1"; break;
-            case "digest": locator["digest"] = new string('A', 64); break;
-            case "wrong-project": locator["project"] = @"D:\real\Project"; break;
-            case "extra-locator-field": locator["typeName"] = "System.IO.File"; break;
-            case "setter": p["value"] = "new name"; break;
-            case "array": p["target"] = new JArray(locator); break;
+            case "missing":
+                p.Remove("target");
+                break;
+            case "type-string":
+                locator["type"] = "1";
+                break;
+            case "digest":
+                locator["digest"] = new string('A', 64);
+                break;
+            case "wrong-project":
+                locator["project"] = @"D:\real\Project";
+                break;
+            case "extra-locator-field":
+                locator["typeName"] = "System.IO.File";
+                break;
+            case "setter":
+                p["value"] = "new name";
+                break;
+            case "array":
+                p["target"] = new JArray(locator);
+                break;
         }
         args.Parameters = mode == "duplicate" ? "{\"target\":{},\"target\":{}}" : p.ToString();
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
@@ -85,8 +101,10 @@ public sealed class ApiTryOperationTests
         JObject p = JObject.Parse(args.Parameters);
         p["bWithCDPs"] = valid ? new JValue(true) : new JValue("true");
         args.Parameters = p.ToString();
-        if (valid) { Assert.Single(Plan(args).Changes); }
-        else { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
+        if (valid)
+        { Assert.Single(Plan(args).Changes); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
     }
 
     [Fact]
@@ -115,8 +133,10 @@ public sealed class ApiTryOperationTests
     [Fact]
     public void StalePlan_NeverInvokes()
     {
-        ApiTryArgs args = Args(); args.Fingerprint = Plan(args).Fingerprint;
-        _dispatch.ChangeOnInvoke = true; _dispatch.Invoke(args);
+        ApiTryArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _dispatch.ChangeOnInvoke = true;
+        _dispatch.Invoke(args);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => new ApiTryExecuteOperation(Planner(), _dispatch).Execute(args)).Error;
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Equal(1, _dispatch.Invocations);
@@ -127,7 +147,8 @@ public sealed class ApiTryOperationTests
     [InlineData("modal")]
     public void UnverifiedInvocationFailure_IsUnknown_NotClaimedRolledBack(string cause)
     {
-        ApiTryArgs args = Args(); args.Fingerprint = Plan(args).Fingerprint;
+        ApiTryArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
         _dispatch.Failure = new InvalidOperationException(cause);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => new ApiTryExecuteOperation(Planner(), _dispatch).Execute(args)).Error;
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
@@ -152,8 +173,11 @@ public sealed class ApiTryOperationTests
         }
         public string Invoke(ApiTryArgs args)
         {
-            Invocations++; if (Failure is { } failure) { throw failure; }
-            _changed |= ChangeOnInvoke; return "=A/1";
+            Invocations++;
+            if (Failure is { } failure)
+            { throw failure; }
+            _changed |= ChangeOnInvoke;
+            return "=A/1";
         }
     }
 }

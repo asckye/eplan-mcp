@@ -117,7 +117,8 @@ internal sealed partial class WritePipeline(
 
         // Nobody is asked anything about a write the policy forbids anyway.
         PolicyDecision decision = PolicyEngine.Decide(request.Tier, !project || ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots), config, masterData);
-        if (request.Unverified && decision.Verdict != PolicyVerdict.Deny) { decision = new(PolicyVerdict.NeedsApproval); }
+        if (request.Unverified && decision.Verdict != PolicyVerdict.Deny)
+        { decision = new(PolicyVerdict.NeedsApproval); }
         if (decision.Verdict == PolicyVerdict.Deny)
         {
             throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = decision.Message! });
@@ -446,7 +447,8 @@ internal sealed partial class WritePipeline(
                 ["processId"] = eplan.Eplan.ProcessId,
             },
         };
-        if (plan.Details?.ContainsKey("unverified") == true) { record["unverified"] = true; }
+        if (plan.Details?.ContainsKey("unverified") == true)
+        { record["unverified"] = true; }
         if (plan.Details?.ContainsKey("property_keys") == true)
         {
             record["fingerprint"] = plan.Fingerprint;
@@ -543,7 +545,8 @@ internal sealed partial class WritePipeline(
         record["execution"] = execution;
         record["reason"] = reason;
         record["recovered"] = recovered;
-        if (tool == Tools.ApiTryTools.Tool && data is not null) { record["observations"] = JsonSerializer.SerializeToNode(data, HostJson.Options); }
+        if (tool == Tools.ApiTryTools.Tool && data is not null)
+        { record["observations"] = JsonSerializer.SerializeToNode(data, HostJson.Options); }
         if (plan.MasterData?.Kind == MasterDataKinds.Translations && data is not null)
         {
             JsonNode? result = JsonSerializer.SerializeToNode(data, HostJson.Options);

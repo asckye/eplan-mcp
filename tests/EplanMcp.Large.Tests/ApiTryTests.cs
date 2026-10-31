@@ -33,7 +33,8 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     }
     public async ValueTask DisposeAsync()
     {
-        if (_services is not null) { await _services.DisposeAsync(); }
+        if (_services is not null)
+        { await _services.DisposeAsync(); }
         Directory.Delete(_home, recursive: true);
     }
     private async Task<JsonElement> Locator(string project)
@@ -91,7 +92,8 @@ internal sealed class TrialApprovals : IApprovalChannel
     public IReadOnlyList<ApprovalQuestion> Questions { get { lock (_questions) { return [.. _questions]; } } }
     public Task<ApprovalAnswer?> AskAsync(ApprovalQuestion question, CancellationToken cancellationToken)
     {
-        lock (_questions) { _questions.Add(question); }
+        lock (_questions)
+        { _questions.Add(question); }
         ApprovalDecision decision = question.Tool == ApiTryTools.Tool && question.Release is null ? ApprovalDecision.Granted : ApprovalDecision.Denied;
         return Task.FromResult<ApprovalAnswer?>(new ApprovalAnswer(question.RequestId, question.Plan.Fingerprint, question.ArgumentsHash, decision));
     }
