@@ -1,5 +1,5 @@
 id: action-catalog
-set: dev
+set: holdout
 prompt: 不启动 EPLAN，查询 backup 的各个 TYPE，指出哪一种在 action_run 白名单内、验证引用是什么，并说明目录是否授予执行权限。
 answer: { type: object, required: [verified_type, execution_authorized], properties: { verified_type: { type: string }, execution_authorized: { type: boolean } } }
 checks: [{ answer: $.verified_type, equals: MASTERDATA }, { answer: $.execution_authorized, equals: false }]
