@@ -40,7 +40,9 @@ public static class CableDefinitionPlanner
         // A node symbol keeps all its pins at its centre (api-notes acceptance trial).
         var centres = new HashSet<string>(scene.Pins.GroupBy(p => string.Join("/", p.Key.Split('/').Take(2)))
             .Where(g => g.Count() > 1 && g.Select(p => P(p.Value.Location)).Distinct().Count() == 1).Select(g => P(g.First().Value.Location)));
-        var edges = scene.Graphical.SelectMany(s => new[] { (From: P(s[0]), To: s[1]), (From: P(s[1]), To: s[0]) }).ToLookup(e => e.From, e => e.To);
+        // The same drawn segment may be listed twice; repeated entries are one route, not two.
+        var edges = scene.Graphical.SelectMany(s => new[] { (From: P(s[0]), To: s[1]), (From: P(s[1]), To: s[0]) })
+            .GroupBy(e => e.From + "|" + P(e.To)).Select(g => g.First()).ToLookup(e => e.From, e => e.To);
         var paths = new List<double[][]>();
         void Walk(double[] at, List<double[]> trail)
         {
@@ -201,7 +203,10 @@ public static class CableDefinitionPlanner
         {
             var matches = candidates.Where(c => JToken.DeepEquals(c.Reference, row["connection"])).ToArray();
             if (matches.Length != 1)
-            { throw new BridgeErrorException(ErrorReason.PlanStale, "The connection locator changed; read the page and re-plan."); }
+            {
+                throw new BridgeErrorException(ErrorReason.PlanStale, FormattableString.Invariant(
+                    $"The connection locator changed; read the page and re-plan (connection {row["connection"]?["locator"]?["oid"]}, {matches.Length} matches among {inventory.Wires.Count} inventory wires)."));
+            }
             var selected = matches[0];
             Require(assigned.Add(selected.Reference.ToString(Formatting.None)), "/items", "Assign each connection only once.");
             if (selected.Before is { } old && (HasCable(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))

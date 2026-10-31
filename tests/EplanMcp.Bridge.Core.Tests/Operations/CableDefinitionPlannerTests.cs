@@ -272,6 +272,9 @@ public sealed class CableDefinitionPlannerTests
         scene.Graphical.Add([[10, 10], [10, 30]]);
         scene.Graphical.Add([[10, 30], [30, 30]]);
         Assert.Equal([[10, 10], [10, 30], [30, 30]], EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30]));
+        scene.Graphical.Add([[30, 30], [10, 30]]); // live: a segment can be listed twice
+        Assert.Equal([[10, 10], [10, 30], [30, 30]], EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30]));
+        scene.Graphical.RemoveAt(scene.Graphical.Count - 1);
 
         scene.Pins["17/3/0"] = new() { Location = [20, 30], Direction = "Up" };
         scene.Graphical.RemoveAt(1);
