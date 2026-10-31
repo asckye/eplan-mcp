@@ -6,6 +6,10 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    /// <summary>Plans one unverified catalog group without invoking it.</summary>
+    public const string ApiTryPlan = "api.try.plan";
+    /// <summary>Executes one generated catalog call with outcome tracking.</summary>
+    public const string ApiTryExecute = "api.try.execute";
     /// <summary>Finds exact dictionary object identities in an open project; never writes.</summary>
     public const string ObjectFind = "object.find";
     /// <summary>Reads a bounded property block of an exact, digest-checked dictionary object.</summary>

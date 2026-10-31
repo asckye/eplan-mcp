@@ -13,7 +13,8 @@ internal static class ApiIndexGenerator
     internal const string RelativePath = "src/EplanMcp.Host/Tools/ApiIndex.g.base64";
     private static readonly JsonSerializerOptions _json = new(CoverageJson.Options) { WriteIndented = false };
 
-    internal static string Render(string root)
+    internal static string Render(string root) => Encode(Data(root));
+    internal static ApiIndexData Data(string root)
     {
         CoverageReport report = CoverageReport.Build(root);
         ToolMapping mapping = ToolMapping.Build(root);
@@ -21,7 +22,7 @@ internal static class ApiIndexGenerator
         ApiCatalog catalog = ApiCatalog.Load(directory);
         if (!report.SdkCatalog)
         {
-            return Encode(new([], new(StringComparer.Ordinal)));
+            return new([], new(StringComparer.Ordinal));
         }
         JsonElement[] members = [.. Directory.GetFiles(Path.Combine(directory, "members"), "*.jsonl").Order(StringComparer.Ordinal)
             .SelectMany(ApiCatalog.Lines).Where(m => Text(m, "layer") == "operation")];
@@ -30,7 +31,7 @@ internal static class ApiIndexGenerator
         var anchors = File.ReadLines(Path.Combine(root, "docs/eplan/api-notes.md")).Where(l => Regex.IsMatch(l, @"^### [AB]\d+\."))
             .ToDictionary(l => l[4..l.IndexOf('.', StringComparison.Ordinal)], l => "docs/eplan/api-notes.md#"
                 + Regex.Replace(l[4..].ToLowerInvariant(), @"[^\p{L}\p{N}_ -]", "").Replace(' ', '-'), StringComparer.Ordinal);
-        return Encode(Build(catalog, report, mapping, members, types, summary.GetProperty("layers").GetProperty("data_dictionary").GetProperty("byObject"), anchors));
+        return Build(catalog, report, mapping, members, types, summary.GetProperty("layers").GetProperty("data_dictionary").GetProperty("byObject"), anchors);
     }
 
     internal static ApiIndexData Build(ApiCatalog catalog, CoverageReport report, ToolMapping mapping,

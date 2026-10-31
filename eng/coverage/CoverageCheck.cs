@@ -25,6 +25,8 @@ internal static class CoverageCheck
         (CoverageReport.RelativePath, root => CoverageJson.Serialize(CoverageReport.Build(root))),
         (CoverageMarkdown.RelativePath, CoverageMarkdown.Render),
         (ApiIndexGenerator.RelativePath, ApiIndexGenerator.Render),
+        (ApiTryGenerator.CatalogPath, ApiTryGenerator.Catalog),
+        (ApiTryGenerator.DispatchPath, ApiTryGenerator.Dispatch),
     ];
 
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>
@@ -90,7 +92,7 @@ internal static class CoverageCheck
             .Where(Directory.Exists)
             .SelectMany(folder => Directory.EnumerateFiles(folder, "*.g.cs"))
             .Select(file => Path.GetRelativePath(repositoryRoot, file).Replace('\\', '/'))
-            .Where(path => !wrappers.ContainsKey(path))
+            .Where(path => !wrappers.ContainsKey(path) && !Generated.Any(g => g.Path == path))
             .Order(StringComparer.Ordinal),
     ];
 

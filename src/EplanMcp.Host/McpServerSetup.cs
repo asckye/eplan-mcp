@@ -81,6 +81,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile == ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
         {
             ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile);
@@ -104,6 +105,7 @@ internal static class McpServerSetup
             .WithTools<RevisionTools>(HostJson.Options)
             .WithTools<ApiTools>(HostJson.Options)
             .WithTools<ActionCatalogTools>(HostJson.Options)
+            .WithTools<ApiTryTools>(HostJson.Options)
             .WithTools<SymbolTools>(HostJson.Options)
             .WithTools<PageTools>(HostJson.Options)
             .WithTools<PageOpenTools>(HostJson.Options)

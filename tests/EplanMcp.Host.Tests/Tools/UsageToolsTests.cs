@@ -10,6 +10,16 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class UsageToolsTests
 {
     [Fact]
+    public void ApiTryUsage_IsOnlyAvailableWhenExplicitlyEnabled_AndExplainsTheSlice()
+    {
+        Assert.True(UsageTools.ToolUsage(ApiTryTools.Tool).IsError);
+        var config = EplanMcp.Host.Safety.HostConfig.Defaults(new(@"D:\test-data")) with { ApiTry = EplanMcp.Host.Safety.ActionRunSwitch.On };
+        string text = Structured(UsageTools.ToolUsage(ApiTryTools.Tool, config: config)).GetProperty("text").GetString()!;
+        Assert.Contains("not_dispatchable_yet", text, StringComparison.Ordinal);
+        Assert.Contains("OUTCOME_UNKNOWN", text, StringComparison.Ordinal);
+        Assert.Contains("unverified", text, StringComparison.Ordinal);
+    }
+    [Fact]
     public void ProjectCreateUsage_ExplainsTheNewFolderCompatibilityAndUnknownOutcome()
     {
         string text = Structured(UsageTools.ToolUsage(ProjectCreateTools.CreateTool)).GetProperty("text").GetString()!;

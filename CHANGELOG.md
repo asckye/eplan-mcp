@@ -9,6 +9,7 @@
 
 ### Added
 - 新增 `eplan_action_catalog_search` / `eplan_action_catalog_get`（full、Read）：查询官方 177 行与运行时本机 UI action，返回 TYPE、已知参数、白名单级别、验证引用及安装版本缺口；不启动 EPLAN，不保存或分发本机清单。
+- 新增默认关闭的 `eplan_api_try` 只读首片：scratch 限定、逐次独立审批、目录生成的编译分发表、业务快照/设计文件指纹比较和 unverified 审计；超时结果未知时暂停写入。当前仅接入三类对象的简单读取，其余组明确尚不可分发；属性写入、15 类扩展及撤销验证待后续切片，Large 已编写未运行。
 - 新增 `eplan_api_search` / `eplan_api_get`（full、Read）：离线发现全部 4,649 个 API 重载组及 69 种属性字典，查询完整签名、排除原因、覆盖状态、证据与到达工具；压缩索引嵌入 Host，无需 EPLAN。
 - `eplan_connection_create` 支持在既有自动连接线段内显式放置方向对齐的 T 节点拆线并引出支路，返回被拆线段与节点位置；保留原逻辑连接，支路远端尚无器件时允许零新增逻辑连接。新增离线回归与待运行的 Large 验证。
 - 七个绘图写工具（设备放置、连线创建/生成、图元创建/移动、宏插入、DXF 导入）支持 `show_page=false`：启用后先开页供实时观看，dry-run 也开页；开页失败不阻止写入，结果以 `pageShown` 和提示报告。

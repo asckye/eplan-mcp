@@ -28,6 +28,7 @@ internal sealed record WriteRequest<TArgs, TExecuteArgs>(
 {
     internal WritePlan? PreparedPlan { get; init; }
     internal object? AuditArguments { get; init; }
+    internal bool Unverified { get; init; }
 
     /// <summary>A write whose execute arguments need no backup target; named like the record's own parameters.</summary>
     public WriteRequest(string Tool, ToolTier Tier, string PlanOperation, string ExecuteOperation, TArgs Args, Func<WritePlan, TExecuteArgs> ExecuteArgs, bool DryRun, TimeSpan Limit, string Activity = "Waiting for EPLAN")
@@ -84,6 +85,8 @@ internal sealed partial class WritePipeline(
             throw NotStarted(ex.Error);
         }
 
+        if (request.Unverified && !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots))
+        { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = "API trials are allowed only in scratch projects." }); }
         // Only a valid, non-empty plan is ever put to the engineer.
         if (request.DryRun || plan.Changes.Count == 0)
         {
@@ -114,6 +117,7 @@ internal sealed partial class WritePipeline(
 
         // Nobody is asked anything about a write the policy forbids anyway.
         PolicyDecision decision = PolicyEngine.Decide(request.Tier, !project || ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots), config, masterData);
+        if (request.Unverified && decision.Verdict != PolicyVerdict.Deny) { decision = new(PolicyVerdict.NeedsApproval); }
         if (decision.Verdict == PolicyVerdict.Deny)
         {
             throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = decision.Message! });
@@ -238,6 +242,8 @@ internal sealed partial class WritePipeline(
         using BridgeProgress? waiting = BridgeProgress.Start(call, request.Activity, clock, cancellationToken);
         try
         {
+            if (request.Unverified && !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots))
+            { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = "API trials are allowed only in scratch projects." }); }
             WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
             await RecordResultAsync(request.Tool, requestId, plan, eplan, result.Execution, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
             await Show(shown, result.Execution, null).ConfigureAwait(false);
@@ -440,6 +446,7 @@ internal sealed partial class WritePipeline(
                 ["processId"] = eplan.Eplan.ProcessId,
             },
         };
+        if (plan.Details?.ContainsKey("unverified") == true) { record["unverified"] = true; }
         if (plan.Details?.ContainsKey("property_keys") == true)
         {
             record["fingerprint"] = plan.Fingerprint;
@@ -536,6 +543,7 @@ internal sealed partial class WritePipeline(
         record["execution"] = execution;
         record["reason"] = reason;
         record["recovered"] = recovered;
+        if (tool == Tools.ApiTryTools.Tool && data is not null) { record["observations"] = JsonSerializer.SerializeToNode(data, HostJson.Options); }
         if (plan.MasterData?.Kind == MasterDataKinds.Translations && data is not null)
         {
             JsonNode? result = JsonSerializer.SerializeToNode(data, HostJson.Options);

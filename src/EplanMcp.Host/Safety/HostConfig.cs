@@ -60,6 +60,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     public MasterDataWrites MasterDataWrites { get; init; } = MasterDataWrites.Approve;
 
     public ActionRunSwitch ActionRun { get; init; } = ActionRunSwitch.Off;
+    public ActionRunSwitch ApiTry { get; init; } = ActionRunSwitch.Off;
 
     public int PlanLifetimeHours { get; init; } = 24;
 
@@ -140,6 +141,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             ApprovalTimeout = timeout,
             MasterDataWrites = file?.MasterDataWrites ?? defaults.MasterDataWrites,
             ActionRun = file?.ActionRun ?? defaults.ActionRun,
+            ApiTry = file?.ApiTry ?? defaults.ApiTry,
             PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
             HttpAllowedOrigins = file?.HttpAllowedOrigins ?? [],
             PlanLifetimeHours = lifetime,
@@ -162,6 +164,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
         public MasterDataWrites? MasterDataWrites { get; set; }
 
         public ActionRunSwitch? ActionRun { get; set; }
+        public ActionRunSwitch? ApiTry { get; set; }
 
         public Dictionary<string, string>? PackSources { get; set; }
     }

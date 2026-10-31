@@ -48,7 +48,7 @@ internal static class ApprovalTexts
             Summary = zh
                 ? $"工具：{question.Tool}\n{MasterData(plan.MasterData, zh)}{project}将进行以下修改（共 {count} 处）："
                 : $"Tool: {question.Tool}\n{MasterData(plan.MasterData, zh)}{project}The following changes will be made ({count}):",
-            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. TranslationImport(plan, zh), .. ValueSet(plan, zh), .. CableGeneration(plan, zh)],
+            Changes = [.. plan.Changes.Select(c => Change(c, zh, plan.Details)), .. TrialParameters(plan), .. Orphaned(plan, zh), .. ToNumber(plan, zh), .. Numbering(plan, zh), .. Translations(plan, zh), .. Translating(plan, zh), .. PartLists(plan, zh), .. TranslationImport(plan, zh), .. ValueSet(plan, zh), .. CableGeneration(plan, zh)],
             Note = plan.MasterData?.Kind == MasterDataKinds.Translations
                 ? zh ? "导入撤不回，执行前会备份翻译库。" : "An import cannot be undone, the translation database is backed up first."
                 : Backup(question.BackupFolder, zh) + MasterDataBackup(question.MasterDataBackupFolder, zh)
@@ -130,6 +130,7 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
+        if (change.Kind == "unverified API") { return "unverified: " + change.Name + "; " + change.Property; }
         if (change.Kind == "action")
         {
             List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];
@@ -304,7 +305,7 @@ internal static class ApprovalTexts
         ? zh ? "记录本地知识审核；提升将新建正式规则。接受候选不授予正式资格。EPLAN 的 Ctrl+Z 不能撤销。" : "Records a local knowledge review; promotion creates a new official Rule. Acceptance grants no official standing. Ctrl+Z in EPLAN cannot undo it."
         : plan.Changes.Any(c => c.Kind == "binding")
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
-          : tool == ActionRunTools.Tool
+          : tool is ActionRunTools.Tool or ApiTryTools.Tool
         ? zh ? "执行后只比较指纹，不逐项核对；提交后一步 Ctrl+Z 尚未验证。" : "Fingerprint readback only; changes are not checked item by item. Single-step Ctrl+Z after commit is unverified."
         : tool == ProjectCreateTools.CreateTool
         ? zh ? "只新建项目，不覆盖或复用已有目录。结束后关闭；没有 EPLAN 撤销步骤，Ctrl+Z 不能撤销。" : "Creates only a new project; never overwrites or reuses a destination. Closed afterwards; no EPLAN undo step or Ctrl+Z."
@@ -518,6 +519,13 @@ internal static class ApprovalTexts
                 : $" ({Field("sourceDeviceCount")} source devices; {Field("functions")} functions, {Field("plcBoxes")} PLC boxes, {Field("articleReferences")} article references).");
     }
 
+    private static IEnumerable<string> TrialParameters(WritePlan plan)
+    {
+        if (plan.Details?.GetValueOrDefault("rawParameters") is not { } raw) { yield break; }
+        string escaped = JsonSerializer.Serialize(raw);
+        for (int offset = 0; offset < escaped.Length; offset += 300)
+        { yield return string.Concat("parameters (JSON text): ", escaped.AsSpan(offset, Math.Min(300, escaped.Length - offset))); }
+    }
     private static string Quoted(string? value, bool zh) => value is null ? (zh ? "（未设置）" : "(not set)") : "'" + Value(value, zh) + "'";
 
     /// <summary>

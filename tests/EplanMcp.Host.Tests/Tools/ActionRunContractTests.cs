@@ -65,8 +65,8 @@ public sealed class ActionRunContractTests
     public void Config_InvalidSwitchIsRejected(string value) => Assert.Null(HostConfig.Parse("{\"actionRun\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-    [InlineData(false, false, 90)]
-    [InlineData(true, false, 91)]
+    [InlineData(false, false, 91)]
+    [InlineData(true, false, 92)]
     [InlineData(false, true, 25)]
     [InlineData(true, true, 25)]
     public void ToolAndUsage_AreRegisteredOnlyInFullWithSwitchOn(bool enabled, bool core, int count)
@@ -194,7 +194,7 @@ public sealed class ActionRunContractTests
     {
         var services = new ServiceCollection();
         services.AddLogging(l => l.ClearProviders());
-        services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with { ActionRun = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off });
+        services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with { ActionRun = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off, ApiTry = ActionRunSwitch.On });
         services.AddSingleton(new ToolProfileChoice(core ? ToolProfile.Core : ToolProfile.Full));
         services.AddEplanMcp();
         return services.BuildServiceProvider();

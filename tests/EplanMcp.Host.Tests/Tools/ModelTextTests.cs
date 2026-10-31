@@ -59,7 +59,7 @@ public sealed partial class ModelTextTests
     {
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;

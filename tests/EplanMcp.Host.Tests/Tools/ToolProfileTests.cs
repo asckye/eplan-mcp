@@ -40,7 +40,7 @@ public sealed class ToolProfileTests
     [Fact]
     public void Full_ListsEveryTool_AndCoreOnlyItsOwn()
     {
-        Assert.Equal(91, Tools(ToolProfile.Full).Length);
+        Assert.Equal(92, Tools(ToolProfile.Full).Length);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PlacementCreateTools.Tool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PlacementCreateTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == AssetTools.ReviewTool);
@@ -87,7 +87,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(full ? ToolProfile.Full : ToolProfile.Core));
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
 
@@ -99,7 +99,7 @@ public sealed class ToolProfileTests
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.ClearProviders());
         services.AddSingleton(new ToolProfileChoice(profile));
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On });
+        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On });
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         return [.. provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!.Select(t => t.ProtocolTool)];
