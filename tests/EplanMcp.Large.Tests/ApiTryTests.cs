@@ -79,8 +79,8 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         JsonElement written = await Call(selection.Project, "Page.Name", new { target, value = renamed });
         Assert.Equal("committed", written.GetProperty("execution").GetString());
         JsonElement change = Assert.Single(written.GetProperty("changes").EnumerateArray(), c => c.GetProperty("key").GetString() == "property:O:Eplan.EplApi.DataModel.Page.Name");
-        Assert.Equal(JsonSerializer.Serialize(original), change.GetProperty("before").GetString());
-        Assert.Equal(JsonSerializer.Serialize(renamed), change.GetProperty("after").GetString());
+        Assert.Equal(original, JsonDocument.Parse(change.GetProperty("before").GetString()!).RootElement.GetString());
+        Assert.Equal(renamed, JsonDocument.Parse(change.GetProperty("after").GetString()!).RootElement.GetString());
         Assert.Equal(renamed, (await Call(selection.Project, "Page.Name", new { target = await Locator(selection.Project, page: renamed) })).GetProperty("value").GetString());
         Assert.Contains(_approvals.Questions, q => q.Changes.Any(c => c.StartsWith("write unverified API O:Eplan.EplApi.DataModel.Page.Name = ", StringComparison.Ordinal)));
         await selection.UndoAsync();
