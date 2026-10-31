@@ -54,6 +54,9 @@ public sealed class AssemblyScannerTests
         Assert.Equal("protected", Get($"M:{W}.OnChanged").Access);
         Assert.Equal("get;set", Get($"P:{W}.Name").Accessors);
         Assert.Equal("get", Get($"P:{W}.Count").Accessors);
+        Assert.Null(Get($"P:{W}.Name").SetterAccess);
+        Assert.Equal(("get;set", "protected"), (Get($"P:{W}.ProtectedWrite").Accessors, Get($"P:{W}.ProtectedWrite").SetterAccess));
+        Assert.Equal("get", Get($"P:{W}.PrivateWrite").Accessors);
         Assert.Equal(("constant", "3"), (Get($"F:{W}.Limit").Kind, Get($"F:{W}.Limit").Value));
         Assert.Equal(("enum_value", "2"), (Get($"F:{Prefix}.Shade.Dark").Kind, Get($"F:{Prefix}.Shade.Dark").Value));
         Assert.Equal("operator", Get($"M:{W}.op_Implicit({W})~System.String").Kind);

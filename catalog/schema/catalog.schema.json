@@ -42,6 +42,7 @@
           }
         },
         "accessors": { "enum": ["get", "set", "get;set"] },
+        "setterAccess": { "const": "protected", "description": "The visible setter is protected; absent means no protected setter." },
         "value": { "type": "string", "description": "Constant value, invariant culture." },
         "base": { "type": "string" },
         "interfaces": { "type": "array", "items": { "type": "string" } },

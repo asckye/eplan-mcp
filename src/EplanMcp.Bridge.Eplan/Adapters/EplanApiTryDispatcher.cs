@@ -14,23 +14,28 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
         MainThread.Assert();
         DrawingLocator locator = ApiTryPlanOperation.Parameters(args.Parameters)["target"]!.ToObject<DrawingLocator>()!;
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(args.Project));
-        IEnumerable<StorableObject> candidates = ApiTryCatalog.Shape(args.Group)![0] switch
+        foreach (string kind in ApiTryCatalog.TargetKinds(args.Group))
         {
-            "Eplan.EplApi.DataModel.Page" => finder.GetPages(null),
-            "Eplan.EplApi.DataModel.Function" => EplanPropertyReadAdapter.Functions(finder, () => OperationContext.Current.ThrowIfCancellationRequested()),
-            _ => finder.GetConnections(null),
-        };
-        StorableObject? found = candidates.FirstOrDefault(o => o.ObjectIdentifier == locator.Oid && SnapshotCanonical.TypeOf(o.ToStringIdentifier()) == locator.Type);
-        SnapshotObject? identity = found is null ? null : EplanPropertyReadAdapter.Describe(found);
-        if (identity is null || identity.Page != locator.Page && found is not Page || found is Page page && page.Name != locator.Page
-            || SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) != locator.Digest)
-        { throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed; get a fresh locator from eplan_object_find."); }
-        return found!;
+            IEnumerable<StorableObject> candidates = EplanObjectReader.Candidates(finder, kind, () => OperationContext.Current.ThrowIfCancellationRequested(), locator.Page);
+            foreach (StorableObject found in candidates.Where(o => o.ObjectIdentifier == locator.Oid && EplanObjectReader.Matches(o, kind)))
+            {
+                SnapshotObject identity = EplanObjectReader.Describe(found, kind);
+                if (identity.Type == locator.Type && (found is Page page ? page.Name : identity.Page ?? string.Empty) == locator.Page
+                    && SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) == locator.Digest)
+                { return found; }
+            }
+        }
+        throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed; get a fresh locator from eplan_object_find.");
     }
+    public string? Read(ApiTryArgs args) => ApiTryDispatch.Read(args.Group, Resolve(args), ApiTryPlanOperation.Parameters(args.Parameters));
     public string? Invoke(ApiTryArgs args)
     {
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
-        string? value = ApiTryDispatch.Read(args.Group, Resolve(args), ApiTryPlanOperation.Parameters(args.Parameters));
+        StorableObject target = Resolve(args);
+        Newtonsoft.Json.Linq.JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
+        if (parameters.ContainsKey("value"))
+        { ApiTryDispatch.Write(args.Group, target, parameters); }
+        string? value = ApiTryDispatch.Read(args.Group, target, parameters);
         using var process = Process.GetCurrentProcess();
         if (process.MainWindowHandle != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(process.MainWindowHandle))
         { throw new BridgeErrorException(ErrorReason.EplanBusy, "A modal dialog appeared during the unverified call."); }
@@ -44,7 +49,8 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
         foreach (KeyValuePair<long, string> page in source.Pages.OrderBy(p => p.Key))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
-            if (watch.Elapsed.TotalSeconds > 20) { throw new BridgeErrorException(ErrorReason.Timeout, "Trial snapshot exceeded 20 seconds; reduce the scratch project."); }
+            if (watch.Elapsed.TotalSeconds > 20)
+            { throw new BridgeErrorException(ErrorReason.Timeout, "Trial snapshot exceeded 20 seconds; reduce the scratch project."); }
             IReadOnlyList<SnapshotSourceObject> objects = source.ReadPage(page.Key, SnapshotProfiles.StandardName);
             state["snapshot:" + page.Key.ToString(System.Globalization.CultureInfo.InvariantCulture)] = SnapshotCanonical.Page(SnapshotProfiles.StandardName, objects[0], objects.Skip(1), SnapshotCanonical.Registered(SnapshotProfiles.StandardName)!).Hash;
         }

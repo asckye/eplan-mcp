@@ -107,7 +107,8 @@ internal static partial class AssemblyScanner
             result.Entries.Add(Member(common, id, "property", name, get == "public" || set == "public" ? null : "protected",
                 !sig.Header.IsInstance, sig.ReturnType, Parameters(reader, any, sig.ParameterTypes),
                 string.Join(";", new[] { get is null ? null : "get", set is null ? null : "set" }.OfType<string>()),
-                typeObsolete || IsObsolete(reader, property.GetCustomAttributes())));
+                typeObsolete || IsObsolete(reader, property.GetCustomAttributes())) with
+            { SetterAccess = set == "protected" ? set : null });
         }
 
         foreach (EventDefinitionHandle eventHandle in type.GetEvents())

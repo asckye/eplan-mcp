@@ -4,6 +4,8 @@ public sealed class ApiTryData
 {
     /// <summary>Scalar result, formatted invariantly.</summary>
     public string? Value { get; set; }
+    /// <summary>A committed transaction cleanup or undo warning, if any.</summary>
+    public string? Warning { get; set; }
     /// <summary>Business page hashes, counts and design-file fingerprints before execution.</summary>
     public Dictionary<string, string> Before { get; set; } = [];
     /// <summary>The same observations after execution.</summary>

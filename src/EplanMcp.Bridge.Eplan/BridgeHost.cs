@@ -113,7 +113,7 @@ internal static class BridgeHost
         IOperation[] operations =
         [
             apiPlan,
-            new ApiTryExecuteOperation(apiPlan, apiTrials),
+            new ApiTryExecuteOperation(apiPlan, apiTrials, transactions),
             new ActionTryPlanOperation(catalog, actions),
             new ActionTryExecuteOperation(catalog, actions, new EplanSystemMessageReader(), transactions),
             new ActionRunPlanOperation(actionMajor, catalog, actions),

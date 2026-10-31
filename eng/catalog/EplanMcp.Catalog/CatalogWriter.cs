@@ -104,6 +104,7 @@ internal static class CatalogWriter
         }
 
         Optional(w, "accessors", e.Accessors);
+        Optional(w, "setterAccess", e.SetterAccess);
         Optional(w, "value", e.Value);
         Optional(w, "base", e.Base);
         if (e.Interfaces is { Count: > 0 } interfaces)

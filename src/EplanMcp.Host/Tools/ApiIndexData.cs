@@ -8,6 +8,6 @@ internal sealed record ApiEntry(ApiRow Row, string Namespace, string Type, strin
 internal sealed record ApiParameter(string Name, string Type);
 internal sealed record ApiDetail(string Kind, string Id, string? Signature = null, string? Summary = null,
     ApiParameter[]? Parameters = null, string? ReturnType = null, string? Accessors = null, bool Static = false,
-    string? ExcludedReason = null, string? Reference = null, string? Note = null, int? PropertyCount = null);
+    string? ExcludedReason = null, string? Reference = null, string? Note = null, int? PropertyCount = null, string? SetterAccess = null, string? Access = null);
 internal sealed record ApiSearchResult(string CatalogVersion, IReadOnlyList<ApiRow> Items, int Total, string? NextCursor, bool Truncated, string? Hint);
 internal sealed record ApiGetResult(string CatalogVersion, ApiRow Entry, IReadOnlyList<ApiDetail> Items, int Total, string? NextCursor, bool Truncated, string? Hint);

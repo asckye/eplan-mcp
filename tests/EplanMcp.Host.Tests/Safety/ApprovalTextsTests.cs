@@ -12,6 +12,16 @@ namespace EplanMcp.Host.Tests.Safety;
 public sealed class ApprovalTextsTests
 {
     [Theory]
+    [InlineData("read", null, "read unverified API O:Page.Name; Page.Name()")]
+    [InlineData("write", "\"new\"", "write unverified API O:Page.Name = \"new\"; Page.Name()")]
+    public void ApiTrialChangesDistinguishReadsAndWrites(string action, string? value, string expected)
+    {
+        var change = new PlannedChange { Action = action, Kind = "unverified API", Name = "O:Page.Name", Property = "Page.Name()", NewValue = value };
+        Assert.Equal(expected, ApprovalTexts.Change(change, zh: false));
+        Assert.Equal(expected, ApprovalTexts.Change(change, zh: true));
+    }
+
+    [Theory]
     [InlineData(true, true)]
     [InlineData(true, false)]
     [InlineData(false, true)]

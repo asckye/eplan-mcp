@@ -14,7 +14,7 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
     internal const string Tool = "eplan_api_try";
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
-    [Description("Trials one unverified catalog group on scratch with per-call approval and snapshot comparison. full + apiTry:on; scalar reads only. target comes from eplan_object_find. Prefer verified task tools. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.")]
+    [Description("Trials an unverified API group on scratch with per-call approval and snapshots. full + apiTry:on; scalar reads and property writes. Copy target from eplan_object_find; value writes. Prefer verified tools. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.")]
     public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, CancellationToken cancellationToken = default)
     {
         try
@@ -37,11 +37,11 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
             { Unverified = true };
             WriteOutcome<ApiTryData> outcome = await writes.RunAsync<ApiTryArgs, ApiTryArgs, ApiTryData>(request, progress, cancellationToken).ConfigureAwait(false);
             ApiTryData? data = outcome.Data;
-            string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).Order(StringComparer.Ordinal)];
+            string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => k.StartsWith("property:", StringComparison.Ordinal) || data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).OrderBy(k => k.StartsWith("property:", StringComparison.Ordinal) ? 0 : 1).ThenBy(k => k, StringComparer.Ordinal)];
             string? Hash(Dictionary<string, string>? state) => state is null ? null : WritePipeline.HashArguments(state.OrderBy(p => p.Key, StringComparer.Ordinal));
             return ToolResults.Success("Unverified API trial: " + outcome.Execution + ".", new ApiTryResult(outcome.Plan.Project, group, outcome.Plan.Details!["status"], true, outcome.Execution, outcome.Recovered,
                 ResultShaper.CleanText(data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
-                "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Recovered calls have no inferred readback; undo is unverified."));
+                "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Recovered calls have no inferred readback. " + data?.Warning));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
     }

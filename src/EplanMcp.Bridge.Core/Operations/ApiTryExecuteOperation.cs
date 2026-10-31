@@ -1,8 +1,8 @@
 using EplanMcp.Contracts;
 using Newtonsoft.Json;
 namespace EplanMcp.Bridge.Core.Operations;
-/// <summary>Read-only first slice, still outcome-tracked because unverified calls may have side effects.</summary>
-public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch) : Operation<ApiTryArgs, ApiTryData>, IWriteOperation
+/// <summary>Outcome-tracked trials; scalar writes share one SafetyPoint and undo step with their readback.</summary>
+public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch, ITransactionScopeFactory transactions) : Operation<ApiTryArgs, ApiTryData>, IWriteOperation
 {
     public override string Name => OperationNames.ApiTryExecute;
     protected override ApiTryData Execute(ApiTryArgs args)
@@ -17,17 +17,45 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             OperationContext.Current.ThrowIfCancellationRequested();
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
+        bool write = plan.Changes[0].Action == "write";
         try
         {
+            if (!write)
+            { return Invoke(); }
+            Committed<ApiTryData> committed = TransactionRunner.Run(transactions, "eplan_api_try", () =>
+            {
+                try
+                { return Invoke(); }
+                catch (BridgeErrorException) { throw; }
+                catch (TimeoutException) { throw; }
+                catch (Exception ex) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property trial failed and was rolled back; re-read before retrying.", ex); }
+            });
+            committed.Result.Warning = committed.Warning;
+            return committed.Result;
+        }
+        catch (BridgeErrorException ex) when (write && ex.Error.Execution == ExecutionState.RolledBack
+            && ex.Error.Reason is not (ErrorReason.Timeout or ErrorReason.EplanBusy or ErrorReason.OutcomeUnknown))
+        { throw; }
+        catch (Exception ex)
+        { throw new BridgeErrorException(ErrorReason.OutcomeUnknown, "Unverified API outcome is unknown. Do not repeat; ask the engineer to inspect EPLAN.", ex) { Error = { Execution = ExecutionState.Unknown } }; }
+
+        ApiTryData Invoke()
+        {
+            var before = JsonConvert.DeserializeObject<Dictionary<string, string>>(plan.Details!["before"])!;
+            string key = "property:" + args.Group;
+            if (write)
+            { before[key] = JsonConvert.SerializeObject(dispatch.Read(args)); }
             string? value = dispatch.Invoke(args);
+            if (write && value != Convert.ToString(((Newtonsoft.Json.Linq.JValue)ApiTryPlanOperation.Parameters(args.Parameters)["value"]!).Value, System.Globalization.CultureInfo.InvariantCulture))
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property did not read back as requested; the trial was rolled back."); }
             OperationContext.Current.ThrowIfCancellationRequested();
-            var data = new ApiTryData { Value = value, Before = JsonConvert.DeserializeObject<Dictionary<string, string>>(plan.Details!["before"])!, After = dispatch.Inspect(args.Project) };
+            var data = new ApiTryData { Value = value, Before = before, After = dispatch.Inspect(args.Project) };
+            if (write)
+            { data.After[key] = JsonConvert.SerializeObject(value); }
             OperationContext.Current.ThrowIfCancellationRequested();
             if (elapsed.Elapsed.TotalSeconds > 30)
             { throw new TimeoutException("Trial exceeded its execution budget."); }
             return data;
         }
-        catch (Exception ex)
-        { throw new BridgeErrorException(ErrorReason.OutcomeUnknown, "Unverified API outcome is unknown. Do not repeat; ask the engineer to inspect EPLAN.", ex) { Error = { Execution = ExecutionState.Unknown } }; }
     }
 }

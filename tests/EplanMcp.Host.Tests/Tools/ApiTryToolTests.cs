@@ -25,7 +25,9 @@ public sealed class ApiTryToolTests : IDisposable
         _harness.Bridge.Handlers[OperationNames.ApiTryPlan] = a =>
         {
             var args = (ApiTryArgs)a!;
-            WritePlan plan = _harness.Plan(_dispatchable ? [new() { Action = "try", Kind = "unverified API", Name = Group, Property = "Page.Name() : System.String", NewValue = args.Parameters }] : []);
+            using JsonDocument parameters = JsonDocument.Parse(args.Parameters);
+            bool write = parameters.RootElement.TryGetProperty("value", out JsonElement value);
+            WritePlan plan = _harness.Plan(_dispatchable ? [new() { Action = write ? "write" : "read", Kind = "unverified API", Name = Group, Property = "Page.Name() : System.String", NewValue = write ? value.GetRawText() : null }] : []);
             plan.Details = new() { ["status"] = _dispatchable ? "dispatchable" : "not_dispatchable_yet", ["unverified"] = "true", ["rawParameters"] = args.Parameters };
             return plan;
         };
@@ -95,13 +97,43 @@ public sealed class ApiTryToolTests : IDisposable
         foreach (string culture in new[] { "en-US", "zh-CN" })
         {
             ApprovalAskArgs view = ApprovalTexts.For(question, CultureInfo.GetCultureInfo(culture));
-            Assert.Contains(Group, view.Changes[0], StringComparison.Ordinal);
+            Assert.StartsWith("read unverified API " + Group, view.Changes[0], StringComparison.Ordinal);
             Assert.Contains("Page.Name", view.Changes[0], StringComparison.Ordinal);
             Assert.Contains("unverified", view.Changes[0], StringComparison.Ordinal);
             Assert.All(view.Changes, line => Assert.InRange(line.Length, 1, 400));
             string shown = string.Concat(view.Changes.Skip(1).Select(line => line["parameters (JSON text): ".Length..]));
             Assert.Equal(raw, JsonSerializer.Deserialize<string>(shown));
         }
+    }
+
+    [Fact]
+    public async Task WriteApprovalAndAuditNameTheWriteAndRequestedValue()
+    {
+        WriteToolHarness.Structured(await Call(parameters: "{\"value\":\"new name\"}"));
+        ApprovalQuestion question = Assert.Single(_approval.Questions);
+        Assert.StartsWith("write unverified API " + Group + " = \"new name\"", Assert.Single(question.Changes), StringComparison.Ordinal);
+        foreach (string culture in new[] { "en-US", "zh-CN" })
+        { Assert.StartsWith("write unverified API " + Group + " = \"new name\"", ApprovalTexts.For(question, CultureInfo.GetCultureInfo(culture)).Changes[0], StringComparison.Ordinal); }
+    }
+
+    [Fact]
+    public async Task PropertyBeforeAfterIsReportedFirst_EvenWhenEqualOrManySnapshotsChange()
+    {
+        const string key = "property:" + Group;
+        _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData
+        {
+            Value = "same",
+            Before = new() { [key] = "\"same\"" },
+            After = Enumerable.Range(0, 25).ToDictionary(i => "snapshot:" + i.ToString(CultureInfo.InvariantCulture), _ => "changed")
+                .Append(new KeyValuePair<string, string>(key, "\"same\"")).ToDictionary(),
+        };
+        JsonElement result = WriteToolHarness.Structured(await Call(parameters: "{\"value\":\"same\"}"));
+        JsonElement first = result.GetProperty("changes")[0];
+        Assert.Equal(key, first.GetProperty("key").GetString());
+        Assert.Equal(first.GetProperty("before").GetString(), first.GetProperty("after").GetString());
+        Assert.Equal(20, result.GetProperty("changes").GetArrayLength());
+        Assert.Equal(26, result.GetProperty("totalChanges").GetInt32());
+        Assert.True(result.GetProperty("truncated").GetBoolean());
     }
 
     [Theory]
@@ -131,12 +163,14 @@ public sealed class ApiTryToolTests : IDisposable
     }
 
     [Theory]
-    [InlineData("timeout")]
-    [InlineData("modal")]
-    public async Task UnknownOutcomeSuspendsProjectAndInstanceAndNeverResends(string cause)
+    [InlineData("timeout", false)]
+    [InlineData("timeout", true)]
+    [InlineData("modal", false)]
+    [InlineData("modal", true)]
+    public async Task UnknownOutcomeSuspendsProjectAndInstanceAndNeverResends(string cause, bool write)
     {
         _harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.OutcomeUnknown, Execution = ExecutionState.Unknown, Message = cause };
-        JsonElement error = WriteToolHarness.Error(await Call());
+        JsonElement error = WriteToolHarness.Error(await Call(parameters: write ? "{\"value\":\"new name\"}" : null));
         Assert.Equal(ExecutionState.Unknown, error.GetProperty("execution").GetString());
         Assert.Single(_harness.Bridge.Writes);
         Assert.NotEmpty(SuspensionStore.For(_harness.Locations).All());

@@ -64,7 +64,7 @@ internal static class ApiIndexGenerator
                     details.Add(new("overload", id, signature, Text(member, "summary"), parameters, returns,
                         Text(member, "accessors"), member.TryGetProperty("static", out JsonElement s) && s.GetBoolean(),
                         member.TryGetProperty("excluded", out JsonElement e) ? Text(e, "reason") + ": " + Text(e, "rule") : null,
-                        Reference: report.Catalog + "/members/" + unit.Scope + ".jsonl"));
+                        Reference: report.Catalog + "/members/" + unit.Scope + ".jsonl", SetterAccess: Text(member, "setterAccess"), Access: Text(member, "access")));
                     aliases.Add(id);
                 }
             }

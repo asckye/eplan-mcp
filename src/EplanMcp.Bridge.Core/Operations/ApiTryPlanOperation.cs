@@ -25,7 +25,9 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         var plan = new WritePlan { Project = project.Name, ProjectPath = project.Path, Details = new() { ["unverified"] = "true", ["status"] = "not_dispatchable_yet" } };
         if (shape is null)
         { return plan; }
-        if (parameters.Count != shape.Length - 1 || parameters.Properties().Any(p => p.Name != "target" && (!shape.Skip(2).Contains(p.Name, StringComparer.Ordinal) || p.Value.Type != JTokenType.Boolean))
+        bool write = parameters.TryGetValue("value", out JToken? value);
+        if (write && !ValidValue(ApiTryCatalog.ValueShape(args.Group), value!)
+            || parameters.Count != shape.Length - 1 + (write ? 1 : 0) || parameters.Properties().Any(p => p.Name != "target" && !(write && p.Name == "value") && (!shape.Skip(2).Contains(p.Name, StringComparer.Ordinal) || p.Value.Type != JTokenType.Boolean))
             || parameters["target"] is not JObject target || target.Count != 5 || target.Properties().Any(p => p.Name is not ("project" or "page" or "type" or "oid" or "digest"))
             || target["project"]?.Type != JTokenType.String || target["page"]?.Type != JTokenType.String || target["type"]?.Type != JTokenType.Integer || target["oid"]?.Type != JTokenType.Integer
             || target["digest"]?.Type != JTokenType.String || !System.Text.RegularExpressions.Regex.IsMatch((string)target["digest"]!, "\\A[0-9a-f]{64}\\z")
@@ -39,9 +41,18 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         plan.Details["before"] = JsonConvert.SerializeObject(before);
         plan.Details["rawParameters"] = args.Parameters;
         plan.Details["status"] = "dispatchable";
-        plan.Changes = [new() { Action = "try", Kind = "unverified API", Name = args.Group, Property = shape[1], NewValue = args.Parameters }];
+        plan.Changes = [new() { Action = write ? "write" : "read", Kind = "unverified API", Name = args.Group, Property = shape[1], NewValue = write ? value!.ToString(Formatting.None) : null }];
         return plan;
     }
+    private static bool ValidValue(string[]? shape, JToken value) => shape?[0] switch
+    {
+        "System.Boolean" => value.Type == JTokenType.Boolean,
+        "System.String" => value.Type == JTokenType.String,
+        "System.Int32" => value.Type == JTokenType.Integer && int.TryParse(value.ToString(Formatting.None), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out _),
+        "System.Double" => value.Type is JTokenType.Integer or JTokenType.Float && double.TryParse(value.ToString(Formatting.None), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double number) && !double.IsNaN(number) && !double.IsInfinity(number),
+        "enum" => value.Type == JTokenType.String && shape.Skip(1).Contains((string)value!, StringComparer.Ordinal),
+        _ => false,
+    };
     internal static JObject Parameters(string raw)
     {
         using var reader = new JsonTextReader(new StringReader(raw)) { DateParseHandling = DateParseHandling.None, MaxDepth = 8 };

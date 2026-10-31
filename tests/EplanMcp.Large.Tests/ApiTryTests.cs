@@ -37,14 +37,17 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         { await _services.DisposeAsync(); }
         Directory.Delete(_home, recursive: true);
     }
-    private async Task<JsonElement> Locator(string project)
+    private async Task<JsonElement> Locator(string project, string kind = "Page", string? page = null)
     {
-        JsonElement found = await eplan.CallAsync("eplan_object_find", new() { ["project"] = project, ["object_type"] = "Page", ["limit"] = 1 });
+        var args = new Dictionary<string, object?> { ["project"] = project, ["object_type"] = kind, ["limit"] = 1 };
+        if (page is not null)
+        { args["page"] = page; }
+        JsonElement found = await eplan.CallAsync("eplan_object_find", args);
         return Assert.Single(found.GetProperty("items").EnumerateArray()).GetProperty("locator");
     }
     private async Task<JsonElement> Call(string project, string member, object parameters, bool dry = false)
     {
-        CallToolResult result = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), "O:Eplan.EplApi.DataModel.Page." + member,
+        CallToolResult result = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), "O:Eplan.EplApi.DataModel." + member,
             project, JsonSerializer.SerializeToElement(parameters), dry, TestContext.Current.CancellationToken);
         Assert.False(result.IsError == true, string.Join("\n", result.Content.OfType<TextContentBlock>().Select(c => c.Text)));
         return result.StructuredContent!.Value;
@@ -55,30 +58,49 @@ public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         string project = await eplan.WriteProjectAsync();
         Assert.True(ScratchPaths.IsInside(project, [LiveEplan.ScratchRoot()]));
         Dictionary<string, string> files = LiveSnapshots.DesignFiles(project);
-        JsonElement result = await Call(project, "Name", new { target = await Locator(project) });
+        JsonElement result = await Call(project, "Page.Name", new { target = await Locator(project) });
         Assert.Equal("committed", result.GetProperty("execution").GetString());
         Assert.Equal(result.GetProperty("before").GetString(), result.GetProperty("after").GetString());
         Assert.Equal(0, result.GetProperty("totalChanges").GetInt32());
         ApprovalQuestion asked = Assert.Single(_approvals.Questions);
         Assert.Equal(ApiTryTools.Tool, asked.Tool);
-        Assert.Contains(asked.Changes, c => c.Contains("unverified API O:Eplan.EplApi.DataModel.Page.Name", StringComparison.Ordinal));
+        Assert.Contains(asked.Changes, c => c.StartsWith("read unverified API O:Eplan.EplApi.DataModel.Page.Name", StringComparison.Ordinal));
         Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
     }
-    [Fact(Skip = "Read-only first slice: enable only after generated property-write dispatch and transaction verification are added.")]
+    [Fact]
     public async Task ScratchCopy_PropertyWriteOneUndoRestoresValueAndEarlierHistory()
     {
         await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
         string[] sentinel = await selection.CreatePagesAsync(1);
-        string original = (await Call(selection.Project, "GridSize", new { target = await Locator(selection.Project) })).GetProperty("value").GetString()!;
+        JsonElement target = await Locator(selection.Project, page: sentinel[0]);
+        string original = (await Call(selection.Project, "Page.Name", new { target })).GetProperty("value").GetString()!;
         string before = await selection.StateAsync();
-        double grid = double.Parse(original, System.Globalization.CultureInfo.InvariantCulture);
-        JsonElement written = await Call(selection.Project, "GridSize", new { target = await Locator(selection.Project), value = grid + 0.5 });
+        string renamed = selection.NextPage;
+        JsonElement written = await Call(selection.Project, "Page.Name", new { target, value = renamed });
         Assert.Equal("committed", written.GetProperty("execution").GetString());
-        Assert.NotEqual(original, (await Call(selection.Project, "GridSize", new { target = await Locator(selection.Project) })).GetProperty("value").GetString());
+        JsonElement change = Assert.Single(written.GetProperty("changes").EnumerateArray(), c => c.GetProperty("key").GetString() == "property:O:Eplan.EplApi.DataModel.Page.Name");
+        Assert.Equal(JsonSerializer.Serialize(original), change.GetProperty("before").GetString());
+        Assert.Equal(JsonSerializer.Serialize(renamed), change.GetProperty("after").GetString());
+        Assert.Equal(renamed, (await Call(selection.Project, "Page.Name", new { target = await Locator(selection.Project, page: renamed) })).GetProperty("value").GetString());
+        Assert.Contains(_approvals.Questions, q => q.Changes.Any(c => c.StartsWith("write unverified API O:Eplan.EplApi.DataModel.Page.Name = ", StringComparison.Ordinal)));
         await selection.UndoAsync();
-        Assert.Equal(original, (await Call(selection.Project, "GridSize", new { target = await Locator(selection.Project) })).GetProperty("value").GetString());
+        Assert.Equal(original, (await Call(selection.Project, "Page.Name", new { target = await Locator(selection.Project, page: original) })).GetProperty("value").GetString());
         Assert.Equal(before, await selection.StateAsync());
         await selection.UndoAsync();
         Assert.DoesNotContain((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel[0]);
+    }
+
+    [Fact]
+    public async Task ScratchCopy_TerminalLocatorReadsGeneratedPropertyWithoutChanges()
+    {
+        string project = await eplan.WriteProjectAsync();
+        Dictionary<string, string> files = LiveSnapshots.DesignFiles(project);
+        JsonElement target = await Locator(project, "Terminal");
+        JsonElement result = await Call(project, "EObjects.Terminal.IsMainTerminal", new { target });
+        Assert.Equal("committed", result.GetProperty("execution").GetString());
+        Assert.True(result.GetProperty("value").GetString() is "True" or "False");
+        Assert.Equal(result.GetProperty("before").GetString(), result.GetProperty("after").GetString());
+        Assert.Equal(0, result.GetProperty("totalChanges").GetInt32());
+        Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(project).OrderBy(p => p.Key, StringComparer.Ordinal));
     }
 }

@@ -39,6 +39,10 @@ public class Widget : IShape
 
     /// <summary>A read-only property.</summary>
     public int Count { get; }
+    /// <summary>A public getter whose setter is protected.</summary>
+    public bool ProtectedWrite { get; protected set; }
+    /// <summary>A public getter whose setter is private.</summary>
+    public bool PrivateWrite { get; private set; }
 
     /// <summary>An indexer.</summary>
     public string this[int index] => Name + index;

@@ -754,7 +754,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_try.md",
-        "specStatus": "Implemented（只读首片，未实机验证）",
+        "specStatus": "Implemented（C1 第二片，未实机验证；工具数不变）",
         "apiNotes": [],
         "tests": [
           {

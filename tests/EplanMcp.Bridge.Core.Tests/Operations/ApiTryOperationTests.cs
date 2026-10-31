@@ -9,6 +9,8 @@ public sealed class ApiTryOperationTests
 {
     private const string Group = "O:Eplan.EplApi.DataModel.Page.Name";
     private readonly Dispatcher _dispatch = new();
+    private readonly FakeTransactions _transactions = new();
+    private ApiTryExecuteOperation Executor() => new(Planner(), _dispatch, _transactions);
     private ApiTryPlanOperation Planner(int major = 2026) => new(major, new Catalog(), _dispatch);
     private static ApiTryArgs Args(string group = Group) => new()
     {
@@ -55,7 +57,7 @@ public sealed class ApiTryOperationTests
     [InlineData("digest")]
     [InlineData("wrong-project")]
     [InlineData("extra-locator-field")]
-    [InlineData("setter")]
+    [InlineData("unknown-field")]
     [InlineData("duplicate")]
     [InlineData("array")]
     public void BadShapes_AreRejectedWithoutInvoking(string mode)
@@ -80,8 +82,8 @@ public sealed class ApiTryOperationTests
             case "extra-locator-field":
                 locator["typeName"] = "System.IO.File";
                 break;
-            case "setter":
-                p["value"] = "new name";
+            case "unknown-field":
+                p["unknown"] = "new name";
                 break;
             case "array":
                 p["target"] = new JArray(locator);
@@ -122,12 +124,13 @@ public sealed class ApiTryOperationTests
         ApiTryArgs args = Args();
         args.Fingerprint = Plan(args).Fingerprint;
         _dispatch.ChangeOnInvoke = true;
-        var data = (ApiTryData)new ApiTryExecuteOperation(Planner(), _dispatch).Execute(args)!;
+        var data = (ApiTryData)Executor().Execute(args)!;
         Assert.Equal("before", data.Before["snapshot:1"]);
         Assert.Equal("after", data.After["snapshot:1"]);
         Assert.Equal("old-file", data.Before["file:Page.eod"]);
         Assert.Equal("new-file", data.After["file:Page.eod"]);
         Assert.Equal(1, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
     }
 
     [Fact]
@@ -137,7 +140,7 @@ public sealed class ApiTryOperationTests
         args.Fingerprint = Plan(args).Fingerprint;
         _dispatch.ChangeOnInvoke = true;
         _dispatch.Invoke(args);
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ApiTryExecuteOperation(Planner(), _dispatch).Execute(args)).Error;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Equal(1, _dispatch.Invocations);
     }
@@ -150,8 +153,126 @@ public sealed class ApiTryOperationTests
         ApiTryArgs args = Args();
         args.Fingerprint = Plan(args).Fingerprint;
         _dispatch.Failure = new InvalidOperationException(cause);
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => new ApiTryExecuteOperation(Planner(), _dispatch).Execute(args)).Error;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+    }
+
+    [Theory]
+    [InlineData("Page.Name", "\"new name\"", true)]
+    [InlineData("Page.Name", "true", false)]
+    [InlineData("Page.WriteProtected", "true", true)]
+    [InlineData("Page.WriteProtected", "\"true\"", false)]
+    [InlineData("Page.GridSize", "2.5", true)]
+    [InlineData("Page.GridSize", "\"2.5\"", false)]
+    [InlineData("Page.GridSize", "1e999", false)]
+    [InlineData("MacroBox.Variant", "1", true)]
+    [InlineData("MacroBox.Variant", "1.5", false)]
+    [InlineData("MacroBox.Variant", "2147483648", false)]
+    [InlineData("Page.PageType", "\"Circuit\"", true)]
+    [InlineData("Page.PageType", "\"circuit\"", false)]
+    [InlineData("Page.PageType", "1", false)]
+    [InlineData("Page.PageTypeName", "\"new\"", false)]
+    public void Setters_RequireExactScalarTypeOrPublishedEnumName(string member, string value, bool valid)
+    {
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel." + member);
+        JObject parameters = JObject.Parse(args.Parameters);
+        parameters["value"] = JToken.Parse(value);
+        args.Parameters = parameters.ToString();
+        if (valid)
+        {
+            PlannedChange change = Assert.Single(Plan(args).Changes);
+            Assert.Equal(("write", value), (change.Action, change.NewValue));
+        }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason); }
+        Assert.Equal(0, _dispatch.Invocations);
+    }
+
+    private ApiTryArgs WriteArgs()
+    {
+        ApiTryArgs args = Args();
+        JObject p = JObject.Parse(args.Parameters);
+        p["value"] = "new name";
+        args.Parameters = p.ToString();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _transactions.Snapshot = () => { string before = _dispatch.Value; return () => _dispatch.Value = before; };
+        return args;
+    }
+
+    [Fact]
+    public void DoubleSetter_ValidatesInvariantJsonInGermanCulture()
+    {
+        System.Globalization.CultureInfo original = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("de-DE");
+            ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Page.GridSize");
+            JObject p = JObject.Parse(args.Parameters);
+            p["value"] = 2.5;
+            args.Parameters = p.ToString();
+            Assert.Equal("2.5", Assert.Single(Plan(args).Changes).NewValue);
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = original; }
+    }
+
+    [Fact]
+    public void Write_ReadsBackAndCommitsExactlyOneStep_WithPropertyBeforeAfter()
+    {
+        ApiTryArgs args = WriteArgs();
+        var data = (ApiTryData)Executor().Execute(args)!;
+        Assert.Equal("new name", data.Value);
+        Assert.Equal("\"=A/1\"", data.Before["property:" + Group]);
+        Assert.Equal("\"new name\"", data.After["property:" + Group]);
+        Assert.Equal(["Begin AI: eplan_api_try", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Write_ExceptionOrReadbackMismatch_RollsBack(bool mismatch)
+    {
+        ApiTryArgs args = WriteArgs();
+        _dispatch.Mismatch = mismatch;
+        _dispatch.Failure = mismatch ? null : new InvalidOperationException("setter failed after writing");
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal("=A/1", _dispatch.Value);
+        Assert.Equal(["Begin AI: eplan_api_try", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(ErrorReason.Timeout)]
+    [InlineData(ErrorReason.EplanBusy)]
+    public void Write_TimeoutOrModal_RemainsUnknownEvenAfterRollback(string reason)
+    {
+        ApiTryArgs args = WriteArgs();
+        _dispatch.Failure = new BridgeErrorException(reason, "blocked");
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+        Assert.Contains("Rollback", _transactions.Calls);
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("Commit")]
+    [InlineData("Rollback")]
+    public void Write_CommitOrRollbackFailure_IsUnknown(string step)
+    {
+        ApiTryArgs args = WriteArgs();
+        _transactions.FailAt = step;
+        if (step == "Rollback")
+        { _dispatch.Mismatch = true; }
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Executor().Execute(args)).Error;
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+    }
+
+    [Fact]
+    public void Write_UndoCloseFailure_PreservesCommittedWarning()
+    {
+        ApiTryArgs args = WriteArgs();
+        _transactions.FailAt = "CloseUndo";
+        var data = (ApiTryData)Executor().Execute(args)!;
+        Assert.Contains("Ctrl+Z", data.Warning, StringComparison.Ordinal);
     }
 
     private sealed class Catalog : IProjectCatalog
@@ -164,6 +285,8 @@ public sealed class ApiTryOperationTests
         public int Inspections { get; private set; }
         public bool ChangeOnInvoke { get; set; }
         public Exception? Failure { get; set; }
+        public bool Mismatch { get; set; }
+        public string Value { get; set; } = "=A/1";
         private bool _changed;
         public void CheckTarget(ApiTryArgs args) { }
         public Dictionary<string, string> Inspect(string project)
@@ -171,13 +294,16 @@ public sealed class ApiTryOperationTests
             Inspections++;
             return new() { ["snapshot:1"] = _changed ? "after" : "before", ["file:Page.eod"] = _changed ? "new-file" : "old-file" };
         }
+        public string Read(ApiTryArgs args) => Value;
         public string Invoke(ApiTryArgs args)
         {
             Invocations++;
+            if (JObject.Parse(args.Parameters).TryGetValue("value", out JToken? value))
+            { Value = Mismatch ? "different" : value.Value<string>()!; }
             if (Failure is { } failure)
             { throw failure; }
             _changed |= ChangeOnInvoke;
-            return "=A/1";
+            return Value;
         }
     }
 }

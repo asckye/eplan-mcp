@@ -93,7 +93,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         }
     }
 
-    private static bool Matches(StorableObject obj, string kind) => kind switch
+    internal static bool Matches(StorableObject obj, string kind) => kind switch
     {
         "blackbox" => obj.GetType() == typeof(BoxedDevice),
         "plcterminal" => obj.GetType() == typeof(Terminal) && ((Terminal)obj).FunctionCategory == FunctionCategory.PLCTerminal,

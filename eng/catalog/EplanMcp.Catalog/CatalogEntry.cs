@@ -44,6 +44,8 @@ internal sealed record CatalogEntry
 
     /// <summary>Properties: get, set or get;set (visible accessors only).</summary>
     public string? Accessors { get; init; }
+    /// <summary>"protected" when the visible setter is not public; null otherwise.</summary>
+    public string? SetterAccess { get; init; }
 
     /// <summary>Data dictionary: the object type the property ID belongs to (Function, Page, ...).</summary>
     public string? Object { get; set; }

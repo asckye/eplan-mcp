@@ -34,6 +34,8 @@ public sealed class WriteChangeLinesTests
     [InlineData("unknown", "custom", null, null, null, "update custom item:  '' -> ''")]
     [InlineData("create", "parts", "list", null, "1", "import parts list into project item from  ( bytes, SHA-256 ); converter ; before ")]
     [InlineData("create", "page", "report", null, null, "create page item")]
+    [InlineData("read", "unverified API", "Page.Name", null, null, "read unverified API item; Page.Name")]
+    [InlineData("write", "unverified API", "Page.Name", null, "\"new\"", "write unverified API item = \"new\"; Page.Name")]
     public void For_RepresentativeChanges_PreservesExactWording(string action, string kind, string? property, string? oldValue, string? newValue, string expected)
     {
         var plan = new WritePlan

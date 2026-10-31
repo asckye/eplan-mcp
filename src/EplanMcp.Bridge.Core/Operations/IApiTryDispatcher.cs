@@ -7,6 +7,8 @@ public interface IApiTryDispatcher
     public void CheckTarget(ApiTryArgs args);
     /// <summary>Reads bounded business and design-file observations.</summary>
     public Dictionary<string, string> Inspect(string project);
-    /// <summary>Invokes one generated scalar read and returns its detached result.</summary>
+    /// <summary>Reads the generated property before a write.</summary>
+    public string? Read(ApiTryArgs args);
+    /// <summary>Invokes one generated read or setter followed by readback.</summary>
     public string? Invoke(ApiTryArgs args);
 }

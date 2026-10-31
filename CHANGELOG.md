@@ -10,7 +10,7 @@
 ### Added
 - C2：新增 `eplan_action_try`，默认关闭，仅 full；目录未验证 action 只在 scratch 副本逐次审批后执行，带禁止表、前后指纹与未验证审计；超时/模态窗口按 unknown 暂停写入。Large 已编写未运行。
 - 新增 `eplan_action_catalog_search` / `eplan_action_catalog_get`（full、Read）：查询官方 177 行与运行时本机 UI action，返回 TYPE、已知参数、白名单级别、验证引用及安装版本缺口；不启动 EPLAN，不保存或分发本机清单。
-- 新增默认关闭的 `eplan_api_try` 只读首片：scratch 限定、逐次独立审批、目录生成的编译分发表、业务快照/设计文件指纹比较和 unverified 审计；超时结果未知时暂停写入。当前仅接入三类对象的简单读取，其余组明确尚不可分发；属性写入、15 类扩展及撤销验证待后续切片，Large 已编写未运行。
+- 新增默认关闭的 `eplan_api_try`：scratch 限定、逐次独立审批、目录生成的编译分发表、业务快照/设计文件指纹比较和 unverified 审计；超时结果未知时暂停写入。未接入的组明确返回尚不可分发；Large 已编写未运行。
 - 新增 `eplan_api_search` / `eplan_api_get`（full、Read）：离线发现全部 4,649 个 API 重载组及 69 种属性字典，查询完整签名、排除原因、覆盖状态、证据与到达工具；压缩索引嵌入 Host，无需 EPLAN。
 - `eplan_connection_create` 支持在既有自动连接线段内显式放置方向对齐的 T 节点拆线并引出支路，返回被拆线段与节点位置；保留原逻辑连接，支路远端尚无器件时允许零新增逻辑连接。新增离线回归与待运行的 Large 验证。
 - 七个绘图写工具（设备放置、连线创建/生成、图元创建/移动、宏插入、DXF 导入）支持 `show_page=false`：启用后先开页供实时观看，dry-run 也开页；开页失败不阻止写入，结果以 `pageShown` 和提示报告。
@@ -37,6 +37,7 @@
 - 包检查校验规则知识文档（`rule`）：受限的类型化 JSON 表达式，只能读登记的属性和关系，限制层数、关系跳数和节点数，正则只接受字面模式；旧版裸规则资料照常可查询。规则求值在后续版本加入。
 
 ### Changed
+- C1 第二片：`eplan_api_try` 生成表扩展为 62 个读组、41 个写组，接入对象查找的全部 14 种定位器；仅开放公开标量 setter，枚举精确校验。读写审批文案区分动作和写入值；写入读回后在 SafetyPoint 中单步提交，异常回滚，timeout/modal 仍按 unknown 暂停。工具数不变，补齐属性写入一步撤销及 Terminal 读取 Large，未运行。
 - `eplan_symbol_search` 增加符号描述 `description`、名称或描述过滤 `text_contains` 与语言选择 `language`；分页前过滤，游标绑定新增条件。`SYMB_DESC` 实机读回待验证，新增 Large 已编写未运行。
 - `eplan_device_place` 增加 PLC 数字输入点的地址、符号地址、功能文本和原生属性显示，以及 NO/NC 触点引脚代号；读回不符回滚、一次撤销。`eplan_plc_get` 增加原生父关系、手工符号地址、EPLAN 计算的卡页引用和同名无父辅助表达计数；提交后派生值需读工具复核。Large 已写未运行。
 - `eplan_device_place` 支持单端子与父端子排：IEC_symbol/X 变体、排功能文本、复合键防重及事务内归属/位置读回，一次撤销；连接后续独立生成。新增假对象与 Large 验收，Large 未运行。

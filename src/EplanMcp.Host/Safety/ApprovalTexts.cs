@@ -131,7 +131,7 @@ internal static class ApprovalTexts
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
         if (change.Kind == "unverified API")
-        { return "unverified: " + change.Name + "; " + change.Property; }
+        { return change.Action + " unverified API " + change.Name + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property; }
         if (change.Kind == "action")
         {
             List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];
@@ -306,7 +306,11 @@ internal static class ApprovalTexts
         ? zh ? "记录本地知识审核；提升将新建正式规则。接受候选不授予正式资格。EPLAN 的 Ctrl+Z 不能撤销。" : "Records a local knowledge review; promotion creates a new official Rule. Acceptance grants no official standing. Ctrl+Z in EPLAN cannot undo it."
         : plan.Changes.Any(c => c.Kind == "binding")
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
-          : tool is ActionRunTools.Tool or ApiTryTools.Tool or ActionTryTools.Tool
+          : tool == ApiTryTools.Tool
+        ? plan.Changes.Any(c => c.Action == "write")
+            ? zh ? "属性写入须读回一致后才在一个撤销步中提交；提交后单步 Ctrl+Z 尚待实机验证。" : "Property writes commit in one undo step only after matching readback; live single-step Ctrl+Z verification is pending."
+            : zh ? "只读试执行不创建撤销步；快照相等不证明没有副作用。" : "Read trials create no undo step; equal snapshots do not prove absence of side effects."
+        : tool is ActionRunTools.Tool or ActionTryTools.Tool
         ? zh ? "执行后只比较指纹，不逐项核对；提交后一步 Ctrl+Z 尚未验证。" : "Fingerprint readback only; changes are not checked item by item. Single-step Ctrl+Z after commit is unverified."
         : tool == ProjectCreateTools.CreateTool
         ? zh ? "只新建项目，不覆盖或复用已有目录。结束后关闭；没有 EPLAN 撤销步骤，Ctrl+Z 不能撤销。" : "Creates only a new project; never overwrites or reuses a destination. Closed afterwards; no EPLAN undo step or Ctrl+Z."
