@@ -74,7 +74,19 @@ try {
         $env:EPLANMCP_HANG_REPORT_DIR = $results
         dotnet test --solution EplanMcp.Ci.slnf -c Release --no-build -- --filter-not-trait "Size=Large" --timeout 20m --report-xunit-trx --results-directory $results
     }
-    Step 'Test count floor' { pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results }
+    Step 'Test count floor' {
+        $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results 2>&1
+        # TRX names carry only a timestamp, so two assemblies finishing together can overwrite each other's file; rerun
+        # an assembly that left no results on its own before judging the floor.
+        $missing = @($floor | Select-String '(\S+) has no test results' | ForEach-Object { $_.Matches[0].Groups[1].Value })
+        foreach ($assembly in $missing) {
+            Write-Output "   rerunning $assembly for its results"
+            dotnet test --project "tests/$assembly" -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory $results | Out-Null
+        }
+        if ($missing.Count -gt 0) { $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results 2>&1 }
+        $floor | ForEach-Object { Write-Output "   $_" }
+        $global:LASTEXITCODE = if ($floor | Select-String 'has no test results|below its floor|is not in tests/test-suites.json') { 1 } else { 0 }
+    }
     Step 'Vulnerable packages' {
         $data = dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive --format json | Out-String | ConvertFrom-Json
         $found = @($data.projects | ForEach-Object { $_.frameworks } |

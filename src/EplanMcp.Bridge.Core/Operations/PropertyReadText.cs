@@ -5,9 +5,11 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 internal static class PropertyReadText
 {
+    // 250 ms bounds backtracking; 50 ms timed out under load (first-use compilation while the test suites ran in
+    // parallel) and hid ordinary values, since a timeout returns null.
     private static readonly Regex _sensitive = new(
         @"[\\]|//|[a-z]:/|(?:^|\s)/[\w.]|[\w.+%-]+@[\w.-]+|(?:mailto|tel|https?|file):|(?<!\w)\+?\d[\d ()-]{6,}\d(?!\w)",
-        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50));
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(250));
 
     // Same CleanText controls and marker as Host ResultShaper; inspect the full view before truncation (SEC-08).
     internal static string? CleanText(string? text, out int length)
