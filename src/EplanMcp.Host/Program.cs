@@ -23,11 +23,25 @@ namespace EplanMcp.Host;
 /// add-in; <c>eplanmcp pack …</c> scans, checks, exports and installs engineering packs (M6); with <c>--format json</c>
 /// these print JSON for the Workbench; <c>eplanmcp --version</c> prints the version.
 /// In serve mode stdout belongs to the MCP protocol: logs go to stderr only (CLAUDE.md rule 5). Exit codes: 2 for a
-/// wrong command line, 3 when serve refuses an invalid config.json.
+/// wrong command line, 3 when serve refuses an invalid config.json, 1 for an unexpected failure.
 /// </summary>
 internal static class Program
 {
     private static async Task<int> Main(string[] args)
+    {
+        try
+        {
+            return await RunCommandAsync(args).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // An unhandled exception would end in the Windows error dialog; report it on stderr (never stdout, rule 5).
+            await Console.Error.WriteLineAsync($"eplanmcp: unexpected {ex.GetType().Name}: {ex.Message}").ConfigureAwait(false);
+            return 1;
+        }
+    }
+
+    private static async Task<int> RunCommandAsync(string[] args)
     {
         switch (CliArguments.Parse(args))
         {
