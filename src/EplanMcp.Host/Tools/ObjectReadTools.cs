@@ -34,6 +34,9 @@ internal sealed class ObjectReadTools
             {
                 if (!shape.GetProperty("properties").TryGetProperty(field.Name, out JsonElement rule))
                 { continue; }
+                // A null cursor asks for the first page, as in the other paged tools; other nulls stay invalid.
+                if (field.Name == "cursor" && field.Value.ValueKind == JsonValueKind.Null)
+                { continue; }
                 if (field.Value.ValueKind == JsonValueKind.Object && rule.GetProperty("type").GetString() == "object")
                 { Validate(field.Value, rule); continue; }
                 if (rule.GetProperty("type").GetString() == "integer" ? field.Value.ValueKind != JsonValueKind.Number || !field.Value.TryGetInt64(out long n) || n < rule.GetProperty("minimum").GetInt64()

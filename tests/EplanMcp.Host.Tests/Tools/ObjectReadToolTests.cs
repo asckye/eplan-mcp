@@ -106,6 +106,14 @@ public sealed class ObjectReadToolTests
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
     }
 
+    [Fact]
+    public async Task Find_NullCursor_ReadsTheFirstPage()
+    {
+        FakeBridgeClient bridge = Bridge(3);
+        JsonElement result = PropertyGetToolTests.Data(await Read(bridge, new PropertySchemaPaging(TimeProvider.System), new JsonObject { ["object_type"] = "Page", ["limit"] = 2, ["cursor"] = null }));
+        Assert.Equal(2, result.GetProperty("items").GetArrayLength());
+    }
+
     [Theory]
     [InlineData("{\"object_type\":\"nope\",\"limit\":300,\"extra\":true}")]
     [InlineData("{\"object_type\":\"Page\",\"limit\":\"1\"}")]
