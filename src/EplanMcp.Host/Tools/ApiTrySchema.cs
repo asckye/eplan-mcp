@@ -7,7 +7,7 @@ internal static class ApiTrySchema
 {
     internal static void Configure(McpServerOptions options, bool enabled)
     {
-        McpServerTool? tool = options.ToolCollection?.SingleOrDefault(t => t.ProtocolTool.Name == ApiTryTools.Tool);
+        McpServerTool? tool = options.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == ApiTryTools.Tool);
         if (tool is null)
         { return; }
         JsonNode input = JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!;
@@ -16,12 +16,5 @@ internal static class ApiTrySchema
         if (enabled)
         { return; }
         options.ToolCollection!.Remove(tool);
-        var usage = options.ToolCollection.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
-        JsonNode schema = JsonNode.Parse(usage.InputSchema.GetRawText())!;
-        JsonArray names = schema["properties"]!["tool"]!["enum"]!.AsArray();
-        // The usage tool is shared by every HTTP session; a later session finds the name already gone.
-        foreach (JsonNode? name in names.Where(n => n!.GetValue<string>() == ApiTryTools.Tool).ToList())
-        { names.Remove(name); }
-        usage.InputSchema = JsonSerializer.SerializeToElement(schema);
     }
 }

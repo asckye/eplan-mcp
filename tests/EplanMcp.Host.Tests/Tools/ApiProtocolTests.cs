@@ -35,6 +35,7 @@ public sealed class ApiProtocolTests
             await using McpClient client = await McpClient.CreateAsync(
                 new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: token);
             var tools = await client.ListToolsAsync(cancellationToken: token);
+            Assert.Equal(ReviewedToolContract.For(actionRun: false, apiTry: false, actionTry: false), tools.Select(t => t.Name).Order(StringComparer.Ordinal));
             foreach (string name in new[] { ApiTools.SearchTool, ApiTools.GetTool, ActionCatalogTools.SearchTool, ActionCatalogTools.GetTool })
             {
                 var tool = Assert.Single(tools, t => t.Name == name).ProtocolTool;

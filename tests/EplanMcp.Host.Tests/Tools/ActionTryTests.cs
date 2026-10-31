@@ -152,11 +152,11 @@ public sealed class ActionTryContractTests
     }
 
     [Theory]
-    [InlineData(false, false, 90)]
-    [InlineData(true, false, 91)]
-    [InlineData(false, true, 25)]
-    [InlineData(true, true, 25)]
-    public void RegistrationAndUsage_AreFullAndOptIn(bool enabled, bool core, int count)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void RegistrationAndUsage_AreFullAndOptIn(bool enabled, bool core)
     {
         var services = new ServiceCollection();
         services.AddLogging(l => l.ClearProviders());
@@ -170,13 +170,13 @@ public sealed class ActionTryContractTests
         // HTTP sessions reconfigure collections holding the same usage tool instance.
         for (int session = 0; session < 3; session++)
         {
-            ActionTrySchema.Configure(options, enabled && !core);
-            Assert.Equal(count, options.ToolCollection!.Count);
+            options = provider.GetRequiredService<IOptionsFactory<McpServerOptions>>().Create(Options.DefaultName);
+            Assert.Equal(ReviewedToolContract.For(profile.Profile, actionRun: false, apiTry: false, actionTry: enabled).Length, options.ToolCollection!.Count);
             Assert.Equal(enabled && !core, options.ToolCollection.Any(t => t.ProtocolTool.Name == ActionTryTools.Tool));
             var usage = options.ToolCollection.First(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
             Assert.Equal(enabled && !core, usage.InputSchema.GetProperty("properties").GetProperty("tool").GetProperty("enum").EnumerateArray().Any(n => n.GetString() == ActionTryTools.Tool));
         }
-        Assert.Equal(enabled && !core, UsageTools.ToolUsage(ActionTryTools.Tool, config: config, profile: profile).IsError != true);
+        Assert.Equal(enabled && !core, UsageTools.ToolUsage(Options.Create(options), ActionTryTools.Tool).IsError != true);
     }
 
     private static ActionTryArgs Check(string json) => ActionTryTools.Check(_catalog, "Scratch", "XViewAction", "DETAIL", JsonDocument.Parse(json).RootElement);

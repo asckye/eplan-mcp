@@ -1,20 +1,95 @@
 using System.Text.Json;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Small")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class UsageToolsTests
 {
+    private static readonly bool[] _switches = [false, true];
+
+    public static IEnumerable<TheoryDataRow<bool, bool, bool, bool>> Configurations() =>
+        from core in _switches
+        from actionRun in _switches
+        from apiTry in _switches
+        from actionTry in _switches
+        select new TheoryDataRow<bool, bool, bool, bool>(core, actionRun, apiTry, actionTry);
+
+    [Theory]
+    [MemberData(nameof(Configurations))]
+    public void SchemaAndValidation_MatchTheReviewedProfileAcrossSessions(bool core, bool actionRun, bool apiTry, bool actionTry)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with
+        {
+            ActionRun = actionRun ? ActionRunSwitch.On : ActionRunSwitch.Off,
+            ApiTry = apiTry ? ActionRunSwitch.On : ActionRunSwitch.Off,
+            ActionTry = actionTry ? ActionRunSwitch.On : ActionRunSwitch.Off,
+        });
+        ToolProfile profile = core ? ToolProfile.Core : ToolProfile.Full;
+        services.AddSingleton(new ToolProfileChoice(profile));
+        services.AddEplanMcp();
+        using ServiceProvider provider = services.BuildServiceProvider();
+        string[] expected = ReviewedToolContract.For(profile, actionRun, apiTry, actionTry);
+        McpServerTool? sharedUsage = null;
+        for (int session = 0; session < 3; session++)
+        {
+            McpServerOptions options = provider.GetRequiredService<IOptionsFactory<McpServerOptions>>().Create(Options.DefaultName);
+            UsageTools.Configure(options);
+            Assert.Equal(expected, options.ToolCollection!.Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal));
+            McpServerTool usage = options.ToolCollection!.First(t => t.ProtocolTool.Name == UsageTools.UsageTool);
+            if (sharedUsage is not null)
+            {
+                Assert.Same(sharedUsage, usage);
+            }
+            sharedUsage = usage;
+            Assert.Equal(expected, usage.ProtocolTool.InputSchema.GetProperty("properties").GetProperty("tool").GetProperty("enum")
+                .EnumerateArray().Select(n => n.GetString()));
+            var configured = Options.Create(options);
+            Assert.All(expected, name => ToolResultAssert.Succeeded(UsageTools.ToolUsage(configured, name)));
+            string violations = Violations(UsageTools.ToolUsage(configured, "missing", "invalid"));
+            Assert.Contains($"'tool' must be one of: {string.Join(", ", expected)}.", violations, StringComparison.Ordinal);
+            Assert.Contains("'topic' must be one of: examples, workflow, fields, errors;", violations, StringComparison.Ordinal);
+            Assert.All(ReviewedToolContract.Names.Except(expected, StringComparer.Ordinal), name =>
+                Assert.True(UsageTools.ToolUsage(configured, name).IsError));
+        }
+    }
+
+    [Fact]
+    public void Validation_UsesRegistrationEvenWhenUsageTextStillExists()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddEplanMcp();
+        using ServiceProvider provider = services.BuildServiceProvider();
+        IOptions<McpServerOptions> options = provider.GetRequiredService<IOptions<McpServerOptions>>();
+        McpServerTool tool = options.Value.ToolCollection!.First(t => t.ProtocolTool.Name == ProjectTools.ListTool);
+        options.Value.ToolCollection!.Remove(tool);
+        UsageTools.Configure(options.Value);
+
+        Assert.True(ToolUsageCatalog.Usage.ContainsKey(ProjectTools.ListTool));
+        Assert.True(UsageTools.ToolUsage(options, ProjectTools.ListTool).IsError);
+        Assert.DoesNotContain(ProjectTools.ListTool, Violations(UsageTools.ToolUsage(options, null!)), StringComparison.Ordinal);
+        options.Value.ToolCollection!.Add(tool);
+        UsageTools.Configure(options.Value);
+        ToolResultAssert.Succeeded(UsageTools.ToolUsage(options, ProjectTools.ListTool));
+    }
+
     [Fact]
     public void ApiTryUsage_IsOnlyAvailableWhenExplicitlyEnabled_AndExplainsTheSlice()
     {
-        Assert.True(UsageTools.ToolUsage(ApiTryTools.Tool).IsError);
+        Assert.True(Usage(ApiTryTools.Tool).IsError);
         var config = EplanMcp.Host.Safety.HostConfig.Defaults(new(@"D:\test-data")) with { ApiTry = EplanMcp.Host.Safety.ActionRunSwitch.On };
-        string text = Structured(UsageTools.ToolUsage(ApiTryTools.Tool, config: config)).GetProperty("text").GetString()!;
+        string text = Structured(Usage(ApiTryTools.Tool, config: config)).GetProperty("text").GetString()!;
         Assert.Contains("not_dispatchable_yet", text, StringComparison.Ordinal);
         Assert.Contains("OUTCOME_UNKNOWN", text, StringComparison.Ordinal);
         Assert.Contains("unverified", text, StringComparison.Ordinal);
@@ -23,17 +98,17 @@ public sealed class UsageToolsTests
     [Fact]
     public void ActionTryUsage_IsOptInAndExplainsUnverifiedScratchAndUnknownOutcome()
     {
-        Assert.True(UsageTools.ToolUsage(ActionTryTools.Tool).IsError);
+        Assert.True(Usage(ActionTryTools.Tool).IsError);
         var config = EplanMcp.Host.Safety.HostConfig.Defaults(new(@"D:\test")) with { ActionTry = EplanMcp.Host.Safety.ActionRunSwitch.On };
-        string text = Structured(UsageTools.ToolUsage(ActionTryTools.Tool, config: config)).GetProperty("text").GetString()!;
+        string text = Structured(Usage(ActionTryTools.Tool, config: config)).GetProperty("text").GetString()!;
         foreach (string token in new[] { "unverified", "scratch", "OUTCOME_UNKNOWN", "Ctrl+Z", "30", "AddParameter" })
         { Assert.Contains(token, text, StringComparison.Ordinal); }
-        Assert.True(UsageTools.ToolUsage(ActionTryTools.Tool, config: config, profile: new(ToolProfile.Core)).IsError);
+        Assert.True(Usage(ActionTryTools.Tool, config: config, profile: new(ToolProfile.Core)).IsError);
     }
     [Fact]
     public void ProjectCreateUsage_ExplainsTheNewFolderCompatibilityAndUnknownOutcome()
     {
-        string text = Structured(UsageTools.ToolUsage(ProjectCreateTools.CreateTool)).GetProperty("text").GetString()!;
+        string text = Structured(Usage(ProjectCreateTools.CreateTool)).GetProperty("text").GetString()!;
         foreach (string word in new[] { "basic_project", "backup", "empty", "IsCompatible", "OUTCOME_UNKNOWN", "Ctrl+Z", "2 GB" })
         { Assert.Contains(word, text, StringComparison.Ordinal); }
     }
@@ -41,7 +116,7 @@ public sealed class UsageToolsTests
     [Fact]
     public void ToolUsage_WithoutTopic_ReturnsAllFourSectionsInOrder()
     {
-        CallToolResult result = UsageTools.ToolUsage(ProjectTools.ListTool);
+        CallToolResult result = Usage(ProjectTools.ListTool);
 
         JsonElement data = Structured(result);
         Assert.Equal(ProjectTools.ListTool, data.GetProperty("tool").GetString());
@@ -54,7 +129,7 @@ public sealed class UsageToolsTests
     [Fact]
     public void ToolUsage_WithTopic_ReturnsOnlyThatSection()
     {
-        CallToolResult result = UsageTools.ToolUsage(SessionTools.StatusTool, ToolUsageCatalog.Errors);
+        CallToolResult result = Usage(SessionTools.StatusTool, ToolUsageCatalog.Errors);
 
         JsonElement data = Structured(result);
         string text = data.GetProperty("text").GetString()!;
@@ -67,7 +142,7 @@ public sealed class UsageToolsTests
     [Fact]
     public void ListImportUsage_ExplainsProjectScopeBackupAndUnknownUndo()
     {
-        string usage = Structured(UsageTools.ToolUsage(ListImportTools.ImportTool)).GetProperty("text").GetString()!;
+        string usage = Structured(Usage(ListImportTools.ImportTool)).GetProperty("text").GetString()!;
         Assert.Contains("parts accept XML only", usage, StringComparison.Ordinal);
         Assert.Contains("Undo after commit is unverified", usage, StringComparison.Ordinal);
         Assert.Contains("300 seconds including backup", usage, StringComparison.Ordinal);
@@ -77,14 +152,14 @@ public sealed class UsageToolsTests
     [Fact]
     public void ToolUsage_UnknownToolAndTopic_AreReportedTogetherWithTheValidValues()
     {
-        CallToolResult result = UsageTools.ToolUsage("eplan_page_lst", "usage");
+        CallToolResult result = Usage("eplan_page_lst", "usage");
 
         Assert.True(result.IsError);
         Assert.Null(result.StructuredContent);
         JsonElement error = JsonDocument.Parse(Text(result, 0)).RootElement.GetProperty("error");
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
         string violations = error.GetProperty("metadata").GetProperty("violations").GetString()!;
-        Assert.Contains("'tool' must be one of: eplan_action_catalog_get, eplan_action_catalog_search, eplan_api_get, eplan_api_search, eplan_asset_get, eplan_asset_review, eplan_asset_search, eplan_asset_update, eplan_cabinet_bind, eplan_cabinet_list, eplan_cable_generate, eplan_cable_get, eplan_cable_renumber, eplan_check_list, eplan_check_run, eplan_connection_create, eplan_connection_generate, eplan_connection_list, eplan_connection_number, eplan_context_get, eplan_device_get, eplan_device_list, eplan_device_place, eplan_device_renumber, eplan_device_update, eplan_export_dxf, eplan_export_image, eplan_export_labels, eplan_export_parts, eplan_export_pdf, eplan_export_pxf, eplan_export_untranslated, eplan_import_dxf, eplan_import_list, eplan_import_pdf_comments, eplan_import_plc, eplan_import_pxf, eplan_language_remove, eplan_language_set, eplan_macro_get, eplan_macro_insert, eplan_macro_list, eplan_message_list, eplan_object_find, eplan_object_get, eplan_pack_build, eplan_pack_get, eplan_pack_import, eplan_pack_list, eplan_page_create, eplan_page_delete, eplan_page_get, eplan_page_list, eplan_page_open, eplan_page_renumber, eplan_page_text_replace, eplan_page_update, eplan_part_export, eplan_part_import, eplan_part_list, eplan_part_search, eplan_part_sync, eplan_placeholder_apply, eplan_placeholder_list, eplan_placement_create, eplan_placement_update, eplan_plan_apply, eplan_plan_get, eplan_plc_get, eplan_project_create, eplan_project_get, eplan_project_list, eplan_project_translate, eplan_property_get, eplan_property_schema, eplan_property_set, eplan_report_update, eplan_revision_list, eplan_rule_check, eplan_session_select, eplan_session_status, eplan_symbol_search, eplan_task_get, eplan_terminal_renumber, eplan_terminal_strip_get, eplan_terminal_strip_list, eplan_tool_usage, eplan_translation_export, eplan_translation_import, eplan_workflow_plan.", violations, StringComparison.Ordinal);
+        Assert.Contains($"'tool' must be one of: {string.Join(", ", ReviewedToolContract.For(actionRun: false, apiTry: false, actionTry: false))}.", violations, StringComparison.Ordinal);
         Assert.Contains("'topic' must be one of: examples, workflow, fields, errors;", violations, StringComparison.Ordinal);
     }
 
@@ -93,7 +168,7 @@ public sealed class UsageToolsTests
     [InlineData("")]
     public void ToolUsage_TopicNotExactlyAnEnumValue_IsInvalidArgument(string topic)
     {
-        Assert.True(UsageTools.ToolUsage(ProjectTools.ListTool, topic).IsError);
+        Assert.True(Usage(ProjectTools.ListTool, topic).IsError);
     }
 
     [Fact]
@@ -138,10 +213,27 @@ public sealed class UsageToolsTests
         Assert.Contains(message, error.Message, StringComparison.Ordinal);
     }
 
+    private static CallToolResult Usage(string tool, string? topic = null, HostConfig? config = null, ToolProfileChoice? profile = null)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(config ?? HostConfig.Defaults(new(@"D:\test-data")));
+        services.AddSingleton(profile ?? new(ToolProfile.Full));
+        services.AddEplanMcp();
+        using ServiceProvider provider = services.BuildServiceProvider();
+        return UsageTools.ToolUsage(provider.GetRequiredService<IOptions<McpServerOptions>>(), tool, topic);
+    }
+
     private static string[] Headings(string text) =>
         [.. text.Split('\n').Where(line => line.StartsWith("## ", StringComparison.Ordinal))];
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
+
+    private static string Violations(CallToolResult result)
+    {
+        using JsonDocument document = JsonDocument.Parse(Text(result, 0));
+        return document.RootElement.GetProperty("error").GetProperty("metadata").GetProperty("violations").GetString()!;
+    }
 
     private static JsonElement Structured(CallToolResult result)
     {

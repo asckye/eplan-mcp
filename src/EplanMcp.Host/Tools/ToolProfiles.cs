@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Tools;
@@ -36,8 +34,7 @@ internal static class ToolProfiles
     };
 
     /// <summary>
-    /// Leaves only the profile's tools, and lists only those in <c>eplan_tool_usage</c>'s <c>tool</c> enum so the model is
-    /// never pointed at a tool it cannot call.
+    /// Leaves only the profile's tools.
     /// </summary>
     public static void Apply(ICollection<McpServerTool> tools, ToolProfile profile)
     {
@@ -49,19 +46,6 @@ internal static class ToolProfiles
         foreach (McpServerTool tool in tools.Where(t => !Core.Contains(t.ProtocolTool.Name)).ToList())
         {
             tools.Remove(tool);
-        }
-
-        McpServerTool? usage = tools.FirstOrDefault(t => t.ProtocolTool.Name == UsageTools.UsageTool);
-        if (usage is not null
-            && JsonNode.Parse(usage.ProtocolTool.InputSchema.GetRawText()) is JsonObject schema
-            && schema["properties"]?["tool"]?["enum"] is JsonArray names)
-        {
-            foreach (JsonNode? name in names.Where(n => n is null || !Core.Contains(n.GetValue<string>())).ToList())
-            {
-                names.Remove(name);
-            }
-
-            usage.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
         }
     }
 }

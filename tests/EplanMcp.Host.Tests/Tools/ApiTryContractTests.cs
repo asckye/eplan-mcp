@@ -28,11 +28,11 @@ public sealed class ApiTryContractTests
     public void InvalidSwitchCannotEnableTrials(string value) => Assert.Null(HostConfig.Parse("{\"apiTry\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-    [InlineData(false, false, 90)]
-    [InlineData(true, false, 91)]
-    [InlineData(false, true, 25)]
-    [InlineData(true, true, 25)]
-    public void ToolAndUsageAreAbsentWhenOffOrCore(bool enabled, bool core, int count)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ToolAndUsageAreAbsentWhenOffOrCore(bool enabled, bool core)
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -41,7 +41,7 @@ public sealed class ApiTryContractTests
         services.AddEplanMcp();
         using ServiceProvider provider = services.BuildServiceProvider();
         var tools = provider.GetRequiredService<IOptions<McpServerOptions>>().Value.ToolCollection!;
-        Assert.Equal(count, tools.Count);
+        Assert.Equal(ReviewedToolContract.For(core ? ToolProfile.Core : ToolProfile.Full, actionRun: false, apiTry: enabled, actionTry: false).Length, tools.Count);
         Assert.Equal(enabled && !core, tools.Any(t => t.ProtocolTool.Name == ApiTryTools.Tool));
         var usage = tools.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         Assert.Equal(enabled && !core, usage.InputSchema.GetProperty("properties").GetProperty("tool").GetProperty("enum").EnumerateArray().Any(n => n.GetString() == ApiTryTools.Tool));

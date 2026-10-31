@@ -10,21 +10,16 @@ internal static class ActionRunSchema
 {
     public static void Configure(McpServerOptions options, HostConfig config)
     {
-        McpServerTool? tool = options.ToolCollection?.SingleOrDefault(t => t.ProtocolTool.Name == ActionRunTools.Tool);
+        McpServerTool? tool = options.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == ActionRunTools.Tool);
         if (tool is null)
         {
             return;
         }
-        var usage = options.ToolCollection!.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
+        var usage = options.ToolCollection!.First(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         var usageSchema = JsonNode.Parse(usage.InputSchema.GetRawText())!;
-        var names = usageSchema["properties"]!["tool"]!["enum"]!.AsArray();
         if (config.ActionRun == ActionRunSwitch.Off)
         {
             options.ToolCollection!.Remove(tool);
-            foreach (JsonNode? name in names.Where(n => n!.GetValue<string>() == ActionRunTools.Tool).ToList())
-            {
-                names.Remove(name);
-            }
         }
         else
         {

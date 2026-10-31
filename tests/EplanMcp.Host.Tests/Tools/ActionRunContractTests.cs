@@ -65,15 +65,15 @@ public sealed class ActionRunContractTests
     public void Config_InvalidSwitchIsRejected(string value) => Assert.Null(HostConfig.Parse("{\"actionRun\":" + value + "}", new(@"D:\test-data")).Config);
 
     [Theory]
-    [InlineData(false, false, 92)]
-    [InlineData(true, false, 93)]
-    [InlineData(false, true, 25)]
-    [InlineData(true, true, 25)]
-    public void ToolAndUsage_AreRegisteredOnlyInFullWithSwitchOn(bool enabled, bool core, int count)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ToolAndUsage_AreRegisteredOnlyInFullWithSwitchOn(bool enabled, bool core)
     {
         using ServiceProvider services = Services(enabled, core);
         McpServerOptions options = services.GetRequiredService<IOptions<McpServerOptions>>().Value;
-        Assert.Equal(count, options.ToolCollection!.Count);
+        Assert.Equal(ReviewedToolContract.For(core ? ToolProfile.Core : ToolProfile.Full, actionRun: enabled).Length, options.ToolCollection!.Count);
         Assert.Equal(enabled && !core, options.ToolCollection.Any(t => t.ProtocolTool.Name == ActionRunTools.Tool));
         var usage = options.ToolCollection.Single(t => t.ProtocolTool.Name == UsageTools.UsageTool).ProtocolTool;
         Assert.Equal(enabled && !core, usage.InputSchema.GetProperty("properties").GetProperty("tool").GetProperty("enum").EnumerateArray().Any(n => n.GetString() == ActionRunTools.Tool));
@@ -99,11 +99,12 @@ public sealed class ActionRunContractTests
     [Fact]
     public void Usage_ListsEachEntryAndItsLimitations_AndRemainsHiddenWhenOff()
     {
-        HostConfig on = HostConfig.Defaults(new(@"D:\test-data")) with { ActionRun = ActionRunSwitch.On };
-        Assert.True(UsageTools.ToolUsage(ActionRunTools.Tool).IsError);
+        using ServiceProvider off = Services(false, false);
+        using ServiceProvider on = Services(true, false);
+        Assert.True(UsageTools.ToolUsage(off.GetRequiredService<IOptions<McpServerOptions>>(), ActionRunTools.Tool).IsError);
         foreach (string name in ActionRunCatalog.Entries.Keys)
         {
-            var usage = UsageTools.ToolUsage(ActionRunTools.Tool, name, on);
+            var usage = UsageTools.ToolUsage(on.GetRequiredService<IOptions<McpServerOptions>>(), ActionRunTools.Tool, name);
             ToolResultAssert.Succeeded(usage);
             string text = usage.StructuredContent!.Value.GetProperty("text").GetString()!;
             Assert.Contains(name, text, StringComparison.Ordinal);

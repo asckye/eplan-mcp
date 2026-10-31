@@ -22,6 +22,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\Contracts.Snapshots\server-contract.verified.json" LogicalName="Contracts.server-contract.verified.json" />
     <!-- Embed release sources so Small tests validate the shipped content without file-system access. -->
     <EmbeddedResource Include="..\..\packaging\claude-plugin\.claude-plugin\marketplace.json" LogicalName="ClaudePlugin.marketplace.json" />
     <EmbeddedResource Include="..\..\packaging\claude-plugin\eplan-mcp\.claude-plugin\plugin.json" LogicalName="ClaudePlugin.plugin.json" />

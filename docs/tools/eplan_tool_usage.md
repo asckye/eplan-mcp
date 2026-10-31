@@ -19,7 +19,7 @@
 | `tool` | string，`enum` 为全部已注册的工具名 | 是 | — | 要说明的工具 |
 | `topic` | string，`enum`：`examples`、`workflow`、`fields`、`errors` | 否 | 省略，即全部四节 | 只返回这一节 |
 
-- 两个 `enum` 用 `[AllowedValues]` 写进 schema；`tool` 的 `enum` 与已注册的工具一致，由契约测试保证。schema 设置 `additionalProperties: false`。
+- `tool` 的 `enum` 在配置阶段从当前 Profile 和开关筛选后的注册集合生成，调用时也按该集合校验；`topic` 的四个通用值用 `[AllowedValues]` 声明（`action_run` 另支持白名单条目名）。schema 设置 `additionalProperties: false`。
 - SDK 不按 schema 校验参数（[api-notes C](../eplan/api-notes.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)），工具自己校验取值，必须完全一致（区分大小写）。`topic` 传 `null` 与省略相同。
 
 ## 3. 输出
@@ -44,7 +44,7 @@
 - 文件格式：恰好四个 `## ` 节，依次为 Examples、Workflow、Fields、Errors（与 `topic` 的值不区分大小写地对应），第一个标题之前没有文字，每节都有内容；节内可以用 `###`。
 - 每节写什么：Examples 是完整的参数对象；Workflow 是与其他工具的典型调用顺序；Fields 是结果字段的含义，并指出哪些是项目数据；Errors 只列这个工具实际会返回的 reason（对照代码和[错误码表](../standards/mcp-tool-design.md#63-错误码表)）以及每种情况下该做什么。
 - 说明文字是工具契约的一部分，修改时和描述一样评审。
-- **新增工具时**：同一个 PR 中添加它的说明文件，并把工具名加入 `tool` 参数的 `[AllowedValues]`，否则契约测试失败。
+- **新增工具时**：同一个 PR 中添加工具规格和说明文件，并审查、接受契约快照测试生成的 `.received.json`；无需维护另一份工具名列表或数量。
 - 描述预算：`tool` 的 `enum` 每多一个工具约增加 20–25 个字符。目前描述加 schema 约 700 个字符；M2 的 13 个工具都加入后约 950 个字符，接近 `Descriptions_StayWithinTheBudget` 的 1000 字符上限，届时可能需要缩短描述。
 
 ## 6. 写操作专项

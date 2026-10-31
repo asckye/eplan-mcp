@@ -20,15 +20,5 @@ internal static class ActionTrySchema
                 tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["action","type","project","unverified","execution","dryRun","recovered","before","after","changed","truncated","hint"],"properties":{"action":{"type":"string"},"type":{"type":["string","null"]},"project":{"type":"string"},"unverified":{"const":true},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},"recovered":{"type":"boolean"},"before":{"type":"object","additionalProperties":{"type":"string"}},"after":{"type":["object","null"],"additionalProperties":{"type":"string"}},"changed":{"type":["boolean","null"]},"truncated":{"type":"boolean"},"hint":{"type":"string"}}}"""));
             }
         }
-        if (enabled)
-        { return; }
-        foreach (McpServerTool usage in (options.ToolCollection ?? []).Where(t => t.ProtocolTool.Name == UsageTools.UsageTool).ToList())
-        {
-            var schema = JsonNode.Parse(usage.ProtocolTool.InputSchema.GetRawText())!;
-            var names = schema["properties"]!["tool"]!["enum"]!.AsArray();
-            foreach (JsonNode? name in names.Where(n => n?.GetValue<string>() == ActionTryTools.Tool).ToList())
-            { names.Remove(name); }
-            usage.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
-        }
     }
 }

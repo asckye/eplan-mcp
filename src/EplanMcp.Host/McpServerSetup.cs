@@ -94,6 +94,8 @@ internal static class McpServerSetup
             }
         });
 
+        services.PostConfigure<McpServerOptions>(UsageTools.Configure);
+
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
         return services
             .AddMcpServer(options =>

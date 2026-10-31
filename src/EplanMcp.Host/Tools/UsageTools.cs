@@ -1,5 +1,8 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -13,6 +16,18 @@ namespace EplanMcp.Host.Tools;
 internal sealed class UsageTools
 {
     public const string UsageTool = "eplan_tool_usage";
+
+    public static void Configure(McpServerOptions options)
+    {
+        // HTTP sessions share tool definitions. Rebuild the enum from the filtered collection on every configuration.
+        string[] names = [.. (options.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)];
+        foreach (McpServerTool usage in (options.ToolCollection ?? []).Where(t => t.ProtocolTool.Name == UsageTool))
+        {
+            var schema = JsonNode.Parse(usage.ProtocolTool.InputSchema.GetRawText())!;
+            schema["properties"]!["tool"]!["enum"] = JsonSerializer.SerializeToNode(names);
+            usage.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
+        }
+    }
 
     [McpServerTool(
         Name = UsageTool,
@@ -28,33 +43,26 @@ internal sealed class UsageTools
         "and what to do about each error. Use it when a description leaves a question open. Works without EPLAN. Example: " +
         "{\"tool\": \"eplan_project_list\", \"topic\": \"errors\"}.")]
     public static CallToolResult ToolUsage(
-        // The enum lists every registered tool; ToolContractTests fails when it, the usage files and the tools differ.
-        [Description("The tool to explain.")][AllowedValues(ActionTryTools.Tool, ActionCatalogTools.SearchTool, ActionCatalogTools.GetTool, ApiTryTools.Tool, ApiTools.SearchTool, ApiTools.GetTool, ActionRunTools.Tool, SessionTools.StatusTool, SessionTools.SelectTool, ProjectTools.ListTool, ProjectTools.GetTool, ProjectCreateTools.CreateTool, PropertySchemaTools.Tool, PropertyGetTools.Tool, ObjectReadTools.FindTool, ObjectReadTools.GetTool, PropertySetTools.Tool, RevisionTools.ListTool, SymbolTools.Tool, PageTools.ListTool, PageTools.GetTool, PageOpenTools.Tool, PageWriteTools.CreateTool, PageWriteTools.UpdateTool, PageTextReplaceTools.Tool, PlacementCreateTools.Tool, PlacementUpdateTools.Tool, PageDestructiveTools.DeleteTool, PageDestructiveTools.RenumberTool, DeviceTools.ListTool, DeviceTools.GetTool, DeviceWriteTools.UpdateTool, DeviceWriteTools.PlaceTool, DeviceDestructiveTools.RenumberTool, ConnectionTools.ListTool, ConnectionWriteTools.GenerateTool, ConnectionCreateTools.Tool, ConnectionDestructiveTools.NumberTool, CableGenerateTools.GenerateTool, CableTools.GetTool, CableDestructiveTools.RenumberTool, TerminalTools.ListTool, TerminalTools.GetTool, TerminalDestructiveTools.RenumberTool, PlcTools.GetTool, PartTools.ListTool, PartTools.SearchTool, MasterDataExportTools.PartTool, MessageTools.ListTool, CheckTools.ListTool, CheckWriteTools.RunTool, MacroTools.ListTool, MacroTools.GetTool, MacroWriteTools.InsertTool, PlaceholderTools.ListTool, PlaceholderWriteTools.ApplyTool, ExportTools.PdfTool, ExportTools.DxfTool, ImageExportTools.ImageTool, ProjectExportTools.PxfTool, ProjectExportTools.PartsTool, ProjectExportTools.LabelsTool, ProjectExportTools.UntranslatedTool, MasterDataExportTools.TranslationTool, TranslationImportTools.Tool, ImportTools.DxfTool, ListImportTools.ImportTool, PdfCommentsImportTools.Tool, PlcImportTools.Tool, ImportTools.PxfTool, ReportWriteTools.UpdateTool, LanguageWriteTools.SetTool, LanguageDestructiveTools.RemoveTool, ProjectDestructiveTools.TranslateTool, PartMasterDataTools.ImportTool, PartMasterDataTools.SyncTool, PackTools.ImportTool, PackTools.ListTool, PackTools.GetTool, PackTools.BuildTool, AssetTools.SearchTool, AssetTools.GetTool, AssetTools.UpdateTool, AssetTools.ReviewTool, CabinetTools.ListTool, CabinetTools.BindTool, ContextTools.GetTool, RuleTools.CheckTool, WorkflowTools.PlanTool, PlanTools.GetTool, PlanApplyTools.ApplyTool, PlanApplyTools.TaskTool, UsageTool)] string tool,
+        IOptions<McpServerOptions> options,
+        [Description("The tool to explain.")] string tool,
         [Description("Only this section; omit for all.")]
         [AllowedValues(ToolUsageCatalog.Examples, ToolUsageCatalog.Workflow, ToolUsageCatalog.Fields, ToolUsageCatalog.Errors)]
-        string? topic = null, EplanMcp.Host.Safety.HostConfig? config = null, ToolProfileChoice? profile = null)
+        string? topic = null)
     {
+        string[] names = [.. (options.Value.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)];
+        bool registered = names.Contains(tool, StringComparer.Ordinal);
         if (tool == ActionRunTools.Tool)
         {
-            return config?.ActionRun != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core
-                ? ToolResults.Error(ActionRunCatalog.Denied("actionRun is unavailable in this configuration/profile.").Error)
-                : ActionRunUsage.For(topic);
+            return registered
+                ? ActionRunUsage.For(topic)
+                : ToolResults.Error(ActionRunCatalog.Denied("actionRun is unavailable in this configuration/profile.").Error);
         }
-        IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> usage = ToolUsageCatalog.Usage;
-        if (config?.ActionTry != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core)
-        { usage = usage.Where(p => p.Key != ActionTryTools.Tool).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal); }
-        if (config?.ActionRun != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core)
-        {
-            usage = usage.Where(p => p.Key != ActionRunTools.Tool).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
-        }
-        if (config?.ApiTry != EplanMcp.Host.Safety.ActionRunSwitch.On || profile?.Profile == ToolProfile.Core)
-        { usage = usage.Where(p => p.Key != ApiTryTools.Tool).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal); }
         var violations = new List<string>();
         string name = tool ?? string.Empty; // an explicit JSON null arrives as null despite the type
-        IReadOnlyDictionary<string, string>? sections = usage.GetValueOrDefault(name);
+        IReadOnlyDictionary<string, string>? sections = registered ? ToolUsageCatalog.Usage.GetValueOrDefault(name) : null;
         if (sections is null)
         {
-            violations.Add($"'tool' must be one of: {string.Join(", ", usage.Keys.Order(StringComparer.Ordinal))}.");
+            violations.Add($"'tool' must be one of: {string.Join(", ", names)}.");
         }
 
         if (topic is not null && !ToolUsageCatalog.Topics.Contains(topic, StringComparer.Ordinal))

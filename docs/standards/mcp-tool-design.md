@@ -301,3 +301,4 @@ eplan_device_place
 - [ ] 项目自由文本只在数据字段中
 - [ ] 描述、schema、用法和错误消息都是英文；示例符合输入 schema；只提到已注册的工具（`ModelTextTests`、`ToolUsageExampleTests` 自动检查）
 - [ ] 至少有一个 Agent 评测任务；契约快照已更新
+- [ ] 新增工具时，只维护一份工具名清单：运行契约快照测试，审查 `.received.json` 后用它覆盖 `tests/Contracts.Snapshots/server-contract.verified.json`；同时维护工具规格和用法文本，不再手改工具名列表或绝对数量。usage 枚举来自实际注册集合，测试的完整工具集合与数量来自该快照；开关和 Profile 按名称过滤。
