@@ -9,15 +9,16 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 [McpServerToolType]
-internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline writes, HostConfig config, ApiIndex index, HostDataLocations? locations = null)
+internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline writes, HostConfig config, ApiIndex index, HostDataLocations? locations = null, ApiTryPages? pages = null)
 {
+    private readonly ApiTryPages _pages = pages ?? new(TimeProvider.System);
     internal const string Tool = "eplan_api_try";
     private static readonly string _hostSession = Session();
     private static string Session() { using var host = System.Diagnostics.Process.GetCurrentProcess(); return host.Id.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + host.StartTime.ToUniversalTime().Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + Guid.NewGuid().ToString("N"); }
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
-    [Description("Scratch; approval; session handles; eplan_api_get templates")]
-    public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, CancellationToken cancellationToken = default)
+    [Description("Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.")]
+    public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, string? result_cursor = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -26,10 +27,13 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             ApiEntry? entry = index.Data.Entries.FirstOrDefault(e => e.Row.Group == group);
             if (entry is null || entry.Row.ExcludedReason is not null || !ApiTryCatalog.Allowed(group))
             { throw ActionRunCatalog.Denied("This API group is unknown or excluded from trial execution."); }
-            if (string.IsNullOrWhiteSpace(project) || parameters.ValueKind != JsonValueKind.Object || parameters.GetRawText().Length > 2048
+            if (string.IsNullOrWhiteSpace(project) || parameters.ValueKind != JsonValueKind.Object || parameters.GetRawText().Length > 131072
                 || parameters.EnumerateObject().Select(p => p.Name).Distinct(StringComparer.Ordinal).Count() != parameters.EnumerateObject().Count()
-                || parameters.EnumerateObject().Any(p => Kind(p.Value) is "Object" or "Array" or "Null") || !MethodParameters(group, parameters))
-            { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and the exact generated parameter shape (2048 characters maximum): simple values, finite PointD coordinates, discovery locators or session-scoped handles." }, ApiCallTemplates.Closest(index, group, parameters)); }
+                || parameters.EnumerateObject().Any(p => Kind(p.Value) is "Object" or "Null" || p.Value.ValueKind == JsonValueKind.Array && ApiTryCatalog.MethodAccess(group) is null) || !MethodParameters(group, parameters))
+            { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and the exact generated shape (131072 characters maximum), with finite PointD, locators/session handles and at most 200 supported elements per array." }, ApiCallTemplates.Closest(index, group, parameters)); }
+            string query = PageCursor.Fingerprint(Tool, group, project, parameters.GetRawText());
+            if (result_cursor is not null)
+            { return ToolResults.Success("Cached API trial observations.", new ApiTryResult(project, group, "cached", true, ExecutionState.NotStarted, false, _pages.Read(result_cursor, query), null, null, [], 0, false, "Cached observations; no API call or approval was repeated.", [])); }
             ProjectGetData resolved = await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false);
             if (!ScratchPaths.IsInside(resolved.Project.Path, config.ScratchRoots))
             { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
@@ -44,13 +48,16 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => k.StartsWith("property:", StringComparison.Ordinal) || data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).OrderBy(k => k.StartsWith("property:", StringComparison.Ordinal) ? 0 : 1).ThenBy(k => k, StringComparer.Ordinal)];
             string? Hash(Dictionary<string, string>? state) => state is null ? null : WritePipeline.HashArguments(state.OrderBy(p => p.Key, StringComparer.Ordinal));
             return ToolResults.Success("Unverified API trial: " + outcome.Execution + ".", new ApiTryResult(outcome.Plan.Project, group, outcome.Plan.Details!["status"], true, outcome.Execution, outcome.Recovered,
-                (object?)data?.Handle ?? (object?)data?.Locator ?? ApiTrySettingsResult.Text(group, parameters, data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
+                (object?)data?.Handle ?? _pages.Shape(data?.ResultJson, query) ?? (object?)data?.Locator ?? ApiTrySettingsResult.Text(group, parameters, data?.Value) ?? ResultShaper.CleanText(data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
                 "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Handles are valid only in this Host session and EPLAN process, expire after 10 idle minutes, and may be evicted at 500. Recovered calls have no inferred readback. " + data?.Warning, data?.Files ?? []));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, ex.Error.Reason == ErrorReason.InvalidArgument ? ApiCallTemplates.Closest(index, group, parameters) : null); }
     }
     internal static bool MethodParameters(string group, JsonElement parameters)
         => EntryParameters(group, parameters) && ApiTrySettingsValidation.Valid(group, n => parameters.TryGetProperty(n, out JsonElement value) ? value.ToString() : null);
+    internal static bool ValidValue(string[]? shape, JsonElement value) => shape?[0] == "array"
+        ? value.ValueKind == JsonValueKind.Array && value.GetArrayLength() <= 200 && value.EnumerateArray().All(v => ValidValue(shape.Skip(1).ToArray(), v))
+        : ApiTryCatalog.ValidValue(shape, Kind(value), value.ValueKind == JsonValueKind.String ? value.GetString()! : value.GetRawText());
     private static string Kind(JsonElement value) => value.ValueKind switch
     {
         JsonValueKind.Object => Handle(value) ? "handle" : Locator(value) ? "locator" : value.EnumerateObject().Count() == 2 && value.TryGetProperty("x", out JsonElement x) && value.TryGetProperty("y", out JsonElement y) && x.ValueKind == JsonValueKind.Number && y.ValueKind == JsonValueKind.Number && x.TryGetDouble(out double a) && y.TryGetDouble(out double b) && double.IsFinite(a) && double.IsFinite(b) ? "PointD" : "Object",

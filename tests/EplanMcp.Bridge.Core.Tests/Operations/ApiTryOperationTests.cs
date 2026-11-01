@@ -473,7 +473,7 @@ public sealed partial class ApiTryOperationTests
         public Action? OnInvoke { get; set; }
         private bool _changed;
         public void CheckTarget(ApiTryArgs args) => TargetCheck?.Invoke(args);
-        public Dictionary<string, string> Inspect(string project)
+        public Dictionary<string, string> Inspect(ApiTryArgs args)
         {
             Inspections++;
             OnInspect?.Invoke();

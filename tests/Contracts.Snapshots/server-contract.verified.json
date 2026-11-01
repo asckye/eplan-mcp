@@ -1002,6 +1002,13 @@
                       },
                       "type": {
                         "type": "string"
+                      },
+                      "direction": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "default": null
                       }
                     },
                     "required": [
@@ -1305,7 +1312,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Scratch; approval; session handles; eplan_api_get templates",
+      "description": "Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1392,6 +1399,88 @@
                       "type": "string"
                     }
                   }
+                },
+                {
+                  "type": "array",
+                  "maxItems": 200,
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "x",
+                          "y"
+                        ],
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "project",
+                          "page",
+                          "type",
+                          "oid",
+                          "digest"
+                        ],
+                        "properties": {
+                          "project": {
+                            "type": "string"
+                          },
+                          "page": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2147483647
+                          },
+                          "oid": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "digest": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "handle",
+                          "type"
+                        ],
+                        "properties": {
+                          "handle": {
+                            "type": "string",
+                            "pattern": "^h:[0-9a-f]{32}$"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -1399,6 +1488,14 @@
           "dry_run": {
             "type": "boolean",
             "default": false
+          },
+          "result_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1024,
+            "description": "Read cache; same group/project/parameters; no API call."
           }
         },
         "required": [
@@ -1485,6 +1582,545 @@
               },
               {
                 "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "items",
+                  "total",
+                  "nextCursor",
+                  "truncated",
+                  "hint"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "maxItems": 200,
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "x",
+                            "y"
+                          ],
+                          "properties": {
+                            "x": {
+                              "type": "number"
+                            },
+                            "y": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "project",
+                            "page",
+                            "type",
+                            "oid",
+                            "digest"
+                          ],
+                          "properties": {
+                            "project": {
+                              "type": "string"
+                            },
+                            "page": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 2147483647
+                            },
+                            "oid": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "digest": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "handle",
+                            "type"
+                          ],
+                          "properties": {
+                            "handle": {
+                              "type": "string",
+                              "pattern": "^h:[0-9a-f]{32}$"
+                            },
+                            "type": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "total": {
+                    "type": "integer"
+                  },
+                  "nextCursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "truncated": {
+                    "type": "boolean"
+                  },
+                  "hint": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "returnValue",
+                  "outputs"
+                ],
+                "properties": {
+                  "returnValue": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "x",
+                          "y"
+                        ],
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "project",
+                          "page",
+                          "type",
+                          "oid",
+                          "digest"
+                        ],
+                        "properties": {
+                          "project": {
+                            "type": "string"
+                          },
+                          "page": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2147483647
+                          },
+                          "oid": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "digest": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "handle",
+                          "type"
+                        ],
+                        "properties": {
+                          "handle": {
+                            "type": "string",
+                            "pattern": "^h:[0-9a-f]{32}$"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "items",
+                          "total",
+                          "nextCursor",
+                          "truncated",
+                          "hint"
+                        ],
+                        "properties": {
+                          "items": {
+                            "type": "array",
+                            "maxItems": 200,
+                            "items": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "x",
+                                    "y"
+                                  ],
+                                  "properties": {
+                                    "x": {
+                                      "type": "number"
+                                    },
+                                    "y": {
+                                      "type": "number"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "project",
+                                    "page",
+                                    "type",
+                                    "oid",
+                                    "digest"
+                                  ],
+                                  "properties": {
+                                    "project": {
+                                      "type": "string"
+                                    },
+                                    "page": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "minimum": 1,
+                                      "maximum": 2147483647
+                                    },
+                                    "oid": {
+                                      "type": "integer",
+                                      "minimum": 1
+                                    },
+                                    "digest": {
+                                      "type": "string",
+                                      "pattern": "^[0-9a-f]{64}$"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "handle",
+                                    "type"
+                                  ],
+                                  "properties": {
+                                    "handle": {
+                                      "type": "string",
+                                      "pattern": "^h:[0-9a-f]{32}$"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "total": {
+                            "type": "integer"
+                          },
+                          "nextCursor": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "truncated": {
+                            "type": "boolean"
+                          },
+                          "hint": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "outputs": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "x",
+                            "y"
+                          ],
+                          "properties": {
+                            "x": {
+                              "type": "number"
+                            },
+                            "y": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "project",
+                            "page",
+                            "type",
+                            "oid",
+                            "digest"
+                          ],
+                          "properties": {
+                            "project": {
+                              "type": "string"
+                            },
+                            "page": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 2147483647
+                            },
+                            "oid": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "digest": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "handle",
+                            "type"
+                          ],
+                          "properties": {
+                            "handle": {
+                              "type": "string",
+                              "pattern": "^h:[0-9a-f]{32}$"
+                            },
+                            "type": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "items",
+                            "total",
+                            "nextCursor",
+                            "truncated",
+                            "hint"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "maxItems": 200,
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "x",
+                                      "y"
+                                    ],
+                                    "properties": {
+                                      "x": {
+                                        "type": "number"
+                                      },
+                                      "y": {
+                                        "type": "number"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "project",
+                                      "page",
+                                      "type",
+                                      "oid",
+                                      "digest"
+                                    ],
+                                    "properties": {
+                                      "project": {
+                                        "type": "string"
+                                      },
+                                      "page": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 2147483647
+                                      },
+                                      "oid": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      "digest": {
+                                        "type": "string",
+                                        "pattern": "^[0-9a-f]{64}$"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "handle",
+                                      "type"
+                                    ],
+                                    "properties": {
+                                      "handle": {
+                                        "type": "string",
+                                        "pattern": "^h:[0-9a-f]{32}$"
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "nextCursor": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "truncated": {
+                              "type": "boolean"
+                            },
+                            "hint": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
               }
             ]
           },

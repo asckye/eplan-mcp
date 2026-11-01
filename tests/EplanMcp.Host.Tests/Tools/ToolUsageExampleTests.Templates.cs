@@ -51,7 +51,7 @@ public sealed partial class ToolUsageExampleTests
                 foreach (JsonProperty parameter in parameters.EnumerateObject().Where(p => p.Name is not ("target" or "via" or "via_key")))
                 {
                     string[] type = (setter && parameter.Name == "value" ? ApiTryCatalog.ValueShape(entry.Row.Group) : ApiTryCatalog.ParameterShape(shape[1], parameter.Name))!;
-                    Assert.True(ApiTryCatalog.ValidValue(type, ValueKind(parameter.Value), parameter.Value.ValueKind == JsonValueKind.String ? parameter.Value.GetString()! : parameter.Value.GetRawText()), template.ToJsonString());
+                    Assert.True(ApiTryTools.ValidValue(type, parameter.Value), template.ToJsonString());
                 }
             }
         }
@@ -61,14 +61,6 @@ public sealed partial class ToolUsageExampleTests
         Assert.Contains("O:Eplan.EplApi.DataModel.ProjectSettings.GetBoolSetting", seen);
         Assert.NotEmpty(seen);
     }
-
-    private static string ValueKind(JsonElement value) => value.ValueKind switch
-    {
-        JsonValueKind.Object => value.TryGetProperty("handle", out _) ? "handle" : value.TryGetProperty("x", out _) ? "PointD" : "locator",
-        JsonValueKind.Number => value.TryGetInt64(out _) ? "Integer" : "Float",
-        JsonValueKind.False or JsonValueKind.True => "Boolean",
-        _ => value.ValueKind.ToString(),
-    };
 
     [Fact]
     public void EveryEligibleActionExampleMatchesItsSchemaAndPolicy()

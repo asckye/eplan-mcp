@@ -43,7 +43,7 @@ public sealed partial class ApiTryToolTests : IDisposable
         { parameters["value"] = value; }
         return JsonSerializer.Serialize(parameters);
     }
-    private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? Parameters()).RootElement, dry, TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? Parameters()).RootElement, dry, cancellationToken: TestContext.Current.CancellationToken);
 
     [Fact]
     public async Task OffUnknownExcludedAndMemberIdsNeverContactBridge()

@@ -28,7 +28,6 @@ public sealed class ApiTryHandlesTests
     [Theory]
     [InlineData("CreatePin", "Eplan.EplApi.DataModel.Pin", "method")]
     [InlineData("RemovePin", "Eplan.EplApi.DataModel.Pin", "method")]
-    [InlineData("GetPins", "Eplan.EplApi.DataModel.Pin[]", "method")]
     [InlineData("GetPin", "Eplan.EplApi.DataModel.Excluded", "method")]
     [InlineData("GetPin", "Eplan.EplApi.DataModel.Hidden", "method")]
     [InlineData("GetPin", "System.Object", "method")]
@@ -46,6 +45,18 @@ public sealed class ApiTryHandlesTests
         { Assert.Empty(Build(root with { Details = [detail] }).Reachable); }
         ApiEntry method = Entry("Pin", "Use", "System.Void", [new("v", "System.String")]);
         Assert.DoesNotContain(Build(root, method with { Details = [method.Details[0], method.Details[0] with { Id = "M:other", Parameters = [new("v", "System.Int32")] }] }).Members, m => m.Entry.Name == "Use");
+    }
+    [Fact]
+    public void ReturnedHandleCollectionsAndOutValuesMakeTheirElementTypesReachable()
+    {
+        ApiEntry collection = Entry("Page", "GetPins", Prefix + "Pin[]", []);
+        ApiTryGenerator.HandleModel model = Build(collection, Entry("Pin", "Name", "System.String"), Entry("Page", "UsePins", "System.Void", [new("pins", Prefix + "Pin[]")]));
+        Assert.Contains(Prefix + "Pin", model.Reachable);
+        Assert.Contains(model.Members, m => m.Entry.Name == "GetPins");
+        Assert.Contains(model.Members, m => m.Entry.Name == "UsePins");
+        ApiEntry output = Entry("Page", "GetPin", "System.Void", [new("pin", Prefix + "Pin@", "out")]);
+        Assert.Contains(Prefix + "Pin", Build(output).Reachable);
+        Assert.Equal([], ApiTryGenerator.CallShape(output, output.Details[0]).Skip(2));
     }
     [Theory]
     [InlineData("Eplan.EplApi.MasterData.MDPart")]

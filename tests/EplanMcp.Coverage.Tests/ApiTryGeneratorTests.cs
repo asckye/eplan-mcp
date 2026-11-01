@@ -83,10 +83,10 @@ public sealed class ApiTryGeneratorTests
     [InlineData("Freeze", "System.Int32", "lifecycle_or_creation")]
     [InlineData("EraseAll", "System.Int32", "lifecycle_or_creation")]
     [InlineData("CreateTransient", "System.Int32", "lifecycle_or_creation")]
-    [InlineData("GetTest", "System.Int32@", "ref_out")]
-    [InlineData("GetTest", "System.Int32[]", "array_or_params")]
+    [InlineData("GetTest", "Eplan.EplApi.DataModel.Page@", "ref_out")]
+    [InlineData("GetTest", "System.Object[]", "array_or_params")]
     [InlineData("GetTest", "System.Action", "delegate_parameter")]
-    [InlineData("GetTest", "System.Collections.Generic.List{System.String}", "generic_or_collection_parameter")]
+    [InlineData("GetTest", "System.Collections.Generic.List{System.Object}", "generic_or_collection_parameter")]
     [InlineData("GetTest", "T", "unsupported_parameter")]
     public void MethodExclusionsAreReported(string name, string type, string reason) => Assert.Equal(reason, ApiTryGenerator.Exclusion(Method(name, Overload(type)), Overload(type), null));
 

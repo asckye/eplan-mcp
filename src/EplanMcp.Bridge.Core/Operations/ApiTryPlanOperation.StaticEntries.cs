@@ -17,6 +17,6 @@ public sealed partial class ApiTryPlanOperation
         return p.Count == shape.Length - 2 + (statik ? 0 : 1) + (setter ? 1 : 0) + (via ? 1 : 0) + (key ? 1 : 0)
             && (!setter || ValidValue(ApiTryCatalog.ValueShape(group), p["value"]!))
             && p.Properties().All(v => v.Name is "target" or "via" or "via_key" || setter && v.Name == "value" || shape.Skip(2).Contains(v.Name, StringComparer.Ordinal) && ValidValue(ApiTryCatalog.ParameterShape(shape[1], v.Name), v.Value))
-            && !p.Properties().Any(v => Kind(v.Value) == "locator" && !ProjectResolver.SamePath(project, (string)v.Value["project"]!));
+            && !p.Descendants().OfType<JObject>().Any(v => Locator(v) && !ProjectResolver.SamePath(project, (string)v["project"]!));
     }
 }

@@ -91,19 +91,31 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         SnapshotObject identity = EplanObjectReader.Describe(obj, kind);
         return new() { Project = project, Page = obj is Page page ? page.Name : identity.Page ?? string.Empty, Type = identity.Type, Oid = identity.Oid, Digest = SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) };
     }
-    public Dictionary<string, string> Inspect(string project)
+    public Dictionary<string, string> Inspect(ApiTryArgs args)
     {
         var watch = Stopwatch.StartNew();
-        Dictionary<string, string> state = new EplanActionRunner().Inspect("api.try", project, new Dictionary<string, string>()).Before;
-        using ISnapshotSource source = new EplanSnapshotReader().Open(project);
-        foreach (KeyValuePair<long, string> page in source.Pages.OrderBy(p => p.Key))
+        string[]? pages = ApiTryObservations.Pages(args);
+        // A12/A36/A70: page/connection identities may be enumerated, but describe only affected pages.
+        Dictionary<string, string> state = pages is null
+            ? new EplanActionRunner().Inspect("api.try", args.Project, new Dictionary<string, string>()).Before : [];
+        using ISnapshotSource source = new EplanSnapshotReader().Open(args.Project);
+        Dictionary<string, string> observed = ApiTryObservations.Capture(source, pages, () =>
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             if (watch.Elapsed.TotalSeconds > 20)
             { throw new BridgeErrorException(ErrorReason.Timeout, "Trial snapshot exceeded 20 seconds; reduce the scratch project."); }
-            IReadOnlyList<SnapshotSourceObject> objects = source.ReadPage(page.Key, SnapshotProfiles.StandardName);
-            state["snapshot:" + page.Key.ToString(System.Globalization.CultureInfo.InvariantCulture)] = SnapshotCanonical.Page(SnapshotProfiles.StandardName, objects[0], objects.Skip(1), SnapshotCanonical.Registered(SnapshotProfiles.StandardName)!).Hash;
-        }
+        }, page =>
+        {
+            try
+            {
+                PageDrawingGeometry? drawing = new EplanDrawingReader().Read(args.Project, page);
+                return drawing is null ? null : Newtonsoft.Json.JsonConvert.SerializeObject(drawing);
+            }
+            catch (Exception ex) when (ex is global::Eplan.EplApi.Base.BaseException or InvalidOperationException)
+            { return null; } // A60: absent page geometry is an evidence gap, not a policy violation.
+        });
+        foreach (KeyValuePair<string, string> item in observed)
+        { state[item.Key] = item.Value; }
         return state;
     }
 }

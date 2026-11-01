@@ -91,8 +91,8 @@ internal static partial class ApiTryGenerator
         EntryModel m = EntryData(root);
         var selected = EntrySelected(m);
         string Switch(string head, IEnumerable<string> lines, string fallback = "null") => "    public static " + head + " switch { " + string.Join(" ", lines) + " _ => " + fallback + " };\n";
-        string Shape(ApiEntry e, ApiDetail d) => "[" + string.Join(", ", new[] { e.Type[2..], d.Signature! }.Concat(d.Parameters!.Select(ParameterName)).Select(Literal)) + "]";
-        string Value(string type) => "[" + string.Join(", ", (m.Enums.TryGetValue(type, out string[]? values) ? _enumShape.Concat(values) : [type]).Select(Literal)) + "]";
+        string Shape(ApiEntry e, ApiDetail d) => "[" + string.Join(", ", CallShape(e, d).Select(Literal)) + "]";
+        string Value(string type) => CollectionShape(type, m.Enums);
         return code + "public static partial class ApiTryCatalog\n{\n"
             + Switch("string[]? EntryShape(string group) => group", selected.Where(s => s.Entry.Row.Kind == "property").Select(s => Literal(s.Entry.Row.Group) + " => " + Shape(s.Entry, s.Member) + ","))
             + Switch("string[][] EntryMethods(string group) => group", selected.Where(s => s.Entry.Row.Kind == "method").GroupBy(s => s.Entry.Row.Group).Select(g => Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => Shape(s.Entry, s.Member))) + "],"), "[]")
@@ -100,7 +100,7 @@ internal static partial class ApiTryGenerator
             + Switch("string[][] ViaPaths(string type) => type", m.Paths.GroupBy(p => p.Type).Select(g => Literal(g.Key) + " => [" + string.Join(", ", g.Select(p => "[" + Literal(p.Root) + ", " + Literal(p.Path) + "]")) + "],"), "[]")
             + Switch("string[]? EntryMethodShape(string group, System.Collections.Generic.IEnumerable<string> names) => (group, string.Join(\"|\", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Where(names, n => n != \"target\" && n != \"via\" && n != \"via_key\"), n => n, System.StringComparer.Ordinal)))", selected.Where(s => s.Entry.Row.Kind == "method").Select(s => "(" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => " + Shape(s.Entry, s.Member) + ","))
             + Switch("string? EntryAccess(string group) => group", selected.Where(s => s.Entry.Row.Kind == "method").DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(EntryRead(s.Entry) ? "read" : "write") + ","))
-            + Switch("string[]? EntryParameter(string signature, string name) => (signature, name)", selected.SelectMany(s => s.Member.Parameters!.Select(p => "(" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Value(p.Type) + ",")))
+            + Switch("string[]? EntryParameter(string signature, string name) => (signature, name)", selected.SelectMany(s => Inputs(s.Member).Select(p => "(" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Value(p.Type) + ",")))
             + Switch("string[]? EntryValue(string group) => group", selected.Where(s => EntryWritable(s.Entry, s.Member)).Select(s => Literal(s.Entry.Row.Group) + " => " + Value(s.Member.ReturnType!) + ","))
             + Switch("bool Entry(string signature) => signature", selected.Select(s => Literal(s.Member.Signature!) + " => true,"), "false")
             + Switch("bool Static(string signature) => signature", selected.Where(s => s.Member.Static).Select(s => Literal(s.Member.Signature!) + " => true,"), "false")
@@ -113,14 +113,15 @@ internal static partial class ApiTryGenerator
         EntryModel m = EntryData(root);
         var selected = EntrySelected(m);
         string ConvertValue(string type, string token) => m.Enums.TryGetValue(type, out string[]? values) ? "(" + token + ".Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + type + "." + v)) + ", _ => throw new System.InvalidOperationException(\"Invalid enum.\") })" : token + ".Value<" + type + ">()";
-        string Argument(ApiParameter p) => ObjectType(p.Type, m.Kinds) ? "((global::" + p.Type + ")resolve(parameters[" + Literal(ParameterName(p)) + "]!, " + Literal(p.Type) + "))" : p.Type == "Eplan.EplApi.Base.PointD" ? HandlePointArgument(p) : ConvertValue(p.Type, "parameters[" + Literal(ParameterName(p)) + "]!");
         return BaseDispatch(root) + "internal static class ApiTryEntryDispatch\n{\n    internal static object? Invoke(string signature, object? target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
             + string.Join("\n", selected.Select(s =>
             {
                 string receiver = s.Member.Static ? "global::" + s.Entry.Type[2..] : "((global::" + s.Entry.Type[2..] + ")target!)";
+                if (s.Entry.Row.Kind == "method")
+                { return MethodCase(s.Entry, s.Member, m.Enums, m.Kinds, new Dictionary<string, ApiTryServices.Service>(), receiver); }
                 string call = receiver + "." + s.Entry.Name;
                 return "            case " + Literal(s.Member.Signature!) + ": { " + (EntryWritable(s.Entry, s.Member) ? "if (parameters.ContainsKey(\"value\")) { " + call + " = " + ConvertValue(s.Member.ReturnType!, "parameters[\"value\"]!") + "; } " : "")
-                    + (s.Member.ReturnType == "System.Void" ? "" : "return ") + call + (s.Entry.Row.Kind == "method" ? "(" + string.Join(", ", s.Member.Parameters!.Select(Argument)) + ")" : "") + ";" + (s.Member.ReturnType == "System.Void" ? " return null;" : "") + " }";
+                    + (s.Member.ReturnType == "System.Void" ? "" : "return ") + call + ";" + (s.Member.ReturnType == "System.Void" ? " return null;" : "") + " }";
             })) + "\n            default: throw new System.InvalidOperationException(\"No entry dispatch.\");\n        }\n    }\n    private static T Hold<T>(T value, System.Action<System.IDisposable> own) { if (value is System.IDisposable disposable && value is not StorableObject) { own(disposable); } return value; }\n    internal static object? Via(string type, string path, StorableObject target, JObject parameters, System.Action<System.IDisposable> own) => (type, path) switch\n    {\n"
             + string.Join("\n", m.Paths.GroupBy(p => (p.Type, p.Path)).Select(g => "        (" + Literal(g.Key.Type) + ", " + Literal(g.Key.Path) + ") => " + string.Join(" : ", g.Select(p => "target is global::" + p.Root + " ? (object?)" + p.Expression)) + " : null,"))
             + "\n        _ => null,\n    };\n}\n";

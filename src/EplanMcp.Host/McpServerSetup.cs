@@ -29,6 +29,7 @@ internal static class McpServerSetup
         services.TryAddSingleton(provider => SuspensionStore.For(provider.GetRequiredService<HostDataLocations>()));
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<PropertySchemaPaging>();
+        services.TryAddSingleton<ApiTryPages>();
         services.TryAddSingleton(_ => ApiIndex.Load());
         services.TryAddSingleton<ActionCatalogReader>();
         services.TryAddSingleton<PropertyGetPaging>();

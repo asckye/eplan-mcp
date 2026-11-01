@@ -38,9 +38,15 @@ public sealed class ApiTryStaticEntriesTests
     [InlineData("url", "System.String", "url_parameter")]
     [InlineData("data", "System.IO.Stream", "stream_parameter")]
     [InlineData("database", "System.String", "database_parameter")]
-    [InlineData("value", "System.Int32@", "ref_out")]
-    [InlineData("value", "System.Int32[]", "array_or_params")]
+    [InlineData("value", "Eplan.EplApi.DataModel.Project@", "ref_out")]
+    [InlineData("value", "System.Int32[][]", "array_or_params")]
     public void StaticParametersUseTheExistingSafetyRestrictions(string name, string type, string reason) => Assert.Equal(reason, Reason(Entry("Eplan.EplApi.Base.Helper", "GetValue", parameters: [new(name, type)])));
+
+    [Theory]
+    [InlineData("System.Int32@")]
+    [InlineData("System.Int32[]")]
+    public void StaticReadsAcceptSupportedArrayAndSimpleRefShapes(string type)
+        => Assert.Null(Reason(Entry("Eplan.EplApi.Base.Helper", "GetValue", parameters: [new("value", type)])));
 
     [Fact]
     public void ProjectSettingsPathIsAnInternalSettingNameAndRemainsReadOnly()

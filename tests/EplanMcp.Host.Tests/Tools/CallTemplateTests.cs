@@ -93,6 +93,25 @@ public sealed class CallTemplateTests
         { Assert.Equal(ApiTryCatalog.ParameterShape(ApiTryCatalog.Methods(entry.Row.Group)[0][1], parameter)![1..], templates[0]["arguments"]!["parameters"]!["properties"]![parameter]!["allowed_values"]!.AsArray().Select(v => v!.GetValue<string>())); }
     }
 
+    [Fact]
+    public void ArrayAndOutputParameterGroupsUseGeneratedInputShapes()
+    {
+        ApiIndex index = ApiIndex.Load();
+        const string Rotate = "O:Eplan.EplApi.HEServices.Edit.Rotate";
+        JsonObject array = Assert.Single(ApiCallTemplates.For(index.Data.Entries.Single(e => e.Row.Group == Rotate)));
+        JsonNode placements = array["arguments"]!["parameters"]!["properties"]!["plcmnts"]!;
+        Assert.Equal("array", placements["kind"]!.GetValue<string>());
+        Assert.Equal("locator", placements["items"]!["kind"]!.GetValue<string>());
+        Assert.True(ApiTryTools.MethodParameters(Rotate, JsonSerializer.SerializeToElement(array["example"]!["parameters"])));
+
+        // The installed catalog marks PointD@ as ref, not out: it remains an input and produces a named output.
+        const string Outputs = "O:Eplan.EplApi.DataModel.Graphics.PolyLine.SetPointAt";
+        JsonObject outputs = Assert.Single(ApiCallTemplates.For(index.Data.Entries.Single(e => e.Row.Group == Outputs)));
+        Assert.Equal("PointD", outputs["arguments"]!["parameters"]!["properties"]!["point"]!["kind"]!.GetValue<string>());
+        Assert.Equal(["target", "index", "point"], outputs["example"]!["parameters"]!.AsObject().Select(p => p.Key));
+        Assert.True(ApiTryTools.MethodParameters(Outputs, JsonSerializer.SerializeToElement(outputs["example"]!["parameters"])));
+    }
+
     [Theory]
     [InlineData("DocumentTypeManager.IsLogicalPageDocType", null, null)]
     [InlineData("ProjectSettings.GetBoolSetting", "Settings", "project")]

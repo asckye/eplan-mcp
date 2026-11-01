@@ -55,8 +55,8 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         bool write = ApiTryCatalog.MethodAccess(args.Group) == "write" || p.ContainsKey("value");
         var descriptions = new List<string>();
         CheckReceiver(args, p, write, descriptions);
-        foreach (string name in shape.Skip(2).Where(n => p[n] is JObject obj && (obj["handle"] is not null || ApiTryCatalog.ParameterShape(shape[1], n)?[0] != "Eplan.EplApi.Base.PointD")))
-        { ResolveObject(args, p[name]!, ApiTryCatalog.ParameterShape(shape[1], name)![0], write, descriptions); }
+        foreach ((JToken token, string type) in ArgumentObjects(shape, p))
+        { ResolveObject(args, token, type, write, descriptions); }
         args.HandleSources = string.Join("; ", descriptions);
     }
     private object? InvokeHandleMember(ApiTryArgs args, JObject p, (object? Value, Func<string?> Owner, bool ReadOnly) target, bool read = false)
@@ -73,10 +73,14 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         { result = InvokeEntry(args, p, target.Value, ApiTryCatalog.MethodAccess(args.Group) is not null, Resolver); }
         if (result is null || read)
         { return result; }
+        return Detach(args.Project, result, native: value => NativeResult(args, value, target), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);
+    }
+    private object NativeResult(ApiTryArgs args, object result, (object? Value, Func<string?> Owner, bool ReadOnly) target)
+    {
         if (result is StorableObject obj && ObjectReadTypes.Types.Where(ObjectReadTypes.Supported).Any(k => EplanObjectReader.Matches(obj, k.ToLowerInvariant())))
         { return Locator(args.Project, obj); }
         if (ApiTryHandleDispatch.Type(result) is not { } nativeType)
-        { return result is string or bool or int or long or double || result.GetType().IsEnum ? Convert.ToString(result, System.Globalization.CultureInfo.InvariantCulture) : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned native type has no compiled handle adapter."); }
+        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned native type has no compiled handle adapter."); }
         object borrowed = ApiTryHandleDispatch.Box(result);
         Func<string?> check = ReferenceEquals(ApiTryHandleDispatch.Owner(result), result) && result is not StorableObject ? target.Owner : () => NativeOwner(result);
         string? project = check();

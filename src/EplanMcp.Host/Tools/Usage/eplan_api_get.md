@@ -17,6 +17,8 @@ Use eplan_api_search to discover exact IDs. Pass nextCursor as cursor with the s
 
 catalogVersion identifies the shipped EPLAN API version.
 
+Parameter direction is nullable: out/ref appears only when the catalog explicitly records it. An @ suffix without direction is treated as ref; names never imply out. eplan_api_try omits out inputs and returns named outputs.
+
 entry describes group status and reaching tools. items contains overload signatures, parameters, returnType, nullable summaries, dictionary propertyCount/reading guidance or evidence references. total counts detail records; nextCursor, truncated and hint describe continuation.
 
 ## Errors

@@ -3,6 +3,7 @@
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Arrays.cs" Link="Adapters\EplanApiTryDispatcher.Arrays.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanText.cs" Link="Adapters\EplanText.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />

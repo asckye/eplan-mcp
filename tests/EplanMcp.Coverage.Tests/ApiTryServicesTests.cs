@@ -78,7 +78,7 @@ public sealed class ApiTryServicesTests
     {
         foreach (string method in new[] { "Create", "Delete", "Remove", "BringToFront" })
         { Assert.Null(Exclusion(Entry(method, parameters: [new("page", "Eplan.EplApi.DataModel.Page")]))); }
-        Assert.Equal("unsupported_return", Exclusion(Entry("GetValue", returns: "Eplan.EplApi.Base.PointD")));
+        Assert.Null(Exclusion(Entry("GetValue", returns: "Eplan.EplApi.Base.PointD")));
         Assert.Equal("unsupported_return", Exclusion(Entry("GetValue", returns: "System.Object")));
         Assert.Equal("static_or_nonpublic", ApiTryGenerator.Exclusion(Entry("GetValue"), Entry("GetValue").Details[0] with { Static = true }, null));
         Assert.Equal("owns_transaction", Exclusion(Entry("EvaluateAndSetAllNamesTXN", "NameService")));

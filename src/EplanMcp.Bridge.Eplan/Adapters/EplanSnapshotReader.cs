@@ -270,7 +270,7 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
             IEnumerable<SnapshotProperty> registered = SnapshotCanonical.Registered(profile)!.Values;
             Page page = _pages[pageOid];
             var objects = new List<SnapshotSourceObject> { PageObject(page, registered) };
-            objects.AddRange(EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>().Select(f => FunctionObject(f, page.Name, registered)));
+            objects.AddRange(EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>().GroupBy(f => f.ObjectIdentifier).Select(g => g.First()).Select(f => FunctionObject(f, page.Name, registered)));
             _connections ??= Connections();
             if (_connections.TryGetValue(pageOid, out List<Connection>? connections))
             {

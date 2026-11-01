@@ -85,6 +85,10 @@ public sealed partial class ApiTryContractTests
         JsonElement point = Assert.Single(shapes.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("x", out _));
         Assert.Equal(["x", "y"], point.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
         Assert.False(point.GetProperty("additionalProperties").GetBoolean());
-        Assert.Equal(4, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
+        JsonElement array = Assert.Single(shapes.EnumerateArray(), s => s.GetProperty("type").GetString() == "array");
+        Assert.Equal(200, array.GetProperty("maxItems").GetInt32());
+        Assert.DoesNotContain(array.GetProperty("items").GetProperty("oneOf").EnumerateArray(), s => s.GetProperty("type").GetString() == "array");
+        Assert.Equal(1024, tool.InputSchema.GetProperty("properties").GetProperty("result_cursor").GetProperty("maxLength").GetInt32());
+        Assert.Equal(7, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
     }
 }

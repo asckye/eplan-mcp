@@ -48,10 +48,29 @@ public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     private async Task<JsonElement> Call(string project, string member, object parameters, bool dry = false)
     {
         CallToolResult result = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), member.StartsWith("O:", StringComparison.Ordinal) ? member : "O:Eplan.EplApi.DataModel." + member,
-            project, JsonSerializer.SerializeToElement(parameters), dry, TestContext.Current.CancellationToken);
+            project, JsonSerializer.SerializeToElement(parameters), dry, cancellationToken: TestContext.Current.CancellationToken);
         Assert.False(result.IsError == true, string.Join("\n", result.Content.OfType<TextContentBlock>().Select(c => c.Text)));
         return result.StructuredContent!.Value;
     }
+    [Fact]
+    public async Task ScratchCopy_ArrayWriteOneUndoRestoresGeometryAndEarlierHistory()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string sentinel = Assert.Single(await session.CreatePagesAsync(1));
+        JsonElement line = await Locator(session.Project, "Line");
+        string before = await session.StateAsync();
+        JsonElement written = await Call(session.Project, "O:Eplan.EplApi.HEServices.Edit.Rotate",
+            new { target = await Locator(session.Project, "Project"), plcmnts = new[] { line }, oPntStart = new { x = 0, y = 0 }, angle = 90 });
+        Assert.Equal("committed", written.GetProperty("execution").GetString());
+        Assert.NotEqual(before, await session.StateAsync());
+        Assert.Contains(_approvals.Questions.SelectMany(q => q.Changes), c => c.StartsWith("write unverified API O:Eplan.EplApi.HEServices.Edit.Rotate", StringComparison.Ordinal));
+        await session.UndoAsync();
+        Assert.Equal(before, await session.StateAsync());
+        Assert.Contains((await session.SnapshotAsync()).Pages, p => p.Name == sentinel);
+        await session.UndoAsync();
+        Assert.DoesNotContain((await session.SnapshotAsync()).Pages, p => p.Name == sentinel);
+    }
+
     [Fact]
     public async Task ScratchCopy_ReadGroupLeavesBusinessAndDesignFingerprintsUnchanged()
     {

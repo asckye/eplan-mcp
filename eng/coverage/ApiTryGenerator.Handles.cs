@@ -6,7 +6,6 @@ namespace EplanMcp.Coverage;
 internal static partial class ApiTryGenerator
 {
     internal sealed record HandleModel(Dictionary<string, JsonElement> Types, HashSet<string> Reachable, (ApiEntry Entry, ApiDetail Member)[] Members);
-    private static string HandlePointArgument(ApiParameter p) => "(parameters[" + Literal(ParameterName(p)) + "]![\"handle\"] is not null ? ((System.Runtime.CompilerServices.StrongBox<global::Eplan.EplApi.Base.PointD>)resolve(parameters[" + Literal(ParameterName(p)) + "]!, \"Eplan.EplApi.Base.PointD\")).Value : new global::Eplan.EplApi.Base.PointD(parameters[" + Literal(ParameterName(p)) + "]![\"x\"]!.Value<double>(), parameters[" + Literal(ParameterName(p)) + "]![\"y\"]!.Value<double>()))";
     private static bool MatchHandle(string text, string pattern) => Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     internal static string? HandleRestriction(string type) => MatchHandle(type, "\\.(MasterData|PartsManagement|PartsService)(\\.|$)") ? "masterdata_copy_pending"
         : MatchHandle(type, "\\.(ApplicationFramework|Gui|System|.*Macro|.*File|.*Stream|.*Transaction|.*Lock|.*SafetyPoint)(\\.|$)") ? "handle_type_excluded" : null;
@@ -30,21 +29,26 @@ internal static partial class ApiTryGenerator
         }
         bool Eligible(ApiEntry e, ApiDetail d) => Receiver(e) && (e.Row.Kind == "method" || ObjectType(e.Type[2..], kinds) || reachable.Contains(e.Type[2..])) && Restriction(e, d) is null && Exclusion(e, d, enums, Expanded(), reachable.Contains(e.Type[2..]) ? null : services) is null
             && (e.Row.Kind == "method" || e.Row.Kind == "property" && d.Parameters is { Length: 0 } && d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true);
+        IEnumerable<string> Produced(ApiDetail d) => ProducedTypes(d).Where(Candidate);
         bool changed;
         do
         {
             changed = false;
             foreach (ApiEntry e in data.Entries.Where(Receiver))
             {
-                foreach (ApiDetail d in e.Details.Where(d => d.Kind == "overload" && Candidate(d.ReturnType)))
+                foreach (ApiDetail d in e.Details.Where(d => d.Kind == "overload" && Produced(d).Any()))
                 {
-                    string type = d.ReturnType!;
                     var expanded = Expanded();
-                    expanded[type.Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal)] = [];
+                    foreach (string produced in Produced(d))
+                    { expanded[produced.Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal)] = []; }
                     if (e.Row.Kind == "property" && !ObjectType(e.Type[2..], kinds) && !reachable.Contains(e.Type[2..]) || Restriction(e, d) is not null || Exclusion(e, d, enums, expanded, reachable.Contains(e.Type[2..]) ? null : services) is not null || e.Row.Kind == "property" && (d.Parameters is not { Length: 0 } || d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) != true))
                     { continue; }
-                    while (Candidate(type))
-                    { changed |= reachable.Add(type); type = Text(types[type], "base"); }
+                    foreach (string produced in Produced(d))
+                    {
+                        string type = produced;
+                        while (Candidate(type))
+                        { changed |= reachable.Add(type); type = Text(types[type], "base"); }
+                    }
                 }
             }
         } while (changed);
@@ -67,14 +71,14 @@ internal static partial class ApiTryGenerator
         HandleModel model = Handles(root);
         Dictionary<string, ApiTryServices.Service> serviceTypes = ApiTryServices.Load(root);
         Dictionary<string, string[]> enums = Enums(root);
-        string Shape(string type) => "[" + string.Join(", ", (enums.TryGetValue(type, out string[]? values) ? _enumShape.Concat(values) : [type]).Select(Literal)) + "]";
+        string Shape(string type) => CollectionShape(type, enums);
         string Switch(string name, IEnumerable<string> rows, string fallback = "null") => "    public static " + name + " switch { " + string.Join(" ", rows) + " _ => " + fallback + " };\n";
-        string Fields(ApiEntry e, ApiDetail d) => "[" + string.Join(", ", new[] { e.Type[2..], d.Signature! }.Concat(d.Parameters!.Select(ParameterName)).Select(Literal)) + "]";
+        string Fields(ApiEntry e, ApiDetail d) => "[" + string.Join(", ", CallShape(e, d).Select(Literal)) + "]";
         return Switch("bool HandleType(string type) => type", model.Reachable.Select(t => Literal(t) + " => true,"), "false")
             + Switch("string[]? HandleShape(string group) => group", model.Members.Where(s => s.Entry.Row.Kind == "property").Select(s => Literal(s.Entry.Row.Group) + " => " + Fields(s.Entry, s.Member) + ","))
             + Switch("string[]? HandleMethodShape(string group, System.Collections.Generic.IEnumerable<string> names) => (group, string.Join(\"|\", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Where(names, n => n != \"target\"), n => n, System.StringComparer.Ordinal)))", model.Members.Where(s => s.Entry.Row.Kind == "method").Select(s => "(" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => " + Fields(s.Entry, s.Member) + ","))
             + Switch("string? HandleMethodAccess(string group) => group", model.Members.Where(s => s.Entry.Row.Kind == "method").DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(ReadMethod(s.Entry) ? "read" : "write") + ","))
-            + Switch("string[]? HandleParameterShape(string signature, string name) => (signature, name)", model.Members.Where(s => s.Entry.Row.Kind == "method").SelectMany(s => s.Member.Parameters!.Select(p => "(" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
+            + Switch("string[]? HandleParameterShape(string signature, string name) => (signature, name)", model.Members.Where(s => s.Entry.Row.Kind == "method").SelectMany(s => Inputs(s.Member).Select(p => "(" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
             + Switch("string[]? HandleValueShape(string group) => group", model.Members.Where(s => s.Entry.Row.Kind == "property" && HandleSetter(s.Entry, s.Member) && Scalar(s.Member.ReturnType, enums)).Select(s => Literal(s.Entry.Row.Group) + " => " + Shape(s.Member.ReturnType!) + ","))
             + Switch("bool HandleService(string group) => group", model.Members.Where(s => serviceTypes.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,"), "false");
     }
@@ -87,22 +91,27 @@ internal static partial class ApiTryGenerator
         ApiIndexData data = Data(root);
         bool Struct(string t) => model.Types.TryGetValue(t, out JsonElement metadata) && metadata.GetProperty("kind").GetString() == "struct";
         string Cast(string t, string value) => Struct(t) ? "((System.Runtime.CompilerServices.StrongBox<global::" + t + ">)" + value + ").Value" : "((global::" + t + ")" + value + ")";
-        string Argument(string name, string type) => enums.TryGetValue(type, out string[]? values) ? "(p[" + Literal(name) + "]!.Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + type + "." + v)) + ", _ => throw new System.InvalidOperationException() })"
-            : ObjectType(type, kinds) || model.Reachable.Contains(type) ? Cast(type, "resolve(p[" + Literal(name) + "]!, " + Literal(type) + ")")
-            : type == "Eplan.EplApi.Base.PointD" ? "new global::Eplan.EplApi.Base.PointD(p[" + Literal(name) + "]![\"x\"]!.Value<double>(), p[" + Literal(name) + "]![\"y\"]!.Value<double>())" : "p[" + Literal(name) + "]!.Value<" + type + ">()";
+        var expanded = kinds.Concat(model.Reachable.Where(t => !ObjectType(t, kinds)).Select(t => new KeyValuePair<string, string[]>(t.Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal), []))).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
+        HashSet<string> structs = [.. model.Reachable.Where(Struct)];
+        string Argument(string name, string type) => ArgumentValue(type, "parameters[" + Literal(name) + "]", enums, expanded, structs);
         return "internal static class ApiTryHandleDispatch\n{\n    internal static bool Compatible(object value, string type) => type switch { " + string.Join(" ", model.Reachable.Select(t => Literal(t) + " => value is " + (Struct(t) ? "System.Runtime.CompilerServices.StrongBox<global::" + t + ">" : "global::" + t) + ",")) + " _ => false };\n"
             + "    internal static string? Type(object value) => value.GetType() switch { " + string.Join(" ", model.Reachable.Select(t => "var t when t == typeof(global::" + t + ") => " + Literal(t) + ",")) + " _ => null };\n"
             + "    internal static object Box(object value) => value switch { " + string.Join(" ", model.Reachable.Where(Struct).Select(t => "global::" + t + " v => new System.Runtime.CompilerServices.StrongBox<global::" + t + ">(v),")) + " _ => value };\n"
             + "    internal static object? Owner(object value) => value switch { " + string.Join(" ", model.Reachable.Select(t => (Type: t, Parent: data.Entries.FirstOrDefault(e => e.Type == "T:" + t && e.Name is "Project" or "ParentFunction" or "Parent" && e.Details.Any(d => d.Accessors?.Contains("get", StringComparison.Ordinal) == true && ObjectType(d.ReturnType, kinds) && d.Access is null && d.ExcludedReason is null && !d.Static && d.Parameters is { Length: 0 })))).Where(p => p.Parent is not null).Select(p => "global::" + p.Type + " v when v.GetType() == typeof(global::" + p.Type + ") => v." + p.Parent!.Name + ",")) + " _ => value };\n"
-            + "    internal static object? Invoke(string signature, object target, JObject p, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
+            + "    internal static object? Invoke(string signature, object target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
             + string.Join("\n", model.Members.Select(s =>
             {
+                if (s.Entry.Row.Kind == "method")
+                {
+                    bool serviceReceiver = services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? helper) && helper.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..]);
+                    return MethodCase(s.Entry, s.Member, enums, expanded, services, serviceReceiver ? null : Cast(s.Entry.Type[2..], "target"), structs);
+                }
                 string receiver = Cast(s.Entry.Type[2..], "target") + "." + s.Entry.Name;
                 string construct = "";
                 if (services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..]))
                 { construct = (service.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..] + "(); "; receiver = "service." + s.Entry.Name; }
                 string call = s.Entry.Row.Kind == "property" ? receiver : receiver + "(" + string.Join(", ", s.Member.Parameters!.Select(p => Argument(ParameterName(p), p.Type))) + ")";
-                string setter = s.Entry.Row.Kind == "property" && HandleSetter(s.Entry, s.Member) && Scalar(s.Member.ReturnType, enums) ? "if (p.ContainsKey(\"value\")) { " + receiver + " = " + Argument("value", s.Member.ReturnType!) + "; } " : "";
+                string setter = s.Entry.Row.Kind == "property" && HandleSetter(s.Entry, s.Member) && Scalar(s.Member.ReturnType, enums) ? "if (parameters.ContainsKey(\"value\")) { " + receiver + " = " + Argument("value", s.Member.ReturnType!) + "; } " : "";
                 return "            case " + Literal(s.Member.Signature!) + ": { " + construct + setter + (s.Member.ReturnType == "System.Void" ? call + "; return null;" : "return " + call + ";") + " }";
             })) + "\n            default: throw new System.InvalidOperationException(\"No compiled handle dispatch.\");\n        }\n    }\n}\n";
     }

@@ -138,7 +138,7 @@ public sealed class ApiTrySettingsOperationTests
             { throw new InvalidOperationException("read refused"); }
             return args.Group == Prefix + "DataModel.Project.Settings" ? "PROJECT" : "{\"items\":[\"A\"],\"total\":1,\"nextOffset\":null}";
         }
-        public Dictionary<string, string> Inspect(string project)
+        public Dictionary<string, string> Inspect(ApiTryArgs args)
         { Inspections++; return new() { ["snapshot:1"] = Calls > 0 && ChangeOnInvoke ? "changed" : "before" }; }
     }
 }

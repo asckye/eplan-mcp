@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
-internal static class ApiTrySchema
+internal static partial class ApiTrySchema
 {
     internal static void Configure(McpServerOptions options, bool enabled)
     {
@@ -16,6 +16,7 @@ internal static class ApiTrySchema
         input["properties"]!["parameters"]!["additionalProperties"]!["oneOf"]!.AsArray().Add(handle.DeepClone());
         JsonNode output = JsonNode.Parse(tool.ProtocolTool.OutputSchema!.Value.GetRawText())!;
         output["properties"]!["value"] = new JsonObject { ["oneOf"] = new JsonArray(JsonNode.Parse("""{"type":"string"}"""), input["properties"]!["parameters"]!["additionalProperties"]!["oneOf"]![4]!.DeepClone(), handle.DeepClone(), JsonNode.Parse("""{"type":"null"}""")) };
+        ConfigureArrays(input, output);
         tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(output);
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
         if (enabled)

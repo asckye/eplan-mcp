@@ -144,7 +144,7 @@ public sealed class ApiTryFilesTests : IDisposable
         public int Invocations { get; private set; }
         public string? Failure { get; set; }
         public void CheckTarget(ApiTryArgs args) { }
-        public Dictionary<string, string> Inspect(string project) => new() { ["snapshot:1"] = "unchanged" };
+        public Dictionary<string, string> Inspect(ApiTryArgs args) => new() { ["snapshot:1"] = "unchanged" };
         public string? Read(ApiTryArgs args) => null;
         public object? Invoke(ApiTryArgs args)
         {

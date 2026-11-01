@@ -56,7 +56,7 @@ internal static class ApiTryServices
             { return "printer_parameter"; }
             if (Match(descriptor, "url|uri"))
             { return "url_parameter"; }
-            if (Match(descriptor, "file|directory|dir(?:name|$| )|folder|path|archive|macro|xml|template") || p.Type == "System.String" && Match(p.Name, "project")
+            if (Match(descriptor, "file|directory|dir(?:name|$| )|folder|path|archive|macro|xml|template") || (p.Type == "System.String" || ApiTryGenerator.Element(p.Type.TrimEnd('@')) == "System.String") && Match(p.Name, "project")
                 || type == "Eplan.EplApi.HEServices.PlcService" && entry.Name == "ImportData" && p.Name == "strFullName")
             { return "external_path_parameter"; }
         }
