@@ -17,7 +17,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
     private static string Session() { using var host = System.Diagnostics.Process.GetCurrentProcess(); return host.Id.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + host.StartTime.ToUniversalTime().Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + Guid.NewGuid().ToString("N"); }
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
-    [Description("Try scratch APIs, including create/remove; per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.")]
+    [Description("Try scratch APIs, including create/remove; per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. Follow returned handles/collection locators across calls (type depth <=4); indexed properties are read-only. See eplan_tool_usage for examples.")]
     public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, string? result_cursor = null, CancellationToken cancellationToken = default)
     {
         try

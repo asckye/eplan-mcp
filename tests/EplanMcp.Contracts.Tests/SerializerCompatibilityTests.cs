@@ -20,6 +20,9 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new ApiHandleElements(),
+        new ApiHandleElements { Items = [new() { Handle = "h:" + new string('a', 32), Type = "Eplan.EplApi.DataModel.Pin" }], Collection = new() { Handle = "h:" + new string('b', 32), Type = "Eplan.EplApi.EServices.SubProjectsCollection" } },
+        new ApiTryData { Elements = new() { Items = [new() { Handle = "h:" + new string('a', 32), Type = "Eplan.EplApi.DataModel.Connection" }] }, HandleSource = "O:Eplan.EplApi.DataModel.Pin.Connections" },
         new ImportPdfCommentsArgs(),
         new ImportPdfCommentsArgs { Project = "Line1", File = "review.pdf", FilePath = @"D:\Imports\review.pdf", Sha256 = new string('a', 64), Fingerprint = "f" },
         new ImportPdfCommentsData(),

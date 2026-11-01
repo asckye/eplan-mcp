@@ -131,6 +131,7 @@
 - 该异常被只读失败边界包装成 `EPLAN_OPERATION_FAILED / rolled_back`，不能据此断言 Pin 属性需要 UI 上下文。06:12:21.460 的 `fe047fdfe3534a609e7ffd6ef3eae6bc` 是 A63 中 `NameService.CanDeviceTagBeNested(Function)` 的 S029128 拒绝，属于另一条服务测试。— 同上两个日志与 `ApiTryTests.ScratchCopy_ServiceReadLeavesBusinessAndDesignFilesUnchanged`。
 - 修复以实际 `ProjectLinkFilePath`、同名 `.edb` 和各级父目录复核归属与链接；Small 用无扩展名不存在、`.elk` 存在的输入复现。本次仅离线验证，Pin 属性读写及单步撤销仍待实机复验，原 Large 断言保留。
 - 2026-11-01 重跑（EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本，A 槽串行）：ApiTryTests 9/9 通过，含 `LargeWrite_PinHandleReadAndWriteUseOneUndoStepAndPreserveEarlierHistory`。— Large 测试 TRX 计数。
+- ADR-0033 链式片（2026-11-01，仅目录、本机 XML 与编译核对）：`Pin.Connections` 返回以该连接点为端点的连接；`Project.Settings` 返回 ProjectSettings。`GraphicalLayerTable.Layer` 与 `UniversalPropertyList.Property` 是默认索引器，须生成 `receiver[key]`；`PlaceHolder.NameOfRecord/Value` 是可用 `get_...` 调用的命名参数属性。PlaceHolder.Variables/ValueSets 是类型层字段，未登记为操作组，本片只在来源缺口中列出。— `catalog/eplan-2026.0.3/`、本机 `Eplan.EplApi.DataModelu.xml` 对应成员及 Bridge 编译；链式行为与撤销仅编写 Large 测试，未实机验证。
 
 ### A76. 原生调用前置条件（2026-11-01，离线文档核对；实机待验）
 

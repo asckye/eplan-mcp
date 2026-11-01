@@ -1,5 +1,6 @@
 using EplanMcp.Contracts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Outcome-tracked trials; writes share one SafetyPoint and undo step with their observations.</summary>
 public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch, ITransactionScopeFactory transactions) : Operation<ApiTryArgs, ApiTryData>, IWriteOperation
@@ -81,7 +82,8 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             if (setter && value != Convert.ToString(((Newtonsoft.Json.Linq.JValue)ApiTryPlanOperation.Parameters(args.Parameters)["value"]!).Value, System.Globalization.CultureInfo.InvariantCulture))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property did not read back as requested; the trial was rolled back."); }
             OperationContext.Current.ThrowIfCancellationRequested();
-            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Handle = result as ApiObjectHandle, HandleSource = result is ApiObjectHandle ? args.Group : null, ResultJson = (result as Newtonsoft.Json.Linq.JToken)?.ToString(Formatting.None), Before = before, After = ApiTryFiles.Observe(args, dispatch.Inspect(args)), Files = ApiTryFiles.Outputs(args) };
+            bool handles = result is ApiObjectHandle || result is JContainer json && json.DescendantsAndSelf().OfType<JObject>().Any(obj => obj.Count == 2 && obj["handle"]?.Type == JTokenType.String && obj["type"]?.Type == JTokenType.String && ApiObjectHandle.Valid((string?)obj["handle"], (string?)obj["type"]));
+            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Handle = result as ApiObjectHandle, HandleSource = handles ? args.Group : null, ResultJson = (result as JToken)?.ToString(Formatting.None), Before = before, After = ApiTryFiles.Observe(args, dispatch.Inspect(args)), Files = ApiTryFiles.Outputs(args) };
             if (setter)
             { data.After[key] = JsonConvert.SerializeObject(value); }
             OperationContext.Current.ThrowIfCancellationRequested();

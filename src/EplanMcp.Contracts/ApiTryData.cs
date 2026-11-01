@@ -8,6 +8,8 @@ public sealed class ApiTryData
     public DrawingLocator? Locator { get; set; }
     /// <summary>Borrowed object reference scoped to this Host session and EPLAN process.</summary>
     public ApiObjectHandle? Handle { get; set; }
+    /// <summary>Bounded element handles, and an optional native collection handle.</summary>
+    public ApiHandleElements? Elements { get; set; }
     /// <summary>Catalog group that produced the handle; audit metadata contains no object contents.</summary>
     public string? HandleSource { get; set; }
     /// <summary>Detached JSON for collection, PointD or named output results.</summary>

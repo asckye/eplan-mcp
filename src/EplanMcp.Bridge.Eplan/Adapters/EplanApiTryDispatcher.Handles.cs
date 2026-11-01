@@ -75,19 +75,24 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         { result = InvokeEntry(args, p, target.Value, ApiTryCatalog.MethodAccess(args.Group) is not null, Resolver); }
         if (result is null || read)
         { return result; }
-        return Detach(args.Project, result, native: value => NativeResult(args, value, target), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);
+        result = ApiTryHandleDispatch.Elements(shape[1], result);
+        if (result is ApiTryNativeElements elements)
+        { return CaptureElements(args, elements, target, shape[1]); }
+        return Detach(args.Project, result, native: value => NativeResult(args, value, target, ReferenceEquals(value, result) ? ChainResultType(value, shape[1]) : null), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);
     }
-    private object NativeResult(ApiTryArgs args, object result, (object? Value, Func<string?> Owner, bool ReadOnly) target)
+    private object NativeResult(ApiTryArgs args, object result, (object? Value, Func<string?> Owner, bool ReadOnly) target, string? declared = null)
     {
         if (result is StorableObject obj && ObjectReadTypes.Types.Where(ObjectReadTypes.Supported).Any(k => EplanObjectReader.Matches(obj, k.ToLowerInvariant())))
         { return Locator(args.Project, obj); }
-        if (ApiTryHandleDispatch.Type(result) is not { } nativeType)
+        if ((ApiTryHandleDispatch.Type(result) ?? declared) is not { } nativeType)
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned native type has no compiled handle adapter."); }
         object borrowed = ApiTryHandleDispatch.Box(result);
+        if (!ApiTryHandleDispatch.Compatible(borrowed, nativeType))
+        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned object does not match its compiled type."); }
         Func<string?> check = ReferenceEquals(ApiTryHandleDispatch.Owner(result), result) && result is not StorableObject ? target.Owner : () => NativeOwner(result);
         string? project = check();
         if (project is null || !ProjectResolver.SamePath(args.Project, project) || !Scratch(args, project))
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "The returned object must belong to the approved scratch project."); }
-        return _handles.Add(args.HostSession, borrowed, nativeType, args.Group, check, target.ReadOnly || SettingsHandle(nativeType));
+        return _handles.Add(args.HostSession, borrowed, nativeType, args.Group, check, target.ReadOnly || ChainReadOnly(nativeType));
     }
 }

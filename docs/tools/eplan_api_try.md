@@ -29,6 +29,8 @@
 设置/方案对象的方法写入和 setter 不生成，方法在清单中标记 `settings_write`；设置名 strSettingPath 是内部设置键，不能借此调用文件导入/导出。静态 setter 同样不开放。via 不接受任意类型名、反射、集合或第三层；原定位器仍校验摘要，路径和选择器纳入审批原文及计划指纹。规划仅校验父定位器，不读取 via getter；审批之后才跟随路径。临时辅助对象按请求释放，借用 StorableObject 不释放。新增 Small 覆盖静态/两层入口与失败校验；LargeWrite 新增静态、设置读取和经 Function.Page 写 GridSize 的一步撤销及历史哨兵测试，仅编写未运行。静态/via 切片当时未改 schema，本次 schema 取句柄与数组/输出参数的并集。以下为该片历史统计，当前以生成清单为准。TSV 保持方法逐签名口径：按 group 去重，读 49→67、写 184→192、整组排除 714→818；有任一签名被排除的组为 743→847（与可执行组可重叠）。本片新增静态/属性入口类型，纳入清单的方法组总数 947→1077；这些计数不包含属性 getter/setter。
 
 ## 2. 输出与错误
+链式扩展沿用 main 已验证的句柄表、会话和到期规则；生成返回类型闭包最多 4 层，继承和已实现接口不额外计层。集合先有界枚举前 200 个元素、略去空项，再经既有 Detach：有限数值、locator 优先于 handle，每个句柄复用 A68 的 ProjectLinkFilePath、同名 .edb 与父目录归属检查。数组沿用缓存分页；原生集合通过既有命名输出形状返回 returnValue（集合句柄）和 outputs.items（元素分页），不另设旧式句柄专用结果。简单键索引属性按完整参数名集合选择唯一只读签名，Int16/UInt32 检查范围；类型层字段仍不可调用。设置与派生句柄只读，链式行为和撤销未运行实机验证。
+
 ### 设置只读切片
 `Settings`、`SettingNode`、`SchemeSetting`、`ProjectSettings`、`ProjectSettingNode` 及 `Project.DeviceTagSettings` 的公开读取使用 scratch Project 定位器作为 `target`；`Project.Settings` 返回根标记 `PROJECT`，后续通过同一定位器读取项目设置，不返回原生句柄。除根标记和 DeviceTagSettings 属性外，参数增加 `node`：只允许 `USER`、`STATION`、`PROJECT` 及逐级枚举出的子节点；ProjectSettings/ProjectSettingNode 只接受 PROJECT。Base.Settings 只接受 USER/STATION；Base.SettingNode/SchemeSetting 在 PROJECT 下分别绑定 ProjectSettingNode/ProjectSchemeSetting。
 

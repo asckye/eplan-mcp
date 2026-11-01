@@ -101,5 +101,10 @@ public sealed partial class ApiTryContractTests
         Assert.DoesNotContain(array.GetProperty("items").GetProperty("oneOf").EnumerateArray(), s => s.GetProperty("type").GetString() == "array");
         Assert.Equal(1024, tool.InputSchema.GetProperty("properties").GetProperty("result_cursor").GetProperty("maxLength").GetInt32());
         Assert.Equal(7, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
+        JsonElement returned = tool.OutputSchema.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf");
+        JsonElement page = Assert.Single(returned.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("nextCursor", out _));
+        JsonElement elements = page.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
+        Assert.Contains(elements.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("digest", out _));
+        Assert.Contains(elements.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("handle", out _));
     }
 }

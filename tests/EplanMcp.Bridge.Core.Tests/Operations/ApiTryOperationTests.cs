@@ -493,7 +493,7 @@ public sealed partial class ApiTryOperationTests
             { throw failure; }
             if (ApiTryCatalog.MethodAccess(args.Group) is not null)
             { return MethodResult; }
-            return Value;
+            return MethodResult ?? Value;
         }
     }
 }

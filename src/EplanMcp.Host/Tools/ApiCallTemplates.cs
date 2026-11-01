@@ -11,11 +11,13 @@ internal static class ApiCallTemplates
         string group = entry.Row.Group;
         if (entry.Row.ExcludedReason is null && ApiTryCatalog.Allowed(group))
         {
-            JsonObject[] methods = [.. ApiTryCatalog.Methods(group).SelectMany(s => Templates(group, s, ApiTryCatalog.MethodAccess(group)!, false))];
-            if (methods.Length > 0)
+            JsonObject[] methods = [.. ApiTryCatalog.Methods(group).SelectMany(s => Templates(group, s, ApiTryCatalog.MethodAccess(group) ?? "read", false))];
+            if (methods.Length > 0 && (entry.Row.Kind != "property" || ApiTryCatalog.Settings(group)))
             { return methods; }
             if (ApiTryCatalog.Shape(group) is { } shape)
-            { return ApiTryCatalog.ValueShape(group) is null ? [.. Templates(group, shape, "read", false)] : [.. Templates(group, shape, "read", false), .. Templates(group, shape, "write", true)]; }
+            { return ApiTryCatalog.ValueShape(group) is null ? [.. methods, .. Templates(group, shape, "read", false)] : [.. methods, .. Templates(group, shape, "read", false), .. Templates(group, shape, "write", true)]; }
+            if (methods.Length > 0)
+            { return methods; }
         }
         return [new() { ["dispatchable"] = false, ["exclusion_reason"] = ApiTryCatalog.ExclusionReason(group) ?? entry.Row.ExcludedReason ?? "No compiled signature in the generated dispatch catalog.",
             ["alternatives"] = JsonSerializer.SerializeToNode(entry.Row.Tools) }];
@@ -120,7 +122,7 @@ internal static class ApiCallTemplates
         { return (Locator(kinds.Contains(type.Split('.').Last().ToLowerInvariant(), StringComparer.Ordinal) ? type.Split('.').Last().ToLowerInvariant() : kinds[0]), LocatorExample()); }
         else
         {
-            type = type switch { "System.String" => "string", "System.Boolean" => "bool", "System.Int32" or "System.Int64" => "int", "System.Double" => "double", "Eplan.EplApi.Base.PointD" => "PointD", _ => throw new InvalidOperationException("Unknown generated parameter kind: " + type) };
+            type = type switch { "System.String" => "string", "System.Boolean" => "bool", "System.Int16" or "System.UInt32" or "System.Int32" or "System.Int64" => "int", "System.Double" => "double", "Eplan.EplApi.Base.PointD" => "PointD", _ => throw new InvalidOperationException("Unknown generated parameter kind: " + type) };
             value = type switch { "bool" => JsonValue.Create(false)!, "int" => JsonValue.Create(1)!, "double" => JsonValue.Create(1.0)!, "PointD" => new JsonObject { ["x"] = 0, ["y"] = 0 }, _ => JsonValue.Create("<string>")! };
         }
         description["kind"] = type;
