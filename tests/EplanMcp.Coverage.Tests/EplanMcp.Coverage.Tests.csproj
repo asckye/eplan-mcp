@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\eng\coverage\EplanMcp.Coverage.csproj" />
+    <Compile Include="..\..\eng\scripts\TestImpact.cs" Link="TestImpact.cs" />
+    <EmbeddedResource Include="fixtures\linked-project.csproj" LogicalName="TestImpact.linked-project.csproj" />
+    <EmbeddedResource Include="..\..\eng\scripts\check-test-floor.ps1" LogicalName="Gate.check-test-floor.ps1" />
   </ItemGroup>
 </Project>

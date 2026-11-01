@@ -91,16 +91,18 @@ worktree 分支名表达任务即可，不要求 Issue 号。只保留 `main` �
 
 ## 7. 本地关卡与 CI
 
-`eng/scripts/local-gate.ps1` 是 main 落地前的阻塞关卡；GitHub CI 是推送后的非阻塞检查。脚本检查相对 `origin/main` 的变更，Small/Medium 程序集选择由 `eng/scripts/affected-tests.ps1` 决定；改构建配置、脚本或共享测试设施时跑全部。`-Full` 跑全部，CI 在 main 上始终跑全部。自动选程序集不能替代人工选择受影响 Large 类。
+`eng/scripts/local-gate.ps1` 是 main 落地前的阻塞关卡；GitHub CI 是推送后的非阻塞检查。脚本要求已提交的干净工作区，没有 dry mode。脚本检查相对 `origin/main` 的变更，Small/Medium 程序集选择由 `eng/scripts/affected-tests.ps1` 决定，含项目依赖、外链编译/资源项及重命名两端；改构建配置、脚本或共享测试设施时跑全部。`-Full` 跑全部，CI 在 main 上始终跑全部。自动选程序集不能替代人工选择受影响 Large 类。
 
 | 关卡 | 实际检查 |
 |---|---|
-| 提交信息 | `eng/scripts/check-commit-message.sh` 检查待推送提交，规则见第 5 节；外部 PR 的标题/描述由 CI 检查。 |
-| 还原与构建 | `EplanMcp.Ci.slnf`，Release，警告即错误；CI 用锁定还原。 |
-| 格式 | `dotnet format EplanMcp.Ci.slnf --verify-no-changes`。 |
-| Action 目录 | `eng/scripts/check-action-catalog.ps1`。 |
+| 工作区与推送 | 开始和还原后检查 `git status --porcelain`（含未跟踪文件）为空；仅 `-Push` 拉取、变基，并在关卡通过且远端未变化时推送。 |
+| 提交信息 | `eng/scripts/check-commit-message.sh --subject` 逐个检查待推送提交的主题与正文，规则见第 5 节；外部 PR 的标题/描述由 CI 检查。 |
+| 还原与构建 | 本地 dotnet 调用设置 `CI=true`，锁定还原；按插件项目求值的 `EplanBinPath` 与 API 引用检测安装，DLL 齐全则还原并 Release 构建 `EplanMcp.slnx`（含 Bridge.Eplan/Offline、分析器及 RS0030），否则打印 `add-in not checked: EPLAN not installed` 并使用 `EplanMcp.Ci.slnf`。CI 始终使用 CI filter；警告即错误。 |
+| 格式 | 对上述选中的解决方案运行 `dotnet format --verify-no-changes --no-restore`；有 EPLAN 时包含插件。 |
+| Action 目录 | `eng/scripts/check-action-catalog.ps1` 核对 JSON Schema、ID、顺序、文档表格逐行内容与预期数量。 |
 | 覆盖文件 | `eng/coverage` 的 `check`；扫描过期只警告，生成结果不一致失败。 |
-| Small/Medium | 按影响范围运行，含契约快照；数量下限见 [testing.md 第 7 节](../standards/testing.md#7-测试数量下限)。 |
+| Small/Medium | 按影响范围运行 CI filter 中的测试（排除 `Size=Large`），含契约快照；每程序集一个独立命名的 TRX，不重跑补结果，无受影响程序集时跳过。 |
+| 测试数量 | 同一次运行中，缺结果、通过数低于下限、未知程序集或下限低于通过数的 80% 均失败；更新到通过数的 90% 向下取整。降低下限须在提交正文说明原因，见 [testing.md 第 7 节](../standards/testing.md#7-测试数量下限)。 |
 | 依赖安全 | `dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive`，High/Critical 失败。 |
 
 Large 和 Agent 评测由维护者在一台 EPLAN 机器上串行安排，不在本地自动关卡或公共 CI 内运行，不使用自托管 runner（ADR-0020）。EPLAN 行为变更满足第 2 节规则；批次和证据见 [实机验证](live-verification.md)。CI 红灯须立即补修复变更集。

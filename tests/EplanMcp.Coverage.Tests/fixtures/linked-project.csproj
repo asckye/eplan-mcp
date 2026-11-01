@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Include="..\Large.Tests\Acceptance.cs" Link="Acceptance.cs" />
+    <Compile Include="..\Host.Tests\ManualTime.cs"><Link>Shared\ManualTime.cs</Link></Compile>
+    <EmbeddedResource Include="..\Snapshots\*-json.verified.json" />
+    <None Include="..\fixtures\**\*.json" Exclude="..\fixtures\private\**" />
+    <Content Include="..\assets\logo.svg;..\assets\theme?.css" />
+    <Compile Include="Internal.cs" Link="..\Virtual\Internal.cs" />
+    <ProjectReference Include="..\Unrelated\Unrelated.csproj" />
+  </ItemGroup>
+</Project>

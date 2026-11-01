@@ -1,11 +1,12 @@
 <#
 .SYNOPSIS
-    Checks that every test assembly passed at least its floor in tests\test-suites.json.
+    Checks the minimum passed count and floor freshness in tests\test-suites.json.
 
 .DESCRIPTION
     A wrong filter or a broken discovery passes with few or no tests run: every test assembly must pass at least its
     floor in tests\test-suites.json, and every assembly that ran must be listed there (testing.md section 7). Run by
     CI (.github\workflows\build.yml) and by eng\scripts\local-gate.ps1 on the TRX files of one test run.
+    A floor below 80% of that run's passed count also fails; update it to floor(90% of passed).
 
 .PARAMETER ResultsDirectory
     The directory that holds the *.trx files of the run.
@@ -37,6 +38,8 @@ foreach ($suite in $suites) {
         $errors += "$($suite.assembly) has no test results: it ran no tests or did not run."
     } elseif ($passed[$suite.assembly] -lt $suite.minPassed) {
         $errors += "$($suite.assembly) passed $($passed[$suite.assembly]) tests, below its floor of $($suite.minPassed). Check the test filter, the Size traits and test discovery."
+    } elseif ($suite.minPassed -lt 0.8 * $passed[$suite.assembly]) {
+        $errors += "$($suite.assembly) floor $($suite.minPassed) is below 80% of its $($passed[$suite.assembly]) passed tests in this run. Raise it to floor(90% of passed); lowering a floor still requires a reason in the commit body."
     } else {
         Write-Output "$($suite.assembly): $($passed[$suite.assembly]) passed, floor $($suite.minPassed)"
     }

@@ -11,7 +11,8 @@
       2. with -Push: fetch and rebase onto origin/main;
       3. every commit in origin/main..HEAD against eng\scripts\check-commit-message.sh (Conventional Commits, no AI
          attribution);
-      4. restore, Release build (warnings as errors), format, action catalog, coverage files, the Small and Medium
+      4. locked restore, clean-tree check, Release build (warnings as errors), format (including the add-in when its
+         EPLAN API assemblies are installed), action catalog, coverage files, the Small and Medium
          tests of the assemblies the changes since origin/main can affect (eng\scripts\affected-tests.ps1; -Full runs
          every assembly) with the test count floor, vulnerable packages;
       5. with -Push: push HEAD to main, only if origin/main has not moved since the rebase.
@@ -43,9 +44,27 @@ function Step([string]$name, [scriptblock]$command) {
     Write-Output ("   {0:n0} s" -f ((Get-Date) - $started).TotalSeconds)
 }
 
-if (git status --porcelain --untracked-files=all) {
-    throw 'The working tree has uncommitted or untracked files; commit or remove them so the gate checks what is pushed.'
+function Assert-CleanTree {
+    $status = @(git status --porcelain --untracked-files=all)
+    if ($LASTEXITCODE -ne 0) { throw 'Could not check the working tree.' }
+    if ($status.Count -gt 0) { throw 'The working tree has uncommitted or untracked files; the gate requires a clean tree, including after restore.' }
 }
+
+function Get-GateSolution {
+    # Evaluate the same EplanBinPath and API HintPaths as the projects, including environment overrides.
+    $references = @(foreach ($project in 'EplanMcp.Bridge.Eplan', 'EplanMcp.Bridge.Offline') {
+        $data = dotnet msbuild "src/$project/$project.csproj" -nologo -getProperty:EplanBinPath -getItem:Reference
+        if ($LASTEXITCODE -ne 0) { throw "Could not evaluate EPLAN API references for $project." }
+        ($data | Out-String | ConvertFrom-Json).Items.Reference | Where-Object { $_.Identity -like 'Eplan.EplApi.*' }
+    })
+    if ($references.Count -eq 0 -or @($references | Where-Object { -not (Test-Path -LiteralPath $_.HintPath -PathType Leaf) }).Count -gt 0) {
+        Write-Host 'add-in not checked: EPLAN not installed'
+        return 'EplanMcp.Ci.slnf'
+    }
+    return 'EplanMcp.slnx'
+}
+
+Assert-CleanTree
 
 if ($Push) {
     Step 'Rebase onto origin/main' { git fetch --quiet origin main; git rebase --quiet origin/main }
@@ -71,13 +90,19 @@ Step 'Commit messages' {
 
 $suites = @((Get-Content tests/test-suites.json -Raw | ConvertFrom-Json).suites.assembly)
 $affected = if ($Full) { $suites } else { @(pwsh -NoProfile -File eng/scripts/affected-tests.ps1 -Base $base) }
+if (-not $Full -and $LASTEXITCODE -ne 0) { throw 'Affected test selection failed.' }
 Write-Output ("== Tests to run: " + $(if ($affected.Count -eq $suites.Count) { 'all' } else { $affected -join ', ' }))
 $filter = Join-Path $root '.gate-tests.slnf'
 $results = Join-Path ([IO.Path]::GetTempPath()) ("eplanmcp-gate-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+$previousCI = $env:CI
+$previousHangReport = $env:EPLANMCP_HANG_REPORT_DIR
 try {
-    Step 'Restore' { dotnet restore EplanMcp.Ci.slnf }
-    Step 'Build' { dotnet build EplanMcp.Ci.slnf -c Release --no-restore -nodeReuse:false }
-    Step 'Format' { dotnet format EplanMcp.Ci.slnf --verify-no-changes --no-restore }
+    $env:CI = 'true'
+    $buildSolution = Get-GateSolution
+    Step 'Restore (locked)' { dotnet restore $buildSolution }
+    Assert-CleanTree
+    Step 'Build' { dotnet build $buildSolution -c Release --no-restore -nodeReuse:false }
+    Step 'Format' { dotnet format $buildSolution --verify-no-changes --no-restore }
     Step 'Action catalog' { pwsh -NoProfile -File eng/scripts/check-action-catalog.ps1 }
     Step 'Coverage files' { dotnet run --project eng/coverage -c Release --no-build -- check }
     Step 'Small and Medium tests' {
@@ -96,19 +121,7 @@ try {
     Step 'Test count floor' {
         # No affected assembly means no results to judge; an empty list would otherwise read as every suite.
         if ($affected.Count -eq 0) { Write-Output '   no test assembly is affected'; $global:LASTEXITCODE = 0; return }
-        $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies ($affected -join ',') 2>&1; $floorExit = $LASTEXITCODE
-        # TRX names carry only a timestamp, so two assemblies finishing together can overwrite each other's file; rerun
-        # an assembly that left no results on its own before judging the floor.
-        $rerunFailed = $false
-        $missing = @($floor | Select-String '(\S+) has no test results' | ForEach-Object { $_.Matches[0].Groups[1].Value })
-        foreach ($assembly in $missing) {
-            Write-Output "   rerunning $assembly for its results"
-            dotnet test --project "tests/$assembly" -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory $results | Out-Null
-            if ($LASTEXITCODE -ne 0) { $rerunFailed = $true; Write-Output "   $assembly failed when rerun" }
-        }
-        if ($missing.Count -gt 0) { $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies ($affected -join ',') 2>&1; $floorExit = $LASTEXITCODE }
-        $floor | ForEach-Object { Write-Output "   $_" }
-        $global:LASTEXITCODE = if ($rerunFailed -or $floorExit -ne 0 -or ($floor | Select-String 'has no test results|below its floor|is not in tests/test-suites.json')) { 1 } else { 0 }
+        pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies ($affected -join ',')
     }
     Step 'Vulnerable packages' {
         $data = dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive --format json | Out-String | ConvertFrom-Json
@@ -119,6 +132,8 @@ try {
         if ($found.Count -gt 0) { $found | ForEach-Object { Write-Error $_ -ErrorAction Continue }; $global:LASTEXITCODE = 1 }
     }
 } finally {
+    $env:CI = $previousCI
+    $env:EPLANMCP_HANG_REPORT_DIR = $previousHangReport
     Remove-Item -Recurse -Force $results -ErrorAction SilentlyContinue
     Remove-Item -Force $filter -ErrorAction SilentlyContinue
 }

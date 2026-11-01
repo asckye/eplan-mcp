@@ -10,8 +10,9 @@
         tests\test-suites.json): every assembly;
       - a file of a project in EplanMcp.Ci.slnf: every listed test assembly that references the project directly or
         through other projects, and the test project itself;
-      - anything else (docs, catalog, evals data, snapshots, the add-in, which no CI test builds): every assembly
-        except the Workbench ones, whose tests read no repository files.
+      - external Compile/EmbeddedResource/None/Content items: the test projects linking the changed file;
+      - files outside known projects: every assembly except the Workbench ones, plus any linking projects above.
+        Workbench embeds repository sources and snapshots, so it also needs the explicit linked-item mapping.
 
     Prints one assembly name per line, in the order of tests\test-suites.json.
 
@@ -27,6 +28,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $suites = @((Get-Content (Join-Path $root 'tests/test-suites.json') -Raw | ConvertFrom-Json).suites.assembly)
 $workbench = @('EplanMcp.Workbench.Tests', 'EplanMcp.Workbench.Protocol.Tests')
+if (-not ('EplanMcp.Build.TestImpact' -as [type])) { Add-Type -Path (Join-Path $PSScriptRoot 'TestImpact.cs') }
+$linkedProjects = @(Get-ChildItem (Join-Path $root 'tests') -Filter '*.Tests.csproj' -Recurse | ForEach-Object {
+    @{ File = $_.FullName; Xml = Get-Content $_.FullName -Raw; Assembly = $_.BaseName }
+})
 
 # Project directory (repository-relative, '/') -> repository-relative directories of the projects it references.
 $projects = @{}
@@ -53,8 +58,15 @@ function Closure([string]$project) {
 
 $buildWide = '^(Directory\.Build\.(props|targets)|Directory\.Packages\.props|global\.json|NuGet\.config|\.editorconfig|[^/]+\.slnx?|[^/]+\.slnf|eng/scripts/|tests/Shared/|tests/Directory\.Build\.(props|targets)|tests/test-suites\.json)'
 $selected = [Collections.Generic.HashSet[string]]::new()
-foreach ($file in git -C $root diff --name-only "$Base..$Head") {
+$changes = @(git -C $root -c core.quotePath=false diff --name-status -M "$Base..$Head")
+if ($LASTEXITCODE -ne 0) { throw 'Could not list changed files.' }
+foreach ($file in [EplanMcp.Build.TestImpact]::ChangedPaths([string[]]$changes)) {
     if ($file -match $buildWide) { $suites; return }
+    foreach ($project in $linkedProjects) {
+        if ([EplanMcp.Build.TestImpact]::LinksFile($project.File, $project.Xml, (Join-Path $root $file))) {
+            [void]$selected.Add($project.Assembly)
+        }
+    }
     $owner = $projects.Keys | Where-Object { $file.StartsWith("$_/", [StringComparison]::Ordinal) } | Sort-Object Length -Descending | Select-Object -First 1
     if ($owner) {
         foreach ($test in $suites) {
