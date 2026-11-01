@@ -74,21 +74,19 @@ public sealed class ApiTryGeneratorTests
 
     [Theory]
     [InlineData("Dispose", "System.Int32", "lifecycle_or_creation")]
-    [InlineData("RemoveFromPage", "System.Int32", "lifecycle_or_creation")]
-    [InlineData("DeleteRecord", "System.Int32", "lifecycle_or_creation")]
     [InlineData("Destroy", "System.Int32", "lifecycle_or_creation")]
     [InlineData("Initialize", "System.Int32", "lifecycle_or_creation")]
     [InlineData("init", "System.Int32", "lifecycle_or_creation")]
     [InlineData("LockObject", "System.Int32", "lifecycle_or_creation")]
     [InlineData("Freeze", "System.Int32", "lifecycle_or_creation")]
-    [InlineData("EraseAll", "System.Int32", "lifecycle_or_creation")]
-    [InlineData("CreateTransient", "System.Int32", "lifecycle_or_creation")]
+    [InlineData("EraseAll", "System.Int32", null)]
+    [InlineData("CreateTransient", "System.Int32", "transient_creation")]
     [InlineData("GetTest", "Eplan.EplApi.DataModel.Page@", "ref_out")]
     [InlineData("GetTest", "System.Object[]", "array_or_params")]
     [InlineData("GetTest", "System.Action", "delegate_parameter")]
     [InlineData("GetTest", "System.Collections.Generic.List{System.Object}", "generic_or_collection_parameter")]
     [InlineData("GetTest", "T", "unsupported_parameter")]
-    public void MethodExclusionsAreReported(string name, string type, string reason) => Assert.Equal(reason, ApiTryGenerator.Exclusion(Method(name, Overload(type)), Overload(type), null));
+    public void MethodExclusionsAreReported(string name, string type, string? reason) => Assert.Equal(reason, ApiTryGenerator.Exclusion(Method(name, Overload(type)), Overload(type), null));
 
     [Theory]
     [InlineData("GetTest", true)]

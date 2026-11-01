@@ -62,6 +62,8 @@ internal static partial class ApiTryGenerator
     }
     internal static string MethodCase(ApiEntry entry, ApiDetail member, IReadOnlyDictionary<string, string[]> enums, IReadOnlyDictionary<string, string[]> kinds, IReadOnlyDictionary<string, ApiTryServices.Service> services, string? receiverExpression = null, IReadOnlySet<string>? structs = null)
     {
+        if (Factory(entry))
+        { return FactoryDispatch(entry, member, p => ArgumentValue(p.Type, "parameters[" + Literal(ParameterName(p)) + "]", enums, kinds, structs)); }
         ApiParameter[] parameters = member.Parameters!;
         ApiParameter[] byref = parameters.Where(p => p.Type.EndsWith('@') || p.Direction is "out" or "ref").ToArray();
         bool service = services.TryGetValue(entry.Type[2..], out ApiTryServices.Service? receiver) && receiverExpression is null;

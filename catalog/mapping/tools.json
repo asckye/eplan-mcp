@@ -2866,6 +2866,11 @@
         ],
         "operationTests": [
           {
+            "name": "ApiTryLifecycleTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ApiTryLifecycleTests.cs"
+          },
+          {
             "name": "ApiTryOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ApiTryOperationTests.cs"

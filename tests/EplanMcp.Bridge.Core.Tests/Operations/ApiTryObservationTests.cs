@@ -64,6 +64,34 @@ public sealed class ApiTryObservationTests
         Assert.Null(ApiTryObservations.Pages(args));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LifecycleUsesTheSameSnapshotAndDrawingPageScope(bool remove)
+    {
+        string page = FakeSnapshotReader.PageName(100);
+        ApiTryArgs args = Rotate(page);
+        JObject parameters = JObject.Parse(args.Parameters);
+        JObject locator = (JObject)parameters["plcmnts"]![0]!;
+        args.Group = remove ? "O:Eplan.EplApi.DataModel.Placement.Remove" : "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create";
+        args.Parameters = (remove ? new JObject { ["target"] = locator } : new JObject
+        {
+            ["target"] = parameters["target"],
+            ["page"] = locator,
+            ["pntStart"] = new JObject { ["x"] = 4, ["y"] = 4 },
+            ["pntEnd"] = new JObject { ["x"] = 12, ["y"] = 4 },
+        }).ToString();
+        string[] scope = ApiTryObservations.Pages(args)!;
+        Assert.Equal([page], scope);
+        var reader = new FakeSnapshotReader { PageCount = 321, MillisecondsPerPage = 1000 };
+        using ISnapshotSource source = reader.Open(args.Project);
+        var drawings = new List<string>();
+        Dictionary<string, string> observed = ApiTryObservations.Capture(source, scope, () => { }, name => { drawings.Add(name); return "geometry"; });
+        Assert.Equal([page], drawings);
+        Assert.Equal(["drawing:100", "snapshot:100"], observed.Keys.OrderBy(k => k, StringComparer.Ordinal));
+        Assert.Equal(1000, reader.Milliseconds);
+    }
+
     [Fact]
     public void MultiplePagesAreDeduplicated_AndMissingEvidenceIsReported()
     {

@@ -12,6 +12,19 @@ namespace EplanMcp.Host.Tests.Safety;
 public sealed class ApprovalTextsTests
 {
     [Theory]
+    [InlineData("creates")]
+    [InlineData("removes")]
+    public void LifecycleApprovalNamesEffectAndUnverifiedUndo(string effect)
+    {
+        var change = new PlannedChange { Action = "write", Kind = "unverified API", Name = "O:Example.Create", Property = "Example()" };
+        foreach (bool zh in new[] { true, false })
+        {
+            string text = ApprovalTexts.Change(change, zh, new Dictionary<string, string> { ["lifecycle"] = effect, ["handles"] = "Pin returned by Connection.StartPin" });
+            Assert.Contains("; " + effect + "; undo unverified", text, StringComparison.Ordinal);
+            Assert.Contains("Pin returned by Connection.StartPin", text, StringComparison.Ordinal);
+        }
+    }
+    [Theory]
     [InlineData("read", null, "read unverified API O:Page.Name; Page.Name()")]
     [InlineData("write", "\"new\"", "write unverified API O:Page.Name = \"new\"; Page.Name()")]
     public void ApiTrialChangesDistinguishReadsAndWrites(string action, string? value, string expected)

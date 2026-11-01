@@ -46,6 +46,25 @@ public sealed partial class ApiTryToolTests : IDisposable
     private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? Parameters()).RootElement, dry, cancellationToken: TestContext.Current.CancellationToken);
 
     [Fact]
+    public async Task RemovalUsesDestructiveApprovalAndDenialNeverExecutes()
+    {
+        const string group = "O:Eplan.EplApi.DataModel.Placement.Remove";
+        _approved = false;
+        _harness.Bridge.Handlers[OperationNames.ApiTryPlan] = a =>
+        {
+            WritePlan plan = _harness.Plan([new() { Action = "write", Kind = "unverified API", Name = group }]);
+            plan.Details = new() { ["status"] = "dispatchable", ["lifecycle"] = "removes", ["rawParameters"] = ((ApiTryArgs)a!).Parameters };
+            return plan;
+        };
+        Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(await Call(group: group)).GetProperty("reason").GetString());
+        ApprovalQuestion question = Assert.Single(_approval.Questions);
+        Assert.Equal(ToolTier.Destructive, question.Tier);
+        Assert.NotNull(question.BackupFolder);
+        Assert.Contains(question.Changes, c => c.Contains("; removes; undo unverified", StringComparison.Ordinal));
+        Assert.DoesNotContain(_harness.Bridge.Calls, c => c.Operation == OperationNames.ApiTryExecute);
+    }
+
+    [Fact]
     public async Task OffUnknownExcludedAndMemberIdsNeverContactBridge()
     {
         Assert.Equal(ErrorReason.PolicyDenied, WriteToolHarness.Error(await Tool(false).TryAsync(_progress, Group, "Line1", JsonSerializer.SerializeToElement(new { }), cancellationToken: TestContext.Current.CancellationToken)).GetProperty("reason").GetString());
@@ -213,6 +232,29 @@ public sealed partial class ApiTryToolTests : IDisposable
     }
 
     [Fact]
+    public async Task LifecycleFactoryRequiresEveryApprovalAndReportsUnverifiedUndoExpectation()
+    {
+        const string factory = "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create";
+        _harness.Bridge.Handlers[OperationNames.ApiTryPlan] = a =>
+        {
+            var args = (ApiTryArgs)a!;
+            WritePlan plan = _harness.Plan([new() { Action = "write", Kind = "unverified API", Name = factory, Property = "Line.#ctor+Create(Page)" }]);
+            plan.Details = new() { ["status"] = "dispatchable", ["unverified"] = "true", ["lifecycle"] = "creates", ["rawParameters"] = args.Parameters };
+            return plan;
+        };
+        _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData { UndoExpected = true };
+        var locator = new { project = _harness.ProjectPath, page = "", type = 1, oid = 1, digest = new string('a', 64) };
+        string parameters = JsonSerializer.Serialize(new { target = locator, page = locator });
+        Assert.True(WriteToolHarness.Structured(await Call(group: factory, parameters: parameters)).GetProperty("undoExpected").GetBoolean());
+        WriteToolHarness.Structured(await Call(group: factory, parameters: parameters));
+        Assert.Equal(2, _approval.Questions.Count);
+        Assert.All(_approval.Questions, q => Assert.Contains(q.Changes, c => c.Contains("; creates; undo unverified", StringComparison.Ordinal)));
+        _approved = false;
+        Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(await Call(group: factory, parameters: parameters)).GetProperty("reason").GetString());
+        Assert.Equal(2, _harness.Bridge.Writes.Count);
+    }
+
+    [Fact]
     public async Task RecoveredCommitDoesNotInventReadback()
     {
         _harness.Bridge.WriteRecovered = true;
@@ -220,6 +262,7 @@ public sealed partial class ApiTryToolTests : IDisposable
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         Assert.Equal(JsonValueKind.Null, result.GetProperty("after").ValueKind);
         Assert.Equal(JsonValueKind.Null, result.GetProperty("value").ValueKind);
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("undoExpected").ValueKind);
     }
 
     [Fact]

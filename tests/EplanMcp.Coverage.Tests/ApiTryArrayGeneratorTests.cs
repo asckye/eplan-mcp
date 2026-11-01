@@ -93,12 +93,13 @@ public sealed class ApiTryArrayGeneratorTests
         Assert.Empty(CSharpSyntaxTree.ParseText("class C { object Call() { switch (\"\") { " + ApiTryGenerator.MethodCase(Entry(output), output, _enums, _kinds, new Dictionary<string, ApiTryServices.Service>()) + " } return null; } }", cancellationToken: TestContext.Current.CancellationToken).GetDiagnostics(TestContext.Current.CancellationToken));
     }
     [Fact]
-    public void OutNameSetCollisionsStayAmbiguous_AndLifecycleAndResourcesStillWin()
+    public void OutNameSetCollisionsStayAmbiguous_AndLifecyclePolicyAndResourcesStillApply()
     {
         ApiDetail a = Member("System.Int32@", "out"), b = Member("System.String@", "out");
         ApiEntry entry = Entry(a) with { Details = [a, b] };
         Assert.Empty(ApiTryGenerator.Methods(new([entry], []), _enums, _kinds));
-        Assert.Equal("lifecycle_or_creation", ApiTryGenerator.Exclusion(Entry(a) with { Name = "Create" }, a, _enums, _kinds));
+        Assert.Null(ApiTryGenerator.Exclusion(Entry(a) with { Name = "Create" }, a, _enums, _kinds));
+        Assert.Equal("transient_creation", ApiTryGenerator.Exclusion(Entry(a) with { Name = "CreateTransient" }, a, _enums, _kinds));
         ApiDetail paths = Member("System.String[]") with { Parameters = [new("files", "System.String[]")] };
         Assert.Equal("external_path_parameter", ApiTryServices.Exclusion(Entry(paths), paths));
         ApiDetail projects = paths with { Parameters = [new("projects", "System.String[]")] };

@@ -44,6 +44,8 @@ public sealed partial class ApiTryPlanOperation(int major, IProjectCatalog catal
         plan.Details["rawParameters"] = args.Parameters;
         plan.Details["handles"] = args.HandleSources;
         plan.Details["status"] = "dispatchable";
+        if (ApiTryLifecycle.Effect(args.Group) is { } effect)
+        { plan.Details["lifecycle"] = effect; }
         plan.Changes = [new() { Action = write ? "write" : "read", Kind = "unverified API", Name = args.Group, Property = shape[1], NewValue = setter ? value!.ToString(Formatting.None) : null }];
         return plan;
     }

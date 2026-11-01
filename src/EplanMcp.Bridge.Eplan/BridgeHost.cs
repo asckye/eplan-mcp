@@ -109,7 +109,7 @@ internal static class BridgeHost
         var actions = new EplanActionRunner();
         int actionMajor = System.Version.TryParse(eplan.Version, out System.Version? actionVersion) ? actionVersion.Major : 0;
         var stepGuard = new PlanStepGuardOperation(catalog, new EplanSnapshotReader(), new EplanObjectFinder(), new EplanPlanFunctionReader());
-        var apiTrials = _apiTrials = new EplanApiTryDispatcher();
+        var apiTrials = _apiTrials = new EplanApiTryDispatcher(log);
         ISelectionAdapter? selection = eplan.Offline ? null : new EplanSelection();
         var apiPlan = new ApiTryPlanOperation(actionMajor, catalog, apiTrials);
         IOperation[] operations =

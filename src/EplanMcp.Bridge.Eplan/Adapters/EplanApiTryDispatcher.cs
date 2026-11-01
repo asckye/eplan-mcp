@@ -7,7 +7,7 @@ using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A12/A36/A39 borrowed identities; ADR-0033 handles remain inside the add-in.</summary>
-internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
+internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher, IApiTryLifecycleDispatcher
 {
     public void CheckTarget(ApiTryArgs args)
     {
@@ -25,6 +25,7 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
                 ? Native("target", "Eplan.EplApi.DataModel.Graphics.TextBase") ?? throw new BridgeErrorException(ErrorReason.InvalidArgument, "The UndockText target handle does not name a text.")
                 : Resolve(args.Project, parameters["target"]!, ApiTryCatalog.TargetKinds(args.Group)));
         }
+        CheckLifecycle(args, parameters, shape);
     }
     private static StorableObject Resolve(string project, JToken token, string[] kinds)
     {
@@ -81,14 +82,15 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         { throw new BridgeErrorException(ErrorReason.EplanBusy, "A modal dialog appeared during the unverified call."); }
         return value;
     }
-    private static DrawingLocator Locator(string project, StorableObject obj)
+    private static DrawingLocator Locator(string project, StorableObject obj) => Locator(project, obj, out _);
+    private static DrawingLocator Locator(string project, StorableObject obj, out SnapshotObject identity)
     {
         Project? owner = obj as Project ?? obj.Project;
         if (owner is null || !ProjectResolver.SamePath(project, owner.ProjectFullName))
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "The returned object does not belong to the target scratch project."); }
         string kind = ObjectReadTypes.Types.Where(ObjectReadTypes.Supported).OrderBy(k => k == "PLCTerminal" ? 1 : 0).Select(k => k.ToLowerInvariant()).FirstOrDefault(k => EplanObjectReader.Matches(obj, k))
             ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned object has no supported discovery locator.");
-        SnapshotObject identity = EplanObjectReader.Describe(obj, kind);
+        identity = EplanObjectReader.Describe(obj, kind);
         return new() { Project = project, Page = obj is Page page ? page.Name : identity.Page ?? string.Empty, Type = identity.Type, Oid = identity.Oid, Digest = SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) };
     }
     public Dictionary<string, string> Inspect(ApiTryArgs args)
@@ -116,6 +118,13 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         });
         foreach (KeyValuePair<string, string> item in observed)
         { state[item.Key] = item.Value; }
+        if (ApiTryLifecycle.Effect(args.Group) is not null)
+        {
+            foreach (KeyValuePair<string, string> item in Observe(args))
+            { state[item.Key] = item.Value; }
+            if (watch.Elapsed.TotalSeconds > 20)
+            { throw new BridgeErrorException(ErrorReason.Timeout, "Trial snapshot exceeded 20 seconds; reduce the scratch project."); }
+        }
         return state;
     }
 }

@@ -13,13 +13,12 @@ internal static partial class ApiTryGenerator
         string path = Path.Combine(root, "src/EplanMcp.Bridge.Eplan/BannedSymbols.txt");
         var banned = (File.Exists(path) ? File.ReadLines(path).Where(l => !l.StartsWith("//", StringComparison.Ordinal) && l.Contains(';', StringComparison.Ordinal)).Select(l => l.Split(';')[0]) : []).ToHashSet(StringComparer.Ordinal);
         ApiIndexData data = ApiIndexGenerator.Data(root);
-        return data with { Entries = [.. data.Entries.Select(e => e with { Details = [.. e.Details.Select(d => banned.Contains(d.Id) || banned.Contains(e.Type) ? d with { ExcludedReason = "banned_symbol" } : d)] })] };
+        return data with { Entries = [.. data.Entries.Select(e => e with { Details = [.. e.Details.Select(d => banned.Contains(d.Id) || banned.Contains(e.Type) || BannedFactory(e, d, banned) ? d with { ExcludedReason = "banned_symbol" } : d)] })] };
     }
     private static string Literal(string value) => JsonSerializer.Serialize(value);
     private static readonly string[] _enumShape = ["enum"];
     private static readonly string[] _readPrefixes = ["Get", "Is", "Has", "Can", "Find"];
-    // Lifecycle and session locks: Destroy/Init(ialize) change an object's existence or internal state, Freeze/Lock*
-    // are session state that one undo step is not known to restore (batch verification 2026-10-31).
+    // Reviewed lifecycle calls use the closed lifecycle policy; session state remains excluded.
     private static readonly string[] _excludedPrefixes = ["Remove", "Delete", "Erase", "Create", "Destroy", "Init", "init", "Freeze", "Lock", "#"];
     private static Dictionary<string, string[]> Enums(string root) => (File.Exists(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) ? File.ReadLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) : [])
         .Select(l => JsonSerializer.Deserialize<JsonElement>(l)).Where(t => t.GetProperty("kind").GetString() == "enum" && t.TryGetProperty("values", out _) && !t.TryGetProperty("excluded", out _))
@@ -41,7 +40,9 @@ internal static partial class ApiTryGenerator
         bool service = services?.ContainsKey(entry.Type[2..]) == true;
         if (service && (services![entry.Type[2..]].Reason ?? FileExclusion(entry, member)) is { } reason)
         { return reason; }
-        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
+        if (LifecycleExclusion(entry, member) is { } lifecycleReason)
+        { return lifecycleReason; }
+        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') && !Factory(entry) || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) && !Lifecycle(entry))
         { return "lifecycle_or_creation"; }
         if (member.Static || member.Access is not null)
         { return "static_or_nonpublic"; }
@@ -92,7 +93,7 @@ internal static partial class ApiTryGenerator
             + "\n        _ => EntryShape(group) ?? HandleShape(group),\n    };\n    public static string[]? Shape(string group, System.Collections.Generic.IEnumerable<string> names) => Settings(group) && !System.Linq.Enumerable.Contains(names, \"via\") ? SettingsShape(group, names) ?? EntryMethodShape(group, names) ?? HandleMethodShape(group, names) : Shape(group) ?? ((group, string.Join(\"|\", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Where(names, n => n != \"target\" && n != \"via\" && n != \"via_key\"), n => n, System.StringComparer.Ordinal))) switch\n    {\n"
             + string.Join("\n", methods.Select(s => "        (" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => [" + string.Join(", ", CallShape(s.Entry, s.Member).Select(Literal)) + "],"))
             + "\n        _ => EntryMethodShape(group, names) ?? HandleMethodShape(group, names),\n    });\n    public static string[][] Methods(string group) => System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(SettingsMethods(group), group switch\n    {\n"
-            + string.Join("\n", methods.Concat(entries.Where(s => s.Entry.Row.Kind == "method")).Concat(handles.Where(s => s.Entry.Row.Kind == "method")).DistinctBy(s => s.Member.Id).GroupBy(s => s.Entry.Row.Group).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => "[" + string.Join(", ", CallShape(s.Entry, s.Member).Select(Literal)) + "]")) + "],"))
+            + string.Join("\n", methods.Concat(entries.Where(s => s.Entry.Row.Kind == "method")).Concat(handles.Where(s => s.Entry.Row.Kind == "method")).DistinctBy(s => s.Member.Signature).GroupBy(s => s.Entry.Row.Group).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => "[" + string.Join(", ", CallShape(s.Entry, s.Member).Select(Literal)) + "]")) + "],"))
             + "\n        _ => EntryMethods(group),\n    }));\n    public static string[] PropertyGroups => [" + string.Join(", ", selected.Concat(entries.Where(s => s.Entry.Row.Kind == "property")).Concat(handles.Where(s => s.Entry.Row.Kind == "property")).Select(s => s.Entry.Row.Group).Distinct(StringComparer.Ordinal).Select(Literal)) + "];\n    public static string? ExclusionReason(string group) => group switch\n    {\n"
             + string.Join("\n", data.Entries.Where(e => !dispatchable.Contains(e.Row.Group)).Select(e => "        " + Literal(e.Row.Group) + " => " + Literal(Reason(e)) + ","))
             + "\n        _ => null,\n    };\n    public static string? MethodAccess(string group) => Settings(group) ? \"read\" : group switch\n    {\n"
@@ -100,13 +101,13 @@ internal static partial class ApiTryGenerator
             + "\n        _ => EntryAccess(group) ?? HandleMethodAccess(group),\n    };\n    public static string[] Producers(string type) => type switch\n    {\n"
             + string.Join("\n", methods.Concat(selected).Concat(entries).Concat(handles).SelectMany(s => ProducedTypes(s.Member).Select(type => (s.Entry, Type: type))).GroupBy(s => s.Type).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => Literal(s.Entry.Row.Group)).Distinct()) + "],"))
             + "\n        _ => [],\n    };\n    public static string[]? ReceiverShape(string signature) => signature switch\n    {\n"
-            + string.Join("\n", methods.Concat(selected).Concat(handles).DistinctBy(s => s.Member.Id).Where(s => !s.Member.Static && !s.Entry.Name.StartsWith('#')).Select(s => "        " + Literal(s.Member.Signature!) + " => " + (services.ContainsKey(s.Entry.Type[2..]) && (methods.Any(m => m.Member.Id == s.Member.Id) || !handleModel.Reachable.Contains(s.Entry.Type[2..])) ? "[\"Eplan.EplApi.DataModel.Project\"]" : ObjectType(s.Entry.Type[2..], kinds) ? Shape(s.Entry.Type[2..]) : "[\"handle\", " + Literal(s.Entry.Type[2..]) + "]") + ","))
+            + string.Join("\n", methods.Concat(selected).Concat(handles).DistinctBy(s => s.Member.Signature).Where(s => !s.Member.Static && (!s.Entry.Name.StartsWith('#') || Factory(s.Entry))).Select(s => "        " + Literal(s.Member.Signature!) + " => " + (Factory(s.Entry) || services.ContainsKey(s.Entry.Type[2..]) && (methods.Any(m => m.Member.Id == s.Member.Id) || !handleModel.Reachable.Contains(s.Entry.Type[2..])) ? "[\"Eplan.EplApi.DataModel.Project\"]" : ObjectType(s.Entry.Type[2..], kinds) ? Shape(s.Entry.Type[2..]) : "[\"handle\", " + Literal(s.Entry.Type[2..]) + "]") + ","))
             + "\n        _ => EntryReceiverShape(signature) ?? SettingsReceiverShape(signature),\n    };\n    public static string[]? ParameterShape(string signature, string name) => SettingsParameterShape(signature, name) ?? ((signature, name) switch\n    {\n"
             + string.Join("\n", methods.SelectMany(s => Inputs(s.Member).Select(p => "        (" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
             + "\n        _ => EntryParameter(signature, name) ?? HandleParameterShape(signature, name),\n    });\n" + FileCatalog(methods, services) + "    public static string[]? ValueShape(string group) => group switch\n    {\n"
             + string.Join("\n", selected.Where(s => PropertyWritable(s.Member, enums)).Select(s => "        " + Literal(s.Entry.Row.Group) + " => [" + string.Join(", ", (enums.TryGetValue(s.Member.ReturnType!, out string[]? values) ? _enumShape.Concat(values) : [s.Member.ReturnType!]).Select(Literal)) + "],"))
             + "\n        _ => EntryValue(group) ?? HandleValueShape(group),\n    };\n    public static bool Service(string group) => group switch { " + string.Join(" ", methods.Where(s => services.ContainsKey(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => HandleService(group) };\n"
-            + "    public static string[] TargetKinds(string group) => Settings(group) || Service(group) ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
+            + "    public static string[] TargetKinds(string group) => Settings(group) || Service(group)" + FactoryTargetCondition + " ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
             + string.Join("\n", kinds.Select(p => "        " + Literal("Eplan.EplApi.DataModel." + p.Key) + " => [" + string.Join(", ", p.Value.Select(Literal)) + "],"))
             + "\n        _ => [],\n    };\n"
             + SettingsCatalog(data)
@@ -126,7 +127,7 @@ internal static partial class ApiTryGenerator
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
         Dictionary<string, ApiTryServices.Service> services = ApiTryServices.Load(root);
         (ApiEntry Entry, ApiDetail Member)[] selected = [.. Selected(data, enums, kinds)];
-        return "// <auto-generated/>\n#nullable enable\nusing Eplan.EplApi.DataModel;\nusing Newtonsoft.Json.Linq;\nnamespace EplanMcp.Bridge.Eplan.Adapters;\ninternal static class ApiTryDispatch\n{\n"
+        return "// <auto-generated/>\n#nullable enable\nusing Eplan.EplApi.DataModel;\nusing Newtonsoft.Json.Linq;\nusing System.Linq;\nnamespace EplanMcp.Bridge.Eplan.Adapters;\ninternal static class ApiTryDispatch\n{\n"
         + "    internal static object? Read(string group, StorableObject target, JObject parameters) => group switch\n    {\n"
         + string.Join("\n", selected.Select(s => "        " + Literal(s.Entry.Row.Group) + " => (object)" + (s.Member.Accessors == "set" ? "((global::Eplan.EplApi.DataModel.Function)target).FunctionCategory" : Target(s.Entry))
             + (s.Entry.Row.Kind == "method" ? "(" + string.Join(", ", s.Member.Parameters!.Select(p => "parameters[" + Literal(p.Name) + "]!.Value<bool>()")) + ")" : "") + ","))
@@ -138,6 +139,6 @@ internal static partial class ApiTryGenerator
                 : "parameters[\"value\"]!.Value<" + s.Member.ReturnType + ">()") + "; break;"))
         + "\n            default: throw new System.InvalidOperationException(\"No compiled setter for this group.\");\n        }\n    }\n    internal static object? Invoke(string signature, StorableObject target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        if (SettingsSignature(signature)) { return InvokeSettings(signature, (Project)target, parameters); }\n        switch (signature)\n        {\n"
         + string.Join("\n", Methods(data, enums, kinds, services).Select(s => MethodCase(s.Entry, s.Member, enums, kinds, services)))
-        + "\n            default: throw new System.InvalidOperationException(\"No compiled method for this signature.\");\n        }\n    }\n" + SettingsDispatch(data) + "}\n" + HandleDispatch(root);
+        + "\n            default: throw new System.InvalidOperationException(\"No compiled method for this signature.\");\n        }\n    }\n" + SettingsDispatch(data) + LifecycleReadback(data, kinds) + "}\n" + HandleDispatch(root);
     }
 }

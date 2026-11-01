@@ -2,7 +2,7 @@ using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>Array object arguments bound observation to their affected pages; project anchors do not widen it.</summary>
+/// <summary>Array and lifecycle locators bound observations to affected pages; project anchors do not widen them.</summary>
 internal static class ApiTryObservations
 {
     internal static string[]? Pages(ApiTryArgs args)
@@ -12,7 +12,7 @@ internal static class ApiTryObservations
         if (shape is null)
         { return null; }
         var pages = new HashSet<string>(StringComparer.Ordinal);
-        bool objects = false;
+        bool objects = ApiTryLifecycle.Effect(args.Group) is not null;
         foreach (string name in shape.Skip(2))
         {
             string[]? parameter = ApiTryCatalog.ParameterShape(shape[1], name);
@@ -34,10 +34,12 @@ internal static class ApiTryObservations
             string page = (string)locator["page"]!;
             if (page.Length > 0)
             { pages.Add(page); }
-            else if (!ReferenceEquals(locator, parameters["target"]) || !ApiTryCatalog.Service(args.Group))
+            else if (!ReferenceEquals(locator, parameters["target"]) || !(ApiTryCatalog.Service(args.Group) || args.Group.EndsWith(".#ctor+Create", StringComparison.Ordinal)))
             { return null; }
         }
-        return pages.OrderBy(p => p, StringComparer.Ordinal).ToArray();
+        if (ApiTryLifecycle.Effect(args.Group) is not null && parameters.Descendants().OfType<JObject>().Any(p => p.ContainsKey("handle")))
+        { return null; }
+        return pages.Count == 0 ? null : pages.OrderBy(p => p, StringComparer.Ordinal).ToArray();
     }
 
     internal static Dictionary<string, string> Capture(ISnapshotSource source, string[]? pages, Action check, Func<string, string?> drawing)

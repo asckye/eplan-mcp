@@ -12,8 +12,10 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
     private readonly global::Eplan.EplApi.ApplicationFramework.EventHandler _handleClose = new("Eplan.EplApi.OnPreCloseProject");
     private readonly global::Eplan.EplApi.ApplicationFramework.EventHandler _handleUserClose = new("Eplan.EplApi.OnUserPreCloseProject");
     private IEnumerable<global::Eplan.EplApi.ApplicationFramework.EventHandler> HandleEvents => [_handleClose, _handleUserClose];
-    public EplanApiTryDispatcher()
+    private readonly global::EplanMcp.Bridge.Core.Diagnostics.IBridgeLog _log;
+    public EplanApiTryDispatcher(global::EplanMcp.Bridge.Core.Diagnostics.IBridgeLog log)
     {
+        _log = log;
         foreach (global::Eplan.EplApi.ApplicationFramework.EventHandler handler in HandleEvents)
         { handler.EplanNameEvent += (_, _) => { try { _handles.Clear(); } catch (Exception ex) { Hosting.StartupFailureLog.Write(ex); } }; }
     }
@@ -71,6 +73,8 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         { result = ApiTryHandleDispatch.Invoke(shape[1], target.Value!, p, Resolver); }
         else
         { result = InvokeEntry(args, p, target.Value, ApiTryCatalog.MethodAccess(args.Group) is not null, Resolver); }
+        if (!read)
+        { result = LifecycleResult(args, target.Value, result); }
         if (result is null || read)
         { return result; }
         return Detach(args.Project, result, native: value => NativeResult(args, value, target), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);

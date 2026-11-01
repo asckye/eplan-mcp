@@ -12,6 +12,16 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed partial class ApiTryContractTests
 {
     [Theory]
+    [InlineData("target,page", true)]
+    [InlineData("page", false)]
+    [InlineData("target,page,unknown", false)]
+    public void FactoryRequiresProjectAnchorAndExactCreationArguments(string fields, bool valid)
+    {
+        object locator = new { project = "Scratch", page = "", type = 1, oid = 1, digest = new string('a', 64) };
+        JsonElement parameters = JsonSerializer.SerializeToElement(fields.Split(',').ToDictionary(f => f, _ => locator));
+        Assert.Equal(valid, ApiTryTools.MethodParameters("O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create", parameters));
+    }
+    [Theory]
     [InlineData("target,pFunction", true)]
     [InlineData("target,pPage,pFunction", true)]
     [InlineData("pFunction", false)]

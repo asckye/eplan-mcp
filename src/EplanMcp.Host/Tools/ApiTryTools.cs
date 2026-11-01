@@ -17,7 +17,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
     private static string Session() { using var host = System.Diagnostics.Process.GetCurrentProcess(); return host.Id.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + host.StartTime.ToUniversalTime().Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture) + ":" + Guid.NewGuid().ToString("N"); }
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
-    [Description("Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.")]
+    [Description("Try scratch APIs, including create/remove; per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.")]
     public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, string? result_cursor = null, CancellationToken cancellationToken = default)
     {
         try
@@ -33,23 +33,23 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and the exact generated shape (131072 characters maximum), with finite PointD, locators/session handles and at most 200 supported elements per array." }, ApiCallTemplates.Closest(index, group, parameters)); }
             string query = PageCursor.Fingerprint(Tool, group, project, parameters.GetRawText());
             if (result_cursor is not null)
-            { return ToolResults.Success("Cached API trial observations.", new ApiTryResult(project, group, "cached", true, ExecutionState.NotStarted, false, _pages.Read(result_cursor, query), null, null, [], 0, false, "Cached observations; no API call or approval was repeated.", [])); }
+            { return ToolResults.Success("Cached API trial observations.", new ApiTryResult(project, group, "cached", true, ExecutionState.NotStarted, false, _pages.Read(result_cursor, query), null, null, [], 0, false, "Cached observations; no API call or approval was repeated.", [], null)); }
             ProjectGetData resolved = await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false);
             if (!ScratchPaths.IsInside(resolved.Project.Path, config.ScratchRoots))
             { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
             ApiTryArgs args = FileArguments(group, resolved.Project.Path, parameters);
             args.HostSession = _hostSession;
             args.ScratchPath = ScratchPaths.Canonical(resolved.Project.Path);
-            var request = new WriteRequest<ApiTryArgs, ApiTryArgs>(Tool, ToolTier.Write, OperationNames.ApiTryPlan, OperationNames.ApiTryExecute, args,
+            var request = new WriteRequest<ApiTryArgs, ApiTryArgs>(Tool, ApiTryLifecycle.Effect(group) == "removes" ? ToolTier.Destructive : ToolTier.Write, OperationNames.ApiTryPlan, OperationNames.ApiTryExecute, args,
                 p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint, DataRoot = args.DataRoot, OutputId = args.OutputId, HostSession = args.HostSession, ScratchPath = args.ScratchPath }, dry_run, TimeSpan.FromSeconds(120), "Trying unverified API")
             { Unverified = true };
             WriteOutcome<ApiTryData> outcome = await writes.RunAsync<ApiTryArgs, ApiTryArgs, ApiTryData>(request, progress, cancellationToken).ConfigureAwait(false);
             ApiTryData? data = outcome.Data;
-            string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => k.StartsWith("property:", StringComparison.Ordinal) || data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).OrderBy(k => k.StartsWith("property:", StringComparison.Ordinal) ? 0 : 1).ThenBy(k => k, StringComparer.Ordinal)];
+            string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => k.StartsWith("property:", StringComparison.Ordinal) || data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).OrderBy(k => k.StartsWith("property:", StringComparison.Ordinal) ? 0 : 1).ThenBy(k => k.StartsWith("object:", StringComparison.Ordinal) && (!data.Before.ContainsKey(k) || !data.After.ContainsKey(k)) ? 0 : 1).ThenBy(k => k, StringComparer.Ordinal)];
             string? Hash(Dictionary<string, string>? state) => state is null ? null : WritePipeline.HashArguments(state.OrderBy(p => p.Key, StringComparer.Ordinal));
             return ToolResults.Success("Unverified API trial: " + outcome.Execution + ".", new ApiTryResult(outcome.Plan.Project, group, outcome.Plan.Details!["status"], true, outcome.Execution, outcome.Recovered,
                 (object?)data?.Handle ?? _pages.Shape(data?.ResultJson, query) ?? (object?)data?.Locator ?? ApiTrySettingsResult.Text(group, parameters, data?.Value) ?? ResultShaper.CleanText(data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
-                "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Handles are valid only in this Host session and EPLAN process, expire after 10 idle minutes, and may be evicted at 500. Recovered calls have no inferred readback. " + data?.Warning, data?.Files ?? []));
+                "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Handles are valid only in this Host session and EPLAN process, expire after 10 idle minutes, and may be evicted at 500. Recovered calls have no inferred readback. " + data?.Warning, data?.Files ?? [], data?.UndoExpected));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, ex.Error.Reason == ErrorReason.InvalidArgument ? ApiCallTemplates.Closest(index, group, parameters) : null); }
     }
@@ -74,4 +74,4 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
         && value.GetProperty("digest").ValueKind == JsonValueKind.String && System.Text.RegularExpressions.Regex.IsMatch(value.GetProperty("digest").GetString()!, "\\A[0-9a-f]{64}\\z");
 }
 internal sealed record ApiTryChange(string Key, string? Before, string? After);
-internal sealed record ApiTryResult(string Project, string Group, string Status, bool Unverified, string Execution, bool Recovered, object? Value, string? Before, string? After, IReadOnlyList<ApiTryChange> Changes, int TotalChanges, bool Truncated, string Hint, IReadOnlyList<ApiTryFile> Files);
+internal sealed record ApiTryResult(string Project, string Group, string Status, bool Unverified, string Execution, bool Recovered, object? Value, string? Before, string? After, IReadOnlyList<ApiTryChange> Changes, int TotalChanges, bool Truncated, string Hint, IReadOnlyList<ApiTryFile> Files, bool? UndoExpected);

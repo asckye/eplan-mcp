@@ -133,7 +133,7 @@ internal static class ApprovalTexts
         if (change.Kind == "placement")
         { return change.Property + " " + Value(change.Name, zh) + ": " + Value(change.NewValue ?? "", zh) + (change.Property == "copy" ? zh ? "；保留标识，副本可能关联已有设备。" : "; tags preserved; copies may associate with existing devices." : change.Property == "delete" ? zh ? "；连同功能本体删除，相关连接见清单。" : "; removes the function itself; incident connections are listed." : ""); }
         if (change.Kind == "unverified API")
-        { return change.Action + " unverified API " + change.Name + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property + (details?.GetValueOrDefault("handles") is { Length: > 0 } handles ? "; " + handles : string.Empty); }
+        { return change.Action + " unverified API " + change.Name + (details?.GetValueOrDefault("lifecycle") is { } effect ? "; " + effect + "; undo unverified" : "") + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property + (details?.GetValueOrDefault("handles") is { Length: > 0 } handles ? "; " + handles : string.Empty); }
         if (change.Kind == "action")
         {
             List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];
@@ -312,7 +312,7 @@ internal static class ApprovalTexts
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
           : tool == ApiTryTools.Tool
         ? plan.Changes.Any(c => c.Action == "write")
-            ? zh ? "属性写入须读回一致后才在一个撤销步中提交；提交后单步 Ctrl+Z 尚待实机验证。" : "Property writes commit in one undo step only after matching readback; live single-step Ctrl+Z verification is pending."
+            ? zh ? "属性写入须匹配读回，方法须完成观察后，才在一个撤销步中提交；提交后单步 Ctrl+Z 尚待实机验证。" : "Property writes require matching readback and methods require observations before committing in one undo step; live single-step Ctrl+Z verification is pending."
             : zh ? "只读试执行不创建撤销步；快照相等不证明没有副作用。" : "Read trials create no undo step; equal snapshots do not prove absence of side effects."
         : tool is ActionRunTools.Tool or ActionTryTools.Tool
         ? zh ? "执行后只比较指纹，不逐项核对；提交后一步 Ctrl+Z 尚未验证。" : "Fingerprint readback only; changes are not checked item by item. Single-step Ctrl+Z after commit is unverified."

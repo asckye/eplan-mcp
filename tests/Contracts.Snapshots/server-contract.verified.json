@@ -1312,7 +1312,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.",
+      "description": "Try scratch APIs, including create/remove; per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2189,6 +2189,12 @@
                 }
               }
             }
+          },
+          "undoExpected": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         },
         "required": [
@@ -2205,7 +2211,8 @@
           "totalChanges",
           "truncated",
           "hint",
-          "files"
+          "files",
+          "undoExpected"
         ]
       },
       "annotations": {

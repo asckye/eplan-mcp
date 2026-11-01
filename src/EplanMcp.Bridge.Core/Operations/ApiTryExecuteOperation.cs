@@ -51,6 +51,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
                 catch (Exception ex) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The API trial failed and was rolled back; re-read before retrying.", ex); }
             });
             committed.Result.Warning = committed.Warning;
+            ApiTryLifecycleObservations.Committed(dispatch, args, committed.Result);
             return committed.Result;
         }
         catch (BridgeErrorException ex) when (ex.Error.Execution == ExecutionState.RolledBack

@@ -37,6 +37,17 @@ public sealed class ApiTryHandlesTests
         Assert.Equal(kind, entry.Row.Kind);
         Assert.Empty(Build(entry).Reachable);
     }
+    [Theory]
+    [InlineData("CreatePin")]
+    [InlineData("RemovePin")]
+    public void LifecycleMayReturnHandlesAlreadyReachableFromAnIndependentGetter(string name)
+    {
+        ApiEntry member = Entry("Page", name, Prefix + "Pin", []);
+        ApiTryGenerator.HandleModel model = Build(Entry("Page", "Pin", Prefix + "Pin"), member);
+        Assert.Contains(Prefix + "Pin", model.Reachable);
+        Assert.Contains(model.Members, m => m.Entry.Name == name);
+        Assert.False(ApiTryGenerator.ReadMethod(member));
+    }
     [Fact]
     public void ExistingExclusionsAndAmbiguousNamesStayClosed()
     {

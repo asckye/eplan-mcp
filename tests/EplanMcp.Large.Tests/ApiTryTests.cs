@@ -75,6 +75,43 @@ public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ScratchCopy_LifecycleFactoryAndRemovalEachPreserveOneUndoAndEarlierHistory()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string sentinel = Assert.Single(await selection.CreatePagesAsync(1));
+        string before = await selection.StateAsync();
+        JsonElement created = await Call(selection.Project, "Graphics.Line.#ctor+Create", new
+        {
+            target = await Locator(selection.Project, "Project"),
+            page = await Locator(selection.Project, page: sentinel),
+            pntStart = new { x = 4, y = 4 },
+            pntEnd = new { x = 12, y = 4 },
+        });
+        Assert.True(created.GetProperty("undoExpected").GetBoolean());
+        Assert.Equal("committed", created.GetProperty("execution").GetString());
+        string createdState = await selection.StateAsync();
+        JsonElement line = created.GetProperty("value");
+        long oid = line.GetProperty("oid").GetInt64();
+        JsonElement found = await eplan.CallAsync("eplan_object_find", new() { ["project"] = selection.Project, ["object_type"] = "Line", ["page"] = sentinel, ["limit"] = 200 });
+        JsonElement fresh = Assert.Single(found.GetProperty("items").EnumerateArray(), i => i.GetProperty("locator").GetProperty("oid").GetInt64() == oid).GetProperty("locator");
+        // Host and Bridge escape page names differently (+ and & as +/&); the JSON values must be equal.
+        Assert.True(JsonElement.DeepEquals(line, fresh), line.GetRawText() + " != " + fresh.GetRawText());
+        JsonElement removed = await Call(selection.Project, "Placement.Remove", new { target = fresh });
+        Assert.True(removed.GetProperty("undoExpected").GetBoolean());
+        Assert.Equal("committed", removed.GetProperty("execution").GetString());
+        Assert.Contains(removed.GetProperty("changes").EnumerateArray(), c => c.GetProperty("key").GetString() == "object:line:" + oid && c.GetProperty("after").ValueKind == JsonValueKind.Null);
+        Assert.Contains(_approvals.Questions, q => q.Changes.Any(c => c.Contains("; creates; undo unverified", StringComparison.Ordinal)));
+        Assert.Contains(_approvals.Questions, q => q.Changes.Any(c => c.Contains("; removes; undo unverified", StringComparison.Ordinal)));
+        await selection.UndoAsync();
+        Assert.Equal(createdState, await selection.StateAsync());
+        await selection.UndoAsync();
+        Assert.Equal(before, await selection.StateAsync());
+        Assert.Contains((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel);
+        await selection.UndoAsync();
+        Assert.DoesNotContain((await selection.SnapshotAsync()).Pages, p => p.Name == sentinel);
+    }
+
+    [Fact]
     public async Task ScratchCopy_ReadGroupLeavesBusinessAndDesignFingerprintsUnchanged()
     {
         string project = await eplan.WriteProjectAsync();

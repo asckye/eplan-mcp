@@ -7,6 +7,25 @@ namespace EplanMcp.Coverage.Tests;
 public sealed class ObjectKindGeneratorTests
 {
     private const string Prefix = "Eplan.EplApi.DataModel.";
+    [Fact]
+    public void LifecycleEnumerationUnionsSourcesOnceAndUsesOneCanonicalKindPerNativeType()
+    {
+        ObjectKindGenerator.Kind[] kinds =
+        [
+            new("Arc", Prefix + "Graphics.Arc", "Arc", "", ["finder.GetPlacements(null)", "finder.GetStorableObjects(null)"], null),
+            new("Line", Prefix + "Graphics.Line", "Line", "", ["finder.GetPlacements(null)", "Placements(finder, check, pageName)"], null),
+            new("BlackBox", Prefix + "BoxedDevice", "Function", "", [], null),
+            new("BoxedDevice", Prefix + "BoxedDevice", "Function", "", ["finder.GetPlacements(null)"], null),
+            new("Unsafe", Prefix + "Unsafe", "", "", ["finder.Unsafe(null)"], "excluded"),
+        ];
+        string dispatch = ObjectKindGenerator.LifecycleDispatch(kinds);
+        Assert.Equal(1, dispatch.Split("() => finder.GetPlacements(null)", StringSplitOptions.None).Length - 1);
+        Assert.Equal(1, dispatch.Split("() => finder.GetStorableObjects(null)", StringSplitOptions.None).Length - 1);
+        Assert.Equal(1, dispatch.Split("() => Placements(finder, check, pageName)", StringSplitOptions.None).Length - 1);
+        Assert.Contains("\"" + Prefix + "BoxedDevice\" => \"boxeddevice\"", dispatch, StringComparison.Ordinal);
+        Assert.DoesNotContain("blackbox", dispatch, StringComparison.Ordinal);
+        Assert.DoesNotContain("Unsafe", dispatch, StringComparison.Ordinal);
+    }
     private static JsonElement Type(string name, string parent, string extra = "") => JsonSerializer.Deserialize<JsonElement>(
         "{\"id\":\"T:" + Prefix + name + "\",\"base\":\"" + Prefix + parent + "\"" + extra + "}");
     private static ApiEntry Member(string type, string name, string returns, ApiParameter[]? parameters = null, string? excluded = null, bool isStatic = false)

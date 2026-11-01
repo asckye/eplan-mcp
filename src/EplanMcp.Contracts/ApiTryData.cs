@@ -12,6 +12,8 @@ public sealed class ApiTryData
     public string? HandleSource { get; set; }
     /// <summary>Detached JSON for collection, PointD or named output results.</summary>
     public string? ResultJson { get; set; }
+    /// <summary>True after a lifecycle write commits; one undo is expected but remains unverified.</summary>
+    public bool? UndoExpected { get; set; }
     /// <summary>A committed transaction cleanup or undo warning, if any.</summary>
     public string? Warning { get; set; }
     /// <summary>Every output artifact, with size and content hash.</summary>

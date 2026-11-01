@@ -34,7 +34,8 @@ internal static partial class ApiTryGenerator
         do
         {
             changed = false;
-            foreach (ApiEntry e in data.Entries.Where(Receiver))
+            // Lifecycle calls may reuse independently reachable handles, but must not introduce new handle roots.
+            foreach (ApiEntry e in data.Entries.Where(e => Receiver(e) && !(e.Row.Kind == "method" && Lifecycle(e))))
             {
                 foreach (ApiDetail d in e.Details.Where(d => d.Kind == "overload" && Produced(d).Any()))
                 {

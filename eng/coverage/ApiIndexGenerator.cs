@@ -28,7 +28,7 @@ internal static class ApiIndexGenerator
         JsonElement[] types = [.. ApiCatalog.Lines(Path.Combine(directory, "types.jsonl"))];
         JsonElement summary = CoverageJson.Read<JsonElement>(Path.Combine(directory, "summary.json"));
         Dictionary<string, string> anchors = ApiNotes.Anchors(root);
-        return Build(catalog, report, mapping, members, types, summary.GetProperty("layers").GetProperty("data_dictionary").GetProperty("byObject"), anchors);
+        return ApiTryGenerator.WithLifecycleFactories(root, Build(catalog, report, mapping, members, types, summary.GetProperty("layers").GetProperty("data_dictionary").GetProperty("byObject"), anchors));
     }
 
     internal static ApiIndexData Build(ApiCatalog catalog, CoverageReport report, ToolMapping mapping,

@@ -16,7 +16,7 @@ internal sealed partial class EplanApiTryDispatcher
             if (p.TryGetValue("via", out JToken? via))
             { Resolve(args.Project, p["target"]!, ApiTryCatalog.ViaKinds(shape[0], (string)via!)); }
             else
-            { ResolveObject(args, p["target"]!, (ApiTryCatalog.Settings(args.Group) && p["target"]?["handle"] is null || ApiTryCatalog.Service(args.Group)) ? "Eplan.EplApi.DataModel.Project" : shape[0], write, descriptions); }
+            { ResolveObject(args, p["target"]!, (ApiTryCatalog.Settings(args.Group) && p["target"]?["handle"] is null || ApiTryCatalog.Service(args.Group) || args.Group.EndsWith(".#ctor+Create", StringComparison.Ordinal)) ? "Eplan.EplApi.DataModel.Project" : shape[0], write, descriptions); }
         }
     }
     private sealed class EntryScope : IDisposable
@@ -31,7 +31,7 @@ internal sealed partial class EplanApiTryDispatcher
         if (ApiTryCatalog.Static(shape[1]))
         { return (null, () => args.Project, false); }
         if (!p.TryGetValue("via", out JToken? via))
-        { return ResolveObject(args, p["target"]!, (ApiTryCatalog.Settings(args.Group) && p["target"]?["handle"] is null || ApiTryCatalog.Service(args.Group)) ? "Eplan.EplApi.DataModel.Project" : shape[0], ApiTryCatalog.MethodAccess(args.Group) == "write" || p.ContainsKey("value"), []); }
+        { return ResolveObject(args, p["target"]!, (ApiTryCatalog.Settings(args.Group) && p["target"]?["handle"] is null || ApiTryCatalog.Service(args.Group) || args.Group.EndsWith(".#ctor+Create", StringComparison.Ordinal)) ? "Eplan.EplApi.DataModel.Project" : shape[0], ApiTryCatalog.MethodAccess(args.Group) == "write" || p.ContainsKey("value"), []); }
         StorableObject parent = Resolve(args.Project, p["target"]!, ApiTryCatalog.ViaKinds(shape[0], (string)via!));
         object value = ApiTryEntryDispatch.Via(shape[0], (string)via!, parent, p, scope.Own)
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "The property entry is absent; refresh the parent locator.");
