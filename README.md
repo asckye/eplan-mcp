@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：真实项目写入逐次审批，操作可审计。
 
-> **v0.4.0 预览版**已于 2026-10-27 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)（标签日期），供测试使用；当前开发版合约快照登记 **93 个工具**。v0.5.0 推迟至操作层 API 补齐、客户页按原图精确重绘完成，再进行客户彩排后发布；范围与排期统一见[路线图](docs/roadmap.md)。
+> **v0.4.0 预览版**已于 2026-10-27 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)（标签日期），供测试使用；当前开发版合约快照登记 **95 个工具**。v0.5.0 推迟至操作层 API 补齐、客户页按原图精确重绘完成，再进行客户彩排后发布；范围与排期统一见[路线图](docs/roadmap.md)。
 
 ## 工作方式
 
@@ -29,7 +29,7 @@ EPLAN 2026（你正在使用的界面）
 
 ## 工具概览
 
-`full` 登记 93 个工具（以[合约快照](tests/Contracts.Snapshots/server-contract.verified.json)为准，默认关闭的工具需另行启用）；`serve --profile core` 提供固定的 25 个常用工具。清单、Profile 与读写注解见[工具索引](docs/tools/README.md)，参数与限制见各工具规格。
+`full` 登记 95 个工具（以[合约快照](tests/Contracts.Snapshots/server-contract.verified.json)为准，默认关闭的工具需另行启用）；`serve --profile core` 提供固定的 25 个常用工具。清单、Profile 与读写注解见[工具索引](docs/tools/README.md)，参数与限制见各工具规格。
 
 | 分组 | 能做什么 |
 |---|---|

@@ -1,6 +1,7 @@
 # 工具规格：`eplan_selection_get`
 | 模板项 | 规格 |
 |---|---|
+| 状态 | Implemented (Unreleased) |
 | 工具 / 分组 / Profile / 状态 | eplan_selection_get / selection / full / Implemented；Large 未运行 |
 | 安全与注解 | Read；readOnly=true，destructive=false，idempotent=true，openWorld=false；不改变 UI、工程数据或撤销历史 |
 | 1. 任务 | 取得当前项目、图形编辑器当前页和直接选择，给依赖选择的功能提供上下文；object_find 不读取 UI 选择。 |
