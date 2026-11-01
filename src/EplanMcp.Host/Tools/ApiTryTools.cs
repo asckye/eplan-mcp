@@ -33,7 +33,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
             ApiTryArgs args = FileArguments(group, resolved.Project.Path, parameters);
             var request = new WriteRequest<ApiTryArgs, ApiTryArgs>(Tool, ToolTier.Write, OperationNames.ApiTryPlan, OperationNames.ApiTryExecute, args,
-                p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint, DataRoot = args.DataRoot, OutputId = args.OutputId }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified API")
+                p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint, DataRoot = args.DataRoot, OutputId = args.OutputId }, dry_run, TimeSpan.FromSeconds(120), "Trying unverified API")
             { Unverified = true };
             WriteOutcome<ApiTryData> outcome = await writes.RunAsync<ApiTryArgs, ApiTryArgs, ApiTryData>(request, progress, cancellationToken).ConfigureAwait(false);
             ApiTryData? data = outcome.Data;

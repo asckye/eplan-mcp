@@ -25,18 +25,39 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Every locator must belong to the target scratch project."); }
         Project nativeProject = EplanProjects.ByPath(project);
         using var finder = new DMObjectsFinder(nativeProject);
-        foreach (string kind in kinds)
+        var watch = Stopwatch.StartNew();
+        void Check()
         {
-            IEnumerable<StorableObject> candidates = EplanObjectReader.Candidates(finder, kind, () => OperationContext.Current.ThrowIfCancellationRequested(), locator.Page, nativeProject);
-            foreach (StorableObject found in candidates.Where(o => o.ObjectIdentifier == locator.Oid && EplanObjectReader.Matches(o, kind)))
+            OperationContext.Current.ThrowIfCancellationRequested();
+            if (watch.Elapsed.TotalSeconds > 20)
+            { throw new BridgeErrorException(ErrorReason.Timeout, "Trial target resolution exceeded 20 seconds; refresh the locator or reduce the scratch project."); }
+        }
+        // A32/A60: a placed locator records its page. Avoid rediscovering that page's objects for every via kind.
+        IEnumerable<StorableObject> Nearby()
+        {
+            yield return nativeProject;
+            if (locator.Page.Length == 0)
+            { yield break; }
+            foreach (Page page in finder.GetPages(null))
             {
-                SnapshotObject identity = EplanObjectReader.Describe(found, kind);
-                if (identity.Type == locator.Type && (found is Page page ? page.Name : identity.Page ?? string.Empty) == locator.Page
-                    && SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(identity)) == locator.Digest)
-                { return found; }
+                Check();
+                if (page.Name != locator.Page)
+                { continue; }
+                yield return page;
+                foreach (Placement placed in page.AllPlacements)
+                { Check(); yield return placed; }
             }
         }
-        throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed; get a fresh locator from eplan_object_find.");
+        return ApiTryTargets.Resolve(locator, kinds, Nearby().Where(obj => obj.ObjectIdentifier == locator.Oid),
+            kind => EplanObjectReader.Candidates(finder, kind, Check, locator.Page, nativeProject),
+            (obj, kind) =>
+            {
+                Check();
+                if (obj.ObjectIdentifier != locator.Oid || SnapshotCanonical.TypeOf(obj.ToStringIdentifier()) != locator.Type || !EplanObjectReader.Matches(obj, kind))
+                { return null; }
+                SnapshotObject identity = EplanObjectReader.Describe(obj, kind);
+                return (identity, obj is Page page ? page.Name : identity.Page ?? string.Empty);
+            });
     }
     public string? Read(ApiTryArgs args) => ReadEntry(args);
     public object? Invoke(ApiTryArgs args)

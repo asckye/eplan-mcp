@@ -467,17 +467,23 @@ public sealed partial class ApiTryOperationTests
         public bool Mismatch { get; set; }
         public string Value { get; set; } = "=A/1";
         public object? MethodResult { get; set; }
+        public Action<ApiTryArgs>? TargetCheck { get; set; }
+        public Action? OnInspect { get; set; }
+        public Action? OnRead { get; set; }
+        public Action? OnInvoke { get; set; }
         private bool _changed;
-        public void CheckTarget(ApiTryArgs args) { }
+        public void CheckTarget(ApiTryArgs args) => TargetCheck?.Invoke(args);
         public Dictionary<string, string> Inspect(string project)
         {
             Inspections++;
+            OnInspect?.Invoke();
             return new() { ["snapshot:1"] = _changed ? "after" : "before", ["file:Page.eod"] = _changed ? "new-file" : "old-file" };
         }
-        public string Read(ApiTryArgs args) => Value;
+        public string Read(ApiTryArgs args) { OnRead?.Invoke(); return Value; }
         public object? Invoke(ApiTryArgs args)
         {
             Invocations++;
+            OnInvoke?.Invoke();
             if (JObject.Parse(args.Parameters).TryGetValue("value", out JToken? value))
             { Value = Mismatch ? "different" : value.Value<string>()!; }
             _changed |= ChangeOnInvoke;

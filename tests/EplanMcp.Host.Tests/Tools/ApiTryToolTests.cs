@@ -35,7 +35,15 @@ public sealed partial class ApiTryToolTests : IDisposable
     }
     public void Dispose() => _harness.Dispose();
     private ApiTryTools Tool(bool enabled = true) => new(_harness.Bridge, _harness.Pipeline, HostConfig.Defaults(_harness.Locations) with { ApiTry = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off }, ApiIndex.Load(), _harness.Locations);
-    private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? "{}").RootElement, dry, TestContext.Current.CancellationToken);
+    private object Target(string page = "=A/1") => new { project = _harness.ProjectPath, page, type = 1, oid = 1, digest = new string('a', 64) };
+    private string Parameters(string? value = null)
+    {
+        var parameters = new Dictionary<string, object> { ["target"] = Target() };
+        if (value is not null)
+        { parameters["value"] = value; }
+        return JsonSerializer.Serialize(parameters);
+    }
+    private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? Parameters()).RootElement, dry, TestContext.Current.CancellationToken);
 
     [Fact]
     public async Task OffUnknownExcludedAndMemberIdsNeverContactBridge()
@@ -49,6 +57,9 @@ public sealed partial class ApiTryToolTests : IDisposable
 
     [Theory]
     [InlineData("[]")]
+    [InlineData("{}")]
+    [InlineData("{\"value\":\"new name\"}")]
+    [InlineData("{\"target\":\"page-name\"}")]
     [InlineData("{\"target\":null}")]
     [InlineData("{\"action\":{\"name\":\"ExecuteScript\"}}")]
     [InlineData("{\"p\":[]}")]
@@ -81,7 +92,7 @@ public sealed partial class ApiTryToolTests : IDisposable
         Assert.Equal("readdata", result.GetProperty("value").GetString());
         WriteToolHarness.Structured(await Call());
         Assert.Equal(2, _approval.Questions.Count);
-        Assert.All(_harness.Bridge.Writes, w => Assert.Equal(TimeSpan.FromSeconds(30), w.Limit));
+        Assert.All(_harness.Bridge.Writes, w => Assert.Equal(TimeSpan.FromSeconds(120), w.Limit));
         string audit = File.ReadAllText(Assert.Single(Directory.GetFiles(_harness.Locations.Audit, "*.jsonl")));
         Assert.Contains("\"unverified\":true", audit, StringComparison.Ordinal);
         Assert.Contains("observations", audit, StringComparison.Ordinal);
@@ -91,7 +102,7 @@ public sealed partial class ApiTryToolTests : IDisposable
     [Fact]
     public async Task ApprovalDisplaysEntireEscapedRawTextAndSignatureWithoutTruncation()
     {
-        string raw = "{ \"target\": \"" + new string('x', 1000) + "\\n\\u202e\" }";
+        string raw = "{ \"target\": " + JsonSerializer.Serialize(Target(new string('x', 1000) + "\n\u202e")) + " }";
         WriteToolHarness.Structured(await Call(parameters: raw));
         ApprovalQuestion question = Assert.Single(_approval.Questions);
         foreach (string culture in new[] { "en-US", "zh-CN" })
@@ -109,7 +120,7 @@ public sealed partial class ApiTryToolTests : IDisposable
     [Fact]
     public async Task WriteApprovalAndAuditNameTheWriteAndRequestedValue()
     {
-        WriteToolHarness.Structured(await Call(parameters: "{\"value\":\"new name\"}"));
+        WriteToolHarness.Structured(await Call(parameters: Parameters("new name")));
         ApprovalQuestion question = Assert.Single(_approval.Questions);
         Assert.StartsWith("write unverified API " + Group + " = \"new name\"", Assert.Single(question.Changes), StringComparison.Ordinal);
         foreach (string culture in new[] { "en-US", "zh-CN" })
@@ -127,7 +138,7 @@ public sealed partial class ApiTryToolTests : IDisposable
             After = Enumerable.Range(0, 25).ToDictionary(i => "snapshot:" + i.ToString(CultureInfo.InvariantCulture), _ => "changed")
                 .Append(new KeyValuePair<string, string>(key, "\"same\"")).ToDictionary(),
         };
-        JsonElement result = WriteToolHarness.Structured(await Call(parameters: "{\"value\":\"same\"}"));
+        JsonElement result = WriteToolHarness.Structured(await Call(parameters: Parameters("same")));
         JsonElement first = result.GetProperty("changes")[0];
         Assert.Equal(key, first.GetProperty("key").GetString());
         Assert.Equal(first.GetProperty("before").GetString(), first.GetProperty("after").GetString());
@@ -170,7 +181,7 @@ public sealed partial class ApiTryToolTests : IDisposable
     public async Task UnknownOutcomeSuspendsProjectAndInstanceAndNeverResends(string cause, bool write)
     {
         _harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.OutcomeUnknown, Execution = ExecutionState.Unknown, Message = cause };
-        JsonElement error = WriteToolHarness.Error(await Call(parameters: write ? "{\"value\":\"new name\"}" : null));
+        JsonElement error = WriteToolHarness.Error(await Call(parameters: write ? Parameters("new name") : null));
         Assert.Equal(ExecutionState.Unknown, error.GetProperty("execution").GetString());
         Assert.Single(_harness.Bridge.Writes);
         Assert.NotEmpty(SuspensionStore.For(_harness.Locations).All());
@@ -179,11 +190,25 @@ public sealed partial class ApiTryToolTests : IDisposable
     }
 
     [Fact]
+    public async Task ReturnedMemberBudgetFailureWithSuccessfulRollbackDoesNotSuspendFurtherWrites()
+    {
+        _harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.Timeout, Execution = ExecutionState.RolledBack, Message = "The member returned over budget; rollback succeeded." };
+        JsonElement error = WriteToolHarness.Error(await Call(parameters: Parameters("new name")));
+        Assert.Equal((ErrorReason.Timeout, ExecutionState.RolledBack), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
+        Assert.Empty(SuspensionStore.For(_harness.Locations).All());
+        _harness.Bridge.WriteFailure = null;
+        Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(await Call()).GetProperty("execution").GetString());
+        Assert.Equal(2, _harness.Bridge.Writes.Count);
+        Assert.Equal(2, _approval.Questions.Count);
+    }
+
+    [Fact]
     public async Task ObjectMethodResultReturnsTheExactDiscoveryLocator()
     {
         var locator = new DrawingLocator { Project = _harness.ProjectPath, Page = "=A/1", Type = 2, Oid = 12, Digest = new string('a', 64) };
         _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData { Locator = locator };
-        JsonElement value = WriteToolHarness.Structured(await Call()).GetProperty("value");
+        JsonElement value = WriteToolHarness.Structured(await Call(group: "O:Eplan.EplApi.HEServices.SelectionSet.GetSelectedObject",
+            parameters: JsonSerializer.Serialize(new { target = Target(page: ""), bFirst = true }))).GetProperty("value");
         Assert.Equal(JsonSerializer.SerializeToElement(locator, EplanMcp.Host.HostJson.Options).GetRawText(), value.GetRawText());
     }
 

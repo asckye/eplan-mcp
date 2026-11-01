@@ -4,10 +4,13 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Outcome-tracked trials; writes share one SafetyPoint and undo step with their observations.</summary>
 public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch, ITransactionScopeFactory transactions) : Operation<ApiTryArgs, ApiTryData>, IWriteOperation
 {
+    private Func<Func<TimeSpan>> StartClock { get; } = ProjectBackups.StartStopwatch;
+    internal ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch, ITransactionScopeFactory transactions, Func<Func<TimeSpan>> startClock)
+        : this(planner, dispatch, transactions) => StartClock = startClock;
+
     public override string Name => OperationNames.ApiTryExecute;
     protected override ApiTryData Execute(ApiTryArgs args)
     {
-        var elapsed = System.Diagnostics.Stopwatch.StartNew();
         WritePlan plan;
         try
         {
@@ -18,6 +21,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         bool write = plan.Changes[0].Action == "write";
+        bool budgetExceeded = false;
         try
         {
             if (!write)
@@ -50,7 +54,8 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             return committed.Result;
         }
         catch (BridgeErrorException ex) when (ex.Error.Execution == ExecutionState.RolledBack
-            && ex.Error.Reason is not (ErrorReason.Timeout or ErrorReason.EplanBusy or ErrorReason.OutcomeUnknown))
+            && ex.Error.Reason is not (ErrorReason.EplanBusy or ErrorReason.OutcomeUnknown)
+            && (ex.Error.Reason != ErrorReason.Timeout || budgetExceeded))
         { throw; }
         catch (Exception ex)
         { throw new BridgeErrorException(ErrorReason.OutcomeUnknown, "Unverified API outcome is unknown. Do not repeat; ask the engineer to inspect EPLAN.", ex) { Error = { Execution = ExecutionState.Unknown } }; }
@@ -62,7 +67,15 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             bool setter = write && ApiTryCatalog.MethodAccess(args.Group) is null;
             if (setter)
             { before[key] = JsonConvert.SerializeObject(dispatch.Read(args)); }
+            Func<TimeSpan> elapsed = StartClock();
             object? result = dispatch.Invoke(args);
+            // The member has returned. This local budget failure can be known after a successful rollback;
+            // an exception raised inside the invocation still has the conservative unknown outcome.
+            if (elapsed().TotalSeconds > 30)
+            {
+                budgetExceeded = true;
+                throw new BridgeErrorException(ErrorReason.Timeout, "The API member exceeded 30 seconds; the trial was rolled back. Reduce the scratch project before retrying.");
+            }
             string? value = result as string;
             if (setter && value != Convert.ToString(((Newtonsoft.Json.Linq.JValue)ApiTryPlanOperation.Parameters(args.Parameters)["value"]!).Value, System.Globalization.CultureInfo.InvariantCulture))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property did not read back as requested; the trial was rolled back."); }
@@ -71,8 +84,6 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             if (setter)
             { data.After[key] = JsonConvert.SerializeObject(value); }
             OperationContext.Current.ThrowIfCancellationRequested();
-            if (elapsed.Elapsed.TotalSeconds > 30)
-            { throw new TimeoutException("Trial exceeded its execution budget."); }
             return data;
         }
     }

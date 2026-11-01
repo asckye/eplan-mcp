@@ -217,6 +217,11 @@
 - 试执行把这类拒绝报告为已知失败（`EPLAN_OPERATION_FAILED`，`rolled_back`）：只在调用前后快照一致时这样报告，否则仍为 `OUTCOME_UNKNOWN` 并暂停写入。
 - `HEServices.ConnectionService.SwapSourceAndTarget` 作为写入试执行：一次撤销恢复连接的源与目标，之前的哨兵页仍在。— Large `ApiTryTests`。
 
+### A66. 静态与 via 试执行的预算失败（2026-11-01，EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本，串行）
+- `ApiTryTests` 共 7 项，6 项通过；`LargeWrite_StaticAndViaReadsAndPageWritePreserveSingleUndoHistory` 在经 Function 定位器、`via:"Page"` 写 `Page.GridSize` 时返回 `OUTCOME_UNKNOWN`。同一测试此前的静态 `IsLogicalPageDocType(Circuit)`、`DeviceTagConfig.EnableSyntaxCheck` 和经 Function.Page 读取 GridSize 已返回且通过断言。— `.local/failures/q-op-static-ApiTryTests.log`，失败位置 `ApiTryTests.StaticEntries.cs:24`。
+- 对应 add-in 记录为 `.local/failures/bridge-slotA.log`，05:29:45.294，关联 ID `e704b39ce143474899d28c3fd4c09b11`：`TimeoutException: Trial exceeded its execution budget.`，堆栈为 `ApiTryExecuteOperation.Invoke → TransactionRunner.Run → ApiTryExecuteOperation.Execute`。这不是 EPLAN 的 GridSize setter 拒绝：按该版源码，异常在成员返回、读回比较及执行后 Inspect 完成之后、提交之前由本地预算检查抛出；TransactionRunner 成功回滚后才原样重抛该异常，回滚失败会改抛另一异常。应归为已回滚的预算失败，不能由它推断原生 setter 耗时超过 30 秒。
+- 离线代码核对发现，原 30 秒计时还包含重新规划、完整快照和属性原值读取；via 解析依次枚举所有允许的父类型，可能在找到记录页上的 Function 前反复扫描全项目。修复先查记录页并保留类型、对象号、页和摘要核对；成员调用单独计时，Host 为重新规划、观察和收尾留时间。本地超限仅在回滚成功后报告 `TIMEOUT / rolled_back`；调用内部超时、模态阻塞及提交/回滚失败仍为 unknown。Small 以 `Page.GridSize` + Function 定位器 + `via:"Page"` + 数值 2.5/4 覆盖该路径及失败分类。本次修复未运行 EPLAN，整项写入和撤销仍待 Large 复验。
+
 ### A64. 电缆经过星形母线节点时的芯线分配（D1 实验，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 的新页上）
 - 三个设备的连接点经一个 T 节点汇成星形：设备 A 在主干一侧，B、C 在两个分支。生成连接后得到两条逻辑连接 A→B、A→C（都从 A 出发，经节点），没有 B↔C。
 - 电缆画在**分支段**（节点与 B 之间）上：只有 A→B 得到连接定义点（芯线），A→C 不受影响。
