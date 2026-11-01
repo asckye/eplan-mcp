@@ -14204,11 +14204,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/SelectionToolTests.cs"
           },
           {
-            "name": "ToolUsageExampleTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Host.Tests/Tools/ToolUsageExampleTests.cs"
-          },
-          {
             "name": "SelectionProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/SelectionProtocolTests.cs"

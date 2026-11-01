@@ -236,7 +236,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_revision_list | read | revision.list | 46 | 21 | 2 | 17 | 0 | 1/0/1 | A28 | — |
 | eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 148 | 68 | 4 | 51 | 0 | 2/1/0 | — | — |
 | eplan_selection_get | read | selection.get | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
-| eplan_selection_set | read | selection.set | 0 | 0 | 0 | 0 | 0 | 3/1/1 | A54 B11 | — |
+| eplan_selection_set | read | selection.set | 0 | 0 | 0 | 0 | 0 | 2/1/1 | A54 B11 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/2 | A52 A53 A55 | — |
