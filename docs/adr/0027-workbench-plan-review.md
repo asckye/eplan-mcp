@@ -22,3 +22,6 @@ ADR-0023 要求完整计划审阅；当前 ApprovalAskParams 只有纯文本 Cha
 
 ## 后果
 M6 阶段 2 使用方案 1，详见[实施设计](../design/2026-10-23-m6-phase2-plans.md)第 5 节，不依赖本提议。未来实现须有严格解析、N/N-1 兼容、完整审阅及结果显示的 Small/Medium 测试；不放宽任何审批权限。
+
+## 修订记录
+- 2026-11-01：项目负责人同意暂缓决定（"按你推荐的来"）。本提议是改变 Workbench IPC 合同的单向门，v0.5.0 不依赖它；Workbench 将按 [ADR-0034](0034-workbench-visual-apple-principles.md) 改版，审批界面届时重做，届时与改版一起评审本提议。状态保持 Proposed。
