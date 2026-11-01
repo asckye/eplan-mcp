@@ -11,7 +11,7 @@ namespace EplanMcp.Host.Tests.Doctor;
 
 /// <summary>
 /// The Workbench groups the doctor checks by their IDs (M5 design 4.4), so every check carries one of
-/// <see cref="DoctorCheckIds"/>, each of which is documented in architecture 5.2. Medium: the data directory checks
+/// <see cref="DoctorCheckIds"/>, each of which is documented in docs/reference/cli.md. Medium: the data directory checks
 /// look at real directories, and the documentation is a file.
 /// </summary>
 [Trait("Size", "Medium")]
@@ -65,14 +65,11 @@ public sealed class DoctorCheckIdTests : IDisposable
     }
 
     [Fact]
-    public void EveryId_IsDocumentedInArchitecture52()
+    public void EveryId_IsDocumentedInTheCliReference()
     {
-        string architecture = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "architecture", "architecture.md"));
-        int from = architecture.IndexOf("### 5.2", StringComparison.Ordinal);
-        int to = architecture.IndexOf("### 5.3", from, StringComparison.Ordinal);
-        Assert.True(from >= 0 && to > from, "architecture.md has no section 5.2.");
-
-        Assert.All(_ids, id => Assert.Contains($"`{id}`", architecture[from..to], StringComparison.Ordinal));
+        // The CLI JSON contracts moved from architecture 5.2 to docs/reference/cli.md on 2026-11-01.
+        string reference = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "reference", "cli.md"));
+        Assert.All(_ids, id => Assert.Contains($"`{id}`", reference, StringComparison.Ordinal));
     }
 
     private static IEnumerable<DoctorCheck> DataChecks(HostDataLocations locations) =>
