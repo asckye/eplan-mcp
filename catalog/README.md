@@ -40,7 +40,7 @@ dotnet run --project eng\coverage -- check      # 与 CI 相同的检查
 - **`scan`** 用插件自己的 Release 构建参数建一个 Roslyn 编译，读 EPLAN `Bin` 目录中的程序集作为引用，不启动、不连接 EPLAN。EPLAN 不在默认目录时加 `--eplan-bin <Bin 目录>`。结果记下扫描日期、最后一次改动所扫源码的提交，以及源码的 token 哈希（不含注释和空白）。
 - **生成的代码不算实现**：从目录生成的内部构件（文件名以 `.g.cs` 结尾）只在有 Bridge 操作到达时计入覆盖；只有生成代码用到、没有操作到达的 ID 列在 `tools.json` 的 `unreachedGenerated` 中，不进入 `coverage.json` 的任何一级（设计文档第 8 节）。手写的代码没有操作到达时仍算基础设施。
 - **两种过期，处理不同**（CI 的 "Coverage files" 步骤运行 `check`）：
-  - **扫描过期只警告，不让 CI 失败**：`src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 在扫描之后改了代码（只改注释和格式不算）。CI 和大多数代理没有 EPLAN，没法重新扫描；所以 CI 只给出警告。但覆盖报告顶部要写明扫描已过期，以及扫描的日期和提交，所以改了 Bridge 代码的 PR 仍要运行 `generate`，把这条提示写进报告。之后有人在装有 EPLAN 的机器上运行 `scan` 并提交，提示随之消失。
+  - **扫描过期只警告，不让 CI 失败**：`src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 在扫描之后改了代码（只改注释和格式不算）。CI 和大多数代理没有 EPLAN，没法重新扫描；所以 CI 只给出警告。但覆盖报告顶部要写明扫描已过期，以及扫描的日期和提交，所以改了 Bridge 代码的变更集仍要运行 `generate`，把这条提示写进报告。之后有人在装有 EPLAN 的机器上运行 `scan` 并提交，提示随之消失。
   - **生成的文件与输入不一致会让 CI 失败**：工具、规格、测试、api-notes、overlay、目录或扫描结果变了，而 `tools.json`、`coverage.json`、覆盖报告没有跟着重新生成。运行 `generate`（不需要 EPLAN）后提交这三个文件。CI 的错误消息中给出同样的命令。
 
 ## 通用属性字典资源
@@ -55,7 +55,7 @@ dotnet run --project eng\coverage -- check      # 与 CI 相同的检查
 的名称也不可读；本目录版本中其余公开属性为 `readable`（属性工具设计 4.3/5）。目录中没有的属性（如新版本新增）一律为
 `unreviewed` 并拒绝，换目录版本须重新审查分类。`readable` 仍须通过运行时 internal/许可/副作用等检查，不授予写权限。
 `PropertyAddressValidation` 校验构造 DTO 之前的 snake_case 工具 JSON，汇总 RFC 6901 路径；locator 的项目参数须为已解析路径。
-值内容脱敏、运行时元数据校验和读适配器由后续 PR 实现；这里不将目录资源计为已实现或实机验证。
+值内容脱敏、运行时元数据校验和读适配器由后续变更实现；这里不将目录资源计为已实现或实机验证。
 
 ## 内部包装的生成
 设计文档第 8 节的"最小生成器"：从目录生成任务工具内部用的构件，**不生成 MCP 工具**，运行时不做反射调用。

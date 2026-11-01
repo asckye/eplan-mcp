@@ -2,7 +2,7 @@
   <!--
     Central Package Management: every NuGet version is declared here exactly once.
     Projects reference packages without a Version attribute.
-    Adding a dependency needs a reason in the PR description (see docs/process/development-workflow.md).
+    Adding a dependency needs a reason in the commit body (see docs/process/development-workflow.md).
   -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>

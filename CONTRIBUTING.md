@@ -6,7 +6,7 @@
 ```bash
 git config core.hooksPath eng/hooks
 ```
-启用本地提交检查：Conventional Commits 格式、禁止 AI 署名。
+启用本地提交检查，规则见 [开发流程第 5 节](docs/process/development-workflow.md#5-分支与提交)。
 
 ## 开发环境
 - Windows 10/11 x64
@@ -14,15 +14,17 @@ git config core.hooksPath eng/hooks
 - Visual Studio 2026 或 JetBrains Rider（可选）
 - 运行 Large 测试需要：EPLAN Electric P8 / Pro Panel 2026，以及包含 **API 扩展**的授权
 
-## 提交一个变更
-1. 先开 Issue 描述问题，或者认领一个已有的 Issue。
-2. 判断变更级别（L0 到 L3）。L2 及以上，先提交设计文档、工具规格或 ADR。
-3. 从 `main` 拉一个短期分支：`feat/42-page-create`。
-4. 按 [编码规范](docs/standards/coding-standards.md) 和 [测试策略](docs/standards/testing.md) 实现。
-5. 提 PR，按模板填写，让 CI 全部通过。
-6. squash 合并，PR 标题就是最终的提交信息。
+## 交付一个变更集
+
+1. 负责人按 [brief 模板](docs/templates/brief.md) 写清原因、设计、不变量、验收测试和边界，并确定 L0–L3 级别；L2 先评审设计，L3 须负责人确认 ADR。
+2. Codex 在 worktree 按 [AGENTS.md](AGENTS.md)、编码规范和测试策略实现，交付未提交改动。
+3. 对照 [评审清单](docs/templates/review-checklist.md) 审查并处理发现；理由写提交正文，L2/L3 必填 why / verify / risk / rollback。
+4. 涉及 EPLAN 行为的变更集，受影响 Large 类须实机通过，或列入 [待验台账](docs/process/large-pending.md) 且提交正文明确说明待验（[实机规范](docs/process/live-verification.md)）。
+5. 维护者审阅并提交后，在干净工作区运行 `pwsh eng/scripts/local-gate.ps1 -Push`，关卡通过才直推 `main`；CI 是事后检查。
+
+一个变更集是一份 brief 和一次关卡，大小按开发流程第 1 节计算。外部贡献者仍使用 PR，见 [.github/pull_request_template.md](.github/pull_request_template.md)。
 
 ## 规矩
 - 写操作只在 scratch 项目上测试，不要用真实客户项目，也不要提交它们。
-- 不要在提交、PR 或文档中加入 AI 署名。
+- 提交和文档遵循 [开发流程第 5 节](docs/process/development-workflow.md#5-分支与提交) 及 [CLAUDE.md 硬性规则](CLAUDE.md#硬性规则违反任何一条都不能合并)。
 - 安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。

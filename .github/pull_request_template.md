@@ -1,28 +1,19 @@
-<!-- PR 标题即最终的 squash 提交信息，格式：type(scope): 摘要。例如 feat(tools): add eplan_page_create -->
+<!-- 本模板仅供外部贡献者使用。仓库内部用 brief → Codex / worktree → 评审 → local-gate.ps1 -Push；见 docs/process/development-workflow.md。 -->
 
-## 为什么
-<!-- 解决什么问题。链接 Issue：Closes #123 -->
+## 原因与范围
+<!-- 解决什么问题、精确复现输入、预期行为、变更边界。无需 Issue 号。 -->
 
-## 改了什么
-<!-- 要点即可，细节看 diff -->
+## 变更级别与设计
+<!-- L0 / L1 / L2 / L3；L2 附工具规格或设计，L3 附 Proposed ADR，由负责人确认。 -->
 
-## 变更级别
-- [ ] L0 琐碎　- [ ] L1 常规　- [ ] L2 显著（已附工具规格或设计文档：链接）　- [ ] L3 架构级（ADR：链接）
-
-## 怎么验证的
-<!-- Small/Medium 测试之外，涉及 EPLAN 的变更贴出实机测试结果：EPLAN 版本、变体、scratch 项目、命令和输出摘要 -->
+## 验证与待验
+<!-- Small/Medium 命令和结果；涉及 EPLAN 行为：受影响 Large 类已实机通过，或登记 docs/process/large-pending.md，并在提交正文说明待验。证据要求见 docs/process/live-verification.md。 -->
 
 ## 风险与回退
-<!-- 可能出什么问题、影响谁、如何回退（回滚 PR / 关闭功能开关 / 配置禁用工具） -->
+<!-- L2/L3 变更集必须完整记录 why / verify / risk / rollback，并同步提交正文；L0/L1 不要求四段式。理由仍需进入提交正文。 -->
 
-## 自查清单
-- [ ] CI 全绿，无新增警告抑制（如有 `#pragma warning disable`，已在代码里写明原因）
-- [ ] 工具契约快照有变化时，已逐项审视；破坏性变更已在标题加 `!` 并写 `BREAKING CHANGE`
-- [ ] 写操作：支持 dry-run、经过审批策略、写审计记录、失败可回滚（或已说明为何不能）
-- [ ] 返回给模型的文本经过截断或分页，来自项目的数据已标记为不可信内容
-- [ ] 测试会在代码出错时真的失败（不只测正常路径）
-- [ ] `CHANGELOG.md` 的 Unreleased 已更新（用户不可见的变更除外）
-- [ ] 没有提交真实项目、授权信息、个人数据或本机路径
-- [ ] 提交信息、PR 描述和文档中没有 AI 署名（`Co-Authored-By` AI 尾注、"Generated with ..." 等）
-- [ ] 新依赖已在描述中说明用途、许可证和替代方案
-- [ ] 已运行 `/code-review`，发现项已处理或回复
+## 自查
+
+- [ ] 已对照 [评审清单](../docs/templates/review-checklist.md) 检查并处理发现。
+- [ ] 提交信息、正文及文档符合 [开发流程第 5 节](../docs/process/development-workflow.md#5-分支与提交)。
+- [ ] 维护者审阅后在干净工作区运行本地关卡，CI 结果作为检查证据；Large 不包含在自动关卡中。

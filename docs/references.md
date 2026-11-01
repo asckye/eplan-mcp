@@ -18,7 +18,7 @@
 | [Anthropic · Advanced tool use](https://www.anthropic.com/engineering/advanced-tool-use) | 工具搜索与延迟加载；参数示例能明显提高准确率 | 工具设计规范 4、10 节 |
 | [Anthropic · Code execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp) | 渐进式披露；在服务器端过滤数据，不把大数据集交给模型 | 工具设计规范 5、7 节 |
 | [Claude Code · MCP](https://code.claude.com/docs/en/mcp) | 工具输出默认上限 25k token（超过 10k 告警）；超过 2 分钟的调用转到后台 | 架构第 2 节；工具设计规范 7.2 节 |
-| [OpenTelemetry MCP 语义约定](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/mcp.md) | span 名称与属性；参数和结果默认不进遥测（目前处于 Development 状态） | 架构第 8.7 节 |
+| [OpenTelemetry MCP 语义约定](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/mcp.md) | span 名称与属性的参考资料（尚未实现遥测；约定处于 Development 状态） | 架构第 8.7 节 |
 
 ## Google
 
@@ -36,7 +36,7 @@
 
 | 来源 | 采纳的要点 | 落地位置 |
 |---|---|---|
-| [Code-With Engineering Playbook](https://microsoft.github.io/code-with-engineering-playbook/) | Definition of Ready / Done；ADR 以 Proposed 状态通过 PR 提交；C# 代码评审要点 | 开发流程第 4 节；[ADR 索引](adr/README.md) |
+| [Code-With Engineering Playbook](https://microsoft.github.io/code-with-engineering-playbook/) | brief 与交付验收；ADR 以 Proposed 状态交由负责人确认；C# 代码评审要点 | 开发流程第 4 节；[ADR 索引](adr/README.md) |
 | [Security Development Lifecycle](https://www.microsoft.com/en-us/securityengineering/sdl/practices) | 威胁建模、供应链安全、安全测试 | 安全标准 |
 | [STRIDE](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats) | 冒充、篡改、抵赖、信息泄露、拒绝服务、权限提升 | 安全标准第 3 节 |
 | [Framework Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/) | 命名与 API 设计的通用规则 | [编码规范](standards/coding-standards.md) |
@@ -57,8 +57,6 @@
 | [C4 model](https://c4model.com/) · [arc42](https://arc42.org/overview) | 分层的架构图；架构文档的章节结构 | 架构文档 |
 | [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) · [SemVer](https://semver.org/) · [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) | 提交格式决定版本号的升级；CHANGELOG 的分组 | 开发流程 5、8 节；[CHANGELOG](../CHANGELOG.md) |
 | [Trunk-Based Development](https://trunkbaseddevelopment.com/) | 短期分支、功能开关、主干持续集成 | 开发流程第 1 节 |
-| [DORA metrics](https://dora.dev/guides/dora-metrics/) | 变更前置时间、变更失败率 | 开发流程第 11 节 |
-| [OpenSSF Scorecard](https://scorecard.dev/) | 分支保护、固定依赖版本、最小 token 权限、签名发布 | 安全标准第 5 节 |
 | [SLSA v1.2](https://slsa.dev/spec/v1.2/build-track-basics) · [GitHub artifact attestations](https://docs.github.com/en/actions/concepts/security/artifact-attestations) · [Sigstore](https://docs.sigstore.dev/about/overview/) | 构建来源证明，达到 SLSA Build L2 | 开发流程第 8 节；安全标准 SEC-16 |
 | [CycloneDX](https://cyclonedx.org/specification/overview/) | SBOM 格式 | 发布清单 |
 

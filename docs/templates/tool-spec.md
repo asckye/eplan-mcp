@@ -36,7 +36,7 @@
 ## 5. 实现要点
 - 使用的 EPLAN API（类型全名），是否已在 [api-notes](../eplan/api-notes.md) 中查证
 - 是否需要 `SafetyPoint` / `LockingStep` / `QuietModeStep`
-- 预计耗时；超过 2 秒的要支持进度通知和取消
+- 预计端到端耗时与 EPLAN 主线程时间预算；Large 记录时长，目标而非关卡，见 [开发流程第 11 节](../process/development-workflow.md#11-依赖协议版本与耗时)；超过 2 秒的要支持进度通知和取消
 
 ## 6. 写操作专项（Read 级工具跳过）
 - dry-run 返回什么（将要发生的变化清单）

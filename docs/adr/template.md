@@ -1,11 +1,11 @@
 # ADR-NNNN：<决策标题，用"采用/使用 X 做 Y"的句式>
 
 > 格式基于 MADR（Markdown Architectural Decision Records）。
-> 一份 ADR 只记录一个决策。ADR 一旦 `Accepted` 就不再修改正文；改变决策时新写一份 ADR，并把旧的标为 `Superseded by ADR-XXXX`。
+> 一份 ADR 只记录一个决策。`Accepted` 后允许修订，每次必须在“修订记录”注明日期、变动、原因及确认依据；替代原决策时新写 ADR，并把旧的标为 `Superseded by ADR-XXXX`。
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed / Accepted / Deprecated / Superseded by ADR-XXXX |
+| 状态 | Proposed / Accepted / Deprecated / Superseded（注明取代它的 ADR-XXXX） |
 | 日期 | yyyy-mm-dd |
 | 决策人 | |
 | 门的类型 | 单向门（难以回退）/ 双向门（容易回退） |
@@ -33,3 +33,9 @@
 ### 方案 A
 - 优点：
 - 缺点：
+
+## 修订记录
+
+| 日期 | 修订内容与原因 | 确认依据 / 取代 ADR |
+|---|---|---|
+| yyyy-mm-dd | | |

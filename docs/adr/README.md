@@ -3,7 +3,7 @@
 记录难以回退、或者会长期影响项目的决策。格式见 [template.md](template.md)（基于 MADR），规则见 [开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)。
 
 - 编号从不复用。决策被推翻时，新写一份 ADR，并把旧的标为 `Superseded by ADR-XXXX`。
-- 以 `Proposed` 状态通过 PR 提交，由项目负责人确认后改为 `Accepted`（冷却期已于 2026-10-20 取消，见开发流程第 6 节）。
+- 以 `Proposed` 状态随 brief 提交评审，由项目负责人确认后改为 `Accepted`（冷却期已于 2026-10-20 取消，见开发流程第 6 节）。Accepted 后修订按模板追加日期、原因及确认依据。
 
 | 编号 | 标题 | 状态 | 门的类型 |
 |---|---|---|---|
@@ -39,3 +39,4 @@
 | [0030](0030-action-catalog-tiers.md) | EPLAN action 分三级：已验证条目照旧，全部 action 只读可查，未验证 action 只在 scratch 中逐次审批后执行，并批量自动验证 | Accepted | 单向门（未验证执行发布后） |
 | [0031](0031-private-extension-modules.md) | 私有扩展模块在单独的工作进程中运行，经清单与哈希注册，只能经现有操作和审批流水线写入，默认关闭 | Accepted | 单向门（扩展契约发布后） |
 | [0032](0032-generic-api-layer.md) | EPLAN API 以通用层加专用工具补齐：对象类型通用读、白名单写，全部操作层与 action 只读目录加分级执行，批量实机验证 | Accepted | 单向门（通用读写与分级执行契约发布后） |
+| [0033](0033-api-try-object-handles.md) | `eplan_api_try` 引入短期对象句柄，覆盖只能由返回值得到的对象 | Accepted（2026-11-01） | 双向门 |

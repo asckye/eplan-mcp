@@ -1,202 +1,151 @@
 # 开发流程
 
 > 适用范围：本仓库的所有代码、文档、配置变更。
-> 依据：Google Engineering Practices、Microsoft Code-With Engineering Playbook、Amazon 的单向门/双向门决策原则，对照条目见 [references.md](../references.md)。
-> 现实前提：项目初期只有一名人类开发者，加上 AI 助手（Claude Code）。流程按这个前提裁剪：凡是大厂靠"第二个人"保证的环节，这里都换成**可自动执行的检查**或**书面记录**，而不是假装有评审人。
-
----
+> 依据：Google Engineering Practices、Microsoft Code-With Engineering Playbook、单向门/双向门决策原则，见 [references.md](../references.md)。
+> 现实前提（2026-11-01）：负责人交付 brief，Codex 在 worktree 工作，经评审后由维护者通过本地关卡直接推送 main。CI 是推送后的非阻塞检查。外部贡献者使用 PR。
 
 ## 1. 五条基本原则
 
-| # | 原则 | 来源 | 在本项目的含义 |
-|---|---|---|---|
-| 1 | **小步变更** | Google *Small CLs* | 一个 PR 只做一件事，并附带对应的测试；重构单独提交。改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、契约快照、测试夹具不计入，原样复制、保留许可声明的第三方代码（如 Workbench 的 TIA 主题，ADR-0017）也不计入，测试写得充分不应成为拆分的理由。Google 的参考是：约 100 行算合理，1000 行就太大了。 |
-| 2 | **主干开发** | trunk-based development | 只有 `main` 一条长期分支。功能分支存活不超过 2 天，未完成的功能用开关隐藏，不靠长分支。 |
-| 3 | **先写下来，再动手** | Google Design Docs、ADR | 重大变更先写设计文档或 ADR（判断标准见第 3 节），决策可以追溯。 |
-| 4 | **工具契约就是 API** | Hyrum's Law、Google AIP | MCP 工具的名称、参数、返回结构一经发布，就会有人（和 AI）依赖。改动按 API 变更管理（见第 8 节）。 |
-| 5 | **安全默认值不可悄悄放宽** | Microsoft SDL | 任何让写操作更容易执行的改动，比如放宽审批或扩大可写范围，都按"单向门"处理，必须有 ADR。 |
-
----
+| # | 原则 | 在本项目的含义 |
+|---|---|---|
+| 1 | **小步变更** | 一个变更集只做一件事，并附带对应测试；重构单独交付。变更集指一份 brief 和一次本地关卡运行。改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、契约快照、测试夹具不计入，原样复制、保留许可声明的第三方代码（如 Workbench 的 TIA 主题，ADR-0017）也不计入。 |
+| 2 | **主干开发** | `main` 是唯一长期分支；Codex 用 worktree 隔离任务，及时同步主干，按变更集交付。 |
+| 3 | **先写下来，再动手** | 按第 3 节分级，重大变更先评审设计文档或 ADR。 |
+| 4 | **工具契约就是 API** | 名称、参数、返回结构、描述和配置格式按第 8 节管理。 |
+| 5 | **安全默认值不可悄悄放宽** | 放宽审批或扩大可写范围必须有 ADR，L3 由负责人确认。 |
 
 ## 2. 工作项生命周期
 
-> 交互式图：[开发工作流程](../diagrams/development-workflow/development-workflow.html)（克隆仓库后用浏览器打开，见 [docs/diagrams](../diagrams/README.md)）。
-
-```
-Issue ──► 分级(Triage) ──► 就绪(DoR) ──► [设计] ──► 实现 ──► 本地关卡 ──► 推送 main ──► 实机验证 ──► 发布说明
-                                       ▲                                           │
-                                       └──────────── 发现设计问题时回退 ◄──────────┘
+```text
+brief → 分级与设计 → Codex / worktree 实现 → 评审 → 实机证据或待验登记 → 本地关卡 -Push → main → 发布记录
 ```
 
-1. **Issue**：所有工作从 Issue 开始，模板见 `.github/ISSUE_TEMPLATE/`。Bug 必须写复现步骤、EPLAN 版本和变体、授权类型。
-2. **分级**：打上 `type/*`、`area/*`、`level/*` 标签（level 见第 3 节）。
-3. **就绪（Definition of Ready）**：满足第 4 节的检查项后才开始写代码。
-4. **设计**：level 2 及以上写设计产物（第 3 节）。
-5. **实现**：见第 5、6 节。
-6. **本地关卡**：见第 7 节，`eng/scripts/local-gate.ps1` 全部通过才能推送到 `main`；CI 在推送后照常运行，只作事后检查，不阻塞。
-7. **实机验证**：凡是涉及 EPLAN 交互的变更，推送前或当天必须在真实 EPLAN 上跑一次对应的 Large 测试（[testing.md](../standards/testing.md)），结果写进提交说明。
-8. **发布说明**：面向用户的变更在 `CHANGELOG.md` 的 `Unreleased` 下记一条。
-
----
+1. 负责人给出 [brief](../templates/brief.md)：原因、设计、不变量、验收测试和边界。缺陷附精确输入、复现步骤及相关 EPLAN 版本、变体、授权条件。
+2. 按第 3 节分级；L2 先评审规格或设计，L3 先写 Proposed ADR，负责人确认后才能实施。
+3. Codex 在 worktree 实现，按 [AGENTS.md](../../AGENTS.md) 执行常设规则，整理证据和未完成项；代理不创建 git 提交。
+4. 使用 [评审清单](../templates/review-checklist.md) 自查并评审，处理发现项，理由进入提交正文。
+5. 涉及 EPLAN 行为的变更集，只有受影响 Large 类已在真实机器通过，或已列入 [待验台账](large-pending.md) 且提交正文明确说明待验，才能落到 main；详见 [实机验证](live-verification.md)。
+6. 维护者审阅并提交后，在干净工作区运行 `pwsh eng/scripts/local-gate.ps1 -Push`。一次通过的关卡对应本次 brief；失败修复后重新运行，不能沿用修复前结果。
+7. CI 随推送运行，出现失败立即修复；用户可见变化记入 `CHANGELOG.md` 的 `Unreleased`。
 
 ## 3. 变更分级与设计产物
 
-借鉴 Amazon 的单向门/双向门：**容易回退的决定快速做，难以回退的决定慢下来写清楚。**
+容易回退的决定快速做，难以回退的决定先写清楚。
 
-| 级别 | 典型变更 | 需要的设计产物 | 评审方式 |
-|---|---|---|---|
-| **L0** 琐碎 | 错别字、注释、纯文档修正 | 无 | PR 自查 |
-| **L1** 常规 | 在现有设计内修 bug、给已有工具加可选参数、重构 | Issue 写清楚即可 | PR 清单 + AI 评审 |
-| **L2** 显著 | 新增一组工具、修改已发布工具的契约、引入新依赖、新增配置项 | **工具规格**（[templates/tool-spec.md](../templates/tool-spec.md)）或**设计文档**（[templates/design-doc.md](../templates/design-doc.md)） | 设计文档先单独提 PR，合并后再写实现 |
-| **L3** 架构级 | 进程拓扑、IPC 协议、支持的 EPLAN 版本、安全/审批模型、数据落盘格式 | **ADR**（[adr/](../adr/)）+ 设计文档 | ADR 状态从 `Proposed` 改为 `Accepted` 需要项目负责人明确同意 |
+| 级别 | 典型变更 | 设计产物与评审 |
+|---|---|---|
+| **L0** 琐碎 | 错别字、注释、纯文档修正 | 简短 brief，自查评审清单。 |
+| **L1** 常规 | 现有设计内修 bug、可选参数、重构 | brief 说明问题与验收，对照清单评审。 |
+| **L2** 显著 | 一组新工具、已发布契约变化、新依赖或配置 | 先评审 [工具规格](../templates/tool-spec.md) 或 [设计文档](../templates/design-doc.md)，再实现。 |
+| **L3** 架构级 | 进程拓扑、IPC、安全/审批、支持的 EPLAN 版本、落盘格式 | [ADR](../adr/) + 设计文档；只有负责人明确确认，ADR 才能从 Proposed 改为 Accepted。 |
 
-**判断口诀**：会改变"AI 能对用户的 EPLAN 项目做什么"的，至少 L2；会改变"系统怎么拆、怎么通信、怎么保证安全"的，就是 L3。
+会改变“代理能对 EPLAN 项目做什么”的至少 L2；改变系统拆分、通信或安全模型的是 L3。
 
----
+## 4. brief 与交付检查
 
-## 4. 就绪与完成的定义
+brief 按模板写清验收条件、限制及 EPLAN API 证据；未验证行为列为先查证事项，不能凭记忆依赖。L2/L3 的设计先经过第 3 节评审。
 
-参考 Microsoft Engineering Playbook 的 Definition of Ready / Definition of Done，按本项目裁剪。
+可以交付到 main 的条件：
 
-### Definition of Ready（开始编码前）
-- [ ] Issue 写明了要解决的问题，而不只是方案。
-- [ ] 验收标准可以检验，例如"在 scratch 项目上调用 X，返回 Y"。
-- [ ] 级别已确定；L2 及以上的设计产物已合并。
-- [ ] 已知涉及的 EPLAN API 已在 [api-notes](../eplan/api-notes.md) 中查证，或者列为本次任务要先查证的事项。
+- [ ] 本地关卡通过，评审发现已处理；编码符合 [coding-standards.md](../standards/coding-standards.md)。
+- [ ] 工具符合 [mcp-tool-design.md](../standards/mcp-tool-design.md)；契约快照按 [testing.md 第 3 节](../standards/testing.md#3-工具契约快照测试) 更新并审视。
+- [ ] Small/Medium 补齐；EPLAN 行为变更满足第 2 节的 Large 通过或待验登记规则。
+- [ ] 写操作有审计、dry-run 和失败回滚，不能回滚的原因已记录。
+- [ ] 用户可见变化有 CHANGELOG，文档同步，无敏感内容。
 
-### Definition of Done（可以推送到 main）
-- [ ] 代码遵循 [coding-standards.md](../standards/coding-standards.md)，本地关卡（第 7 节）全部通过。
-- [ ] 新增或修改的工具符合 [mcp-tool-design.md](../standards/mcp-tool-design.md)，工具契约快照已更新并经过审视。
-- [ ] 测试按 [testing.md](../standards/testing.md) 补齐：Small 必须有；涉及 EPLAN 的必须有 Large，并已在实机上跑过。
-- [ ] 写操作有审计记录、能 dry-run，失败时能回滚，或者明确记录了不能回滚的原因。
-- [ ] 用户可见的变化已写进 `CHANGELOG.md`；文档已同步。
-- [ ] 没有提交真实客户项目、授权信息或个人数据。
-
----
+实机验证完成和发布验收另见 [live-verification.md](live-verification.md)；登记待验不代表验证完成。
 
 ## 5. 分支与提交
 
-### 分支命名
-`<type>/<issue号>-<简短描述>`，例如 `feat/42-page-create`、`fix/57-pin-designation-encoding`。
+worktree 分支名表达任务即可，不要求 Issue 号。只保留 `main` 一条长期分支。
 
 ### 提交信息：Conventional Commits 1.0
-```
+
+```text
 <type>(<scope>): <摘要，祈使句，≤72 字符>
 
-<正文：为什么改，而不是改了什么>
-
-Refs: #42
+<正文：为什么改>
 ```
+
 - **type**：`feat` `fix` `docs` `refactor` `perf` `test` `build` `ci` `chore` `revert`
-- **scope**（与架构组件对应）：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `evals` `docs` `ci` `spikes`
-- 破坏工具契约的变更必须在 type 后加 `!`，并写 `BREAKING CHANGE:` 脚注。发布工具会根据它决定是否升主版本。
-- **不允许出现 AI 署名**：提交信息里不能有 `Co-Authored-By: <AI 名称>` 之类的尾注；PR 描述、发布说明、CHANGELOG 和文档里不能写 "Generated with ..." 等 AI 生成标记，也不能把 AI 列为作者。CI 会检查（见第 7 节）。
+- **scope**：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `evals` `docs` `ci` `spikes`
+- 理由写提交正文；仅 **L2/L3 变更集**必须完整写出 why / verify / risk / rollback（为什么、验证、风险、回退）。L0/L1 不要求四段式正文。
+- 任何等级若有 Large 待验，提交正文都必须注明台账条目、受影响类、尚未验证的范围；已有测试结果与未运行项分开记录。
+- 破坏性变更用 `!` 和 `BREAKING CHANGE:` 标记，版本及兼容期遵循第 8 节。
+- **不允许出现 AI 署名**：提交信息中不加相关 `Co-Authored-By` 尾注；PR 描述、发布说明、CHANGELOG 和文档不加生成标记，也不把代理列为作者。本地 `commit-msg` 钩子和 CI 检查。此规则与 [CLAUDE.md 硬性规则](../../CLAUDE.md#硬性规则违反任何一条都不能合并) 是统一依据，其他文件只引用。
 
-### 合并策略
-- 项目负责人 2026-10-30 决定：**本地关卡通过后直接推送 `main`，不开 PR，也不等 CI**。`eng/scripts/local-gate.ps1 -Push` 先变基到 `origin/main` 保持线性历史，跑完第 7 节的全部关卡，`origin/main` 在此期间没有变化才推送。
-- 每个提交仍按第 1 节控制大小，提交信息符合 Conventional Commits，说明里写清为什么、怎么验证（附实机测试结果）、风险和回退办法（原 PR 描述的内容）。
-- CI 在每次推送 `main` 后照常运行，不阻塞；结果变红时立即补一个修复提交。外部贡献者仍然通过 PR 提交。
+### 推送方式
 
----
+维护者在评审后提交，运行 `eng/scripts/local-gate.ps1 -Push`：变基到 `origin/main`，检查已提交状态，关卡通过且远端未变化才推送 `HEAD:main`。工作区必须干净，包含未跟踪文件的检查。大小限制按第 1 节的整个变更集计算，不能靠拆成多个提交绕过。外部贡献者保留 [PR 模板](../../.github/pull_request_template.md)，不作为内部评审记录入口。
 
-## 6. 提交与评审
+## 6. 评审
 
-### 提交者
-1. 先自查：对照 PR 模板（`.github/pull_request_template.md`）逐项勾选。
-2. 提交说明（外部贡献者为 PR 描述）写三件事：**为什么**、**怎么验证的**（附实机测试输出）、**风险和回退办法**。
-3. 新增依赖时写明理由：用来做什么、许可证、维护状况、有没有更轻的替代。
+按 [review-checklist.md](../templates/review-checklist.md) 检查，顺序为设计、功能与安全、复杂度、测试、命名与风格。让代码库整体变好即可通过；个人偏好用 `Nit:` 标记，不阻塞交付。
 
-### 评审（参考 Google 的评审者指南）
-按以下顺序看，前面的不过关就不用看后面的：
-1. **设计**：这个变更该不该做，放在这里对不对？
-2. **功能与安全**：对 EPLAN 项目会不会有意外写入？失败路径有没有处理？
-3. **复杂度**：下一个人（或下一个 AI 会话）能不能读懂？
-4. **测试**：测试会不会在代码出错时真的失败？
-5. **命名、注释、风格**：大部分交给分析器，人只看分析器管不到的地方。
+- 每个变更集推送前执行 `/code-review`，L2/L3 用 high 档，发现和处理结果附在评审记录中。
+- L3 由负责人明确确认，ADR 记录日期及确认原话；冷却期于 2026-10-20 取消。
+- 必测失败路径的范围只维护在 [testing.md 第 6 节](../standards/testing.md#必须测失败路径的地方)。
+- 新依赖在设计及提交正文说明用途、许可证、维护状况和替代方案。
 
-**通过标准**（Google 原则）：只要这个变更让代码库整体变得更好，就可以通过，不要求完美。挑剔的个人偏好用 `Nit:` 前缀标出，不阻塞合并。
+<a id="7-ci-关卡"></a>
 
-### 一人开发时的替代机制
-- **AI 评审**：每个变更在推送前跑一次 `/code-review`，L2 及以上用 high 档；处理过的发现在提交说明里简要记录。
-- **L3 的确认**：L3 的 ADR 由项目负责人明确确认后即改为 `Accepted`。原来"写完后至少隔一天再确认"的冷却期，项目负责人在 2026-10-20 取消，以加快开发；ADR 中照常记录确认的日期和原话。
-- **安全敏感区域**（审批策略、可写范围判断、审计、Bridge 的线程调度）的改动，必须附带针对失败场景的测试，不能只测正常路径。
+## 7. 本地关卡与 CI
 
----
+`eng/scripts/local-gate.ps1` 是 main 落地前的阻塞关卡；GitHub CI 是推送后的非阻塞检查。脚本检查相对 `origin/main` 的变更，Small/Medium 程序集选择由 `eng/scripts/affected-tests.ps1` 决定；改构建配置、脚本或共享测试设施时跑全部。`-Full` 跑全部，CI 在 main 上始终跑全部。自动选程序集不能替代人工选择受影响 Large 类。
 
-## 7. CI 关卡
+| 关卡 | 实际检查 |
+|---|---|
+| 提交信息 | `eng/scripts/check-commit-message.sh` 检查待推送提交，规则见第 5 节；外部 PR 的标题/描述由 CI 检查。 |
+| 还原与构建 | `EplanMcp.Ci.slnf`，Release，警告即错误；CI 用锁定还原。 |
+| 格式 | `dotnet format EplanMcp.Ci.slnf --verify-no-changes`。 |
+| Action 目录 | `eng/scripts/check-action-catalog.ps1`。 |
+| 覆盖文件 | `eng/coverage` 的 `check`；扫描过期只警告，生成结果不一致失败。 |
+| Small/Medium | 按影响范围运行，含契约快照；数量下限见 [testing.md 第 7 节](../standards/testing.md#7-测试数量下限)。 |
+| 依赖安全 | `dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive`，High/Critical 失败。 |
 
-下表中运行位置为 GitHub 托管 runner 的关卡，`eng/scripts/local-gate.ps1` 在开发机上按相同步骤先跑一遍（工作区必须干净，没有未提交或未跟踪的文件），通过后才推送；GitHub 上的运行改为推送后的事后检查（项目负责人 2026-10-30 决定）。本地关卡的 Small/Medium 测试只跑本次改动（相对 `origin/main`）可能影响的测试程序集（`eng/scripts/affected-tests.ps1`）：改了项目代码，跑直接或间接引用它的测试程序集；改了构建配置、`eng/scripts`、`tests/Shared` 或 `tests/test-suites.json`，跑全部；改了其他文件（文档、目录、评测数据、快照、插件），跑除 Workbench 外的全部。`-Full` 跑全部；CI 在 `main` 上仍跑全部（项目负责人 2026-10-31 决定）。
-
-| 关卡 | 内容 | 运行位置 | 触发 |
-|---|---|---|---|
-| 构建 | `dotnet build -c Release`，警告即错误 | GitHub 托管 Windows runner | 每个 PR / push |
-| 格式 | `dotnet format --verify-no-changes` | 同上 | 每个 PR |
-| 提交信息 | PR 标题和每个提交都必须符合 Conventional Commits；凡是包含 AI 署名的一律拒绝，例如 `Co-Authored-By:` 尾注里出现 AI 名称或 noreply 地址，或者 `Generated with` 等字样。同样的规则也检查 PR 描述 | 同上 | 每个 PR |
-| Small + Medium 测试 | 单元测试、契约测试、使用 Fake Bridge 的端到端测试；每个测试程序集的通过数不得低于 `tests/test-suites.json` 中的下限（[测试策略第 7 节](../standards/testing.md#7-测试数量下限)） | 同上 | 每个 PR |
-| 工具契约快照 | 所有工具的名称、描述、JSON Schema、注解导出为快照，与仓库中的快照比对；有差异时 PR 必须同时更新快照 | 同上 | 每个 PR |
-| 依赖安全 | `dotnet list package --vulnerable --include-transitive`，有高危漏洞就失败 | 同上 | 每个 PR + 每周 |
-| 文档 | Markdown 链接检查 | 同上 | 每个 PR |
-| **Large 实机测试** | 在装有 EPLAN 和授权的机器上，用 scratch 项目跑实机测试 | 维护者在开发机上手动运行（[ADR-0020](../adr/0020-no-self-hosted-runner.md)） | 合并写入类工具或 Bridge 的改动之前 + 发布前 |
-| Agent 评测 | 用真实任务让模型调用工具，统计成功率、调用次数和 token 消耗 | 维护者在开发机上手动运行（ADR-0020） | 发布前 + 工具描述有改动时 |
-
-> 实机测试不能放在公共 CI 上：需要 EPLAN 授权，而且会占用一个授权席位。本项目不使用自托管 runner（ADR-0020），实机测试的结果写在提交说明或发布说明中。
-
----
+Large 和 Agent 评测由维护者在一台 EPLAN 机器上串行安排，不在本地自动关卡或公共 CI 内运行，不使用自托管 runner（ADR-0020）。EPLAN 行为变更满足第 2 节规则；批次和证据见 [实机验证](live-verification.md)。CI 红灯须立即补修复变更集。
 
 ## 8. 版本与发布
 
-### 版本号：Semantic Versioning 2.0
-对一个 MCP 服务器来说，"公共 API"就是**工具契约**加上**配置文件格式**。以下属于**破坏性变更**，必须升主版本：
-- 删除或重命名工具，删除参数，把可选参数改为必填；
-- 删除返回结构中的字段，或改变字段含义；
-- 改变工具的安全注解，例如把 `readOnlyHint: true` 改为 false；
-- 配置文件不兼容。
+公共 API 是工具契约和配置格式。删除/重命名工具或参数、可选改必填、删除/改变返回字段含义、改变安全注解、配置不兼容均属于破坏性变更。
 
-新增工具、新增可选参数、新增返回字段属于次版本；修复属于修订号。
-
-### 废弃策略
-工具要删除时，先在描述开头加 `[DEPRECATED: 用 X 代替，计划在 vN 移除]`，至少保留一个次版本，再在下一个主版本中删除。
+- **0.x**：破坏性变更升 minor（例如 0.4.x → 0.5.0），在 CHANGELOG 增设 **Breaking** 节；重命名或替换时，旧名保留为别名至少一个发布版本，注明新名与移除版本。其他不兼容变化也须提供一个版本的兼容入口或迁移支持，不能悄悄更改含义。
+- **1.x 起**：破坏性变更升 major；新增工具、可选参数或返回字段升 minor，修复升 patch。0.x 的兼容新增同样升 minor，修复升 patch。
+- 废弃先在描述注明 `[DEPRECATED: 用 X 代替，计划在 vN 移除]`，按上述兼容期保留旧名；描述变化也要审视快照。
 
 ### 发布清单
-- [ ] `CHANGELOG.md` 把 `Unreleased` 整理为新版本（遵循 Keep a Changelog）。
-- [ ] 发布前的 Large 实机测试和 Agent 评测都已通过，结果附在发布说明里。
-- [ ] 产物：安装包或压缩包、SHA-256 校验和、SBOM（CycloneDX）、构建来源证明（GitHub artifact attestation）。
-- [ ] 插件由维护者用 `eng/scripts/release-addin.ps1 -Tag vX.Y.Z` 从标签的干净检出构建，在离线宿主上通过 Large 测试，上传到草稿发布并给出 SHA-256；发布工作流比对后打包（ADR-0020）。
-- [ ] 发布说明写明支持矩阵：EPLAN 版本、变体、需要的授权模块。
-- [ ] 打 `vX.Y.Z` 标签，由 CI 构建产物，**不发布本地构建的二进制**；唯一的例外是上一条的插件（ADR-0020）。
 
----
+- [ ] `Unreleased` 整理为新版本，含需要的 Breaking 与迁移说明。
+- [ ] 发布范围的 Large 待验已清零、实机验收和 Agent 评测通过，结果附发布说明；不能以台账登记代替发布验证。
+- [ ] 安装包或压缩包、SHA-256、SBOM（CycloneDX）和 GitHub artifact attestation 齐全。
+- [ ] 插件由维护者用 `eng/scripts/release-addin.ps1 -Tag vX.Y.Z` 从标签干净检出构建，在离线宿主通过 Large 后上传草稿发布并给出 SHA-256（ADR-0020）。
+- [ ] 发布说明含 EPLAN 版本、变体和授权模块支持矩阵。
+- [ ] 打 `vX.Y.Z` 标签，由 CI 构建发布产物；插件是按上一条处理的唯一例外。
 
 ## 9. 缺陷与事故
 
 | 级别 | 定义 | 响应 |
 |---|---|---|
-| **S1** | 写坏了用户项目的数据，或在未经批准的情况下执行了写操作 | 立即停止相关工具（通过配置禁用），修复，写一份不追究个人责任的事后复盘 |
-| **S2** | 工具返回错误结果，但没有写入 | 下个修订版本修复 |
-| **S3** | 体验问题、描述不清、性能问题 | 排入常规迭代 |
+| **S1** | 写坏用户数据或未经批准写入 | 立即禁用相关工具、修复并写不追究个人责任的复盘。 |
+| **S2** | 工具返回错误结果但没有写入 | 下个修订版本修复。 |
+| **S3** | 体验、描述、性能问题 | 排入常规迭代。 |
 
-S1 复盘放在 `docs/postmortems/`，内容包括：时间线、影响、根因、为什么之前的防线没拦住、后续行动项。行动项必须落到 Issue 上。
+S1 复盘放 `docs/postmortems/`，包含时间线、影响、根因、防线缺口和后续行动；行动项落实到 brief 并跟踪验收。每个实机失败都用精确输入复现为 Small 测试，按 [AGENTS.md](../../AGENTS.md) 执行。
 
----
+## 10. 与编码代理协作
 
-## 10. 与 AI 助手协作
+Codex 先读 [AGENTS.md](../../AGENTS.md)，共享常设规则由它维护；[CLAUDE.md](../../CLAUDE.md) 的五条硬性规则保持有效。所有实现均经过相同评审和关卡；提交规范统一见第 5 节。
 
-仓库根目录的 `CLAUDE.md` 是给 AI 助手的规则，和本流程一致。核心约束：
-- AI 只能在 **scratch 项目**上执行写操作，永远不能在用户的真实项目上试验。
-- AI 提出的 L3 决策只能是 `Proposed` 状态的 ADR，由人确认后才能生效。
-- AI 生成的代码同样走本地关卡、CI 和评审，没有例外。
-- 推送到 GitHub 的任何内容都**不带 AI 署名**（见第 5 节）。AI 助手在本仓库中生成提交或 PR 时，不添加任何署名尾注或"由 AI 生成"标记。
+## 11. 依赖、协议版本与耗时
 
----
+### 依赖更新
 
-## 11. 度量
+每月集中复核依赖，安全修复及时处理。NuGet 版本固定在 [`Directory.Packages.props`](../../Directory.Packages.props)，更新时同步锁文件、许可证与兼容验证。GitHub Actions 的更新必须固定到完整提交 SHA，并在注释注明版本；截至 2026-11-01，现有 workflow 仍使用 `@v4` 等版本标签，SHA 固定尚待专门变更落实，本规范不宣称已完成。
 
-只看少数几个能指导行动的指标，每个里程碑结束时回顾一次：
+### MCP spec 与 SDK
 
-| 指标 | 来源 | 目标 |
-|---|---|---|
-| 变更前置时间（从开始实现到推送 main） | DORA | 中位数不超过 1 天 |
-| 变更失败率（需要回滚或热修的发布占比） | DORA | 低于 15% |
-| 实机测试通过率 | 合并前和发布前的 Large 测试 | 高于 95%；不稳定的测试要么修好，要么隔离 |
-| Agent 任务成功率 | Agent 评测 | 每次发布不下降 |
-| 平均每个任务的工具调用次数和 token 消耗 | Agent 评测 | 呈下降趋势（说明工具设计在变好） |
+当前 SDK 的固定版本位于 `Directory.Packages.props` 的 `ModelContextProtocol` / `ModelContextProtocol.AspNetCore`（均为 `2.2.0`）；同处注释记录 MCP revision `2026-07-28` 及 `2025-11-25` 客户端兼容。每次 SDK 升级都复核官方 revision、协商/兼容范围、schema、传输和安全差异，同步该处版本与注释、[工具规范](../standards/mcp-tool-design.md)、[安全规范](../standards/security.md) 和契约快照；验证证据写入变更集记录。不要把 SDK 包版本当成协议 revision。
+
+### 每工具主线程时间预算
+
+每个工具在规格中写明 EPLAN 主线程时间目标；普通交互调用以单次占用不超过 **2 秒**为初始目标，批量、导入导出等长操作另写输入规模与预算。Large 测试输出记录工具名、输入规模、EPLAN 版本、主线程执行时长及端到端时长；将排队、审批等待与主线程占用分开。暂时不能取得主线程时长时标“未测”，不能用墙钟时间冒充。超目标需分析并记录改进项；目前是目标，**不是关卡**，不改变已有安全超时或取消要求。

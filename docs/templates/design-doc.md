@@ -8,7 +8,7 @@
 |---|---|
 | 状态 | Draft / In Review / Approved / Implemented / Superseded |
 | 作者 | |
-| 关联 Issue | # |
+| 关联 brief / 变更集 | |
 | 相关 ADR | |
 | 最后更新 | yyyy-mm-dd |
 
