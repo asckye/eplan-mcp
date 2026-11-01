@@ -58,14 +58,17 @@ public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         string sentinel = Assert.Single(await session.CreatePagesAsync(1));
         JsonElement line = await Locator(session.Project, "Line");
+        string start = (await Call(session.Project, "Graphics.Line.StartPoint", new { target = line })).GetProperty("value").GetRawText();
         string before = await session.StateAsync();
         JsonElement written = await Call(session.Project, "O:Eplan.EplApi.HEServices.Edit.Rotate",
             new { target = await Locator(session.Project, "Project"), plcmnts = new[] { line }, oPntStart = new { x = 0, y = 0 }, angle = 90 });
         Assert.Equal("committed", written.GetProperty("execution").GetString());
-        Assert.NotEqual(before, await session.StateAsync());
+        // The page snapshot holds functions and connections only; the line's geometry is in the drawing observation.
+        Assert.Contains(written.GetProperty("changes").EnumerateArray(), c => c.GetProperty("key").GetString()!.StartsWith("drawing:", StringComparison.Ordinal));
         Assert.Contains(_approvals.Questions.SelectMany(q => q.Changes), c => c.StartsWith("write unverified API O:Eplan.EplApi.HEServices.Edit.Rotate", StringComparison.Ordinal));
         await session.UndoAsync();
         Assert.Equal(before, await session.StateAsync());
+        Assert.Equal(start, (await Call(session.Project, "Graphics.Line.StartPoint", new { target = line })).GetProperty("value").GetRawText());
         Assert.Contains((await session.SnapshotAsync()).Pages, p => p.Name == sentinel);
         await session.UndoAsync();
         Assert.DoesNotContain((await session.SnapshotAsync()).Pages, p => p.Name == sentinel);
