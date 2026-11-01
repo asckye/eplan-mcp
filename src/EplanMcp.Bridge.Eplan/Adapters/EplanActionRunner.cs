@@ -128,7 +128,8 @@ internal sealed partial class EplanActionRunner : IActionRunner
         IntPtr window = unverified ? process.MainWindowHandle : IntPtr.Zero;
         using var monitor = new System.Threading.Timer(_ =>
         {
-            if (window != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(window)) { System.Threading.Interlocked.Exchange(ref modal, 1); }
+            if (window != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(window))
+            { System.Threading.Interlocked.Exchange(ref modal, 1); }
         }, null, unverified ? 0 : System.Threading.Timeout.Infinite, 25);
         bool result = action.Execute(context);
         if (System.Threading.Volatile.Read(ref modal) != 0)
