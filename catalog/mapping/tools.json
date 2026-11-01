@@ -3938,6 +3938,11 @@
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           },
           {
+            "name": "PlacementEditSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
+          },
+          {
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
@@ -5204,6 +5209,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "PlacementEditSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -7863,6 +7873,11 @@
             "name": "ObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ObjectReadTests.cs"
+          },
+          {
+            "name": "PlacementEditSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -11319,6 +11334,11 @@
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
           },
           {
+            "name": "PlacementEditSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
+          },
+          {
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
@@ -11371,6 +11391,41 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_placement_edit",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PlacementEditTools.cs",
+      "operations": [
+        "placement.edit.execute",
+        "placement.edit.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_placement_edit.md",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PlacementEditProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlacementEditProtocolTests.cs"
+          },
+          {
+            "name": "PlacementEditSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
