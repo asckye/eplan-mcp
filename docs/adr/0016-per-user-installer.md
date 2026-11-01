@@ -1,4 +1,4 @@
-# ADR-0016：用按用户安装的 Inno Setup 安装包分发，程序固定在 `%USERPROFILE%\EplanMcp\app\`，插件只经 `eplanmcp install-addin` 注册
+# ADR-0016：只提供 ZIP，程序解压到短且固定的目录，数据与程序分开，插件只经 `eplanmcp install-addin` 注册
 
 | 项 | 内容 |
 |---|---|

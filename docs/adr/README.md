@@ -3,7 +3,7 @@
 记录难以回退、或者会长期影响项目的决策。格式见 [template.md](template.md)（基于 MADR），规则见 [开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)。
 
 - 编号从不复用。决策被推翻时，新写一份 ADR，并把旧的标为 `Superseded by ADR-XXXX`。
-- 以 `Proposed` 状态随 brief 提交评审，由项目负责人确认后改为 `Accepted`（冷却期已于 2026-10-20 取消，见开发流程第 6 节）。Accepted 后修订按模板追加日期、原因及确认依据。
+- 以 `Proposed` 状态随 brief 起草和评审，由项目负责人确认后改为 `Accepted`，经 `eng/scripts/local-gate.ps1` 本地关卡直接推送 main（冷却期已于 2026-10-20 取消，见开发流程第 6 节）。Accepted 后修订按模板追加日期、原因及确认依据。
 
 | 编号 | 标题 | 状态 | 门的类型 |
 |---|---|---|---|
@@ -22,7 +22,7 @@
 | [0013](0013-destructive-backup.md) | Destructive 操作前用 `CopyProject` 的快照方式自动备份，备份失败就不执行 | Accepted | 单向门（Destructive 工具发布后） |
 | [0014](0014-workbench-approval-channel.md) | Workbench 作为单独的进程，在每个用户、每个数据根目录一个的命名管道上接收 Host 的审批 | Accepted | 双向门（1.0 发布前） |
 | [0015](0015-workbench-ui-stack.md) | Workbench 用 WinUI 3（Windows App SDK，未打包、自包含）实现 Fluent 2 界面 | Superseded by [0017](0017-workbench-wpf-tia-theme.md) | 双向门（第一版 Workbench 发布前） |
-| [0016](0016-per-user-installer.md) | 用按用户安装的 Inno Setup 安装包分发，程序固定在 `%USERPROFILE%\EplanMcp\app\`，插件只经 `eplanmcp install-addin` 注册 | Accepted | 单向门（第一个安装包发布后） |
+| [0016](0016-per-user-installer.md) | 只提供 ZIP，程序解压到短且固定的目录，数据与程序分开，插件只经 `eplanmcp install-addin` 注册 | Accepted | 单向门（第一个安装包发布后） |
 | [0017](0017-workbench-wpf-tia-theme.md) | Workbench 改用 WPF（.NET 10），复用 TIA Workbench 的 Ant Design v5 主题，字体用 Maple Mono CN | Accepted | 双向门（第一版 Workbench 发布前） |
 | [0018](0018-vm-http-transport.md) | EPLAN 在虚拟机、AI 客户端在宿主机时，虚拟机中的 Host 以 HTTP 提供 MCP，用共享密钥认证，防火墙只放行宿主机 | Accepted | 双向门（1.0 发布前） |
 | [0019](0019-master-data-writes.md) | 部件库、翻译库的写入按 Destructive 处理：每次审批，先备份主数据，只支持文件型数据库 | Accepted | 单向门（写系统主数据的工具发布后） |

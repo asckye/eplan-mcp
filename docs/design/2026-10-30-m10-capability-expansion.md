@@ -4,7 +4,7 @@
 |---|---|
 | 状态 | Accepted（项目负责人 2026-10-30 同意分级方案，并接受 ADR-0030、ADR-0031） |
 | 级别 | L2 为主；action 未验证执行与私有扩展模块为 L3，见 ADR-0030、ADR-0031 |
-| 相关依据 | [ADR-0021](../adr/0021-action-run-whitelist.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[架构](../architecture/architecture.md) 里程碑表 |
+| 相关依据 | [ADR-0021](../adr/0021-action-run-whitelist.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[路线图](../roadmap.md) |
 | 最后更新 | 2026-10-30 |
 
 ## 1. 背景
@@ -40,7 +40,7 @@
 2. **第 2 批**：C 级执行（ADR-0030 接受后）、图片识别符号、本地文档检索与 action 核对、技能包、AAS。
 3. **第 3 批**：浏览器查看器、私有扩展模块（ADR-0031 接受后）、Workbench 对照补齐。
 
-v0.5.0（M6 第 3 阶段与 M8）先完成；M10 与 M9 并行或接续，按负责人安排。
+当前发布范围与 M9/M10 的推进顺序统一见[路线图](../roadmap.md)。
 
 ## 5. 验收
 - 每个新工具按工具规格模板写规格，Bridge 与写工具在 scratch 上实跑 Large；

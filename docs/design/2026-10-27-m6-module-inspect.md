@@ -1,6 +1,12 @@
-# M2 模块只读检查服务
+# 设计文档：M6 模块只读检查服务
 
-入口为 Host 内部 `ModuleInspectService.InspectAsync`，供 M3 使用；设计第 6 节的 `module.inspect` 是 invoke 能力，未命名独立 MCP 工具。本 PR 不注册工具、资源或 Bridge 操作，不改变 full/core、用法资源或 MCP 契约快照。原生读取器及其登记仍须通过后续集成门槛；当前 Bridge 缺此能力时返回 `CAPABILITY_MISSING`，不能以普通宏列表推断完整闭包。
+| 项 | 内容 |
+|---|---|
+| 状态 | Implemented（Host 内部服务；原生读取器集成与 Large 实机对照待完成） |
+| 相关设计 | [M6 第 3 阶段](2026-10-26-m6-phase3-config-modules-rules.md) |
+| 相关 ADR | [ADR-0029](../adr/0029-phase3-engineering-records.md) |
+
+入口为 Host 内部 `ModuleInspectService.InspectAsync`，供 M3 使用；设计第 6 节的 `module.inspect` 是 invoke 能力，未命名独立 MCP 工具。本服务不注册工具、资源或 Bridge 操作，不改变 full/core、用法资源或 MCP 契约快照。原生读取器及其登记仍须通过后续集成门槛；当前 Bridge 缺此能力时返回 `CAPABILITY_MISSING`，不能以普通宏列表推断完整闭包。
 
 输入：`ReferenceCopyService` 持有的只读副本 handle、1–50 个显式页名、包根下 bundled `.ema` 资源，可附 M1 已校验的 `ModuleDefinition`。源参考资源前后复核摘要；宏以拒绝写入/替换的只读句柄持有，SHA-256 必须匹配。检查不插宏、不应用值集、不调用 `GetAllCurrentValues`，不写副本或项目（A33/A51/A56）。
 

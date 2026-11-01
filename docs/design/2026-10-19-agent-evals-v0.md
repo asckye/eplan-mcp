@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | In Review（Q1、Q2 已由项目负责人决定） |
+| 状态 | Implemented |
 | 作者 | asckye |
 | 关联 Issue | — |
 | 相关文档 | [M2 设计](2026-10-18-m2-read-core.md) 第 7 节与 Q1；[测试规范第 5 节](../standards/testing.md#5-agent-评测)；[工具设计规范第 2 节](../standards/mcp-tool-design.md#2-设计流程) |

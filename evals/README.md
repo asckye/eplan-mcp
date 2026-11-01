@@ -34,7 +34,7 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 ### 写入题：每次作答一份新副本
 `fixture: copy` 的题目要修改项目（M3 设计第 7 节和 Q4）。运行器为这类题的**每次作答**复制一份 EPLAN 自带的 `EPLAN_Sample_Project`（在 `C:\Users\Public\EPLAN\Data` 下找，或用 `--template <.elk>` 指定），放在 `<scratch 根目录>\evals\<运行>\copies\<nn>\Eval_<运行>_<nn>`，每份的项目名都不同。题目中的 `{project}` 换成这个名字，标准调用和事后检查也都对这份副本进行（传入 `project`）。`fixture: copy_outside_scratch` 的副本放在 `outside\` 下，不在模型的 scratch 根目录中，用来考察写入被策略拒绝后模型怎么回答。
 
-**份数**：所选任务中 `fixture` 为 `copy` 或 `copy_outside_scratch` 的题数，乘以 `--repeat`；每份约 200 MB。目前开发集有 8 道这样的题，保留集有 1 道：`run` 要打开 8 份，`run --set all --repeat 3` 要打开 27 份，`run --task page-create` 只要 1 份；份数多时可以用 `--set`、`--task` 分几次运行。所选任务都在共享夹具上时，运行器不复制，也不需要打开什么。
+**份数**：所选任务中 `fixture` 为 `copy` 或 `copy_outside_scratch` 的题数，乘以 `--repeat`；每份约 200 MB。目前开发集有 9 道这样的题，保留集有 1 道：`run` 要打开 9 份，`run --set all --repeat 3` 要打开 30 份，`run --task page-create` 只要 1 份；份数多时可以用 `--set`、`--task` 分几次运行。所选任务都在共享夹具上时，运行器不复制，也不需要打开什么。
 
 **副本由工程师在 EPLAN 中手工打开**（[M3 设计 Q4](../docs/design/2026-10-19-m3-safe-writes.md#9-待定问题与决定)，2026-10-20 项目负责人决定）。运行器复制好全部副本后列出它们的 `.elk` 路径，然后等待，最多 20 分钟（Ctrl+C 停止）：每 2 秒用 `eplan_project_list` 查看一次，情况有变化时显示已打开几份。这期间工程师：
 1. 在 EPLAN 中逐个打开列出的 `Eval_<运行>_<nn>.elk`（文件 > 打开）。打开的副本可能成为当前项目。
@@ -72,7 +72,7 @@ Destructive 工具（删页、页面重编号、设备编号，以及 M4c 的端
 因 API 错误无效、而模型还没做任何事（没有工具调用、没有花费）的作答，运行器等一分钟后**重试一次**。例如，另一个 Claude Code 进程同时刷新共享的登录时，会出现 "Failed to refresh OAuth token"。未登录不重试。两次都写进报告，重试标为"（重试）"；第一次照样是无效，不计入成功率，所以费用上限不变。
 
 ## 任务集
-`evals/tasks/` 中 40 题：开发集 30 题（上限 30），保留集 10 题；新增 C2 默认关闭、scratch 外拒绝及禁止绕过的安全题。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
+`evals/tasks/` 中 41 题：开发集 31 题，保留集 10 题；包含 C2 默认关闭、scratch 外拒绝及禁止绕过的安全题和调用模板题。题目都针对夹具 `EPLAN_Sample_Project`，覆盖：
 - 项目概况：页数、设备数、连接数；
 - 页面：某个结构下的页、某种类型的页数、页上的设备；
 - 设备：所在页、用了哪些部件、没有部件的电机；

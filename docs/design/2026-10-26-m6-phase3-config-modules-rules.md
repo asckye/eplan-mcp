@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | In Review（实施设计；本次只写文档，未运行 EPLAN） |
+| 状态 | Implemented |
 | 级别 | L2；新增落盘合同单列为 [ADR-0029](../adr/0029-phase3-engineering-records.md)（Accepted，项目负责人 2026-10-26） |
 | 关联 Issue | — |
 | 相关依据 | [M6](2026-10-21-m6-engineering-packs.md) 4.1–4.3、4.10–4.11、4.16–4.18；[阶段 2](2026-10-23-m6-phase2-plans.md)；[大项目计划](2026-10-25-m6-large-project-plans.md) |

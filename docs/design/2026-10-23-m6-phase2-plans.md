@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | In Review（实施合同草案；未实现、未运行 EPLAN） |
+| 状态 | Implemented |
 | 级别 | L2，细化已接受的 ADR-0023；新增落盘格式见已接受的 [ADR-0028](../adr/0028-plan-record-format.md)，可选 Workbench 扩展仅提议 [ADR-0027](../adr/0027-workbench-plan-review.md) |
 | 关联 Issue | — |
 | 相关依据 | [M6](2026-10-21-m6-engineering-packs.md) 4.5–4.10、4.13、4.16–4.17；[Bridge 快照设计](2026-10-21-m6-bridge-snapshot.md)；ADR-0003/0005/0010/0013/0014/0023–0026 |

@@ -3,7 +3,7 @@
 让 AI 代理通过 [Model Context Protocol](https://modelcontextprotocol.io/) **安全地**操作 EPLAN Electric P8 / Pro Panel：查询项目、生成页面、放置设备、整理标识、更新报表、导出与检查。
 工程师始终掌握控制权：真实项目写入逐次审批，操作可审计。
 
-> **状态：v0.4.0 预览版，76 个工具（当前开发版）**。已于 2026-10-26 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)，供测试使用。M0–M4 已完成；M4c 已完成（PDF 便笺与翻译库导入均已实现，PDF 工具 Large 测试待运行）；M5 的 ZIP 交付和虚拟机连接已实现，干净机器验收和跨机器实测待完成；M6 第 1 阶段（工程包与资源）和第 2 阶段（多步工作流计划，见[计划使用指南](docs/guides/plans.zh-CN.md)，核验到 3,000 页）已完成，第 3–5 阶段未开始；通用属性读取已实现，属性写入首批（20011、20027）已实现。路线图见 [架构文档第 11 节](docs/architecture/architecture.md#11-里程碑)。
+> **v0.4.0 预览版**已于 2026-10-27 [发布](https://github.com/asckye/eplan-mcp/releases/tag/v0.4.0)（标签日期），供测试使用；当前开发版合约快照登记 **93 个工具**。v0.5.0 推迟至操作层 API 补齐、客户页按原图精确重绘完成，再进行客户彩排后发布；范围与排期统一见[路线图](docs/roadmap.md)。
 
 ## 工作方式
 
@@ -29,7 +29,7 @@ EPLAN 2026（你正在使用的界面）
 
 ## 工具概览
 
-默认 `full` 提供全部 64 个工具；`serve --profile core` 提供固定的 25 个常用工具。已实现清单见[工具映射](catalog/mapping/tools.json)，参数与限制见[工具规格](docs/tools/)（目录中也包含待实现的规格）。
+`full` 登记 93 个工具（以[合约快照](tests/Contracts.Snapshots/server-contract.verified.json)为准，默认关闭的工具需另行启用）；`serve --profile core` 提供固定的 25 个常用工具。清单、Profile 与读写注解见[工具索引](docs/tools/README.md)，参数与限制见各工具规格。
 
 | 分组 | 能做什么 |
 |---|---|
@@ -38,7 +38,7 @@ EPLAN 2026（你正在使用的界面）
 | Destructive | 删页、页面/设备/端子/电缆/连接编号、生成电缆、项目翻译、删除语言、导入清单与 PLC 数据 |
 | 导出 | PDF、DXF、图片、PXF、部件清单、标签、未翻译文本 |
 | 导入 | DXF/DWG、PXF、设备/部件清单、PLC 数据 |
-| 部件库与翻译库 | 系统部件库查询、导入、同步与导出；翻译库导出（导入待验证） |
+| 部件库与翻译库 | 系统部件库查询、导入、同步与导出；翻译库导入与导出 |
 | 工程包与资源 | 导入、列出、查询、构建工程包；搜索、读取与更新资源知识 |
 
 ## 安全模型
@@ -98,6 +98,7 @@ node eng/scripts/apply-archify-font.mjs
 
 | 想了解 | 读这里 |
 |---|---|
+| 里程碑状态、发布范围与排期 | [路线图](docs/roadmap.md) |
 | ZIP 预览版怎么开始使用 | [中文入门指南](docs/getting-started/zh-CN.md) |
 | 系统怎么设计、为什么这样设计 | [架构](docs/architecture/architecture.md) · [ADR](docs/adr/README.md) |
 | EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |

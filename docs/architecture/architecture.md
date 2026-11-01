@@ -154,7 +154,7 @@ flowchart TB
 | **Host**（`eplanmcp.exe`） | .NET 10 控制台程序，自包含单文件发布；官方 MCP C# SDK 2.x（支持 2026-07-28 规范，并兼容旧版客户端） | MCP 协议；工具注册和 Profile；参数校验；策略与审批；审计；结果整形；发现和管理 Bridge 连接；CLI 子命令 | 不引用任何 EPLAN 程序集 |
 | **Bridge**（EPLAN 插件） | net481 类库，由 EPLAN 加载；**除 EPLAN 自带的程序集外不带任何第三方依赖** | 在主线程上执行操作；事务和撤销；把 EPLAN 对象映射为契约 DTO；收集操作期间产生的 EPLAN 系统消息 | 不做策略判断，不访问 MCP，不写审计 |
 | **Contracts** | netstandard2.0 类库，纯 POCO | Host 与 Bridge 共享的请求/响应 DTO、操作名、错误码、协议版本 | 不包含逻辑，也不依赖任何序列化器 |
-| **Workbench**（M5） | 单独的桌面程序 `app\workbench\EplanMcp.Workbench.exe`，WPF（.NET 10，自包含，[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)），视觉与 TIA 的 Workbench 一致（Ant Design v5，复用其主题）；中英双语；字体 Maple Mono CN（SIL OFL 1.1，随程序附带，许可证文本随安装包附带） | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
+| **Workbench**（M5） | 单独的桌面程序 `workbench\EplanMcp.Workbench.exe`，WPF（.NET 10，自包含，[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)），视觉与 TIA 的 Workbench 一致（Ant Design v5，复用其主题）；中英双语；字体 Maple Mono CN（SIL OFL 1.1，随程序附带，许可证文本随安装包附带） | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
 
 **职责划分原则：Host 决定"能不能做"，Bridge 只负责"怎么做"。** 安全逻辑全部在 Host 中，不依赖 EPLAN，可以用 Small 测试穷尽验证。
 
@@ -229,12 +229,21 @@ src/
 tests/
   EplanMcp.Contracts.Tests/            Small：两种序列化器的往返一致性
   EplanMcp.Workbench.Protocol.Tests/   Small：管道名、帧上限、消息往返与严格解析
-  EplanMcp.Host.Tests/                 Small
-  EplanMcp.Host.IntegrationTests/      Medium：stdio + Fake Bridge
+  EplanMcp.Host.Tests/                 Small / Medium：含 stdio + Fake Bridge
   EplanMcp.Bridge.Core.Tests/          Small / Medium
-  EplanMcp.Bridge.Eplan.LiveTests/     Large：需要 EPLAN
+  EplanMcp.Packs.Tests/                工程包
+  EplanMcp.Evals.Tests/                评测运行器与任务集
+  EplanMcp.Catalog.Tests/              能力目录
+  EplanMcp.Coverage.Tests/             覆盖报告与生成表
+  EplanMcp.Workbench.Tests/            Small / Medium：视图模型与界面
+  EplanMcp.Large.Tests/                Large：需要 EPLAN；单机串行运行
+  EplanMcp.Large.ConnectionHelper/     Large 测试辅助程序
+  EplanMcp.Large.DrawingHelper/        Large 测试辅助程序
+  EplanMcp.Large.RevisionHelper/       Large 测试辅助程序
   Contracts.Snapshots/                 工具契约快照
-  fixtures/                            自制的测试项目
+  Shared/                             共享测试辅助代码
+  release/                            发布回归检查
+  test-suites.json                     常规测试程序集与通过数下限
 evals/                                 Agent 评测任务与运行器
 docs/  eng/  .github/
 ```
@@ -356,14 +365,15 @@ sequenceDiagram
 
 | 项 | 做法 | 理由 |
 |---|---|---|
-| 安装范围 | 按用户安装到 `%USERPROFILE%\EplanMcp\app\`，不需要管理员权限。不放在 `%LOCALAPPDATA%` 下，原因同 ADR-0008：安装命令如果从 MSIX 打包的应用中运行，写入会被重定向，EPLAN 就找不到插件 | 工程师的电脑常常没有管理员权限 |
-| 安装包 | 按用户安装的 Inno Setup 安装包（`PrivilegesRequired=lowest`），单个文件，离线可装；位置固定，不能选择；卸载项在 HKCU；升级整体替换 `app\`，不强制结束正在运行的程序；卸载保留数据根目录中的全部数据（[ADR-0016](../adr/0016-per-user-installer.md)） | 不需要管理员权限；EPLAN 的注册、客户端配置和插件都指向固定的位置 |
-| Host | 自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
+| 安装范围 | 校验并解除 ZIP 锁定后，整体解压到短且固定的程序目录；数据仍在 `%USERPROFILE%\EplanMcp\`，与程序分开 | 无需管理员权限；程序可放在工程师选择的位置 |
+| 安装包 | 只提供 `EplanMcp-<version>.zip`，唯一顶层目录 `EplanMcp-<version>\`，内含 Host、`bridge\net481\`、`workbench\`、`claude-plugin\`、`docs\` 和 `README.md`，不套 `app\`；升级前关闭 EPLAN、Workbench 和客户端，再整体替换同一路径；卸载先撤销注册和客户端配置，再删除程序目录，保留数据（[ADR-0016](../adr/0016-per-user-installer.md)、[发布流程](../process/release.md)、[打包布局](../../packaging/README.md)） | 无需管理员或联网，不创建卸载项或开始菜单入口 |
+| Host | 程序目录根部的 `eplanmcp.exe`，自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
+| Workbench | `workbench\EplanMcp.Workbench.exe`，自包含目录，附字体及许可证 | 解压后直接打开，完成插件注册与客户端配置 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
 | 插件注册 | 只经 `eplanmcp install-addin`：它用命令行方式调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次（有 EPLAN 在运行时拒绝），等命令启动的 EPLAN 加载插件、在握手中核对加载的是这个 DLL 后关闭它，结果记在 `<数据根目录>\state\addins.json`；注册不落在 MSIX 重定向的目录中，所以在 MSIX 环境中照常执行（S14）；`uninstall-addin` 按记录完全撤销（[ADR-0016](../adr/0016-per-user-installer.md)、[M5 设计](../design/2026-10-20-m5-operability.md) 4.2）。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
 | 签名 | 0.x 的安装包和程序不签名，附 SHA-256 和构建来源证明，入门指南说明 SmartScreen 的"仍要运行"和校验方法；以后是否购买代码签名证书由项目负责人决定（M5 设计 Q6）。插件的 EADN 签名视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 暂时没有证书；授权要求 |
-| Claude Code 插件 | 随安装包提供本地插件市场 `app\claude-plugin\`，插件中的 `.mcp.json` 写 `eplanmcp.exe` 的完整路径；版本必然与安装的程序一致，不联网也能装（M5 设计 4.7、Q10） | 一键安装，不依赖网络 |
-| 客户端配置 | `eplanmcp client-config <客户端>…` 为 M5 设计 4.11 中的 11 种客户端写入或移除名为 `eplan` 的本地 stdio 服务器。命令是运行 client-config 的那个 `eplanmcp.exe` 的完整路径：安装后就是 `%USERPROFILE%\EplanMcp\app\eplanmcp.exe`（ADR-0016），开发时是构建输出中的那一个，没有环境变量或配置能改变它；参数 `serve`。`--dry-run` 只显示这一项改动前后的写法；写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`，其他服务器和设置保留；每次写入和移除都记在 `<数据根目录>\state\clients.json`，卸载时 `client-config --remove`（不带客户端）按记录移除 | 用户可以掌控被改动的内容；卸载能撤销写入过的配置 |
+| Claude Code 插件 | 程序目录的 `claude-plugin\` 只是模板；`client-config claude-code --plugin` 将它复制到 `<数据根目录>\claude-plugin\`，在 `.mcp.json` 写入当前 Host 的实际绝对路径，再按 Workbench 提示安装；程序移动后重新生成（M5 设计 4.7、Q10） | 一键安装，不依赖网络 |
+| 客户端配置 | `eplanmcp client-config <客户端>…` 为 M5 设计 4.11 中的 11 种客户端写入或移除名为 `eplan` 的本地 stdio 服务器。命令是运行 client-config 的那个 `eplanmcp.exe` 的完整路径：ZIP 中为 `<程序目录>\eplanmcp.exe`，开发时为构建输出中的那一个，没有环境变量或配置能改变它；参数 `serve`。`--dry-run` 只显示这一项改动前后的写法；写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`，其他服务器和设置保留；每次写入和移除都记在 `<数据根目录>\state\clients.json`，卸载时 `client-config --remove`（不带客户端）按记录移除 | 用户可以掌控被改动的内容；卸载能撤销写入过的配置 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
 | 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010；`client-config` 写入过的条目 `clients.json`；`install-addin` 的注册 `addins.json`）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；`packs\`（M6 安装的工程包，每个版本一个只读目录 `<id>\<version>\`）、`packs-dev\`（M6 开发中的工程包，每个包一个普通目录，只经工具写入；旁边的 `.<id>.lock` 是改动时的锁）、`workspaces\`（M6 项目绑定，每个项目一个目录，其中的 `binding.json` 记下柜、按摘要锁定的包版本和修订号；目录名取项目键的 SHA-256 前 32 位）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
 | 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写、导出占用的空间 | 把这次环境排查中踩过的坑全部变成自动检查 |
@@ -381,7 +391,7 @@ sequenceDiagram
 | I6 | **不绑定电脑**，没有授权注册、注销和转移的流程 | 重装系统或换电脑后授权作废，转移要先注销 |
 | I7 | 支持矩阵中的每个 EPLAN 版本都实际安装验证过；不支持的版本，`doctor` 给出明确提示 | 新旧版本兼容问题，例如某个小版本图标不显示 |
 | I8 | 在虚拟机中同样可以安装和使用 | 虚拟机上授权受限 |
-| I9 | `uninstall-addin` 和卸载程序能完全撤销注册，不留残余 | 卸载不干净、插件管理混乱 |
+| I9 | 在 Workbench 或经 `uninstall-addin` 完全撤销注册后，再删除程序目录 | 卸载不干净、插件管理混乱 |
 | I10 | 由 MSIX 打包的客户端（Claude 桌面版）启动时同样正常工作（ADR-0008） | 本项目实测：`%LOCALAPPDATA%` 被重定向；数据根目录和命名管道不受影响（spike S5） |
 
 ---
@@ -444,12 +454,12 @@ sequenceDiagram
 - 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。`packSources` 为空：工程包只能复制资源，不能就地引用；列出的根目录名（如 `"packSources": {"company-refs": "\\\\server\\eplan\\refs"}`）才可以被引用（ADR-0024 第 6 节）。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
+### 8.10 协议版本
+Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版本号，Host 支持当前版本 N 和上一个版本 N-1。不兼容时给出明确提示，例如"请运行 eplanmcp install-addin 更新插件"。
+
 ### 8.11 界面语言
 - 面向人的内容提供**中文和英文**：Workbench、审批对话框、`doctor` 的输出、安装和入门文档。默认跟随系统语言，可以切换。
 - 面向模型的内容（工具名称、描述、schema、错误的 `reason`）统一使用英文，保证不同客户端和模型下行为一致；错误的 `message` 中引用的项目数据保持原文。
-
-### 8.10 协议版本
-Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版本号，Host 支持当前版本 N 和上一个版本 N-1。不兼容时给出明确提示，例如"请运行 eplanmcp install-addin 更新插件"。
 
 ---
 
@@ -492,25 +502,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 
 ## 11. 里程碑
 
-每个里程碑都有明确的完成标准，达不到就不进入下一个。
-
-| 里程碑 | 内容 | 完成标准 |
-|---|---|---|
-| **M0 启动**（已完成 2026-10-13） | 架构、ADR、规范、流程、仓库配置 | 本文档和 ADR-0001 到 0006 评审通过（Accepted） |
-| **M1 技术验证 + 打通骨架**（完成标准已达到 2026-10-18） | spike S0 授权（未签名插件能否加载，5 页限制是否生效）；S1 主线程调度；S2 回滚与撤销；S3 程序集共存；S4 客户端的 elicitation 支持。最小端到端链路：Host（stdio）↔ 管道 ↔ Bridge ↔ EPLAN，提供 `eplan_session_status`、`eplan_project_list`；`doctor`；CI 运行构建和 Small 测试 | 在 Claude Code 中调用 `eplan_project_list` 拿到真实结果；S0–S4 全部有结论，记入 api-notes；写出 ADR-0007 |
-| **M2 只读核心**（完成标准已达到 2026-10-19） | 项目、页面、设备、连接、部件、属性、系统消息、检查结果的只读工具；分页与结构化输出；契约快照；Agent 评测 v0（只读任务） | 只读任务的 Agent 评测成功率 ≥ 90% |
-| **M3 安全写入**（完成标准已达到 2026-10-20） | 策略引擎、审批（EPLAN 对话框，[ADR-0011](../adr/0011-approval-out-of-band.md)）、事务与撤销、审计哈希链、scratch 工作流；第一批写工具：建页、放置设备或宏、设备标识、属性、连接。分两段：M3a 是基础设施和 API 已验证的页、设备标识工具，M3b 是放置设备、宏和连接（[M3 设计](../design/2026-10-19-m3-safe-writes.md)） | Q1、Q2、Q3、Q6、Q7、Q9 通过；写入类 Agent 评测通过 |
-| **M4 工程工作流**（完成标准已达到 2026-10-20，按 M4 设计 Q1：两批工具完成、端到端评测通过） | 报表更新、检查、导出（PDF/DXF/图片）、宏、重编号等面向任务的工具；耗时操作的进度与任务支持；受控 action 白名单 | 典型工作流的端到端 Agent 评测通过；[API 覆盖矩阵](../eplan/api-coverage.md)中 M4 的条目全部完成 |
-| **M4b Pro Panel 3D**（未开始） | 先做 spike（E3D 对象的读写、坐标系、回滚与撤销），再实现 Pro Panel 工具家族：查询 3D 布局、布置导轨和线槽、把设备放进 3D 布局、钻孔、母排与铜排、生产输出。详见 [API 覆盖矩阵第 3 节](../eplan/api-coverage.md#3-pro-panel-3dm4b) | 3D 布局类 Agent 评测任务通过；写操作同样满足 Q1–Q3 |
-| **M4c 更多工程工具**（已完成：PDF 便笺导入基于 A39/S44 实现，翻译库导入已实现；PDF 工具 Large 测试待运行） | 按符号放置设备；电缆、端子、PLC 的工具及端子、电缆、连接的编号；导入（DXF、PDF 注释、清单、PLC、PXF；预规划等授权）；部件库、翻译、修订；PXF、清单、标签等导出；工具 Profile（[M4c 设计](../design/2026-10-21-m4c-more-tools.md)） | 未被阻塞的批次全部完成，评测通过；写系统主数据的工具在 [ADR-0019](../adr/0019-master-data-writes.md) 接受之后才开工 |
-| **M5 可运维**（进行中：ZIP 交付（ADR-0016 修订）、Workbench（审批队列、审计浏览、状态与插件注册、客户端配置向导、虚拟机连接）、Claude Code 插件、中英文指南、发布流水线和虚拟机连接已实现，v0.2.0 已发布；干净机器验收和跨机器实测待完成） | ZIP 交付（解压即用，2026-10-22 起取代按用户安装的安装包）；**Workbench**（含虚拟机连接）（客户端配置向导、审批队列、审计浏览，中英双语）；**Claude Code 插件形式的交付包**（一键安装，附中文入门指南）；离线宿主（实机测试在开发机上手动运行，ADR-0020）；发布流水线（SBOM、来源证明，视情况加 EADN 签名；插件由维护者按标签构建） | 在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](#71-安装验收清单m5-发布前逐项通过)全部通过 |
-| **M6 工程包**（进行中：第 1 阶段工程包与资源工具已完成；第 2 阶段已完成并随 v0.3.0 发布：`eplan_project_create`、多步工作流计划（编译、审阅、整体审批与初始备份、逐步执行、对象数据层校验与差异）、最小上下文，核验 300/1,000/3,000 页；第 3 阶段[设计审阅中](../design/2026-10-26-m6-phase3-config-modules-rules.md)，尚未实施；第 4–5 阶段未开始） | 把基本项目、参考项目、宏和公司资料导入为带版本的工程包（清单自动生成），资源索引与查询，配置分层（公司、柜型、项目、柜）与版本锁定，参数化模块（宏 + 占位符 + 值集），受限格式的规则，声明式计划（一次审批、计划前备份、逐步执行），三层校验与差异，关系图与按需上下文，长任务；分 5 个阶段（[M6 设计](../design/2026-10-21-m6-engineering-packs.md)，ADR-0023 到 0026 已接受） | 设计第 4.16 节各阶段的验收标准和第 4.17 节的必测场景全部通过 |
-| **M7 多版本**（未开始；原 M6，2026-10-21 起 M6 用于工程包；ADR-0004、ADR-0009 中的"M6"指这一项） | EPLAN 2024、2025、2027 验证（spike S7，[ADR-0009](../adr/0009-supported-eplan-versions.md)） | Q10 通过 |
-| **M8 绘图**（进行中：2026-10-27 启动，与 M6 第 3 阶段并行，随 v0.5.0 一起发布；[设计草稿](../design/2026-10-27-m8-drawing.md)） | 任意布线与角连接/T-node/电位连接点及 autoconnect；无部件库符号及标识/属性显示；自由文本、直线/矩形和对象移动；编辑器打开页与提交刷新；S43 补中断点及计算交叉引用、位置/结构盒、多线电缆定义与芯线/颜色、单端子、PLC 连接点/地址/属性表、常开/常闭触点及连接点代号。自主设计电路留 M6 第 3–5 阶段之后 | S40–S43 验证通过；按工程师先确认的绘图清单在 scratch 重绘验收页，连接/标识/地址精确一致、位置在栅格容差内，工程师可在窗口观看；回滚、每次有效写调用一步撤销（`eplan_connection_create` 按 O3 决定为放置和生成两步）及 Large/Agent 通过。客户页仅限本地 scratch、永不提交，仓库自动化用非客户材料构造的虚构同类页 |
-| **M9 主数据与报表**（第一批提前：项目负责人 2026-10-31 决定，与 API 补齐并行；其余在 v0.5.0 之后） | 第一批：导入 Data Portal 下载的 EDZ 包（部件、宏、图片）到系统部件库；按 Excel 清单生成部件数据并导入（先生成 XML 经 `eplan_part_import`，再升级为直接新建/修改）。之后：按指定表格模板新生成报表；直接新建/修改单个部件数据（不经 XML 文件）；设计和修改表格（.f*）与图框（.fn1）模板。Data Portal 本身不接入：需要登录与同意条款，由工程师下载 EDZ | 每项先做 spike 并补 api-notes；主数据写入每次审批，测试只用主数据的 scratch 副本；若改变审批模型或支持的写入范围，先提 Proposed ADR |
-| **M10 能力扩展**（计划：v0.5.0 之后；项目负责人 2026-10-30 决定；[设计草稿](../design/2026-10-30-m10-capability-expansion.md)） | 吸收同类项目的全部有益功能并用自有代码实现：全部 EPLAN action 分三级开放（[ADR-0030](../adr/0030-action-catalog-tiers.md)）、生命周期与 scratch 建项目工具、discovery Profile、AAS、图片识别符号、本地文档检索、开发技能包、浏览器查看器、私有扩展模块（[ADR-0031](../adr/0031-private-extension-modules.md)） | ADR-0030/0031 已接受（2026-10-30）；新工具按规格实测；批量验证报告进 api-notes；不复制无许可证项目的代码与数据，不分发 EPLAN 文件 |
-| **M11 按参考 PDF 复刻图纸**（计划：M9、M10 之后；项目负责人 2026-10-30 决定；设计文档待写） | 从客户提供的 PDF 图纸集提取页、器件、电位、导线和标题栏信息，生成绘图清单，用 M8 绘图工具在 scratch 项目中重画整套图纸，并与原图逐页比对验证；客户 PDF 只保存在本机 scratch 输入目录，不入库。离线布局检查（图框外无对象、无重叠）与导出图片核对不属于本里程碑，直接并入 M8 验收 |
-| **M12 审图规则与按清单生成**（计划：项目负责人 2026-10-31 批准，与 API 补齐、客户页重画并行；[设计草稿](../design/2026-10-31-m12-review-and-generation.md)） | 规则包（各国家/地区标准、标识体系、公司与客户规则，以 M6 工程包承载，只含可检查的规则与条款号）、电气逻辑检查、`eplan_project_review`、从 IO 清单生成 PLC 页并自动审查 | 每个规则包的每条规则有正反例测试页并经工程师签核；IO 清单生成的页面经 `eplan_page_review` 审查为 clean |
+里程碑状态、发布范围与排期统一维护在[路线图](../roadmap.md)。
 
 ---
 

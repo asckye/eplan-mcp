@@ -3,14 +3,13 @@
 > 用途：对照官方 API，确认本项目计划的工具没有遗漏重要能力，并看清每个里程碑覆盖到哪里。
 > 原则（[ADR-0006](../adr/0006-tool-surface-design.md)）：**不追求一对一包装 API**，而是按工程师的任务设计工具。"覆盖"的含义是：这个领域里常见的工程任务有工具可用。
 > 成员一级的能力目录、计数口径和状态见 [API 能力覆盖设计](../design/2026-10-21-api-capability-coverage.md)；本表保留命名空间一级的规划视图。
-> 维护：新增或调整工具家族时，同步更新本表；每个里程碑结束时复核一次。最近一次复核：2026-10-20，M4 结束时；按 M4 设计 Q1，第一批、第二批之外的 M4 条目改标"M4 之后"，各自单独设计。
+> 维护：新增或调整工具家族时，同步更新本表；每个里程碑结束时复核一次。最近一次文档复核：2026-11-01，按合约快照核对工具注册；实机证据仍以 [api-notes](api-notes.md) 为准，里程碑状态见[路线图](../roadmap.md)。
 
 状态图例：⬜ 计划中　🟡 进行中　✅ 已实现　➖ 暂不覆盖（写明原因）
 
-M8 T4a：[`eplan_placement_create`](../tools/eplan_placement_create.md) 已有文本/直线/矩形的契约和只读规划（A54），尚未注册工具或执行操作；文字测量适配、混合创建及 Large 验收留 T4b/T4c，不计作可用写能力。
-M8 T4b：Bridge 内部已接 `placement.text.create.execute`：TEXT 语言、字高和坐标在事务内逐项读回，相等才提交；失败回滚不留空撤销步（A54/A55）。绘图发现附带字高及其摘要；Host 仍未注册，执行保持 `CAPABILITY_MISSING`，统一入口、文字测量及混合创建留 T4c；Large 已编写，未运行。
+`eplan_placement_create` 已注册 `full` 入口（[规格](../tools/eplan_placement_create.md)，T4c）：TEXT/LINE/RECTANGLE 在同一事务创建并逐项读回，失败整批回滚，成功一次撤销。文字语言与完整外框的限制见规格；新增混合 Large 测试已编写、尚未运行，不将注册或离线测试视为实机通过。
 
-M8 T3a：`eplan_connection_create` 的[规格与单页路径/连接符号预测](../tools/eplan_connection_create.md)已实现为未注册的 dry-run 规划器；尚无 MCP/Bridge 入口或执行能力。图形与生成后逻辑端点分别预测；A52 要求单独提交生成，原子执行门槛留 T3b。
+`eplan_connection_create` 已于 T3b 注册 `full` 入口，提供单页显式路径与连接符号的规划和执行（[规格](../tools/eplan_connection_create.md)）；图形与生成后逻辑端点分别核验，提交与撤销边界见规格及 A52/A55。
 M8 T8b：既有 `eplan_connection_create` 开放定义线/定向绑定/芯线执行，按 A55 分阶段提交并在最终生成后逐芯核对；失败自动撤销本次已确认提交，补偿不确定报 unknown。Small/Medium 与 Large 测试已补；Large 未运行，不新增工具或 Bridge 操作。
 M8 T7b：在 T3b 已注册入口扩展 `interruption_point`，按 A55/S43 创建 SPECIAL BPF；规划绑定显式对端页完整证据，拒绝歧义/越界配对，提交后返回双向原生对端及计算引用，保持两次提交与失败补偿。不新增工具或 Bridge 操作；Large 测试已编写，本次未运行 EPLAN，产品路径实机验收待完成。
 M6 第 3 阶段 M2：已增加 [模块只读检查内部服务](../design/2026-10-27-m6-module-inspect.md) 与闭包证据校验，供 M3 使用；原生 `module.inspect` 尚未注册，缺能力明确拒绝，Large 实机对照未运行，不计入已开放的工具覆盖。

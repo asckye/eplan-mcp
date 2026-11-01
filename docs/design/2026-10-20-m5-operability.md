@@ -142,6 +142,9 @@ flowchart LR
 4. 第二个实例把第一个带到前台的办法。
 
 ### 4.5 界面技术：Fluent 2 的实现方式（Q1，ADR-0015）
+
+> 本节 WinUI 3 / Fluent 2 方案为历史记录，已由 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted：WPF + TIA 主题）取代；原 Inno Setup 安装与 `app\` 布局由 [ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md#2026-10-22-修订只提供-zip)取代。当前界面与交付分别遵循[界面规范](../standards/workbench-ui.md)和[发布流程](../process/release.md)。
+
 项目负责人已决定用 Fluent 2。适合"在 EPLAN 旁边运行的 Windows 桌面工具"的实现有下面几种（2026-10-20 查阅的官方文档，出处见 ADR-0015）：
 
 | 约束 | A：WinUI 3（Windows App SDK 2.5，未打包、自包含） | B：WPF + .NET 10 自带的 Fluent 主题 | C：Blazor Hybrid（WebView2）+ Fluent UI Blazor 5 | D：WebView2 + Fluent UI Web Components 3 |

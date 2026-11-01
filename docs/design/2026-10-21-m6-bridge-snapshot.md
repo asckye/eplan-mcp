@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | In Review |
+| 状态 | Implemented |
 | 级别 | L2：M6 设计 3.1 中"新的 Bridge 操作"的细化。只新增 Bridge 操作（ADR-0003：新能力加操作，不加 JSON-RPC 方法），不改变进程拓扑、IPC、审批模型和支持的版本 |
 | 作者 | asckye |
 | 相关文档 | [M6 设计](2026-10-21-m6-engineering-packs.md) 3.1、4.4、4.6、4.7、4.16；ADR-0005、ADR-0010、ADR-0023、ADR-0024；api-notes A3、A12、A20、A24、A31、A32、A34、A35、A36；spike S27、S28、S30、S31 |
