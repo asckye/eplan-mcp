@@ -8,11 +8,12 @@ internal class Placement(long oid, int type = 4) : IDisposable
 {
     public long ObjectIdentifier { get; } = oid;
     public string Prefix { get; set; } = "53";
+    public int IdentifierType { get; set; } = type;
     public PointD Location { get; set; }
     public Group? Group { get; set; }
     public PointD[] Bounds { get; set; } = [new(0, 0), new(10, 10)];
     public Exception? BoundsError { get; set; }
-    public string ToStringIdentifier() => $"{Prefix}/{type}/{ObjectIdentifier}/0";
+    public string ToStringIdentifier() => $"{Prefix}/{IdentifierType}/{ObjectIdentifier}/0";
     public PointD[] GetBoundingBox() => BoundsError is { } error ? throw error : Bounds;
     public void Dispose() => throw new InvalidOperationException("Borrowed placement must never be disposed.");
 }
@@ -30,6 +31,23 @@ internal interface IPropertyPlacementsContainer
 internal class SymbolReference(long oid) : Placement(oid, 17)
 {
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
+    public bool UseLocalPropertyPlacements { get; set; } = true;
+    public int LocalCopies { get; private set; }
+    public Action? BeforeLocalCopy { get; set; }
+    public void SwitchLocalPropertyPlacements(bool useLocal)
+    {
+        Assert.True(useLocal);
+        Assert.False(UseLocalPropertyPlacements);
+        BeforeLocalCopy?.Invoke();
+        PropertyPlacements = [.. PropertyPlacements.Select(p => new ContextPropertyPlacement(ObjectIdentifier, this)
+        {
+            IdentifierType = 17,
+            Location = p.Location, Bounds = p.Bounds, DisplayedId = p.DisplayedId,
+            Display = p.Display, Contents = new(p.Contents.GetAsString()), Rotation = p.Rotation, IsDocked = p.IsDocked,
+        })];
+        UseLocalPropertyPlacements = true;
+        LocalCopies++;
+    }
     public static SymbolReference Create(object variant, Page page) => LocationBox.CreateBox(variant, page);
 }
 

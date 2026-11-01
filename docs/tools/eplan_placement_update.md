@@ -13,6 +13,7 @@
 增量先换算绝对目标，再按页栅格吸附（中点远离零）；结果固化绝对位置，重复使用增量不具有幂等性，后续执行必须消费固化计划。无组 Function、SymbolReference、PotentialDefinition、Text、Line、Rectangle 及父符号的全部属性文字构成闭包。重复 locator、组/宏组/未知类型拒绝。
 
 D4 增加与 `moves` 互斥的 `property_moves[1..50]`：每项 `{parent,property_id,property_index,x_mm,y_mm,angle_deg}`。parent 为最新绘图父定位器，ID 和零基序号取子项 properties 的同名字段；不能用共享父号的子定位器代替。角度为绝对 0/90/180/270 度，坐标为页面绝对毫米；仅改变选定文字，脱离停靠，父线和其他文字不变。绘图 properties 增加 angle_deg、docked；继承图层或非直角的原始旋转暂拒绝。规划绕文字插入点旋转外框并平移，页界不明或越界拒绝。输出 moves 增加 propertyId/propertyIndex/beforeAngle/angle；沿相同审批、完整页指纹、事务、提交前后读回和一步撤销流程，no-op 无撤销步。Small/Medium 覆盖同父同属性多项、角度/位置/旁项错误及 stale；Large 新页电缆竖排和 PNG 仅编写，未运行。
+默认符号文字属于只读库（A57，D4 失败日志），执行时在同一事务内先复制为父符号的本地属性放置，再按属性/序号重新取得选定文字。绘图文字以父对象号及属性/序号、内容几何摘要定位，复制本身不改变其绘图身份；完整页读回、旁项不变和回滚核验照常执行。此修复已补离线回归，实机组合仍待复验。
 ## 预览与错误
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 返回 `execution=not_started,dryRun=true,noOp`、栅格/`Page.Size`、闭包逐对象 locator/parent/before/requested/after/snapped/bounds，以及 `graphicalChanges` 的引脚/前后线段、`connectionChanges` 的受影响逻辑端点对和完整页 fingerprint。零增量/同绝对位置保持原位（即使原位不在栅格），或吸附回原位为 no-op，不创建事务。

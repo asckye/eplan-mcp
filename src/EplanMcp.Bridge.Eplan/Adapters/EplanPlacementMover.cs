@@ -33,17 +33,30 @@ internal sealed class EplanPlacementMover : IPlacementMover
             using AnyPropertyId id = text.DisplayedProperty;
             if (id.AsInt != (int)m["propertyId"]! || text.Parent.ObjectIdentifier != owner.ObjectIdentifier)
             { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PlanStale, "Property placement selection changed; refresh drawings.")); }
-            return (Text: text, Owner: owner, Row: m);
+            return (Owner: owner, Row: m);
         }).ToArray();
         return () =>
         {
-            foreach (var item in texts)
+            foreach (var group in texts.GroupBy(t => t.Owner.ToStringIdentifier(), StringComparer.Ordinal))
             {
                 OperationContext.Current.ThrowIfCancellationRequested();
-                if (item.Text.IsDocked)
-                { item.Text.UndockText(); }
-                item.Text.Rotation = (double)item.Row["angle"]! * Math.PI / 180;
-                item.Text.Location = new PointD((double)item.Row["after"]![0]! - item.Owner.Location.X, (double)item.Row["after"]![1]! - item.Owner.Location.Y);
+                Placement owner = group.First().Owner;
+                // A57: default texts belong to the read-only symbol library. Copy inside the write scope,
+                // then resolve the local copies; the preflight objects still refer to the library.
+                if (owner is SymbolReference symbol && !symbol.UseLocalPropertyPlacements)
+                { symbol.SwitchLocalPropertyPlacements(true); }
+                foreach (var item in group)
+                {
+                    OperationContext.Current.ThrowIfCancellationRequested();
+                    PropertyPlacement text = (owner is SymbolReference local ? local.PropertyPlacements : ((IPropertyPlacementsContainer)owner).PropertyPlacements)[(int)item.Row["propertyIndex"]!];
+                    using AnyPropertyId id = text.DisplayedProperty;
+                    if (id.AsInt != (int)item.Row["propertyId"]! || text.Parent.ObjectIdentifier != owner.ObjectIdentifier)
+                    { throw new BridgeErrorException(ErrorReason.PlanStale, "Local property placement selection changed; refresh drawings."); }
+                    if (text.IsDocked)
+                    { text.UndockText(); }
+                    text.Rotation = (double)item.Row["angle"]! * Math.PI / 180;
+                    text.Location = new PointD((double)item.Row["after"]![0]! - owner.Location.X, (double)item.Row["after"]![1]! - owner.Location.Y);
+                }
             }
             foreach (var item in roots)
             {

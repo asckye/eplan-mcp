@@ -8,7 +8,13 @@ internal abstract class TextBase(long oid) : Placement(oid)
     public double Height { get; set; } = 3;
     public double Rotation { get; set; }
     public bool IsDocked { get; set; }
-    public void UndockText() => IsDocked = false;
+    public bool ReadOnly { get; init; }
+    public void UndockText()
+    {
+        if (ReadOnly)
+        { throw new BaseException(); }
+        IsDocked = false;
+    }
     public bool IsVisible { get; set; }
 }
 
@@ -22,7 +28,7 @@ internal sealed class Text(long oid = 99) : TextBase(oid)
     }
 }
 
-internal sealed class PropertyPlacement(long oid = 99, Placement? parent = null) : TextBase(oid)
+internal class PropertyPlacement(long oid = 99, Placement? parent = null) : TextBase(oid)
 {
     public Placement Parent { get; private set; } = parent!;
     public string Display { get; set; } = "-K1";
@@ -43,6 +49,8 @@ internal sealed class PropertyPlacement(long oid = 99, Placement? parent = null)
         return GetBoundingBox();
     }
 }
+
+internal sealed class ContextPropertyPlacement(long oid, Placement parent) : PropertyPlacement(oid, parent);
 
 internal sealed class Line(long oid = 100) : Placement(oid)
 {

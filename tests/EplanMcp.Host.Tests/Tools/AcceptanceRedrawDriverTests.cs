@@ -88,6 +88,33 @@ public sealed class AcceptanceRedrawDriverTests
     }
 
     [Fact]
+    public async Task CableText_SixSameNamedCorePoints_SelectsTheUniqueCableDefinition()
+    {
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = Driver(fake);
+        await driver.DrawAsync();
+        JsonElement move = Assert.Single(fake.Requests, r => r.Tool == "eplan_placement_update").Args.GetProperty("property_moves")[0];
+        JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
+        JsonElement[] sameName = report.GetProperty("evidence").EnumerateArray()
+            .Where(e => e.TryGetProperty("tool", out JsonElement tool) && tool.GetString() == "eplan_page_get")
+            .SelectMany(e => e.GetProperty("result").GetProperty("drawings").GetProperty("items").EnumerateArray())
+            .Where(d => d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && name.GetString() == "+A1-Wtest3")
+            .DistinctBy(d => d.GetProperty("locator").GetProperty("oid").GetInt64()).ToArray();
+        Assert.Equal(7, sameName.Length);
+        Assert.Equal(6, sameName.Count(d => d.GetProperty("kind").GetString() == "ConnectionDefinitionPoint"));
+        JsonElement cable = Assert.Single(sameName, d => d.GetProperty("kind").GetString() == "Cable");
+        Assert.True(JsonElement.DeepEquals(cable.GetProperty("locator"), move.GetProperty("parent")));
+    }
+
+    [Fact]
+    public async Task CableText_TwoCableDefinitionsWithSameName_StillFailsUniquenessAssertion()
+    {
+        var fake = new DrawingTools { ConnectWires = true, DuplicateCableDefinition = true };
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(() => Driver(fake).DrawAsync());
+        Assert.DoesNotContain(fake.Requests, r => r.Tool == "eplan_placement_update");
+    }
+
+    [Fact]
     public async Task CableText_WrongNativeAngle_FailsIndependentDrawingReadback()
     {
         var fake = new DrawingTools { ConnectWires = true, WrongPropertyAngle = true };
@@ -798,6 +825,7 @@ public sealed class AcceptanceRedrawDriverTests
         internal string? CounterpartFault { get; init; }
         internal bool MissingInterruptionLine { get; init; }
         internal bool WrongPropertyAngle { get; init; }
+        internal bool DuplicateCableDefinition { get; init; }
         internal bool WrongStripDefinitionPosition { get; init; }
         internal JsonElement? ConnectionItems { get; private set; }
         internal int ContinuationReads { get; private set; }
@@ -948,8 +976,24 @@ public sealed class AcceptanceRedrawDriverTests
                         _cables.AddRange(cables);
                         foreach (JsonElement c in cables)
                         {
-                            var locator = new { project = "LargeWrite", page = args["page"], type = 1, oid = ++_oid, digest = new string('a', 64) };
+                            var locator = new { project = "LargeWrite", page = args["page"], type = 17, oid = ++_oid, digest = new string('a', 64) };
                             _drawings.Add(new { page = args["page"], kind = "Cable", properties = new { name = Stored(c.GetProperty("designation").GetString()!) }, location = (double[])[80, 148], bounds = (double[])[80, 148, 260, 148], locator });
+                            if (DuplicateCableDefinition)
+                            { _drawings.Add(_drawings[^1]); }
+                            // q-d46-AcceptanceRedrawTests: W3's six native core points also carry the cable name.
+                            for (int core = 0; core < c.GetProperty("cores").GetArrayLength(); core++)
+                            {
+                                _drawings.Add(new
+                                {
+                                    page = args["page"],
+                                    kind = "ConnectionDefinitionPoint",
+                                    parent = (object?)null,
+                                    properties = new { grouped = "false", name = Stored(c.GetProperty("designation").GetString()!) },
+                                    location = (double[])[80, 148],
+                                    bounds = (double[])[80, 148, 80, 148],
+                                    locator = new { project = "LargeWrite", page = args["page"], type = 59, oid = ++_oid, digest = new string('b', 64) }
+                                });
+                            }
                             for (int slot = 0; slot < 2; slot++)
                             {
                                 _drawings.Add(new

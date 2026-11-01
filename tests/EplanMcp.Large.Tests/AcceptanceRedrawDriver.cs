@@ -331,7 +331,7 @@ internal sealed class AcceptanceRedrawDriver(
             { Skip(Id(cable) + "/text_layout", "The cable was not created and independently read back."); continue; }
             JsonElement layout = cable.GetProperty("text_layout");
             JsonElement[] before = await DrawingsAsync(Page);
-            JsonElement parent = Function(before, Expand(cable.GetProperty("tag").GetString()!));
+            JsonElement parent = Function(before, Expand(cable.GetProperty("tag").GetString()!), "Cable");
             JsonElement[] texts = before.Where(p => p.GetProperty("kind").GetString() == "PropertyPlacement" && p.TryGetProperty("parent", out JsonElement owner)
                 && JsonElement.DeepEquals(owner, parent.GetProperty("locator")) && p.GetProperty("properties").TryGetProperty("display", out JsonElement display) && !string.IsNullOrWhiteSpace(display.GetString())).ToArray();
             Assert.NotEmpty(texts);
@@ -357,7 +357,7 @@ internal sealed class AcceptanceRedrawDriver(
             if (result is null)
             { continue; }
             JsonElement[] after = await DrawingsAsync(Page);
-            Check(() => Assert.True(JsonElement.DeepEquals(parent, Function(after, Expand(cable.GetProperty("tag").GetString()!)))));
+            Check(() => Assert.True(JsonElement.DeepEquals(parent, Function(after, Expand(cable.GetProperty("tag").GetString()!), "Cable"))));
             foreach (var move in moves)
             {
                 JsonElement text = Assert.Single(after, t => t.GetProperty("kind").GetString() == "PropertyPlacement" && t.TryGetProperty("parent", out JsonElement owner) && JsonElement.DeepEquals(owner, move.parent)
@@ -816,7 +816,7 @@ internal sealed class AcceptanceRedrawDriver(
     }
 
     private static Dictionary<string, object?> PageArgs(string page) => new() { ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
-    private JsonElement Function(JsonElement[] drawings, string tag) => Assert.Single(drawings, d => d.GetProperty("kind").GetString() != "PropertyPlacement" && d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && SameName(tag, name.GetString()!));
+    private JsonElement Function(JsonElement[] drawings, string tag, string? kind = null) => Assert.Single(drawings, d => (kind is null ? d.GetProperty("kind").GetString() != "PropertyPlacement" : d.GetProperty("kind").GetString() == kind) && d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && SameName(tag, name.GetString()!));
     private bool SameName(string requested, string actual) => CableDefinitionPlanner.SameName(requested, actual, Page);
     private JsonElement[] Items(string key) => list.GetProperty(key).EnumerateArray().ToArray();
     private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal).Replace("{next}", next ?? run + "2", StringComparison.Ordinal);

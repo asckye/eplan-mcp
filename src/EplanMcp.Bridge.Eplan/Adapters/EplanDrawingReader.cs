@@ -41,7 +41,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 string? slot = placement is PropertyPlacement child && parent is not null
                     ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", DisplayedId(child), index++)
                     : null;
-                string key = slot is null ? placement.ToStringIdentifier() : placement.ToStringIdentifier() + "#" + slot;
+                string key = slot is null ? placement.ToStringIdentifier() : FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}");
                 if ((placement is PropertyPlacement && parent is null && !excluded) || !seen.Add(key))
                 {
                     continue;
@@ -78,7 +78,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
             string digest = SnapshotCanonical.Sha256(JsonConvert.SerializeObject(new
             {
-                kind = placement.GetType().Name,
+                kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name,
                 parentType = parent?.Type,
                 parentOid = parent?.Oid,
                 slot, // property placements share their parent's identifier
@@ -113,7 +113,11 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 Location = location,
                 Bounds = bounds,
                 Parent = parent,
-                Locator = DrawingLocators.FromIdentifier(projectPath, page.Name, placement.ToStringIdentifier(), digest),
+                // A57: default library texts become local context copies when edited. Identify both by
+                // their parent and slot/content digest so copying does not change the drawing identity.
+                Locator = placement is PropertyPlacement && parent is not null
+                    ? new DrawingLocator { Project = projectPath, Page = page.Name, Type = parent.Type, Oid = parent.Oid, Digest = digest }
+                    : DrawingLocators.FromIdentifier(projectPath, page.Name, placement.ToStringIdentifier(), digest),
             };
         }
 
