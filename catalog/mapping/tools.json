@@ -483,6 +483,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
           },
           {
+            "name": "SelectionCatalogTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionCatalogTests.cs"
+          },
+          {
             "name": "TaskSetTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Evals.Tests/TaskSetTests.cs"
@@ -519,6 +524,11 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          },
+          {
+            "name": "SelectionCatalogTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionCatalogTests.cs"
           }
         ],
         "operationTests": []
@@ -5191,6 +5201,11 @@
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -7816,6 +7831,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ObjectReadProtocolTests.cs"
           },
           {
+            "name": "ActionTryTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
+          },
+          {
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
@@ -7829,6 +7849,11 @@
             "name": "ObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ObjectReadTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -9662,6 +9687,11 @@
             "name": "PageOpenTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -11268,6 +11298,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementCreateProtocolTests.cs"
           },
           {
+            "name": "ActionTryTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
+          },
+          {
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
@@ -11276,6 +11311,11 @@
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
           }
         ],
         "operationTests": [

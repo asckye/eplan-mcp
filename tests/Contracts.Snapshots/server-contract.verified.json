@@ -726,7 +726,7 @@
     {
       "name": "eplan_action_try",
       "title": "Try an unverified catalog action",
-      "description": "Try one unverified catalog action in scratch; full + actionTry:on. eplan_action_catalog_get returns try_template parameters, selection guidance and deny status; INVALID_ARGUMENT includes the closest template. Always requires approval; refusal: APPROVAL_DENIED. Prefer verified task tools; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}",
+      "description": "Try one unverified catalog action in scratch; full + actionTry:on. eplan_action_catalog_get returns try_template parameters, selection guidance and deny status; INVALID_ARGUMENT includes the closest template. Optional selection sets same-page discovery locators; [] clears, omission preserves UI context. Always requires approval; refusal: APPROVAL_DENIED. Prefer verified task tools; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -757,6 +757,41 @@
           "dry_run": {
             "type": "boolean",
             "default": false
+          },
+          "selection": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "project",
+                "page",
+                "type",
+                "oid",
+                "digest"
+              ],
+              "properties": {
+                "project": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "digest": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -16175,6 +16210,369 @@
       }
     },
     {
+      "name": "eplan_selection_get",
+      "title": "Read current selection",
+      "description": "Reads the current project, edited page and selected object locators, matching eplan_object_find digests. Property placements are counted as unsupported. Repeat limit and response_format with cursor. Example: {\"limit\":50}. Requires the windowed add-in.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 200
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "response_format": {
+            "type": "string",
+            "default": "concise",
+            "enum": [
+              "concise",
+              "detailed"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items",
+          "total",
+          "unsupported",
+          "unselected",
+          "exact",
+          "cursor",
+          "truncated"
+        ],
+        "properties": {
+          "project": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "page": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "locator"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "locator": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "project",
+                    "page",
+                    "type",
+                    "oid",
+                    "digest"
+                  ],
+                  "properties": {
+                    "project": {
+                      "type": "string"
+                    },
+                    "page": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "oid": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "digest": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "unsupported": {
+            "type": "integer"
+          },
+          "exact": {
+            "type": "boolean"
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unselected": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "project",
+                "page",
+                "type",
+                "oid",
+                "digest"
+              ],
+              "properties": {
+                "project": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "digest": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "annotations": {
+        "title": "Read current selection",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "eplan_selection_set",
+      "title": "Set current selection",
+      "description": "Changes UI selection only; optionally opens/focuses its page and makes its project current. replace/add need exact eplan_object_find locators on one page; clear needs none. Does not change project data or undo history. Returns actual selection and every unselected locator. Property placements are unsupported. Example: {\"mode\":\"clear\"}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "locators": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "project",
+                "page",
+                "type",
+                "oid",
+                "digest"
+              ],
+              "properties": {
+                "project": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "digest": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "default": "replace",
+            "enum": [
+              "replace",
+              "add",
+              "clear"
+            ]
+          },
+          "show_page": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items",
+          "total",
+          "unsupported",
+          "unselected",
+          "exact",
+          "cursor",
+          "truncated"
+        ],
+        "properties": {
+          "project": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "page": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "locator"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "locator": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "project",
+                    "page",
+                    "type",
+                    "oid",
+                    "digest"
+                  ],
+                  "properties": {
+                    "project": {
+                      "type": "string"
+                    },
+                    "page": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2147483647
+                    },
+                    "oid": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "digest": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "unsupported": {
+            "type": "integer"
+          },
+          "exact": {
+            "type": "boolean"
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "unselected": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "project",
+                "page",
+                "type",
+                "oid",
+                "digest"
+              ],
+              "properties": {
+                "project": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "oid": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "digest": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "annotations": {
+        "title": "Set current selection",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
       "name": "eplan_session_select",
       "title": "Choose the EPLAN to work with",
       "description": "Chooses which running EPLAN this server works with when several have the add-in loaded and other tools return SESSION_NOT_SELECTED. Take process_id from the instances of eplan_session_status; the result names that EPLAN's version and variant, so select another if it is not the one meant. Lasts until that EPLAN exits; changes nothing in EPLAN. Example: {\"process_id\": 24688}.",
@@ -17283,6 +17681,8 @@
               "eplan_report_update",
               "eplan_revision_list",
               "eplan_rule_check",
+              "eplan_selection_get",
+              "eplan_selection_set",
               "eplan_session_select",
               "eplan_session_status",
               "eplan_symbol_search",
