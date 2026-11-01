@@ -40,3 +40,15 @@
 | [0031](0031-private-extension-modules.md) | 私有扩展模块在单独的工作进程中运行，经清单与哈希注册，只能经现有操作和审批流水线写入，默认关闭 | Accepted | 单向门（扩展契约发布后） |
 | [0032](0032-generic-api-layer.md) | EPLAN API 以通用层加专用工具补齐：对象类型通用读、白名单写，全部操作层与 action 只读目录加分级执行，批量实机验证 | Accepted | 单向门（通用读写与分级执行契约发布后） |
 | [0033](0033-api-try-object-handles.md) | `eplan_api_try` 引入短期对象句柄，覆盖只能由返回值得到的对象 | Accepted（2026-11-01） | 双向门 |
+| [0034](0034-workbench-visual-apple-principles.md) | Workbench 视觉改用 v2 设计，技术栈沿用 ADR-0017 | Accepted | 双向门 |
+| [0035](0035-destructive-approval-default-reject.md) | 破坏性操作审批默认拒绝，批准需输入确认 | Accepted | 双向门 |
+| [0036](0036-settings-and-schemes.md) | 为设置与方案调用建立全局作用域审批及备份恢复边界 | Proposed | 单向门 |
+| [0037](0037-interactive-and-session-state.md) | 为交互与会话状态调用建立隔离、恢复和模态取消边界 | Proposed | 单向门 |
+| [0038](0038-banned-symbol-adapters.md) | 以逐符号写适配器审阅禁用 API，保留禁止表默认约束 | Proposed | 单向门 |
+| [0039](0039-internal-api-boundary.md) | 对 internal 签名先审阅公开契约，禁止反射和裸指针绕过 | Proposed | 单向门 |
+| [0040](0040-deprecated-api-boundary.md) | 对 deprecated 重载采用非弃用路径优先与逐签名例外 | Proposed | 单向门 |
+| [0041](0041-not-applicable-signatures.md) | 对 not_applicable 签名区分协议适配与架构边界 | Proposed | 单向门 |
+| [0042](0042-external-path-grants.md) | 对导入导出根目录外资源采用人工路径授权与受控副本 | Proposed | 单向门 |
+| [0043](0043-licensing-operations.md) | 对授权 API 采用只读优先、隔离占用与凭据禁止边界 | Proposed | 单向门 |
+| [0044](0044-network-operations.md) | 对网络调用采用隔离端点、数据清单与不可撤回审批 | Proposed | 单向门 |
+| [0045](0045-printing-operations.md) | 对打印调用采用虚拟队列优先与物理输出逐次确认 | Proposed | 单向门 |
