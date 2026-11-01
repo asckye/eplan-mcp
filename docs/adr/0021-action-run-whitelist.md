@@ -26,7 +26,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 ## 决策驱动因素
 - **任务工具优先**：任务工具在审批前列出每一项变化，执行后逐项读回；运行器做不到，不能让它成为绕开任务工具的途径。
 - **长尾要有出口**：M4c 之后工具将有约 55 个，再给每个 action 写一个工具，模型难以选择（ADR-0006）。
-- **不凭文档假设 action 的行为**：文档有 10 处没说清楚的副作用（api-actions 7.2）；实测中部件清单 CSV 导出后 EPLAN 关闭了全部项目（[api-notes](../eplan/api-notes.md) A25），部件库导入内部走的是另一个界面 action，在事务中留下未关闭的撤销日志（A30）。
+- **不凭文档假设 action 的行为**：文档有 10 处没说清楚的副作用（api-actions 7.2）；实测中部件清单 CSV 导出后 EPLAN 关闭了全部项目（[api-notes](../eplan/api-notes/actions.md#a25-m4c-的导出spike-s252026-10-21eplan-20260325421electric-p8在调度器中) A25），部件库导入内部走的是另一个界面 action，在事务中留下未关闭的撤销日志（A30）。
 - **安全默认值不可悄悄放宽**（[开发流程](../process/development-workflow.md)第 1 节原则 5）；模型给的参数一律不可信（[security.md](../standards/security.md) TB1）。
 - **结果要如实**：做不到逐项核对时，要明说。
 
@@ -182,7 +182,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 | 174 | `XSettingsExport` | F | — | — | 不纳入：导出的设置可能含数据库连接等信息（未核实）；`/prj` 在开发机上返回 FALSE（A24）。负责人需要时另议 |
 | 33、50、51、170 | 预规划的 4 个 action | P/F | — | — | 不纳入：授权中没有 Preplanning，无法验证（M4c 设计 Q6） |
 
-按 Q2 应用 S26 r1 结果：上述三种未运行用法移到“以后”；其余“已验证”仅指验证列注明的范围，AML 副作用、执行期窗口禁用和提交后一步撤销的缺口见 [S26 结果](../../spikes/S26-action-run/README.md#结果) 与 [A40](../eplan/api-notes.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中)，发布前仍须满足本 ADR 的加入条件。
+按 Q2 应用 S26 r1 结果：上述三种未运行用法移到“以后”；其余“已验证”仅指验证列注明的范围，AML 副作用、执行期窗口禁用和提交后一步撤销的缺口见 [S26 结果](../../spikes/S26-action-run/README.md#结果) 与 [A40](../eplan/api-notes/actions.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中)，发布前仍须满足本 ADR 的加入条件。
 
 合计：首批 12 种（建议只读导出 11 种、Write 1 种），以后 33 种，不纳入 12 种。
 

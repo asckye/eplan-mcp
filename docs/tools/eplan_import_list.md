@@ -84,7 +84,7 @@
 - **Bridge API**：`Eplan.EplApi.ApplicationFramework.ActionManager.FindAction(...).Execute(context)`，`Eplan.EplApi.ApplicationFramework.ActionCallingContext.AddParameter` 逐项传参，不拼命令行。不走 `eplan_action_run`，不调用 `ImportPartsListToSystem`、`MDPartsDatabase.ImportParts` 或部件同步。
 - **指纹**：文件大小、修改时间、完整 SHA-256，加项目页/功能的会话内标识和名称、设备清单条目编号和部件号、项目部件与部件引用的可读回业务字段；覆盖同数量修改的具体字段集合**未验证**，须在 Large 中补齐，不把计数当完整指纹。Host 执行前重做 SEC-31 检查和哈希，Bridge 在 action 前核对同一文件哈希与项目指纹；变化即 `PLAN_STALE`。
 - **事务**：沿用 `TransactionScope` 的 `LockingStep → SafetyPoint → UndoStep → QuietModeStep(ShowNoDialogs)`；备份后再验指纹，在提交前读回三类计数、设备条目部件号及相关引用。失败或取消则回滚；新编号在执行内重新枚举。S34 没有 UndoStep，这个完整包装及提交后撤销**未验证**，是发布前验证项；不改用普通 `Transaction.Abort()`（A13/A14 不能互相推广）。
-- **已验证**（[api-notes A39](../eplan/api-notes.md)、[S34](../../spikes/S34-m4c-actions/README.md)）：设备默认 XML、显式 XML、CSV 均恢复两条，约 20–150 ms；部件 XML 约 14 MB，导入 58–83 秒（约 1–1.5 分钟），引用 2,900 → 2,902 → 回滚 2,900；导入时只读打开配置部件库。MODE 省略、1、2 都成功不证明其合并语义。
+- **已验证**（[api-notes A39](../eplan/api-notes/actions.md#a39-m4c-剩余工具用到的-actionspike-s342026-10-22eplan-20260325421electric-p8在调度器中)、[S34](../../spikes/S34-m4c-actions/README.md)）：设备默认 XML、显式 XML、CSV 均恢复两条，约 20–150 ms；部件 XML 约 14 MB，导入 58–83 秒（约 1–1.5 分钟），引用 2,900 → 2,902 → 回滚 2,900；导入时只读打开配置部件库。MODE 省略、1、2 都成功不证明其合并语义。
 - **时限**：规划 30 秒；执行预算 300 秒（含备份），备份上限 150 秒（ADR-0013），不开放 `timeout_s`。备份和导入分别报告进度，每 5 秒心跳；支持 Tasks 时按长任务运行。取消只能在 action 前、返回后和提交前的安全点检查，不承诺中断原生导入；超时先取回结果，不能直接返回可重试的 `TIMEOUT`。
 - **所有权**：不释放 finder、集合或工厂返回的 `StorableObject`（包括 `DeviceListEntry`、`Article`）；只释放自建辅助对象及属性读取资源，遵循 S34 r3，避免 r2 的原生堆损坏。
 

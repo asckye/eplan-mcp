@@ -15,7 +15,7 @@
 
 `PlanTaskAcceptanceScenariosTests` 经真实 stdio Host 从基本项目新建、打开独立 scratch 项目，验证建页→改描述（有设备时还改名）、初备份、范围冲突、选择变化、审批等待和缺能力。2026-10-25 已在 EPLAN 2026.0.3（Electric P8）实跑 5/5 通过，审批用例的批准和到期两种结果都出现过。
 
-准备兼容的示例 `.zw9`，可用 `EPLANMCP_LARGE_BASIC_PROJECT` 指定；默认依次查找唯一 IEC、GB 基本项目。导航复用 `PlanStepLiveSession` 的本机 Remote Client 辅助程序，只用 `ProjectOpen /Quiet` 打开已确认关闭的项目，用 `XPrjActionProjectClose` 关闭已核对的当前项目，见 [A46](../../docs/eplan/api-notes.md#a46-项目打开当前选择与导航器顺序p252026-10-25eplan-20260325421electric-p8)。从 worktree 运行时，`EPLANMCP_EPLREMOTE` 必须指向**主 checkout** 的 `.local/tools/eplremote/bin/Release/net481/eplremote.exe`；另设 `EPLREMOTE_HOST`，端口可用 `EPLREMOTE_PORT` 指定。
+准备兼容的示例 `.zw9`，可用 `EPLANMCP_LARGE_BASIC_PROJECT` 指定；默认依次查找唯一 IEC、GB 基本项目。导航复用 `PlanStepLiveSession` 的本机 Remote Client 辅助程序，只用 `ProjectOpen /Quiet` 打开已确认关闭的项目，用 `XPrjActionProjectClose` 关闭已核对的当前项目，见 [A46](../../docs/eplan/api-notes/reads-and-snapshots.md#a46-项目打开当前选择与导航器顺序p252026-10-25eplan-20260325421electric-p8)。从 worktree 运行时，`EPLANMCP_EPLREMOTE` 必须指向**主 checkout** 的 `.local/tools/eplremote/bin/Release/net481/eplremote.exe`；另设 `EPLREMOTE_HOST`，端口可用 `EPLREMOTE_PORT` 指定。
 
 运行：`dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filter-class EplanMcp.Large.Tests.PlanTaskAcceptanceScenariosTests`。使用界面中的标准 Large 夹具；自建项目使用唯一名称 `LargeP25t_<8 hex>`、`LargeP25o_<8 hex>`，排在夹具和 `LargeOutside` 之后、`LargeWrite` 之前（`LargeWrite` 会被其他测试改动，重开可能弹模态提示，所以始终不关闭它），打开后核对选择未变。普通用例直到清理才关闭已知副本。场景 5 在夹具当前时显式为 T 编译，再逐个核对并关闭当前的已知副本，记录关闭集合，直到 O 当前；核对只有 T 被修改，O 和重开的全部副本设计文件不变（关闭过的副本排除关闭时改写的 `ProjectInfo.xml`，页内容另行核对）。审批用例只观察 `waiting_approval`，让工程师处理或按测试配置 60 秒到期，测试绝不点击或关闭审批窗口；工程师批准时核对批准审计和初备份，拒绝或到期时核对项目未变。
 
@@ -201,7 +201,7 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 2. 在 EPLAN 中打开这份副本，**夹具仍然是当前项目**（读测试不传 `project`，用的是当前项目）。写测试按路径找 `writes\` 下打开的项目；找不到时失败并说明怎么做。
 3. 每次运行都在 `=GAA+A1&EFS1` 最后一页之后新建页，副本会越来越大；需要时删掉 `writes\` 重新复制。不要对副本按 Ctrl+Z：EPLAN 中开着两个项目时，撤销可能落在当前项目（夹具）上（api-notes A14）。
 
-已知数据来自 EPLAN 2026.0.3 自带的示例项目（[api-notes A12](../../docs/eplan/api-notes.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)、A17）。换了 EPLAN 版本，示例项目可能不同，这时先核对数据，再改测试。
+已知数据来自 EPLAN 2026.0.3 自带的示例项目（[api-notes A12](../../docs/eplan/api-notes/reads-and-snapshots.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)、A17）。换了 EPLAN 版本，示例项目可能不同，这时先核对数据，再改测试。
 
 待补：按 eplan_cable_generate spec 第 7 节，由工程师准备能实际新增自动电缆的 scratch 夹具，再编写正向生成、更新与恢复测试；形成条件、完整选型/连接字段及提交后一次 Ctrl+Z 均未验证，本步不编写正向夹具测试。
 

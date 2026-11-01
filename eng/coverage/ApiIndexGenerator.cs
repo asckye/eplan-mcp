@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using EplanMcp.Coverage.Mapping;
 using EplanMcp.Coverage.Reporting;
 using EplanMcp.Host.Tools;
@@ -28,9 +27,7 @@ internal static class ApiIndexGenerator
             .SelectMany(ApiCatalog.Lines).Where(m => Text(m, "layer") == "operation")];
         JsonElement[] types = [.. ApiCatalog.Lines(Path.Combine(directory, "types.jsonl"))];
         JsonElement summary = CoverageJson.Read<JsonElement>(Path.Combine(directory, "summary.json"));
-        var anchors = File.ReadLines(Path.Combine(root, "docs/eplan/api-notes.md")).Where(l => Regex.IsMatch(l, @"^### [AB]\d+\."))
-            .ToDictionary(l => l[4..l.IndexOf('.', StringComparison.Ordinal)], l => "docs/eplan/api-notes.md#"
-                + Regex.Replace(l[4..].ToLowerInvariant(), @"[^\p{L}\p{N}_ -]", "").Replace(' ', '-'), StringComparer.Ordinal);
+        Dictionary<string, string> anchors = ApiNotes.Anchors(root);
         return Build(catalog, report, mapping, members, types, summary.GetProperty("layers").GetProperty("data_dictionary").GetProperty("byObject"), anchors);
     }
 
@@ -95,7 +92,7 @@ internal static class ApiIndexGenerator
     }
 
     private static ApiDetail[] Evidence(ToolEntry tool, IReadOnlyDictionary<string, string>? anchors) => [..
-        new[] { tool.Evidence.Spec }.OfType<string>().Concat(tool.Evidence.ApiNotes.Select(a => anchors?.GetValueOrDefault(a) ?? "docs/eplan/api-notes.md#" + a.ToLowerInvariant()))
+        new[] { tool.Evidence.Spec }.OfType<string>().Concat(tool.Evidence.ApiNotes.Select(a => anchors?.GetValueOrDefault(a) ?? ApiNotes.IndexPath + "#" + a.ToLowerInvariant()))
         .Concat(tool.Evidence.Tests.Concat(tool.Evidence.OperationTests).Select(t => t.File + "#" + t.Name))
         .Concat(tool.Live.Select(l => l.Source)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)
         .Select(r => new ApiDetail("evidence", tool.Name, Reference: r, Note: "Tool-level coverage evidence; not independent verification of every overload."))];

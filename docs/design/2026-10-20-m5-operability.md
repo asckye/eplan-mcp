@@ -9,7 +9,7 @@
 | 最后更新 | 2026-10-22：按项目负责人决定改为 ZIP；原安装器与固定目录方案由 ADR-0016 修订取代 |
 
 ## 1. 背景
-[架构第 11 节](../architecture/architecture.md#11-里程碑)给 M5 的范围是：按用户安装的安装包；Workbench（客户端配置向导、审批队列、审计浏览，中英双语）；Claude Code 插件形式的交付包（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名）。完成标准是：在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](../architecture/architecture.md#71-安装验收清单m5-发布前逐项通过) I1–I10 全部通过。
+[架构第 11 节](../architecture/architecture.md#11-里程碑)给 M5 的范围是：按用户安装的安装包；Workbench（客户端配置向导、审批队列、审计浏览，中英双语）；Claude Code 插件形式的交付包（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名）。完成标准是：在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](../process/release.md#安装验收清单m5-发布前逐项通过) I1–I10 全部通过。
 
 **现状**：
 - 安装只有开发脚本：`eng\scripts\eplan-addin.ps1` 用 `EPLAN.exe /Variant:"…" EplApiModuleAction /register:"<dll>"` 注册插件（会启动 EPLAN），README 用 `claude mcp add` 配置客户端。`install-addin`、`client-config` 两个子命令还没有实现（[M1 设计](2026-10-13-m1-skeleton.md)第 2 节）。

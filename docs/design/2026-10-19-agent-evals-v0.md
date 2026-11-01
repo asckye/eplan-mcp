@@ -13,7 +13,7 @@ M2 的完成标准是"只读任务的 Agent 评测成功率 ≥ 90%"。13 个只
 
 M2 设计 Q1 已经决定：用 Claude Code 的无界面模式 `claude -p` 驱动模型，沿用现有登录。对本机 Claude Code 2.1.299 的核查（2026-10-19）：
 - 可用的开关：`--json-schema`（结构化输出）、`--mcp-config` 与 `--strict-mcp-config`、`--allowedTools`、`--output-format stream-json`、`--no-session-persistence`、`--restricted`、`--tools`、`--disable-slash-commands`、`--model`、`--max-budget-usd`、`--max-turns`（`--help` 中没有列出，[CLI 参考](https://code.claude.com/docs/en/cli-reference)中有）。
-- `--bare` **不读取登录态**，只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`（[无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)），与 Q1"沿用现有登录"冲突，因此不用；改用为评测设计的 `--restricted`（2026-10-19 实测见 [api-notes C 节](../eplan/api-notes.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)）。
+- `--bare` **不读取登录态**，只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`（[无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)），与 Q1"沿用现有登录"冲突，因此不用；改用为评测设计的 `--restricted`（2026-10-19 实测见 [api-notes C 节](../eplan/api-notes/clients-and-host.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)）。
 - 桌面版自带的 `claude.exe` 单独运行时没有登录态（`claude auth status` 返回 `loggedIn: false`），需要工程师先在命令行登录一次（`claude auth login`，或用 `claude setup-token` 生成长期令牌）。
 
 ## 2. 目标与非目标

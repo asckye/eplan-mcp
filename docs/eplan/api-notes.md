@@ -4,7 +4,7 @@
 > 没有验证过的内容不写进来；写代码时遇到不确定的 EPLAN 行为，先验证，再补到这里。
 > 每条格式：**事实** — 出处 / 验证方式。
 
----
+## 维护规则
 
 ## A. 实机验证记录（2026-10-12，EPLAN 2026.0.3，Pro Panel 变体，Windows 11）
 
@@ -699,147 +699,94 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 - **第一次从无编辑器状态打开刚绘制的页，会伴随设计文件变化**：S45 的 `no_editor` 前后 204 个设计文件仅 `Page.eod`、`Page.eox` 的 SHA-256 不同；后续 `one_page`、`different_pages`、`property_placement` 均无文件差异。日志不能确定变化的是缓存还是业务字段，不能再笼统声称开页总是逐字节不变（A54 的既有样本不足以推广）。Large 调整为先开页初始化，同时精确核对业务快照和绘图指纹；随后关闭编辑器重测无编辑器路径，仍比较全部设计文件，不排除 Page 文件，仍验证一次撤销恢复及保留先前历史。— 同一日志的四个阶段 `designBefore/designAfter`；新增初始化与聚焦断言尚未运行 EPLAN 复验。
 - 此轮两个 Selection 失败分别是原生探针的文件相等断言、产品第一次 `exact` 断言；测试错误没有 correlation ID，`bridge-slotA.log` 对应 selection 加载时段（05:05–05:08）没有异常。ActionTry 测试通过；该 add-in 全天日志内其他 worktree 的 api_try 超时等异常不属于这两个测试的错误，不能据此将它们归类为本轮写入结果未知。— [测试输出](../../.local/failures/q-selection-SelectionSpikeTests.log)、[ActionTry 输出](../../.local/failures/q-selection-ActionTryTests.log)、[add-in 日志](../../.local/failures/bridge-slotA.log)（均为本地证据，不提交）。
 
+> A. 实机验证记录（2026-10-12，EPLAN 2026.0.3，Pro Panel 变体，Windows 11）
+> B. 官方文档与反射核实的事实（2026-10-12）
 > 出处缩写：`2026/<页面>` 指 `https://www.eplan.help/en-us/Infoportal/Content/api/2026/<页面>`；"XML" 指 EPLAN Bin 目录中随 API 一起提供的 IntelliSense 文档（`Eplan.EplApi.*u.xml`）；"反射" 指对 `C:\Program Files\EPLAN\Platform\2026.0.3\Bin` 中程序集做只读反射。
 
-### B1. 程序集与目标框架
-- 2026 的 14 个 `Eplan.EplApi.*u.dll` 全部以 **.NET Framework 4.8.1** 为目标：AFu、Baseu、DataModelu、EServicesu、Guiu、HEServicesu、MasterDatau、RecorderToolsu、RemoteClientu、Remotingu、Starteru、Systemu、WebServicesu、WebServiceu。程序集版本 1.0.0.0，文件版本 2026.0.3.25421。大多数是 x64 混合模式程序集。— 反射。
-- `EPLAN.exe` 是原生 x64（MFC）程序，CLR 在其中被宿主。— 反射（没有 CLR 头）。
-- Bin 中自带 `Newtonsoft.Json 13.0.3`（程序集版本 13.0.0.0）、`Grpc.Core 2.46.6`、`Grpc.Core.Api 2.55`、`Google.Protobuf 3.24.1`；**没有** `System.Text.Json`、`System.Memory`、`Grpc.Net.Client`。— 检查 Bin 目录。
-- **EPLAN 2027 新增一套并行的 .NET 8 API**（程序集名带 `Net`：`AFNetu`、`BaseNetu`、`DataModelNetu`……），**.NET Framework 4.8.1 的 API 仍然保留**。两套程序集不能混用。.NET 8 插件用 `EplApiModuleActionNet` 注册，需要安装 .NET 8 Desktop Runtime 和 ASP.NET Core Runtime。为 .NET 8 构建的插件只能在 2027 及以后运行。— 2027 `EplanApiDotNet.html`、`Assemblies for .NET 8.html`、`EplApiModuleActionNet.html`。
-  - 未验证：现有的 4.8.1 插件能否不重新编译就在 2027 上运行。既然 4.8.1 API 仍然保留，可能性很大。
+## 条目索引
 
-### B2. 插件（Add-in）
-- 接口 `Eplan.EplApi.ApplicationFramework.IEplAddIn`（AFu）：`bool OnRegister(ref bool bLoadOnStart)`、`OnUnregister()`、`OnInit()`、`OnInitGui()`、`OnExit()`。**一个程序集中只能有一个类实现它。** — 反射 + XML。
-- 生命周期：`OnRegister` 在第一次选择该插件时调用一次；`OnInit` 在启动时加载时调用；`OnInitGui` 在界面初始化完成后调用，并且只在 `bLoadOnStart = true` 时才会调用；`OnExit` 在退出时调用。`bLoadOnStart = false` 时，插件在其 action 第一次被调用时才延迟加载，`OnInitGui` 不会被调用。— XML。
-- 插件会被影子复制到 `%APPDATA%\EPLAN\ShadowCopyAssemblies\`，所以 EPLAN 运行期间可以重新编译原始 DLL。可选接口 `IEplAddInShadowCopy.OnBeforeInit(string originalPath)` 会传入原始路径。— `2026/ShadowCopyingAPIAssemblies.html`。
-  - 2026 的 `Eplan.EplApi.AFu.xml`：`OnBeforeInit` 在 `OnInit` 之前调用，传入"注册插件程序集的位置"；它抛出的异常不影响初始化，只记入系统消息。返回类型是 `void`（按 2026 的程序集编译通过）。传入的是 DLL 的完整路径还是所在目录，以及 `/register` 在运行中的会话里加载插件时是否也调用它，都没有核实；Bridge 在握手的 `addinPath` 中原样报告。— 只读查看 XML 文档；编译。
-- 注册方式：
-  - 界面：文件 > 附加 > 接口 > API > 管理；
-  - 命令行：`EPLAN.exe /Variant:"Electric P8" EplApiModuleAction /register:"<dll 全路径>"`，以及 `/unregister:"<程序集标题>"`；
-  - 代码：`EplApplication.ShowApiAddInDialog()`。
-  
-  — `2026/EplApiModuleAction.html`、`2026/CSharpAddins.html`。
-- 注册信息保存在 STATION 设置 `EplanEplApiModule.<模块>.AsmAddIn` 中（`AssemblyPath`、`AssemblyName`、`TypeName`、`LoadOnStart`）。— 本机 `Platform\2026.0.3\Cfg\EplanEplApiModule.xml`。
+日期取自原条目标题；无独立日期时注明继承的上下文。正文与证据在主题文件。
 
-### B3. 自定义 Action
-- `IEplAction`：`bool OnRegister(ref string Name, ref int Ordinal)`、`bool Execute(ActionCallingContext ctx)`、`void GetActionProperties(ref ActionProperties)`。**action 名称中不能含有 `.`**。— 反射 + XML。
-- `ActionCallingContext`（派生自 `Eplan.EplApi.Base.Context`）：通过 `GetParameter(name, ref value)` 读取输入，通过 `AddParameter(name, value)` 输出结果，全部是字符串。`ContextParameterBlock` 可以传递对象，但只限于进程内。— 反射。
-- 进程内调用：`new ActionManager().FindAction(name).Execute(ctx)`，每次调用使用新的 context。— `2026/CallingActions.html`。
+| 编号 | 一行标题 | 日期 | 主题文件 |
+|---|---|---|---|
+| A1 | 环境与进程 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#a1-环境与进程) |
+| A2 | 授权 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#a2-授权eplaneplapiapplicationframeworklicense) |
+| A3 | DataModel 行为 | 2026-10-12（原章节） | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a3-datamodel-行为通过脚本在-scratch-项目上验证) |
+| A4 | 路径变量 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#a4-路径变量) |
+| A5 | 未签名插件与授权 | 2026-10-13 | [environment-and-licensing](api-notes/environment-and-licensing.md#a5-未签名插件与授权spike-s02026-10-13electric-p8-变体) |
+| A6 | 由 MSIX 打包应用启动的进程 | 2026-10-12（原章节） | [clients-and-host](api-notes/clients-and-host.md#a6-由-msix-打包应用启动的进程claude-桌面版) |
+| A7 | 回滚与撤销 | 2026-10-13 | [transactions-and-undo](api-notes/transactions-and-undo.md#a7-回滚与撤销spike-s22026-10-13均在插件-action-中执行) |
+| A8 | 插件程序集的生命周期 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#a8-插件程序集的生命周期) |
+| A9 | 从后台线程调度到 EPLAN 主线程 | 2026-10-13 | [transactions-and-undo](api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13) |
+| A10 | M1 骨架的实机验证 | 2026-10-18 | [environment-and-licensing](api-notes/environment-and-licensing.md#a10-m1-骨架的实机验证2026-10-18) |
+| A11 | 只读 API 的实机验证 | 2026-10-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a11-只读-api-的实机验证spike-s62026-10-19electric-p8在-action-中) |
+| A12 | M2 只读工具的实机验证 | 2026-10-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8) |
+| A13 | 写入 API 的实机验证 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a13-写入-api-的实机验证spike-s92026-10-20eplan-20260325421electric-p8在-action-中) |
+| A14 | 在 Bridge 调度器中写入 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a14-在-bridge-调度器中写入spike-s102026-10-20eplan-20260325421electric-p8) |
+| A15 | 写操作中断 | 2026-10-20 | [transactions-and-undo](api-notes/transactions-and-undo.md#a15-写操作中断spike-s82026-10-20eplan-20260325421electric-p8在调度器中) |
+| A16 | 检查、报表、导出 | 2026-10-20 | [actions](api-notes/actions.md#a16-检查报表导出spike-s112026-10-20eplan-20260325421electric-p8在调度器中) |
+| A17 | M3a 写工具的实机验证 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a17-m3a-写工具的实机验证2026-10-20eplan-20260325421electric-p8) |
+| A18 | 复制、备份、删页、重编号 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a18-复制备份删页重编号spike-s122026-10-20eplan-20260325421electric-p8在调度器中) |
+| A19 | M3b 写工具的实机验证 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a19-m3b-写工具的实机验证2026-10-20eplan-20260325421electric-p8) |
+| A20 | M4 工具的实机验证 | 2026-10-20 | [writes-and-placement](api-notes/writes-and-placement.md#a20-m4-工具的实机验证2026-10-20eplan-20260325421electric-p8) |
+| A21 | Claude Code 客户端的进度与图片 | 2026-10-20 | [clients-and-host](api-notes/clients-and-host.md#a21-claude-code-客户端的进度与图片spike-s132026-10-20claude-code-21299) |
+| A22 | 离线程序 | 2026-10-20 | [environment-and-licensing](api-notes/environment-and-licensing.md#a22-离线程序spike-s152026-10-20eplan-20260325421electric-p8) |
+| A23 | 插件注册 | 2026-10-21 | [environment-and-licensing](api-notes/environment-and-licensing.md#a23-插件注册spike-s142026-10-21eplan-20260325421electric-p8非提升权限) |
+| A24 | 电缆、端子、PLC 的读取与编号 | 2026-10-21 | [plc-and-terminals](api-notes/plc-and-terminals.md#a24-电缆端子plc-的读取与编号spike-s212026-10-21eplan-20260325421electric-p8在调度器中) |
+| A25 | M4c 的导出 | 2026-10-21 | [actions](api-notes/actions.md#a25-m4c-的导出spike-s252026-10-21eplan-20260325421electric-p8在调度器中) |
+| A26 | 不用窗口宏放置单个设备 | 2026-10-21 | [writes-and-placement](api-notes/writes-and-placement.md#a26-不用窗口宏放置单个设备spike-s202026-10-21eplan-20260325421electric-p8在调度器中) |
+| A27 | 部件库与翻译库的只读访问 | 2026-10-21 | [master-data-and-parts](api-notes/master-data-and-parts.md#a27-部件库与翻译库的只读访问spike-s242026-10-21eplan-20260325421electric-p8在调度器中) |
+| A28 | 翻译、项目语言与修订 | 2026-10-21 | [actions](api-notes/actions.md#a28-翻译项目语言与修订spike-s232026-10-21eplan-20260325421electric-p8在调度器中) |
+| A29 | 导入 | 2026-10-21 | [actions](api-notes/actions.md#a29-导入spike-s222026-10-21eplan-20260325421electric-p8在调度器中) |
+| A30 | 主数据的备份、还原与部件库写入 | 2026-10-21 | [master-data-and-parts](api-notes/master-data-and-parts.md#a30-主数据的备份还原与部件库写入spike-s24-写入部分2026-10-21eplan-20260325421electric-p8在调度器中) |
+| A31 | 新建项目、还原项目、判断项目版本 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a31-新建项目还原项目判断项目版本spike-s272026-10-21eplan-20260325421electric-p8在调度器中) |
+| A32 | 对象标识与整个项目的读取耗时 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a32-对象标识与整个项目的读取耗时spike-s282026-10-21eplan-20260325421electric-p8在调度器中) |
+| A33 | 占位符对象与值集 | 2026-10-21 | [writes-and-placement](api-notes/writes-and-placement.md#a33-占位符对象与值集spike-s292026-10-21eplan-20260325421electric-p8在调度器中) |
+| A34 | 对象编号与项目生命周期 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a34-对象编号与项目生命周期spike-s302026-10-21eplan-20260325421electric-p8在调度器中) |
+| A35 | 工程包涉及的文件 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a35-工程包涉及的文件2026-10-21只读查看开发机上-eplan-202603-的数据目录和-scratch-中的-spike-文件不启动-eplan) |
+| A36 | 快照提取：耗时、内存、确定性与修改标记 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a36-快照提取耗时内存确定性与修改标记spike-s312026-10-21eplan-20260325421electric-p8在调度器中) |
+| A37 | 模块写回为宏、新建占位符、授权选项 | 2026-10-21 | [writes-and-placement](api-notes/writes-and-placement.md#a37-模块写回为宏新建占位符授权选项spike-s322026-10-21eplan-20260325421electric-p8在调度器中) |
+| A38 | EPLAN 事件 | 2026-10-21 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a38-eplan-事件spike-s332026-10-21eplan-20260325421electric-p8在调度器中) |
+| A39 | M4c 剩余工具用到的 action | 2026-10-22 | [actions](api-notes/actions.md#a39-m4c-剩余工具用到的-actionspike-s342026-10-22eplan-20260325421electric-p8在调度器中) |
+| A40 | 长尾 action 的首批白名单 | 2026-10-22 | [actions](api-notes/actions.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中) |
+| A41 | 提交后的撤销粒度、备份副作用、宏读句柄 | 2026-10-23 | [transactions-and-undo](api-notes/transactions-and-undo.md#a41-提交后的撤销粒度备份副作用宏读句柄spike-s35-第-1-部分2026-10-23eplan-20260325421electric-p8经-host-的真实工具) |
+| A42 | 通用 Project/Page 属性读取 | 2026-10-25 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a42-通用-projectpage-属性读取p3b2026-10-25) |
+| A43 | 用 Page.CopyTo 放大示例项目、全项目名称枚举的规模 | 2026-10-25 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a43-用-pagecopyto-放大示例项目全项目名称枚举的规模spike-s372026-10-25eplan-20260325421electric-p8在调度器中) |
+| A44 | 通用 Function/Connection 属性读取 | 2026-10-25 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a44-通用-functionconnection-属性读取p42026-10-25eplan-20260325421electric-p8只读-sample-fixture) |
+| A45 | 设备改名的连带变化 | 2026-10-25 | [writes-and-placement](api-notes/writes-and-placement.md#a45-设备改名的连带变化lp-92026-10-25eplan-20260325421electric-p8largewrite-scratch-副本) |
+| A46 | 项目打开、当前选择与导航器顺序 | 2026-10-25 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a46-项目打开当前选择与导航器顺序p252026-10-25eplan-20260325421electric-p8) |
+| A47 | 翻译库导入 `Translate.ImportDatabaseTexts` | 2026-10-26 | [master-data-and-parts](api-notes/master-data-and-parts.md#a47-翻译库导入-translateimportdatabasetextss24-r192026-10-26eplan-20260325421electric-p8项目负责人指示在正在用的翻译库上执行) |
+| A48 | FUNC_TECHNICAL_CHARACTERISTIC 20027 的运行时类型 | 2026-10-26 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a48-func_technical_characteristic-20027-的运行时类型s39-r12026-10-26eplan-20260325421electric-p8只读-sample-夹具) |
+| A49 | 页面文字、标题栏与图框 | 2026-10-26 | [drawing-and-layout](api-notes/drawing-and-layout.md#a49-页面文字标题栏与图框s38-r32026-10-26eplan-20260325421electric-p8只打开-scratch-示例副本) |
+| A50 | action 白名单第 2 批的回滚验证 | 2026-10-26 | [actions](api-notes/actions.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上) |
+| A51 | 插入宏并应用占位符值集的提交、撤销与回滚 | 2026-10-27 | [writes-and-placement](api-notes/writes-and-placement.md#a51-插入宏并应用占位符值集的提交撤销与回滚spike-s36-第-1-部分2026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A52 | 连接符号、自动连线与生成连接 | 2026-10-27 | [drawing-and-layout](api-notes/drawing-and-layout.md#a52-连接符号自动连线与生成连接spike-s402026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A53 | 无部件符号与标识显示 | 2026-10-27 | [drawing-and-layout](api-notes/drawing-and-layout.md#a53-无部件符号与标识显示spike-s412026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A54 | 文字、图形、移动与打开页 | 2026-10-27 | [drawing-and-layout](api-notes/drawing-and-layout.md#a54-文字图形移动与打开页spike-s422026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A55 | 中断点、端子、触点代号、电缆芯线、PLC 连接点与位置盒 | 2026-10-27 | [drawing-and-layout](api-notes/drawing-and-layout.md#a55-中断点端子触点代号电缆芯线plc-连接点与位置盒spike-s432026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A56 | 模块引用闭包与写回宏 | 2026-10-27 | [writes-and-placement](api-notes/writes-and-placement.md#a56-模块引用闭包与写回宏spike-s36-第-2-部分2026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A57 | 函数的属性放置是 ContextPropertyPlacement | 2026-10-27 | [drawing-and-layout](api-notes/drawing-and-layout.md#a57-函数的属性放置是-contextpropertyplacementm8-t2b-实机2026-10-27eplan-20260325421electric-p8只在-scratch-副本上) |
+| A60 | 通用对象读取的类型与属性入口 | 2026-10-30 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a60-通用对象读取的类型与属性入口2026-10-30核对-2026-官方-api-文档及本机-xml不运行-eplan) |
+| A61 | 界面 action 的试执行 | 2026-10-31 | [actions](api-notes/actions.md#a61-界面-action-的试执行c2-eplan_action_try2026-10-31eplan-20260325421electric-p8只在-scratch-副本-largewrite-上) |
+| A62 | 通用对象读取的实机结果 | 2026-10-31 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#a62-通用对象读取的实机结果c1-第四片2026-10-31eplan-20260325421electric-p8只读-scratch-副本-largewrite) |
+| A63 | 服务类方法的试执行 | 2026-10-31 | [actions](api-notes/actions.md#a63-服务类方法的试执行c1-第五片2026-10-31eplan-20260325421electric-p8只在-scratch-副本-largewrite-上) |
+| A64 | 电缆经过星形母线节点时的芯线分配 | 2026-10-31 | [drawing-and-layout](api-notes/drawing-and-layout.md#a64-电缆经过星形母线节点时的芯线分配d1-实验2026-10-31eplan-20260325421electric-p8只在-scratch-副本-largewrite-的新页上) |
+| A65 | 同名中断点的配对 | 2026-10-31（同 A64） | [drawing-and-layout](api-notes/drawing-and-layout.md#a65-同名中断点的配对d2-实验同上) |
+| A66 | 静态与 via 试执行的预算失败 | 2026-11-01 | [actions](api-notes/actions.md#a66-静态与-via-试执行的预算失败2026-11-01eplan-20260325421electric-p8largewrite-scratch-副本串行) |
+| B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |
+| B2 | 插件 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b2-插件add-in) |
+| B3 | 自定义 Action | 2026-10-12（原章节） | [actions](api-notes/actions.md#b3-自定义-action) |
+| B4 | Remote Client | 2026-10-12（原章节） | [clients-and-host](api-notes/clients-and-host.md#b4-remote-clienteplaneplapiremoteclientudll) |
+| B5 | 离线程序 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b5-离线程序无界面) |
+| B6 | 线程 | 2026-10-12（原章节） | [transactions-and-undo](api-notes/transactions-and-undo.md#b6-线程) |
+| B7 | 事务、锁定、撤销、静默模式 | 2026-10-12（原章节） | [transactions-and-undo](api-notes/transactions-and-undo.md#b7-事务锁定撤销静默模式eplaneplapidatamodel除非另行注明) |
+| B8 | 授权 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b8-授权) |
+| B9 | 导出与导出方案 | 2026-10-20 | [actions](api-notes/actions.md#b9-导出与导出方案heservicesexportbaseschemesetting2026-10-20) |
+| B10 | 端子、电缆、线号的编号与项目方案 | 2026-10-21 | [plc-and-terminals](api-notes/plc-and-terminals.md#b10-端子电缆线号的编号与项目方案heservicesdatamodelprojectschemesetting2026-10-21) |
+| B11 | 选择集签名与实机读回 | 2026-10-31、2026-11-01 | [reads-and-snapshots](api-notes/reads-and-snapshots.md#b11-选择集签名与实机读回2026-10-31-目录xml-核对2026-11-01-large-日志) |
+| C | MCP 客户端与 C# SDK | 2026-10-13 | [clients-and-host](api-notes/clients-and-host.md#c-mcp-客户端与-c-sdkspike-s42026-10-13) |
+| D5 | 离线实现说明 | 2026-10-31 | [drawing-and-layout](api-notes/drawing-and-layout.md#d5-离线实现说明2026-10-31未运行-eplan) |
 
-### B4. Remote Client（`Eplan.EplApi.RemoteClientu.dll`）
-- `EplanRemoteClient` 的主要成员：`Connect(host, port[, TimeSpan])`、`Ping()`、`ExecuteAction(string)`、`ExecuteAction(string, ref Eplan.EplApi.Remoting.CallingContext)`、`StartEplan(...)`、`StopEplan()`、`GetActiveEplanServersOnLocalMachine(...)`、`SelectEplanObjects(...)`、`LockAllEplanObjects`/`UnlockAllEplanObjects`、`DisableSynchronizingCalls(bool)`，以及属性 `SynchronousMode`。— 反射。
-- **只有在 `SynchronousMode = true` 时才能读回返回值**（默认是异步，没有返回值）。返回值都会被转换为字符串；输出键如果在调用前已存在于字典中，就不会被覆盖，所以输出要使用不同的键名。— XML + IL 分析。
-- **远程调用只在 EPLAN 空闲且没有 action 正在运行时才执行**，可以用 `DisableSynchronizingCalls(true)` 关闭这项同步。— XML。
-- 传输层是旧版 C-core gRPC（`Grpc.Core`），使用 `ChannelCredentials.Insecure`（没有 TLS），附带一个双工回调流。客户端进程还需要 `System.Memory` 和 `System.Runtime.CompilerServices.Unsafe`，这两个 Bin 里都没有。— 反射 + IL。
-- 服务器端：需要开启"允许通过 Remote Client 进行远程访问"（`STATION.Remoting.AllowLocalAccess`）；EPLAN 不能以 `/NoRemoting` 启动；默认端口 49152，可以用 `/EplanServerPort` 指定（49152–65535）。— `2026/EPLANRemoting.html`。
-- 远程调用 `ExecuteScript` 时，即使脚本编译失败也会返回成功（见 A1）。
-- 客户端（net481 x64）引用 EPLAN Bin 中的 `RemoteClientu`、`Remotingu`、`Grpc.Core.Api`、`Newtonsoft.Json`，另加 NuGet 包 `System.Memory` 4.5.5（带来 `Unsafe` 等）即可运行。**gRPC 会使用 `HTTP_PROXY` 等代理环境变量**，设置了代理时要在客户端进程内清除，否则连不上本机的 EPLAN。— spike S9 驱动。
-- 通过 `ExecuteAction` 传给 action 的参数中，**含中文的路径没有完整传到**（action 报文件不存在）；ASCII 路径正常。— spike S9。
+## 新条目
 
-### B5. 离线程序（无界面）
-- `Eplan.EplApi.System.EplApplication`（Systemu）：`Init(appModifier[, allowLicenseDlg[, allowLoginDlg]])`、`Exit()`，以及属性 `EplanBinFolder`、`LicenseFile`、`QuietMode`、`StartEplanRemoteServer`（必须在 `Init` 之前设置）。— 反射。
-- `Eplan.EplApi.Starteru.dll` 提供 `AssemblyResolver`（`SetEplanBinPath` 等）、`EplanFinder.SelectEplanVersion`、`EplanSignedAssemblyAttribute`。— 反射。
-- 要求：x64 进程；目标 .NET Framework 4.8.1；**必须是 STA 线程**（`[STAThread]`）；`Exit()` 只能在主线程调用一次，之后不能再次 `Init`；使用 DataModel 前要创建 `LockingStep`。— XML、`2026/UsingEplanAssemblies.html`。
-- `Init` 之后，除了会显示界面的功能（模态对话框、停靠窗口、MDI 窗口）以外，**所有 API 功能都可以使用**。— XML。
-- `ProjectManager.OpenProject(链接文件, OpenMode)`：XML 没有列出 `OpenMode` 的成员，反射得到 `Standard`=0、`ReadOnly`=1、`Exclusive`=3。离线宿主用 `ReadOnly` 打开完成的修订（`.elr`），修订中的项目（`.ell`）照常打开；能否打开这两种链接文件，待 Large 测试确认。— 反射（2026-10-21）。
-
-### B6. 线程
-- **只能在 EPLAN 主线程上调用 API。** 官方说明："Executing API code purely out of main Eplan thread is not recommended… not tested and are out of support." — XML（`EplanMainThreadDispatcher`）。
-- 官方提供 `Eplan.EplApi.Base.Internal.EplanMainThreadDispatcher`（Baseu）：`ExecuteInMainThreadSync(...)`、`ExecuteInMainThreadAsync(...)`、`CanAccessMainThread()`，以及静态方法 `SetMainThreadDispatcher(System.Windows.Threading.Dispatcher)`、`GetMainThreadDispatcher()`。没有设置调度器时调用会抛异常。— 反射 + XML。
-  - 未验证：EPLAN 的 GUI 进程是否已自动设置该调度器。M1 spike 验证。
-  - 注意：这个类型位于 `Internal` 命名空间，但有官方文档。使用时封装在适配层中，以便日后替换。
-- `LockingStep`：明确不支持多线程。— XML。
-
-### B7. 事务、锁定、撤销、静默模式（`Eplan.EplApi.DataModel`，除非另行注明）
-- `SafetyPoint`：静态 `Create()`，以及 `Start()`、`Commit()`、`Rollback()`、`Dispose()`。存在期间自动锁定对象；**不调用 `Commit` 就会回滚**；提交时释放锁。— 反射 + `2026/Locking.html`。
-  - 实测（spike S2，在 action 中）：不提交即回滚**成立**，`Rollback()`、`Start()` 后释放、中途抛异常也都能回滚，修改已有属性同样会恢复。**例外：如果 `UndoStep` 在 SafetyPoint 外面创建，回滚会静默失效**（即使显式调用 `Rollback()`）。S0 中观察到的"不回滚"正是这个原因。详见 A7。
-- `LockingStep`：释放其生存期内获得的锁，可以嵌套。在非模态对话框、离线程序和校验中**必须显式创建**；action 内部会隐式创建一个。— XML。
-  - 对本项目的影响：Bridge 通过调度器执行的代码**不在 action 内**，所以必须自己创建 `LockingStep`。
-- 缺少 `LockingStep` 时抛出 `NoLockingStepException`（派生自 `DataModelException`）。`Project.LockAllObjects()`、`StorableObject.LockObject()` / `SmartLock()`；锁定失败时抛出 `Eplan.EplApi.Base.LockingException`，其 `GetAllFailed2LockAsString()` 列出锁定失败的对象。— 反射 + XML。
-- **撤销**：`UndoManager.CreateUndoStep()` 返回 `UndoStep`（`SetUndoDescription(string)`、`CloseUndo()`、`DoUndo(...)`）。**如果通过 API 修改项目时没有创建 `UndoStep`，EPLAN 会清空撤销历史。** — 反射 + XML。
-  - 对本项目的影响：每个写操作都必须创建并关闭 `UndoStep`，否则工程师会失去手工操作的撤销历史。
-- `TransactionManager.CreateTransaction()` 返回 `Transaction`（`Commit`、`Abort`、`Store`）。— 反射。与 `SafetyPoint` 的分工见 A7、A13（S9：插入宏只有 `SafetyPoint` 能撤回，按符号新建功能只能用 `Transaction`）。
-- `QuietModeStep(QuietModes)`（AFu）配合 `using` 使用。`QuietModes`：`ShowAllDialogs=0`、`ShowNoDialogs=1`、`ShowSomeDialogs=2`。— 反射。
-
-### B8. 授权
-- **脚本**：不需要 API 授权即可运行，但只能使用 Base、ApplicationFramework/Scripting、Gui、MasterData；引用其他程序集（例如 DataModel）需要 **API 扩展授权**（`LicenseOptions.APIExtension = 725`）。— `2026/Scripts.html`。
-- **编译的 API 程序（插件、离线程序）**有两种授权方式：
-  - **开发者授权**：只能加载**未签名**的程序，"normally has a limitation of a maximum size of Eplan projects to 5 pages"（通常把项目大小限制在 5 页以内），只用于开发和测试；
-  - **运行时授权**：只能加载**已签名**的程序。签名流程：在程序集上标注 `EplanSignedAssemblyAttribute`，用 EPLAN 提供的公钥延迟签名，然后上传到 Eplan Cloud 的 **EADN Signing** 服务完成签名（需要 EADN Signing 的 User 角色，自动签名还需要个人访问令牌）。客户"通过开发者"获得该程序的运行时授权。
-  
-  — `2026/Signing_EPLAN_assembies.html`。
-- 运行时由 `Base.Internal.LicenseChecker` 检查调用栈，缺少授权时报告 "API License missing"。— XML。
-- Remote Client：没有找到官方的授权说明；客户端 DLL 不引用 Baseu，不做客户端授权检查。— 未验证。
-- **已验证（spike S0）**：在开发机的授权下，未签名的插件可以加载，并能读写 321 页的项目（A5）。其他授权类型仍然未知。
-
-### B9. 导出与导出方案（`HEServices.Export`、`Base.SchemeSetting`，2026-10-20）
-导出工具依赖的文档说明；实测结果见 A14、A16。
-- `Export.PdfPages(ArrayList, 方案, 文件名, DegreeOfColor, 3D 模型, 语言, 打印边距)`：方案为空串时用界面上次使用的方案（`USER.PDFExportGUI.SCHEMAS`）；文件名带路径时覆盖方案中的目录，目录不存在时新建；没有扩展名时补上。`DegreeOfColor` 为 `Color`、`GreyLevel`、`BlackAndWhite`。— XML，枚举名经编译确认。
-- `Export.DxfDwgPagesToDisk(Page[], 方案, 目录, 语言)`：方案在 `USER.DXF.SCHEMES`，空串用上次使用的，名称不存在时抛 `BaseException`；方案可以按页树或页属性建子目录；语言非空时先把项目翻译成该语言。— XML。
-- `Export.GraphicPage(Page, 目录, Format, 色深, 宽度, Compression, 黑白)`：目录不存在时新建；PNG、JPG 可用色深 24；压缩只影响 TIF；高度按页的比例计算；不能导出外部文档页。— XML。
-- `SchemeSetting`：`Init(节点)`；`CheckIfSchemeExists(名称)`；`GetCount()`、`SetScheme(序号)`（不改"上次使用"）、`GetName()`（与语言无关的内部名称）；`GetLastUsed()`；`SetLastUsed(名称)`，空串抛 `ArgumentException`，名称无效抛 `BaseException`。— XML。
-- `Export`、`SchemeSetting` 都实现 `IDisposable`。— 编译（CA2000）、XML。
-- `SchemeSetting.GetStringSetting(路径, 序号)` 的路径相对于当前方案（XML：从方案名之后开始），设置不存在时抛 `BaseException`。— XML。
-  - 🔴 实测（2026-10-21，第一次 Large 测试，EPLAN 2026.0.3）：标签方案（`USER.Labelling.Config`）的相对路径**从方案的 `Data` 节点算起**，不是从方案名之后：`SetScheme` 之后 `GetStringSetting("Data.File.Format", 0)` 抛 `BaseException`，消息中的路径是 `USER.Labelling.Config.<方案>.Data<.Data.File.Format`；`GetStringSetting("File.Format", 0)` 能读到。不经 `SchemeSetting`、用完整路径 `new Settings().GetStringSetting("USER.Labelling.Config.<方案>.Data.File.Format", 0)` 也能读到。— 实机。
-- 标签方案（`USER.Labelling.Config`）：EPLAN 自带的方案（`Device tag list`、`Summarized parts list`、`Terminal diagram`、`Cable diagram`、`PCT-Loops`、`SmartWiring`）的输出格式在方案下的 `Data.File.Format`，值是转换器名：`XmlLblTextExportConverterImpl`（前两个）或 `XmlLblExcelExportConverterImpl`（其余）；平台还登记了 `XmlLblXmlExportConverterImpl`。目标文件在 `Data.File.Destination`（如 `$(MD_DOCUMENTS)\BM-Liste.txt`），Excel 方案的模板在 `Data.File.Template`（`.xlsx`）。同一节点下还有 EPLAN 内部的方案 `InternalRefDefScheme`，也是"上次使用"的缺省值。— 只读查看 `Platform\2026.0.3\Cfg\LabelLog.xml`、`LabelLog_User_Config_*.xml`、`regPlatform.xml`（2026-10-21）。
-  - 实测读出的格式（2026-10-21，第一次 Large 测试，按上面相对 `Data` 的路径）：`Device tag list`、`Summarized parts list` 为 `XmlLblTextExportConverterImpl`；`Cable diagram`、`PCT-Loops`、`Rittal Length cutting C8+`、`SmartWiring` 为 `XmlLblExcelExportConverterImpl`。`Terminal diagram` 没有在这次读出的方案中，S25 中它导出的是 xlsx。— 实机。
-- 项目的翻译语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（索引 0，分号分隔，如 `en_US;de_DE`）。— CommandLineActions XML 中 `projectsettings` 动作的示例；S25 用 `ProjectSettings.GetStringSetting` 读出示例项目的 20 种（A25）。`Translate.ExportMissingTranslation` 要求每种语言都已是项目的翻译语言。— XML。
-- `Label.DoLabel(project, 方案, 语言, 目标文件, 1, 1)`：目标文件的扩展名要与方案的配置一致，应为 `.txt`、`.xls`、`.xlsx` 或 `.xml`，否则换成 `.txt`；`.xls` 需要 Excel；目标为空时用方案中的目标；带 `bShowOutput` 的重载会打开输出文件。— XML。
-
-### B10. 端子、电缆、线号的编号与项目方案（`HEServices`、`DataModel.ProjectSchemeSetting`，2026-10-21）
-M4c 编号工具依赖的文档说明；实测结果见 A24（S21 只用了空方案、`All` 和"不只编带 ? 的"），其余由 Large 测试确认。
-- `ProjectSchemeSetting.Init(节点, Project)`：用项目设置的节点初始化（XML 的例子为 `CableLog.CableAutoSelectionScheme`），节点不是该项目的方案时抛 `BaseException`。它继承 `SchemeSetting`，`GetCount`、`SetScheme(序号)`、`GetName` 可用，实现 `IDisposable`。— XML、编译。
-- `Renumber.Terminals(Function[], TerminalsSequence, Extent, …, 方案, 起始值, 步长, 前缀, 后缀, 允许改变排序, 填补空号, 只编带 ? 的, 连带 PLC 控制的)`：`Extent.AllSelectedTerminalStrips` 编号给出的端子所在端子排的全部端子，`Extent.Selected` 只编给出的端子；前缀、后缀只在方案为"按在线编号格式"时有用；方案名不存在时抛 `InvalidScheme`。"只编带 ? 的"按 XML 只编名称中带 `?` 的端子，实际上挡不住已编号的端子（A24，2026-10-21）。— XML，枚举名经编译确认。
-- `CableService.RenumberCables(Function[], 方案, 保留旧名, 保留标识符, 起始值, 步长)`：参数可以是电缆和屏蔽；"保留旧名"为 true 时已有的标识不变，只给标识中带 `?` 的电缆编号；方案名不存在时 XML 一处写抛 `InvalidScheme`、一处写抛 `ArgumentException`。— XML。
-- `ConnectionService.DesignateConnections(Project, 方案, DesignateOverwrition, 标为手工, 先生成连接)`：`None` 从不覆盖、`ExceptManuals` 覆盖标为"手工设定"之外的、`All` 全部覆盖；与界面不同，只有"先生成连接"为 true 时才先更新连接；方案名不存在时抛 `InvalidScheme`（备注中写 `ArgumentException`）。— XML。
-- `Renumber`、`CableService`、`ConnectionService` 都实现 `IDisposable`。— XML、编译。
-
----
-
-## C. MCP 客户端与 C# SDK（spike S4，2026-10-13）
-
-> 不属于 EPLAN API，但同样是"代码依赖的外部行为"，按同样的规则记录。环境：ModelContextProtocol 2.2.0，Claude Code 2.1.295。
-
-- **Claude Code 2.1.295 使用 MCP 2026-07-28**：连接时先发 `server/discover`（id `server-discover-probe-1`），每个请求的 `params._meta` 中都带 `io.modelcontextprotocol/protocolVersion: "2026-07-28"`、`clientInfo`（`name: "claude-code"`）和 `clientCapabilities: {"roots": {"listChanged": true}, "elicitation": {"form": {}, "url": {}}}`；随后用 `subscriptions/listen` 订阅 `toolsListChanged`。— [spike S4](../../spikes/S4-elicitation/README.md) 的报文记录。
-- **SDK 2.x 中，工具抛出 `InputRequiredException` 即可发起 elicitation**，两种协议都适用：2026-07-28 下返回 `resultType: "input_required"`（`inputRequests` + `requestState`），客户端用新的 id 重发 `tools/call` 并带回 `inputResponses` 和原样的 `requestState`；2025-11-25（stdio）下 SDK 改为向客户端发送 `elicitation/create` 请求，拿到回答后**重新调用同一个工具处理器**，`RequestContext.Params.InputResponses` 和 `RequestState` 同样有值。— S4 selftest（10 个场景）+ 报文核对。
-- `McpServer.IsMrtrSupported` 在 2026-07-28 下、以及 stdio 上的 2025-11-25 会话中都为 true；客户端没有声明 elicitation 时 `McpServer.ClientCapabilities.Elicitation` 为 null。规范禁止向未声明的客户端发送 `elicitation/create`，因此两者都要检查。— S4 + [MRTR 规范](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr)。
-- `McpServer.ElicitAsync` 在无状态模式下抛出 `InvalidOperationException`，只适用于旧协议的有状态会话；Host 不使用它。— SDK 文档 `docs/concepts/elicitation`。
-- SDK **不按 `inputSchema` 校验 `tools/call` 的参数**：即使 schema 中有 `additionalProperties: false`，拼错的参数（如 `limt`）也被静默忽略，工具按默认值执行。Host 用 `tools/call` 请求过滤器统一拒绝未知参数。— M1 骨架的 stdio 端到端测试（2026-10-13）。
-- SDK 由 `[McpServerTool]` 生成的 `inputSchema` **不含 `additionalProperties: false`**；在特性中显式设置的 `Title`、`ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld` 都出现在 `tools/list` 的 `annotations` 中（`title` 同时出现在工具顶层）。— S4 报文。
-- 参数上的 DataAnnotations 特性会写进 `inputSchema`：`[AllowedValues]` 生成 `enum`，`[Range]` 生成 `minimum` / `maximum`；SDK 不校验 `enum`：不在其中的值照样传给工具方法（`minimum` / `maximum` 未单独验证）。— 2026-10-19 核对 `tools/list`，以及 `eplan_tool_usage` 的 stdio 端到端测试。
-- 缺少必填参数（方法参数没有默认值，schema 中列在 `required`）时，工具方法不会被调用，SDK 返回 `isError: true` 和通用文字 "An error occurred invoking '<工具名>'."，**没有 reason，也不说缺了哪个参数**。可选参数显式传 `null` 时，方法收到 `null`。— 2026-10-19 stdio 端到端实测（`eplan_tool_usage`）。
-  - 对本项目的影响：Host 的参数过滤器（`UnknownArgumentFilter`）在调用工具之前检查 schema 中的 `required`，缺少或为 `null` 时与未知参数一起报告为 `INVALID_ARGUMENT`，请求不会到达 SDK 的这段逻辑。
-- Claude 桌面版自带的 Claude Code 可执行文件在无界面模式（`claude -p`）下单独运行时没有登录态（"Not logged in"），但在报错前已经完成 MCP 服务器的连接和 `tools/list`。— S4。
-- 这个 `claude.exe` 在桌面版的进程中看到的位置是 `%APPDATA%\Claude\claude-code\<版本>\<构建>\claude.exe`，**包外的进程（例如用户自己打开的终端）在那里找不到它**：实际位置是包的重定向目录 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude-code\…`（A6）。登录（`claude auth login`）只需做一次，两边共享登录态。— 2026-10-19 实测（Claude Code 2.1.299，登录后 `auth status` 为 `loggedIn: true`、`authMethod: claude.ai`）。
-
-### Claude Code 无界面模式（Agent 评测的驱动方式，2026-10-19，Claude Code 2.1.299，未登录）
-- **`--bare` 不读取登录态**（OAuth 和系统钥匙串），只接受 `ANTHROPIC_API_KEY` 或 `apiKeyHelper`。— [无界面模式文档](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode)。
-- `--max-turns` 可用，但 `claude --help` 不列出它（"`--help` does not list every flag"）。— [CLI 参考](https://code.claude.com/docs/en/cli-reference)。
-- `claude -p --restricted --tools "" --disable-slash-commands --strict-mcp-config --mcp-config <只含 eplanmcp>` 的 `system/init` 事件中：`tools` 只有 `mcp__eplan__*`，`slash_commands` 和 `skills` 为空，`mcp_servers` 为 `[{"name": "eplan", "status": "connected", "source": "dynamic"}]`；调试日志（`--debug-file`）记录 "project memory is off"，且不读取工作目录的 `.claude/settings.local.json`（不加 `--restricted` 时会读）。`plugins` 中仍有 3 个内置插件（`cc-plugin-agents-md` 等），不带技能。加上 `--json-schema` 后 `tools` 多出内置的 `StructuredOutput`：模型通过它提交结构化答案，统计工具调用时不能算它。上面这组开关加 `--allowedTools mcp__eplan`、`--permission-mode dontAsk`、`--permission-prompts none`、`--max-turns` 都被接受，以 `-` 开头的提示从标准输入传入也不会被当成开关。— 实测，工作目录分别在仓库内外。
-- 评测运行器（`ClaudeRunner`，用 `ProcessStartInfo.ArgumentList` 传参，空字符串作为 `--tools` 的值）以同样的参数启动 claude 2.1.299，`system/init` 与上一条相同（`StructuredOutput` 加 eplanmcp 的工具，`skills` 和 `slash_commands` 为空，`permissionMode: dontAsk`），stderr 为空。— 2026-10-19 实测（未登录）。
-- 未登录时，stream-json 依次输出 `system/init`、一条 `assistant` 消息（`error: "authentication_failed"`、`is_api_error_message: true`、文字 "Not logged in · Please run /login"）和 `result` 事件，退出码 1。**`result` 的 `subtype` 仍是 `"success"`**，失败要看 `is_error: true` 和 `terminal_reason: "api_error"`；`total_cost_usd` 为 0，`usage` 含 `input_tokens`、`output_tokens`、`cache_read_input_tokens`、`cache_creation_input_tokens`。— 实测。
-- **第一次真实运行确认的 stream-json 格式**（2026-10-19，Claude Code 2.1.299，`claude-sonnet-5-5`，已登录 Max 套餐）：
-  - 工具调用是 `assistant` 消息 `message.content` 中的 `{"type": "tool_use", "id": "toolu_…", "name": "mcp__eplan__eplan_project_get", "input": {…}}`；工具结果是 `user` 消息中的 `{"type": "tool_result", "tool_use_id": "toolu_…", "content": "<文本>"}`，成功时没有 `is_error` 字段，`content` 是字符串。两者的 `parent_tool_use_id` 都是 null。
-  - 结构化答案：模型常先用文字作答，Claude Code 随后插入一条合成的 `user` 消息（`isSynthetic: true`，文字为 "[structured-output-enforce] You MUST call the StructuredOutput tool…"），模型再调用 `StructuredOutput`，其 `input` 就是答案；`result` 事件的 `structured_output` 与之相同。所以 1 次工具调用的题目 `num_turns` 为 4。
-  - 还会出现 `rate_limit_event` 和 `system`/`post_turn_summary` 两种事件，与答题无关。
-  - 提示从标准输入传入时被当作题目读入（模型回答了"项目一共有 321 页"）。
-  - `total_cost_usd` 在套餐登录时也会给出（客户端估算）；一道 1 次调用的题约 0.01–0.05 美元，输入 token 中位数约 2.4 万（几乎全部是缓存读取）。
-  - — 实测（`.local/evals/` 中的轨迹，不提交）。
-
-### Claude Code 插件与桌面版配置（spike S17，2026-10-20，Claude Code 2.1.299，隔离的配置目录，未登录）
-详细数据见 [spike S17](../../spikes/S17-client-plugin/README.md)。
-- `CLAUDE_CONFIG_DIR` 把 `.claude.json`、`settings.json`、`plugins\` 都放到指定目录，`auth status` 报告这个目录；真实的 `~\.claude*` 不变。— S17。
-- 本地目录形式的插件市场：`plugin marketplace add`、`plugin install` 不需要登录，网络不可达时也成功。市场不复制；install 在 `plugins\cache\<市场>\<插件>\<版本>\` 中复制一份插件，但从源目录加载（`plugin list` 的 "Read from"、`${CLAUDE_PLUGIN_ROOT}` 都指向源目录，改写源目录的 `.mcp.json` 后下一个进程就用新内容）。源目录不在时插件 `failed to load … cache-miss`，不会退回到缓存。`marketplace remove` 同时卸载插件，缓存副本留下并标记 `.orphaned_at`。— S17。
-- 插件 `.mcp.json` 的 `command`、`args`、`env` 中 `${VAR}` 和 `${VAR:-默认值}` 都会展开，包括 `${USERPROFILE}`、`${CLAUDE_PLUGIN_ROOT}`（Windows 上用正斜杠）和任意环境变量；`%VAR%` 不展开。未设置又没有默认值的变量原样保留，`mcp list` 不给出警告。插件的 stdio 服务器继承命令行进程的环境。— S17。
-- 两个插件服务器的命令行相同时，只启动一个（文档：插件按端点判断重复，本地、项目、用户范围的定义优先）。`mcp get` 隐藏插件服务器的命令、参数和环境变量。— S17。
-- `marketplace add` 能展开 `~/…`，不能展开 `%USERPROFILE%\…`（报 "Invalid marketplace source format"）。— S17。
-- 桌面版（MSIX，`Claude_pzs8sxrjxfjjc`）的 `claude_desktop_config.json` 只在 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\` 中。包外的进程看不到 `%APPDATA%\Claude\`；包内的进程看到的 `%APPDATA%\Claude\claude_desktop_config.json` 与包目录中的是同一个文件（文件 ID 相同）。桌面版运行时每隔几十秒就会改写它。— S17、A6。
-
-### Streamable HTTP 与 Claude Code 远程客户端（spike S19，2026-10-21，ModelContextProtocol.AspNetCore 2.2.0，Claude Code 2.1.299，只在 127.0.0.1 上）
-详细数据见 [spike S19](../../spikes/S19-vm-http/README.md)。
-- **`HttpServerTransportOptions.SessionMode` 默认是 `Stateless`**：没有 `Mcp-Session-Id`，每个请求一个新的服务器对象，`initialize` 中的客户端名称在后续请求中取不到，按会话保存的状态无处可放。`Stateful` 对 2026-07-28 的请求回 -32022；`StatefulForInitializeClients` 只给用 `initialize` 的客户端会话。— SDK 的 XML 文档 + S19 探测。
-- HTTP 方式下**根服务容器中没有 `McpServer`**（三种模式都是），单例中 `GetService<McpServer>()` 为 null；stdio 方式下有，2025-11-25 和 2026-07-28 两种客户端的名称都能取到。— S19。
-- `ConfigureSessionOptions` 在 Stateful 模式下每个会话调用一次，这时来源地址和响应头中新生成的 `Mcp-Session-Id` 都可用；SDK 不把会话绑定到来源地址；`IdleTimeout` 默认 2 小时，`MaxIdleSessionCount` 默认 10,000；`RunSessionHandler` 是实验性 API；`EnableLegacySse` 默认关闭（`/sse`、`/message` 回 404）。— S19。
-- 带上 `ModelContextProtocol.AspNetCore` 后，自包含单文件多 26.5 MB；`Microsoft.Extensions.*` 改用 ASP.NET Core 运行时包中的 ReadyToRun 版本；发布目录多一个 Kestrel 用不到的 `aspnetcorev2_inprocess.dll`。— S19。
-- **Claude Code 2.1.299 连接远程 HTTP 服务器时先发 2026-07-28 的 `server/discover`**；服务器回 -32022 时退回 `initialize`（2025-11-25）并带 `Mcp-Session-Id`，再开 `GET /mcp` 的 SSE 流；不发 `Origin`；`User-Agent` 为 `claude-code/2.1.299 (sdk-cli)`；`mcp list`/`mcp get` 每次都新建会话，结束时不发 `DELETE`。— S19 的请求日志。
-- `claude mcp add --transport http --scope user <名称> <URL> --header "Authorization: Bearer …"` 在 `.claude.json` 顶层 `mcpServers` 中写 `{"type":"http","url":…,"headers":{…}}`；`mcp get` 原样打印请求头的值。401 时报 "Server rejected the configured Authorization header (HTTP 401)"，配置了 `Authorization` 就不再尝试 OAuth。请求头中的 `${VAR}` 原样保存、连接时展开，变量不存在时在诊断中警告。— S19。
+在途分支在此追加完整条目；合入后由维护者归档并更新索引。目前无待归档条目。

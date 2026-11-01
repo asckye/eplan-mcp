@@ -56,7 +56,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 | `synchronize/MULTILINE` | Write / 项目 | `PROJECTNAME`、`TYPE=MULTILINE` | `{}`；从多线表示同步项目数据，不同步系统部件库 |
 | `synchronize/OVERVIEW` | Write / 项目 | `PROJECTNAME`、`TYPE=OVERVIEW` | `{}`；从总览表示同步项目数据，不同步系统部件库 |
 
-第 2 批依据 [A50](../eplan/api-notes.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上) / S26 r3 的回滚证据开放这三项候选；产品提交、一次当前项目 `XEsUndoAction` 及早期撤销历史保留，仍须 Large 验证。`synchronize/SINGLELINE` 留在 pending：示例上没有可观察业务效果，需要有表示差异的样本。其余 pending 条目仍不开放。
+第 2 批依据 [A50](../eplan/api-notes/actions.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上) / S26 r3 的回滚证据开放这三项候选；产品提交、一次当前项目 `XEsUndoAction` 及早期撤销历史保留，仍须 Large 验证。`synchronize/SINGLELINE` 留在 pending：示例上没有可观察业务效果，需要有表示差异的样本。其余 pending 条目仍不开放。
 
 ### 2.2 逐条校验
 
@@ -289,6 +289,6 @@ Q1 默认关闭、Q2 不通过移到以后、Q3 按验证主版本、Q4 与任�
 [adr8]: ../adr/0021-action-run-whitelist.md#8-剩下的-57-种用法与首批条目
 [decisions]: ../adr/0021-action-run-whitelist.md#项目负责人的决定
 [s26]: ../../spikes/S26-action-run/README.md#结果
-[a40]: ../eplan/api-notes.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中
-[a50]: ../eplan/api-notes.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上
-[a30]: ../eplan/api-notes.md#a30-主数据的备份还原与部件库写入spike-s24-写入部分2026-10-21eplan-20260325421electric-p8在调度器中
+[a40]: ../eplan/api-notes/actions.md#a40-长尾-action-的首批白名单spike-s262026-10-22eplan-20260325421electric-p8在调度器中
+[a50]: ../eplan/api-notes/actions.md#a50-action-白名单第-2-批的回滚验证spike-s26-r32026-10-26eplan-20260325421electric-p8只在-scratch-副本上
+[a30]: ../eplan/api-notes/master-data-and-parts.md#a30-主数据的备份还原与部件库写入spike-s24-写入部分2026-10-21eplan-20260325421electric-p8在调度器中

@@ -46,7 +46,7 @@ internal sealed partial class ToolMapping
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
         (List<HostTool> hostTools, Dictionary<string, string> references) = HostTools.Read(repositoryRoot);
         var tests = new TestIndex(repositoryRoot);
-        HashSet<string> sections = [.. Heading().Matches(File.ReadAllText(Path.Combine(repositoryRoot, "docs", "eplan", "api-notes.md"))).Select(m => m.Groups[1].Value)];
+        HashSet<string> sections = [.. ApiNotes.Anchors(repositoryRoot).Keys];
         ILookup<string, string> idsByOperation = usage.Usages
             .SelectMany(u => u.Value.SelectMany(s => s.Operations).Distinct().Select(operation => (Operation: operation, Id: u.Key)))
             .ToLookup(p => p.Operation, p => p.Id);
@@ -118,9 +118,6 @@ internal sealed partial class ToolMapping
             .OrderBy(s => s[0]).ThenBy(s => int.Parse(s[1..], System.Globalization.CultureInfo.InvariantCulture))];
         return new ToolEvidence(spec, Status().Match(text) is { Success: true } status ? status.Groups[1].Value.Trim() : null, cited, tests, operationTests);
     }
-
-    [GeneratedRegex(@"^### ([AB]\d+)\.", RegexOptions.Multiline)]
-    private static partial Regex Heading();
 
     [GeneratedRegex("```.*?```|`[^`\n]*`", RegexOptions.Singleline)]
     private static partial Regex Code();

@@ -101,7 +101,8 @@ node eng/scripts/apply-archify-font.mjs
 | 里程碑状态、发布范围与排期 | [路线图](docs/roadmap.md) |
 | ZIP 预览版怎么开始使用 | [中文入门指南](docs/getting-started/zh-CN.md) |
 | 系统怎么设计、为什么这样设计 | [架构](docs/architecture/architecture.md) · [ADR](docs/adr/README.md) |
-| EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
+| CLI JSON 输出与安装验收 | [CLI 参考](docs/reference/cli.md) · [发布流程](docs/process/release.md#安装验收清单m5-发布前逐项通过) |
+| EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes 主题索引](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
 | 工具怎么设计 | [MCP 工具设计规范](docs/standards/mcp-tool-design.md) |
 | 代码怎么写 | [编码规范](docs/standards/coding-standards.md) |
 | 怎么测试 | [测试策略](docs/standards/testing.md) |

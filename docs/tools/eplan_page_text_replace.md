@@ -76,7 +76,7 @@
 
 ## 5. 实现要点
 
-- 依据 [api-notes A49](../eplan/api-notes.md) 和 [S38](../../spikes/S38-drawing-texts-frames/README.md) 的 Texts / Probes：先递归遍历 `PlotFrame.SubPlacements` 记录排除集合，再遍历 `Page.AllPlacements` 和组的 `SubPlacements`，按对象身份去重；仅选择页面来源的精确 `Graphics.Text` 类型。遍历失败整体拒绝。
+- 依据 [api-notes A49](../eplan/api-notes/drawing-and-layout.md#a49-页面文字标题栏与图框s38-r32026-10-26eplan-20260325421electric-p8只打开-scratch-示例副本) 和 [S38](../../spikes/S38-drawing-texts-frames/README.md) 的 Texts / Probes：先递归遍历 `PlotFrame.SubPlacements` 记录排除集合，再遍历 `Page.AllPlacements` 和组的 `SubPlacements`，按对象身份去重；仅选择页面来源的精确 `Graphics.Text` 类型。遍历失败整体拒绝。
 - `Text.Contents` 读取 `MultiLangString`，通过 `GetLanguageList` 和 `GetString` 取得准确存储语言及内容，不解析 `@` / `;` 分隔的显示串。写入重建全部语言，保留不修改的条目、空文本与 `??_??`；适配器释放 API 返回的可释放值，不跨请求持有 EPLAN 对象。
 - Host 通过 WritePipeline 调用 `page.text.replace.plan` / `page.text.replace.execute`。Bridge 每个对象语言一条 PlannedChange，定位信息和 occurrences 保存在 `WritePlan.PageTextChanges`，不反解析显示字符串；执行在同次主线程调用内先核对指纹再生成变更。只读 `page.text.inspect` 按显式页名读取自由文本及图框等受保护文字的哈希，供独立读回与 Large 测试核对，不增加 MCP 工具。
 - 指纹覆盖项目和页身份、选定页上全部合格自由文本的身份及其全部存储语言原文，包含无匹配文本和空页，固定排序后用无歧义的结构编码计算 SHA-256；不对清洗或截断后的文字取哈希。参数摘要沿用流水线绑定，审批后 execute 在同一锁定作用域内重新读取并核对指纹，再执行原定范围；新增、删除或修改文字都使计划过期。

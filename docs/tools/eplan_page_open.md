@@ -33,7 +33,7 @@
 | `EPLAN_OPERATION_FAILED` / `EPLAN_BUSY` / `TIMEOUT` / `LICENCE_MISSING` | 检查 EPLAN 消息、关闭模态窗口或核对授权后重试 |
 
 ## 5. 实现要点
-依据 [api-notes](../eplan/api-notes.md)（A54） / [S42](../../spikes/S42-graphics-move-view/README.md)：在既有主线程 `LockingStep` 内解析项目和精确页，用 `Eplan.EplApi.HEServices.Edit.OpenPageWithName(Project.ProjectLinkFilePath, Page.Name)` 并核对返回页归属。不建 `SafetyPoint/UndoStep/Transaction`，不保存，不改属性、栅格或设置，不生成连接，不调用 action 或 `RedrawGed`；已开编辑器在提交后自动刷新。预计不足 2 秒，沿既有取消与超时；不缓存 EPLAN 对象。
+依据 [api-notes](../eplan/api-notes/drawing-and-layout.md#a54-文字图形移动与打开页spike-s422026-10-27eplan-20260325421electric-p8只在-scratch-副本上)（A54） / [S42](../../spikes/S42-graphics-move-view/README.md)：在既有主线程 `LockingStep` 内解析项目和精确页，用 `Eplan.EplApi.HEServices.Edit.OpenPageWithName(Project.ProjectLinkFilePath, Page.Name)` 并核对返回页归属。不建 `SafetyPoint/UndoStep/Transaction`，不保存，不改属性、栅格或设置，不生成连接，不调用 action 或 `RedrawGed`；已开编辑器在提交后自动刷新。预计不足 2 秒，沿既有取消与超时；不缓存 EPLAN 对象。
 
 ## 7. 测试
 Small：必填、未知成员、精确页名与 Read 注解。Medium：真实命名管道验证跨项目/同名前缀页隔离、缺页、离线与无 Bridge；stdio 的工具合同及快照。Large：scratch 中先建哨兵与待撤销页，反复打开后业务快照哈希不变，两次独立撤销仍分别删除原来的页；只编写，不运行。Agent 验收：从显式项目列页，打开指定页并说明界面焦点变化。

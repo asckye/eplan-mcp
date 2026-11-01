@@ -8,7 +8,7 @@
 | 门的类型 | 双向门：签名可以随时加上，但对外公布的支持范围要谨慎 |
 
 ## 背景与问题
-EPLAN 官方文档把编译的 API 程序分为两种授权（[api-notes](../eplan/api-notes.md) B8）：
+EPLAN 官方文档把编译的 API 程序分为两种授权（[api-notes](../eplan/api-notes/environment-and-licensing.md#b8-授权) B8）：
 - **开发者授权**：只加载**未签名**程序，"通常"把项目限制在 5 页以内，只用于开发和测试；
 - **运行时授权**：只加载经过 **EADN 签名**的程序。签名需要加入 EPLAN 的开发者计划（EADN），由 Eplan Cloud 的签名服务完成；客户"通过开发者"获得运行时授权。
 

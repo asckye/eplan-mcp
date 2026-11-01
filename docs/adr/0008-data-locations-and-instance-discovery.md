@@ -11,7 +11,7 @@
 ## 背景与问题
 架构原定所有数据都放在 `%LOCALAPPDATA%\EplanMcp\`：配置、审计、日志、scratch 项目，以及 Bridge 写给 Host 的实例发现文件。
 
-spike S0 发现（[api-notes](../eplan/api-notes.md) A6）：Claude 桌面应用是 MSIX 包。由它启动的进程（将来的 Host 就是这种情况）写入 `%LOCALAPPDATA%` 时，会被重定向到 `%LOCALAPPDATA%\Packages\Claude_…\LocalCache\Local\`。结果是：
+spike S0 发现（[api-notes](../eplan/api-notes/clients-and-host.md#a6-由-msix-打包应用启动的进程claude-桌面版) A6）：Claude 桌面应用是 MSIX 包。由它启动的进程（将来的 Host 就是这种情况）写入 `%LOCALAPPDATA%` 时，会被重定向到 `%LOCALAPPDATA%\Packages\Claude_…\LocalCache\Local\`。结果是：
 - Host 创建的 scratch 项目，EPLAN **打不开**（S0 实测）；
 - Host 写的审计日志和配置，工程师在 `%LOCALAPPDATA%\EplanMcp\` 下**找不到**；
 - Bridge 写在 `%LOCALAPPDATA%` 的实例发现文件，Host 能否读到尚不确定；

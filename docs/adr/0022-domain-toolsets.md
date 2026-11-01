@@ -14,7 +14,7 @@
 现在只有两个 Profile：`core`（明确列出的 25 个）和 `full`（全部，默认）。问题：
 - 工具一多，`full` 的工具定义要占大量 token，模型也更难选对工具（ADR-0006 的背景）；
 - `core` 是一份固定清单，做 3D 布局的工程师要么用 `full`，要么缺工具；
-- 客户端对 MCP 工具列表变更的支持不一样。MCP 2026-07-28 中，服务器在工具列表变化时发 `notifications/tools/list_changed`，客户端要先用 `subscriptions/listen` 订阅 `toolsListChanged`。已知 Claude Code 2.1.295 会订阅（[api-notes](../eplan/api-notes.md) C 节，spike S4）；其他客户端是否订阅、收到后是否重新拉取列表，没有核实。
+- 客户端对 MCP 工具列表变更的支持不一样。MCP 2026-07-28 中，服务器在工具列表变化时发 `notifications/tools/list_changed`，客户端要先用 `subscriptions/listen` 订阅 `toolsListChanged`。已知 Claude Code 2.1.295 会订阅（[api-notes](../eplan/api-notes/clients-and-host.md#c-mcp-客户端与-c-sdkspike-s42026-10-13) C 节，spike S4）；其他客户端是否订阅、收到后是否重新拉取列表，没有核实。
 
 ## 决策驱动因素
 - **不支持动态发现的客户端必须照常可用**，不能依赖工具列表变更通知。

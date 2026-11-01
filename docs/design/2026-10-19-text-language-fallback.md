@@ -5,7 +5,7 @@
 | 状态 | Implemented（2026-10-19） |
 | 作者 | asckye |
 | 关联 Issue | — |
-| 相关文档 | [M2 设计](2026-10-18-m2-read-core.md) Q3；[api-notes A11](../eplan/api-notes.md#a11-只读-api-的实机验证spike-s62026-10-19electric-p8在-action-中)、[A12](../eplan/api-notes.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)；[编码规范第 13、13a 条](../standards/coding-standards.md) |
+| 相关文档 | [M2 设计](2026-10-18-m2-read-core.md) Q3；[api-notes A11](../eplan/api-notes/reads-and-snapshots.md#a11-只读-api-的实机验证spike-s62026-10-19electric-p8在-action-中)、[A12](../eplan/api-notes/reads-and-snapshots.md#a12-m2-只读工具的实机验证2026-10-19eplan-20260325421electric-p8)；[编码规范第 13、13a 条](../standards/coding-standards.md) |
 | 最后更新 | 2026-10-19 |
 
 ## 1. 背景

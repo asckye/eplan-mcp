@@ -11,7 +11,7 @@
 ## 1. 这个工具解决什么任务
 “从基本项目新建一个目标项目”“把示例项目备份还原成 scratch 副本”。这是 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.16“一个完整任务”的起点，也覆盖 ADR-0005 预留的 `eplan_scratch_create` 用途（M6 Q2）。EPJ/PXF 文件继续用 `eplan_import_pxf`。
 
-本版的 `basic_project`、`backup` 两种模式均可执行，不以归档版本预检为前提。Host 只接受不存在的目标，由 Bridge 执行时创建目录。🔴 `restore /TYPE:PROJECT` 会无提示地覆盖已有项目（[api-notes A31](../eplan/api-notes.md)），**任何已有目标都拒绝，包括已有空目录**；工具调用之后新项目处于关闭状态（A34 最新补充，见第 5 节）。
+本版的 `basic_project`、`backup` 两种模式均可执行，不以归档版本预检为前提。Host 只接受不存在的目标，由 Bridge 执行时创建目录。🔴 `restore /TYPE:PROJECT` 会无提示地覆盖已有项目（[api-notes A31](../eplan/api-notes/reads-and-snapshots.md#a31-新建项目还原项目判断项目版本spike-s272026-10-21eplan-20260325421electric-p8在调度器中)），**任何已有目标都拒绝，包括已有空目录**；工具调用之后新项目处于关闭状态（A34 最新补充，见第 5 节）。
 
 ## 2. 输入参数
 
@@ -49,7 +49,7 @@
 
 - `outputSchema`：上述字段均声明；`execution` 为 ADR-0010 的四值枚举，`dryRun`、`project.opened` 为 boolean，`mode` 同输入枚举；`file`、路径和名称为 string，`sha256` 为 64 位小写十六进制；`pages` 为非负 integer 或 null，`projectGuid`、`databaseVersion`、`hint` 为 string 或 null，`seconds` 为非负数。示例中的哈希、时间是占位值。
 - `basic_project` 的 `pages`、`projectGuid` 来自同次 Bridge 创建调用；`backup` 当前的 `NewProjectData` 两字段为 null，不能捏造页数或为填字段自动打开项目。两种模式的 `databaseVersion` 均来自 Bridge execute 内的兼容性检查，通过后写入 `NewProjectData`。`dry_run` 返回 `execution: not_started`、目标路径、源哈希和 `changes[]`，这三个未读取的项目字段均为 null。响应丢失后 `outcome.get` 只恢复执行状态，没有项目元数据；此时上述字段仍为 null，hint 明示，不重做兼容性检查或执行。
-- `projectGuid` 是原样读出的 `PROJ_GUID`，形如“名称@Unix 秒数”，不是全局唯一 GUID；还原及文件副本会沿用原值（[A34](../eplan/api-notes.md)，S30）。对象编号也不能单独区分项目副本（A32、A34）。
+- `projectGuid` 是原样读出的 `PROJ_GUID`，形如“名称@Unix 秒数”，不是全局唯一 GUID；还原及文件副本会沿用原值（[A34](../eplan/api-notes/reads-and-snapshots.md#a34-对象编号与项目生命周期spike-s302026-10-21eplan-20260325421electric-p8在调度器中)，S30）。对象编号也不能单独区分项目副本（A32、A34）。
 - `seconds` 为 Host 本次处理用时（不含等待人工审批）；Bridge 的 `NewProjectData.Seconds` 只测 EPLAN 阶段，不冒充整个调用用时。结果给实际目标路径；错误不泄露本机路径（SEC-12）。名称等数据经过 ResultShaper。
 - 返回 `structuredContent`、同内容 JSON 文本块和一行摘要：`Created project 'Line1' from a basic project; it is closed.`；还原时用 `Restored backup as new project 'Line1'; it is closed.`。结果很小，不分页，不设 `response_format`。
 
@@ -74,7 +74,7 @@
 ## 5. 实现要点
 
 - **已有合同**：[NewProjectArgs](../../src/EplanMcp.Contracts/NewProjectArgs.cs)、[NewProjectData](../../src/EplanMcp.Contracts/NewProjectData.cs)。`basic_project` 对应 `project.create.plan` / `.execute`；`backup` 对应 `project.restore.plan` / `.execute`，都经 Host 写入流水线的策略、审批、审计和结果恢复。不发明 `project.copy`、`project.open`、`project.close` 操作。
-- **创建/还原后检查兼容性**：`NewProjectExecution` 在 `make(request)` 及 `.elk`/`.edb` 检查之后、返回成功之前，通过注入的 `IProjectFiles` 检查新 `.elk`，与 `project.compatibility` 使用同一状态判定：`IsCompatible` 才对应 `compatible: true`。检查不打开项目（[A31](../eplan/api-notes.md)，0.02–0.3 秒），版本写入两种模式的 `NewProjectData.DatabaseVersion`。不兼容抛 `INVALID_ARGUMENT`，检查失败抛 `EPLAN_OPERATION_FAILED`，都进入现有执行清理路径；清理不全为 `OUTCOME_UNKNOWN`。Host 不再另发兼容性调用，普通写流水线审计的就是完整执行结果。
+- **创建/还原后检查兼容性**：`NewProjectExecution` 在 `make(request)` 及 `.elk`/`.edb` 检查之后、返回成功之前，通过注入的 `IProjectFiles` 检查新 `.elk`，与 `project.compatibility` 使用同一状态判定：`IsCompatible` 才对应 `compatible: true`。检查不打开项目（[A31](../eplan/api-notes/reads-and-snapshots.md#a31-新建项目还原项目判断项目版本spike-s272026-10-21eplan-20260325421electric-p8在调度器中)，0.02–0.3 秒），版本写入两种模式的 `NewProjectData.DatabaseVersion`。不兼容抛 `INVALID_ARGUMENT`，检查失败抛 `EPLAN_OPERATION_FAILED`，都进入现有执行清理路径；清理不全为 `OUTCOME_UNKNOWN`。Host 不再另发兼容性调用，普通写流水线审计的就是完整执行结果。
 - **未验证的跨版本行为**：从较旧或较新材料创建/还原时是否升级、弹对话框或失败均**未验证**（A31、S30）；现有 Large 基线只用 `GB_bas001.zw9` 和数据库版本 `18.0` 的示例备份，不能外推跨版本支持。不主动请求升级，不依据 `ProjectInfo.xml` 的版本文字宣称兼容（A35：10043/10088 不一定随写入更新）；7z 归档预检只作为 Q1 的后续可选改进。
 - **目录**：默认在 `<scratch>\projects\<name>\` 中生成 `<name>.elk` 和 `<name>.edb`。Host 校验目标不存在，执行参数生成时再次复核目标及源哈希，直接使用 Bridge 返回的指纹。Bridge 规划不创建目录；执行在同次主线程调用中重核前置状态和指纹，再 `Directory.CreateDirectory`，记录目录是否由本次执行创建并负责失败清理。默认缺失父目录也由此创建；Host 对显式 destination 保留父目录必须存在的校验。
 - **EPLAN 调用**：[EplanProjectFactory](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs) 在主线程调度器的 `LockingStep` 中，用 `QuietModeStep(ShowNoDialogs)` 调 `Eplan.EplApi.DataModel.ProjectManager.CreateProject(linkFile, basicProject)`；还原用 `Eplan.EplApi.ApplicationFramework.ActionManager.FindAction("restore").Execute(context)`，逐项加入 `TYPE=PROJECT`、`ARCHIVENAME`、`PROJECTNAME`，不拼命令行。创建行为见 A31、A34；restore 的进程内路径由现有 Large 测试覆盖，是否已实际运行不能由“测试已合入”推断，仍标为**未验证**。

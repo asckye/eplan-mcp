@@ -83,7 +83,7 @@ public sealed class ApiIndexGeneratorTests
                 new("eplan_object_get", "read", "host", [], [], [], new(null, null, [], [], []), [], null, ["D:Function"])],
         };
         ApiIndexData data = ApiIndexGenerator.Build(catalog, Report([new("D:Function", "data_dictionary", "live_verified", false, ["eplan_property_get"])], []),
-            mapping, [], types, objects.RootElement, new Dictionary<string, string>(StringComparer.Ordinal) { ["A1"] = "docs/eplan/api-notes.md#a1-environment" });
+            mapping, [], types, objects.RootElement, new Dictionary<string, string>(StringComparer.Ordinal) { ["A1"] = "docs/eplan/api-notes/environment-and-licensing.md#a1-environment" });
         ApiEntry entry = Assert.Single(data.Entries);
         Assert.Equal("data_dictionary", entry.Row.Kind);
         Assert.Equal("live_verified", entry.Row.Status);
@@ -95,7 +95,7 @@ public sealed class ApiIndexGeneratorTests
         ApiDetail[] evidence = data.Evidence["eplan_property_get"];
         Assert.Contains(evidence, e => e.Reference == "docs/tools/eplan_property_get.md");
         Assert.Contains(evidence, e => e.Reference == "tests/ReaderTests.cs#ReaderTests");
-        Assert.Contains(evidence, e => e.Reference == "docs/eplan/api-notes.md#a1-environment");
+        Assert.Contains(evidence, e => e.Reference == "docs/eplan/api-notes/environment-and-licensing.md#a1-environment");
     }
 
     private static ToolMapping Mapping() => new() { EplanApi = "2026.0.3", Tools = [], Infrastructure = [], UnreachedGenerated = [] };

@@ -7,7 +7,7 @@
 已注册；标题 `Create connection symbols and explicit wire paths`；connections / full / Write；四注解均为 false。普通 T3b 路径按 O2/O3 分两次提交、两步撤销；D5 含中断点的调用在同一步内生成与核验，注明 **1 undo step**。
 
 ## 1. 这个工具解决什么任务
-按工程师明确给出的单页路径与节点预测连接符号、图形自动连线及生成后的逻辑端点；普通图形 Line 不承担导线功能。不寻路、不选器件、不导入符号库。依据 [M8 4.2–4.4、T3a](../design/2026-10-27-m8-drawing.md)、[api-notes A52](../eplan/api-notes.md)、[S40](../../spikes/S40-connection-symbols/README.md)。
+按工程师明确给出的单页路径与节点预测连接符号、图形自动连线及生成后的逻辑端点；普通图形 Line 不承担导线功能。不寻路、不选器件、不导入符号库。依据 [M8 4.2–4.4、T3a](../design/2026-10-27-m8-drawing.md)、[api-notes A52](../eplan/api-notes/drawing-and-layout.md#a52-连接符号自动连线与生成连接spike-s402026-10-27eplan-20260325421electric-p8只在-scratch-副本上)、[S40](../../spikes/S40-connection-symbols/README.md)。
 
 ## 2. 输入参数
 | 参数 | 类型 / 默认值 | 说明 |

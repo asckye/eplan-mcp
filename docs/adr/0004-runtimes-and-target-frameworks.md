@@ -8,7 +8,7 @@
 | 门的类型 | 单向门 |
 
 ## 背景与问题
-- EPLAN 2026 的 API 程序集全部以 .NET Framework **4.8.1** 为目标，只能在 x64 的 .NET Framework 进程中使用（[api-notes](../eplan/api-notes.md) B1）。
+- EPLAN 2026 的 API 程序集全部以 .NET Framework **4.8.1** 为目标，只能在 x64 的 .NET Framework 进程中使用（[api-notes](../eplan/api-notes/environment-and-licensing.md#b1-程序集与目标框架) B1）。
 - EPLAN 2027 新增了一套并行的 .NET 8 API，同时保留 4.8.1 API，两套不能混用。
 - 官方 MCP C# SDK 2.x 支持 netstandard2.0、net8.0、net9.0、net10.0。
 - 开发机已安装 .NET SDK 10.0.401 和 Visual Studio 2026。

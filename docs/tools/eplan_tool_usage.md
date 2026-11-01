@@ -20,7 +20,7 @@
 | `topic` | string，`enum`：`examples`、`workflow`、`fields`、`errors` | 否 | 省略，即全部四节 | 只返回这一节 |
 
 - `tool` 的 `enum` 在配置阶段从当前 Profile 和开关筛选后的注册集合生成，调用时也按该集合校验；`topic` 的四个通用值用 `[AllowedValues]` 声明（`action_run` 另支持白名单条目名）。schema 设置 `additionalProperties: false`。
-- SDK 不按 schema 校验参数（[api-notes C](../eplan/api-notes.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)），工具自己校验取值，必须完全一致（区分大小写）。`topic` 传 `null` 与省略相同。
+- SDK 不按 schema 校验参数（[api-notes C](../eplan/api-notes/clients-and-host.md#c-mcp-客户端与-c-sdkspike-s42026-10-13)），工具自己校验取值，必须完全一致（区分大小写）。`topic` 传 `null` 与省略相同。
 
 ## 3. 输出
 ```json

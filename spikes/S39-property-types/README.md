@@ -1,6 +1,6 @@
 # Spike S39：FUNC_TECHNICAL_CHARACTERISTIC 的运行时类型
 
-状态：已实现，待协调者运行。目标是补齐 [A44](../../docs/eplan/api-notes.md) 中 20027 的确切类型证据，供之后的属性写白名单评审使用。
+状态：已实现，待协调者运行。目标是补齐 [A44](../../docs/eplan/api-notes/reads-and-snapshots.md#a44-通用-functionconnection-属性读取p42026-10-25eplan-20260325421electric-p8只读-sample-fixture) 中 20027 的确切类型证据，供之后的属性写白名单评审使用。
 
 ## 方法
 

@@ -9,7 +9,7 @@
 | 影响 | 修订 [ADR-0005](0005-safety-model.md) 第 3、4 节：补充"结果未知"的处理和写入暂停，其余规则不变 |
 
 ## 背景与问题
-ADR-0005 规定写操作在 Bridge 的事务包装中执行，失败回滚，成功提交。但结果只用文字说明（`EPLAN_OPERATION_FAILED` 写"已回滚"，见 [mcp-tool-design 6.3](../standards/mcp-tool-design.md#63-错误码表)），而且 Host 有时并不知道结果：`BridgeClient` 每次 `invoke` 最多等 30 秒，超时后断开连接，返回可重试的 `TIMEOUT`，[M1 设计](../design/2026-10-13-m1-skeleton.md) 4.5 写明这只在只读时没有问题。WPF `Dispatcher.Invoke` 的超时只限制等待开始的时间，委托开始后会执行完（WPF 文档；进入超时的情况见 [api-notes](../eplan/api-notes.md) A9）。所以 Host 报告超时后，写操作仍可能提交；模型一重试，同一个页面就建了两次。
+ADR-0005 规定写操作在 Bridge 的事务包装中执行，失败回滚，成功提交。但结果只用文字说明（`EPLAN_OPERATION_FAILED` 写"已回滚"，见 [mcp-tool-design 6.3](../standards/mcp-tool-design.md#63-错误码表)），而且 Host 有时并不知道结果：`BridgeClient` 每次 `invoke` 最多等 30 秒，超时后断开连接，返回可重试的 `TIMEOUT`，[M1 设计](../design/2026-10-13-m1-skeleton.md) 4.5 写明这只在只读时没有问题。WPF `Dispatcher.Invoke` 的超时只限制等待开始的时间，委托开始后会执行完（WPF 文档；进入超时的情况见 [api-notes](../eplan/api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13) A9）。所以 Host 报告超时后，写操作仍可能提交；模型一重试，同一个页面就建了两次。
 
 写操作被中断有四种情况：① Host 等待超时；② 管道断开（客户端重启、Host 被结束）；③ EPLAN 在途中崩溃或被强制结束；④ 回滚本身失败。① 和 ② 中 Bridge 知道结果，③ 和 ④ 才是真正的"结果未知"。
 

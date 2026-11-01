@@ -12,7 +12,7 @@
 - 写目标固定在 `%USERPROFILE%\EplanMcp\scratch\`。不采用 `EPLANMCP_HOME` 重定向。Action 和 Driver 都解析完整路径，以带尾分隔符的根做 `OrdinalIgnoreCase` 比较；拒绝路径逃逸、ADS、含糊的尾点/空格、祖先及数据库内部的联接点/符号链接。Marker（`.jsonl`）和宏（`.emp`）也必须在 scratch，且在 `.edb` 之外。不存在的/未打开的项目不会自动打开。
 - `SpikeS37Action` 注册名为 **`EplanMcpSpikeS37`**，独立程序集 `EplanMcp.Spikes.S37.dll`。与 S32 一样，action 返回后经 WPF Dispatcher 在主线程执行；每次调度先建 `LockingStep`，检查模态窗口，委托内部捕获异常。一次只接受一个运行；批次间释放主线程和所有 API 辅助对象，重新取得项目和页。不保留跨批 EPLAN 对象。
 - 每批是 `SafetyPoint → UndoManager/UndoStep → QuietModeStep(ShowNoDialogs)`；静默作用域结束后提交，再 `CloseUndo()`，顺序与 Bridge `TransactionScope` 相同。按页复制遇到第一个异常就停止本批并回滚，后续批次不再执行；页宏原生批量操作失败时只能记录整批来源页，不能推断是哪一页出错。之前已提交的批次保留。
-- **禁止在有真实项目打开时运行实验或测试撤销。** `undo` 会检查目标是 CURRENT 项目；它只创建一个命名复制步骤，不会自动撤销。按 Ctrl+Z / 执行 `XEsUndoAction` 前必须再次确认当前项目，并确认该步骤确实存在（[api-notes A41](../../docs/eplan/api-notes.md)）。不要在关闭重开后测试旧撤销步骤。
+- **禁止在有真实项目打开时运行实验或测试撤销。** `undo` 会检查目标是 CURRENT 项目；它只创建一个命名复制步骤，不会自动撤销。按 Ctrl+Z / 执行 `XEsUndoAction` 前必须再次确认当前项目，并确认该步骤确实存在（[api-notes A41](../../docs/eplan/api-notes/transactions-and-undo.md#a41-提交后的撤销粒度备份副作用宏读句柄spike-s35-第-1-部分2026-10-23eplan-20260325421electric-p8经-host-的真实工具)）。不要在关闭重开后测试旧撤销步骤。
 - [S8](../S8-write-interruption/README.md) 已证明 SafetyPoint 不能防进程死亡。这里不强杀、不重启 EPLAN、不处理对话框。中断、超时、崩溃或缺少终结 marker 时，副本可能只完成部分操作；先人工检查，使用新 generation 重测，不自动重发。
 - 只释放 finder、属性列表/值、macro、服务、context、事务等辅助对象。**不 Dispose EPLAN 返回的 Project/Page/Function/Placement/Connection**（A36/A39）。一个对象的名称属性列表只获取并释放一次。系统消息每次只使用一个集合，读完立即转为普通 JSON，不保存原生消息对象（A11）。
 

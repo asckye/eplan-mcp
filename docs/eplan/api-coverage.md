@@ -74,7 +74,7 @@ M6 第 3 阶段 M2：已增加 [模块只读检查内部服务](../design/2026-1
 
 ## 3. Pro Panel 3D（M4b）
 
-开发机授权包含 `ProPanel`、`ProPanelProfessional` 等模块（[api-notes](api-notes.md) A2）。目前没有找到专门做 Pro Panel 3D 自动化的开源项目，这是本项目可以形成特色的方向。
+开发机授权包含 `ProPanel`、`ProPanelProfessional` 等模块（[api-notes](api-notes/environment-and-licensing.md#a2-授权eplaneplapiapplicationframeworklicense) A2）。目前没有找到专门做 Pro Panel 3D 自动化的开源项目，这是本项目可以形成特色的方向。
 
 | 任务 | 主要类型（`Eplan.EplApi.DataModel.E3D`） |
 |---|---|
