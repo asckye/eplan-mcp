@@ -50,15 +50,22 @@ public static class PlacementMoveExecution
         void Verify(bool committed)
         {
             ConnectionCreatePlanner.Scene actual = Read();
+            var measuredBounds = new List<(JToken Row, double[]? Bounds)>();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
             { throw Mismatch("placement count"); }
             for (int i = 0; i < expected.Page.Placements.Count; i++)
             {
                 DrawingPlacement want = expected.Page.Placements[i], found = actual.Page.Placements[i];
-                if (rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, want.Locator)))
+                JToken? row = rows.SingleOrDefault(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, want.Locator));
+                if (row is not null)
                 {
+                    measuredBounds.Add((row, found.Bounds));
                     found.Locator.Digest = want.Locator.Digest;
-                    if (input.ContainsKey("property_moves") && found.Bounds is { } bounds && want.Bounds is { } expectedBounds && bounds.Length == expectedBounds.Length && bounds.Zip(expectedBounds, (a, b) => Math.Abs(a - b) <= 0.000001).All(equal => equal))
+                    // A74: freshly created property text can have stale outline offsets. The approved bounds
+                    // already include any 90/270-degree size swap; compare size while keeping the measured outline.
+                    if (want.Kind == "PropertyPlacement" && found.Bounds is { Length: 4 } bounds && want.Bounds is { Length: 4 } expectedBounds
+                        && Math.Abs((bounds[2] - bounds[0]) - (expectedBounds[2] - expectedBounds[0])) <= 0.01
+                        && Math.Abs((bounds[3] - bounds[1]) - (expectedBounds[3] - expectedBounds[1])) <= 0.01)
                     { found.Bounds = expectedBounds; }
                     if (found.Parent is not null && want.Parent is not null)
                     { found.Parent.Digest = want.Parent.Digest; }
@@ -80,6 +87,11 @@ public static class PlacementMoveExecution
             { throw Mismatch("logical connections"); }
             if (committed && Segments(expected.Graphical) != Segments(actual.Graphical))
             { throw Mismatch("autoconnect lines " + Segments(actual.Graphical) + " instead of " + Segments(expected.Graphical)); }
+            if (committed)
+            {
+                foreach (var measured in measuredBounds)
+                { measured.Row["bounds"] = measured.Bounds is null ? null : new JArray(measured.Bounds); }
+            }
         }
         Committed<bool> result = TransactionRunner.Run(transactions, "eplan_placement_update", () => { move(); Verify(false); return true; }, _ => true,
             _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { Verify(true); return true; }),

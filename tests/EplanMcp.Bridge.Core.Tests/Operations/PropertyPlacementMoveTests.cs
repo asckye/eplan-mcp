@@ -111,6 +111,104 @@ public sealed class PropertyPlacementMoveTests
         Assert.Empty(fake.Transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    public void CreatedCableText_StaleBoundsOffset_CommitsAndReturnsMeasuredBounds(int beforeAngle)
+    {
+        var fake = CableText(beforeAngle);
+        JObject approved = fake.Plan();
+        double[] predicted = approved["moves"]![0]!["bounds"]!.Values<double>().ToArray();
+        double[] expected = [59.4425, 109.24, 63.72125, 160];
+        Assert.All(predicted.Zip(expected), pair => Assert.Equal(pair.Second, pair.First, 10));
+        Assert.Equal([68d, 160d], approved["moves"]![0]!["after"]!.Values<double>());
+        Assert.Equal(90, (int)approved["moves"]![0]!["angle"]!);
+        string siblings = BridgeJson.FromObject(fake.Scene.Page.Placements.Where(p => p != fake.Child)).ToString();
+
+        JObject result = fake.Execute((string)approved["fingerprint"]!);
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal([63.72125, 109.24, 68d, 160d], result["moves"]![0]!["bounds"]!.Values<double>());
+        Assert.Equal(fake.Child.Bounds, result["moves"]![0]!["bounds"]!.Values<double>());
+        Assert.Equal([68d, 160d], fake.Child.Location);
+        Assert.Equal("90", fake.Child.Properties["angle_deg"]);
+        Assert.Equal("false", fake.Child.Properties["docked"]);
+        Assert.Equal(siblings, BridgeJson.FromObject(fake.Scene.Page.Placements.Where(p => p != fake.Child)).ToString());
+        Assert.Equal(["Begin AI: eplan_placement_update", "Commit", "CloseUndo", "Dispose"], fake.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(90)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void RotatedText_OutlineSizeWithinTolerance_ReturnsCommittedMeasurement(int angle)
+    {
+        double[] measured = angle is 90 or 270 ? [55, 60, 57.009, 68.009] : [55, 60, 63.009, 62.009];
+        double[] committed = measured.Select((n, i) => n + (i % 2 == 0 ? 1 : 0)).ToArray();
+        var fake = new Mover(angle) { ReadbackBounds = measured, CommittedBounds = committed };
+
+        JObject result = fake.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(committed, result["moves"]![0]!["bounds"]!.Values<double>());
+        Assert.Equal([50d, 50d], fake.Child.Location);
+        Assert.Equal(angle.ToString(System.Globalization.CultureInfo.InvariantCulture), fake.Child.Properties["angle_deg"]);
+    }
+
+    [Theory]
+    [InlineData("angle")]
+    [InlineData("position")]
+    [InlineData("width")]
+    [InlineData("height")]
+    [InlineData("text")]
+    [InlineData("display")]
+    [InlineData("property_id")]
+    [InlineData("property_index")]
+    [InlineData("docked")]
+    [InlineData("text_parent")]
+    [InlineData("sibling_bounds")]
+    [InlineData("parent_bounds")]
+    [InlineData("committed")]
+    public void CreatedCableText_ChangedReadback_StillRollsBack(string failure)
+    {
+        var fake = CableText(90, failure);
+        string before = BridgeJson.FromObject(fake.Scene).ToString();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Equal(before, BridgeJson.FromObject(fake.Scene).ToString());
+        Assert.DoesNotContain("CloseUndo", fake.Transactions.Calls);
+        Assert.Contains("Rollback", fake.Transactions.Calls);
+    }
+
+    private static Mover CableText(int beforeAngle, string? failure = null)
+    {
+        var fake = new Mover(90) { Failure = failure, ReadbackBounds = [63.72125, 109.24, 68, 160] };
+        fake.Scene.Page.PageSize = [420, 297];
+        fake.Child.Location = [60, 140];
+        // The logs show the docked 0-degree outline; the 90-degree case isolates a translation with no rotation.
+        fake.Child.Bounds = beforeAngle == 0 ? [9.240000000000002, 144.27875, 60, 148.5575] : [51.4425, 89.24, 55.72125, 140];
+        fake.Child.Properties = new()
+        {
+            ["grouped"] = "false",
+            ["property_id"] = "20040",
+            ["property_index"] = "4",
+            ["angle_deg"] = beforeAngle.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["docked"] = beforeAngle == 0 ? "true" : "false",
+            ["text"] = "??_??@ÖLFLEX CLASSIC 100 300/500V;",
+            ["display"] = "ÖLFLEX CLASSIC 100 300/500V"
+        };
+        JToken move = fake.Request["property_moves"]![0]!;
+        move["property_id"] = 20040;
+        move["property_index"] = 4;
+        move["x_mm"] = 68;
+        move["y_mm"] = 160;
+        return fake;
+    }
+
     private sealed class Mover : IPlacementMover
     {
         internal ConnectionCreatePlanner.Scene Scene { get; private set; }
@@ -118,6 +216,8 @@ public sealed class PropertyPlacementMoveTests
         internal JObject Request { get; }
         internal FakeTransactions Transactions { get; } = new();
         internal string? Failure { get; init; }
+        internal double[]? ReadbackBounds { get; init; }
+        internal double[]? CommittedBounds { get; init; }
         internal Mover(int angle)
         {
             var fixture = new MoveFixture();
@@ -142,14 +242,19 @@ public sealed class PropertyPlacementMoveTests
         public ConnectionCreatePlanner.Scene Read(string project, string page)
         {
             ConnectionCreatePlanner.Scene result = Clone();
-            if (Failure == "committed" && Transactions.Calls.Contains("Commit") && !Transactions.Calls.Contains("Rollback"))
-            { result.Page.Placements[1].Location[0]++; }
+            if (Transactions.Calls.Contains("Commit") && !Transactions.Calls.Contains("Rollback"))
+            {
+                if (Failure == "committed")
+                { result.Page.Placements[1].Location[0]++; }
+                if (CommittedBounds is not null)
+                { result.Page.Placements[1].Bounds = CommittedBounds.ToArray(); }
+            }
             return result;
         }
         public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
         {
             Child.Location = moves[0]!["after"]!.Values<double>().ToArray();
-            Child.Bounds = moves[0]!["bounds"]!.Values<double>().ToArray();
+            Child.Bounds = ReadbackBounds?.ToArray() ?? moves[0]!["bounds"]!.Values<double>().ToArray();
             Child.Properties["angle_deg"] = moves[0]!["angle"]!.ToString();
             Child.Properties["docked"] = "false";
             if (Failure == "angle")
@@ -162,6 +267,18 @@ public sealed class PropertyPlacementMoveTests
             { Scene.Page.Placements[0].Location[0]++; }
             if (Failure == "logical")
             { Scene.Logical.Add(new() { StartDevice = "unplanned" }); }
+            if (Failure == "width")
+            { Child.Bounds[2] += 0.02; }
+            if (Failure == "height")
+            { Child.Bounds[3] += 0.02; }
+            if (Failure is "text" or "display" or "property_id" or "property_index" or "docked")
+            { Child.Properties[Failure] = "changed"; }
+            if (Failure == "text_parent")
+            { Child.Parent = new() { Project = "scratch-project", Page = "P", Type = 17, Oid = 999 }; }
+            if (Failure == "sibling_bounds")
+            { Scene.Page.Placements[2].Bounds![0]++; }
+            if (Failure == "parent_bounds")
+            { Scene.Page.Placements[0].Bounds![0]++; }
             if (Failure == "cancel")
             { OperationContext.Current.Cancel(); }
         };

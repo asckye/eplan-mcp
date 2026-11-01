@@ -21,6 +21,22 @@ public sealed class PlacementMoveExecutionTests
         Assert.Equal(["Begin AI: eplan_placement_update", "Commit", "CloseUndo", "Dispose"], mover.Transactions.Calls);
     }
 
+    [Fact]
+    public void MovedParent_FollowingPropertyBoundsRecomputed_ReturnsMeasuredOutlines()
+    {
+        var mover = new Mover { PropertyBoundsOffset = 4.27875 };
+
+        JObject result = mover.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal([25d, 20d], mover.Scene.Page.Placements[0].Location);
+        Assert.Equal([27d, 22d], mover.Scene.Page.Placements[1].Location);
+        Assert.Equal([30.27875, 21d, 32.27875, 23d], result["moves"]![1]!["bounds"]!.Values<double>());
+        Assert.Equal(mover.Scene.Page.Placements[1].Bounds, result["moves"]![1]!["bounds"]!.Values<double>());
+        Assert.Equal([40d, 20d], mover.Scene.Page.Placements[3].Location);
+        Assert.Equal(["Begin AI: eplan_placement_update", "Commit", "CloseUndo", "Dispose"], mover.Transactions.Calls);
+    }
+
     [Theory]
     [InlineData("location")]
     [InlineData("child")]
@@ -59,6 +75,7 @@ public sealed class PlacementMoveExecutionTests
         internal FakeTransactions Transactions { get; } = new();
         internal string? Failure { get; set; }
         internal bool BreakRestore { get; set; }
+        internal double PropertyBoundsOffset { get; init; }
         internal int Moves { get; private set; }
         internal Mover()
         {
@@ -91,6 +108,8 @@ public sealed class PlacementMoveExecutionTests
                 DrawingPlacement placement = Scene.Page.Placements.Single(p => p.Locator.Digest == (string)row["locator"]!["digest"]!);
                 placement.Location = row["after"]!.Values<double>().ToArray();
                 placement.Bounds = row["bounds"]!.Values<double>().ToArray();
+                if (placement.Kind == "PropertyPlacement")
+                { placement.Bounds[0] += PropertyBoundsOffset; placement.Bounds[2] += PropertyBoundsOffset; }
                 placement.Locator.Digest = new string('e', 64);
                 Moves++;
                 if (Failure == "batch")

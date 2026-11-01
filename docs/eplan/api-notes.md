@@ -240,6 +240,10 @@
 - A55/A65 的无对端设备或落单中断点允许零逻辑连接；产品仍完整核对实际自动连线、名称、位置、引脚方向和原生配对，两侧真实设备引脚仍须连通。
 - 本机 `Eplan.EplApi.DataModelu.xml` 的 `UndoStep` 文档说明：撤销协议独立于 Transaction，DoUndo 回到初始化或最后一次 CloseOpenUndo。中断点路径先提交放置事务，再在仍打开的同一 UndoStep 和静默模式内生成与读回；失败 DoUndo 并重新核对范围指纹。此单步撤销组合尚未实机验证，不能视为 A55 已验证行为；Large 测试仅编写。
 
+### A74. 新建属性文字的外框偏移（2026-11-01，EPLAN 2026.0.3，Electric P8，已有 scratch 失败日志）
+- **刚创建后读取的属性文字外框可能偏移一个文字高度，直到 EPLAN 重新计算；移动后，90° 文字的 X 外框报告为 `[x-h,x]`。** `CableDefinitionTests.ThreeVerticalWires_DefineW9_ReadNativeCores_UndosRestore` 中属性 20040/序号 4 的批准位置为 `[68,160]`、角度 90°、未停靠，预测外框 `[59.4425,109.24,63.72125,160]`，读回为 `[63.72125,109.24,68,160]`；位置、角度、文字、属性选择及父对象不变，尺寸相同，X 偏移恰为文字高度 `h=4.27875 mm`。整页验收在 `[64,156]` 复现同一偏移。— 证据：`.local/failures/q-d46-CableDefinitionTests.log`、`.local/failures/q-d46-AcceptanceRedrawTests.log`；本次只读既有日志，未运行 EPLAN。
+- 对移动读回的影响：已执行的 PropertyPlacement 继续逐项精确核对位置、角度、文字/显示值、属性 ID/序号、父对象及停靠状态；外框按批准旋转后的宽高比较（容差 0.01 mm），结果保留实测外框，供写后布局检查使用，不能以创建后外框的绝对偏移判定移动失败。
+
 ### A57. 函数的属性放置是 ContextPropertyPlacement（M8 T2b 实机，2026-10-27，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本上）
 - D4 Large 失败（2026-11-01，2026.0.3.25421，Electric P8，LargeWrite）：电缆 `-W9` 的默认停靠文字 20053/序号 2（`3x0.5`）和 20040/序号 4（`ÖLFLEX CLASSIC 100 300/500V`）均在 (60,140)，请求移到 (60,160)、(68,160)，角度 90°；第一项 `TextBase.UndockText()` 抛 `BaseException`“数据库写保护”，事务已回滚，属于产品缺陷，非结果未知。— `.local/failures/q-d46-CableDefinitionTests.log`、`bridge-slotA.log`，关联 ID `988b799cb3e24e9f9120a1890da6ac76`（04:29:26.671；同日 03:20:37 的 `db10bb36c79541fa9e8ae8c208f41cc1` 为同一异常栈）。
 - 本机 2026 XML 的 `ContextPropertyPlacement` 明确说明符号库数据库只读，不能修改 `SymbolVariant` 的属性放置；`SymbolReference.UseLocalPropertyPlacements=false` 时使用变体的文字，`SwitchLocalPropertyPlacements(true)` 复制全部文字并设置本地标志。修改默认文字须在写事务内复制，再按父对象、属性 ID 和集合序号重取副本，不能继续修改复制前的句柄。绘图文字定位统一用父对象身份加属性/序号及内容几何摘要，避免库文字复制为本地 ContextPropertyPlacement 后原生身份和包装类型变化造成误报；旁项仍逐字段核对。— 上述 XML 与失败栈；修复及 Small 验证为离线，本次未复跑 Large，复制后的实机读回、撤销和 PNG 仍待复验。
