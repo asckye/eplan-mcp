@@ -30,7 +30,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
         try
         {
             JsonElement seed = await Probe(new { project = session.Project, page, operation = "seed", oids = Array.Empty<long>() });
-            Assert.True(seed.GetProperty("success").GetBoolean());
+            Assert.True(seed.GetProperty("success").GetBoolean(), seed.ToString());
             string sentinel = Assert.Single(await session.CreatePagesAsync(1));
             JsonElement before = seed.GetProperty("after");
             long[] ids = before.GetProperty("objects").EnumerateArray().Select(o => o.GetProperty("oid").GetInt64()).ToArray();
@@ -44,6 +44,12 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
             Assert.Contains(originals, o => o.GetProperty("kind").GetString() == "Rectangle");
             Assert.Contains(originals, o => o.GetProperty("kind").GetString() == "SymbolReference");
             Assert.Contains(originals, o => o.GetProperty("kind").GetString() == "PotentialDefinition");
+            foreach (JsonElement original in originals)
+            {
+                if (original.GetProperty("angle").ValueKind == JsonValueKind.Number)
+                { Assert.Equal(0, original.GetProperty("angle").GetDouble()); }
+                Assert.All(original.GetProperty("children").EnumerateArray(), child => Assert.Equal(0, child.GetProperty("angle").GetDouble()));
+            }
             if (operation == "delete")
             {
                 Assert.NotEmpty(before.GetProperty("connections").EnumerateArray());
@@ -154,7 +160,10 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
             ["items"] = ((int[])[40, 100, 180]).Select((x, i) => new { kind = "rectangle", corners = new[] { new[] { x, 200 - i * 20 }, new[] { x + 10, 210 - i * 20 } } }).ToArray()
         });
         JsonElement found = await host.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "Rectangle" });
-        JsonElement[] locators = found.GetProperty("objects").EnumerateArray().Select(o => o.GetProperty("locator")).ToArray();
+        Assert.Equal("supported", found.GetProperty("status").GetString());
+        Assert.False(found.GetProperty("truncated").GetBoolean());
+        JsonElement[] locators = found.GetProperty("items").EnumerateArray().Select(o => o.GetProperty("locator")).ToArray();
+        Assert.Equal(3, locators.Length);
         var args = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["operation"] = operation, ["locators"] = operation is "align" or "distribute" ? locators : locators.Take(1).ToArray(), ["response_format"] = "detailed" };
         switch (operation)
         {

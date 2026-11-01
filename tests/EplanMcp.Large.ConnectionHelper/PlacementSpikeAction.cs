@@ -2,6 +2,7 @@ using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
+using Eplan.EplApi.DataModel.MasterData;
 using Eplan.EplApi.HEServices;
 using EplanMcp.Bridge.Eplan.Adapters;
 using Newtonsoft.Json.Linq;
@@ -30,6 +31,9 @@ public sealed class PlacementSpikeAction : IEplAction
             { throw new InvalidOperationException("Only an explicit new page of current scratch LargeWrite is permitted."); }
             Page Page() => project.Pages.Single(p => p.Name == (string)input["page"]!);
             result["before"] = Read(project, Page());
+            // A52: discover library variants before entering SafetyPoint.
+            SymbolVariant Variant(string symbol) => project.SymbolLibraries.Single(l => l.Name == "SPECIAL").Symbols.Single(s => s.Name == symbol).Variants.OrderBy(v => v.VariantNr).First();
+            (SymbolVariant Variant, double X)[] seedSymbols = (string?)input["operation"] == "seed" ? [(Variant("TLRO"), 280), (Variant("PCP"), 340)] : [];
             if ((string?)input["operation"] != "read")
             {
                 using var scope = new TransactionScope("Placement edit spike");
@@ -40,14 +44,20 @@ public sealed class PlacementSpikeAction : IEplAction
                     Placement[] roots = page.AllPlacements.Where(p => p is not PropertyPlacement && input["oids"]!.Values<long>().Contains(p.ObjectIdentifier)).ToArray();
                     if ((string?)input["operation"] == "seed")
                     {
-                        foreach (TextBase text in page.AllPlacements.OfType<TextBase>().Concat(page.AllPlacements.OfType<SymbolReference>().SelectMany(s => s.PropertyPlacements)))
-                        { text.Rotation = 0; }
-                        foreach ((string symbol, double x) in new[] { ("TLRO", 280d), ("PCP", 340d) })
+                        foreach ((SymbolVariant variant, double x) in seedSymbols)
                         {
-                            var variant = project.SymbolLibraries.Single(l => l.Name == "SPECIAL").Symbols.Single(s => s.Name == symbol).Variants.OrderBy(v => v.VariantNr).First();
 #pragma warning disable CA2000 // A39: EPLAN owns created placements, including rollback paths.
                             SymbolReference.Create(variant, page).Location = new PointD(x, 200);
 #pragma warning restore CA2000
+                        }
+                        foreach (TextBase text in page.AllPlacements.OfType<TextBase>())
+                        { text.Rotation = 0; }
+                        foreach (SymbolReference symbol in page.AllPlacements.OfType<SymbolReference>())
+                        {
+                            // B11: variant property placements belong to the read-only symbol library.
+                            symbol.UseLocalPropertyPlacements = true;
+                            foreach (PropertyPlacement text in symbol.PropertyPlacements)
+                            { text.Rotation = 0; }
                         }
                     }
                     foreach (Placement root in roots)
