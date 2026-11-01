@@ -116,14 +116,6 @@ gh attestation verify ".\$asset" --repo asckye/eplan-mcp
 | I9 | 在 Workbench 或经 `uninstall-addin` 完全撤销注册后，再删除程序目录 | 卸载不干净、插件管理混乱 |
 | I10 | 由 MSIX 打包的客户端（Claude 桌面版）启动时同样正常工作（ADR-0008） | 本项目实测：`%LOCALAPPDATA%` 被重定向；数据根目录和命名管道不受影响（spike S5） |
 
-## 评审拆分
-
-- ZIP 打包：`.github/workflows/release.yml`；删除 `eng/installer/EplanMcp.iss` 和 build 的安装脚本检查。
-- 插件发布脚本：`eng/scripts/release-addin.ps1`。
-- 发布 workflow 与文档：`.github/workflows/release.yml`、`eng/installer/Release.pubxml`（仅对 Host 启用单文件打包，固定 SDK 的单文件分析器）、本文、CHANGELOG 的新增一行，以及 `src/` 下 Host、Workbench、Contracts、Packs、Workbench.Protocol 的五个生成的 `packages.win-x64.lock.json`（生成文件不计评审行数）。
-
-保留 `eng/installer/Release.pubxml`：Host 的单文件发布仍引用它。Part A 不改 UI 或插件生成代码；Part B 完成后再执行真实 GitHub Actions 和实机验收。
-
 ## 回归检查
 
 回归检查运行 `pwsh -NoProfile -File tests/release/Release.Tests.ps1`，也由发布作业执行：检查 YAML、PowerShell 和 action SHA，以假附件验证交接与失败路径，并实际验证 ZIP 顶层目录、点文件、逐文件哈希、两类证明 subject 和附件清单；不会调用 EPLAN、git、gh 或网络。
