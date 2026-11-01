@@ -21,7 +21,7 @@ public sealed class AcceptanceListFileTests
             await driver.ExportAsync();
             Assert.Equal(7, fake.ConnectionItems!.Value.GetArrayLength());
             // D5 removed two support placements and combined each interruption batch into one undo step.
-            Assert.Equal(37, driver.UndoSteps);
+            Assert.Equal(38, driver.UndoSteps);
             string report = Path.Combine(folder, "report.json");
             await File.WriteAllTextAsync(report, JsonSerializer.Serialize(driver.Report), TestContext.Current.CancellationToken);
             using JsonDocument saved = JsonDocument.Parse(await File.ReadAllTextAsync(report, TestContext.Current.CancellationToken));

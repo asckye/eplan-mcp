@@ -99,37 +99,37 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places a part device, library symbol (including NO/NC contacts or PLC), terminal with its strip, or dashed location box; Ctrl+Z undoes it. " +
-        "Devices inside a location box keep their own structure; no devices are renamed. Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: " +
-        "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.")]
+        "Places part devices, library symbols (including NO/NC, PLC), terminals with strips or dashed location boxes on circuit pages. " +
+        "Devices inside a location box keep their own structure; no devices are renamed. x/y: mm, bottom left, y up. " +
+        "One Ctrl+Z undoes it. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
-        [Description("Project")] string project,
-        [Description("Circuit page")] string page,
-        [Description("mm")] double x,
-        [Description("mm")] double y,
-        [Description("Device tag")] string? tag = null,
-        [Description("From eplan_part_search")] string? part = null,
-        [Description("Default: 1")] string? variant = null,
+        string project,
+        string page,
+        double x,
+        double y,
+        string? tag = null,
+        string? part = null,
+        string? variant = null,
         [Description("Only return the plan")] bool dry_run = false,
-        [Description("Project library")] string? library = null,
-        [Description("Symbol name")] string? symbol = null,
-        [Description("Symbol variant")] int? symbol_variant = null,
+        string? library = null,
+        string? symbol = null,
+        int? symbol_variant = null,
         [Description("Relative displays")] JsonElement[]? display_properties = null,
-        [Description("Pin designations in order")] string[]? connection_designations = null,
-        [Description("Exclusive +location, e.g. +P1")] string? location_box = null,
-        [Description("Box corner x, mm")] double? corner_x = null,
-        [Description("Box corner y, mm")] double? corner_y = null,
-        [Description("Strip tag, e.g. -X6")] string? terminal_strip = null,
-        [Description("Terminal number")] string? terminal_number = null,
-        [Description("New strip text (??_??) only")] string? terminal_strip_text = null,
-        [Description("New strip definition [x,y], mm; requires text")] double[]? terminal_strip_position = null,
+        string[]? connection_designations = null,
+        string? location_box = null,
+        double? corner_x = null,
+        double? corner_y = null,
+        string? terminal_strip = null,
+        string? terminal_number = null,
+        string? terminal_strip_text = null,
+        double[]? terminal_strip_position = null,
         [Description("PLC point suffix; tag is existing card")] string? plc_connection_point = null,
-        [Description("PLC I/O address, e.g. I0.0")] string? plc_address = null,
-        [Description("PLC manual symbolic address")] string? plc_symbolic_address = null,
-        [Description("PLC function text (??_??)")] string? plc_text = null,
-        [Description(PageDisplay.Description)] bool show_page = false,
+        string? plc_address = null,
+        string? plc_symbolic_address = null,
+        string? plc_text = null,
+        [Description("Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {

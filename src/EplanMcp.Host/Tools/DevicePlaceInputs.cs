@@ -28,7 +28,7 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["terminal_number"]!["minLength"] = 1;
         schema["properties"]!["terminal_number"]!["maxLength"] = 64;
         schema["properties"]!["terminal_strip_text"]!["maxLength"] = 256;
-        schema["properties"]!["terminal_strip_position"] = JsonNode.Parse("""{"type":["array","null"],"minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000},"description":"New strip definition [x,y], mm; requires terminal_strip_text."}""");
+        schema["properties"]!["terminal_strip_position"] = JsonNode.Parse("""{"type":["array","null"],"minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000}}""");
         schema["dependentRequired"]!["terminal_strip_position"] = JsonNode.Parse("""["terminal_strip","terminal_strip_text"]""");
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");

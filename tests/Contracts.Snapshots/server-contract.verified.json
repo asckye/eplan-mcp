@@ -5298,42 +5298,35 @@
     {
       "name": "eplan_device_place",
       "title": "Place a device on an EPLAN page",
-      "description": "Places a part device, library symbol (including NO/NC contacts or PLC), terminal with its strip, or dashed location box; Ctrl+Z undoes it. Devices inside a location box keep their own structure; no devices are renamed. Sources are exclusive. x, y: mm from bottom left, y up. Outside scratch needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"part\": \"SIE.3RH2122-1HB40\", \"x\": 80, \"y\": 160, \"tag\": \"-KF20\"}.",
+      "description": "Places part devices, library symbols (including NO/NC, PLC), terminals with strips or dashed location boxes on circuit pages. Devices inside a location box keep their own structure; no devices are renamed. x/y: mm, bottom left, y up. One Ctrl+Z undoes it. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "project": {
-            "description": "Project",
             "type": "string"
           },
           "page": {
-            "description": "Circuit page",
             "type": "string"
           },
           "x": {
-            "description": "mm",
             "type": "number"
           },
           "y": {
-            "description": "mm",
             "type": "number"
           },
           "tag": {
-            "description": "Device tag",
             "type": [
               "string",
               "null"
             ]
           },
           "part": {
-            "description": "From eplan_part_search",
             "type": [
               "string",
               "null"
             ]
           },
           "variant": {
-            "description": "Default: 1",
             "type": [
               "string",
               "null"
@@ -5345,21 +5338,18 @@
             "default": false
           },
           "library": {
-            "description": "Project library",
             "type": [
               "string",
               "null"
             ]
           },
           "symbol": {
-            "description": "Symbol name",
             "type": [
               "string",
               "null"
             ]
           },
           "symbol_variant": {
-            "description": "Symbol variant",
             "type": [
               "integer",
               "null"
@@ -5406,7 +5396,6 @@
             }
           },
           "connection_designations": {
-            "description": "Pin designations in order",
             "type": [
               "array",
               "null"
@@ -5418,35 +5407,30 @@
             }
           },
           "location_box": {
-            "description": "Exclusive +location, e.g. +P1",
             "type": [
               "string",
               "null"
             ]
           },
           "corner_x": {
-            "description": "Box corner x, mm",
             "type": [
               "number",
               "null"
             ]
           },
           "corner_y": {
-            "description": "Box corner y, mm",
             "type": [
               "number",
               "null"
             ]
           },
           "terminal_strip": {
-            "description": "Strip tag, e.g. -X6",
             "type": [
               "string",
               "null"
             ]
           },
           "terminal_number": {
-            "description": "Terminal number",
             "type": [
               "string",
               "null"
@@ -5455,7 +5439,6 @@
             "maxLength": 64
           },
           "terminal_strip_text": {
-            "description": "New strip text (??_??) only",
             "type": [
               "string",
               "null"
@@ -5473,8 +5456,7 @@
               "type": "number",
               "minimum": 0,
               "maximum": 10000
-            },
-            "description": "New strip definition [x,y], mm; requires terminal_strip_text."
+            }
           },
           "plc_connection_point": {
             "description": "PLC point suffix; tag is existing card",
@@ -5486,7 +5468,6 @@
             "maxLength": 64
           },
           "plc_address": {
-            "description": "PLC I/O address, e.g. I0.0",
             "type": [
               "string",
               "null"
@@ -5495,7 +5476,6 @@
             "maxLength": 256
           },
           "plc_symbolic_address": {
-            "description": "PLC manual symbolic address",
             "type": [
               "string",
               "null"
@@ -5504,7 +5484,6 @@
             "maxLength": 256
           },
           "plc_text": {
-            "description": "PLC function text (??_??)",
             "type": [
               "string",
               "null"
