@@ -53,6 +53,8 @@ internal sealed record EvalTask(
 
     public TaskFixture Fixture { get; init; } = TaskFixture.Shared;
 
+    public IReadOnlyList<string> ToolSequence { get; init; } = [];
+
     public IReadOnlyDictionary<string, OracleCall> After { get; init; } = new Dictionary<string, OracleCall>();
 }
 
@@ -73,6 +75,7 @@ internal sealed record Check(JsonPath? Answer, ComparisonKind Kind, string? Orac
 /// <summary>Limits of one attempt; going over any of them fails the task.</summary>
 internal sealed record Budget(int MaxToolCalls, TimeSpan MaxDuration, decimal MaxUsd)
 {
+    public int? MaxArgumentRetries { get; init; }
     /// <summary>The spending limit follows Q3 of the design and is confirmed after the first real run.</summary>
     public static Budget Default { get; } = new(20, TimeSpan.FromMinutes(5), 0.50m);
 }

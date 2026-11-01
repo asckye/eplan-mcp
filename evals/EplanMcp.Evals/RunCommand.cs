@@ -95,7 +95,7 @@ internal static class RunCommand
             string run = Directory.CreateDirectory(Path.Combine(evals, name)).FullName;
             string home = Path.Combine(run, "eplanmcp");
             string copiesRoot = Path.Combine(Preflight.ScratchRoot(), "evals", name);
-            EvalsHome.Write(home, ProjectCopies.Writable(copiesRoot));
+            EvalsHome.Write(home, ProjectCopies.Writable(copiesRoot), tasks.Any(t => t.ToolSequence.Contains("eplan_api_try", StringComparer.Ordinal)));
             string mcpConfig = Path.Combine(run, "mcp.json");
             await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);

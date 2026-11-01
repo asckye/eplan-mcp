@@ -1,5 +1,7 @@
 # 工具规格：`eplan_action_try`
 
+参数校验错误附带同名、最接近 TYPE 与已给参数的 `try_template`；模板报告禁用状态，不能绕过拒绝规则。
+
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile | action / full，`config.json` 中 `actionTry:on` 才注册，默认 off |

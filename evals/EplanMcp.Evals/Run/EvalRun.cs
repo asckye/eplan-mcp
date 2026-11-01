@@ -114,6 +114,9 @@ internal static class EvalRun
                     run = run with { Status = AttemptStatus.Invalid, Reason = NotIsolated };
                 }
 
+                if (run.Status == AttemptStatus.Answered && (task.Budget.MaxArgumentRetries is { } max && run.Trace.ArgumentRetries > max || !run.Trace.Follows(task.ToolSequence)))
+                { run = run with { Status = AttemptStatus.Failed, Reason = "argument retries exceeded the budget or the required successful tool sequence was missing" }; }
+
                 Verdict? verdict = null;
                 if (run.Status == AttemptStatus.Answered)
                 {

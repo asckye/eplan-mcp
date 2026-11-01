@@ -154,10 +154,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_catalog_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
 | eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/1 | — | — |
 | eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 1/1/0 | A11 A25 A30 A39 A40 | — |
-| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 2/1/1 | A9 A40 | — |
-| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | — | — |
+| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 3/2/1 | A9 A40 | — |
+| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/3/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1728 | 701 | 5 | 959 | 0 | 2/0/1 | A39 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1728 | 701 | 5 | 959 | 0 | 5/2/1 | A39 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
@@ -197,7 +197,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/2/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 377 | 215 | 63 | 160 | 0 | 1/1/3 | A57 A60 | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 377 | 215 | 63 | 160 | 0 | 2/1/3 | A57 A60 | — |
 | eplan_object_get | read | object.find<br>object.get<br>project.get | 377 | 215 | 63 | 160 | 0 | 1/1/2 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |

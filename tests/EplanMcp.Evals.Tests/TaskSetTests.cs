@@ -44,9 +44,12 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
     {
         EvalTask[] tasks = [.. Files.Select(f => f.Task!)];
 
-        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 30);
+        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 31);
         Assert.InRange(tasks.Count(t => t.Set == TaskSet.Holdout), 5, 10);
         Assert.Contains(tasks, t => t.Id == "holdout-action-try-safety");
+        EvalTask template = Assert.Single(tasks, t => t.Id == "api-try-template");
+        Assert.Equal(0, template.Budget.MaxArgumentRetries);
+        Assert.Equal(["eplan_api_get", "eplan_api_try"], template.ToolSequence);
         Assert.Equal(tasks.Length, tasks.Select(t => t.Prompt).Distinct(StringComparer.Ordinal).Count());
     }
 

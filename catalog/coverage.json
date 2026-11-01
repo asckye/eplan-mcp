@@ -756,8 +756,8 @@
       "dependencies": 55,
       "actions": 0,
       "spec": "docs/tools/eplan_action_try.md",
-      "small": 2,
-      "medium": 1,
+      "small": 3,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A9",
@@ -774,8 +774,8 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_api_get.md",
-      "small": 1,
-      "medium": 2,
+      "small": 4,
+      "medium": 3,
       "large": 0,
       "apiNotes": []
     },
@@ -808,8 +808,8 @@
       "dependencies": 959,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
-      "small": 2,
-      "medium": 0,
+      "small": 5,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A39"
@@ -1713,7 +1713,7 @@
       "dependencies": 160,
       "actions": 0,
       "spec": "docs/tools/eplan_object_find.md",
-      "small": 1,
+      "small": 2,
       "medium": 1,
       "large": 3,
       "apiNotes": [

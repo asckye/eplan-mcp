@@ -51,7 +51,7 @@ internal sealed class ApiTools
 
     [McpServerTool(Name = GetTool, Title = "Describe an offline EPLAN API group", ReadOnly = true,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiGetResult))]
-    [Description("Gets a catalogued API group by exact XML member ID, group key or dictionary type ID, without EPLAN. Pages full overload signatures then tool-level evidence; pass nextCursor as cursor for the rest. Null summaries were not stored in the source. Example: {\"id\":\"D:Function\"}. Discover IDs with eplan_api_search. Catalog status does not authorize execution.")]
+    [Description("Gets an offline API group by exact member ID, group key or dictionary type ID. Returns generated eplan_api_try templates with parameter kinds, sources and examples, or exclusion reasons and alternatives; then signatures and evidence. Pass nextCursor as cursor for more. Example: {\"id\":\"D:Function\"}. Discover IDs with eplan_api_search. Catalog status does not authorize execution.")]
     public static CallToolResult Get(ApiIndex index, [MinLength(1), MaxLength(4096)] string id, [Range(1, 100)] int limit = 20,
         string? cursor = null, CancellationToken cancellationToken = default)
     {
@@ -62,7 +62,7 @@ internal sealed class ApiTools
             violations.Add("id must contain 1 to 4096 characters; use an ID from eplan_api_search.");
         }
         ApiEntry? entry = index.Data.Entries.FirstOrDefault(e => e.Aliases.Contains(id, StringComparer.Ordinal));
-        ApiDetail[] details = entry is null ? [] : [.. entry.Details, .. entry.Row.Tools
+        ApiDetail[] details = entry is null ? [] : [.. entry.Row.Group.StartsWith("O:", StringComparison.Ordinal) ? ApiCallTemplates.For(entry).Select(t => new ApiDetail("try_template", entry.Row.Group, TryTemplate: t)) : [], .. entry.Details, .. entry.Row.Tools
             .SelectMany(t => index.Data.Evidence.GetValueOrDefault(t) ?? []).Distinct()];
         string fingerprint = PageCursor.Fingerprint(GetTool, index.Fingerprint, id, limit.ToString(CultureInfo.InvariantCulture));
         return Page(details, limit, cursor, fingerprint, GetTool, violations,

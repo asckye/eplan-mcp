@@ -36,6 +36,16 @@ public sealed class EvalsHomeTests : IDisposable
     }
 
     [Fact]
+    public void ApiTrialTaskEnablesOnlyItsIsolatedHome()
+    {
+        string home = Path.Combine(_directory.FullName, "trial");
+        EvalsHome.Write(home, "copies", apiTry: true);
+        string config = File.ReadAllText(Path.Combine(home, "config.json"));
+        Assert.Contains("\"apiTry\":\"on\"", config, StringComparison.Ordinal);
+        Assert.Contains("\"writesOutsideScratch\":\"deny\"", config, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AuditedWrites_ReadsALogThatEplanmcpIsStillAppendingTo()
     {
         string audit = Directory.CreateDirectory(Path.Combine(_directory.FullName, "audit")).FullName;

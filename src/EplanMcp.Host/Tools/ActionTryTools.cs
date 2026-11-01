@@ -15,15 +15,17 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
 {
     public const string Tool = "eplan_action_try";
     [McpServerTool(Name = Tool, Title = "Try an unverified catalog action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
-    [Description("Try one unverified catalog action in scratch; full + actionTry:on.\nAlways requires approval; refusal: APPROVAL_DENIED.\nPrefer verified task tools; never retry unknown outcomes.\nExample: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}")]
+    [Description("Try one unverified catalog action in scratch; full + actionTry:on. eplan_action_catalog_get returns try_template parameters, selection guidance and deny status; INVALID_ARGUMENT includes the closest template. Always requires approval; refusal: APPROVAL_DENIED. Prefer verified task tools; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}")]
     public async Task<CallToolResult> TryAsync(string project, string action, string? type = null, JsonElement? parameters = null, bool dry_run = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
+        ActionCatalogData? definitions = null;
         try
         {
             if (config.ActionTry != ActionRunSwitch.On)
             { throw ActionRunCatalog.Denied("Action trials are disabled."); }
-            ActionTryArgs args = Check(await catalog.ReadAsync(cancellationToken).ConfigureAwait(false), project, action, type, parameters ?? default);
+            definitions = await catalog.ReadAsync(cancellationToken).ConfigureAwait(false);
+            ActionTryArgs args = Check(definitions, project, action, type, parameters ?? default);
             var request = new WriteRequest<ActionTryArgs, ActionTryArgs>(Tool, ToolTier.Write, OperationNames.ActionTryPlan, OperationNames.ActionTryExecute, args,
                 p => new() { Project = args.Project, Action = args.Action, Type = args.Type, Parameters = args.Parameters, Fingerprint = p.Fingerprint }, dry_run, TimeSpan.FromSeconds(30), "Trying unverified action")
             { Unverified = true };
@@ -47,7 +49,7 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
             };
             return ToolResults.Success(dry_run ? "Unverified action planned; nothing executed." : "Unverified action finished; inspect the fingerprint comparison.", result);
         }
-        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, definitions is not null && ex.Error.Reason == ErrorReason.InvalidArgument ? ActionCallTemplates.Closest(definitions, action, type, parameters ?? default) : null); }
     }
     private static JsonObject Evidence(Dictionary<string, string> state) => new(state.Where(p => p.Key != "target").OrderBy(p => p.Key, StringComparer.Ordinal).Take(20)
         .Select(p => new KeyValuePair<string, JsonNode?>(p.Key, JsonValue.Create(ResultShaper.CleanText(p.Value)))));

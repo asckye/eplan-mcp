@@ -32,6 +32,8 @@ internal sealed record AttemptRecord(
     double Seconds,
     bool Retry = false)
 {
+    public int ArgumentRetries { get; init; }
+
     /// <summary>Joins what claude did with how its answer graded; <paramref name="verdict"/> is null when nothing was graded.</summary>
     public static AttemptRecord From(int attempt, AgentAttempt run, Verdict? verdict, bool retry = false)
     {
@@ -58,7 +60,8 @@ internal sealed record AttemptRecord(
             trace.Result?.CostUsd ?? 0,
             trace.Result?.Turns ?? 0,
             Math.Round(run.Elapsed.TotalSeconds, 1),
-            retry);
+            retry)
+        { ArgumentRetries = trace.ArgumentRetries };
     }
 }
 

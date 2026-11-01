@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EplanMcp.Evals.Agent;
 using EplanMcp.Evals.Reporting;
 using EplanMcp.Evals.Run;
@@ -281,6 +282,28 @@ public sealed class EvalRunTests
 
     private static FakeToolClient Project(int pages) =>
         new FakeToolClient().Answer("eplan_project_get", """{"counts":{"pages":N}}""".Replace("N", pages.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal));
+
+    [Theory]
+    [InlineData(false, false, "solved")]
+    [InlineData(true, false, "failed")]
+    [InlineData(false, true, "failed")]
+    public async Task ArgumentBudgetAndSuccessfulSequenceAreEnforced(bool rejected, bool missing, string outcome)
+    {
+        AgentAttempt run = Answer("""{"pages":321}""");
+        foreach ((string id, string tool, bool error) in new[] { ("get", "eplan_api_get", false), ("bad", "eplan_api_try", rejected), ("try", missing ? "eplan_api_get" : "eplan_api_try", false) })
+        {
+            run.Trace.Read(JsonSerializer.Serialize(new { type = "assistant", message = new { content = new[] { new { type = "tool_use", id, name = "mcp__eplan__" + tool } } } }));
+            run.Trace.Read(JsonSerializer.Serialize(new { type = "user", message = new { content = new[] { new { type = "tool_result", tool_use_id = id, content = error ? "INVALID_ARGUMENT" : "{}", is_error = error } } } }));
+        }
+        var task = _pageCount with { Budget = Budget.Default with { MaxArgumentRetries = 0 }, ToolSequence = ["eplan_api_get", "eplan_api_try"] };
+        if (missing)
+        { task = task with { ToolSequence = ["eplan_api_get", "eplan_action_try"] }; }
+        var records = new List<TaskRecord>();
+        await EvalRun.RunAsync([task], 1, Project(321), _tools, new FakeRunner(run), TextWriter.Null, records, TimeSpan.Zero, _noCopies, () => 0, TestContext.Current.CancellationToken);
+        AttemptRecord record = Assert.Single(Assert.Single(records).Attempts);
+        Assert.Equal(outcome, record.Outcome);
+        Assert.Equal(rejected ? 1 : 0, record.ArgumentRetries);
+    }
 
     private static AgentAttempt Answer(string json, bool committed = false)
     {

@@ -1,6 +1,8 @@
 using System.IO.Pipelines;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -90,5 +92,43 @@ public sealed class ApiProtocolTests
         Assert.DoesNotContain(ApiTools.GetTool, names);
         Assert.DoesNotContain(ActionCatalogTools.SearchTool, names);
         Assert.DoesNotContain(ActionCatalogTools.GetTool, names);
+    }
+
+    [Fact]
+    public async Task TrialValidationIncludesTemplatesBeforeSdkBindingAndBridgeDispatch()
+    {
+        var toServer = new Pipe();
+        var toClient = new Pipe();
+        var bridge = new FakeBridgeClient();
+        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });
+        builder.Logging.ClearProviders();
+        builder.Services.AddSingleton(HostConfig.Defaults(new(@"D:\test-data")) with { ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
+        builder.Services.AddEplanMcp().WithStreamServerTransport(toServer.Reader.AsStream(), toClient.Writer.AsStream());
+        builder.Services.AddSingleton<IBridgeClient>(bridge);
+        builder.Services.AddSingleton(new ActionCatalogReader(() => (null, null)));
+        using IHost host = builder.Build();
+        CancellationToken token = TestContext.Current.CancellationToken;
+        await host.StartAsync(token);
+        try
+        {
+            await using McpClient client = await McpClient.CreateAsync(new StreamClientTransport(toServer.Writer.AsStream(), toClient.Reader.AsStream()), cancellationToken: token);
+            foreach (bool missing in new[] { false, true })
+            {
+                var api = new Dictionary<string, object?> { ["group"] = "O:Eplan.EplApi.DataModel.Page.GetWriteProtectionFlagSet", ["parameters"] = new { target = "bad", nKind = "wrong" } };
+                var action = new Dictionary<string, object?> { ["action"] = "XEsGetPropertyAction", ["parameters"] = missing ? new[] { "bad" } : (object)new { Unknown = 1 } };
+                if (!missing)
+                { api["project"] = "Scratch"; action["project"] = "Scratch"; }
+                foreach ((string tool, Dictionary<string, object?> args) in new[] { (ApiTryTools.Tool, api), (ActionTryTools.Tool, action) })
+                {
+                    CallToolResult result = await client.CallToolAsync(tool, args, cancellationToken: token);
+                    Assert.True(result.IsError);
+                    using JsonDocument document = JsonDocument.Parse(Assert.IsType<TextContentBlock>(Assert.Single(result.Content)).Text);
+                    Assert.Equal(ErrorReason.InvalidArgument, document.RootElement.GetProperty("error").GetProperty("reason").GetString());
+                    Assert.Equal(tool, document.RootElement.GetProperty("try_template").GetProperty("tool").GetString());
+                }
+            }
+            Assert.Empty(bridge.Calls);
+        }
+        finally { await host.StopAsync(CancellationToken.None); }
     }
 }

@@ -23,7 +23,7 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
         return [.. document.RootElement.EnumerateArray().Select(row => Create(row.GetProperty("action").GetString()!, "official",
             row.GetProperty("type").GetString(), null, null, [.. row.GetProperty("parameters").EnumerateArray().Select(p => p.Clone())],
             row.TryGetProperty("reason", out var reason) ? reason.GetString() : null,
-            "docs/eplan/api-actions.md; row " + row.GetProperty("row").GetRawText() + "; " + row.GetProperty("docUrl").GetString()))];
+            "docs/eplan/api-actions.md; row " + row.GetProperty("row").GetRawText() + "; " + row.GetProperty("docUrl").GetString()) with { Context = [.. row.GetProperty("context").EnumerateArray().Select(c => c.GetString()!)] })];
     }
 
     internal static ActionCatalogItem Create(string name, string source, string? type, string? location, string? text,
@@ -127,7 +127,8 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
             rows.Add(Create(action, "ui", type, location.Length == 0 ? null : location, (string?)element.Attribute("text"),
                 [.. (known?.Parameters ?? []).Concat(parameters.Select(p => JsonSerializer.SerializeToElement(new { name = p.Groups[1].Value })))
                     .DistinctBy(p => p.GetProperty("name").GetString(), StringComparer.Ordinal)], known?.ExcludedReason,
-                reference + ":" + ((string?)element.Parent?.Attribute("name") ?? element.Name.LocalName)));
+                reference + ":" + ((string?)element.Parent?.Attribute("name") ?? element.Name.LocalName)) with
+            { Context = known?.Context });
         }
         return [.. rows];
     }

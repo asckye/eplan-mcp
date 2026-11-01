@@ -27,9 +27,11 @@ internal static class ToolResults
         };
     }
 
-    public static CallToolResult Error(BridgeError error)
+    public static CallToolResult Error(BridgeError error, JsonObject? template = null)
     {
         var body = new JsonObject { ["error"] = JsonSerializer.SerializeToNode(error, HostJson.Options) };
+        if (template is not null)
+        { body["try_template"] = template; }
         return new CallToolResult
         {
             IsError = true,

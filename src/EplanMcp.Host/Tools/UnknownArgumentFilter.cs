@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
+using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -22,7 +23,7 @@ internal static class UnknownArgumentFilter
             {
                 BridgeError error = ToolResults.InvalidArgumentError(["parameters must be a flat object."]);
                 error.Execution = ExecutionState.NotStarted;
-                return ValueTask.FromResult(ToolResults.Error(error));
+                return InvalidAsync(context, error, cancellationToken);
             }
             if (tool?.ProtocolTool.Name is PropertyGetTools.Tool or PropertySetTools.Tool or PlacementCreateTools.Tool)
             {
@@ -42,7 +43,7 @@ internal static class UnknownArgumentFilter
                 {
                     BridgeError error = ToolResults.InvalidArgumentError(violations);
                     error.Execution = ExecutionState.NotStarted;
-                    return ValueTask.FromResult(ToolResults.Error(error));
+                    return InvalidAsync(context, error, cancellationToken);
                 }
 
                 return ValueTask.FromResult(ToolResults.InvalidArguments(violations));
@@ -50,6 +51,18 @@ internal static class UnknownArgumentFilter
 
             return next(context, cancellationToken);
         };
+
+    private static async ValueTask<CallToolResult> InvalidAsync(RequestContext<CallToolRequestParams> context, BridgeError error, CancellationToken cancellationToken)
+    {
+        var args = context.Params?.Arguments;
+        string? Text(string name) => args?.TryGetValue(name, out JsonElement value) == true && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+        JsonElement given = args?.TryGetValue("parameters", out JsonElement supplied) == true ? supplied : default;
+        if (context.Params?.Name == ApiTryTools.Tool && Text("group") is { } group)
+        { return ToolResults.Error(error, ApiCallTemplates.Closest(context.Server.Services!.GetRequiredService<ApiIndex>(), group, given)); }
+        if (context.Params?.Name == ActionTryTools.Tool && Text("action") is { } action)
+        { return ToolResults.Error(error, ActionCallTemplates.Closest(await context.Server.Services!.GetRequiredService<ActionCatalogReader>().ReadAsync(cancellationToken).ConfigureAwait(false), action, Text("type"), given)); }
+        return ToolResults.Error(error);
+    }
 
     /// <summary>
     /// Every argument not in the schema's properties, then every required one that is absent or null; then the same for

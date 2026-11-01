@@ -85,7 +85,7 @@ public sealed class ApiToolTests
             ids.Add(Assert.Single(data.GetProperty("items").EnumerateArray()).GetProperty("id").GetString()!);
             cursor = data.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
-        Assert.Equal(["M:A", "M:A(System.Int32)", "eplan_api_get"], ids);
+        Assert.Equal(["O:A", "M:A", "M:A(System.Int32)", "eplan_api_get"], ids);
         AssertError(ApiTools.Get(index, "missing", cancellationToken: TestContext.Current.CancellationToken), ErrorReason.ResourceNotFound);
         AssertError(ApiTools.Get(index, null!, cancellationToken: TestContext.Current.CancellationToken));
         AssertError(ApiTools.Get(index, "M:A", cursor: new string('x', 1025), cancellationToken: TestContext.Current.CancellationToken));
@@ -104,7 +104,8 @@ public sealed class ApiToolTests
     {
         Assert.NotEqual(true, result.IsError);
         JsonElement data = Assert.IsType<JsonElement>(result.StructuredContent);
-        Assert.Equal(data.GetRawText(), Assert.IsType<TextContentBlock>(result.Content[1]).Text);
+        using JsonDocument text = JsonDocument.Parse(Assert.IsType<TextContentBlock>(result.Content[1]).Text);
+        Assert.True(JsonElement.DeepEquals(data, text.RootElement));
         Assert.False(data.TryGetProperty("execution", out _));
         return data;
     }

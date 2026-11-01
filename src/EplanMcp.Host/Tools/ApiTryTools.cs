@@ -14,7 +14,7 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
     internal const string Tool = "eplan_api_try";
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
-    [Description("Trials scratch properties/methods; approval each call, full + apiTry:on. Example: {\"group\":\"O:Eplan.EplApi.DataModel.Function.Create\",\"project\":\"Scratch\",\"parameters\":{},\"dry_run\":true}. See eplan_tool_usage.")]
+    [Description("Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.")]
     public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = false, CancellationToken cancellationToken = default)
     {
         try
@@ -27,7 +27,7 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
             if (string.IsNullOrWhiteSpace(project) || parameters.ValueKind != JsonValueKind.Object || parameters.GetRawText().Length > 2048
                 || parameters.EnumerateObject().Select(p => p.Name).Distinct(StringComparer.Ordinal).Count() != parameters.EnumerateObject().Count()
                 || parameters.EnumerateObject().Any(p => Kind(p.Value) is "Object" or "Array" or "Null") || !MethodParameters(group, parameters))
-            { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and the exact generated parameter shape (2048 characters maximum): simple values, finite PointD coordinates or discovery locators." }); }
+            { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Supply project and the exact generated parameter shape (2048 characters maximum): simple values, finite PointD coordinates or discovery locators." }, ApiCallTemplates.Closest(index, group, parameters)); }
             ProjectGetData resolved = await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false);
             if (!ScratchPaths.IsInside(resolved.Project.Path, config.ScratchRoots))
             { throw ActionRunCatalog.Denied("API trials are allowed only in scratch projects."); }
@@ -43,7 +43,7 @@ internal sealed class ApiTryTools(IBridgeClient bridge, WritePipeline writes, Ho
                 (object?)data?.Locator ?? ResultShaper.CleanText(data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
                 "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Recovered calls have no inferred readback. " + data?.Warning));
         }
-        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, ex.Error.Reason == ErrorReason.InvalidArgument ? ApiCallTemplates.Closest(index, group, parameters) : null); }
     }
     internal static bool MethodParameters(string group, JsonElement parameters)
     {

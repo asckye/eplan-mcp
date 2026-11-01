@@ -3,7 +3,9 @@ using System.Text.Json;
 namespace EplanMcp.Host.Tools;
 
 internal sealed record ActionCatalogItem(string Name, string Source, string? Type, string? Location, string? UiText,
-    JsonElement[] Parameters, string Tier, string? ExcludedReason, string? WhitelistEntry, string? VerificationReference, string Reference);
+    JsonElement[] Parameters, string Tier, string? ExcludedReason, string? WhitelistEntry, string? VerificationReference, string Reference,
+    [property: System.Text.Json.Serialization.JsonPropertyName("try_template")] System.Text.Json.Nodes.JsonObject? TryTemplate = null,
+    [property: System.Text.Json.Serialization.JsonIgnore] string[]? Context = null);
 internal sealed record ActionCatalogData(ActionCatalogItem[] Items, string? InstallationVersion, string[] Gaps)
 {
     internal string Fingerprint => PageCursor.Fingerprint("action_catalog", JsonSerializer.Serialize(this, HostJson.Options));

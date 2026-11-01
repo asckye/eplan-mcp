@@ -4,6 +4,7 @@
 
 The example action must first be found in the local catalog; discovery grants no execution permission.
 ## Workflow
+eplan_action_catalog_get supplies try_template, known parameters and values, selection guidance and deny-list status. INVALID_ARGUMENT includes the nearest catalog template. Null requiredness or allowed values means the source did not record them.
 Look up the exact action, TYPE and known parameters. Available only with full and actionTry:on. Open only the target scratch copy and make it current. Every execution needs separate engineer approval showing unverified. dry_run only plans. Prefer verified task tools.
 ## Fields
 project and action are required; type exactly matches the catalog TYPE when present. parameters is a flat object of at most 32 string/number/bool values, with names known in the same catalog row. Values are at most 100 characters; paths, slashes, quotes, control characters, target overrides and nested actions are forbidden. Each value goes through AddParameter, just like action_run; no command line is accepted. Results include unverified, execution, before/after, changed and truncated. At most 20 fingerprint entries are displayed; changed compares all evidence. Only business counts and design-file sizes/timestamps are checked; individual changes, rollback and Ctrl+Z remain unverified.

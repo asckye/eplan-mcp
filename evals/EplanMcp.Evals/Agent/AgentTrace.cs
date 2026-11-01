@@ -15,6 +15,8 @@ internal sealed class ToolCall(string id, string tool)
 
     public bool? IsError { get; set; }
 
+    public bool ArgumentRejected { get; set; }
+
     /// <summary>The result reports <c>"execution": "committed"</c>: a write tool changed the project.</summary>
     public bool Committed { get; set; }
 }
@@ -47,6 +49,16 @@ internal sealed partial class AgentTrace
     private readonly List<ToolCall> _calls = [];
 
     public IReadOnlyList<ToolCall> Calls => _calls;
+
+    public int ArgumentRetries => _calls.Count(c => c.ArgumentRejected);
+
+    public bool Follows(IReadOnlyList<string> sequence)
+    {
+        int matched = 0;
+        foreach (ToolCall call in _calls.Where(c => c.IsError == false))
+        { if (matched < sequence.Count && call.Tool == sequence[matched]) { matched++; } }
+        return matched == sequence.Count;
+    }
 
     /// <summary>The tools the session offers the model, from <c>system/init</c>; null until it arrives.</summary>
     public IReadOnlyList<string>? Tools { get; private set; }
@@ -130,6 +142,7 @@ internal sealed partial class AgentTrace
                     if (_calls.FirstOrDefault(c => c.Id == Text(result["tool_use_id"])) is { } call)
                     {
                         call.IsError = result["is_error"] is JsonValue flag && flag.GetValueKind() == JsonValueKind.True;
+                        call.ArgumentRejected = call.IsError == true && ArgumentRejection().IsMatch(ResultText(result["content"]));
                         call.Committed = call.IsError == false && CommittedResult().IsMatch(ResultText(result["content"]));
                     }
                 }
@@ -170,6 +183,9 @@ internal sealed partial class AgentTrace
 
     [GeneratedRegex("\"execution\"\\s*:\\s*\"committed\"", RegexOptions.CultureInvariant)]
     private static partial Regex CommittedResult();
+
+    [GeneratedRegex(@"INVALID_ARGUMENT|\bInputValidationError\b|\b(?:input|argument|schema)\s+validation\s+(?:errors?|failed)\b|\binvalid\s+(?:arguments|params)\b|-32602", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex ArgumentRejection();
 
     private static string? Text(JsonNode? node) => Comparison.Text(node);
 

@@ -19,7 +19,7 @@ internal static partial class TaskLoader
     private const string OraclePrefix = "oracle.";
     private const string AfterPrefix = "after.";
 
-    private static readonly string[] _taskKeys = ["id", "set", "fixture", "prompt", "answer", "oracle", "after", "checks", "budget"];
+    private static readonly string[] _taskKeys = ["id", "set", "fixture", "prompt", "answer", "oracle", "after", "checks", "budget", "tool_sequence"];
     private static readonly string[] _oracleKeys = ["tool", "args", "pick"];
     private static readonly string[] _checkKeys = ["answer", "after", .. Comparison.Names.Keys];
 
@@ -29,7 +29,7 @@ internal static partial class TaskLoader
         ["copy"] = TaskFixture.Copy,
         ["copy_outside_scratch"] = TaskFixture.CopyOutsideScratch,
     };
-    private static readonly string[] _budgetKeys = ["max_tool_calls", "max_minutes", "max_usd"];
+    private static readonly string[] _budgetKeys = ["max_tool_calls", "max_minutes", "max_usd", "max_argument_retries"];
 
     public static IReadOnlyList<TaskFile> LoadDirectory(string directory) =>
         [.. Directory.EnumerateFiles(directory, "*.yaml").Order(StringComparer.Ordinal)
@@ -111,6 +111,14 @@ internal static partial class TaskLoader
 
             List<Check> checks = Required(root, "checks") is { } checksNode ? Checks(checksNode, answer) : [];
             Budget budget = Child(root, "budget") is { } budgetNode && Mapping(budgetNode, "'budget'") is { } map ? BudgetOf(map) : Budget.Default;
+            var sequence = new List<string>();
+            if (Child(root, "tool_sequence") is { } sequenceNode)
+            {
+                if (sequenceNode is not YamlSequenceNode { Children.Count: > 0 } tools)
+                { Problem(sequenceNode, "tool_sequence must be a non-empty sequence of tool names"); }
+                else
+                { foreach (YamlNode node in tools.Children) { if (Text(node, "tool name") is { } tool && ToolName().IsMatch(tool)) { sequence.Add(tool); } else { Problem(node, "Invalid tool name in tool_sequence"); } } }
+            }
             foreach ((string unused, (YamlNode key, _)) in _oracle.Where(o => !_used.Contains(o.Key)))
             {
                 Problem(key, $"oracle '{unused}' is not used by any check");
@@ -122,7 +130,7 @@ internal static partial class TaskLoader
             }
 
             return Problems.Count == 0
-                ? new EvalTask(name, set!.Value, prompt!, answer!, Calls(_oracle), checks, budget) { Fixture = fixture, After = Calls(_after) }
+                ? new EvalTask(name, set!.Value, prompt!, answer!, Calls(_oracle), checks, budget) { Fixture = fixture, After = Calls(_after), ToolSequence = sequence }
                 : null;
         }
 
@@ -353,21 +361,23 @@ internal static partial class TaskLoader
             decimal? calls = Limit(Child(budget, "max_tool_calls"), "max_tool_calls", 200, whole: true);
             decimal? minutes = Limit(Child(budget, "max_minutes"), "max_minutes", 60, whole: false);
             decimal? usd = Limit(Child(budget, "max_usd"), "max_usd", 5, whole: false);
+            decimal? retries = Limit(Child(budget, "max_argument_retries"), "max_argument_retries", 200, whole: true, zero: true);
             return new Budget(
                 calls is { } c ? (int)c : Budget.Default.MaxToolCalls,
                 minutes is { } m ? TimeSpan.FromMinutes((double)m) : Budget.Default.MaxDuration,
-                usd ?? Budget.Default.MaxUsd);
+                usd ?? Budget.Default.MaxUsd)
+            { MaxArgumentRetries = retries is { } r ? (int)r : null };
         }
 
         /// <summary>A positive number up to <paramref name="max"/>; the upper bounds catch typos before they cost.</summary>
-        private decimal? Limit(YamlNode? node, string key, decimal max, bool whole)
+        private decimal? Limit(YamlNode? node, string key, decimal max, bool whole, bool zero = false)
         {
             if (node is null)
             {
                 return null;
             }
 
-            if (Comparison.Number(Json(node)) is { } value && value > 0 && value <= max && (!whole || value == decimal.Truncate(value)))
+            if (Comparison.Number(Json(node)) is { } value && (zero ? value >= 0 : value > 0) && value <= max && (!whole || value == decimal.Truncate(value)))
             {
                 return value;
             }

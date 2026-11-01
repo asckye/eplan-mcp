@@ -134,7 +134,7 @@ public sealed class TaskLoaderTests
         Assert.Null(file.Task);
         Assert.Equal(
             [
-                "line 23: unknown key notes; expected id, set, fixture, prompt, answer, oracle, after, checks, budget",
+                "line 23: unknown key notes; expected id, set, fixture, prompt, answer, oracle, after, checks, budget, tool_sequence",
                 "line 1: id 'device-page' differs from the file name 'device-pages'",
                 "line 2: set 'test' is neither dev nor holdout",
                 "line 3: 'prompt' must be a non-empty string",
@@ -149,7 +149,7 @@ public sealed class TaskLoaderTests
                 "line 19: equals_ignore_case compares with a string",
                 "line 20: set_equals compares with a list",
                 "line 21: a check must be a mapping",
-                "line 22: unknown key max_tokens; expected max_tool_calls, max_minutes, max_usd",
+                "line 22: unknown key max_tokens; expected max_tool_calls, max_minutes, max_usd, max_argument_retries",
                 "line 22: 'max_tool_calls' must be a positive whole number up to 200",
                 "line 22: 'max_minutes' must be a positive number up to 60",
                 "line 22: 'max_usd' must be a positive number up to 5",

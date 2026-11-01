@@ -1,0 +1,8 @@
+id: api-try-template
+set: dev
+fixture: copy
+prompt: 在项目 {project} 中，先查询 Page.GetWriteProtectionFlagSet 的 API 详情，按返回的调用模板取得新定位符并正确试规划 Manual 保护标志读取（dry_run），不执行修改。报告规划状态。
+answer: { type: object, required: [status], properties: { status: { type: string } } }
+checks: [{ answer: $.status, equals: dispatchable }]
+tool_sequence: [eplan_api_get, eplan_api_try]
+budget: { max_tool_calls: 8, max_argument_retries: 0 }

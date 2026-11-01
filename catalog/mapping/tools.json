@@ -404,9 +404,19 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionTryTests.cs"
           },
           {
+            "name": "EvalRunTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
+          },
+          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "ApiProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -448,6 +458,21 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiToolTests.cs"
           },
           {
+            "name": "ArgumentRetryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Agent/ArgumentRetryTests.cs"
+          },
+          {
+            "name": "CallTemplateTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CallTemplateTests.cs"
+          },
+          {
+            "name": "EvalRunTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
+          },
+          {
             "name": "ApiCatalogCoverageTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiCatalogCoverageTests.cs"
@@ -456,6 +481,11 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          },
+          {
+            "name": "TaskSetTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Evals.Tests/TaskSetTests.cs"
           }
         ],
         "operationTests": []
@@ -2249,9 +2279,34 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiTryContractTests.cs"
           },
           {
+            "name": "ArgumentRetryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Agent/ArgumentRetryTests.cs"
+          },
+          {
+            "name": "CallTemplateTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CallTemplateTests.cs"
+          },
+          {
+            "name": "EvalRunTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
+          },
+          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "ApiProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          },
+          {
+            "name": "TaskSetTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Evals.Tests/TaskSetTests.cs"
           },
           {
             "name": "ApiTryTests",
@@ -7739,6 +7794,11 @@
           "A60"
         ],
         "tests": [
+          {
+            "name": "CallTemplateTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CallTemplateTests.cs"
+          },
           {
             "name": "ToolContractTests",
             "size": "Small",

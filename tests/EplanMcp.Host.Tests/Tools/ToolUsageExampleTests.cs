@@ -24,7 +24,7 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed partial class ToolUsageExampleTests : IDisposable
 {
     /// <summary>Tools named before they are registered. Remove the entry when the tool is registered.</summary>
-    private static readonly (string Tool, string Reason)[] _planned = [];
+    private static readonly (string Tool, string Reason)[] _planned = [("eplan_selection_set", "Owner-requested selection guidance; the selection branch registers this tool separately.")];
 
     private static readonly JsonSerializerOptions _readableJson = new(McpJsonUtilities.DefaultOptions)
     {
@@ -182,6 +182,12 @@ public sealed partial class ToolUsageExampleTests : IDisposable
     /// </summary>
     private static IEnumerable<string> Violations(JsonElement schema, JsonElement value, string? path)
     {
+        if (schema.TryGetProperty("const", out JsonElement constant) && !JsonElement.DeepEquals(constant, value))
+        { yield return $"'{path}' must equal {constant.GetRawText()}"; }
+        if (schema.TryGetProperty("oneOf", out JsonElement alternatives) && alternatives.EnumerateArray().Count(s => !Violations(s, value, path).Any()) != 1)
+        { yield return $"'{path}' must match exactly one schema alternative"; yield break; }
+        if (schema.TryGetProperty("pattern", out JsonElement pattern) && value.ValueKind == JsonValueKind.String && !Regex.IsMatch(value.GetString()!, pattern.GetString()!, RegexOptions.CultureInvariant))
+        { yield return $"'{path}' does not match its pattern"; }
         string what = path is null ? "the argument object" : $"'{path}'";
         if (schema.TryGetProperty("type", out JsonElement type) && !TypeNames(type).Any(t => IsOfType(value, t)))
         {

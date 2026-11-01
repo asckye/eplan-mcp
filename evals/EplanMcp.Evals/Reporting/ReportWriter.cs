@@ -81,6 +81,8 @@ internal static class ReportWriter
             Line(text, $"| {(set.Set == "dev" ? "开发集" : "保留集")} | {set.Tasks} | {set.Counted} | {set.Solved} | {Percent(set.SuccessRate)} | {Figure(set.MedianToolCalls)} | {Figure(set.MedianInputTokens)} | {Figure(set.MedianOutputTokens)} | {Figure(set.MedianSeconds)} | {set.CostUsd.ToString("0.00", CultureInfo.InvariantCulture)} |");
         }
 
+        Section(text, "参数重试 argument retries（目标 0）", report.Tasks.SelectMany(t => t.Attempts.Select(a =>
+            string.Create(CultureInfo.InvariantCulture, $"- `{t.Id}` {Label(a)}：{a.ArgumentRetries}"))));
         Section(text, "失败", report.Tasks.SelectMany(t => t.Attempts.Where(a => a.Outcome == Outcome.Failed).SelectMany(a =>
             (IEnumerable<string>)[$"- `{t.Id}` {Label(a)}：{Inline(a.Reason)}", .. a.Failures.Select(f => $"  - {Inline(f)}")])));
         Section(text, "无效（不计入成功率）", report.Tasks.SelectMany(t => t.Invalid is { } invalid

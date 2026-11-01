@@ -1,5 +1,7 @@
 # 工具规格：`eplan_api_try`
 
+参数校验错误附带最接近参数名集合的 `try_template`（含完整示例）；从 `eplan_api_get` 获取的模板与生成分发表一致，不靠失败调用猜测签名。
+
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile | api / full；`config.json` 的 `apiTry: "on"` 显式启用，默认 off 时不注册 |

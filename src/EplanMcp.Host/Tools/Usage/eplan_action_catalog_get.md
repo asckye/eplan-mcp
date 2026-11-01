@@ -5,6 +5,7 @@ Read every official TYPE variant and local definition of backup:
     {"name":"backup","limit":10}
 
 ## Workflow
+Each row includes try_template: the complete eplan_action_try example, known parameter names, recorded requiredness/allowed values, denied parameters and action deny status. Unknown metadata is null. Selection recommendations follow catalog context; requiredness is unknown. eplan_selection_set, when listed by the server, sets the chosen scratch objects before a selection-based trial.
 
 Discover exact names using eplan_action_catalog_search. Names are case-sensitive. Repeat name and limit with nextCursor as cursor until truncated is false. No EPLAN process or Bridge is required; only local installation files are read.
 
