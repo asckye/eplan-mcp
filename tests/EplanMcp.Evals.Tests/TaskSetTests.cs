@@ -44,8 +44,11 @@ public sealed class TaskSetTests(EplanMcpServerFixture server) : IClassFixture<E
     {
         EvalTask[] tasks = [.. Files.Select(f => f.Task!)];
 
-        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Dev), 12, 31);
-        Assert.InRange(tasks.Count(t => t.Set == TaskSet.Holdout), 5, 10);
+        // The design's v0 sizes (about 14 + 6) grow with the tools; what must hold is a real holdout share.
+        int dev = tasks.Count(t => t.Set == TaskSet.Dev), holdout = tasks.Count(t => t.Set == TaskSet.Holdout);
+        Assert.True(dev >= 12, $"dev set has {dev} tasks");
+        Assert.True(holdout >= 5, $"holdout set has {holdout} tasks");
+        Assert.InRange((double)holdout / (dev + holdout), 0.20, 0.35);
         Assert.Contains(tasks, t => t.Id == "holdout-action-try-safety");
         EvalTask template = Assert.Single(tasks, t => t.Id == "api-try-template");
         Assert.Equal(0, template.Budget.MaxArgumentRetries);
