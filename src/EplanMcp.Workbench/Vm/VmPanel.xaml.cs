@@ -106,7 +106,7 @@ public partial class VmPanel : UserControl
             string help = field != HostAddress && view.Running ? Loc.Current["Vm.StopFirst"] : text;
             AutomationProperties.SetHelpText(field, help);
             field.ToolTip = help;
-            field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "Primer.warn" : "Primer.inputBorder");
+            field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "State.Warning.Text" : "Border.Control");
         }
 
         if (!ReferenceEquals(Instance.ItemsSource, view.Processes))

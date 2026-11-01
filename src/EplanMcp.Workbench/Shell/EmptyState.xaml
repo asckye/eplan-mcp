@@ -5,9 +5,9 @@
     x:Name="Root" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center">
   <!-- ERR-05: what is missing, then one sentence on why and what comes next; centred in the page body. -->
   <StackPanel MaxWidth="480">
-    <Path Style="{StaticResource Primer.EmptyImage}" Margin="0,0,0,12" />
-    <TextBlock Text="{Binding Title, ElementName=Root}" Style="{StaticResource Primer.EmptyText}" FontWeight="SemiBold"
-               Foreground="{DynamicResource Primer.text}" />
-    <TextBlock Text="{Binding Text, ElementName=Root}" Style="{StaticResource Primer.EmptyText}" Margin="0,8,0,0" />
+    <Path Style="{StaticResource Primer.EmptyImage}" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
+    <TextBlock Text="{Binding Title, ElementName=Root}" Style="{StaticResource Workbench.EmptyTitle}"
+               Foreground="{DynamicResource Text.Primary}" />
+    <TextBlock Text="{Binding Text, ElementName=Root}" Style="{StaticResource Primer.EmptyText}" Margin="{StaticResource Ui.Gap.Top.XS}" />
   </StackPanel>
 </UserControl>

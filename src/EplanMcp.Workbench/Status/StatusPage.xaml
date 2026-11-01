@@ -13,7 +13,7 @@
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">
       <DockPanel>
-        <Button x:Name="RefreshButton" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="16,0,0,0" Style="{StaticResource Primer.Secondary}"
+        <Button x:Name="RefreshButton" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.Left.Normal}" Style="{StaticResource Primer.Secondary}"
                 Content="{l:Tr Status.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
         <StackPanel>
           <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Status}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
@@ -23,26 +23,26 @@
       </DockPanel>
     </Border>
 
-    <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Margin="0,0,0,12"
+    <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Margin="{StaticResource Ui.Gap.Bottom.SM}"
                  AutomationProperties.Name="{l:Tr Status.Running}" Visibility="Collapsed" />
-    <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Margin="0,0,0,12" Style="{StaticResource Primer.Alert.Error}" Visibility="Collapsed">
+    <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Error}" Visibility="Collapsed">
       <DockPanel>
-        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
         <StackPanel>
           <TextBlock x:Name="ErrorText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
           <TextBox x:Name="ErrorDetails" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=ErrorText}" />
         </StackPanel>
       </DockPanel>
     </Border>
-    <Border x:Name="SuspensionBanner" DockPanel.Dock="Top" Margin="0,0,0,12" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
+    <Border x:Name="SuspensionBanner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
       <DockPanel>
-        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
         <StackPanel>
-          <TextBlock x:Name="SuspensionTitle" Text="{l:Tr Status.Suspended}" Style="{StaticResource Primer.Text}" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="None" />
+          <TextBlock x:Name="SuspensionTitle" Text="{l:Tr Status.Suspended}" Style="{StaticResource Ui.Text.BodyStrong}" TextWrapping="Wrap" TextTrimming="None" />
           <ItemsControl x:Name="Suspensions" Focusable="False">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <TextBlock Text="{Binding Text}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="0,4,0,0" />
+                <TextBlock Text="{Binding Text}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XXS}" />
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
@@ -52,14 +52,14 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
-        <GroupBox Margin="0,0,0,12" AutomationProperties.Name="{l:Tr Addin.Title}">
+        <GroupBox Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.Name="{l:Tr Addin.Title}">
           <GroupBox.Header>
             <TextBlock Text="{l:Tr Addin.Title}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" />
           </GroupBox.Header>
           <StackPanel>
             <TextBlock Text="{l:Tr Addin.Help}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
-            <TextBlock x:Name="VariantHint" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
-            <ItemsControl x:Name="Variants" Focusable="False" AutomationProperties.Name="{l:Tr Addin.Title}" Margin="0,8,0,0">
+            <TextBlock x:Name="VariantHint" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+            <ItemsControl x:Name="Variants" Focusable="False" AutomationProperties.Name="{l:Tr Addin.Title}" Margin="{StaticResource Ui.Gap.Top.XS}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
                   <CheckBox Content="{Binding Text}" IsChecked="{Binding IsSelected, Mode=TwoWay}" AutomationProperties.Name="{Binding Text}"
@@ -67,25 +67,25 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <WrapPanel Margin="0,12,0,0">
-              <Button x:Name="RegisterButton" Content="{l:Tr Addin.Register}" Style="{StaticResource Primer.Run}" Click="OnRegister" Margin="0,0,8,8" />
-              <Button x:Name="UnregisterButton" Content="{l:Tr Addin.Unregister}" Style="{StaticResource Primer.Secondary}" Click="OnUnregister" Margin="0,0,0,8" />
+            <WrapPanel Margin="{StaticResource Ui.Gap.Top.SM}">
+              <Button x:Name="RegisterButton" Content="{l:Tr Addin.Register}" Style="{StaticResource Primer.Run}" Click="OnRegister" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
+              <Button x:Name="UnregisterButton" Content="{l:Tr Addin.Unregister}" Style="{StaticResource Primer.Secondary}" Click="OnUnregister" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
             </WrapPanel>
           </StackPanel>
         </GroupBox>
       <ItemsControl x:Name="Groups" Focusable="False">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
-            <GroupBox Margin="0,0,0,12" AutomationProperties.Name="{Binding Title}">
+            <GroupBox Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.Name="{Binding Title}">
               <GroupBox.Header>
                 <TextBlock Text="{Binding Title}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" TextTrimming="None" />
               </GroupBox.Header>
               <ItemsControl ItemsSource="{Binding Lines}" Focusable="False">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <DockPanel Margin="0,4">
-                      <Path x:Name="Icon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Success}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
-                      <TextBlock DockPanel.Dock="Left" Text="{Binding Severity}" Style="{StaticResource Primer.Text}" FontWeight="SemiBold" Margin="0,0,8,0" VerticalAlignment="Top" />
+                    <DockPanel Margin="{StaticResource Ui.Inset.Vertical.XXS}">
+                      <Path x:Name="Icon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Success}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
+                      <TextBlock DockPanel.Dock="Left" Text="{Binding Severity}" Style="{StaticResource Ui.Text.BodyStrong}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Top" />
                       <TextBlock Text="{Binding Text}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" VerticalAlignment="Top"
                                  AutomationProperties.Name="{Binding AccessibleName}" />
                     </DockPanel>

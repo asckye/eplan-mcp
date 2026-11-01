@@ -224,7 +224,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         Grid.SetRow(DetailArea, wide ? 1 : 2);
         Grid.SetColumn(DetailArea, wide ? 1 : 0);
         Grid.SetColumnSpan(DetailArea, wide ? 1 : 2);
-        DetailArea.Margin = wide ? new Thickness(24, 0, 0, 0) : new Thickness(0, 24, 0, 0);
+        DetailArea.Margin = wide ? (Thickness)FindResource("Ui.Gap.Left.LG") : (Thickness)FindResource("Ui.Gap.Top.LG");
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => ApplyTexts();

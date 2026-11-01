@@ -13,10 +13,10 @@
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">
       <DockPanel>
-        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.Left.Normal}">
           <Button x:Name="ReloadButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.Reload}" AutomationProperties.AcceleratorKey="F5" Click="OnReload" />
-          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.OpenFolder}" Margin="8,0,0,0" Click="OnFolder" />
-          <Button x:Name="VerifyButton" Style="{StaticResource Primer.Run}" Content="{l:Tr Audit.Verify}" Margin="8,0,0,0" Click="OnVerify" />
+          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Audit.OpenFolder}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnFolder" />
+          <Button x:Name="VerifyButton" Style="{StaticResource Primer.Run}" Content="{l:Tr Audit.Verify}" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnVerify" />
         </StackPanel>
         <StackPanel>
           <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Audit}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
@@ -27,17 +27,17 @@
     </Border>
 
     <!-- STS-05: why a command did nothing, where it was given. -->
-    <TextBlock x:Name="Notice" DockPanel.Dock="Top" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="0,0,0,12"
+    <TextBlock x:Name="Notice" DockPanel.Dock="Top" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Bottom.SM}"
                Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
 
     <!-- STS-02, STS-03: what is running, and what came of it, told to screen readers too. -->
-    <StackPanel x:Name="Working" DockPanel.Dock="Top" Margin="0,0,0,12" Visibility="Collapsed">
+    <StackPanel x:Name="Working" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Bottom.SM}" Visibility="Collapsed">
       <TextBlock x:Name="WorkingText" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
-      <ProgressBar x:Name="WorkingBar" Style="{StaticResource Primer.Progress}" Maximum="1" Margin="0,8,0,0" AutomationProperties.Name="{Binding Text, ElementName=WorkingText}" />
+      <ProgressBar x:Name="WorkingBar" Style="{StaticResource Primer.Progress}" Maximum="1" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.Name="{Binding Text, ElementName=WorkingText}" />
     </StackPanel>
-    <Border x:Name="Banner" DockPanel.Dock="Top" Margin="0,0,0,12" Visibility="Collapsed">
+    <Border x:Name="Banner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Bottom.SM}" Visibility="Collapsed">
       <DockPanel>
-        <Path x:Name="BannerIcon" DockPanel.Dock="Left" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <Path x:Name="BannerIcon" DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
         <StackPanel>
           <TextBlock x:Name="BannerText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
           <TextBox x:Name="BannerDetails" Style="{StaticResource Workbench.CodeValue}" Visibility="Collapsed" AutomationProperties.LabeledBy="{Binding ElementName=BannerText}" />
@@ -46,33 +46,33 @@
     </Border>
 
     <!-- Lines that are not records: something changed the log, or an append stopped halfway; audit verify says where. -->
-    <Border x:Name="NotRecordsBanner" DockPanel.Dock="Top" Margin="0,0,0,12" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
+    <Border x:Name="NotRecordsBanner" DockPanel.Dock="Top" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Warning}" Visibility="Collapsed">
       <DockPanel>
-        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="16" Height="16" Margin="0,2,8,0" VerticalAlignment="Top" />
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
         <TextBlock x:Name="NotRecordsText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
       </DockPanel>
     </Border>
 
     <!-- The filters (CTL-03): each with its label above it, all applied together. -->
     <WrapPanel x:Name="Filters" DockPanel.Dock="Top" AutomationProperties.Name="{l:Tr Audit.Filters}">
-      <StackPanel Margin="0,0,12,12" Width="160">
-        <TextBlock x:Name="DayLabel" Text="{l:Tr Audit.Day}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+      <StackPanel Margin="{StaticResource Ui.Gap.Wrap.SM}" Width="160">
+        <TextBlock x:Name="DayLabel" Text="{l:Tr Audit.Day}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
         <ComboBox x:Name="DayFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DayLabel}" SelectionChanged="OnFilter" />
       </StackPanel>
-      <StackPanel Margin="0,0,12,12" Width="200">
-        <TextBlock x:Name="ToolLabel" Text="{l:Tr Audit.Tool}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+      <StackPanel Margin="{StaticResource Ui.Gap.Wrap.SM}" Width="200">
+        <TextBlock x:Name="ToolLabel" Text="{l:Tr Audit.Tool}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
         <ComboBox x:Name="ToolFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ToolLabel}" SelectionChanged="OnFilter" />
       </StackPanel>
-      <StackPanel Margin="0,0,12,12" Width="240">
-        <TextBlock x:Name="ProjectLabel" Text="{l:Tr Audit.Project}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+      <StackPanel Margin="{StaticResource Ui.Gap.Wrap.SM}" Width="240">
+        <TextBlock x:Name="ProjectLabel" Text="{l:Tr Audit.Project}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
         <ComboBox x:Name="ProjectFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ProjectLabel}" SelectionChanged="OnFilter" />
       </StackPanel>
-      <StackPanel Margin="0,0,12,12" Width="160">
-        <TextBlock x:Name="DecisionLabel" Text="{l:Tr Audit.Decision}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+      <StackPanel Margin="{StaticResource Ui.Gap.Wrap.SM}" Width="160">
+        <TextBlock x:Name="DecisionLabel" Text="{l:Tr Audit.Decision}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
         <ComboBox x:Name="DecisionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=DecisionLabel}" SelectionChanged="OnFilter" />
       </StackPanel>
-      <StackPanel Margin="0,0,12,12" Width="160">
-        <TextBlock x:Name="ExecutionLabel" Text="{l:Tr Audit.Execution}" Style="{StaticResource Primer.InputLabel}" Margin="0,0,0,8" />
+      <StackPanel Margin="{StaticResource Ui.Gap.Wrap.SM}" Width="160">
+        <TextBlock x:Name="ExecutionLabel" Text="{l:Tr Audit.Execution}" Style="{StaticResource Primer.InputLabel}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
         <ComboBox x:Name="ExecutionFilter" Style="{StaticResource Primer.Select}" DisplayMemberPath="Text" AutomationProperties.LabeledBy="{Binding ElementName=ExecutionLabel}" SelectionChanged="OnFilter" />
       </StackPanel>
     </WrapPanel>

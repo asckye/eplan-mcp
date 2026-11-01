@@ -1,0 +1,43 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <!-- Thickness resources, unlike Ui.Space.* doubles, can feed Margin and Padding directly. -->
+  <Thickness x:Key="Ui.Gap.Bottom.SM">0,0,0,12</Thickness>
+  <Thickness x:Key="Ui.Gap.Bottom.XS">0,0,0,8</Thickness>
+  <Thickness x:Key="Ui.Gap.ChangesLabel">0,12,0,8</Thickness>
+  <Thickness x:Key="Ui.Gap.Countdown">0,8,0,16</Thickness>
+  <Thickness x:Key="Ui.Gap.DialogIcon">0,4,12,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Drawer">0,8,8,8</Thickness>
+  <Thickness x:Key="Ui.Gap.Icon">0,4,8,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.LG">24,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.Normal">16,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.XS">8,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.XXS">4,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Right.SM">0,0,12,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Right.XS">0,0,8,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Right.XXS">0,0,4,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.LG">0,24,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.Normal">0,16,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.SM">0,12,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.XS">0,8,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Top.XXS">0,4,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Wrap.SM">0,0,12,12</Thickness>
+  <Thickness x:Key="Ui.Gap.Wrap.XS">0,0,8,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Brand">16,0,12,0</Thickness>
+  <Thickness x:Key="Ui.Inset.ClientCard">16,12</Thickness>
+  <Thickness x:Key="Ui.Inset.Code">12,8</Thickness>
+  <Thickness x:Key="Ui.Inset.CodeValue">4,4</Thickness>
+  <Thickness x:Key="Ui.Inset.DrawerFields">24,16,24,0</Thickness>
+  <Thickness x:Key="Ui.Inset.DrawerFooter">24,12,24,24</Thickness>
+  <Thickness x:Key="Ui.Inset.DrawerHeader">24,12,16,12</Thickness>
+  <Thickness x:Key="Ui.Inset.DrawerMessage">24,12,24,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Header">24,0,8,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Horizontal.Normal">16,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Horizontal.XS">8,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Horizontal.XXS">4,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Input">8,4</Thickness>
+  <Thickness x:Key="Ui.Inset.SiderToggle">4,4,4,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Vertical.XS">0,8,0,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Vertical.XXS">0,4</Thickness>
+  <sys:Double x:Key="Ui.IconSize.Caption">12</sys:Double>
+  <sys:Double x:Key="Ui.IconSize.Small">16</sys:Double>
+  <sys:Double x:Key="Ui.IconSize.Large">20</sys:Double>
+</ResourceDictionary>

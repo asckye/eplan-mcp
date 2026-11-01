@@ -49,7 +49,7 @@ public partial class ClientsPage
             string help = field.IsEnabled ? text : Loc.Current["Clients.Running"];
             AutomationProperties.SetHelpText(field, help);
             field.ToolTip = help;
-            field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "Primer.diffRed" : "Primer.inputBorder");
+            field.SetResourceReference(BorderBrushProperty, text.Length > 0 ? "State.Error.Text" : "Border.Control");
             if (error.Text != text)
             { error.Text = text; AccessibleStatus.Announce(error); }
         }

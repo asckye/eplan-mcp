@@ -65,7 +65,9 @@ public sealed partial class ThemeContrastTests(WpfContext wpf)
             foreach ((string text, string surface, double minimum) in _textPairs.Select(p => (p.Text, p.Surface, 4.5)).Concat(_graphicPairs.Select(p => (p.Graphic, p.Surface, 3.0))))
             {
                 Color background = Composite(Token(surface), window);
-                double contrast = Contrast(Composite(Token(text), background), background);
+                // COL-03: the selected row replaces all inner text/graphics with the paired highlight text.
+                string foreground = palette == Palette.HighContrast && surface == "Primer.cardSel" ? "Text.Selected" : text;
+                double contrast = Contrast(Composite(Token(foreground), background), background);
                 if (contrast < minimum)
                 {
                     failures.Add($"{palette}: {text} on {surface} = {contrast:F2}, needs {minimum}");
@@ -89,15 +91,19 @@ public sealed partial class ThemeContrastTests(WpfContext wpf)
     [Fact]
     public void HighContrast_TakesEveryColourFromTheSystem()
     {
-        XDocument palette = XDocument.Parse(SourceScan.Single("Tia/Themes/Palette.HighContrast.xaml").Text);
-
-        Assert.All(palette.Root!.Elements(), brush => Assert.Matches(SystemColour(), (string?)brush.Attribute("Color") ?? string.Empty));
+        foreach (string path in new[] { "Tia/Themes/Palette.HighContrast.xaml", "Themes/Palette.HighContrast.xaml" })
+        {
+            XDocument palette = XDocument.Parse(SourceScan.Single(path).Text);
+            Assert.All(palette.Root!.Elements().Where(e => ((string?)e.Attribute("{http://schemas.microsoft.com/winfx/2006/xaml}Key"))?.StartsWith("Primer.", StringComparison.Ordinal) == true
+                || path.StartsWith("Tia/", StringComparison.Ordinal)), brush => Assert.Matches(SystemColour(), (string?)brush.Attribute("Color") ?? string.Empty));
+        }
     }
 
     [Fact]
     public void Colours_LiveOnlyInThePalettes()
     {
-        SourceFile[] files = [.. SourceScan.Markup.Concat(SourceScan.Code).Where(f => !f.Path.StartsWith("Tia/Themes/Palette.", StringComparison.Ordinal))];
+        SourceFile[] files = [.. SourceScan.Markup.Concat(SourceScan.Code).Where(f => !f.Path.StartsWith("Tia/Themes/Palette.", StringComparison.Ordinal)
+            && !f.Path.StartsWith("Themes/Palette.", StringComparison.Ordinal))];
         IEnumerable<string> brushes = files.Where(f => f.Path.EndsWith(".xaml", StringComparison.Ordinal))
             .SelectMany(f => XDocument.Parse(f.Text).Descendants().Where(e => e.Name.LocalName.EndsWith("Brush", StringComparison.Ordinal)).Select(e => $"{f.Path}: {e.Name.LocalName}"));
         IEnumerable<string> literals = files.SelectMany(f => LiteralColour().Matches(f.Text).Select(m => $"{f.Path}: {m.Value}"));

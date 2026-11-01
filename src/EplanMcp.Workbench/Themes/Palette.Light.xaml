@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Project aliases wrap the unchanged TIA palette; ThemeManager still swaps Themes/Palette.*. -->
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="../Tia/Themes/Palette.Light.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Input" Color="{Binding Color, Source={StaticResource Primer.input}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Button" Color="{Binding Color, Source={StaticResource Primer.pill}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Elevated" Color="{Binding Color, Source={StaticResource Primer.menuBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Subtle" Color="{Binding Color, Source={StaticResource Primer.cardSoft}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Code" Color="{Binding Color, Source={StaticResource Primer.codeBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Selected" Color="{Binding Color, Source={StaticResource Primer.cardSel}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Hover" Color="{Binding Color, Source={StaticResource Primer.pillHover}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Scrim" Color="{Binding Color, Source={StaticResource Ant.colorBgMask}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Tooltip" Color="{Binding Color, Source={StaticResource Ant.colorBgSpotlight}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Primary" Color="{Binding Color, Source={StaticResource Primer.text}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Code" Color="{Binding Color, Source={StaticResource Primer.codeText}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Secondary" Color="{Binding Color, Source={StaticResource Primer.textMuted}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Faint" Color="{Binding Color, Source={StaticResource Primer.textFaint}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Disabled" Color="{Binding Color, Source={StaticResource Ant.colorTextDisabled}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Selected" Color="{Binding Color, Source={StaticResource Primer.selectedText}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.OnAccent" Color="{Binding Color, Source={StaticResource Primer.onAccent}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.OnHighlight" Color="{Binding Color, Source={StaticResource Ant.colorWhite}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.OnPrimary" Color="{Binding Color, Source={StaticResource Primer.primaryText}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Text.Tooltip" Color="{Binding Color, Source={StaticResource Ant.colorTextLightSolid}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Layer" Color="{Binding Color, Source={StaticResource Primer.cardBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Divider" Color="{Binding Color, Source={StaticResource Primer.divider}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Button" Color="{Binding Color, Source={StaticResource Ant.colorBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Control" Color="{Binding Color, Source={StaticResource Primer.inputBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Check" Color="{Binding Color, Source={StaticResource Primer.checkBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.FocusOuter" Color="{Binding Color, Source={StaticResource Primer.focusOuter}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.FocusInner" Color="{Binding Color, Source={StaticResource Primer.focusInner}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Accent.Text" Color="{Binding Color, Source={StaticResource Primer.accent}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Accent.Graphic" Color="{Binding Color, Source={StaticResource Ant.colorPrimary}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Accent.Button" Color="{Binding Color, Source={StaticResource Primer.primaryBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Accent.HoverText" Color="{Binding Color, Source={StaticResource Ant.colorLinkHover}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Success.Text" Color="{Binding Color, Source={StaticResource Primer.ok}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Success.Background" Color="{Binding Color, Source={StaticResource Primer.okBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Success.Border" Color="{Binding Color, Source={StaticResource Ant.colorSuccessBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Warning.Text" Color="{Binding Color, Source={StaticResource Primer.warn}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Warning.Background" Color="{Binding Color, Source={StaticResource Primer.warnBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Warning.Border" Color="{Binding Color, Source={StaticResource Ant.colorWarningBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Warning.CountBackground" Color="{Binding Color, Source={StaticResource Primer.countWarningBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Text" Color="{Binding Color, Source={StaticResource Primer.diffRed}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Graphic" Color="{Binding Color, Source={StaticResource Ant.colorError}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Background" Color="{Binding Color, Source={StaticResource Ant.colorErrorBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Border" Color="{Binding Color, Source={StaticResource Ant.colorErrorBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Solid" Color="{Binding Color, Source={StaticResource Ant.colorErrorSolid}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Info.Text" Color="{Binding Color, Source={StaticResource Primer.noteAccent}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Info.Background" Color="{Binding Color, Source={StaticResource Primer.noteBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Info.Border" Color="{Binding Color, Source={StaticResource Primer.noteBorder}, Mode=OneWay}" />
+</ResourceDictionary>

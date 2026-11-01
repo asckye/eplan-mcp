@@ -30,7 +30,7 @@
     <KeyBinding Key="F6" Modifiers="Shift" Command="{x:Static shell:MainWindow.RegionCommand}" CommandParameter="-1" />
   </Window.InputBindings>
 
-  <Grid x:Name="Root" Background="{DynamicResource Primer.bg}">
+  <Grid x:Name="Root" Background="{DynamicResource Surface.Window}">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition Width="*" />
@@ -46,20 +46,20 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid MinHeight="56" Margin="16,0,12,0">
+        <Grid MinHeight="56" Margin="{StaticResource Ui.Inset.Brand}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Border Style="{StaticResource Primer.BrandDot}" />
-          <TextBlock x:Name="Brand" Grid.Column="1" Text="{l:Tr App.Name}" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" Margin="8,0" />
+          <TextBlock x:Name="Brand" Grid.Column="1" Text="{l:Tr App.Name}" Style="{StaticResource Ui.Text.BodyStrong}" TextTrimming="None" VerticalAlignment="Center" TextWrapping="Wrap" Margin="{StaticResource Ui.Inset.Horizontal.XS}" />
           <Border x:Name="VersionChip" Grid.Column="2" Style="{StaticResource Primer.Chip}">
             <TextBlock x:Name="VersionText" Style="{StaticResource Primer.Mono.text}" />
           </Border>
         </Grid>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-          <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="0,8,0,0">
+          <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="{StaticResource Ui.Gap.Top.XS}">
             <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Bell}" Content="{l:Tr Page.Approvals}"
                          AutomationProperties.Name="{l:Tr Page.Approvals}" AutomationProperties.AcceleratorKey="Ctrl+1"
                          AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
@@ -76,7 +76,7 @@
         </ScrollViewer>
         <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource Primer.MenuButton}" ux:Ux.Icon="{DynamicResource Icon.Setting}" Content="{l:Tr Settings.Title}"
                 AutomationProperties.Name="{l:Tr Settings.Title}" Click="OnSettings" />
-        <Button x:Name="SiderToggle" Grid.Row="3" Style="{StaticResource Primer.MenuButton}" Margin="4,4,4,8" Click="OnSiderToggle" />
+        <Button x:Name="SiderToggle" Grid.Row="3" Style="{StaticResource Primer.MenuButton}" Margin="{StaticResource Ui.Inset.SiderToggle}" Click="OnSiderToggle" />
       </Grid>
     </Border>
 
@@ -89,7 +89,7 @@
       <!-- Header: breadcrumb (secondary text, not a heading), the status area, the window buttons. -->
       <Border x:Name="Header" Style="{StaticResource Primer.HeaderBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
         <!-- Columns, not docking, so that the Tab order is the visual order (KEY-02). -->
-        <Grid MinHeight="56" Margin="24,0,8,0">
+        <Grid MinHeight="56" Margin="{StaticResource Ui.Inset.Header}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -97,23 +97,23 @@
           </Grid.ColumnDefinitions>
           <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock Text="{l:Tr Shell.Breadcrumb}" Style="{StaticResource Primer.Breadcrumb}" />
-            <TextBlock Text="/" Margin="8,0" Style="{StaticResource Primer.Breadcrumb}" />
+            <TextBlock Text="/" Margin="{StaticResource Ui.Inset.Horizontal.XS}" Style="{StaticResource Primer.Breadcrumb}" />
             <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
           </StackPanel>
           <!--
             STS-11: whether approvals are taken, always, in words, and when not, why and that the EPLAN dialog asks instead;
             STS-10: the waiting count, which opens the queue.
           -->
-          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource Ui.Inset.Horizontal.Normal}" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Click="OnPendingBadge" />
-            <Path x:Name="PipeIcon" Width="14" Height="14" Margin="8,0" VerticalAlignment="Center" />
+            <Path x:Name="PipeIcon" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Inset.Horizontal.XS}" VerticalAlignment="Center" />
             <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" MaxWidth="360" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">
               <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
             </Button>
-            <Button x:Name="MaximizeButton" Style="{StaticResource Primer.WindowButton}" Margin="4,0" Click="OnMaximize">
+            <Button x:Name="MaximizeButton" Style="{StaticResource Primer.WindowButton}" Margin="{StaticResource Ui.Inset.Horizontal.XXS}" Click="OnMaximize">
               <Path x:Name="MaximizeGlyph" Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
             </Button>
             <Button x:Name="CloseButton" Style="{StaticResource Primer.WindowButton}" Click="OnClose">
@@ -123,7 +123,7 @@
         </Grid>
       </Border>
 
-      <Grid x:Name="Body" Grid.Row="1" Margin="24" AutomationProperties.Name="{l:Tr Shell.Content}">
+      <Grid x:Name="Body" Grid.Row="1" Margin="{StaticResource Ui.Padding.Content}" AutomationProperties.Name="{l:Tr Shell.Content}">
         <approvals:ApprovalsPage x:Name="ApprovalsPage" />
         <audit:AuditPage x:Name="AuditPage" />
         <status:StatusPage x:Name="StatusPage" />

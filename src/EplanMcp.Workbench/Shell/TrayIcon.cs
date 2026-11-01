@@ -127,13 +127,13 @@ internal sealed class TrayIcon : IDisposable
         using (Graphics graphics = Graphics.FromImage(bitmap))
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var brand = new SolidBrush(Token("Ant.colorPrimary"));
+            using var brand = new SolidBrush(Token("Accent.Graphic"));
             graphics.FillEllipse(brand, 1, 1, size.Width - 2, size.Height - 2);
             if (badge.Length > 0)
             {
                 var area = new RectangleF(size.Width * 0.35f, size.Height * 0.35f, size.Width * 0.65f, size.Height * 0.65f);
-                using var fill = new SolidBrush(Token("Primer.warn"));
-                using var ink = new SolidBrush(Token("Primer.onAccent"));
+                using var fill = new SolidBrush(Token("State.Warning.Text"));
+                using var ink = new SolidBrush(Token("Text.OnAccent"));
                 using var font = new Font(SystemFonts.MessageBoxFont!.FontFamily, size.Height * 0.42f, System.Drawing.FontStyle.Bold, GraphicsUnit.Pixel);
                 using var centred = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                 graphics.FillEllipse(fill, area);

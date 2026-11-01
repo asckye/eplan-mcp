@@ -35,9 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- TIA's ThemeManager loads the palettes from .../component/Themes/: the vendored dictionaries keep that path. -->
+    <!-- ThemeManager loads Themes/Palette.* wrappers; their merged TIA palettes remain unchanged at Tia/Themes/. -->
     <Page Remove="Tia\Themes\*.xaml" />
-    <Page Include="Tia\Themes\*.xaml" Link="Themes\%(Filename)%(Extension)" />
+    <Page Include="Tia\Themes\Primer.xaml;Tia\Themes\Icons.xaml" Link="Themes\%(Filename)%(Extension)" />
+    <Page Include="Tia\Themes\Palette.*.xaml" />
   </ItemGroup>
 
   <!--

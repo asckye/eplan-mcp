@@ -10,11 +10,11 @@
     language, theme and start at login, which apply at once (LOC-08, COL-09, CMD-08), and config.json read only, with a
     way to open it in its own program (NAV-10). Nothing here changes approvals (APR-16) or the Host's settings.
   -->
-  <Border Width="400" Margin="0,8,8,8" HorizontalAlignment="Right" Style="{StaticResource Primer.Drawer}"
+  <Border Width="400" Margin="{StaticResource Ui.Gap.Drawer}" HorizontalAlignment="Right" Style="{StaticResource Primer.Drawer}"
           AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Settings.Title}"
           KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle">
     <DockPanel>
-      <Border DockPanel.Dock="Top" Padding="24,12,16,12" Style="{StaticResource Primer.Divider}">
+      <Border DockPanel.Dock="Top" Padding="{StaticResource Ui.Inset.DrawerHeader}" Style="{StaticResource Primer.Divider}">
         <DockPanel>
           <Button x:Name="CloseButton" DockPanel.Dock="Right" Style="{StaticResource Primer.WindowButton}" Click="OnClose"
                   AutomationProperties.Name="{l:Tr Settings.Close}" ToolTip="{l:Tr Settings.Close}">
@@ -25,17 +25,17 @@
         </DockPanel>
       </Border>
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="24">
+      <StackPanel Margin="{StaticResource Ui.Padding.Content}">
         <TextBlock x:Name="LanguageLabel" Text="{l:Tr Settings.Language}" Style="{StaticResource Primer.SectionLabel}" />
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=LanguageLabel}"
+        <StackPanel Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=LanguageLabel}"
                     AutomationProperties.Name="{l:Tr Settings.Language}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
           <RadioButton GroupName="Language" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.Chinese}" AutomationProperties.Name="{l:Tr Settings.Chinese}"
                        IsChecked="{Binding IsChinese, Source={x:Static l:Loc.Current}}" />
           <RadioButton GroupName="Language" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.English}" AutomationProperties.Name="{l:Tr Settings.English}"
                        IsChecked="{Binding IsEnglish, Source={x:Static l:Loc.Current}}" />
         </StackPanel>
-        <TextBlock x:Name="ThemeLabel" Text="{l:Tr Settings.Theme}" Style="{StaticResource Primer.SectionLabel}" Margin="0,24,0,0" />
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=ThemeLabel}"
+        <TextBlock x:Name="ThemeLabel" Text="{l:Tr Settings.Theme}" Style="{StaticResource Primer.SectionLabel}" Margin="{StaticResource Ui.Gap.Top.LG}" />
+        <StackPanel Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=ThemeLabel}"
                     AutomationProperties.Name="{l:Tr Settings.Theme}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
           <RadioButton GroupName="Theme" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.ThemeSystem}" AutomationProperties.Name="{l:Tr Settings.ThemeSystem}"
                        IsChecked="{Binding IsAuto, Source={x:Static themes:ThemeManager.Current}}" />
@@ -44,19 +44,19 @@
           <RadioButton GroupName="Theme" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.ThemeDark}" AutomationProperties.Name="{l:Tr Settings.ThemeDark}"
                        IsChecked="{Binding IsDark, Source={x:Static themes:ThemeManager.Current}}" />
         </StackPanel>
-        <TextBlock Text="{l:Tr Settings.HighContrast}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
+        <TextBlock Text="{l:Tr Settings.HighContrast}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}" />
 
-        <TextBlock x:Name="LoginLabel" Text="{l:Tr Settings.Login}" Style="{StaticResource Primer.SectionLabel}" Margin="0,24,0,0" />
-        <ToggleButton x:Name="LoginSwitch" Style="{StaticResource Primer.Switch}" Margin="0,8,0,0" HorizontalAlignment="Left" Content="{l:Tr Settings.LoginSwitch}"
+        <TextBlock x:Name="LoginLabel" Text="{l:Tr Settings.Login}" Style="{StaticResource Primer.SectionLabel}" Margin="{StaticResource Ui.Gap.Top.LG}" />
+        <ToggleButton x:Name="LoginSwitch" Style="{StaticResource Primer.Switch}" Margin="{StaticResource Ui.Gap.Top.XS}" HorizontalAlignment="Left" Content="{l:Tr Settings.LoginSwitch}"
                       AutomationProperties.Name="{l:Tr Settings.LoginSwitch}" Checked="OnLogin" Unchecked="OnLogin" />
         <TextBlock x:Name="LoginError" Text="{l:Tr Settings.LoginFailed}" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None"
-                   Margin="0,8,0,0" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+                   Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
 
-        <TextBlock x:Name="ConfigLabel" Text="{l:Tr Settings.Config}" Style="{StaticResource Primer.SectionLabel}" Margin="0,24,0,0" />
-        <TextBlock x:Name="ConfigPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" />
-        <TextBox x:Name="ConfigText" Style="{StaticResource Workbench.ProjectData}" MaxHeight="240" Margin="0,8,0,0" AutomationProperties.LabeledBy="{Binding ElementName=ConfigLabel}" />
-        <Button x:Name="ConfigButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenConfig}" Margin="0,8,0,0" HorizontalAlignment="Left" Click="OnOpenConfig" />
-        <TextBlock x:Name="ConfigProblem" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0"
+        <TextBlock x:Name="ConfigLabel" Text="{l:Tr Settings.Config}" Style="{StaticResource Primer.SectionLabel}" Margin="{StaticResource Ui.Gap.Top.LG}" />
+        <TextBlock x:Name="ConfigPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}" />
+        <TextBox x:Name="ConfigText" Style="{StaticResource Workbench.ProjectData}" MaxHeight="240" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=ConfigLabel}" />
+        <Button x:Name="ConfigButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenConfig}" Margin="{StaticResource Ui.Gap.Top.XS}" HorizontalAlignment="Left" Click="OnOpenConfig" />
+        <TextBlock x:Name="ConfigProblem" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}"
                    Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
       </StackPanel>
       </ScrollViewer>
