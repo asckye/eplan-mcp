@@ -16,6 +16,8 @@
 param([Parameter(Mandatory)][string]$ResultsDirectory, [string[]]$Assemblies)
 
 $ErrorActionPreference = 'Stop'
+# local-gate.ps1 passes the list as one comma-separated string (pwsh -File splits arrays into separate arguments).
+$Assemblies = @($Assemblies | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $suites = @((Get-Content (Join-Path $root 'tests/test-suites.json') -Raw | ConvertFrom-Json).suites)
 if ($Assemblies) { $suites = @($suites | Where-Object { $_.assembly -in $Assemblies }) }
