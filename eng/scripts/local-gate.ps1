@@ -61,8 +61,9 @@ Step 'Commit messages' {
     $message = New-TemporaryFile
     try {
         foreach ($sha in git rev-list "$base..HEAD") {
-            git log -1 --format=%B $sha | Set-Content -NoNewline -Encoding utf8 $message
-            & $bash eng/scripts/check-commit-message.sh $message.FullName
+            # Keep the lines: the trailer rules are anchored per line, and -NoNewline alone would join them into one.
+            (git log -1 --format=%B $sha) -join "`n" | Set-Content -NoNewline -Encoding utf8 $message
+            & $bash eng/scripts/check-commit-message.sh --subject $message.FullName
             if ($LASTEXITCODE -ne 0) { throw "Commit $sha violates the commit rules." }
         }
     } finally { Remove-Item $message }
@@ -93,17 +94,21 @@ try {
         } else { Write-Output '   no test assembly is affected'; $global:LASTEXITCODE = 0 }
     }
     Step 'Test count floor' {
+        # No affected assembly means no results to judge; an empty list would otherwise read as every suite.
+        if ($affected.Count -eq 0) { Write-Output '   no test assembly is affected'; $global:LASTEXITCODE = 0; return }
         $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies ($affected -join ',') 2>&1; $floorExit = $LASTEXITCODE
         # TRX names carry only a timestamp, so two assemblies finishing together can overwrite each other's file; rerun
         # an assembly that left no results on its own before judging the floor.
+        $rerunFailed = $false
         $missing = @($floor | Select-String '(\S+) has no test results' | ForEach-Object { $_.Matches[0].Groups[1].Value })
         foreach ($assembly in $missing) {
             Write-Output "   rerunning $assembly for its results"
             dotnet test --project "tests/$assembly" -c Release --no-build -- --filter-not-trait "Size=Large" --report-xunit-trx --results-directory $results | Out-Null
+            if ($LASTEXITCODE -ne 0) { $rerunFailed = $true; Write-Output "   $assembly failed when rerun" }
         }
         if ($missing.Count -gt 0) { $floor = pwsh -NoProfile -File eng/scripts/check-test-floor.ps1 -ResultsDirectory $results -Assemblies ($affected -join ',') 2>&1; $floorExit = $LASTEXITCODE }
         $floor | ForEach-Object { Write-Output "   $_" }
-        $global:LASTEXITCODE = if ($floorExit -ne 0 -or ($floor | Select-String 'has no test results|below its floor|is not in tests/test-suites.json')) { 1 } else { 0 }
+        $global:LASTEXITCODE = if ($rerunFailed -or $floorExit -ne 0 -or ($floor | Select-String 'has no test results|below its floor|is not in tests/test-suites.json')) { 1 } else { 0 }
     }
     Step 'Vulnerable packages' {
         $data = dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive --format json | Out-String | ConvertFrom-Json

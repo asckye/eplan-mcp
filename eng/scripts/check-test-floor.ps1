@@ -20,6 +20,8 @@ $ErrorActionPreference = 'Stop'
 $Assemblies = @($Assemblies | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $suites = @((Get-Content (Join-Path $root 'tests/test-suites.json') -Raw | ConvertFrom-Json).suites)
+$unknown = @($Assemblies | Where-Object { $_ -notin $suites.assembly })
+if ($unknown) { Write-Error "Unknown test assemblies: $($unknown -join ', '); they are not in tests/test-suites.json." -ErrorAction Continue; exit 1 }
 if ($Assemblies) { $suites = @($suites | Where-Object { $_.assembly -in $Assemblies }) }
 $passed = @{}
 foreach ($file in Get-ChildItem $ResultsDirectory -Filter *.trx -ErrorAction SilentlyContinue) {
