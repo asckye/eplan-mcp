@@ -10,6 +10,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_catalog_get.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -42,6 +43,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_catalog_search.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -216,7 +218,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_run.md",
-        "specStatus": "v0.4.0 第 2 批已实现并经 Large 实测：提交、一次撤销恢复、更早的撤销历史保留（[A50][a50]）",
+        "specStatus": "Implemented (v0.2.0)",
         "apiNotes": [
           "A11",
           "A25",
@@ -392,7 +394,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_try.md",
-        "specStatus": "Implemented；实机验证待运行（ADR-0030、ADR-0032）",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A9",
           "A40"
@@ -449,7 +451,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_get.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -507,7 +509,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_search.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -2278,7 +2280,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_try.md",
-        "specStatus": "Implemented（C1 Files、静态成员与属性入口切片未实机验证；工具数不变）",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A39",
           "A56"
@@ -2370,7 +2372,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_asset_get.md",
-        "specStatus": "Proposed（M6 第 1 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -2393,7 +2395,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_asset_review.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -2426,7 +2428,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_asset_search.md",
-        "specStatus": "Proposed（M6 第 1 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A33"
         ],
@@ -2456,7 +2458,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_asset_update.md",
-        "specStatus": "Proposed（M6 第 1 阶段的部分：候选、模块元数据、物料对应表、缺口；工作流在第 3 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -2538,7 +2540,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cabinet_bind.md",
-        "specStatus": "已实现；pack / full / 本地数据；四注解 false/false/true/false",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -2651,7 +2653,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cabinet_list.md",
-        "specStatus": "已实现；pack / full / Read；四注解 true/false/true/false",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -2828,7 +2830,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_cable_generate.md",
-        "specStatus": "Proposed（S34 已验证参数与改名风险；实际新增自动电缆的正向场景未验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A24",
           "A30",
@@ -2961,7 +2963,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cable_get.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A24"
         ],
@@ -3160,7 +3162,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cable_renumber.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A24"
         ],
@@ -3236,7 +3238,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_check_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A12"
         ],
@@ -3400,7 +3402,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_check_run.md",
-        "specStatus": "Proposed（M4 第 6 步；已实现，2026-10-20 实机验证，见 api-notes A20）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
           "A16",
@@ -3692,6 +3694,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_connection_create.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A52",
           "A55"
@@ -3885,7 +3888,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_connection_generate.md",
-        "specStatus": "Proposed（M3b 第 5 步；已实现，等待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A3",
           "A11",
@@ -4045,7 +4048,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_connection_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -4260,7 +4263,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_connection_number.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A24"
         ],
@@ -4407,7 +4410,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_context_get.md",
-        "specStatus": "已实现最小只读聚合（P24）；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准；Large 待实跑",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [
           "A20",
           "A33",
@@ -4572,7 +4575,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_device_get.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -4738,7 +4741,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_device_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
           "A12"
@@ -5123,7 +5126,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_device_place.md",
-        "specStatus": "Proposed（M4c 第二批）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A13",
           "A14",
@@ -5317,7 +5320,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_device_renumber.md",
-        "specStatus": "Proposed（M4 第 12 步；已实现，2026-10-20 实机验证并修复崩溃，见 api-notes A20）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A14",
           "A18",
@@ -5437,7 +5440,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_device_update.md",
-        "specStatus": "Proposed（M3a 第 11 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A3",
           "A11",
@@ -5541,7 +5544,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_dxf.md",
-        "specStatus": "Proposed（M4 第 8 步；已实现，待实机验证；取消时通知 Bridge 依赖第 4 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A16"
         ],
@@ -5640,7 +5643,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_image.md",
-        "specStatus": "Proposed（M4 第 8 步；已实现，待实机验证；Bridge 分步进度的转发和取消时通知 Bridge 依赖第 4 步；`inline` 待 S13 确认）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A14",
           "A16"
@@ -5771,7 +5774,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_labels.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A24",
           "A25",
@@ -5861,7 +5864,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_parts.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A25"
         ],
@@ -5965,7 +5968,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_pdf.md",
-        "specStatus": "Proposed（M4 第 8 步；已实现，待实机验证；取消时通知 Bridge 依赖第 4 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A16"
         ],
@@ -6043,7 +6046,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_pxf.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A25"
         ],
@@ -6128,7 +6131,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_export_untranslated.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A25",
           "B9"
@@ -6252,7 +6255,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_import_dxf.md",
-        "specStatus": "Proposed（M4c 第三批）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A29"
         ],
@@ -6391,7 +6394,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_import_list.md",
-        "specStatus": "Proposed（Bridge / Host 已实现，待 Large 实机验证；设备清单样本和提交后撤销尚未验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30",
           "A31"
@@ -6537,7 +6540,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_import_pdf_comments.md",
-        "specStatus": "Implemented（M4c 第三批；实机依据 A39/S34 r4、S44）",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A39"
         ],
@@ -6675,7 +6678,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_import_plc.md",
-        "specStatus": "Proposed（S34 已验证新增对象读回和 SafetyPoint 回滚；工具的事务内重复保护 Large 测试与无冲突目标的正向导入未验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30"
         ],
@@ -6737,7 +6740,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_import_pxf.md",
-        "specStatus": "Proposed（M4c 第三批）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A28",
           "A29"
@@ -6850,7 +6853,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_language_remove.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A28"
         ],
@@ -6944,7 +6947,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_language_set.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A28"
         ],
@@ -7052,7 +7055,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_macro_get.md",
-        "specStatus": "Proposed（M3b 第 3 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A14"
         ],
@@ -7200,7 +7203,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_macro_insert.md",
-        "specStatus": "Proposed（M3b 第 4 步；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A12",
           "A13",
@@ -7294,7 +7297,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_macro_list.md",
-        "specStatus": "Proposed（M3b 第 3 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A4"
         ],
@@ -7355,7 +7358,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_message_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A1",
           "A11"
@@ -7810,6 +7813,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_object_find.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A57",
           "A60"
@@ -8342,6 +8346,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_object_get.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -8469,7 +8474,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_build.md",
-        "specStatus": "Proposed（M6 第 1 阶段；导出 `.eplanpack` 属于第 3 阶段，不在本工具中）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -8502,7 +8507,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_get.md",
-        "specStatus": "Proposed（M6 第 1 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -8525,7 +8530,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_import.md",
-        "specStatus": "Proposed（M6 第 1 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A35"
         ],
@@ -8555,7 +8560,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_list.md",
-        "specStatus": "Proposed（M6 第 1 阶段）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -8658,7 +8663,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_create.md",
-        "specStatus": "Proposed（M3a 第 10 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A7",
           "A9",
@@ -8943,7 +8948,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_delete.md",
-        "specStatus": "Proposed（M4 第 11 步；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A15",
           "A18",
@@ -9166,7 +9171,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_get.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
           "A12"
@@ -9418,7 +9423,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11"
         ],
@@ -9643,7 +9648,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_open.md",
-        "specStatus": "Implemented；新增 Large 测试待运行",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A54"
         ],
@@ -9796,7 +9801,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_renumber.md",
-        "specStatus": "Proposed（M4 第 12 步；已实现，2026-10-20 实机验证，见 api-notes A20）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A18",
           "A20"
@@ -9939,7 +9944,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_text_replace.md",
-        "specStatus": "Implemented（v0.4.0；Host、Bridge、Small / Medium 与 Large 测试代码已实现，实机测试另行运行）",
+        "specStatus": "Implemented (v0.4.0)",
         "apiNotes": [
           "A41"
         ],
@@ -10076,7 +10081,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_update.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A7",
           "A13",
@@ -10224,7 +10229,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_export.md",
-        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）；`backup` 格式是 API 能力覆盖第一期的文件输出样例，已实现，待实机验证",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30"
         ],
@@ -10355,7 +10360,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_import.md",
-        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30"
         ],
@@ -10495,7 +10500,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_part_list.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -10604,7 +10609,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_part_search.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -10803,7 +10808,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_sync.md",
-        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30"
         ],
@@ -10945,7 +10950,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placeholder_apply.md",
-        "specStatus": "Proposed（API 能力覆盖第一期的修改样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，**提交后的持久性和 Ctrl+Z 待实机验证**（第 5 节）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A14",
           "A33"
@@ -11039,7 +11044,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placeholder_list.md",
-        "specStatus": "Proposed（API 能力覆盖第一期的只读样例，[设计](../design/2026-10-21-api-capability-coverage.md)第 8 节）；已实现，待实机验证",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
           "A14",
@@ -11257,7 +11262,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placement_create.md",
-        "specStatus": "T4c 已注册 full 入口；TEXT/LINE/RECTANGLE 共用既有 Bridge operation，新增混合 Large 验证尚未运行",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A54"
         ],
@@ -11601,7 +11606,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_placement_update.md",
-        "specStatus": "T5b 已注册 full 移动入口；复用既有 connection.create.plan/execute 的封闭 moves 分支，不增加 Bridge operation；Large 已编写，未运行",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -11670,7 +11675,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plan_apply.md",
-        "specStatus": "Implemented（LP-9 按 compilerVersion 分流；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [
           "A14",
           "A17",
@@ -11767,7 +11772,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plan_get.md",
-        "specStatus": "Implemented（P12：工具、只读 Resource、Small/Medium；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -11943,7 +11948,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plc_get.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A55"
         ],
@@ -12052,7 +12057,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_project_create.md",
-        "specStatus": "Implemented（M6 第 2 阶段；工具 Large 验收尚未运行，跨版本行为未验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A31",
           "A32",
@@ -12191,7 +12196,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_get.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11"
         ],
@@ -12327,7 +12332,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_list.md",
-        "specStatus": "Proposed（M1）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -12610,7 +12615,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_translate.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
           "A14",
@@ -13030,7 +13035,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_property_get.md",
-        "specStatus": "Implemented（P5a 校验与映射；P5b 续读、游标、预算及 full/property 注册）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [
           "A36",
           "A44"
@@ -13122,7 +13127,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_property_schema.md",
-        "specStatus": "Implemented（P2：仅发布目录）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -13581,7 +13586,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_property_set.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (v0.4.0)",
         "apiNotes": [
           "A36",
           "A44",
@@ -13719,7 +13724,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_report_update.md",
-        "specStatus": "Proposed（M4 第 7 步；已实现，待实机验证；进度和取消依赖第 3、4 步）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A16",
           "A18"
@@ -13821,7 +13826,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_revision_list.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A28"
         ],
@@ -14018,6 +14023,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_rule_check.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -14228,7 +14234,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_session_select.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14283,7 +14289,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_session_status.md",
-        "specStatus": "Proposed（M1）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14463,7 +14469,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_symbol_search.md",
-        "specStatus": "Implemented；新增 Large 测试待运行",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A52",
           "A53",
@@ -14536,7 +14542,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_task_get.md",
-        "specStatus": "In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D10–D13 为准）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14677,7 +14683,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_terminal_renumber.md",
-        "specStatus": "Proposed（M4c 第二批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A20",
           "A24"
@@ -14767,7 +14773,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_terminal_strip_get.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14847,7 +14853,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_terminal_strip_list.md",
-        "specStatus": "Proposed（M4c 第一批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14901,7 +14907,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_tool_usage.md",
-        "specStatus": "Proposed（M2）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -15030,7 +15036,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_translation_export.md",
-        "specStatus": "Proposed（M4c 第四批；已实现，待实机验证）",
+        "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A30"
         ],
@@ -15122,7 +15128,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_translation_import.md",
-        "specStatus": "Implemented；Large 测试已编写、尚未运行，每次运行须项目负责人批准（[api-notes A47](../eplan/api-notes.md) 为已有 API 实测）",
+        "specStatus": "Implemented (v0.4.0)",
         "apiNotes": [
           "A47"
         ],
@@ -15367,7 +15373,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_workflow_plan.md",
-        "specStatus": "Implemented（旧路径 compiler=2；W2 工程计划 compiler=3，仅编译，执行待 W3；本次未运行 EPLAN）",
+        "specStatus": "Implemented (v0.3.0)",
         "apiNotes": [
           "A14",
           "A17",
