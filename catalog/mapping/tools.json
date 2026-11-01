@@ -14144,6 +14144,87 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_selection_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/SelectionTools.cs",
+      "operations": [
+        "selection.get"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_selection_get.md",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "SelectionToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionToolTests.cs"
+          },
+          {
+            "name": "SelectionProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionProtocolTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_selection_set",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/SelectionTools.cs",
+      "operations": [
+        "selection.set"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_selection_set.md",
+        "apiNotes": [
+          "A54",
+          "B11"
+        ],
+        "tests": [
+          {
+            "name": "CallTemplateTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/CallTemplateTests.cs"
+          },
+          {
+            "name": "SelectionToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionToolTests.cs"
+          },
+          {
+            "name": "ToolUsageExampleTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolUsageExampleTests.cs"
+          },
+          {
+            "name": "SelectionProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SelectionProtocolTests.cs"
+          },
+          {
+            "name": "SelectionSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_session_select",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/SessionTools.cs",

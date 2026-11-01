@@ -2561,6 +2561,43 @@
       "apiNotes": []
     },
     {
+      "name": "eplan_selection_get",
+      "safety": "read",
+      "operations": [
+        "selection.get"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_selection_get.md",
+      "small": 1,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_selection_set",
+      "safety": "read",
+      "operations": [
+        "selection.set"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_selection_set.md",
+      "small": 3,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A54",
+        "B11"
+      ]
+    },
+    {
       "name": "eplan_session_select",
       "safety": "read",
       "operations": [],
