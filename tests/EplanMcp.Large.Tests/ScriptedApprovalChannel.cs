@@ -23,6 +23,9 @@ internal sealed class ScriptedApprovalChannel : IApprovalChannel
 
     public string Where => "in the Large test's script";
 
+    /// <summary>An additional fail-closed target check for master-data tests that must write a specific copy.</summary>
+    internal Func<ApprovalQuestion, bool>? TargetCheck { get; set; }
+
     /// <summary>Every question asked so far, oldest first.</summary>
     public IReadOnlyList<ApprovalQuestion> Questions
     {
@@ -64,7 +67,7 @@ internal sealed class ScriptedApprovalChannel : IApprovalChannel
                 : _approvals.FindIndex(a => a.Tool == question.Tool
                     && string.Equals(a.Project, question.Plan.ProjectPath, StringComparison.OrdinalIgnoreCase)
                     && a.Changes.SequenceEqual(question.Changes, StringComparer.Ordinal));
-            if (registered >= 0)
+            if (registered >= 0 && (TargetCheck?.Invoke(question) ?? true))
             {
                 _approvals.RemoveAt(registered);
                 decision = ApprovalDecision.Granted;

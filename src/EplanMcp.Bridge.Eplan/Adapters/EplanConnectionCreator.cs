@@ -15,7 +15,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
 {
     private readonly List<(int Type, long Oid, string Kind)> _createdSymbols = [];
 
-    public PartsDatabaseContent Read(string? language) => new EplanPartsDatabase().Read(language);
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null) => new EplanPartsDatabase().Read(language, buildNumbers);
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => new EplanSymbolReader().Read(projectPath, args);
     private static Page Page(string project, string page)
     {

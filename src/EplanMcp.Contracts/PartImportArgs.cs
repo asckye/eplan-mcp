@@ -3,6 +3,8 @@ namespace EplanMcp.Contracts;
 /// <summary>Arguments of <see cref="OperationNames.PartImportPlan"/> and <see cref="OperationNames.PartImportExecute"/>.</summary>
 public sealed class PartImportArgs
 {
+    /// <summary>Build-only baseline, by part number; null values mean absent parts. Rechecked before importing.</summary>
+    public Dictionary<string, Dictionary<string, string>?>? BuildBaseline { get; set; }
     /// <summary>The file's path below the import folder, with <c>/</c> between folders, as the tool returns it.</summary>
     public string? File { get; set; }
 

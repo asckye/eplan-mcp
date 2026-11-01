@@ -140,6 +140,8 @@ internal static class ApprovalTexts
         { return $"add part {Value(change.NewValue ?? string.Empty, zh)} (variant {Value(change.Property ?? string.Empty, zh)}) to {Value(change.Name, zh)}"; }
         if (change.Kind == "placement")
         { return change.Property + " " + Value(change.Name, zh) + ": " + Value(change.NewValue ?? "", zh) + (change.Property == "copy" ? zh ? "；保留标识，副本可能关联已有设备。" : "; tags preserved; copies may associate with existing devices." : change.Property == "delete" ? zh ? "；连同功能本体删除，相关连接见清单。" : "; removes the function itself; incident connections are listed." : ""); }
+        if (change.Kind == "part" && change.Property is not null)
+        { return $"{change.Action} part {Value(change.Name, zh)}: {Value(change.Property, zh)} {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"; }
         if (change.Kind == "unverified API")
         { return change.Action + " unverified API " + change.Name + (details?.GetValueOrDefault("lifecycle") is { } effect ? "; " + effect + "; undo unverified" : "") + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property + (details?.GetValueOrDefault("handles") is { Length: > 0 } handles ? "; " + handles : string.Empty); }
         if (change.Kind == "action")

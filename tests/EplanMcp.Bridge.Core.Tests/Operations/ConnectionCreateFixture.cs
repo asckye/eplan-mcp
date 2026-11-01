@@ -7,7 +7,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 internal sealed class ConnectionCreateFixture : ISymbolReader, IPartsDatabase
 {
-    public PartsDatabaseContent Read(string? language) => new() { Parts = [new() { PartNumber = "PXC.2861344", Variant = "1" }] };
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null) => new() { Parts = [new() { PartNumber = "PXC.2861344", Variant = "1" }] };
     internal const string PageName = "=F+A1&EFS1/1";
     internal ConnectionCreatePlanner.Scene Scene { get; } = new()
     {

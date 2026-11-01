@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 120（25.0%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 121（24.8%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -273,7 +273,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_review | read | page.review | 205 | 133 | 2 | 69 | 0 | 4/2/2 | A41 A64 A65 A72 A73 | — |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 79 | 38 | 0 | 41 | 0 | 1/2/1 | A41 | — |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 81 | 41 | 1 | 38 | 0 | 3/5/6 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
-| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 1/2/1 | A30 | 2026-10-27 pass（Large 测试 README） |
+| eplan_part_build | destructive | part.import.execute<br>part.import.plan<br>part.search | 52 | 18 | 1 | 29 | 0 | 1/1/1 | A30 | — |
+| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 1/2/2 | A30 | 2026-10-27 pass（Large 测试 README） |
 | eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 45 | 13 | 0 | 30 | 1 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 45 | 24 | 1 | 19 | 0 | 1/2/3 | — | 2026-10-19 pass_with_findings（api-notes A12） |
 | eplan_part_search | read | part.search | 36 | 16 | 1 | 15 | 0 | 2/2/4 | — | 2026-10-21 pass（api-notes A30） |

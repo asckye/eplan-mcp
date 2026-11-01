@@ -202,7 +202,7 @@ internal sealed class FakePartsDatabase : IPartsDatabase
 
     public List<string?> Reads { get; } = [];
 
-    public PartsDatabaseContent Read(string? language)
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null)
     {
         Reads.Add(language);
         return language == "xx_XX"

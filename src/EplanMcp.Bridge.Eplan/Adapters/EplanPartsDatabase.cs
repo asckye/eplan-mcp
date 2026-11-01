@@ -20,7 +20,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// </summary>
 internal sealed class EplanPartsDatabase : IPartsDatabase
 {
-    public PartsDatabaseContent Read(string? language)
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null)
     {
         MainThread.Assert();
         TextLanguage textLanguage = EplanText.Language(language);
@@ -30,7 +30,7 @@ internal sealed class EplanPartsDatabase : IPartsDatabase
             using MDPartsDatabase database = new MDPartsManagement().OpenDatabase() ?? throw new InvalidOperationException("EPLAN opened no parts database.");
             try
             {
-                return new PartsDatabaseContent { Database = selected, Parts = [.. database.Parts.Select(part => Read(part, textLanguage))] };
+                return new PartsDatabaseContent { Database = selected, Parts = [.. database.Parts.Where(p => buildNumbers is null || buildNumbers.Contains(p.PartNr, StringComparer.Ordinal)).Select(part => { PartSearchItem item = Read(part, textLanguage); if (buildNumbers is not null) { item.BuildValues = BuildValues(part); } return item; })] };
             }
             finally
             {
@@ -71,4 +71,37 @@ internal sealed class EplanPartsDatabase : IPartsDatabase
     }
 
     private static string? Plain(MDPropertyValue value) => value.IsEmpty ? null : value.ToString() is { Length: > 0 } text ? text : null;
+
+    // S24 exported schema (A30); typed numeric conversions follow the installed MDPropertyValue XML documentation.
+    private static Dictionary<string, string> BuildValues(MDPart part)
+    {
+        var p = part.Properties;
+        var values = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["manufacturer"] = Plain(p.ARTICLE_MANUFACTURER) ?? "",
+            ["type_number"] = Plain(p.ARTICLE_TYPENR) ?? "",
+            ["order_number"] = Plain(p.ARTICLE_ORDERNR) ?? "",
+            ["supplier"] = Plain(p.ARTICLE_SUPPLIER) ?? "",
+            ["product_group"] = p.ARTICLE_PRODUCTGROUP.IsEmpty ? "" : p.ARTICLE_PRODUCTGROUP.ToInt().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["product_subgroup"] = p.ARTICLE_PRODUCTSUBGROUP.IsEmpty ? "" : p.ARTICLE_PRODUCTSUBGROUP.ToInt().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["width"] = p.ARTICLE_WIDTH.IsEmpty ? "" : p.ARTICLE_WIDTH.ToDouble().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["height"] = p.ARTICLE_HEIGHT.IsEmpty ? "" : p.ARTICLE_HEIGHT.ToDouble().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["depth"] = p.ARTICLE_DEPTH.IsEmpty ? "" : p.ARTICLE_DEPTH.ToDouble().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["technical_data"] = Plain(p.ARTICLE_CHARACTERISTICS) ?? "",
+            ["macro_file"] = Plain(p.ARTICLE_MACRO) ?? "",
+            ["picture_file"] = Plain(p.ARTICLE_PICTUREFILE) ?? "",
+            ["part_type"] = p.ARTICLE_PARTTYPE.IsEmpty ? "1" : p.ARTICLE_PARTTYPE.ToInt().ToString(System.Globalization.CultureInfo.InvariantCulture),
+        };
+        if (!p.ARTICLE_DESCR1.IsEmpty)
+        {
+            foreach (string code in TextLanguages.Stored(p.ARTICLE_DESCR1.ToString()))
+            { values["description." + code] = EplanText.ReadWithLanguage(p.ARTICLE_DESCR1, EplanText.Language(code)).Text ?? ""; }
+        }
+        MDFunctionTemplatePosition[] templates = part.FunctionTemplatePositions;
+        values["function_category"] = templates.Length == 0 ? "" : templates.Length > 1 ? "multiple" : ((int)templates[0].FunctionDefinitionCategory).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        // Take the template's property list once (api-notes: repeated Properties per wrapper is a known crash pattern).
+        var template = templates.Length == 1 ? templates[0].Properties : null;
+        values["connection_points"] = template is null ? "" : string.Join("|", Enumerable.Range(1, 1000).Select(i => Plain(template.get_FUNCTEMPLATE_CONNPT_DESIGNATION(i)) ?? "")).TrimEnd('|');
+        return values;
+    }
 }

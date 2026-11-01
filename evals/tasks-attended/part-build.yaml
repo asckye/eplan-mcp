@@ -1,0 +1,8 @@
+id: part-build
+set: dev
+fixture: copy
+prompt: 本次测试项目为 {project}；工程师另已把系统部件库配置为隔离副本，并在 imports 放好 fictional-parts.csv（FICTION.BUILD1/2/3，制造商 FICTION）。先检查该表的每一行，报告未知列和错误；没有错误才请求生成这三个部件，等待工程师独立审批，最后检查实际制造商。不要修改库的配置。
+answer: { type: object, required: [count], properties: { count: { type: integer } } }
+after: { count: { tool: eplan_part_search, args: { query: FICTION.BUILD, manufacturer: FICTION }, pick: $.total } }
+checks: [{ after: count, equals: 3 }, { answer: $.count, equals: 3 }]
+budget: { max_tool_calls: 8, max_minutes: 5 }

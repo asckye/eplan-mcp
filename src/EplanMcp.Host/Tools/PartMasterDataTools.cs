@@ -97,7 +97,7 @@ internal sealed class PartMasterDataTools
     }
 
     /// <summary>The result: read back after a commit; from the plan for a dry run, a file with nothing to do, or a recovered commit.</summary>
-    private static CallToolResult Imported(WriteOutcome<PartImportData> outcome, ImportFile source, string mode, string matchBy, bool dryRun)
+    internal static CallToolResult Imported(WriteOutcome<PartImportData> outcome, ImportFile source, string mode, string matchBy, bool dryRun)
     {
         bool committed = outcome.Execution == ExecutionState.Committed;
         PartImportData? data = outcome.Data;

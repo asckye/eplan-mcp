@@ -6,6 +6,8 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class PartSearchArgs
 {
+    /// <summary>Internal build read: exact part numbers, including one-character numbers; null uses normal search.</summary>
+    public List<string>? BuildNumbers { get; set; }
     /// <summary>
     /// Text, 2 to 100 characters, that the part number, the type number, the order number or the description contains,
     /// ignoring case.

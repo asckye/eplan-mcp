@@ -612,7 +612,7 @@ public sealed class ConnectionDefinitionPointTests
             .Execute(new JObject { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] })));
         public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new()
         { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Drawn ?? [.. Fixture.Scene.Graphical, .. Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!] };
-        public PartsDatabaseContent Read(string? language) => Fixture.Read(language);
+        public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null) => Fixture.Read(language);
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => Fixture.Read(project, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { Events.Add("place"); State = 1; };

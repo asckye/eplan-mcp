@@ -468,7 +468,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) { Search = args; return Symbols; }
         public PartsDatabaseContent Parts { get; } = new();
-        public PartsDatabaseContent Read(string? database) { PartReads++; return Parts; }
+        public PartsDatabaseContent Read(string? database, IReadOnlyList<string>? buildNumbers = null) { PartReads++; return Parts; }
         public DeviceNames? ReadDevice(string projectPath, string tag) => new()
         { Tag = tag, Functions = [.. Channels.Select(c => new DeviceNames.NamedFunction { Name = c.Name, Category = "PLCTerminal", Page = c.Page, IsMain = c.Main })] };
         public RenameReadBack Rename(string projectPath, string tag, string newTag) => throw new NotSupportedException();

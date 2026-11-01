@@ -69,7 +69,7 @@ internal sealed class PartImportRequest
     /// Every argument problem at once (the MCP server standard), then the file, the database (POLICY_DENIED on SQL Server,
     /// ADR-0019) and its parts.
     /// </summary>
-    public static PartImportRequest Check(PartImportArgs args, IPartsDatabaseWriter writer)
+    public static PartImportRequest Check(PartImportArgs args, IPartsDatabaseWriter writer, IPartsDatabase? reader = null)
     {
         var violations = new List<string>();
         ImportSource? source = ImportSource.Check(args.File, args.FilePath, args.Sha256, Extensions, violations);
@@ -103,6 +103,14 @@ internal sealed class PartImportRequest
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN has no parts database configured, so nothing was imported. Ask the engineer to choose one in EPLAN's parts management.");
         }
 
+        if (args.BuildBaseline is { } baseline)
+        {
+            PartsDatabaseContent current = (reader ?? throw new InvalidOperationException("Build requires a parts reader.")).Read(null, [.. baseline.Keys]);
+            if (!string.Equals(current.Database, database.Database, StringComparison.Ordinal) || baseline.Any(entry =>
+                entry.Value is null ? current.Parts.Any(p => p.PartNumber == entry.Key) :
+                current.Parts.Count(p => p.PartNumber == entry.Key) != 1 || current.Parts.Single(p => p.PartNumber == entry.Key).Variant != "1" || !current.Parts.Single(p => p.PartNumber == entry.Key).BuildValues.OrderBy(p => p.Key, StringComparer.Ordinal).SequenceEqual(entry.Value.OrderBy(p => p.Key, StringComparer.Ordinal))))
+            { throw new BridgeErrorException(ErrorReason.PlanStale, "The compared part fields changed. Call eplan_part_build again; nothing was imported."); }
+        }
         return new PartImportRequest(source, mode, matchBy, database, writer.Read(), parts);
     }
 

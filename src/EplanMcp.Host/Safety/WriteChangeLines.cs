@@ -12,6 +12,7 @@ internal static class WriteChangeLines
         "run" when c.Kind == "action" => ApprovalTexts.Change(c, zh: false, plan.Details),
         _ when c.Property == "list" => $"import {c.Kind} list into project {c.Name} from {plan.Details?.GetValueOrDefault("file")} ({plan.Details?.GetValueOrDefault("bytes")} bytes, SHA-256 {plan.Details?.GetValueOrDefault("sha256")}); converter {plan.Details?.GetValueOrDefault("converter")}; before {plan.Details?.GetValueOrDefault("before")}",
         // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
+        _ when c.Kind == "part" && c.Property is not null => $"{c.Action} part {c.Name}: {c.Property} '{c.OldValue}' -> '{c.NewValue}'",
         "create" when c.Kind == "parts" => $"add {Parts(c.NewValue)} from {c.Name} to the parts database",
         _ when c.Kind == "parts" => $"update {Parts(c.NewValue)} of the parts database from {c.Name}",
 

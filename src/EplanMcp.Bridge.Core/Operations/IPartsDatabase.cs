@@ -13,5 +13,5 @@ public interface IPartsDatabase
     /// database and closes it again before returning; never changes, upgrades or selects a database. A database that
     /// cannot be opened or read throws EPLAN_OPERATION_FAILED.
     /// </summary>
-    public PartsDatabaseContent Read(string? language);
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null);
 }

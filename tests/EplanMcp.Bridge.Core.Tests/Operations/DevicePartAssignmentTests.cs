@@ -372,7 +372,7 @@ public sealed partial class DevicePartAssignmentTests
         public string? Mismatch { get; set; }
         public bool KeepPartAfterRollback { get; set; }
         public bool KeepNameAfterRollback { get; set; }
-        public PartsDatabaseContent Read(string? language) => Database;
+        public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null) => Database;
         public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false)
         {
             Reads++;

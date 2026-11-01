@@ -302,8 +302,8 @@ internal static class BridgeHost
         return
         [
             new MasterDataBackupOperation(new EplanMasterDataBackup()),
-            new PartImportPlanOperation(parts),
-            new PartImportExecuteOperation(parts),
+            new PartImportPlanOperation(parts, new EplanPartsDatabase()),
+            new PartImportExecuteOperation(parts, new EplanPartsDatabase()),
             new TranslationImportPlanOperation(translations),
             new TranslationImportExecuteOperation(translations),
             new PartSyncPlanOperation(catalog, reader, parts),

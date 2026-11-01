@@ -14,7 +14,7 @@ internal sealed class SamplePartsDatabase : IPartsDatabase
 {
     public bool Broken { get; set; }
 
-    public PartsDatabaseContent Read(string? language)
+    public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null)
     {
         if (language == "xx_XX")
         {

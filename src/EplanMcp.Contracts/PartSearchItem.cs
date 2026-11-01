@@ -6,6 +6,8 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public sealed class PartSearchItem
 {
+    /// <summary>Internal build snapshot in canonical column names; never instructions or exposed by normal search.</summary>
+    public Dictionary<string, string> BuildValues { get; set; } = [];
     /// <summary>The part number (<c>MDPart.PartNr</c>), e.g. <c>SIE.3RH2122-1HB40</c>.</summary>
     public string PartNumber { get; set; } = string.Empty;
 

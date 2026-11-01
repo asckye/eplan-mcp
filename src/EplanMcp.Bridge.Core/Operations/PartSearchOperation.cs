@@ -20,7 +20,7 @@ public sealed class PartSearchOperation(IPartsDatabase database) : Operation<Par
     protected override PartSearchData Execute(PartSearchArgs args)
     {
         string query = Given(args.Query) ?? string.Empty;
-        if (query.Length is < MinQueryLength or > MaxQueryLength)
+        if (args.BuildNumbers is null && query.Length is < MinQueryLength or > MaxQueryLength)
         {
             throw InvalidArgument(string.Format(
                 CultureInfo.InvariantCulture,
@@ -30,12 +30,12 @@ public sealed class PartSearchOperation(IPartsDatabase database) : Operation<Par
         }
 
         string? manufacturer = Given(args.Manufacturer);
-        PartsDatabaseContent content = database.Read(Given(args.Language));
+        PartsDatabaseContent content = database.Read(Given(args.Language), args.BuildNumbers);
         List<PartSearchItem> matching =
         [
             .. content.Parts
                 .Where(p => (manufacturer is null || string.Equals(p.Manufacturer?.Trim(), manufacturer, StringComparison.OrdinalIgnoreCase))
-                    && (Contains(p.PartNumber, query) || Contains(p.TypeNumber, query) || Contains(p.OrderNumber, query) || Contains(p.Description, query)))
+                    && (args.BuildNumbers?.Contains(p.PartNumber, StringComparer.Ordinal) ?? (Contains(p.PartNumber, query) || Contains(p.TypeNumber, query) || Contains(p.OrderNumber, query) || Contains(p.Description, query))))
                 .OrderBy(p => p.PartNumber, StringComparer.Ordinal)
                 .ThenBy(p => p.Variant ?? string.Empty, StringComparer.Ordinal),
         ];

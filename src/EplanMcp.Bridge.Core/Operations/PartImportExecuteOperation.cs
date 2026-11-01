@@ -11,7 +11,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// database may be partly changed and nothing rolls it back. A read-back that does not match is reported, not an error:
 /// the import ran (tool spec 5).
 /// </summary>
-public sealed class PartImportExecuteOperation(IPartsDatabaseWriter writer) : Operation<PartImportArgs, PartImportData>, IWriteOperation
+public sealed class PartImportExecuteOperation(IPartsDatabaseWriter writer, IPartsDatabase? reader = null) : Operation<PartImportArgs, PartImportData>, IWriteOperation
 {
     /// <summary>What the model reads for OUTCOME_UNKNOWN; the Host adds the backup as <c>metadata.backup</c>.</summary>
     public const string UnknownMessage =
@@ -29,7 +29,7 @@ public sealed class PartImportExecuteOperation(IPartsDatabaseWriter writer) : Op
                 throw InvalidArgument("'fingerprint' is required: the one part.import.plan returned.");
             }
 
-            request = PartImportRequest.Check(args, writer);
+            request = PartImportRequest.Check(args, writer, reader);
             if (!string.Equals(request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(

@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// the file with its size and SHA-256 and the part numbers, at most 50 per kind, are in the details. A file whose parts
 /// the mode all skips plans no change. Reads only.
 /// </summary>
-public sealed class PartImportPlanOperation(IPartsDatabaseWriter writer) : Operation<PartImportArgs, WritePlan>
+public sealed class PartImportPlanOperation(IPartsDatabaseWriter writer, IPartsDatabase? reader = null) : Operation<PartImportArgs, WritePlan>
 {
     /// <summary>The <see cref="WritePlan.Details"/> keys.</summary>
     public const string File = "file";
@@ -31,7 +31,7 @@ public sealed class PartImportPlanOperation(IPartsDatabaseWriter writer) : Opera
 
     protected override WritePlan Execute(PartImportArgs args)
     {
-        PartImportRequest request = PartImportRequest.Check(args, writer);
+        PartImportRequest request = PartImportRequest.Check(args, writer, reader);
         string file = request.Source.Describe();
         var changes = new List<PlannedChange>();
         if (request.Added.Count > 0)

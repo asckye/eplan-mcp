@@ -15433,6 +15433,124 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_part_build",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PartBuildTools.cs",
+      "operations": [
+        "part.import.execute",
+        "part.import.plan",
+        "part.search"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.Base.ISOCode.Language.L___",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.PartNumber",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.UniqueId",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier.UniqueIdOptPartNumber",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.AppendNewRecords",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.ReplaceAndAppend",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.UpdateAndAppend",
+        "F:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode.UpdateExistingRecords",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.ISOCode.#ctor(System.String)",
+        "M:Eplan.EplApi.Base.ISOCode.GetNumber",
+        "M:Eplan.EplApi.Base.ISOCode.IsValid",
+        "M:Eplan.EplApi.Base.Languages.#ctor",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.Close",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts(System.String,System.String,Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode,System.Boolean,Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier,System.String)",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.#ctor",
+        "M:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase",
+        "M:Eplan.EplApi.MasterData.MDPropertyValue.ToMultiLangString",
+        "M:Eplan.EplApi.MasterData.MDPropertyValue.ToString",
+        "P:Eplan.EplApi.Base.Languages.GuiLanguage",
+        "P:Eplan.EplApi.MasterData.MDPart.PartNr",
+        "P:Eplan.EplApi.MasterData.MDPart.ProductGroup",
+        "P:Eplan.EplApi.MasterData.MDPart.Variant",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabase.Parts",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Properties",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_DESCR1",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_MACRO",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_MANUFACTURER",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_ORDERNR",
+        "P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_TYPENR",
+        "P:Eplan.EplApi.MasterData.MDPartsManagement.SelectedPartsDatabaseAsString",
+        "P:Eplan.EplApi.MasterData.MDPropertyValue.IsEmpty",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.ISOCode",
+        "T:Eplan.EplApi.Base.ISOCode.Language",
+        "T:Eplan.EplApi.Base.Languages",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.Base.PathMap",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.MasterData.MDPart",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase.ImportIdentifier",
+        "T:Eplan.EplApi.MasterData.MDPartsDatabase.ImportMode",
+        "T:Eplan.EplApi.MasterData.MDPartsManagement",
+        "T:Eplan.EplApi.MasterData.MDPropertyValue"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_part_build.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A30"
+        ],
+        "tests": [
+          {
+            "name": "PartBuildTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PartBuildTests.cs"
+          },
+          {
+            "name": "PartBuildToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PartBuildToolTests.cs"
+          },
+          {
+            "name": "PartBuildTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartBuildTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "PartSearchOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSearchOperationTests.cs"
+          },
+          {
+            "name": "PartBuildToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PartBuildToolTests.cs"
+          },
+          {
+            "name": "PartImportOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartImportOperationTests.cs"
+          },
+          {
+            "name": "PartSyncOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
+          },
+          {
+            "name": "PartToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_part_export",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/MasterDataExportTools.cs",
@@ -15498,6 +15616,11 @@
             "name": "MasterDataExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MasterDataExportToolTests.cs"
+          },
+          {
+            "name": "PartBuildTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartBuildTests.cs"
           },
           {
             "name": "PartExportTests",
@@ -15656,6 +15779,11 @@
             "name": "MasterDataBackupOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataBackupOperationTests.cs"
+          },
+          {
+            "name": "PartBuildToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PartBuildToolTests.cs"
           },
           {
             "name": "PartImportOperationTests",
