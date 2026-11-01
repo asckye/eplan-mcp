@@ -684,6 +684,8 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 ### B11. 选择集签名（2026-10-31，仅目录工具与 XML 核对，未运行 EPLAN）
 `eplan_api_search/get` 确认 HEServices.SelectionSet.Selection 返回 StorableObject[]，CurrentlyEdited 返回 StorableObject（文档为 Page/InstallationSpace 或 null），OpenedPages 返回 Page[]；两个默认锁定开关均可设置。Edit.SelectObjects(string,StringCollection,bool) 返回 void；XML 要求 Type/Id/0，不含数据库前缀；ClearSelection 只清 GED，不清导航器。无编辑器、跨页及属性放置的实际效果、安全副作用与撤销历史由 Large SelectionSpikeTests 打印，尚未运行；实现只按独立读回报告成功，不假定原生调用全选中。A57 属性放置仍不提供无歧义定位符。
 
+- 2026-11-01（EPLAN 2026.0.3，Pro Panel，LargeWrite scratch 副本）：`NativeNoEditorDifferentPagesAndPropertyPlacement_PrintReadbackAndPreserveOneUndo` 在前置 `eplan_device_place` 调用被 Host 拒绝（`INVALID_ARGUMENT`、`not_started`）：测试给了 `library="IEC_symbol"`、`symbol="K"`，漏了库符号来源必填的 `symbol_variant`，并非 EPLAN 选择行为异常。测试补齐变体 `0`，不传互斥的 `part/variant`；此次日志没有执行到原生选择探针，不能据此确认无编辑器、跨页或属性放置的选择效果。— 证据：[本地完整日志](../../.local/failures/q-selection-SelectionSpikeTests.log)（不提交）。本次修复仅离线验证，原生探针仍待复验。
+
 > 出处缩写：`2026/<页面>` 指 `https://www.eplan.help/en-us/Infoportal/Content/api/2026/<页面>`；"XML" 指 EPLAN Bin 目录中随 API 一起提供的 IntelliSense 文档（`Eplan.EplApi.*u.xml`）；"反射" 指对 `C:\Program Files\EPLAN\Platform\2026.0.3\Bin` 中程序集做只读反射。
 
 ### B1. 程序集与目标框架

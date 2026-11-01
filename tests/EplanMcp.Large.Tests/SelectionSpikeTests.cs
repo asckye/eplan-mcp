@@ -21,6 +21,7 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
             ["page"] = pages[0],
             ["library"] = "IEC_symbol",
             ["symbol"] = "K",
+            ["symbol_variant"] = 0,
             ["x"] = 80,
             ["y"] = 160,
             ["tag"] = "-KS" + Guid.NewGuid().ToString("N")[..6],
