@@ -105,10 +105,10 @@ public static class PlacementEditPlanner
                     if (row["angle"]?.Type is JTokenType.Float or JTokenType.Integer)
                     {
                         double angle = (double)row["angle"]!;
-                        // B11: native edits reorder an axis-aligned rectangle's corners; its angle stays zero.
+                        // B12: native edits reorder an axis-aligned rectangle's corners; its angle stays zero.
                         if ((string?)row["kind"] == "Rectangle" && angle == 0 && op is "rotate" or "mirror")
                         { row["location"] = new JArray(row["bounds"]![0]!.DeepClone(), row["bounds"]![1]!.DeepClone()); }
-                        // B11: mirroring zero-angle free text changes its alignment and outline, not its angle.
+                        // B12: mirroring zero-angle free text changes its alignment and outline, not its angle.
                         else if (op != "mirror" || (string?)row["kind"] != "Text" || angle != 0)
                         { row["angle"] = Normalize((op == "mirror" ? axis == 0 ? Math.PI - angle : -angle : angle) + turns * Math.PI / 2); }
                     }

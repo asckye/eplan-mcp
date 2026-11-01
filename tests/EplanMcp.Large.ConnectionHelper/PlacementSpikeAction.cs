@@ -54,7 +54,7 @@ public sealed class PlacementSpikeAction : IEplAction
                         { text.Rotation = 0; }
                         foreach (SymbolReference symbol in page.AllPlacements.OfType<SymbolReference>())
                         {
-                            // B11: variant property placements belong to the read-only symbol library.
+                            // B12: variant property placements belong to the read-only symbol library.
                             symbol.UseLocalPropertyPlacements = true;
                             foreach (PropertyPlacement text in symbol.PropertyPlacements)
                             { text.Rotation = 0; }

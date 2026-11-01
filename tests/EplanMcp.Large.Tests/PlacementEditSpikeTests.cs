@@ -101,7 +101,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                             : operation == "copy" ? direction : horizontal ? direction switch { "Up" => "Down", "Down" => "Up", _ => direction } : direction switch { "Left" => "Right", "Right" => "Left", _ => direction };
                         Assert.Equal(expectedDirection, next.GetProperty("direction").GetString());
                         double[] expectedPin = Transform(px, py);
-                        // B11: the seeded PCP's variants have unequal offsets; K's mirrored upper pin is +3.99.
+                        // B12: the seeded PCP's variants have unequal offsets; K's mirrored upper pin is +3.99.
                         if (kind == "PotentialDefinition")
                         {
                             Assert.Equal([x, y + 3], pin.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()));
@@ -123,7 +123,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                         JsonElement child = original.GetProperty("children")[i], next = found.GetProperty("children")[i];
                         double cx = child.GetProperty("location")[0].GetDouble(), cy = child.GetProperty("location")[1].GetDouble();
                         Assert.Equal(child.GetProperty("text").GetRawText(), next.GetProperty("text").GetRawText());
-                        // B11: only the observed anchor slots change offset; the other entries retain local offsets.
+                        // B12: only the observed anchor slots change offset; the other entries retain local offsets.
                         bool anchor = kind == "PotentialDefinition" ? i == 0 : i == 0 || i == childCount - 4 || i == childCount - 2 || childCount == 13 && i == 8;
                         Assert.Equal(anchor && operation == "rotate" ? -cy : anchor && operation == "mirror" && !horizontal ? -cx : cx, next.GetProperty("location")[0].GetDouble(), 6);
                         Assert.Equal(anchor && operation == "rotate" ? cx : anchor && operation == "mirror" && horizontal ? -cy : cy, next.GetProperty("location")[1].GetDouble(), 6);
