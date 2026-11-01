@@ -151,6 +151,7 @@ flowchart LR
 ## 5. 开发中的安全要求
 - C1 Files 沿用 T16/T17/T28：只有方向明确的字符串文件参数可解除 external_path_parameter，输入限制为 Host imports，输出为新建 exports 子目录；共同拒绝 UNC、路径穿越、保留名、重解析点及超限。输入 SHA-256、大小和目标目录身份绑定审批，Bridge 执行前重算；输出清单在单撤销事务提交前校验大小/哈希。外部产物不随项目撤销（A56），失败与 unknown 可能留有文件；目录及打印/发送/主数据/设置/隐式目的地排除不变。
 - C1 静态/属性入口：静态调用不接受 target，仅开放目录公开类型的编译分支；有写入可能时必须有同项目对象参数。via 由公开 getter 的闭合路径表生成，深度最多 2；父定位器、参数和返回对象均核对 scratch 项目，规划不跟随 getter，路径/图层选择器进入审批与指纹。ProjectSettings/方案只读，settings_write 不生成写分支；既有生命周期、文件、网络、授权、应用/会话状态、主数据排除不放宽。
+- C1 设置只读入口沿用 T36：以 scratch Project 定位器绑定项目，USER/STATION/PROJECT 节点和叶设置逐段枚举，规划及执行时复核；offset/limit 与索引有界。方案只绑定已枚举节点，不切换方案或写 LastUsed；所有设置 setter、修改方法及 COMPANY/INSTALL 根仍排除。读取逐次审批、观察前后快照且不创建撤销步；快照不覆盖 USER/STATION 设置库，不证明全局无副作用。ref 容器只在封闭适配器内使用，不放宽通用 ref/out 限制。
 - C1 服务入口沿用 T36：只从目录生成公开无参服务构造和编译调用；IDisposable 服务用 using，借用对象不释放。Project 定位器锚定目标 scratch，所有对象参数和返回定位器都须属于该项目；无对象形参的入口还复核当前项目。路径、流、数据库、主数据、部件管理、设置/方案、打印机、URL、授权/退出、隐式外部目的地及自建事务入口均排除，逐签名理由写入 `catalog/api-try.g.tsv`；其余按无副作用参数的读前缀或单撤销写事务分类。Large 服务读取与写入撤销测试已编写，未运行。
 - C2 威胁（TB1/TB3）：未验证 action 可能越出项目、弹窗或执行外部程序。`eplan_action_try` 默认关闭且仅 full；Host 校验同一目录行参数，Host/Bridge 共同拒绝随包禁止表中的类别和目标覆盖。只允许目标 scratch 项目单独打开且为当前项目，逐次审批显示 unverified，规划后与执行前复核 scratch，审计标记 unverified=true。复用静默事务、业务/设计文件指纹；超时或观察到模态窗口按 unknown 暂停项目及实例。禁止表不是第三方 action 的安全证明，文件指纹不覆盖用户/工作站设置；不得把 C 级结果当成验证证据。失败场景由 Small/Medium 覆盖，Large 已编写待运行。
 - 涉及安全措施的变更集必须附带失败场景测试，范围统一见 [testing.md 第 6 节](testing.md#必须测失败路径的地方)。

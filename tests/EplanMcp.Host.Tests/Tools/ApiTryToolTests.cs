@@ -221,4 +221,28 @@ public sealed partial class ApiTryToolTests : IDisposable
         Assert.Equal(JsonValueKind.Null, result.GetProperty("after").ValueKind);
         Assert.Equal(JsonValueKind.Null, result.GetProperty("value").ValueKind);
     }
+
+    [Fact]
+    public async Task SettingsEnumerationStillRequiresApprovalForEachCallAndPreservesPagingJson()
+    {
+        const string settings = "O:Eplan.EplApi.Base.SettingNode.GetListOfNodes";
+        string raw = JsonSerializer.Serialize(new
+        {
+            target = new { project = _harness.ProjectPath, page = "", type = 1, oid = 1, digest = new string('a', 64) },
+            node = "USER",
+            offset = 0,
+            limit = 200,
+        });
+        _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData
+        { Value = JsonSerializer.Serialize(new { items = Enumerable.Repeat(new string('a', 100), 200), total = 200, nextOffset = (int?)null }) };
+        for (int i = 0; i < 2; i++)
+        {
+            JsonElement result = WriteToolHarness.Structured(await Call(parameters: raw, group: settings));
+            using JsonDocument page = JsonDocument.Parse(result.GetProperty("value").GetString()!);
+            Assert.InRange(page.RootElement.GetProperty("items").GetArrayLength(), 1, 199);
+            Assert.True(page.RootElement.GetProperty("nextOffset").GetInt32() > 0);
+        }
+        Assert.Equal(2, _approval.Questions.Count);
+        Assert.Equal(2, _harness.Bridge.Writes.Count);
+    }
 }

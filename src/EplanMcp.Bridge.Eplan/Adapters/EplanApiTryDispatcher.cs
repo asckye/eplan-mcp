@@ -13,6 +13,8 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
     {
         JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
         CheckReceiver(args, parameters);
+        if (ApiTryCatalog.Settings(args.Group))
+        { CheckSettings(args); return; }
         string[] shape = ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name))!;
         foreach (string name in shape.Skip(2).Where(n => parameters[n] is JObject && ApiTryCatalog.ParameterShape(shape[1], n)?[0] != "Eplan.EplApi.Base.PointD"))
         { Resolve(args.Project, parameters[name]!, ApiTryCatalog.Kinds(ApiTryCatalog.ParameterShape(shape[1], name)![0])); }

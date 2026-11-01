@@ -10,7 +10,7 @@ internal sealed partial class ApiTryTools
         if (shape is null)
         { return ApiTryCatalog.MethodAccess(group) is null; }
         bool statik = ApiTryCatalog.Static(shape[1]), via = p.TryGetProperty("via", out JsonElement path), key = p.TryGetProperty("via_key", out JsonElement selector);
-        if (!statik && ApiTryCatalog.Entry(shape[1]) && !via)
+        if (!statik && ApiTryCatalog.Entry(shape[1]) && !via && !ApiTryCatalog.Settings(group))
         { return false; }
         bool setter = ApiTryCatalog.MethodAccess(group) is null && p.TryGetProperty("value", out _);
         if (statik ? p.TryGetProperty("target", out _) || via || key : !p.TryGetProperty("target", out JsonElement target) || Kind(target) != "locator")

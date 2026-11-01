@@ -40,13 +40,13 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             string[] changed = data is null ? [] : [.. data.Before.Keys.Union(data.After.Keys).Where(k => k.StartsWith("property:", StringComparison.Ordinal) || data.Before.GetValueOrDefault(k) != data.After.GetValueOrDefault(k)).OrderBy(k => k.StartsWith("property:", StringComparison.Ordinal) ? 0 : 1).ThenBy(k => k, StringComparer.Ordinal)];
             string? Hash(Dictionary<string, string>? state) => state is null ? null : WritePipeline.HashArguments(state.OrderBy(p => p.Key, StringComparer.Ordinal));
             return ToolResults.Success("Unverified API trial: " + outcome.Execution + ".", new ApiTryResult(outcome.Plan.Project, group, outcome.Plan.Details!["status"], true, outcome.Execution, outcome.Recovered,
-                (object?)data?.Locator ?? ResultShaper.CleanText(data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
+                (object?)data?.Locator ?? ApiTrySettingsResult.Text(group, parameters, data?.Value), Hash(data?.Before), Hash(data?.After), changed.Take(20).Select(k => new ApiTryChange(ResultShaper.CleanText(k)!, ResultShaper.CleanText(data!.Before.GetValueOrDefault(k)), ResultShaper.CleanText(data!.After.GetValueOrDefault(k)))).ToArray(), changed.Length, changed.Length > 20,
                 "Unverified; snapshots omit unplaced objects and 3D connections. Equal observations do not prove absence of side effects. Property changes contain JSON-encoded scalar text. Writes use one undo step; live undo verification is pending. Recovered calls have no inferred readback. " + data?.Warning, data?.Files ?? []));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, ex.Error.Reason == ErrorReason.InvalidArgument ? ApiCallTemplates.Closest(index, group, parameters) : null); }
     }
     internal static bool MethodParameters(string group, JsonElement parameters)
-        => EntryParameters(group, parameters);
+        => EntryParameters(group, parameters) && ApiTrySettingsValidation.Valid(group, n => parameters.TryGetProperty(n, out JsonElement value) ? value.ToString() : null);
     private static string Kind(JsonElement value) => value.ValueKind switch
     {
         JsonValueKind.Object => Locator(value) ? "locator" : value.EnumerateObject().Count() == 2 && value.TryGetProperty("x", out JsonElement x) && value.TryGetProperty("y", out JsonElement y) && x.ValueKind == JsonValueKind.Number && y.ValueKind == JsonValueKind.Number && x.TryGetDouble(out double a) && y.TryGetDouble(out double b) && double.IsFinite(a) && double.IsFinite(b) ? "PointD" : "Object",

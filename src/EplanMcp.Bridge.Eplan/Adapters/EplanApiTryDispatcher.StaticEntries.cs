@@ -49,6 +49,8 @@ internal sealed partial class EplanApiTryDispatcher
     private static object? InvokeEntry(ApiTryArgs args, JObject p, object? target, bool method)
     {
         string signature = EntryShape(args, p)[1];
+        if (ApiTryCatalog.Settings(args.Group) && !p.ContainsKey("via"))
+        { return ApiTryDispatch.Invoke(signature, (Project)target!, p, (token, type) => Resolve(args.Project, token, ApiTryCatalog.Kinds(type))); }
         if (ApiTryCatalog.Entry(signature))
         { return ApiTryEntryDispatch.Invoke(signature, target, p, (token, type) => Resolve(args.Project, token, ApiTryCatalog.Kinds(type))); }
         if (!method && p.ContainsKey("value"))

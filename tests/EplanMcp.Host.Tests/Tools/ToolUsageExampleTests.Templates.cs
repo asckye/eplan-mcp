@@ -26,7 +26,8 @@ public sealed partial class ToolUsageExampleTests
                 Assert.Equal(shape[1], template["signature"]!.GetValue<string>());
                 Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
                 bool setter = template["access"]!.GetValue<string>() == "write" && ApiTryCatalog.MethodAccess(entry.Row.Group) is null;
-                string[]? receiver = ApiTryCatalog.ReceiverShape(shape[1]);
+                string[]? receiver = ApiTryCatalog.Settings(entry.Row.Group) && !parameters.TryGetProperty("via", out _)
+                    ? ["Eplan.EplApi.DataModel.Project"] : ApiTryCatalog.ReceiverShape(shape[1]);
                 bool via = receiver is ["via", _];
                 bool key = via && ApiTryCatalog.ViaKey(shape[0], parameters.GetProperty("via").GetString()!);
                 Assert.Equal(shape.Skip(2).Concat(receiver is null ? Array.Empty<string>() : ["target"]).Concat(via ? ["via"] : Array.Empty<string>()).Concat(key ? ["via_key"] : Array.Empty<string>()).Concat(setter ? ["value"] : Array.Empty<string>()).Order(StringComparer.Ordinal), parameters.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));

@@ -22,22 +22,34 @@ internal static class ApiCallTemplates
     }
 
     private static IEnumerable<JsonObject> Templates(string group, string[] shape, string access, bool setter)
-        => ApiTryCatalog.ReceiverShape(shape[1]) is ["via", var type]
-            ? ApiTryCatalog.ViaPaths(type).Select(path => Create(group, shape, access, setter, path))
-            : [Create(group, shape, access, setter)];
+    {
+        if (ApiTryCatalog.SettingsMethods(group).Any(s => s.SequenceEqual(shape)))
+        {
+            yield return Create(group, shape, access, setter, receiver: ["Eplan.EplApi.DataModel.Project"]);
+            if (!ApiTryCatalog.Entry(shape[1]) || shape.Skip(2).Contains("node", StringComparer.Ordinal))
+            { yield break; }
+        }
+        if (ApiTryCatalog.ReceiverShape(shape[1]) is ["via", var type])
+        {
+            foreach (string[] path in ApiTryCatalog.ViaPaths(type))
+            { yield return Create(group, shape, access, setter, path); }
+        }
+        else
+        { yield return Create(group, shape, access, setter); }
+    }
 
-    private static JsonObject Create(string group, string[] shape, string access, bool setter, string[]? path = null)
+    private static JsonObject Create(string group, string[] shape, string access, bool setter, string[]? path = null, string[]? receiver = null)
     {
         var parameters = new JsonObject();
         var example = new JsonObject();
-        if (ApiTryCatalog.ReceiverShape(shape[1]) is { } receiver)
+        if ((receiver ?? ApiTryCatalog.ReceiverShape(shape[1])) is { } receiverShape)
         {
-            var target = Parameter(path is null ? receiver : [path[0]]);
+            var target = Parameter(path is null ? receiverShape : [path[0]]);
             parameters["target"] = target.Description;
             example["target"] = target.Example;
             if (path is not null)
             {
-                parameters["via"] = new JsonObject { ["kind"] = "string", ["required"] = true, ["const"] = path[1], ["receiver_type"] = receiver[1], ["source"] = "generated public property path from target" };
+                parameters["via"] = new JsonObject { ["kind"] = "string", ["required"] = true, ["const"] = path[1], ["receiver_type"] = receiverShape[1], ["source"] = "generated public property path from target" };
                 example["via"] = path[1];
                 if (ApiTryCatalog.ViaKey(shape[0], path[1]))
                 {
@@ -54,6 +66,11 @@ internal static class ApiCallTemplates
             (JsonObject description, JsonNode value) = Parameter(type);
             parameters[name] = description;
             example[name] = value;
+        }
+        if (ApiTryCatalog.Settings(group) && example.ContainsKey("node"))
+        {
+            example["node"] = group.Contains(".ProjectSetting", StringComparison.Ordinal) ? "PROJECT" : "USER";
+            parameters["node"]!["source"] = "enumerated settings node under USER/STATION/PROJECT";
         }
         return new()
         {

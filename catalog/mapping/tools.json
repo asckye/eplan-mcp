@@ -2334,6 +2334,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ApiTryOperationTests.cs"
           },
           {
+            "name": "ApiTrySettingsOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ApiTrySettingsOperationTests.cs"
+          },
+          {
             "name": "ProjectGetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectGetOperationTests.cs"

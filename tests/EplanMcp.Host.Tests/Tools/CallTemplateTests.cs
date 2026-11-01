@@ -78,7 +78,7 @@ public sealed class CallTemplateTests
         Assert.All(templates, template => Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, JsonSerializer.SerializeToElement(template["example"]!["parameters"])), template.ToJsonString()));
         if (via is not null)
         {
-            templates = [.. templates.Where(t => t["example"]!["parameters"]!["via"]!.GetValue<string>() == via
+            templates = [.. templates.Where(t => t["example"]!["parameters"]!["via"]?.GetValue<string>() == via
                 && t["arguments"]!["parameters"]!["properties"]!["target"]!["object_type"]!.GetValue<string>() == parentKind)];
             Assert.NotEmpty(templates);
         }
@@ -105,6 +105,36 @@ public sealed class CallTemplateTests
                 Assert.Equal(key, properties.ContainsKey("via_key"));
             }
         });
+    }
+
+    [Fact]
+    public void SettingsEnumerationTemplateIncludesProjectAnchorAndBoundedPagingShape()
+    {
+        const string group = "O:Eplan.EplApi.Base.SettingNode.GetListOfNodes";
+        ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == group);
+        Assert.Null(ApiTryCatalog.ExclusionReason(group));
+        JsonObject template = Assert.Single(ApiCallTemplates.For(entry));
+        Assert.True(template["dispatchable"]!.GetValue<bool>());
+        Assert.Equal("read", template["access"]!.GetValue<string>());
+        JsonObject properties = template["arguments"]!["parameters"]!["properties"]!.AsObject();
+        Assert.Equal("project", properties["target"]!["object_type"]!.GetValue<string>());
+        Assert.Equal("string", properties["node"]!["kind"]!.GetValue<string>());
+        Assert.Equal("int", properties["offset"]!["kind"]!.GetValue<string>());
+        Assert.Equal("int", properties["limit"]!["kind"]!.GetValue<string>());
+        Assert.False(properties.ContainsKey("bAbsolutPath"));
+        Assert.False(properties.ContainsKey("via"));
+        Assert.True(ApiTryTools.MethodParameters(group, JsonSerializer.SerializeToElement(template["example"]!["parameters"])));
+    }
+
+    [Fact]
+    public void SettingsTemplatesKeepBothNodeAndViaEntryShapes()
+    {
+        const string group = "O:Eplan.EplApi.DataModel.ProjectSettings.GetBoolSetting";
+        ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == group);
+        JsonObject[] templates = ApiCallTemplates.For(entry);
+        Assert.Contains(templates, t => t["example"]!["parameters"]!["node"]?.GetValue<string>() == "PROJECT");
+        Assert.Contains(templates, t => t["example"]!["parameters"]!["via"]?.GetValue<string>() == "Settings");
+        Assert.All(templates, t => Assert.True(ApiTryTools.MethodParameters(group, JsonSerializer.SerializeToElement(t["example"]!["parameters"])), t.ToJsonString()));
     }
 
     [Fact]
