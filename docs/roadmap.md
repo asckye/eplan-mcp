@@ -2,15 +2,15 @@
 
 截至 2026-11-01，里程碑状态只在本页维护；设计与 ADR 保留方案和决策历史。状态：已完成（done）、进行中（in progress）、计划中（planned）、等待负责人（waiting on owner）。全路线图目标为 **2027 年 1 月底**；以下日期为估计。
 
-v0.4.0 于 **2026-10-27** 发布（标签日期）。v0.5.0 推迟：先补齐操作层 API，再把客户页按原图精确重绘，完成客户彩排后发布。
+v0.4.0 于 **2026-10-27** 发布（标签日期）。v0.5.0 推迟：先补齐操作层 API，再把客户页按原图精确重绘，完成客户彩排后发布，预计 **12 月上旬**。
 
 | 当前主线与发布门槛 | 状态 | 发布 / 预计时间 | 设计依据 | ADR |
 |---|---|---|---|---|
-| 操作层 API 补齐：4014 个重载组，main 约 1010 组可试（约 25%），目标 85–90%；覆盖证据以[生成报告](eplan/coverage-report.md)为准 | 进行中 | v0.5.0；预计 11-08..10 | [实施计划](design/2026-10-31-api-completion.md) | [0032](adr/0032-generic-api-layer.md)、[0033](adr/0033-api-try-object-handles.md) |
+| 操作层 API：**4014 组全部可调用（scratch、逐次审批），整夜批量验证持续推进**；2026-11-01 main 可达 1114，五个开放分支并集原始计数 1858，扣除 36 个分母外辅助组后为 1822 / 4014，缺口 2192（原始算术差 2156）；85–90% 不是目标，详见[逐组清单](eplan/operation-gap-inventory.md) | 进行中；安全类别逐份等待负责人决定 | 全部可调用预计 11-25..28；v0.5.0 预计 12 月上旬，取决于 ADR 决定与实机验证 | [实施计划](design/2026-10-31-api-completion.md)、[缺口 TSV](../catalog/operation-gaps.tsv) | [0032](adr/0032-generic-api-layer.md)、[0033](adr/0033-api-try-object-handles.md)、[0036–0045 Proposed](adr/README.md) |
 | 布局护栏 R1–R9：并入操作层主线 | 进行中 | v0.5.0 | [绘图设计](design/2026-10-27-m8-drawing.md) | [0032](adr/0032-generic-api-layer.md) |
 | 调用模板 `try_template`：并入操作层主线 | 进行中（模板已接入） | Unreleased，目标 v0.5.0 | [API 补齐设计](design/2026-10-31-api-completion.md)；[API](tools/eplan_api_get.md) / [action](tools/eplan_action_catalog_get.md) 规格 | [0032](adr/0032-generic-api-layer.md)、[0033](adr/0033-api-try-object-handles.md) |
 | 页面审查 `eplan_page_review`：第 1 片测试中，第 2 片在操作层之后 | 进行中 | Unreleased | [审图设计](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
-| M8 绘图与客户页精确重绘：必须与原图完全一致，再客户彩排 | 进行中 | v0.5.0；重绘预计 11 月中旬 | [M8](design/2026-10-27-m8-drawing.md)、[验收要求](design/2026-10-31-api-completion.md#45-客户页差异必须在重画前解决) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
+| M8 绘图与客户页精确重绘：必须与原图完全一致，再客户彩排 | 进行中 | v0.5.0；操作层补齐后重绘，预计 11 月底至 12 月初 | [M8](design/2026-10-27-m8-drawing.md)、[验收要求](design/2026-10-31-api-completion.md#45-客户页差异必须在重画前解决) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
 
 每周五预览版（v0.4.x），首个 v0.4.1：2026-11-06
 
