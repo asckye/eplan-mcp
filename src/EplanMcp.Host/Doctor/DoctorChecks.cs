@@ -24,6 +24,11 @@ internal static class DoctorChecks
     public static DoctorCheck HostVersion() =>
         new(DoctorCheckIds.HostVersion, DoctorStatus.Info, $"eplanmcp {HostInfo.Version}", $"eplanmcp {HostInfo.Version}");
 
+    /// <summary>doctor --offline (release smoke test) skips the live Bridge connection and licence checks.</summary>
+    public static DoctorCheck OfflineBridgeSkipped() =>
+        new(DoctorCheckIds.BridgePipe, DoctorStatus.Info,
+            "离线自检：未检查实时 Bridge 连接与授权", "Offline doctor: live Bridge connection and licence were not checked.");
+
     public static DoctorCheck Plans(HostDataLocations locations)
     {
         try

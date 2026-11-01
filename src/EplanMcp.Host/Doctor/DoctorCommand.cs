@@ -37,8 +37,7 @@ internal static class DoctorCommand
         checks.AddRange(DoctorChecks.RunningEplan());
         if (offline)
         {
-            checks.Add(new(DoctorCheckIds.BridgePipe, DoctorStatus.Info,
-                "离线自检：未检查实时 Bridge 连接与授权", "Offline doctor: live Bridge connection and licence were not checked."));
+            checks.Add(DoctorChecks.OfflineBridgeSkipped());
         }
         else
         {
