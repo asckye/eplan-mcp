@@ -24,7 +24,7 @@ internal sealed class EplanReportUpdater : IReportUpdater
         // A null filter returns every page, in EPLAN's page order (S6).
         return
         [
-            .. finder.GetPages(null)
+            .. EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray()
                 .Where(page => page.ReportBlock is not null)
                 .Select(page => new ReportPageRecord { Name = page.Name, Id = page.ToStringIdentifier() }),
         ];
@@ -71,6 +71,7 @@ internal sealed class EplanReportUpdater : IReportUpdater
         }
         catch (Exception ex) when ((ex is BaseException or ApplicationException) && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not update the reports, so nothing was changed. metadata.eplanMessage has EPLAN's message; ask the engineer to update the reports in EPLAN to see why.",

@@ -31,7 +31,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
             }
         }
 
-        IEnumerable<Connection> found = device is null ? finder.GetConnections(null) : DeviceConnections(finder, device);
+        IEnumerable<Connection> found = device is null ? EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray() : DeviceConnections(finder, device);
         if (target is not null)
         {
             // In memory by Connection.Page, as S6 found right (40 on =GAA+A1&EFS1/1): the obsolete ConnectionsFilter.Page
@@ -66,7 +66,7 @@ internal sealed class EplanConnectionReader : IConnectionReader
         {
             using var filter = new ConnectionsFilter();
             filter.Function = function;
-            foreach (Connection connection in finder.GetConnections(filter))
+            foreach (Connection connection in EplanNativePreconditions.Valid(finder.GetConnections(filter)).ToArray())
             {
                 if (seen.Add(connection))
                 {
@@ -94,8 +94,9 @@ internal sealed class EplanConnectionReader : IConnectionReader
         {
             return connection.Page;
         }
-        catch (BaseException)
+        catch (BaseException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null;
         }
     }

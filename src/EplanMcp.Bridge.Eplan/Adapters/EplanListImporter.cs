@@ -18,11 +18,11 @@ internal sealed class EplanListImporter : IListImporter
             Project project = EplanProjects.ByPath(projectPath);
             using var finder = new DMObjectsFinder(project);
             // A39: these StorableObjects belong to EPLAN. Dispose only the finder and the context, never its results.
-            var entries = finder.GetAll<DeviceListEntry>(true).Cast<DeviceListEntry>().ToArray();
+            var entries = EplanNativePreconditions.Valid(finder.GetAll<DeviceListEntry>(true).Cast<DeviceListEntry>()).ToArray();
             Article[] articles = project.Articles;
-            ArticleReference[] references = finder.GetArticleReferences(null);
-            IEnumerable<string> lines = finder.GetPages(null).Select(p => Line("page", p.ToStringIdentifier(), p.Name))
-                .Concat(finder.GetFunctions(null).Select(f => Line("function", f.ToStringIdentifier(), f.Name)))
+            ArticleReference[] references = EplanNativePreconditions.Valid(finder.GetArticleReferences(null)).ToArray();
+            IEnumerable<string> lines = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray().Select(p => Line("page", p.ToStringIdentifier(), p.Name))
+                .Concat(EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => Line("function", f.ToStringIdentifier(), f.Name)))
                 .Concat(entries.Select(e => Line("entry", e.ObjectIdentifier, e.PartNumber)))
                 .Concat(articles.Select(a => Line("part", a.ToStringIdentifier(), a.PartNr, a.VariantNr)))
                 .Concat(references.Select(r => Line("reference", r.ToStringIdentifier(), r.PartNr, r.VariantNr, r.Count, r.ParentObject?.ToStringIdentifier())));
@@ -35,6 +35,7 @@ internal sealed class EplanListImporter : IListImporter
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed(ex);
         }
     }
@@ -61,6 +62,7 @@ internal sealed class EplanListImporter : IListImporter
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed(ex);
         }
     }

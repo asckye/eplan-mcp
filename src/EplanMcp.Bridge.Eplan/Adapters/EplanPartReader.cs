@@ -20,7 +20,7 @@ internal sealed class EplanPartReader : IPartReader
         {
             // A null filter returns every valid reference (Count > 0, part number set; EPLAN XML docs): S6 found 2900 in
             // the sample project, references on wires included, against 981 on functions.
-            References = [.. finder.GetArticleReferences(null).Select(Reference)],
+            References = [.. EplanNativePreconditions.Valid(finder.GetArticleReferences(null)).ToArray().Select(Reference)],
 
             // The project's part data (S6: 293 in 10 ms), never the parts database: Article.LoadFromMasterdata would write
             // into the project (BannedSymbols.txt). Descriptions are multi-language, the manufacturer is not (S6).

@@ -64,8 +64,9 @@ public sealed class ImportPlcExecuteOperation(IProjectCatalog catalog, IPageRead
             result.EplanMessageCount = added.Count;
             result.EplanMessages = [.. added.Take(20).Select(m => new SystemMessage { Level = MessageListOperation.LevelName(m.Level)!, Number = m.Index.Length == 0 || m.Index == MessageListOperation.NoNumber ? null : m.Index, Text = m.Text, Occurrences = m.Occurrences })];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // A11: only copied records survive ReadAll; a collection failure cannot replace a known outcome.
             result.Warning += " EPLAN messages could not be read; inspect the session messages in EPLAN.";
         }
@@ -99,8 +100,9 @@ public sealed class ImportPlcExecuteOperation(IProjectCatalog catalog, IPageRead
             // After the backup: opening and closing the copy logs messages with local paths that are not this call's.
             bookmark = messages?.ReadAll().Count ?? 0;
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // A missing bookmark must not change the execution outcome.
         }
 

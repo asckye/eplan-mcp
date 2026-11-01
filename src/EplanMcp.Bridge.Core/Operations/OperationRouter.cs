@@ -67,7 +67,7 @@ public sealed class OperationRouter
 
         object parsed = operation.ParseArgs(args);
         bool write = operation is IWriteOperation;
-        var context = new OperationContext(correlationId, write, progress);
+        var context = new OperationContext(correlationId, write, progress, _log);
         _running.Add(context);
         try
         {

@@ -36,7 +36,7 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Function[] inScope = pages is null
-            ? finder.GetFunctions(null)
+            ? EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray()
             : [.. pages.SelectMany(page => Functions(finder, page) ?? throw new InvalidOperationException("A page the operation resolved is gone."))];
 
         // PostNumerate raised an access violation, which ends EPLAN, when it got a function whose device tag has no '?':
@@ -55,10 +55,12 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
         }
         catch (InvalidScheme ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw NumberingSchemes.Unknown(scheme, ex.Message, ex);
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not number the device tags, so nothing was numbered. metadata.eplanMessage has EPLAN's message; tags with '?' that EPLAN cannot number are for the engineer to number in EPLAN.",
@@ -76,7 +78,7 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
     {
         if (page is null)
         {
-            return finder.GetFunctions(null);
+            return EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray();
         }
 
         if (EplanDeviceReader.FindPage(finder, page) is not { } target)
@@ -85,6 +87,6 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
         }
 
         using var filter = new FunctionsFilter { Page = target };
-        return finder.GetFunctions(filter);
+        return EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray();
     }
 }

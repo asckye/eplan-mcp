@@ -61,7 +61,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         using (var filter = new PagesFilter { Name = target.Page, ExactNameMatching = true })
         {
             Check();
-            page = finder.GetPages(filter).SingleOrDefault(p => string.Equals(p.Name, target.Page, StringComparison.Ordinal))
+            page = EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().SingleOrDefault(p => string.Equals(p.Name, target.Page, StringComparison.Ordinal))
                 ?? throw new BridgeErrorException(ErrorReason.PageNotFound, "The page is no longer in the project. Call eplan_page_list to see its pages.");
         }
 
@@ -74,7 +74,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
     internal static IEnumerable<Function> Functions(DMObjectsFinder finder, Action check)
     {
         check();
-        foreach (Function function in finder.GetFunctions(null))
+        foreach (Function function in EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray())
         {
             check();
             yield return function;
@@ -83,7 +83,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
         foreach (Page page in Pages(finder, check))
         {
             check();
-            foreach (Function function in page.AllPlacements.OfType<Function>())
+            foreach (Function function in EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>())
             {
                 check();
                 yield return function;
@@ -94,7 +94,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
     private static IEnumerable<Page> Pages(DMObjectsFinder finder, Action check)
     {
         check();
-        foreach (Page page in finder.GetPages(null))
+        foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray())
         {
             check();
             yield return page;
@@ -162,8 +162,9 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
                 transferred = true;
                 return handle;
             }
-            catch (PropertyNotFoundException)
+            catch (PropertyNotFoundException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 return null;
             }
             finally
@@ -212,12 +213,14 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
             {
                 return new EplanPropertyReadValue(index.HasValue ? list[id, index.Value] : list[id], check);
             }
-            catch (PropertyNotFoundException)
+            catch (PropertyNotFoundException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 return null;
             }
-            catch (InvalidIndexException)
+            catch (InvalidIndexException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 throw new BridgeErrorException(ErrorReason.InvalidArgument, "The property index is outside the runtime definition's range.");
             }
         }

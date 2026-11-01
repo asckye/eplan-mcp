@@ -123,8 +123,9 @@ internal sealed class EplanProjectExporter : IProjectExporter
         {
             return setting.GetStringSetting(LabelFormatSetting, 0);
         }
-        catch (BaseException)
+        catch (BaseException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null; // the setting is not defined (EPLAN XML docs)
         }
     }

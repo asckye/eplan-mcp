@@ -78,10 +78,12 @@ internal sealed class EplanTerminalRenumberer : ITerminalRenumberer
         }
         catch (InvalidScheme ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw SchemeChoice.Refused(scheme, ex.Message, "terminal", ex);
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not number the terminals, so nothing was numbered. metadata.eplanMessage has EPLAN's message.",
@@ -103,10 +105,10 @@ internal sealed class EplanTerminalRenumberer : ITerminalRenumberer
     {
         if (strip is null)
         {
-            return finder.GetTerminals(null);
+            return EplanNativePreconditions.Valid(finder.GetTerminals(null)).ToArray();
         }
 
-        TerminalStrip[] named = [.. finder.GetTerminalStrips(null).Where(s => string.Equals(s.Name, strip, StringComparison.Ordinal))];
+        TerminalStrip[] named = [.. EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray().Where(s => string.Equals(s.Name, strip, StringComparison.Ordinal))];
         return named.Length == 0 ? null : [.. named.SelectMany(s => s.Terminals).Distinct()];
     }
 }

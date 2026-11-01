@@ -29,9 +29,9 @@ internal sealed class EplanCableGenerator : ICableGenerator
             Project project = EplanProjects.ByPath(projectPath);
             using var finder = new DMObjectsFinder(project);
             using var filter = new FunctionsFilter { FunctionCategory = FunctionCategory.Cable };
-            Dictionary<string, string> connections = finder.GetConnections(null).ToDictionary(c => c.ToStringIdentifier(), ConnectionState, StringComparer.Ordinal);
+            Dictionary<string, string> connections = EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().ToDictionary(c => c.ToStringIdentifier(), ConnectionState, StringComparer.Ordinal);
             var cables = new List<CableGenerationCable>();
-            foreach (Function function in finder.GetFunctions(filter))
+            foreach (Function function in EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray())
             {
                 OperationContext.Current.ThrowIfCancellationRequested();
                 var cable = (Cable)function;
@@ -44,11 +44,12 @@ internal sealed class EplanCableGenerator : ICableGenerator
                 cables.Add(new CableGenerationCable(function.ToStringIdentifier(), function.Name, automatic.IsEmpty ? null : automatic.ToBool(), business));
             }
 
-            string[] objects = [.. finder.GetPages(null).Select(p => Hash(p.ToStringIdentifier(), p.Name, p.AllPlacements.Select(o => o.ToStringIdentifier()).OrderBy(s => s, StringComparer.Ordinal).ToArray()))];
+            string[] objects = [.. EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray().Select(p => Hash(p.ToStringIdentifier(), p.Name, p.AllPlacements.Select(o => o.ToStringIdentifier()).OrderBy(s => s, StringComparer.Ordinal).ToArray()))];
             return new CableGenerationSnapshot(cables, connections.Count, Hash(objects.OrderBy(s => s, StringComparer.Ordinal).ToArray(), connections.OrderBy(p => p.Key, StringComparer.Ordinal).ToArray()));
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Required cable generation readback failed. Ask the engineer to check the project and schemes before trying again.", ex);
         }
     }
@@ -78,6 +79,7 @@ internal sealed class EplanCableGenerator : ICableGenerator
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not generate automatic cables. Ask the engineer to check the schemes and EPLAN messages.", ex);
         }
     }

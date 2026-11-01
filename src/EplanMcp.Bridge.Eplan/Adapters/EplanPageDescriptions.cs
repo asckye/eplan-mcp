@@ -80,7 +80,7 @@ internal sealed class EplanPageDescriptions(Func<string, string, PagePropertyLis
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        return finder.GetPages(filter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal))
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal))
             ?? throw new BridgeErrorException(
                 ErrorReason.PageNotFound,
                 "The page is no longer in the project. Call eplan_page_list to see its pages.",

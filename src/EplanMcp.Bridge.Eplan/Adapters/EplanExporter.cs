@@ -49,6 +49,7 @@ internal sealed class EplanExporter : IExporter
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException)
         {
+            WriteExceptionDiagnostics.Report(ex);
             return false; // an empty or unknown name (EPLAN XML docs); the operation warns
         }
     }

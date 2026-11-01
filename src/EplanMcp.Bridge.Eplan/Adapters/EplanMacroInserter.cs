@@ -38,7 +38,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
             Height = size?.Y,
 
             // Every placement on the page, groups resolved (EPLAN XML docs, Page.AllPlacements).
-            Objects = [.. page.AllPlacements.Select(placement => placement.ToStringIdentifier())],
+            Objects = [.. EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Select(placement => placement.ToStringIdentifier())],
         };
     }
 
@@ -65,6 +65,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
         }
         catch (BaseException ex) when (ex.Message.IndexOf(StackedSymbols, StringComparison.Ordinal) >= 0)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var stacked = new BridgeErrorException(
                 ErrorReason.InvalidArgument,
                 "EPLAN refuses to place the macro there because the same symbols are at that position already, so nothing was inserted. Choose another position; eplan_page_get shows the devices on the page.",
@@ -94,7 +95,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
     {
         using var finder = new DMObjectsFinder(project);
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        return finder.GetPages(filter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
     }
 
     /// <summary>The functions on the page: <c>FunctionsFilter.Page</c>, not the shared <c>Page.Filter</c> (BannedSymbols.txt).</summary>
@@ -102,7 +103,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
     {
         using var finder = new DMObjectsFinder(project);
         using var filter = new FunctionsFilter { Page = page };
-        return finder.GetFunctions(filter);
+        return EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray();
     }
 
     /// <summary>
@@ -115,12 +116,14 @@ internal sealed class EplanMacroInserter : IMacroInserter
         {
             return page.Size;
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null;
         }
-        catch (BaseException)
+        catch (BaseException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null;
         }
     }

@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| [原生前置条件](2026-11-01-native-preconditions.md)、[无效对象枚举](2026-11-01-valid-enumeration.md)、[事务诊断](2026-11-01-native-write-diagnostics.md) | 完整 Large 套件，重点 `ApiTryTests`、`PlacementMoveTests`、`DeviceAndConnectionTests`、`DevicePlaceTests`、`ObjectReadTests`、`PropertyReadTests`、`PlanFunctionsTests`、`PlanImpactTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：本次禁止运行 EPLAN。共享 finder/页对象枚举及事务诊断影响多条读写路径，故保守扩大到完整套件；核对保护文本不触达 UndockText、不创建撤销步，无页 NameService 拒绝、显式页重载正向、IsValid 对实际失效句柄的识别、Warning 计数/correlation id、原审批暂停与撤销回滚。完整请求 JSON、原始日志、变体与授权尚缺，须补精确输入 Small；崩溃因果假说由负责人另测。系统主数据类仍按 README 单独获准后运行。 |
 | C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
 | C1 设置只读切片（本次 op-settings 变基合并；api-notes A67） | `ApiTryTests`（含 `ApiTryTests.Settings.cs` 的 LargeWrite 用例）、`NoSideEffectTests`、`WriteSafetyTests` | 待运行：本次仅构建及 Small/契约验证，未启动 EPLAN；需验证两种设置入口、分页枚举与文件无变化，以及设置读取间项目写入的一步撤销和历史哨兵。 |
 | ADR-0033 短期对象句柄与 main Files/静态入口合并（`feat/op-handles` rebase） | `ApiTryTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：Pin 句柄读写、类型与 scratch 归属复核、设置只读、单步撤销及既有历史；合并后同时回归 Files/静态/via 调用与共享写入安全。A68 的原实机失败已有相同结构与值的 Small 回归；本次按负责人要求不启动 EPLAN，不能以编译和 Small 通过替代实机证据。 |

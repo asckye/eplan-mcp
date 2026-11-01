@@ -42,6 +42,7 @@ internal sealed class EplanLanguageRemover : ILanguageRemover
         }
         catch (Exception ex) when ((ex is BaseException or ArgumentException) && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 $"EPLAN could not remove {language}, so nothing was removed. metadata.eplanMessage has EPLAN's message.",

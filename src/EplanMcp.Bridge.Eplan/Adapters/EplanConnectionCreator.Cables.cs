@@ -67,12 +67,12 @@ internal sealed partial class EplanConnectionCreator
             }
         }
     }
-    private static Cable FindCable(string project, string page, JToken definition) => Page(project, page).AllPlacements.OfType<Cable>()
+    private static Cable FindCable(string project, string page, JToken definition) => EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<Cable>()
         .Single(c => CableDefinitionPlanner.SameName((string)definition["designation"]!, c.Name, page));
     private static Connection[] CableRuns(string project, string page, JObject request, JObject plan, JToken definition)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-        Connection[] all = finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page).ToArray();
+        Connection[] all = EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Where(c => EplanConnectionReader.PageOf(c)?.Name == page).ToArray();
         Cable cable = FindCable(project, page, definition);
         return plan["coreImpact"]!.Where(r => (string?)r["designation"] == (string?)definition["designation"]).Select(row =>
         {
@@ -202,7 +202,7 @@ internal sealed partial class EplanConnectionCreator
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
         var result = new JObject();
-        foreach (Connection run in finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
+        foreach (Connection run in EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             using ConnectionPropertyList properties = run.Properties;
             result[run.ObjectIdentifier.ToString(CultureInfo.InvariantCulture)] = new JObject { ["pins"] = JArray.FromObject(CablePins(run)), ["cable"] = CableText(properties, 20005), ["label"] = CableText(properties, 31011), ["colour"] = CableText(properties, 31004), ["section"] = CableText(properties, 31002) };

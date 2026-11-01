@@ -23,7 +23,7 @@ internal sealed class EplanDrawingImporter : IDrawingImporter
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
         Page page = Find(project, pageName) ?? throw new InvalidOperationException("The planned page is gone.");
-        int before = page.AllPlacements.Length;
+        int before = EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Length;
         try
         {
             using var transformation = new Transformation(
@@ -38,6 +38,7 @@ internal sealed class EplanDrawingImporter : IDrawingImporter
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not import the drawing, so nothing was changed. metadata.eplanMessage has EPLAN's message; the file may be damaged or of a version EPLAN does not read.",
@@ -46,7 +47,7 @@ internal sealed class EplanDrawingImporter : IDrawingImporter
             throw failed;
         }
 
-        return page.AllPlacements.Length - before;
+        return EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Length - before;
     }
 
     /// <summary>The page whose full name is exactly <paramref name="pageName"/>: EPLAN's exact name filter (S6), checked ordinally.</summary>
@@ -54,6 +55,6 @@ internal sealed class EplanDrawingImporter : IDrawingImporter
     {
         using var finder = new DMObjectsFinder(project);
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        return finder.GetPages(filter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
     }
 }

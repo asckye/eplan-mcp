@@ -26,7 +26,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         using var finder = new DMObjectsFinder(project);
         IEnumerable<StorableObject> objects = Candidates(finder, args.ObjectType.ToLowerInvariant(), Check, args.Page, project);
         var found = new Dictionary<(int, long), ObjectSummary>();
-        foreach (StorableObject obj in objects)
+        foreach (StorableObject obj in EplanNativePreconditions.Valid(objects))
         {
             Check();
             if (!Matches(obj, args.ObjectType.ToLowerInvariant()))
@@ -59,21 +59,21 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         check();
         IEnumerable<StorableObject> objects = kind switch
         {
-            "page" => finder.GetPages(null),
+            "page" => EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray(),
             "function" => EplanPropertyReadAdapter.Functions(finder, check),
-            "connection" => finder.GetConnections(null),
-            "terminal" or "plcterminal" => finder.GetTerminals(null),
-            "terminalstrip" => finder.GetTerminalStrips(null),
-            "plc" => finder.GetPLCs(null),
-            "cable" => finder.GetCablesWithFilterScheme(null),
-            "blackbox" => finder.GetBoxedDevices(null),
-            "placeholder" => finder.GetPlaceholdersWithFilterScheme(null),
-            "interruptionpoint" => finder.GetInterruptionPoints(null),
-            "potentialdefinition" => finder.GetPotentialDefinitionsWithFilterScheme(null),
+            "connection" => EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray(),
+            "terminal" or "plcterminal" => EplanNativePreconditions.Valid(finder.GetTerminals(null)).ToArray(),
+            "terminalstrip" => EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray(),
+            "plc" => EplanNativePreconditions.Valid(finder.GetPLCs(null)).ToArray(),
+            "cable" => EplanNativePreconditions.Valid(finder.GetCablesWithFilterScheme(null)).ToArray(),
+            "blackbox" => EplanNativePreconditions.Valid(finder.GetBoxedDevices(null)).ToArray(),
+            "placeholder" => EplanNativePreconditions.Valid(finder.GetPlaceholdersWithFilterScheme(null)).ToArray(),
+            "interruptionpoint" => EplanNativePreconditions.Valid(finder.GetInterruptionPoints(null)).ToArray(),
+            "potentialdefinition" => EplanNativePreconditions.Valid(finder.GetPotentialDefinitionsWithFilterScheme(null)).ToArray(),
             "locationbox" or "macrobox" => Placements(),
             _ => ObjectKindDispatch.Candidates(finder, project ?? throw new InvalidOperationException("Project is required for generic discovery."), kind, check, pageName),
         };
-        foreach (StorableObject obj in objects)
+        foreach (StorableObject obj in EplanNativePreconditions.Valid(objects))
         {
             check();
             // Property-get's Function locator also accepts derived function classes, as before B2.
@@ -83,12 +83,12 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
 
         IEnumerable<Placement> Placements()
         {
-            foreach (Page page in finder.GetPages(null))
+            foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)))
             {
                 check();
                 if (pageName is not null && page.Name != pageName)
                 { continue; }
-                foreach (Placement placement in page.AllPlacements)
+                foreach (Placement placement in EplanNativePreconditions.Valid(page.AllPlacements).ToArray())
                 { check(); yield return placement; }
             }
         }

@@ -51,6 +51,7 @@ internal sealed class EplanPageWriter : IPageWriter
         }
         catch (NameConflictException ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var exists = new BridgeErrorException(
                 ErrorReason.AlreadyExists,
                 "EPLAN reports that a page with this name exists already, so nothing was created. Choose an unused page number; eplan_page_list with name_prefix shows the numbers in use.",

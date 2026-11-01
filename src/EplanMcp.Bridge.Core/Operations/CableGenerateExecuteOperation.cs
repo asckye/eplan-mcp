@@ -37,8 +37,9 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
             {
                 bookmark = messages?.ReadAll().Count ?? 0;
             }
-            catch (Exception)
+            catch (Exception nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 messageWarning = MessageWarning;
             }
         }
@@ -94,8 +95,9 @@ public sealed class CableGenerateExecuteOperation(IProjectCatalog catalog, IPage
                 Text = m.Text, Occurrences = m.Occurrences,
             })];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // Message collection must not replace the known execution outcome.
             result.Warning += " " + MessageWarning;
         }

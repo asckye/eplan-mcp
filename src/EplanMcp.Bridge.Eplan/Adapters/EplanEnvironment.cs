@@ -70,6 +70,7 @@ internal static class EplanEnvironment
         }
         catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
         {
+            EplanMcp.Bridge.Core.Operations.WriteExceptionDiagnostics.Report(ex);
             log.Write(BridgeLogLevel.Warning, "Could not read the EPLAN remote server registry", ex);
         }
 
@@ -87,6 +88,7 @@ internal static class EplanEnvironment
         }
         catch (Exception ex)
         {
+            EplanMcp.Bridge.Core.Operations.WriteExceptionDiagnostics.Report(ex);
             log.Write(BridgeLogLevel.Warning, "Could not check the API extension licence", ex);
             return null;
         }

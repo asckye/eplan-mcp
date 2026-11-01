@@ -39,8 +39,9 @@ internal sealed class EplanPartsDatabaseWriter : IPartsDatabaseWriter
                 string expanded = PathMap.SubstitutePath(database);
                 path = expanded.Contains("$(") || !Path.IsPathRooted(expanded) ? string.Empty : expanded;
             }
-            catch (BaseException)
+            catch (BaseException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 // The path only names the database in the approval and keys its suspension; the setting stands in.
             }
         }

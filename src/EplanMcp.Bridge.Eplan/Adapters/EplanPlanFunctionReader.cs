@@ -39,15 +39,15 @@ internal sealed class EplanPlanFunctionReader : IPlanNameReader, IPlanGuardFunct
         // The unfiltered finder can omit additional representations (A12); placements supply those, the finder supplies
         // unplaced functions. These fields need no property lists; never dispose returned StorableObjects (A39).
         checkpoint();
-        Add(finder.GetFunctions(null));
+        Add(EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray());
         checkpoint();
-        Page[] pages = finder.GetPages(null);
+        Page[] pages = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray();
         checkpoint();
         foreach (Page page in pages)
         {
             checkpoint();
             inventory.Pages.Add(page.Name ?? string.Empty);
-            Add(page.AllPlacements);
+            Add(EplanNativePreconditions.Valid(page.AllPlacements).ToArray());
         }
 
         checkpoint();
@@ -57,7 +57,7 @@ internal sealed class EplanPlanFunctionReader : IPlanNameReader, IPlanGuardFunct
         {
             checkpoint();
             int count = 0;
-            foreach (StorableObject obj in objects)
+            foreach (StorableObject obj in EplanNativePreconditions.Valid(objects))
             {
                 if (count++ % 128 == 0)
                 {

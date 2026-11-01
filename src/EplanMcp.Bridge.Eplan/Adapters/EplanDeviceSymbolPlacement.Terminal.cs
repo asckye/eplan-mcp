@@ -16,10 +16,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         MainThread.Assert();
         string name = tag.Substring(0, tag.LastIndexOf(':'));
         using var finder = new DMObjectsFinder(_project);
-        TerminalStrip[] matches = [.. finder.GetTerminalStrips(null).Where(s => Same(name.ToUpperInvariant(), s.Name.ToUpperInvariant()))];
+        TerminalStrip[] matches = [.. EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray().Where(s => Same(name.ToUpperInvariant(), s.Name.ToUpperInvariant()))];
         CheckTerminal(matches.Length <= 1, "several strips share this name");
         bool create = matches.Length == 0;
-        CheckTerminal(!create || !finder.GetFunctions(null).Any(f => Same(name.ToUpperInvariant(), f.Name.ToUpperInvariant())), "another function already has the strip name");
+        CheckTerminal(!create || !EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Any(f => Same(name.ToUpperInvariant(), f.Name.ToUpperInvariant())), "another function already has the strip name");
 #pragma warning disable CA2000 // A39/A55: persistent strips and terminals belong to EPLAN, also after Abort.
         TerminalStrip strip = create ? new TerminalStrip() : matches[0];
         if (create)

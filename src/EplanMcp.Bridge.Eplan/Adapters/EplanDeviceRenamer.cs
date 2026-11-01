@@ -17,7 +17,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Function[] named = Named(finder, tag);
-        if (Main(named) is not { } main)
+        if (MainFunction(named) is not { } main)
         {
             return null;
         }
@@ -29,7 +29,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
             Tag = tag,
             DeviceTag = own.IsEmpty ? string.Empty : own.ToString(),
             Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Id = f.ToStringIdentifier(), IsMain = f.IsMainFunction, Page = f.Page?.Name })],
-            SubFunctions = [.. main.SubFunctions.Select(f => f.Name ?? string.Empty)],
+            SubFunctions = [.. EplanNativePreconditions.Valid(main.SubFunctions).Select(f => f.Name ?? string.Empty)],
         };
     }
 
@@ -37,7 +37,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. finder.GetFunctions(null).Select(f => f.Name ?? string.Empty)];
+        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name ?? string.Empty)];
     }
 
     public RenameReadBack Rename(string projectPath, string tag, string newTag)
@@ -45,7 +45,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Function[] named = Named(finder, tag);
-        Function main = Main(named) ?? throw new InvalidOperationException("The planned device has no main function any more.");
+        Function main = MainFunction(named) ?? throw new InvalidOperationException("The planned device has no main function any more.");
         main.Name = newTag;
         foreach (Function function in named)
         {
@@ -56,7 +56,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         }
 
         string renamed = main.Name ?? string.Empty;
-        string[] names = [.. finder.GetFunctions(null).Select(f => f.Name ?? string.Empty)];
+        string[] names = [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name ?? string.Empty)];
         return new RenameReadBack
         {
             MainName = renamed,
@@ -72,10 +72,10 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         using var filter = new FunctionsFilter();
         filter.Name = tag;
         filter.ExactNameMatching = true;
-        return [.. finder.GetFunctions(filter).Where(f => string.Equals(f.Name, tag, StringComparison.Ordinal))];
+        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().Where(f => string.Equals(f.Name, tag, StringComparison.Ordinal))];
     }
 
     /// <summary>The main function that stands for the device: the one with a shown tag, else the first (A12).</summary>
-    private static Function? Main(Function[] named) =>
+    private static Function? MainFunction(Function[] named) =>
         named.FirstOrDefault(f => f.IsMainFunction && DeviceTags.Shown(f.VisibleName) is not null) ?? named.FirstOrDefault(f => f.IsMainFunction);
 }

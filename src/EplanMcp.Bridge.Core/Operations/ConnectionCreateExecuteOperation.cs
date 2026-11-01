@@ -79,7 +79,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 new OperationContext(OperationContext.Current.RequestId, write: true, progress: null).Run(() =>
                 { if (generationCommitted) { creator.Undo(project); } creator.Undo(project); return ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint); });
             }
-            catch (Exception) { throw Unknown(); }
+            catch (Exception nativeFailure) { WriteExceptionDiagnostics.Report(nativeFailure); throw Unknown(); }
             string cause = failure is BridgeErrorException { Error.Reason: ErrorReason.EplanOperationFailed } known ? " Cause: " + known.Error.Message : string.Empty;
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying." + cause, failure)
             { Error = { Execution = ExecutionState.RolledBack } };

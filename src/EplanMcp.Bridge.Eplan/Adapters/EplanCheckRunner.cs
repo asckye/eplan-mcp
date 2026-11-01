@@ -24,7 +24,7 @@ internal sealed class EplanCheckRunner : ICheckRunner
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
 
         // A null filter returns every page, in EPLAN's page order (S6).
-        Page[] scope = pages is null ? finder.GetPages(null) : Find(finder, pages);
+        Page[] scope = pages is null ? EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray() : Find(finder, pages);
         return [.. scope.Select(page => page.ToStringIdentifier())];
     }
 
@@ -55,6 +55,7 @@ internal sealed class EplanCheckRunner : ICheckRunner
         }
         catch (InvalidScheme ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             const string Violation = "'scheme' is not a check scheme EPLAN knows; omit it to check with the scheme EPLAN uses now.";
             var invalid = new BridgeErrorException(ErrorReason.InvalidArgument, "Invalid arguments: " + Violation + " Nothing was checked.", ex);
             invalid.Error.Metadata = new Dictionary<string, string>
@@ -67,6 +68,7 @@ internal sealed class EplanCheckRunner : ICheckRunner
         }
         catch (BaseException ex) when (new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not run the check, so nothing was changed. metadata.eplanMessage has EPLAN's message; ask the engineer to run the check in EPLAN to see why.",

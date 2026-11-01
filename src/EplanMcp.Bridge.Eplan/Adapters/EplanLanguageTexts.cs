@@ -16,12 +16,12 @@ internal static class EplanLanguageTexts
     public static List<LanguageText> All(DMObjectsFinder finder)
     {
         var texts = new List<LanguageText>();
-        foreach (Function function in finder.GetFunctions(null))
+        foreach (Function function in EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray())
         {
             Add(texts, function);
         }
 
-        foreach (Page page in finder.GetPages(null))
+        foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray())
         {
             Add(texts, page);
         }
@@ -50,7 +50,7 @@ internal static class EplanLanguageTexts
     public static Function[] FunctionsOn(DMObjectsFinder finder, Page page)
     {
         using var filter = new FunctionsFilter { Page = page };
-        return finder.GetFunctions(filter);
+        return EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray();
     }
 
     private static void Add(List<LanguageText> texts, Function function) => Add(texts, "F " + function.ToStringIdentifier(), function.Name ?? string.Empty, function.Properties.FUNC_TEXT);

@@ -50,6 +50,7 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
         }
         catch (Exception ex) when (IsEplanFailure(ex))
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed(
                 file is null ? "EPLAN could not open or read its parts database" : "EPLAN could not export its parts database, so no files were kept",
                 "the configured database in EPLAN's parts management",
@@ -68,6 +69,7 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
         }
         catch (Exception ex) when (IsEplanFailure(ex))
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed("EPLAN could not tell which translation database it uses", "the translation database in EPLAN's settings", ex);
         }
     }
@@ -89,6 +91,7 @@ internal sealed class EplanMasterDataExporter : IMasterDataExporter
         }
         catch (Exception ex) when (IsEplanFailure(ex))
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed("EPLAN could not export its translation database, so no files were kept", "the translation database in EPLAN's settings", ex);
         }
     }

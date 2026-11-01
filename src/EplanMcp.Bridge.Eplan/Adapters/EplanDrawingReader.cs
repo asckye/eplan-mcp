@@ -15,7 +15,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        Page? page = finder.GetPages(filter).SingleOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        Page? page = EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().SingleOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
         if (page is null)
         {
             return null;
@@ -126,7 +126,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             Walk(plotFrame.SubPlacements, excluded: true);
         }
 
-        Walk(page.AllPlacements, excluded: false);
+        Walk(EplanNativePreconditions.Valid(page.AllPlacements).ToArray(), excluded: false);
         return result;
     }
 
@@ -145,6 +145,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         }
         catch (Exception ex) when (ex is BaseException or InvalidOperationException)
         {
+            WriteExceptionDiagnostics.Report(ex);
             return null; // A14/S42: unavailable size or default empty property text bounds.
         }
     }

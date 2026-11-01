@@ -34,7 +34,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page)!;
         geometry.Project = target.Path;
         var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true, Graphical = Graphical(target.Path, page) };
-        foreach (Placement placement in native.AllPlacements)
+        foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements))
         {
             if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
             { scene.Complete = false; }
@@ -53,8 +53,8 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static CableDefinitionPlanner.Inventory ReadCables(string project, string page, ConnectionCreatePlanner.Scene scene)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-        var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = finder.GetFunctions(null).Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
-        foreach (Connection connection in finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
+        var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
+        foreach (Connection connection in EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             Pin? start = connection.StartPin, end = connection.EndPin;
             if (start?.ParentFunction is not { } a || end?.ParentFunction is not { } b || a.Page?.Name != page || b.Page?.Name != page
@@ -154,10 +154,10 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.PageSize is null || scene.Page.Placements.Count > 10000)
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Read a complete Circuit counterpart page within 10000 placements."); }
             scene.Pins.Clear();
-            foreach (Function function in native.AllPlacements.OfType<Function>())
+            foreach (Function function in EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>())
             { foreach (PinBase pin in function.GraphicalConnectionPoints) { scene.Pins.Add(Key(function, pin.Index), new() { Location = [function.Location.X + pin.Location.X, function.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); } }
             snapshots.Add(new JObject { ["page"] = page, ["drawing"] = BridgeJson.FromObject(scene.Page), ["pins"] = BridgeJson.FromObject(scene.Pins), ["graphical"] = JArray.FromObject(scene.Graphical), ["logical"] = BridgeJson.FromObject(scene.Logical) });
-            foreach (InterruptionPoint point in native.AllPlacements.OfType<InterruptionPoint>())
+            foreach (InterruptionPoint point in EplanNativePreconditions.Valid(native.AllPlacements).OfType<InterruptionPoint>())
             {
                 // A55: acquire once, release before returning; no wrapper survives into Abort or compensation.
                 using InterruptionPointPropertyList properties = point.Properties;
@@ -195,17 +195,20 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     {
         try
         { return variant.GetBoundingBox().SelectMany(XY).ToArray(); }
-        catch (BaseException)
-        { return [0, 0, 0, 0]; }
+        catch (BaseException nativeFailure)
+        {
+            WriteExceptionDiagnostics.Report(nativeFailure);
+            return [0, 0, 0, 0];
+        }
     }
-    private static List<double[][]> Graphical(string project, string page) => Page(project, page).AllPlacements.OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)
+    private static List<double[][]> Graphical(string project, string page) => EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)
         .Select(g => new[] { new[] { g.StartSymbolRef.Location.X + g.StartConnectionPoint.Location.X, g.StartSymbolRef.Location.Y + g.StartConnectionPoint.Location.Y },
             new[] { g.EndSymbolRef.Location.X + g.EndConnectionPoint.Location.X, g.EndSymbolRef.Location.Y + g.EndConnectionPoint.Location.Y } }).ToList();
     public List<string?[]> Endpoints(string project, string page)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
         var result = new List<string?[]>();
-        foreach (Connection connection in finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
+        foreach (Connection connection in EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             Pin? start = connection.StartPin; // borrowed, never disposed (A39)
             Pin? end = connection.EndPin;

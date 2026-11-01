@@ -93,7 +93,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter { Name = name, ExactNameMatching = true };
-        return finder.GetPages(filter).SingleOrDefault(p => string.Equals(p.Name, name, StringComparison.Ordinal))
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().SingleOrDefault(p => string.Equals(p.Name, name, StringComparison.Ordinal))
             ?? throw new BridgeErrorException(ErrorReason.PageNotFound, "Page no longer exists; use eplan_page_list to find its exact name.");
     }
 }

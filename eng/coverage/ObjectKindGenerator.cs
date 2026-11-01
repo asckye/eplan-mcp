@@ -60,7 +60,7 @@ internal static class ObjectKindGenerator
             if (Derives(type, Prefix + "E3D.InstallationSpace") && Has("P:" + Prefix + "Project.InstallationSpaces"))
             { sources.Add("project.InstallationSpaces"); }
             if (type == Prefix + "E3D.Connection3D" && Has("P:" + Prefix + "Project.InstallationSpaces") && Has("P:" + Prefix + "E3D.InstallationSpace.Connection3Ds"))
-            { sources.Add("project.InstallationSpaces.SelectMany(s => s.Connection3Ds)"); }
+            { sources.Add("EplanNativePreconditions.Valid(project.InstallationSpaces).SelectMany(s => s.Connection3Ds)"); }
             if (type == Prefix + "Project")
             { sources.Add("new[] { project }"); }
             sources.AddRange(ApiTryGenerator.ObjectEntrySources(type, data));
@@ -107,7 +107,7 @@ internal static class ObjectKindGenerator
             + "\n        _ => false,\n    };\n    internal static UniversalPropertyList Properties(StorableObject obj) => obj.GetType().FullName switch\n    {\n"
             + string.Join("\n", kinds.Select(k => "        " + Q(k.Type) + " => ((global::" + k.PropertyOwner + ")obj).Properties,"))
             + "\n        _ => throw new EplanMcp.Bridge.Core.BridgeErrorException(EplanMcp.Contracts.ErrorReason.CapabilityMissing, \"This locator kind has no property adapter.\"),\n    };\n"
-            + "    private static IEnumerable<StorableObject> Enumerate(Func<IEnumerable<StorableObject>>[] sources, Action check)\n    {\n        foreach (Func<IEnumerable<StorableObject>> source in sources)\n        {\n            check();\n            foreach (StorableObject obj in source())\n            { check(); yield return obj; }\n        }\n    }\n    private static IEnumerable<Placement> Placements(DMObjectsFinder finder, Action check, string? pageName)\n    {\n        foreach (Page page in finder.GetPages(null))\n        {\n            check();\n            if (pageName is not null && page.Name != pageName)\n            { continue; }\n            foreach (Placement placement in page.AllPlacements)\n            { check(); yield return placement; }\n        }\n    }\n\n"
+            + "    private static IEnumerable<StorableObject> Enumerate(Func<IEnumerable<StorableObject>>[] sources, Action check)\n    {\n        foreach (Func<IEnumerable<StorableObject>> source in sources)\n        {\n            check();\n            foreach (StorableObject obj in EplanNativePreconditions.Valid(source()))\n            { check(); yield return obj; }\n        }\n    }\n    private static IEnumerable<Placement> Placements(DMObjectsFinder finder, Action check, string? pageName)\n    {\n        foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)))\n        {\n            check();\n            if (pageName is not null && page.Name != pageName)\n            { continue; }\n            foreach (Placement placement in EplanNativePreconditions.Valid(page.AllPlacements))\n            { check(); yield return placement; }\n        }\n    }\n\n"
             + "}\n";
     }
     internal static string Table(string root)

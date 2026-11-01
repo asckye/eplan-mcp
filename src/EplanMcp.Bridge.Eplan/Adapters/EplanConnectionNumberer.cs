@@ -29,7 +29,7 @@ internal sealed class EplanConnectionNumberer : IConnectionNumberer
         MainThread.Assert();
         TextLanguage language = EplanText.Language(null);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. finder.GetConnections(null).Select(connection => new DesignatedConnection
+        return [.. EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Select(connection => new DesignatedConnection
         {
             Id = connection.ToStringIdentifier(),
             Designation = EplanText.Read(connection.Properties.CONNECTION_DESIGNATION, language),
@@ -58,10 +58,12 @@ internal sealed class EplanConnectionNumberer : IConnectionNumberer
         }
         catch (InvalidScheme ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw SchemeChoice.Refused(scheme, ex.Message, "wire", ex);
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not number the connections, so nothing was numbered. metadata.eplanMessage has EPLAN's message.",

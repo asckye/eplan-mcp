@@ -36,6 +36,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed,
                 "EPLAN could not read the placed point's displays. Nothing was committed; read the page and re-plan.", ex);
         }

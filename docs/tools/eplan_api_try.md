@@ -36,6 +36,8 @@
 
 方案列表由枚举到的 SCHEMES 节点的 GetListOfNodes 读取，SchemeSetting.GetCount/GetLastUsed 等读取当前方案元数据；方案值路径对当前方案的数据节点枚举。只在已枚举节点上内部 Init 绑定临时句柄，不开放 Init/SetScheme；不切换方案，不写 LastUsed。所有 setter、Set*/Save*/Load*/Import*/Export*/Reset*、增删、合并、重载、ReadSettings/Write* 均拒绝（`settings_write`）；生命周期及未支持的原生句柄返回仍排除。COMPANY、INSTALL 根、直接 ISettings 接口组、非本片服务的设置/方案参数仍不可达；既有主数据、文件及生命周期排除不变。schema 不变，读仍逐次审批、前后快照、不创建撤销步；观察范围仍是项目业务/设计文件，不包含 USER/STATION 设置库，不据快照相等宣称全局无副作用；ref 容器仅在此封闭适配器内使用，不放宽通用 ref/out 规则。
 
+原生前置条件（api-notes A76）：规划与执行重检时，表内 NameService 调用要求显式 Page 重载及有效的已放置对象；`Reports.Update(ReportBlockReference)` 要求报表对象有效且页绑定。不满足返回 `INVALID_ARGUMENT/not_started`，不调用成员、不创建事务。`TextBase.UndockText` 的对象、所属项目或页明确只读/写保护时返回 `EPLAN_OPERATION_FAILED/not_started`。表逐组手工维护于 `ApiTryPreconditions`，不扩大目录权限，不改变审批或 unknown 暂停行为。
+
 Files 切片：仅开放能明确判定方向的字符串文件参数。参数名 input/import/source 表示输入，output/export/target/destination 表示输出；无方向名称时使用目录说明的导入/读取或导出/保存含义，再以方法 Import/Read/Load、Export/Write/Save 或 Insert 服务判定。方向冲突、目录、字符串项目路径和模板仍排除；打印、发送、主数据、设置、方案、生命周期及隐式目的地的排除不变。输入为 Host 数据根目录 imports 下的相对文件路径（最多 260 字符、128 MiB），输出仅接受最多 100 字符的文件名，由 Host 分配新的 exports/api-try-<随机 ID> 子目录；拒绝 UNC、盘符、`.`/`..`、设备名、尾部点/空格、非法字符及重解析点。Bridge 独立复核，输入大小和 SHA-256 绑定审批指纹，执行前重新计算；输出不覆盖已有目录或文件。
 
 结果新增 files，列出本次输出目录全部文件的 exports 相对路径、bytes 和 sha256；最多 100 个、每个最多 128 MiB。产物检查在项目写事务提交之前；项目撤销不撤销外部文件（A56），产物保留供工程师检查，失败或 unknown 时也可能留有部分文件，不将项目 rolled_back 当作文件已删除。

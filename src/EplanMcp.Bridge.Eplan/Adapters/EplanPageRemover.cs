@@ -24,7 +24,7 @@ internal sealed class EplanPageRemover : IPageRemover
             {
                 Name = page.Name,
                 Type = page.PageType.ToString(),
-                ObjectIds = [page.ToStringIdentifier(), .. page.AllPlacements.Select(placement => placement.ToStringIdentifier())],
+                ObjectIds = [page.ToStringIdentifier(), .. EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Select(placement => placement.ToStringIdentifier())],
             }
             : null;
     }
@@ -36,7 +36,7 @@ internal sealed class EplanPageRemover : IPageRemover
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         return
         [
-            .. finder.GetFunctions(null).Select(function => new PlacedFunction
+            .. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(function => new PlacedFunction
             {
                 Name = function.Name ?? string.Empty,
                 IsMain = function.IsMainFunction,
@@ -62,6 +62,7 @@ internal sealed class EplanPageRemover : IPageRemover
         }
         catch (Exception ex) when (ex is BaseException or RemoveFailedException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not delete a page, so nothing was deleted. metadata.eplanMessage has EPLAN's message; ask the engineer to check the page in EPLAN.",

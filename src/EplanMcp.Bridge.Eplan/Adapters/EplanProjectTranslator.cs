@@ -44,6 +44,7 @@ internal sealed class EplanProjectTranslator : IProjectTranslator
         }
         catch (Exception ex) when ((ex is BaseException or ArgumentException) && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not translate, so nothing was translated. metadata.eplanMessage has EPLAN's message.",

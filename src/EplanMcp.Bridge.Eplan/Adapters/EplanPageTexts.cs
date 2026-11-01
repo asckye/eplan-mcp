@@ -47,7 +47,7 @@ internal sealed class EplanPageTexts : IPageTextWriter, IPageTextInspector
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        return finder.GetPages(filter).SingleOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().SingleOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
     }
 
     private static List<Text> FreeTexts(Page page)
@@ -82,7 +82,7 @@ internal sealed class EplanPageTexts : IPageTextWriter, IPageTextInspector
             Walk(frame.SubPlacements, editable: false);
         }
 
-        Walk(page.AllPlacements, editable: true);
+        Walk(EplanNativePreconditions.Valid(page.AllPlacements).ToArray(), editable: true);
         return result;
     }
 
@@ -139,7 +139,7 @@ internal sealed class EplanPageTexts : IPageTextWriter, IPageTextInspector
                 Walk(plotFrame.SubPlacements, frame: true);
             }
 
-            Walk(page.AllPlacements, frame: false);
+            Walk(EplanNativePreconditions.Valid(page.AllPlacements).ToArray(), frame: false);
             result.Add(new PageTextInspection
             {
                 Page = page.Name,

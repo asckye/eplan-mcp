@@ -35,7 +35,7 @@ public sealed class ActionRunOperation(int major, IProjectCatalog catalog, IActi
         var parameters = request.Data.Parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal);
         try
         { done = runner.Run((string)request.Entry["action"]!, parameters, unverified); }
-        catch (Exception ex) { failure = ex; }
+        catch (Exception ex) { WriteExceptionDiagnostics.Report(ex); failure = ex; }
         if (unverified && failure is BridgeErrorException { Error.Reason: ErrorReason.OutcomeUnknown })
         { throw failure; }
         List<SystemMessageRecord> added;

@@ -19,13 +19,13 @@ internal sealed partial class EplanActionRunner
             if (project.TypeOfProject != Project.ProjectType.Macro)
             { throw Invalid("This entry requires an existing macro project."); }
             using var finder = new DMObjectsFinder(project);
-            foreach (MacroBox box in finder.GetAll<MacroBox>(true))
+            foreach (MacroBox box in EplanNativePreconditions.Valid(finder.GetAll<MacroBox>(true).Cast<MacroBox>()))
             { data.Before["macro:group:" + box.ObjectIdentifier] = box.Group?.ObjectIdentifier.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "none"; }
         }
         else if (entry == "UpdateSegmentsFilling")
         {
             using var finder = new DMObjectsFinder(project);
-            foreach (Segment segment in finder.GetAll<Segment>(true))
+            foreach (Segment segment in EplanNativePreconditions.Valid(finder.GetAll<Segment>(true).Cast<Segment>()))
             {
                 using var properties = segment.Properties;
                 using var value = properties.CABLINGSEGMENT_FILLING;
@@ -38,7 +38,7 @@ internal sealed partial class EplanActionRunner
             string configuration = parameters["CONFIGURATIONPROJECT"];
             string station = parameters["PLCSTATION"];
             string cpu = configuration + "." + station + "." + parameters["PLCCPU"];
-            bool found = finder.GetPLCs(null).Any(plc =>
+            bool found = EplanNativePreconditions.Valid(finder.GetPLCs(null)).ToArray().Any(plc =>
             {
                 using var properties = plc.Properties;
                 using var configured = properties.FUNC_PLCCONFIGURATIONPROJECT;

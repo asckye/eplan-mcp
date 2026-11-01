@@ -85,6 +85,7 @@ internal sealed class EplanPropertySetSession(string projectPath) : IPropertySet
                 }
                 catch (Exception ex)
                 {
+                    WriteExceptionDiagnostics.Report(ex);
                     failures.Add(ex);
                 }
             }

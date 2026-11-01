@@ -120,7 +120,7 @@ public sealed class ObjectKindCatalogTests
         Assert.Contains("finder.GetConnections(null)", Assert.Single(kinds, k => k.Name == "RoutedConnection").Sources);
         Assert.Contains("finder.GetPlacements3D(null)", Assert.Single(kinds, k => k.Name == "MountingPanel").Sources);
         Assert.Contains("project.InstallationSpaces", Assert.Single(kinds, k => k.Name == "InstallationSpace").Sources);
-        Assert.Contains("project.InstallationSpaces.SelectMany(s => s.Connection3Ds)", Assert.Single(kinds, k => k.Name == "Connection3D").Sources);
+        Assert.Contains("EplanNativePreconditions.Valid(project.InstallationSpaces).SelectMany(s => s.Connection3Ds)", Assert.Single(kinds, k => k.Name == "Connection3D").Sources);
         Assert.All(kinds.Where(k => k.Name.StartsWith("Comparison", StringComparison.Ordinal)), k => Assert.Contains("finder.GetStorableObjects(null)", k.Sources));
     }
 

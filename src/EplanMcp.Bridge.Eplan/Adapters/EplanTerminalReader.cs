@@ -21,14 +21,14 @@ internal sealed class EplanTerminalReader : ITerminalReader
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. finder.GetTerminalStrips(null).Select(Item)];
+        return [.. EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray().Select(Item)];
     }
 
     public TerminalStripRecord? ReadStrip(string projectPath, string name)
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        TerminalStrip? strip = finder.GetTerminalStrips(null).FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.Ordinal));
+        TerminalStrip? strip = EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray().FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.Ordinal));
         return strip is null ? null : new TerminalStripRecord { Strip = Item(strip), Terminals = [.. strip.Terminals.Select(Read)] };
     }
 
@@ -76,6 +76,7 @@ internal sealed class EplanTerminalReader : ITerminalReader
         }
         catch (Exception ex) when (ex is WrongCategoryException or BaseException)
         {
+            WriteExceptionDiagnostics.Report(ex);
             return null;
         }
     }

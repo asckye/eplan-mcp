@@ -7,7 +7,6 @@ internal sealed class LocationBox(long oid) : SymbolReference(oid)
     [ThreadStatic]
     public static Func<object, Page, SymbolReference>? Factory;
     public static SymbolReference CreateBox(object variant, Page page) => Factory!(variant, page);
-    public Page Page { get; set; } = null!;
     public BoxSymbolVariant SymbolVariant { get; set; } = new();
     public Placement? Graphics { get; set; }
     public bool WrongArea { get; set; }

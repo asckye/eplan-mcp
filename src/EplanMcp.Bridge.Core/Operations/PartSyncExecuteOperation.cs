@@ -105,8 +105,9 @@ public sealed class PartSyncExecuteOperation(
             data.ProjectPartsAfter = parts.Articles.Count;
             data.NotStored = [.. request.StoredInProject.Where(number => !stored.Contains(number)).Take(Max)];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // The synchronization is committed; only the check is missing.
             data.Warning = (warning is null ? string.Empty : warning + " ") + "EPLAN synchronized the parts, but the parts database or the project could not be read back; ask the engineer to check them in EPLAN.";
         }

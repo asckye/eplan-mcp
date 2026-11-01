@@ -52,7 +52,7 @@ internal sealed class EplanPlcReader : IPlcReader
         {
             // A11/A55: a native name-prefix filter includes unplaced and cross-page representations of this card.
             using var filter = new FunctionsFilter { Name = plc.Name + ":", ExactNameMatching = false, FunctionCategory = FunctionCategory.PLCTerminal };
-            ILookup<string, Terminal> parentless = finder.GetFunctions(filter).OfType<Terminal>()
+            ILookup<string, Terminal> parentless = EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<Terminal>()
                 .Where(t => t.PLC is null).ToLookup(t => t.Name, StringComparer.Ordinal);
             foreach (PlcChannel channel in record.Channels)
             { channel.ParentlessRepresentations = parentless[channel.Name].Count(); }

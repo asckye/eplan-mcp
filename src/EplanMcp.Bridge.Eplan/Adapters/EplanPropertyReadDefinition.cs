@@ -38,8 +38,9 @@ internal sealed class EplanPropertyReadDefinition(PropertyDefinition definition,
         {
             return read();
         }
-        catch (BaseException)
+        catch (BaseException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null; // The API cannot supply this fact; unknown never grants permission.
         }
     }
@@ -66,8 +67,9 @@ internal sealed class EplanPropertyReadDefinition(PropertyDefinition definition,
                 _ => null,
             };
         }
-        catch (BaseException)
+        catch (BaseException nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             return null; // Missing or unsupported bounds remain unknown.
         }
     }

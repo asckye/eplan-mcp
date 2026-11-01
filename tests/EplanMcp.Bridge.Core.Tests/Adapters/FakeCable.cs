@@ -16,7 +16,7 @@ internal sealed class Cable : Placement
     { _guard(); _state.Page = page; _state.Area = new(start, end); _store.Cables.Add(_state); }
     public string Name { get { _guard(); return _state.Name; } set { _guard(); _state.Name = value; } }
     public string VisibleName => Name;
-    public Page Page { get { _guard(); return _state.Page; } }
+    public new Page Page { get { _guard(); return _state.Page; } }
     public FunctionCategory FunctionCategory { get { _guard(); return FunctionCategory.Cable; } }
     public RectangleD GetLogicalArea() { _guard(); return _state.Area; }
     public FunctionPropertyList Properties { get { _guard(); return new(_store, _state.Properties); } }

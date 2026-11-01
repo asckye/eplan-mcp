@@ -108,8 +108,9 @@ public sealed class ImportListExecuteOperation(IProjectCatalog catalog, IPageRea
                 Text = m.Text, Occurrences = m.Occurrences,
             })];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // Message collection must not replace the known execution outcome.
             result.Warning += " EPLAN messages could not be read; inspect the session messages in EPLAN.";
         }

@@ -23,7 +23,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         string parent = tag.Substring(0, tag.Length - point.Length - 1);
         using var finder = new DMObjectsFinder(_project);
         using var filter = new FunctionsFilter { Name = parent, ExactNameMatching = true, FunctionCategory = FunctionCategory.PLCBox };
-        PLC[] cards = [.. finder.GetFunctions(filter).OfType<PLC>().Where(p => p.IsMainFunction && DevicePlaceRequest.SameName(parent, p.Name))];
+        PLC[] cards = [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<PLC>().Where(p => p.IsMainFunction && DevicePlaceRequest.SameName(parent, p.Name))];
         Require(cards.Length == 1);
         FunctionDefinition definition = _project.FunctionDefinitionLibrary.FunctionDefinitions.Single(d => d.FunctionCategory == FunctionCategory.PLCTerminal
             && FormattableString.Invariant($"{d.Group}/{d.Id}") == _symbol.PlcInputDefinition);

@@ -40,7 +40,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         }
 
         // A null filter returns every function (S6); FunctionsFilter.Page and FunctionCategory narrow it (S6).
-        Function[] functions = finder.GetFunctions(page is null && category is null ? null : filter);
+        Function[] functions = EplanNativePreconditions.Valid(finder.GetFunctions(page is null && category is null ? null : filter)).ToArray();
         return
         [
             .. functions.Select(f => new FunctionRecord
@@ -62,7 +62,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         using var finder = new DMObjectsFinder(project);
         return
         [
-            .. finder.GetFunctions(null)
+            .. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray()
                 .Where(f => f.IsMainFunction)
                 .Select(f => new FunctionName { Name = f.Name ?? string.Empty, VisibleName = f.VisibleName ?? string.Empty }),
         ];
@@ -167,7 +167,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         using var filter = new FunctionsFilter();
         filter.Name = tag;
         filter.ExactNameMatching = true;
-        Function[] mains = [.. finder.GetFunctions(filter).Where(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal))];
+        Function[] mains = [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().Where(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal))];
         return mains.FirstOrDefault(preferred) ?? mains.FirstOrDefault();
     }
 
@@ -180,6 +180,6 @@ internal sealed class EplanDeviceReader : IDeviceReader
         using var filter = new PagesFilter();
         filter.Name = name;
         filter.ExactNameMatching = true;
-        return finder.GetPages(filter).FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.Ordinal));
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.Ordinal));
     }
 }

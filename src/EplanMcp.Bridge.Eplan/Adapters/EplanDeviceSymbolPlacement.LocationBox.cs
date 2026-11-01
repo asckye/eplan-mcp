@@ -13,7 +13,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(_project);
-        var before = finder.GetFunctions(null).Select(f => (Function: f, Name: f.Name)).ToArray();
+        var before = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => (Function: f, Name: f.Name)).ToArray();
         // A55: use the native box factory, never a graphical rectangle substitute.
 #pragma warning disable CA2000 // A39/A55: native placements belong to EPLAN, also after Abort.
         SymbolReference created = SymbolReference.Create(_variant, _page);

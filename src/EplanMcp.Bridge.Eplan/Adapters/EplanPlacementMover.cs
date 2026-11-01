@@ -20,7 +20,8 @@ internal sealed class EplanPlacementMover : IPlacementMover
         var roots = moves.Where(m => m["parent"]!.Type == JTokenType.Null).Select(m =>
         {
             DrawingLocator locator = m["locator"]!.ToObject<DrawingLocator>()!;
-            Placement root = page.AllPlacements.Single(p => p is not PropertyPlacement && p.ObjectIdentifier == locator.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == locator.Type);
+            Placement root = EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Single(p => p is not PropertyPlacement && p.ObjectIdentifier == locator.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == locator.Type);
+            EplanNativePreconditions.Writable(root);
             if (root.Group is not null)
             { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Grouped placements cannot be moved.")); }
             return (Root: root, Before: root.Location, After: new PointD((double)m["after"]![0]!, (double)m["after"]![1]!));

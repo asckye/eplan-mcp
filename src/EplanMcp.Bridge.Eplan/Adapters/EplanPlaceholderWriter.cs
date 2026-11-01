@@ -23,7 +23,7 @@ internal sealed class EplanPlaceholderWriter : IPlaceholderWriter
         TextLanguage language = EplanText.Language(null);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
-        PlaceHolder[] found = [.. (finder.GetPlaceholdersWithFilterScheme(null) ?? []).Where(h => h.Page?.Name == page && (h.Name ?? string.Empty) == name && HasValueSet(h, valueSet))];
+        PlaceHolder[] found = [.. (EplanNativePreconditions.Valid(finder.GetPlaceholdersWithFilterScheme(null)).ToArray() ?? []).Where(h => h.Page?.Name == page && (h.Name ?? string.Empty) == name && HasValueSet(h, valueSet))];
         if (found.Length != 1)
         {
             throw new InvalidOperationException($"Expected one placeholder to apply the value set to, found {found.Length}.");

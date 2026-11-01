@@ -1,4 +1,5 @@
 using EplanMcp.Contracts;
+using EplanMcp.Bridge.Core.Diagnostics;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
@@ -19,14 +20,16 @@ public sealed class OperationContext
 
     private readonly bool _write;
     private readonly ProgressSlot? _progress;
+    private readonly IBridgeLog? _log;
     private int _cancelled;
     private int _lastProgress = int.MinValue;
 
-    internal OperationContext(string requestId, bool write, ProgressSlot? progress)
+    internal OperationContext(string requestId, bool write, ProgressSlot? progress, IBridgeLog? log = null)
     {
         RequestId = requestId;
         _write = write;
         _progress = progress;
+        _log = log ?? _current?._log;
     }
 
     /// <summary>The context of the operation running on this thread.</summary>
@@ -34,6 +37,9 @@ public sealed class OperationContext
 
     /// <summary>The request ID (<c>correlationId</c>) of the invoke.</summary>
     public string RequestId { get; }
+
+    /// <summary>Reports a diagnostic without changing the operation's result or safety state.</summary>
+    public void Warn(string message, Exception? exception = null) => _log?.Write(BridgeLogLevel.Warning, $"[{RequestId}] {message}", exception);
 
     public bool IsCancellationRequested => Volatile.Read(ref _cancelled) != 0;
 

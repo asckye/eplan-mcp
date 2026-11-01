@@ -28,7 +28,7 @@ internal static class ObjectKindDispatch
         "comparisonentrydetail" => Enumerate([() => finder.GetStorableObjects(null)], check),
         "component" => Enumerate([() => finder.GetFunctions3D(null), () => finder.GetPlacements3D(null), () => finder.GetStorableObjects(null)], check),
         "connection" => Enumerate([() => finder.GetConnections(null), () => finder.GetConnectionsWithFilterScheme(null), () => finder.GetStorableObjects(null)], check),
-        "connection3d" => Enumerate([() => finder.GetConnections(null), () => finder.GetConnectionsWithFilterScheme(null), () => finder.GetStorableObjects(null), () => project.InstallationSpaces.SelectMany(s => s.Connection3Ds)], check),
+        "connection3d" => Enumerate([() => finder.GetConnections(null), () => finder.GetConnectionsWithFilterScheme(null), () => finder.GetStorableObjects(null), () => EplanNativePreconditions.Valid(project.InstallationSpaces).SelectMany(s => s.Connection3Ds)], check),
         "connectiondefinitionpoint" => Enumerate([() => finder.GetCablesWithFilterScheme(null), () => finder.GetFunctions(null), () => finder.GetFunctionsWithFilterScheme(null), () => finder.GetPlacements(null), () => finder.GetStorableObjects(null), () => Placements(finder, check, pageName)], check),
         "connectionpointsinfo" => Enumerate([() => finder.GetStorableObjects(null)], check),
         "contactimage" => Enumerate([() => finder.GetPlacements(null), () => finder.GetStorableObjects(null), () => Placements(finder, check, pageName)], check),
@@ -378,18 +378,18 @@ internal static class ObjectKindDispatch
         foreach (Func<IEnumerable<StorableObject>> source in sources)
         {
             check();
-            foreach (StorableObject obj in source())
+            foreach (StorableObject obj in EplanNativePreconditions.Valid(source()))
             { check(); yield return obj; }
         }
     }
     private static IEnumerable<Placement> Placements(DMObjectsFinder finder, Action check, string? pageName)
     {
-        foreach (Page page in finder.GetPages(null))
+        foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)))
         {
             check();
             if (pageName is not null && page.Name != pageName)
             { continue; }
-            foreach (Placement placement in page.AllPlacements)
+            foreach (Placement placement in EplanNativePreconditions.Valid(page.AllPlacements))
             { check(); yield return placement; }
         }
     }

@@ -62,6 +62,7 @@ internal sealed class EplanProjectFactory(IBridgeLog log) : IProjectFactory
                 }
                 catch (Exception ex)
                 {
+                    WriteExceptionDiagnostics.Report(ex);
                     log.Write(BridgeLogLevel.Information, $"Project create Close() threw: linkFile='{linkFile}'", ex);
                     throw;
                 }

@@ -64,6 +64,7 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or InvalidOperationException)
         {
+            WriteExceptionDiagnostics.Report(ex);
             return (null, null);
         }
     }

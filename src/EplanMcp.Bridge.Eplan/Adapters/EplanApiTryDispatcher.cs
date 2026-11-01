@@ -14,6 +14,17 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         CheckHandleTargets(args);
         if (ApiTryCatalog.Settings(args.Group))
         { CheckSettings(args); }
+        // A76: check native preconditions on the resolved objects, whether a locator or a session handle names them.
+        JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
+        string[] shape = ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name))!;
+        StorableObject? Native(string name, string type) => ResolveObject(args, parameters[name]!, type, false, []).Value as StorableObject;
+        ApiTryPreconditions.Check(args.Group, shape, name => Native(name, ApiTryCatalog.ParameterShape(shape[1], name)![0]) is { } obj && EplanNativePreconditions.HasPage(obj));
+        if (args.Group == "O:Eplan.EplApi.DataModel.Graphics.TextBase.UndockText")
+        {
+            EplanNativePreconditions.Writable(parameters["target"]?["handle"] is not null
+                ? Native("target", "Eplan.EplApi.DataModel.Graphics.TextBase") ?? throw new BridgeErrorException(ErrorReason.InvalidArgument, "The UndockText target handle does not name a text.")
+                : Resolve(args.Project, parameters["target"]!, ApiTryCatalog.TargetKinds(args.Group)));
+        }
     }
     private static StorableObject Resolve(string project, JToken token, string[] kinds)
     {
@@ -36,13 +47,13 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
             yield return nativeProject;
             if (locator.Page.Length == 0)
             { yield break; }
-            foreach (Page page in finder.GetPages(null))
+            foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)))
             {
                 Check();
                 if (page.Name != locator.Page)
                 { continue; }
                 yield return page;
-                foreach (Placement placed in page.AllPlacements)
+                foreach (Placement placed in EplanNativePreconditions.Valid(page.AllPlacements))
                 { Check(); yield return placed; }
             }
         }

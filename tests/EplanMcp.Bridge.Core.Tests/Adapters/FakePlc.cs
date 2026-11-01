@@ -4,5 +4,5 @@ internal sealed class PLC() : Function(4)
 {
     public bool IsCPU { get; set; }
     public Terminal[] PLCTerminals { get; set; } = [];
-    public FunctionPropertyList Properties { get; } = new();
+    public new FunctionPropertyList Properties { get; } = new();
 }

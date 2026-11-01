@@ -19,6 +19,7 @@ public static class TransactionRunner
     public static Committed<T> Run<T>(ITransactionScopeFactory transactions, string tool, Func<T> change, Func<T, bool>? shouldCommit = null,
         Action<T>? verifyCommitted = null, Action? verifyRollback = null)
     {
+        using IDisposable diagnostics = WriteExceptionDiagnostics.Begin();
         ITransactionScope scope = transactions.Begin(UndoPrefix + tool);
         T result;
         bool commit;
@@ -33,6 +34,7 @@ public static class TransactionRunner
         }
         catch (Exception failure)
         {
+            WriteExceptionDiagnostics.Report(failure);
             Abandon(scope, tool, closeUndo: shouldCommit is null, verifyRollback);
             if (failure is BridgeErrorException known)
             {
@@ -55,6 +57,7 @@ public static class TransactionRunner
         }
         catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             DisposeAfterFailure(scope);
             throw Unknown(tool, "committing", ex);
         }
@@ -64,6 +67,7 @@ public static class TransactionRunner
         { verifyCommitted?.Invoke(result); }
         catch (Exception failure)
         {
+            WriteExceptionDiagnostics.Report(failure);
             Abandon(scope, tool, closeUndo: false, verifyRollback);
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
@@ -72,8 +76,9 @@ public static class TransactionRunner
         {
             scope.CloseUndo();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             // The change is in the project; only its undo step may be broken (ADR-0010 section 1: a warning).
             warning = $"The change was committed, but EPLAN did not close its undo step, so Ctrl+Z in EPLAN may not undo '{UndoPrefix}{tool}' in one step.";
         }
@@ -82,8 +87,9 @@ public static class TransactionRunner
         {
             scope.Dispose();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             warning ??= "The change was committed, but EPLAN reported an error while ending the transaction. Ask the engineer to check the project in EPLAN.";
         }
 
@@ -103,8 +109,9 @@ public static class TransactionRunner
                 scope.CloseUndo();
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             // Nothing to do: the rollback below decides what happens to the data.
         }
 
@@ -116,6 +123,7 @@ public static class TransactionRunner
         }
         catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             DisposeAfterFailure(scope);
             throw Unknown(tool, "rolling back", ex);
         }
@@ -127,8 +135,9 @@ public static class TransactionRunner
         {
             scope.Dispose();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             // Already reported as an unknown outcome; a second failure adds nothing.
         }
     }

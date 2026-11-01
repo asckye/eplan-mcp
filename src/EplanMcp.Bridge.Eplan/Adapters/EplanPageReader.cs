@@ -38,7 +38,7 @@ internal sealed class EplanPageReader : IPageReader
         }
 
         // Without conditions, null: S6 verified that a null filter returns every page, in EPLAN's page order.
-        Page[] pages = finder.GetPages(namePrefix is null && pageType is null ? null : filter);
+        Page[] pages = EplanNativePreconditions.Valid(finder.GetPages(namePrefix is null && pageType is null ? null : filter)).ToArray();
         return
         [
             .. pages.Select(page =>
@@ -53,7 +53,7 @@ internal sealed class EplanPageReader : IPageReader
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. finder.GetPages(null).Select(page => page.Name)];
+        return [.. EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray().Select(page => page.Name)];
     }
 
     public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language)
@@ -64,7 +64,7 @@ internal sealed class EplanPageReader : IPageReader
         using var pageFilter = new PagesFilter { Name = pageName, ExactNameMatching = true }; // S6: one page for its exact name
         // The ordinal check keeps the match exact even if EPLAN's exact matching ignores case, which S6 did not test;
         // the operation retries ignoring case on its own terms.
-        Page? page = finder.GetPages(pageFilter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        Page? page = EplanNativePreconditions.Valid(finder.GetPages(pageFilter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
         if (page is null)
         {
             return null;
@@ -86,7 +86,7 @@ internal sealed class EplanPageReader : IPageReader
             },
             Functions =
             [
-                .. finder.GetFunctions(functionFilter).Select(function => new FunctionRecord
+                .. EplanNativePreconditions.Valid(finder.GetFunctions(functionFilter)).ToArray().Select(function => new FunctionRecord
                 {
                     Name = function.Name ?? string.Empty,
                     VisibleName = function.VisibleName ?? string.Empty,

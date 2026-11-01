@@ -47,10 +47,10 @@ internal sealed class EplanSelection : ISelectionAdapter
     private static List<StorableObject> Resolve(string project, IReadOnlyList<DrawingLocator> locators)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-        Page? page = finder.GetPages(null).SingleOrDefault(p => p.Name == locators[0].Page);
+        Page? page = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray().SingleOrDefault(p => p.Name == locators[0].Page);
         if (page is null)
         { throw new BridgeErrorException(ErrorReason.PageNotFound, "Page not found; call eplan_page_list."); }
-        Placement[] candidates = page.AllPlacements.Where(p => p is not PropertyPlacement and not Page).ToArray();
+        Placement[] candidates = EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Where(p => p is not PropertyPlacement and not Page).ToArray();
         return locators.Select(l => candidates.FirstOrDefault(o => o.ObjectIdentifier == l.Oid && SnapshotCanonical.TypeOf(o.ToStringIdentifier()) == l.Type
             && Describe(project, o) is { } row && DrawingLocators.Matches(l, row.Locator)) as StorableObject
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "Object is stale or unsupported for selection; use eplan_object_find. Property placements cannot be selected by these locators.")).ToList();

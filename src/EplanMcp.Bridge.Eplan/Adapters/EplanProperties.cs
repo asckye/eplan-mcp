@@ -36,6 +36,7 @@ internal static class EplanProperties
                 }
                 catch (Exception ex) when (ex is IndexedPropertyException or NotIndexedPropertyException or EmptyPropertyException or PropertyNotFoundException)
                 {
+                    EplanMcp.Bridge.Core.Operations.WriteExceptionDiagnostics.Report(ex);
                     // One property EPLAN cannot read as listed costs that property, not the whole result; which ones do
                     // is not verified on real projects yet (M2 Large tests).
                 }

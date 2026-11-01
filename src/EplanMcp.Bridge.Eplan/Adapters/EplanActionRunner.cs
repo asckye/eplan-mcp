@@ -38,7 +38,7 @@ internal sealed partial class EplanActionRunner : IActionRunner
                 {
                     // A50: function texts change while object counts can stay equal. Keep full guard evidence.
                     int texts = 0;
-                    foreach (Function function in finder.GetFunctions(null))
+                    foreach (Function function in EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray())
                     {
                         using var properties = function.Properties;
                         using var value = properties.FUNC_TEXT;
@@ -110,7 +110,10 @@ internal sealed partial class EplanActionRunner : IActionRunner
             return data;
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
-        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not inspect the action target; check the project or configured database.", ex); }
+        {
+            WriteExceptionDiagnostics.Report(ex);
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not inspect the action target; check the project or configured database.", ex);
+        }
     }
 
     public bool Run(string actionName, IReadOnlyDictionary<string, string> parameters, bool unverified = false)

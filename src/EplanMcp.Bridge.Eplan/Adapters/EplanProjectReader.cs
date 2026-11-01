@@ -17,8 +17,8 @@ internal sealed class EplanProjectReader : IProjectReader
         using var finder = new DMObjectsFinder(project);
 
         // A null filter returns every object of the kind (S6). GetFunctions leaves out connection definition points.
-        Page[] pages = finder.GetPages(null);
-        Function[] functions = finder.GetFunctions(null);
+        Page[] pages = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray();
+        Function[] functions = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray();
         return new ProjectContent
         {
             PageTypes = [.. pages.Select(page => page.PageType.ToString())],

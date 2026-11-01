@@ -19,7 +19,7 @@ internal sealed class EplanObjectFinder : IObjectFinder
         MainThread.Assert();
         IEnumerable<SnapshotProperty> registered = SnapshotCanonical.Registered(profile)!.Values;
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        Page[] pages = finder.GetPages(null);
+        Page[] pages = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray();
         Connection[]? connections = null;
         ILookup<long, (Function Function, Page Page)>? functions = null; // every page's, built once when a function is not on its page
         var results = new List<SnapshotSourceObject?>();
@@ -42,7 +42,7 @@ internal sealed class EplanObjectFinder : IObjectFinder
                     results.Add(found is { } f ? EplanSnapshotReader.FunctionObject(f.Function, f.Page.Name, registered) : null);
                     break;
                 default:
-                    connections ??= finder.GetConnections(null);
+                    connections ??= EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray();
                     Connection? connection = Pick(connections.Where(c => c.ObjectIdentifier == locator.Oid), locator);
                     results.Add(connection is null ? null : EplanSnapshotReader.ConnectionObject(connection, EplanConnectionReader.PageOf(connection)?.Name, registered));
                     break;
@@ -54,7 +54,7 @@ internal sealed class EplanObjectFinder : IObjectFinder
 
     /// <summary>The functions placed on <paramref name="pages"/> by their number.</summary>
     private static ILookup<long, (Function Function, Page Page)> Placed(IEnumerable<Page> pages) =>
-        pages.SelectMany(p => p.AllPlacements.OfType<Function>().Select(f => (f, p))).ToLookup(m => m.f.ObjectIdentifier, m => (m.f, m.p));
+        pages.SelectMany(p => EplanNativePreconditions.Valid(p.AllPlacements).OfType<Function>().Select(f => (f, p))).ToLookup(m => m.f.ObjectIdentifier, m => (m.f, m.p));
 
     /// <summary>Of <paramref name="matches"/>, the function of the locator's type; unless <paramref name="typedOnly"/>, one of another type when there is none.</summary>
     private static (Function Function, Page Page)? Function(IEnumerable<(Function Function, Page Page)> matches, ObjectLocator locator, bool typedOnly)

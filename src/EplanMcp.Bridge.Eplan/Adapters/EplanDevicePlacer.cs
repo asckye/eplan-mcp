@@ -23,7 +23,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         MacroTargetPage? result = new EplanMacroInserter().ReadPage(projectPath, pageName);
         if (result is not null)
         {
-            foreach (LocationBox box in Find(EplanProjects.ByPath(projectPath), pageName)!.AllPlacements.OfType<LocationBox>())
+            foreach (LocationBox box in EplanNativePreconditions.Valid(Find(EplanProjects.ByPath(projectPath), pageName)!.AllPlacements).OfType<LocationBox>())
             {
                 using FunctionBasePropertyList parts = box.NameParts;
                 using PropertyValue location = parts.DESIGNATION_LOCATION;
@@ -47,6 +47,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 $"EPLAN could not place part '{part}', so nothing was changed. metadata.eplanMessage has EPLAN's message; check the part's macro in EPLAN's parts management, or insert a window macro with eplan_macro_insert.",
@@ -78,7 +79,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
     {
         using var finder = new DMObjectsFinder(project);
         using var filter = new PagesFilter { Name = pageName, ExactNameMatching = true };
-        return finder.GetPages(filter).FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
+        return EplanNativePreconditions.Valid(finder.GetPages(filter)).ToArray().FirstOrDefault(p => string.Equals(p.Name, pageName, StringComparison.Ordinal));
     }
 
     /// <summary>The session identifiers of the functions on the page: <c>FunctionsFilter.Page</c>, not the shared <c>Page.Filter</c>.</summary>
@@ -86,6 +87,6 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
     {
         using var finder = new DMObjectsFinder(project);
         using var filter = new FunctionsFilter { Page = page };
-        return [.. finder.GetFunctions(filter).Select(f => f.ToStringIdentifier())];
+        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().Select(f => f.ToStringIdentifier())];
     }
 }

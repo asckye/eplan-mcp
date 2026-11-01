@@ -48,6 +48,7 @@ internal sealed class EplanPageRenumberer : IPageRenumberer
         }
         catch (NameConflictException ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
                 "EPLAN reports that a new page number is taken, so nothing was renumbered. Choose another 'start'; eplan_page_list with name_prefix shows the numbers in use.",
@@ -55,6 +56,7 @@ internal sealed class EplanPageRenumberer : IPageRenumberer
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && ex.Message.StartsWith(AmbiguousPageName, StringComparison.Ordinal))
         {
+            WriteExceptionDiagnostics.Report(ex);
             // A new number that an existing page has: EPLAN refuses with "page name ambiguous" (live check, A20); in the
             // live Large run it did not come as a BaseException, so the message number decides.
             throw new BridgeErrorException(
@@ -64,6 +66,7 @@ internal sealed class EplanPageRenumberer : IPageRenumberer
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not renumber the pages, so nothing was renumbered. metadata.eplanMessage has EPLAN's message; ask the engineer to check the pages in EPLAN.",

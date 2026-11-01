@@ -74,6 +74,7 @@ internal sealed class ConnectionPropertyList(FakeCableStore? store, Dictionary<i
 }
 
 internal class Connection(FakeCableStore? store = null, ConnectionState? state = null)
+    : StorableObject
 {
     private readonly Action _guard = store?.Guard() ?? (() => { });
     private readonly ConnectionState _state = state ?? new();

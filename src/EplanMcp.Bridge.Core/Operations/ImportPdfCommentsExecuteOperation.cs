@@ -89,8 +89,9 @@ public sealed class ImportPdfCommentsExecuteOperation(IProjectCatalog catalog, I
             result.EplanMessageCount = added.Length;
             result.EplanMessages = [.. added.Take(20).Select(m => new SystemMessage { Level = MessageListOperation.LevelName(m.Level)!, Number = m.Index.Length == 0 || m.Index == MessageListOperation.NoNumber ? null : m.Index, Text = m.Text, Occurrences = m.Occurrences })];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // A11: collection failures must not replace a known execution outcome.
             result.Warning += " EPLAN messages could not be read; inspect session messages in EPLAN.";
         }

@@ -82,8 +82,9 @@ public sealed class PartImportExecuteOperation(IPartsDatabaseWriter writer) : Op
             data.PartsAfter = after.PartCount;
             data.Missing = [.. request.Added.Concat(request.Updated).Where(number => !after.PartNumbers.Contains(number)).Take(PartImportData.MaxListed)];
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // The import has run; only the check is missing.
             data.Warning = "EPLAN imported the file, but the parts database could not be read back; ask the engineer to check the parts in EPLAN's parts management.";
         }

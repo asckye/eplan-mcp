@@ -15,8 +15,8 @@ internal sealed class EplanPlcImporter : IPlcImporter
         try
         {
             using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-            Function[] functions = finder.GetFunctions(null);
-            var plcs = finder.GetPLCs(null);
+            Function[] functions = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray();
+            var plcs = EplanNativePreconditions.Valid(finder.GetPLCs(null)).ToArray();
             var boxes = new HashSet<long>(plcs.Select(p => p.ObjectIdentifier));
             // A39: never dispose EPLAN-owned StorableObjects; merge the two enumerations by object number, not name.
             var all = functions.Cast<Function>().Concat(plcs).GroupBy(f => f.ObjectIdentifier).Select(g => g.First());
@@ -25,6 +25,7 @@ internal sealed class EplanPlcImporter : IPlcImporter
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed(ex);
         }
     }
@@ -48,6 +49,7 @@ internal sealed class EplanPlcImporter : IPlcImporter
         }
         catch (Exception ex) when (ex is not BridgeErrorException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw Failed(ex);
         }
     }

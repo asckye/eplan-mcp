@@ -52,10 +52,12 @@ internal sealed class EplanCableRenumberer : ICableRenumberer
         }
         catch (InvalidScheme ex)
         {
+            WriteExceptionDiagnostics.Report(ex);
             throw SchemeChoice.Refused(scheme, ex.Message, "cable", ex);
         }
         catch (Exception ex) when (ex is BaseException or ApplicationException or ArgumentException && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not number the cables, so nothing was numbered. metadata.eplanMessage has EPLAN's message.",
@@ -68,6 +70,6 @@ internal sealed class EplanCableRenumberer : ICableRenumberer
     private static Function[] Cables(DMObjectsFinder finder)
     {
         using var filter = new FunctionsFilter { FunctionCategory = FunctionCategory.Cable };
-        return finder.GetFunctions(filter);
+        return EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray();
     }
 }

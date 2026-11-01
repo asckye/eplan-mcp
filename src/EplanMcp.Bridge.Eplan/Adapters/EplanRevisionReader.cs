@@ -51,7 +51,7 @@ internal sealed class EplanRevisionReader : IRevisionReader
         }
 
         using var finder = new DMObjectsFinder(project);
-        content.MarkedPages = finder.GetPages(null).Count(page => page.Properties.PAGE_INSTANCE_WITH_REVISIONMARKER is { IsEmpty: false } marker && marker.ToBool());
+        content.MarkedPages = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray().Count(page => page.Properties.PAGE_INSTANCE_WITH_REVISIONMARKER is { IsEmpty: false } marker && marker.ToBool());
         return content;
     }
 

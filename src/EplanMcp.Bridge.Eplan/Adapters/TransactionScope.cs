@@ -37,8 +37,9 @@ internal sealed class TransactionScope : ITransactionScope
             _undoManager = undoManager;
             _undoStep = undoStep;
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             // Nothing was changed yet; a SafetyPoint released without a commit rolls back (A7).
             undoManager?.Dispose();
             safetyPoint.Dispose();

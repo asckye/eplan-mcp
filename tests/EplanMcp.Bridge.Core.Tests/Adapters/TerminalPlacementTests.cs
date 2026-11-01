@@ -113,7 +113,9 @@ public sealed class TerminalPlacementTests : IDisposable
     [Fact]
     public void Create_ReusesNativeParent_AndRefusesAnOrdinaryDeviceAtTheParentName()
     {
+#pragma warning disable CA2000 // Project-owned fake parent must not be disposed (A39).
         var strip = new TerminalStrip { Name = "=F+A1-X6", IsMainFunction = true };
+#pragma warning restore CA2000
         _page.AllPlacements = [strip];
         DevicePlaceArgs args = Args();
         args.TerminalStripText = null;

@@ -29,7 +29,7 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
         TextLanguage language = EplanText.Language(null);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         var byPage = pages.Distinct(StringComparer.Ordinal).ToDictionary(page => page, _ => new List<ConnectionRecord>(), StringComparer.Ordinal);
-        foreach (Connection connection in finder.GetConnections(null))
+        foreach (Connection connection in EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray())
         {
             // Page names are unique in a project; the name is what connection.list reports as the connection's page.
             if (EplanConnectionReader.PageOf(connection)?.Name is { } page && byPage.TryGetValue(page, out List<ConnectionRecord>? list))
@@ -49,7 +49,7 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. Find(finder, pages).Select(page => (IReadOnlyList<string>)[.. page.AllPlacements.Select(placement => placement.ToStringIdentifier())])];
+        return [.. Find(finder, pages).Select(page => (IReadOnlyList<string>)[.. EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Select(placement => placement.ToStringIdentifier())])];
     }
 
     /// <summary>
@@ -69,6 +69,7 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
         }
         catch (BaseException ex) when (new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var failed = new BridgeErrorException(
                 ErrorReason.EplanOperationFailed,
                 "EPLAN could not generate the connections on these pages, so nothing was changed. metadata.eplanMessage has EPLAN's message; ask the engineer to check the pages in EPLAN.",

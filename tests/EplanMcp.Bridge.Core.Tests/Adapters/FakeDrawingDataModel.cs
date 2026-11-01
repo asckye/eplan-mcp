@@ -4,8 +4,22 @@ using Eplan.EplApi.DataModel.Graphics;
 
 namespace Eplan.EplApi.DataModel;
 
-internal class Placement(long oid, int type = 4) : IDisposable
+internal class StorableObject
 {
+    public bool IsValid { get; set; } = true;
+    public bool IsReadOnly { get; set; }
+    public Project? Project { get; set; }
+}
+
+internal interface IWriteProtection
+{
+    public bool WriteProtected { get; }
+}
+
+internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
+{
+    public Page Page { get; set; } = null!;
+    public bool IsPlaced => Page is not null;
     public long ObjectIdentifier { get; } = oid;
     public string Prefix { get; set; } = "53";
     public int IdentifierType { get; set; } = type;
@@ -53,12 +67,19 @@ internal class SymbolReference(long oid) : Placement(oid, 17)
 
 internal class FunctionBase(long oid) : SymbolReference(oid)
 {
-    public string Name { get; set; } = "+A1-K1";
+    private string _name = "+A1-K1";
+    public int NameReads { get; private set; }
+    public string Name
+    {
+        get { NameReads++; return IsValid ? _name : throw new BaseException("S063001错误:无对象"); }
+        set => _name = value;
+    }
 }
 
 internal class Function(long oid) : FunctionBase(oid)
 {
-    public Page Page { get; set; } = null!;
+    private FunctionPropertyList? _properties;
+    public FunctionPropertyList Properties => _properties ??= new();
     public bool IsMainFunction { get; set; }
     public string? VisibleName { get; set; }
     public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
@@ -73,8 +94,9 @@ internal sealed class PlotFrame(params Placement[] children)
     public PointD Size { get; set; } = new(420, 297);
 }
 
-internal sealed class Page : IDisposable
+internal sealed class Page : StorableObject, IWriteProtection, IDisposable
 {
+    public bool WriteProtected { get; set; }
     public DocumentTypeManager.DocumentType PageType { get; set; } = DocumentTypeManager.DocumentType.Circuit;
     public string Name { get; set; } = "+A1/1";
     public double GridSize { get; set; } = 4;
@@ -89,7 +111,7 @@ internal sealed class Page : IDisposable
     public void Dispose() => throw new InvalidOperationException("Borrowed page must never be disposed.");
 }
 
-internal sealed class Project(params Page[] pages)
+internal sealed class Project(params Page[] pages) : StorableObject
 {
     public Page[] Pages { get; } = pages;
     public string Display { get; set; } = "zh_CN;";

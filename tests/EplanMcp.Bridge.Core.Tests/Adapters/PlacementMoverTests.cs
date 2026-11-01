@@ -3,6 +3,7 @@ using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Protocol;
+using EplanMcp.Contracts;
 using EplanMcp.Bridge.Eplan.Adapters;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
@@ -14,6 +15,32 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 [Trait("Size", "Small")]
 public sealed class PlacementMoverTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Prepare_ReadOnlyRootOrProject_RefusesBeforeMoveAndTransaction(bool objectReadOnly)
+    {
+        var text = new Text(2) { Location = new(40, 40), IsReadOnly = objectReadOnly };
+        var page = new Page { AllPlacements = [text] };
+        EplanProjects.Project = new Project(page) { IsReadOnly = !objectReadOnly };
+        text.Project = EplanProjects.Project;
+        var transactions = new FakeTransactions();
+        try
+        {
+            var scene = new ConnectionCreatePlanner.Scene { Project = new() { Path = "project" }, Page = new() { Page = page.Name } };
+            BridgeError error = Assert.Throws<BridgeErrorException>(() =>
+            {
+                Action move = new EplanPlacementMover().Prepare(scene, new JArray(Row(text, null, [50, 55])));
+                TransactionRunner.Run(transactions, "eplan_placement_update", () => { move(); return true; });
+            }).Error;
+            Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.NotStarted), (error.Reason, error.Execution));
+            Assert.Equal(new PointD(40, 40), text.Location);
+            Assert.Empty(transactions.Calls);
+            Assert.Equal(0, text.UndockCalls);
+        }
+        finally { EplanProjects.Project = null; }
+    }
+
     [Fact]
     public void CableW9_DefaultDockedTexts_CopyOnceInsideWriteAndReacquireBeforeMoving()
     {

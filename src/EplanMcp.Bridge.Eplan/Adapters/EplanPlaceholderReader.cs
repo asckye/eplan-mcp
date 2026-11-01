@@ -25,7 +25,7 @@ internal sealed class EplanPlaceholderReader : IPlaceholderReader
         TextLanguage textLanguage = EplanText.Language(language);
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
-        return [.. (finder.GetPlaceholdersWithFilterScheme(null) ?? []).Select(holder => Record(holder, textLanguage, currentValues))];
+        return [.. (EplanNativePreconditions.Valid(finder.GetPlaceholdersWithFilterScheme(null)).ToArray() ?? []).Select(holder => Record(holder, textLanguage, currentValues))];
     }
 
     /// <summary>
@@ -66,8 +66,9 @@ internal sealed class EplanPlaceholderReader : IPlaceholderReader
             {
                 record.CurrentValues = CurrentValues(holder, language);
             }
-            catch (LockingException)
+            catch (LockingException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 // The placeholder is not locked, as in a read (api-notes A33); the tool says so instead of failing.
                 record.CurrentValuesRefused = true;
             }

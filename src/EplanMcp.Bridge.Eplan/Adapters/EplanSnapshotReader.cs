@@ -181,8 +181,9 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
             {
                 Read(accessors[property.Id](list), property.Id, values);
             }
-            catch (PropertyNotFoundException)
+            catch (PropertyNotFoundException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 // Registered properties may be absent on objects in the scope, e.g. PLC properties on ordinary terminals (A36).
             }
         }
@@ -205,8 +206,9 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
                     values.Add(new SnapshotSourceValue(id, null, value.ToString()));
                 }
             }
-            catch (IndexedPropertyException)
+            catch (IndexedPropertyException nativeFailure)
             {
+                WriteExceptionDiagnostics.Report(nativeFailure);
                 foreach (int index in value.Indexes)
                 {
                     using PropertyValue item = value[index];
@@ -240,7 +242,7 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
             _project = project;
             _owner = owner;
             _finder = new DMObjectsFinder(project);
-            _pages = _finder.GetPages(null).ToDictionary(p => p.ObjectIdentifier);
+            _pages = EplanNativePreconditions.Valid(_finder.GetPages(null)).ToArray().ToDictionary(p => p.ObjectIdentifier);
             Name = project.ProjectName;
             Path = project.ProjectFullName;
             using ProjectPropertyList properties = project.Properties;
@@ -268,7 +270,7 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
             IEnumerable<SnapshotProperty> registered = SnapshotCanonical.Registered(profile)!.Values;
             Page page = _pages[pageOid];
             var objects = new List<SnapshotSourceObject> { PageObject(page, registered) };
-            objects.AddRange(page.AllPlacements.OfType<Function>().Select(f => FunctionObject(f, page.Name, registered)));
+            objects.AddRange(EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>().Select(f => FunctionObject(f, page.Name, registered)));
             _connections ??= Connections();
             if (_connections.TryGetValue(pageOid, out List<Connection>? connections))
             {
@@ -301,7 +303,7 @@ internal sealed class EplanSnapshotReader : ISnapshotReader
         private Dictionary<long, List<Connection>> Connections()
         {
             var byPage = new Dictionary<long, List<Connection>>();
-            foreach (Connection connection in _finder.GetConnections(null))
+            foreach (Connection connection in EplanNativePreconditions.Valid(_finder.GetConnections(null)).ToArray())
             {
                 if (EplanConnectionReader.PageOf(connection) is not { } page)
                 {

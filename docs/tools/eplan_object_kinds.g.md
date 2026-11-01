@@ -23,7 +23,7 @@
 | ComparisonEntryDetail | supported | finder.GetStorableObjects(null) | StorableObject |
 | Component | supported | finder.GetFunctions3D(null) + finder.GetPlacements3D(null) + finder.GetStorableObjects(null) | Function3D |
 | Connection | supported | finder.GetConnections(null) + finder.GetConnectionsWithFilterScheme(null) + finder.GetStorableObjects(null) | Connection |
-| Connection3D | supported | finder.GetConnections(null) + finder.GetConnectionsWithFilterScheme(null) + finder.GetStorableObjects(null) + project.InstallationSpaces.SelectMany(s => s.Connection3Ds) | Connection |
+| Connection3D | supported | finder.GetConnections(null) + finder.GetConnectionsWithFilterScheme(null) + finder.GetStorableObjects(null) + EplanNativePreconditions.Valid(project.InstallationSpaces).SelectMany(s => s.Connection3Ds) | Connection |
 | ConnectionDefinitionPoint | supported | finder.GetCablesWithFilterScheme(null) + finder.GetFunctions(null) + finder.GetFunctionsWithFilterScheme(null) + finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | ConnectionDefinitionPoint |
 | ConnectionPointsInfo | supported | finder.GetStorableObjects(null) | ConnectionPointsInfo |
 | ContactImage | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | GraphicalPlacement |

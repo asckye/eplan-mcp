@@ -124,6 +124,7 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
         }
         catch (Exception ex) when ((ex is BaseException or ArgumentException or ApplicationException) && new EplanExceptionMapper().Map(ex) is null)
         {
+            WriteExceptionDiagnostics.Report(ex);
             var error = new BridgeErrorException(ErrorReason.EplanOperationFailed, failed + " metadata.eplanMessage has EPLAN's message.", ex);
             error.Error.Metadata = new Dictionary<string, string> { ["eplanMessage"] = EplanConnectionGenerator.ForModel(ex.Message) };
             throw error;

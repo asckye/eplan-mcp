@@ -16,7 +16,7 @@ internal sealed class EplanPdfCommentsImporter : IPdfCommentsImporter
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return finder.GetAll<Comment>(true).Cast<Comment>().Select(c => c.ToStringIdentifier()).ToArray();
+        return EplanNativePreconditions.Valid(finder.GetAll<Comment>(true).Cast<Comment>()).Select(c => c.ToStringIdentifier()).ToArray();
     }
 
     public bool Import(string projectPath, string filePath)
@@ -38,7 +38,7 @@ internal sealed class EplanPdfCommentsImporter : IPdfCommentsImporter
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         var wanted = new HashSet<string>(identifiers, StringComparer.Ordinal);
         var result = new List<PdfComment>();
-        foreach (Comment comment in finder.GetAll<Comment>(true).Cast<Comment>().Where(c => wanted.Contains(c.ToStringIdentifier())))
+        foreach (Comment comment in EplanNativePreconditions.Valid(finder.GetAll<Comment>(true).Cast<Comment>()).Where(c => wanted.Contains(c.ToStringIdentifier())))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             using CommentPropertyList properties = comment.Properties; // Acquire exactly once (A36/A51).

@@ -33,8 +33,9 @@ internal sealed class FunctionTransactionScope : ITransactionScope
             _quietMode = new QuietModeStep(QuietModes.ShowNoDialogs);
             _transaction = transaction;
         }
-        catch (Exception)
+        catch (Exception nativeFailure)
         {
+            WriteExceptionDiagnostics.Report(nativeFailure);
             transaction?.Dispose();
             _undoManager.Dispose();
             throw;
