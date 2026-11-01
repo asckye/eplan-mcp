@@ -14160,6 +14160,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_selection_get.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -14194,6 +14195,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_selection_set.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A54",
           "B11"
