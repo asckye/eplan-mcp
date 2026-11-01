@@ -19,7 +19,9 @@ internal static partial class ApiTryGenerator
     {
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
-        var types = File.ReadLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")).Select(l => JsonSerializer.Deserialize<JsonElement>(l)).ToDictionary(t => t.GetProperty("id").GetString()![2..], StringComparer.Ordinal);
+        string typesFile = Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl");
+        // Test repositories hold no catalogue, like Enums and ObjectKindGenerator.Load expect.
+        var types = (File.Exists(typesFile) ? File.ReadLines(typesFile) : []).Select(l => JsonSerializer.Deserialize<JsonElement>(l)).ToDictionary(t => t.GetProperty("id").GetString()![2..], StringComparer.Ordinal);
         return new(data, kinds, Enums(root), EntryPaths(data, kinds, types), types);
     }
     internal static EntryPath[] EntryPaths(ApiIndexData data, IReadOnlyDictionary<string, string[]> kinds, IReadOnlyDictionary<string, JsonElement> types)
