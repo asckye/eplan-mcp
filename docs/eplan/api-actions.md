@@ -1,5 +1,9 @@
 # EPLAN 2026 官方 API Actions 逐条核对
 
+> 阅读摘要（2026-11-01）：本文决定各 action 用途的覆盖归属、候选工具与待查副作用，保留 2026-10-18 文档核对及 2026-10-21 在线复核记录；文档核对不代表实机验证，正文里的里程碑建议是历史记录。
+> 当前排期与交付状态见[路线图](../roadmap.md)和[覆盖报告](coverage-report.md)；调用边界与分级见 [ADR-0021](../adr/0021-action-run-whitelist.md)、[0030](../adr/0030-action-catalog-tiers.md)、[0032](../adr/0032-generic-api-layer.md)。
+> 当前契约见 [eplan_action_run](../tools/eplan_action_run.md)、[eplan_action_try](../tools/eplan_action_try.md)及[工具规格索引](../tools/README.md)；机器目录见 [actions.json](../../catalog/eplan-2026.0.3/actions.json)，已验证行为见 [api-notes 索引](api-notes.md)。
+
 - 核对日期：2026-10-18。只依据官方文档，没有在 EPLAN 上执行任何 action；结论汇总在 [API 覆盖矩阵第 2 节](api-coverage.md#2-官方文档中的-action约-100-个)。
 - 依据：EPLAN 官方 API 帮助 `eplan.help`，2026 版目录（页脚 "Eplan API, 18.03.2026"）。2025 版（页脚 "EPLAN API , 17.02.2025"）只用于对比。
 - 方法：用 curl 下载每个 action 页面的原始 HTML，并提取文本（WebFetch 会做摘要，可能丢失参数，所以没有用它取参数）。action 名称、TYPE 值和参数名都**从页面原样复制**，大小写与拼写保持不变，包括文档中的拼写错误，例如 `DXFDWGPPAGESSCHEME`、`PAGFILTERNAME`。

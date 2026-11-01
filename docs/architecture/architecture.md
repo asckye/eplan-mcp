@@ -172,20 +172,7 @@ flowchart TB
 | `BridgeClient` | 发现 EPLAN 实例；建立管道连接并握手；**每个 EPLAN 实例一个串行队列**；超时与取消 |
 | `Cli` | `serve`（默认）、`doctor`、`install-addin` / `uninstall-addin`、`client-config <客户端>`、`audit verify`、`pack scan / check / export / install`（M6 工程包，供手工使用和测试，库在 `EplanMcp.Packs`） |
 
-**CLI 的 JSON 输出**（给 Workbench 用，[M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.11）：`doctor`、`audit verify`、`client-config`、`install-addin`、`uninstall-addin` 带 `--format json` 时在 stdout 输出一个 UTF-8 的 JSON 对象，退出码与文本输出相同；`--format` 只接受 `json`，其他值或缺少值按命令行错误处理（退出码 2）。结构变化时 `schemaVersion` 加 1，快照在 `tests/Contracts.Snapshots/`。
-- `doctor`：`{schemaVersion: 1, hostVersion, status, checks: [{id, subject?, status, zh, en}]}`。`status` 取 `ok`、`info`、`warning`、`failure`；顶层的 `status` 是最严重的一项，`info` 按 `ok` 计。`checks` 按输出顺序排列，`id` 稳定，同类的几项共用一个：`host.version`、`data.directory`、`config`、`audit.directory`、`exports`、`backups`、`plans`、`msix`、`suspension`、`http.service`、`vm.firewall`、`eplan.installation`、`eplan.running`、`bridge.pipe`、`bridge.handshake`、`bridge.licence`、`path.length`。HTTP 状态发现文件与固定防火墙规则见 ADR-0018 第 11 条。`subject` 是这一项针对的 EPLAN 版本（`eplan.installation`）或 EPLAN 进程号（其他各项），不针对某一个时省略。
-- `audit verify`：`{schemaVersion: 1, directory, exists, intactRecords, intact, break}`。`intactRecords` 是完整的记录数（断开时是断开处之前的）；`break` 为 `{file, line, problem}`，`problem` 取 `changed`、`missing`、`not_a_record`，哈希链完整时为 `null`。
-- `client-config`：`{schemaVersion: 1, mode, server: {name, command, args}, problem, clients: [{client, file, action, result, before, after, backup, notes, problem}]}`，每个客户端一项，顺序同命令行。
-  - `mode` 取 `write`、`dry_run`、`remove`；`action` 取 `write`、`remove`；`result` 取 `written`、`would_write`、`removed`、`unchanged`、`failed`；
-  - `before`、`after` 只是 `eplan` 这一项在文件中的写法（JSON 或 TOML 的文本），没有时为 `null`，从不包含文件的其他部分；`file` 在无法确定位置时为 `null`；`notes` 目前只有 `{code: "comments_dropped", zh, en}`；
-  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `invalid_file`、`unsupported_toml`、`ambiguous_package`、`file_changed`、`invalid_record`、`record_failed`、`unknown_client`、`io_error`、`not_eplanmcp`、`plugin_installed`、`claude_desktop_running`、`msix_redirected`。`record_failed` 时文件已经改好，`result` 仍是 `written` 或 `removed`；
-  - 顶层的 `problem` 表示整个命令被拒绝（`not_eplanmcp`、`msix_redirected`，或 `--remove` 时 `invalid_record`），这时 `clients` 为空。任何一处有 `problem` 时退出码为 1。
-- `install-addin`、`uninstall-addin`：`{schemaVersion: 1, action, dll, problem, results: [{eplan, version, variant, result, processId, notes, problem}]}`，每个 `EPLAN.exe` 和变体一项（M5 设计 4.2）。
-  - `action` 取 `install`、`uninstall`；`dll` 是注册的插件，撤销时为 `null`；`eplan` 是执行命令的 `EPLAN.exe`，`version` 是它的文件版本；整个版本因不在支持范围内被跳过时 `variant` 为 `null`；`processId` 是命令启动的 EPLAN，没有启动时为 `null`；
-  - `result` 取 `registered`、`unregistered`、`not_confirmed`（等待结束时 EPLAN 还没有加载插件，留着没有关）、`failed`、`refused`（没有启动 EPLAN）、`skipped`；
-  - `notes` 的每一项为 `{code, zh, en}`，`code` 取 `version_untested`、`unsupported_version`、`eplan_missing`（记录的 EPLAN 或变体已不在，记录已删除）、`close_eplan`（EPLAN 没有按要求关闭）；
-  - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `addin_not_found`、`no_eplan`、`variant_not_found`、`unblock_failed`、`invalid_record`、`eplan_running`、`other_user`、`start_failed`、`eplan_exited`、`not_loaded`、`path_mismatch`（EPLAN 从另一个位置加载了插件，或者加载的是不报告路径的旧版插件，这次的注册没有生效或看不出是否生效）、`handshake_failed`（插件没有回应握手，看不出加载的是哪一个注册）、`record_failed`；顶层的 `problem` 表示什么都没有做，这时 `results` 为空。任何一处有 `problem` 时退出码为 1。
-- `pack`（M6，暂不给 Workbench 用，结构随 M6 设计可能变化）：`{schemaVersion: 1, command, ok, …}`，`ok` 为 false 时退出码为 1。`scan` 另有 `resources`、`facts`、`findings: [{severity, code, subject, message}]`（`severity` 取 `error`、`warning`、`gap`），给了 `--id`/`--name`/`--version` 时有 `manifest` 和 `problems`，写出后有 `written`；`check` 有 `id`、`version`、`resources`（个数）、`problems: [{location, message}]`；`export` 有 `file`、`bytes`；`install` 有 `outcome`（`installed`、`already_installed`、`refused`）、`id`、`version`、`folder`。
+CLI 的 JSON 输出契约、版本与退出码见 [CLI 参考](../reference/cli.md#json-输出契约)。
 
 ### 5.3 Bridge 组件
 
@@ -378,21 +365,9 @@ sequenceDiagram
 | 数据目录 | `%USERPROFILE%\EplanMcp\`：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`（写入暂停的记录，ADR-0010；`client-config` 写入过的条目 `clients.json`；`install-addin` 的注册 `addins.json`）、`exports\`（每次导出新建一个目录，不自动清理，SEC-20）；`packs\`（M6 安装的工程包，每个版本一个只读目录 `<id>\<version>\`）、`packs-dev\`（M6 开发中的工程包，每个包一个普通目录，只经工具写入；旁边的 `.<id>.lock` 是改动时的锁）、`workspaces\`（M6 项目绑定，每个项目一个目录，其中的 `binding.json` 记下柜、按摘要锁定的包版本和修订号；目录名取项目键的 SHA-256 前 32 位）；可用 `EPLANMCP_HOME` 改到别处（[ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)） | 不受 MSIX 文件重定向影响，EPLAN 和工程师都能看到；不放在可能被 OneDrive 同步的"文档"目录 |
 | 自检 | `eplanmcp doctor`：EPLAN 版本、插件注册状态、授权（`APIExtension`，开发者授权还是运行时授权）、远程访问设置、**EPLAN 进程的 TEMP 是否正常**、**用户 PATH 长度**、管道连通性、审计目录是否可写、导出占用的空间 | 把这次环境排查中踩过的坑全部变成自动检查 |
 
-### 7.1 安装验收清单（M5 发布前逐项通过）
-清单来源：本项目实机验证中踩过的坑，以及国内 EPLAN 插件用户反映的常见安装问题（[电气CAD吧插件商店](https://www.cad-bbs.cn/pluginstore/)的安装说明与用户评论）。
+### 7.1 安装验收
 
-| # | 要求 | 用户常遇到的问题 |
-|---|---|---|
-| I1 | 安装、使用、卸载都**不需要管理员权限**，不需要"以管理员身份运行 EPLAN" | 不以管理员身份运行时，插件提示"未联网"或注册表访问被拒绝 |
-| I2 | 只通过 EPLAN 官方的 `EplApiModuleAction` 注册插件，不写注册表、不往 EPLAN 安装目录复制文件 | 安装程序把类库复制到 EPLAN 目录、改注册表 |
-| I3 | 安装后**无需手工**在 API 管理中卸载再加载；需要重启 EPLAN 时（例如更新插件，api-notes A8），安装程序明确提示 | 装完要在 API 管理中先卸载再加载，图标才出现 |
-| I4 | 升级时直接覆盖安装，不需要先手工卸载旧版本 | 部分版本要求先卸载旧版再安装 |
-| I5 | 安装和使用都**不需要联网**（MIT 开源，没有在线授权检查） | 断网安装报错 |
-| I6 | **不绑定电脑**，没有授权注册、注销和转移的流程 | 重装系统或换电脑后授权作废，转移要先注销 |
-| I7 | 支持矩阵中的每个 EPLAN 版本都实际安装验证过；不支持的版本，`doctor` 给出明确提示 | 新旧版本兼容问题，例如某个小版本图标不显示 |
-| I8 | 在虚拟机中同样可以安装和使用 | 虚拟机上授权受限 |
-| I9 | 在 Workbench 或经 `uninstall-addin` 完全撤销注册后，再删除程序目录 | 卸载不干净、插件管理混乱 |
-| I10 | 由 MSIX 打包的客户端（Claude 桌面版）启动时同样正常工作（ADR-0008） | 本项目实测：`%LOCALAPPDATA%` 被重定向；数据根目录和命名管道不受影响（spike S5） |
+发布前的 I1–I10 清单与操作步骤统一见[发布流程](../process/release.md#安装验收清单m5-发布前逐项通过)。
 
 ---
 

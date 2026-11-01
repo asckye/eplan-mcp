@@ -1,5 +1,9 @@
 # 设计文档：M6 工程包（engineering packs）
 
+> 阅读摘要（2026-11-01）：本文保留工程包的总体方案与原始决策记录；设计状态为 Approved，实施进度与范围统一见[路线图](../roadmap.md)（第 1–3 阶段已实现，第 4–5 阶段计划中；当前先完成项目整理）。
+> 包容器、计划审批、代码插件与事件边界见 [ADR-0023](../adr/0023-plan-approval-and-backup.md)、[0024](../adr/0024-pack-trust-and-container.md)、[0025](../adr/0025-code-plugin-worker.md)、[0026](../adr/0026-eplan-events-and-push.md)；落盘记录见 [0028](../adr/0028-plan-record-format.md)、[0029](../adr/0029-phase3-engineering-records.md)。
+> 分阶段实现细节见[快照设计](2026-10-21-m6-bridge-snapshot.md)、[计划设计](2026-10-23-m6-phase2-plans.md)、[配置/模块/规则设计](2026-10-26-m6-phase3-config-modules-rules.md)；当前调用契约见[工具规格索引](../tools/README.md)中的 `eplan_pack_*`、`eplan_plan_*`、配置、模块与规则工具。
+
 | 项 | 内容 |
 |---|---|
 | 状态 | Approved（2026-10-21，项目负责人：ADR-0023 到 0026"四个都接受"；第 10 节的 Q1–Q12"全部按建议"，其中 Q11 为"不再单独审批"） |
