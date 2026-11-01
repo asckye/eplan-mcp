@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `message` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "EPLAN 刚才报了什么错？"很多 EPLAN 操作的失败只出现在系统消息里（api-notes A1）。代理用它读取本次 EPLAN 会话的系统消息，帮工程师定位问题。

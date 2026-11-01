@@ -10,7 +10,7 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 | 所属分组 / Profile | `device` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。代理知道部件号，不必先找窗口宏：工具放置部件自带的宏，图上与工程师手工放置的设备相同（标识、技术参数、连接点、触点镜像，S20），再给它目标标识。需要一组预先设计好的电路时用 `eplan_macro_insert`。

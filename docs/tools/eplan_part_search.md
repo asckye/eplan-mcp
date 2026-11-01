@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "部件库里有没有 3RH2 的辅助接触器？""SIE.3RH2122-1HB40 是什么、有没有宏？"代理在 EPLAN 配置的系统部件库中查部件，为 `eplan_device_place` 选部件号，或者回答选型问题。只读，不改部件库，也不改项目。

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `device` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "-K1 是什么部件、功能文本是什么、它的触点分布在哪几页？"代理拿到一个设备标识后，用它看设备的全貌：主功能、辅助功能及其所在的页、部件、连接点。

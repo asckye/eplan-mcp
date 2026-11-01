@@ -2,7 +2,7 @@
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile / 级别 | `placement` / `full` / Write；四注解 false/false/true/false |
-| 状态 | T5b 已注册 full 移动入口；复用既有 connection.create.plan/execute 的封闭 moves 分支，不增加 Bridge operation；Large 已编写，未运行 |
+| 状态 | Implemented (Unreleased) |
 ## 输入与范围
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |

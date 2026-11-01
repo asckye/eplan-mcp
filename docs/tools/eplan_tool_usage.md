@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `meta` / `core`（在 `core` 中，`tool` 只能取 `core` 中的工具） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 代理在某个工具的描述不够用时调用它：不清楚参数怎么填、前后该调用哪个工具、结果字段是什么意思、某个错误该怎么处理。它返回该工具的详细用法。这样每个工具的描述可以保持在约 250 token 的预算内（[工具设计规范 4.2](../standards/mcp-tool-design.md#42-规则)），详细内容按需获取，不占用每次 `tools/list` 的上下文（[第 10 节](../standards/mcp-tool-design.md#10-profile-与发现)）。

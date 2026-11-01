@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M1） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 代理在开始工作前，或者其他工具返回 `EPLAN_NOT_CONNECTED` / `BRIDGE_INCOMPATIBLE` 之后，用它确认"EPLAN 有没有在运行、插件是否已加载、连的是哪个版本"。它是唯一一个在 EPLAN 不可用时也**正常返回**（而不是报错）的工具，所以代理可以用它诊断问题，并把下一步告诉工程师。

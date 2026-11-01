@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把项目打包成 PXF 发给别人""导出一份 EPJ 存档"。代理把整个项目导出为一个 EPJ（PXF）文件，得到文件所在的目录。与其他导出相同，只在服务器新建的目录中写文件（ADR-0012）。

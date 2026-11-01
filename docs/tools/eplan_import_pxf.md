@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `import` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第三批） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把别人发来的这个 EPJ 打开看看"。代理把导入目录中的 EPJ（PXF）文件导入为一个新项目。新项目只建在 scratch 根目录中（M4c 设计 Q5），不改任何已有项目，所以是 Write，不需要审批；工程师需要时自己把它移走。

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第四批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把翻译库导出来，我要交给翻译公司校对""看看翻译库里 '断路器' 有哪些译法"。代理把 EPLAN 配置的**系统翻译库**导出为文件，交给人，或者自己读取。

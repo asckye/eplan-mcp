@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 工程师同时开着两个 EPLAN（例如 Electric P8 和 Pro Panel，项目负责人两个变体都用），其他工具会返回 `SESSION_NOT_SELECTED`。代理用 `eplan_session_status` 看到各实例后，用这个工具选定要操作的那一个。

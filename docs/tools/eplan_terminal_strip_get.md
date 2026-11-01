@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `terminal` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "-XD4 的端子按什么顺序排？每个端子内侧、外侧各接到哪里？哪些端子有跨接？"代理看一排端子的全貌，用来回答端子图类的问题，或者在编号前后核对。

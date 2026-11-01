@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `property` / `full`；工具集选择尚未实现，沿用 ADR-0022 的 Profile 过渡规则；不加入 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true，`destructiveHint` = false，`idempotentHint` = true，`openWorldHint` = false |
-| 状态 | Implemented（P2：仅发布目录） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 代理按对象类型查属性 ID、正式名称及读写限制；现有对象读取工具不能提供完整目录。

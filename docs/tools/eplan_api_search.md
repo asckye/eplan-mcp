@@ -5,7 +5,7 @@
 | 所属分组 / Profile | api / full |
 | 安全级别 | Read（ADR-0032 B 级） |
 | MCP 注解 | readOnlyHint=true，destructiveHint=false，idempotentHint=true，openWorldHint=false |
-| 状态 | Implemented |
+| 状态 | Implemented (Unreleased) |
 
 代理查找已登记能力及到达它的工具，无需连接 EPLAN。全部操作层重载组（含排除项）和数据字典对象均可发现；目录不授予执行权限。
 

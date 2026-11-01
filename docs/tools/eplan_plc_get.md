@@ -8,7 +8,7 @@ T7d 兼容读回字段仅在 `response_format=detailed` 时返回：`owner`（�
 | 所属分组 / Profile | `plc` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "-KE1 这块 PLC 卡有哪些通道？每个通道的地址、符号地址是什么、接到哪个设备？哪些通道还空着？"代理看一个 PLC 盒的通道与地址，用来核对 I/O 分配。

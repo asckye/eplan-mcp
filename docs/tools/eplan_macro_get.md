@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `macro` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 3 步） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "这个宏里有哪些设备，有多大，有几个变体"。代理用 `eplan_macro_list` 找到宏之后，用它确认宏是否合适、要放在页上的什么位置，再调用 `eplan_macro_insert`。

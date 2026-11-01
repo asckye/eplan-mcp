@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `terminal` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把 -XD1 的端子按顺序重新编号""给新加的端子编号"。代理让 EPLAN 按端子编号方案给指定端子排或整个项目的端子编号。结果由方案和端子排中的顺序决定，事先算不出，所以变更清单只列范围，执行后列出每个改变的端子（与 `eplan_device_renumber` 相同，M4 设计 Q7）。大范围改名，按 Destructive 处理：每次审批，执行前备份。

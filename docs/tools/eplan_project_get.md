@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 代理接手一个项目时，先要知道它的规模和构成："这个项目有多少页""有哪些类型的页""有多少设备"。一次调用给出概况，代理再决定用哪个列表工具、带什么过滤条件，而不是盲目地把全部页面或设备列出来。

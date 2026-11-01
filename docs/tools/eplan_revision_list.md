@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "这个项目现在是哪个修订？""修订记录里有哪些？""这是已经完成的修订吗，还能改吗？"代理读出项目的修订状态和修订记录（EPLAN 的变更跟踪），在写入之前判断项目能不能改，或者把修订历史报告给工程师。

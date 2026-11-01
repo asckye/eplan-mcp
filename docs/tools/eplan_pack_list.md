@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "有哪些工程包？哪个版本被项目锁定了？"代理列出开发中的包（`packs-dev\`）和已安装的版本（`packs\`），以及项目绑定中锁定它们的项目，用来选择要查询、构建或绑定的包。不需要 EPLAN。

@@ -8,7 +8,7 @@ T7d 兼容输出增加 `functionCategory`（原生功能类别）与 `plcInputDe
 | 所属分组 / Profile | `symbol` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint=true`、`destructiveHint=false`、`idempotentHint=true`、`openWorldHint=false` |
-| 状态 | Implemented；新增 Large 测试待运行 |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 查询指定项目已可用的库符号、变体和连接点，为绘图选择符号；现有部件查询不能发现无部件符号。

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "项目里用了哪些西门子的部件？""3RT2016 用了几个？"代理按部件汇总项目的用料，相当于一份精简的部件清单。部件库查询（`eplan_part_search`）属于 M3（M2 设计 Q4）。

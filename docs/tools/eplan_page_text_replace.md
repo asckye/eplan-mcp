@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full`，不加入 `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false，`destructiveHint` = false，`idempotentHint` = false，`openWorldHint` = false |
-| 状态 | Implemented（v0.4.0；Host、Bridge、Small / Medium 与 Large 测试代码已实现，实机测试另行运行） |
+| 状态 | Implemented (v0.4.0) |
 
 ## 1. 这个工具解决什么任务
 

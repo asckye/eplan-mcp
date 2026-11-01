@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `macro` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 4 步；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1&EFS1/60` 页左上方放一个接触器反馈控制回路"。代理先用 `eplan_macro_list` 和 `eplan_macro_get` 选好宏，再用它把宏放到页上的指定位置，得到带标识、在图上显示的设备。这是 M3b 放置设备的唯一方式（M3b 设计 Q1）：一次调用插一个宏，只审批一次，按一次 Ctrl+Z 撤销。

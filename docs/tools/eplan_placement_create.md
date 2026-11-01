@@ -3,7 +3,7 @@
 |---|---|
 | 分组 / Profile / 安全级别 | `placement` / `full` / Write |
 | 标题 / 四注解 | `Create text and graphics on an EPLAN page`；readOnly/destructive/idempotent/openWorld 均 false |
-| 状态 | T4c 已注册 full 入口；TEXT/LINE/RECTANGLE 共用既有 Bridge operation，新增混合 Large 验证尚未运行 |
+| 状态 | Implemented (Unreleased) |
 ## 1. 这个工具解决什么任务
 在指定电路图页添加说明文字、图形直线和矩形；图形线不承担导线功能。契约见 `PlacementCreateContract`，英文用法草案见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
 ## 2. 输入参数

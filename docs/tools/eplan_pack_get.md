@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "这个包能用吗？缺什么？"代理查看一个包（开发包或某个已安装版本）的清单摘要、问题、缺口，以及包的要求在当前 EPLAN 和 EplanMcp 上是否满足（M6 设计 4.4），再决定构建、补资料或换包。

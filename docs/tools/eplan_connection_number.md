@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `connection` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "给项目的连接编线号""按电位重新编线号"。代理让 EPLAN 按线号方案给项目的连接编号（EPLAN 的"连接编号"，覆盖矩阵第 4 节的"线号管理器"）。一次可能改几百条线号（S21：605 条），结果由方案决定，事先算不出，按 Destructive 处理：每次审批，执行前备份。

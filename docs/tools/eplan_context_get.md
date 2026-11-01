@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `context`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | 已实现最小只读聚合（P24）；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D14–D15 为准；Large 待实跑 |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 “针对这些页/对象，给我编译任务需要的紧凑上下文，并说明来源”。按 [M6 4.3/4.7/4.16](../design/2026-10-21-m6-engineering-packs.md)，支持 v2 多柜结构映射及五层配置；规则强制检查留后续 PR，关系图邻域和依赖缓存失效留第 4 阶段。

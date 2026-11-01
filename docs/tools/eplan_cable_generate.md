@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full`（M4c 第二批） |
 | 安全级别 | Destructive（scratch 中也逐次审批，执行前备份项目） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（S34 已验证参数与改名风险；实际新增自动电缆的正向场景未验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 “根据连接和方案生成或更新自动电缆”。本工具只用 `generate/CABLES` 的受限模式：**`ONLYAUTOCABLES=1`、`KEEPOLDNAMES=1` 固定**。已有电缆的重编号仍由 [eplan_cable_renumber](eplan_cable_renumber.md) 完成；不暴露关闭保留旧名或处理全部电缆的开关，也不提供删除自动电缆的独立操作。

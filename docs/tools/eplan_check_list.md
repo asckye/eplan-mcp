@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `check` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "上次检查有几条错误？都是什么问题？"代理读取项目中已有的检查消息（EPLAN 的消息管理），帮工程师归类和解释。**不运行检查**：运行检查会改写项目的消息，属于 M3 的 `eplan_check_run`（M2 设计 Q2，spike S6）。

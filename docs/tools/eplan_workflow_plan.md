@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `workflow`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read（保存 Host 计划记录，不执行 EPLAN 写入） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented（旧路径 compiler=2；W2 工程计划 compiler=3，仅编译，执行待 W3；本次未运行 EPLAN） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 “先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤；阶段 3 增加按柜配置展开的锁定工作流与规则，工程计划的执行重核留 W3。

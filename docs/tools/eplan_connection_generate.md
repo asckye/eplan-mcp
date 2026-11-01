@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `connection` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 5 步；已实现，等待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把新放的回路连起来""这一页的连线生成连接"。在 EPLAN 中，两个连接点在同一条线上相对时，图上会画出自动连线，但还没有 `Connection` 对象（A3），导线清单、端子图等报表也就看不到它们。代理插入宏、放好设备之后，用它在指定的页上执行"生成连接"，让画出的连线成为真正的连接（M3b 设计 4.3，Q4）。

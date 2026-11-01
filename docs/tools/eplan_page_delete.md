@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 11 步；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把 `=GAA+A1&EFS1/60` 和 `/61` 删掉"。代理给出完整页名，一次调用删除 1–50 页：每次都要工程师审批（scratch 中也一样），执行前自动备份整个项目，删除后在 EPLAN 中按一次 Ctrl+Z 就能全部恢复。删页会让其他页上的辅助功能失去主功能（S12，A18），变更清单和结果都列出这些设备；报表不随之更新，要再调用 `eplan_report_update`。删页不常用，又是 Destructive，所以放在 `full` Profile。

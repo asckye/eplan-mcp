@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `macro` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M3b 第 3 步） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "有没有电机启动的宏""接触器反馈控制的宏在哪"。代理插宏之前，先用它在宏目录中按名称找到宏，再用 `eplan_macro_get` 看宏的内容，最后用 `eplan_macro_insert` 插入。示例数据有 695 个窗口宏，所以过滤在服务端完成，结果分页。

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 给出页名，修改页描述或切换到项目中已被页面使用的图框；可同时修改两项。一次调用只审批一次，在 EPLAN 中按一次 Ctrl+Z 撤销。图框通过页属性 11016 修改，不新增工具、不导入主数据。

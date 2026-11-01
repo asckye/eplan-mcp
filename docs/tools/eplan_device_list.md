@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `device` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "列出所有接触器""=GAA+A1 下有哪些设备""哪些设备没有部件""-K1 在哪里"。代理按标识、结构、页、类别或"是否有部件"找到设备，再用 `eplan_device_get` 看细节。示例项目有 2876 个功能，过滤在服务端完成，结果分页。

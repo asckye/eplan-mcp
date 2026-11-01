@@ -5,7 +5,7 @@
 | 所属分组 / Profile | api / full |
 | 安全级别 | Read（ADR-0032 B 级） |
 | MCP 注解 | readOnlyHint=true，destructiveHint=false，idempotentHint=true，openWorldHint=false |
-| 状态 | Implemented |
+| 状态 | Implemented (Unreleased) |
 
 按必填 `id` 查询 XML 成员 ID、重载 group 或 `D:Function` 一类对象键。成员 ID 返回整个组；数据字典也接受对应 PropertyList、属性枚举或对象的类型 ID。`limit` 默认 20、范围 1–100；`cursor` 继续取详情。
 

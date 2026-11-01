@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M1） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 代理需要知道 EPLAN 中打开了哪些项目、哪个是当前项目，才能决定后续工具的 `project` 参数。工程师常说"在当前项目里……"，代理用这个工具把"当前项目"解析成具体的项目名。

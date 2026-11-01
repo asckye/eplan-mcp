@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "=GAA+A1&EFS1/1 这页上有哪些设备？""这页是什么类型、页描述是什么？"代理知道页名后，用它看一页的概况和页上的设备；需要设备的细节时，再用 `eplan_device_get`。

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把项目里的电缆重新编号""给新电缆编号"。代理让 EPLAN 按电缆编号方案给指定电缆或全部电缆编号。结果事先算不出，变更清单只列范围，执行后列出每个改变的电缆标识（同 `eplan_device_renumber`）。按 Destructive 处理：每次审批，执行前备份。

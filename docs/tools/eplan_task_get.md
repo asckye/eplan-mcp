@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `task`；M6 工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | In Review（未实现；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D10–D13 为准） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 “刚才的计划还在等审批吗？”“任务完成了吗，结果是什么？”可能耗时长的工具在等待窗口内未完成时返回 `taskId`；代理用本工具继续等待或读取状态。返回任务 ID 不取消任务（[M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.13）。它不发起计划、不回答审批、不取消任务，也不重做写步骤。

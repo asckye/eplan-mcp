@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "按'设备标识清单'方案导出一份标签数据""导出端子图的 Excel"。EPLAN 的标签（Labelling）按方案生成清单文件：设备标识、端子、电缆、部件汇总等。代理选一个方案导出，得到文件。这也覆盖了"全部设备的清单"：`DeviceService.ExportDeviceList` 导出的是预规划清单（S25），不是设备列表。

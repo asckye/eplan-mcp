@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `core` |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 8 步；已实现，待实机验证；取消时通知 Bridge 依赖第 4 步） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把这三页导出成 PDF 给我看""整个项目出一份 PDF"。代理把页或整个项目导出为一个 PDF 文件，得到文件所在的目录，交给工程师查看或转发。导出不改动项目的设计数据（S11，A16），只在服务器新建的目录中写文件，所以是 Read 级，不需要审批；它会写文件，注解如实标为 `readOnlyHint: false`（ADR-0012）。本规格第 5 节的"导出目录"也适用于 `eplan_export_dxf`、`eplan_export_image`。

@@ -6,7 +6,8 @@
 |---|---|
 | 分组 / Profile | api / full；`config.json` 的 `apiTry: "on"` 显式启用，默认 off 时不注册 |
 | 级别 / 注解 | C 级未验证试执行；false / true / false / false |
-| 状态 | Implemented（C1 Files、静态成员与属性入口切片未实机验证；工具数不变） |
+| 状态 | Implemented (Unreleased) |
+| 实机验证 | C1 Files、静态成员与属性入口切片未实机验证，见 [待验证清单](../process/large-pending.md) |
 
 ## 1. 任务与输入
 在 scratch 上试执行一个目录重载组；已有专用工具时优先使用。必填 `group` 是目录的精确 O: 组 ID，`project` 显式指定项目，`parameters` 是闭合调用形状，实例调用包含 `target`（find 返回的 project/page/type/oid/digest 定位器）和签名参数，公开静态调用省略 `target`；`dry_run` 默认 false。属性省略 `value` 为读，添加 `value` 为写，组 ID 不变；方法按精确参数名集合选择唯一签名，禁止依数值猜测重载，歧义为 INVALID_ARGUMENT。方法形参 `target` 映射为 `argument_target`，接收对象仍用 `target`。TSV 方法组现有 **49 个读组、194 个写组、737 个含排除签名的组**（分类之间可能重叠），另有属性 342 个读组、211 个可写组；Files 切片新增 10 个写方法组、14 个签名。方法参数支持 bool/int/long/double/string、PointD、全部受支持对象类型定位器与目录枚举；枚举仅接受区分大小写的精确名称，int 须在 Int32 范围，double 须有限。PointD 仅接受有限数值的 `{"x":number,"y":number}`。拒绝类型名、反射、数组、任意对象、未知字段、空值和隐式类型转换。

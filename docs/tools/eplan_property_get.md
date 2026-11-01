@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `property` / `full`；沿用 ADR-0022 的 Profile 过渡规则，不加入 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true，`destructiveHint` = false，`idempotentHint` = true，`openWorldHint` = false |
-| 状态 | Implemented（P5a 校验与映射；P5b 续读、游标、预算及 full/property 注册） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "列出 =GAA 下的所有页""有哪些端子图""页描述里带'电源'的是哪几页"。代理用它按结构、页类型或页描述找到页，再用 `eplan_page_get` 看某一页的内容。示例项目有 321 页，所以过滤在服务端完成，结果分页。

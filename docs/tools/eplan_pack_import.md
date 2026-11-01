@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack`（ADR-0022；工具集实现之前只是代码中的分组） / `full`（不进 `core`） |
 | 安全级别 | 本地数据（M6 设计 4.5.1：只写 EplanMcp 的数据目录，不碰 EPLAN 项目，不审批，写审计）；安装别人的 `.eplanpack` 要工程师确认（ADR-0024 第 4 节） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "我把基本项目、两个参考项目和公司的宏放进 imports 了，整理成工程包"。代理把工程师的材料导入一个**开发包**（`<数据根目录>\packs-dev\<包 ID>\`）：识别种类、算哈希、读出不靠 EPLAN 就能读的事实，自动生成清单 `pack.json` 和资源索引。工程师和代理都不手写 YAML 或 JSON。

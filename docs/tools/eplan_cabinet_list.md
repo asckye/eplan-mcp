@@ -2,7 +2,8 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | 已实现；pack / full / Read；四注解 true/false/true/false |
+| 状态 | Implemented (Unreleased) |
+| 分组 / Profile / 注解 | pack / full / Read；四注解 true/false/true/false |
 ## 1. 任务
 分页检查柜映射、配置链、生效值和来源；未绑定时返回虚拟 default，不创建绑定。
 ## 2. 输入

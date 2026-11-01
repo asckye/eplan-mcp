@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint=true`、`destructiveHint=false`、`idempotentHint=true`、`openWorldHint=false` |
-| 状态 | Implemented；新增 Large 测试待运行 |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 将指定的已打开项目中的一页展示给工程师；`eplan_page_get` 只返回数据，不能定位编辑器。此调用会打开或聚焦页面编辑器，重复调用只重新聚焦。

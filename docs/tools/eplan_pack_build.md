@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | 本地数据（M6 设计 4.5.1） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段；导出 `.eplanpack` 属于第 3 阶段，不在本工具中） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "资料整理好了，发布成 1.0.0"。代理把开发包冻结为一个**不可变的版本**，安装到 `<数据根目录>\packs\<包 ID>\<版本>\`，以后项目可以锁定它（M6 设计 4.1.5）。同一版本重复构建、内容相同时什么都不做（所以 `idempotentHint` 为 true）。

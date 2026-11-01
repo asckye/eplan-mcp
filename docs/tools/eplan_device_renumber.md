@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `device` / `core` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4 第 12 步；已实现，2026-10-20 实机验证并修复崩溃，见 api-notes A20） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把这一页上带 ? 的设备标识编号"。设备标识中的 `?` 表示还没有编号，例如插入宏后没有线圈的触点 `-?QA1`（A14）、`+A1-?XG1`（S12）。代理用它让 EPLAN 按编号方案给指定页或整个项目的设备编号：默认只给带 `?` 的标识编号（`PostNumerate`），也可以给范围内的全部设备重新编号。结果由 EPLAN 的规则决定，事先算不出（M4 设计 Q7），所以变更清单只列范围，执行后列出每个改变的标识。大范围改名难以逐项撤销，按 Destructive 处理：每次审批，执行前备份，按一次 Ctrl+Z 撤销。

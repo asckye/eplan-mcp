@@ -3,7 +3,8 @@
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile | action_catalog / full |
-| 级别 / 状态 | Read / Implemented |
+| 级别 | Read |
+| 状态 | Implemented (Unreleased) |
 | MCP 注解 | readOnly=true、destructive=false、idempotent=true、openWorld=false |
 
 用于发现官方 action 用法与本机界面 action；目录不授予执行权限，不调用 EPLAN 或 Bridge。

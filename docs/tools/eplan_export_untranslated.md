@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `export` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "项目里还有哪些文字没有英文翻译？"代理导出缺失词表（项目中的文本在翻译库中找不到的译文），交给翻译人员或自己读取后整理。翻译项目本身是第二批的 `eplan_project_translate`。

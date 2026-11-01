@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project`；M6 工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Write（scratch 中自动；之外逐次审批，仍只建新项目） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented（M6 第 2 阶段；工具 Large 验收尚未运行，跨版本行为未验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 “从基本项目新建一个目标项目”“把示例项目备份还原成 scratch 副本”。这是 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.16“一个完整任务”的起点，也覆盖 ADR-0005 预留的 `eplan_scratch_create` 用途（M6 Q2）。EPJ/PXF 文件继续用 `eplan_import_pxf`。

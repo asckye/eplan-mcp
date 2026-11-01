@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)）：每次审批，执行前备份主数据 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented；Large 测试已编写、尚未运行，每次运行须项目负责人批准（[api-notes A47](../eplan/api-notes.md) 为已有 API 实测） |
+| 状态 | Implemented (v0.4.0) |
 
 TI-1、TI-2a、TI-2b 已接通基础支持、Bridge 和 Host；`full` 共 73 个工具，本工具归 `language` 分组，不在 `core` 中。
 

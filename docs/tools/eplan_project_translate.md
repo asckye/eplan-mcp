@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Destructive：每次审批，执行前备份项目（ADR-0013） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第二批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把项目翻译成英文和中文""新加的那几页也翻译一下"。代理用 EPLAN 配置的系统翻译库，把项目（或指定的页）中的文本译进项目的全部翻译语言。只读翻译库，不改它。

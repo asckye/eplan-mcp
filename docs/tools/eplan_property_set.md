@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `property` / `full`；不加入 `core` |
 | 安全级别 | Write |
 | MCP 注解 | readOnly=false，destructive=false，idempotent=true，openWorld=false |
-| 状态 | Implemented |
+| 状态 | Implemented (v0.4.0) |
 
 ## 1. 这个工具解决什么任务
 代理预览并赋值已验证的项目属性。首批仅 EPLAN 2026 Function 的 20011 FUNC_TEXT 和 20027 FUNC_TECHNICAL_CHARACTERISTIC；后者按独立文本原样写入，不作数值转换。依据[设计](../design/2026-10-25-property-tools.md) P6–P8、[api-notes](../eplan/api-notes.md)（A36、A44、A48）和 P7 Large 验证。

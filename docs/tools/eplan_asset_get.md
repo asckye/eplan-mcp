@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "这个宏是从哪里来的？能用吗？"代理取一个资源的详情：来源位置、哈希、测得的事实、知识文档的内容，以及它现在是否可用。回答"说明来源"类问题时引用这里的 `source` 和 `facts`（M6 必测场景 3）。

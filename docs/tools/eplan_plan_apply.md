@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | 计划中最高步骤级别（Write / Destructive），由服务端判定 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false；静态注解覆盖目录内的 Destructive 计划，不代替运行时 tier |
-| 状态 | Implemented（LP-9 按 compilerVersion 分流；Large 已在 EPLAN 2026.0.3 实跑：LargeWrite 及 1,000/3,000 页夹具） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 “执行刚才审阅的完整计划，并报告做到了哪里”。以 [ADR-0023](../adr/0023-plan-approval-and-backup.md) 为审批、备份及计划级结果的权威；不是逐次调用 MCP 写工具，也不是一个覆盖全计划的事务。只执行 [`eplan_workflow_plan`](eplan_workflow_plan.md) 的第 2 阶段目录。

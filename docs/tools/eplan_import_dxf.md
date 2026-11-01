@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `import` / `full`（M4c 的新工具默认只在 `full` 中） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第三批） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "把这张机械图（DXF）放到 `=GAA+A1&EFS1/92` 页上"。代理把导入目录中的 DXF 或 DWG 文件插入一页，作为图形。只新增图形、不覆盖已有对象，能被 `SafetyPoint` 回滚、一步撤销（S22），所以是 Write：scratch 中直接执行，真实项目逐次审批。

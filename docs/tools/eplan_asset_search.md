@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "包里有没有电机回路的宏？""公司对端子有什么规则？"代理在**资源索引**中查找：原生文件（宏、项目、表格、图框、文档、物料对应表）和知识文档（候选、模块、缺口）。找到后用 `eplan_asset_get` 看详情和来源。不需要 EPLAN。

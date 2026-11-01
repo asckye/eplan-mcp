@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `connection` / `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M2） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "-FC1 接到了哪里？""这一页上有哪些连接、用的什么截面？"代理按设备或按页列出连接，回答接线类的问题。

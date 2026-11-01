@@ -1,7 +1,8 @@
 # 工具规格：`eplan_rule_check`
 | 项 | 内容 |
 |---|---|
-| 状态 / 分组 | 已实现；workflow / full |
+| 状态 | Implemented (Unreleased) |
+| 分组 / Profile | workflow / full |
 | 级别 / 注解 | Read；true / false / true / false |
 检查显式项目中所选柜的本机已提升正式规则；候选接受不授予规则资格。复用规则解释器与计划编译器，不新增 Bridge 操作。
 输入：必填 `project`、`scope`（沿 context 的 pages/structures/kinds/locators）；可选 `cabinet`（多柜必填）、`rules`（精确锁内规则 ID）、`fix_plan=false`、`limit=50`（1–200）、`cursor`、`max_tokens=5000`（1–20000）。

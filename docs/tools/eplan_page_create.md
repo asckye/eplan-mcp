@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `page` / `core` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（M3a 第 10 步） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1` 下新建 EFS1 的第 5 到第 8 页电路图，页描述是……"。代理给出完整页名，一次调用建好全部页面：只审批一次，在 EPLAN 中按一次 Ctrl+Z 就能全部撤销。

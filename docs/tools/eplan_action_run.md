@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `action` / 仅 `full`，另须 `actionRun: on`（[ADR §5][adr5]） |
 | 安全级别 | 按条目：Read（导出级）11 种、Write 4 种（[ADR §8][adr8]） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false（[ADR §6][adr6]） |
-| 状态 | v0.4.0 第 2 批已实现并经 Large 实测：提交、一次撤销恢复、更早的撤销历史保留（[A50][a50]） |
+| 状态 | Implemented (v0.2.0) |
 
 依据为 Accepted 的 [ADR-0021][adr]，不重新决定 Q1–Q5。本规格的首批范围沿用其第 8 节；“已验证”仅限 [S26 r1][s26] / [A40][a40] 或 S24 / [A30][a30] 明确记录的行为。输入限制、输出结构、产品流水线及预算是待实现契约，**未验证**；不得把规格或构建通过当成实机验证。首批仍须满足 ADR §2 的加入条件，尤其不能把 AML 导出已成功解释为只读条件已经全部满足。
 

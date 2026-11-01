@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `import` / `full`（M4c 第三批） |
 | 安全级别 | Destructive（scratch 中也逐次审批，执行前备份项目） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Proposed（S34 已验证新增对象读回和 SafetyPoint 回滚；工具的事务内重复保护 Large 测试与无冲突目标的正向导入未验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 “把 PLC 总线交换文件导入一个尚不包含这些设备的项目”。用 `plcservice/BUSDATAIMPORT` 导入 `.pbf` 或 `.aml`，不承诺静默更新已有 PLC。查询已有 PLC 用 [eplan_plc_get](eplan_plc_get.md)。导入可能新增大量设备和部件引用，且无法可靠匹配原设备，按 Destructive 处理。

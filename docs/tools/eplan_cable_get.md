@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M4c 第一批；已实现，待实机验证） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 "-WG2 是什么电缆、多长、从哪里接到哪里、每根芯线接在哪个端子上？"代理拿到一个电缆标识后，看电缆的全貌：型号和规格、两端、芯线及其连接。

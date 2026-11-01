@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | 本地数据（M6 设计 4.5.1） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Proposed（M6 第 1 阶段的部分：候选、模块元数据、物料对应表、缺口；工作流在第 3 阶段） |
+| 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
 代理整理材料时写下结构化的结果："三个参考项目的电机回路都带热继电器"（候选）、"motor.ema 的参数是功率和起动方式"（模块元数据）、"5.5 kW 对应部件 X"（物料对应表）、"没有端子排的规则文件"（缺口）。写进开发包的知识文档 `knowledge/<种类>/<名称>.json`，Host 校验后重算清单。同名的文档被整个替换（所以同样的调用重复执行结果相同）。

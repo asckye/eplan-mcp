@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plan`；工具集 `workflow` / `full`，不进 `core` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented（P12：工具、只读 Resource、Small/Medium；本期合同以[实施设计](../design/2026-10-23-m6-phase2-plans.md) D08–D09 为准） |
+| 状态 | Implemented (v0.3.0) |
 
 ## 1. 这个工具解决什么任务
 “查看这个计划准备做什么、已经做了什么、校验及差异是什么”。读取已保存计划，不重新规划、不触发审批/执行。与 task_get 的等待进度不同，本工具提供工程审查内容；按 [M6 4.9](../design/2026-10-21-m6-engineering-packs.md) 默认只给摘要，详细条目按需读取。
