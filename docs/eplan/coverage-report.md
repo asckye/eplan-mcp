@@ -1,11 +1,13 @@
 # EPLAN API 覆盖报告
 
+> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-01 按 Bridge 源码 3e62de6a 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
+
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-01 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 3e62de6a）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
 
 ## 口径
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
-- C 级方法选择：read 49 组，write 184 组；排除（按签名）：lifecycle_or_creation 298，external_path_parameter 184，unsupported_return 93，unsupported_parameter 72，settings_or_scheme_parameter 72，catalog:banned_symbol 62，no_public_default_constructor 56，masterdata_or_parts_management 50，shared_interactive_state 39，array_or_params 38，catalog:deprecated 37，printer_parameter 32，abstract_service 29，static_or_nonpublic 28，generic_or_collection_parameter 28，catalog:internal 14，catalog:deprecated: obsolete_attribute 14，catalog:not_applicable 6，ref_out 4，database_parameter 4，external_destination 3，catalog:internal: native_signature 1，owns_transaction 1。
+- C 级方法选择：read 49 组，write 194 组；排除（按签名）：lifecycle_or_creation 298，external_path_parameter 161，unsupported_return 99，unsupported_parameter 73，settings_or_scheme_parameter 72，catalog:banned_symbol 62，no_public_default_constructor 56，masterdata_or_parts_management 50，array_or_params 39，shared_interactive_state 39，catalog:deprecated 37，printer_parameter 32，generic_or_collection_parameter 29，abstract_service 29，static_or_nonpublic 28，catalog:internal 14，catalog:deprecated: obsolete_attribute 14，catalog:not_applicable 6，ref_out 4，database_parameter 4，external_destination 3，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
 - 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
 - 状态（设计文档第 4 节），每一级都包含更高的级别：implemented 表示 Bridge 中有代码到达它，经 MCP 工具，或只经插件的基础设施（启动、调度、授权检查）；automated_test 表示到达它的某个工具有 Small 或 Medium 测试，或它的 Bridge 操作有 Bridge.Core 测试（这些测试用假的 EPLAN，不执行 EPLAN 成员）；live_verified 表示这个工具还在 overlay 中有写明工具名、结果通过的实机记录（api-notes、规格或 Large 测试 README，带日期和版本）。另有 env_blocked（overlay 标为被环境挡住且没有实现）、excluded（目录的机械规则或 overlay 排除，不进入分母）、部分重载（重载组中只用到一部分重载）和无文档（不在 IntelliSense 中，仍在分母里，Q2）。
@@ -157,7 +159,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 132 | 70 | 2 | 55 | 0 | 3/2/1 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/3/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1728 | 701 | 5 | 959 | 0 | 5/2/1 | A39 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 1728 | 701 | 5 | 959 | 0 | 5/2/1 | A39 A56 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
