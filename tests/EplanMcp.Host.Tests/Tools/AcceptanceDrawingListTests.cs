@@ -48,7 +48,13 @@ public sealed class AcceptanceDrawingListTests
         });
         Assert.Contains(list.GetProperty("nodes").EnumerateArray(), n => n.GetProperty("kind").GetString() == "t_node");
         Assert.False(list.TryGetProperty("interruption_support", out _));
-        Assert.Equal([252d, 212d], list.GetProperty("interruption_points")[0].GetProperty("line_to").EnumerateArray().Select(n => n.GetDouble()));
+        JsonElement terminal7 = Assert.Single(list.GetProperty("terminal_strip").GetProperty("terminals").EnumerateArray(), t => t.GetProperty("id").GetString() == "terminal7");
+        JsonElement link1 = Assert.Single(list.GetProperty("interruption_points").EnumerateArray(), p => p.GetProperty("id").GetString() == "link1");
+        double x = terminal7.GetProperty("position")[0].GetDouble(), y = terminal7.GetProperty("position")[1].GetDouble();
+        // A55: the upper IEC_symbol/X pin is 2 mm above its insertion point.
+        Assert.Equal(new[] { x, y + 2 }, link1.GetProperty("line_to").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Equal(new[] { x, y + 16 }, link1.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Equal("Down", link1.GetProperty("direction").GetString());
     }
 
     [Fact]

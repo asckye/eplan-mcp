@@ -919,8 +919,8 @@
       "id": "link1",
       "name": "=GAA+A1-LINK{run}1",
       "position": [
-        252,
-        256
+        280,
+        136
       ],
       "direction": "Down",
       "counterpart_position": [
@@ -929,8 +929,8 @@
       ],
       "counterpart_direction": "Down",
       "line_to": [
-        252,
-        212
+        280,
+        122
       ]
     },
     {

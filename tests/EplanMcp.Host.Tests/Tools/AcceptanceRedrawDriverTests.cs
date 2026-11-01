@@ -312,6 +312,24 @@ public sealed class AcceptanceRedrawDriverTests
     }
 
     [Theory]
+    [InlineData(252, 256, "Down", 252, 212)]
+    [InlineData(280, 136, "Up", 280, 122)]
+    [InlineData(280, 136, "Down", 280, 120)]
+    public async Task DanglingInterruption_NonexistentOrUnfacedPin_FailsSegmentAssertion(int x, int y, string direction, int endX, int endY)
+    {
+        JsonObject list = JsonNode.Parse(AcceptanceDrawingListTests.Fixture())!.AsObject();
+        JsonNode link = list["interruption_points"]![0]!;
+        link["position"] = new JsonArray(x, y);
+        link["direction"] = direction;
+        link["line_to"] = new JsonArray(endX, endY);
+        var fake = new DrawingTools { ConnectWires = true };
+        var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", AcceptanceDrawingList.Read(list.ToJsonString()), "test", _ => { });
+        var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        Assert.Contains("Assert.Contains()", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("eplan_placement_create", fake.Calls);
+    }
+
+    [Theory]
     [InlineData("name")]
     [InlineData("page")]
     [InlineData("missing")]
@@ -780,8 +798,9 @@ public sealed class AcceptanceRedrawDriverTests
 
         private static string Stored(string tag) => tag.StartsWith('=') ? tag[tag.IndexOf('+', StringComparison.Ordinal)..] : tag;
 
-        private static JsonElement[] ConnectionPoints(int count, bool horizontal = false) => Enumerable.Range(0, count)
-            .Select(i => JsonSerializer.SerializeToElement(new { location = horizontal ? new[] { 8 * i, 0 } : new[] { 0, -8 * i }, direction = horizontal ? i == 0 ? "Left" : "Right" : i == 0 ? "Up" : "Down" })).ToArray();
+        private static JsonElement[] ConnectionPoints(int count, bool horizontal = false, bool terminal = false) => Enumerable.Range(0, count)
+            // A55: IEC_symbol/X pins are offset from the insertion point by +2 and -0.75 mm.
+            .Select(i => JsonSerializer.SerializeToElement(new { location = terminal ? new[] { 0, i == 0 ? 2d : -0.75 } : horizontal ? new double[] { 8 * i, 0 } : new double[] { 0, -8 * i }, direction = horizontal ? i == 0 ? "Left" : "Right" : i == 0 ? "Up" : "Down" })).ToArray();
 
         internal Task<(bool Succeeded, JsonElement Result)> CallAsync(string tool, Dictionary<string, object?> args)
         {
@@ -823,7 +842,7 @@ public sealed class AcceptanceRedrawDriverTests
                         { Assert.Equal(2, pins.Length); }
                         _pins[tag] = pins;
                         bool horizontal = (int)args["symbol_variant"]! == 1;
-                        _symbolPoints[tag] = ConnectionPoints(pins.Length, horizontal);
+                        _symbolPoints[tag] = ConnectionPoints(pins.Length, horizontal, terminal);
                         if (terminal || input)
                         { _owners[tag] = parent; }
                         if (args.TryGetValue("terminal_strip_text", out object? text))
@@ -1065,8 +1084,28 @@ public sealed class AcceptanceRedrawDriverTests
         {
             string page = (string)args["page"]!;
             var result = new List<JsonObject>();
+            var ports = _drawings.Select(d => JsonSerializer.SerializeToElement(d)).Where(d => d.GetProperty("page").GetString() == page && d.GetProperty("kind").GetString() is "Function" or "Terminal").SelectMany(row =>
+            {
+                string tag = row.GetProperty("properties").GetProperty("name").GetString()![1..];
+                return _symbolPoints[tag].Select(p => new
+                {
+                    Position = new[] { row.GetProperty("location")[0].GetDouble() + p.GetProperty("location")[0].GetDouble(), row.GetProperty("location")[1].GetDouble() + p.GetProperty("location")[1].GetDouble() },
+                    Direction = p.GetProperty("direction").GetString(),
+                });
+            }).ToArray();
+            var lines = new List<double[][]>();
             foreach (JsonElement point in items.EnumerateArray().Where(i => i.GetProperty("kind").GetString() == "interruption_point"))
             {
+                double[] position = [.. point.GetProperty("position").EnumerateArray().Select(n => n.GetDouble())];
+                var target = ports.Where(p => point.GetProperty("direction").GetString() switch
+                {
+                    "Down" => p.Direction == "Up" && p.Position[0] == position[0] && p.Position[1] < position[1],
+                    "Up" => p.Direction == "Down" && p.Position[0] == position[0] && p.Position[1] > position[1],
+                    "Left" => p.Direction == "Right" && p.Position[1] == position[1] && p.Position[0] < position[0],
+                    _ => p.Direction == "Left" && p.Position[1] == position[1] && p.Position[0] > position[0],
+                }).OrderBy(p => Math.Abs(p.Position[0] - position[0]) + Math.Abs(p.Position[1] - position[1])).FirstOrDefault();
+                if (target is not null)
+                { lines.Add([position, target.Position]); }
                 string peer = Assert.Single(point.GetProperty("counterpart_pages").EnumerateArray()).GetString()!;
                 Assert.NotEqual(page, peer);
                 string name = point.GetProperty("name").GetString()!;
@@ -1087,7 +1126,7 @@ public sealed class AcceptanceRedrawDriverTests
                     result.Add(row);
                 }
             }
-            return new { execution = "committed", undoSteps = 1, interruptionPoints = result, graphicalAutoconnect = new double[][][] { [[252, 256], [252, 212]] }, actualGraphicalAutoconnect = MissingInterruptionLine ? [] : new double[][][] { [[252, 256], [252, 212]] } };
+            return new { execution = "committed", undoSteps = 1, interruptionPoints = result, graphicalAutoconnect = lines, actualGraphicalAutoconnect = MissingInterruptionLine ? [] : lines.ToArray() };
         }
 
         private IEnumerable<object> NodeConnections(JsonElement batch)
@@ -1097,7 +1136,7 @@ public sealed class AcceptanceRedrawDriverTests
             {
                 string tag = row.GetProperty("properties").GetProperty("name").GetString()![1..];
                 for (int i = 0; i < _pins[tag].Length; i++)
-                { ports.Add((tag + "/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), row.GetProperty("location")[0].GetDouble(), row.GetProperty("location")[1].GetDouble() - 8 * i, i == 0 ? "Up" : "Down", Endpoint(tag, i))); }
+                { ports.Add((tag + "/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), row.GetProperty("location")[0].GetDouble() + _symbolPoints[tag][i].GetProperty("location")[0].GetDouble(), row.GetProperty("location")[1].GetDouble() + _symbolPoints[tag][i].GetProperty("location")[1].GetDouble(), _symbolPoints[tag][i].GetProperty("direction").GetString()!, Endpoint(tag, i))); }
             }
             JsonElement[] nodes = batch.EnumerateArray().Where(i => i.GetProperty("kind").GetString() is "corner" or "t_node" or "potential_point").ToArray();
             for (int i = 0; i < nodes.Length; i++)

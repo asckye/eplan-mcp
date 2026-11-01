@@ -21,11 +21,13 @@ UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未�
 | wires | `{id,from:{item,pin},to:{item,pin},points}`；item 引用设备、端子或 PLC 点的 ID，pin 是实际代号；points 至少两点、最多 32 点，只允许首点 `"from"`、末点 `"to"` 为引脚锚点，其余为显式坐标。`["from","to"]` 表示由 EPLAN 自动连线连接，不调用 connection_create；两引脚必须在同一轴上相向（同 x 的 Up/Down 或同 y 的 Left/Right，并朝向对方），否则必须给出显式转折坐标；不自动寻路 |
 | nodes | `{id,kind,position,directions}`；kind 为 corner/t_node/potential_point，方向为 Up/Down/Left/Right；分支必须显式声明 |
 | cables | `{id,tag,type_text,core_count,cross_section_mm2,points,cores}`；定义线两个正交坐标，每芯 `{wire,label,colour}` 引用 wire ID；全为显式路径时转换为同次调用的 `{connection:{item_index:n},label,colour}`，与导线及节点一起提交。含自动连线芯线时，整条电缆在 generate 后单独创建，所有芯线引用详细连接列表返回的原样 `{locator}`；颜色使用工具封闭代码 |
-| interruption_points | `{id,name,position,direction,counterpart_position,counterpart_direction,line_to?}`；在两页创建同名原生中断点，counterpart_pages 只指向清单的另一页；可选 line_to 为主页该点必须接到的图形端点，驱动以实际线段双向比较。link1 接 switch6 上侧引脚，对端无设备，必须无逻辑连接且保留图形 |
+| interruption_points | `{id,name,position,direction,counterpart_position,counterpart_direction,line_to?}`；在两页创建同名原生中断点，counterpart_pages 只指向清单的另一页；可选 line_to 为主页该点必须接到的图形端点，驱动以实际线段双向比较。link1 在 (280,136) 向下接 terminal7 的空闲上侧引脚 (280,122)，对端无设备，必须无新增逻辑连接且保留图形 |
 | texts | `{id,position,text,height_mm}`；写语言无关 `??_??`，避免未设置显示语言时不显示；不与其他语言混写 |
 | expected_connections | 完整预期连接多重集：`{from:{item,pin},to:{item,pin}}`；同一对端点的重复连接也计数，不只核对连通集合；忽略起止方向，名称按 A55 容忍空结构段及未使用的功能结构段 |
 
 驱动从最新 `eplan_page_get include_drawings` 分页取实际放置 locator、位置；引脚索引取独立 `device_get` 读回的实际代号，局部几何取放置返回的已验证符号变体。PLC 盒先用 SPECIAL/PLCC 放置，连接点使用读回的父盒标识及 plc_connection_point/plc_address/plc_symbolic_address/plc_text；提交后从父盒的 functions 独立核对引脚，再用 plc_get 核对所属、地址、手动符号地址和语言无关功能文本。通道按带连接点的名称计数，排除 A55 的额外器件级端子。端子使用 terminal_strip/terminal_number，仅首次传 terminal_strip_text；提交后读回原生排成员、顺序与排功能文本，不能用事务内尚为空的 owner 代替。锚点只替换端点坐标，不生成拐弯；解析后每段必须正交。每轴位置容差严格为当前页半格；不扩大容差、不模糊匹配 pin。读取覆盖必须完整；截断无续页时失败。
+
+D5 失败日志中的缺线为 (252,256)→(252,212)：该轴上没有器件引脚，原 line_to 误认为它是 switch6 上侧引脚；实读为 (248,216)，且已接供电母线。改接 terminal7 的空闲上侧，不切断既有供电连接，不添加辅助器件。端子上侧相对插入点偏移 +2 mm，依据 A55 和失败日志中 (280,122) 的实际端点；Small 假工具按已放置引脚的位置及方向计算线段，不再返回硬编码的预期线段。整页实机复验仍待进行。
 
 ## 运行与证据
 
