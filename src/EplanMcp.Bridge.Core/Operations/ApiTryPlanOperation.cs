@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Independent catalog/shape validation; planning never invokes the trial member.</summary>
-public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApiTryDispatcher dispatch) : Operation<ApiTryArgs, WritePlan>
+public sealed partial class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApiTryDispatcher dispatch) : Operation<ApiTryArgs, WritePlan>
 {
     public override string Name => OperationNames.ApiTryPlan;
     protected override WritePlan Execute(ApiTryArgs args) => Prepare(args);
@@ -30,10 +30,7 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         bool setter = method is null && parameters.ContainsKey("value");
         JToken? value = setter ? parameters["value"] : null;
         bool write = setter || method == "write";
-        if (setter && !ValidValue(ApiTryCatalog.ValueShape(args.Group), value!)
-            || parameters.Count != shape.Length - 1 + (setter ? 1 : 0) || parameters.Properties().Any(p => p.Name != "target" && !(setter && p.Name == "value") && (!shape.Skip(2).Contains(p.Name, StringComparer.Ordinal) || !ValidValue(ApiTryCatalog.ParameterShape(shape[1], p.Name), p.Value)))
-            || parameters["target"] is not JObject target || !Locator(target)
-            || parameters.Properties().Any(p => Kind(p.Value) == "locator" && !ProjectResolver.SamePath(project.Path, (string)p.Value["project"]!)))
+        if (!EntryParameters(args.Group, shape, parameters, setter, project.Path))
         { throw InvalidArgument("Use the exact generated parameter shape and a target locator from eplan_object_find; no coercion is allowed."); }
         if (ApiTryCatalog.Service(args.Group) && !project.Current && !shape.Skip(2).Any(n => ApiTryCatalog.Kinds(ApiTryCatalog.ParameterShape(shape[1], n)?[0]).Length > 0))
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "A service without explicit object arguments requires the target scratch project to be current."); }

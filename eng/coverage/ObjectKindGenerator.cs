@@ -63,6 +63,7 @@ internal static class ObjectKindGenerator
             { sources.Add("project.InstallationSpaces.SelectMany(s => s.Connection3Ds)"); }
             if (type == Prefix + "Project")
             { sources.Add("new[] { project }"); }
+            sources.AddRange(ApiTryGenerator.ObjectEntrySources(type, data));
             // GetStorableObjects explicitly omits property placements and symbols; A57/A60 override generic paths.
             reason ??= property is null || !property.Details.Any(d => Safe(property, d) && d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true) ? "no_safe_properties" : sources.Count == 0 ? "no_safe_enumeration" : null;
             result.Add(new(name, type, dictionary, owner, [.. sources.Distinct(StringComparer.Ordinal)], reason));

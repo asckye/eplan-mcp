@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 [Trait("Size", "Small")]
-public sealed class ApiTryOperationTests
+public sealed partial class ApiTryOperationTests
 {
     private const string Group = "O:Eplan.EplApi.DataModel.Page.Name";
     private readonly Dispatcher _dispatch = new();

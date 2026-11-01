@@ -12,7 +12,7 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
     public void CheckTarget(ApiTryArgs args)
     {
         JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
-        Resolve(args.Project, parameters["target"]!, ApiTryCatalog.TargetKinds(args.Group));
+        CheckReceiver(args, parameters);
         string[] shape = ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name))!;
         foreach (string name in shape.Skip(2).Where(n => parameters[n] is JObject && ApiTryCatalog.ParameterShape(shape[1], n)?[0] != "Eplan.EplApi.Base.PointD"))
         { Resolve(args.Project, parameters[name]!, ApiTryCatalog.Kinds(ApiTryCatalog.ParameterShape(shape[1], name)![0])); }
@@ -38,17 +38,15 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         }
         throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed; get a fresh locator from eplan_object_find.");
     }
-    public string? Read(ApiTryArgs args) => ApiTryDispatch.Read(args.Group, Resolve(args.Project, ApiTryPlanOperation.Parameters(args.Parameters)["target"]!, ApiTryCatalog.TargetKinds(args.Group)), ApiTryPlanOperation.Parameters(args.Parameters));
+    public string? Read(ApiTryArgs args) => ReadEntry(args);
     public object? Invoke(ApiTryArgs args)
     {
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
         JObject parameters = FileParameters(args);
-        StorableObject target = Resolve(args.Project, parameters["target"]!, ApiTryCatalog.TargetKinds(args.Group));
+        using var entry = new EntryScope();
+        object? target = Receiver(args, parameters, entry);
         bool method = ApiTryCatalog.MethodAccess(args.Group) is not null;
-        if (!method && parameters.ContainsKey("value"))
-        { ApiTryDispatch.Write(args.Group, target, parameters); }
-        object? result = method ? ApiTryDispatch.Invoke(ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name))![1], target, parameters,
-            (token, type) => Resolve(args.Project, token, ApiTryCatalog.Kinds(type))) : ApiTryDispatch.Read(args.Group, target, parameters);
+        object? result = InvokeEntry(args, parameters, target, method);
         object? value = result is StorableObject obj ? Locator(args.Project, obj) : result is null ? null : Convert.ToString(result, System.Globalization.CultureInfo.InvariantCulture);
         using var process = Process.GetCurrentProcess();
         if (process.MainWindowHandle != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(process.MainWindowHandle))

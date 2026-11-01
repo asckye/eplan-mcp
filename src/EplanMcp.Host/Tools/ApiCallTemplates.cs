@@ -11,25 +11,42 @@ internal static class ApiCallTemplates
         string group = entry.Row.Group;
         if (entry.Row.ExcludedReason is null && ApiTryCatalog.Allowed(group))
         {
-            JsonObject[] methods = [.. ApiTryCatalog.Methods(group).Select(s => Create(group, s, ApiTryCatalog.MethodAccess(group)!, false))];
+            JsonObject[] methods = [.. ApiTryCatalog.Methods(group).SelectMany(s => Templates(group, s, ApiTryCatalog.MethodAccess(group)!, false))];
             if (methods.Length > 0)
             { return methods; }
             if (ApiTryCatalog.Shape(group) is { } shape)
-            { return ApiTryCatalog.ValueShape(group) is null ? [Create(group, shape, "read", false)] : [Create(group, shape, "read", false), Create(group, shape, "write", true)]; }
+            { return ApiTryCatalog.ValueShape(group) is null ? [.. Templates(group, shape, "read", false)] : [.. Templates(group, shape, "read", false), .. Templates(group, shape, "write", true)]; }
         }
         return [new() { ["dispatchable"] = false, ["exclusion_reason"] = ApiTryCatalog.ExclusionReason(group) ?? entry.Row.ExcludedReason ?? "No compiled signature in the generated dispatch catalog.",
             ["alternatives"] = JsonSerializer.SerializeToNode(entry.Row.Tools) }];
     }
 
-    internal static JsonObject Create(string group, string[] shape, string access, bool setter)
+    private static IEnumerable<JsonObject> Templates(string group, string[] shape, string access, bool setter)
+        => ApiTryCatalog.ReceiverShape(shape[1]) is ["via", var type]
+            ? ApiTryCatalog.ViaPaths(type).Select(path => Create(group, shape, access, setter, path))
+            : [Create(group, shape, access, setter)];
+
+    private static JsonObject Create(string group, string[] shape, string access, bool setter, string[]? path = null)
     {
         var parameters = new JsonObject();
         var example = new JsonObject();
         if (ApiTryCatalog.ReceiverShape(shape[1]) is { } receiver)
         {
-            var target = Parameter(receiver);
+            var target = Parameter(path is null ? receiver : [path[0]]);
             parameters["target"] = target.Description;
             example["target"] = target.Example;
+            if (path is not null)
+            {
+                parameters["via"] = new JsonObject { ["kind"] = "string", ["required"] = true, ["const"] = path[1], ["receiver_type"] = receiver[1], ["source"] = "generated public property path from target" };
+                example["via"] = path[1];
+                if (ApiTryCatalog.ViaKey(shape[0], path[1]))
+                {
+                    var key = Parameter(["System.String"]);
+                    key.Description["source"] = "layer name in the target project";
+                    parameters["via_key"] = key.Description;
+                    example["via_key"] = "<layer name>";
+                }
+            }
         }
         foreach (string name in shape.Skip(2).Concat(setter ? ["value"] : Array.Empty<string>()))
         {

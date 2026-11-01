@@ -52,6 +52,8 @@ public sealed class CallTemplateTests
     [InlineData("Page.GetWriteProtectionFlagSet", "read", "nKind")]
     [InlineData("Function.IsPointInsideLogicalArea", "read", "pnt")]
     [InlineData("Graphics.PlaceHolder.ApplyRecord", "write", "strRecordName")]
+    [InlineData("DocumentTypeManager.IsLogicalPageDocType", "read", "nPageType")]
+    [InlineData("ProjectSettings.GetBoolSetting", "read", "strSettingPath")]
     public void RepresentativeGroupsComeFromTheGeneratedCatalog(string name, string access, string parameter)
     {
         ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == "O:Eplan.EplApi.DataModel." + name);
@@ -60,6 +62,49 @@ public sealed class CallTemplateTests
         Assert.All(templates, t => Assert.NotNull(t["arguments"]!["parameters"]!["properties"]![parameter]));
         if (parameter == "nKind")
         { Assert.Equal(ApiTryCatalog.ParameterShape(ApiTryCatalog.Methods(entry.Row.Group)[0][1], parameter)![1..], templates[0]["arguments"]!["parameters"]!["properties"]![parameter]!["allowed_values"]!.AsArray().Select(v => v!.GetValue<string>())); }
+    }
+
+    [Theory]
+    [InlineData("DocumentTypeManager.IsLogicalPageDocType", null, null)]
+    [InlineData("ProjectSettings.GetBoolSetting", "Settings", "project")]
+    [InlineData("Project.DeviceTagSettings.EnableSyntaxCheck", "DeviceTagConfig", "project")]
+    [InlineData("Graphics.GraphicalLayer.Name", "LayerTable.Layer", "project")]
+    public void StaticAndEntryTemplatesDescribeTheGeneratedReceiver(string name, string? via, string? parentKind)
+    {
+        ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == "O:Eplan.EplApi.DataModel." + name);
+        Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
+        JsonObject[] templates = ApiCallTemplates.For(entry);
+        Assert.NotEmpty(templates);
+        Assert.All(templates, template => Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, JsonSerializer.SerializeToElement(template["example"]!["parameters"])), template.ToJsonString()));
+        if (via is not null)
+        {
+            templates = [.. templates.Where(t => t["example"]!["parameters"]!["via"]!.GetValue<string>() == via
+                && t["arguments"]!["parameters"]!["properties"]!["target"]!["object_type"]!.GetValue<string>() == parentKind)];
+            Assert.NotEmpty(templates);
+        }
+        Assert.All(templates, template =>
+        {
+            JsonObject parameters = template["example"]!["parameters"]!.AsObject();
+            JsonObject properties = template["arguments"]!["parameters"]!["properties"]!.AsObject();
+            if (via is null)
+            {
+                Assert.False(parameters.ContainsKey("target"));
+                Assert.False(parameters.ContainsKey("via"));
+                Assert.False(parameters.ContainsKey("via_key"));
+                Assert.False(properties.ContainsKey("target"));
+            }
+            else
+            {
+                Assert.Equal(via, parameters["via"]!.GetValue<string>());
+                Assert.Equal(via, properties["via"]!["const"]!.GetValue<string>());
+                Assert.True(properties["via"]!["required"]!.GetValue<bool>());
+                Assert.Equal(parentKind, properties["target"]!["object_type"]!.GetValue<string>());
+                Assert.Equal(parentKind, properties["target"]!["source"]!["arguments"]!["object_type"]!.GetValue<string>());
+                bool key = ApiTryCatalog.ViaKey(ApiTryCatalog.Shape(entry.Row.Group, parameters.Select(p => p.Key))![0], via);
+                Assert.Equal(key, parameters.ContainsKey("via_key"));
+                Assert.Equal(key, properties.ContainsKey("via_key"));
+            }
+        });
     }
 
     [Fact]

@@ -23,10 +23,21 @@ public sealed partial class ToolUsageExampleTests
                 JsonElement parameters = example.GetProperty("parameters");
                 string[] shape = ApiTryCatalog.Shape(entry.Row.Group, parameters.EnumerateObject().Select(p => p.Name))!;
                 Assert.NotNull(shape);
+                Assert.Equal(shape[1], template["signature"]!.GetValue<string>());
+                Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
                 bool setter = template["access"]!.GetValue<string>() == "write" && ApiTryCatalog.MethodAccess(entry.Row.Group) is null;
-                Assert.Equal(shape.Skip(2).Concat(ApiTryCatalog.ReceiverShape(shape[1]) is null ? Array.Empty<string>() : ["target"]).Concat(setter ? ["value"] : Array.Empty<string>()).Order(StringComparer.Ordinal), parameters.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
+                string[]? receiver = ApiTryCatalog.ReceiverShape(shape[1]);
+                bool via = receiver is ["via", _];
+                bool key = via && ApiTryCatalog.ViaKey(shape[0], parameters.GetProperty("via").GetString()!);
+                Assert.Equal(shape.Skip(2).Concat(receiver is null ? Array.Empty<string>() : ["target"]).Concat(via ? ["via"] : Array.Empty<string>()).Concat(key ? ["via_key"] : Array.Empty<string>()).Concat(setter ? ["value"] : Array.Empty<string>()).Order(StringComparer.Ordinal), parameters.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
+                if (via)
+                {
+                    string path = parameters.GetProperty("via").GetString()!;
+                    Assert.Contains(template["arguments"]!["parameters"]!["properties"]!["target"]!["object_type"]!.GetValue<string>(), ApiTryCatalog.ViaKinds(shape[0], path));
+                    Assert.Equal(path, template["arguments"]!["parameters"]!["properties"]!["via"]!["const"]!.GetValue<string>());
+                }
                 Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, parameters), template.ToJsonString());
-                foreach (JsonProperty parameter in parameters.EnumerateObject().Where(p => p.Name != "target"))
+                foreach (JsonProperty parameter in parameters.EnumerateObject().Where(p => p.Name is not ("target" or "via" or "via_key")))
                 {
                     string[] type = (setter && parameter.Name == "value" ? ApiTryCatalog.ValueShape(entry.Row.Group) : ApiTryCatalog.ParameterShape(shape[1], parameter.Name))!;
                     Assert.True(ApiTryCatalog.ValidValue(type, ValueKind(parameter.Value), parameter.Value.ValueKind == JsonValueKind.String ? parameter.Value.GetString()! : parameter.Value.GetRawText()), template.ToJsonString());
@@ -35,6 +46,8 @@ public sealed partial class ToolUsageExampleTests
         }
         Assert.All(ApiTryCatalog.PropertyGroups, g => Assert.Contains(g, seen));
         Assert.All(index.Data.Entries.Where(e => ApiTryCatalog.Methods(e.Row.Group).Length > 0), e => Assert.Contains(e.Row.Group, seen));
+        Assert.Contains("O:Eplan.EplApi.DataModel.DocumentTypeManager.IsLogicalPageDocType", seen);
+        Assert.Contains("O:Eplan.EplApi.DataModel.ProjectSettings.GetBoolSetting", seen);
         Assert.NotEmpty(seen);
     }
 

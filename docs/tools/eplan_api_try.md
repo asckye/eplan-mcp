@@ -6,10 +6,10 @@
 |---|---|
 | 分组 / Profile | api / full；`config.json` 的 `apiTry: "on"` 显式启用，默认 off 时不注册 |
 | 级别 / 注解 | C 级未验证试执行；false / true / false / false |
-| 状态 | Implemented（C1 Files 切片未实机验证；工具数不变） |
+| 状态 | Implemented（C1 Files、静态成员与属性入口切片未实机验证；工具数不变） |
 
 ## 1. 任务与输入
-在 scratch 上试执行一个目录重载组；已有专用工具时优先使用。必填 `group` 是目录的精确 O: 组 ID，`project` 显式指定项目，`parameters` 是闭合调用形状，包含 `target`（find 返回的 project/page/type/oid/digest 定位器）和签名参数；`dry_run` 默认 false。属性省略 `value` 为读，添加 `value` 为写，组 ID 不变；方法按精确参数名集合选择唯一签名，禁止依数值猜测重载，歧义为 INVALID_ARGUMENT。方法形参 `target` 映射为 `argument_target`，接收对象仍用 `target`。TSV 方法组现有 **49 个读组、194 个写组、737 个含排除签名的组**（分类之间可能重叠），另有属性 342 个读组、211 个可写组；Files 切片新增 10 个写方法组、14 个签名。方法参数支持 bool/int/long/double/string、PointD、全部受支持对象类型定位器与目录枚举；枚举仅接受区分大小写的精确名称，int 须在 Int32 范围，double 须有限。PointD 仅接受有限数值的 `{"x":number,"y":number}`。拒绝类型名、反射、数组、任意对象、未知字段、空值和隐式类型转换。
+在 scratch 上试执行一个目录重载组；已有专用工具时优先使用。必填 `group` 是目录的精确 O: 组 ID，`project` 显式指定项目，`parameters` 是闭合调用形状，实例调用包含 `target`（find 返回的 project/page/type/oid/digest 定位器）和签名参数，公开静态调用省略 `target`；`dry_run` 默认 false。属性省略 `value` 为读，添加 `value` 为写，组 ID 不变；方法按精确参数名集合选择唯一签名，禁止依数值猜测重载，歧义为 INVALID_ARGUMENT。方法形参 `target` 映射为 `argument_target`，接收对象仍用 `target`。TSV 方法组现有 **49 个读组、194 个写组、737 个含排除签名的组**（分类之间可能重叠），另有属性 342 个读组、211 个可写组；Files 切片新增 10 个写方法组、14 个签名。方法参数支持 bool/int/long/double/string、PointD、全部受支持对象类型定位器与目录枚举；枚举仅接受区分大小写的精确名称，int 须在 Int32 范围，double 须有限。PointD 仅接受有限数值的 `{"x":number,"y":number}`。拒绝类型名、反射、数组、任意对象、未知字段、空值和隐式类型转换。
 
 定位器复用 `eplan_object_find` 的候选枚举、精确类型筛选和摘要，覆盖 121 个查询名称（119 个原生类型），详见[生成类型表](eplan_object_kinds.g.md)。基类声明的属性、方法及对象形参接受受支持派生类型；每个定位器按原生类型、编号和新鲜摘要核对，不做类型转换。原有 14 个查询名称的摘要保持不变。
 
@@ -19,6 +19,13 @@
 服务调用的 `parameters.target` 必须是目标 scratch 项目的 Project 定位器，作为项目校验锚点；例如 `O:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget` 接受 `target` 和 `connection`，后者是同项目 Connection 定位器。Project、Page 及其他对象形参均从定位器解析；每个定位器必须属于目标项目，并核对类型、编号和摘要。没有对象形参、依赖当前选择的服务入口还要求目标 scratch 项目就是当前项目，执行前重新检查；返回对象也须属于目标项目。
 
 服务方法只有 Get*/Is*/Has*/Can*/Find* 且所有重载均无对话框、锁定、更新等副作用参数和输出文件时归为 read，其余归为 write，沿用执行前后快照和同一单撤销事务。文件参数按下节规则限制；目录及字符串项目路径、流、数据库、主数据或部件管理、设置或方案、打印机、URL、授权或退出仍排除；导入、导出、打印、备份和还原服务的隐式目的地同样拒绝。非简单且非定位器的返回值、内部交互状态、自己创建事务的 TXN 入口及既有目录禁用项均不生成。逐签名分类理由与排除数量见 [生成清单](../../catalog/api-try.g.tsv) 和 [覆盖报告](../eplan/coverage-report.md)。
+
+### 静态成员与属性入口
+公开静态方法/属性从 DataModel 及子命名空间、HEServices、EServices（含 Ged）、Base 的公开目录类型生成编译分派，不构造服务或接收对象。例如 `DocumentTypeManager.IsLogicalPageDocType` 的 parameters 为 `{"nPageType":"Circuit"}`。静态调用仅允许读取，或显式带同项目对象参数并通过既有写入筛选。文件、网络、授权、应用/会话状态、主数据及生命周期入口继续排除；原始字符串对象身份不能代替定位器。
+
+用 `eplan_project_list` 选择当前或其他已打开项目，再通过 `eplan_object_find(object_type="Project")` 获取项目定位器；无需页面放置。结构标识符增加 Project.GetLocationObjects() 枚举，图框增加 Page.PlotFrame 来源，其余 finder 结果沿用目录驱动发现。`parameters.via` 是相对 target 的公开属性路径，按目录生成闭合表，区分大小写且最多两层；group 指向最终对象的成员。例如 Project 定位器加 `via:"Settings"` 调用 ProjectSettings.GetBoolSetting（strSettingPath/nIdx），或 `via:"DeviceTagConfig"` 读取 Project.DeviceTagSettings.EnableSyntaxCheck；Page 定位器加 `via:"PlotFrame"` 读取项目图框。项目图层用 `via:"LayerTable.Layer"` 和字符串 `via_key` 指定名称，其他路径禁止 via_key。没有对象、路径错误、额外字段或跨项目父/结果对象均拒绝。
+
+设置/方案对象的方法写入和 setter 不生成，方法在清单中标记 `settings_write`；设置名 strSettingPath 是内部设置键，不能借此调用文件导入/导出。静态 setter 同样不开放。via 不接受任意类型名、反射、集合或第三层；原定位器仍校验摘要，路径和选择器纳入审批原文及计划指纹。规划仅校验父定位器，不读取 via getter；审批之后才跟随路径。临时辅助对象按请求释放，借用 StorableObject 不释放。新增 Small 覆盖静态/两层入口与失败校验；LargeWrite 新增静态、设置读取和经 Function.Page 写 GridSize 的一步撤销及历史哨兵测试，仅编写未运行。输入/输出 schema 不变。TSV 保持方法逐签名口径：按 group 去重，读 49→67、写 184→192、整组排除 714→818；有任一签名被排除的组为 743→847（与可执行组可重叠）。本片新增静态/属性入口类型，纳入清单的方法组总数 947→1077；这些计数不包含属性 getter/setter。
 
 ## 2. 输出与错误
 Files 切片：仅开放能明确判定方向的字符串文件参数。参数名 input/import/source 表示输入，output/export/target/destination 表示输出；无方向名称时使用目录说明的导入/读取或导出/保存含义，再以方法 Import/Read/Load、Export/Write/Save 或 Insert 服务判定。方向冲突、目录、字符串项目路径和模板仍排除；打印、发送、主数据、设置、方案、生命周期及隐式目的地的排除不变。输入为 Host 数据根目录 imports 下的相对文件路径（最多 260 字符、128 MiB），输出仅接受最多 100 字符的文件名，由 Host 分配新的 exports/api-try-<随机 ID> 子目录；拒绝 UNC、盘符、`.`/`..`、设备名、尾部点/空格、非法字符及重解析点。Bridge 独立复核，输入大小和 SHA-256 绑定审批指纹，执行前重新计算；输出不覆盖已有目录或文件。
@@ -30,7 +37,7 @@ Files 切片：仅开放能明确判定方向的字符串文件参数。参数�
 ## 3. 执行、安全与审计
 每次实际执行都经独立窗口审批，读显示 `read unverified API <group>`，属性写显示 `write unverified API <group> = <value>`，方法写显示 `write unverified API <group>`，并展示精确签名和完整转义参数原文。读写均走 WritePipeline 的结果恢复和审计；读不创建撤销步。写沿用 TransactionRunner：调度器 LockingStep 内的 SafetyPoint → 内部 UndoStep → QuietModeStep，属性读回等于请求值且快照成功后才 Commit/CloseUndo；方法以执行后业务/文件观察为证据，不重复调用方法读回，整次写入恰好一个撤销步；异常或读回不符回滚，提交/回滚失败为 unknown，清理或关闭撤销步失败给出已提交警告。默认 30 秒，支持进度和取消；超时或模态阻塞按 OUTCOME_UNKNOWN 暂停项目及实例写入，不因尝试过回滚就声称结果确定，不自动重发。
 
-执行前后复用 action_run 的对象计数、设计文件大小/修改时间指纹，再比较 standard-v1 业务快照的逐页哈希；排除锁文件及 User.eod/eox。快照不覆盖无页对象和 3D 连接，不将摘要相等当作无副作用证明。Bridge 独立核对生成目录及参数形状，按编译调用表分发。生成源为 API 目录、排除规则和 ApiTryGenerator 的类型/成员选择；方法名 Get*/Is*/Has*/Can*/Find* 且无副作用参数为 read，其余为 write 并进入同一个撤销事务。排除 Dispose、对象接收器的 Remove/Delete/Erase*、Create*、构造函数、ref/out/params/数组/委托/集合/泛型参数、静态或非公开成员、不支持的返回值及目录排除项；同时读取 BannedSymbols.txt 排除禁用成员，ViewPart.UseLocalPropertyPlacements 的过时 setter 不生成。逐签名分类和排除理由见 `catalog/api-try.g.tsv`。非公开 setter、索引器和复杂属性值仍不开放写入。目录保留 protected setter 的独立可见性，不能仅凭公开 getter 判断可写。TerminalStrip.FunctionCategory 通过 Function 基类 getter 读回；不访问禁用的基类 Properties。
+执行前后复用 action_run 的对象计数、设计文件大小/修改时间指纹，再比较 standard-v1 业务快照的逐页哈希；排除锁文件及 User.eod/eox。快照不覆盖无页对象和 3D 连接，不将摘要相等当作无副作用证明。Bridge 独立核对生成目录及参数形状，按编译调用表分发。生成源为 API 目录、排除规则和 ApiTryGenerator 的类型/成员选择；方法名 Get*/Is*/Has*/Can*/Find* 且无副作用参数为 read，其余为 write 并进入同一个撤销事务。排除 Dispose、对象接收器的 Remove/Delete/Erase*、Create*、构造函数、ref/out/params/数组/委托/集合/泛型参数、非公开成员及未通过静态安全筛选的成员、不支持的返回值及目录排除项；同时读取 BannedSymbols.txt 排除禁用成员，ViewPart.UseLocalPropertyPlacements 的过时 setter 不生成。逐签名分类和排除理由见 `catalog/api-try.g.tsv`。非公开 setter、索引器和复杂属性值仍不开放写入。目录保留 protected setter 的独立可见性，不能仅凭公开 getter 判断可写。TerminalStrip.FunctionCategory 通过 Function 基类 getter 读回；不访问禁用的基类 Properties。
 
 ## 4. 切片与测试
 Files 切片 Small 覆盖方向判定、每个新增签名形状、Windows 路径与长度限制；Medium 覆盖输入替换/重解析点、输出大小/数量、哈希清单、审批参数绑定及单事务回滚。Large 在 LargeWrite 副本导入唯一设备清单，核对一次撤销恢复清单、再次撤销哨兵页；仅编写、编译，未运行。

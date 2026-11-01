@@ -55,7 +55,7 @@
 | InstallationSpace | supported | finder.GetPlacements3D(null) + finder.GetStorableObjects(null) + project.InstallationSpaces | InstallationSpace |
 | InterruptionPoint | supported | finder.GetInterruptionPoints(null) + finder.GetInterruptionPointsWithFilterScheme(null) + finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | InterruptionPoint |
 | Line | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | Line |
-| Location | supported | finder.GetStorableObjects(null) | Location |
+| Location | supported | finder.GetStorableObjects(null) + project.GetLocationObjects() | Location |
 | LocationBox | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | LocationBox |
 | LockedMountingArea | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | Rectangle |
 | MDFunctionTemplatePosition | unsupported | not_storable_catalog_type | MDFunctionTemplatePosition |
@@ -93,7 +93,7 @@
 | PlanningObject | supported | finder.GetPlanningSegments(null) + finder.GetPlanningSegmentsWithFilterScheme(null) + finder.GetStorableObjects(null) | PlanningSegment |
 | PlanningSegment | supported | finder.GetPlanningSegments(null) + finder.GetPlanningSegmentsWithFilterScheme(null) + finder.GetStorableObjects(null) | PlanningSegment |
 | PlcIO | supported | finder.GetStorableObjects(null) | PlcIO |
-| PlotFrame | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | PlotFrame |
+| PlotFrame | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) + finder.GetPages(null).Select(p => p.PlotFrame).Where(p => p != null) | PlotFrame |
 | Plug | supported | finder.GetCablesWithFilterScheme(null) + finder.GetFunctions(null) + finder.GetFunctionsWithFilterScheme(null) + finder.GetPlacements(null) + finder.GetPlugs(null) + finder.GetPlugsWithFilterScheme(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | Function |
 | PlugStrip | supported | finder.GetCablesWithFilterScheme(null) + finder.GetFunctions(null) + finder.GetFunctionsWithFilterScheme(null) + finder.GetPlacements(null) + finder.GetPlugStrips(null) + finder.GetPlugStripsWithFilterScheme(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | PlugStrip |
 | PolyLine | supported | finder.GetPlacements(null) + finder.GetStorableObjects(null) + Placements(finder, check, pageName) | GraphicalPlacement |

@@ -46,13 +46,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error, ex.Error.Reason == ErrorReason.InvalidArgument ? ApiCallTemplates.Closest(index, group, parameters) : null); }
     }
     internal static bool MethodParameters(string group, JsonElement parameters)
-    {
-        if (ApiTryCatalog.MethodAccess(group) is null)
-        { return true; }
-        string[]? shape = ApiTryCatalog.Shape(group, parameters.EnumerateObject().Select(p => p.Name));
-        return shape is not null && parameters.TryGetProperty("target", out JsonElement target) && Kind(target) == "locator"
-            && parameters.EnumerateObject().All(p => p.Name == "target" || ApiTryCatalog.ValidValue(ApiTryCatalog.ParameterShape(shape[1], p.Name), Kind(p.Value), p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString()! : p.Value.GetRawText()));
-    }
+        => EntryParameters(group, parameters);
     private static string Kind(JsonElement value) => value.ValueKind switch
     {
         JsonValueKind.Object => Locator(value) ? "locator" : value.EnumerateObject().Count() == 2 && value.TryGetProperty("x", out JsonElement x) && value.TryGetProperty("y", out JsonElement y) && x.ValueKind == JsonValueKind.Number && y.ValueKind == JsonValueKind.Number && x.TryGetDouble(out double a) && y.TryGetDouble(out double b) && double.IsFinite(a) && double.IsFinite(b) ? "PointD" : "Object",
