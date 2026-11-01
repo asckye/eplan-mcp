@@ -77,6 +77,42 @@ public sealed class SelectionOperationTests
     }
 
     [Fact]
+    public void ReplaceRectangle_ShowPageWithNavigatorActive_FocusesGedBeforeExactReadback()
+    {
+        // Large ProductSelection: two rectangles at [40,40]..[80,80] and [100,40]..[140,80].
+        // SelectObjects changes GED selection, while SelectionSet still reports the active navigator's Project.
+        double[][][] rectangles = [[[40, 40], [80, 80]], [[100, 40], [140, 80]]];
+        DrawingLocator[] locators = [.. rectangles.Select((corners, i) => new DrawingLocator
+        {
+            Project = _project.Path, Page = "=A/1", Type = 31, Oid = i + 1,
+            Digest = SnapshotCanonical.Sha256(Newtonsoft.Json.JsonConvert.SerializeObject(corners)),
+        })];
+        DrawingLocator first = locators[0], second = locators[1];
+        _selection.NavigatorActive = true;
+        SelectionData result = Execute(new() { Mode = "replace", Locators = [first], ShowPage = true });
+        Assert.True(result.Exact);
+        Assert.Empty(result.Unselected);
+        Assert.Same(first, Assert.Single(result.Objects).Locator);
+        Assert.True(Execute(new() { Mode = "add", Locators = [second] }).Exact);
+        Assert.Equal(2, _selection.Current.Objects.Count);
+        Assert.True(Execute(new() { Mode = "clear" }).Exact);
+        Assert.Equal(3, _selection.Focuses);
+    }
+
+    [Fact]
+    public void FocusFailure_ReportsUiErrorWithoutAssumingTheRequestedSelection()
+    {
+        _selection.FocusSucceeds = false;
+        var error = Assert.Throws<BridgeErrorException>(() => Execute(new() { Mode = "replace", Locators = [Locator()], ShowPage = true })).Error;
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Null(error.Execution);
+        Assert.Equal(1, _selection.Mutations);
+        // Clear with no editor still independently reads the navigator, so it cannot claim an exact empty selection.
+        _selection.NavigatorActive = true;
+        Assert.False(Execute(new() { Mode = "clear" }).Exact);
+    }
+
+    [Fact]
     public void Read_IsBoundedAndFingerprintCoversTheCompleteSelection()
     {
         _selection.Current.Objects = Enumerable.Range(1, 250).Select(i => new ObjectSummary { Locator = Locator(i) }).ToList();
@@ -109,8 +145,24 @@ public sealed class SelectionOperationTests
         public bool Stale { get; set; }
         public bool Drop { get; set; }
         public bool Extra { get; set; }
+        public bool NavigatorActive { get; set; }
+        public bool FocusSucceeds { get; set; } = true;
+        public int Focuses { get; private set; }
         public int Mutations { get; private set; }
-        public SelectionData Read() => new() { Project = Current.Project, Page = Current.Page, Objects = Current.Objects.ToList(), Unsupported = Current.Unsupported };
+        public SelectionData Read() => new()
+        {
+            Project = Current.Project,
+            Page = Current.Page,
+            Unsupported = Current.Unsupported,
+            Objects = NavigatorActive ? [new() { Locator = new() { Project = Current.Project!, Type = 14, Oid = 1, Digest = new string('b', 64) } }] : Current.Objects.ToList(),
+        };
+        public bool FocusEditor()
+        {
+            Focuses++;
+            if (FocusSucceeds)
+            { NavigatorActive = false; }
+            return FocusSucceeds;
+        }
         public void Validate(string project, IReadOnlyList<DrawingLocator> locators)
         { if (Stale) { throw new BridgeErrorException(ErrorReason.PlanStale, "Object changed."); } }
         public void Apply(string? project, IReadOnlyList<DrawingLocator> locators, bool showPage)

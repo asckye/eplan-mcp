@@ -6,4 +6,6 @@ public interface ISelectionAdapter
     public SelectionData Read();
     public void Validate(string project, IReadOnlyList<DrawingLocator> locators);
     public void Apply(string? project, IReadOnlyList<DrawingLocator> locators, bool showPage);
+    /// <summary>Activate the GED before reading its selection; false means no editor could take focus.</summary>
+    public bool FocusEditor();
 }

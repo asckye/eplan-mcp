@@ -5,7 +5,7 @@ using EplanMcp.Host.Bridge;
 
 namespace EplanMcp.Large.Tests;
 
-/// <summary>Written only: native UI behavior must be observed before the customer-page rehearsal.</summary>
+/// <summary>Native UI evidence and exact product selection on new scratch pages.</summary>
 [Trait("Size", "Large")]
 public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
@@ -34,6 +34,8 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
             ["snap_to_grid"] = false,
             ["items"] = new[] { new { kind = "line", points = (int[][])[[40, 40], [80, 40]] } }
         });
+        await InitializeEditorsAsync(session, pages);
+        string before = (await session.SnapshotAsync()).Hash;
         string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
         string dll = Path.Combine(root, "spikes", "S45-selection", "bin", "Debug", "net481", "EplanMcp.Spikes.S45.dll");
         Assert.True(File.Exists(dll), "Build spikes/S45-selection first; do not run EPLAN as part of building.");
@@ -58,11 +60,14 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         JsonElement[] observations = [.. lines.Select(l => JsonDocument.Parse(l).RootElement)];
         Assert.Contains(observations, o => o.GetProperty("phase").GetString() == "completed");
         Assert.DoesNotContain(observations, o => o.GetProperty("phase").GetString() == "failure");
-        foreach (string phase in new[] { "no_editor", "one_page", "different_pages", "property_placement" })
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+        foreach (string phase in new[] { "no_editor", "one_page", "different_pages", "property_placement", "focused_one_page" })
         {
             JsonElement data = Assert.Single(observations, o => o.GetProperty("phase").GetString() == phase).GetProperty("data");
             Assert.Equal(data.GetProperty("designBefore").GetRawText(), data.GetProperty("designAfter").GetRawText());
         }
+        JsonElement focused = Assert.Single(observations, o => o.GetProperty("phase").GetString() == "focused_one_page").GetProperty("data");
+        Assert.Equal(focused.GetProperty("requested")[0].GetProperty("id").GetString(), Assert.Single(focused.GetProperty("actual").EnumerateArray()).GetProperty("id").GetString());
         JsonElement property = Assert.Single(observations, o => o.GetProperty("phase").GetString() == "property_identity").GetProperty("data");
         Assert.Equal(property.GetProperty("parent").GetString(), property.GetProperty("property").GetString());
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(host.ProcessId);
@@ -91,6 +96,13 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         });
         JsonElement[] locators = [.. (await host.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "Rectangle" })).GetProperty("items").EnumerateArray().Select(o => o.GetProperty("locator"))];
         Assert.Equal(2, locators.Length);
+        await InitializeEditorsAsync(session, [page], async _ =>
+        {
+            // Keep the original failing request before any page_open has initialized this editor.
+            JsonElement initial = await host.CallAsync("eplan_selection_set", new() { ["locators"] = new[] { locators[0] }, ["show_page"] = true });
+            Assert.True(initial.GetProperty("exact").GetBoolean(), initial.GetRawText());
+            Assert.Empty(initial.GetProperty("unselected").EnumerateArray());
+        });
         var before = LiveSnapshots.DesignFiles(session.Project);
         for (int i = 0; i < 2; i++)
         {
@@ -109,5 +121,25 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         await session.UndoAsync();
         Assert.Equal(baseline, (await session.SnapshotAsync()).Hash);
         Assert.Contains((await session.SnapshotAsync()).Pages, p => p.Name == page);
+    }
+
+    private async Task InitializeEditorsAsync(PlanStepLiveSession session, string[] pages, Func<string, Task>? initialize = null)
+    {
+        // B11: first opening a newly drawn page changed Page.eod/eox. Initialize before the byte-preservation boundary;
+        // still verify business content and every drawing locator across initialization, and every design file afterwards.
+        string before = (await session.SnapshotAsync()).Hash;
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(host.ProcessId);
+        foreach (string page in pages)
+        {
+            var args = new PageGetArgs { Project = session.Project, Page = page };
+            PageDrawingGeometry drawing = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, args, TestContext.Current.CancellationToken);
+            if (initialize is null)
+            { await host.CallAsync("eplan_page_open", new() { ["project"] = session.Project, ["page"] = page }); }
+            else
+            { await initialize(page); }
+            PageDrawingGeometry after = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, args, TestContext.Current.CancellationToken);
+            Assert.Equal(drawing.Fingerprint(), after.Fingerprint());
+        }
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
     }
 }

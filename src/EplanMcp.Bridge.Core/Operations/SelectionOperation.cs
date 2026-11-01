@@ -38,6 +38,9 @@ public sealed class SelectionOperation(IProjectCatalog catalog, ISelectionAdapte
             if (project is not null && !args.ShowPage && !catalog.ListOpenProjects().Any(p => p.Current && ProjectResolver.SamePath(p.Path, project)))
             { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Target is not current; use show_page to open its editor."); }
             ui.Apply(project, desired, args.ShowPage);
+            // SelectionSet reads the active window, which can still be the navigator after SelectObjects (B11).
+            if (!ui.FocusEditor() && desired.Count > 0)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not focus the selected page. Check its editor and read eplan_selection_get."); }
             SelectionData actual = ui.Read();
             actual.Unselected = desired.Where(l => !actual.Objects.Any(o => DrawingLocators.Matches(l, o.Locator))).ToList();
             actual.Exact = actual.Unsupported == 0 && actual.Unselected.Count == 0 && actual.Objects.Count == desired.Count;

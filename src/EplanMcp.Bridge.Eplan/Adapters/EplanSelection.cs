@@ -56,6 +56,16 @@ internal sealed class EplanSelection : ISelectionAdapter
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "Object is stale or unsupported for selection; use eplan_object_find. Property placements cannot be selected by these locators.")).ToList();
     }
     public void Validate(string project, IReadOnlyList<DrawingLocator> locators) { MainThread.Assert(); _ = Resolve(project, locators); }
+    public bool FocusEditor()
+    {
+        MainThread.Assert();
+        var selection = new SelectionSet { LockProjectByDefault = false, LockSelectionByDefault = false };
+        if (selection.CurrentlyEdited is not Page)
+        { return false; }
+        using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
+        using var edit = new Edit();
+        return edit.SetFocusToGED();
+    }
     public void Apply(string? project, IReadOnlyList<DrawingLocator> locators, bool showPage)
     {
         MainThread.Assert();

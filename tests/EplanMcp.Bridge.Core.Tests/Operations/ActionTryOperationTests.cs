@@ -59,6 +59,20 @@ public sealed class ActionTryOperationTests
     }
 
     [Fact]
+    public void Selection_CannotFocusGed_ActionDoesNotRunOrBeginTransaction()
+    {
+        var args = Args();
+        args.Selection = [SelectionOperationTests.Locator()];
+        args.Fingerprint = Plan(args).Fingerprint;
+        _selection.NavigatorActive = true;
+        _selection.FocusSucceeds = false;
+        var error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Null(_runner.Action);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
     public void Trial_UsesTypedParametersTransactionsAndFullFingerprintReadback()
     {
         var args = Args();

@@ -681,10 +681,15 @@ M6 资源扫描器（`EplanMcp.Packs.Scanning`）不靠 EPLAN 读出的内容以
 
 ## B. 官方文档与反射核实的事实（2026-10-12）
 
-### B11. 选择集签名（2026-10-31，仅目录工具与 XML 核对，未运行 EPLAN）
-`eplan_api_search/get` 确认 HEServices.SelectionSet.Selection 返回 StorableObject[]，CurrentlyEdited 返回 StorableObject（文档为 Page/InstallationSpace 或 null），OpenedPages 返回 Page[]；两个默认锁定开关均可设置。Edit.SelectObjects(string,StringCollection,bool) 返回 void；XML 要求 Type/Id/0，不含数据库前缀；ClearSelection 只清 GED，不清导航器。无编辑器、跨页及属性放置的实际效果、安全副作用与撤销历史由 Large SelectionSpikeTests 打印，尚未运行；实现只按独立读回报告成功，不假定原生调用全选中。A57 属性放置仍不提供无歧义定位符。
+### B11. 选择集签名与实机读回（2026-10-31 目录/XML 核对；2026-11-01 Large 日志）
+`eplan_api_search/get` 确认 HEServices.SelectionSet.Selection 返回 StorableObject[]，CurrentlyEdited 返回 StorableObject（文档为 Page/InstallationSpace 或 null），OpenedPages 返回 Page[]；两个默认锁定开关均可设置。Edit.SelectObjects(string,StringCollection,bool) 返回 void；XML 要求 Type/Id/0，不含数据库前缀；ClearSelection 只清 GED，不清导航器。A57 属性放置仍不提供无歧义定位符。
 
-- 2026-11-01（EPLAN 2026.0.3，Pro Panel，LargeWrite scratch 副本）：`NativeNoEditorDifferentPagesAndPropertyPlacement_PrintReadbackAndPreserveOneUndo` 在前置 `eplan_device_place` 调用被 Host 拒绝（`INVALID_ARGUMENT`、`not_started`）：测试给了 `library="IEC_symbol"`、`symbol="K"`，漏了库符号来源必填的 `symbol_variant`，并非 EPLAN 选择行为异常。测试补齐变体 `0`，不传互斥的 `part/variant`；此次日志没有执行到原生选择探针，不能据此确认无编辑器、跨页或属性放置的选择效果。— 证据：[本地完整日志](../../.local/failures/q-selection-SelectionSpikeTests.log)（不提交）。本次修复仅离线验证，原生探针仍待复验。
+- 2026-11-01 早一轮（EPLAN 2026.0.3，Pro Panel，LargeWrite scratch 副本）：`NativeNoEditorDifferentPagesAndPropertyPlacement_PrintReadbackAndPreserveOneUndo` 在前置 `eplan_device_place` 调用被 Host 拒绝（`INVALID_ARGUMENT`、`not_started`）：测试给了 `library="IEC_symbol"`、`symbol="K"`，漏了库符号来源必填的 `symbol_variant`，并非 EPLAN 选择行为异常。测试补齐变体 `0`，不传互斥的 `part/variant`；该轮没有执行到原生选择探针，不能据此确认无编辑器、跨页或属性放置的选择效果。— 分支提交 `b159c81d` 的测试修正与当轮记录；当前本地日志已是后续运行，结果见下。
+
+- 同日后续运行（EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本，S45 完成）：无编辑器时请求功能 `17/69835/0`，调用后 `/103` 已打开，但 `Selection` 仍返回原导航器的 Project；随后 `one_page` 也返回 Project。跨页请求该功能及 `/104` 的 Line 时，两页均已打开，实际只返回 `/103` 的功能；不能把跨页请求当成全部选中。属性放置 `ContextPropertyPlacement` 的标识与父功能完全相同，原生请求读回的是 Function，不能据此提供属性放置定位。`clear` 读回为空。— 证据：[q-selection-SelectionSpikeTests.log](../../.local/failures/q-selection-SelectionSpikeTests.log) 的 `environment`、`no_editor_before`、`no_editor`、`one_page`、`different_pages`、`property_identity`、`property_placement`、`clear`。
+- **选择读回取决于活动窗口，而不只取决于当前页**：本机 `Eplan.EplApi.HEServicesu.xml` 的 `SelectionSet.Selection` 明确读取 active window；`Edit.SelectObjects` 只说明选择 GED 对象，未承诺聚焦；`Edit.SetFocusToGED()` 返回 bool，明确用于聚焦 GED。上述 Project 读回与此一致。产品在 UI 修改后显式聚焦，再独立比对全部定位符；聚焦失败不报告精确成功，action_try 不执行 action。Small 模拟相同的矩形请求、导航器活动状态及聚焦失败；修复后的实机效果仍待 Large 复验，未把焦点解释写成已验证的时序结论。
+- **第一次从无编辑器状态打开刚绘制的页，会伴随设计文件变化**：S45 的 `no_editor` 前后 204 个设计文件仅 `Page.eod`、`Page.eox` 的 SHA-256 不同；后续 `one_page`、`different_pages`、`property_placement` 均无文件差异。日志不能确定变化的是缓存还是业务字段，不能再笼统声称开页总是逐字节不变（A54 的既有样本不足以推广）。Large 调整为先开页初始化，同时精确核对业务快照和绘图指纹；随后关闭编辑器重测无编辑器路径，仍比较全部设计文件，不排除 Page 文件，仍验证一次撤销恢复及保留先前历史。— 同一日志的四个阶段 `designBefore/designAfter`；新增初始化与聚焦断言尚未运行 EPLAN 复验。
+- 此轮两个 Selection 失败分别是原生探针的文件相等断言、产品第一次 `exact` 断言；测试错误没有 correlation ID，`bridge-slotA.log` 对应 selection 加载时段（05:05–05:08）没有异常。ActionTry 测试通过；该 add-in 全天日志内其他 worktree 的 api_try 超时等异常不属于这两个测试的错误，不能据此将它们归类为本轮写入结果未知。— [测试输出](../../.local/failures/q-selection-SelectionSpikeTests.log)、[ActionTry 输出](../../.local/failures/q-selection-ActionTryTests.log)、[add-in 日志](../../.local/failures/bridge-slotA.log)（均为本地证据，不提交）。
 
 > 出处缩写：`2026/<页面>` 指 `https://www.eplan.help/en-us/Infoportal/Content/api/2026/<页面>`；"XML" 指 EPLAN Bin 目录中随 API 一起提供的 IntelliSense 文档（`Eplan.EplApi.*u.xml`）；"反射" 指对 `C:\Program Files\EPLAN\Platform\2026.0.3\Bin` 中程序集做只读反射。
 

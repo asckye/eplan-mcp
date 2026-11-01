@@ -87,6 +87,8 @@ public sealed class SelectionSpikeAction : IEplAction
                         try
                         { edit.SelectObjects(project.ProjectLinkFilePath, ids, true); }
                         catch (Exception ex) { Print(phase + "_exception", Evidence.Error(ex)); }
+                        if (phase == "focused_one_page" && !edit.SetFocusToGED())
+                        { throw new InvalidOperationException("GED did not take focus."); }
                         Print(phase, new
                         {
                             requested = objects.Select(o => new { type = o.GetType().Name, id = o.ToStringIdentifier() }).ToArray(),
@@ -123,6 +125,7 @@ public sealed class SelectionSpikeAction : IEplAction
                             property.Location.Y
                         });
                         Select("property_placement", property);
+                        Select("focused_one_page", function);
                         edit.ClearSelection();
                         Print("clear", new { actual = Rows(), currentPage = (selection.CurrentlyEdited as Page)?.Name });
                     }
