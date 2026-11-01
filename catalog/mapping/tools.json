@@ -9179,7 +9179,8 @@
         "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A11",
-          "A12"
+          "A12",
+          "A57"
         ],
         "tests": [
           {
@@ -11612,7 +11613,9 @@
       "evidence": {
         "spec": "docs/tools/eplan_placement_update.md",
         "specStatus": "Implemented (Unreleased)",
-        "apiNotes": [],
+        "apiNotes": [
+          "A57"
+        ],
         "tests": [
           {
             "name": "AcceptanceRedrawDriverTests",
