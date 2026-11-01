@@ -133,7 +133,7 @@ internal static class ApprovalTexts
         if (change.Kind == "placement")
         { return change.Property + " " + Value(change.Name, zh) + ": " + Value(change.NewValue ?? "", zh) + (change.Property == "copy" ? zh ? "；保留标识，副本可能关联已有设备。" : "; tags preserved; copies may associate with existing devices." : change.Property == "delete" ? zh ? "；连同功能本体删除，相关连接见清单。" : "; removes the function itself; incident connections are listed." : ""); }
         if (change.Kind == "unverified API")
-        { return change.Action + " unverified API " + change.Name + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property; }
+        { return change.Action + " unverified API " + change.Name + (change.Action == "write" ? " = " + Value(change.NewValue ?? string.Empty, zh) : string.Empty) + "; " + change.Property + (details?.GetValueOrDefault("handles") is { Length: > 0 } handles ? "; " + handles : string.Empty); }
         if (change.Kind == "action")
         {
             List<ActionParameter> parameters = JsonSerializer.Deserialize<List<ActionParameter>>(change.NewValue ?? "[]", HostJson.Options) ?? [];

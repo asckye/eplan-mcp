@@ -9,7 +9,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Small")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class ApiTryContractTests
+public sealed partial class ApiTryContractTests
 {
     [Theory]
     [InlineData("target,pFunction", true)]
@@ -85,6 +85,6 @@ public sealed class ApiTryContractTests
         JsonElement point = Assert.Single(shapes.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("x", out _));
         Assert.Equal(["x", "y"], point.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
         Assert.False(point.GetProperty("additionalProperties").GetBoolean());
-        Assert.Equal(3, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(4, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("value").GetProperty("oneOf").GetArrayLength());
     }
 }

@@ -80,7 +80,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             if (setter && value != Convert.ToString(((Newtonsoft.Json.Linq.JValue)ApiTryPlanOperation.Parameters(args.Parameters)["value"]!).Value, System.Globalization.CultureInfo.InvariantCulture))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property did not read back as requested; the trial was rolled back."); }
             OperationContext.Current.ThrowIfCancellationRequested();
-            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Before = before, After = ApiTryFiles.Observe(args, dispatch.Inspect(args.Project)), Files = ApiTryFiles.Outputs(args) };
+            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Handle = result as ApiObjectHandle, HandleSource = result is ApiObjectHandle ? args.Group : null, Before = before, After = ApiTryFiles.Observe(args, dispatch.Inspect(args.Project)), Files = ApiTryFiles.Outputs(args) };
             if (setter)
             { data.After[key] = JsonConvert.SerializeObject(value); }
             OperationContext.Current.ThrowIfCancellationRequested();

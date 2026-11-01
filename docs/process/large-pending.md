@@ -6,6 +6,7 @@
 |---|---|---|
 | C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
 | C1 设置只读切片（本次 op-settings 变基合并；api-notes A67） | `ApiTryTests`（含 `ApiTryTests.Settings.cs` 的 LargeWrite 用例）、`NoSideEffectTests`、`WriteSafetyTests` | 待运行：本次仅构建及 Small/契约验证，未启动 EPLAN；需验证两种设置入口、分页枚举与文件无变化，以及设置读取间项目写入的一步撤销和历史哨兵。 |
+| ADR-0033 短期对象句柄与 main Files/静态入口合并（`feat/op-handles` rebase） | `ApiTryTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：Pin 句柄读写、类型与 scratch 归属复核、设置只读、单步撤销及既有历史；合并后同时回归 Files/静态/via 调用与共享写入安全。A68 的原实机失败已有相同结构与值的 Small 回归；本次按负责人要求不启动 EPLAN，不能以编译和 Small 通过替代实机证据。 |
 | C2 未验证 action（历史 brief/提交待补定位；security.md 第 5 节） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
 | P06 功能与影响闭包（历史 brief/提交待补定位） | `PlanFunctionsTests`、`PlanImpactTests` | 待运行：Large README 明确尚未实跑；保留完整性与边界断言，缺页证据的现有拒绝行为需按当前常设规则另行评审，不在文档任务中弱化测试。 |
 | D1 电缆星形（历史 brief/提交待补定位） | `CableBusStarSpikeTests` | 待运行：Spike=D1；探索测试只断言搭建成功，不能代替产品验收。 |

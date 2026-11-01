@@ -20,6 +20,7 @@ internal static class BridgeHost
     private static readonly TimeSpan _startTimeout = TimeSpan.FromSeconds(10);
 
     private static BridgeServer? _server;
+    private static EplanApiTryDispatcher? _apiTrials;
 
     /// <summary>Where EPLAN registered the add-in, set by <see cref="EplanAddIn.OnBeforeInit"/> before the Bridge starts; null in the offline host.</summary>
     public static string? AddinPath { get; set; }
@@ -108,7 +109,7 @@ internal static class BridgeHost
         var actions = new EplanActionRunner();
         int actionMajor = System.Version.TryParse(eplan.Version, out System.Version? actionVersion) ? actionVersion.Major : 0;
         var stepGuard = new PlanStepGuardOperation(catalog, new EplanSnapshotReader(), new EplanObjectFinder(), new EplanPlanFunctionReader());
-        var apiTrials = new EplanApiTryDispatcher();
+        var apiTrials = _apiTrials = new EplanApiTryDispatcher();
         ISelectionAdapter? selection = eplan.Offline ? null : new EplanSelection();
         var apiPlan = new ApiTryPlanOperation(actionMajor, catalog, apiTrials);
         IOperation[] operations =
@@ -270,6 +271,8 @@ internal static class BridgeHost
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void Stop()
     {
+        _apiTrials?.Dispose();
+        _apiTrials = null;
         _server?.Dispose();
         _server = null;
     }

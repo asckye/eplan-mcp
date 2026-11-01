@@ -10,7 +10,7 @@
 | 实机验证 | C1 Files、静态成员、属性入口及设置切片待实机验证，见 [待验证清单](../process/large-pending.md) |
 
 ## 1. 任务与输入
-在 scratch 上试执行一个目录重载组；已有专用工具时优先使用。必填 `group` 是目录的精确 O: 组 ID，`project` 显式指定项目，`parameters` 是闭合调用形状，实例调用包含 `target`（find 返回的 project/page/type/oid/digest 定位器）和签名参数，公开静态调用省略 `target`；`dry_run` 默认 false。属性省略 `value` 为读，添加 `value` 为写，组 ID 不变；方法按精确参数名集合选择唯一签名，禁止依数值猜测重载，歧义为 INVALID_ARGUMENT。方法形参 `target` 映射为 `argument_target`，接收对象仍用 `target`。Files 切片的 TSV 方法组为 **49 个读组、194 个写组、737 个含排除签名的组**（历史分类可重叠；合并后计数见第 4 节），另有属性 342 个读组、211 个可写组；Files 切片新增 10 个写方法组、14 个签名；设置适配器覆盖 65 个只读组。方法参数支持 bool/int/long/double/string、PointD、全部受支持对象类型定位器与目录枚举；枚举仅接受区分大小写的精确名称，int 须在 Int32 范围，double 须有限。PointD 仅接受有限数值的 `{"x":number,"y":number}`。拒绝类型名、反射、数组、任意对象、未知字段、空值和隐式类型转换。
+在 scratch 上试执行一个目录重载组；已有专用工具时优先使用。必填 `group` 是目录的精确 O: 组 ID，`project` 显式指定项目，`parameters` 是闭合调用形状，实例调用包含 `target`（find 返回的 project/page/type/oid/digest 定位器或生成形状允许的会话句柄）和签名参数，公开静态调用省略 `target`；`dry_run` 默认 false。属性省略 `value` 为读，添加 `value` 为写，组 ID 不变；方法按精确参数名集合选择唯一签名，禁止依数值猜测重载，歧义为 INVALID_ARGUMENT。方法形参 `target` 映射为 `argument_target`，接收对象仍用 `target`。当前读写分组及逐签名排除数量以 [生成清单](../../catalog/api-try.g.tsv) 为准（分类可重叠，清单补列属性行）。Files 切片当时统计为 **49 个读组、194 个写组、737 个含排除签名的组**，另有属性 342 个读组、211 个可写组；该片新增 10 个写方法组、14 个签名；设置适配器覆盖 65 个只读组。方法参数支持 bool/int/long/double/string、PointD、全部受支持对象类型定位器、会话句柄与目录枚举；枚举仅接受区分大小写的精确名称，int 须在 Int32 范围，double 须有限。PointD 接受有限数值的 `{"x":number,"y":number}` 或对应会话句柄。拒绝类型名、反射、数组、任意对象、未知字段、空值和隐式类型转换。
 
 定位器复用 `eplan_object_find` 的候选枚举、精确类型筛选和摘要，覆盖 121 个查询名称（119 个原生类型），详见[生成类型表](eplan_object_kinds.g.md)。基类声明的属性、方法及对象形参接受受支持派生类型；每个定位器按原生类型、编号和新鲜摘要核对，不做类型转换。原有 14 个查询名称的摘要保持不变。
 
@@ -19,7 +19,7 @@
 
 服务调用的 `parameters.target` 必须是目标 scratch 项目的 Project 定位器，作为项目校验锚点；例如 `O:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget` 接受 `target` 和 `connection`，后者是同项目 Connection 定位器。Project、Page 及其他对象形参均从定位器解析；每个定位器必须属于目标项目，并核对类型、编号和摘要。没有对象形参、依赖当前选择的服务入口还要求目标 scratch 项目就是当前项目，执行前重新检查；返回对象也须属于目标项目。
 
-服务方法只有 Get*/Is*/Has*/Can*/Find* 且所有重载均无对话框、锁定、更新等副作用参数和输出文件时归为 read，其余归为 write，沿用执行前后快照和同一单撤销事务。文件参数按下节规则限制；目录及字符串项目路径、流、数据库、主数据或部件管理、设置或方案、打印机、URL、授权或退出仍排除；导入、导出、打印、备份和还原服务的隐式目的地同样拒绝。非简单且非定位器的返回值、内部交互状态、自己创建事务的 TXN 入口及既有目录禁用项均不生成。逐签名分类理由与排除数量见 [生成清单](../../catalog/api-try.g.tsv) 和 [覆盖报告](../eplan/coverage-report.md)。
+服务方法只有 Get*/Is*/Has*/Can*/Find* 且所有重载均无对话框、锁定、更新等副作用参数和输出文件时归为 read，其余归为 write，沿用执行前后快照和同一单撤销事务。文件参数按下节规则限制；目录及字符串项目路径、流、数据库、主数据或部件管理、设置或方案、打印机、URL、授权或退出仍排除；导入、导出、打印、备份和还原服务的隐式目的地同样拒绝。未进入生成句柄类型表的非简单且非定位器返回值、内部交互状态、自己创建事务的 TXN 入口及既有目录禁用项均不生成。逐签名分类理由与排除数量见 [生成清单](../../catalog/api-try.g.tsv) 和 [覆盖报告](../eplan/coverage-report.md)。
 
 ### 静态成员与属性入口
 公开静态方法/属性从 DataModel 及子命名空间、HEServices、EServices（含 Ged）、Base 的公开目录类型生成编译分派，不构造服务或接收对象。例如 `DocumentTypeManager.IsLogicalPageDocType` 的 parameters 为 `{"nPageType":"Circuit"}`。静态调用仅允许读取，或显式带同项目对象参数并通过既有写入筛选。文件、网络、授权、应用/会话状态、主数据及生命周期入口继续排除；原始字符串对象身份不能代替定位器。
@@ -40,7 +40,7 @@ Files 切片：仅开放能明确判定方向的字符串文件参数。参数�
 
 结果新增 files，列出本次输出目录全部文件的 exports 相对路径、bytes 和 sha256；最多 100 个、每个最多 128 MiB。产物检查在项目写事务提交之前；项目撤销不撤销外部文件（A56），产物保留供工程师检查，失败或 unknown 时也可能留有部分文件，不将项目 rolled_back 当作文件已删除。
 
-输出 project/group/status/unverified/execution/recovered，以及实际执行时的 value、before/after 摘要、changes、totalChanges、truncated、hint。属性写入的 `value` 为读回文本；方法简单返回值为文本、void 为 null，StorableObject 返回值为与对象查找相同摘要的定位器。对象参数与接收对象均检查项目、类型及新鲜摘要。属性写入的 `property:<group>` 观察项包含写前/写后的 JSON 编码标量文本，即使两者相等也列出。单次结果至多列 20 个变化，属性项优先，文本经 ResultShaper 清洗；变化清单不分页，设置列表按 nextOffset 分页。允许但未接入的组返回 `not_dispatchable_yet`，不审批或执行；目录外或排除组、scratch 外为 POLICY_DENIED。参数错误为 INVALID_ARGUMENT，定位器或审批指纹变化为 PLAN_STALE，以上均 not_started。审批拒绝、无渠道、审计不可写均不执行。
+输出 project/group/status/unverified/execution/recovered，以及实际执行时的 value、before/after 摘要、changes、totalChanges、truncated、hint。属性写入的 `value` 为读回文本；方法简单返回值为文本、void 为 null，可定位的 StorableObject 返回值为与对象查找相同摘要的定位器，其他受支持对象返回会话句柄。对象参数与接收对象均检查项目、类型及新鲜摘要。属性写入的 `property:<group>` 观察项包含写前/写后的 JSON 编码标量文本，即使两者相等也列出。单次结果至多列 20 个变化，属性项优先，文本经 ResultShaper 清洗；变化清单不分页，设置列表按 nextOffset 分页。允许但未接入的组返回 `not_dispatchable_yet`，不审批或执行；目录外或排除组、scratch 外为 POLICY_DENIED。参数错误为 INVALID_ARGUMENT，定位器或审批指纹变化为 PLAN_STALE，以上均 not_started。审批拒绝、无渠道、审计不可写均不执行。
 
 ## 3. 执行、安全与审计
 每次实际执行都经独立窗口审批，读显示 `read unverified API <group>`，属性写显示 `write unverified API <group> = <value>`，方法写显示 `write unverified API <group>`，并展示精确签名和完整转义参数原文。读写均走 WritePipeline 的结果恢复和审计；读不创建撤销步。写沿用 TransactionRunner：调度器 LockingStep 内的 SafetyPoint → 内部 UndoStep → QuietModeStep，属性读回等于请求值且快照成功后才 Commit/CloseUndo；方法以执行后业务/文件观察为证据，不重复调用方法读回，整次写入恰好一个撤销步；异常或读回不符回滚，提交/回滚失败为 unknown，清理或关闭撤销步失败给出已提交警告。成员调用预算为 30 秒，执行前重新规划、属性原值读取和前后观察不占用该预算；定位器解析及每次快照各限 20 秒，Host 等待完整执行结果 120 秒，留出检查与事务收尾时间，支持进度和取消。成员返回后由本地预算检查触发的超限，只有事务回滚成功才返回 TIMEOUT / rolled_back；调用内部超时、模态阻塞、提交或回滚失败仍为 OUTCOME_UNKNOWN，暂停项目及实例写入，不自动重发。
@@ -48,9 +48,12 @@ Files 切片：仅开放能明确判定方向的字符串文件参数。参数�
 执行前后复用 action_run 的对象计数、设计文件大小/修改时间指纹，再比较 standard-v1 业务快照的逐页哈希；排除锁文件及 User.eod/eox。快照不覆盖无页对象和 3D 连接，不将摘要相等当作无副作用证明。Bridge 独立核对生成目录及参数形状，按编译调用表分发。生成源为 API 目录、排除规则和 ApiTryGenerator 的类型/成员选择；方法名 Get*/Is*/Has*/Can*/Find* 且无副作用参数为 read，其余为 write 并进入同一个撤销事务。排除 Dispose、对象接收器的 Remove/Delete/Erase*、Create*、构造函数、ref/out/params/数组/委托/集合/泛型参数、非公开成员及未通过静态安全筛选的成员、不支持的返回值及目录排除项；同时读取 BannedSymbols.txt 排除禁用成员，ViewPart.UseLocalPropertyPlacements 的过时 setter 不生成。逐签名分类和排除理由见 `catalog/api-try.g.tsv`。非公开 setter、索引器和复杂属性值仍不开放写入。目录保留 protected setter 的独立可见性，不能仅凭公开 getter 判断可写。TerminalStrip.FunctionCategory 通过 Function 基类 getter 读回；不访问禁用的基类 Properties。
 
 ## 4. 切片与测试
-合并后的 TSV 按精确组 ID（区分大小写），采用“有 write 优先，否则有 read，否则全排除”口径，读/写/全排除为 **124/202/878**；设置行包含 getter 与 setter 排除，原有 342 个标量属性仍另计。重叠设置签名只登记一次，设置适配器与既有 via 形状同时保留。
+设置切片合并时的 TSV 按精确组 ID（区分大小写），采用“有 write 优先，否则有 read，否则全排除”口径，读/写/全排除为 **124/202/878**；设置行包含 getter 与 setter 排除，原有 342 个标量属性仍另计。重叠设置签名只登记一次，设置适配器与既有 via 形状同时保留。
 
 设置切片增加只读形状、范围/索引/分页、逐段枚举、跨项目与伪造定位器拒绝、全部设置写入拒绝，以及 refused-read/unknown 和无撤销步的 Small 测试；LargeWrite 测试在设置读取间写 Page.Name，核对一次撤销恢复该写、再一次撤销此前哨兵页，仅编写未运行。新生成逻辑在 ApiTryGenerator.Settings.cs，运行时设置逻辑在独立 partial 文件。
 Files 切片 Small 覆盖方向判定、每个新增签名形状、Windows 路径与长度限制；Medium 覆盖输入替换/重解析点、输出大小/数量、哈希清单、审批参数绑定及单事务回滚。Large 在 LargeWrite 副本导入唯一设备清单，核对一次撤销恢复清单、再次撤销哨兵页；仅编写、编译，未运行。
 第五片增加服务构造条件、继承 IDisposable、安全分类、资源参数排除、Project 锚点、精确签名、跨项目定位器拒绝、当前项目复核与服务单事务回滚的 Small 测试。Large 在 LargeWrite 上读取 `NameService.CanDeviceTagBeNested` 并断言设计文件不变，写 `ConnectionService.SwapSourceAndTarget` 后核对两端互换、一次撤销恢复业务快照、再一次撤销此前建页；仅编写未运行。
 新增目录映射、最派生 Properties、原有 14 种摘要字节回归和排除规则测试；Large 新增通用 find/get，记录零对象类型并要求至少覆盖 10 个新增类型且设计文件不变，仅编写未运行。Small 另覆盖方法重载选择、歧义排除、分类、枚举/PointD/定位器参数、方法单事务与空值/定位器返回；Large 新增 Page 枚举参数读取及 PlaceHolder.AddRecord 单步撤销和既有历史检查，未运行。Small 覆盖开关、scratch 策略、目录排除、标量/枚举形状、非公开 setter、单事务提交、异常/读回不符回滚及 timeout/modal unknown；Medium 用假 Bridge 验证逐次审批、拒绝、变化报告、审计失败与 unknown 暂停。Large 已补齐 scratch 副本 Page.Name 写入后一次撤销恢复原值、再撤销此前建页，以及 Terminal 定位器读取无变化；本片不运行 Large，不声称已实机验证。评测场景：查目录、取得定位器、dry-run、工程师批准读或写并检查变化。
+
+**对象句柄（ADR-0033）**：返回的 `{"handle":"h:<32 位小写十六进制>","type":"<原生类型全名>"}` 可原样用于 `parameters.target` 或生成表指定的对象参数；先从 `Connection.StartPin` 取得 Pin，再用 `Pin.Name` 读取或用 `Pin.IntrinsicSafetyPossible` 的 `value` 写入，仍应先 dry-run。仅限同一 Host 会话和同一 EPLAN 进程，闲置 10 分钟失效，每会话最多 500 个、超出淘汰最早创建项；项目关闭、EPLAN 退出及 Host 重启后必须重新获取。
+句柄表只在插件进程内存中保存借用对象，每次调用清理、每次使用重新核对有效性、编译类型及所属 scratch 项目；伪造类型为 INVALID_ARGUMENT，失效为 PLAN_STALE，项目或 scratch 归属不符为 POLICY_DENIED。审批显示 `<type> returned by <group>` 与 unverified；审计只保留类型、来源组和不透明标识，不序列化对象内容。设置及其返回对象的句柄只读；部件库和主数据仍以 `masterdata_copy_pending` 排除，等待部件库副本规则。数组、集合、ref/out、生命周期及未获 Files 切片支持的文件入口等既有排除不变，属性仍只写原有标量/枚举形状。 Small 覆盖期限、上限、会话隔离、类型、项目复核、失效、设置只读及生成形状；LargeWrite 的 Pin 句柄读写、单次撤销与既有历史检查已编写，本片未运行 EPLAN。

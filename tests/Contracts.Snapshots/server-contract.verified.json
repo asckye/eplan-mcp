@@ -1305,7 +1305,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Try scratch APIs; per-call approval, full + apiTry:on. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. See eplan_tool_usage for examples.",
+      "description": "Scratch; approval; session handles; eplan_api_get templates",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1373,6 +1373,23 @@
                     "digest": {
                       "type": "string",
                       "pattern": "^[0-9a-f]{64}$"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "handle",
+                    "type"
+                  ],
+                  "properties": {
+                    "handle": {
+                      "type": "string",
+                      "pattern": "^h:[0-9a-f]{32}$"
+                    },
+                    "type": {
+                      "type": "string"
                     }
                   }
                 }
@@ -1446,6 +1463,23 @@
                   "digest": {
                     "type": "string",
                     "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "handle",
+                  "type"
+                ],
+                "properties": {
+                  "handle": {
+                    "type": "string",
+                    "pattern": "^h:[0-9a-f]{32}$"
+                  },
+                  "type": {
+                    "type": "string"
                   }
                 }
               },

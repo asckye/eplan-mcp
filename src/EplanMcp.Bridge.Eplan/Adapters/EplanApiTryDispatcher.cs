@@ -6,18 +6,14 @@ using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
-/// <summary>A12/A36/A39 borrowed identities; no EPLAN object crosses a request boundary.</summary>
+/// <summary>A12/A36/A39 borrowed identities; ADR-0033 handles remain inside the add-in.</summary>
 internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
 {
     public void CheckTarget(ApiTryArgs args)
     {
-        JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
-        CheckReceiver(args, parameters);
+        CheckHandleTargets(args);
         if (ApiTryCatalog.Settings(args.Group))
-        { CheckSettings(args); return; }
-        string[] shape = ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name))!;
-        foreach (string name in shape.Skip(2).Where(n => parameters[n] is JObject && ApiTryCatalog.ParameterShape(shape[1], n)?[0] != "Eplan.EplApi.Base.PointD"))
-        { Resolve(args.Project, parameters[name]!, ApiTryCatalog.Kinds(ApiTryCatalog.ParameterShape(shape[1], name)![0])); }
+        { CheckSettings(args); }
     }
     private static StorableObject Resolve(string project, JToken token, string[] kinds)
     {
@@ -67,10 +63,8 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
         JObject parameters = FileParameters(args);
         using var entry = new EntryScope();
-        object? target = Receiver(args, parameters, entry);
-        bool method = ApiTryCatalog.MethodAccess(args.Group) is not null;
-        object? result = InvokeEntry(args, parameters, target, method);
-        object? value = result is StorableObject obj ? Locator(args.Project, obj) : result is null ? null : Convert.ToString(result, System.Globalization.CultureInfo.InvariantCulture);
+        var target = Receiver(args, parameters, entry);
+        object? value = InvokeHandleMember(args, parameters, target);
         using var process = Process.GetCurrentProcess();
         if (process.MainWindowHandle != IntPtr.Zero && !Interop.NativeMethods.IsWindowEnabled(process.MainWindowHandle))
         { throw new BridgeErrorException(ErrorReason.EplanBusy, "A modal dialog appeared during the unverified call."); }

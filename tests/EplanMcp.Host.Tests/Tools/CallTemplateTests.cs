@@ -49,6 +49,35 @@ public sealed class CallTemplateTests
     }
 
     [Theory]
+    [InlineData("Eplan.EplApi.DataModel.Pin.ConsumerSources", "target", "Eplan.EplApi.DataModel.Pin")]
+    [InlineData("Eplan.EplApi.Base.MultiLangString.IsEqual", "otherVal", "Eplan.EplApi.Base.MultiLangString")]
+    public void HandleGroupsHaveDispatchableTemplatesWithRealProducers(string name, string parameter, string type)
+    {
+        ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == "O:" + name);
+        Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
+        JsonObject[] templates = [.. ApiCallTemplates.For(entry).Where(t => t["arguments"]!["parameters"]!["properties"]![parameter]?["kind"]?.GetValue<string>() == "handle")];
+        Assert.NotEmpty(templates);
+        Assert.All(templates, template =>
+        {
+            Assert.True(template["dispatchable"]!.GetValue<bool>());
+            JsonNode description = template["arguments"]!["parameters"]!["properties"]![parameter]!;
+            Assert.Equal("handle", description["kind"]!.GetValue<string>());
+            Assert.Equal(type, description["type"]!.GetValue<string>());
+            string[] producers = ApiTryCatalog.Producers(type);
+            Assert.NotEmpty(producers);
+            Assert.Equal("handle returned by " + string.Join(", ", producers), description["source"]!.GetValue<string>());
+            JsonElement example = JsonSerializer.SerializeToElement(template["example"]!["parameters"]);
+            Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, example));
+        });
+        if (parameter == "target")
+        {
+            Assert.Contains(entry.Row.Group, ApiTryCatalog.PropertyGroups);
+            Assert.Contains(templates, t => t["access"]!.GetValue<string>() == "read");
+            Assert.Contains(templates, t => t["access"]!.GetValue<string>() == "write");
+        }
+    }
+
+    [Theory]
     [InlineData("Page.GetWriteProtectionFlagSet", "read", "nKind")]
     [InlineData("Function.IsPointInsideLogicalArea", "read", "pnt")]
     [InlineData("Graphics.PlaceHolder.ApplyRecord", "write", "strRecordName")]

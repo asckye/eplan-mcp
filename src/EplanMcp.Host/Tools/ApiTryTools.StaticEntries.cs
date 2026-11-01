@@ -10,10 +10,10 @@ internal sealed partial class ApiTryTools
         if (shape is null)
         { return ApiTryCatalog.MethodAccess(group) is null; }
         bool statik = ApiTryCatalog.Static(shape[1]), via = p.TryGetProperty("via", out JsonElement path), key = p.TryGetProperty("via_key", out JsonElement selector);
-        if (!statik && ApiTryCatalog.Entry(shape[1]) && !via && !ApiTryCatalog.Settings(group))
+        if (!statik && ApiTryCatalog.Entry(shape[1]) && !via && !ApiTryCatalog.SettingsMethods(group).Any(s => s.SequenceEqual(shape)) && (!p.TryGetProperty("target", out JsonElement handle) || Kind(handle) != "handle"))
         { return false; }
         bool setter = ApiTryCatalog.MethodAccess(group) is null && p.TryGetProperty("value", out _);
-        if (statik ? p.TryGetProperty("target", out _) || via || key : !p.TryGetProperty("target", out JsonElement target) || Kind(target) != "locator")
+        if (statik ? p.TryGetProperty("target", out _) || via || key : !p.TryGetProperty("target", out JsonElement target) || !(Kind(target) == "locator" || !via && Kind(target) == "handle"))
         { return false; }
         if (via && (ApiTryCatalog.Service(group) || path.ValueKind != JsonValueKind.String || ApiTryCatalog.ViaKinds(shape[0], path.GetString()!).Length == 0)
             || key != (via && ApiTryCatalog.ViaKey(shape[0], path.GetString()!)) || key && (selector.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(selector.GetString())))

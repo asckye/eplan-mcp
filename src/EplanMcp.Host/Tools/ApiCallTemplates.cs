@@ -33,6 +33,8 @@ internal static class ApiCallTemplates
         {
             foreach (string[] path in ApiTryCatalog.ViaPaths(type))
             { yield return Create(group, shape, access, setter, path); }
+            if (ApiTryCatalog.HandleType(type))
+            { yield return Create(group, shape, access, setter); }
         }
         else
         { yield return Create(group, shape, access, setter); }
@@ -44,7 +46,7 @@ internal static class ApiCallTemplates
         var example = new JsonObject();
         if ((receiver ?? ApiTryCatalog.ReceiverShape(shape[1])) is { } receiverShape)
         {
-            var target = Parameter(path is null ? receiverShape : [path[0]]);
+            var target = Parameter(path is not null ? [path[0]] : receiverShape is ["via", var type] ? ["handle", type] : receiverShape);
             parameters["target"] = target.Description;
             example["target"] = target.Example;
             if (path is not null)
@@ -104,12 +106,12 @@ internal static class ApiCallTemplates
             value = new JsonArray(item.Example);
             type = "array";
         }
-        else if (type == "handle" || type.StartsWith("handle:", StringComparison.Ordinal))
+        else if (type == "handle" || type.StartsWith("handle:", StringComparison.Ordinal) || type != "Eplan.EplApi.Base.PointD" && ApiTryCatalog.Kinds(type).Length == 0 && ApiTryCatalog.HandleType(type))
         {
-            string handleType = type == "handle" ? shape[1] : type[7..];
+            string handleType = type == "handle" ? shape[1] : type.StartsWith("handle:", StringComparison.Ordinal) ? type[7..] : type;
             description["type"] = handleType;
             description["source"] = "handle returned by " + string.Join(", ", shape.Skip(type == "handle" ? 2 : 1).Concat(ApiTryCatalog.Producers(handleType)).Distinct());
-            value = JsonValue.Create("<handle of type " + handleType + ">")!;
+            value = new JsonObject { ["handle"] = "h:" + new string('a', 32), ["type"] = handleType };
             type = "handle";
         }
         else if (type is "input_path" or "output_path")

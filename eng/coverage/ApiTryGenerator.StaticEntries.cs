@@ -113,8 +113,8 @@ internal static partial class ApiTryGenerator
         EntryModel m = EntryData(root);
         var selected = EntrySelected(m);
         string ConvertValue(string type, string token) => m.Enums.TryGetValue(type, out string[]? values) ? "(" + token + ".Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + type + "." + v)) + ", _ => throw new System.InvalidOperationException(\"Invalid enum.\") })" : token + ".Value<" + type + ">()";
-        string Argument(ApiParameter p) => ObjectType(p.Type, m.Kinds) ? "((global::" + p.Type + ")resolve(parameters[" + Literal(ParameterName(p)) + "]!, " + Literal(p.Type) + "))" : p.Type == "Eplan.EplApi.Base.PointD" ? "new global::Eplan.EplApi.Base.PointD(parameters[" + Literal(ParameterName(p)) + "]![\"x\"]!.Value<double>(), parameters[" + Literal(ParameterName(p)) + "]![\"y\"]!.Value<double>())" : ConvertValue(p.Type, "parameters[" + Literal(ParameterName(p)) + "]!");
-        return BaseDispatch(root) + "internal static class ApiTryEntryDispatch\n{\n    internal static object? Invoke(string signature, object? target, JObject parameters, System.Func<JToken, string, StorableObject> resolve)\n    {\n        switch (signature)\n        {\n"
+        string Argument(ApiParameter p) => ObjectType(p.Type, m.Kinds) ? "((global::" + p.Type + ")resolve(parameters[" + Literal(ParameterName(p)) + "]!, " + Literal(p.Type) + "))" : p.Type == "Eplan.EplApi.Base.PointD" ? HandlePointArgument(p) : ConvertValue(p.Type, "parameters[" + Literal(ParameterName(p)) + "]!");
+        return BaseDispatch(root) + "internal static class ApiTryEntryDispatch\n{\n    internal static object? Invoke(string signature, object? target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
             + string.Join("\n", selected.Select(s =>
             {
                 string receiver = s.Member.Static ? "global::" + s.Entry.Type[2..] : "((global::" + s.Entry.Type[2..] + ")target!)";

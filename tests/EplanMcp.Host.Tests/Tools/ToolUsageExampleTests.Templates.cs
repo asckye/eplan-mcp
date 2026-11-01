@@ -26,9 +26,19 @@ public sealed partial class ToolUsageExampleTests
                 Assert.Equal(shape[1], template["signature"]!.GetValue<string>());
                 Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
                 bool setter = template["access"]!.GetValue<string>() == "write" && ApiTryCatalog.MethodAccess(entry.Row.Group) is null;
-                string[]? receiver = ApiTryCatalog.Settings(entry.Row.Group) && !parameters.TryGetProperty("via", out _)
+                string[]? receiver = ApiTryCatalog.Settings(entry.Row.Group) && !parameters.TryGetProperty("via", out _) && !parameters.GetProperty("target").TryGetProperty("handle", out _)
                     ? ["Eplan.EplApi.DataModel.Project"] : ApiTryCatalog.ReceiverShape(shape[1]);
-                bool via = receiver is ["via", _];
+                bool via = parameters.TryGetProperty("via", out _);
+                if (receiver is ["via", var handleType] && !via)
+                {
+                    JsonElement handle = parameters.GetProperty("target");
+                    Assert.True(ApiTryCatalog.HandleType(handleType));
+                    Assert.Equal(handleType, handle.GetProperty("type").GetString());
+                    Assert.True(ApiObjectHandle.Valid(handle.GetProperty("handle").GetString(), handleType));
+                    Assert.Equal("handle", template["arguments"]!["parameters"]!["properties"]!["target"]!["kind"]!.GetValue<string>());
+                }
+                else
+                { Assert.Equal(receiver is ["via", _], via); }
                 bool key = via && ApiTryCatalog.ViaKey(shape[0], parameters.GetProperty("via").GetString()!);
                 Assert.Equal(shape.Skip(2).Concat(receiver is null ? Array.Empty<string>() : ["target"]).Concat(via ? ["via"] : Array.Empty<string>()).Concat(key ? ["via_key"] : Array.Empty<string>()).Concat(setter ? ["value"] : Array.Empty<string>()).Order(StringComparer.Ordinal), parameters.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
                 if (via)
@@ -54,7 +64,7 @@ public sealed partial class ToolUsageExampleTests
 
     private static string ValueKind(JsonElement value) => value.ValueKind switch
     {
-        JsonValueKind.Object => value.TryGetProperty("x", out _) ? "PointD" : "locator",
+        JsonValueKind.Object => value.TryGetProperty("handle", out _) ? "handle" : value.TryGetProperty("x", out _) ? "PointD" : "locator",
         JsonValueKind.Number => value.TryGetInt64(out _) ? "Integer" : "Float",
         JsonValueKind.False or JsonValueKind.True => "Boolean",
         _ => value.ValueKind.ToString(),
