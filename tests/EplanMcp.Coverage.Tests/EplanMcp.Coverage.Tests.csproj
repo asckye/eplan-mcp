@@ -5,4 +5,10 @@
     <EmbeddedResource Include="fixtures\linked-project.csproj" LogicalName="TestImpact.linked-project.csproj" />
     <EmbeddedResource Include="..\..\eng\scripts\check-test-floor.ps1" LogicalName="Gate.check-test-floor.ps1" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Repository evidence is embedded so the Small reference check performs no file I/O. -->
+    <EmbeddedResource Include="../../catalog/mapping/overlay.yaml" LogicalName="mapping-overlay.yaml" />
+    <EmbeddedResource Include="../Contracts.Snapshots/server-contract.verified.json" LogicalName="tool-contract.json" />
+    <EmbeddedResource Include="../../src/EplanMcp.Bridge.Eplan/Adapters/*.cs" LogicalName="%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

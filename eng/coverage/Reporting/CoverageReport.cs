@@ -73,6 +73,8 @@ internal sealed class CoverageReport
 
     public required IReadOnlyList<ApiRule> OverlayRules { get; init; }
 
+    public IReadOnlyList<ToolReach> ReachedByTool { get; init; } = [];
+
     public required IReadOnlyList<Availability> Availability { get; init; }
 
     public static CoverageReport Build(string repositoryRoot)
@@ -93,7 +95,8 @@ internal sealed class CoverageReport
         var properties = new HashSet<string>(StringComparer.Ordinal);
         var actionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var unmatched = new List<string>();
-        foreach (string id in usage.Usages.Where(u => u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key))
+        foreach (string id in usage.Usages.Where(u => u.Value.Any(BridgeUsage.Counts)).Select(u => u.Key)
+            .Concat(overlay.ReachedByTool.SelectMany(r => r.Members)).Distinct(StringComparer.Ordinal))
         {
             string? unit = catalog.Resolve(id);
             properties.UnionWith(catalog.PropertyOf(id) is { } property ? [property] : []);
@@ -166,6 +169,7 @@ internal sealed class CoverageReport
                 .OrderBy(u => u.Layer, StringComparer.Ordinal).ThenBy(u => u.Unit, StringComparer.Ordinal)],
             Unmatched = unmatched,
             OverlayRules = overlay.Api,
+            ReachedByTool = overlay.ReachedByTool,
             Availability = overlay.Availability,
         };
     }

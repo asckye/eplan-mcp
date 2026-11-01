@@ -53,6 +53,16 @@ internal sealed partial class ToolMapping
         using JsonDocument contract = JsonDocument.Parse(File.ReadAllText(Path.Combine(repositoryRoot, ContractSnapshot)));
         JsonElement[] snapshot = [.. contract.RootElement.GetProperty("tools").EnumerateArray()];
         Overlay overlay = Overlay.Load(repositoryRoot, [.. snapshot.Select(t => t.GetProperty("name").GetString()!)]);
+        ApiCatalog? catalog = overlay.ReachedByTool.Count == 0 ? null : ApiCatalog.Load(Path.Combine(repositoryRoot,
+            $"catalog/eplan-{string.Join('.', usage.EplanApi.Split('.').Take(3))}"));
+        foreach (ToolReach reach in overlay.ReachedByTool)
+        {
+            if (!catalog!.Groups.TryGetValue(reach.Match, out var members)
+                || reach.Members.Any(id => !members.Contains((id, false))))
+            {
+                throw new InvalidDataException($"{Overlay.RelativePath}: reached-by-tool {reach.Match} must name non-excluded members of that catalog group.");
+            }
+        }
         string dictionaryPath = Path.Combine(repositoryRoot, PropertyDictionaryGenerator.SourcePath);
         string[] dictionaries = File.Exists(dictionaryPath)
             ? [.. ApiCatalog.Lines(dictionaryPath).Select(p => p.GetProperty("object").GetString()!).Distinct(StringComparer.Ordinal)
@@ -69,6 +79,15 @@ internal sealed partial class ToolMapping
                 ? throw new InvalidDataException($"{Overlay.RelativePath}: {name} names the operation {unknown}, which the Bridge does not have.")
                 : [.. host.Operations.Union(extra).Order(StringComparer.Ordinal)];
             string[] ids = [.. operations.SelectMany(o => idsByOperation[o]).Distinct().Order(StringComparer.Ordinal)];
+            ToolReach[] reaches = [.. overlay.ReachedByTool.Where(r => r.Tools.Contains(name))];
+            foreach (ToolReach reach in reaches)
+            {
+                if (!ids.Any(id => catalog!.Resolve(id) == reach.Via))
+                {
+                    throw new InvalidDataException($"{Overlay.RelativePath}: reached-by-tool {reach.Match}: {name} does not reach {reach.Via} in the scan.");
+                }
+            }
+            ids = [.. ids.Concat(reaches.SelectMany(r => r.Members)).Distinct().Order(StringComparer.Ordinal)];
             string[] classes = [.. usage.Operations.Where(o => operations.Contains(o.Name)).Select(o => o.Class).Distinct()];
             string[] names = [name, .. references.Where(r => r.Value == name).Select(r => r.Key)];
             tools.Add(new ToolEntry(

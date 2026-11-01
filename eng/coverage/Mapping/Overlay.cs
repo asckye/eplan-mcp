@@ -81,6 +81,9 @@ internal sealed class Overlay
 
     public List<Availability> Availability { get; set; } = [];
 
+    [YamlMember(Alias = "reached-by-tool", ApplyNamingConventions = false)]
+    public List<ToolReach> ReachedByTool { get; set; } = [];
+
     public static Overlay Load(string repositoryRoot, IReadOnlyCollection<string> tools)
     {
         string path = Path.Combine(repositoryRoot, RelativePath);
@@ -89,11 +92,16 @@ internal sealed class Overlay
             return new Overlay();
         }
 
+        return Parse(File.ReadAllText(path), tools);
+    }
+
+    internal static Overlay Parse(string yaml, IReadOnlyCollection<string> tools)
+    {
         Overlay overlay;
         try
         {
             overlay = new DeserializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build()
-                .Deserialize<Overlay?>(File.ReadAllText(path)) ?? new Overlay();
+                .Deserialize<Overlay?>(yaml) ?? new Overlay();
         }
         catch (YamlException ex)
         {
@@ -102,7 +110,11 @@ internal sealed class Overlay
 
         string[] problems =
         [
-            .. overlay.Live.Keys.Concat(overlay.Tools.Keys).Where(t => !tools.Contains(t)).Select(t => $"{t} is not a tool of the contract snapshot"),
+            .. overlay.Live.Keys.Concat(overlay.Tools.Keys).Concat(overlay.ReachedByTool.SelectMany(r => r.Tools))
+                .Where(t => !tools.Contains(t)).Select(t => $"{t} is not a tool of the contract snapshot"),
+            .. overlay.ReachedByTool.Where(r => !r.Match.StartsWith("O:", StringComparison.Ordinal) || r.Members.Count == 0 || r.Tools.Count == 0
+                || !r.Via.StartsWith("O:", StringComparison.Ordinal) || r.Source.Length == 0 || r.Receiver.Length == 0)
+                .Select(r => $"reached-by-tool {r.Match}: needs an overload group, members, tools, via group, source and receiver code references"),
             .. overlay.Live.SelectMany(l => l.Value.Where(r => !DateOnly.TryParseExact(r.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
                 || r.Result is not ("pass" or "pass_with_findings" or "partial" or "fail") || r.Basis is not ("stated" or "inferred") || r.Source.Length == 0)
                 .Select(r => $"{l.Key}: a live record needs a yyyy-MM-dd date, a result, a basis and a source")),
