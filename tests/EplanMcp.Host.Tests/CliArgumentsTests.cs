@@ -7,6 +7,22 @@ namespace EplanMcp.Host.Tests;
 public sealed class CliArgumentsTests
 {
     [Theory]
+    [InlineData("doctor --offline", false)]
+    [InlineData("doctor --offline --format json", true)]
+    [InlineData("doctor --format json --offline", true)]
+    public void Parse_OfflineDoctor_IsExplicit(string line, bool json)
+    {
+        Assert.Equal(new CliArguments(CliCommand.Doctor, Json: json, Offline: true), CliArguments.Parse(Split(line)));
+    }
+
+    [Theory]
+    [InlineData("doctor --offline --offline")]
+    [InlineData("doctor --offline --format xml")]
+    [InlineData("serve --offline")]
+    [InlineData("audit verify --offline")]
+    public void Parse_OfflineForOtherCommandsOrInvalidOptions_IsNull(string line) => Assert.Null(CliArguments.Parse(Split(line)));
+
+    [Theory]
     [InlineData("", "Serve", false)]
     [InlineData("serve", "Serve", false)]
     [InlineData("--version", "Version", false)]
@@ -157,7 +173,7 @@ public sealed class CliArgumentsTests
     public void Usage_NamesEveryCommandWithItsOptionsAndTheClients()
     {
         Assert.Equal(
-            "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+            "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
             + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
             + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
             + " | client-config [<client>...] --vm --remove [--format json]"

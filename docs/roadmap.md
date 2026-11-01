@@ -12,6 +12,8 @@ v0.4.0 于 **2026-10-27** 发布（标签日期）。v0.5.0 推迟：先补齐�
 | 页面审查 `eplan_page_review`：第 1 片测试中，第 2 片在操作层之后 | 进行中 | Unreleased | [审图设计](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
 | M8 绘图与客户页精确重绘：必须与原图完全一致，再客户彩排 | 进行中 | v0.5.0；重绘预计 11 月中旬 | [M8](design/2026-10-27-m8-drawing.md)、[验收要求](design/2026-10-31-api-completion.md#45-客户页差异必须在重画前解决) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
 
+每周五预览版（v0.4.x），首个 v0.4.1：2026-11-06
+
 | v0.5.0 之后（按推进顺序） | 状态 | 发布 | 设计依据 | ADR |
 |---|---|---|---|---|
 | M9 主数据与报表余项；EDZ 导入等待负责人样本；`eplan_part_build` 已实现，实机测试延后 | 等待负责人（EDZ）；其余计划中 | v0.5.0 之后，版本待定 | [API 主数据补齐](design/2026-10-31-api-completion.md)、[能力扩展](design/2026-10-30-m10-capability-expansion.md)（独立设计待写） | [0019](adr/0019-master-data-writes.md)、[0032](adr/0032-generic-api-layer.md) |

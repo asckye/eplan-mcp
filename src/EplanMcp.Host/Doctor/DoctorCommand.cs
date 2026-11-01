@@ -14,7 +14,10 @@ internal static class DoctorCommand
     /// <summary>The version of the JSON shape (architecture 5.2); a change to the shape raises it.</summary>
     public const int SchemaVersion = 1;
 
-    public static async Task<int> RunAsync(TextWriter output, CultureInfo culture, bool json, CancellationToken cancellationToken)
+    public static Task<int> RunAsync(TextWriter output, CultureInfo culture, bool json, CancellationToken cancellationToken) =>
+        RunAsync(output, culture, json, offline: false, cancellationToken);
+
+    public static async Task<int> RunAsync(TextWriter output, CultureInfo culture, bool json, bool offline, CancellationToken cancellationToken)
     {
         HostDataLocations locations = HostDataLocations.FromEnvironment();
         var checks = new List<DoctorCheck>
@@ -32,10 +35,18 @@ internal static class DoctorCommand
         checks.AddRange(VmDoctorChecks.Read(() => HttpServiceStateStore.Read(locations), HttpServiceStateStore.StartOf, new VmFirewall()));
         checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
         checks.AddRange(DoctorChecks.RunningEplan());
-        var bridge = new BridgeClient(new PipeBridgeDiscovery(), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);
-        await using (bridge.ConfigureAwait(false))
+        if (offline)
         {
-            checks.AddRange(await DoctorChecks.BridgeAsync(bridge, cancellationToken).ConfigureAwait(false));
+            checks.Add(new(DoctorCheckIds.BridgePipe, DoctorStatus.Info,
+                "离线自检：未检查实时 Bridge 连接与授权", "Offline doctor: live Bridge connection and licence were not checked."));
+        }
+        else
+        {
+            var bridge = new BridgeClient(new PipeBridgeDiscovery(), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);
+            await using (bridge.ConfigureAwait(false))
+            {
+                checks.AddRange(await DoctorChecks.BridgeAsync(bridge, cancellationToken).ConfigureAwait(false));
+            }
         }
 
         checks.Add(DoctorChecks.UserPathLength(DoctorChecks.ReadUserPathLength()));

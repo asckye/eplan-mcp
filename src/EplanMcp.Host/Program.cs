@@ -64,7 +64,7 @@ internal static class Program
     {
         { VmTest: { } test } => await VmTestCommand.RunAsync(test, output, CancellationToken.None).ConfigureAwait(false),
         { Command: CliCommand.VmInstances } => await VmInstances.WriteAsync(new PipeBridgeDiscovery(), output).ConfigureAwait(false),
-        { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, CancellationToken.None).ConfigureAwait(false),
+        { Command: CliCommand.Doctor } => await DoctorCommand.RunAsync(output, CultureInfo.CurrentUICulture, cli.Json, cli.Offline, CancellationToken.None).ConfigureAwait(false),
         { KeyAction: { } action } => await VmKey.RunAsync(action, HostDataLocations.FromEnvironment(), output, CancellationToken.None).ConfigureAwait(false),
         { Firewall: { } firewall } => VmFirewallCommand.ForMachine().Run(firewall, output),
         { Command: CliCommand.AddinVariants } => AddinCommand.ForMachine().ListVariants(output, cli.Json),

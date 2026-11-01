@@ -39,10 +39,11 @@ internal sealed record CliArguments(
     HttpArguments? Http = null,
     string? KeyAction = null,
     VmFirewallRequest? Firewall = null,
-    VmTestRequest? VmTest = null)
+    VmTestRequest? VmTest = null,
+    bool Offline = false)
 {
     public static string Usage { get; } =
-        "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+        "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
         + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
         + " | client-config [<client>...] --vm --remove [--format json]"
@@ -67,6 +68,8 @@ internal sealed record CliArguments(
         ["--version"] => new(CliCommand.Version, Json: false),
         ["vm-instances", "--format", "json"] => new(CliCommand.VmInstances, Json: true),
         ["vm-test", .. var options] when VmTestRequest.Parse(options) is { } test => new(CliCommand.VmTest, test.Json, VmTest: test),
+        ["doctor", "--offline", .. var options] => WithFormat(CliCommand.Doctor, options) is { } offline ? offline with { Offline = true } : null,
+        ["doctor", "--format", "json", "--offline"] => new(CliCommand.Doctor, Json: true, Offline: true),
         ["doctor", .. var options] => WithFormat(CliCommand.Doctor, options),
         ["audit", "verify", .. var options] => WithFormat(CliCommand.AuditVerify, options),
         ["client-config", .. var options] => ClientConfigArguments(options),
