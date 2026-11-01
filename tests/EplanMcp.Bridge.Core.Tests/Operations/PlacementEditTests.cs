@@ -23,8 +23,8 @@ public sealed class PlacementEditTests
     }
     [Theory]
     [InlineData("horizontal", 20, 100, 0)]
-    [InlineData("vertical", 100, 20, Math.PI)]
-    public void Mirror_ReflectsPositionAndTextAngle(string axis, double x, double y, double angle)
+    [InlineData("vertical", 100, 20, 0)]
+    public void Mirror_ReflectsPositionAndKeepsHorizontalTextReadable(string axis, double x, double y, double angle)
     {
         var fake = new PlacementEditFixture();
         JObject input = fake.Input("mirror");

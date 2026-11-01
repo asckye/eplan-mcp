@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using EplanMcp.Contracts;
 namespace EplanMcp.Large.Tests;
@@ -71,6 +72,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                         : Assert.Single(actual, a => a.GetProperty("oid").GetInt64() == original.GetProperty("oid").GetInt64());
                     Assert.Equal(original.GetProperty("name").GetRawText(), found.GetProperty("name").GetRawText());
                     Assert.Equal(original.GetProperty("text").GetRawText(), found.GetProperty("text").GetRawText());
+                    string kind = original.GetProperty("kind").GetString()!;
                     double x = original.GetProperty("location")[0].GetDouble(), y = original.GetProperty("location")[1].GetDouble();
                     double[] Transform(double px, double py) => operation == "rotate" ? [x - py + y, y + px - x] : operation == "copy" ? [px, py - 100] : horizontal ? [px, 300 - py] : [420 - px, py];
                     double[] box = original.GetProperty("bounds").EnumerateArray().Select(v => v.GetDouble()).ToArray();
@@ -80,14 +82,16 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                     { Assert.Equal(expectedBox[i], found.GetProperty("bounds")[i].GetDouble(), 5); }
                     if (original.GetProperty("points").ValueKind == JsonValueKind.Array)
                     { for (int i = 0; i < 2; i++) { double[] at = Transform(original.GetProperty("points")[i][0].GetDouble(), original.GetProperty("points")[i][1].GetDouble()); Assert.Equal(at[0], found.GetProperty("points")[i][0].GetDouble(), 6); Assert.Equal(at[1], found.GetProperty("points")[i][1].GetDouble(), 6); } }
-                    Assert.Equal(operation == "mirror" && !horizontal ? 420 - x : x, found.GetProperty("location")[0].GetDouble(), 6);
-                    Assert.Equal(operation == "copy" ? y - 100 : operation == "mirror" && horizontal ? 300 - y : y, found.GetProperty("location")[1].GetDouble(), 6);
+                    Assert.Equal(kind == "Rectangle" ? expectedBox[0] : operation == "mirror" && !horizontal ? 420 - x : x, found.GetProperty("location")[0].GetDouble(), 6);
+                    Assert.Equal(kind == "Rectangle" ? expectedBox[1] : operation == "copy" ? y - 100 : operation == "mirror" && horizontal ? 300 - y : y, found.GetProperty("location")[1].GetDouble(), 6);
                     if (operation == "rotate" && original.GetProperty("angle").ValueKind == JsonValueKind.Number)
-                    { Assert.Equal(Math.PI / 2, found.GetProperty("angle").GetDouble(), 6); }
+                    { Assert.Equal(kind == "Rectangle" ? 0 : Math.PI / 2, found.GetProperty("angle").GetDouble(), 6); }
                     // Independent observation includes relative property offsets, text contents, angles and every pin.
                     Assert.Equal(original.GetProperty("children").GetArrayLength(), found.GetProperty("children").GetArrayLength());
+                    int childCount = original.GetProperty("children").GetArrayLength();
+                    Assert.True(kind == "Function" ? childCount is 12 or 13 : kind == "PotentialDefinition" ? childCount == 2 : childCount == 0);
                     if (operation == "mirror" && original.GetProperty("angle").ValueKind == JsonValueKind.Number)
-                    { Assert.Equal(horizontal ? 0 : Math.PI, found.GetProperty("angle").GetDouble(), 6); }
+                    { Assert.Equal(0, found.GetProperty("angle").GetDouble(), 6); }
                     for (int i = 0; i < original.GetProperty("pins").GetArrayLength(); i++)
                     {
                         JsonElement pin = original.GetProperty("pins")[i], next = found.GetProperty("pins")[i];
@@ -96,18 +100,35 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                         string expectedDirection = operation == "rotate" ? direction switch { "Right" => "Up", "Up" => "Left", "Left" => "Down", "Down" => "Right", _ => throw new InvalidOperationException() }
                             : operation == "copy" ? direction : horizontal ? direction switch { "Up" => "Down", "Down" => "Up", _ => direction } : direction switch { "Left" => "Right", "Right" => "Left", _ => direction };
                         Assert.Equal(expectedDirection, next.GetProperty("direction").GetString());
-                        Assert.Equal(operation == "rotate" ? x - py + y : operation == "mirror" && !horizontal ? 420 - px : px, next.GetProperty("location")[0].GetDouble(), 6);
-                        Assert.Equal(operation == "rotate" ? y + px - x : operation == "copy" ? py - 100 : operation == "mirror" && horizontal ? 300 - py : py, next.GetProperty("location")[1].GetDouble(), 6);
+                        double[] expectedPin = Transform(px, py);
+                        // B11: the seeded PCP's variants have unequal offsets; K's mirrored upper pin is +3.99.
+                        if (kind == "PotentialDefinition")
+                        {
+                            Assert.Equal([x, y + 3], pin.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()));
+                            if (operation == "rotate")
+                            { expectedPin = [x - 2, y]; }
+                            else if (operation == "mirror" && horizontal)
+                            { expectedPin = [x, 300 - y - 4]; }
+                        }
+                        else if (kind == "Function" && operation == "mirror" && horizontal && i == 1)
+                        {
+                            Assert.Equal([x, y - 4], pin.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()));
+                            expectedPin = [x, 300 - y + 3.99];
+                        }
+                        Assert.Equal(expectedPin[0], next.GetProperty("location")[0].GetDouble(), 6);
+                        Assert.Equal(expectedPin[1], next.GetProperty("location")[1].GetDouble(), 6);
                     }
                     for (int i = 0; i < original.GetProperty("children").GetArrayLength(); i++)
                     {
                         JsonElement child = original.GetProperty("children")[i], next = found.GetProperty("children")[i];
                         double cx = child.GetProperty("location")[0].GetDouble(), cy = child.GetProperty("location")[1].GetDouble();
                         Assert.Equal(child.GetProperty("text").GetRawText(), next.GetProperty("text").GetRawText());
-                        Assert.Equal(operation == "rotate" ? -cy : operation == "mirror" && !horizontal ? -cx : cx, next.GetProperty("location")[0].GetDouble(), 6);
-                        Assert.Equal(operation == "rotate" ? cx : operation == "mirror" && horizontal ? -cy : cy, next.GetProperty("location")[1].GetDouble(), 6);
+                        // B11: only the observed anchor slots change offset; the other entries retain local offsets.
+                        bool anchor = kind == "PotentialDefinition" ? i == 0 : i == 0 || i == childCount - 4 || i == childCount - 2 || childCount == 13 && i == 8;
+                        Assert.Equal(anchor && operation == "rotate" ? -cy : anchor && operation == "mirror" && !horizontal ? -cx : cx, next.GetProperty("location")[0].GetDouble(), 6);
+                        Assert.Equal(anchor && operation == "rotate" ? cx : anchor && operation == "mirror" && horizontal ? -cy : cy, next.GetProperty("location")[1].GetDouble(), 6);
                         double angle = next.GetProperty("angle").GetDouble();
-                        Assert.Equal(operation == "rotate" ? Math.PI / 2 : operation == "mirror" && !horizontal ? Math.PI : 0, (angle + 2 * Math.PI) % (2 * Math.PI), 6);
+                        Assert.Equal(0, (angle + 2 * Math.PI) % (2 * Math.PI), 6);
                     }
                 }
             }
@@ -133,7 +154,8 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
                     double x = target.GetProperty("location")[0].GetDouble(), y = target.GetProperty("location")[1].GetDouble();
                     JsonElement pivoted = await Probe(new { project = session.Project, page, operation = "rotate", oids = new[] { target.GetProperty("oid").GetInt64() }, pivot = new[] { x + 4, y + 4 } });
                     JsonElement moved = pivoted.GetProperty("after").GetProperty("objects").EnumerateArray().Single(o => o.GetProperty("oid").GetInt64() == target.GetProperty("oid").GetInt64());
-                    Assert.Equal(x + 8, moved.GetProperty("location")[0].GetDouble(), 6);
+                    double height = target.GetProperty("bounds")[3].GetDouble() - target.GetProperty("bounds")[1].GetDouble();
+                    Assert.Equal(target.GetProperty("kind").GetString() == "Rectangle" ? x + 8 - height : x + 8, moved.GetProperty("location")[0].GetDouble(), 6);
                     Assert.Equal(y, moved.GetProperty("location")[1].GetDouble(), 6);
                     await session.UndoAsync();
                 }
@@ -192,11 +214,25 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
         JsonElement preview = await host.CallAsync("eplan_placement_edit", new(args) { ["dry_run"] = true });
         Assert.Equal(ExecutionState.NotStarted, preview.GetProperty("execution").GetString());
         Assert.Equal(baseline, await Geometry());
+        if (operation == "delete")
+        {
+            Assert.Empty(preview.GetProperty("removedConnections").EnumerateArray());
+            JsonElement removed = Assert.Single(preview.GetProperty("predicted").EnumerateArray());
+            Assert.Equal("Rectangle", removed.GetProperty("kind").GetString());
+            Assert.False(removed.GetProperty("exists").GetBoolean());
+            JsonElement locator = removed.GetProperty("locator");
+            string position = JsonSerializer.Serialize(removed.GetProperty("location"));
+            string angle = removed.GetProperty("angle").GetDouble().ToString(CultureInfo.InvariantCulture);
+            host.Approvals.Approve("eplan_placement_edit", session.Project,
+                [$"update placement {page}:{locator.GetProperty("type")}/{locator.GetProperty("oid")}: delete '' -> 'position={position}; angle(rad)={angle}; tag='"]);
+        }
         JsonElement result = await host.CallAsync("eplan_placement_edit", args);
         TestContext.Current.TestOutputHelper!.WriteLine(operation + " product: " + result);
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         if (operation == "copy")
         { Assert.Equal(2, result.GetProperty("newLocators").GetArrayLength()); }
+        if (operation == "delete")
+        { Assert.False(string.IsNullOrEmpty(result.GetProperty("backup").GetString())); }
         await session.UndoAsync();
         Assert.Equal(baseline, await Geometry());
         Assert.Contains((await session.SnapshotAsync()).Pages, p => p.Name == sentinel);
