@@ -82,7 +82,7 @@ public sealed class ApiTryServicesTests
         Assert.Equal("unsupported_return", Exclusion(Entry("GetValue", returns: "System.Object")));
         Assert.Equal("static_or_nonpublic", ApiTryGenerator.Exclusion(Entry("GetValue"), Entry("GetValue").Details[0] with { Static = true }, null));
         Assert.Equal("owns_transaction", Exclusion(Entry("EvaluateAndSetAllNamesTXN", "NameService")));
-        Assert.Equal("external_path_parameter", Exclusion(Entry("ImportData", "PlcService", [new("strFullName", "System.String")])));
+        Assert.Null(Exclusion(Entry("ImportData", "PlcService", [new("strFullName", "System.String")])));
     }
 
     [Fact]

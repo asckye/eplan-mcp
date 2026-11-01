@@ -3,7 +3,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Tools;
 namespace EplanMcp.Coverage;
 /// <summary>Catalog-derived closed dispatch. Extend the reviewed type/member selection, never runtime reflection.</summary>
-internal static class ApiTryGenerator
+internal static partial class ApiTryGenerator
 {
     internal const string CatalogPath = "src/EplanMcp.Contracts/Generated/ApiTryCatalog.g.cs";
     internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs";
@@ -28,7 +28,7 @@ internal static class ApiTryGenerator
     private static bool ObjectType(string? type, IReadOnlyDictionary<string, string[]>? kinds = null) => kinds is null ? ApiTryCatalog.Kinds(type).Length > 0 : kinds.ContainsKey((type ?? "").Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal));
     private static bool Scalar(string? type, IReadOnlyDictionary<string, string[]>? enums) => type is "System.String" or "System.Boolean" or "System.Double" or "System.Int32" or "System.Int64" || type is not null && enums?.ContainsKey(type) == true;
     internal static bool ReadMethod(ApiEntry entry) => _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal))
-        && !entry.Details.Where(d => d.Kind == "overload").SelectMany(d => d.Parameters!).Any(ApiTryServices.SideEffectParameter);
+        && !entry.Details.Where(d => d.Kind == "overload").SelectMany(d => d.Parameters!).Any(ApiTryServices.SideEffectParameter) && !FileOutput(entry);
     private static string ParameterName(ApiParameter p) => p.Name == "target" ? "argument_target" : p.Name;
     internal static string Names(ApiDetail member) => string.Join("|", member.Parameters!.Select(ParameterName).Order(StringComparer.Ordinal));
     private static string Classification(ApiEntry entry, bool service) => (ReadMethod(entry) ? "read" : "write") + "\t"
@@ -38,7 +38,7 @@ internal static class ApiTryGenerator
         if (entry.Row.ExcludedReason is not null || member.ExcludedReason is not null)
         { return "catalog:" + (entry.Row.ExcludedReason ?? member.ExcludedReason); }
         bool service = services?.ContainsKey(entry.Type[2..]) == true;
-        if (service && (services![entry.Type[2..]].Reason ?? ApiTryServices.Exclusion(entry, member)) is { } reason)
+        if (service && (services![entry.Type[2..]].Reason ?? FileExclusion(entry, member)) is { } reason)
         { return reason; }
         if (entry.Name == "Dispose" || entry.Name.StartsWith('#') || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
         { return "lifecycle_or_creation"; }
@@ -109,7 +109,7 @@ internal static class ApiTryGenerator
             + string.Join("\n", methods.Concat(selected).Where(s => !s.Member.Static && !s.Entry.Name.StartsWith('#')).Select(s => "        " + Literal(s.Member.Signature!) + " => " + (services.ContainsKey(s.Entry.Type[2..]) ? "[\"Eplan.EplApi.DataModel.Project\"]" : ObjectType(s.Entry.Type[2..], kinds) ? Shape(s.Entry.Type[2..]) : "[\"handle\", " + Literal(s.Entry.Type[2..]) + "]") + ","))
             + "\n        _ => null,\n    };\n    public static string[]? ParameterShape(string signature, string name) => (signature, name) switch\n    {\n"
             + string.Join("\n", methods.SelectMany(s => s.Member.Parameters!.Select(p => "        (" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
-            + "\n        _ => null,\n    };\n    public static string[]? ValueShape(string group) => group switch\n    {\n"
+            + "\n        _ => null,\n    };\n" + FileCatalog(methods, services) + "    public static string[]? ValueShape(string group) => group switch\n    {\n"
             + string.Join("\n", selected.Where(s => Writable(s.Member) && s.Member.ReturnType != "System.Int64").Select(s => "        " + Literal(s.Entry.Row.Group) + " => [" + string.Join(", ", (enums.TryGetValue(s.Member.ReturnType!, out string[]? values) ? _enumShape.Concat(values) : [s.Member.ReturnType!]).Select(Literal)) + "],"))
             + "\n        _ => null,\n    };\n    public static bool Service(string group) => group switch { " + string.Join(" ", methods.Where(s => services.ContainsKey(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => false };\n"
             + "    public static string[] TargetKinds(string group) => Service(group) ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"

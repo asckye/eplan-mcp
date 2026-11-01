@@ -210,6 +210,7 @@
 - 两个 EPLAN 实例同时运行时，分页游标不能绑定全部实例列表：另一个实例启动或退出会使游标失效。游标只绑定所选实例（进程号与管道名）。— Large `GenericObjectReadTests`、`ObjectReadTests`（A、B 两槽并行）。
 
 ### A63. 服务类方法的试执行（C1 第五片，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 上）
+- C1 Files（2026-11-01，仅核对本机官方 `Eplan.EplApi.HEServicesu.xml`，未运行 EPLAN）：DeviceService.ImportDeviceList/ExportDeviceList 的 strImportFilePath/strExportFilePath 是完整文件路径；PlcService.ImportData 的 strFullName/strInputFileName 是输入文件；PrePlanningService 的定义文件导入/导出明确是项目与文件之间的数据交换。ProjectManagement.ReadProjectInfo 从 XML 读取并设置项目属性，故仍归 write；ConnectionService.ExportProductionWiring 的 strDestinationPath 实际是目录，本片继续排除。产物不随项目撤销沿用 A56，新增 Large 文件写入撤销仅编写、编译。
 - `HEServices.NameService.CanDeviceTagBeNested(Function)` 在只读调用时抛 `ApplicationException`（S029128，"未确定任何页"）；先用 `eplan_page_open` 打开该功能所在的页也一样。带页参数的重载 `CanDeviceTagBeNested(Page, Function)` 正常返回布尔值，业务快照与设计文件都不变。需要"当前页"的服务方法，优先选带显式页参数的重载。
 - 试执行把这类拒绝报告为已知失败（`EPLAN_OPERATION_FAILED`，`rolled_back`）：只在调用前后快照一致时这样报告，否则仍为 `OUTCOME_UNKNOWN` 并暂停写入。
 - `HEServices.ConnectionService.SwapSourceAndTarget` 作为写入试执行：一次撤销恢复连接的源与目标，之前的哨兵页仍在。— Large `ApiTryTests`。

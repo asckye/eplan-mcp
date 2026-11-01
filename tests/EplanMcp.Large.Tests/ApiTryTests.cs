@@ -12,7 +12,7 @@ namespace EplanMcp.Large.Tests;
 
 /// <summary>Prepared LargeWrite scratch copy only; every trial approval is answered by the engineer.</summary>
 [Trait("Size", "Large")]
-public sealed class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
+public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
 {
     private readonly string _home = Directory.CreateTempSubdirectory("eplanmcp-large-api-try-").FullName;
     private ServiceProvider? _services;

@@ -8,6 +8,8 @@ public sealed class ApiTryData
     public DrawingLocator? Locator { get; set; }
     /// <summary>A committed transaction cleanup or undo warning, if any.</summary>
     public string? Warning { get; set; }
+    /// <summary>Every output artifact, with size and content hash.</summary>
+    public List<ApiTryFile> Files { get; set; } = [];
     /// <summary>Business page hashes, counts and design-file fingerprints before execution.</summary>
     public Dictionary<string, string> Before { get; set; } = [];
     /// <summary>The same observations after execution.</summary>

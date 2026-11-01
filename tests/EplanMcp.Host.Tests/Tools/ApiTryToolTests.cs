@@ -9,7 +9,7 @@ using ModelContextProtocol.Protocol;
 namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
-public sealed class ApiTryToolTests : IDisposable
+public sealed partial class ApiTryToolTests : IDisposable
 {
     private readonly FakeApprovalChannel _approval;
     private readonly WriteToolHarness _harness;
@@ -34,7 +34,7 @@ public sealed class ApiTryToolTests : IDisposable
         _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData { Value = "read\u202edata", Before = new() { ["snapshot:1"] = "a", ["file:Page.eod"] = "old" }, After = new() { ["snapshot:1"] = "b", ["file:Page.eod"] = "new" } };
     }
     public void Dispose() => _harness.Dispose();
-    private ApiTryTools Tool(bool enabled = true) => new(_harness.Bridge, _harness.Pipeline, HostConfig.Defaults(_harness.Locations) with { ApiTry = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off }, ApiIndex.Load());
+    private ApiTryTools Tool(bool enabled = true) => new(_harness.Bridge, _harness.Pipeline, HostConfig.Defaults(_harness.Locations) with { ApiTry = enabled ? ActionRunSwitch.On : ActionRunSwitch.Off }, ApiIndex.Load(), _harness.Locations);
     private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? "{}").RootElement, dry, TestContext.Current.CancellationToken);
 
     [Fact]

@@ -39,7 +39,7 @@ public sealed class ApiTryPlanOperation(int major, IProjectCatalog catalog, IApi
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "A service without explicit object arguments requires the target scratch project to be current."); }
         args.Project = project.Path;
         dispatch.CheckTarget(args);
-        Dictionary<string, string> before = dispatch.Inspect(project.Path);
+        Dictionary<string, string> before = ApiTryFiles.Observe(args, dispatch.Inspect(project.Path), planning: true);
         plan.Fingerprint = Fingerprint.Of([args.Group, args.Project, args.Parameters, .. before.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => JsonConvert.SerializeObject(p))]);
         plan.Details["before"] = JsonConvert.SerializeObject(before);
         plan.Details["rawParameters"] = args.Parameters;

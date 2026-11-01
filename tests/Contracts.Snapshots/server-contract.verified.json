@@ -1467,6 +1467,23 @@
           },
           "hint": {
             "type": "string"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "bytes": {
+                  "type": "integer"
+                },
+                "sha256": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -1482,7 +1499,8 @@
           "changes",
           "totalChanges",
           "truncated",
-          "hint"
+          "hint",
+          "files"
         ]
       },
       "annotations": {

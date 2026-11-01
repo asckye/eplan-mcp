@@ -10,4 +10,8 @@ public sealed class ApiTryArgs
     public string Parameters { get; set; } = "{}";
     /// <summary>Approved state and parameter fingerprint.</summary>
     public string? Fingerprint { get; set; }
+    /// <summary>Trusted Host data root, supplied internally rather than by tool parameters.</summary>
+    public string DataRoot { get; set; } = string.Empty;
+    /// <summary>Host-allocated output directory identity, bound to the approved fingerprint.</summary>
+    public string OutputId { get; set; } = string.Empty;
 }

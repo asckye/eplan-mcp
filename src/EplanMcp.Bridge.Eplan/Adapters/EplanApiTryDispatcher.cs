@@ -7,7 +7,7 @@ using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A12/A36/A39 borrowed identities; no EPLAN object crosses a request boundary.</summary>
-internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
+internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher
 {
     public void CheckTarget(ApiTryArgs args)
     {
@@ -42,7 +42,7 @@ internal sealed class EplanApiTryDispatcher : IApiTryDispatcher
     public object? Invoke(ApiTryArgs args)
     {
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
-        JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
+        JObject parameters = FileParameters(args);
         StorableObject target = Resolve(args.Project, parameters["target"]!, ApiTryCatalog.TargetKinds(args.Group));
         bool method = ApiTryCatalog.MethodAccess(args.Group) is not null;
         if (!method && parameters.ContainsKey("value"))

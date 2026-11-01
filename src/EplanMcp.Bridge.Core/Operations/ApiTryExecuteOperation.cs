@@ -28,7 +28,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
                 {
                     // EPLAN refuses some reads (e.g. S029128, no current page): unchanged state makes that a known failure.
                     var before = JsonConvert.DeserializeObject<Dictionary<string, string>>(plan.Details!["before"])!;
-                    Dictionary<string, string> after = dispatch.Inspect(args.Project);
+                    Dictionary<string, string> after = ApiTryFiles.Observe(args, dispatch.Inspect(args.Project));
                     if (before.Count == after.Count && before.All(p => after.TryGetValue(p.Key, out string? v) && v == p.Value))
                     {
                         throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN refused this read and nothing changed; it may need a current page or selection.", ex)
@@ -67,7 +67,7 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             if (setter && value != Convert.ToString(((Newtonsoft.Json.Linq.JValue)ApiTryPlanOperation.Parameters(args.Parameters)["value"]!).Value, System.Globalization.CultureInfo.InvariantCulture))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The property did not read back as requested; the trial was rolled back."); }
             OperationContext.Current.ThrowIfCancellationRequested();
-            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Before = before, After = dispatch.Inspect(args.Project) };
+            var data = new ApiTryData { Value = value, Locator = result as DrawingLocator, Before = before, After = ApiTryFiles.Observe(args, dispatch.Inspect(args.Project)), Files = ApiTryFiles.Outputs(args) };
             if (setter)
             { data.After[key] = JsonConvert.SerializeObject(value); }
             OperationContext.Current.ThrowIfCancellationRequested();
