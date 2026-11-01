@@ -1,5 +1,9 @@
 # 工具规格：`eplan_placement_edit`
-placement / full / Implemented（新增 Large 未运行）。delete 为 Destructive（SEC-21，逐次审批和备份），其余 Write；MCP：readOnly=false、destructive=true、idempotent=false、openWorld=false。
+| 模板项 | 规格 |
+|---|---|
+| 状态 | Implemented (Unreleased) |
+
+placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为 Destructive（SEC-21，逐次审批和备份），其余 Write；MCP：readOnly=false、destructive=true、idempotent=false、openWorld=false。
 ## 1. 这个工具解决什么任务
 同页删除、复制、旋转、镜像、对齐和等间隙分布；单纯移动仍用 `eplan_placement_update`。对齐/分布复用其 planner、Scene 和执行器。
 ## 2. 输入参数

@@ -29,7 +29,7 @@ EPLAN 2026（你正在使用的界面）
 
 ## 工具概览
 
-`full` 登记 95 个工具（以[合约快照](tests/Contracts.Snapshots/server-contract.verified.json)为准，默认关闭的工具需另行启用）；`serve --profile core` 提供固定的 25 个常用工具。清单、Profile 与读写注解见[工具索引](docs/tools/README.md)，参数与限制见各工具规格。
+`full` 登记 96 个工具（以[合约快照](tests/Contracts.Snapshots/server-contract.verified.json)为准，默认关闭的工具需另行启用）；`serve --profile core` 提供固定的 25 个常用工具。清单、Profile 与读写注解见[工具索引](docs/tools/README.md)，参数与限制见各工具规格。
 
 | 分组 | 能做什么 |
 |---|---|
