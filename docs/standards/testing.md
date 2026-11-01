@@ -11,14 +11,14 @@
 
 | 规模 | 允许使用 | 不允许 | 单个测试时长 | 运行时机 |
 |---|---|---|---|---|
-| **Small** | 单进程内存计算 | 文件系统、网络、管道、EPLAN、`Thread.Sleep` | < 100 ms | 每次构建、每个 PR |
-| **Medium** | 本机文件系统（临时目录）、本机进程间通信（命名管道）、子进程 | EPLAN、外网 | < 5 s | 每个 PR |
-| **Large** | 真实 EPLAN、授权、scratch 项目 | 用户的真实项目 | 分钟级 | 每晚、发布前、手动触发 |
+| **Small** | 单进程内存计算 | 文件系统、网络、管道、EPLAN、`Thread.Sleep` | < 100 ms | 每次构建、本地关卡 |
+| **Medium** | 本机文件系统（临时目录）、本机进程间通信（命名管道）、子进程 | EPLAN、外网 | < 5 s | 本地关卡 |
+| **Large** | 真实 EPLAN、授权、scratch 项目 | 用户的真实项目 | 分钟级 | 按第 4 节落地条件、发布验收 |
 | **Agent 评测** | 真实 EPLAN + 真实模型 | 用户的真实项目 | 每个任务数分钟 | 发布前、工具描述改动后 |
 
 测试类用 trait 标注规模：`[Trait("Size", "Small")]`。CI 按 trait 过滤执行。
 
-**比例目标**：Small 约 70%，Medium 约 20%，Large 约 10%。Google 的参考比例约为 80/15/5；本项目的 Bridge 适配层天然需要更多实机测试，所以比例略放宽。如果某个功能只能靠 Large 测试覆盖，说明可测试性设计有问题：业务逻辑应该从 EPLAN 调用里剥离出来，单独做 Small 测试。
+不设测试规模比例目标。业务逻辑应从 EPLAN 调用里剥离出来，单独做 Small 测试；真实 API 行为由 Large 验证。
 
 ---
 
@@ -43,7 +43,7 @@
 工具的名称、标题、描述、输入输出 JSON Schema、四个注解，以及服务器说明（instructions），是本项目对外承诺的 API（见 [mcp-tool-design.md 第 11 节](mcp-tool-design.md#11-契约变更)）。
 
 - `ToolContractSnapshotTests`（Medium）用 [Verify](https://github.com/VerifyTests/Verify) 把服务器说明和 `tools/list` 中每个工具的完整定义（工具与 `serve` 注册的相同，按名称排序）序列化成 `tests/Contracts.Snapshots/server-contract.verified.json`，提交到仓库。
-- 任何导致快照变化的 PR，都必须同时提交新的快照，并在 PR 描述中说明契约为什么要变（[mcp-tool-design 第 11 节](mcp-tool-design.md#11-契约变更)）。评审时快照的 diff 就是契约变更的清单。
+- 任何导致快照变化的变更集，都必须同时交付新的快照，并在提交正文中说明契约为什么要变（[mcp-tool-design 第 11 节](mcp-tool-design.md#11-契约变更)）。评审时快照的 diff 就是契约变更的清单。
 - 描述文字的修改也会体现在快照中。描述会直接影响模型行为，所以同样要评审，必要时重跑 Agent 评测。
 - 快照从不自动接受：契约一变，测试就失败（本地和 CI 都一样），Verify 只在旁边写出 `*.received.json`（已被 `.gitignore` 忽略），不会弹出比较工具。
 - `CliJsonSnapshotTests`（Medium）用同样的方式固定 `doctor --format json`、`audit verify --format json`、`client-config --format json`、`install-addin`、`uninstall-addin --format json` 和 `vm-test --format json` 的结构（`doctor-json`、`audit-verify-json`、`client-config-json`、`addin-json`、`vm-test-json`，[架构 5.2](../architecture/architecture.md#52-host-组件)），更新方法与下文相同；结构变化时 `schemaVersion` 加 1。
@@ -52,7 +52,7 @@
 ### 更新快照
 1. 运行快照测试：`dotnet test --project tests\EplanMcp.Host.Tests -- --filter-class "EplanMcp.Host.Tests.Tools.ToolContractSnapshotTests"`。契约有变化时测试失败，失败信息逐行列出变化（`-` 是已提交的快照，`+` 是当前结果，带行号）；还没有快照时列出全部内容。
 2. 审视差异：`git diff --no-index tests\Contracts.Snapshots\server-contract.verified.json tests\Contracts.Snapshots\server-contract.received.json`，确认每一处变化都是有意的。
-3. 接受：用 `.received.json` 覆盖 `.verified.json`（`Move-Item -Force` 两个文件），重新运行测试确认通过，把新快照和代码改动放在同一个 PR 里提交。
+3. 接受：用 `.received.json` 覆盖 `.verified.json`（`Move-Item -Force` 两个文件），重新运行测试确认通过，把新快照和代码改动放在同一个变更集中交付。
 
 快照文件由 Verify 写出，是带 BOM 的 UTF-8、LF 换行（`.editorconfig` 中有对应规则）。不要手工编辑快照，改代码后重新生成。
 
@@ -69,8 +69,8 @@
 
 ### 环境
 - 装有 EPLAN（版本与支持矩阵一致）、具备 API 扩展授权的开发机；不使用自托管 runner（[ADR-0020](../adr/0020-no-self-hosted-runner.md)）。
-- 测试只操作 **scratch 根目录**（默认 `%USERPROFILE%\EplanMcp\scratch\`，见 ADR-0008）下的项目，测试结束后删除。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
-- Large 测试在开发机上手动运行，见 [tests/EplanMcp.Large.Tests](../../tests/EplanMcp.Large.Tests/README.md)：合并写入类工具或 Bridge 的改动之前、每次发布之前（ADR-0020）。只读测试共用夹具脚本复制的示例项目，不自建、也不删除它；M3 的写测试按下文的要求自建夹具。
+- 测试只操作 **scratch 根目录**（默认 `%USERPROFILE%\EplanMcp\scratch\`，见 ADR-0008）下的项目；按类的约定清理或保留验收证据。Host 的写入保护会拒绝 scratch 之外的写操作，测试不能关闭这项保护。
+- 涉及 EPLAN 行为的变更集，只有受影响 Large 类已在真实机器通过，或已列入 [待验台账](../process/large-pending.md) 且提交正文明确说明待验，才能落到 main。选择类、单机串行批次及发布前完成条件见 [实机验证](../process/live-verification.md)，夹具和命令见 [Large README](../../tests/EplanMcp.Large.Tests/README.md)。只读测试共用夹具脚本复制的示例项目，不自建、也不删除它；M3 的写测试按下文的要求自建夹具。
 - 能在离线宿主上运行的 Large 测试类另标 `[Trait("Host", "Offline")]`（[M5 设计](../design/2026-10-20-m5-operability.md) 4.9），按 `--filter-trait "Host=Offline"` 运行，方法见上面的 README。这些类中需要打开规模夹具（`EPLANMCP_LARGE_FIXTURE`）的方法另标 `[Trait("Fixture", "Scale")]`，离线运行（包括 `release-addin.ps1`）用 `--filter-not-trait "Fixture=Scale"` 排除，否则它们只能跳过，而发布脚本不接受跳过。
 
 ### 测试夹具项目
@@ -86,8 +86,8 @@
 - 导出类功能（PDF/PNG/DXF）：检查文件存在、页数、大小范围。需要验证图形时，用图像差异比较并设置阈值，阈值写在测试里。
 
 ### 稳定性
-- 不稳定的测试在 24 小时内隔离（标注 `[Trait("Quarantine", "true")]` 并开 Issue），一周内修好或删除。不允许"重跑直到通过"。
-- 每个 Large 测试必须独立：自建夹具、自己清理，不依赖执行顺序。
+- 不稳定的测试先保留证据、查因；每个实机失败用精确输入补 Small 回归。保持 main 的 Large 通过，不弱化断言，不允许“重跑直到通过”；失败待修和未完成验证记入待验台账。
+- Large 测试不依赖其他测试结果：只读测试可共用只读夹具，写测试使用隔离副本并按各类约定清理或保留验收证据。单机各批次串行。
 
 ---
 
@@ -140,25 +140,29 @@ budget: { max_tool_calls: 25, max_minutes: 5 }
 `方法或场景_条件_预期结果`，例如 `CreatePage_OutsideScratchRoot_IsDeniedWithoutApproval`。
 
 ### 必须测失败路径的地方
-以下代码的 PR，没有失败场景测试不能合并：
-- 审批与写入保护（策略引擎）
+以下区域的变更集没有失败场景测试不能交付；这是唯一范围清单，其他规范引用本节：
+- 审批与写入保护（策略引擎、可写范围）
 - 审计写入（磁盘满、文件被占用）
+- 路径判断、导出目录与备份（越界、链接、备份失败）
+- 管道认证，以及 Workbench 审批界面和管道（身份、畸形帧、断开、迟到回答、防误触）
 - Bridge 与 EPLAN 主线程之间的调度（超时、EPLAN 正在显示模态对话框、EPLAN 退出）
 - 事务回滚（写到一半出错时，项目状态必须恢复）
+- `install-addin`（注册失败、已有插件属于其他用户）
+- `eplan_action_run` 白名单校验（未知 action/参数、越界路径和注入）
 
 ---
 
 ## 7. 测试数量下限
 
-过滤条件写错、`Size` trait 拼错或测试发现失败时，`dotnet test` 可能只运行了很少甚至 0 个测试，结果仍然是"通过"。CI 的 "Test count floor" 步骤读取测试生成的 TRX 文件，按 [`tests/test-suites.json`](../../tests/test-suites.json) 检查：
+过滤条件写错、`Size` trait 拼错或测试发现失败时，`dotnet test` 可能只运行了很少甚至 0 个测试，结果仍然是"通过"。本地关卡与 CI 的 "Test count floor" 步骤读取测试生成的 TRX 文件，按 [`tests/test-suites.json`](../../tests/test-suites.json) 检查：
 
 - 登记的每个测试程序集（`assembly`）通过的测试数不少于 `minPassed`；没有结果也算失败；
-- 运行了但没有登记的测试程序集也算失败：新增测试项目时，在同一个 PR 中登记。
+- 运行了但没有登记的测试程序集也算失败：新增测试项目时，在同一个变更集中登记。
 
 下限设在当时实际通过数的 90% 左右，只用来发现"整套没跑或大量没跑"，不要求每加一个测试就改。
 
 **下限只升不降。** 测试明显增多后（例如一个里程碑结束时）把下限提高：
 1. 在本地运行 `dotnet test --solution EplanMcp.Ci.slnf -- --filter-not-trait "Size=Large"`，或者看 CI 日志中该步骤打印的每个程序集的通过数和当前下限；
-2. 把 `minPassed` 改为新通过数的 90% 左右（向下取整到 5 的倍数），单独提交或随相关 PR 提交。
+2. 把 `minPassed` 改为新通过数的 90% 左右（向下取整到 5 的倍数），单独作为变更集或随相关变更集更新。
 
-删除或合并测试导致低于下限时，先确认这些测试确实应该删除。降低下限等于放宽检查，必须在 PR 描述中说明原因，由项目负责人批准。
+删除或合并测试导致低于下限时，先确认这些测试确实应该删除。降低下限等于放宽检查，必须在提交正文中说明原因，由项目负责人批准。

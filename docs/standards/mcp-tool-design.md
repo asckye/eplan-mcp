@@ -200,7 +200,7 @@ eplan_device_place
 | `EPLAN_OPERATION_FAILED` | 视情况 | `rolled_back` | EPLAN 报告失败；`eplanMessages` 中附带 EPLAN 的系统消息；已回滚 |
 | `TIMEOUT` | 是 | `not_started` | 读工具执行超过时限；写工具只在规划阶段超时，或已确认执行请求没有送达时返回。写工具发出执行请求后不再直接返回它，而是先向 Bridge 取回结果（[ADR-0010](../adr/0010-write-outcomes.md)） |
 | `AUDIT_UNAVAILABLE` | 否 | `not_started` | 审计无法写入，所以写操作被拒绝 |
-| `INTERNAL` | 否 | 按发生的阶段：执行前 `not_started`，事务中 `rolled_back`，Bridge 已提交之后 `committed` | 本项目的缺陷；附上关联 ID，请工程师提交 Issue |
+| `INTERNAL` | 否 | 按发生的阶段：执行前 `not_started`，事务中 `rolled_back`，Bridge 已提交之后 `committed` | 本项目的缺陷；附上关联 ID 和精确输入，交给负责人形成修复 brief |
 | `OUTCOME_UNKNOWN` | 否 | `unknown` | 写操作被中断，取不回结果，无法确定项目是否被修改。提示**不要重复调用**，先请工程师在 EPLAN 中检查，可以用读工具查看现状；该项目的写入随之暂停 |
 | `PACK_INVALID` | 否 | — | 工程包或开发包校验不通过（ADR-0024：文件与清单不符、不允许的类型、超限；没有来源的正式规则）；`metadata.problems` 逐条列出，什么都没有安装或构建 |
 | `RESOURCE_NOT_FOUND` | 否 | — | 工程包、版本、资源或计划不存在/不可见；计划先查会话归属，不泄露存在性；其他资源提示用 `eplan_pack_list`、`eplan_asset_search` 查询 |
@@ -285,7 +285,7 @@ eplan_device_place
 ## 11. 契约变更
 - 工具契约 = 名称 + 描述 + 输入输出 schema + 注解。全部纳入快照测试。
 - 破坏性变更和废弃规则见 [开发流程第 8 节](../process/development-workflow.md#8-版本与发布)。
-- 修改描述也是契约变更：需要在 PR 中说明理由，必要时重跑 Agent 评测。
+- 修改描述也是契约变更：需要在提交正文中说明理由，必要时重跑 Agent 评测。
 
 ---
 
@@ -302,4 +302,4 @@ eplan_device_place
 - [ ] 项目自由文本只在数据字段中
 - [ ] 描述、schema、用法和错误消息都是英文；示例符合输入 schema；只提到已注册的工具（`ModelTextTests`、`ToolUsageExampleTests` 自动检查）
 - [ ] 至少有一个 Agent 评测任务；契约快照已更新
-- [ ] 新增工具时，只维护一份工具名清单：运行契约快照测试，审查 `.received.json` 后用它覆盖 `tests/Contracts.Snapshots/server-contract.verified.json`；同时维护工具规格和用法文本，不再手改工具名列表或绝对数量。usage 枚举来自实际注册集合，测试的完整工具集合与数量来自该快照；开关和 Profile 按名称过滤。
+- [ ] 新增工具时，只维护一份工具名清单：按 [testing.md 第 3 节](testing.md#3-工具契约快照测试) 更新并审视契约快照；同时维护工具规格和用法文本，不再手改工具名列表或绝对数量。usage 枚举来自实际注册集合，测试的完整工具集合与数量来自该快照；开关和 Profile 按名称过滤。
