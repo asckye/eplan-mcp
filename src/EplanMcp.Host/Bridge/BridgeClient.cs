@@ -40,6 +40,9 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     internal int? FixedProcessId { get; init; }
 
+    /// <summary>Whether a process still runs; a missing pipe alone does not mean the selected EPLAN exited.</summary>
+    internal Func<int, bool> ProcessAlive { get; init; } = DefaultProcessAlive;
+
     public BridgeClient(IBridgeDiscovery discovery, IBridgeConnector connector, ILogger<BridgeClient> logger)
         : this(discovery, connector, logger, DefaultQueueTimeout, DefaultCallTimeout)
     {
@@ -187,6 +190,12 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
     {
         if (Selected is { } selected && !instances.Any(i => i.ProcessId == selected))
         {
+            // Pipe listing can miss a running instance while another EPLAN starts or exits: keep the choice then.
+            if (ProcessAlive(selected))
+            {
+                throw new BridgeCallException(BridgeErrors.NotConnected());
+            }
+
             LogSelectionGone(selected);
             _selectedProcessId = 0;
             if (_channel?.Endpoint.ProcessId == selected)
@@ -353,6 +362,19 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     [LoggerMessage(Level = LogLevel.Information, Message = "EPLAN process {ProcessId} selected")]
     private partial void LogSelected(int processId);
+
+    private static bool DefaultProcessAlive(int processId)
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetProcessById(processId);
+            return !process.HasExited;
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            return false;
+        }
+    }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Selected EPLAN process {ProcessId} is gone; selection cleared")]
     private partial void LogSelectionGone(int processId);

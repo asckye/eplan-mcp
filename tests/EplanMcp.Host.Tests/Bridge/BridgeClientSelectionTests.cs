@@ -99,6 +99,26 @@ public sealed class BridgeClientSelectionTests
     }
 
     [Fact]
+    public async Task SelectedEplanMissingFromThePipeListButAlive_KeepsTheChoice_AndUsesItWhenItReappears()
+    {
+        // While another EPLAN starts or exits, the pipe listing can miss a running instance (two slots, 2026-11-01).
+        _discovery.Endpoints.AddRange([_eplanA, _eplanB, _eplanC]);
+        await using BridgeClient client = Client();
+        await client.SelectAsync(200, Token);
+        _alive.Add(200);
+
+        _discovery.Endpoints.Remove(_eplanB);
+        BridgeCallException ex = await Assert.ThrowsAsync<BridgeCallException>(() => Invoke(client));
+        Assert.Equal(ErrorReason.EplanNotConnected, ex.Error.Reason);
+        Assert.True(ex.Error.Retryable);
+        Assert.Equal(200, (await client.GetStatusAsync(Token)).SelectedProcessId);
+
+        _discovery.Endpoints.Add(_eplanB);
+        await Invoke(client);
+        Assert.Equal(_eplanB, _connector.Opened[^1].Endpoint);
+    }
+
+    [Fact]
     public async Task SelectedEplanExits_AndOneOtherRuns_ThatOneIsUsed()
     {
         _discovery.Endpoints.AddRange([_eplanA, _eplanB]);
@@ -135,8 +155,10 @@ public sealed class BridgeClientSelectionTests
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
+    private readonly HashSet<int> _alive = [];
+
     private BridgeClient Client() =>
-        new(_discovery, _connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+        new(_discovery, _connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5)) { ProcessAlive = _alive.Contains };
 
     private static Task<ProjectListData> Invoke(BridgeClient client) =>
         client.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new ProjectListArgs(), Token);
