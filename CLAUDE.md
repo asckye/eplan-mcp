@@ -21,11 +21,13 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 - Workbench 界面：[docs/standards/workbench-ui.md](docs/standards/workbench-ui.md)。改 `EplanMcp.Workbench` 的界面前先读
 - EPLAN API 已验证的事实：[docs/eplan/api-notes.md](docs/eplan/api-notes.md)。**不要凭记忆假设 EPLAN API 的行为**，没验证过的先查文档或在 scratch 项目上验证，再把结论补进 api-notes。
 
+共享常设规则（含不创建提交、失败复现与证据要求）见 [AGENTS.md](AGENTS.md#共享常设规则)。
+
 ## 约定
 - **与项目负责人交流一律使用中文**：回复、提问、进度说明、总结和表格都用中文，长时间运行任务之后也一样；代码标识符、API 名称、文件路径和命令保持原文。
 - 文档用中文；代码标识符、代码注释、日志消息、提交信息用英文。
-- 提交信息遵循 Conventional Commits，scope 取自：`host` `bridge` `contracts` `tools` `policy` `audit` `workbench` `installer` `evals` `docs` `ci` `spikes`。
-- 一次提交只做一件事，改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、快照、夹具、原样复制的第三方代码不计入。
+- 提交信息遵循 Conventional Commits，scope 清单见 [开发流程第 5 节](docs/process/development-workflow.md#5-分支与提交)。
+- 一个变更集（一份 brief + 一次本地关卡运行）只做一件事，改动目标在 200 行以内，超过 400 行必须拆分。行数只统计生产代码和文档；测试代码、生成文件、快照、夹具、原样复制的第三方代码不计入。
 
 ## 本机环境注意事项
 - 开发机装有 EPLAN 2026.0.3（`C:\Program Files\EPLAN\Platform\2026.0.3\Bin`），通常以 `/Variant:"Pro Panel"` 启动。

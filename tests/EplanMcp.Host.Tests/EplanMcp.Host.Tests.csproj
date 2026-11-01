@@ -22,6 +22,9 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <!-- Compare the agent hard rules in memory, without runtime file-system access. -->
+    <EmbeddedResource Include="..\..\AGENTS.md" LogicalName="AgentRules.AGENTS.md" />
+    <EmbeddedResource Include="..\..\CLAUDE.md" LogicalName="AgentRules.CLAUDE.md" />
     <EmbeddedResource Include="..\Contracts.Snapshots\server-contract.verified.json" LogicalName="Contracts.server-contract.verified.json" />
     <!-- Embed release sources so Small tests validate the shipped content without file-system access. -->
     <EmbeddedResource Include="..\..\packaging\claude-plugin\.claude-plugin\marketplace.json" LogicalName="ClaudePlugin.marketplace.json" />
