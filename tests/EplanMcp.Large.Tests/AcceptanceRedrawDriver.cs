@@ -139,25 +139,26 @@ internal sealed class AcceptanceRedrawDriver(
         var issues = new List<JsonElement>();
         int warnings = list.TryGetProperty("expected_review_warnings", out JsonElement expected) ? expected.GetArrayLength() : 0;
         string? cursor = null;
+        JsonElement summary;
         do
         {
             var args = new Dictionary<string, object?> { ["page"] = Page, ["limit"] = 200 };
             if (cursor is not null)
             { args["cursor"] = cursor; }
             JsonElement review = await ReadAsync("eplan_page_review", args);
-            JsonElement summary = review.GetProperty("summary");
-            // Customer run 2026-11-02: a count mismatch must show the findings themselves.
+            summary = review.GetProperty("summary");
+            // Customer run 2026-11-02: read every page and show the findings before checking their count.
             foreach (JsonElement issue in review.GetProperty("issues").EnumerateArray())
             { output("Review issue: " + issue.GetRawText()); }
-            Assert.Equal(0, summary.GetProperty("errors").GetInt32());
-            Assert.Equal(warnings, summary.GetProperty("warnings").GetInt32());
-            Assert.Equal(warnings == 0, summary.GetProperty("clean").GetBoolean());
             issues.AddRange(review.GetProperty("issues").EnumerateArray());
             cursor = review.GetProperty("cursor").GetString();
             Assert.Equal(cursor is not null, review.GetProperty("truncated").GetBoolean());
             if (cursor is null)
             { Assert.Equal(review.GetProperty("total").GetInt32(), issues.Count); }
         } while (cursor is not null);
+        Assert.Equal(0, summary.GetProperty("errors").GetInt32());
+        Assert.Equal(warnings, summary.GetProperty("warnings").GetInt32());
+        Assert.Equal(warnings == 0, summary.GetProperty("clean").GetBoolean());
         AcceptanceReview.Verify(list, run, Page, issues.ToArray(), drawings);
     }
 
