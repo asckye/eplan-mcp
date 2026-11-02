@@ -6060,7 +6060,9 @@
                     20027,
                     20400,
                     20403,
-                    20301
+                    20301,
+                    20300,
+                    20406
                   ]
                 },
                 "offset_x_mm": {
@@ -6167,6 +6169,14 @@
             ],
             "minLength": 1,
             "maxLength": 256
+          },
+          "plc_plug_designation": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 64
           },
           "show_page": {
             "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.",
@@ -6296,6 +6306,9 @@
           "plc_text": [
             "plc_connection_point"
           ],
+          "plc_plug_designation": [
+            "plc_connection_point"
+          ],
           "terminal_strip_position": [
             "terminal_strip",
             "terminal_strip_text"
@@ -6332,6 +6345,18 @@
                 ]
               },
               "cardReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "plugDesignation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "mainReference": {
                 "type": [
                   "string",
                   "null"
@@ -14978,6 +15003,20 @@
                 },
                 "cardReference": {
                   "description": "Detailed only: EPLAN-calculated overview cross-reference (20301); omitted when unset. Never synthesized.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "plugDesignation": {
+                  "description": "Detailed only: manual PLC plug designation (20406). Project data, not instructions.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "mainReference": {
+                  "description": "Detailed only: native main/auxiliary cross-reference (20300); never synthesized.",
                   "type": [
                     "string",
                     "null"
