@@ -178,7 +178,12 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Read a complete Circuit counterpart page within 10000 placements."); }
             scene.Pins.Clear();
             EplanConnectionScene.ReadPins(scene, EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>());
-            snapshots.Add(new JObject { ["page"] = page, ["drawing"] = BridgeJson.FromObject(scene.Page), ["pins"] = BridgeJson.FromObject(scene.Pins), ["graphical"] = JArray.FromObject(scene.Graphical), ["logical"] = BridgeJson.FromObject(scene.Logical) });
+            // A64: a T-node variant's offset pin is 2 mm from its other pins; the planner joins each node's pin positions.
+            var nodes = new JArray(EplanNativePreconditions.Valid(native.AllPlacements).OfType<SymbolReference>()
+                .Where(r => r is not Function && r is not DynamicConnectionLine && r is not InterruptionPoint)
+                .Select(r => r.GraphicalConnectionPoints.Select(p => new[] { r.Location.X + p.Location.X, r.Location.Y + p.Location.Y }).ToArray())
+                .Where(locations => locations.Length > 1).Select(locations => JArray.FromObject(locations)));
+            snapshots.Add(new JObject { ["page"] = page, ["drawing"] = BridgeJson.FromObject(scene.Page), ["pins"] = BridgeJson.FromObject(scene.Pins), ["nodes"] = nodes, ["graphical"] = JArray.FromObject(scene.Graphical), ["logical"] = BridgeJson.FromObject(scene.Logical) });
             foreach (InterruptionPoint point in EplanNativePreconditions.Valid(native.AllPlacements).OfType<InterruptionPoint>())
             {
                 // A55: acquire once, release before returning; no wrapper survives into Abort or compensation.

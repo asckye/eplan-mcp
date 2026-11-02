@@ -213,6 +213,7 @@ public sealed class InterruptionExistingNetTests
                 ["page"] = p,
                 ["drawing"] = BridgeJson.FromObject(Fixture.Scene.Page),
                 ["pins"] = p == ConnectionCreateFixture.PageName ? BridgeJson.FromObject(Fixture.Scene.Pins) : new JObject(),
+                ["nodes"] = new JArray(),
                 ["graphical"] = p == ConnectionCreateFixture.PageName ? GraphicalEvidence() : new JArray(),
                 ["logical"] = p == ConnectionCreateFixture.PageName ? BridgeJson.FromObject(Fixture.Scene.Logical) : new JArray(),
             })),

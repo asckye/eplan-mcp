@@ -220,6 +220,16 @@ public sealed class InterruptionPointTests
         Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
     }
 
+    [Fact]
+    public void ConnectedPair_ThroughAnOffsetNode_StillJoinsTheNet()
+    {
+        // Live 2026-11-02 (customer page): the scope held function pins only, so TOUR variant 0's offset pin cut the net.
+        var fake = new InterruptionPointFixture { OffsetNode = true };
+        fake.ConnectPair();
+        JToken group = Assert.Single(fake.Plan()["logicalAfterGenerate"]!, g => g["pins"]!.Values<string>().Contains("17/3/0", StringComparer.Ordinal));
+        Assert.Equal(["17/3/0", "17/9/0"], group["pins"]!.Values<string>());
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

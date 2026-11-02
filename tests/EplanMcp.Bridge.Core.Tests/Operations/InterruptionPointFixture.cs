@@ -24,6 +24,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal long? PlacedSortCode { get; private set; }
     internal bool Isolated { get; set; }
     internal bool Dangling { get; set; }
+    internal bool OffsetNode { get; set; }
     internal JObject Request => Base.Request;
     internal InterruptionPointFixture()
     {
@@ -120,7 +121,9 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
                 ["drawing"] = BridgeJson.FromObject(Base.Scene.Page),
                 ["revision"] = DrawingRevision,
                 ["pins"] = p == PeerPage ? _connected && !Dangling ? new JObject { ["17/9/0"] = BridgeJson.FromObject(new SymbolConnectionPoint { Location = [80, 64], Direction = "Up" }) } : new JObject() : BridgeJson.FromObject(Base.Scene.Pins),
-                ["graphical"] = p == PeerPage && _connected && !Dangling ? JArray.FromObject(new double[][][] { [[80, 64], [80, 80]] }) : new JArray(),
+                // OffsetNode: the peer route passes a node whose two pins are 2 mm apart (A64 variant 0).
+                ["graphical"] = p == PeerPage && _connected && !Dangling ? JArray.FromObject(OffsetNode ? new double[][][] { [[80, 64], [80, 70]], [[80, 72], [80, 80]] } : new double[][][] { [[80, 64], [80, 80]] }) : new JArray(),
+                ["nodes"] = p == PeerPage && OffsetNode ? JArray.FromObject(new double[][][] { [[80, 70], [80, 72]] }) : new JArray(),
                 ["logical"] = p == PeerPage && _connected && !Dangling ? BridgeJson.FromObject(new[] { new ConnectionRecord { EndDevice = "17/9/0" } }) : new JArray(),
             })),
         };
