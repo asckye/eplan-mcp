@@ -11,6 +11,47 @@ namespace EplanMcp.Coverage.Tests;
 [SupportedOSPlatform("windows")]
 public sealed class BatchVerificationTests
 {
+    [Theory]
+    [InlineData("O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate")]
+    [InlineData("O:Eplan.EplApi.DataModel.MacroBox.RepresentationType")]
+    [InlineData("O:Eplan.EplApi.DataModel.Page.ConvertToGraphics")]
+    public void RefusedWritesAreSkippedBeforeLookingUpObjectsOrArguments(string group)
+    {
+        BatchEntry entry = Assert.Single(BatchValues.ApiEntries(), e => e.Group == group && e.Kind == "api-write");
+        var result = new BatchObservation(entry.Id, entry.Kind);
+        Assert.True(BatchValues.SkipRefused(entry, result));
+        Assert.Equal("skipped:refused_unsafe", result.Outcome);
+        Assert.False(BatchValues.Stops(result));
+        if (group.EndsWith("RepresentationType", StringComparison.Ordinal))
+        { Assert.False(BatchValues.SkipRefused(Assert.Single(BatchValues.ApiEntries(), e => e.Group == group && e.Kind == "api-read"), new(group, "api-read"))); }
+    }
+
+    [Theory]
+    [InlineData(ErrorReason.ProjectNotOpen, true)]
+    [InlineData(ErrorReason.SessionNotSelected, true)]
+    [InlineData(ErrorReason.EplanNotConnected, true)]
+    [InlineData(ErrorReason.EplanOperationFailed, false)]
+    public void LostEplanClassifiesTheLiveConvertToGraphicsResultAsUnknown(string reason, bool alive)
+    {
+        var result = new BatchObservation("O:Eplan.EplApi.DataModel.Page.ConvertToGraphics#write", "api-write")
+        { Outcome = "failed", Detail = reason + ": EPLAN unavailable", Seconds = 25.9 };
+        Assert.True(BatchValues.EplanLost(result, alive));
+        Assert.Equal("outcome_unknown", result.Outcome);
+        Assert.Equal("EPLAN process exited during the trial", result.Detail);
+        Assert.Equal(25.9, result.Seconds);
+        Assert.True(BatchValues.Stops(result));
+        Assert.True(BatchValues.EplanLost(result, processAlive: true));
+    }
+
+    [Fact]
+    public void OrdinaryFailuresWithALiveEplanRemainFailures()
+    {
+        var result = new BatchObservation("id", "api-write") { Detail = ErrorReason.EplanOperationFailed + ": ordinary failure" };
+        Assert.False(BatchValues.EplanLost(result, processAlive: true));
+        Assert.Equal("failed", result.Outcome);
+        Assert.False(BatchValues.Stops(result));
+    }
+
     [Fact]
     public void ExpectedCountsMatchTheGeneratedPropertyAndMethodTables()
     {

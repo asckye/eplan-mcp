@@ -11,6 +11,7 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher, IApiTry
 {
     public void CheckTarget(ApiTryArgs args)
     {
+        ApiTryRefusals.Check(args.Group, ApiTryPlanOperation.Parameters(args.Parameters).ContainsKey("value"));
         CheckHandleTargets(args);
         if (ApiTryCatalog.Settings(args.Group))
         { CheckSettings(args); }
@@ -72,6 +73,7 @@ internal sealed partial class EplanApiTryDispatcher : IApiTryDispatcher, IApiTry
     public string? Read(ApiTryArgs args) => ReadEntry(args);
     public object? Invoke(ApiTryArgs args)
     {
+        ApiTryRefusals.Check(args.Group, ApiTryPlanOperation.Parameters(args.Parameters).ContainsKey("value"));
         using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
         JObject parameters = FileParameters(args);
         using var entry = new EntryScope();

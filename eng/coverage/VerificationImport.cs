@@ -22,11 +22,13 @@ internal static class VerificationImport
         BridgeUsage scan = CoverageJson.Read<BridgeUsage>(Path.Combine(root, BridgeUsage.RelativePath));
         var unknown = new SortedSet<string>(StringComparer.Ordinal);
         string path = Path.Combine(root, Overlay.RelativePath);
-        string merged = MergeText(File.ReadAllText(path), runs, EligibleIds(root), scan.EplanApi, id => unknown.Add(id));
+        int notObserved = 0;
+        string merged = MergeText(File.ReadAllText(path), runs, EligibleIds(root), scan.EplanApi, id => unknown.Add(id), _ => notObserved++);
         File.WriteAllText(path, merged);
         foreach (string id in unknown)
         { Console.WriteLine("Dropped unknown verification ID: " + id); }
         Console.WriteLine("Dropped unknown verification IDs: " + unknown.Count.ToString(CultureInfo.InvariantCulture));
+        Console.WriteLine("Not observed verification entries: " + notObserved.ToString(CultureInfo.InvariantCulture));
         return Task.CompletedTask;
     }
 
@@ -55,20 +57,32 @@ internal static class VerificationImport
     internal static void Merge(string path, IEnumerable<VerificationRun> runs, IReadOnlyDictionary<string, string> ids, string version)
         => File.WriteAllText(path, MergeText(File.ReadAllText(path), runs, ids, version));
 
-    internal static string MergeText(string original, IEnumerable<VerificationRun> runs, IReadOnlyDictionary<string, string> ids, string version, Action<string>? reportUnknown = null)
+    internal static string MergeText(string original, IEnumerable<VerificationRun> runs, IReadOnlyDictionary<string, string> ids, string version, Action<string>? reportUnknown = null, Action<string>? reportNotObserved = null)
     {
         // Validate and merge all files before replacing the overlay; later files win for each ID.
         foreach (VerificationRun run in runs)
-        { original = MergeText(original, run, ids, version, reportUnknown); }
+        { original = MergeText(original, run, ids, version, reportUnknown, reportNotObserved); }
         return original;
     }
 
-    internal static string MergeText(string original, VerificationRun run, IReadOnlyDictionary<string, string> ids, string version, Action<string>? reportUnknown = null)
+    internal static string MergeText(string original, VerificationRun run, IReadOnlyDictionary<string, string> ids, string version, Action<string>? reportUnknown = null, Action<string>? reportNotObserved = null)
     {
-        if (run.Eplan != version || !DateOnly.TryParseExact(run.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
-            || run.Entries.Select(e => e.Id).Distinct(StringComparer.Ordinal).Count() != run.Entries.Count)
-        { throw new InvalidDataException("Verification needs a matching EPLAN version, yyyy-MM-dd date and unique entry IDs."); }
+        var entries = new List<VerificationRecord>();
+        bool afterLoss = false;
         foreach (VerificationRecord entry in run.Entries)
+        {
+            if (afterLoss || entry.Detail?.StartsWith("PROJECT_NOT_OPEN", StringComparison.Ordinal) == true
+                || entry.Detail?.StartsWith("SESSION_NOT_SELECTED", StringComparison.Ordinal) == true)
+            { reportNotObserved?.Invoke(entry.Id); }
+            else
+            { entries.Add(entry); }
+            if (run.StopReason == "eplan_lost" && entry.Id == run.StoppedAt)
+            { afterLoss = true; }
+        }
+        if (run.Eplan != version || !DateOnly.TryParseExact(run.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
+            || entries.Select(e => e.Id).Distinct(StringComparer.Ordinal).Count() != entries.Count)
+        { throw new InvalidDataException("Verification needs a matching EPLAN version, yyyy-MM-dd date and unique entry IDs."); }
+        foreach (VerificationRecord entry in entries)
         {
             if (!ids.TryGetValue(entry.Id, out string? kind))
             { continue; }
@@ -91,7 +105,7 @@ internal static class VerificationImport
             new YamlStream(new YamlDocument(existing)).Save(writer, assignAnchors: false);
             records = new(parser.Deserialize<Dictionary<string, VerificationRecord>>(writer.ToString()) ?? [], StringComparer.Ordinal);
         }
-        foreach (string id in records.Keys.Concat(run.Entries.Select(e => e.Id)).Where(id => !ids.ContainsKey(id)).Distinct(StringComparer.Ordinal).ToArray())
+        foreach (string id in records.Keys.Concat(entries.Select(e => e.Id)).Where(id => !ids.ContainsKey(id)).Distinct(StringComparer.Ordinal).ToArray())
         {
             records.Remove(id);
             if (reportUnknown is not null)
@@ -99,7 +113,7 @@ internal static class VerificationImport
             else
             { Console.Error.WriteLine("Dropped unknown verification ID: " + id); }
         }
-        foreach (VerificationRecord entry in run.Entries)
+        foreach (VerificationRecord entry in entries)
         { if (ids.ContainsKey(entry.Id)) { records[entry.Id] = entry; } }
         string block = Render(records);
         if (existing is not null)

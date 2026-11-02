@@ -190,14 +190,16 @@ internal sealed class CoverageReport
             Reachability = includeReachability ? CallableCoverage.Build(all, status,
                 File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "",
                 File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.PropertyGroups(repositoryRoot) : [],
-                CallableCoverage.ActionWhitelist()) : null,
+                CallableCoverage.ActionWhitelist(), overlay.Api,
+                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) && overlay.Api.Any(r => r.Status == "refused" && r.Sides!.Contains("read", StringComparer.Ordinal))
+                    ? ApiTryGenerator.PropertyGroups(repositoryRoot, writableOnly: true) : []) : null,
         };
     }
 
     /// <summary>The first overlay rule for a unit: N:&lt;namespace&gt; with its sub-namespaces, T:&lt;declaring type&gt;, or the unit's key.</summary>
-    internal static ApiRule? Rule(Unit unit, IReadOnlyList<ApiRule> rules) => rules.FirstOrDefault(r => r.Match.StartsWith("N:", StringComparison.Ordinal)
+    internal static ApiRule? Rule(Unit unit, IReadOnlyList<ApiRule> rules) => rules.FirstOrDefault(r => r.Status != "refused" && (r.Match.StartsWith("N:", StringComparison.Ordinal)
         ? unit.Layer == ApiCatalog.Operation && (unit.Scope == r.Match[2..] || unit.Scope.StartsWith(r.Match[2..] + ".", StringComparison.Ordinal))
-        : string.Equals(r.Match, unit.Type, StringComparison.Ordinal) || string.Equals(r.Match, unit.Key, StringComparison.Ordinal));
+        : string.Equals(r.Match, unit.Type, StringComparison.Ordinal) || string.Equals(r.Match, unit.Key, StringComparison.Ordinal)));
 
     private static string Status(Unit unit, Dictionary<string, (int Level, SortedSet<string> Tools, HashSet<string> Ids)> used, Overlay overlay)
     {

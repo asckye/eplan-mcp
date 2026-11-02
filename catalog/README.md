@@ -34,6 +34,7 @@ dotnet run --project eng\catalog\EplanMcp.Catalog -- extract --sdk "<EPLAN 安�
 `coverage.json` 的 `reachability` 是独立的可调用汇总，不改变既有 layers 和 units 状态。
 `operation` 的 tools（沿用 implemented）、apiTry、callable（两者并集）均限于 overlay 排除后的同一分母；
 outsideDenominator 按原因列出未计入的 api_try 辅助组。operationsByNamespace 给出各命名空间的 callable。
+overlay 的 `refused` 只作用于精确组的 `sides: [read/write/call]`，要求 `reason: unsafe`、非空 note/source；不排除分母或改变单元状态。被拒绝侧不计 apiTry，仍可用的侧继续计数；`refused_unsafe` 单列拒绝组数（按组去重）。
 `action` 的 actionTry 按已提交 action 行及试执行的离线名称、拒绝与白名单规则统计，不包含本机 UI 动态目录。
 `schema/` 的现有 schema 只描述原始目录，不覆盖 `coverage.json`。
 

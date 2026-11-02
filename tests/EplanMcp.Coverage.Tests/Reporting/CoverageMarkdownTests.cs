@@ -1,10 +1,29 @@
 using EplanMcp.Coverage.Reporting;
+using EplanMcp.Coverage.Mapping;
 
 namespace EplanMcp.Coverage.Tests.Reporting;
 
 [Trait("Size", "Medium")]
 public sealed class CoverageMarkdownTests
 {
+    [Fact]
+    public void RefusedGroupCountAppearsBesideCallableWithoutChangingUnitEvidenceOrDenominators()
+    {
+        using TempRepository repository = ReportFixture.Create();
+        CoverageReport before = CoverageReport.Build(repository.Root);
+        repository.Write(Overlay.RelativePath, repository.Read(Overlay.RelativePath).Replace("api:\n",
+            "api:\n  - {match: 'O:Eplan.EplApi.Test.Page.Remove', status: refused, sides: [write], reason: unsafe, note: crash, source: api-notes A77}\n", StringComparison.Ordinal));
+        CoverageReport after = CoverageReport.Build(repository.Root);
+        Assert.Equal(CoverageJson.Serialize(before.Layers), CoverageJson.Serialize(after.Layers));
+        Assert.Equal(CoverageJson.Serialize(before.Units), CoverageJson.Serialize(after.Units));
+        Assert.Equal(before.Reachability!.Operation.Callable, after.Reachability!.Operation.Callable);
+        Assert.Equal(1, after.Reachability.Operation.RefusedUnsafe);
+        string markdown = CoverageMarkdown.Render(repository.Root);
+        Assert.Contains("| 操作层分母 | tools | api_try | callable | refused_unsafe |", markdown, StringComparison.Ordinal);
+        Assert.Contains("| 4 | 3 | 0 | 3 | 1 |", markdown, StringComparison.Ordinal);
+        Assert.Contains("| `O:Eplan.EplApi.Test.Page.Remove` | refused | write: unsafe; crash | api-notes A77 |", markdown, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Render_EveryPercentage_ShowsNumeratorDenominatorAndExclusions()
     {
@@ -16,7 +35,7 @@ public sealed class CoverageMarkdownTests
         Assert.Contains("| 　其中对象属性 | 1 | — | 1 | 1 / 1（100.0%） |", report, StringComparison.Ordinal);
         Assert.Contains("| action（按行） | 3 | printing：1 | 2 | 1 / 2（50.0%） |", report, StringComparison.Ordinal);
         Assert.Contains("登记 5 组（其中 0 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4 组，再按 overlay 排除后 4 组", report, StringComparison.Ordinal);
-        Assert.Contains("| `Eplan.EplApi.Test.Planning` | 1 | 0 / 1（0.0%） | 0 / 1（0.0%） | 0 |", report, StringComparison.Ordinal);
+        Assert.Contains("| `Eplan.EplApi.Test.Planning` | 1 | 0 / 1（0.0%） | 0 / 1（0.0%） | 0 | 0 |", report, StringComparison.Ordinal);
         Assert.Contains("**操作层 4 组：可调用 3（工具 3，api_try 0），实机验证 1**", report, StringComparison.Ordinal);
         Assert.Contains("action 2 行：工具到达 1，action_try 可尝试 0", report, StringComparison.Ordinal);
         Assert.Contains("summary.json 缺失，汇总暂未计入 api_try；这是证据缺口", report, StringComparison.Ordinal);

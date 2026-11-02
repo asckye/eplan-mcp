@@ -44,6 +44,8 @@ internal sealed class ApiRule
 
     public string? Reason { get; set; }
 
+    public List<string>? Sides { get; set; }
+
     public string? Condition { get; set; }
 
     public string? Note { get; set; }
@@ -123,10 +125,13 @@ internal sealed class Overlay
             .. overlay.Live.SelectMany(l => l.Value.Where(r => !DateOnly.TryParseExact(r.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
                 || r.Result is not ("pass" or "pass_with_findings" or "partial" or "fail") || r.Basis is not ("stated" or "inferred") || r.Source.Length == 0)
                 .Select(r => $"{l.Key}: a live record needs a yyyy-MM-dd date, a result, a basis and a source")),
-            .. overlay.Api.Where(r => r.Source.Length == 0 || r.Match.IndexOf(':', StringComparison.Ordinal) != 1
-                || (r.Status, r.Condition, r.Note) is not (("excluded", _, not null) or ("env_blocked", not null, _) or ("partial", _, not null))
-                || (r.Status == "excluded") != Reasons.Contains(r.Reason))
-                .Select(r => $"api {r.Match}: needs a source, an ID or N:<namespace>, and excluded with a reason ({string.Join(", ", Reasons)}) and a note, env_blocked with a condition, or partial with a note"),
+            .. overlay.Api.Where(r => string.IsNullOrEmpty(r.Source) || r.Match is null || r.Match.IndexOf(':', StringComparison.Ordinal) != 1
+                || (r.Status, r.Condition, r.Note) is not (("excluded", _, not null) or ("env_blocked", not null, _) or ("partial", _, not null) or ("refused", _, not null))
+                || (r.Status is "excluded" or "refused") != Reasons.Contains(r.Reason)
+                || r.Status == "refused" && (!r.Match.StartsWith("O:", StringComparison.Ordinal) || r.Match.Length <= 2
+                    || r.Sides is not { Count: > 0 } || r.Sides.Any(s => s is not ("read" or "write" or "call"))
+                    || r.Reason != "unsafe" || string.IsNullOrWhiteSpace(r.Note) || string.IsNullOrWhiteSpace(r.Source)))
+                .Select(r => $"api {r.Match}: needs a source, an ID or N:<namespace>, and excluded with a reason ({string.Join(", ", Reasons)}) and a note, env_blocked with a condition, partial with a note, or refused with a group ID, sides (read/write/call), reason unsafe, note and source"),
         ];
         return problems.Length == 0 ? overlay : throw new InvalidDataException($"{RelativePath}: " + string.Join("; ", problems));
     }

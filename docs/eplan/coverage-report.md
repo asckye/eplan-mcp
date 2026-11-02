@@ -2,7 +2,7 @@
 
 > **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-01 按 Bridge 源码 f49baa25 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
 
-**操作层 4014 组：可调用 1981（工具 1340，api_try 1703），实机验证 228**
+**操作层 4014 组：可调用 1980（工具 1340，api_try 1701），实机验证 228**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-01 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 f49baa25）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
@@ -10,6 +10,12 @@
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
 - action_try 只统计已提交 action 目录中、分母内符合 ActionTryTools.Check 离线规则的行：合法名称与 TYPE、未被 ActionTryPolicy 拒绝、未排除、且不在已发布 action 白名单。未计本机 UI 动态目录，运行时上下文、参数与审批仍须满足；与工具到达的行可能重叠，不直接相加。
+- refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
+
+| 操作层分母 | tools | api_try | callable | refused_unsafe |
+|---:|---:|---:|---:|---:|
+| 4014 | 1340 | 1701 | 1980 | 3 |
+
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
 - C 级方法选择：read 1199 组，write 689 组；排除（按签名）：masterdata_copy_pending 774，catalog:internal 177，external_path_parameter 176，masterdata_or_parts_management 103，lifecycle_or_creation 93，settings_write 92，catalog:banned_symbol 72，settings_or_scheme_parameter 72，catalog:deprecated 47，catalog:not_applicable 43，shared_interactive_state 39，unsupported_parameter 36，transient_creation 36，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，no_public_default_constructor 24，unsupported_return 17，catalog:deprecated: obsolete_attribute 16，entry_type_excluded 10，generic_or_collection_parameter 8，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，external_destination 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，unsupported_required_modifier 1，ref_out 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1，array_or_params 1，catalog:not_applicable: object_override 1。
@@ -62,26 +68,26 @@ Bridge 共用到 2629 个 ID（方法 613，属性 843，类型 324，字段和�
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
 ## 3. 按命名空间（操作层）与按对象类型（数据字典）
-| 命名空间（overlay 排除后） | 分母 | implemented | callable | live_verified |
-|---|---:|---:|---:|---:|
-| `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 9 / 88（10.2%） | 2 |
-| `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 103 / 268（38.4%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 796 / 1247（63.8%） | 141 |
-| `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 270 / 368（73.4%） | 0 |
-| `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 72 / 83（86.7%） | 11 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 312 / 414（75.4%） | 12 |
-| `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 |
-| `Eplan.EplApi.DataModel.MasterData` | 121 | 38 / 121（31.4%） | 40 / 121（33.1%） | 8 |
-| `Eplan.EplApi.DataModel.Planning` | 122 | 50 / 122（41.0%） | 101 / 122（82.8%） | 0 |
-| `Eplan.EplApi.DataModel.Revisions` | 20 | 14 / 20（70.0%） | 18 / 20（90.0%） | 0 |
-| `Eplan.EplApi.DataModel.Topology` | 17 | 9 / 17（52.9%） | 14 / 17（82.4%） | 0 |
-| `Eplan.EplApi.EServices` | 127 | 12 / 127（9.4%） | 29 / 127（22.8%） | 6 |
-| `Eplan.EplApi.EServices.Ged` | 90 | 4 / 90（4.4%） | 4 / 90（4.4%） | 0 |
-| `Eplan.EplApi.HEServices` | 417 | 132 / 417（31.7%） | 189 / 417（45.3%） | 17 |
-| `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 |
-| `Eplan.EplApi.MasterData` | 592 | 24 / 592（4.1%） | 24 / 592（4.1%） | 14 |
-| `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 |
-| `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 / 22（0.0%） | 0 |
+| 命名空间（overlay 排除后） | 分母 | implemented | callable | refused_unsafe | live_verified |
+|---|---:|---:|---:|---:|---:|
+| `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 9 / 88（10.2%） | 0 | 2 |
+| `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 103 / 268（38.4%） | 0 | 17 |
+| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 795 / 1247（63.8%） | 3 | 141 |
+| `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 270 / 368（73.4%） | 0 | 0 |
+| `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 72 / 83（86.7%） | 0 | 11 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 312 / 414（75.4%） | 0 | 12 |
+| `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
+| `Eplan.EplApi.DataModel.MasterData` | 121 | 38 / 121（31.4%） | 40 / 121（33.1%） | 0 | 8 |
+| `Eplan.EplApi.DataModel.Planning` | 122 | 50 / 122（41.0%） | 101 / 122（82.8%） | 0 | 0 |
+| `Eplan.EplApi.DataModel.Revisions` | 20 | 14 / 20（70.0%） | 18 / 20（90.0%） | 0 | 0 |
+| `Eplan.EplApi.DataModel.Topology` | 17 | 9 / 17（52.9%） | 14 / 17（82.4%） | 0 | 0 |
+| `Eplan.EplApi.EServices` | 127 | 12 / 127（9.4%） | 29 / 127（22.8%） | 0 | 6 |
+| `Eplan.EplApi.EServices.Ged` | 90 | 4 / 90（4.4%） | 4 / 90（4.4%） | 0 | 0 |
+| `Eplan.EplApi.HEServices` | 417 | 132 / 417（31.7%） | 189 / 417（45.3%） | 0 | 17 |
+| `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
+| `Eplan.EplApi.MasterData` | 592 | 24 / 592（4.1%） | 24 / 592（4.1%） | 0 | 14 |
+| `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 | 0 |
+| `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 / 22（0.0%） | 0 | 0 |
 
 数据字典中已实现的对象类型（63 个）：Arc（live_verified）、Article（live_verified）、Block（automated_test）、BusBar（live_verified）、Cable（live_verified）、Comment（automated_test）、Connection（live_verified）、ConnectionDefinitionPoint（automated_test）、ConnectionPointsInfo（automated_test）、CopperBundle（automated_test）、DeletedObjectInfo（automated_test）、DeviceListEntry（automated_test）、DimensionCircle（automated_test）、DimensionItem（automated_test）、Function（live_verified）、Function3D（automated_test）、FunctionBase（automated_test）、FunctionDefinitionLibrary（automated_test）、GraphicalPlacement（automated_test）、HyperLink（automated_test）、Image（automated_test）、InstallationSpace（automated_test）、InterruptionPoint（live_verified）、Line（automated_test）、Location（automated_test）、LocationBox（live_verified）、MDPartsDatabaseItem（live_verified）、MacroBox（live_verified）、MacroEntry（automated_test）、MergedArticleReference（automated_test）、Option（automated_test）、OptionFragment（automated_test）、OptionGroup（automated_test）、Page（live_verified）、PathText（automated_test）、PipingDefinition（automated_test）、PlaceHolder（live_verified）、Placement（automated_test）、Placement3D（automated_test）、PlanningSegment（automated_test）、PlcIO（automated_test）、PlotFrame（automated_test）、PlugStrip（automated_test）、PotentialDefinition（live_verified）、Project（live_verified）、ProtectedGroup（automated_test）、QRCode（live_verified）、Rectangle（automated_test）、RoutedConnection（automated_test）、Segment（automated_test）、SegmentDefinition（automated_test）、SegmentPlacement（automated_test）、SegmentTemplate（automated_test）、StorableObject（automated_test）、StrandConnector（automated_test）、Symbol（automated_test）、SymbolLibrary（automated_test）、SymbolReference（automated_test）、SymbolVariant（automated_test）、TerminalStrip（live_verified）、Text（automated_test）、TextBase（automated_test）、ViewPlacement（automated_test）。
 
@@ -175,9 +181,9 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/1 | — | — |
 | eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 1/1/0 | A11 A25 A30 A39 A40 | — |
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/2 | A9 A40 | — |
-| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/4/0 | — | — |
+| eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 5/4/0 | A77 | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/2 | A39 A56 A67 A68 A76 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/2 | A39 A56 A67 A68 A76 A77 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
@@ -280,6 +286,9 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 ## 7. 不能从代码推导、来自 overlay 的规则
 | 匹配 | 状态 | 原因、条件或说明 | 来源 |
 |---|---|---|---|
+| `O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xe0434352） | api-notes A77 |
+| `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
+| `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
 | `N:Eplan.EplApi.RemoteClient` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.RemoteServer` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.Remoting` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |

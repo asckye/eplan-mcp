@@ -56,7 +56,19 @@ public sealed partial class ToolUsageExampleTests
             }
         }
         Assert.All(ApiTryCatalog.PropertyGroups, g => Assert.Contains(g, seen));
-        Assert.All(index.Data.Entries.Where(e => ApiTryCatalog.Methods(e.Row.Group).Length > 0), e => Assert.Contains(e.Row.Group, seen));
+        Assert.All(index.Data.Entries.Where(e => ApiTryCatalog.Methods(e.Row.Group).Length > 0), e =>
+        {
+            if (seen.Contains(e.Row.Group))
+            { return; }
+            var templates = ApiCallTemplates.For(e);
+            Assert.NotEmpty(templates);
+            Assert.All(templates, t =>
+            {
+                Assert.False(t["dispatchable"]!.GetValue<bool>());
+                Assert.Equal("refused_unsafe", t["refusal_reason"]!.GetValue<string>());
+                Assert.NotNull(ApiTryCatalog.Refused(e.Row.Group, t["access"]!.GetValue<string>()) ?? ApiTryCatalog.Refused(e.Row.Group, "call"));
+            });
+        });
         Assert.Contains("O:Eplan.EplApi.DataModel.DocumentTypeManager.IsLogicalPageDocType", seen);
         Assert.Contains("O:Eplan.EplApi.DataModel.ProjectSettings.GetBoolSetting", seen);
         Assert.NotEmpty(seen);

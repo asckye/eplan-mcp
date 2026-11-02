@@ -593,8 +593,15 @@
       "evidence": {
         "spec": "docs/tools/eplan_api_get.md",
         "specStatus": "Implemented (Unreleased)",
-        "apiNotes": [],
+        "apiNotes": [
+          "A77"
+        ],
         "tests": [
+          {
+            "name": "ApiRefusalTemplateTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiRefusalTemplateTests.cs"
+          },
           {
             "name": "ApiToolTests",
             "size": "Small",
@@ -2817,7 +2824,8 @@
           "A56",
           "A67",
           "A68",
-          "A76"
+          "A76",
+          "A77"
         ],
         "tests": [
           {

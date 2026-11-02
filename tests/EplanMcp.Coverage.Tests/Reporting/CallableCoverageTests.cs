@@ -2,6 +2,7 @@ extern alias host;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using EplanMcp.Coverage.Reporting;
+using EplanMcp.Coverage.Mapping;
 using host::EplanMcp.Host.Bridge;
 using host::EplanMcp.Host.Tools;
 
@@ -10,6 +11,28 @@ namespace EplanMcp.Coverage.Tests.Reporting;
 [Trait("Size", "Small")]
 public sealed class CallableCoverageTests
 {
+    [Fact]
+    public void RefusalsKeepTheDenominatorAndCountGroupsWhileAllowingTheOtherSide()
+    {
+        string[] names = ["Function.UpdateLocalTemplate", "MacroBox.RepresentationType", "Page.ConvertToGraphics"];
+        Unit[] units = [.. names.Select(n => new Unit("O:Eplan.EplApi.DataModel." + n, ApiCatalog.Operation, "N", "T:N.T", n.Contains("MacroBox", StringComparison.Ordinal) ? "property" : "method", null))];
+        var status = units.ToDictionary(u => u.Key, _ => "registered", StringComparer.Ordinal);
+        ApiRule[] rules = [.. units.Select(u => new ApiRule { Match = u.Key, Status = "refused", Sides = ["write"], Reason = "unsafe", Note = "crash", Source = "api-notes A77" })];
+        string trials = "group\tsignature\tstatus\treason\n" + string.Join('\n', units.Where(u => u.Kind == "method").Select(u => u.Key + "\tsignature\twrite\t-"));
+        CallableCoverage coverage = CallableCoverage.Build(units, status, trials, [units[1].Key], [], rules);
+        Assert.Equal((3, 0, 1, 1, 3), (coverage.Operation.Denominator, coverage.Operation.Tools, coverage.Operation.ApiTry, coverage.Operation.Callable, coverage.Operation.RefusedUnsafe));
+        Assert.Equal(3, Assert.Single(coverage.OperationsByNamespace).RefusedUnsafe);
+        using JsonDocument json = JsonDocument.Parse(CoverageJson.Serialize(coverage));
+        Assert.Equal(3, json.RootElement.GetProperty("operation").GetProperty("refused_unsafe").GetInt32());
+        Assert.All(status.Values, s => Assert.Equal("registered", s));
+        rules[1].Sides = ["read"];
+        Assert.Contains(units[1].Key, CallableCoverage.ApiTryGroups(trials, [units[1].Key], rules, [units[1].Key]));
+        rules[1].Sides = ["read", "write"];
+        Assert.Empty(CallableCoverage.ApiTryGroups(trials, [units[1].Key], rules, [units[1].Key]));
+        rules[0].Sides = ["call"];
+        Assert.Empty(CallableCoverage.ApiTryGroups(trials, [], rules));
+    }
+
     private const string Trials = "group\tsignature\tstatus\treason\n"
         + "O:N.T.Shared\tM:N.T.Shared()\tread\t-\n"
         + "O:N.T.Shared\tM:N.T.Shared(System.Int32)\twrite\t-\n"

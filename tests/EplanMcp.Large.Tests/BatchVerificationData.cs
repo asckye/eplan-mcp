@@ -19,6 +19,8 @@ internal sealed record BatchEntry(string Id, string Kind, string[]? ObjectKinds 
 {
     internal string Group => Id.EndsWith("#write", StringComparison.Ordinal) ? Id[..^6] : Id;
     internal bool Destructive => ApiTryLifecycle.Effect(Group) == "removes";
+    internal bool Refused => ApiTryCatalog.Refused(Group, Kind == "api-write" ? "write" : "read") is not null
+        || Method && ApiTryCatalog.Refused(Group, "call") is not null;
     internal bool NeedsContext => Action is { } action && (action.Context?.Any(c => c is "file" or "page" or "selection") == true
         || ActionCallTemplates.Example(action).Any(p => p.Value?.GetValue<string>().StartsWith("<scratch ", StringComparison.Ordinal) == true)
         || action.Parameters.Any(p => p.TryGetProperty("required", out var required) && required.ValueKind == JsonValueKind.True
@@ -130,6 +132,22 @@ internal static class BatchValues
         _ => members is { Length: > 1 } && Array.IndexOf(members, value) is >= 0 and var index ? members[(index + 1) % members.Length] : null,
     };
     internal static bool Stops(BatchObservation result) => result.Outcome is "outcome_unknown" or "modal" or "timeout" || result.UndoRestores == false || result.Changed && (result.Kind == "api-read" || result.Outcome == "rolled_back");
+    internal static bool SkipRefused(BatchEntry entry, BatchObservation result)
+    {
+        if (!entry.Refused)
+        { return false; }
+        result.Outcome = "skipped:refused_unsafe";
+        return true;
+    }
+    internal static bool EplanLost(BatchObservation result, bool processAlive)
+    {
+        if (processAlive && result.Detail != "EPLAN process exited during the trial" && !new[] { ErrorReason.ProjectNotOpen, ErrorReason.SessionNotSelected, ErrorReason.EplanNotConnected }
+            .Any(reason => result.Detail?.StartsWith(reason + ":", StringComparison.Ordinal) == true))
+        { return false; }
+        result.Outcome = "outcome_unknown";
+        result.Detail = "EPLAN process exited during the trial";
+        return true;
+    }
     internal static void Classify(BatchObservation result)
     {
         if (result.Outcome == "rolled_back" && result.EplanMessages == 0

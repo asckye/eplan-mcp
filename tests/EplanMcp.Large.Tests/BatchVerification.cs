@@ -96,12 +96,13 @@ public sealed class BatchVerification(LiveEplan eplan)
                     observation.Detail = ex.GetType().Name + ": " + ex.Message;
                 }
                 observation.Seconds = elapsed.Elapsed.TotalSeconds;
+                bool lost = BatchValues.EplanLost(observation, ProcessAlive());
                 _results.Add(observation);
                 if (_results.Count % 25 == 0)
                 { TestContext.Current.TestOutputHelper.WriteLine($"Batch progress: {_results.Count}; elapsed: {watch.Elapsed}; current: {entry.Id}"); }
                 if (BatchValues.Stops(observation))
                 {
-                    _stopReason = observation.Outcome;
+                    _stopReason = lost ? "eplan_lost" : observation.Outcome;
                     alone.PauseCleanup();
                     // Evidence must survive even if recording the persistent suspension fails.
                     Save();
@@ -122,6 +123,8 @@ public sealed class BatchVerification(LiveEplan eplan)
 
     private async Task VerifyAsync(BatchEntry entry, BatchObservation result, PlanStepLiveSession alone, ServiceProvider provider, CancellationToken cancellationToken)
     {
+        if (BatchValues.SkipRefused(entry, result))
+        { return; }
         IBridgeClient bridge = provider.GetRequiredService<IBridgeClient>();
         string project = alone.Project;
         if (SuspensionStore.For(HostDataLocations.FromEnvironment()).Blocking(project, eplan.ProcessId, ProcessStart()).Count > 0)
@@ -180,7 +183,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         if (call.IsError == true)
         {
             Error(result, data.Deserialize<BridgeError>(HostJson.Options)!);
-            if (result.Outcome is "outcome_unknown" or "modal" or "timeout")
+            if (BatchValues.EplanLost(result, processAlive: true) || result.Outcome is "outcome_unknown" or "modal" or "timeout")
             { return; }
         }
         else
@@ -298,6 +301,15 @@ public sealed class BatchVerification(LiveEplan eplan)
             // A crashed instance still requires a persistent project suspension.
             return DateTimeOffset.MinValue;
         }
+    }
+    private bool ProcessAlive()
+    {
+        try
+        {
+            using Process process = Process.GetProcessById(eplan.ProcessId);
+            return !process.HasExited;
+        }
+        catch (ArgumentException) { return false; }
     }
     private void Save()
     {

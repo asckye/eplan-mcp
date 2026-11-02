@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A77、B13**（A67–A76 已由在途分支占用）。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A78、B13**（A67–A76 已由在途分支占用）。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -194,3 +194,17 @@
 - 离线核对旧路径：对每个受支持查询名称逐一全项目枚举（共 120 个名称，跳过 BlackBox 别名），把同一候选集重复读取；生成查询表中 `GetStorableObjects(null)` 出现 116 次、`GetPlacements(null)` 出现 62 次（旧观测对部分传统类型另走专用 finder）。重复候选还会在字典覆盖同一项之前再次累计字节。A32 的普通示例副本已有 44,735 个放置，按全项目逐对象描述不能合理套用 10,000 项 / 256 KiB 的单次局部观测预算。旧错误没有计量字段，不能从日志判断首先触发的是时间、项数还是字节限制。
 - 离线修正：带页定位器时只枚举所涉及页的 `AllPlacements`、页身份和归属这些页的连接；Project 工厂/服务锚点不扩大范围。无页对象保留全项目回退，但合并生成查询源，每个源只运行一次；按原生类型对应的规范种类与对象号去重，资源读回和字节计量仅执行一次。提交后同样按页重新查找创建对象；沿用 A55，不复用事务内原生句柄。20 秒、10,000 项、256 KiB 上限不提高；日志记录 scope/visited/objects/bytes/elapsedMs，超限错误附同一计量，计时不进入审批指纹。全项目业务快照和设计文件指纹仍保留，局部身份观测不证明全部副作用。
 - Small 使用同一工厂参数形状、同页 `Placement.Remove` 和模拟的普通示例规模，验证不会访问无关页、创建/移除证据保留、重复候选不重复描述/计费及真实超限仍被拒绝。本次不运行 EPLAN；修复后的 Large 一步撤销仍待实机复验。
+
+### A77. 批量验证中使 EPLAN 崩溃的成员（2026-11-02，EPLAN 2026.0.3.25421，仅 scratch 副本）
+
+以下事实由协调人把批量实机结果（`results.json` 的停止条目与文件时间）和 Windows Application 日志中 `Application Error` 的 `EPLAN.exe` 崩溃事件逐一对照得到。
+
+| 组 | 侧 | 崩溃时间 | 槽 / 变体 | 异常码 | 批量记录耗时与结果 |
+|---|---|---|---|---|---|
+| `O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate` | write | 2026-10-31 03:22:30 | B / Pro Panel | `0xe0434352`（未处理 .NET 异常） | 约 18 秒，`outcome_unknown` |
+| `O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate` | write | 2026-11-01 23:12:47 | B / Pro Panel | `0xe0434352`（未处理 .NET 异常） | 约 18 秒，`outcome_unknown` |
+| `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | write | 2026-10-31 02:59:38 | B / Pro Panel | `0xc0000409`（fail-fast） | 21 秒，`outcome_unknown` |
+| `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | write | 2026-11-01 23:45:10 | B / Pro Panel | `0xc0000409`（fail-fast） | 25.9 秒后记录 `failed`、`PROJECT_NOT_OPEN` |
+
+- `MacroBox.RepresentationType` 的 read 侧不受影响。`Page.ConvertToGraphics` 崩溃后，同轮接下来的 708 项在两个 EPLAN 实例环境下返回 `PROJECT_NOT_OPEN` 或 `SESSION_NOT_SELECTED`，实际均未试执行，不能算作失败观察。
+- 结论：以上 write 侧由 `eplan_api_try` 拒绝，并由批量验证跳过；不从覆盖分母中移除。批量记录的返回耗时不能进一步证明精确的原生崩溃延迟；原始 target/value 参数未记录在结果中，保留这一证据缺口。

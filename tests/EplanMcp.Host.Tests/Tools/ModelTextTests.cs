@@ -36,6 +36,7 @@ public sealed partial class ModelTextTests
     /// <summary>Types whose string literals may contain CJK (with their nested, compiler-generated types).</summary>
     private static readonly (string Type, string Reason)[] _allowedInLiterals =
     [
+        ("EplanMcp.Contracts.ApiTryCatalog", "Generated A77 refusal evidence preserves the Chinese overlay notes; model-facing refusals use the English RefusalMessage."),
         ("EplanMcp.Host.Doctor.DoctorChecks", "doctor prints each check in Chinese and English for the engineer; the model never sees it."),
         ("EplanMcp.Host.Doctor.VmDoctorChecks", "doctor reports VM service and firewall diagnostics in Chinese and English for the engineer; the model never sees it."),
         ("EplanMcp.Host.Audit.AuditCommand", "audit verify prints its result in Chinese or English for the engineer; the model never sees it."),

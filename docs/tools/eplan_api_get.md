@@ -7,6 +7,8 @@
 | MCP 注解 | readOnlyHint=true，destructiveHint=false，idempotentHint=true，openWorldHint=false |
 | 状态 | Implemented (Unreleased) |
 
+overlay 标为 `refused` 的侧在 `try_template` 中显示 `dispatchable:false`、`refused_unsafe` 和 A77 崩溃拒绝说明，不提供调用参数或示例；其余侧保留原模板。
+
 按必填 `id` 查询 XML 成员 ID、重载 group 或 `D:Function` 一类对象键。成员 ID 返回整个组；数据字典也接受对应 PropertyList、属性枚举或对象的类型 ID。`limit` 默认 20、范围 1–100；`cursor` 继续取详情。
 
 输出 `catalogVersion` 回显目录对应的 EPLAN API 版本；`entry` 为组说明（含 partial）；`items` 为有序详情流：先完整重载（签名、参数、返回类型、访问器、静态标记、摘要和单重载排除原因），再去重证据（工具规格、测试类/文件、api-notes 锚点、实机来源、排除规则来源）。对象条目给出属性 ID 总数和读取指引；只指向已经存在的读取工具，不推断未实现对象可读。`total`、`nextCursor`、`truncated`、`hint` 保证所有详情可续取。

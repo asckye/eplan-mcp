@@ -25,6 +25,19 @@ internal static class ApiCallTemplates
 
     private static IEnumerable<JsonObject> Templates(string group, string[] shape, string access, bool setter)
     {
+        if (ApiTryCatalog.Refused(group, access) is not null || !setter && ApiTryCatalog.MethodAccess(group) is not null && ApiTryCatalog.Refused(group, "call") is not null)
+        {
+            yield return new()
+            {
+                ["signature"] = shape[1],
+                ["access"] = access,
+                ["dispatchable"] = false,
+                ["refusal_reason"] = "refused_unsafe",
+                ["reason"] = ErrorReason.CapabilityMissing,
+                ["exclusion_reason"] = ApiTryCatalog.RefusalMessage
+            };
+            yield break;
+        }
         if (ApiTryCatalog.SettingsMethods(group).Any(s => s.SequenceEqual(shape)))
         {
             yield return Create(group, shape, access, setter, receiver: ["Eplan.EplApi.DataModel.Project"]);

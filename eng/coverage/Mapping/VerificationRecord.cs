@@ -17,12 +17,18 @@ internal sealed class VerificationRecord
     public int EplanMessages { get; set; }
     public string Date { get; set; } = "";
     public string Eplan { get; set; } = "";
+    [YamlIgnore]
+    public string? Detail { get; set; }
     [JsonIgnore, YamlIgnore]
     public bool Verifies => Outcome == "ok" && UndoRestores != false && (Kind == "api-read" ? !Changed : UndoRestores == true || !Changed && Kind == "action");
 }
 
 internal sealed class VerificationRun
 {
+    [JsonPropertyName("stopped_at")]
+    public string? StoppedAt { get; set; }
+    [JsonPropertyName("stop_reason")]
+    public string? StopReason { get; set; }
     public string Date { get; set; } = "";
     public string Eplan { get; set; } = "";
     public List<VerificationRecord> Entries { get; set; } = [];

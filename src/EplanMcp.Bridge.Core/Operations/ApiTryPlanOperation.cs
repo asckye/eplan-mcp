@@ -17,6 +17,7 @@ public sealed partial class ApiTryPlanOperation(int major, IProjectCatalog catal
         try
         { parameters = Parameters(args.Parameters); }
         catch (JsonException) { throw InvalidArgument("parameters must be a JSON object without duplicate fields."); }
+        ApiTryRefusals.Check(args.Group, parameters.ContainsKey("value"));
         if (parameters.ContainsKey("target") && args.Group.EndsWith(".Create", StringComparison.Ordinal) && !ApiTryCatalog.Service(args.Group))
         { throw WriteArguments.NotStarted(InvalidArgument("Omit target for factory creation; Create cannot be called on an existing instance.")); }
         if (parameters.Properties().Any(p => Kind(p.Value) == "Object" || p.Value.Type == JTokenType.Null))
