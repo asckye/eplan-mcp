@@ -58,8 +58,15 @@ public static class PlacementMoveExecution
             // A75: points can be added before old crossings/core membership are reconciled by generation.
             DrawingPlacement[] cables = movedCables.Concat(actual.Page.Placements.Where(p => p.Kind == "Cable"
                 && movedCables.Any(c => c.Locator.Type == p.Locator.Type && c.Locator.Oid == p.Locator.Oid))).ToArray();
-            expected.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
-            actual.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
+            // The points' own property texts go with them, also when only one side still has the point (live 2026-11-02:
+            // an unnamed new point and its text were added, the old point's text was gone).
+            // Points are judged per side, so another cable's point that changes owner still differs.
+            DrawingPlacement[] before = [.. expected.Page.Placements.Where(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)))];
+            DrawingPlacement[] after = [.. actual.Page.Placements.Where(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c))
+                || PlacementMovePlanner.IsNewCablePoint(p, scene.Page.Placements, cables))];
+            bool PointText(DrawingPlacement p) => p.Parent is { } parent && before.Concat(after).Any(q => q.Locator.Type == parent.Type && q.Locator.Oid == parent.Oid);
+            expected.Page.Placements.RemoveAll(p => before.Contains(p) || PointText(p));
+            actual.Page.Placements.RemoveAll(p => after.Contains(p) || PointText(p));
             // Described before the size-only bounds normalization below, so a mismatch reports the measured bounds.
             JObject[] observed = actual.Page.Placements.Select(PlacementMoveMismatch.Describe).ToArray();
             BridgeErrorException Mismatch(string check, string detail, object want, object found) => PlacementMoveMismatch.Create(check, detail, scene, expected, actual, observed, want, found);

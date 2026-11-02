@@ -187,6 +187,20 @@ public static class PlacementMovePlanner
         && cable.Properties.TryGetValue("name", out string? name) && !string.IsNullOrWhiteSpace(name)
         && point.Properties.TryGetValue("name", out string? owner) && string.Equals(name, owner, StringComparison.Ordinal);
 
+    /// <summary>
+    /// Live 2026-11-02 (A75): at a moved cable's new crossing EPLAN adds a point with a new identity whose name is only a
+    /// structure prefix ("+") until generation assigns it; any other name or position stays a mismatch.
+    /// </summary>
+    internal static bool IsNewCablePoint(DrawingPlacement point, IReadOnlyList<DrawingPlacement> before, IEnumerable<DrawingPlacement> cables)
+    {
+        const double tolerance = 0.5;
+        string name = point.Properties.TryGetValue("name", out string? value) ? value ?? "" : "";
+        return point.Kind == "ConnectionDefinitionPoint" && point.Location.Length == 2 && name.All(c => "=+&#-".Contains(c))
+            && !before.Any(p => p.Locator.Type == point.Locator.Type && p.Locator.Oid == point.Locator.Oid)
+            && cables.Any(c => c.Bounds is { Length: 4 } b && point.Location[0] >= b[0] - tolerance && point.Location[0] <= b[2] + tolerance
+                && point.Location[1] >= b[1] - tolerance && point.Location[1] <= b[3] + tolerance);
+    }
+
     public static Dictionary<string, double[][]> Autoconnect(Dictionary<string, SymbolConnectionPoint> pins)
     {
         string Owner(string pin) => string.Join("/", pin.Split('/').Take(2));

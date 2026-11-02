@@ -167,6 +167,39 @@ public sealed class PlacementMoveCablePointTests
         Assert.DoesNotContain("Rollback", mover.Transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LiveCable_UnnamedNewPointAndPointTexts_AreLeftToGeneration_Commits(bool afterCommit)
+    {
+        // Live 2026-11-02: EPLAN added point 69847 named "+" at the new crossing with its own text; the old point's text was gone.
+        var mover = new Mover { Failure = "unnamed_point", AfterCommit = afterCommit };
+        mover.Scene.Page.Placements.Add(Mover.PointText(69845, 128));
+
+        JObject result = mover.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.DoesNotContain("Rollback", mover.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("unnamed_point_off_cable", false)]
+    [InlineData("unnamed_point_off_cable", true)]
+    [InlineData("unnamed_point_existing", false)]
+    [InlineData("unnamed_point_existing", true)]
+    public void LiveCable_UnnamedPointOffTheCableOrNotNew_RollsBack(string failure, bool afterCommit)
+    {
+        var mover = new Mover { Failure = failure, AfterCommit = afterCommit };
+        mover.Scene.Page.Placements.Add(Mover.PointText(69845, 128));
+        string before = BridgeJson.FromObject(mover.Scene).ToString();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => mover.Execute()).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal("count", (string?)JObject.Parse(error.Metadata!["moveMismatch"])["check"]);
+        Assert.Equal(before, BridgeJson.FromObject(mover.Scene).ToString());
+    }
+
     [Fact]
     public void DefinitionPointMovedAlone_RecreatedIdentity_StillRollsBack()
     {
@@ -260,6 +293,16 @@ public sealed class PlacementMoveCablePointTests
             Properties = new() { ["name"] = "+A1-WReview103", ["grouped"] = "false" }
         };
 
+        internal static DrawingPlacement PointText(long oid, double y) => new()
+        {
+            Kind = "PropertyPlacement",
+            Locator = new() { Project = "scratch-project", Page = "=GAA+A1&EFS1/103", Type = 59, Oid = oid, Digest = new string('e', 64) },
+            Parent = new() { Project = "scratch-project", Page = "=GAA+A1&EFS1/103", Type = 59, Oid = oid, Digest = new string('b', 64) },
+            Location = [121.5, y + 0.5],
+            Bounds = [0, 0, 0, 0],
+            Properties = new() { ["property_id"] = "31004", ["property_index"] = "0", ["grouped"] = "false" }
+        };
+
         public ConnectionCreatePlanner.Scene Read(string project, string page)
         {
             ConnectionCreatePlanner.Scene copy = Clone(Scene);
@@ -331,6 +374,14 @@ public sealed class PlacementMoveCablePointTests
                         added.Properties["name"] = "+A1-WAdded";
                         scene.Page.Placements.Add(added);
                     }
+                    break;
+                case "unnamed_point" or "unnamed_point_off_cable" or "unnamed_point_existing":
+                    scene.Page.Placements.RemoveAll(p => p.Parent is { Type: 59, Oid: 69845 });
+                    point.Locator.Oid = Failure == "unnamed_point_existing" ? 69850 : 69847;
+                    point.Properties["name"] = "+";
+                    if (Failure == "unnamed_point_off_cable")
+                    { point.Location = [120, 230]; point.Bounds = [118.75, 228.75, 121.25, 231.25]; }
+                    scene.Page.Placements.Add(PointText(point.Locator.Oid, point.Location[1]));
                     break;
                 case "line":
                     scene.Page.Placements.Single(p => p.Kind == "Cable").Bounds![3] += 4;
