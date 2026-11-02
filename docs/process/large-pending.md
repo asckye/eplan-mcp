@@ -4,23 +4,12 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| 设置文本结果兼容修复（`feat/op-chains`，基线 `681b40a3`） | `ApiTryTests`（完整类，重点 `LargeWrite_SettingsReadsPreserveFilesAndSingleUndoForProjectWrite`、Pin 句柄及两步链用例） | 待运行：负责人报告链式分支 11/12、main 对照 11/11，设置用例首次 Project.Settings 返回对象而非字符串；Small 已复现实际分发优先级问题。修复后须匹配插件确认文本返回、设置读取文件不变、项目写入一次撤销及此前历史、非设置链与集合。本次禁止运行 EPLAN；不将离线检查当作实机通过，主线程耗时未测。 |
-| `feat/op-chains` cherry-pick 冲突衔接（2026-11-01；[链式设计](../design/2026-11-01-api-handle-chains.md)、api-notes A68） | `ApiTryTests`（完整类，含 `LargeWrite_TwoStepPinConnectionChainReadAndWritePreserveSingleUndoHistory`）、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：本次禁止启动 EPLAN。保留 main 已验证的句柄归属、期限、设置、数组/out、前置条件及页观察；链集合元素经 Detach，优先 locator，其他元素沿既有句柄表。需匹配插件复验返回链、200 元素边界、索引读取、设置派生只读、单步撤销及此前历史。仅构建 Large 不代表实机通过；主线程耗时未测。 |
-| 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 待运行：本次禁止 EPLAN。需在新 LargeWrite scratch 副本验证完整目录枚举、90 秒写入预算、模态暂停后按 FROM/AFTER 续跑、工厂无 target、Remove destructive 审批/备份及单步撤销。main 既有 ApiTryTests 12/12 为负责人提供的先前结果，不代表本次复验；缺少句柄来源、文件/页面等上下文只记 failed:needs_context。 |
-| [原生前置条件](2026-11-01-native-preconditions.md)、[无效对象枚举](2026-11-01-valid-enumeration.md)、[事务诊断](2026-11-01-native-write-diagnostics.md) | 完整 Large 套件，重点 `ApiTryTests`、`PlacementMoveTests`、`DeviceAndConnectionTests`、`DevicePlaceTests`、`ObjectReadTests`、`PropertyReadTests`、`PlanFunctionsTests`、`PlanImpactTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：本次禁止运行 EPLAN。共享 finder/页对象枚举及事务诊断影响多条读写路径，故保守扩大到完整套件；核对保护文本不触达 UndockText、不创建撤销步，无页 NameService 拒绝、显式页重载正向、IsValid 对实际失效句柄的识别、Warning 计数/correlation id、原审批暂停与撤销回滚。完整请求 JSON、原始日志、变体与授权尚缺，须补精确输入 Small；崩溃因果假说由负责人另测。系统主数据类仍按 README 单独获准后运行。 |
-| `feat/op-arrays` 变基冲突合并（2026-11-01；settings/handles/arrays/out 并集） | `ApiTryTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：负责人要求本次不启动 EPLAN。数组分支 ApiTryTests 9/9、main 设置及句柄合并后 10/10 为此前结果；本次合并需重新验证数组元素句柄解析、locator/handle/PointD/命名输出转换、页观察、单步撤销及已有历史，不能以构建和 Small 替代实机证据。主线程耗时未测。 |
-| C1 数组合并及规划观察范围修复（2026-11-01；`ApiTryObservations` / api-notes A70） | `ApiTryTests`（完整类，含 `ScratchCopy_ArrayWriteOneUndoRestoresGeometryAndEarlierHistory`） | 待运行：既有 Large 6 通过、数组写入因 30 秒执行前超时失败。本次只构建和离线测试，不启动 EPLAN；需匹配插件核对几何变化、一次撤销及此前历史。主线程耗时未测；证据 `.local/failures/q-op-arrays-ApiTryTests.log`，诊断见 A70。 |
-| R3 默认电缆文字误拒绝（2026-11-01，`feat/layout-guard`；api-notes A75 的 W4 / `17/69867` 记录） | `LayoutGuardTests`、`AcceptanceRedrawTests`、`CableDefinitionTests`、`DevicePlaceTests`、`PlacementTextCreateTests`、`PlacementMoveTests`、`PlacementEditSpikeTests` | 待运行：本次按负责人要求不启动 EPLAN。须验证 `cables_after_generate` 默认文字穿线仅警告并进入 `cable_text_layout`，告警定位与独立文字空位；显式创建、`display_properties` 偏移、`property_moves` 及直接文字移动的冲突拒绝和回滚保持。Small 与插件编译不能替代实机结果。 |
-| 布局守卫变基合并（`feat/layout-guard`，合并主干中断点、属性文字与放置编辑；设计 `2026-11-01-layout-guard.md`） | `LayoutGuardTests`、`DevicePlaceTests`、`ConnectionCreateTests`、`DanglingInterruptionTests`、`CableDefinitionTests`、`PlacementMoveTests`、`PlacementEditSpikeTests`、`AcceptanceRedrawTests` | 待运行：本次按任务约束未启动 EPLAN；A75 第六轮为变基前分支证据，不能替代合并后验证。须复验各提交阶段的实测布局拒绝、同一撤销步回滚、前一步撤销历史、属性文字尺寸比较及实测外框、编辑 align/distribute 共用守卫；copy/rotate/mirror/delete 的守卫接入仍为设计后续项。 |
+| 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
 | C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
-| C1 设置只读切片（本次 op-settings 变基合并；api-notes A67） | `ApiTryTests`（含 `ApiTryTests.Settings.cs` 的 LargeWrite 用例）、`NoSideEffectTests`、`WriteSafetyTests` | 待运行：本次仅构建及 Small/契约验证，未启动 EPLAN；需验证两种设置入口、分页枚举与文件无变化，以及设置读取间项目写入的一步撤销和历史哨兵。 |
-| ADR-0033 短期对象句柄与 main Files/静态入口合并（`feat/op-handles` rebase） | `ApiTryTests`、`WriteSafetyTests`、`NoSideEffectTests`、`SnapshotWriteTests` | 待运行：Pin 句柄读写、类型与 scratch 归属复核、设置只读、单步撤销及既有历史；合并后同时回归 Files/静态/via 调用与共享写入安全。A68 的原实机失败已有相同结构与值的 Small 回归；本次按负责人要求不启动 EPLAN，不能以编译和 Small 通过替代实机证据。 |
-| C1 生命周期与主线设置/句柄/数组/原生前置条件合并（feat/op-lifecycle；eplan_api_try 规格、api-notes A69） | `ApiTryTests` | 待运行：A69 规划观察超限修复后，复验统一 ApiTryObservations 页范围（创建页/移除对象页）、复用原目录 Create 组且省略 target 的工厂创建与 Detach 结果、既有实例 target 的执行前拒绝、移除 destructive 审批/备份、单步撤销和此前历史，以及设置/句柄/数组/原生前置条件和 Files/静态/via 回归。本次不启动 EPLAN；构建和 Small 不代表实机通过。 |
 | C2 未验证 action（历史 brief/提交待补定位；security.md 第 5 节） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
 | P06 功能与影响闭包（历史 brief/提交待补定位） | `PlanFunctionsTests`、`PlanImpactTests` | 待运行：Large README 明确尚未实跑；保留完整性与边界断言，缺页证据的现有拒绝行为需按当前常设规则另行评审，不在文档任务中弱化测试。 |
 | D1 电缆星形（历史 brief/提交待补定位） | `CableBusStarSpikeTests` | 待运行：Spike=D1；探索测试只断言搭建成功，不能代替产品验收。 |
 | D2 中断点配对（历史 brief/提交待补定位） | `InterruptionPairingSpikeTests` | 待运行：Spike=D2；配对规则须以实机证据回填 api-notes。 |
-| D5 中断点事务组合（历史 brief/提交待补定位） | `DanglingInterruptionTests` | 待运行：coding-standards.md 第 9.3 节注明仅编写；须核对生成读回、撤销及补偿。 |
 | 项目备份（历史 brief/提交待补定位） | `ProjectBackupTests` | 待运行：README 注明仅编译；非空/零页副本及无副作用证据尚待运行。 |
 | PDF 审图便笺导入（历史 brief/提交待补定位） | `ImportPdfCommentsTests` | 受阻：准备 README 要求的带便笺 PDF；运行后另核对一次撤销及重复导入不留空步。 |
 | 绘图几何 T0a（历史 brief/提交待补定位） | `DrawingGeometryTests` | 待运行：README 注明本次未运行；实际空页、图框几何及辅助程序环境待核对。 |
@@ -29,3 +18,15 @@
 | M9 `eplan_part_build`（负责人 2026-11-01 决定） | 专用 Large 类待补定位（当前检出未找到同名类） | 受阻：实现已完成，实机验证延后；EDZ 导入另待负责人样本，不宣称已通过。 |
 
 每项通过后保留本行，补日期、源码/插件版本、命令、结果与证据链接。部分通过继续列出未完成用例。发布范围内待验项须完成后才能发布。
+
+## 最近移出（已实机通过）
+
+- 2026-11-01，句柄链与设置文本修复：`ApiTryTests` 13/13（A 槽 Electric P8，变基到含生命周期的 main 后），main c5672ab9
+- 2026-11-01，原生前置条件、无效对象枚举与事务诊断：`ApiTryTests` 10/10、`DevicePlaceTests` 8/8（B 槽 Pro Panel，合并设置/句柄后）；此前 A 槽 8/8、7/7、`ConnectionCreateTests` 14/14、`PlacementMoveTests` 1/1，main 0113de9d
+- 2026-11-01，数组/out 与设置、句柄、原生前置条件合并：`ApiTryTests` 11/11（B 槽，含 `ScratchCopy_ArrayWriteOneUndoRestoresGeometryAndEarlierHistory`），main c13de0fe
+- 2026-11-01，默认位置文字只警告：`AcceptanceRedrawTests` 13 个阶段完成、problems 为空（A 槽），main 35bb10d6
+- 2026-11-01，布局护栏合并 main 后第七轮：LayoutGuard 4/4、DevicePlace 8/8、ConnectionCreate 14/14、CableDefinition 2/2、PlacementMove 1/1、DanglingInterruption 2/2、PlacementEditSpike 15/15、验收 13 阶段（A 槽）；另在 B 槽 Pro Panel 验收完整通过，main 35bb10d6
+- 2026-11-01，设置读取：`ApiTryTests` 9/9（A 槽），合并句柄后 10/10，main d17ea6a3
+- 2026-11-01，对象句柄：`ApiTryTests` 10/10（B 槽，合并设置后），main d8bcadc3
+- 2026-11-01，创建/删除（工厂复用已有 Create 组）：`ApiTryTests` 12/12（B 槽），main 51f38a68
+- 2026-11-01，`DanglingInterruptionTests` 2/2（A 槽，布局护栏合并后）
