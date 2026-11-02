@@ -804,9 +804,10 @@ internal sealed class AcceptanceRedrawDriver(
                     string actual = row.GetProperty("properties").GetProperty("display").GetString()!;
                     output(FormattableString.Invariant($"PLC {Id(point)} property {id} at ({x}, {y}): {actual}"));
                     Assert.Equal("true", row.GetProperty("properties").GetProperty("visible").GetString());
-                    // Live d3 2026-11-02: a displayed reference drops the structure it shares with the page (=GAA), like SameName (A55).
-                    if (id == 20300 && !string.IsNullOrEmpty(expected))
-                    { Assert.True(SameName(expected, actual), FormattableString.Invariant($"20300 shows '{actual}' for '{expected}'")); }
+                    // Live d3 2026-11-02: displayed designations (20300 main reference, 20301 card reference, 20403 symbolic
+                    // address) drop the structure they share with the page (=GAA), like SameName (A55).
+                    if (id is 20300 or 20301 or 20403 && !string.IsNullOrEmpty(expected))
+                    { Assert.True(SameName(expected, actual), FormattableString.Invariant($"{id} shows '{actual}' for '{expected}'")); }
                     else
                     { Assert.Equal(expected ?? "", actual); }
                 }, Id(point) + "/display_properties/" + id.ToString(System.Globalization.CultureInfo.InvariantCulture));
