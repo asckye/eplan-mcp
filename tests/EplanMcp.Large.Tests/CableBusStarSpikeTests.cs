@@ -22,6 +22,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
 {
     private static readonly string[] _starDirections = ["Up", "Down", "Right"];
     private static readonly string[] _busDirections = ["Down", "Left", "Right"];
+    private static readonly string[] _columnDirections = ["Up", "Down", "Right"];
 
     [Fact]
     public async Task DownBranchTNodeVariant0_ChainsSourceBranchAndContinuation()
@@ -86,6 +87,58 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             string[] pairs = [.. connections.GetProperty("connections").EnumerateArray()
                 .Select(c => c.GetProperty("from").GetProperty("device").GetString()![^1..] + c.GetProperty("to").GetProperty("device").GetString()![^1..]).Order(StringComparer.Ordinal)];
             Assert.Equal(["AB", "BC"], pairs);
+        }
+    }
+
+    /// <summary>
+    /// D1 probe (2026-11-02): the customer column T-node (TOUR: through line up-down, branch right) must chain the bus side
+    /// to -X6:1 and on to the branch. Writes pins and logical endpoints per variant to %TEMP%\eplanmcp-spikes.
+    /// </summary>
+    [Fact]
+    public async Task VerticalTNode_EachTargetVariant_RecordsLogicalEndpoints()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        JsonElement found = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = session.Project, ["library"] = "SPECIAL", ["kind"] = "t_node", ["name_contains"] = "TOUR", ["limit"] = 200 });
+        JsonElement[] variants = [.. found.GetProperty("symbols").EnumerateArray().Where(s => s.GetProperty("name").GetString() == "TOUR" && s.GetProperty("variant").GetInt32() is >= 0 and <= 3)];
+        Assert.NotEmpty(variants);
+        string[] pages = await session.CreatePagesAsync(variants.Length);
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        ListData<SymbolSearchItem> devices = await bridge.InvokeAsync<SymbolSearchArgs, ListData<SymbolSearchItem>>(OperationNames.SymbolSearch,
+            new() { Project = session.Project, Library = "IEC_symbol", NameContains = "BAT", Limit = 200 }, TestContext.Current.CancellationToken);
+        string evidence = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "eplanmcp-spikes")).FullName;
+        for (int i = 0; i < variants.Length; i++)
+        {
+            string page = pages[i], suffix = page.Split('/')[^1];
+            int variant = variants[i].GetProperty("variant").GetInt32();
+            PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            double grid = geometry.GridSize;
+            // A above and C to the right first (not collinear), then the node, then B below (collinear A-B would pre-connect, T3b).
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "A", [40 * grid, 60 * grid], "Down");
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "C", [60 * grid, 40 * grid], "Left");
+            bool placed = true;
+            object node;
+            try
+            {
+                node = await host.CallAsync("eplan_connection_create", new()
+                {
+                    ["project"] = session.Project,
+                    ["page"] = page,
+                    ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "t_node", position = new[] { 40 * grid, 40 * grid }, directions = _columnDirections, variant } }),
+                });
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            { placed = false; node = ex.Message; }
+            JsonElement? connections = null;
+            if (placed)
+            {
+                await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
+                await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+                connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
+            }
+            await File.WriteAllTextAsync(Path.Combine(evidence, FormattableString.Invariant($"D1-tour-variant-{variant}.json")),
+                JsonSerializer.Serialize(new { variant, pins = variants[i].GetProperty("connectionPoints"), placed, node, connections }), TestContext.Current.CancellationToken);
         }
     }
 
