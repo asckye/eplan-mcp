@@ -268,6 +268,18 @@ public sealed class CallTemplateTests
     }
 
     [Fact]
+    public void ParameterlessOfficialExample_DoesNotHideRequiredParameters()
+    {
+        // XGedUpdateMacroAction: the official page starts with a call without parameters, NewVariant is required.
+        ActionCatalogItem row = Assert.Single(ActionCatalogReader.Official(), r => r.Name == "XGedUpdateMacroAction");
+        Assert.Equal("{}", row.Examples![0].GetRawText());
+
+        JsonObject example = ActionCallTemplates.For(row)["example"]!["parameters"]!.AsObject();
+
+        Assert.Equal("<simple value>", example["NewVariant"]!.GetValue<string>());
+    }
+
+    [Fact]
     public void AllOfficialFirstExamplesReplaceAbsolutePathsWithoutChangingTheCatalog()
     {
         foreach (ActionCatalogItem row in ActionCatalogReader.Official().Where(r => r.Examples is { Length: > 0 }))

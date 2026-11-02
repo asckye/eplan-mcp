@@ -23,7 +23,7 @@ internal static class ActionCallTemplates
                 ["allowed_values"] = values,
                 ["denied"] = denied
             };
-            if (row.Examples is not { Length: > 0 } && !denied && parameter.TryGetProperty("required", out required) && required.ValueKind == JsonValueKind.True)
+            if (!example.Any(p => p.Key.Equals(name, StringComparison.OrdinalIgnoreCase)) && !denied && parameter.TryGetProperty("required", out required) && required.ValueKind == JsonValueKind.True)
             { example[name] = values is JsonArray { Count: > 0 } list ? list[0]?.DeepClone() : JsonValue.Create("<simple value>"); }
         }
         bool contextBlocked = example.Any(p => !ActionTryPolicy.Name(p.Key) || ActionTryPolicy.Denied("parameter", p.Key) || !ActionTryPolicy.Value(p.Value?.GetValue<string>()));
@@ -56,7 +56,10 @@ internal static class ActionCallTemplates
 
     internal static JsonObject Example(ActionCatalogItem row)
     {
-        var example = row.Examples is { Length: > 0 } ? JsonNode.Parse(row.Examples[0].GetRawText())!.AsObject() : new JsonObject();
+        // Official pages also show calls without parameters; prefer the first example that names the most required parameters.
+        string[] required = [.. row.Parameters.Where(p => p.TryGetProperty("required", out JsonElement r) && r.ValueKind == JsonValueKind.True).Select(p => p.GetProperty("name").GetString()!)];
+        JsonElement? chosen = row.Examples?.Select(e => (JsonElement?)e).OrderByDescending(e => required.Count(n => e!.Value.EnumerateObject().Any(p => p.Name.Equals(n, StringComparison.OrdinalIgnoreCase)))).FirstOrDefault();
+        var example = chosen is { } official ? JsonNode.Parse(official.GetRawText())!.AsObject() : new JsonObject();
         foreach (string name in example.Select(p => p.Key).ToArray())
         {
             if (name.Equals("TYPE", StringComparison.OrdinalIgnoreCase))

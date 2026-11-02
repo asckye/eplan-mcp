@@ -123,6 +123,21 @@
           "sensitive": {
             "description": "True for a credential: an agent must never supply it.",
             "const": true
+          },
+          "type": {
+            "description": "The value kind the official parameter table implies (import-actions): string, flag (0/1), integer, path (folder) or file.",
+            "enum": ["string", "flag", "integer", "path", "file"]
+          },
+          "values": {
+            "description": "The allowed literal values the official parameter table lists (import-actions).",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string" }
+          },
+          "default": {
+            "description": "The literal default the official parameter table states (import-actions); absent for dynamic defaults.",
+            "type": "string"
           }
         }
       }
@@ -148,6 +163,15 @@
       "description": "How the project plans to cover the row, in our own words (the table's handling column).",
       "type": "string",
       "minLength": 1
+    },
+    "examples": {
+      "description": "Parameter sets of the official example calls whose TYPE matches this row (import-actions): parameter name to literal value, never descriptive text; an empty object is a call without parameters.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
     },
     "notes": {
       "description": "Our own summary of what the action does plus the undocumented side effects and doubts recorded in docs/eplan/api-actions.md. Never official text.",
