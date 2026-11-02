@@ -166,7 +166,7 @@ public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         // A76: refuse before approval/native invocation, including with no page editor; subsequent trials stay enabled.
         await eplan.CallAsync("eplan_page_open", new() { ["project"] = project, ["page"] = function.GetProperty("page").GetString() });
         await PlanStepLiveSession.ActionAsync("XGedClosePage");
-        CallToolResult refused = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), Group, project, JsonSerializer.SerializeToElement(parameters), false, TestContext.Current.CancellationToken);
+        CallToolResult refused = await _tool!.TryAsync(new Progress<ProgressNotificationValue>(), Group, project, JsonSerializer.SerializeToElement(parameters), false, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(refused.IsError == true);
         string text = string.Join("\n", refused.Content.OfType<TextContentBlock>().Select(c => c.Text));
         Assert.Contains("INVALID_ARGUMENT", text, StringComparison.Ordinal);

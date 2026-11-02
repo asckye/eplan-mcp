@@ -12,7 +12,7 @@ public sealed class ApiTryArrayAdapterTests
     public void ReturnCollectionsBecomeReusableLocatorsAndTypedSimpleValues()
     {
         DrawingLocator identity = new() { Project = "Scratch", Page = "A", Type = 1, Oid = 2, Digest = new string('a', 64) };
-        JArray result = Assert.IsType<JArray>(EplanApiTryDispatcher.Copy(new[] { new StorableObject(identity) }));
+        JArray result = Assert.IsType<JArray>(EplanApiTryDispatcher.Copy(new[] { new BorrowedStorable(identity) }));
         Assert.Equal(identity.Digest, result[0]["digest"]!.Value<string>());
         Assert.Equal("Scratch", result[0]["project"]!.Value<string>());
         JArray values = Assert.IsType<JArray>(EplanApiTryDispatcher.Copy(new object[] { 1, true, "text", new PointD(2, 3) }));
@@ -38,13 +38,13 @@ public sealed class ApiTryArrayAdapterTests
         Assert.Throws<InvalidOperationException>(() => EplanApiTryDispatcher.Copy(Enumerable.Range(0, 201)));
         Assert.Throws<InvalidOperationException>(() => EplanApiTryDispatcher.Copy(new PointD(double.NaN, 1)));
         Assert.Throws<InvalidOperationException>(() => EplanApiTryDispatcher.Copy(new[] { double.PositiveInfinity }));
-        Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => EplanApiTryDispatcher.Copy(new[] { new StorableObject(new() { Project = "Real" }) })).Error.Reason);
+        Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => EplanApiTryDispatcher.Copy(new[] { new BorrowedStorable(new() { Project = "Real" }) })).Error.Reason);
     }
     [Fact]
     public void NestedNativeValuesUseTheSameConverterAndKeepOpaqueHandleWireFields()
     {
-        var located = new StorableObject(new() { Project = "Scratch", Oid = 1 });
-        var unlocated = new StorableObject(new() { Project = "Scratch" });
+        var located = new BorrowedStorable(new() { Project = "Scratch", Oid = 1 });
+        var unlocated = new BorrowedStorable(new() { Project = "Scratch" });
         object helper = new();
         var visited = new List<object>();
         object ConvertNative(object value)
