@@ -161,10 +161,12 @@ public sealed class DoctorTests
     }
 
     [Fact]
-    public void EplanInstallations_NothingInstalled_IsAFailure()
+    public void EplanInstallations_NothingInstalled_IsAFailure_OfflineOnlyAWarning()
     {
-        DoctorCheck check = Assert.Single(DoctorChecks.EplanInstallations(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))));
+        string missing = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
-        Assert.Equal(DoctorStatus.Failure, check.Status);
+        Assert.Equal(DoctorStatus.Failure, Assert.Single(DoctorChecks.EplanInstallations(missing)).Status);
+        // Release CI 2026-11-02: the runner has no EPLAN, and doctor --offline exited 1.
+        Assert.Equal(DoctorStatus.Warning, Assert.Single(DoctorChecks.EplanInstallations(missing, offline: true)).Status);
     }
 }

@@ -13,7 +13,7 @@
 1. 同步 main 和标签（`git fetch origin main --tags`），在干净且 `HEAD == origin/main` 的检出中运行 `pwsh eng/scripts/release-prep.ps1 -Version 0.4.1`（后续换为下一 patch）。脚本只更新三个产品项目的构建版本及 Claude 插件模板版本、将 CHANGELOG Unreleased 移入带当天日期的新版本节，并生成 `.local/release/v0.4.1-notes.md`；留下空的 Unreleased。它只读取本地 Git 引用，不联网、不提交、不打标签、不推送、不创建发布。
 2. 审阅从 Unreleased 生成的中文说明和台账未关闭行，核对默认开关、受影响 Large 通过证据及明确排除的待验范围；补齐支持矩阵、Agent 与界面验收记录。台账缺失或格式不明仅提示证据缺口，由维护者核对。
 3. 审阅并提交准备改动，在干净工作区执行 `pwsh eng/scripts/local-gate.ps1 -Full -Push`；必须是最终发布提交关卡全绿且已落到 main，不能沿用旧提交结果。准备脚本后的提交与关卡均为人工步骤；关卡若变基，重新核对该提交的验证证据。
-4. 在该提交的 Release 构建上执行 `pwsh eng/scripts/smoke.ps1`（可用 `-HostPath` 指定已构建的 Host），完成 `doctor --offline`、stdio initialize 与 tools/list 往返；离线自检明确标记未检查实时 Bridge 与授权，不需要 EPLAN，任何失败均须处理，不能替代实机 Large。
+4. 在该提交的 Release 构建上执行 `pwsh eng/scripts/smoke.ps1`（可用 `-HostPath` 指定已构建的 Host），完成 `doctor --offline`（未安装 EPLAN 只记警告）、stdio initialize 与 tools/list 往返；离线自检明确标记未检查实时 Bridge 与授权，不需要 EPLAN，任何失败均须处理，不能替代实机 Large。
 5. 在通过关卡的准确提交上打标签、推送标签，再用生成说明创建 **draft prerelease**；按下节执行 ADR-0020 插件构建与 **Add-in SHA-256 整行交接**。标签首次工作流可能因交接未完成而失败；补齐草稿、附件和哈希后重跑整次工作流。
 6. 核对 CI 最终产物、哈希、实机证据和最终 ZIP 验收，最后由维护者手动发布草稿。脚本不会执行上述发布动作。
 

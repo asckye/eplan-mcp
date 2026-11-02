@@ -249,13 +249,14 @@ internal static class DoctorChecks
             ? Directory.EnumerateDirectories(packages).FirstOrDefault(p => File.Exists(Path.Combine(p, "LocalCache", "Local", name))) is { } package ? Path.GetFileName(package) : null
             : null;
 
-    public static IEnumerable<DoctorCheck> EplanInstallations(string programFiles)
+    // An offline check (CI runner, smoke test) runs where EPLAN may be absent: a missing installation only warns there.
+    public static IEnumerable<DoctorCheck> EplanInstallations(string programFiles, bool offline = false)
     {
         string platform = Path.Combine(programFiles, "EPLAN", "Platform");
         IReadOnlyList<string> executables = EplanInstallation.Executables(programFiles);
         if (executables.Count == 0)
         {
-            yield return new(DoctorCheckIds.EplanInstallation, DoctorStatus.Failure, $"在 {platform} 下没有找到 EPLAN", $"No EPLAN found under {platform}");
+            yield return new(DoctorCheckIds.EplanInstallation, offline ? DoctorStatus.Warning : DoctorStatus.Failure, $"在 {platform} 下没有找到 EPLAN", $"No EPLAN found under {platform}");
             yield break;
         }
 

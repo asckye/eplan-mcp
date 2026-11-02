@@ -33,7 +33,7 @@ internal static class DoctorCommand
         };
         checks.AddRange(DoctorChecks.Suspensions(locations));
         checks.AddRange(VmDoctorChecks.Read(() => HttpServiceStateStore.Read(locations), HttpServiceStateStore.StartOf, new VmFirewall()));
-        checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
+        checks.AddRange(DoctorChecks.EplanInstallations(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), offline));
         checks.AddRange(DoctorChecks.RunningEplan());
         if (offline)
         {
