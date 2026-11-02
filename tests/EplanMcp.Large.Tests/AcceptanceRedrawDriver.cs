@@ -942,7 +942,8 @@ internal sealed class AcceptanceRedrawDriver(
     }
 
     private static Dictionary<string, object?> PageArgs(string page) => new() { ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
-    private JsonElement Function(JsonElement[] drawings, string tag, string? kind = null) => Assert.Single(drawings, d => (kind is null ? d.GetProperty("kind").GetString() != "PropertyPlacement" : d.GetProperty("kind").GetString() == kind) && d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && SameName(tag, name.GetString()!));
+    // Customer page: I2/I5 carry the name of the device they lead to (=GAA+HMT-13S1); they are not that device.
+    private JsonElement Function(JsonElement[] drawings, string tag, string? kind = null) => Assert.Single(drawings, d => (kind is null ? d.GetProperty("kind").GetString() is not ("PropertyPlacement" or "InterruptionPoint") : d.GetProperty("kind").GetString() == kind) && d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && SameName(tag, name.GetString()!));
     private bool SameName(string requested, string actual) => CableDefinitionPlanner.SameName(requested, actual, Page);
     private JsonElement[] Items(string key) => list.GetProperty(key).EnumerateArray().ToArray();
     private string Expand(string value) => value.Replace("{run}", run, StringComparison.Ordinal).Replace("{next}", next ?? run + "2", StringComparison.Ordinal);
