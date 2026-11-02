@@ -433,9 +433,11 @@ internal sealed class AcceptanceRedrawDriver(
             { Skip(Id(wire), "An endpoint or independent pin readback was skipped; no wire is drawn from guessed pin coordinates."); incomplete = true; return; }
             if (points.GetArrayLength() == 2 && points[0].ValueKind == JsonValueKind.String && points[1].ValueKind == JsonValueKind.String)
             {
-                Assert.True(Facing(from, to), $"Wire '{Id(wire)}' uses [\"from\",\"to\"] for autoconnect, but its pins do not face each other on one axis; provide explicit bend points in the drawing list.");
+                // A generated wire is drawn by the nodes' autoconnect lines; only its pins are resolved, for a cable core.
+                bool generated = wire.TryGetProperty("generated", out JsonElement g) && g.GetBoolean();
+                Assert.True(generated || Facing(from, to), $"Wire '{Id(wire)}' uses [\"from\",\"to\"] for autoconnect, but its pins do not face each other on one axis; provide explicit bend points in the drawing list.");
                 _wires[Id(wire)] = (from, to, null);
-                _evidence.Add(new { wire = Id(wire), mode = "autoconnect" });
+                _evidence.Add(new { wire = Id(wire), mode = generated ? "generated" : "autoconnect" });
                 return;
             }
             double[][] path = points.EnumerateArray().Select(p => p.ValueKind == JsonValueKind.String

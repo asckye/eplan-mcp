@@ -85,7 +85,11 @@ public sealed class ConnectionCreatePlannerTests
         fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("t_node", [40, 40], "Down", "Up", "Right"));
         fixture.Request["items"]![0]!["variant"] = 0;
 
-        Assert.Equal(0, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+        JObject plan = fixture.Plan();
+        Assert.Equal(0, (int)Assert.Single(plan["symbols"]!)["symbol"]!["variant"]!);
+        // The reader reports drawn lines from symbol location plus pin offset; the prediction must match it.
+        Assert.Equal("[[[40.0,40.0],[40.0,60.0]],[[42.0,40.0],[60.0,40.0]]]",
+            new JArray(plan["graphicalAutoconnect"]!.OrderBy(s => s.ToString(Newtonsoft.Json.Formatting.None), StringComparer.Ordinal)).ToString(Newtonsoft.Json.Formatting.None));
     }
 
     private static ConnectionCreateFixture TNodeVariants()

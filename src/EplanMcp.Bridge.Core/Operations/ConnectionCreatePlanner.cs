@@ -335,8 +335,10 @@ public static class ConnectionCreatePlanner
         layout.Lines = layout.Lines.Where(l => !splits.Any(s => SegmentKey(s.Segment) == SegmentKey(l.Points))).ToList();
         foreach (LayoutGuard.Segment line in layout.Lines)
         { line.Net = Net(line.Points); }
+        // Logical grouping above uses node points; drawn lines (layout, readback comparison) end at the variant's real pins.
         double[] Drawn(double[] end, double[] other) => nodePins.TryGetValue(Key(end) + "/" + Direction(end, other), out double[]? pin) ? pin : end;
-        layout.Lines.AddRange(segments.Select((s, i) => new LayoutGuard.Segment { Points = [Drawn(s[0], s[1]), Drawn(s[1], s[0])], Changed = true, Net = Net(s), Locator = new() { Oid = -i - 1000 } }));
+        List<double[][]> drawn = segments.Select(s => new[] { Drawn(s[0], s[1]), Drawn(s[1], s[0]) }).ToList();
+        layout.Lines.AddRange(segments.Select((s, i) => new LayoutGuard.Segment { Points = drawn[i], Changed = true, Net = Net(s), Locator = new() { Oid = -i - 1000 } }));
         DrawingPlacement[] proposed = resolved.Select((p, i) => LayoutGuard.Proposed("SymbolReference", p["position"]!.ToObject<double[]>()!, p["bounds"]!.ToObject<double[]>()!, i)).ToArray();
         for (int i = 0; i < proposed.Length; i++)
         { foreach (SymbolConnectionPoint pin in resolved[i]["symbol"]!["connectionPoints"]!.ToObject<List<SymbolConnectionPoint>>()!) { layout.Pins.Add(FormattableString.Invariant($"0/{proposed[i].Locator.Oid}/{layout.Pins.Count}"), new() { Direction = pin.Direction, Location = pin.Location.Zip(proposed[i].Location, (a, b) => a + b).ToArray() }); } }
@@ -349,7 +351,7 @@ public static class ConnectionCreatePlanner
             ["dryRun"] = true,
             ["coordinates"] = requested,
             ["symbols"] = resolved,
-            ["graphicalAutoconnect"] = JArray.FromObject(segments),
+            ["graphicalAutoconnect"] = JArray.FromObject(drawn),
             ["logicalAfterGenerate"] = logical,
             ["gridSize"] = grid,
             ["pageSize"] = new JArray(scene.Page.PageSize!),
