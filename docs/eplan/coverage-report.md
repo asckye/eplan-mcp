@@ -265,7 +265,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_selection_set | read | selection.set | 180 | 41 | 0 | 139 | 0 | 2/1/1 | A54 B11 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/4 | A52 A53 A55 | — |
+| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/5 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 2/1/3 | — | — |

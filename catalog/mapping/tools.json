@@ -16018,6 +16018,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "CableBusStarSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"

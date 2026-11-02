@@ -4337,6 +4337,9 @@
                           "Right"
                         ]
                       }
+                    },
+                    "variant": {
+                      "type": "integer"
                     }
                   },
                   "required": [
@@ -4423,6 +4426,10 @@
                       "minItems": 1,
                       "maxItems": 20,
                       "uniqueItems": true
+                    },
+                    "sort_code": {
+                      "type": "integer",
+                      "minimum": 0
                     }
                   },
                   "required": [
@@ -4608,7 +4615,7 @@
             ]
           },
           "show_page": {
-            "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.",
+            "description": "Open this page before drawing; UI only, no data change.",
             "type": "boolean",
             "default": false
           }
