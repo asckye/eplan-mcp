@@ -116,7 +116,9 @@ internal static class AcceptanceDrawingList
         var wireIds = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "wires", "", (wire, at) =>
         {
-            Object(wire, at, "id from to points", "");
+            Object(wire, at, "id from to points", "generated");
+            if (wire.TryGetProperty("generated", out JsonElement generated))
+            { Require(generated.ValueKind is JsonValueKind.True or JsonValueKind.False, at + "/generated", "must be a boolean"); }
             Identity(wire, at);
             wireIds.Add(wire.GetProperty("id").GetString()!);
             Endpoint(wire.GetProperty("from"), at + "/from");
@@ -135,7 +137,7 @@ internal static class AcceptanceDrawingList
         });
         Each(root, "nodes", "", (node, at) =>
         {
-            Object(node, at, "id kind position directions", "");
+            Object(node, at, "id kind position directions", "variant");
             Identity(node, at);
             Position(node.GetProperty("position"), at + "/position");
             Text(node, "kind", at);
@@ -146,6 +148,8 @@ internal static class AcceptanceDrawingList
                 && directions.Distinct(StringComparer.Ordinal).Count() == directions.Length
                 && directions.All(d => d is "Up" or "Down" or "Left" or "Right")
                 && (kind != "corner" || directions.Any(d => d is "Up" or "Down") && directions.Any(d => d is "Left" or "Right")), at + "/directions", "must match the node kind");
+            if (node.TryGetProperty("variant", out JsonElement variant))
+            { Require(kind == "t_node" && variant.TryGetInt32(out int v) && v >= 0, at + "/variant", "must be a nonnegative integer on a t_node"); }
         });
         var assigned = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "cables", "", (cable, at) =>
@@ -185,10 +189,14 @@ internal static class AcceptanceDrawingList
         var interruptionNames = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "interruption_points", "", (point, at) =>
         {
-            Object(point, at, "id name position direction counterpart_position counterpart_direction", "line_to");
+            Object(point, at, "id name position direction counterpart_position counterpart_direction", "line_to sort_code counterpart_sort_code");
             Identity(point, at);
             Text(point, "name", at);
-            Require(interruptionNames.Add(point.GetProperty("name").GetString()!), at + "/name", "duplicate interruption name");
+            // A65: same-name points pair by ascending sort code, so a repeated name needs codes on both pages.
+            bool sorted = point.TryGetProperty("sort_code", out JsonElement sort) & point.TryGetProperty("counterpart_sort_code", out JsonElement peer);
+            Require(!sorted ? !point.TryGetProperty("sort_code", out _) && !point.TryGetProperty("counterpart_sort_code", out _)
+                : sort.TryGetInt32(out int a) && peer.TryGetInt32(out int b) && a > 0 && b > 0, at + "/sort_code", "sort_code and counterpart_sort_code are positive integers given together");
+            Require(interruptionNames.Add(point.GetProperty("name").GetString()!) || sorted, at + "/name", "duplicate interruption name needs sort codes");
             Position(point.GetProperty("position"), at + "/position");
             Position(point.GetProperty("counterpart_position"), at + "/counterpart_position");
             if (point.TryGetProperty("line_to", out JsonElement line))

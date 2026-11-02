@@ -84,6 +84,7 @@
 - 2026-11-02 官方文档补充：[T-node Direction](https://www.eplan.help/en-us/Infoportal/Content/Plattform/2.9/Content/htm/egedgui_d_tstueck.htm) 说明四方向各四变体，变体决定连接流向；无编号点为来源，直线 1 与斜线 2 决定目标次序。结合 A52 的 SPECIAL 符号事实，产品按方向引脚过滤后允许显式选择符号变体。各变体在 EPLAN 2026.0.3 的实际逻辑端点尚待 D1 Spike，不从原星形实验推定链形结果。
 
 - 2026-11-02 实机（Electric P8，LargeWrite scratch）：SPECIAL 的四个 T 节点符号（TLRO/TLRU/TOUL/TOUR）各有变体 0、1、2、3、8。变体 8 三个引脚都在插入点，画成点，即上面观察到星形的那种；变体 0–3 是官方说的目标变体，第 2 目标（斜线）的引脚离插入点 2 mm。TLRU 变体 0（左、下在插入点，右在 (2,0)）：A 在左、B 在下、C 在右时生成 A→B、B→C，即链式，经过源一侧那段的只有 A→B 一条连接。客户页母线的 T 节点按变体 0 画，第 1 列就只属于 -X6:1 到第一个开关的连接，RD 芯线可以单独分配（D1）。— Large `CableBusStarSpikeTests`。
+- 2026-11-02 实机（同上，`VerticalTNode_EachTargetVariant_RecordsLogicalEndpoints`）：TOUR 只有上方 A、右方 C 两个设备时，变体 1、2、3 放置并生成 A–C；变体 0（引脚顺序 Down、Up、Right）生成后**没有**连接：第一个目标（Down）为空时，链式连接源→目标 1→目标 2 断开。规划仍按整组预测 A–C，因此该探测以"读回不符"撤销；客户页上节点放置时三端都已存在，不受影响。连线偏移引脚：读回的自动连接线端点是"符号位置 + 引脚偏移"，规划的 `graphicalAutoconnect` 与布局检查按此预测。
 ### A65. 同名中断点的配对（D2 实验，同上）
 - 同名中断点先按页在项目中的顺序、再按页内位置从左到右排序，相邻两两配对（第 1 与第 2、第 3 与第 4……）；与创建顺序无关（正序、倒序创建结果相同）。
 - 两页时（A、C 在第一页，B、D 在第二页）：两个同名 A、B → A–B；三个同名 A、C、B → **A–C**（同页的两个先配成一对），B 落单、没有连接；四个 → A–C、B–D。
