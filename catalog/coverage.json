@@ -808,12 +808,13 @@
       "dependencies": 1082,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
-      "small": 5,
+      "small": 6,
       "medium": 2,
       "large": 1,
       "apiNotes": [
         "A39",
-        "A56"
+        "A56",
+        "A76"
       ]
     },
     {
@@ -2273,11 +2274,12 @@
       "dependencies": 87,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
-      "small": 3,
+      "small": 4,
       "medium": 2,
       "large": 2,
       "apiNotes": [
-        "A57"
+        "A57",
+        "A76"
       ]
     },
     {

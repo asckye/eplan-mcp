@@ -160,7 +160,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/1 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/4/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 5/2/1 | A39 A56 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 6/2/1 | A39 A56 A76 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
@@ -223,7 +223,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placeholder_list | read | placeholder.list | 43 | 26 | 0 | 17 | 0 | 1/0/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>project.get | 165 | 93 | 1 | 71 | 0 | 4/3/5 | A54 | — |
 | eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 167 | 105 | 1 | 61 | 0 | 1/1/1 | — | — |
-| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 233 | 138 | 5 | 87 | 0 | 3/2/2 | A57 | — |
+| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 233 | 138 | 5 | 87 | 0 | 4/2/2 | A57 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
 | eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 2/1/2 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
