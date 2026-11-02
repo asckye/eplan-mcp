@@ -43,19 +43,31 @@ internal sealed class EplanPlcReader : IPlcReader
             Slot = EplanText.Read(plc.Properties.FUNC_PLCSOCKET, textLanguage),
             Cpu = plc.IsCPU,
         };
-        Terminal[] channels = plc.PLCTerminals ?? [];
+        Terminal[] members = plc.PLCTerminals ?? [];
+        // A11/A55, D3: the native prefix filter also finds placed points outside the box, even on another page.
+        using var filter = new FunctionsFilter { Name = plc.Name + ":", ExactNameMatching = false, FunctionCategory = FunctionCategory.PLCTerminal };
+        ILookup<string, Terminal> representations = EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<Terminal>()
+            .ToLookup(t => t.Name, StringComparer.Ordinal);
+        var memberNames = new HashSet<string>(members.Select(t => t.Name), StringComparer.Ordinal);
+        Terminal[] channels =
+        [
+            .. members,
+            .. representations.Where(group => !memberNames.Contains(group.Key))
+                .Select(group => group.Where(t => t.Page is not null).OrderByDescending(t => t.IsMainFunction)
+                    .ThenBy(t => t.Page!.Name, StringComparer.Ordinal).FirstOrDefault()).OfType<Terminal>(),
+        ];
         // Live T7d: Terminal.PLC of a placed point stays null although PLCTerminals lists it; the owner is this PLC.
-        record.Channels = [.. channels.Select(terminal => Channel(terminal, textLanguage, detailed))];
-        if (detailed)
-        { foreach (PlcChannel channel in record.Channels) { channel.Owner ??= plc.Name; } }
-        if (detailed && record.Channels.Count > 0)
+        foreach (Terminal terminal in channels)
         {
-            // A11/A55: a native name-prefix filter includes unplaced and cross-page representations of this card.
-            using var filter = new FunctionsFilter { Name = plc.Name + ":", ExactNameMatching = false, FunctionCategory = FunctionCategory.PLCTerminal };
-            ILookup<string, Terminal> parentless = EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<Terminal>()
-                .Where(t => t.PLC is null).ToLookup(t => t.Name, StringComparer.Ordinal);
-            foreach (PlcChannel channel in record.Channels)
-            { channel.ParentlessRepresentations = parentless[channel.Name].Count(); }
+            PlcChannel channel = Channel(terminal, textLanguage, detailed);
+            if (detailed)
+            {
+                channel.Owner ??= plc.Name;
+                // Other representations only: a parentless channel never counts itself as its own duplicate.
+                channel.ParentlessRepresentations = Math.Max(0, representations[channel.Name].Count(t => t.PLC is null)
+                    - (terminal.PLC is null ? 1 : 0));
+            }
+            record.Channels.Add(channel);
         }
         record.Connections = Connections(finder, plc, channels);
         return record;

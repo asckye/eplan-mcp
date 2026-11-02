@@ -35,15 +35,124 @@ public sealed class PlcReaderTests
 
         Assert.Equal(2, record.Channels.Count);
         Assert.All(record.Channels, c => Assert.Equal(channel.Name, c.Name));
+        Assert.Equal(new[] { circuit.Name, overview.Name }, record.Channels.Select(c => c.Page));
         Assert.Equal(("I0.0", "Start input"), (record.Channels[0].Address, record.Channels[0].Text));
         Assert.Equal(detailed ? plc.Name : null, record.Channels[0].Owner);
         Assert.Equal(detailed ? "Start" : null, record.Channels[0].ManualSymbolicAddress);
         Assert.Equal(detailed ? "-X10" : null, record.Channels[0].PlugDesignation);
         Assert.Equal(detailed ? "&EFA1/1.2" : null, record.Channels[0].MainReference);
         Assert.All(record.Channels, c => Assert.Equal(detailed ? (int?)2 : null, c.ParentlessRepresentations));
-        Assert.Equal(detailed ? 2 : 1, project.FunctionQueries.Count);
-        if (detailed)
-        { Assert.Equal((plc.Name + ":", false, (FunctionCategory?)FunctionCategory.PLCTerminal), project.FunctionQueries[1]); }
+        Assert.Equal(2, project.FunctionQueries.Count);
+        Assert.Equal((plc.Name + ":", false, (FunctionCategory?)FunctionCategory.PLCTerminal), project.FunctionQueries[1]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReadPlc_EmptyCardWithCrossPageParentlessPoint_ReturnsPlacedChannel(bool detailed)
+    {
+#pragma warning disable CA2000 // The linked reader borrows fake project-owned objects, whose Dispose rejects ownership mistakes.
+        var cardPage = new Page { Name = "+A1/1" };
+        var pointPage = new Page { Name = "+A1/2" };
+        var plc = new PLC { Name = "=GAA+A1-D3KF3", Page = cardPage, IsMainFunction = true, FunctionCategory = FunctionCategory.PLCBox, PLCTerminals = [] };
+        var point = Point(plc.Name + ":1", pointPage);
+        point.IsMainFunction = false;
+        point.Location = new(120, 176);
+        point.Properties.FUNC_PLCADDRESS = "??_??@I0.1;";
+        point.Properties.FUNC_PLCPLUG_DESIGNATION_MANUAL = "??_??@-X10;";
+        cardPage.AllPlacements = [plc];
+        pointPage.AllPlacements = [point, Point(plc.Name + "0:1", pointPage)];
+        var project = new Project(cardPage, pointPage) { RejectUnfilteredFunctions = true, UnplacedFunctions = [Point(point.Name, null)] };
+#pragma warning restore CA2000
+        EplanProjects.Project = project;
+
+        PlcRecord record = new EplanPlcReader().ReadPlc("project", plc.Name, "??_??", detailed)!;
+
+        var channel = Assert.Single(record.Channels);
+        Assert.Equal((point.Name, pointPage.Name, false, "I0.1"), (channel.Name, channel.Page, channel.Main, channel.Address));
+        Assert.Equal(detailed ? "-X10" : null, channel.PlugDesignation);
+        Assert.Equal(detailed ? plc.Name : null, channel.Owner);
+        Assert.Equal(detailed ? (int?)1 : null, channel.ParentlessRepresentations);
+        Assert.Equal(2, project.FunctionQueries.Count);
+        Assert.Equal((plc.Name + ":", false, (FunctionCategory?)FunctionCategory.PLCTerminal), project.FunctionQueries[1]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReadPlc_ExistingParentlessChannelWithCrossPageMain_KeepsExistingChannel(bool detailed)
+    {
+#pragma warning disable CA2000 // Ownership transfers to the fake project.
+        var cardPage = new Page { Name = "+A1/1" };
+        var pointPage = new Page { Name = "+A1/2" };
+        var plc = new PLC { Name = "+A1-KF1", Page = cardPage, IsMainFunction = true, FunctionCategory = FunctionCategory.PLCBox };
+        var point = Point(plc.Name + ":1", pointPage);
+        var other = Point(point.Name, cardPage);
+        other.IsMainFunction = true;
+        plc.PLCTerminals = [point];
+        cardPage.AllPlacements = [plc, other];
+        pointPage.AllPlacements = [point];
+        EplanProjects.Project = new Project(cardPage, pointPage) { RejectUnfilteredFunctions = true, UnplacedFunctions = [Point(point.Name, null)] };
+#pragma warning restore CA2000
+
+        PlcRecord record = new EplanPlcReader().ReadPlc("project", plc.Name, "??_??", detailed)!;
+
+        var channel = Assert.Single(record.Channels);
+        Assert.Equal((point.Name, pointPage.Name, false), (channel.Name, channel.Page, channel.Main));
+        Assert.Equal(detailed ? plc.Name : null, channel.Owner);
+        Assert.Equal(detailed ? (int?)2 : null, channel.ParentlessRepresentations);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void ReadPlc_MissingNameWithTwoPlacedRepresentations_PrefersMainThenPageName(bool detailed, bool hasMain)
+    {
+#pragma warning disable CA2000 // Ownership transfers to the fake project.
+        var firstPage = new Page { Name = "+A1/1" };
+        var lastPage = new Page { Name = "+A1/2" };
+        var plc = new PLC { Name = "+A1-KF1", Page = firstPage, IsMainFunction = true, FunctionCategory = FunctionCategory.PLCBox };
+        var first = Point(plc.Name + ":1", firstPage);
+        first.Properties.FUNC_PLCADDRESS = "??_??@I0.0;";
+        var last = Point(first.Name, lastPage, plc);
+        last.IsMainFunction = hasMain;
+        last.Properties.FUNC_PLCADDRESS = "??_??@I0.1;";
+        var unplaced = Point(first.Name, null);
+        unplaced.IsMainFunction = true;
+        firstPage.AllPlacements = [plc, first];
+        lastPage.AllPlacements = [last];
+        EplanProjects.Project = new Project(lastPage, firstPage) { RejectUnfilteredFunctions = true, UnplacedFunctions = [unplaced] };
+#pragma warning restore CA2000
+
+        PlcRecord record = new EplanPlcReader().ReadPlc("project", plc.Name, "??_??", detailed)!;
+
+        var channel = Assert.Single(record.Channels);
+        Assert.Equal((first.Name, hasMain ? lastPage.Name : firstPage.Name, hasMain, hasMain ? "I0.1" : "I0.0"),
+            (channel.Name, channel.Page, channel.Main, channel.Address));
+        Assert.Equal(detailed ? plc.Name : null, channel.Owner);
+        Assert.Equal(detailed ? (int?)(hasMain ? 2 : 1) : null, channel.ParentlessRepresentations);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReadPlc_MissingNameWithoutPlacedRepresentation_AddsNoChannel(bool detailed)
+    {
+#pragma warning disable CA2000 // Ownership transfers to the fake project.
+        var page = new Page { Name = "+A1/1" };
+        var plc = new PLC { Name = "+A1-KF1", Page = page, IsMainFunction = true, FunctionCategory = FunctionCategory.PLCBox };
+        page.AllPlacements = [plc];
+        var project = new Project(page) { RejectUnfilteredFunctions = true, UnplacedFunctions = [Point(plc.Name + ":1", null)] };
+#pragma warning restore CA2000
+        EplanProjects.Project = project;
+
+        PlcRecord record = new EplanPlcReader().ReadPlc("project", plc.Name, "??_??", detailed)!;
+
+        Assert.Empty(record.Channels);
+        Assert.Equal(2, project.FunctionQueries.Count);
+        Assert.Equal((plc.Name + ":", false, (FunctionCategory?)FunctionCategory.PLCTerminal), project.FunctionQueries[1]);
     }
 
 #pragma warning disable CA2000 // Ownership transfers to the fake project.
