@@ -2839,6 +2839,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/NativePreconditionTests.cs"
           },
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
