@@ -6,7 +6,7 @@
     { "assembly": "EplanMcp.Packs.Tests", "minPassed": 978 },
     { "assembly": "EplanMcp.Evals.Tests", "minPassed": 286 },
     { "assembly": "EplanMcp.Catalog.Tests", "minPassed": 53 },
-    { "assembly": "EplanMcp.Coverage.Tests", "minPassed": 392 },
+    { "assembly": "EplanMcp.Coverage.Tests", "minPassed": 525 },
     { "assembly": "EplanMcp.Workbench.Protocol.Tests", "minPassed": 63 },
     { "assembly": "EplanMcp.Workbench.Tests", "minPassed": 1449 }
   ]
