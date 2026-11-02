@@ -245,6 +245,8 @@ internal sealed class AcceptanceRedrawDriver(
             args["plc_text"] = point.GetProperty("function_text").GetString();
             if (point.TryGetProperty("plug_designation", out JsonElement plug))
             { args["plc_plug_designation"] = plug.GetString(); }
+            if (point.TryGetProperty("connection_description", out JsonElement description))
+            { args["connection_descriptions"] = new[] { description.GetString() }; }
             if (point.TryGetProperty("display_properties", out JsonElement requestedDisplays))
             { args["display_properties"] = requestedDisplays; }
             JsonElement? result = await WriteAsync("eplan_device_place", args, [Id(point)]);
@@ -380,9 +382,13 @@ internal sealed class AcceptanceRedrawDriver(
             Assert.NotEmpty(texts);
             double[] origin = texts[0].GetProperty("location").EnumerateArray().Select(n => n.GetDouble()).ToArray();
             int angle = layout.GetProperty("angle_deg").GetInt32();
+            bool start = layout.TryGetProperty("align", out JsonElement align) && align.GetString() == "start";
             var moves = texts.Select(text =>
             {
-                double x = text.GetProperty("location")[0].GetDouble() - origin[0], y = text.GetProperty("location")[1].GetDouble() - origin[1];
+                // D9: docked lines share one location (bottom right); only their bounds show the line pitch. "start" puts
+                // each line's left end at the position, as the original's rotated block starts at the cable.
+                double[] bounds = text.GetProperty("bounds").EnumerateArray().Select(n => n.GetDouble()).ToArray();
+                double x = start ? bounds[2] - bounds[0] : bounds[2] - origin[0], y = bounds[1] - origin[1];
                 for (int i = 0; i < angle / 90; i++)
                 { (x, y) = (-y, x); }
                 return new
@@ -491,21 +497,27 @@ internal sealed class AcceptanceRedrawDriver(
 
     private bool NeedsGeneratedCores(JsonElement cable) => cable.GetProperty("cores").EnumerateArray().Any(c => _wires[c.GetProperty("wire").GetString()!].ItemIndex is null);
 
-    private object CableItem(JsonElement cable, Func<string, object> connection) => new
+    private Dictionary<string, object?> CableItem(JsonElement cable, Func<string, object> connection)
     {
-        kind = "cable_definition",
-        designation = Expand(cable.GetProperty("tag").GetString()!),
-        type_text = cable.GetProperty("type_text").GetString(),
-        core_count = cable.GetProperty("core_count").GetInt32(),
-        cross_section_mm2 = cable.GetProperty("cross_section_mm2").GetDouble(),
-        points = cable.GetProperty("points"),
-        cores = cable.GetProperty("cores").EnumerateArray().Select(core => new
+        var item = new Dictionary<string, object?>
         {
-            connection = connection(core.GetProperty("wire").GetString()!),
-            label = core.GetProperty("label").GetString(),
-            colour = core.GetProperty("colour").GetString(),
-        }).ToArray(),
-    };
+            ["kind"] = "cable_definition",
+            ["designation"] = Expand(cable.GetProperty("tag").GetString()!),
+            ["type_text"] = cable.GetProperty("type_text").GetString(),
+            ["core_count"] = cable.GetProperty("core_count").GetInt32(),
+            ["cross_section_mm2"] = cable.GetProperty("cross_section_mm2").GetDouble(),
+            ["points"] = cable.GetProperty("points"),
+            ["cores"] = cable.GetProperty("cores").EnumerateArray().Select(core => new
+            {
+                connection = connection(core.GetProperty("wire").GetString()!),
+                label = core.GetProperty("label").GetString(),
+                colour = core.GetProperty("colour").GetString(),
+            }).ToArray(),
+        };
+        if (cable.TryGetProperty("voltage", out JsonElement voltage))
+        { item["voltage"] = voltage.GetString(); }
+        return item;
+    }
 
     private async Task GeneratedCablesAsync()
     {

@@ -61,8 +61,8 @@ internal static class AcceptanceDrawingList
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         Each(plc, "points", "/plc", (point, at) =>
         {
-            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text direction", "display_properties plug_designation main_reference_contains main_reference");
-            foreach (string field in "plug_designation main_reference_contains".Split(' '))
+            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text direction", "display_properties plug_designation main_reference_contains main_reference connection_description");
+            foreach (string field in "plug_designation main_reference_contains connection_description".Split(' '))
             { if (point.TryGetProperty(field, out _)) { Text(point, field, at); } }
             if (point.TryGetProperty("main_reference", out JsonElement nativeReference))
             { Require(nativeReference.ValueKind == JsonValueKind.String, at + "/main_reference", "must be an exact native reference string, including empty"); }
@@ -154,10 +154,14 @@ internal static class AcceptanceDrawingList
         var assigned = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "cables", "", (cable, at) =>
         {
-            Object(cable, at, "id tag type_text core_count cross_section_mm2 points cores", "text_layout");
+            Object(cable, at, "id tag type_text core_count cross_section_mm2 points cores", "text_layout voltage");
+            if (cable.TryGetProperty("voltage", out _))
+            { Text(cable, "voltage", at); }
             if (cable.TryGetProperty("text_layout", out JsonElement layout))
             {
-                Object(layout, at + "/text_layout", "position angle_deg", "");
+                Object(layout, at + "/text_layout", "position angle_deg", "align");
+                if (layout.TryGetProperty("align", out JsonElement align))
+                { Require(align.GetString() is "start" or "end", at + "/text_layout/align", "must be start or end"); }
                 Position(layout.GetProperty("position"), at + "/text_layout/position");
                 int angle = Integer(layout.GetProperty("angle_deg"), at + "/text_layout/angle_deg", 0, 270);
                 Require(angle % 90 == 0, at + "/text_layout/angle_deg", "must be a right angle");
